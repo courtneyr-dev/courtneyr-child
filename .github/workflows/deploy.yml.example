@@ -1,0 +1,78 @@
+# GitHub Actions deploy template — courtneyr-child theme.
+#
+# This is a starting point. Rename to `deploy.yml` and adjust to match
+# your existing courtneyr-dev-site CI/CD pipeline. The same
+# gd-wordpress-deployer action used for the parent site applies here,
+# with deployment_dest pointing at the child theme directory inside
+# wp-content/themes/.
+#
+# Required GitHub secrets:
+#   GD_DEPLOY_KEY    — the same SSH key used by courtneyr-dev-site
+#   GD_DEPLOY_HOST   — managed.wordpress.com host (or staging)
+#   GD_DEPLOY_USER   — your SFTP user
+#
+# Note: gd-wordpress-deployer auto-prepends "html/" to deployment_dest,
+# so use "wp-content/themes/courtneyr-child" (not "html/wp-content/...").
+
+name: Deploy courtneyr-child theme
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Deploy target"
+        type: choice
+        options: [staging, production]
+        default: staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate theme.json
+        run: |
+          # Fail fast if theme.json is malformed.
+          if ! jq empty theme.json 2>/dev/null; then
+            echo "::error::theme.json is not valid JSON"
+            exit 1
+          fi
+          # Fail fast if any styles/*.json variation is malformed.
+          for f in styles/*.json; do
+            if [ -f "$f" ] && ! jq empty "$f" 2>/dev/null; then
+              echo "::error::$f is not valid JSON"
+              exit 1
+            fi
+          done
+
+      - name: PHP syntax check
+        run: |
+          # Lint every PHP file. Fail on first parse error.
+          find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" | while read -r file; do
+            php -l "$file" || exit 1
+          done
+
+      - name: Deploy to GoDaddy
+        uses: godaddy-wordpress/gd-wordpress-deployer@v1
+        with:
+          ssh_private_key: ${{ secrets.GD_DEPLOY_KEY }}
+          remote_host: ${{ secrets.GD_DEPLOY_HOST }}
+          remote_user: ${{ secrets.GD_DEPLOY_USER }}
+          # Adjust target based on input. Production hits the live theme,
+          # staging deploys to a parallel slot.
+          deployment_dest: wp-content/themes/courtneyr-child
+          # Exclude development files from upload.
+          exclude: |
+            .git
+            .github
+            .gitignore
+            README.md
+            *.md
+            tests/

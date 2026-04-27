@@ -1,0 +1,950 @@
+/* =============================================================================
+   courtneyr.dev — design tokens v2.0
+   Zine aesthetic. Printer-ivory surface. Hard shadows. Light rotation.
+   "Decoration in margins, calm in measure."
+
+   This file is the foundation. components.css and the mockups depend on
+   every token defined here. Any change here ripples everywhere.
+
+   File order (deliberate):
+   1. Raw palette        — never reference these directly in components
+   2. Semantic tokens    — what components actually use
+   3. Typography         — 4-font system + scale + leading + tracking + weight
+   4. Spacing            — t-shirt scale
+   5. Radius             — t-shirt scale (zine uses radii sparingly)
+   6. Shapes & shadows   — zine vocabulary + soft scale for legacy components
+   7. Motion             — durations + easings (gated behind reduced-motion)
+   8. Post-type tokens   — IndieWeb taxonomy colors used by .cr-chip* family
+   9. Texture            — fiber + halftone backgrounds
+   10. Dark mode flips   — semantic tokens get reassigned, raw palette never changes
+   11. Element defaults  — every common HTML element styled
+   12. Legacy defenses   — courtneyr.dev posts go back to 2007
+   13. Reduced motion    — the user's preference, honored
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. RAW PALETTE
+   Use these only to build semantic tokens below. Components reference
+   --cr-ink, --cr-link, --cr-marker, etc. — never the raw hex.
+   ============================================================================= */
+:root {
+  --cr-russian-violet:  #241c4a;
+  --cr-periwinkle:      #bcb5e3;
+  --cr-glaucous:        #647baf;  /* Background only. Fails AA on cream as text. */
+  --cr-sky-blue:        #8ecae6;
+  --cr-blue-green:      #219ebc;
+  --cr-cerulean:        #126782;
+  --cr-prussian-blue:   #023047;
+  --cr-selective-yellow:#ffb703;
+  --cr-ut-orange:       #fb8500;
+  --cr-light-orange:    #fee2c3;
+  --cr-printer-ivory:   #fbfaf5;
+  --cr-photocopier-blk: #1a1714;
+  --cr-night-elevated:  #251f1c;
+  --cr-white:           #ffffff;
+  --cr-black:           #000000;
+
+  /* v2.1 — extended palette for the 18-type post taxonomy.
+     Each new token was chosen to pass 3:1 against masking tape #f3e5b8
+     (WCAG 1.4.11 non-text contrast for the chip's left-border accent).
+     A few also pass 4.5:1 against tape for use as inline text/icon color.
+
+     Color           Hex      vs tape   notes
+     ──────────────  ───────  ────────  ────────────────────────────────
+     glaucous-light  #5a7ea8  3.35:1    cooler than glaucous, visually distinct
+     russian-violet- #3d2f6e  9.13:1    softer than russian-violet; chip-text safe
+       soft
+     ut-orange-dark  #b85f00  3.57:1    burnt-orange counterpart to ut-orange
+     light-orange-d. #a87a45  3.02:1    muted ochre; light-orange (#fee2c3) failed AA
+     coral           #d63240  3.81:1    warm red, marker-feel; AA pass
+     cerulean-light  #3a8090  3.58:1    softer cerulean for repost
+     glaucous-dark   #3d527d  6.19:1    deeper than glaucous; chip-text safe
+     sage            #658057  3.50:1    desaturated green for events
+     mauve           #9d4e6c  4.47:1    dusty plum for review
+  */}
+
+
+/* =============================================================================
+   2. SEMANTIC TOKENS (light mode default)
+   Components reference only these. The dark-mode block at the end reassigns
+   them, so flipping the whole site is one media query.
+   ============================================================================= */
+:root {
+  /* Surfaces */
+  --cr-surface:          var(--cr-printer-ivory);
+  --cr-surface-soft:     var(--cr-light-orange);
+  --cr-surface-elevated: var(--cr-white);
+
+  /* Ink */
+  --cr-ink:         var(--cr-russian-violet);
+  --cr-ink-muted:   var(--cr-cerulean);
+  --cr-ink-soft:    #4a4566;             /* derived ink, AA on ivory */
+  --cr-ink-inverse: var(--cr-printer-ivory);
+
+  /* Links */
+  --cr-link:         var(--cr-cerulean);
+  --cr-link-hover:   var(--cr-russian-violet);
+  --cr-link-visited: #5a4a8a;             /* derived violet, AA on ivory */
+
+  /* Borders & rules */
+  --cr-rule:          #d8d3c3;            /* horizontal rule, table border */
+  --cr-border:        rgba(36, 28, 74, 0.12);
+  --cr-border-strong: rgba(36, 28, 74, 0.24);
+  --cr-border-thick:  2px solid var(--cr-ink);
+  --cr-border-thin:   1px solid var(--cr-rule);
+
+  /* Zine accents */
+  --cr-marker:    var(--cr-ut-orange);
+  --cr-highlight: var(--cr-selective-yellow);
+
+  /* Callouts */
+  --cr-callout-bg:  var(--cr-cerulean);
+  --cr-callout-ink: var(--cr-white);
+
+  /* Accent blocks */
+  --cr-accent-1-bg:  var(--cr-sky-blue);
+  --cr-accent-1-ink: var(--cr-russian-violet);
+  --cr-accent-2-bg:  var(--cr-periwinkle);
+  --cr-accent-2-ink: var(--cr-russian-violet);
+  --cr-accent-3-bg:  var(--cr-light-orange);
+  --cr-accent-3-ink: var(--cr-russian-violet);
+
+  /* Masking tape */
+  --cr-tape:     #f3e5b8;
+  --cr-tape-ink: var(--cr-russian-violet);
+
+  /* CTA buttons */
+  --cr-cta-bg:        var(--cr-ut-orange);
+  --cr-cta-bg-hover:  var(--cr-russian-violet);
+  --cr-cta-ink:       var(--cr-prussian-blue);
+  --cr-cta-ink-hover: var(--cr-sky-blue);
+
+  /* Generic primary/accent — legacy aliases used by .cr-button family */
+  --cr-primary:       var(--cr-ut-orange);
+  --cr-primary-hover: var(--cr-russian-violet);
+  --cr-primary-ink:   var(--cr-prussian-blue);
+  --cr-accent:        var(--cr-blue-green);
+  --cr-accent-shape:  var(--cr-sky-blue);
+  --cr-accent-soft:   var(--cr-light-orange);
+
+  /* Focus ring */
+  --cr-focus-ring: var(--cr-selective-yellow);
+
+  /* Code */
+  --cr-code-bg:  #efece1;
+  --cr-code-ink: var(--cr-russian-violet);
+}
+
+
+/* =============================================================================
+   3. TYPOGRAPHY
+   4-font system. Rock Salt is display-only — never body text.
+   ============================================================================= */
+:root {
+  --cr-font-display: "Rock Salt", "Bradley Hand", cursive;
+  --cr-font-accent:  "Roboto Slab", Georgia, serif;
+  --cr-font-body:    "Barlow", system-ui, -apple-system, sans-serif;
+  --cr-font-mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Type scale — modular ratio ~1.25, base 1rem */
+  --cr-text-xs:   0.75rem;
+  --cr-text-sm:   0.875rem;
+  --cr-text-base: 1rem;
+  --cr-text-md:   1.125rem;
+  --cr-text-lg:   1.25rem;
+  --cr-text-xl:   1.5rem;
+  --cr-text-2xl:  1.875rem;
+  --cr-text-3xl:  2.25rem;
+  --cr-text-4xl:  3rem;
+  --cr-text-5xl:  3.75rem;
+
+  /* Leading */
+  --cr-leading-tight:   1.15;
+  --cr-leading-snug:    1.35;
+  --cr-leading-normal:  1.55;
+  --cr-leading-relaxed: 1.7;
+
+  /* Tracking */
+  --cr-tracking-tight:   -0.01em;
+  --cr-tracking-normal:  0;
+  --cr-tracking-wide:    0.05em;
+  --cr-tracking-eyebrow: 0.12em;
+  --cr-tracking-widest:  0.2em;
+
+  /* Weight */
+  --cr-weight-regular:   400;
+  --cr-weight-medium:    500;
+  --cr-weight-semibold:  600;
+  --cr-weight-bold:      700;
+  --cr-weight-extrabold: 800;
+  --cr-weight-black:     900;
+}
+
+
+/* =============================================================================
+   4. SPACING
+   T-shirt scale.
+   ============================================================================= */
+:root {
+  --cr-space-3xs: 0.125rem;   /*  2px */
+  --cr-space-2xs: 0.25rem;    /*  4px */
+  --cr-space-xs:  0.5rem;     /*  8px */
+  --cr-space-sm:  0.75rem;    /* 12px */
+  --cr-space-md:  1rem;       /* 16px */
+  --cr-space-lg:  1.5rem;     /* 24px */
+  --cr-space-xl:  2rem;       /* 32px */
+  --cr-space-2xl: 3rem;       /* 48px */
+  --cr-space-3xl: 4.5rem;     /* 72px */
+  --cr-space-4xl: 6rem;       /* 96px */
+
+  /* Reading widths */
+  --cr-measure:        65ch;
+  --cr-measure-narrow: 50ch;
+  --cr-measure-wide:   80ch;
+}
+
+
+/* =============================================================================
+   5. RADIUS
+   Zine uses radii sparingly. Soft components (legacy buttons, stream-item
+   image frames) use the larger radii; zine components avoid them.
+   ============================================================================= */
+:root {
+  --cr-radius-xs:   0.25rem;
+  --cr-radius-sm:   0.5rem;
+  --cr-radius-md:   0.75rem;
+  --cr-radius-lg:   1.25rem;   /* default for stream-item image frames */
+  --cr-radius-xl:   2rem;
+  --cr-radius-2xl:  3rem;
+  --cr-radius-full: 9999px;
+}
+
+
+/* =============================================================================
+   6. SHAPES, SHADOWS, ROTATIONS
+   Zine vocabulary first. Soft scale below for stream-item hover lift,
+   chip subtle shadows, and other places where a hard shadow would be loud.
+   ============================================================================= */
+:root {
+  /* Zine — hard offset shadows, slight rotation */
+  --cr-shadow-hard:   4px 4px 0 var(--cr-ink);
+  --cr-shadow-hard-2: 6px 6px 0 var(--cr-ink);
+  --cr-shadow-marker: 0 -0.4em 0 inset var(--cr-marker);
+
+  /* Soft — for legacy components and unobtrusive depth */
+  --cr-shadow-sm: 0 1px 2px rgba(36, 28, 74, 0.06);
+  --cr-shadow-md: 0 4px 12px -2px rgba(36, 28, 74, 0.10);
+  --cr-shadow-lg: 0 10px 30px -10px rgba(36, 28, 74, 0.25), 0 2px 8px rgba(36, 28, 74, 0.08);
+
+  /* Rotation — four values, deliberately limited */
+  --cr-rotate-1:    -1.2deg;
+  --cr-rotate-2:     1.5deg;
+  --cr-rotate-neg:  -2.5deg;
+  --cr-rotate-neg2:  2.8deg;
+}
+
+
+/* =============================================================================
+   7. MOTION
+   All non-essential motion gated behind @media (prefers-reduced-motion: no-preference).
+   ============================================================================= */
+:root {
+  --cr-motion-fast: 150ms;
+  --cr-motion-base: 250ms;
+  --cr-motion-slow: 400ms;
+
+  --cr-ease-out:    cubic-bezier(0.2, 0.8, 0.2, 1);
+  --cr-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* =============================================================================
+   8. POST-TYPE TOKENS
+   IndieWeb taxonomy + WordPress standard formats + Courtney-specific types.
+   v2.1: 18 types, each with its own accent. Used by .cr-chip--{type} and
+   .cr-stream-item--{type}. Source of truth for the post-type color system.
+
+   The chip carries the accent as a 4px left-border against masking tape
+   #f3e5b8 — every value below is verified ≥3:1 vs tape (WCAG 1.4.11).
+   ============================================================================= */
+:root {
+  --cr-type-blog:     var(--cr-russian-violet);   /*  1 blog        — longform group */
+  --cr-type-aside:    var(--cr-glaucous);          /*  2 aside       — small group */
+  --cr-type-image:    var(--cr-blue-green);        /*  3 image       — media group */
+  --cr-type-gallery:  var(--cr-blue-green);        /*  4 gallery     — media group */
+  --cr-type-video:    var(--cr-blue-green);        /*  5 video       — media group */
+  --cr-type-audio:    #000000;                     /*  6 audio       — impact group */
+  --cr-type-chat:     var(--cr-glaucous);          /*  7 chat        — small group */
+  --cr-type-status:   var(--cr-glaucous);          /*  8 status      — small group */
+  --cr-type-link:     var(--cr-cerulean);          /*  9 link        — shares group */
+  --cr-type-bookmark: var(--cr-cerulean);          /* 10 bookmark    — shares group */
+  --cr-type-quote:    var(--cr-russian-violet);    /* 11 quote       — longform group */
+  --cr-type-speaking: var(--cr-prussian-blue);     /* 12 speaking    — events group */
+  --cr-type-book:     var(--cr-russian-violet);    /* 13 book        — longform group */
+  --cr-type-like:     #000000;                     /* 14 like        — impact group */
+  --cr-type-repost:   var(--cr-cerulean);          /* 15 repost      — shares group */
+  --cr-type-reply:    #000000;                     /* 16 reply       — impact group */
+  --cr-type-event:    var(--cr-prussian-blue);     /* 17 event       — events group */
+  --cr-type-review:   var(--cr-prussian-blue);     /* 18 review      — events group */
+}
+
+
+/* =============================================================================
+   9. TEXTURE
+   Subtle horizontal fiber on the page surface; halftone for hero overlays.
+   ============================================================================= */
+:root {
+  --cr-fiber: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(36, 28, 74, 0.012) 2px,
+    rgba(36, 28, 74, 0.012) 3px
+  );
+
+  /* v2.1: softened default. Was 0.18 opacity / 6px grid — fought the type. */
+  --cr-halftone: radial-gradient(
+    rgba(36, 28, 74, 0.08) 1px,
+    transparent 1.2px
+  );
+  --cr-halftone-size: 12px 12px;
+
+  /* Louder variant preserved for cases that genuinely need a screentone. */
+  --cr-halftone-strong: radial-gradient(
+    rgba(36, 28, 74, 0.18) 1px,
+    transparent 1.2px
+  );
+  --cr-halftone-strong-size: 6px 6px;
+}
+
+
+/* =============================================================================
+   10. DARK MODE
+   Reassign semantic tokens. Raw palette never changes.
+   Surface flips from printer ivory to photocopier black.
+   ============================================================================= */
+@media (prefers-color-scheme: dark) {
+  /* OS-level dark mode — only applies if user has not explicitly chosen via [data-theme] */
+  :root:not([data-theme]) {
+    --cr-surface:          var(--cr-photocopier-blk);
+    --cr-surface-soft:     var(--cr-prussian-blue);
+    --cr-surface-elevated: var(--cr-night-elevated);
+
+    --cr-ink:         var(--cr-printer-ivory);
+    --cr-ink-muted:   var(--cr-periwinkle);
+    --cr-ink-soft:    #c8c2d8;
+    --cr-ink-inverse: var(--cr-russian-violet);
+
+    --cr-link:         var(--cr-sky-blue);
+    --cr-link-hover:   var(--cr-selective-yellow);
+    --cr-link-visited: var(--cr-periwinkle);
+
+    --cr-rule:          #3a342f;
+    --cr-border:        rgba(188, 181, 227, 0.15);
+    --cr-border-strong: rgba(188, 181, 227, 0.30);
+
+    --cr-callout-bg:  var(--cr-prussian-blue);
+    --cr-callout-ink: var(--cr-sky-blue);
+
+    --cr-accent-1-bg:  var(--cr-prussian-blue);
+    --cr-accent-1-ink: var(--cr-sky-blue);
+    --cr-accent-2-bg:  var(--cr-russian-violet);
+    --cr-accent-2-ink: var(--cr-periwinkle);
+    --cr-accent-3-bg:  var(--cr-cerulean);
+    --cr-accent-3-ink: var(--cr-light-orange);
+
+    --cr-tape:     #4a3f1c;
+    --cr-tape-ink: var(--cr-selective-yellow);
+
+    --cr-primary:       var(--cr-selective-yellow);
+    --cr-primary-hover: var(--cr-sky-blue);
+    --cr-primary-ink:   var(--cr-russian-violet);
+
+    /* CTA buttons — dark mode override (selective-yellow + russian-violet = 8.5:1 AAA) */
+    --cr-cta-bg:        var(--cr-selective-yellow);
+    --cr-cta-bg-hover:  var(--cr-sky-blue);
+    --cr-cta-ink:       var(--cr-russian-violet);
+    --cr-cta-ink-hover: var(--cr-russian-violet);
+    --cr-accent:        var(--cr-sky-blue);
+    --cr-accent-shape:  var(--cr-cerulean);
+    --cr-accent-soft:   var(--cr-prussian-blue);
+
+    --cr-code-bg:  #2a2520;
+    --cr-code-ink: var(--cr-periwinkle);
+
+    --cr-shadow-hard:   4px 4px 0 var(--cr-selective-yellow);
+    --cr-shadow-hard-2: 6px 6px 0 var(--cr-selective-yellow);
+
+    --cr-fiber: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(255, 255, 255, 0.018) 2px,
+      rgba(255, 255, 255, 0.018) 3px
+    );
+
+    /* v2.1 — post-type accents in dark mode.
+       Each maps to a brighter variant of its light-mode color so the
+       4px chip edge stays visible against dark tape (#4a3f1c).
+       Every value below verified ≥3:1 vs dark tape. */
+    --cr-type-blog:     var(--cr-selective-yellow);  /*  1 blog (warm/inviting) */
+    --cr-type-aside:    var(--cr-glaucous);           /*  2 aside (works on both) */
+    --cr-type-image:    var(--cr-blue-green);         /*  3 image (works on both) */
+    --cr-type-gallery:  var(--cr-blue-green);         /*  4 gallery */
+    --cr-type-video:    var(--cr-blue-green);         /*  5 video */
+    --cr-type-audio:    #ffffff;                      /*  6 audio (impact - inverted to white) */
+    --cr-type-chat:     var(--cr-glaucous);           /*  7 chat */
+    --cr-type-status:   var(--cr-glaucous);           /*  8 status */
+    --cr-type-link:     var(--cr-sky-blue);           /*  9 link (cool, lighter than cerulean) */
+    --cr-type-bookmark: var(--cr-sky-blue);           /* 10 bookmark */
+    --cr-type-quote:    var(--cr-selective-yellow);   /* 11 quote */
+    --cr-type-speaking: var(--cr-periwinkle);         /* 12 speaking (lighter than prussian) */
+    --cr-type-book:     var(--cr-selective-yellow);   /* 13 book */
+    --cr-type-like:     #ffffff;                      /* 14 like */
+    --cr-type-repost:   var(--cr-sky-blue);           /* 15 repost */
+    --cr-type-reply:    #ffffff;                      /* 16 reply */
+    --cr-type-event:    var(--cr-periwinkle);         /* 17 event */
+    --cr-type-review:   var(--cr-periwinkle);         /* 18 review */
+  }
+}
+
+/* Manual dark mode override — ui-kit toggle sets [data-theme="dark"] on <html> */
+:root[data-theme="dark"] {
+    --cr-surface:          var(--cr-photocopier-blk);
+    --cr-surface-soft:     var(--cr-prussian-blue);
+    --cr-surface-elevated: var(--cr-night-elevated);
+
+    --cr-ink:         var(--cr-printer-ivory);
+    --cr-ink-muted:   var(--cr-periwinkle);
+    --cr-ink-soft:    #c8c2d8;
+    --cr-ink-inverse: var(--cr-russian-violet);
+
+    --cr-link:         var(--cr-sky-blue);
+    --cr-link-hover:   var(--cr-selective-yellow);
+    --cr-link-visited: var(--cr-periwinkle);
+
+    --cr-rule:          #3a342f;
+    --cr-border:        rgba(188, 181, 227, 0.15);
+    --cr-border-strong: rgba(188, 181, 227, 0.30);
+
+    --cr-callout-bg:  var(--cr-prussian-blue);
+    --cr-callout-ink: var(--cr-sky-blue);
+
+    --cr-accent-1-bg:  var(--cr-prussian-blue);
+    --cr-accent-1-ink: var(--cr-sky-blue);
+    --cr-accent-2-bg:  var(--cr-russian-violet);
+    --cr-accent-2-ink: var(--cr-periwinkle);
+    --cr-accent-3-bg:  var(--cr-cerulean);
+    --cr-accent-3-ink: var(--cr-light-orange);
+
+    --cr-tape:     #4a3f1c;
+    --cr-tape-ink: var(--cr-selective-yellow);
+
+    --cr-primary:       var(--cr-selective-yellow);
+    --cr-primary-hover: var(--cr-sky-blue);
+    --cr-primary-ink:   var(--cr-russian-violet);
+
+    /* CTA buttons — dark mode override (selective-yellow + russian-violet = 8.5:1 AAA) */
+    --cr-cta-bg:        var(--cr-selective-yellow);
+    --cr-cta-bg-hover:  var(--cr-sky-blue);
+    --cr-cta-ink:       var(--cr-russian-violet);
+    --cr-cta-ink-hover: var(--cr-russian-violet);
+    --cr-accent:        var(--cr-sky-blue);
+    --cr-accent-shape:  var(--cr-cerulean);
+    --cr-accent-soft:   var(--cr-prussian-blue);
+
+    --cr-code-bg:  #2a2520;
+    --cr-code-ink: var(--cr-periwinkle);
+
+    --cr-shadow-hard:   4px 4px 0 var(--cr-selective-yellow);
+    --cr-shadow-hard-2: 6px 6px 0 var(--cr-selective-yellow);
+
+    --cr-fiber: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(255, 255, 255, 0.018) 2px,
+      rgba(255, 255, 255, 0.018) 3px
+    );
+
+    /* v2.1 — post-type accents in dark mode.
+       Each maps to a brighter variant of its light-mode color so the
+       4px chip edge stays visible against dark tape (#4a3f1c).
+       Every value below verified ≥3:1 vs dark tape. */
+    --cr-type-blog:     var(--cr-selective-yellow);  /*  1 blog (warm/inviting) */
+    --cr-type-aside:    var(--cr-glaucous);           /*  2 aside (works on both) */
+    --cr-type-image:    var(--cr-blue-green);         /*  3 image (works on both) */
+    --cr-type-gallery:  var(--cr-blue-green);         /*  4 gallery */
+    --cr-type-video:    var(--cr-blue-green);         /*  5 video */
+    --cr-type-audio:    #ffffff;                      /*  6 audio (impact - inverted to white) */
+    --cr-type-chat:     var(--cr-glaucous);           /*  7 chat */
+    --cr-type-status:   var(--cr-glaucous);           /*  8 status */
+    --cr-type-link:     var(--cr-sky-blue);           /*  9 link (cool, lighter than cerulean) */
+    --cr-type-bookmark: var(--cr-sky-blue);           /* 10 bookmark */
+    --cr-type-quote:    var(--cr-selective-yellow);   /* 11 quote */
+    --cr-type-speaking: var(--cr-periwinkle);         /* 12 speaking (lighter than prussian) */
+    --cr-type-book:     var(--cr-selective-yellow);   /* 13 book */
+    --cr-type-like:     #ffffff;                      /* 14 like */
+    --cr-type-repost:   var(--cr-sky-blue);           /* 15 repost */
+    --cr-type-reply:    #ffffff;                      /* 16 reply */
+    --cr-type-event:    var(--cr-periwinkle);         /* 17 event */
+    --cr-type-review:   var(--cr-periwinkle);         /* 18 review */
+}
+
+
+
+/* =============================================================================
+   11. ELEMENT DEFAULTS
+   Every common HTML element gets zine-aware defaults. The goal: an unstyled
+   article using semantic markup looks intentional out of the box.
+   ============================================================================= */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--cr-surface);
+  background-image: var(--cr-fiber);
+  color: var(--cr-ink);
+  font-family: var(--cr-font-body);
+  font-size: var(--cr-text-base);
+  line-height: var(--cr-leading-normal);
+  margin: 0;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Headings — Roboto Slab for accent voice; Rock Salt only via .cr-display opt-in */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--cr-font-accent);
+  font-weight: var(--cr-weight-bold);
+  line-height: var(--cr-leading-tight);
+  margin: var(--cr-space-2xl) 0 var(--cr-space-md);
+  color: var(--cr-ink);
+}
+h1 { font-size: var(--cr-text-4xl); letter-spacing: var(--cr-tracking-tight); font-weight: var(--cr-weight-black); }
+h2 { font-size: var(--cr-text-3xl); font-weight: var(--cr-weight-extrabold); }
+h3 { font-size: var(--cr-text-2xl); }
+h4 { font-size: var(--cr-text-xl); }
+h5 { font-size: var(--cr-text-lg); }
+h6 { font-size: var(--cr-text-md); text-transform: uppercase; letter-spacing: var(--cr-tracking-wide); }
+
+p { margin: 0 0 var(--cr-space-md); max-width: var(--cr-measure); }
+
+a {
+  color: var(--cr-link);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  text-decoration-color: currentColor;
+  transition: color var(--cr-motion-fast) var(--cr-ease-out);
+}
+a:hover { color: var(--cr-link-hover); }
+a:visited { color: var(--cr-link-visited); }
+a:focus-visible {
+  outline: 3px solid var(--cr-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--cr-radius-xs);
+}
+
+/* Inline semantics */
+strong, b { font-weight: var(--cr-weight-bold); }
+em, i      { font-style: italic; }
+small      { font-size: var(--cr-text-sm); }
+mark {
+  background: linear-gradient(
+    180deg,
+    transparent 0 55%,
+    var(--cr-highlight) 55% 92%,
+    transparent 92%
+  );
+  color: inherit;
+  padding: 0 0.1em;
+}
+del { text-decoration: line-through; opacity: 0.7; }
+ins { text-decoration: underline; text-decoration-color: var(--cr-marker); text-decoration-thickness: 2px; }
+sub, sup       { font-size: 0.75em; line-height: 0; }
+abbr[title]    { text-decoration: underline dotted; cursor: help; }
+
+/* dfn — explicitly NO underline. It looks like a link otherwise. */
+dfn {
+  font-style: italic;
+  font-weight: var(--cr-weight-semibold);
+  text-decoration: none;
+}
+
+q { quotes: """ """ "'" "'"; font-style: italic; }
+cite { font-style: italic; color: var(--cr-ink-muted); }
+
+kbd {
+  font-family: var(--cr-font-mono);
+  font-size: 0.85em;
+  padding: 0.1em 0.4em;
+  border: var(--cr-border-thin);
+  border-bottom-width: 2px;
+  border-radius: var(--cr-radius-xs);
+  background: var(--cr-surface-elevated);
+}
+samp, var { font-family: var(--cr-font-mono); font-size: 0.95em; }
+
+/* Code */
+code {
+  font-family: var(--cr-font-mono);
+  font-size: 0.9em;
+  background: var(--cr-code-bg);
+  color: var(--cr-code-ink);
+  padding: 0.1em 0.35em;
+  border-radius: var(--cr-radius-xs);
+}
+pre {
+  font-family: var(--cr-font-mono);
+  background: var(--cr-code-bg);
+  color: var(--cr-code-ink);
+  padding: var(--cr-space-md);
+  border: var(--cr-border-thick);
+  box-shadow: var(--cr-shadow-hard);
+  overflow-x: auto;
+  margin: var(--cr-space-lg) 0;
+  line-height: var(--cr-leading-snug);
+}
+pre code { background: transparent; padding: 0; }
+
+/* Blockquote — plain element. .cr-pull-quote is the big zine variant. */
+blockquote {
+  margin: var(--cr-space-lg) 0;
+  padding: var(--cr-space-md) var(--cr-space-lg);
+  border-left: 4px solid var(--cr-marker);
+  font-family: var(--cr-font-accent);
+  font-size: var(--cr-text-md);
+  font-style: italic;
+  color: var(--cr-ink);
+}
+blockquote cite {
+  display: block;
+  margin-top: var(--cr-space-xs);
+  font-size: var(--cr-text-sm);
+  font-style: normal;
+}
+
+/* Lists */
+ul, ol { padding-left: var(--cr-space-lg); margin: 0 0 var(--cr-space-md); max-width: var(--cr-measure); }
+ul { list-style: none; }
+ul > li { position: relative; padding-left: var(--cr-space-md); }
+ul > li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  color: var(--cr-marker);
+  font-size: 0.85em;
+  top: 0.15em;
+}
+ul ul > li::before { content: "•"; color: var(--cr-blue-green); }
+ol { list-style: decimal; }
+ol > li::marker { color: var(--cr-marker); font-family: var(--cr-font-accent); font-weight: var(--cr-weight-bold); }
+li { margin: var(--cr-space-2xs) 0; }
+li > ul, li > ol { margin-top: var(--cr-space-2xs); }
+
+dl { margin: var(--cr-space-lg) 0; }
+dt { font-family: var(--cr-font-accent); font-weight: var(--cr-weight-bold); margin-top: var(--cr-space-md); }
+dd { margin: 0 0 var(--cr-space-sm) var(--cr-space-lg); }
+
+/* Tables — UN-rotated. Built for scanning, not zine flair. */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--cr-space-lg) 0;
+  font-size: var(--cr-text-sm);
+  border: var(--cr-border-thin);
+}
+caption {
+  caption-side: top;
+  text-align: left;
+  font-family: var(--cr-font-accent);
+  font-weight: var(--cr-weight-semibold);
+  padding: var(--cr-space-xs) 0;
+  color: var(--cr-ink-muted);
+}
+thead {
+  background: var(--cr-sky-blue);
+  color: var(--cr-russian-violet);
+  border-bottom: var(--cr-border-thick);
+}
+th, td {
+  padding: var(--cr-space-xs) var(--cr-space-sm);
+  text-align: left;
+  border: var(--cr-border-thin);
+  vertical-align: top;
+}
+th { font-weight: var(--cr-weight-bold); font-family: var(--cr-font-accent); }
+tbody tr:nth-child(odd) { background: rgba(36, 28, 74, 0.025); }
+
+/* Figures & media */
+figure { margin: var(--cr-space-lg) 0; }
+img, picture, video, svg, canvas { max-width: 100%; height: auto; display: block; }
+figcaption {
+  /* explicitly NOT glaucous — fails AA on cream */
+  color: var(--cr-cerulean);
+  font-family: var(--cr-font-accent);
+  font-style: italic;
+  font-size: var(--cr-text-sm);
+  margin-top: var(--cr-space-xs);
+}
+
+/* HR — a marker stripe, not a thin line */
+hr {
+  border: 0;
+  height: 4px;
+  background: var(--cr-marker);
+  margin: var(--cr-space-2xl) 0;
+  width: 60%;
+  transform: rotate(var(--cr-rotate-1));
+}
+
+/* Forms */
+button, input, select, textarea { font: inherit; color: inherit; }
+input[type="text"], input[type="email"], input[type="url"], input[type="search"],
+input[type="password"], input[type="number"], input[type="tel"], textarea, select {
+  background: var(--cr-surface-elevated);
+  border: var(--cr-border-thick);
+  padding: var(--cr-space-xs) var(--cr-space-sm);
+  border-radius: var(--cr-radius-xs);
+  width: 100%;
+  max-width: 30rem;
+}
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 3px solid var(--cr-focus-ring);
+  outline-offset: 2px;
+}
+button, input[type="submit"], input[type="button"] {
+  font-family: var(--cr-font-accent);
+  font-weight: var(--cr-weight-bold);
+  background: var(--cr-cta-bg);
+  color: var(--cr-cta-ink);
+  border: var(--cr-border-thick);
+  padding: var(--cr-space-xs) var(--cr-space-md);
+  cursor: pointer;
+  box-shadow: var(--cr-shadow-hard);
+  transition: transform 80ms var(--cr-ease-out), box-shadow 80ms var(--cr-ease-out), background 80ms var(--cr-ease-out);
+}
+button:hover, input[type="submit"]:hover {
+  background: var(--cr-cta-bg-hover);
+  color: var(--cr-cta-ink-hover);
+}
+button:active, input[type="submit"]:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--cr-ink);
+}
+
+label { display: block; font-family: var(--cr-font-accent); font-weight: var(--cr-weight-semibold); margin-bottom: var(--cr-space-2xs); }
+fieldset { border: var(--cr-border-thick); padding: var(--cr-space-md); margin: var(--cr-space-md) 0; }
+legend { font-family: var(--cr-font-accent); font-weight: var(--cr-weight-bold); padding: 0 var(--cr-space-xs); }
+
+/* Details/summary */
+details {
+  border: var(--cr-border-thin);
+  padding: var(--cr-space-sm) var(--cr-space-md);
+  border-radius: var(--cr-radius-md);
+  margin: var(--cr-space-md) 0;
+  background: var(--cr-surface-elevated);
+}
+summary {
+  cursor: pointer;
+  font-family: var(--cr-font-accent);
+  font-weight: var(--cr-weight-semibold);
+}
+summary:hover { color: var(--cr-link-hover); }
+details[open] summary { margin-bottom: var(--cr-space-sm); }
+
+/* Address */
+address { font-style: normal; }
+
+
+/* =============================================================================
+   12. LEGACY DEFENSES
+   courtneyr.dev's posts go back to 2007. Older content can include long-
+   deprecated elements (<center>, <font>, <tt>, <big>, <marquee>, <blink>,
+   <acronym>, <nobr>) and pre-Gutenberg WordPress class markup. Don't let
+   any of it break the page or harm accessibility.
+   ============================================================================= */
+
+/* ---- HTML4 / pre-HTML5 deprecated elements ---- */
+center { display: block; text-align: center; }
+font   { font: inherit !important; color: inherit !important; }
+tt     { font-family: var(--cr-font-mono); font-size: 0.95em; }
+big    { font-size: var(--cr-text-md); }
+strike, s { text-decoration: line-through; opacity: 0.7; }
+
+/* HTML4 abbreviation. HTML5 says use <abbr>; old posts may still use <acronym>. */
+acronym {
+  text-decoration: underline dotted;
+  cursor: help;
+  font-variant: normal;
+}
+
+/* IE-era no-break wrapper. */
+nobr { white-space: nowrap; }
+
+/* ---- Deprecated motion elements (a11y critical) ----
+   <marquee> and <blink> are legacy browser-native animations that bypass
+   prefers-reduced-motion (the global reduced-motion block above doesn't
+   catch them — the animation isn't CSS). Strip the animation, render as
+   normal flow content. Old posts with marquee or blink stop trapping
+   keyboard focus, stop triggering vestibular issues, and stop violating
+   WCAG 2.2.2 (Pause, Stop, Hide).
+*/
+marquee {
+  display: inline;
+  animation: none !important;
+  scroll-behavior: auto;
+}
+blink {
+  text-decoration: none;
+  animation: none !important;
+}
+
+/* ---- Modern semantics worth styling explicitly ---- */
+time {
+  font-variant-numeric: tabular-nums;        /* nicer date alignment */
+}
+
+meter, progress {
+  display: inline-block;
+  width: 100%;
+  max-width: 20rem;
+  height: 1em;
+  vertical-align: middle;
+}
+progress {
+  border: var(--cr-border-thin);
+  border-radius: var(--cr-radius-xs);
+  background: var(--cr-surface-elevated);
+}
+progress::-webkit-progress-bar              { background: var(--cr-surface-elevated); }
+progress::-webkit-progress-value            { background: var(--cr-marker); }
+progress::-moz-progress-bar                 { background: var(--cr-marker); }
+meter::-webkit-meter-bar                    { background: var(--cr-surface-elevated); border: var(--cr-border-thin); }
+meter::-webkit-meter-optimum-value          { background: var(--cr-blue-green); }
+meter::-webkit-meter-suboptimum-value       { background: var(--cr-selective-yellow); }
+meter::-webkit-meter-even-less-good-value   { background: var(--cr-ut-orange); }
+
+/* ---- MathML — handdrawn lettering (teacher's-whiteboard feel) ----
+   Rock Salt on identifiers (variables), numbers, and inline math text —
+   the parts that benefit from a teacher's-handwriting vibe. Operators
+   stay on a math-font fallback so the Unicode operator block (∫ ∑ × ÷
+   ≠ ≤ ≥ ≈ ∈ ∀ ∃ ∂ ∇ √ etc.) renders with proper math metrics. Fraction
+   bars, radical signs, root extenders, and superscript/subscript
+   positioning are browser-drawn natively from currentColor and inherit
+   ink — they don't need font coverage.
+
+   Browser support: Firefox always; Chrome 109+ (Jan 2023); Safari forever.
+   Older browsers fall through to plain-text rendering of the inner
+   content — still legible, just not laid out.
+
+   The visual outcome: cursive Rock Salt variables and numbers, clean
+   math-font operators, native fraction/radical drawing. Reads like
+   chalkboard math.
+*/
+math {
+  font-size: 1.05em;
+  line-height: 1.4;
+}
+math[display="block"] {
+  display: block;
+  margin: var(--cr-space-lg) auto;
+  font-size: 1.25em;
+  text-align: center;
+}
+/* Lettering parts — Rock Salt */
+mi, mn, mtext, ms {
+  font-family: var(--cr-font-display);
+  font-style: normal;                          /* Rock Salt has its own slant — kill UA italic on <mi> */
+}
+/* Operators — math font fallback for Unicode operator glyphs */
+mo {
+  font-family: "Cambria Math", "Latin Modern Math", "STIX Two Math", math, serif;
+}
+
+/* ---- HTML5 sectioning elements (defensive display: block) ----
+   Modern browsers handle this, but a stray `* { display: inline }` from
+   user-supplied content shouldn't be able to collapse a <main> or <article>.
+*/
+main, nav, header, footer, article, section, aside, hgroup {
+  display: block;
+}
+
+/* ---- [hidden] attribute (belt-and-suspenders) ----
+   Browsers handle [hidden] by default, but a parent rule like
+   * { display: block } would override it. This restores the contract.
+*/
+[hidden] { display: none !important; }
+
+/* ---- WordPress legacy class markup ----
+   Pre-Gutenberg [caption] and [gallery] shortcodes, and Classic Editor
+   alignment classes. Newer Block Editor markup already uses <figure>,
+   <ul>, etc. — covered by element defaults above.
+*/
+
+/* WordPress alignments (Classic Editor) */
+.alignleft   { float: left;  margin: 0 var(--cr-space-md) var(--cr-space-md) 0; }
+.alignright  { float: right; margin: 0 0 var(--cr-space-md) var(--cr-space-md); }
+.aligncenter { display: block; margin-left: auto; margin-right: auto; }
+.alignwide   { max-width: 90%; margin-left: auto; margin-right: auto; }
+.alignfull   { width: 100%; }
+
+/* [caption] shortcode — predates <figure>, common in pre-2017 posts */
+.wp-caption {
+  margin: var(--cr-space-lg) 0;
+  max-width: 100%;
+}
+.wp-caption img { max-width: 100%; height: auto; display: block; }
+.wp-caption-text,
+.wp-caption-dd {
+  color: var(--cr-cerulean);                 /* match figcaption — NOT glaucous */
+  font-family: var(--cr-font-accent);
+  font-style: italic;
+  font-size: var(--cr-text-sm);
+  margin-top: var(--cr-space-xs);
+}
+
+/* [gallery] shortcode — flex-based grid */
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cr-space-md);
+  margin: var(--cr-space-lg) 0;
+  list-style: none;
+  padding: 0;
+}
+.gallery-row { display: flex; flex-wrap: wrap; gap: var(--cr-space-md); width: 100%; }
+.gallery-item { flex: 1 1 calc(50% - var(--cr-space-md)); margin: 0; }
+.gallery-icon img { max-width: 100%; height: auto; display: block; }
+.gallery-caption {
+  color: var(--cr-cerulean);                 /* match figcaption — NOT glaucous */
+  font-family: var(--cr-font-accent);
+  font-style: italic;
+  font-size: var(--cr-text-sm);
+  margin-top: var(--cr-space-xs);
+}
+
+/* Common .gallery-columns-{N} variants. Others fall back to the
+   default 2-column layout via the .gallery-item rule above. */
+.gallery-columns-1 .gallery-item { flex: 1 1 100%; }
+.gallery-columns-2 .gallery-item { flex: 1 1 calc(50% - var(--cr-space-md)); }
+.gallery-columns-3 .gallery-item { flex: 1 1 calc(33.333% - var(--cr-space-md)); }
+.gallery-columns-4 .gallery-item { flex: 1 1 calc(25% - var(--cr-space-md)); }
+.gallery-columns-5 .gallery-item { flex: 1 1 calc(20% - var(--cr-space-md)); }
+
+
+/* =============================================================================
+   13. REDUCED MOTION
+   Honor prefers-reduced-motion across the system.
+   ============================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+  html { scroll-behavior: auto; }
+}

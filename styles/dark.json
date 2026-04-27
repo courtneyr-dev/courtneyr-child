@@ -1,0 +1,81 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 3,
+  "title": "Dark (Photocopier)",
+  "description": "Dark style variation. Photocopier-black surface, printer-ivory ink, selective-yellow shadows. AA contrast preserved across all post-type accents. WordPress site editor users can choose this as their default; the per-visitor JS toggle will still override at runtime.",
+
+  "settings": {
+    "color": {
+      "palette": [
+        { "slug": "russian-violet",   "name": "Russian Violet",   "color": "#241c4a" },
+        { "slug": "periwinkle",       "name": "Periwinkle",       "color": "#bcb5e3" },
+        { "slug": "glaucous",         "name": "Glaucous",         "color": "#647baf" },
+        { "slug": "sky-blue",         "name": "Sky Blue",         "color": "#8ecae6" },
+        { "slug": "blue-green",       "name": "Blue Green",       "color": "#219ebc" },
+        { "slug": "cerulean",         "name": "Cerulean",         "color": "#126782" },
+        { "slug": "prussian-blue",    "name": "Prussian Blue",    "color": "#023047" },
+        { "slug": "selective-yellow", "name": "Selective Yellow", "color": "#ffb703" },
+        { "slug": "ut-orange",        "name": "UT Orange",        "color": "#fb8500" },
+        { "slug": "light-orange",     "name": "Light Orange",     "color": "#fee2c3" },
+        { "slug": "printer-ivory",    "name": "Printer Ivory",    "color": "#fbfaf5" },
+        { "slug": "photocopier-blk",  "name": "Photocopier Black","color": "#1a1714" },
+        { "slug": "night-elevated",   "name": "Night Elevated",   "color": "#251f1c" },
+        { "slug": "white",            "name": "White",            "color": "#ffffff" },
+        { "slug": "black",            "name": "Black",            "color": "#000000" }
+      ]
+    },
+    "shadow": {
+      "presets": [
+        { "slug": "hard",   "name": "Hard Shadow",       "shadow": "4px 4px 0 #ffb703" },
+        { "slug": "hard-2", "name": "Hard Shadow Large", "shadow": "6px 6px 0 #ffb703" }
+      ]
+    }
+  },
+
+  "styles": {
+    "color": {
+      "background": "#1a1714",
+      "text":       "#fbfaf5"
+    },
+    "elements": {
+      "heading": {
+        "color": { "text": "#fbfaf5" }
+      },
+      "link": {
+        "color": { "text": "#8ecae6" },
+        ":hover": { "color": { "text": "#ffb703" } }
+      },
+      "button": {
+        "color": {
+          "background": "#ffb703",
+          "text":       "#241c4a"
+        },
+        ":hover": {
+          "color": {
+            "background": "#8ecae6",
+            "text":       "#241c4a"
+          }
+        }
+      },
+      "caption": {
+        "color": { "text": "#bcb5e3" }
+      }
+    },
+    "blocks": {
+      "core/quote": {
+        "border": {
+          "left": { "color": "#ffb703", "style": "solid", "width": "4px" }
+        }
+      },
+      "core/code": {
+        "color": {
+          "background": "#2a2520",
+          "text":       "#bcb5e3"
+        }
+      },
+      "core/separator": {
+        "color": { "background": "#3a342f" }
+      }
+    }
+  }
+}

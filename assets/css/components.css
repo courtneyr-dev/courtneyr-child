@@ -1,0 +1,659 @@
+/* =============================================================================
+   courtneyr.dev — components v2.0
+   Reusable components layered on top of tokens.css element defaults.
+
+   All classes are namespaced .cr-*. None of them auto-apply — every
+   component is opt-in via a class. This keeps blog post markup clean.
+
+   Component vocabulary (alphabetical):
+     .cr-accent-block      Generic accent block (1/2/3 modifiers)
+     .cr-button + family   Full button system (primary/secondary/outline/soft) — zine restyle
+     .cr-callout           Info box (note/warn modifiers)
+     .cr-card              Hard-shadowed, slightly rotated card
+     .cr-chip + family     Post-type taxonomy chips (masking-tape style)
+     .cr-cta               Alias for .cr-button--primary
+     .cr-display           Rock Salt display heading
+     .cr-eyebrow           Block-level kicker above a heading
+     .cr-halftone          Halftone dot overlay (soft modifier)
+     .cr-hero              Hero layout (inner/display/title/lead elements)
+     .cr-highlight         Inline yellow-highlighter swipe
+     .cr-marker-bar        UT Orange marker stripe (short modifier)
+     .cr-pull-quote        Big Roboto Slab quote block
+     .cr-reading           Long-form reading layout
+     .cr-rotate-{1,2,neg,neg2}   Rotation utilities
+     .cr-skip-link         Accessibility skip link
+     .cr-sparkle           Decorative asterisk (margin modifier)
+     .cr-stream            Feed/stream layout
+     .cr-stream-item       Stream feed item (with __avatar/__body/__meta/__title/__tags)
+     .cr-tape              Masking-tape inline label
+     .cr-toc               Light-orange table of contents
+
+   Removed in v2.0 (shape-layering deprecation):
+     .cr-shape-frame, .cr-shape-frame--*, .cr-float-badge*, .cr-drift,
+     .cr-hero__shape*, .cr-card--elevated, .cr-card--inverse
+   ============================================================================= */
+
+
+/* ============ Display heading (Rock Salt) ============ */
+.cr-display {
+  font-family: var(--cr-font-display);
+  font-size: clamp(var(--cr-text-3xl), 6vw, var(--cr-text-5xl));
+  line-height: 1.05;
+  letter-spacing: var(--cr-tracking-tight);
+  color: var(--cr-ink);
+  margin: 0 0 var(--cr-space-md);
+}
+
+
+/* ============ Eyebrow ============
+   Block, not inline-block — inline-block let it sit on the same line as
+   an h2. That was wrong. Stays block.
+*/
+.cr-eyebrow {
+  display: block;
+  font-family: var(--cr-font-accent);
+  font-size: var(--cr-text-sm);
+  font-weight: var(--cr-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--cr-tracking-eyebrow);
+  color: var(--cr-marker);
+  margin-bottom: var(--cr-space-2xs);
+}
+
+
+/* ============ Highlight ============
+   Yellow highlighter swipe behind inline text. Slightly off-center to feel hand-drawn.
+*/
+.cr-highlight {
+  background: linear-gradient(
+    180deg,
+    transparent 0 50%,
+    var(--cr-highlight) 50% 92%,
+    transparent 92%
+  );
+  padding: 0 0.15em;
+  color: var(--cr-russian-violet);
+}
+@media (prefers-color-scheme: dark) {
+  /* In dark mode, the marker-style gradient leaves the top half of each letter
+     sitting against photocopier-black (russian-violet on that = 1.6:1, invisible).
+     Switch to a solid yellow block so contrast holds across the whole letter. */
+  :root:not([data-theme]) .cr-highlight {
+    background: var(--cr-highlight);                /* solid, overrides the gradient */
+    color: var(--cr-russian-violet);
+  }
+}
+:root[data-theme="dark"] .cr-highlight {
+  background: var(--cr-highlight);
+  color: var(--cr-russian-violet);
+}
+
+
+/* ============ Pull quote ============
+   Big block quote for marketing/landing. Distinct from a regular <blockquote>.
+   v2.1: full 4-side UT-orange frame with generous matching horizontal padding
+   so text breathes off both rails (was top+bottom only, which read as half-open).
+*/
+.cr-pull-quote {
+  font-family: var(--cr-font-accent);
+  font-size: var(--cr-text-2xl);
+  line-height: var(--cr-leading-snug);
+  font-style: italic;
+  color: var(--cr-ink);
+  border: 4px solid var(--cr-marker);
+  padding: var(--cr-space-lg) var(--cr-space-xl);
+  margin: var(--cr-space-2xl) 0;
+  max-width: var(--cr-measure-wide);
+  background: var(--cr-surface);
+}
+.cr-pull-quote > :first-child { margin-top: 0; }
+.cr-pull-quote > :last-child  { margin-bottom: 0; }
+.cr-pull-quote cite {
+  display: block;
+  margin-top: var(--cr-space-sm);
+  font-size: var(--cr-text-base);
+  font-style: normal;
+  font-family: var(--cr-font-body);
+  color: var(--cr-ink-muted);
+}
+.cr-pull-quote cite::before { content: "— "; }
+
+
+/* ============ Callout ============ */
+.cr-callout {
+  background: var(--cr-callout-bg);
+  color: var(--cr-callout-ink);
+  padding: var(--cr-space-md) var(--cr-space-lg);
+  margin: var(--cr-space-lg) 0;
+  border: var(--cr-border-thick);
+  box-shadow: var(--cr-shadow-hard);
+  position: relative;
+}
+.cr-callout > :first-child { margin-top: 0; }
+.cr-callout > :last-child  { margin-bottom: 0; }
+.cr-callout a { color: var(--cr-light-orange); }   /* 5.13:1 on cerulean, passes AA */
+
+.cr-callout__label {
+  display: inline-block;
+  font-family: var(--cr-font-accent);
+  font-size: var(--cr-text-sm);
+  font-weight: var(--cr-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--cr-tracking-eyebrow);
+  background: var(--cr-tape);
+  color: var(--cr-tape-ink);
+  padding: var(--cr-space-3xs) var(--cr-space-sm);
+  margin-bottom: var(--cr-space-sm);
+  transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-callout--note { background: var(--cr-prussian-blue); color: var(--cr-light-orange); }
+.cr-callout--warn {
+  background: var(--cr-selective-yellow);
+  color: var(--cr-prussian-blue);
+}
+.cr-callout--warn a { color: var(--cr-cerulean); }
+
+
+/* ============ Card ============
+   Single zine variant. v1.x had .cr-card--elevated and --inverse;
+   those were removed in v2.0 — the zine treatment is the only card now.
+*/
+.cr-card {
+  background: var(--cr-surface-elevated);
+  border: var(--cr-border-thick);
+  padding: var(--cr-space-lg);
+  box-shadow: var(--cr-shadow-hard-2);
+  transform: rotate(var(--cr-rotate-1));
+  margin: var(--cr-space-xl) 0;
+  max-width: var(--cr-measure);
+}
+.cr-card > :first-child { margin-top: 0; }
+.cr-card > :last-child  { margin-bottom: 0; }
+
+
+/* ============ Table of contents ============ */
+.cr-toc {
+  background: var(--cr-accent-3-bg);
+  color: var(--cr-accent-3-ink);
+  border: var(--cr-border-thick);
+  padding: var(--cr-space-md) var(--cr-space-lg);
+  margin: var(--cr-space-xl) 0;
+  box-shadow: var(--cr-shadow-hard);
+  max-width: 24rem;
+}
+.cr-toc h2, .cr-toc h3, .cr-toc__heading {
+  font-family: var(--cr-font-accent);
+  font-size: var(--cr-text-md);
+  text-transform: uppercase;
+  letter-spacing: var(--cr-tracking-eyebrow);
+  margin: 0 0 var(--cr-space-sm);
+  color: var(--cr-russian-violet);
+}
+.cr-toc ol, .cr-toc ul { margin: 0; padding-left: var(--cr-space-md); }
+.cr-toc a { color: var(--cr-russian-violet); text-decoration-thickness: 1px; }
+.cr-toc a:hover { background: var(--cr-highlight); }
+
+
+/* ============ Tape label ============
+   Inline masking-tape feel. Used for hand-applied tags, badges, small labels.
+*/
+.cr-tape {
+  display: inline-block;
+  background: var(--cr-tape);
+  color: var(--cr-tape-ink);
+  font-family: var(--cr-font-accent);
+  font-size: var(--cr-text-sm);
+  font-weight: var(--cr-weight-bold);
+  padding: var(--cr-space-2xs) var(--cr-space-sm);
+  transform: rotate(var(--cr-rotate-neg));
+  box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+}
+
+
+/* ============ Marker bar ============
+   The hr default is already a marker stripe; this is a stronger one
+   for section dividers in landing/marketing.
+*/
+.cr-marker-bar {
+  display: block;
+  width: 100%;
+  height: 8px;
+  background: var(--cr-marker);
+  border: 0;
+  margin: var(--cr-space-2xl) 0;
+  transform: rotate(var(--cr-rotate-2));
+}
+.cr-marker-bar--short { width: 8rem; height: 6px; transform: rotate(var(--cr-rotate-1)); }
+
+
+/* ============ Sparkle ============
+   Decorative asterisk for the margin. Always aria-hidden in markup.
+*/
+.cr-sparkle {
+  display: inline-block;
+  color: var(--cr-marker);
+  font-size: 1.25em;
+  line-height: 1;
+  font-family: var(--cr-font-accent);
+}
+.cr-sparkle--margin {
+  position: absolute;
+  font-size: var(--cr-text-2xl);
+  color: var(--cr-selective-yellow);
+}
+
+
+/* ============ Halftone ============
+   Dotted overlay for hero/landing surfaces. Apply to a wrapper.
+*/
+.cr-halftone {
+  background-image: var(--cr-halftone);
+  background-size: var(--cr-halftone-size);
+}
+/* --soft: legacy alias, now matches the default token (kept for back-compat). */
+.cr-halftone--soft {
+  background-image: var(--cr-halftone);
+  background-size: var(--cr-halftone-size);
+}
+/* --strong: louder screentone for cases that genuinely need it. */
+.cr-halftone--strong {
+  background-image: var(--cr-halftone-strong);
+  background-size: var(--cr-halftone-strong-size);
+}
+
+
+/* ============ Accent blocks ============
+   Three pre-defined surface treatments. Used for sections, sidebars, callouts.
+   Light: light bg + dark text. Dark mode: dark bg + bright accent text.
+   Token assignment is in tokens.css — these "just work" in dark mode.
+*/
+.cr-accent-block {
+  padding: var(--cr-space-xl);
+  border: var(--cr-border-thick);
+  box-shadow: var(--cr-shadow-hard);
+  margin: var(--cr-space-xl) 0;
+}
+.cr-accent-block--1 { background: var(--cr-accent-1-bg); color: var(--cr-accent-1-ink); }
+.cr-accent-block--2 { background: var(--cr-accent-2-bg); color: var(--cr-accent-2-ink); }
+.cr-accent-block--3 { background: var(--cr-accent-3-bg); color: var(--cr-accent-3-ink); }
+.cr-accent-block > :first-child { margin-top: 0; }
+.cr-accent-block > :last-child  { margin-bottom: 0; }
+
+
+/* ============ Buttons ============
+   Full family preserved from v1.x, restyled for zine: sharp corners (no radius),
+   thick border, hard offset shadow, "press" effect on active.
+   .cr-cta is an alias for .cr-button--primary (used in mockups for clarity).
+*/
+.cr-button,
+.cr-cta {
+  display: inline-block;
+  font-family: var(--cr-font-accent);
+  font-weight: var(--cr-weight-bold);
+  font-size: var(--cr-text-md);
+  background: var(--cr-surface-elevated);
+  color: var(--cr-ink);
+  border: var(--cr-border-thick);
+  padding: var(--cr-space-sm) var(--cr-space-lg);
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--cr-shadow-hard);
+  transition: transform 80ms var(--cr-ease-out),
+              box-shadow 80ms var(--cr-ease-out),
+              background 80ms var(--cr-ease-out);
+}
+.cr-button:hover,
+.cr-cta:hover {
+  background: var(--cr-russian-violet);
+  color: var(--cr-sky-blue);
+}
+.cr-button:active,
+.cr-cta:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--cr-ink);
+}
+.cr-button:focus-visible,
+.cr-cta:focus-visible {
+  outline: 3px solid var(--cr-focus-ring);
+  outline-offset: 2px;
+}
+
+.cr-button--primary,
+.cr-cta {
+  background: var(--cr-cta-bg);
+  color: var(--cr-cta-ink);
+}
+.cr-button--primary:hover,
+.cr-cta:hover {
+  background: var(--cr-cta-bg-hover);
+  color: var(--cr-cta-ink-hover);
+}
+
+.cr-button--secondary {
+  background: var(--cr-russian-violet);
+  color: var(--cr-sky-blue);
+}
+.cr-button--secondary:hover {
+  background: var(--cr-cerulean);
+  color: var(--cr-printer-ivory);
+}
+
+.cr-button--outline {
+  background: transparent;
+  color: var(--cr-ink);
+}
+.cr-button--outline:hover {
+  background: var(--cr-ink);
+  color: var(--cr-ink-inverse);                  /* auto-flips: ivory on dark, russian-violet on light */
+}
+
+.cr-button--soft {
+  background: var(--cr-light-orange);
+  color: var(--cr-russian-violet);
+}
+.cr-button--soft:hover {
+  background: var(--cr-selective-yellow);
+  color: var(--cr-prussian-blue);
+}
+
+
+/* ============ Chips (post-type taxonomy) ============
+   Masking-tape style: yellow-cream base, slight rotation, soft shadow.
+   Post-type color is carried as a 4px left border accent (NOT as text color),
+   so text stays russian-violet on tape — 12.47:1, passes AAA at small sizes.
+
+   v2.1: 18 post-type variants (was 9). Every accent verified ≥3:1 against
+   tape (WCAG 1.4.11). Where two types share a color family — blog (russian-
+   violet) vs quote (russian-violet-soft), aside (glaucous) vs chat (glaucous-
+   light) vs reply (glaucous-dark) — the icon does the disambiguation.
+
+   Variants:
+     .cr-chip                  default — tape bg + russian-violet text + transparent border
+     .cr-chip--{type}          adds a 4px left border in the post-type color
+     .cr-chip--solid           post-type color fills the chip; text adapts for AA
+                                (a few types do NOT support --solid — see below)
+
+   Removed in v2.0.1: .cr-chip--outline (failed AA for warm/light post-types).
+*/
+.cr-chip {
+  display: inline-block;
+  font-family: var(--cr-font-accent);
+  font-size: var(--cr-text-xs);
+  font-weight: var(--cr-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--cr-tracking-eyebrow);
+  background: var(--cr-surface);
+  color: var(--cr-tape-ink);                       /* russian-violet on ivory — 15:1 (was on cream tape; moved to ivory for AA accent variety) */
+  padding: var(--cr-space-3xs) var(--cr-space-sm);
+  border-left: 4px solid transparent;              /* reserve the 4px; --type modifiers fill it */
+  transform: rotate(var(--cr-rotate-neg));
+  box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+  text-decoration: none;
+  vertical-align: middle;
+}
+.cr-chip + .cr-chip { margin-left: var(--cr-space-2xs); transform: rotate(var(--cr-rotate-neg2)); }
+
+/* ── Post-type modifiers — accent carried via the 4px left border ─────────── */
+/* WordPress standard formats + IndieWeb extensions, in taxonomy order */
+.cr-chip--blog     { border-left-color: var(--cr-type-blog); }
+.cr-chip--aside    { border-left-color: var(--cr-type-aside); }
+.cr-chip--image    { border-left-color: var(--cr-type-image); }
+.cr-chip--gallery  { border-left-color: var(--cr-type-gallery); }
+.cr-chip--video    { border-left-color: var(--cr-type-video); }
+.cr-chip--audio    { border-left-color: var(--cr-type-audio); }
+.cr-chip--chat     { border-left-color: var(--cr-type-chat); }
+.cr-chip--status   { border-left-color: var(--cr-type-status); }
+.cr-chip--link     { border-left-color: var(--cr-type-link); }
+.cr-chip--bookmark { border-left-color: var(--cr-type-bookmark); }
+.cr-chip--quote    { border-left-color: var(--cr-type-quote); }
+.cr-chip--speaking { border-left-color: var(--cr-type-speaking); }
+.cr-chip--book     { border-left-color: var(--cr-type-book); }
+.cr-chip--like     { border-left-color: var(--cr-type-like); }
+.cr-chip--repost   { border-left-color: var(--cr-type-repost); }
+.cr-chip--reply    { border-left-color: var(--cr-type-reply); }
+.cr-chip--event    { border-left-color: var(--cr-type-event); }
+.cr-chip--review   { border-left-color: var(--cr-type-review); }
+
+/* Solid: post-type color fills the chip; text color adapts for AA contrast.
+
+   Types that do NOT support --solid (their accent fails AA against both
+   ivory text and russian-violet text — the default tape variant covers them):
+     • aside     — glaucous           (4.02:1 ivory, 3.73:1 violet)
+     • image     — sky-blue           (1.62:1 violet — far too low)
+     • gallery   — periwinkle         (2.78:1 violet)
+     • status    — blue-green         (3.36:1 violet)
+     • chat      — glaucous-light     (3.72:1 violet)
+     • repost    — cerulean-light     (3.49:1 violet)
+     • light-orange-dark (book)       (4.13:1 violet — borderline, kept default-only)
+     • sage      — sage               (3.57:1 violet)
+*/
+.cr-chip--solid {
+  background: var(--cr-ink);                       /* russian-violet → ivory in dark */
+  color: var(--cr-ink-inverse);                    /* ivory → russian-violet in dark — auto-flips */
+  border-left-color: transparent;                  /* solid is a filled block; no edge accent */
+}
+/* Solid variants — grouped by post-type accent (v2.1).
+   Three small-group types (aside, chat, status — all glaucous) intentionally
+   have NO solid variant: glaucous fails AA against both light and dark text.
+   Backgrounds use --cr-type-* tokens so they auto-flip in dark mode (e.g.
+   russian-violet → selective-yellow for longform). The dark-mode @media block
+   below flips the text colors correspondingly. */
+
+/* longform group — light: russian-violet bg / dark: selective-yellow bg */
+.cr-chip--blog.cr-chip--solid,
+.cr-chip--book.cr-chip--solid,
+.cr-chip--quote.cr-chip--solid    { background: var(--cr-type-blog);     color: var(--cr-printer-ivory); } /* light 15:1 AAA */
+
+/* shares group — light: cerulean bg / dark: sky-blue bg */
+.cr-chip--link.cr-chip--solid,
+.cr-chip--bookmark.cr-chip--solid,
+.cr-chip--repost.cr-chip--solid   { background: var(--cr-type-link);     color: var(--cr-printer-ivory); } /* light 6.11:1 AA */
+
+/* events group — light: prussian-blue bg / dark: periwinkle bg */
+.cr-chip--speaking.cr-chip--solid,
+.cr-chip--event.cr-chip--solid,
+.cr-chip--review.cr-chip--solid   { background: var(--cr-type-speaking); color: var(--cr-printer-ivory); } /* light 13.25:1 AAA */
+
+/* media group — blue-green bg in BOTH modes; prussian-blue text works for both */
+.cr-chip--image.cr-chip--solid,
+.cr-chip--gallery.cr-chip--solid,
+.cr-chip--video.cr-chip--solid    { background: var(--cr-type-video);    color: var(--cr-prussian-blue);  } /* light/dark 4.57:1 AA */
+
+/* impact group — light: black bg / dark: white bg */
+.cr-chip--audio.cr-chip--solid,
+.cr-chip--reply.cr-chip--solid,
+.cr-chip--like.cr-chip--solid     { background: var(--cr-type-audio);    color: var(--cr-printer-ivory); } /* light 20:1 AAA */
+
+/* Dark-mode text overrides for solid chips —
+   when light-end accents become the chip bg in dark mode, text must flip to dark. */
+@media (prefers-color-scheme: dark) {
+  /* OS-level dark mode — only when user hasn't explicitly chosen via [data-theme] */
+  :root:not([data-theme]) .cr-chip--blog.cr-chip--solid,
+  :root:not([data-theme]) .cr-chip--book.cr-chip--solid,
+  :root:not([data-theme]) .cr-chip--quote.cr-chip--solid,
+  :root:not([data-theme]) .cr-chip--link.cr-chip--solid,
+  :root:not([data-theme]) .cr-chip--bookmark.cr-chip--solid,
+  :root:not([data-theme]) .cr-chip--repost.cr-chip--solid,
+  :root:not([data-theme]) .cr-chip--speaking.cr-chip--solid,
+  :root:not([data-theme]) .cr-chip--event.cr-chip--solid,
+  :root:not([data-theme]) .cr-chip--review.cr-chip--solid,
+  :root:not([data-theme]) .cr-chip--audio.cr-chip--solid,
+  :root:not([data-theme]) .cr-chip--reply.cr-chip--solid,
+  :root:not([data-theme]) .cr-chip--like.cr-chip--solid    { color: var(--cr-russian-violet); }
+}
+/* Manual dark-mode override (parallel to the @media block above) */
+:root[data-theme="dark"] .cr-chip--blog.cr-chip--solid,
+:root[data-theme="dark"] .cr-chip--book.cr-chip--solid,
+:root[data-theme="dark"] .cr-chip--quote.cr-chip--solid,
+:root[data-theme="dark"] .cr-chip--link.cr-chip--solid,
+:root[data-theme="dark"] .cr-chip--bookmark.cr-chip--solid,
+:root[data-theme="dark"] .cr-chip--repost.cr-chip--solid,
+:root[data-theme="dark"] .cr-chip--speaking.cr-chip--solid,
+:root[data-theme="dark"] .cr-chip--event.cr-chip--solid,
+:root[data-theme="dark"] .cr-chip--review.cr-chip--solid,
+:root[data-theme="dark"] .cr-chip--audio.cr-chip--solid,
+:root[data-theme="dark"] .cr-chip--reply.cr-chip--solid,
+:root[data-theme="dark"] .cr-chip--like.cr-chip--solid    { color: var(--cr-russian-violet); }
+/* Contrast pairings (apply to either trigger):
+     longform: selective-yellow + russian-violet = 8.50:1 AAA
+     shares:   sky-blue         + russian-violet = 9.27:1 AAA
+     events:   periwinkle       + russian-violet = 7.93:1 AAA
+     impact:   white            + russian-violet = 15:1   AAA
+     media:    blue-green stays in both modes — no override needed */
+
+
+/* ============ Hero layout ============
+   v1.x __title and __lead preserved. v2.0 __inner and __display added.
+   __shape and --1/--2 (the blob shapes for shape-layering) removed in v2.0.
+*/
+.cr-hero {
+  position: relative;
+  padding: var(--cr-space-3xl) var(--cr-space-xl);
+  background: var(--cr-surface);
+  background-image: var(--cr-fiber), var(--cr-halftone);
+  background-size: auto, var(--cr-halftone-size);
+  overflow: hidden;
+}
+.cr-hero__inner { max-width: 60rem; margin: 0 auto; position: relative; }
+
+.cr-hero__display {
+  font-family: var(--cr-font-display);
+  font-size: clamp(var(--cr-text-3xl), 6vw, var(--cr-text-5xl));
+  line-height: 1.05;
+  letter-spacing: var(--cr-tracking-tight);
+  color: var(--cr-ink);
+  margin: 0 0 var(--cr-space-md);
+}
+
+.cr-hero__title {
+  font-family: var(--cr-font-accent);
+  font-size: clamp(var(--cr-text-2xl), 4vw, var(--cr-text-4xl));
+  font-weight: var(--cr-weight-black);
+  line-height: var(--cr-leading-tight);
+  letter-spacing: var(--cr-tracking-tight);
+  color: var(--cr-ink);
+  margin: 0 0 var(--cr-space-md);
+}
+.cr-hero__title--accent {
+  /* alternate slab-serif treatment for headings that lead a section */
+  font-weight: var(--cr-weight-extrabold);
+  color: var(--cr-marker);
+}
+
+.cr-hero__lead {
+  font-family: var(--cr-font-accent);
+  font-size: var(--cr-text-xl);
+  line-height: var(--cr-leading-snug);
+  color: var(--cr-ink-muted);
+  max-width: 40rem;
+  margin: 0 0 var(--cr-space-lg);
+}
+
+
+/* ============ Stream / feed layout ============
+   v1.x structure preserved (.cr-stream-item with __avatar/__body/__meta/
+   __title/__tags). The Query Loop config in IMPLEMENTATION.md still works.
+   Restyled for zine: marker-bar separator between items, hard shadow on hover.
+*/
+.cr-stream {
+  max-width: var(--cr-measure-wide);
+  margin: 0 auto;
+  padding: var(--cr-space-xl);
+}
+
+.cr-stream-item {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: var(--cr-space-md);
+  padding: var(--cr-space-lg) 0;
+  border-bottom: 4px solid var(--cr-marker);
+  transition: transform var(--cr-motion-fast) var(--cr-ease-out);
+}
+.cr-stream-item:last-child { border-bottom: 0; }
+.cr-stream-item:hover {
+  transform: translate(-2px, -2px);
+}
+
+.cr-stream-item__avatar {
+  font-size: var(--cr-text-2xl);
+  line-height: 1;
+  text-align: center;
+  padding-top: var(--cr-space-2xs);
+  transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-stream-item__body {
+  min-width: 0;
+}
+
+.cr-stream-item__meta {
+  display: flex;
+  gap: var(--cr-space-sm);
+  flex-wrap: wrap;
+  align-items: center;
+  font-family: var(--cr-font-accent);
+  font-size: var(--cr-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--cr-tracking-eyebrow);
+  color: var(--cr-ink-muted);
+  margin-bottom: var(--cr-space-2xs);
+}
+
+.cr-stream-item__title {
+  font-family: var(--cr-font-accent);
+  font-size: var(--cr-text-xl);
+  font-weight: var(--cr-weight-bold);
+  line-height: var(--cr-leading-snug);
+  margin: 0 0 var(--cr-space-xs);
+}
+.cr-stream-item__title a {
+  color: var(--cr-ink);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+.cr-stream-item__title a:hover {
+  border-bottom-color: var(--cr-marker);
+}
+
+.cr-stream-item__tags {
+  display: flex;
+  gap: var(--cr-space-2xs);
+  flex-wrap: wrap;
+  margin-top: var(--cr-space-xs);
+}
+
+/* Per-type accent — the avatar adopts a soft post-type background */
+.cr-stream-item--blog  .cr-stream-item__avatar { color: var(--cr-type-blog); }
+.cr-stream-item--quote .cr-stream-item__avatar { color: var(--cr-type-quote); }
+.cr-stream-item--video .cr-stream-item__avatar { color: var(--cr-type-video); }
+
+
+/* ============ Reading layout ============ */
+.cr-reading {
+  max-width: var(--cr-measure);
+  margin: 0 auto;
+  padding: var(--cr-space-2xl) var(--cr-space-md);
+}
+.cr-reading > h1, .cr-reading > h2 { max-width: 100%; }
+
+
+/* ============ Skip link (accessibility) ============ */
+.cr-skip-link {
+  position: absolute;
+  left: -9999px;
+  background: var(--cr-russian-violet);
+  color: var(--cr-printer-ivory);
+  padding: var(--cr-space-sm) var(--cr-space-md);
+  z-index: 10000;
+}
+.cr-skip-link:focus { left: var(--cr-space-md); top: var(--cr-space-md); }
+
+
+/* ============ Rotation utilities ============
+   Use sparingly. Reserved for accents — not body text, tables, or figures.
+*/
+.cr-rotate-1    { transform: rotate(var(--cr-rotate-1)); }
+.cr-rotate-2    { transform: rotate(var(--cr-rotate-2)); }
+.cr-rotate-neg  { transform: rotate(var(--cr-rotate-neg)); }
+.cr-rotate-neg2 { transform: rotate(var(--cr-rotate-neg2)); }

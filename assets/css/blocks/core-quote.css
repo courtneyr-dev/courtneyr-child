@@ -1,0 +1,60 @@
+/* =============================================================================
+   core/quote — block-specific extensions on top of components.css.
+
+   theme.json already sets the base quote styling (marker left border,
+   accent font, italic). This file holds:
+
+   1. Block style variations registered in inc/block-styles.php
+      (.is-style-cr-rotate-*, .is-style-cr-torn-paper)
+   2. Selector chains that theme.json's selector schema cannot express
+      (e.g. .is-style-cr-torn-paper > cite, :has() queries)
+   3. Hover and focus-visible behaviors that need direct CSS
+
+   Loaded only when core/quote actually renders on the current page,
+   via wp_enqueue_block_style() in inc/enqueue.php.
+   ============================================================================= */
+
+/* Rotation variants — apply one of the four locked rotation values. */
+.wp-block-quote.is-style-cr-rotate-1 {
+	transform: rotate(var(--cr-rotate-1, -1.2deg));
+}
+.wp-block-quote.is-style-cr-rotate-2 {
+	transform: rotate(var(--cr-rotate-2, 1.5deg));
+}
+
+/* Torn paper — quote pulled from the page like a hand-torn note.
+   Uses a clip-path with jagged edges + the soft-md shadow.
+   Background switches to surface-elevated so the paper looks lifted. */
+.wp-block-quote.is-style-cr-torn-paper {
+	background: var(--cr-surface-elevated, #ffffff);
+	color: var(--cr-ink, #241c4a);
+	padding: var(--cr-space-lg, 1.5rem) var(--cr-space-xl, 2rem);
+	border-left: none; /* Override theme.json marker border. */
+	box-shadow: var(--cr-shadow-md, 0 4px 12px -2px rgba(36, 28, 74, 0.10));
+	transform: rotate(var(--cr-rotate-1, -1.2deg));
+
+	/* Slight irregular edge — top and bottom only, sides stay clean. */
+	clip-path: polygon(
+		0% 4%, 5% 0%, 12% 3%, 22% 0%, 35% 4%, 48% 1%, 60% 4%, 72% 0%, 85% 3%, 96% 1%, 100% 4%,
+		100% 96%, 95% 100%, 82% 97%, 68% 100%, 55% 96%, 42% 99%, 28% 96%, 14% 100%, 4% 97%, 0% 96%
+	);
+}
+
+.wp-block-quote.is-style-cr-torn-paper cite {
+	display: block;
+	margin-top: var(--cr-space-md, 1rem);
+	font-family: var(--cr-font-body, "Barlow", sans-serif);
+	font-style: normal;
+	font-size: var(--cr-text-sm, 0.875rem);
+	letter-spacing: var(--cr-tracking-wide, 0.05em);
+	text-transform: uppercase;
+	color: var(--cr-ink-muted, #126782);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.wp-block-quote.is-style-cr-rotate-1,
+	.wp-block-quote.is-style-cr-rotate-2,
+	.wp-block-quote.is-style-cr-torn-paper {
+		transform: none;
+	}
+}

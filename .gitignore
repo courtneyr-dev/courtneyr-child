@@ -1,0 +1,29 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Build artifacts (none yet, but reserved)
+node_modules/
+vendor/
+*.log
+.cache/
+
+# Local env
+.env
+.env.local
+*.local.php
+
+# Composer (if added later)
+composer.lock
+
+# Local font working files. Drop final .woff2 into assets/fonts/.
+assets/fonts/*.ttf
+assets/fonts/*.otf
+assets/fonts/.staging/
+
+# Temporary export folders
+/tmp-export/
