@@ -7,23 +7,12 @@
  * Pro) and WP core defaults all leak through despite defaultPalette:false
  * because that flag only affects the 'default' origin layer, not 'theme'.
  *
- * WordPress exposes four filter layers, each with its own origin:
- *   - wp_theme_json_data_default   (origin: default — WP core)
- *   - wp_theme_json_data_blocks    (origin: blocks  — block.json files)
- *   - wp_theme_json_data_theme     (origin: theme   — theme.json + parent + filters)
- *   - wp_theme_json_data_user      (origin: custom  — Site Editor saved styles)
- *
- * The merged palette structure is:
- *   palette = {
- *     default: [...]   // WP core (cyan-bluish-gray, vivid-purple, etc.)
- *     theme:   [...]   // theme.json from parent + child + plugin filters
- *     custom:  [...]   // user customizations
- *   }
- *
- * To get JUST our 15 colors we need to:
- *   1. Empty the 'default' palette via wp_theme_json_data_default
- *   2. Replace the 'theme' palette with only our entries via
- *      wp_theme_json_data_theme (priority 999 to run after Ollie Pro)
+ * The wp_theme_json_data_default filter empties WP core's color
+ * contributions. The wp_theme_json_data_theme filter has to manipulate
+ * the data structure directly: update_with() is purely additive (it
+ * cannot remove parent contributions), so we read the current state,
+ * replace the palette + gradients with our canonical values, and write
+ * it back via update_with() with the version field so WP accepts it.
  *
  * @package CourtneyrChild
  */
@@ -71,13 +60,10 @@ function strip_core_defaults( \WP_Theme_JSON_Data $theme_json ): \WP_Theme_JSON_
 		return $theme_json;
 	}
 
-	// Replace WP core's color contributions with empty arrays.
 	$data['settings']['color']['palette']   = array();
 	$data['settings']['color']['gradients'] = array();
 	$data['settings']['color']['duotone']   = array();
-
-	// update_with() requires a version field. Match the layer's version.
-	$data['version'] = 3;
+	$data['version']                        = 3;
 
 	return $theme_json->update_with( $data );
 }
@@ -85,25 +71,32 @@ add_filter( 'wp_theme_json_data_default', __NAMESPACE__ . '\\strip_core_defaults
 
 /**
  * Replace the 'theme' origin palette + gradients with ONLY ours.
- * Runs at priority 999 to execute AFTER all other plugin filters
- * (Ollie Pro registers theirs at default priority 10).
+ *
+ * KEY MECHANIC: get_data() returns the current merged state. We mutate
+ * the palette + gradients arrays directly (replacing whatever Ollie +
+ * Ollie Pro merged in) then pass the entire mutated structure back
+ * through update_with(). update_with() is additive on its OWN call,
+ * but because we're passing back a structure where palette/gradients
+ * are arrays of OUR entries (not deltas), the result is just our values.
+ *
+ * Runs at priority 999 to execute AFTER all other plugin filters.
  */
 function override_theme_palette( \WP_Theme_JSON_Data $theme_json ): \WP_Theme_JSON_Data {
 	$canonical = read_canonical();
+	$data      = $theme_json->get_data();
 
-	$new_data = array(
-		'version'  => 3,
-		'settings' => array(
-			'color' => array(
-				'palette'          => $canonical['palette'],
-				'gradients'        => $canonical['gradients'],
-				'defaultPalette'   => false,
-				'defaultGradients' => false,
-				'defaultDuotone'   => false,
-			),
-		),
-	);
+	if ( ! isset( $data['settings']['color'] ) ) {
+		$data['settings']['color'] = array();
+	}
 
-	return $theme_json->update_with( $new_data );
+	// Wholesale replacement of the merged arrays, not deltas.
+	$data['settings']['color']['palette']          = $canonical['palette'];
+	$data['settings']['color']['gradients']        = $canonical['gradients'];
+	$data['settings']['color']['defaultPalette']   = false;
+	$data['settings']['color']['defaultGradients'] = false;
+	$data['settings']['color']['defaultDuotone']   = false;
+	$data['version']                               = 3;
+
+	return $theme_json->update_with( $data );
 }
 add_filter( 'wp_theme_json_data_theme', __NAMESPACE__ . '\\override_theme_palette', 999 );
