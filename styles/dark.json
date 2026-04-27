@@ -28,7 +28,7 @@
         },
         {
           "slug": "main",
-          "name": "Printer Ivory (Text)",
+          "name": "Printer Ivory Text",
           "color": "#fbfaf5"
         },
         {
@@ -38,7 +38,7 @@
         },
         {
           "slug": "base",
-          "name": "Photocopier Black (Surface)",
+          "name": "Photocopier Surface",
           "color": "#1a1714"
         },
         {
@@ -48,17 +48,17 @@
         },
         {
           "slug": "tertiary",
-          "name": "Night Elevated",
+          "name": "Night Elevated Card",
           "color": "#251f1c"
         },
         {
           "slug": "border-light",
-          "name": "Night Elevated (Border)",
-          "color": "#251f1c"
+          "name": "Border Light Dark",
+          "color": "#3a342f"
         },
         {
           "slug": "border-dark",
-          "name": "Periwinkle (Border)",
+          "name": "Border Dark Highlight",
           "color": "#bcb5e3"
         },
         {

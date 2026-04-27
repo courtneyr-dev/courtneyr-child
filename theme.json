@@ -66,13 +66,13 @@
         },
         {
           "slug": "border-light",
-          "name": "Periwinkle (Border)",
-          "color": "#bcb5e3"
+          "name": "Border Light",
+          "color": "#d4cfeb"
         },
         {
           "slug": "border-dark",
-          "name": "Prussian Blue (Border)",
-          "color": "#023047"
+          "name": "Border Dark",
+          "color": "#011d2c"
         },
         {
           "slug": "selective-yellow",
