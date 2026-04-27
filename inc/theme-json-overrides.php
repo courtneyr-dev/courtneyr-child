@@ -3,28 +3,27 @@
  * Theme JSON merge overrides.
  *
  * The child-theme inheritance model in WordPress merges parent and child
- * theme.json *additively* for arrays like settings.color.palette, even
- * when both parent and child set defaultPalette:false. The child cannot
- * say "drop the parent's array entirely" through theme.json alone.
+ * theme.json palette arrays additively. Parent palette (Ollie + Ollie
+ * Pro) and WP core defaults all leak through despite defaultPalette:false
+ * because that flag only affects the 'default' origin layer, not 'theme'.
  *
- * This file uses the wp_theme_json_data_theme filter (priority 20, after
- * Ollie Pro at priority 10) to:
+ * WordPress exposes four filter layers, each with its own origin:
+ *   - wp_theme_json_data_default   (origin: default — WP core)
+ *   - wp_theme_json_data_blocks    (origin: blocks  — block.json files)
+ *   - wp_theme_json_data_theme     (origin: theme   — theme.json + parent + filters)
+ *   - wp_theme_json_data_user      (origin: custom  — Site Editor saved styles)
  *
- *   1. Replace the merged palette with ONLY courtneyr-child's 15 colors
- *   2. Replace the merged gradients with ONLY courtneyr-child's 2
- *   3. Re-assert defaultPalette:false (kills WordPress core defaults
- *      that leak through despite settings.color.defaultPalette:false in
- *      child theme.json — same root cause)
+ * The merged palette structure is:
+ *   palette = {
+ *     default: [...]   // WP core (cyan-bluish-gray, vivid-purple, etc.)
+ *     theme:   [...]   // theme.json from parent + child + plugin filters
+ *     custom:  [...]   // user customizations
+ *   }
  *
- * Without this, the block editor color picker shows ~30 colors
- * (15 ours + Ollie's 11 + WP core 8) and authors have to scroll past
- * unrelated brand colors to pick the right one. With this filter,
- * authors only see our 15.
- *
- * Why a separate file vs. dropping it in theme-supports.php: this is
- * a focused override that may need to be removed in v0.2 when patterns
- * land. Easier to comment out one require_once than to surgically
- * remove a function from a multi-purpose file.
+ * To get JUST our 15 colors we need to:
+ *   1. Empty the 'default' palette via wp_theme_json_data_default
+ *   2. Replace the 'theme' palette with only our entries via
+ *      wp_theme_json_data_theme (priority 999 to run after Ollie Pro)
  *
  * @package CourtneyrChild
  */
@@ -38,47 +37,73 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Replace the merged theme.json color palette with ours only.
- *
- * Runs at priority 20 so it executes AFTER plugins (Ollie Pro at 10)
- * have contributed their palette additions. The set_data() call replaces
- * the entire color sub-object, removing both Ollie's slugs and WP core's
- * leaked defaults in one pass.
+ * Read our canonical palette + gradients from theme.json on disk.
+ * Cached for the duration of the request.
  */
-function override_palette( \WP_Theme_JSON_Data $theme_json ): \WP_Theme_JSON_Data {
-	$child_theme_json_path = COURTNEYR_CHILD_DIR . '/theme.json';
-
-	if ( ! is_readable( $child_theme_json_path ) ) {
-		return $theme_json;
+function read_canonical(): array {
+	static $cache = null;
+	if ( $cache !== null ) {
+		return $cache;
 	}
 
-	$child_data = json_decode( file_get_contents( $child_theme_json_path ), true );
-	if ( ! is_array( $child_data ) ) {
-		return $theme_json;
+	$path = COURTNEYR_CHILD_DIR . '/theme.json';
+	if ( ! is_readable( $path ) ) {
+		$cache = array( 'palette' => array(), 'gradients' => array() );
+		return $cache;
 	}
 
-	// Pull the canonical palette + gradients from theme.json on disk.
-	$our_palette   = $child_data['settings']['color']['palette']   ?? array();
-	$our_gradients = $child_data['settings']['color']['gradients'] ?? array();
-
-	// Get the current merged data, modify only the color section, re-set.
-	$current = $theme_json->get_data();
-
-	if ( ! isset( $current['settings'] ) ) {
-		$current['settings'] = array();
-	}
-	if ( ! isset( $current['settings']['color'] ) ) {
-		$current['settings']['color'] = array();
-	}
-
-	$current['settings']['color']['palette']        = $our_palette;
-	$current['settings']['color']['gradients']      = $our_gradients;
-	$current['settings']['color']['defaultPalette'] = false;
-	$current['settings']['color']['defaultGradients']    = false;
-	$current['settings']['color']['defaultDuotone']      = false;
-
-	$theme_json->update_with( $current );
-
-	return $theme_json;
+	$decoded = json_decode( (string) file_get_contents( $path ), true );
+	$cache   = array(
+		'palette'   => $decoded['settings']['color']['palette']   ?? array(),
+		'gradients' => $decoded['settings']['color']['gradients'] ?? array(),
+	);
+	return $cache;
 }
-add_filter( 'wp_theme_json_data_theme', __NAMESPACE__ . '\\override_palette', 20 );
+
+/**
+ * Empty WP core's default palette, gradients, and duotone presets.
+ * Runs against the 'default' origin layer (WP core).
+ */
+function strip_core_defaults( \WP_Theme_JSON_Data $theme_json ): \WP_Theme_JSON_Data {
+	$data = $theme_json->get_data();
+
+	if ( ! isset( $data['settings']['color'] ) ) {
+		return $theme_json;
+	}
+
+	// Replace WP core's color contributions with empty arrays.
+	$data['settings']['color']['palette']   = array();
+	$data['settings']['color']['gradients'] = array();
+	$data['settings']['color']['duotone']   = array();
+
+	// update_with() requires a version field. Match the layer's version.
+	$data['version'] = 3;
+
+	return $theme_json->update_with( $data );
+}
+add_filter( 'wp_theme_json_data_default', __NAMESPACE__ . '\\strip_core_defaults' );
+
+/**
+ * Replace the 'theme' origin palette + gradients with ONLY ours.
+ * Runs at priority 999 to execute AFTER all other plugin filters
+ * (Ollie Pro registers theirs at default priority 10).
+ */
+function override_theme_palette( \WP_Theme_JSON_Data $theme_json ): \WP_Theme_JSON_Data {
+	$canonical = read_canonical();
+
+	$new_data = array(
+		'version'  => 3,
+		'settings' => array(
+			'color' => array(
+				'palette'          => $canonical['palette'],
+				'gradients'        => $canonical['gradients'],
+				'defaultPalette'   => false,
+				'defaultGradients' => false,
+				'defaultDuotone'   => false,
+			),
+		),
+	);
+
+	return $theme_json->update_with( $new_data );
+}
+add_filter( 'wp_theme_json_data_theme', __NAMESPACE__ . '\\override_theme_palette', 999 );
