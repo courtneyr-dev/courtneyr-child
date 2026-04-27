@@ -631,16 +631,42 @@ blockquote cite {
 /* Lists */
 ul, ol { padding-left: var(--cr-space-lg); margin: 0 0 var(--cr-space-md); max-width: var(--cr-measure); }
 ul { list-style: none; }
-ul > li { position: relative; padding-left: var(--cr-space-md); }
-ul > li::before {
+/* Sparkle markers — scoped to PROSE contexts only, not global UI lists.
+   v2.2: Was a global ul > li::before rule that bled into wp-block-social-links,
+   wp:navigation, comment threads, and any layout that uses semantic <ul>.
+   Now opt-in: only fires inside .cr-prose / .wp-block-post-content / .entry-content.
+   Breathing room added so sparkles never crowd or get clipped — padding-left
+   bumped to space-lg, sparkle inset 0.25em from absolute edge. */
+.cr-prose ul,
+.wp-block-post-content ul,
+.entry-content ul {
+  list-style: none;
+}
+.cr-prose ul > li,
+.wp-block-post-content ul > li,
+.entry-content ul > li {
+  position: relative;
+  padding-left: var(--cr-space-lg);
+}
+.cr-prose ul > li::before,
+.wp-block-post-content ul > li::before,
+.entry-content ul > li::before {
   content: "✦";
   position: absolute;
-  left: 0;
+  left: 0.25em;
   color: var(--cr-marker);
   font-size: 0.85em;
-  top: 0.15em;
+  top: 0.2em;
 }
-ul ul > li::before { content: "•"; color: var(--cr-blue-green); }
+.cr-prose ul ul > li::before,
+.wp-block-post-content ul ul > li::before,
+.entry-content ul ul > li::before {
+  content: "•";
+  color: var(--cr-blue-green);
+}
+/* Default ul outside prose contexts gets standard padding back, no sparkle. */
+ul > li { position: static; padding-left: 0; }
+ul > li::before { content: none; }
 ol { list-style: decimal; }
 ol > li::marker { color: var(--cr-marker); font-family: var(--cr-font-accent); font-weight: var(--cr-weight-bold); }
 li { margin: var(--cr-space-2xs) 0; }
