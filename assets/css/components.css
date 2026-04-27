@@ -657,3 +657,90 @@
 .cr-rotate-2    { transform: rotate(var(--cr-rotate-2)); }
 .cr-rotate-neg  { transform: rotate(var(--cr-rotate-neg)); }
 .cr-rotate-neg2 { transform: rotate(var(--cr-rotate-neg2)); }
+
+
+/* ============================================================
+   Site header — zine-ready hooks
+   ============================================================ */
+
+.site-header__inner {
+	gap: var(--wp--preset--spacing--medium);
+	align-items: center;
+}
+
+.site-header__brand .wp-block-site-title {
+	font-family: var(--wp--preset--font-family--secondary, serif);
+	letter-spacing: 0.01em;
+}
+
+.site-header__nav {
+	font-weight: 500;
+}
+
+/* ============================================================
+   Site footer — zine-ready hooks
+   ============================================================ */
+
+.site-footer {
+	margin-top: var(--wp--preset--spacing--xx-large);
+}
+
+.site-footer__brand .wp-block-site-title a {
+	font-family: var(--wp--preset--font-family--secondary, serif);
+	color: inherit;
+	text-decoration: none;
+}
+
+.site-footer__connect-heading {
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	opacity: 0.85;
+	margin-block: var(--wp--preset--spacing--small);
+}
+
+/* Social icon row */
+.site-footer__social.wp-block-social-links {
+	gap: var(--wp--preset--spacing--small);
+	row-gap: var(--wp--preset--spacing--small);
+}
+
+/* Custom-service icon polish — these come through as service="chain"
+   and are rewritten to wp-social-link-{slug} by inc/social-services.php.
+   Match the brand-color treatment WP core uses for known services. */
+
+.site-footer__social .wp-social-link-readwise {
+	background-color: #1A56F0;
+	color: #ffffff;
+}
+.site-footer__social .wp-social-link-boardgamegeek {
+	background-color: #FF5100;
+	color: #ffffff;
+}
+.site-footer__social .wp-social-link-snipd {
+	background-color: #6F4FF2;
+	color: #ffffff;
+}
+.site-footer__social .wp-social-link-openprofile {
+	background-color: var(--wp--preset--color--cerulean, #126782);
+	color: #ffffff;
+}
+
+.site-footer__colophon {
+	opacity: 0.75;
+	margin-top: var(--wp--preset--spacing--medium);
+}
+
+.site-footer__colophon a {
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+
+/* ============================================================
+   Color-scheme — flips browser-rendered UI surfaces with the
+   active style variation. Variation files override the value.
+   ============================================================ */
+
+:root {
+	color-scheme: light;
+}
