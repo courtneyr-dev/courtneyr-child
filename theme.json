@@ -20,38 +20,58 @@
       "defaultDuotone": false,
       "palette": [
         {
-          "slug": "russian-violet",
+          "slug": "primary",
           "name": "Russian Violet",
           "color": "#241c4a"
         },
         {
-          "slug": "periwinkle",
+          "slug": "primary-accent",
           "name": "Periwinkle",
           "color": "#bcb5e3"
         },
         {
-          "slug": "glaucous",
-          "name": "Glaucous",
-          "color": "#647baf"
-        },
-        {
-          "slug": "sky-blue",
-          "name": "Sky Blue",
-          "color": "#8ecae6"
-        },
-        {
-          "slug": "blue-green",
+          "slug": "primary-alt",
           "name": "Blue Green",
           "color": "#219ebc"
         },
         {
-          "slug": "cerulean",
-          "name": "Cerulean",
-          "color": "#126782"
+          "slug": "primary-alt-accent",
+          "name": "Prussian Blue",
+          "color": "#023047"
         },
         {
-          "slug": "prussian-blue",
-          "name": "Prussian Blue",
+          "slug": "main",
+          "name": "Photocopier Black",
+          "color": "#1a1714"
+        },
+        {
+          "slug": "main-accent",
+          "name": "Printer Ivory",
+          "color": "#fbfaf5"
+        },
+        {
+          "slug": "base",
+          "name": "White",
+          "color": "#ffffff"
+        },
+        {
+          "slug": "secondary",
+          "name": "Glaucous",
+          "color": "#647baf"
+        },
+        {
+          "slug": "tertiary",
+          "name": "Light Orange",
+          "color": "#fee2c3"
+        },
+        {
+          "slug": "border-light",
+          "name": "Periwinkle (Border)",
+          "color": "#bcb5e3"
+        },
+        {
+          "slug": "border-dark",
+          "name": "Prussian Blue (Border)",
           "color": "#023047"
         },
         {
@@ -65,34 +85,19 @@
           "color": "#fb8500"
         },
         {
-          "slug": "light-orange",
-          "name": "Light Orange",
-          "color": "#fee2c3"
+          "slug": "cerulean",
+          "name": "Cerulean",
+          "color": "#126782"
         },
         {
-          "slug": "printer-ivory",
-          "name": "Printer Ivory",
-          "color": "#fbfaf5"
-        },
-        {
-          "slug": "photocopier-blk",
-          "name": "Photocopier Black",
-          "color": "#1a1714"
+          "slug": "sky-blue",
+          "name": "Sky Blue",
+          "color": "#8ecae6"
         },
         {
           "slug": "night-elevated",
           "name": "Night Elevated",
           "color": "#251f1c"
-        },
-        {
-          "slug": "white",
-          "name": "White",
-          "color": "#ffffff"
-        },
-        {
-          "slug": "black",
-          "name": "Black",
-          "color": "#000000"
         }
       ],
       "gradients": [
