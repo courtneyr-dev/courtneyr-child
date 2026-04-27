@@ -28,3 +28,4 @@ require_once __DIR__ . '/inc/enqueue.php';
 require_once __DIR__ . '/inc/block-styles.php';
 require_once __DIR__ . '/inc/block-patterns.php';
 require_once __DIR__ . '/inc/interactivity.php';
+require_once __DIR__ . '/inc/theme-json-overrides.php';
