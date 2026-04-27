@@ -121,3 +121,78 @@ function add_editor_assets(): void {
 	);
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\\add_editor_assets' );
+
+
+/**
+ * Print the no-flash theme initializer inline in <head> at priority 1
+ * — BEFORE any stylesheet links so the data-theme attribute is set on
+ * <html> before the first paint. This prevents the dark-flash that
+ * happens when a user has chosen "dark" but the page renders light first.
+ *
+ * The script is ~550 bytes; small enough to inline. Reads the same
+ * localStorage key (courtneyr-theme) that view.js writes to.
+ */
+function print_no_flash_theme_script(): void {
+	$path = COURTNEYR_CHILD_DIR . '/assets/js/theme-toggle/no-flash.js';
+	if ( ! is_readable( $path ) ) {
+		return;
+	}
+	$contents = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	if ( false === $contents ) {
+		return;
+	}
+	echo "<script id=\"courtneyr-theme-no-flash\">" . $contents . "</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+}
+add_action( 'wp_head', __NAMESPACE__ . '\\print_no_flash_theme_script', 1 );
+
+/**
+ * Enqueue the theme-toggle click handler. Loaded in the footer with
+ * defer so it does not block the first paint. Pairs with the inline
+ * no-flash script above.
+ */
+function enqueue_theme_toggle(): void {
+	wp_enqueue_script(
+		'courtneyr-theme-toggle',
+		COURTNEYR_CHILD_URI . '/assets/js/theme-toggle/view.js',
+		array(),
+		COURTNEYR_CHILD_VERSION,
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
+	);
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_theme_toggle' );
+
+/**
+ * Enqueue the icon-injector script that converts <use href> references
+ * into inline SVGs from the post-type icon sprite. Required for the
+ * cr-icon-avatar pattern to render its icon glyphs.
+ *
+ * Only enqueued when the icon sprite is present on disk.
+ */
+function enqueue_icons_inject(): void {
+	$path = COURTNEYR_CHILD_DIR . '/assets/svg/icons.svg';
+	if ( ! is_readable( $path ) ) {
+		return;
+	}
+	wp_enqueue_script(
+		'courtneyr-icons-inject',
+		COURTNEYR_CHILD_URI . '/assets/js/icons-inject.js',
+		array(),
+		COURTNEYR_CHILD_VERSION,
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
+	);
+	// Pass the sprite URL as a JS global so icons-inject knows where to fetch.
+	wp_add_inline_script(
+		'courtneyr-icons-inject',
+		'window.COURTNEYR_ICONS_SPRITE_URL = ' . wp_json_encode(
+			COURTNEYR_CHILD_URI . '/assets/svg/icons.svg?ver=' . COURTNEYR_CHILD_VERSION
+		) . ';',
+		'before'
+	);
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_icons_inject' );

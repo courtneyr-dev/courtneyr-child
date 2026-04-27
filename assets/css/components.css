@@ -744,3 +744,193 @@
 :root {
 	color-scheme: light;
 }
+
+
+/* ============================================================
+   Theme toggle button — 3 states (system / dark / light)
+   Driven by data-theme attribute on :root, set by no-flash.js
+   and updated by theme-toggle/view.js on click.
+   ============================================================ */
+
+.cr-theme-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0;
+	width: 2.25rem;
+	height: 2.25rem;
+	padding: 0;
+	background: transparent;
+	border: 1.5px solid var(--cr-border, currentColor);
+	border-radius: 999px;
+	color: inherit;
+	cursor: pointer;
+	transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+}
+
+.cr-theme-toggle:hover {
+	border-color: var(--cr-marker, currentColor);
+	background: color-mix(in srgb, currentColor 6%, transparent);
+}
+
+.cr-theme-toggle:active {
+	transform: scale(0.95);
+}
+
+.cr-theme-toggle:focus-visible {
+	outline: 3px solid var(--cr-focus-ring, var(--cr-marker, dodgerblue));
+	outline-offset: 2px;
+}
+
+.cr-theme-toggle__icon {
+	display: none;
+	width: 1.125rem;
+	height: 1.125rem;
+	stroke: currentColor;
+	fill: none;
+	stroke-width: 1.75;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+/* Show only the icon for the current data-theme.
+   :not([data-theme]) covers the brief moment before no-flash.js runs;
+   should never actually render to the user. */
+:root:not([data-theme]) .cr-theme-toggle__icon--system,
+:root[data-theme="system"] .cr-theme-toggle__icon--system,
+:root[data-theme="dark"]   .cr-theme-toggle__icon--dark,
+:root[data-theme="light"]  .cr-theme-toggle__icon--light {
+	display: inline-block;
+}
+
+/* Hide screen-reader-only label visually but keep accessible */
+.cr-theme-toggle__sr-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+
+/* ============================================================
+   Single post — layout fixes for the v0.2 templates/single.html
+   ============================================================ */
+
+.single-post__title {
+	font-size: var(--wp--preset--font-size--x-large, 2.25rem);
+	line-height: 1.15;
+	margin-bottom: var(--wp--preset--spacing--small);
+}
+
+.single-post__byline {
+	color: var(--cr-ink-muted, currentColor);
+}
+
+.single-post__byline-sep {
+	margin: 0;
+}
+
+/* Tags + categories strip — distinct from comments wrapper background */
+.single-post__meta {
+	font-family: var(--cr-font-accent, sans-serif);
+	color: var(--cr-ink-muted, currentColor);
+}
+
+.single-post__meta a {
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+
+/* IndieBlocks facepile / "Ping Me!" — give it breathing room before comments */
+.single-post__syndication,
+.single-post__facepile {
+	max-width: var(--cr-measure, 720px);
+	margin-inline: auto;
+}
+
+.wp-block-indieblocks-facepile {
+	padding-bottom: var(--wp--preset--spacing--x-large, 3rem);
+}
+
+/* Comments — main-accent background distinguishes from peach tertiary tags */
+.single-post__comments-wrapper {
+	margin-top: var(--wp--preset--spacing--x-large);
+}
+
+.single-post__comments-title {
+	margin-bottom: var(--wp--preset--spacing--small);
+}
+
+.single-post__comment-item {
+	box-shadow: 2px 2px 0 var(--cr-border-light, rgba(0,0,0,0.1));
+}
+
+/* ============================================================
+   Related posts grid — fixes for category star spacing + huge dates
+   ============================================================ */
+
+.related-posts__heading {
+	font-size: var(--wp--preset--font-size--large, 1.5rem);
+	margin-bottom: var(--wp--preset--spacing--medium);
+}
+
+.related-post {
+	gap: var(--wp--preset--spacing--small, 0.75rem);
+}
+
+/* Category — tighten the star/term-button proximity */
+.related-post__category {
+	font-family: var(--cr-font-accent, sans-serif);
+	font-weight: 500;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--cr-marker, currentColor);
+	margin-bottom: var(--wp--preset--spacing--2x-small, 0.25rem);
+}
+
+.related-post__category a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.related-post__category::before {
+	content: "✦";
+	display: inline-block;
+	margin-right: 0.4em;
+	color: var(--cr-selective-yellow, var(--cr-marker, currentColor));
+	font-size: 0.85em;
+	transform: translateY(-0.05em);
+}
+
+/* Title — anchored, no underline, hover marker */
+.related-post__title {
+	line-height: 1.3;
+}
+.related-post__title a {
+	color: inherit;
+	text-decoration: none;
+}
+.related-post__title a:hover,
+.related-post__title a:focus-visible {
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+	text-decoration-color: var(--cr-marker, currentColor);
+}
+
+/* Date — explicitly small, defeating any inheritance */
+.related-post__date,
+.related-post__date a,
+.related-post__date time {
+	font-size: var(--wp--preset--font-size--x-small, 0.85rem) !important;
+	font-family: var(--cr-font-accent, sans-serif);
+	color: var(--cr-ink-muted, currentColor);
+	text-decoration: none;
+	font-weight: 400;
+	line-height: 1.4;
+}

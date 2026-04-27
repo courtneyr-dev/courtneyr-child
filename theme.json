@@ -98,6 +98,51 @@
 					"slug": "night-elevated",
 					"name": "Night Elevated",
 					"color": "#251f1c"
+				},
+				{
+					"slug": "glaucous-light",
+					"color": "#5a7ea8",
+					"name": "Glaucous Light"
+				},
+				{
+					"slug": "russian-violet-soft",
+					"color": "#3d2f6e",
+					"name": "Russian Violet Soft"
+				},
+				{
+					"slug": "ut-orange-dark",
+					"color": "#b85f00",
+					"name": "UT Orange Dark"
+				},
+				{
+					"slug": "light-orange-dark",
+					"color": "#a87a45",
+					"name": "Light Orange Dark"
+				},
+				{
+					"slug": "coral",
+					"color": "#d63240",
+					"name": "Coral"
+				},
+				{
+					"slug": "cerulean-light",
+					"color": "#3a8090",
+					"name": "Cerulean Light"
+				},
+				{
+					"slug": "glaucous-dark",
+					"color": "#3d527d",
+					"name": "Glaucous Dark"
+				},
+				{
+					"slug": "sage",
+					"color": "#658057",
+					"name": "Sage"
+				},
+				{
+					"slug": "mauve",
+					"color": "#9d4e6c",
+					"name": "Mauve"
 				}
 			],
 			"gradients": [

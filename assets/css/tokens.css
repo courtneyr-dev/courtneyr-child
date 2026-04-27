@@ -65,6 +65,18 @@
   */}
 
 
+
+/* =============================================================================
+   COLOR-SCHEME DECLARATIONS
+   Tells the browser which UA color scheme to render UI surfaces in (form
+   controls, scrollbars, autofill highlights, native pickers). Driven by
+   the same [data-theme] attribute that flips semantic tokens.
+   ============================================================================= */
+:root                            { color-scheme: light dark; } /* fallback follows OS */
+:root[data-theme="system"]       { color-scheme: light dark; }
+:root[data-theme="light"]        { color-scheme: light; }
+:root[data-theme="dark"]         { color-scheme: dark; }
+
 /* =============================================================================
    2. SEMANTIC TOKENS (light mode default)
    Components reference only these. The dark-mode block at the end reassigns
@@ -325,8 +337,9 @@
    Surface flips from printer ivory to photocopier black.
    ============================================================================= */
 @media (prefers-color-scheme: dark) {
-  /* OS-level dark mode — only applies if user has not explicitly chosen via [data-theme] */
-  :root:not([data-theme]) {
+  /* OS-level dark mode — applies when no preference stored OR when explicitly set to "system" */
+  :root:not([data-theme]),
+  :root[data-theme="system"] {
     --cr-surface:          var(--cr-photocopier-blk);
     --cr-surface-soft:     var(--cr-prussian-blue);
     --cr-surface-elevated: var(--cr-night-elevated);

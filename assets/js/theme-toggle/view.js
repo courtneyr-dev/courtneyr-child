@@ -1,57 +1,60 @@
-/**
- * Theme toggle — Interactivity API view module.
+/* Theme toggle — cycles system → dark → light → system on click.
+ * Persists choice to localStorage. Updates aria-label dynamically.
  *
- * Binds reactive toggle behavior to any element with
- * data-wp-interactive="courtneyr/theme-toggle" in the rendered markup.
- *
- * Markup contract (in a pattern, template part, or block):
- *
- *   <div data-wp-interactive="courtneyr/theme-toggle">
- *     <button
- *       data-wp-on--click="actions.toggle"
- *       data-wp-bind--aria-pressed="state.isDark"
- *       data-wp-text="state.label"
- *     >Light</button>
- *   </div>
- *
- * State is rehydrated from localStorage by the inline pre-paint script
- * in inc/interactivity.php. This module only handles the click action
- * and the persisted-write side effect.
+ * The CSS in tokens.css drives the actual color-flips via [data-theme]
+ * attribute on <html>. This file just manages state + accessibility.
  */
+(function () {
+	var STORAGE_KEY = 'courtneyr-theme';
+	var ORDER       = [ 'system', 'dark', 'light' ];
+	var LABELS      = {
+		system: 'System (follows OS)',
+		dark:   'Dark',
+		light:  'Light'
+	};
+	var root = document.documentElement;
 
-import { store, getContext } from '@wordpress/interactivity';
+	function getCurrent() {
+		var v = root.getAttribute( 'data-theme' );
+		return ( v === 'light' || v === 'dark' || v === 'system' ) ? v : 'system';
+	}
 
-const STORAGE_KEY = 'courtneyr-theme';
+	function applyTheme( value ) {
+		root.setAttribute( 'data-theme', value );
+		try { localStorage.setItem( STORAGE_KEY, value ); } catch ( e ) {}
+		updateButtons( value );
+	}
 
-const { state, actions } = store('courtneyr/theme-toggle', {
-	state: {
-		get isDark() {
-			return document.documentElement.getAttribute('data-theme') === 'dark';
-		},
-		get label() {
-			return state.isDark ? 'Light mode' : 'Dark mode';
-		},
-	},
-	actions: {
-		toggle() {
-			const next = state.isDark ? 'light' : 'dark';
-			document.documentElement.setAttribute('data-theme', next);
+	function updateButtons( value ) {
+		var buttons = document.querySelectorAll( '[data-theme-toggle]' );
+		for ( var i = 0; i < buttons.length; i++ ) {
+			var current = LABELS[ value ] || value;
+			var nextValue = ORDER[ ( ORDER.indexOf( value ) + 1 ) % ORDER.length ];
+			var nextLabel = LABELS[ nextValue ];
+			buttons[ i ].setAttribute( 'aria-label',
+				'Theme: ' + current + '. Click to switch to ' + nextLabel + '.'
+			);
+			buttons[ i ].setAttribute( 'title', 'Theme: ' + current );
+		}
+	}
 
-			try {
-				localStorage.setItem(STORAGE_KEY, next);
-			} catch (e) {
-				// localStorage may be blocked (private browsing, third-party
-				// frame). The visual toggle still works for the session.
-			}
-		},
+	function onClick( ev ) {
+		var btn = ev.target.closest( '[data-theme-toggle]' );
+		if ( ! btn ) return;
+		ev.preventDefault();
+		var current = getCurrent();
+		var next    = ORDER[ ( ORDER.indexOf( current ) + 1 ) % ORDER.length ];
+		applyTheme( next );
+	}
 
-		clearPreference() {
-			document.documentElement.removeAttribute('data-theme');
-			try {
-				localStorage.removeItem(STORAGE_KEY);
-			} catch (e) {
-				// Same as above.
-			}
-		},
-	},
-});
+	// Wire on DOM ready
+	if ( document.readyState === 'loading' ) {
+		document.addEventListener( 'DOMContentLoaded', function () {
+			updateButtons( getCurrent() );
+			document.addEventListener( 'click', onClick );
+		} );
+	} else {
+		updateButtons( getCurrent() );
+		document.addEventListener( 'click', onClick );
+	}
+})();
