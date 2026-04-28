@@ -2912,19 +2912,7 @@ body.home .wp-block-cover.has-tertiary-background-color .wp-block-cover__inner-c
 
 /* (4) ZINE FLOURISHES */
 
-/* Sparkle before main h2 headings on home page content (skips wp:latest-posts items) */
-body.home main.homepage > .wp-block-post-content h2.wp-block-heading::before,
-body.home main.homepage > .wp-block-post-content h1.wp-block-heading::before {
-	content: "✦ ";
-	color: var(--cr-marker, #fb8500);
-	font-family: var(--cr-font-body, sans-serif);
-	font-weight: 400;
-	font-size: 0.7em;
-	margin-right: 0.3em;
-	vertical-align: 0.15em;
-	opacity: 0.85;
-	display: inline-block;
-}
+/* (removed in v0.2.6.7 — sparkles only in Recent Posts) */
 
 /* Don't add sparkle inside captions or buttons */
 body.home figcaption h2::before,
@@ -2991,24 +2979,7 @@ body.home h2.wp-block-heading + .wp-block-latest-posts {
 	border-top: 4px solid var(--cr-marker, #fb8500);
 }
 
-/* Decorative sparkle dot scattered near corners of homepage sections —
-   subtle sparkle ::after on every alignfull section that has padding */
-body.home main.homepage > .alignfull:not(.wp-block-cover):not(.wp-block-latest-posts) {
-	position: relative;
-}
-
-body.home main.homepage > .alignfull:not(.wp-block-cover):not(.wp-block-latest-posts)::after {
-	content: "✦";
-	position: absolute;
-	top: 1.5rem;
-	right: 1.5rem;
-	color: var(--cr-selective-yellow, #ffb703);
-	font-size: 1.5rem;
-	opacity: 0.4;
-	pointer-events: none;
-	transform: rotate(15deg);
-	z-index: 1;
-}
+/* (removed in v0.2.6.7 — sparkles only in Recent Posts) */
 
 /* Underline accent on key links (hover) — zine-style hand-drawn look */
 body.home main.homepage a:hover {
@@ -3027,4 +2998,35 @@ body.home main.homepage p:not(.has-text-align-center) {
 	body.home main.homepage p:not(.has-text-align-center) {
 		font-size: 1.1rem;
 	}
+}
+
+
+/* ============================================================
+   v0.2.6.7 — sparkles ONLY in Recent Posts
+   ============================================================ */
+
+/* Belt-and-suspenders: explicitly nuke any ✦ ::before/::after that
+   v0.2.6.6 may have left elsewhere. Recent Posts sparkles use the
+   .wp-block-latest-posts li::before selector and are preserved. */
+body.home main.homepage > .wp-block-post-content h2.wp-block-heading::before,
+body.home main.homepage > .wp-block-post-content h1.wp-block-heading::before,
+body.home main.homepage > .wp-block-post-content h3.wp-block-heading::before,
+body.home main.homepage > .alignfull:not(.wp-block-latest-posts)::after,
+body.home main.homepage > .alignfull:not(.wp-block-latest-posts)::before,
+body.home main.homepage > .wp-block-cover::after,
+body.home main.homepage > .wp-block-cover::before {
+	content: none !important;
+	display: none !important;
+}
+
+/* But the Recent Posts list-item sparkle stays — re-affirm */
+body.home .wp-block-latest-posts li::before {
+	content: "✦" !important;
+	display: block !important;
+	position: absolute !important;
+	left: 0.25rem !important;
+	top: 1.25rem !important;
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
+	font-size: 1.75rem !important;
+	line-height: 1 !important;
 }
