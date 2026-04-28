@@ -3628,26 +3628,35 @@ body.home .homepage__content > .alignfull:has(#h-recent-posts) + .alignfull {
 /* (4) ✦ glyph on Query Loop Recent Posts items.
    The v0.2.6.7 rule targeted .wp-block-latest-posts but the home now
    renders .wp-block-post-template > li (wp:query). Bigger size, sibling
-   text unchanged because only the ::before is sized. */
+   text unchanged because only the ::before is sized.
+
+   v0.3.5: anchor the glyph to .wp-block-post-date instead of the LI
+   so it sits immediately left of the date text regardless of how the
+   25%-width date column lays out. Previously the ::before was on the
+   LI at left:0.5rem while the date text rendered ~9rem in (inside its
+   25% flex column), leaving a wide gap on narrow viewports. */
 body.home .wp-block-post-template > li {
 	list-style: none !important;
-	position: relative;
-	padding-left: 3.5rem !important;
 }
 
-body.home .wp-block-post-template > li::before {
+body.home .wp-block-post-template > li::marker {
+	content: "" !important;
+}
+
+body.home .wp-block-post-template > li .wp-block-post-date {
+	position: relative;
+	padding-left: 3rem;
+}
+
+body.home .wp-block-post-template > li .wp-block-post-date::before {
 	content: "✦";
 	position: absolute;
-	left: 0.5rem;
+	left: 0;
 	top: 50%;
 	transform: translateY(-50%);
 	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
 	font-size: var(--cr-text-3xl, 2.5rem);
 	line-height: 1;
-}
-
-body.home .wp-block-post-template > li::marker {
-	content: "" !important;
 }
 
 /* (5) Code blocks — hide the horizontal scrollbar.
