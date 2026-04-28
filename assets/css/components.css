@@ -3030,3 +3030,170 @@ body.home .wp-block-latest-posts li::before {
 	font-size: 1.75rem !important;
 	line-height: 1 !important;
 }
+
+
+/* ============================================================
+   v0.2.6.8 — block styles + utility classes for sections
+   ============================================================
+   Stable architecture for color-contextual styling that doesn't
+   depend on auto-generated .wp-elements-{hash} classes.
+
+   USAGE:
+   - In the editor, click any Group block → Styles panel → pick
+     "Inverse (dark)", "Journey CTA (sky/cerulean)", "Notebook
+     (peach with rules)", or "Tape strip (yellow)".
+   - The block gets an .is-style-cr-{name} class automatically.
+   - CSS below targets that class.
+
+   ALTERNATIVE: Add a Custom Class .cr-section--{name} via the
+   Block → Advanced → Additional CSS classes panel — also matched
+   by the rules below.
+*/
+
+/* (1) INVERSE — dark bg, ivory text. Use on any block that needs
+   to read as a dark zine card on a light surrounding. */
+.is-style-cr-inverse,
+.cr-section--inverse {
+	background-color: var(--cr-night-elevated, #251f1c) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+	padding: var(--wp--preset--spacing--xx-large, 3rem) var(--wp--preset--spacing--large, 1.5rem);
+}
+
+.is-style-cr-inverse h1,
+.is-style-cr-inverse h2,
+.is-style-cr-inverse h3,
+.is-style-cr-inverse h4,
+.is-style-cr-inverse strong,
+.is-style-cr-inverse p,
+.is-style-cr-inverse li,
+.is-style-cr-inverse label,
+.cr-section--inverse h1,
+.cr-section--inverse h2,
+.cr-section--inverse h3,
+.cr-section--inverse h4,
+.cr-section--inverse strong,
+.cr-section--inverse p,
+.cr-section--inverse li,
+.cr-section--inverse label {
+	color: var(--cr-printer-ivory, #fbfaf5);
+}
+
+.is-style-cr-inverse a:not(.wp-element-button):not(.cr-cta),
+.cr-section--inverse a:not(.wp-element-button):not(.cr-cta) {
+	color: var(--cr-sky-blue, #8ecae6);
+}
+
+/* (2) JOURNEY CTA — sky-blue zine card in light, cerulean in dark.
+   Distinct from cream/peach/violet sections around it. */
+.is-style-cr-journey,
+.cr-section--journey {
+	background-color: var(--cr-sky-blue, #8ecae6) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+	padding: var(--wp--preset--spacing--xx-large, 3rem) var(--wp--preset--spacing--large, 1.5rem);
+	position: relative;
+}
+
+.is-style-cr-journey h1,
+.is-style-cr-journey h2,
+.is-style-cr-journey h3,
+.is-style-cr-journey strong,
+.is-style-cr-journey p,
+.is-style-cr-journey li,
+.is-style-cr-journey label,
+.cr-section--journey h1,
+.cr-section--journey h2,
+.cr-section--journey h3,
+.cr-section--journey strong,
+.cr-section--journey p,
+.cr-section--journey li,
+.cr-section--journey label {
+	color: var(--cr-russian-violet, #241c4a);
+}
+
+/* Dark mode flip — cerulean bg, ivory text */
+:root[data-theme="dark"] .is-style-cr-journey,
+:root[data-theme="dark"] .cr-section--journey {
+	background-color: var(--cr-cerulean, #126782) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+
+:root[data-theme="dark"] .is-style-cr-journey h1,
+:root[data-theme="dark"] .is-style-cr-journey h2,
+:root[data-theme="dark"] .is-style-cr-journey h3,
+:root[data-theme="dark"] .is-style-cr-journey strong,
+:root[data-theme="dark"] .is-style-cr-journey p,
+:root[data-theme="dark"] .is-style-cr-journey li,
+:root[data-theme="dark"] .is-style-cr-journey label,
+:root[data-theme="dark"] .cr-section--journey h1,
+:root[data-theme="dark"] .cr-section--journey h2,
+:root[data-theme="dark"] .cr-section--journey h3,
+:root[data-theme="dark"] .cr-section--journey strong,
+:root[data-theme="dark"] .cr-section--journey p,
+:root[data-theme="dark"] .cr-section--journey li,
+:root[data-theme="dark"] .cr-section--journey label {
+	color: var(--cr-printer-ivory, #fbfaf5);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .is-style-cr-journey,
+	:root:not([data-theme]) .cr-section--journey,
+	:root[data-theme="system"] .is-style-cr-journey,
+	:root[data-theme="system"] .cr-section--journey {
+		background-color: var(--cr-cerulean, #126782) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+	:root:not([data-theme]) .is-style-cr-journey h1,
+	:root:not([data-theme]) .is-style-cr-journey h2,
+	:root:not([data-theme]) .is-style-cr-journey strong,
+	:root:not([data-theme]) .is-style-cr-journey p,
+	:root[data-theme="system"] .is-style-cr-journey h1,
+	:root[data-theme="system"] .is-style-cr-journey h2,
+	:root[data-theme="system"] .is-style-cr-journey strong,
+	:root[data-theme="system"] .is-style-cr-journey p {
+		color: var(--cr-printer-ivory, #fbfaf5);
+	}
+}
+
+/* (3) NOTEBOOK — peach with subtle ruled-paper horizontal lines */
+.is-style-cr-notebook,
+.cr-section--notebook {
+	background-color: var(--cr-tertiary, #fee2c3) !important;
+	color: var(--cr-russian-violet, #241c4a);
+	padding: var(--wp--preset--spacing--xx-large, 3rem) var(--wp--preset--spacing--large, 1.5rem);
+	background-image: linear-gradient(
+		0deg,
+		transparent 96%,
+		rgba(36, 28, 74, 0.06) 96%,
+		rgba(36, 28, 74, 0.06) 100%
+	);
+	background-size: 100% 2.5rem;
+	background-repeat: repeat-y;
+}
+
+:root[data-theme="dark"] .is-style-cr-notebook,
+:root[data-theme="dark"] .cr-section--notebook {
+	background-color: var(--cr-night-elevated, #251f1c) !important;
+	color: var(--cr-printer-ivory, #fbfaf5);
+	background-image: none;
+}
+
+/* (4) TAPE — warm yellow band, slight rotation, washi-tape vibe */
+.is-style-cr-tape,
+.cr-section--tape {
+	background-color: var(--cr-selective-yellow, #ffb703) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+	padding: var(--wp--preset--spacing--medium, 1rem) var(--wp--preset--spacing--large, 1.5rem);
+	transform: rotate(-0.6deg);
+	box-shadow: 0 4px 0 rgba(36, 28, 74, 0.15);
+}
+
+.is-style-cr-tape h1,
+.is-style-cr-tape h2,
+.is-style-cr-tape h3,
+.is-style-cr-tape strong,
+.is-style-cr-tape p {
+	color: var(--cr-russian-violet, #241c4a);
+}
+
+/* Dark mode keeps the yellow — selective-yellow is a brand pop color
+   that should stay consistent for visual recognition */
