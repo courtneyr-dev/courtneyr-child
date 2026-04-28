@@ -1262,3 +1262,123 @@ figure.wp-block-post-featured-image.single-post__featured {
 .site-footer__social.is-style-logos-only .wp-social-link:focus-visible {
 	color: var(--wp--preset--color--selective-yellow, #ffb703) !important;
 }
+
+
+/* ============================================================
+   v0.2.4 — alignfull width fix + light-bg dark-mode contrast
+   ============================================================ */
+
+/* (1) Full-width sections must actually reach the viewport edges.
+   The native WP alignfull rule uses negative margins computed from
+   --wp--style--root--padding-{left,right}, which on this site come
+   out asymmetric — leaving a visible strip of page bg on the right.
+   Force-recompute via 50% / 50vw math, which is the canonical edge-
+   to-edge technique that doesn't depend on inherited padding vars.
+
+   html, body { overflow-x: hidden } prevents horizontal scrollbars
+   when the alignfull element pushes one pixel past 100vw on browsers
+   that include scrollbar width in vw calculations. */
+
+html,
+body {
+	overflow-x: hidden;
+}
+
+.wp-block-group.alignfull,
+main.alignfull,
+section.alignfull,
+.single-post.alignfull,
+.single-post__comments-wrapper.alignfull,
+.related-posts.alignfull {
+	margin-left: calc(50% - 50vw) !important;
+	margin-right: calc(50% - 50vw) !important;
+	max-width: 100vw !important;
+	width: 100vw !important;
+}
+
+/* (2) Light-bg sections: peach (tertiary) and cream (main-accent)
+   palette tokens never flip in dark mode by design. So the SECTIONS
+   that use them as backgrounds stay light in dark mode, and the
+   TEXT inside must stay dark for contrast. Without this rule, links
+   in dark mode pick up the dark-mode --cr-link (sky-blue) and
+   --cr-link-visited (periwinkle / light purple) which fail AA on
+   peach (~2.1:1) and AAA on cream (~3.5:1).
+
+   Lock dark text + dark links any time these palette bg classes
+   are present, regardless of [data-theme] state. AA-passing across
+   light, dark, and system modes. */
+
+.has-tertiary-background-color,
+.has-main-accent-background-color,
+.related-posts,
+.single-post__comments-wrapper {
+	color: var(--cr-russian-violet, #241c4a);
+}
+
+.has-tertiary-background-color a:not(.wp-element-button):not(.cr-cta),
+.has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta),
+.related-posts a:not(.wp-element-button):not(.cr-cta),
+.single-post__comments-wrapper a:not(.wp-element-button):not(.cr-cta) {
+	color: var(--cr-russian-violet, #241c4a);
+}
+
+.has-tertiary-background-color a:visited:not(.wp-element-button):not(.cr-cta),
+.has-main-accent-background-color a:visited:not(.wp-element-button):not(.cr-cta),
+.related-posts a:visited:not(.wp-element-button):not(.cr-cta),
+.single-post__comments-wrapper a:visited:not(.wp-element-button):not(.cr-cta) {
+	color: var(--cr-russian-violet-soft, #3d2f6e);
+}
+
+.has-tertiary-background-color a:hover:not(.wp-element-button):not(.cr-cta),
+.has-main-accent-background-color a:hover:not(.wp-element-button):not(.cr-cta),
+.related-posts a:hover:not(.wp-element-button):not(.cr-cta),
+.single-post__comments-wrapper a:hover:not(.wp-element-button):not(.cr-cta) {
+	color: var(--cr-ut-orange-dark, #b85f00);
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+/* Headings inside light-bg sections — same dark-text lock */
+.has-tertiary-background-color h1,
+.has-tertiary-background-color h2,
+.has-tertiary-background-color h3,
+.has-tertiary-background-color h4,
+.has-main-accent-background-color h1,
+.has-main-accent-background-color h2,
+.has-main-accent-background-color h3,
+.has-main-accent-background-color h4,
+.related-posts h1,
+.related-posts h2,
+.related-posts h3,
+.related-posts h4,
+.single-post__comments-wrapper h1,
+.single-post__comments-wrapper h2,
+.single-post__comments-wrapper h3,
+.single-post__comments-wrapper h4 {
+	color: var(--cr-russian-violet, #241c4a);
+}
+
+/* Comments-form labels and inputs inside the cream comments wrapper —
+   make sure form controls don't render with dark-mode flipped colors */
+.single-post__comments-wrapper input[type="text"],
+.single-post__comments-wrapper input[type="email"],
+.single-post__comments-wrapper input[type="url"],
+.single-post__comments-wrapper textarea {
+	color: var(--cr-russian-violet, #241c4a);
+	background: var(--cr-printer-ivory, #fbfaf5);
+	border: 1px solid var(--wp--preset--color--border-light, #d4cfeb);
+}
+
+.single-post__comments-wrapper label,
+.single-post__comments-wrapper legend {
+	color: var(--cr-russian-violet, #241c4a);
+}
+
+/* Code blocks/inline code inside light sections — dark-on-light pair */
+.has-tertiary-background-color code,
+.has-main-accent-background-color code,
+.related-posts code,
+.single-post__comments-wrapper code {
+	color: var(--cr-russian-violet, #241c4a);
+	background: rgba(36, 28, 74, 0.06);
+}
