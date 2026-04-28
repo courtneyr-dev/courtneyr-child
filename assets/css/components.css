@@ -3247,7 +3247,11 @@ body.home .wp-block-latest-posts li::before {
 	}
 }
 
-/* (3) NOTEBOOK — peach with subtle ruled-paper horizontal lines */
+/* (3) NOTEBOOK — peach with ruled-paper horizontal lines.
+   v0.4.2: bumped line opacity 0.06 → 0.18 and tightened spacing
+   2.5rem → 1.75rem so the ruled-paper feel is actually visible.
+   The original values rendered as effectively invisible against the
+   peach bg, so the block style had no perceptible effect. */
 .is-style-cr-notebook,
 .cr-section--notebook {
 	background-color: var(--cr-tertiary, #fee2c3) !important;
@@ -3255,11 +3259,11 @@ body.home .wp-block-latest-posts li::before {
 	padding: var(--wp--preset--spacing--xx-large, 3rem) var(--wp--preset--spacing--large, 1.5rem);
 	background-image: linear-gradient(
 		0deg,
-		transparent 96%,
-		rgba(36, 28, 74, 0.06) 96%,
-		rgba(36, 28, 74, 0.06) 100%
+		transparent calc(100% - 1px),
+		rgba(36, 28, 74, 0.18) calc(100% - 1px),
+		rgba(36, 28, 74, 0.18) 100%
 	);
-	background-size: 100% 2.5rem;
+	background-size: 100% 1.75rem;
 	background-repeat: repeat-y;
 }
 
