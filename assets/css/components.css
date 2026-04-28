@@ -3672,19 +3672,34 @@ body.home .wp-block-post-template > li .wp-block-post-date::before {
 /* (5) Code blocks — hide the horizontal scrollbar.
    The zine aesthetic doesn't want browser UI chrome under code blocks.
    Long lines still scroll horizontally via keyboard / touch / wheel,
-   the visible track just disappears. */
+   the visible track just disappears.
+
+   v0.3.7: the actual scrollable element is <code> inside <pre>, not
+   the <pre> wrapper. Ollie parent's inline CSS sets
+   `.wp-block-code code { overflow-x: scroll }` which forces the
+   scrollbar to always render, even without overflow. Switch to auto
+   (only when needed) and hide the visible track. */
 pre.wp-block-code,
 pre.wp-block-preformatted,
 .wp-block-code,
-.wp-block-preformatted {
+.wp-block-preformatted,
+.wp-block-code code,
+.wp-block-preformatted code {
 	scrollbar-width: none; /* Firefox */
 	-ms-overflow-style: none; /* IE/Edge legacy */
+}
+
+.wp-block-code code,
+.wp-block-preformatted code {
+	overflow-x: auto !important; /* override Ollie's overflow-x: scroll */
 }
 
 pre.wp-block-code::-webkit-scrollbar,
 pre.wp-block-preformatted::-webkit-scrollbar,
 .wp-block-code::-webkit-scrollbar,
-.wp-block-preformatted::-webkit-scrollbar {
+.wp-block-preformatted::-webkit-scrollbar,
+.wp-block-code code::-webkit-scrollbar,
+.wp-block-preformatted code::-webkit-scrollbar {
 	display: none; /* Webkit: Safari, Chrome, Edge */
 }
 
@@ -3782,4 +3797,21 @@ body.home .wp-block-post-template > li::before,
 body.home .wp-block-post-template > li::after {
 	content: none !important;
 	display: none !important;
+}
+
+/* v0.3.7: bulletproof caption color for cover blocks.
+   Even with the v0.3.6 rotation-rule exclusion, something in the
+   cascade is still beating .has-base-color on the cover caption's
+   <strong>, forcing it to render russian-violet instead of white.
+   Force descendants of has-text-color elements (inside any cover
+   block on home) to inherit !important — that pulls the parent's
+   explicit textColor down to strong/em/a regardless of what other
+   rules are layering on. Functionally equivalent to manually targeting
+   .wp-elements-{hash} strong but stable across content edits (the
+   hash is content-derived and changes whenever the block is edited). */
+body.home .wp-block-cover .has-text-color > strong,
+body.home .wp-block-cover .has-text-color > em,
+body.home .wp-block-cover .has-text-color > span,
+body.home .wp-block-cover .has-text-color > a:not(.wp-element-button):not(.cr-cta) {
+	color: inherit !important;
 }
