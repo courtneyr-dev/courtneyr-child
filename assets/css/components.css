@@ -2017,3 +2017,262 @@ body.home .home-stream .home-stream-item .home-stream-item__title a:focus-visibl
 	text-decoration: underline !important;
 	text-underline-offset: 0.18em !important;
 }
+
+
+/* ============================================================
+   v0.2.6.2 — homepage polish + WCAG iteration 2
+   ============================================================
+   Real-page review fixes:
+   (A) "From the blog" home-stream layout was broken — .cr-stream-item
+       is a 2-column grid (3rem avatar + 1fr body) and our markup has no
+       __avatar/__body wrappers, so meta/title/excerpt got auto-placed
+       into grid columns. Removed cr-stream-item class from template;
+       this CSS now styles .home-stream-item as a clean vertical stack.
+   (B) Tag pills (.is-style-term-button) bled into the cerulean section
+       below in dark mode. Switch to russian-violet-soft bg in dark for
+       visual separation. Add real spacing margins above and below.
+   (C) Border line above the tags row — a default border-top on
+       .wp-block-post-terms — removed.
+   (D) Black gaps between adjacent palette-bg sections caused by default
+       block spacing margin-top. Zero out for adjacent alignfull groups
+       inside body.home content.
+   (E) Cerulean gradient strips between sections — convert to a thin
+       cr-marker-bar (orange) treatment instead of a teal band.
+   (F) Reduce cerulean visual weight site-wide on home — only the first
+       cerulean section stays cerulean; subsequent ones repaint to
+       cr-surface (dark/black) for the "more black" feel.
+*/
+
+/* (A) home-stream-item — clean vertical stack, no grid */
+.home-stream,
+body.home .home-stream {
+	display: block;
+	max-width: var(--cr-measure, 720px);
+	margin-inline: auto;
+	width: 100%;
+	padding-inline: 1rem;
+}
+
+.home-stream-item,
+body.home .home-stream-item {
+	display: block !important;
+	width: 100%;
+	max-width: 100%;
+	padding: 1.5rem 0;
+	border-bottom: 1px solid var(--cr-border, #d4cfeb);
+	transition: transform 0.15s ease;
+}
+
+.home-stream-item:hover {
+	transform: translateX(4px);
+}
+
+.home-stream-item:last-child {
+	border-bottom: 0;
+}
+
+.home-stream-item > * {
+	display: block;
+	max-width: 100%;
+	width: 100%;
+	margin-inline: 0;
+}
+
+.home-stream-item__meta,
+body.home .home-stream-item__meta {
+	display: flex !important;
+	flex-wrap: wrap;
+	gap: 0.5rem 0.75rem;
+	align-items: baseline;
+	margin: 0 0 0.5rem 0 !important;
+	font-family: var(--cr-font-accent, serif);
+	color: var(--cr-ink-muted, currentColor);
+}
+
+.home-stream-item__category {
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	font-weight: 600;
+	font-size: 0.75rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.home-stream-item__category::before {
+	content: "✦ ";
+	color: var(--cr-selective-yellow, #ffb703);
+	margin-right: 0.3em;
+}
+
+.home-stream-item__category a {
+	color: inherit !important;
+	text-decoration: none !important;
+}
+
+.home-stream-item__date {
+	color: var(--cr-ink-muted);
+	font-weight: 500;
+	font-size: 0.75rem;
+	letter-spacing: 0.04em;
+}
+
+.home-stream-item__date::before {
+	content: "·";
+	margin-right: 0.5em;
+	color: var(--cr-ink-muted);
+}
+
+.home-stream-item__excerpt,
+body.home .home-stream-item__excerpt {
+	color: var(--cr-ink-muted, currentColor) !important;
+	font-size: 0.95rem !important;
+	line-height: 1.55 !important;
+	max-width: 60ch;
+	margin: 0.4rem 0 0 0 !important;
+}
+
+.home-stream-item__excerpt p {
+	margin: 0;
+}
+
+/* (B) Tag pills — different color in dark mode (NOT cerulean) */
+.is-style-term-button {
+	margin: 2rem 0 !important;
+	border-top: none !important;
+	border: none !important;
+	padding: 0 !important;
+}
+
+.is-style-term-button a,
+.wp-block-post-terms.is-style-term-button a {
+	background: var(--cr-callout-bg, #fee2c3) !important;
+	color: var(--cr-callout-ink, #241c4a) !important;
+}
+
+/* In dark mode: distinct russian-violet-soft pill, NOT the cerulean
+   that the section below is using. */
+:root[data-theme="dark"] .is-style-term-button a,
+:root[data-theme="dark"] .wp-block-post-terms.is-style-term-button a {
+	background: var(--cr-russian-violet-soft, #3d2f6e) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .is-style-term-button a,
+	:root:not([data-theme]) .wp-block-post-terms.is-style-term-button a,
+	:root[data-theme="system"] .is-style-term-button a,
+	:root[data-theme="system"] .wp-block-post-terms.is-style-term-button a {
+		background: var(--cr-russian-violet-soft, #3d2f6e) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+}
+
+/* (C) Strip any inherited border-top off the post-terms block */
+.wp-block-post-terms,
+.wp-block-post-terms.is-style-term-button {
+	border-top: none !important;
+	border-bottom: none !important;
+}
+
+/* (D) Kill black gaps between adjacent palette-bg sections in body.home.
+   When two alignfull groups stack with default 1.5rem block-spacing margin,
+   the page bg shows through between them = black strip. Zero it. */
+body.home .alignfull + .alignfull,
+body.home .wp-block-cover + .wp-block-cover,
+body.home .wp-block-cover + .alignfull,
+body.home .alignfull + .wp-block-cover,
+body.home .wp-block-group.alignfull + .wp-block-group.alignfull {
+	margin-top: 0 !important;
+	margin-block-start: 0 !important;
+}
+
+/* And kill margin between cerulean groups specifically (multiple) */
+body.home .has-cerulean-background-color + .has-cerulean-background-color,
+body.home .has-primary-alt-background-color + .has-primary-alt-background-color,
+body.home .has-cerulean-background-color + .has-primary-alt-background-color,
+body.home .has-primary-alt-background-color + .has-cerulean-background-color {
+	margin-top: 0 !important;
+}
+
+/* (E) Replace cerulean / gradient separators with thin cr-marker-bar */
+body.home .wp-block-post-content .wp-block-separator,
+body.home .homepage__content .wp-block-separator,
+body.home .wp-block-post-content hr,
+body.home .homepage__content hr {
+	background: var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
+	background-color: var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
+	background-image: none !important;
+	height: 6px !important;
+	width: 12rem !important;
+	max-width: 30% !important;
+	margin: 2.5rem auto !important;
+	transform: rotate(-1deg);
+	border: none !important;
+	opacity: 1;
+	display: block !important;
+}
+
+/* But our own template-level cr-marker-bar gets a unique reinforcement */
+body.home main.homepage > hr.cr-marker-bar.wp-block-separator {
+	display: block !important;
+	background: var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
+}
+
+/* (F) Reduce cerulean weight — keep the first one (the hero), repaint
+   the rest to dark surface so the page feels "more black" overall.
+   :first-of-type matches first .has-cerulean-background-color sibling. */
+body.home .has-cerulean-background-color ~ .has-cerulean-background-color,
+body.home .has-primary-alt-background-color ~ .has-primary-alt-background-color,
+body.home .has-cerulean-background-color ~ .has-primary-alt-background-color,
+body.home .has-primary-alt-background-color ~ .has-cerulean-background-color {
+	background-color: var(--cr-surface, #1a1714) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+
+/* Decorative-only cerulean strips (cover blocks with no real content,
+   often <80px tall acting as visual dividers) — collapse to marker bar */
+body.home .wp-block-cover.has-cerulean-background-color:not(:has(.wp-block-heading)):not(:has(p)),
+body.home .wp-block-cover.has-primary-alt-background-color:not(:has(.wp-block-heading)):not(:has(p)) {
+	min-height: 0 !important;
+	height: 6px !important;
+	background-color: var(--cr-marker, #fb8500) !important;
+	background-image: none !important;
+	margin: 1.5rem auto !important;
+	width: 12rem !important;
+	max-width: 30% !important;
+	padding: 0 !important;
+	transform: rotate(-1deg);
+}
+
+/* (G) Spacing — tighten the gap between home-stream__head and the
+   first home-stream-item, and between sections overall */
+.home-stream__head {
+	margin-bottom: 1.5rem;
+}
+
+body.home main.homepage {
+	gap: var(--wp--preset--spacing--large, 1.5rem);
+}
+
+/* (H) Style the home-stream__more "See all posts →" link as a CTA */
+.home-stream__more {
+	margin-top: 2rem !important;
+	text-align: right;
+}
+
+.home-stream__more a {
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 700;
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	text-decoration: none;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	font-size: 0.875rem;
+	border-bottom: 2px solid var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	padding-bottom: 0.15rem;
+	transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.home-stream__more a:hover {
+	color: var(--cr-ink, currentColor);
+	border-bottom-color: var(--cr-ink, currentColor);
+}
