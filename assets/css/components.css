@@ -3248,10 +3248,11 @@ body.home .wp-block-latest-posts li::before {
 }
 
 /* (3) NOTEBOOK — peach with ruled-paper horizontal lines.
-   v0.4.2: bumped line opacity 0.06 → 0.18 and tightened spacing
-   2.5rem → 1.75rem so the ruled-paper feel is actually visible.
-   The original values rendered as effectively invisible against the
-   peach bg, so the block style had no perceptible effect. */
+   v0.4.3: visible-for-real iteration. Real notebook paper has blue
+   ruled lines, not violet, and they're a clear 2px stripe (not a 1px
+   whisper). Switched to prussian-blue at 35% opacity, 2px line every
+   1.75rem. Background-image is layered as a separate property so it
+   coexists with whatever bg-color upstream rules apply. */
 .is-style-cr-notebook,
 .cr-section--notebook {
 	background-color: var(--cr-tertiary, #fee2c3) !important;
@@ -3259,9 +3260,10 @@ body.home .wp-block-latest-posts li::before {
 	padding: var(--wp--preset--spacing--xx-large, 3rem) var(--wp--preset--spacing--large, 1.5rem);
 	background-image: linear-gradient(
 		0deg,
-		transparent calc(100% - 1px),
-		rgba(36, 28, 74, 0.18) calc(100% - 1px),
-		rgba(36, 28, 74, 0.18) 100%
+		transparent 0,
+		transparent calc(100% - 2px),
+		rgba(2, 48, 71, 0.35) calc(100% - 2px),
+		rgba(2, 48, 71, 0.35) 100%
 	);
 	background-size: 100% 1.75rem;
 	background-repeat: repeat-y;
