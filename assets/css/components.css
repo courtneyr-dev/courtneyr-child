@@ -1382,3 +1382,258 @@ section.alignfull,
 	color: var(--cr-russian-violet, #241c4a);
 	background: rgba(36, 28, 74, 0.06);
 }
+
+
+/* ============================================================
+   v0.2.5 — Homepage zine refactor + nav dropdown fix
+   ============================================================ */
+
+/* (1) Nav submenu — match the page background instead of hardcoding
+   the elevated surface. In light mode this is printer-ivory cream, in
+   dark mode it flips to photocopier-black. Either way the dropdown
+   reads as a continuation of the nav bar, not a floating white card. */
+.site-header__nav .wp-block-navigation__submenu-container,
+.site-header__nav .wp-block-navigation-submenu .wp-block-navigation__submenu-container {
+	background: var(--cr-surface, var(--wp--preset--color--main-accent, #fbfaf5)) !important;
+	border-color: var(--cr-border, var(--wp--preset--color--border-light, #d4cfeb));
+	color: var(--cr-ink);
+}
+
+.site-header__nav .wp-block-navigation__submenu-container .wp-block-navigation-item__content {
+	color: var(--cr-ink, currentColor);
+}
+
+/* (2) Hide the "Home" heading in the homepage post-content. The page
+   has an H1 reading "Home" as its first block; the new front-page.html
+   has no wp:post-title, so dropping that single heading is enough to
+   make "Home" never render. Body.home is added by WordPress on the
+   front page. */
+body.home .wp-block-post-content > .wp-block-heading:first-child,
+body.home .wp-block-post-content > h1:first-child,
+body.home .homepage__content > .wp-block-heading:first-child,
+body.home .homepage__content > h1:first-child {
+	display: none !important;
+}
+
+/* (3) Homepage content — dark-mode-safe text colors.
+   The home page mixes peach callouts, cream-cards, and full-bleed
+   hero sections. In dark mode the page background flips dark but
+   palette-color sections stay light, leaving the SEMANTIC text
+   tokens (which also flip to light) unreadable on those light bgs.
+   Lock dark text inside any homepage palette-color surface. */
+body.home .has-tertiary-background-color,
+body.home .has-main-accent-background-color,
+body.home .has-base-background-color,
+body.home .has-secondary-background-color,
+body.home .has-primary-accent-background-color {
+	color: var(--cr-russian-violet, #241c4a);
+}
+
+body.home .has-tertiary-background-color *:not(.wp-element-button):not(.cr-cta),
+body.home .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta),
+body.home .has-base-background-color *:not(.wp-element-button):not(.cr-cta),
+body.home .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta) {
+	color: inherit;
+}
+
+body.home .has-tertiary-background-color a:not(.wp-element-button):not(.cr-cta),
+body.home .has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta),
+body.home .has-base-background-color a:not(.wp-element-button):not(.cr-cta) {
+	color: var(--cr-russian-violet, #241c4a);
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+	text-decoration-thickness: 1px;
+}
+
+body.home .has-tertiary-background-color a:hover:not(.wp-element-button):not(.cr-cta),
+body.home .has-main-accent-background-color a:hover:not(.wp-element-button):not(.cr-cta),
+body.home .has-base-background-color a:hover:not(.wp-element-button):not(.cr-cta) {
+	color: var(--cr-ut-orange-dark, #b85f00);
+}
+
+/* (4) Newsletter form fields — readable across light/dark, zine framing */
+body.home input[type="email"],
+body.home input[type="text"],
+body.home input[type="url"],
+.homepage input[type="email"],
+.homepage input[type="text"],
+.homepage input[type="url"] {
+	background: var(--cr-printer-ivory, #fbfaf5);
+	color: var(--cr-russian-violet, #241c4a);
+	border: 1.5px solid var(--cr-russian-violet, #241c4a);
+	padding: 0.6em 0.8em;
+	border-radius: 0;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 1rem;
+	box-shadow: 3px 3px 0 var(--cr-russian-violet, #241c4a);
+	transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+body.home input[type="email"]:focus,
+body.home input[type="text"]:focus,
+.homepage input[type="email"]:focus,
+.homepage input[type="text"]:focus {
+	outline: 3px solid var(--cr-selective-yellow, #ffb703);
+	outline-offset: 2px;
+	box-shadow: 4px 4px 0 var(--cr-russian-violet, #241c4a);
+}
+
+/* Newsletter form button — make it look like a cr-cta */
+body.home input[type="submit"],
+body.home button[type="submit"],
+.homepage input[type="submit"],
+.homepage button[type="submit"] {
+	background: var(--cr-selective-yellow, #ffb703);
+	color: var(--cr-russian-violet, #241c4a);
+	border: 2px solid var(--cr-russian-violet, #241c4a);
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 700;
+	font-size: 1rem;
+	letter-spacing: 0.02em;
+	padding: 0.7em 1.5em;
+	cursor: pointer;
+	box-shadow: 4px 4px 0 var(--cr-russian-violet, #241c4a);
+	transition: box-shadow 0.15s ease, transform 0.1s ease;
+	border-radius: 0;
+}
+
+body.home input[type="submit"]:hover,
+body.home button[type="submit"]:hover,
+.homepage input[type="submit"]:hover,
+.homepage button[type="submit"]:hover {
+	box-shadow: 2px 2px 0 var(--cr-russian-violet, #241c4a);
+	transform: translate(2px, 2px);
+}
+
+/* (5) Recent-posts stream on home — cr-stream-item zine treatment.
+   The .home-stream-item entries get a sparkle marker on the eyebrow,
+   slim borders between rows, accent-font titles, hover-lift effect. */
+.home-stream {
+	max-width: var(--cr-measure, 720px);
+	margin-inline: auto;
+	width: 100%;
+}
+
+.home-stream__head .cr-eyebrow {
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	margin-bottom: var(--wp--preset--spacing--2x-small, 0.25rem);
+}
+
+.home-stream__title {
+	font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+	margin: 0 0 var(--wp--preset--spacing--medium, 1rem);
+	color: var(--cr-ink);
+}
+
+.home-stream-item {
+	transition: transform 0.15s ease;
+}
+
+.home-stream-item:hover {
+	transform: translateX(4px);
+}
+
+.home-stream-item__meta {
+	color: var(--cr-ink-muted, currentColor);
+	font-family: var(--cr-font-accent, serif);
+}
+
+.home-stream-item__meta .home-stream-item__category {
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+}
+
+.home-stream-item__meta .home-stream-item__category::before {
+	content: "✦";
+	display: inline-block;
+	margin-right: 0.4em;
+	color: var(--cr-selective-yellow, #ffb703);
+	transform: translateY(-0.05em);
+}
+
+.home-stream-item__category a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.home-stream-item__date {
+	color: var(--cr-ink-muted);
+	font-weight: 500;
+}
+
+.home-stream-item__date::before {
+	content: "·";
+	margin: 0 0.4em 0 0.2em;
+	color: var(--cr-ink-muted);
+}
+
+.home-stream-item__title {
+	line-height: 1.2;
+}
+
+.home-stream-item__title a {
+	color: var(--cr-ink);
+	text-decoration: none;
+}
+
+.home-stream-item__title a:hover,
+.home-stream-item__title a:focus-visible {
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+	text-decoration-thickness: 2px;
+}
+
+.home-stream-item__excerpt {
+	color: var(--cr-ink-muted, currentColor);
+	font-size: 0.95rem;
+	line-height: 1.55;
+	max-width: 60ch;
+}
+
+.home-stream__more {
+	margin-top: var(--wp--preset--spacing--medium, 1rem);
+}
+
+.home-stream__more a {
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 600;
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	text-decoration: none;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	font-size: 0.875rem;
+}
+
+.home-stream__more a:hover {
+	color: var(--cr-ink);
+}
+
+/* (6) Marker bar separator — visible zine motif */
+hr.cr-marker-bar.wp-block-separator {
+	border: none;
+	background: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	height: 6px;
+	width: 12rem;
+	max-width: 30%;
+	margin-inline: auto;
+	transform: rotate(-1deg);
+	opacity: 1;
+}
+
+/* (7) Homepage page title — hide if it sneaks back in via wp:post-title */
+body.home .wp-block-post-title:first-of-type,
+body.home > main > h1.entry-title:first-child,
+body.home > .wp-site-blocks > main > h1:first-child {
+	display: none !important;
+}
+
+/* (8) Homepage main padding — give breathing room around content */
+body.home .homepage {
+	padding-inline: var(--wp--preset--spacing--medium, 1rem);
+}
+
+@media (min-width: 768px) {
+	body.home .homepage {
+		padding-inline: var(--wp--preset--spacing--large, 1.5rem);
+	}
+}
