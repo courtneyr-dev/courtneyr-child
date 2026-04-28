@@ -2276,3 +2276,236 @@ body.home main.homepage {
 	color: var(--cr-ink, currentColor);
 	border-bottom-color: var(--cr-ink, currentColor);
 }
+
+
+/* ============================================================
+   v0.2.6.3 — section padding + delete all bars + dark hero
+   ============================================================
+   Final-pass fixes from real-page review:
+   - Cerulean hero needs to flip to dark surface in dark mode (user
+     explicitly: "in dark mode I want the blue background in the hero
+     to be black instead").
+   - The blue bar between sections (gradient cerulean strip) needs to
+     be gone. v0.2.6.2 converted these to marker bars; user wants them
+     deleted entirely. Spacing from padding, not bars.
+   - Orange marker bar overlapping the Join Newsletter button — caused
+     by my template-level cr-marker-bar AND converted-separator bars.
+     All hidden now.
+   - Arrow circles (peach circles holding the right arrows next to the
+     "Empower your open source / Equip educators / Support leaders /
+     Advance your skills" headings) lose color in dark mode because
+     v0.2.6 dark-mode flip rule paints .has-tertiary-background-color
+     to cr-surface-soft. Distinguish small icon circles from full
+     section bgs and keep them yellow (zine pop) in both modes.
+   - Recent Posts heading bleeds against the peach callout above it
+     because there's no section padding separation. Force section
+     padding everywhere.
+   - "From the blog" stream items too close together — bump padding.
+*/
+
+/* (1) Hide every separator and decorative bar on the homepage —
+   override v0.2.6.2's marker-bar conversion. */
+body.home .wp-block-post-content .wp-block-separator,
+body.home .homepage__content .wp-block-separator,
+body.home .wp-block-post-content hr,
+body.home .homepage__content hr,
+body.home main.homepage hr.wp-block-separator,
+body.home main.homepage > hr.cr-marker-bar,
+body.home main.homepage hr {
+	display: none !important;
+}
+
+/* Decorative cover blocks (those with NO heading and NO paragraph
+   inside) act as visual bars. Hide them. The hero stays because it
+   has both a heading ("Are you passionate about") and paragraphs. */
+body.home .wp-block-cover:not(:has(.wp-block-heading)):not(:has(h1)):not(:has(h2)):not(:has(h3)):not(:has(h4)):not(:has(p)) {
+	display: none !important;
+}
+
+/* (2) Hero cerulean → cr-surface (black-ish) in dark mode.
+   Light mode: keep cerulean. Dark mode: flip to dark surface so the
+   page feels uniformly dark from the top. */
+:root[data-theme="dark"] body.home .has-cerulean-background-color,
+:root[data-theme="dark"] body.home .has-primary-alt-background-color,
+:root[data-theme="dark"] body.home .wp-block-cover.has-cerulean-background-color,
+:root[data-theme="dark"] body.home .wp-block-cover.has-primary-alt-background-color,
+:root[data-theme="dark"] body.home .wp-block-group.has-cerulean-background-color,
+:root[data-theme="dark"] body.home .wp-block-group.has-primary-alt-background-color {
+	background-color: var(--cr-surface, #1a1714) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .has-cerulean-background-color,
+	:root:not([data-theme]) body.home .has-primary-alt-background-color,
+	:root:not([data-theme]) body.home .wp-block-cover.has-cerulean-background-color,
+	:root:not([data-theme]) body.home .wp-block-cover.has-primary-alt-background-color,
+	:root[data-theme="system"] body.home .has-cerulean-background-color,
+	:root[data-theme="system"] body.home .has-primary-alt-background-color,
+	:root[data-theme="system"] body.home .wp-block-cover.has-cerulean-background-color,
+	:root[data-theme="system"] body.home .wp-block-cover.has-primary-alt-background-color {
+		background-color: var(--cr-surface, #1a1714) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+}
+
+/* Cover-block overlays — strip the dark-mode bg overlay since we
+   already set the bg color, and the overlay was darkening the image */
+:root[data-theme="dark"] body.home .wp-block-cover.has-cerulean-background-color > .wp-block-cover__background,
+:root[data-theme="dark"] body.home .wp-block-cover.has-primary-alt-background-color > .wp-block-cover__background {
+	background-color: var(--cr-surface, #1a1714) !important;
+	opacity: 0.85;
+}
+
+/* (3) Arrow circles — keep them YELLOW with violet ink in BOTH modes.
+   Override the v0.2.6 dark-mode tertiary flip for icon-sized covers
+   (small dimensions or border-radius indicating circle).
+
+   Approach: any wp-block-cover or wp-block-group on the homepage that
+   has tertiary bg AND inline border-radius (indicating it's a circle/
+   pill, not a full section) gets the yellow + violet treatment. */
+body.home .wp-block-cover[style*="border-radius"],
+body.home .wp-block-group[style*="border-radius"][class*="has-tertiary"],
+body.home .wp-block-cover[style*="border-radius"][class*="has-tertiary"],
+body.home .wp-block-cover.is-style-rounded,
+body.home .wp-block-group.is-style-rounded {
+	background-color: var(--cr-selective-yellow, #ffb703) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+/* SVG arrows inside the icon circles must stay violet on yellow */
+body.home .wp-block-cover[style*="border-radius"] svg,
+body.home .wp-block-cover[style*="border-radius"] svg path,
+body.home .wp-block-group[style*="border-radius"] svg,
+body.home .wp-block-group[style*="border-radius"] svg path {
+	color: var(--cr-russian-violet, #241c4a) !important;
+	fill: currentColor !important;
+}
+
+/* Same in dark mode — DO NOT let the v0.2.6 dark-mode flip override */
+:root[data-theme="dark"] body.home .wp-block-cover[style*="border-radius"],
+:root[data-theme="dark"] body.home .wp-block-cover[style*="border-radius"][class*="has-tertiary"],
+:root[data-theme="dark"] body.home .wp-block-group[style*="border-radius"][class*="has-tertiary"] {
+	background-color: var(--cr-selective-yellow, #ffb703) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .wp-block-cover[style*="border-radius"],
+	:root:not([data-theme]) body.home .wp-block-group[style*="border-radius"][class*="has-tertiary"],
+	:root[data-theme="system"] body.home .wp-block-cover[style*="border-radius"],
+	:root[data-theme="system"] body.home .wp-block-group[style*="border-radius"][class*="has-tertiary"] {
+		background-color: var(--cr-selective-yellow, #ffb703) !important;
+		color: var(--cr-russian-violet, #241c4a) !important;
+	}
+}
+
+/* (4) Section padding everywhere on homepage — 3rem mobile / 4.5rem
+   desktop on every full-width section/cover/group. */
+body.home main.homepage > .alignfull,
+body.home main.homepage > .wp-block-group.alignfull,
+body.home main.homepage > .wp-block-cover.alignfull,
+body.home main.homepage > .wp-block-cover,
+body.home .wp-block-post-content > .alignfull,
+body.home .wp-block-post-content > .wp-block-cover,
+body.home .wp-block-post-content > .wp-block-group.alignfull {
+	padding-top: var(--wp--preset--spacing--xx-large, 3rem) !important;
+	padding-bottom: var(--wp--preset--spacing--xx-large, 3rem) !important;
+}
+
+@media (min-width: 768px) {
+	body.home main.homepage > .alignfull,
+	body.home main.homepage > .wp-block-cover,
+	body.home .wp-block-post-content > .alignfull,
+	body.home .wp-block-post-content > .wp-block-cover {
+		padding-top: 4.5rem !important;
+		padding-bottom: 4.5rem !important;
+	}
+}
+
+/* (5) Recent Posts (wp:latest-posts) container needs breathing room
+   from the peach callout above it AND the blog stream below */
+body.home .wp-block-latest-posts {
+	padding-top: 2rem !important;
+	padding-bottom: 2rem !important;
+	margin-top: 2.5rem !important;
+	margin-bottom: 2.5rem !important;
+}
+
+body.home .wp-block-latest-posts li {
+	padding: 1rem 0 !important;
+	border-bottom: 1px solid var(--cr-border, #d4cfeb);
+}
+
+body.home .wp-block-latest-posts li:last-child {
+	border-bottom: 0;
+}
+
+/* (6) Home-stream-item — bigger padding for breathing room.
+   Was 1.5rem, now 2.5rem mobile / 3.5rem desktop. */
+.home-stream-item,
+body.home .home-stream-item {
+	padding: 2.5rem 0 !important;
+}
+
+@media (min-width: 768px) {
+	.home-stream-item,
+	body.home .home-stream-item {
+		padding: 3.5rem 0 !important;
+	}
+}
+
+/* (7) Home-stream wrapper — generous vertical padding for the whole
+   "From the blog" section. */
+body.home .home-stream,
+body.home main.homepage > .home-stream {
+	padding-top: 4rem !important;
+	padding-bottom: 4rem !important;
+}
+
+@media (min-width: 768px) {
+	body.home .home-stream,
+	body.home main.homepage > .home-stream {
+		padding-top: 5rem !important;
+		padding-bottom: 5rem !important;
+	}
+}
+
+/* (8) The "FIELD NOTES & UPDATES" eyebrow — replace the deleted
+   marker-bar with a yellow highlighter underline behind the text. */
+.home-stream__head .cr-eyebrow,
+body.home .home-stream .cr-eyebrow {
+	display: inline-block !important;
+	background-image: linear-gradient(
+		180deg,
+		transparent 0%,
+		transparent 60%,
+		var(--cr-selective-yellow, #ffb703) 60%,
+		var(--cr-selective-yellow, #ffb703) 100%
+	) !important;
+	padding: 0 0.4em !important;
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
+	margin-bottom: 1rem !important;
+}
+
+/* (9) Adjacent palette-bg sections in body.home — zero margin so
+   they butt cleanly without showing page bg between (was creating
+   black gap user complained about). */
+body.home main.homepage > * + *,
+body.home .wp-block-post-content > * + * {
+	margin-block-start: 0 !important;
+	margin-top: 0 !important;
+}
+
+/* But preserve generous padding inside each section (set above) */
+
+/* (10) Newsletter section — make sure it doesn't have an orange bar
+   overlapping the button. The button needs clear space below. */
+body.home .wp-block-button,
+body.home .wp-block-buttons,
+.tnp-subscription input[type="submit"],
+.tnp-subscription button[type="submit"] {
+	margin-bottom: 1rem !important;
+	position: relative;
+	z-index: 2;
+}
