@@ -1637,3 +1637,357 @@ body.home .homepage {
 		padding-inline: var(--wp--preset--spacing--large, 1.5rem);
 	}
 }
+
+
+/* ============================================================
+   v0.2.6 — WCAG 2.1 dark-mode pass + section bg semantics
+   ============================================================
+   Fixes from real-page review:
+   - v0.2.5's :first-of-type post-title hiding hit EVERY post-title in
+     the new home-stream (each is first-of-type inside its own group);
+     replaced with direct-child selectors that only target the actual
+     page title.
+   - Comments wrapper and Related Posts had palette bgs (cream, peach)
+     that stayed light in dark mode; switched to semantic tokens.
+   - Tables had no styling; in dark mode the body cells became
+     invisible (light text inheriting from cr-ink, white default bg).
+   - Term-button tag pills (.is-style-term-button) used palette colors
+     producing light purple on peach = ~2.1:1, fail.
+   - Cerulean separator block in home page content needs hiding.
+   - The home-stream wp:post-title titles vanished entirely thanks to
+     the over-broad v0.2.5 hide rule.
+*/
+
+/* (1) Replace v0.2.5's overly aggressive title hiding.
+   Only hide the ACTUAL page title — direct child of main/post-content,
+   never anything nested inside .home-stream-item or .related-posts. */
+body.home > .wp-site-blocks > main > .wp-block-post-title,
+body.home main.homepage > .wp-block-post-title,
+body.home main.homepage > .homepage__content > .wp-block-heading:first-child,
+body.home main.homepage > .homepage__content > h1:first-child,
+body.home main.homepage > .wp-block-post-content > .wp-block-heading:first-child,
+body.home main.homepage > .wp-block-post-content > h1:first-child {
+	display: none !important;
+}
+
+/* Restore visibility for any home-stream-item titles that v0.2.5
+   accidentally hid via :first-of-type. Belt and suspenders. */
+.home-stream-item .wp-block-post-title,
+.home-stream-item__title,
+body.home .home-stream .home-stream-item .wp-block-post-title {
+	display: block !important;
+	visibility: visible !important;
+}
+
+/* (2) Section backgrounds via semantic tokens that flip in dark mode.
+   Comments wrapper and related-posts no longer carry palette bg in
+   markup; CSS controls them, so the colors track light/dark. */
+.single-post__comments-wrapper {
+	background: var(--cr-surface-soft, #fbfaf5);
+	color: var(--cr-ink, #241c4a);
+	border-top: 2px solid var(--cr-border, #d4cfeb);
+}
+
+.related-posts {
+	background: var(--cr-callout-bg, #fee2c3);
+	color: var(--cr-callout-ink, #241c4a);
+}
+
+/* (3) Aggressive dark-mode flip — ANY palette-color background class
+   anywhere on the site, when in dark mode, gets re-painted with the
+   semantic surface token + ivory text. This eliminates the
+   white-card-on-dark-page visual noise the user called out. */
+:root[data-theme="dark"] .has-main-accent-background-color,
+:root[data-theme="dark"] .has-tertiary-background-color,
+:root[data-theme="dark"] .has-base-background-color,
+:root[data-theme="dark"] .has-secondary-background-color {
+	background-color: var(--cr-surface-soft) !important;
+	color: var(--cr-printer-ivory) !important;
+}
+
+:root[data-theme="dark"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
+:root[data-theme="dark"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
+:root[data-theme="dark"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
+:root[data-theme="dark"] .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button) {
+	color: var(--cr-printer-ivory) !important;
+}
+
+:root[data-theme="dark"] .has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta),
+:root[data-theme="dark"] .has-tertiary-background-color  a:not(.wp-element-button):not(.cr-cta),
+:root[data-theme="dark"] .has-base-background-color      a:not(.wp-element-button):not(.cr-cta) {
+	color: var(--cr-sky-blue, #8ecae6) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .has-main-accent-background-color,
+	:root:not([data-theme]) .has-tertiary-background-color,
+	:root:not([data-theme]) .has-base-background-color,
+	:root:not([data-theme]) .has-secondary-background-color,
+	:root[data-theme="system"] .has-main-accent-background-color,
+	:root[data-theme="system"] .has-tertiary-background-color,
+	:root[data-theme="system"] .has-base-background-color,
+	:root[data-theme="system"] .has-secondary-background-color {
+		background-color: var(--cr-surface-soft) !important;
+		color: var(--cr-printer-ivory) !important;
+	}
+	:root:not([data-theme]) .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
+	:root:not([data-theme]) .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
+	:root:not([data-theme]) .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
+	:root[data-theme="system"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
+	:root[data-theme="system"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
+	:root[data-theme="system"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button) {
+		color: var(--cr-printer-ivory) !important;
+	}
+}
+
+/* (4) Tables — semantic surface tokens with zebra striping + dark mode
+   flip. Default Ollie tables had no bg in dark mode = invisible body
+   cells. Now they get cr-surface-elevated bg, cr-callout-bg header,
+   and zebra rows for legibility. */
+.wp-block-post-content table,
+.entry-content table,
+.cr-prose table {
+	background: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+	border-collapse: collapse;
+	width: 100%;
+	margin: 1.5rem 0;
+	font-family: var(--cr-font-body, sans-serif);
+}
+
+.wp-block-post-content table th,
+.entry-content table th,
+.cr-prose table th {
+	background: var(--cr-callout-bg);
+	color: var(--cr-callout-ink);
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 700;
+	text-align: left;
+	padding: 0.75rem 1rem;
+	border-bottom: 2px solid var(--cr-border, #d4cfeb);
+}
+
+.wp-block-post-content table td,
+.entry-content table td,
+.cr-prose table td {
+	background: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+	padding: 0.7rem 1rem;
+	border-bottom: 1px solid var(--cr-border, #d4cfeb);
+	vertical-align: top;
+}
+
+.wp-block-post-content table tr:nth-child(even) td,
+.entry-content table tr:nth-child(even) td,
+.cr-prose table tr:nth-child(even) td {
+	background: var(--cr-surface-soft);
+}
+
+/* Force visible text on tables in dark mode regardless of inherited rules */
+:root[data-theme="dark"] .wp-block-post-content table td,
+:root[data-theme="dark"] .entry-content table td,
+:root[data-theme="dark"] .wp-block-post-content table th,
+:root[data-theme="dark"] .entry-content table th {
+	color: var(--cr-printer-ivory) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .wp-block-post-content table td,
+	:root:not([data-theme]) .entry-content table td,
+	:root:not([data-theme]) .wp-block-post-content table th,
+	:root:not([data-theme]) .entry-content table th,
+	:root[data-theme="system"] .wp-block-post-content table td,
+	:root[data-theme="system"] .entry-content table td,
+	:root[data-theme="system"] .wp-block-post-content table th,
+	:root[data-theme="system"] .entry-content table th {
+		color: var(--cr-printer-ivory) !important;
+	}
+}
+
+/* (5) Tag pills (.is-style-term-button — used by post tags like
+   ai, gtd, obsidian, PARA, pkm). Was light purple on peach = fail.
+   Now uses callout-bg/callout-ink semantics, hover-marker, AA-passing. */
+.is-style-term-button a,
+.taxonomy-post_tag.is-style-term-button a,
+.wp-block-post-terms.is-style-term-button a {
+	background: var(--cr-callout-bg) !important;
+	color: var(--cr-callout-ink) !important;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 500;
+	font-size: 0.875rem;
+	padding: 0.25rem 0.7rem;
+	border-radius: 999px;
+	text-decoration: none;
+	display: inline-block;
+	transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.is-style-term-button a:hover,
+.is-style-term-button a:focus-visible,
+.taxonomy-post_tag.is-style-term-button a:hover,
+.wp-block-post-terms.is-style-term-button a:hover {
+	background: var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+	transform: translateY(-1px);
+}
+
+/* (6) Hide the cerulean separator block that lives in the home page
+   content (visible above "How this newsletter can help you grow"). */
+body.home .wp-block-post-content > hr.wp-block-separator,
+body.home .homepage__content > hr.wp-block-separator,
+body.home .wp-block-post-content > .wp-block-separator.has-cerulean-color,
+body.home .wp-block-post-content > .wp-block-separator.has-cerulean-background-color,
+body.home .wp-block-post-content > .wp-block-separator.has-primary-alt-background-color,
+body.home .wp-block-post-content > .wp-block-separator.has-blue-green-background-color {
+	display: none !important;
+}
+
+/* But preserve our own cr-marker-bar (added by front-page.html) */
+body.home main.homepage > .wp-block-separator.cr-marker-bar {
+	display: block !important;
+}
+
+/* (7) Force home-stream item TITLES to be visible and use semantic
+   ink token so they flip in dark mode. Belt-and-suspenders against
+   any inherited rules trying to hide them. */
+.home-stream-item .wp-block-post-title,
+.home-stream-item .wp-block-post-title a,
+.home-stream-item__title,
+.home-stream-item__title a {
+	color: var(--cr-ink) !important;
+	display: block !important;
+	visibility: visible !important;
+	font-family: var(--cr-font-accent, serif) !important;
+	font-weight: 700 !important;
+	line-height: 1.2 !important;
+	font-size: clamp(1.125rem, 1rem + 0.4vw, 1.4rem) !important;
+	text-decoration: none !important;
+	margin: 0.25rem 0 0.5rem !important;
+}
+
+.home-stream-item .wp-block-post-title a:hover,
+.home-stream-item .wp-block-post-title a:focus-visible,
+.home-stream-item__title a:hover,
+.home-stream-item__title a:focus-visible {
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
+	text-decoration: underline !important;
+	text-underline-offset: 0.18em !important;
+}
+
+.home-stream-item__excerpt {
+	color: var(--cr-ink-muted, currentColor) !important;
+}
+
+.home-stream-item {
+	border-bottom-color: var(--cr-border, #d4cfeb) !important;
+}
+
+/* (8) Force homepage wp:latest-posts titles visible (the page has a
+   "Recent Posts" block separate from my home-stream — that block was
+   rendering with invisible titles too). */
+body.home .wp-block-latest-posts a,
+body.home .wp-block-latest-posts__post-title,
+body.home .wp-block-latest-posts li > a,
+body.home ul.wp-block-latest-posts li a {
+	color: var(--cr-ink) !important;
+	display: inline-block !important;
+	visibility: visible !important;
+	font-family: var(--cr-font-accent, serif) !important;
+	font-weight: 600 !important;
+	font-size: 1.125rem !important;
+	line-height: 1.3 !important;
+	text-decoration: none !important;
+	margin-bottom: 0.25rem;
+}
+
+body.home .wp-block-latest-posts a:hover,
+body.home .wp-block-latest-posts li > a:hover {
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
+	text-decoration: underline !important;
+}
+
+body.home .wp-block-latest-posts__post-date {
+	color: var(--cr-ink-muted) !important;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 500;
+	font-size: 0.875rem;
+}
+
+/* (9) Comments form inputs — semantic flip for dark mode safety */
+.single-post__comments-wrapper input[type="text"],
+.single-post__comments-wrapper input[type="email"],
+.single-post__comments-wrapper input[type="url"],
+.single-post__comments-wrapper textarea,
+.wp-block-post-comments-form input[type="text"],
+.wp-block-post-comments-form input[type="email"],
+.wp-block-post-comments-form input[type="url"],
+.wp-block-post-comments-form textarea {
+	background: var(--cr-surface-elevated) !important;
+	color: var(--cr-ink) !important;
+	border: 1.5px solid var(--cr-border) !important;
+}
+
+/* (10) Comments wrapper sub-elements — readable text in both modes */
+.single-post__comments-title,
+.single-post__comments-wrapper h2,
+.single-post__comments-wrapper h3 {
+	color: var(--cr-ink) !important;
+}
+
+.single-post__comment-item,
+.wp-block-post-comments-form .comment-form-comment label,
+.wp-block-post-comments-form label {
+	color: var(--cr-ink) !important;
+}
+
+.single-post__comment-item {
+	background: var(--cr-surface-elevated);
+	border: 1px solid var(--cr-border);
+	box-shadow: 2px 2px 0 var(--cr-border);
+	padding: 1rem;
+	margin-bottom: 1rem;
+}
+
+/* (11) Related-posts sub-elements — semantic ink colors */
+.related-posts__heading,
+.related-posts h2 {
+	color: var(--cr-ink) !important;
+}
+
+.related-post__title,
+.related-post__title a {
+	color: var(--cr-ink) !important;
+	text-decoration: none;
+}
+
+.related-post__title a:hover,
+.related-post__title a:focus-visible {
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+.related-post__category,
+.related-post__category a {
+	color: var(--cr-ut-orange-dark, #b85f00) !important;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 600;
+}
+
+:root[data-theme="dark"] .related-post__category,
+:root[data-theme="dark"] .related-post__category a {
+	color: var(--cr-selective-yellow, #ffb703) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .related-post__category,
+	:root:not([data-theme]) .related-post__category a,
+	:root[data-theme="system"] .related-post__category,
+	:root[data-theme="system"] .related-post__category a {
+		color: var(--cr-selective-yellow, #ffb703) !important;
+	}
+}
+
+.related-post__date {
+	color: var(--cr-ink-muted) !important;
+}
