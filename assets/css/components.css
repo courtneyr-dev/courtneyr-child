@@ -3899,3 +3899,28 @@ body.home .wp-block-cover .has-main-accent-color > a:not(.wp-element-button):not
 	background-image: var(--cr-fiber), var(--cr-halftone);
 	background-size: auto, var(--cr-halftone-size);
 }
+
+
+/* ============================================================
+   v0.4.1 — staggered rotation on Newsletter Features cards
+   ============================================================
+   The base .cr-card rule applies a single rotate(--cr-rotate-1) to
+   every card. Across 4 stacked Feature cards on the home page that
+   reads as too uniform — same tilt every time. Here we scope to the
+   Newsletter Features section (via :has() on the section heading
+   anchor) and use :nth-of-type to give each card a different angle
+   and direction. The 4 Feature divs are siblings in the same column
+   with <hr> separators between them; nth-of-type for div skips the
+   hrs and counts Features 1..4 directly. */
+body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(1) {
+	transform: rotate(-1.8deg);
+}
+body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(2) {
+	transform: rotate(1.2deg);
+}
+body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(3) {
+	transform: rotate(-0.7deg);
+}
+body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(4) {
+	transform: rotate(1.5deg);
+}
