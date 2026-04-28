@@ -1620,12 +1620,9 @@ hr.cr-marker-bar.wp-block-separator {
 	opacity: 1;
 }
 
-/* (7) Homepage page title — hide if it sneaks back in via wp:post-title */
-body.home .wp-block-post-title:first-of-type,
-body.home > main > h1.entry-title:first-child,
-body.home > .wp-site-blocks > main > h1:first-child {
-	display: none !important;
-}
+/* (7) Homepage page title — superseded by v0.2.6 (1) which uses direct
+   child combinators only. The old :first-of-type rule was killing every
+   recent-post title in the home-stream, so it has been removed. */
 
 /* (8) Homepage main padding — give breathing room around content */
 body.home .homepage {
@@ -1990,4 +1987,33 @@ body.home .wp-block-latest-posts__post-date {
 
 .related-post__date {
 	color: var(--cr-ink-muted) !important;
+}
+
+
+/* v0.2.6 specificity reinforcement — make the home-stream titles
+   un-hideable. Body + home + .home-stream + .home-stream-item gives us
+   enough specificity to beat any inherited or cached selector that
+   might still try to set display: none. */
+body.home .home-stream .home-stream-item .wp-block-post-title,
+body.home .home-stream .home-stream-item .wp-block-post-title a,
+body.home .home-stream .home-stream-item .home-stream-item__title,
+body.home .home-stream .home-stream-item .home-stream-item__title a {
+	display: block !important;
+	visibility: visible !important;
+	color: var(--cr-ink) !important;
+	font-family: var(--wp--preset--font-family--accent, "Roboto Slab", Georgia, serif) !important;
+	font-weight: 700 !important;
+	line-height: 1.2 !important;
+	font-size: clamp(1.125rem, 1rem + 0.4vw, 1.4rem) !important;
+	text-decoration: none !important;
+	margin: 0.25rem 0 0.5rem !important;
+}
+
+body.home .home-stream .home-stream-item .wp-block-post-title a:hover,
+body.home .home-stream .home-stream-item .wp-block-post-title a:focus-visible,
+body.home .home-stream .home-stream-item .home-stream-item__title a:hover,
+body.home .home-stream .home-stream-item .home-stream-item__title a:focus-visible {
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
+	text-decoration: underline !important;
+	text-underline-offset: 0.18em !important;
 }
