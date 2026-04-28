@@ -94,7 +94,8 @@
    v2.1: full 4-side UT-orange frame with generous matching horizontal padding
    so text breathes off both rails (was top+bottom only, which read as half-open).
 */
-.cr-pull-quote {
+.cr-pull-quote,
+.is-style-cr-pull-quote {
   font-family: var(--cr-font-accent);
   font-size: var(--cr-text-2xl);
   line-height: var(--cr-leading-snug);
@@ -106,9 +107,12 @@
   max-width: var(--cr-measure-wide);
   background: var(--cr-surface);
 }
-.cr-pull-quote > :first-child { margin-top: 0; }
-.cr-pull-quote > :last-child  { margin-bottom: 0; }
-.cr-pull-quote cite {
+.cr-pull-quote > :first-child,
+.is-style-cr-pull-quote > :first-child { margin-top: 0; }
+.cr-pull-quote > :last-child,
+.is-style-cr-pull-quote > :last-child  { margin-bottom: 0; }
+.cr-pull-quote cite,
+.is-style-cr-pull-quote cite {
   display: block;
   margin-top: var(--cr-space-sm);
   font-size: var(--cr-text-base);
@@ -116,7 +120,8 @@
   font-family: var(--cr-font-body);
   color: var(--cr-ink-muted);
 }
-.cr-pull-quote cite::before { content: "— "; }
+.cr-pull-quote cite::before,
+.is-style-cr-pull-quote cite::before { content: "— "; }
 
 
 /* ============ Callout ============ */
@@ -159,7 +164,9 @@
    Single zine variant. v1.x had .cr-card--elevated and --inverse;
    those were removed in v2.0 — the zine treatment is the only card now.
 */
-.cr-card {
+.cr-card,
+.is-style-cr-card,
+.cr-section--card {
   background: var(--cr-surface-elevated);
   border: var(--cr-border-thick);
   padding: var(--cr-space-lg);
@@ -168,8 +175,12 @@
   margin: var(--cr-space-xl) 0;
   max-width: var(--cr-measure);
 }
-.cr-card > :first-child { margin-top: 0; }
-.cr-card > :last-child  { margin-bottom: 0; }
+.cr-card > :first-child,
+.is-style-cr-card > :first-child,
+.cr-section--card > :first-child { margin-top: 0; }
+.cr-card > :last-child,
+.is-style-cr-card > :last-child,
+.cr-section--card > :last-child  { margin-bottom: 0; }
 
 
 /* ============ Table of contents ============ */
@@ -215,7 +226,9 @@
    The hr default is already a marker stripe; this is a stronger one
    for section dividers in landing/marketing.
 */
-.cr-marker-bar {
+.cr-marker-bar,
+hr.is-style-cr-marker-bar,
+hr.is-style-cr-marker-bar-short {
   display: block;
   width: 100%;
   height: 8px;
@@ -224,7 +237,8 @@
   margin: var(--cr-space-2xl) 0;
   transform: rotate(var(--cr-rotate-2));
 }
-.cr-marker-bar--short { width: 8rem; height: 6px; transform: rotate(var(--cr-rotate-1)); }
+.cr-marker-bar--short,
+hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(var(--cr-rotate-1)); }
 
 
 /* ============ Sparkle ============
@@ -247,7 +261,9 @@
 /* ============ Halftone ============
    Dotted overlay for hero/landing surfaces. Apply to a wrapper.
 */
-.cr-halftone {
+.cr-halftone,
+.is-style-cr-halftone,
+.cr-section--halftone {
   background-image: var(--cr-halftone);
   background-size: var(--cr-halftone-size);
 }
@@ -285,9 +301,21 @@
    Full family preserved from v1.x, restyled for zine: sharp corners (no radius),
    thick border, hard offset shadow, "press" effect on active.
    .cr-cta is an alias for .cr-button--primary (used in mockups for clarity).
+
+   v0.3.0 — Phase B block-style aliases (registered in inc/block-styles.php):
+     .is-style-cr-cta              → primary CTA
+     .is-style-cr-button-secondary → secondary
+     .is-style-cr-button-outline   → outline
+     .is-style-cr-button-soft      → soft
+   The block-style class lands on .wp-block-button (the wrapper); the visible
+   button is the inner .wp-block-button__link, hence the descendant qualifier.
 */
 .cr-button,
-.cr-cta {
+.cr-cta,
+.is-style-cr-cta > .wp-block-button__link,
+.is-style-cr-button-secondary > .wp-block-button__link,
+.is-style-cr-button-outline > .wp-block-button__link,
+.is-style-cr-button-soft > .wp-block-button__link {
   display: inline-block;
   font-family: var(--cr-font-accent);
   font-weight: var(--cr-weight-bold);
@@ -304,55 +332,75 @@
               background 80ms var(--cr-ease-out);
 }
 .cr-button:hover,
-.cr-cta:hover {
+.cr-cta:hover,
+.is-style-cr-cta > .wp-block-button__link:hover,
+.is-style-cr-button-secondary > .wp-block-button__link:hover,
+.is-style-cr-button-outline > .wp-block-button__link:hover,
+.is-style-cr-button-soft > .wp-block-button__link:hover {
   background: var(--cr-russian-violet);
   color: var(--cr-sky-blue);
 }
 .cr-button:active,
-.cr-cta:active {
+.cr-cta:active,
+.is-style-cr-cta > .wp-block-button__link:active,
+.is-style-cr-button-secondary > .wp-block-button__link:active,
+.is-style-cr-button-outline > .wp-block-button__link:active,
+.is-style-cr-button-soft > .wp-block-button__link:active {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 var(--cr-ink);
 }
 .cr-button:focus-visible,
-.cr-cta:focus-visible {
+.cr-cta:focus-visible,
+.is-style-cr-cta > .wp-block-button__link:focus-visible,
+.is-style-cr-button-secondary > .wp-block-button__link:focus-visible,
+.is-style-cr-button-outline > .wp-block-button__link:focus-visible,
+.is-style-cr-button-soft > .wp-block-button__link:focus-visible {
   outline: 3px solid var(--cr-focus-ring);
   outline-offset: 2px;
 }
 
 .cr-button--primary,
-.cr-cta {
+.cr-cta,
+.is-style-cr-cta > .wp-block-button__link {
   background: var(--cr-cta-bg);
   color: var(--cr-cta-ink);
 }
 .cr-button--primary:hover,
-.cr-cta:hover {
+.cr-cta:hover,
+.is-style-cr-cta > .wp-block-button__link:hover {
   background: var(--cr-cta-bg-hover);
   color: var(--cr-cta-ink-hover);
 }
 
-.cr-button--secondary {
+.cr-button--secondary,
+.is-style-cr-button-secondary > .wp-block-button__link {
   background: var(--cr-russian-violet);
   color: var(--cr-sky-blue);
 }
-.cr-button--secondary:hover {
+.cr-button--secondary:hover,
+.is-style-cr-button-secondary > .wp-block-button__link:hover {
   background: var(--cr-cerulean);
   color: var(--cr-printer-ivory);
 }
 
-.cr-button--outline {
+.cr-button--outline,
+.is-style-cr-button-outline > .wp-block-button__link {
   background: transparent;
   color: var(--cr-ink);
 }
-.cr-button--outline:hover {
+.cr-button--outline:hover,
+.is-style-cr-button-outline > .wp-block-button__link:hover {
   background: var(--cr-ink);
   color: var(--cr-ink-inverse);                  /* auto-flips: ivory on dark, russian-violet on light */
 }
 
-.cr-button--soft {
+.cr-button--soft,
+.is-style-cr-button-soft > .wp-block-button__link {
   background: var(--cr-light-orange);
   color: var(--cr-russian-violet);
 }
-.cr-button--soft:hover {
+.cr-button--soft:hover,
+.is-style-cr-button-soft > .wp-block-button__link:hover {
   background: var(--cr-selective-yellow);
   color: var(--cr-prussian-blue);
 }

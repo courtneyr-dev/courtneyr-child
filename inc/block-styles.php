@@ -62,5 +62,81 @@ add_action(
 				'label' => __( 'Tape strip (yellow)', 'courtneyr-child' ),
 			)
 		);
+
+		// v0.3.0 — Phase B: design-system block styles.
+		// CSS lives in assets/css/components.css via selector-list
+		// extension on the existing .cr-* source rules. No style_handle
+		// required — components.css is enqueued globally by inc/enqueue.php.
+
+		// Buttons — 4 variants matching the kit's primary/secondary/outline/soft.
+		register_block_style(
+			'core/button',
+			array(
+				'name'  => 'cr-cta',
+				'label' => __( 'CTA (primary)', 'courtneyr-child' ),
+			)
+		);
+		register_block_style(
+			'core/button',
+			array(
+				'name'  => 'cr-button-secondary',
+				'label' => __( 'Secondary', 'courtneyr-child' ),
+			)
+		);
+		register_block_style(
+			'core/button',
+			array(
+				'name'  => 'cr-button-outline',
+				'label' => __( 'Outline', 'courtneyr-child' ),
+			)
+		);
+		register_block_style(
+			'core/button',
+			array(
+				'name'  => 'cr-button-soft',
+				'label' => __( 'Soft', 'courtneyr-child' ),
+			)
+		);
+
+		// Separators — UT Orange marker bars at full and short widths.
+		register_block_style(
+			'core/separator',
+			array(
+				'name'  => 'cr-marker-bar',
+				'label' => __( 'Marker bar', 'courtneyr-child' ),
+			)
+		);
+		register_block_style(
+			'core/separator',
+			array(
+				'name'  => 'cr-marker-bar-short',
+				'label' => __( 'Marker bar (short)', 'courtneyr-child' ),
+			)
+		);
+
+		// Group — zine card + halftone overlay.
+		register_block_style(
+			'core/group',
+			array(
+				'name'  => 'cr-card',
+				'label' => __( 'Card (zine)', 'courtneyr-child' ),
+			)
+		);
+		register_block_style(
+			'core/group',
+			array(
+				'name'  => 'cr-halftone',
+				'label' => __( 'Halftone overlay', 'courtneyr-child' ),
+			)
+		);
+
+		// Quote — big italic block quote with marker frame.
+		register_block_style(
+			'core/quote',
+			array(
+				'name'  => 'cr-pull-quote',
+				'label' => __( 'Pull quote (zine)', 'courtneyr-child' ),
+			)
+		);
 	}
 );
