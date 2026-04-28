@@ -984,3 +984,162 @@
 .editor-styles-wrapper p {
 	line-height: 1.6;
 }
+
+
+/* ============================================================
+   Site wordmark — Rock Salt "courtneyr.dev" replacing wp:site-title.
+   Hand-drawn display typeface, single line, links to home.
+   ============================================================ */
+
+.cr-wordmark {
+	font-family: var(--cr-font-display, "Rock Salt", "Bradley Hand", cursive);
+	font-size: clamp(1.25rem, 1rem + 0.7vw, 1.65rem);
+	font-weight: 400;
+	line-height: 1;
+	color: var(--cr-ink, #241c4a);
+	text-decoration: none;
+	letter-spacing: -0.01em;
+	display: inline-block;
+	padding: 0.1em 0.05em 0.2em; /* room for Rock Salt's irregular baseline */
+	transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.cr-wordmark:hover,
+.cr-wordmark:focus-visible {
+	color: var(--cr-marker, #ffb703);
+	transform: rotate(-0.5deg);
+}
+
+.cr-wordmark:focus-visible {
+	outline: 3px solid var(--cr-focus-ring, var(--cr-marker, #ffb703));
+	outline-offset: 4px;
+	border-radius: 2px;
+}
+
+/* ============================================================
+   Footer on russian-violet — light text, light social icons,
+   icon hover state for the dark surface.
+   ============================================================ */
+
+.site-footer {
+	color: var(--cr-printer-ivory, #fbfaf5);
+}
+
+.site-footer .site-footer__connect-heading {
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 500;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--cr-periwinkle, #bcb5e3); /* softer than full ivory for hierarchy */
+	margin-bottom: var(--wp--preset--spacing--medium, 1rem);
+}
+
+.site-footer .site-footer__colophon a {
+	color: var(--cr-sky-blue, #8ecae6);
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+
+.site-footer .site-footer__colophon a:hover {
+	color: var(--cr-selective-yellow, #ffb703);
+}
+
+/* Social icons — invert on hover to selective-yellow for that
+   "highlighter on dark page" zine vibe */
+.site-footer__social .wp-social-link {
+	transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.site-footer__social .wp-social-link:hover,
+.site-footer__social .wp-social-link:focus-visible {
+	color: var(--cr-selective-yellow, #ffb703) !important;
+	transform: translateY(-2px) rotate(-2deg);
+}
+
+.site-footer__social .wp-social-link svg {
+	width: 26px;
+	height: 26px;
+}
+
+/* ============================================================
+   Nav menu refinement — accent font, marker underline on hover,
+   subtle uppercase, generous gap between top-level items.
+   ============================================================ */
+
+.site-header__nav .wp-block-navigation__container {
+	gap: var(--wp--preset--spacing--medium, 1rem);
+}
+
+.site-header__nav .wp-block-navigation-item__content {
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 500;
+	color: var(--cr-ink, #241c4a);
+	padding: 0.25rem 0.1rem;
+	transition: color 0.15s ease;
+	text-decoration: none;
+	background-image: linear-gradient(currentColor, currentColor);
+	background-position: 0 100%;
+	background-repeat: no-repeat;
+	background-size: 0% 2px;
+	transition: background-size 0.2s ease, color 0.15s ease;
+}
+
+.site-header__nav .wp-block-navigation-item__content:hover,
+.site-header__nav .wp-block-navigation-item__content:focus-visible,
+.site-header__nav .current-menu-item .wp-block-navigation-item__content {
+	color: var(--cr-marker, #ffb703);
+	background-size: 100% 2px;
+}
+
+/* Submenu surfaces — soft elevated card, borderless, with marker accent on hover */
+.site-header__nav .wp-block-navigation__submenu-container {
+	background: var(--cr-surface-elevated, var(--cr-printer-ivory, #fbfaf5));
+	border: 1px solid var(--cr-border, var(--wp--preset--color--border-light, #d4cfeb));
+	border-radius: 8px;
+	box-shadow: 4px 4px 0 var(--cr-shadow, rgba(36, 28, 74, 0.08));
+	padding: 0.5rem 0;
+	min-width: 12rem;
+}
+
+.site-header__nav .wp-block-navigation__submenu-container .wp-block-navigation-item__content {
+	padding: 0.5rem 1rem;
+	background-image: none;
+	border-radius: 4px;
+}
+
+.site-header__nav .wp-block-navigation__submenu-container .wp-block-navigation-item__content:hover {
+	background-color: color-mix(in srgb, var(--cr-marker, #ffb703) 12%, transparent);
+	color: var(--cr-ink, #241c4a);
+}
+
+/* ============================================================
+   Related-posts — now sits on tertiary (peach) background.
+   Update sub-elements so they read well against peach.
+   ============================================================ */
+
+.related-posts {
+	/* The peach bg is provided by the block; reinforce text rhythm here */
+}
+
+.related-posts__heading {
+	color: var(--cr-russian-violet, #241c4a);
+	margin-bottom: var(--wp--preset--spacing--large, 1.5rem);
+}
+
+.related-post__category {
+	color: var(--cr-ut-orange-dark, #b85f00); /* darker than ut-orange for contrast on peach */
+}
+
+.related-post__category::before {
+	color: var(--cr-russian-violet, #241c4a); /* sparkle pops dark on peach */
+}
+
+.related-post__title a {
+	color: var(--cr-russian-violet, #241c4a);
+}
+
+.related-post__date,
+.related-post__date a,
+.related-post__date time {
+	color: var(--cr-cerulean, #126782);
+}
