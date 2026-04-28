@@ -3815,3 +3815,24 @@ body.home .wp-block-cover .has-text-color > span,
 body.home .wp-block-cover .has-text-color > a:not(.wp-element-button):not(.cr-cta) {
 	color: inherit !important;
 }
+
+/* v0.3.8: belt-and-suspenders. The v0.3.7 inherit !important should
+   pull from <p class="has-base-color"> ... but on the live site the
+   inherited color is somehow still rendering as russian-violet rather
+   than white. Skip the inherit chain entirely and set the strong color
+   to the same preset variable the parent's class uses. One rule per
+   common textColor slug — covers the common cases without burning
+   specificity on every palette token. */
+body.home .wp-block-cover .has-base-color > strong,
+body.home .wp-block-cover .has-base-color > em,
+body.home .wp-block-cover .has-base-color > span:not(.wp-element-button):not(.cr-cta),
+body.home .wp-block-cover .has-base-color > a:not(.wp-element-button):not(.cr-cta) {
+	color: var(--wp--preset--color--base, #ffffff) !important;
+}
+
+body.home .wp-block-cover .has-main-accent-color > strong,
+body.home .wp-block-cover .has-main-accent-color > em,
+body.home .wp-block-cover .has-main-accent-color > span:not(.wp-element-button):not(.cr-cta),
+body.home .wp-block-cover .has-main-accent-color > a:not(.wp-element-button):not(.cr-cta) {
+	color: var(--wp--preset--color--main-accent, #fbfaf5) !important;
+}
