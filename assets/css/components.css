@@ -3510,3 +3510,161 @@ body.home .homepage__content .wp-block-newsletter,
 body.home .homepage__content .newsletter-inline-form {
 	background: transparent !important;
 }
+
+
+/* ============================================================
+   v0.3.1 — bug fixes (post-v0.3.0 design system port)
+   ============================================================
+   1) Caption color: don't override explicit textColor classes
+      inside has-*-bg sections on the home page.
+   2) Recent Posts: unify the Archive Titles heading section and
+      the Blog Post List section so they read as one continuous
+      row instead of two adjacent rotation slots.
+   3) Pagination: dark-mode contrast for query pagination numbers.
+   4) ✦ glyph: zine flourish on the Query Loop Recent Posts items
+      (the v0.2.6.7 rule targeted .wp-block-latest-posts; the home
+      now uses wp:query → .wp-block-post-template). Bigger size,
+      siblings unchanged.
+   5) Code blocks: hide horizontal scrollbar (zine aesthetic — no
+      browser UI chrome). Long lines still scroll via keyboard /
+      touch.
+*/
+
+/* (1) Caption color override fix.
+   The v0.2.5 inherit-color rules (L1480) strip explicit textColor
+   classes inside has-*-bg sections. Restore: when an element has a
+   has-text-color class, revert to its own explicit color. Using
+   `revert` walks the cascade back to the user-agent / theme.json
+   level so the has-base-color (or any other palette text color)
+   actually applies. */
+body.home .has-tertiary-background-color .has-text-color,
+body.home .has-main-accent-background-color .has-text-color,
+body.home .has-base-background-color .has-text-color,
+body.home .has-secondary-background-color .has-text-color,
+body.home .has-primary-accent-background-color .has-text-color {
+	color: revert !important;
+}
+
+/* (2) Recent Posts: combine Archive Titles + Blog Post List into
+   one continuous section. Both have has-main-accent-background-color
+   in the source markup but the v0.2.6.10 nth-of-type rotation puts
+   them at different positions in the cycle, giving them different
+   bgs. Force both adjacent siblings to position-1 (ivory / black)
+   so they read as one row.
+
+   :has() is supported in all evergreen browsers (Firefox 121+, Dec 2023). */
+body.home .homepage__content > .alignfull:has(#h-recent-posts),
+body.home .homepage__content > .alignfull:has(#h-recent-posts) + .alignfull {
+	background-color: var(--cr-printer-ivory, #fbfaf5) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+:root[data-theme="dark"] body.home .homepage__content > .alignfull:has(#h-recent-posts),
+:root[data-theme="dark"] body.home .homepage__content > .alignfull:has(#h-recent-posts) + .alignfull {
+	background-color: var(--cr-photocopier-black, #1a1714) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .homepage__content > .alignfull:has(#h-recent-posts),
+	:root:not([data-theme]) body.home .homepage__content > .alignfull:has(#h-recent-posts) + .alignfull,
+	:root[data-theme="system"] body.home .homepage__content > .alignfull:has(#h-recent-posts),
+	:root[data-theme="system"] body.home .homepage__content > .alignfull:has(#h-recent-posts) + .alignfull {
+		background-color: var(--cr-photocopier-black, #1a1714) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+}
+
+/* Remove top padding from the Blog Post List section that follows the
+   Archive Titles section so the visual gap between heading and first
+   list item matches what you'd expect from one section. */
+body.home .homepage__content > .alignfull:has(#h-recent-posts) + .alignfull {
+	padding-top: 0 !important;
+}
+
+/* (3) Pagination — query loop pagination numbers + prev/next.
+   Default WP renders them as plain text in palette colors that fail
+   in dark mode. Lock to a zine-style outlined chip that flips cleanly. */
+.wp-block-query-pagination .page-numbers,
+.wp-block-query-pagination-numbers .page-numbers,
+.wp-block-query-pagination .wp-block-query-pagination-previous,
+.wp-block-query-pagination .wp-block-query-pagination-next {
+	display: inline-block;
+	color: var(--cr-ink, var(--cr-russian-violet, #241c4a));
+	background: var(--cr-surface-elevated, var(--cr-printer-ivory, #fbfaf5));
+	border: 2px solid var(--cr-ink, var(--cr-russian-violet, #241c4a));
+	padding: var(--cr-space-2xs, 0.25rem) var(--cr-space-sm, 0.75rem);
+	margin: 0 var(--cr-space-2xs, 0.25rem);
+	text-decoration: none;
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold);
+	font-size: var(--cr-text-sm);
+	line-height: 1.2;
+	min-width: 2rem;
+	text-align: center;
+}
+
+.wp-block-query-pagination .page-numbers.current,
+.wp-block-query-pagination-numbers .page-numbers.current {
+	background: var(--cr-ink, var(--cr-russian-violet, #241c4a));
+	color: var(--cr-ink-inverse, var(--cr-printer-ivory, #fbfaf5));
+}
+
+.wp-block-query-pagination .page-numbers:hover,
+.wp-block-query-pagination .wp-block-query-pagination-previous:hover,
+.wp-block-query-pagination .wp-block-query-pagination-next:hover {
+	background: var(--cr-russian-violet, #241c4a);
+	color: var(--cr-sky-blue, #8ecae6);
+}
+
+/* Dots between number ranges shouldn't get the chip treatment */
+.wp-block-query-pagination .page-numbers.dots {
+	background: transparent;
+	border: 0;
+	color: var(--cr-ink-muted);
+	padding: 0 var(--cr-space-xs);
+}
+
+/* (4) ✦ glyph on Query Loop Recent Posts items.
+   The v0.2.6.7 rule targeted .wp-block-latest-posts but the home now
+   renders .wp-block-post-template > li (wp:query). Bigger size, sibling
+   text unchanged because only the ::before is sized. */
+body.home .wp-block-post-template > li {
+	list-style: none !important;
+	position: relative;
+	padding-left: 3.5rem !important;
+}
+
+body.home .wp-block-post-template > li::before {
+	content: "✦";
+	position: absolute;
+	left: 0.5rem;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	font-size: var(--cr-text-3xl, 2.5rem);
+	line-height: 1;
+}
+
+body.home .wp-block-post-template > li::marker {
+	content: "" !important;
+}
+
+/* (5) Code blocks — hide the horizontal scrollbar.
+   The zine aesthetic doesn't want browser UI chrome under code blocks.
+   Long lines still scroll horizontally via keyboard / touch / wheel,
+   the visible track just disappears. */
+pre.wp-block-code,
+pre.wp-block-preformatted,
+.wp-block-code,
+.wp-block-preformatted {
+	scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none; /* IE/Edge legacy */
+}
+
+pre.wp-block-code::-webkit-scrollbar,
+pre.wp-block-preformatted::-webkit-scrollbar,
+.wp-block-code::-webkit-scrollbar,
+.wp-block-preformatted::-webkit-scrollbar {
+	display: none; /* Webkit: Safari, Chrome, Edge */
+}
