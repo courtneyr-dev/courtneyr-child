@@ -3322,3 +3322,143 @@ body.home .has-sky-blue-background-color strong {
 		color: var(--cr-printer-ivory, #fbfaf5) !important;
 	}
 }
+
+
+/* ============================================================
+   v0.2.6.10 — consistent section bg rotation (light + dark) +
+   icon size override that actually wins
+   ============================================================
+   The user has 4-5 alignfull sections on the homepage, most with
+   has-base-background-color (white). That makes everything look
+   the same in light mode. v0.2.6 dark-flip rules made them all
+   look the same in dark mode too. Now: rotate 3 distinct colors
+   across the sections, with paired light/dark values so the
+   pattern is consistent between modes.
+
+   ROTATION (skips sections that already have intentional bg —
+   .has-cerulean (hero cover) and .has-sky-blue (start journey)):
+     Position 1 (light): printer-ivory   (dark): photocopier-black
+     Position 2 (light): tertiary peach  (dark): russian-violet-soft
+     Position 3 (light): glaucous-light  (dark): prussian-blue
+     ... then repeats
+*/
+
+/* (1) Defeat inline width:3.3em on Spectra icon containers with
+   an even more specific selector. Inline style+!important would
+   be needed to win over us; theirs has no !important so we win. */
+html body.home .wp-block-outermost-icon-block .icon-container,
+html body.home div.wp-block-outermost-icon-block div.icon-container {
+	width: 5em !important;
+	max-width: 5em !important;
+	height: 5em !important;
+	min-height: 5em !important;
+	padding: 0 !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	background-color: var(--cr-selective-yellow, #ffb703) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+	border-radius: 100px !important;
+}
+
+html body.home .wp-block-outermost-icon-block .icon-container svg {
+	width: 60% !important;
+	height: 60% !important;
+	max-width: 60% !important;
+	max-height: 60% !important;
+	fill: currentColor !important;
+}
+
+html body.home .wp-block-outermost-icon-block .icon-container svg path {
+	fill: currentColor !important;
+}
+
+/* (2) ROTATING SECTION BACKGROUNDS — applies to all alignfull
+   sections that DON'T have an intentional palette bg. Uses
+   :nth-of-type to cycle through 3 paired-color combos. */
+
+/* Reset has-base-background-color to transparent on home so our
+   nth-of-type rotation can apply its own colors */
+body.home main.homepage > .has-base-background-color,
+body.home .homepage__content > .has-base-background-color {
+	background-color: transparent !important;
+}
+
+/* Position 1 in rotation: printer-ivory / photocopier-black */
+body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+2) {
+	background-color: var(--cr-printer-ivory, #fbfaf5) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+:root[data-theme="dark"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+2) {
+	background-color: var(--cr-photocopier-black, #1a1714) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+2),
+	:root[data-theme="system"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+2) {
+		background-color: var(--cr-photocopier-black, #1a1714) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+}
+
+/* Position 2 in rotation: tertiary peach / russian-violet-soft */
+body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n) {
+	background-color: var(--cr-tertiary, #fee2c3) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+:root[data-theme="dark"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n) {
+	background-color: var(--cr-russian-violet-soft, #3d2f6e) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n),
+	:root[data-theme="system"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n) {
+		background-color: var(--cr-russian-violet-soft, #3d2f6e) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+}
+
+/* Position 3 in rotation: glaucous-light / prussian-blue */
+body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+1) {
+	background-color: var(--cr-glaucous-light, #c7d3f3) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+:root[data-theme="dark"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+1) {
+	background-color: var(--cr-prussian-blue, #023047) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+1),
+	:root[data-theme="system"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+1) {
+		background-color: var(--cr-prussian-blue, #023047) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+}
+
+/* (3) Inside any rotation-bg section, paragraph/list/heading text
+   inherits the section's color. Override the v0.2.6 universal rules
+   that locked text to russian-violet on light bg. */
+body.home .homepage__content > .alignfull p,
+body.home .homepage__content > .alignfull li,
+body.home .homepage__content > .alignfull h1,
+body.home .homepage__content > .alignfull h2,
+body.home .homepage__content > .alignfull h3,
+body.home .homepage__content > .alignfull h4,
+body.home .homepage__content > .alignfull strong,
+body.home .homepage__content > .alignfull label {
+	color: inherit;
+}
+
+/* (4) Form widgets transparent so the section bg shows through */
+body.home .homepage__content form,
+body.home .homepage__content .tnp-subscription,
+body.home .homepage__content .wp-block-newsletter,
+body.home .homepage__content .newsletter-inline-form {
+	background: transparent !important;
+}
