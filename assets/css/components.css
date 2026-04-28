@@ -2173,25 +2173,7 @@ body.home .home-stream-item__excerpt {
 	border-bottom: none !important;
 }
 
-/* (D) Kill black gaps between adjacent palette-bg sections in body.home.
-   When two alignfull groups stack with default 1.5rem block-spacing margin,
-   the page bg shows through between them = black strip. Zero it. */
-body.home .alignfull + .alignfull,
-body.home .wp-block-cover + .wp-block-cover,
-body.home .wp-block-cover + .alignfull,
-body.home .alignfull + .wp-block-cover,
-body.home .wp-block-group.alignfull + .wp-block-group.alignfull {
-	margin-top: 0 !important;
-	margin-block-start: 0 !important;
-}
-
-/* And kill margin between cerulean groups specifically (multiple) */
-body.home .has-cerulean-background-color + .has-cerulean-background-color,
-body.home .has-primary-alt-background-color + .has-primary-alt-background-color,
-body.home .has-cerulean-background-color + .has-primary-alt-background-color,
-body.home .has-primary-alt-background-color + .has-cerulean-background-color {
-	margin-top: 0 !important;
-}
+/* (removed in v0.2.6.5 — was blocking Site Editor margin controls) */
 
 /* (E) Replace cerulean / gradient separators with thin cr-marker-bar */
 body.home .wp-block-post-content .wp-block-separator,
@@ -2488,16 +2470,7 @@ body.home .home-stream .cr-eyebrow {
 	margin-bottom: 1rem !important;
 }
 
-/* (9) Adjacent palette-bg sections in body.home — zero margin so
-   they butt cleanly without showing page bg between (was creating
-   black gap user complained about). */
-body.home main.homepage > * + *,
-body.home .wp-block-post-content > * + * {
-	margin-block-start: 0 !important;
-	margin-top: 0 !important;
-}
-
-/* But preserve generous padding inside each section (set above) */
+/* (removed in v0.2.6.5 — was blocking Site Editor margin controls) */
 
 /* (10) Newsletter section — make sure it doesn't have an orange bar
    overlapping the button. The button needs clear space below. */

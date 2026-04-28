@@ -1,59 +1,14 @@
 <!-- wp:template-part {"slug":"header","tagName":"header"} /-->
 
-<!-- wp:group {"tagName":"main","metadata":{"name":"Homepage"},"align":"full","className":"homepage","style":{"spacing":{"padding":{"top":"var:preset|spacing|x-large","bottom":"var:preset|spacing|xx-large"},"blockGap":"var:preset|spacing|xx-large"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"tagName":"main","metadata":{"name":"Homepage"},"align":"full","className":"homepage","style":{"spacing":{"padding":{"top":"var:preset|spacing|x-large","bottom":"var:preset|spacing|xx-large"}}},"layout":{"type":"constrained"}} -->
 <main class="wp-block-group alignfull homepage" style="padding-top:var(--wp--preset--spacing--x-large);padding-bottom:var(--wp--preset--spacing--xx-large)">
 
-	<!-- The page's own blocks render here. The first H1 gets hidden via CSS
-	     (.homepage .wp-block-post-content > .wp-block-heading:first-of-type)
-	     so the literal "Home" heading never appears on screen. -->
+	<!-- The page's own blocks render here. The first H1 "Home" is hidden via
+	     CSS (.homepage__content > .wp-block-heading:first-child) so the literal
+	     word never appears on screen. Page content is fully editable from the
+	     Page editor; the homepage shell (this template) is editable from the
+	     Site Editor → Templates → Front Page. -->
 	<!-- wp:post-content {"className":"homepage__content","layout":{"type":"constrained"}} /-->
-
-	<!-- wp:group {"metadata":{"name":"Recent Posts Stream"},"className":"home-stream","style":{"spacing":{"blockGap":"var:preset|spacing|large"}},"layout":{"type":"constrained"}} -->
-	<div class="wp-block-group home-stream">
-
-		<!-- wp:heading {"level":2,"className":"home-stream__title","fontFamily":"accent"} -->
-		<h2 class="wp-block-heading home-stream__title has-accent-font-family">Field notes &amp; updates</h2>
-		<!-- /wp:heading -->
-
-		<!-- wp:query {"queryId":2,"query":{"perPage":"5","pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","exclude":[],"sticky":"","inherit":false},"className":"home-stream__query"} -->
-		<div class="wp-block-query home-stream__query">
-
-			<!-- wp:post-template {"className":"cr-stream","style":{"spacing":{"blockGap":"0"}}} -->
-
-				<!-- wp:group {"className":"home-stream-item","style":{"spacing":{"padding":{"top":"var:preset|spacing|large","bottom":"var:preset|spacing|large"},"blockGap":"var:preset|spacing|small"},"border":{"bottom":{"color":"var:preset|color|border-light","width":"1px"}}},"layout":{"type":"constrained"}} -->
-				<div class="wp-block-group home-stream-item" style="border-bottom-color:var(--wp--preset--color--border-light);border-bottom-width:1px;padding-top:var(--wp--preset--spacing--large);padding-bottom:var(--wp--preset--spacing--large)">
-
-					<!-- wp:group {"className":"home-stream-item__meta","style":{"spacing":{"blockGap":"var:preset|spacing|small"},"typography":{"textTransform":"uppercase","letterSpacing":"0.06em","fontStyle":"normal","fontWeight":"600"}},"fontSize":"x-small","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"left"}} -->
-					<div class="wp-block-group home-stream-item__meta has-x-small-font-size" style="font-style:normal;font-weight:600;letter-spacing:0.06em;text-transform:uppercase">
-						<!-- wp:post-terms {"term":"category","className":"home-stream-item__category"} /-->
-						<!-- wp:post-date {"format":"F j, Y","className":"home-stream-item__date"} /-->
-					</div>
-					<!-- /wp:group -->
-
-					<!-- wp:post-title {"isLink":true,"className":"home-stream-item__title","style":{"spacing":{"margin":{"top":"0","bottom":"0"}},"typography":{"fontStyle":"normal","fontWeight":"700","textDecoration":"none","lineHeight":"1.2"}},"fontSize":"large","fontFamily":"accent"} /-->
-
-					<!-- wp:post-excerpt {"className":"home-stream-item__excerpt","moreText":"Read on →","fontSize":"small"} /-->
-
-				</div>
-				<!-- /wp:group -->
-
-			<!-- /wp:post-template -->
-
-			<!-- wp:query-no-results -->
-				<!-- wp:paragraph -->
-				<p>No posts yet — check back soon.</p>
-				<!-- /wp:paragraph -->
-			<!-- /wp:query-no-results -->
-
-		</div>
-		<!-- /wp:query -->
-
-		<!-- wp:paragraph {"className":"home-stream__more","align":"right","fontSize":"small"} -->
-		<p class="has-text-align-right home-stream__more has-small-font-size"><a href="/blog/">See all posts →</a></p>
-		<!-- /wp:paragraph -->
-
-	</div>
-	<!-- /wp:group -->
 
 </main>
 <!-- /wp:group -->
