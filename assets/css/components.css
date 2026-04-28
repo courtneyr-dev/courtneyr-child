@@ -35,7 +35,8 @@
 
 
 /* ============ Display heading (Rock Salt) ============ */
-.cr-display {
+.cr-display,
+.is-style-cr-display {
   font-family: var(--cr-font-display);
   font-size: clamp(var(--cr-text-3xl), 6vw, var(--cr-text-5xl));
   line-height: 1.05;
@@ -49,7 +50,8 @@
    Block, not inline-block — inline-block let it sit on the same line as
    an h2. That was wrong. Stays block.
 */
-.cr-eyebrow {
+.cr-eyebrow,
+.is-style-cr-eyebrow {
   display: block;
   font-family: var(--cr-font-accent);
   font-size: var(--cr-text-sm);
@@ -124,8 +126,18 @@
 .is-style-cr-pull-quote cite::before { content: "— "; }
 
 
-/* ============ Callout ============ */
-.cr-callout {
+/* ============ Callout ============
+   v0.4.0: surfaced as block styles for core/group.
+   - .is-style-cr-callout         → default cerulean
+   - .is-style-cr-callout-note    → prussian / light-orange
+   - .is-style-cr-callout-warn    → selective-yellow / prussian
+   The base styles need to apply to all three block-style aliases so
+   --note and --warn pick up padding/border/shadow before their color
+   override. */
+.cr-callout,
+.is-style-cr-callout,
+.is-style-cr-callout-note,
+.is-style-cr-callout-warn {
   background: var(--cr-callout-bg);
   color: var(--cr-callout-ink);
   padding: var(--cr-space-md) var(--cr-space-lg);
@@ -134,9 +146,18 @@
   box-shadow: var(--cr-shadow-hard);
   position: relative;
 }
-.cr-callout > :first-child { margin-top: 0; }
-.cr-callout > :last-child  { margin-bottom: 0; }
-.cr-callout a { color: var(--cr-light-orange); }   /* 5.13:1 on cerulean, passes AA */
+.cr-callout > :first-child,
+.is-style-cr-callout > :first-child,
+.is-style-cr-callout-note > :first-child,
+.is-style-cr-callout-warn > :first-child { margin-top: 0; }
+.cr-callout > :last-child,
+.is-style-cr-callout > :last-child,
+.is-style-cr-callout-note > :last-child,
+.is-style-cr-callout-warn > :last-child  { margin-bottom: 0; }
+.cr-callout a,
+.is-style-cr-callout a,
+.is-style-cr-callout-note a,
+.is-style-cr-callout-warn a { color: var(--cr-light-orange); }   /* 5.13:1 on cerulean, passes AA */
 
 .cr-callout__label {
   display: inline-block;
@@ -152,12 +173,15 @@
   transform: rotate(var(--cr-rotate-1));
 }
 
-.cr-callout--note { background: var(--cr-prussian-blue); color: var(--cr-light-orange); }
-.cr-callout--warn {
+.cr-callout--note,
+.is-style-cr-callout-note { background: var(--cr-prussian-blue); color: var(--cr-light-orange); }
+.cr-callout--warn,
+.is-style-cr-callout-warn {
   background: var(--cr-selective-yellow);
   color: var(--cr-prussian-blue);
 }
-.cr-callout--warn a { color: var(--cr-cerulean); }
+.cr-callout--warn a,
+.is-style-cr-callout-warn a { color: var(--cr-cerulean); }
 
 
 /* ============ Card ============
@@ -208,8 +232,13 @@
 
 /* ============ Tape label ============
    Inline masking-tape feel. Used for hand-applied tags, badges, small labels.
+
+   v0.4.0: .is-style-cr-tape-label registered for core/paragraph so the
+   user can apply it from the editor sidebar. Forces inline-block on the
+   paragraph wrapper so it shrinks to content width like a real label.
 */
-.cr-tape {
+.cr-tape,
+.is-style-cr-tape-label {
   display: inline-block;
   background: var(--cr-tape);
   color: var(--cr-tape-ink);
@@ -284,17 +313,33 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
    Light: light bg + dark text. Dark mode: dark bg + bright accent text.
    Token assignment is in tokens.css — these "just work" in dark mode.
 */
-.cr-accent-block {
+/* v0.4.0: surfaced as core/group block styles
+   .is-style-cr-accent-1 / -2 / -3 — sky / periwinkle / peach.
+   Same base padding/border/shadow as .cr-accent-block, plus the
+   per-variant background + ink. */
+.cr-accent-block,
+.is-style-cr-accent-1,
+.is-style-cr-accent-2,
+.is-style-cr-accent-3 {
   padding: var(--cr-space-xl);
   border: var(--cr-border-thick);
   box-shadow: var(--cr-shadow-hard);
   margin: var(--cr-space-xl) 0;
 }
-.cr-accent-block--1 { background: var(--cr-accent-1-bg); color: var(--cr-accent-1-ink); }
-.cr-accent-block--2 { background: var(--cr-accent-2-bg); color: var(--cr-accent-2-ink); }
-.cr-accent-block--3 { background: var(--cr-accent-3-bg); color: var(--cr-accent-3-ink); }
-.cr-accent-block > :first-child { margin-top: 0; }
-.cr-accent-block > :last-child  { margin-bottom: 0; }
+.cr-accent-block--1,
+.is-style-cr-accent-1 { background: var(--cr-accent-1-bg); color: var(--cr-accent-1-ink); }
+.cr-accent-block--2,
+.is-style-cr-accent-2 { background: var(--cr-accent-2-bg); color: var(--cr-accent-2-ink); }
+.cr-accent-block--3,
+.is-style-cr-accent-3 { background: var(--cr-accent-3-bg); color: var(--cr-accent-3-ink); }
+.cr-accent-block > :first-child,
+.is-style-cr-accent-1 > :first-child,
+.is-style-cr-accent-2 > :first-child,
+.is-style-cr-accent-3 > :first-child { margin-top: 0; }
+.cr-accent-block > :last-child,
+.is-style-cr-accent-1 > :last-child,
+.is-style-cr-accent-2 > :last-child,
+.is-style-cr-accent-3 > :last-child  { margin-bottom: 0; }
 
 
 /* ============ Buttons ============
@@ -3835,4 +3880,22 @@ body.home .wp-block-cover .has-main-accent-color > em,
 body.home .wp-block-cover .has-main-accent-color > span:not(.wp-element-button):not(.cr-cta),
 body.home .wp-block-cover .has-main-accent-color > a:not(.wp-element-button):not(.cr-cta) {
 	color: var(--wp--preset--color--main-accent, #fbfaf5) !important;
+}
+
+
+/* ============================================================
+   v0.4.0 — Paper texture block style
+   ============================================================
+   Halftone + fiber background layer, lifted from the .cr-hero rule
+   (components.css L562) and made standalone so any core/group can
+   opt into the textured-paper feel without inheriting hero layout.
+
+   Use sparingly — the texture is decorative; it should never carry
+   the page's primary message. Pairs well with .is-style-cr-card and
+   .is-style-cr-callout when you want a section to read as a zine
+   page break. */
+.cr-paper,
+.is-style-cr-paper {
+	background-image: var(--cr-fiber), var(--cr-halftone);
+	background-size: auto, var(--cr-halftone-size);
 }

@@ -138,5 +138,98 @@ add_action(
 				'label' => __( 'Pull quote (zine)', 'courtneyr-child' ),
 			)
 		);
+
+		// v0.4.0 — zine block styles for callouts, accent blocks,
+		// paper texture, plus inline treatments for eyebrow / tape
+		// label / Rock Salt display heading. All source CSS already
+		// lives in components.css; we add selector-list aliases to
+		// expose each as a one-click block-style picker.
+
+		// Group — Callout family (default cerulean / note prussian / warn yellow).
+		register_block_style(
+			'core/group',
+			array(
+				'name'  => 'cr-callout',
+				'label' => __( 'Callout', 'courtneyr-child' ),
+			)
+		);
+		register_block_style(
+			'core/group',
+			array(
+				'name'  => 'cr-callout-note',
+				'label' => __( 'Callout — Note', 'courtneyr-child' ),
+			)
+		);
+		register_block_style(
+			'core/group',
+			array(
+				'name'  => 'cr-callout-warn',
+				'label' => __( 'Callout — Warn', 'courtneyr-child' ),
+			)
+		);
+
+		// Group — Accent blocks 1/2/3 (sky, periwinkle, peach).
+		register_block_style(
+			'core/group',
+			array(
+				'name'  => 'cr-accent-1',
+				'label' => __( 'Accent — Sky', 'courtneyr-child' ),
+			)
+		);
+		register_block_style(
+			'core/group',
+			array(
+				'name'  => 'cr-accent-2',
+				'label' => __( 'Accent — Periwinkle', 'courtneyr-child' ),
+			)
+		);
+		register_block_style(
+			'core/group',
+			array(
+				'name'  => 'cr-accent-3',
+				'label' => __( 'Accent — Peach', 'courtneyr-child' ),
+			)
+		);
+
+		// Group — Paper texture (halftone + fiber, the cr-hero bg layer
+		// without the hero layout). Use on landing surfaces, section heads.
+		register_block_style(
+			'core/group',
+			array(
+				'name'  => 'cr-paper',
+				'label' => __( 'Paper texture', 'courtneyr-child' ),
+			)
+		);
+
+		// Paragraph — kicker / eyebrow above headings (block, accent
+		// font, uppercase, marker color).
+		register_block_style(
+			'core/paragraph',
+			array(
+				'name'  => 'cr-eyebrow',
+				'label' => __( 'Eyebrow (kicker)', 'courtneyr-child' ),
+			)
+		);
+
+		// Paragraph — inline masking-tape label for "NEW" / "FRESH"
+		// callouts. Forces the paragraph to inline-block so it shrinks
+		// to content width.
+		register_block_style(
+			'core/paragraph',
+			array(
+				'name'  => 'cr-tape-label',
+				'label' => __( 'Tape label', 'courtneyr-child' ),
+			)
+		);
+
+		// Heading — Rock Salt brand-voice display heading. Use once
+		// per page; the brand voice does not scale.
+		register_block_style(
+			'core/heading',
+			array(
+				'name'  => 'cr-display',
+				'label' => __( 'Display (Rock Salt)', 'courtneyr-child' ),
+			)
+		);
 	}
 );
