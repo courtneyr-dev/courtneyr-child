@@ -519,7 +519,11 @@ html { scroll-behavior: smooth; }
 
 body {
   background-color: var(--cr-surface);
-  background-image: var(--cr-fiber);
+  /* v0.3.4: removed body-level --cr-fiber.
+     The texture bled through on single-post bodies (which have no section bg)
+     and read as faint horizontal alternating bands while scrolling. The token
+     is still available for intentional use — .cr-hero opts in at
+     components.css:562. */
   color: var(--cr-ink);
   font-family: var(--cr-font-body);
   font-size: var(--cr-text-base);
