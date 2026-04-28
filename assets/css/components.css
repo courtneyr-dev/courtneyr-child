@@ -1477,10 +1477,10 @@ body.home .has-primary-accent-background-color {
 	color: var(--cr-russian-violet, #241c4a);
 }
 
-body.home .has-tertiary-background-color *:not(.wp-element-button):not(.cr-cta),
-body.home .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta),
-body.home .has-base-background-color *:not(.wp-element-button):not(.cr-cta),
-body.home .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta) {
+body.home .has-tertiary-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color),
+body.home .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color),
+body.home .has-base-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color),
+body.home .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color) {
 	color: inherit;
 }
 
@@ -3667,4 +3667,95 @@ pre.wp-block-preformatted::-webkit-scrollbar,
 .wp-block-code::-webkit-scrollbar,
 .wp-block-preformatted::-webkit-scrollbar {
 	display: none; /* Webkit: Safari, Chrome, Edge */
+}
+
+
+/* ============================================================
+   v0.3.3 — homepage section bg overrides + ✦ centering
+   ============================================================
+   The v0.2.6.10 rotation cycles 3 paired bg colors across
+   alignfull sections by nth-of-type. The user wants explicit
+   choices for 3 named sections, identified via the heading anchors:
+
+   - Newsletter Hero  (#h-are-you-passionate-about)         → ivory / black
+   - Newsletter Features (#h-how-this-newsletter-can-help-you-grow)
+                                                            → periwinkle (glaucous-light) / prussian-blue
+   - Recent Posts     (#h-recent-posts)                     → ivory / black  (already v0.3.1)
+   - Start your journey (#h-start-your-journey-today)       → peach (tertiary) / russian-violet-soft
+
+   Plus: vertically center ✦ + date + title on Recent Posts items.
+
+   :has() is supported in all evergreen browsers (Firefox 121+, Dec 2023). */
+
+/* Newsletter Hero — ivory in light, photocopier-black in dark */
+body.home .homepage__content > .alignfull:has(#h-are-you-passionate-about) {
+	background-color: var(--cr-printer-ivory, #fbfaf5) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+:root[data-theme="dark"] body.home .homepage__content > .alignfull:has(#h-are-you-passionate-about) {
+	background-color: var(--cr-photocopier-black, #1a1714) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .homepage__content > .alignfull:has(#h-are-you-passionate-about),
+	:root[data-theme="system"] body.home .homepage__content > .alignfull:has(#h-are-you-passionate-about) {
+		background-color: var(--cr-photocopier-black, #1a1714) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+}
+
+/* Newsletter Features — periwinkle in light, prussian-blue in dark */
+body.home .homepage__content > .alignfull:has(#h-how-this-newsletter-can-help-you-grow) {
+	background-color: var(--cr-glaucous-light, #c7d3f3) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+:root[data-theme="dark"] body.home .homepage__content > .alignfull:has(#h-how-this-newsletter-can-help-you-grow) {
+	background-color: var(--cr-prussian-blue, #023047) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .homepage__content > .alignfull:has(#h-how-this-newsletter-can-help-you-grow),
+	:root[data-theme="system"] body.home .homepage__content > .alignfull:has(#h-how-this-newsletter-can-help-you-grow) {
+		background-color: var(--cr-prussian-blue, #023047) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+}
+
+/* Start your journey — peach in light, russian-violet-soft in dark */
+body.home .homepage__content > .alignfull:has(#h-start-your-journey-today) {
+	background-color: var(--cr-tertiary, var(--cr-light-orange, #fee2c3)) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+:root[data-theme="dark"] body.home .homepage__content > .alignfull:has(#h-start-your-journey-today) {
+	background-color: var(--cr-russian-violet-soft, #3d2f6e) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .homepage__content > .alignfull:has(#h-start-your-journey-today),
+	:root[data-theme="system"] body.home .homepage__content > .alignfull:has(#h-start-your-journey-today) {
+		background-color: var(--cr-russian-violet-soft, #3d2f6e) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+}
+
+/* ✦ vertical centering on Recent Posts items.
+   The ::before glyph already uses top:50% + translateY(-50%), but the
+   columns inside the LI default to top-aligned (align-items: stretch on
+   wp-block-columns by default). When the title wraps to 2 lines the
+   date sits at the top of its column, the title fills more height, and
+   the ✦ at LI's vertical midpoint visually offsets from both.
+
+   Fix: align-items: center on the columns so date + title share a
+   centered baseline. The ✦ at LI midpoint then visually aligns with
+   the row content. */
+body.home .wp-block-post-template > li > .wp-block-columns {
+	align-items: center;
+}
+
+/* Pagination current-page color: explicit !important so the v0.2.5
+   universal-color rule can't beat it back to russian-violet (which
+   would render the dark "1" square as dark-on-dark). */
+.wp-block-query-pagination .page-numbers.current,
+.wp-block-query-pagination-numbers .page-numbers.current {
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
 }
