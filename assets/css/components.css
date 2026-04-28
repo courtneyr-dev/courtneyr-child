@@ -2763,12 +2763,17 @@ body.home .has-tertiary-background-color h3 {
 }
 
 /* (5) NEWSLETTER WHITE BOX (image 4) — the form sits inside a white
-   wp-block-group. Make any group containing a form transparent on home. */
+   wp-block-group. Make any group containing a form transparent on home.
+   v0.4.4: removed the `background: transparent !important` shorthand —
+   the shorthand resets ALL background properties including
+   `background-image`, which clobbered the is-style-cr-notebook ruled-
+   paper gradient on the Footer section (which contains the newsletter
+   form, so :has(form) matches it). The bg-color rule below is what we
+   actually wanted. */
 body.home .wp-block-group:has(form),
 body.home .wp-block-group:has(.tnp-subscription),
 body.home .wp-block-group:has(input[type="email"]),
 body.home .wp-block-columns:has(form) .wp-block-column:has(form) {
-	background: transparent !important;
 	background-color: transparent !important;
 	box-shadow: none !important;
 	border: none !important;
