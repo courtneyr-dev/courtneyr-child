@@ -934,3 +934,53 @@
 	font-weight: 400;
 	line-height: 1.4;
 }
+
+
+/* ============================================================
+   Block editor parity — post-editor visual matches front-of-site
+   so writing posts looks the same as readers will see them.
+
+   The .editor-post-title and .editor-post-title__input selectors are
+   the post-editor's title input field (Gutenberg UI), not a wp:post-title
+   block. By matching their styles to .single-post__title we close the
+   visual gap between the editing experience and the published page.
+   ============================================================ */
+
+.editor-post-title,
+.editor-post-title__input,
+.editor-styles-wrapper .wp-block-post-title,
+.edit-post-visual-editor .wp-block-post-title {
+	font-family: var(--cr-font-accent, serif) !important;
+	font-size: var(--wp--preset--font-size--x-large, 2.25rem) !important;
+	line-height: 1.15 !important;
+	font-weight: 700 !important;
+	color: var(--cr-ink, #241c4a) !important;
+	margin-bottom: var(--wp--preset--spacing--small, 0.5rem) !important;
+	max-width: var(--cr-measure, 720px);
+}
+
+/* The post-editor wraps content in a div.editor-styles-wrapper.
+   Make body text use the ink color so the editor matches the
+   reader-side experience. */
+.editor-styles-wrapper {
+	color: var(--cr-ink, #241c4a);
+	font-family: var(--cr-font-body, sans-serif);
+}
+
+/* Headings inside the editor inherit the same accent font we use
+   on the front of site. WP's editor sometimes overrides this with
+   browser defaults so we lock it down. */
+.editor-styles-wrapper h1,
+.editor-styles-wrapper h2,
+.editor-styles-wrapper h3,
+.editor-styles-wrapper h4,
+.editor-styles-wrapper h5,
+.editor-styles-wrapper h6 {
+	font-family: var(--cr-font-accent, serif);
+	color: var(--cr-ink, #241c4a);
+}
+
+/* Editor body content gets the same paragraph rhythm as the front of site */
+.editor-styles-wrapper p {
+	line-height: 1.6;
+}
