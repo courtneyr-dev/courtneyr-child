@@ -3491,15 +3491,21 @@ body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):no
 
 /* (3) Inside any rotation-bg section, paragraph/list/heading text
    inherits the section's color. Override the v0.2.6 universal rules
-   that locked text to russian-violet on light bg. */
-body.home .homepage__content > .alignfull p,
-body.home .homepage__content > .alignfull li,
-body.home .homepage__content > .alignfull h1,
-body.home .homepage__content > .alignfull h2,
-body.home .homepage__content > .alignfull h3,
-body.home .homepage__content > .alignfull h4,
-body.home .homepage__content > .alignfull strong,
-body.home .homepage__content > .alignfull label {
+   that locked text to russian-violet on light bg.
+
+   v0.3.6: exclude .has-text-color so explicit textColor classes (like
+   the cover caption's has-base-color) survive untouched. Without this,
+   the rule's specificity (0,0,2,2) beat .has-base-color (0,0,1,0) and
+   forced strong/p to inherit the section color instead of rendering
+   in their explicit class color. */
+body.home .homepage__content > .alignfull p:not(.has-text-color),
+body.home .homepage__content > .alignfull li:not(.has-text-color),
+body.home .homepage__content > .alignfull h1:not(.has-text-color),
+body.home .homepage__content > .alignfull h2:not(.has-text-color),
+body.home .homepage__content > .alignfull h3:not(.has-text-color),
+body.home .homepage__content > .alignfull h4:not(.has-text-color),
+body.home .homepage__content > .alignfull strong:not(.has-text-color),
+body.home .homepage__content > .alignfull label:not(.has-text-color) {
 	color: inherit;
 }
 
@@ -3606,8 +3612,12 @@ body.home .homepage__content > .alignfull:has(#h-recent-posts) + .alignfull {
 
 .wp-block-query-pagination .page-numbers.current,
 .wp-block-query-pagination-numbers .page-numbers.current {
-	background: var(--cr-ink, var(--cr-russian-violet, #241c4a));
-	color: var(--cr-ink-inverse, var(--cr-printer-ivory, #fbfaf5));
+	/* v0.3.6: use palette tokens (don't flip in dark mode) so the
+	   current page is always dark bg + ivory text. Previously used
+	   --cr-ink which flips to ivory in dark, giving white-on-white. */
+	background: var(--cr-russian-violet, #241c4a) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+	border-color: var(--cr-russian-violet, #241c4a) !important;
 }
 
 .wp-block-query-pagination .page-numbers:hover,
@@ -3761,10 +3771,15 @@ body.home .wp-block-post-template > li > .wp-block-columns {
 	align-items: center;
 }
 
-/* Pagination current-page color: explicit !important so the v0.2.5
-   universal-color rule can't beat it back to russian-violet (which
-   would render the dark "1" square as dark-on-dark). */
-.wp-block-query-pagination .page-numbers.current,
-.wp-block-query-pagination-numbers .page-numbers.current {
-	color: var(--cr-printer-ivory, #fbfaf5) !important;
+/* Pagination current-page: see v0.3.1 rule above (now palette-locked). */
+
+/* Defensive nuke for stray ::before on Recent Posts LIs.
+   The pre-v0.3.5 rule put ✦ at left:0.5rem of the LI; v0.3.5 moved
+   the glyph to .wp-block-post-date::before. Browsers with cached
+   v0.3.4 CSS would render BOTH glyphs simultaneously. This nuke
+   ensures the LI ::before stays empty regardless of cache state. */
+body.home .wp-block-post-template > li::before,
+body.home .wp-block-post-template > li::after {
+	content: none !important;
+	display: none !important;
 }
