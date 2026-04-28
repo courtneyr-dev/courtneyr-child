@@ -2757,3 +2757,274 @@ body.home .has-base-background-color li {
 :root[data-theme="dark"] body.home .has-base-background-color p {
 	color: var(--cr-printer-ivory, #fbfaf5) !important;
 }
+
+
+/* ============================================================
+   v0.2.6.6 — captions, section bg differentiation, bigger
+   glyphs, zine flourishes
+   ============================================================
+   Fixes:
+   (1) Image captions set to white in the editor were being overridden
+       by my body.home text color !important rules. Captions now respect
+       the editor color via higher-specificity rules.
+   (2) Recent Posts (wp:latest-posts) and Start your journey (page block
+       with tertiary bg) were both flipping to the same dark surface
+       in dark mode, and the differentiation was weak in light mode.
+       Now: Recent Posts → printer-ivory cream in light, photocopier-
+       black in dark. Start your journey → keeps peach in light, flips
+       to night-elevated in dark. Visually distinct in BOTH modes.
+   (3) Glyphs bigger: latest-posts list markers replaced with sparkle ✦
+       at 1.5rem, arrow SVGs in icon circles bumped to 2em.
+   (4) Zine flourishes: sparkle before each major h2 heading, yellow
+       highlight band under italic em (inside hero headings), subtle
+       notebook-rule lines on tertiary sections in light mode.
+*/
+
+/* (1) CAPTIONS — preserve editor-set colors */
+body.home figcaption.wp-element-caption,
+body.home .wp-element-caption,
+body.home .wp-block-image figcaption,
+body.home .wp-block-cover figcaption {
+	color: var(--cr-printer-ivory, #fbfaf5);
+}
+
+/* When user sets a specific color in editor it adds .has-{slug}-color
+   class. White is the most common; explicit override wins. */
+body.home figcaption.has-white-color,
+body.home figcaption.has-text-color.has-white-color,
+body.home .wp-element-caption.has-white-color,
+body.home .wp-block-image figcaption.has-white-color,
+body.home .wp-block-cover figcaption.has-white-color {
+	color: #ffffff !important;
+}
+
+body.home figcaption.has-main-accent-color,
+body.home figcaption.has-text-color.has-main-accent-color {
+	color: var(--wp--preset--color--main-accent, #fbfaf5) !important;
+}
+
+body.home figcaption.has-russian-violet-color {
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+body.home figcaption.has-selective-yellow-color {
+	color: var(--cr-selective-yellow, #ffb703) !important;
+}
+
+/* General: any caption with has-text-color set, trust the WP class */
+body.home figcaption.has-text-color,
+body.home .wp-element-caption.has-text-color {
+	/* color comes from .has-{slug}-color sibling class */
+}
+
+/* (2) RECENT POSTS vs START YOUR JOURNEY — distinct in both modes */
+
+/* Recent Posts: cream in light, photocopier-black in dark */
+body.home .wp-block-latest-posts {
+	background-color: var(--cr-printer-ivory, #fbfaf5) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+body.home .wp-block-latest-posts a,
+body.home .wp-block-latest-posts li > a {
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+:root[data-theme="dark"] body.home .wp-block-latest-posts {
+	background-color: var(--cr-surface, #1a1714) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+
+:root[data-theme="dark"] body.home .wp-block-latest-posts a,
+:root[data-theme="dark"] body.home .wp-block-latest-posts li > a {
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .wp-block-latest-posts,
+	:root[data-theme="system"] body.home .wp-block-latest-posts {
+		background-color: var(--cr-surface, #1a1714) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+	:root:not([data-theme]) body.home .wp-block-latest-posts a,
+	:root[data-theme="system"] body.home .wp-block-latest-posts a {
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+}
+
+/* Start your journey (tertiary bg page block): peach in light, night-
+   elevated in dark — distinct from Recent Posts */
+:root[data-theme="dark"] body.home .has-tertiary-background-color:not(.wp-block-cover):not(.wp-block-latest-posts) {
+	background-color: var(--cr-night-elevated, #251f1c) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .has-tertiary-background-color:not(.wp-block-cover):not(.wp-block-latest-posts),
+	:root[data-theme="system"] body.home .has-tertiary-background-color:not(.wp-block-cover):not(.wp-block-latest-posts) {
+		background-color: var(--cr-night-elevated, #251f1c) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+}
+
+/* (3) BIGGER GLYPHS */
+
+/* Recent Posts list — replace default marker with bigger sparkle */
+body.home .wp-block-latest-posts {
+	list-style: none !important;
+	padding-left: 0 !important;
+}
+
+body.home .wp-block-latest-posts li {
+	list-style: none !important;
+	position: relative;
+	padding-left: 2.5rem !important;
+	padding-top: 1.25rem !important;
+	padding-bottom: 1.25rem !important;
+}
+
+body.home .wp-block-latest-posts li::before {
+	content: "✦";
+	position: absolute;
+	left: 0.25rem;
+	top: 1.25rem;
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	font-size: 1.75rem;
+	line-height: 1;
+}
+
+body.home .wp-block-latest-posts li::marker {
+	content: "" !important;
+}
+
+/* Bigger arrow icons in cover circles */
+body.home .wp-block-cover.has-tertiary-background-color svg {
+	width: 2em !important;
+	height: 2em !important;
+	transform: scale(1.4);
+	transform-origin: center;
+}
+
+body.home .wp-block-cover.has-tertiary-background-color .wp-block-cover__inner-container {
+	font-size: 1.4em;
+	font-weight: 700;
+}
+
+/* (4) ZINE FLOURISHES */
+
+/* Sparkle before main h2 headings on home page content (skips wp:latest-posts items) */
+body.home main.homepage > .wp-block-post-content h2.wp-block-heading::before,
+body.home main.homepage > .wp-block-post-content h1.wp-block-heading::before {
+	content: "✦ ";
+	color: var(--cr-marker, #fb8500);
+	font-family: var(--cr-font-body, sans-serif);
+	font-weight: 400;
+	font-size: 0.7em;
+	margin-right: 0.3em;
+	vertical-align: 0.15em;
+	opacity: 0.85;
+	display: inline-block;
+}
+
+/* Don't add sparkle inside captions or buttons */
+body.home figcaption h2::before,
+body.home figcaption h1::before,
+body.home .wp-block-button h2::before,
+body.home .wp-block-button h1::before {
+	content: "" !important;
+	display: none !important;
+}
+
+/* Yellow highlight under italic em inside hero headings — preserves
+   the "passionate" effect even after hero flipped to night-elevated bg */
+body.home .has-cerulean-background-color h1 em,
+body.home .has-cerulean-background-color h2 em,
+body.home .has-primary-alt-background-color h1 em,
+body.home .has-primary-alt-background-color h2 em,
+body.home .has-night-elevated-background-color h1 em,
+body.home .wp-block-cover h1 em,
+body.home .wp-block-cover h2 em {
+	background-image: linear-gradient(
+		180deg,
+		transparent 0%,
+		transparent 55%,
+		var(--cr-selective-yellow, #ffb703) 55%,
+		var(--cr-selective-yellow, #ffb703) 95%,
+		transparent 95%
+	);
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	padding: 0 0.2em;
+	color: var(--cr-russian-violet, #241c4a) !important;
+	font-style: italic;
+	border-radius: 2px;
+}
+
+/* Notebook lines on tertiary (peach) sections in light mode — subtle
+   horizontal rules every 2.5rem, mimicking ruled paper. Disabled in
+   dark mode where the section flips to night-elevated. */
+body.home .has-tertiary-background-color:not(.wp-block-cover):not(.wp-block-latest-posts) {
+	background-image: linear-gradient(
+		0deg,
+		transparent 96%,
+		rgba(36, 28, 74, 0.05) 96%,
+		rgba(36, 28, 74, 0.05) 100%
+	);
+	background-size: 100% 2.5rem;
+	background-repeat: repeat-y;
+}
+
+:root[data-theme="dark"] body.home .has-tertiary-background-color {
+	background-image: none !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .has-tertiary-background-color,
+	:root[data-theme="system"] body.home .has-tertiary-background-color {
+		background-image: none !important;
+	}
+}
+
+/* Marker bar accent under "Recent Posts" heading where it meets the list */
+body.home h2.wp-block-heading + .wp-block-latest-posts {
+	margin-top: 0 !important;
+	border-top: 4px solid var(--cr-marker, #fb8500);
+}
+
+/* Decorative sparkle dot scattered near corners of homepage sections —
+   subtle sparkle ::after on every alignfull section that has padding */
+body.home main.homepage > .alignfull:not(.wp-block-cover):not(.wp-block-latest-posts) {
+	position: relative;
+}
+
+body.home main.homepage > .alignfull:not(.wp-block-cover):not(.wp-block-latest-posts)::after {
+	content: "✦";
+	position: absolute;
+	top: 1.5rem;
+	right: 1.5rem;
+	color: var(--cr-selective-yellow, #ffb703);
+	font-size: 1.5rem;
+	opacity: 0.4;
+	pointer-events: none;
+	transform: rotate(15deg);
+	z-index: 1;
+}
+
+/* Underline accent on key links (hover) — zine-style hand-drawn look */
+body.home main.homepage a:hover {
+	text-decoration-thickness: 2px;
+	text-decoration-style: wavy;
+	text-underline-offset: 4px;
+}
+
+/* (5) Slightly bigger body text size for better zine readability */
+body.home main.homepage p:not(.has-text-align-center) {
+	font-size: 1.05rem;
+	line-height: 1.65;
+}
+
+@media (min-width: 768px) {
+	body.home main.homepage p:not(.has-text-align-center) {
+		font-size: 1.1rem;
+	}
+}
