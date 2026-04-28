@@ -3197,3 +3197,128 @@ body.home .wp-block-latest-posts li::before {
 
 /* Dark mode keeps the yellow — selective-yellow is a brand pop color
    that should stay consistent for visual recognition */
+
+
+/* ============================================================
+   v0.2.6.9 — actually-correct icon size + Start your journey
+   full-row bg
+   ============================================================
+   Discovered via inspecting live HTML:
+   - Arrow circles are wp-block-outermost-icon-block (Spectra plugin),
+     not native Cover blocks. My v0.2.6.* selectors targeting
+     .wp-block-cover.has-tertiary-background-color were never matching.
+     The actual element is .wp-block-outermost-icon-block .icon-container
+     with inline style="width:3.3em".
+   - Start your journey IS already .has-sky-blue-background-color
+     (alignfull). The white form box from the newsletter shortcode is
+     breaking the visual continuity of the bg color across the row.
+*/
+
+/* (1) Bigger arrow circles. Override the inline width:3.3em. */
+body.home .wp-block-outermost-icon-block .icon-container {
+	width: 5em !important;
+	height: 5em !important;
+	padding: 0 !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	background-color: var(--cr-selective-yellow, #ffb703) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+body.home .wp-block-outermost-icon-block .icon-container svg {
+	width: 60% !important;
+	height: 60% !important;
+	fill: currentColor !important;
+}
+
+/* Same in dark mode — keep yellow, do not let earlier dark-flip rules win */
+:root[data-theme="dark"] body.home .wp-block-outermost-icon-block .icon-container {
+	background-color: var(--cr-selective-yellow, #ffb703) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .wp-block-outermost-icon-block .icon-container,
+	:root[data-theme="system"] body.home .wp-block-outermost-icon-block .icon-container {
+		background-color: var(--cr-selective-yellow, #ffb703) !important;
+		color: var(--cr-russian-violet, #241c4a) !important;
+	}
+}
+
+/* (2) Start your journey full-row sky-blue bg. The form's white box
+   is breaking continuity across the row. Force any wrapper inside the
+   sky-blue section to inherit the bg, including the columns/groups
+   that hold the newsletter form. */
+body.home .has-sky-blue-background-color,
+body.home section.has-sky-blue-background-color,
+body.home .wp-block-group.has-sky-blue-background-color {
+	background-color: var(--cr-sky-blue, #8ecae6) !important;
+}
+
+body.home .has-sky-blue-background-color > *,
+body.home .has-sky-blue-background-color .wp-block-group:not([class*="has-"][class*="background-color"]),
+body.home .has-sky-blue-background-color .wp-block-column:not([class*="has-"][class*="background-color"]),
+body.home .has-sky-blue-background-color .wp-block-columns:not([class*="has-"][class*="background-color"]) {
+	background-color: transparent !important;
+}
+
+/* Newsletter form inside sky-blue section — transparent so the bg
+   shows through, dark text for readability */
+body.home .has-sky-blue-background-color form,
+body.home .has-sky-blue-background-color .tnp,
+body.home .has-sky-blue-background-color .tnp-subscription,
+body.home .has-sky-blue-background-color .wp-block-newsletter,
+body.home .has-sky-blue-background-color .newsletter-inline-form,
+body.home .has-sky-blue-background-color .wp-block-shortcode {
+	background: transparent !important;
+	background-color: transparent !important;
+	box-shadow: none !important;
+	border: none !important;
+}
+
+/* Default dark text for paragraphs/labels in the sky-blue section */
+body.home .has-sky-blue-background-color,
+body.home .has-sky-blue-background-color p,
+body.home .has-sky-blue-background-color li,
+body.home .has-sky-blue-background-color label,
+body.home .has-sky-blue-background-color h1,
+body.home .has-sky-blue-background-color h2,
+body.home .has-sky-blue-background-color h3,
+body.home .has-sky-blue-background-color h4,
+body.home .has-sky-blue-background-color strong {
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+/* In dark mode flip the section to cerulean (deeper blue) with ivory text */
+:root[data-theme="dark"] body.home .has-sky-blue-background-color {
+	background-color: var(--cr-cerulean, #126782) !important;
+}
+
+:root[data-theme="dark"] body.home .has-sky-blue-background-color,
+:root[data-theme="dark"] body.home .has-sky-blue-background-color p,
+:root[data-theme="dark"] body.home .has-sky-blue-background-color li,
+:root[data-theme="dark"] body.home .has-sky-blue-background-color label,
+:root[data-theme="dark"] body.home .has-sky-blue-background-color h1,
+:root[data-theme="dark"] body.home .has-sky-blue-background-color h2,
+:root[data-theme="dark"] body.home .has-sky-blue-background-color h3,
+:root[data-theme="dark"] body.home .has-sky-blue-background-color strong {
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .has-sky-blue-background-color,
+	:root[data-theme="system"] body.home .has-sky-blue-background-color {
+		background-color: var(--cr-cerulean, #126782) !important;
+	}
+	:root:not([data-theme]) body.home .has-sky-blue-background-color,
+	:root:not([data-theme]) body.home .has-sky-blue-background-color p,
+	:root:not([data-theme]) body.home .has-sky-blue-background-color h2,
+	:root:not([data-theme]) body.home .has-sky-blue-background-color strong,
+	:root[data-theme="system"] body.home .has-sky-blue-background-color,
+	:root[data-theme="system"] body.home .has-sky-blue-background-color p,
+	:root[data-theme="system"] body.home .has-sky-blue-background-color h2,
+	:root[data-theme="system"] body.home .has-sky-blue-background-color strong {
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+}
