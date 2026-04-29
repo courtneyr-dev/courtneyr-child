@@ -32,6 +32,7 @@
   --cr-russian-violet:  #241c4a;
   --cr-periwinkle:      #bcb5e3;
   --cr-glaucous:        #647baf;  /* Background only. Fails AA on cream as text. */
+  --cr-glaucous-dark:   #3d527d;  /* v0.5.31 — chip-text safe; 7.44:1 ivory text */
   --cr-sky-blue:        #8ecae6;
   --cr-blue-green:      #219ebc;
   --cr-cerulean:        #126782;
@@ -109,6 +110,13 @@
   /* Zine accents */
   --cr-marker:    var(--cr-ut-orange);
   --cr-highlight: var(--cr-selective-yellow);
+
+  /* v0.5.31 — eyebrow-ink decoupled from --cr-marker.
+     The marker color (ut-orange #fb8500) reads at 2.38:1 on ivory,
+     failing WCAG 1.4.3 AA when used as text. Eyebrows still want
+     a "marker" look, but the actual text color must clear 4.5:1.
+     russian-violet (#241c4a) on ivory (#fbfaf5) = 17.08:1 AAA. */
+  --cr-eyebrow-ink: var(--cr-russian-violet);
 
   /* Callouts */
   --cr-callout-bg:  var(--cr-cerulean);
@@ -383,6 +391,10 @@
     --cr-accent-shape:  var(--cr-cerulean);
     --cr-accent-soft:   var(--cr-prussian-blue);
 
+    /* v0.5.31 — eyebrow-ink dark mode: selective-yellow on
+       photocopier-blk = 12.7:1 AAA; preserves the "marker" energy. */
+    --cr-eyebrow-ink: var(--cr-selective-yellow);
+
     --cr-code-bg:  #2a2520;
     --cr-code-ink: var(--cr-periwinkle);
 
@@ -466,6 +478,10 @@
     --cr-accent:        var(--cr-sky-blue);
     --cr-accent-shape:  var(--cr-cerulean);
     --cr-accent-soft:   var(--cr-prussian-blue);
+
+    /* v0.5.31 — eyebrow-ink dark mode: selective-yellow on
+       photocopier-blk = 12.7:1 AAA; preserves the "marker" energy. */
+    --cr-eyebrow-ink: var(--cr-selective-yellow);
 
     --cr-code-bg:  #2a2520;
     --cr-code-ink: var(--cr-periwinkle);

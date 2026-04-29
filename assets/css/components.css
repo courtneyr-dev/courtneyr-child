@@ -58,7 +58,12 @@
   font-weight: var(--cr-weight-bold);
   text-transform: uppercase;
   letter-spacing: var(--cr-tracking-eyebrow);
-  color: var(--cr-marker);
+  /* v0.5.31 — was --cr-marker (ut-orange = 2.38:1 on ivory, fails
+     WCAG 1.4.3). New --cr-eyebrow-ink token resolves to russian-
+     violet on light surfaces (17:1 AAA), selective-yellow on dark
+     (12.7:1 AAA). Marker still drives separator/tape backgrounds
+     where the orange wash is decorative, not text. */
+  color: var(--cr-eyebrow-ink, var(--cr-marker));
   margin-bottom: var(--cr-space-2xs);
 }
 
@@ -4253,7 +4258,10 @@ body.single .single-post__tags a:nth-child(6n+4) {
 }
 .cr-archive .cr-stream-item__tags a:nth-child(6n+5),
 body.single .single-post__tags a:nth-child(6n+5) {
-	background: var(--cr-glaucous, #647baf) !important;
+	/* v0.5.31 — was glaucous (#647baf) on ivory (#fbfaf5) text =
+	   4.02:1, fails WCAG 1.4.3 AA at 4.5:1 (small text). glaucous-dark
+	   (#3d527d) on ivory = 7.44:1 AAA. Same hue family, deeper value. */
+	background: var(--cr-glaucous-dark, #3d527d) !important;
 	color: var(--cr-printer-ivory, #fbfaf5) !important;
 }
 .cr-archive .cr-stream-item__tags a:nth-child(6n),
@@ -5911,7 +5919,10 @@ input.wp-block-search__input:focus,
 .cr-404__tape {
 	font-size: clamp(2.5rem, 2rem + 2vw, 4rem) !important;
 	background: var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
-	color: var(--cr-printer-ivory, #fbfaf5) !important;
+	/* v0.5.31 — was printer-ivory (#fbfaf5) on ut-orange (#fb8500) =
+	   2.38:1, fails WCAG 1.4.3 even at the 3:1 large-text threshold.
+	   russian-violet on ut-orange = 10.22:1 AAA. */
+	color: var(--cr-russian-violet, #241c4a) !important;
 	padding: 0.4rem 1.2rem !important;
 	transform: rotate(-4deg) !important;
 	display: inline-block;
