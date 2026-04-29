@@ -3554,6 +3554,20 @@ body.home .homepage__content > .alignfull.has-main-accent-background-color {
 	background-repeat: repeat, repeat;
 }
 
+/* (2c) v0.4.17: dark-mode color for home main-accent sections so they
+   stay distinct from rotation 3n+1 (prussian-blue). Without this, the
+   site-wide aggressive dark-mode flip at L1790 forces them to
+   surface-soft, which collides visually with Newsletter Benefits. */
+:root[data-theme="dark"] body.home .homepage__content > .alignfull.has-main-accent-background-color {
+	background-color: var(--cr-night-elevated, #251f1c) !important;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .homepage__content > .alignfull.has-main-accent-background-color,
+	:root[data-theme="system"] body.home .homepage__content > .alignfull.has-main-accent-background-color {
+		background-color: var(--cr-night-elevated, #251f1c) !important;
+	}
+}
+
 /* (3) Inside any rotation-bg section, paragraph/list/heading text
    inherits the section's color. Override the v0.2.6 universal rules
    that locked text to russian-violet on light bg.
