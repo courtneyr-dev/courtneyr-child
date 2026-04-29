@@ -3207,6 +3207,140 @@ body.home .wp-block-latest-posts li::before {
 
 
 /* ============================================================
+   v0.5.7 — About page (cr-page) zine spread.
+     - Featured image gets a polaroid-style frame: white border, hard
+       shadow, slight rotation, scattered ✺/✦ sparkles in the margin
+       around the photo.
+     - Body copy gets a "lede" treatment for the first paragraph
+       (italic + larger + dropped first letter style).
+     - .cr-page__cta button group spaces the two CTAs out.
+   ============================================================ */
+
+/* (1) Featured image — polaroid frame on cr-page__featured. The
+   image gets a thick white border (printer-ivory tinted), a hard
+   russian-violet shadow, and a slight CCW rotation. Decorative
+   sparkles float in the corners around it via ::before/::after. */
+.cr-page .cr-page__featured {
+	position: relative;
+	max-width: 540px;
+	margin-inline: auto;
+	margin-block: var(--cr-space-lg, 1.5rem) var(--cr-space-2xl, 3rem) !important;
+	transform: rotate(-1.2deg);
+	filter: drop-shadow(8px 8px 0 var(--cr-russian-violet, #241c4a));
+	transition: transform 0.3s ease, filter 0.3s ease;
+}
+.cr-page .cr-page__featured:hover {
+	transform: rotate(0deg);
+	filter: drop-shadow(12px 12px 0 var(--cr-russian-violet, #241c4a));
+}
+.cr-page .cr-page__featured img {
+	display: block;
+	width: 100%;
+	height: auto;
+	background: var(--cr-printer-ivory, #fbfaf5);
+	padding: 1rem 1rem 4rem;
+	box-sizing: border-box;
+	border-radius: 2px;
+}
+/* Scattered sparkles around the photo — top-left ✺ in marker color,
+   bottom-right ✦ in cerulean. Both decorative-only (aria-hidden via
+   pseudo-element which screen readers ignore by default). */
+.cr-page .cr-page__featured::before,
+.cr-page .cr-page__featured::after {
+	position: absolute;
+	font-family: var(--cr-font-accent);
+	font-size: 2.5rem;
+	line-height: 1;
+	pointer-events: none;
+}
+.cr-page .cr-page__featured::before {
+	content: "✺";
+	top: -2rem;
+	left: -1.5rem;
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	transform: rotate(-15deg);
+}
+.cr-page .cr-page__featured::after {
+	content: "✦";
+	bottom: 1rem;
+	right: -2rem;
+	color: var(--cr-cerulean, #126782);
+	transform: rotate(20deg);
+	font-size: 3rem;
+}
+
+/* (2) Page tape label (e.g. "ABOUT") inside content — rotates and
+   sits at the start of the page like a sticky note. */
+.cr-page .cr-page__tape {
+	display: inline-block;
+}
+
+/* (3) Lede paragraph — large, italic, with a drop-cap-style first
+   letter. Sets the page voice before the section breakdown. */
+.cr-page .cr-page__lede {
+	color: var(--cr-ink, #241c4a);
+	max-width: var(--cr-measure, 720px);
+	margin-block: var(--cr-space-lg, 1.5rem);
+}
+.cr-page .cr-page__lede::first-letter {
+	font-family: var(--cr-font-condensed, var(--cr-font-accent));
+	font-size: 3.5em;
+	font-style: normal;
+	font-weight: var(--cr-weight-bold, 700);
+	float: left;
+	line-height: 0.85;
+	margin-right: 0.15em;
+	margin-top: 0.05em;
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+}
+
+/* (4) Section heading polish on cr-page (the cr-flank already lands
+   the ✺ accents, but cr-page wants slightly bigger headings). */
+.cr-page h2.cr-flank {
+	font-size: var(--cr-text-2xl, 1.75rem);
+	margin-block: var(--cr-space-xl, 2rem) var(--cr-space-md, 1rem);
+}
+
+/* (5) Page CTA group — generous gap, left-aligned, wraps on mobile. */
+.cr-page__cta {
+	margin-top: var(--cr-space-xl, 2rem);
+	gap: var(--cr-space-md, 1rem) !important;
+}
+
+/* (6) Decorative scattered sparkles in the page content margins —
+   absolute-positioned ::before/::after on the content area so the
+   page feels like a zine spread with hand-placed flourishes.
+   Hidden below 900px width to avoid crowding mobile. */
+@media (min-width: 900px) {
+	.cr-page__content {
+		position: relative;
+	}
+	.cr-page__content::before {
+		content: "✦";
+		position: absolute;
+		top: 6rem;
+		left: -3rem;
+		font-family: var(--cr-font-accent);
+		font-size: 2rem;
+		color: var(--cr-selective-yellow, #ffb703);
+		transform: rotate(-12deg);
+		pointer-events: none;
+	}
+	.cr-page__content::after {
+		content: "✺";
+		position: absolute;
+		top: 30%;
+		right: -3rem;
+		font-family: var(--cr-font-accent);
+		font-size: 2.25rem;
+		color: var(--cr-cerulean, #126782);
+		transform: rotate(15deg);
+		pointer-events: none;
+	}
+}
+
+
+/* ============================================================
    v0.5.1 — Single post zine pass.
      - Header restructured: meta row (date + cr-chip category) above
        title (template change), title gets cr-flank--blue.
