@@ -3954,6 +3954,94 @@ body.blog button[type="submit"]:hover {
 		flex-wrap: wrap;
 	}
 }
+
+
+/* v0.5.16: fix the chip layout on the FRONT of site (homepage post-
+   template loop — different markup from cr-stream-loop). The
+   homepage Recent Posts block uses a wp:columns layout: 25% date
+   column on the left, 75% content column on the right. The right
+   column wraps the chips + title in a vertical-flex group, which
+   stacks each chip on its own line.
+
+   Override: turn that vertical flex group into row-wrap so chips
+   sit horizontally. Force the post-title to flex-basis:100% so it
+   drops to its own line below the chip row.
+
+   Plus: when a wp:post-terms wrapper renders multiple terms (e.g.
+   a post in "Speaking" AND "WordPress"), style each inner anchor
+   as its own chip with alternating periwinkle/light-orange bg and
+   alternating tilt direction so they read as a hand-stuck label
+   pair, not a comma-separated list. */
+body.home .wp-block-post-template > li .wp-block-group.is-vertical {
+	flex-flow: row wrap !important;
+	align-items: center;
+	gap: 0.5rem 0.75rem;
+}
+body.home .wp-block-post-template > li .wp-block-group.is-vertical > .wp-block-post-title {
+	flex-basis: 100%;
+	margin-top: 0.5rem;
+}
+
+/* Format chip already has -3deg from base .cr-format-chip rule.
+   When it sits next to a category chip, flip the category chip to
+   +3deg so the pair reads as opposite-tilted hand-stuck labels. */
+body.home .wp-block-post-template .cr-format-chip + .wp-block-post-terms.cr-chip,
+body.home .wp-block-post-template .cr-format-chip + .wp-block-post-terms {
+	transform: rotate(var(--cr-rotate-2, 3deg));
+}
+
+/* Multi-term post-terms — split each anchor into its own chip with
+   alternating periwinkle / light-orange / sky-blue colors and
+   alternating tilt direction. Override the wrapper's chip styling
+   so the comma-list reads as multiple stuck labels instead. */
+body.home .wp-block-post-template .wp-block-post-terms.cr-chip:has(a + a),
+body.home .wp-block-post-template .wp-block-post-terms:has(a + a) {
+	background: transparent !important;
+	padding: 0 !important;
+	transform: none !important;
+	box-shadow: none !important;
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	border: 0 !important;
+}
+body.home .wp-block-post-template .wp-block-post-terms.cr-chip:has(a + a) a,
+body.home .wp-block-post-template .wp-block-post-terms:has(a + a) a {
+	display: inline-block;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xs, 0.7rem);
+	font-weight: var(--cr-weight-bold, 700);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	padding: var(--cr-space-3xs, 0.15em) var(--cr-space-sm, 0.7em);
+	color: var(--cr-tape-ink, var(--cr-russian-violet, #241c4a));
+	text-decoration: none;
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+	vertical-align: middle;
+}
+/* Color rotation across multiple terms — periwinkle, light-orange,
+   sky-blue, sage. Tilt alternates -3 / +3 so adjacent terms lean
+   opposite directions. */
+body.home .wp-block-post-template .wp-block-post-terms.cr-chip:has(a + a) a:nth-child(4n+1),
+body.home .wp-block-post-template .wp-block-post-terms:has(a + a) a:nth-child(4n+1) {
+	background: var(--wp--preset--color--primary-accent, #bcb5e3);
+	transform: rotate(var(--cr-rotate-neg, -3deg));
+}
+body.home .wp-block-post-template .wp-block-post-terms.cr-chip:has(a + a) a:nth-child(4n+2),
+body.home .wp-block-post-template .wp-block-post-terms:has(a + a) a:nth-child(4n+2) {
+	background: var(--wp--preset--color--tertiary, #fee2c3);
+	transform: rotate(var(--cr-rotate-2, 3deg));
+}
+body.home .wp-block-post-template .wp-block-post-terms.cr-chip:has(a + a) a:nth-child(4n+3),
+body.home .wp-block-post-template .wp-block-post-terms:has(a + a) a:nth-child(4n+3) {
+	background: var(--cr-sky-blue, #8ecae6);
+	transform: rotate(var(--cr-rotate-neg, -3deg));
+}
+body.home .wp-block-post-template .wp-block-post-terms.cr-chip:has(a + a) a:nth-child(4n+4),
+body.home .wp-block-post-template .wp-block-post-terms:has(a + a) a:nth-child(4n+4) {
+	background: var(--cr-tape, #f3e5b8);
+	transform: rotate(var(--cr-rotate-2, 3deg));
+}
 /* v0.5.9: Force left alignment on the body too — wp:group's
    constrained layout was centering content.
    v0.5.12: also force left-align on the meta row's children directly,
@@ -5542,51 +5630,58 @@ body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow
            field. Dark mode gets a parallel pair.
    ============================================================ */
 
-/* (1) Search results query input — readable text + visible field */
-.cr-search-results .wp-block-search__input,
-body.search .wp-block-search__input {
-	background: var(--cr-surface-elevated, var(--cr-printer-ivory, #fbfaf5));
-	color: var(--cr-ink, #241c4a);
-	border: 2px solid var(--cr-russian-violet, #241c4a);
-	padding: 0.5rem 0.75rem;
-	font-size: 1rem;
+/* (1) Search input — readable text + visible field, EVERYWHERE the
+   wp:search block renders. Ollie's parent-theme `:where(.wp-block-
+   search__input)` rule was painting input text the same color as
+   the input background, making typed query text invisible. v0.5.14
+   scoped this to body.search + cr-search-results; v0.5.16 broadens
+   to all .wp-block-search__input on any page (header expanded
+   search, in-page search blocks, etc.) and uses !important to win
+   the cascade against Ollie's :where() rules. */
+input.wp-block-search__input,
+.wp-block-search__input {
+	background: var(--cr-surface-elevated, var(--cr-printer-ivory, #fbfaf5)) !important;
+	color: var(--cr-ink, #241c4a) !important;
+	border: 2px solid var(--cr-russian-violet, #241c4a) !important;
+	padding: 0.5rem 0.75rem !important;
+	font-size: 1rem !important;
 }
-.cr-search-results .wp-block-search__input::placeholder,
-body.search .wp-block-search__input::placeholder {
-	color: var(--cr-ink-muted, #5e577a);
-	opacity: 1;
+input.wp-block-search__input::placeholder,
+.wp-block-search__input::placeholder {
+	color: var(--cr-ink-muted, #5e577a) !important;
+	opacity: 1 !important;
 }
-.cr-search-results .wp-block-search__input:focus,
-body.search .wp-block-search__input:focus {
-	outline: 3px solid var(--cr-marker, var(--cr-ut-orange, #fb8500));
+input.wp-block-search__input:focus,
+.wp-block-search__input:focus {
+	outline: 3px solid var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
 	outline-offset: 2px;
 }
 
 /* Dark-mode pair — flip surface to night-elevated + ink-color to
-   ivory. Same three-path dark-mode trio used elsewhere. */
-:root[data-theme="dark"] .cr-search-results .wp-block-search__input,
-:root[data-theme="dark"] body.search .wp-block-search__input {
-	background: var(--cr-night-elevated, #251f1c);
-	color: var(--cr-printer-ivory, #fbfaf5);
-	border-color: var(--cr-printer-ivory, #fbfaf5);
+   ivory. Three-path dark-mode trio. */
+:root[data-theme="dark"] input.wp-block-search__input,
+:root[data-theme="dark"] .wp-block-search__input {
+	background: var(--cr-night-elevated, #251f1c) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+	border-color: var(--cr-printer-ivory, #fbfaf5) !important;
 }
-:root[data-theme="dark"] .cr-search-results .wp-block-search__input::placeholder,
-:root[data-theme="dark"] body.search .wp-block-search__input::placeholder {
-	color: var(--cr-periwinkle, #d4cfeb);
+:root[data-theme="dark"] input.wp-block-search__input::placeholder,
+:root[data-theme="dark"] .wp-block-search__input::placeholder {
+	color: var(--cr-periwinkle, #d4cfeb) !important;
 }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme]) .cr-search-results .wp-block-search__input,
-	:root:not([data-theme]) body.search .wp-block-search__input,
-	:root[data-theme="system"] .cr-search-results .wp-block-search__input,
-	:root[data-theme="system"] body.search .wp-block-search__input {
-		background: var(--cr-night-elevated, #251f1c);
-		color: var(--cr-printer-ivory, #fbfaf5);
-		border-color: var(--cr-printer-ivory, #fbfaf5);
+	:root:not([data-theme]) input.wp-block-search__input,
+	:root:not([data-theme]) .wp-block-search__input,
+	:root[data-theme="system"] input.wp-block-search__input,
+	:root[data-theme="system"] .wp-block-search__input {
+		background: var(--cr-night-elevated, #251f1c) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+		border-color: var(--cr-printer-ivory, #fbfaf5) !important;
 	}
-	:root:not([data-theme]) .cr-search-results .wp-block-search__input::placeholder,
-	:root:not([data-theme]) body.search .wp-block-search__input::placeholder,
-	:root[data-theme="system"] .cr-search-results .wp-block-search__input::placeholder,
-	:root[data-theme="system"] body.search .wp-block-search__input::placeholder {
-		color: var(--cr-periwinkle, #d4cfeb);
+	:root:not([data-theme]) input.wp-block-search__input::placeholder,
+	:root:not([data-theme]) .wp-block-search__input::placeholder,
+	:root[data-theme="system"] input.wp-block-search__input::placeholder,
+	:root[data-theme="system"] .wp-block-search__input::placeholder {
+		color: var(--cr-periwinkle, #d4cfeb) !important;
 	}
 }
