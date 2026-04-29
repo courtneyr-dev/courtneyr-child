@@ -770,6 +770,57 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 	font-weight: 500;
 }
 
+/* v0.5.9: New header layout — brand on the left, controls (toggle + nav
+   + search) on the right, all in one row with no wrap. Theme toggle was
+   previously detached/floated; bring it back into the controls flex
+   group so it sits with the nav and search. */
+.site-header__controls {
+	flex-wrap: nowrap !important;
+	align-items: center;
+	gap: var(--cr-space-md, 1rem);
+	flex-shrink: 0;
+}
+.site-header__controls .cr-theme-toggle {
+	position: static !important;
+	margin: 0 !important;
+	flex-shrink: 0;
+}
+/* Search block in the header — render as an icon-only button. */
+.site-header__search {
+	margin: 0 !important;
+}
+.site-header__search .wp-block-search__inside-wrapper {
+	border: 0 !important;
+	background: transparent !important;
+}
+.site-header__search .wp-block-search__button {
+	background: transparent !important;
+	color: var(--cr-ink, #241c4a) !important;
+	border: 0 !important;
+	padding: 0.4rem !important;
+	min-width: 0 !important;
+	cursor: pointer;
+	transition: color 0.15s ease;
+}
+.site-header__search .wp-block-search__button svg {
+	width: 24px;
+	height: 24px;
+	fill: currentColor;
+}
+.site-header__search .wp-block-search__button:hover,
+.site-header__search .wp-block-search__button:focus-visible {
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
+	background: transparent !important;
+}
+
+/* On narrower viewports, allow the nav to collapse into its mobile
+   drawer (WP handles this) — controls stay in a single row. */
+@media (max-width: 768px) {
+	.site-header__controls {
+		gap: var(--cr-space-sm, 0.75rem);
+	}
+}
+
 /* ============================================================
    Site footer — zine-ready hooks
    ============================================================ */
@@ -3379,14 +3430,26 @@ body.single .single-post__comments-wrapper {
 	}
 }
 
-/* (2) Lede meta row — date + chip side by side, tight spacing. */
+/* (2) Lede meta row — date + chip side by side.
+   v0.5.9: enlarge gap so the WORDPRESS / BLOG chip doesn't crowd the
+   date. Also enforce flex-start so items don't center on wide rows. */
 .single-post__lede-meta {
 	color: var(--cr-ink-muted);
 	font-family: var(--cr-font-accent);
+	gap: var(--cr-space-md, 1rem) !important;
+	justify-content: flex-start !important;
+	align-items: center !important;
+	margin-bottom: var(--cr-space-sm, 0.75rem) !important;
 }
 .single-post__lede-meta .wp-block-post-date,
 .single-post__lede-meta time {
 	color: inherit;
+}
+
+/* v0.5.9: byline (author name only) — needs breathing room above the
+   featured image (which lands directly below). Add margin-bottom. */
+.single-post__byline {
+	margin-bottom: var(--cr-space-xl, 2rem) !important;
 }
 
 /* (3) Single post title — h1 with cr-flank, tighter line-height. */
@@ -3788,6 +3851,13 @@ body.blog button[type="submit"]:hover {
 	gap: var(--cr-space-sm, 0.75rem);
 	color: var(--cr-ink-muted);
 	font-size: var(--cr-text-sm, 0.875rem);
+	justify-content: flex-start !important;
+	text-align: left !important;
+}
+/* v0.5.9: Force left alignment on the body too — wp:group's
+   constrained layout was centering content. */
+.cr-archive .cr-stream-item__body {
+	text-align: left;
 }
 .cr-archive .cr-stream-item__meta time,
 .cr-archive .cr-stream-item__meta .wp-block-post-date {
@@ -3937,12 +4007,41 @@ body.blog button[type="submit"]:hover {
 
 /* (4f) Tag pills — the existing is-style-term-button rule already
    styles tag links as filled teal pills, but here we add a top-margin
-   so the pills sit clearly below the excerpt. */
+   so the pills sit clearly below the excerpt.
+   v0.5.9: cycle through 6 design-system colors via :nth-child so the
+   pill row reads as varied chip palette instead of flat teal repetition. */
 .cr-archive .cr-stream-item__tags {
 	margin-top: var(--cr-space-xs, 0.5rem);
 	display: flex;
 	flex-wrap: wrap;
 	gap: var(--cr-space-2xs, 0.35rem);
+}
+.cr-archive .cr-stream-item__tags a {
+	transition: transform 0.15s ease, background-color 0.15s ease;
+}
+.cr-archive .cr-stream-item__tags a:nth-child(6n+1) {
+	background: var(--cr-cerulean, #126782) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+.cr-archive .cr-stream-item__tags a:nth-child(6n+2) {
+	background: var(--cr-russian-violet, #241c4a) !important;
+	color: var(--cr-selective-yellow, #ffb703) !important;
+}
+.cr-archive .cr-stream-item__tags a:nth-child(6n+3) {
+	background: var(--cr-prussian-blue, #023047) !important;
+	color: var(--cr-light-orange, #fee2c3) !important;
+}
+.cr-archive .cr-stream-item__tags a:nth-child(6n+4) {
+	background: var(--cr-ut-orange, #fb8500) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+.cr-archive .cr-stream-item__tags a:nth-child(6n+5) {
+	background: var(--cr-glaucous, #647baf) !important;
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+.cr-archive .cr-stream-item__tags a:nth-child(6n) {
+	background: var(--cr-blue-green, #219ebc) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
 }
 
 /* (5) Pagination — hard-edge buttons matching the design system. */

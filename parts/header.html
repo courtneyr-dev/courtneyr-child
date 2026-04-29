@@ -1,8 +1,8 @@
 <!-- wp:group {"tagName":"header","metadata":{"name":"Site Header"},"align":"full","className":"site-header","style":{"spacing":{"padding":{"top":"var:preset|spacing|medium","bottom":"var:preset|spacing|medium","left":"var:preset|spacing|medium","right":"var:preset|spacing|medium"}}},"layout":{"type":"constrained"}} -->
 <header class="wp-block-group alignfull site-header" style="padding-top:var(--wp--preset--spacing--medium);padding-right:var(--wp--preset--spacing--medium);padding-bottom:var(--wp--preset--spacing--medium);padding-left:var(--wp--preset--spacing--medium)">
 
-	<!-- wp:group {"align":"wide","className":"site-header__inner","layout":{"type":"flex","justifyContent":"space-between","flexWrap":"nowrap"}} -->
-	<div class="wp-block-group alignwide site-header__inner">
+	<!-- wp:group {"align":"full","className":"site-header__inner","layout":{"type":"flex","justifyContent":"space-between","flexWrap":"nowrap"}} -->
+	<div class="wp-block-group alignfull site-header__inner">
 
 		<!-- wp:group {"className":"site-header__brand","style":{"spacing":{"blockGap":"0"}},"layout":{"type":"constrained"}} -->
 		<div class="wp-block-group site-header__brand">
@@ -14,8 +14,6 @@
 
 		<!-- wp:group {"className":"site-header__controls","style":{"spacing":{"blockGap":"var:preset|spacing|small"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"right"}} -->
 		<div class="wp-block-group site-header__controls">
-
-			<!-- wp:navigation {"className":"site-header__nav","openSubmenusOnClick":true,"icon":"menu","style":{"spacing":{"blockGap":"var:preset|spacing|small"}},"fontSize":"medium"} /-->
 
 			<!-- wp:html -->
 			<button type="button" class="cr-theme-toggle" data-theme-toggle aria-label="Theme: System (follows OS). Click to switch to Dark.">
@@ -33,6 +31,10 @@
 				</svg>
 			</button>
 			<!-- /wp:html -->
+
+			<!-- wp:navigation {"className":"site-header__nav","openSubmenusOnClick":true,"icon":"menu","style":{"spacing":{"blockGap":"var:preset|spacing|small"}},"fontSize":"medium"} /-->
+
+			<!-- wp:search {"label":"Search","showLabel":false,"placeholder":"Search…","width":300,"widthUnit":"px","buttonText":"Search","buttonPosition":"button-only","buttonUseIcon":true,"className":"site-header__search"} /-->
 
 		</div>
 		<!-- /wp:group -->
