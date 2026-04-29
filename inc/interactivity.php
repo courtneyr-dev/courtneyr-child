@@ -1,25 +1,23 @@
 <?php
 /**
- * Interactivity API setup for the theme toggle.
+ * Interactivity API modules for the theme.
  *
- * The Interactivity API (WP 6.5+, Core in 6.6+) is the WordPress-native
- * way to add reactive front-end behavior to a block theme. It replaces
- * the kit's vanilla-JS toggle with a Core-supported store + directives.
+ * v0.5.18 cleanup: the original aspirational IA scaffolding for the
+ * theme toggle was removed — the working toggle is vanilla JS
+ * (assets/js/theme-toggle/view.js, enqueued in inc/enqueue.php). The
+ * theme toggle MUST run pre-paint to prevent a dark-mode flash, which
+ * IA's hydrate-after-parse model can't satisfy. Keeping it vanilla.
  *
- * Architecture:
- *   - Pre-paint: a tiny inline script reads localStorage and sets
- *     <html data-theme="dark"> before the first frame, preventing the
- *     flash of wrong theme. This stays inline because it must execute
- *     before any CSS loads.
- *   - Hydration: assets/js/theme-toggle/view.js registers the
- *     Interactivity store and binds toggle behavior to any element with
- *     data-wp-interactive="courtneyr/theme-toggle".
- *   - Persistence: the store writes to localStorage so the choice
- *     survives page navigation and OS dark-mode pref changes.
+ * Active IA modules:
+ *   - courtneyr/callout (v0.5.14) — collapsible callouts
+ *   - courtneyr/stream-filter (v0.5.14) — cr-stream-loop format filter
+ *   - courtneyr/reading-progress (v0.5.18) — single-post scroll bar
+ *   - courtneyr/pull-quote (v0.5.18) — copy-to-clipboard button
  *
- * The toggle button itself can live in the header template part as a
- * core/button block with the appropriate data-wp-* attributes, or as a
- * pattern users drop in. Either way, no custom block is required.
+ * Pre-paint script for theme:
+ *   The inline pre_paint_theme() below sets data-theme on <html>
+ *   before any CSS loads. This stays inline because it must execute
+ *   before first paint.
  *
  * @package CourtneyrChild
  */
@@ -59,42 +57,6 @@ function pre_paint_theme(): void {
 	<?php
 }
 add_action( 'wp_head', __NAMESPACE__ . '\\pre_paint_theme', 1 );
-
-/**
- * Register the theme-toggle Interactivity API view script.
- *
- * The script is loaded as an ES module (Interactivity API requirement)
- * and only enqueued on pages that actually contain the toggle, via the
- * data-wp-interactive directive in the rendered markup.
- */
-function register_theme_toggle_view(): void {
-	wp_register_script_module(
-		'courtneyr/theme-toggle',
-		COURTNEYR_CHILD_URI . '/assets/js/theme-toggle/view.js',
-		array( '@wordpress/interactivity' ),
-		COURTNEYR_CHILD_VERSION
-	);
-}
-add_action( 'init', __NAMESPACE__ . '\\register_theme_toggle_view' );
-
-/**
- * Enqueue the toggle view script + matching stylesheet on any page that
- * could render the toggle. We check for the data-wp-interactive attribute
- * in the rendered output rather than enumerating every template, so the
- * toggle works wherever it is dropped in.
- */
-function maybe_enqueue_theme_toggle(): void {
-	wp_enqueue_script_module( 'courtneyr/theme-toggle' );
-
-	wp_enqueue_style(
-		'courtneyr-theme-toggle',
-		COURTNEYR_CHILD_URI . '/assets/css/interactivity/theme-toggle.css',
-		array( 'courtneyr-tokens' ),
-		COURTNEYR_CHILD_VERSION
-	);
-}
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\maybe_enqueue_theme_toggle' );
-
 
 /* ============================================================
  * v0.5.14 — Callout collapse/expand (IA module #1).
@@ -217,3 +179,92 @@ function maybe_enqueue_stream_filter(): void {
 	wp_enqueue_script_module( 'courtneyr/stream-filter' );
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\maybe_enqueue_stream_filter' );
+
+
+/* ============================================================
+ * v0.5.18 — Reading-progress bar (IA module #3).
+ *
+ * Thin fixed-position bar at the top of single posts. Hooks window
+ * scroll, computes the percent of page scrolled past, and binds the
+ * value to the bar's width. Only enqueued on single-post pages —
+ * no value on the homepage / archive views where the page isn't a
+ * focused linear read.
+ * ============================================================ */
+
+function register_reading_progress_view(): void {
+	wp_register_script_module(
+		'courtneyr/reading-progress',
+		COURTNEYR_CHILD_URI . '/assets/js/interactivity/reading-progress/view.js',
+		array( '@wordpress/interactivity' ),
+		COURTNEYR_CHILD_VERSION
+	);
+}
+add_action( 'init', __NAMESPACE__ . '\\register_reading_progress_view' );
+
+function maybe_enqueue_reading_progress(): void {
+	if ( ! is_singular( 'post' ) ) {
+		return;
+	}
+	wp_enqueue_script_module( 'courtneyr/reading-progress' );
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\maybe_enqueue_reading_progress' );
+
+
+/* ============================================================
+ * v0.5.18 — Pull-quote copy-to-clipboard (IA module #4).
+ *
+ * Adds a "Copy quote" button after every blockquote inside a
+ * .is-style-cr-pull-quote container. Click writes the quote's first
+ * paragraph text to navigator.clipboard, then swaps the button
+ * label to "Copied" for 2 seconds.
+ *
+ * Same render-time filter pattern used for the callout module:
+ * patterns themselves stay simple wp:quote blocks; the filter
+ * injects the IA wiring + button at render time.
+ * ============================================================ */
+
+/**
+ * Inject a "Copy quote" button after each rendered cr-pull-quote.
+ */
+function transform_pull_quote_block( string $block_content, array $block ): string {
+	if ( ! isset( $block['blockName'] ) || 'core/quote' !== $block['blockName'] ) {
+		return $block_content;
+	}
+	$class = $block['attrs']['className'] ?? '';
+	if ( ! str_contains( $class, 'is-style-cr-pull-quote' ) && ! str_contains( $class, 'cr-pull-quote' ) ) {
+		return $block_content;
+	}
+
+	// Wrap the quote in a container with IA wiring, append a copy
+	// button. context.copied=false initially; toggles to true for
+	// 2s after a successful clipboard write.
+	$button = '<button type="button" class="cr-pull-quote__copy" data-wp-on--click="actions.copyQuote" data-wp-class--is-copied="context.copied" aria-live="polite">'
+		. '<span class="cr-pull-quote__copy-default">Copy quote</span>'
+		. '<span class="cr-pull-quote__copy-confirm" aria-hidden="true">Copied</span>'
+		. '</button>';
+
+	// Wrap the rendered block in an IA-aware container. Keep the
+	// original markup intact; just nest it.
+	$wrapped = '<div class="cr-pull-quote-wrap" data-wp-interactive="courtneyr/pull-quote" data-wp-context=\'{"copied":false}\'>'
+		. $block_content
+		. $button
+		. '</div>';
+
+	return $wrapped;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\transform_pull_quote_block', 10, 2 );
+
+function register_pull_quote_view(): void {
+	wp_register_script_module(
+		'courtneyr/pull-quote',
+		COURTNEYR_CHILD_URI . '/assets/js/interactivity/pull-quote/view.js',
+		array( '@wordpress/interactivity' ),
+		COURTNEYR_CHILD_VERSION
+	);
+}
+add_action( 'init', __NAMESPACE__ . '\\register_pull_quote_view' );
+
+function maybe_enqueue_pull_quote(): void {
+	wp_enqueue_script_module( 'courtneyr/pull-quote' );
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\maybe_enqueue_pull_quote' );

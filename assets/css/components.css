@@ -5810,3 +5810,102 @@ input.wp-block-search__input:focus,
 		pointer-events: none;
 	}
 }
+
+
+/* ============================================================
+   v0.5.18 — Reading-progress bar (IA module).
+     Thin fixed-position bar at the top of single posts. The IA
+     module updates context.progress on window scroll; the inner
+     .cr-reading-progress__bar's width is bound via wp-style--width
+     to "state.progressWidth" which formats the 0–100 value as a
+     percentage string.
+
+     Z-index high enough to sit above the site header but below
+     any modals. The track is faintly visible so users see how far
+     they have left to read.
+   ============================================================ */
+
+.cr-reading-progress {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: rgba(36, 28, 74, 0.08);
+	z-index: 100;
+	pointer-events: none;
+}
+
+.cr-reading-progress__bar {
+	height: 100%;
+	width: 0;
+	background: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	transition: width 0.05s linear;
+}
+
+:root[data-theme="dark"] .cr-reading-progress {
+	background: rgba(251, 250, 245, 0.08);
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .cr-reading-progress,
+	:root[data-theme="system"] .cr-reading-progress {
+		background: rgba(251, 250, 245, 0.08);
+	}
+}
+
+
+/* ============================================================
+   v0.5.18 — Pull-quote copy-to-clipboard (IA module).
+     The render filter wraps each cr-pull-quote in a
+     .cr-pull-quote-wrap with IA wiring + appends a "Copy quote"
+     button. CSS swaps the button label between "Copy quote" and
+     "Copied" via the .is-copied class (driven by context.copied).
+   ============================================================ */
+
+.cr-pull-quote-wrap {
+	position: relative;
+}
+
+.cr-pull-quote__copy {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin-top: var(--cr-space-sm, 0.5rem);
+	padding: var(--cr-space-3xs, 0.2rem) var(--cr-space-sm, 0.7em);
+	background: transparent;
+	border: 1px solid var(--cr-border, var(--cr-ink-muted, #5e577a));
+	border-radius: var(--cr-radius-xs, 0.25rem);
+	color: var(--cr-ink-muted, #5e577a);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xs, 0.75rem);
+	font-weight: var(--cr-weight-bold, 700);
+	text-transform: uppercase;
+	letter-spacing: var(--cr-tracking-eyebrow, 0.05em);
+	cursor: pointer;
+	transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.cr-pull-quote__copy:hover,
+.cr-pull-quote__copy:focus-visible {
+	background: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	border-color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	color: var(--cr-printer-ivory, #fbfaf5);
+}
+
+/* Confirmation state — swap the visible label. The two spans live
+   in the button at all times; only one is rendered visually based
+   on the .is-copied class. The aria-live on the button announces
+   the change to screen readers. */
+.cr-pull-quote__copy-confirm {
+	display: none;
+}
+.cr-pull-quote__copy.is-copied .cr-pull-quote__copy-default {
+	display: none;
+}
+.cr-pull-quote__copy.is-copied .cr-pull-quote__copy-confirm {
+	display: inline;
+}
+.cr-pull-quote__copy.is-copied {
+	background: var(--cr-cerulean, #126782);
+	border-color: var(--cr-cerulean, #126782);
+	color: var(--cr-printer-ivory, #fbfaf5);
+}
