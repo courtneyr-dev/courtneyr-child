@@ -3207,6 +3207,130 @@ body.home .wp-block-latest-posts li::before {
 
 
 /* ============================================================
+   v0.5.1 — Single post zine pass.
+     - Header restructured: meta row (date + cr-chip category) above
+       title (template change), title gets cr-flank--blue.
+     - Surface: ivory main-accent + faint paper texture (matches the
+       archive treatment).
+     - Related Posts section flips from peach tertiary to ivory paper.
+     - Comments form submit button picks up the cr-cta tokens — same
+       fix as v0.4.24 but extended to body.single + body.archive.
+   ============================================================ */
+
+/* (1) Surface + paper texture on single post main + related posts.
+   Same fiber+halftone overlay as the archive. */
+body.single .single-post,
+body.single .related-posts,
+body.single .single-post__comments-wrapper {
+	background-image: var(--cr-fiber), var(--cr-halftone);
+	background-size: auto, var(--cr-halftone-size);
+	background-blend-mode: multiply, multiply;
+	background-repeat: repeat, repeat;
+}
+
+/* Dark-mode override for single post surfaces — match home + archive. */
+:root[data-theme="dark"] body.single .single-post,
+:root[data-theme="dark"] body.single .related-posts,
+:root[data-theme="dark"] body.single .single-post__comments-wrapper {
+	background-color: var(--cr-night-elevated, #251f1c) !important;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.single .single-post,
+	:root:not([data-theme]) body.single .related-posts,
+	:root:not([data-theme]) body.single .single-post__comments-wrapper,
+	:root[data-theme="system"] body.single .single-post,
+	:root[data-theme="system"] body.single .related-posts,
+	:root[data-theme="system"] body.single .single-post__comments-wrapper {
+		background-color: var(--cr-night-elevated, #251f1c) !important;
+	}
+}
+
+/* (2) Lede meta row — date + chip side by side, tight spacing. */
+.single-post__lede-meta {
+	color: var(--cr-ink-muted);
+	font-family: var(--cr-font-accent);
+}
+.single-post__lede-meta .wp-block-post-date,
+.single-post__lede-meta time {
+	color: inherit;
+}
+
+/* (3) Single post title — h1 with cr-flank, tighter line-height. */
+.single-post__title.wp-block-post-title {
+	font-size: clamp(2rem, 1.5rem + 2vw, 3.25rem);
+	line-height: 1.05;
+	margin-block: var(--cr-space-xs, 0.5rem) var(--cr-space-sm, 0.75rem);
+}
+
+/* (4) Byline (author name) — small, low-emphasis. */
+.single-post__byline {
+	color: var(--cr-ink-muted);
+}
+.single-post__byline .wp-block-post-author {
+	color: inherit;
+}
+.single-post__byline .wp-block-post-author__name {
+	font-weight: 500;
+}
+
+/* (5) Submit button extension — body.single + body.archive get the
+   same cr-cta-token-driven button as body.home. v0.4.24 only covered
+   body.home / .homepage. */
+body.single input[type="submit"],
+body.single button[type="submit"],
+body.archive input[type="submit"],
+body.archive button[type="submit"],
+body.blog input[type="submit"],
+body.blog button[type="submit"] {
+	background-color: var(--cr-cta-bg, #fb8500) !important;
+	color: var(--cr-cta-ink, #023047) !important;
+	border-width: 2px !important;
+	border-style: solid !important;
+	border-color: var(--cr-russian-violet, #241c4a) !important;
+	border-radius: 0 !important;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: var(--cr-weight-bold, 700);
+	font-size: var(--cr-text-md, 1rem);
+	letter-spacing: 0.02em;
+	padding: 0.75rem 1.5rem !important;
+	cursor: pointer;
+	box-shadow: 4px 4px 0 var(--cr-russian-violet, #241c4a) !important;
+	transition: box-shadow 0.15s ease, transform 0.1s ease, background-color 0.15s ease, color 0.15s ease;
+	-webkit-appearance: none;
+	appearance: none;
+}
+body.single input[type="submit"]:hover,
+body.single button[type="submit"]:hover,
+body.archive input[type="submit"]:hover,
+body.archive button[type="submit"]:hover,
+body.blog input[type="submit"]:hover,
+body.blog button[type="submit"]:hover {
+	background-color: var(--cr-cta-bg-hover, #241c4a) !important;
+	color: var(--cr-cta-ink-hover, #8ecae6) !important;
+	box-shadow: 2px 2px 0 var(--cr-russian-violet, #241c4a) !important;
+	transform: translate(2px, 2px);
+}
+
+/* (6) Related Posts section — drop the peach tertiary look that the
+   template used to ship with, swap heading prefix for the same
+   marker-bar / eyebrow rhythm as the archive header. */
+.related-posts {
+	border-top: 1px dashed var(--cr-rule, rgba(36, 28, 74, 0.15));
+}
+.related-posts__heading {
+	font-family: var(--cr-font-condensed, var(--cr-font-accent));
+	font-size: var(--cr-text-xl, 1.5rem);
+	margin-bottom: var(--cr-space-md, 1rem);
+}
+.related-post__category {
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	font-family: var(--cr-font-accent);
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+
+
+/* ============================================================
    v0.5.0 — Archive overhaul (blog index, category, tag, post-format
    archives all share `templates/archive.html` + `templates/home.html`,
    both rendering the cr-stream-loop pattern).
