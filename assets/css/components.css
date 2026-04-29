@@ -5394,14 +5394,29 @@ body.admin-bar {
      3. Any group user marks as sticky in the editor
    All three get position:sticky + top:0 + admin-bar-aware offset
    + z-index high enough to sit above page content but below the
-   reading-progress bar (z:9999) and pagination popovers. */
+   reading-progress bar (z:9999) and pagination popovers.
+
+   v0.5.29: nav surface uses ivory paper TEXTURE (cr-fiber +
+   cr-halftone gradient stack from tokens.css), not just a solid
+   color. Without the texture, the nav reads as a flat strip
+   floating over content; with it, the nav reads as the same
+   "paper" as the rest of the site so scrolling underneath doesn't
+   visually conflict. The bottom border + soft shadow gives a
+   clear separation edge as content slides under. !important
+   wins over any rotation-bg rule that might cascade in. */
 .site-header,
 .wp-block-group:has(> .site-header),
 .wp-block-group.is-position-sticky {
 	position: sticky !important;
 	top: calc(0px + var(--wp-admin--admin-bar--position-offset, 0px)) !important;
 	z-index: 50 !important;
-	background: var(--cr-surface, var(--cr-printer-ivory, #fbfaf5));
+	background-color: var(--cr-surface, var(--cr-printer-ivory, #fbfaf5)) !important;
+	background-image: var(--cr-fiber), var(--cr-halftone) !important;
+	background-size: auto, var(--cr-halftone-size, 12px 12px) !important;
+	background-blend-mode: multiply, multiply !important;
+	background-repeat: repeat, repeat !important;
+	border-bottom: 1px solid rgba(36, 28, 74, 0.12);
+	box-shadow: 0 4px 12px rgba(36, 28, 74, 0.08);
 	/* Don't let the sticky element itself become a scrolling
 	   container — would break its own descendants' sticky behavior. */
 	overflow: visible !important;
@@ -5409,7 +5424,9 @@ body.admin-bar {
 :root[data-theme="dark"] .site-header,
 :root[data-theme="dark"] .wp-block-group:has(> .site-header),
 :root[data-theme="dark"] .wp-block-group.is-position-sticky {
-	background: var(--cr-night-elevated, #251f1c);
+	background-color: var(--cr-night-elevated, #251f1c) !important;
+	border-bottom-color: rgba(251, 250, 245, 0.12);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme]) .site-header,
@@ -5418,7 +5435,9 @@ body.admin-bar {
 	:root[data-theme="system"] .site-header,
 	:root[data-theme="system"] .wp-block-group:has(> .site-header),
 	:root[data-theme="system"] .wp-block-group.is-position-sticky {
-		background: var(--cr-night-elevated, #251f1c);
+		background-color: var(--cr-night-elevated, #251f1c) !important;
+		border-bottom-color: rgba(251, 250, 245, 0.12);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 	}
 }
 
@@ -6294,5 +6313,301 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
 	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4,
 	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label) {
 		color: #000 !important;
+	}
+}
+
+
+/* ============================================================
+   v0.5.29 — Pre-comments newsletter banner +
+                Newsletter page form polish
+   ============================================================
+   (1) `.cr-newsletter-banner` is the horizontal callout that ships
+       in templates/single.html between the syndication area and
+       the comments wrapper. Same banner shape across every post
+       — copy, tape badge, dual CTA. Soft printer-ivory paper
+       texture so it visually nests inside the post body without
+       fighting the rotating bg of long single posts. Two-column
+       at >=900px, stacks cleanly below.
+   (2) The Newsletter Plugin's `[newsletter]` shortcode renders on
+       /newsletter/ but the colorful homepage submit + focus-ring
+       rules are scoped to `body.home` so they didn't apply.
+       Extend selectors to `.cr-newsletter-form-wrap` (the
+       wrapper class on /newsletter/ Subscribe section) and
+       `body.page-newsletter`.
+   ============================================================ */
+
+/* (1) Pre-comments newsletter banner ------------------------------ */
+
+.cr-newsletter-banner {
+	background-color: var(--cr-surface, var(--cr-printer-ivory, #fbfaf5)) !important;
+	background-image: var(--cr-fiber), var(--cr-halftone) !important;
+	background-size: auto, var(--cr-halftone-size, 12px 12px) !important;
+	background-blend-mode: multiply, multiply !important;
+	background-repeat: repeat, repeat !important;
+	border-top: 2px solid var(--cr-russian-violet, #241c4a);
+	border-bottom: 2px solid var(--cr-russian-violet, #241c4a);
+	box-shadow: 0 4px 0 -1px var(--cr-russian-violet, #241c4a),
+	            0 -4px 0 -1px var(--cr-russian-violet, #241c4a);
+	color: var(--cr-russian-violet, #241c4a);
+}
+
+.cr-newsletter-banner__inner {
+	gap: var(--cr-space-xl, 2.5rem);
+	max-width: 1200px;
+	margin: 0 auto;
+	width: 100%;
+}
+
+.cr-newsletter-banner__copy {
+	flex: 1 1 28rem;
+	min-width: 18rem;
+}
+
+.cr-newsletter-banner__tape {
+	display: inline-block !important;
+	margin-bottom: 0.4rem !important;
+}
+
+.cr-newsletter-banner__title {
+	color: var(--cr-russian-violet, #241c4a) !important;
+	margin: 0 0 0.6rem !important;
+	letter-spacing: -0.5px;
+	line-height: 1.1;
+}
+
+.cr-newsletter-banner__lede {
+	color: var(--cr-russian-violet, #241c4a);
+	margin: 0;
+	font-size: 1.05rem;
+	line-height: 1.5;
+}
+
+.cr-newsletter-banner__lede strong {
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+}
+
+.cr-newsletter-banner__cta {
+	flex: 0 1 auto;
+	gap: 0.75rem;
+}
+
+.cr-newsletter-banner__cta .wp-block-buttons {
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+/* Dark mode — flip surface to night-elevated, ivory ink */
+:root[data-theme="dark"] .cr-newsletter-banner {
+	background-color: var(--cr-night-elevated, #251f1c) !important;
+	border-top-color: var(--cr-printer-ivory, #fbfaf5);
+	border-bottom-color: var(--cr-printer-ivory, #fbfaf5);
+	box-shadow: 0 4px 0 -1px var(--cr-printer-ivory, #fbfaf5),
+	            0 -4px 0 -1px var(--cr-printer-ivory, #fbfaf5);
+	color: var(--cr-printer-ivory, #fbfaf5);
+}
+:root[data-theme="dark"] .cr-newsletter-banner__title,
+:root[data-theme="dark"] .cr-newsletter-banner__lede {
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+:root[data-theme="dark"] .cr-newsletter-banner__lede strong {
+	color: var(--cr-selective-yellow, #ffb703);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .cr-newsletter-banner,
+	:root[data-theme="system"] .cr-newsletter-banner {
+		background-color: var(--cr-night-elevated, #251f1c) !important;
+		border-top-color: var(--cr-printer-ivory, #fbfaf5);
+		border-bottom-color: var(--cr-printer-ivory, #fbfaf5);
+		box-shadow: 0 4px 0 -1px var(--cr-printer-ivory, #fbfaf5),
+		            0 -4px 0 -1px var(--cr-printer-ivory, #fbfaf5);
+		color: var(--cr-printer-ivory, #fbfaf5);
+	}
+	:root:not([data-theme]) .cr-newsletter-banner__title,
+	:root:not([data-theme]) .cr-newsletter-banner__lede,
+	:root[data-theme="system"] .cr-newsletter-banner__title,
+	:root[data-theme="system"] .cr-newsletter-banner__lede {
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+	:root:not([data-theme]) .cr-newsletter-banner__lede strong,
+	:root[data-theme="system"] .cr-newsletter-banner__lede strong {
+		color: var(--cr-selective-yellow, #ffb703);
+	}
+}
+
+/* Stack tighter on narrow viewports */
+@media (max-width: 768px) {
+	.cr-newsletter-banner__inner {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	.cr-newsletter-banner__cta {
+		width: 100%;
+	}
+}
+
+
+/* (2) Newsletter page form polish ---------------------------------- */
+/* The homepage rules at L1681-1754 use body.home as scope. Mirror
+   the same input + submit styling for /newsletter/ (page-newsletter
+   slug) and any wrapper carrying .cr-newsletter-form-wrap. */
+
+body.page-newsletter input[type="email"],
+body.page-newsletter input[type="text"],
+body.page-newsletter input[type="url"],
+.cr-newsletter-form-wrap input[type="email"],
+.cr-newsletter-form-wrap input[type="text"],
+.cr-newsletter-form-wrap input[type="url"],
+.cr-newsletter-banner input[type="email"],
+.cr-newsletter-banner input[type="text"] {
+	background: var(--cr-printer-ivory, #fbfaf5);
+	color: var(--cr-russian-violet, #241c4a);
+	border: 1.5px solid var(--cr-russian-violet, #241c4a);
+	padding: 0.6em 0.8em;
+	border-radius: 0;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 1rem;
+	box-shadow: 3px 3px 0 var(--cr-russian-violet, #241c4a);
+	transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+body.page-newsletter input[type="email"]:focus,
+body.page-newsletter input[type="text"]:focus,
+body.page-newsletter input[type="url"]:focus,
+.cr-newsletter-form-wrap input[type="email"]:focus,
+.cr-newsletter-form-wrap input[type="text"]:focus,
+.cr-newsletter-form-wrap input[type="url"]:focus,
+.cr-newsletter-banner input[type="email"]:focus,
+.cr-newsletter-banner input[type="text"]:focus {
+	outline: 3px solid var(--cr-selective-yellow, #ffb703);
+	outline-offset: 2px;
+	box-shadow: 4px 4px 0 var(--cr-russian-violet, #241c4a);
+}
+
+/* Subscribe button — colorful CTA matching the homepage form.
+   Use longhand props (the Chrome shorthand-with-token gotcha noted
+   at L1709) and !important so the cascade is unambiguous against
+   the Newsletter Plugin's own button styles. */
+body.page-newsletter input[type="submit"],
+body.page-newsletter button[type="submit"],
+.cr-newsletter-form-wrap input[type="submit"],
+.cr-newsletter-form-wrap button[type="submit"] {
+	background-color: var(--cr-cta-bg, #fb8500) !important;
+	color: var(--cr-cta-ink, #023047) !important;
+	border-width: 2px !important;
+	border-style: solid !important;
+	border-color: var(--cr-russian-violet, #241c4a) !important;
+	border-radius: 0 !important;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: var(--cr-weight-bold, 700);
+	font-size: var(--cr-text-md, 1rem);
+	letter-spacing: 0.02em;
+	padding-top: 0.75rem !important;
+	padding-bottom: 0.75rem !important;
+	padding-left: 1.5rem !important;
+	padding-right: 1.5rem !important;
+	cursor: pointer;
+	box-shadow: 4px 4px 0 var(--cr-russian-violet, #241c4a) !important;
+	transition: box-shadow 0.15s ease, transform 0.1s ease, background-color 0.15s ease, color 0.15s ease;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+body.page-newsletter input[type="submit"]:hover,
+body.page-newsletter button[type="submit"]:hover,
+.cr-newsletter-form-wrap input[type="submit"]:hover,
+.cr-newsletter-form-wrap button[type="submit"]:hover {
+	background-color: var(--cr-cta-bg-hover, #241c4a) !important;
+	color: var(--cr-cta-ink-hover, #8ecae6) !important;
+	box-shadow: 2px 2px 0 var(--cr-russian-violet, #241c4a) !important;
+	transform: translate(2px, 2px);
+}
+
+body.page-newsletter input[type="submit"]:active,
+body.page-newsletter button[type="submit"]:active,
+.cr-newsletter-form-wrap input[type="submit"]:active,
+.cr-newsletter-form-wrap button[type="submit"]:active {
+	transform: translate(4px, 4px);
+	box-shadow: 0 0 0 var(--cr-russian-violet, #241c4a) !important;
+}
+
+body.page-newsletter input[type="submit"]:focus-visible,
+body.page-newsletter button[type="submit"]:focus-visible,
+.cr-newsletter-form-wrap input[type="submit"]:focus-visible,
+.cr-newsletter-form-wrap button[type="submit"]:focus-visible {
+	outline: 3px solid var(--cr-selective-yellow, #ffb703);
+	outline-offset: 2px;
+}
+
+/* Newsletter Plugin sometimes wraps the form in white/transparent
+   wrappers that swallow our background. Force transparent so the
+   page surface shows through. */
+body.page-newsletter .tnp,
+body.page-newsletter .tnp-subscription,
+body.page-newsletter .tnp-subscription-page-form,
+body.page-newsletter form.tnp,
+body.page-newsletter form.tnp-subscription,
+.cr-newsletter-form-wrap form,
+.cr-newsletter-form-wrap .tnp,
+.cr-newsletter-form-wrap .tnp-subscription,
+.cr-newsletter-form-wrap .wp-block-newsletter,
+.cr-newsletter-form-wrap .wp-block-shortcode {
+	background: transparent !important;
+	background-color: transparent !important;
+	box-shadow: none !important;
+	border: none !important;
+	padding: 0 !important;
+}
+
+/* Form labels visible in any context */
+body.page-newsletter form label,
+body.page-newsletter .tnp-field label,
+.cr-newsletter-form-wrap form label,
+.cr-newsletter-form-wrap .tnp-field label {
+	color: inherit !important;
+	font-weight: 600;
+}
+
+/* Field rhythm — give Subscribe button breathing room above */
+body.page-newsletter .tnp-field,
+.cr-newsletter-form-wrap .tnp-field {
+	margin-bottom: 1rem;
+}
+
+/* Dark mode — ivory inputs + bright CTA still legible */
+:root[data-theme="dark"] body.page-newsletter input[type="email"],
+:root[data-theme="dark"] body.page-newsletter input[type="text"],
+:root[data-theme="dark"] body.page-newsletter input[type="url"],
+:root[data-theme="dark"] .cr-newsletter-form-wrap input[type="email"],
+:root[data-theme="dark"] .cr-newsletter-form-wrap input[type="text"],
+:root[data-theme="dark"] .cr-newsletter-form-wrap input[type="url"],
+:root[data-theme="dark"] .cr-newsletter-banner input[type="email"],
+:root[data-theme="dark"] .cr-newsletter-banner input[type="text"] {
+	background: var(--cr-printer-ivory, #fbfaf5);
+	color: var(--cr-russian-violet, #241c4a);
+	border-color: var(--cr-printer-ivory, #fbfaf5);
+	box-shadow: 3px 3px 0 var(--cr-printer-ivory, #fbfaf5);
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.page-newsletter input[type="email"],
+	:root:not([data-theme]) body.page-newsletter input[type="text"],
+	:root:not([data-theme]) body.page-newsletter input[type="url"],
+	:root:not([data-theme]) .cr-newsletter-form-wrap input[type="email"],
+	:root:not([data-theme]) .cr-newsletter-form-wrap input[type="text"],
+	:root:not([data-theme]) .cr-newsletter-form-wrap input[type="url"],
+	:root:not([data-theme]) .cr-newsletter-banner input[type="email"],
+	:root:not([data-theme]) .cr-newsletter-banner input[type="text"],
+	:root[data-theme="system"] body.page-newsletter input[type="email"],
+	:root[data-theme="system"] body.page-newsletter input[type="text"],
+	:root[data-theme="system"] body.page-newsletter input[type="url"],
+	:root[data-theme="system"] .cr-newsletter-form-wrap input[type="email"],
+	:root[data-theme="system"] .cr-newsletter-form-wrap input[type="text"],
+	:root[data-theme="system"] .cr-newsletter-form-wrap input[type="url"],
+	:root[data-theme="system"] .cr-newsletter-banner input[type="email"],
+	:root[data-theme="system"] .cr-newsletter-banner input[type="text"] {
+		background: var(--cr-printer-ivory, #fbfaf5);
+		color: var(--cr-russian-violet, #241c4a);
+		border-color: var(--cr-printer-ivory, #fbfaf5);
+		box-shadow: 3px 3px 0 var(--cr-printer-ivory, #fbfaf5);
 	}
 }
