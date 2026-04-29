@@ -5300,22 +5300,41 @@ body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow
 }
 
 
-/* v0.5.19: sticky site header. Stays pinned to viewport top while
-   content scrolls. Reading-progress bar (z:9999) sits above it;
-   page content sits behind. Background forced to cr-surface so
-   content doesn't show through during scroll. */
-.site-header {
-	position: sticky;
-	top: 0;
-	z-index: 50;
+/* v0.5.19: sticky site header. v0.5.22 fix: position:sticky requires
+   no `overflow` (other than `visible`) on any ancestor. Many WP
+   themes (and Ollie) set `overflow-x: hidden` on body or
+   .wp-site-blocks to prevent horizontal scroll, which silently
+   breaks position:sticky on descendants. Override to overflow-x:
+   clip (newer property that prevents horizontal scroll without
+   establishing a scrolling container). */
+html,
+body,
+.wp-site-blocks {
+	overflow-x: clip !important;
+	overflow-y: visible !important;
+}
+
+.site-header,
+/* If user has wrapped header in a sticky group block, target both */
+.wp-block-group:has(> .site-header),
+.wp-block-group.is-position-sticky {
+	position: sticky !important;
+	top: 0 !important;
+	z-index: 50 !important;
 	background: var(--cr-surface, var(--cr-printer-ivory, #fbfaf5));
 }
-:root[data-theme="dark"] .site-header {
+:root[data-theme="dark"] .site-header,
+:root[data-theme="dark"] .wp-block-group:has(> .site-header),
+:root[data-theme="dark"] .wp-block-group.is-position-sticky {
 	background: var(--cr-night-elevated, #251f1c);
 }
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme]) .site-header,
-	:root[data-theme="system"] .site-header {
+	:root:not([data-theme]) .wp-block-group:has(> .site-header),
+	:root:not([data-theme]) .wp-block-group.is-position-sticky,
+	:root[data-theme="system"] .site-header,
+	:root[data-theme="system"] .wp-block-group:has(> .site-header),
+	:root[data-theme="system"] .wp-block-group.is-position-sticky {
 		background: var(--cr-night-elevated, #251f1c);
 	}
 }
@@ -6021,61 +6040,84 @@ input.wp-block-search__input:focus,
           asked); caption text stays dark. The polaroid is a
           physical object on the page — it doesn't theme-flip.
      ============================================================ */
+/* W3Docs polaroid pattern adapted for wp:cover. The trick: abandon
+   cover's flex + absolute-positioned image entirely. Make the
+   cover a plain block with padding (the polaroid frame), let the
+   image flow naturally as a regular block element with width:100%,
+   and let the caption flow underneath in document order. No
+   inset math, no aspect-ratio fights, no flex contention.
+
+   The wp-block-cover__image-background is normally `position:
+   absolute; inset: 0` to fill the cover. We override to position:
+   relative + width:100% so it behaves like a regular <img>. The
+   inner-container's `is-position-bottom-center` flex anchoring
+   becomes irrelevant once we set the cover to display:block. */
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) {
-	background: #ffffff !important; /* pure white polaroid paper */
-	border-radius: 0 !important; /* outer corners straight */
-	padding: 12px 12px 38px 12px !important; /* tight frame */
-	min-height: 0 !important; /* don't stretch beyond image aspect */
+	background: #ffffff !important;
+	display: block !important;
+	padding: 14px 14px 30px 14px !important;
+	border-radius: 0 !important;
+	min-height: 0 !important;
+	aspect-ratio: unset !important;
 	box-shadow: 12px 12px 0 var(--cr-russian-violet, #241c4a);
 	transform: rotate(-1.5deg);
 	transition: transform 0.3s ease, box-shadow 0.3s ease;
 	margin: 1.5rem !important;
+	text-align: center !important;
+	max-width: 420px;
 }
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]):hover {
 	transform: rotate(0deg);
 	box-shadow: 16px 16px 0 var(--cr-russian-violet, #241c4a);
 }
-/* Inset the photo so the white frame is visible around it; round
-   only the INNER corners (where photo meets frame). */
+
+/* Image flows naturally — square aspect, full width of polaroid paper. */
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) > img.wp-block-cover__image-background {
-	top: 12px !important;
-	right: 12px !important;
-	bottom: 38px !important;
-	left: 12px !important;
-	width: auto !important;
+	position: relative !important;
+	top: auto !important;
+	right: auto !important;
+	bottom: auto !important;
+	left: auto !important;
+	inset: auto !important;
+	width: 100% !important;
 	height: auto !important;
+	aspect-ratio: 1 !important;
+	display: block !important;
 	border-radius: 6px !important;
-	object-fit: cover;
+	object-fit: cover !important;
+	object-position: center !important;
+	margin: 0 !important;
 }
-/* HIDE the dark dim overlay entirely — was producing the gray
-   shaded box behind the caption (image #104). The polaroid frame
-   doesn't need the cover block's overlay; the caption sits on the
-   plain white paper. */
+
+/* Hide the dim overlay layer entirely (was the gray box). */
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) > .wp-block-cover__background {
 	display: none !important;
 }
-/* Caption — pure black on the white frame strip, no background,
-   no overlay, hand-drawn display font for polaroid feel. */
+
+/* Caption flows below the image in document order, sitting in the
+   30px bottom padding strip. Pure black on white, hand-drawn font. */
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container {
+	position: static !important;
+	display: block !important;
+	margin: 12px 0 0 0 !important;
+	padding: 0 !important;
 	color: #000 !important;
 	background: transparent !important;
-	margin: 0 !important;
-	padding: 0 12px !important;
+	text-align: center !important;
 	z-index: 2;
 }
-body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h1,
-body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h2,
-body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h3,
-body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container p {
+body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > * {
 	color: #000 !important;
 	background: transparent !important;
 	text-shadow: none !important;
 	font-family: var(--cr-font-display, var(--cr-font-accent, cursive)) !important;
-	font-size: 0.72rem !important;
+	font-size: 0.7rem !important;
 	font-weight: 700 !important;
 	line-height: 1.3 !important;
 	margin: 0 !important;
+	padding: 0 !important;
 	letter-spacing: 0.01em;
+	text-align: center !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
