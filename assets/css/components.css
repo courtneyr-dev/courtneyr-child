@@ -3186,6 +3186,30 @@ body.home .wp-block-latest-posts li::before {
 
 
 /* ============================================================
+   v0.4.22 — kill the empty pfpu (post-formats-plugin) pseudo-element
+   on chat-format posts in the home Recent Posts loop. The plugin's
+   rule injects `content: ""` (empty string) for `.format-chat`
+   while the OTHER formats have no content rule at all — result is a
+   visible 15×24px empty box before the title. Proper hand-drawn
+   icon rendering for post formats lands with the archive overhaul
+   (see `_handoffs/future-archive-overhaul.md`); for now, suppress
+   the artifact entirely.
+   ============================================================ */
+.wp-block-post-template .format-chat .wp-block-post-title::before,
+.wp-block-post-template .format-aside .wp-block-post-title::before,
+.wp-block-post-template .format-status .wp-block-post-title::before,
+.wp-block-post-template .format-link .wp-block-post-title::before,
+.wp-block-post-template .format-quote .wp-block-post-title::before,
+.wp-block-post-template .format-gallery .wp-block-post-title::before,
+.wp-block-post-template .format-image .wp-block-post-title::before,
+.wp-block-post-template .format-video .wp-block-post-title::before,
+.wp-block-post-template .format-audio .wp-block-post-title::before {
+	content: none !important;
+	display: none !important;
+}
+
+
+/* ============================================================
    v0.2.6.8 — block styles + utility classes for sections
    ============================================================
    Stable architecture for color-contextual styling that doesn't
