@@ -3885,22 +3885,21 @@ body.home .wp-block-post-template > li::after {
 }
 
 /* Top-left — washi-tape strip diagonally crossing the corner.
-   Positioned so the center of the rotated tape sits on the photo's
-   top-left corner; the upper portion extends into the surrounding
-   ivory bg, the lower portion overlaps onto the photo.
-   v0.4.11: solid cream bg + heavier drop shadow so the tape is
-   clearly visible against the ivory page bg. (v0.4.10's translucent
-   alpha rendered nearly invisible on ivory.) z-index bumped to 50
-   to clear any sibling stacking contexts. */
+   v0.4.12: anchor the tape's CENTER to the cover's top-left corner
+   using top:0; left:0 + translate(-50%, -50%). The translate offsets
+   the element by half its own dimensions, so its center lands exactly
+   at (0, 0) of the cover regardless of how wide the tape ends up.
+   That keeps half on photo / half on bg perfectly symmetric.
+   Rotation eased from -50deg to -45deg (clockwise 5deg). */
 .wp-block-cover .is-style-cr-tape-label.cr-tape-pin-tl {
 	position: absolute !important;
-	top: -1.5rem;
-	left: -2.5rem;
+	top: 0;
+	left: 0;
 	margin: 0 !important;
 	padding: 0.5em 2.25em !important;
 	background: var(--cr-tape, #f3e5b8) !important;
 	box-shadow: 2px 3px 6px rgba(36, 28, 74, 0.22) !important;
-	transform: rotate(-50deg);
+	transform: translate(-50%, -50%) rotate(-45deg);
 	transform-origin: center;
 	z-index: 50;
 }
