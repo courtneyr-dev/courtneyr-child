@@ -759,18 +759,18 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 .site-header__inner {
 	gap: var(--wp--preset--spacing--medium);
 	align-items: center;
+	flex-wrap: nowrap !important;
 }
 
 /* v0.5.10: brand gets a bit of breathing room from the left edge so
    the wordmark doesn't kiss the screen border. Mirror with a small
    right-side allowance on the controls so the search icon also isn't
-   flush against the screen edge. */
+   flush against the screen edge.
+   v0.5.11: keep these tight so the nav has room to lay out in one
+   row. The brand padding alone is enough breathing room — the search
+   button already carries 0.4rem of internal padding. */
 .site-header__brand {
 	padding-left: var(--cr-space-md, 1rem);
-}
-
-.site-header__controls {
-	padding-right: var(--cr-space-sm, 0.5rem);
 }
 
 .site-header__brand .wp-block-site-title {
@@ -785,16 +785,29 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 /* v0.5.9: New header layout — brand on the left, controls (toggle + nav
    + search) on the right, all in one row with no wrap. Theme toggle was
    previously detached/floated; bring it back into the controls flex
-   group so it sits with the nav and search. */
+   group so it sits with the nav and search.
+   v0.5.11: also force the navigation block AND its inner <ul> container
+   to nowrap. Without this, the nav's own block layout flex-wraps when
+   7 menu items don't fit, which pushed the theme toggle and "Stories"
+   onto their own rows. */
 .site-header__controls {
 	flex-wrap: nowrap !important;
 	align-items: center;
-	gap: var(--cr-space-md, 1rem);
+	gap: var(--cr-space-sm, 0.75rem);
 	flex-shrink: 0;
 }
 .site-header__controls .cr-theme-toggle {
 	position: static !important;
 	margin: 0 !important;
+	flex-shrink: 0;
+}
+.site-header__nav,
+.site-header__nav .wp-block-navigation__container,
+.site-header__nav .wp-block-navigation__responsive-container-content {
+	flex-wrap: nowrap !important;
+}
+/* Tighten nav item padding so the 7-item menu fits without wrapping. */
+.site-header__nav .wp-block-navigation-item {
 	flex-shrink: 0;
 }
 /* Search block in the header — render as an icon-only button. */
@@ -1378,10 +1391,12 @@ figure.wp-block-post-featured-image.single-post__featured {
 }
 
 /* Bump nav text presence — the wp:navigation fontSize=medium is
-   1.125rem; reinforce in case any WP core CSS argues with it. */
+   1.125rem; reinforce in case any WP core CSS argues with it.
+   v0.5.11: tighten horizontal padding from 0.5rem to 0.4rem so the
+   7-item menu fits in one row at common laptop widths. */
 .site-header__nav .wp-block-navigation-item__content {
 	font-size: 1.125rem;
-	padding: 0.4rem 0.5rem;
+	padding: 0.4rem 0.4rem;
 }
 
 /* Wordmark — bumped up 20% so the brand reads stronger in the
@@ -1545,6 +1560,33 @@ section.alignfull,
 .single-post__comments-wrapper code {
 	color: var(--cr-russian-violet, #241c4a);
 	background: rgba(36, 28, 74, 0.06);
+}
+
+/* v0.5.11: dark-mode override for inline code on the same surfaces.
+   The light-mode rule above wins on cascade order even in dark mode,
+   leaving us with russian-violet text on a russian-violet-tinted bg
+   (or worse, the parent theme's peach `<code>` default), which fails
+   readability. Force the design-system dark code tokens in all three
+   dark-mode paths (explicit, system-via-not, and prefers media). */
+:root[data-theme="dark"] .has-tertiary-background-color code,
+:root[data-theme="dark"] .has-main-accent-background-color code,
+:root[data-theme="dark"] .related-posts code,
+:root[data-theme="dark"] .single-post__comments-wrapper code {
+	color: var(--cr-code-ink, var(--cr-periwinkle, #d4cfeb)) !important;
+	background: var(--cr-code-bg, #2a2520) !important;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .has-tertiary-background-color code,
+	:root:not([data-theme]) .has-main-accent-background-color code,
+	:root:not([data-theme]) .related-posts code,
+	:root:not([data-theme]) .single-post__comments-wrapper code,
+	:root[data-theme="system"] .has-tertiary-background-color code,
+	:root[data-theme="system"] .has-main-accent-background-color code,
+	:root[data-theme="system"] .related-posts code,
+	:root[data-theme="system"] .single-post__comments-wrapper code {
+		color: var(--cr-code-ink, var(--cr-periwinkle, #d4cfeb)) !important;
+		background: var(--cr-code-bg, #2a2520) !important;
+	}
 }
 
 
@@ -5090,88 +5132,52 @@ body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-
    ============================================================ */
 
 @media (min-width: 1100px) {
-	/* Make every direct child of post body its own positioning
-	   context so absolute-positioned glyphs land in that block's
-	   own gutter, not relative to the article wrapper (which would
-	   stack them all at the top). */
-	body.single .single-post__content > p,
-	body.single .single-post__content > h2,
-	body.single .single-post__content > h3,
-	body.single .single-post__content > h4,
-	body.single .single-post__content > ul,
-	body.single .single-post__content > ol,
-	body.single .single-post__content > blockquote,
-	body.single .single-post__content > .wp-block-image {
+	/* v0.5.11: drastic reduction from v0.5.10. Original spec stamped
+	   a glyph next to every h2 / every h3 / every 5th paragraph —
+	   which made the page look algorithmically decorated, not zine.
+	   The About page only has TWO sparkles total; that's the bar.
+
+	   This pass keeps:
+	     - article-level top-right + bottom-left bookends (2 glyphs
+	       per post, regardless of length — matches About)
+	     - a single sparse paragraph rhythm at every 13th paragraph,
+	       so a 25-paragraph post picks up 1–2 extra scattered glyphs;
+	       short posts get just the bookends.
+
+	   Removed:
+	     - per-h2 marginalia (was the most "stamped" rule)
+	     - per-h3 marginalia
+	     - blockquote ::after
+	     - second paragraph-rhythm (cerulean ✺ on right) — kept the
+	       layout flexible by removing the matched pair. */
+
+	body.single .single-post__content {
 		position: relative;
 	}
 
-	/* (1) Body paragraph rhythm — ✦ on the left margin every 5th p.
-	   nth-of-type counts paragraphs only, skipping h2/h3/blockquotes. */
-	body.single .single-post__content > p:nth-of-type(5n+1)::before {
+	/* Sparse paragraph rhythm — ✦ in the left gutter, only every 13th
+	   paragraph. nth-of-type counts paragraphs only, skipping h2/h3.
+	   Long posts get extra scatter; short posts (under ~13 paragraphs)
+	   show only the bookends. */
+	body.single .single-post__content > p:nth-of-type(13n+5) {
+		position: relative;
+	}
+	body.single .single-post__content > p:nth-of-type(13n+5)::before {
 		content: "✦";
 		position: absolute;
-		top: 0.1em;
+		top: 0.2em;
 		left: -3rem;
 		font-family: var(--cr-font-accent);
-		font-size: 1.6rem;
+		font-size: 1.5rem;
 		line-height: 1;
 		color: var(--cr-selective-yellow, #ffb703);
 		transform: rotate(-12deg);
 		pointer-events: none;
 	}
 
-	/* (2) Right-side ✺ every 7th paragraph, offset from the ✦ rhythm
-	   so the eye sees scatter, not pattern. */
-	body.single .single-post__content > p:nth-of-type(7n+3)::after {
-		content: "✺";
-		position: absolute;
-		top: 0.4em;
-		right: -3rem;
-		font-family: var(--cr-font-accent);
-		font-size: 1.85rem;
-		line-height: 1;
-		color: var(--cr-cerulean, #126782);
-		transform: rotate(15deg);
-		pointer-events: none;
-	}
-
-	/* (3) Subheadings get their own marginalia — ✦ in marker orange
-	   beside body h2s, ✺ in glaucous beside h3s. These complement the
-	   cr-flank treatment on the post title (which stays exclusive to
-	   h2.cr-flank — body h2s typically don't carry that class). */
-	body.single .single-post__content > h2:not(.cr-flank)::before {
-		content: "✦";
-		position: absolute;
-		top: 0.35em;
-		left: -2.5rem;
-		font-family: var(--cr-font-accent);
-		font-size: 1.5rem;
-		line-height: 1;
-		color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
-		transform: rotate(-8deg);
-		pointer-events: none;
-	}
-
-	body.single .single-post__content > h3::after {
-		content: "✺";
-		position: absolute;
-		top: 0.4em;
-		right: -2.25rem;
-		font-family: var(--cr-font-accent);
-		font-size: 1.25rem;
-		line-height: 1;
-		color: var(--cr-glaucous, #6c8eb8);
-		transform: rotate(20deg);
-		pointer-events: none;
-	}
-
-	/* (4) Article-level top + bottom flourish on the post wrapper —
-	   acts like opening + closing punctuation on the spread. Use the
-	   single-post__content as the relative container; positions are
-	   absolute relative to its full height so they bookend the body. */
-	body.single .single-post__content {
-		position: relative;
-	}
+	/* Article bookends — top-right ✺ in ut-orange, bottom-left ✦ in
+	   sky-blue. Two glyphs per post, no matter how long. Matches the
+	   About page's two-sparkle rhythm. */
 	body.single .single-post__content::before {
 		content: "✺";
 		position: absolute;
@@ -5194,22 +5200,6 @@ body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-
 		line-height: 1;
 		color: var(--cr-sky-blue, #8ecae6);
 		transform: rotate(18deg);
-		pointer-events: none;
-	}
-
-	/* (5) Blockquote gets a small ✦ flourish in the right gutter —
-	   marks pulled-quote moments without competing with the quote's
-	   own treatment. */
-	body.single .single-post__content > blockquote::after {
-		content: "✦";
-		position: absolute;
-		top: 1rem;
-		right: -2.5rem;
-		font-family: var(--cr-font-accent);
-		font-size: 1.5rem;
-		line-height: 1;
-		color: var(--cr-prussian-blue, #023047);
-		transform: rotate(-10deg);
 		pointer-events: none;
 	}
 }
