@@ -476,8 +476,8 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
   font-weight: var(--cr-weight-bold);
   text-transform: uppercase;
   letter-spacing: var(--cr-tracking-eyebrow);
-  background: var(--cr-surface);
-  color: var(--cr-tape-ink);                       /* russian-violet on ivory — 15:1 (was on cream tape; moved to ivory for AA accent variety) */
+  background: var(--wp--preset--color--primary-accent, #bcb5e3);  /* periwinkle — AA-clean against russian-violet ink */
+  color: var(--cr-tape-ink);                       /* russian-violet — 8:1 on periwinkle */
   padding: var(--cr-space-3xs) var(--cr-space-sm);
   border-left: 4px solid transparent;              /* reserve the 4px; --type modifiers fill it */
   transform: rotate(var(--cr-rotate-neg));
@@ -3489,60 +3489,69 @@ body.home .homepage__content > .has-base-background-color {
 }
 
 /* Position 1 in rotation: printer-ivory / photocopier-black */
-body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+2) {
+body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):not(.has-main-accent-background-color):nth-of-type(3n+2) {
 	background-color: var(--cr-printer-ivory, #fbfaf5) !important;
 	color: var(--cr-russian-violet, #241c4a) !important;
 }
 
-:root[data-theme="dark"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+2) {
+:root[data-theme="dark"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):not(.has-main-accent-background-color):nth-of-type(3n+2) {
 	background-color: var(--cr-photocopier-black, #1a1714) !important;
 	color: var(--cr-printer-ivory, #fbfaf5) !important;
 }
 
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme]) body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+2),
-	:root[data-theme="system"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+2) {
+	:root:not([data-theme]) body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):not(.has-main-accent-background-color):nth-of-type(3n+2),
+	:root[data-theme="system"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):not(.has-main-accent-background-color):nth-of-type(3n+2) {
 		background-color: var(--cr-photocopier-black, #1a1714) !important;
 		color: var(--cr-printer-ivory, #fbfaf5) !important;
 	}
 }
 
 /* Position 2 in rotation: tertiary peach / russian-violet-soft */
-body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n) {
+body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):not(.has-main-accent-background-color):nth-of-type(3n) {
 	background-color: var(--cr-tertiary, #fee2c3) !important;
 	color: var(--cr-russian-violet, #241c4a) !important;
 }
 
-:root[data-theme="dark"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n) {
+:root[data-theme="dark"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):not(.has-main-accent-background-color):nth-of-type(3n) {
 	background-color: var(--cr-russian-violet-soft, #3d2f6e) !important;
 	color: var(--cr-printer-ivory, #fbfaf5) !important;
 }
 
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme]) body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n),
-	:root[data-theme="system"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n) {
+	:root:not([data-theme]) body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):not(.has-main-accent-background-color):nth-of-type(3n),
+	:root[data-theme="system"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):not(.has-main-accent-background-color):nth-of-type(3n) {
 		background-color: var(--cr-russian-violet-soft, #3d2f6e) !important;
 		color: var(--cr-printer-ivory, #fbfaf5) !important;
 	}
 }
 
 /* Position 3 in rotation: glaucous-light / prussian-blue */
-body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+1) {
+body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):not(.has-main-accent-background-color):nth-of-type(3n+1) {
 	background-color: var(--cr-glaucous-light, #c7d3f3) !important;
 	color: var(--cr-russian-violet, #241c4a) !important;
 }
 
-:root[data-theme="dark"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+1) {
+:root[data-theme="dark"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):not(.has-main-accent-background-color):nth-of-type(3n+1) {
 	background-color: var(--cr-prussian-blue, #023047) !important;
 	color: var(--cr-printer-ivory, #fbfaf5) !important;
 }
 
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme]) body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+1),
-	:root[data-theme="system"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):nth-of-type(3n+1) {
+	:root:not([data-theme]) body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):not(.has-main-accent-background-color):nth-of-type(3n+1),
+	:root[data-theme="system"] body.home .homepage__content > .alignfull:not(.has-cerulean-background-color):not(.has-sky-blue-background-color):not(.has-tertiary-background-color):not(.has-primary-background-color):not(.has-main-accent-background-color):nth-of-type(3n+1) {
 		background-color: var(--cr-prussian-blue, #023047) !important;
 		color: var(--cr-printer-ivory, #fbfaf5) !important;
 	}
+}
+
+/* (2b) v0.4.16: home main-accent sections opt out of rotation AND get a
+   faint paper texture so they read as printed pages, not flat color. */
+body.home .homepage__content > .alignfull.has-main-accent-background-color {
+	background-image: var(--cr-fiber), var(--cr-halftone);
+	background-size: auto, var(--cr-halftone-size);
+	background-blend-mode: multiply, multiply;
+	background-repeat: repeat, repeat;
 }
 
 /* (3) Inside any rotation-bg section, paragraph/list/heading text
