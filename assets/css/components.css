@@ -1046,7 +1046,13 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
    easing curve so it lands with a slight bounce, reinforcing the
    "switch" feel vs. the previous "three buttons" feel. */
 .cr-theme-segments {
-	position: relative;
+	/* v0.5.43 — !important required to defeat the earlier
+	   .site-header__controls .cr-theme-segments rule at L804 which
+	   set position: static !important. Without this, the absolute-
+	   positioned indicator escapes to the next-up `position: relative`
+	   ancestor (the header), rendering as a giant pill behind the
+	   wordmark (image #129). */
+	position: relative !important;
 	display: inline-grid;
 	grid-template-columns: repeat(3, 1fr);
 	align-items: center;
@@ -1351,7 +1357,11 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 .cr-wordmark {
 	font-family: var(--cr-font-display, "Rock Salt", "Bradley Hand", cursive);
 	font-size: clamp(1.25rem, 1rem + 0.7vw, 1.65rem);
-	font-weight: 400;
+	/* v0.5.43 — bumped weight from 400 to 700. Rock Salt is naturally
+	   heavy at 400 (it's a hand-lettered display face), but the
+	   variable-axis 700 picks up extra ink density that reads
+	   stronger as a brand mark in the nav. */
+	font-weight: 700;
 	line-height: 1;
 	color: var(--cr-ink, #241c4a);
 	/* v0.5.10: !important needed because Ollie's parent anchor rule
