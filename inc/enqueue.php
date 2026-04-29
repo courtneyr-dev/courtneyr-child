@@ -196,3 +196,27 @@ function enqueue_icons_inject(): void {
 	);
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_icons_inject' );
+
+
+/**
+ * v0.5.21 — Re-skin the wp-admin chrome in the courtneyr.dev palette.
+ *
+ * The admin runs on its own CSS and doesn't see tokens.css or
+ * components.css. assets/css/admin.css inlines the design tokens as
+ * fallbacks and overrides the stable wp-admin selectors (top bar,
+ * sidebar, buttons, links, list tables, notices, postboxes).
+ *
+ * Loaded on every admin page via admin_enqueue_scripts. The block
+ * editor canvas is intentionally NOT restyled here — the theme's
+ * own CSS handles editor canvas; this stylesheet only touches the
+ * admin chrome around it.
+ */
+function enqueue_admin_styles(): void {
+	wp_enqueue_style(
+		'courtneyr-admin',
+		COURTNEYR_CHILD_URI . '/assets/css/admin.css',
+		array(),
+		COURTNEYR_CHILD_VERSION
+	);
+}
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\enqueue_admin_styles' );

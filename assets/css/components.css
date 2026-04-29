@@ -6022,9 +6022,10 @@ input.wp-block-search__input:focus,
           physical object on the page — it doesn't theme-flip.
      ============================================================ */
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) {
-	background: var(--cr-printer-ivory, #fbfaf5) !important;
-	border-radius: 0 !important; /* override inline 10px → straight outer */
-	padding: 14px 14px 60px 14px !important;
+	background: #ffffff !important; /* pure white polaroid paper */
+	border-radius: 0 !important; /* outer corners straight */
+	padding: 12px 12px 38px 12px !important; /* tight frame */
+	min-height: 0 !important; /* don't stretch beyond image aspect */
 	box-shadow: 12px 12px 0 var(--cr-russian-violet, #241c4a);
 	transform: rotate(-1.5deg);
 	transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -6036,38 +6037,45 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]):hover {
 }
 /* Inset the photo so the white frame is visible around it; round
    only the INNER corners (where photo meets frame). */
-body.home .wp-block-cover:has(img[src*="courtney-pirate"]) > img.wp-block-cover__image-background,
-body.home .wp-block-cover:has(img[src*="courtney-pirate"]) > .wp-block-cover__background {
-	top: 14px !important;
-	right: 14px !important;
-	bottom: 60px !important;
-	left: 14px !important;
+body.home .wp-block-cover:has(img[src*="courtney-pirate"]) > img.wp-block-cover__image-background {
+	top: 12px !important;
+	right: 12px !important;
+	bottom: 38px !important;
+	left: 12px !important;
 	width: auto !important;
 	height: auto !important;
-	border-radius: 8px !important;
+	border-radius: 6px !important;
 	object-fit: cover;
 }
-/* Caption — black-ish russian-violet on the white bottom strip,
-   hand-drawn display font, small caps treatment to match the
-   polaroid-handwriting reference. */
+/* HIDE the dark dim overlay entirely — was producing the gray
+   shaded box behind the caption (image #104). The polaroid frame
+   doesn't need the cover block's overlay; the caption sits on the
+   plain white paper. */
+body.home .wp-block-cover:has(img[src*="courtney-pirate"]) > .wp-block-cover__background {
+	display: none !important;
+}
+/* Caption — pure black on the white frame strip, no background,
+   no overlay, hand-drawn display font for polaroid feel. */
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container {
-	color: var(--cr-russian-violet, #241c4a) !important;
-	font-family: var(--cr-font-display, var(--cr-font-accent, "Rock Salt", cursive)) !important;
-	margin-bottom: 0 !important;
-	padding-bottom: 0 !important;
+	color: #000 !important;
+	background: transparent !important;
+	margin: 0 !important;
+	padding: 0 12px !important;
 	z-index: 2;
 }
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h1,
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h2,
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h3,
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container p {
-	color: var(--cr-russian-violet, #241c4a) !important;
-	font-family: var(--cr-font-display, var(--cr-font-accent, cursive)) !important;
-	font-size: 0.78rem !important;
-	font-weight: 700 !important;
-	line-height: 1.25 !important;
+	color: #000 !important;
+	background: transparent !important;
 	text-shadow: none !important;
+	font-family: var(--cr-font-display, var(--cr-font-accent, cursive)) !important;
+	font-size: 0.72rem !important;
+	font-weight: 700 !important;
+	line-height: 1.3 !important;
 	margin: 0 !important;
+	letter-spacing: 0.01em;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -6080,25 +6088,24 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inne
 	}
 }
 
-/* Dark mode — white frame STAYS WHITE (per user direction).
-   A polaroid is a physical object; it doesn't theme-flip. The
-   caption text stays dark because it sits on the white frame. */
+/* Dark mode — white frame STAYS WHITE + caption STAYS BLACK.
+   A polaroid is a physical object; it doesn't theme-flip. */
 :root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) {
-	background: var(--cr-printer-ivory, #fbfaf5) !important;
+	background: #ffffff !important;
 }
 :root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container,
 :root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container * {
-	color: var(--cr-russian-violet, #241c4a) !important;
+	color: #000 !important;
 }
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]),
 	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) {
-		background: var(--cr-printer-ivory, #fbfaf5) !important;
+		background: #ffffff !important;
 	}
 	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container,
 	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container *,
 	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container,
 	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container * {
-		color: var(--cr-russian-violet, #241c4a) !important;
+		color: #000 !important;
 	}
 }

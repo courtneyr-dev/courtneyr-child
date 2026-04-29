@@ -1,0 +1,316 @@
+/* =============================================================================
+   courtneyr.dev admin theme — re-skin wp-admin in the site palette.
+
+   Loaded via inc/enqueue.php on `admin_enqueue_scripts`. Targets the
+   stable WP admin selectors: #wpadminbar (top bar), #adminmenuwrap
+   (sidebar), #wpwrap, .wp-core-ui buttons, links, etc.
+
+   Color vocabulary mirrors the front-end:
+     - Russian violet (#241c4a) → admin chrome (top bar, sidebar)
+     - Printer ivory (#fbfaf5)  → content surface
+     - UT orange (#fb8500)      → primary CTAs (Save, Publish)
+     - Cerulean (#126782)       → links + secondary accents
+     - Selective yellow (#ffb703) → focus + highlights
+
+   Tokens are inlined as fallbacks so this file works even if
+   tokens.css isn't loaded in the admin context (which it isn't —
+   tokens.css is front-end-scoped).
+   ============================================================================= */
+
+/* ============ Root variables for admin scope ============ */
+:root {
+	--cr-admin-chrome:       #241c4a;
+	--cr-admin-chrome-hover: #3d2f6e;
+	--cr-admin-surface:      #fbfaf5;
+	--cr-admin-surface-alt:  #f3eedc;
+	--cr-admin-ink:          #241c4a;
+	--cr-admin-ink-inverse:  #fbfaf5;
+	--cr-admin-cta:          #fb8500;
+	--cr-admin-cta-hover:    #e07700;
+	--cr-admin-link:         #126782;
+	--cr-admin-link-hover:   #fb8500;
+	--cr-admin-marker:       #ffb703;
+	--cr-admin-border:       #d4cfeb;
+}
+
+/* ============ Top admin bar ============ */
+#wpadminbar {
+	background: var(--cr-admin-chrome) !important;
+	color: var(--cr-admin-ink-inverse);
+}
+#wpadminbar .ab-top-menu > li > .ab-item,
+#wpadminbar .quicklinks > ul > li > a,
+#wpadminbar .ab-item,
+#wpadminbar a.ab-item,
+#wpadminbar > #wp-toolbar span.ab-label,
+#wpadminbar > #wp-toolbar span.noticon {
+	color: var(--cr-admin-ink-inverse) !important;
+}
+#wpadminbar .ab-top-menu > li:hover > .ab-item,
+#wpadminbar .ab-top-menu > li.hover > .ab-item,
+#wpadminbar .ab-top-menu > li > .ab-item:focus {
+	background: var(--cr-admin-chrome-hover) !important;
+	color: var(--cr-admin-marker) !important;
+}
+#wpadminbar .ab-submenu .ab-item {
+	color: var(--cr-admin-ink-inverse) !important;
+}
+#wpadminbar .ab-sub-wrapper {
+	background: var(--cr-admin-chrome-hover) !important;
+}
+
+/* ============ Sidebar menu (#adminmenu) ============ */
+#adminmenuback,
+#adminmenuwrap,
+#adminmenu,
+#adminmenu .wp-submenu {
+	background: var(--cr-admin-chrome) !important;
+}
+#adminmenu li.wp-menu-separator {
+	background: rgba(251, 250, 245, 0.1) !important;
+	border-color: rgba(251, 250, 245, 0.1) !important;
+}
+#adminmenu a {
+	color: var(--cr-admin-ink-inverse) !important;
+}
+#adminmenu div.wp-menu-image:before,
+#adminmenu .wp-submenu-head {
+	color: var(--cr-admin-ink-inverse) !important;
+}
+#adminmenu li.menu-top:hover,
+#adminmenu li.opensub > a.menu-top,
+#adminmenu li > a.menu-top:focus {
+	background: var(--cr-admin-chrome-hover) !important;
+	color: var(--cr-admin-marker) !important;
+}
+#adminmenu li.menu-top:hover div.wp-menu-image:before,
+#adminmenu li.opensub > a.menu-top div.wp-menu-image:before {
+	color: var(--cr-admin-marker) !important;
+}
+
+/* Active menu item — orange marker accent */
+#adminmenu li.wp-menu-open,
+#adminmenu li.current,
+#adminmenu li a.current,
+#adminmenu li.wp-has-current-submenu > a.menu-top,
+.folded #adminmenu li.current.menu-top,
+.folded #adminmenu li.wp-has-current-submenu {
+	background: var(--cr-admin-cta) !important;
+	color: var(--cr-admin-chrome) !important;
+}
+#adminmenu li.wp-menu-open div.wp-menu-image:before,
+#adminmenu li.current div.wp-menu-image:before,
+#adminmenu li.wp-has-current-submenu div.wp-menu-image:before {
+	color: var(--cr-admin-chrome) !important;
+}
+#adminmenu li.wp-has-current-submenu .wp-submenu .wp-submenu-head,
+#adminmenu .wp-submenu .wp-submenu-head {
+	background: var(--cr-admin-chrome-hover) !important;
+	color: var(--cr-admin-marker) !important;
+}
+
+/* Submenu items */
+#adminmenu .wp-submenu a {
+	color: rgba(251, 250, 245, 0.85) !important;
+}
+#adminmenu .wp-submenu a:hover,
+#adminmenu .wp-submenu a:focus,
+#adminmenu .wp-submenu li.current a {
+	color: var(--cr-admin-marker) !important;
+	background: transparent !important;
+}
+
+/* Collapse button at bottom of sidebar */
+#collapse-menu {
+	color: rgba(251, 250, 245, 0.7) !important;
+}
+#collapse-menu:hover {
+	color: var(--cr-admin-marker) !important;
+}
+
+/* ============ Primary content area ============ */
+html.wp-toolbar {
+	background: var(--cr-admin-surface);
+}
+#wpbody-content {
+	color: var(--cr-admin-ink);
+}
+
+/* Headings */
+.wrap h1,
+.wrap h1.wp-heading-inline,
+#wpbody-content h2 {
+	color: var(--cr-admin-ink);
+}
+
+/* ============ Buttons (.wp-core-ui) ============ */
+.wp-core-ui .button-primary {
+	background: var(--cr-admin-cta) !important;
+	border-color: var(--cr-admin-cta) !important;
+	color: var(--cr-admin-chrome) !important;
+	text-shadow: none !important;
+	box-shadow: 2px 2px 0 var(--cr-admin-chrome) !important;
+	font-weight: 700 !important;
+}
+.wp-core-ui .button-primary:hover,
+.wp-core-ui .button-primary:focus,
+.wp-core-ui .button-primary:active {
+	background: var(--cr-admin-cta-hover) !important;
+	border-color: var(--cr-admin-cta-hover) !important;
+	color: var(--cr-admin-chrome) !important;
+	box-shadow: 1px 1px 0 var(--cr-admin-chrome) !important;
+	transform: translate(1px, 1px);
+}
+.wp-core-ui .button-primary:focus {
+	outline: 2px solid var(--cr-admin-marker) !important;
+	outline-offset: 2px;
+}
+
+.wp-core-ui .button,
+.wp-core-ui .button-secondary {
+	background: var(--cr-admin-surface) !important;
+	border-color: var(--cr-admin-chrome) !important;
+	color: var(--cr-admin-chrome) !important;
+}
+.wp-core-ui .button:hover,
+.wp-core-ui .button-secondary:hover {
+	background: var(--cr-admin-surface-alt) !important;
+	border-color: var(--cr-admin-chrome) !important;
+	color: var(--cr-admin-chrome) !important;
+}
+
+/* ============ Links inside content ============ */
+#wpbody-content a:not(.button):not(.button-primary):not(.media-menu-item):not(.row-title):not(.wp-color-result),
+.wrap a:not(.button):not(.button-primary):not(.row-title) {
+	color: var(--cr-admin-link);
+}
+#wpbody-content a:not(.button):not(.button-primary):not(.media-menu-item):hover,
+.wrap a:not(.button):not(.button-primary):hover {
+	color: var(--cr-admin-link-hover);
+}
+
+/* Row titles in list tables — make them prominent */
+.row-title {
+	color: var(--cr-admin-ink) !important;
+	font-weight: 700;
+}
+.row-title:hover {
+	color: var(--cr-admin-link-hover) !important;
+}
+
+/* ============ Notices ============ */
+.notice,
+div.error,
+div.updated {
+	border-left-width: 4px !important;
+	background: var(--cr-admin-surface) !important;
+}
+.notice-success,
+div.updated {
+	border-left-color: var(--cr-admin-cta) !important;
+}
+.notice-info {
+	border-left-color: var(--cr-admin-link) !important;
+}
+.notice-warning {
+	border-left-color: var(--cr-admin-marker) !important;
+}
+.notice-error,
+div.error {
+	border-left-color: #d63240 !important;
+}
+
+/* ============ Form inputs ============ */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="url"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+textarea:focus,
+select:focus {
+	border-color: var(--cr-admin-link) !important;
+	box-shadow: 0 0 0 1px var(--cr-admin-link) !important;
+	outline: 2px solid transparent !important;
+}
+
+/* ============ List tables ============ */
+.wp-list-table thead th,
+.wp-list-table tfoot th {
+	background: var(--cr-admin-surface-alt) !important;
+	color: var(--cr-admin-ink) !important;
+	font-weight: 700;
+}
+.wp-list-table thead th a,
+.wp-list-table tfoot th a {
+	color: var(--cr-admin-ink) !important;
+}
+.wp-list-table tbody tr:hover,
+.wp-list-table tbody tr:focus-within {
+	background: rgba(251, 183, 3, 0.08) !important;
+}
+
+/* ============ Tabs (nav-tab) ============ */
+.nav-tab-active,
+.nav-tab-active:hover,
+.nav-tab-active:focus {
+	background: var(--cr-admin-surface) !important;
+	border-bottom-color: var(--cr-admin-surface) !important;
+	color: var(--cr-admin-ink) !important;
+	font-weight: 700;
+}
+.nav-tab {
+	background: var(--cr-admin-surface-alt) !important;
+	border-color: var(--cr-admin-border) !important;
+	color: var(--cr-admin-ink) !important;
+}
+.nav-tab:hover,
+.nav-tab:focus {
+	background: var(--cr-admin-surface) !important;
+	color: var(--cr-admin-link-hover) !important;
+}
+
+/* ============ Postbox / metabox ============ */
+.postbox {
+	border-color: var(--cr-admin-border) !important;
+	background: var(--cr-admin-surface) !important;
+}
+.postbox > .postbox-header {
+	border-bottom-color: var(--cr-admin-border) !important;
+	background: var(--cr-admin-surface-alt) !important;
+}
+.postbox .hndle {
+	color: var(--cr-admin-ink) !important;
+}
+
+/* ============ "At a glance" dashboard widget icons ============ */
+#dashboard_right_now li a:before,
+#dashboard_right_now li span:before {
+	color: var(--cr-admin-link) !important;
+}
+
+/* ============ Block editor canvas frame (admin chrome only) ============
+   Don't override the canvas itself — the theme's own styles handle that.
+   Just tint the editor toolbar + sidebar to match the rest of admin. */
+.edit-post-header,
+.editor-header {
+	background: var(--cr-admin-surface) !important;
+	border-bottom: 1px solid var(--cr-admin-border) !important;
+}
+.edit-post-sidebar,
+.editor-sidebar {
+	background: var(--cr-admin-surface) !important;
+}
+
+/* ============ "Howdy, [user]" greeting + account chrome ============ */
+#wpadminbar #wp-admin-bar-my-account .display-name,
+#wpadminbar #wp-admin-bar-user-info .display-name,
+#wpadminbar #wp-admin-bar-user-info .username {
+	color: var(--cr-admin-ink-inverse) !important;
+}
+
+/* ============ Body class hooks for subtle handle ============ */
+body.wp-admin {
+	color: var(--cr-admin-ink);
+}
