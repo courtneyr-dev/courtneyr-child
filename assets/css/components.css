@@ -3917,9 +3917,15 @@ body.blog button[type="submit"]:hover {
 	text-align: left !important;
 }
 /* v0.5.9: Force left alignment on the body too — wp:group's
-   constrained layout was centering content. */
-.cr-archive .cr-stream-item__body {
-	text-align: left;
+   constrained layout was centering content.
+   v0.5.12: also force left-align on the meta row's children directly,
+   because `text-align:center` was bleeding through from a parent's
+   constrained layout on category-archive views (image #88). */
+.cr-archive .cr-stream-item__body,
+.cr-archive .cr-stream-item__body > *,
+.cr-archive .cr-stream-item__meta,
+.cr-archive .cr-stream-item__meta > * {
+	text-align: left !important;
 }
 .cr-archive .cr-stream-item__meta time,
 .cr-archive .cr-stream-item__meta .wp-block-post-date {
@@ -3927,15 +3933,32 @@ body.blog button[type="submit"]:hover {
 	font-family: var(--cr-font-accent);
 	font-weight: 500;
 }
+
+/* v0.5.12: Category as a chip (periwinkle tape) with opposite tilt to
+   the format chip — when both render in the same meta row, format
+   chip leans -3deg (left) and category chip leans +3deg (right) so
+   they read as two stuck-on labels, not stacked twins.
+
+   Was previously plain uppercase text. Image #86 user feedback: chip
+   styling reads better against the meta row, and the opposite tilt
+   makes the pair feel hand-applied. */
 .cr-archive .cr-stream-item__category {
+	display: inline-block;
 	font-family: var(--cr-font-accent);
 	font-size: var(--cr-text-xs, 0.7rem);
 	font-weight: var(--cr-weight-bold, 700);
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
+	background: var(--wp--preset--color--primary-accent, #bcb5e3);
+	color: var(--cr-tape-ink, var(--cr-russian-violet, #241c4a));
+	padding: var(--cr-space-3xs, 0.15em) var(--cr-space-sm, 0.7em);
+	border-left: 4px solid transparent;
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+	transform: rotate(var(--cr-rotate-2, 3deg));
+	vertical-align: middle;
 }
 .cr-archive .cr-stream-item__category a {
-	color: var(--cr-ink-muted);
+	color: inherit;
 	text-decoration: none;
 }
 .cr-archive .cr-stream-item__category a:hover {
@@ -5201,5 +5224,69 @@ body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-
 		color: var(--cr-sky-blue, #8ecae6);
 		transform: rotate(18deg);
 		pointer-events: none;
+	}
+}
+
+
+/* ============================================================
+   v0.5.12 — Torn-paper edges on home Newsletter Features section.
+     The periwinkle "How this newsletter can help you grow" section
+     has flat horizontal top + bottom borders against the ivory
+     surfaces above/below. Replace those flat lines with ragged
+     torn-paper edges so the section reads like a paper strip ripped
+     from the surrounding zine page.
+
+     Approach: ::before + ::after pseudo-elements positioned at the
+     section's top and bottom. Each contains an inline SVG with a
+     jagged path filled in ivory (light) or night-elevated (dark) —
+     the periwinkle below the jagged edge shows through the SVG's
+     transparent area. ::after gets transform: scaleY(-1) so the
+     same SVG produces an upward-facing tear at the bottom.
+
+     The :has() selector pins this to one specific section — the one
+     containing the section's anchor heading — so the effect doesn't
+     leak to other periwinkle/primary-accent surfaces.
+   ============================================================ */
+
+body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow) {
+	position: relative;
+}
+
+body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow)::before,
+body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow)::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 14px;
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 14' preserveAspectRatio='none'><path fill='%23fbfaf5' d='M0,0 L320,0 L320,7 L312,4 L305,9 L296,5 L287,2 L278,8 L269,4 L259,9 L249,5 L240,7 L230,3 L220,8 L210,5 L200,9 L190,4 L180,7 L170,3 L160,8 L150,5 L140,9 L130,4 L120,7 L110,3 L100,8 L90,5 L80,9 L70,4 L60,7 L50,3 L40,8 L30,5 L20,9 L10,4 L0,7 Z'/></svg>");
+	background-size: 320px 14px;
+	background-repeat: repeat-x;
+	pointer-events: none;
+	z-index: 1;
+}
+
+body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow)::before {
+	top: 0;
+}
+
+body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow)::after {
+	bottom: 0;
+	transform: scaleY(-1);
+}
+
+/* Dark-mode tear: ivory above flips to night-elevated, so the SVG
+   fill must flip too. Three paths (explicit, default-system,
+   prefers-media) match the project's standard dark-mode trio. */
+:root[data-theme="dark"] body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow)::before,
+:root[data-theme="dark"] body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow)::after {
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 14' preserveAspectRatio='none'><path fill='%23251f1c' d='M0,0 L320,0 L320,7 L312,4 L305,9 L296,5 L287,2 L278,8 L269,4 L259,9 L249,5 L240,7 L230,3 L220,8 L210,5 L200,9 L190,4 L180,7 L170,3 L160,8 L150,5 L140,9 L130,4 L120,7 L110,3 L100,8 L90,5 L80,9 L70,4 L60,7 L50,3 L40,8 L30,5 L20,9 L10,4 L0,7 Z'/></svg>");
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow)::before,
+	:root:not([data-theme]) body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow)::after,
+	:root[data-theme="system"] body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow)::before,
+	:root[data-theme="system"] body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow)::after {
+		background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 14' preserveAspectRatio='none'><path fill='%23251f1c' d='M0,0 L320,0 L320,7 L312,4 L305,9 L296,5 L287,2 L278,8 L269,4 L259,9 L249,5 L240,7 L230,3 L220,8 L210,5 L200,9 L190,4 L180,7 L170,3 L160,8 L150,5 L140,9 L130,4 L120,7 L110,3 L100,8 L90,5 L80,9 L70,4 L60,7 L50,3 L40,8 L30,5 L20,9 L10,4 L0,7 Z'/></svg>");
 	}
 }
