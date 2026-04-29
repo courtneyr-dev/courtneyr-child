@@ -5661,21 +5661,25 @@ header.is-position-sticky {
 	overflow: visible !important;
 }
 
-/* v0.5.36: full-viewport width on the outermost sticky wrapper.
-   The Site Editor-saved Group wrapping the template-part inherits
-   the constrained content-size from .wp-site-blocks layout — so
-   the nav bar didn't extend to the screen edges, leaving periwinkle
-   gaps left + right of the ivory strip (image #120 close-up).
-   Negative-margin breakout technique forces the bar to span the
-   full viewport: 50vw - 50% on each side cancels any centering
-   constraint regardless of parent max-width. */
+/* v0.5.46: full-viewport width on the outermost sticky wrapper.
+   v0.5.36 used `width: 100vw` + `margin: calc(50% - 50vw)` negative
+   breakout. That works when parent has padding to escape from. Now
+   that the sticky wrapper sits directly under `.wp-site-blocks` (which
+   has no horizontal padding), the calc evaluates to 0 — but on browsers
+   where `vw` includes the scrollbar (Firefox + Windows Chrome with
+   classic scrollbars), `100vw` is wider than `100%`, producing a
+   sub-pixel offset that leaves a visible left-edge gap (image #131).
+   Fix: use `width: 100%` (matches parent width exactly, scrollbar-safe)
+   with `margin: 0`. Parent `.wp-site-blocks` has no horizontal padding
+   so this fills the visible viewport edge-to-edge across all browsers. */
 .wp-block-group.is-position-sticky,
 header.is-position-sticky,
 .wp-block-group:has(> .site-header) {
-	margin-left: calc(50% - 50vw) !important;
-	margin-right: calc(50% - 50vw) !important;
-	width: 100vw !important;
-	max-width: 100vw !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+	margin-inline: 0 !important;
+	width: 100% !important;
+	max-width: none !important;
 	padding-left: var(--wp--preset--spacing--md, 1rem) !important;
 	padding-right: var(--wp--preset--spacing--md, 1rem) !important;
 	box-sizing: border-box !important;
