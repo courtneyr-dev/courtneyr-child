@@ -3105,10 +3105,12 @@ body.home main.homepage p:not(.has-text-align-center) {
 
 /* Belt-and-suspenders: explicitly nuke any ✦ ::before/::after that
    v0.2.6.6 may have left elsewhere. Recent Posts sparkles use the
-   .wp-block-latest-posts li::before selector and are preserved. */
-body.home main.homepage > .wp-block-post-content h2.wp-block-heading::before,
-body.home main.homepage > .wp-block-post-content h1.wp-block-heading::before,
-body.home main.homepage > .wp-block-post-content h3.wp-block-heading::before,
+   .wp-block-latest-posts li::before selector and are preserved.
+   v0.4.19: explicit opt-out for .cr-flank so headings tagged with that
+   class can still emit sparkle pseudo-elements. */
+body.home main.homepage > .wp-block-post-content h2.wp-block-heading:not(.cr-flank)::before,
+body.home main.homepage > .wp-block-post-content h1.wp-block-heading:not(.cr-flank)::before,
+body.home main.homepage > .wp-block-post-content h3.wp-block-heading:not(.cr-flank)::before,
 body.home main.homepage > .alignfull:not(.wp-block-latest-posts)::after,
 body.home main.homepage > .alignfull:not(.wp-block-latest-posts)::before,
 body.home main.homepage > .wp-block-cover::after,
@@ -3139,20 +3141,46 @@ body.home .wp-block-latest-posts li::before {
 .cr-flank::before,
 .cr-flank::after {
 	content: "✦" !important;
-	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	color: var(--cr-ut-orange, #fb8500);
+	/* Layered text-shadow renders ghost sparkles in two more colors,
+	   so each pseudo-element resolves to 3 visible ✦s in different
+	   positions: orange (base) + yellow (up-right) + blue (down-left). */
+	text-shadow:
+		0.75em -0.35em 0 var(--cr-selective-yellow, #ffb703),
+		-0.55em 0.45em 0 var(--cr-cerulean, #126782);
 	font-size: 0.7em;
 	display: inline-block !important;
-	opacity: 0.85;
+	opacity: 0.95;
 	vertical-align: middle;
 	font-family: var(--cr-font-accent);
 }
 .cr-flank::before {
-	margin-right: 0.4em;
+	margin-right: 0.45em;
 	transform: rotate(-12deg);
 }
 .cr-flank::after {
-	margin-left: 0.4em;
+	margin-left: 0.45em;
 	transform: rotate(12deg);
+}
+/* Dark mode — flip the warm/cool roles so each sparkle stays AA on
+   the dark surfaces. Yellow + sky-blue are both AAA on prussian-blue. */
+:root[data-theme="dark"] .cr-flank::before,
+:root[data-theme="dark"] .cr-flank::after {
+	color: var(--cr-selective-yellow, #ffb703);
+	text-shadow:
+		0.75em -0.35em 0 var(--cr-sky-blue, #8ecae6),
+		-0.55em 0.45em 0 var(--cr-light-orange, #fee2c3);
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .cr-flank::before,
+	:root:not([data-theme]) .cr-flank::after,
+	:root[data-theme="system"] .cr-flank::before,
+	:root[data-theme="system"] .cr-flank::after {
+		color: var(--cr-selective-yellow, #ffb703);
+		text-shadow:
+			0.75em -0.35em 0 var(--cr-sky-blue, #8ecae6),
+			-0.55em 0.45em 0 var(--cr-light-orange, #fee2c3);
+	}
 }
 
 
