@@ -3876,15 +3876,22 @@ body.home .wp-block-post-template > li::after {
 	position: static !important;
 }
 
-/* Top-left — negative offsets so the tape OVERLAPS past the corner
-   edge, half on the photo and half on the surrounding background.
-   Visually reads as a tape strip affixing the photo to the page. */
+/* Top-left — washi-tape strip diagonally crossing the corner.
+   Positioned so the center of the rotated tape sits on the photo's
+   top-left corner; the upper portion extends into the surrounding
+   ivory bg, the lower portion overlaps onto the photo. Wider padding
+   makes it read as a strip rather than a chip; rgba bg adds
+   translucency so the photo edge shows through where they overlap.
+   v0.4.10: -50deg rotation, stretched padding, semi-transparent. */
 .wp-block-cover .is-style-cr-tape-label.cr-tape-pin-tl {
 	position: absolute !important;
-	top: -0.5rem;
-	left: -0.5rem;
+	top: -1.5rem;
+	left: -2.5rem;
 	margin: 0 !important;
-	transform: rotate(-30deg);
+	padding: 0.5em 2.25em !important;
+	background: rgba(243, 229, 184, 0.82) !important;
+	box-shadow: 1px 1px 4px rgba(36, 28, 74, 0.18) !important;
+	transform: rotate(-50deg);
 	transform-origin: center;
 	z-index: 5;
 }
