@@ -4227,30 +4227,37 @@ body.home .wp-block-post-template .wp-block-post-terms:has(a + a) a:nth-child(4n
 	flex-wrap: wrap;
 	gap: var(--cr-space-2xs, 0.35rem);
 }
-.cr-archive .cr-stream-item__tags a {
+.cr-archive .cr-stream-item__tags a,
+body.single .single-post__tags a {
 	transition: transform 0.15s ease, background-color 0.15s ease;
 }
-.cr-archive .cr-stream-item__tags a:nth-child(6n+1) {
+.cr-archive .cr-stream-item__tags a:nth-child(6n+1),
+body.single .single-post__tags a:nth-child(6n+1) {
 	background: var(--cr-cerulean, #126782) !important;
 	color: var(--cr-printer-ivory, #fbfaf5) !important;
 }
-.cr-archive .cr-stream-item__tags a:nth-child(6n+2) {
+.cr-archive .cr-stream-item__tags a:nth-child(6n+2),
+body.single .single-post__tags a:nth-child(6n+2) {
 	background: var(--cr-russian-violet, #241c4a) !important;
 	color: var(--cr-selective-yellow, #ffb703) !important;
 }
-.cr-archive .cr-stream-item__tags a:nth-child(6n+3) {
+.cr-archive .cr-stream-item__tags a:nth-child(6n+3),
+body.single .single-post__tags a:nth-child(6n+3) {
 	background: var(--cr-prussian-blue, #023047) !important;
 	color: var(--cr-light-orange, #fee2c3) !important;
 }
-.cr-archive .cr-stream-item__tags a:nth-child(6n+4) {
+.cr-archive .cr-stream-item__tags a:nth-child(6n+4),
+body.single .single-post__tags a:nth-child(6n+4) {
 	background: var(--cr-ut-orange, #fb8500) !important;
 	color: var(--cr-russian-violet, #241c4a) !important;
 }
-.cr-archive .cr-stream-item__tags a:nth-child(6n+5) {
+.cr-archive .cr-stream-item__tags a:nth-child(6n+5),
+body.single .single-post__tags a:nth-child(6n+5) {
 	background: var(--cr-glaucous, #647baf) !important;
 	color: var(--cr-printer-ivory, #fbfaf5) !important;
 }
-.cr-archive .cr-stream-item__tags a:nth-child(6n) {
+.cr-archive .cr-stream-item__tags a:nth-child(6n),
+body.single .single-post__tags a:nth-child(6n) {
 	background: var(--cr-blue-green, #219ebc) !important;
 	color: var(--cr-russian-violet, #241c4a) !important;
 }
@@ -5259,6 +5266,60 @@ body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow
 	transform: rotate(1.5deg);
 }
 
+/* v0.5.19: subtle hover rotation — flip each card's tilt to the
+   opposite direction at the same magnitude. Transform-only, short
+   transition, respects prefers-reduced-motion (WCAG 2.3.3 AAA).
+   :focus-within keyboard parity. */
+body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card {
+	transition: transform 0.3s ease;
+}
+body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(1):hover,
+body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(1):focus-within {
+	transform: rotate(1.8deg);
+}
+body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(2):hover,
+body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(2):focus-within {
+	transform: rotate(-1.2deg);
+}
+body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(3):hover,
+body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(3):focus-within {
+	transform: rotate(0.7deg);
+}
+body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(4):hover,
+body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(4):focus-within {
+	transform: rotate(-1.5deg);
+}
+@media (prefers-reduced-motion: reduce) {
+	body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card {
+		transition: none;
+	}
+	body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:hover,
+	body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:focus-within {
+		transform: revert;
+	}
+}
+
+
+/* v0.5.19: sticky site header. Stays pinned to viewport top while
+   content scrolls. Reading-progress bar (z:9999) sits above it;
+   page content sits behind. Background forced to cr-surface so
+   content doesn't show through during scroll. */
+.site-header {
+	position: sticky;
+	top: 0;
+	z-index: 50;
+	background: var(--cr-surface, var(--cr-printer-ivory, #fbfaf5));
+}
+:root[data-theme="dark"] .site-header {
+	background: var(--cr-night-elevated, #251f1c);
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .site-header,
+	:root[data-theme="system"] .site-header {
+		background: var(--cr-night-elevated, #251f1c);
+	}
+}
+
 
 /* ============================================================
    v0.5.10 — Single post margin glyphs.
@@ -5304,11 +5365,17 @@ body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow
 		position: relative;
 	}
 
-	/* Sparse paragraph rhythm — ✦ in the left gutter, only every 13th
-	   paragraph. nth-of-type counts paragraphs only, skipping h2/h3.
-	   Long posts get extra scatter; short posts (under ~13 paragraphs)
-	   show only the bookends. */
-	body.single .single-post__content > p:nth-of-type(13n+5) {
+	/* Sparse paragraph rhythm — alternating left/right gutters so
+	   margin glyphs distribute across both sides of the column.
+	   v0.5.11 placed ALL margin glyphs on the left (every 13th p);
+	   user feedback (image #99) noted the imbalance. v0.5.19 splits
+	   into two offset strides so the eye sees scatter on both sides:
+	     - 13n+5 → left  ✦ in selective-yellow
+	     - 13n+11 → right ✺ in cerulean
+	   Net density per post stays small (~2 glyphs per 13 paragraphs)
+	   so the page still reads zine, not algorithmic. */
+	body.single .single-post__content > p:nth-of-type(13n+5),
+	body.single .single-post__content > p:nth-of-type(13n+11) {
 		position: relative;
 	}
 	body.single .single-post__content > p:nth-of-type(13n+5)::before {
@@ -5321,6 +5388,18 @@ body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow
 		line-height: 1;
 		color: var(--cr-selective-yellow, #ffb703);
 		transform: rotate(-12deg);
+		pointer-events: none;
+	}
+	body.single .single-post__content > p:nth-of-type(13n+11)::after {
+		content: "✺";
+		position: absolute;
+		top: 0.4em;
+		right: -3rem;
+		font-family: var(--cr-font-accent);
+		font-size: 1.6rem;
+		line-height: 1;
+		color: var(--cr-cerulean, #126782);
+		transform: rotate(15deg);
 		pointer-events: none;
 	}
 
@@ -5827,12 +5906,16 @@ input.wp-block-search__input:focus,
 
 .cr-reading-progress {
 	position: fixed;
-	top: 0;
+	top: 0 !important;
 	left: 0;
 	right: 0;
+	margin: 0 !important;
 	height: 3px;
 	background: rgba(36, 28, 74, 0.08);
-	z-index: 100;
+	/* z-index well above the site-header's stacking context so the
+	   bar always sits flush to the very top edge regardless of
+	   intervening fixed/sticky elements. */
+	z-index: 9999;
 	pointer-events: none;
 }
 
@@ -5908,4 +5991,74 @@ input.wp-block-search__input:focus,
 	background: var(--cr-cerulean, #126782);
 	border-color: var(--cr-cerulean, #126782);
 	color: var(--cr-printer-ivory, #fbfaf5);
+}
+
+
+/* ============================================================
+   v0.5.19 — Homepage hero photo: polaroid treatment.
+     The pirate-hat photo on the home hero is a wp:cover block (not
+     a wp:image), so the v0.5.7 cr-page__featured polaroid pattern
+     doesn't directly apply. Use stacked box-shadows to paint the
+     polaroid frame without modifying the actual border (which would
+     push content inward and break the existing She/Her tape +
+     caption-overlay positioning).
+
+     Shadow stack (outermost first):
+       1. Hard russian-violet drop shadow (8px down/right)
+       2. Dark outline ring (14px from edge)
+       3. White ivory inner ring (12px from edge — the "polaroid
+          paper")
+
+     Plus -1.5deg rotation, hover-straightens. Margin gives room
+     for the shadow rings without overlapping siblings. Detection
+     via :has() matches the Cover wherever it appears on the home.
+     WCAG 2.3.3: transform-only animation < 5s, respects prefers-
+     reduced-motion. */
+body.home .wp-block-cover:has(img[src*="courtney-pirate"]) {
+	box-shadow:
+		0 0 0 12px var(--cr-printer-ivory, #fbfaf5),
+		0 0 0 14px var(--cr-russian-violet, #241c4a),
+		18px 18px 0 var(--cr-russian-violet, #241c4a) !important;
+	transform: rotate(-1.5deg);
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+	margin: 1.5rem !important;
+}
+body.home .wp-block-cover:has(img[src*="courtney-pirate"]):hover {
+	transform: rotate(0deg);
+	box-shadow:
+		0 0 0 12px var(--cr-printer-ivory, #fbfaf5),
+		0 0 0 14px var(--cr-russian-violet, #241c4a),
+		22px 22px 0 var(--cr-russian-violet, #241c4a) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+	body.home .wp-block-cover:has(img[src*="courtney-pirate"]) {
+		transition: none;
+	}
+	body.home .wp-block-cover:has(img[src*="courtney-pirate"]):hover {
+		transform: rotate(-1.5deg);
+		box-shadow:
+			0 0 0 12px var(--cr-printer-ivory, #fbfaf5),
+			0 0 0 14px var(--cr-russian-violet, #241c4a),
+			18px 18px 0 var(--cr-russian-violet, #241c4a) !important;
+	}
+}
+/* Dark mode — flip the inner ivory ring to night-elevated so the
+   polaroid frame matches the surrounding dark surface. */
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]),
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]):hover {
+	box-shadow:
+		0 0 0 12px var(--cr-night-elevated, #251f1c),
+		0 0 0 14px var(--cr-printer-ivory, #fbfaf5),
+		18px 18px 0 var(--cr-printer-ivory, #fbfaf5) !important;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]),
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]),
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]):hover,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]):hover {
+		box-shadow:
+			0 0 0 12px var(--cr-night-elevated, #251f1c),
+			0 0 0 14px var(--cr-printer-ivory, #fbfaf5),
+			18px 18px 0 var(--cr-printer-ivory, #fbfaf5) !important;
+	}
 }
