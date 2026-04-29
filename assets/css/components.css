@@ -5300,28 +5300,91 @@ body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow
 }
 
 
-/* v0.5.19: sticky site header. v0.5.22 fix: position:sticky requires
-   no `overflow` (other than `visible`) on any ancestor. Many WP
-   themes (and Ollie) set `overflow-x: hidden` on body or
-   .wp-site-blocks to prevent horizontal scroll, which silently
-   breaks position:sticky on descendants. Override to overflow-x:
-   clip (newer property that prevents horizontal scroll without
-   establishing a scrolling container). */
+/* v0.5.19/22/25: sticky header — aligned with Ollie's official
+   sticky-positioning tutorial (olliewp.com/lesson/using-sticky-
+   positioning-for-sticky-a/).
+
+   How Ollie's pattern works:
+     1. Wrap the wp:template-part header in a wp:group block.
+     2. Set the group's Position attribute to "Sticky" in the
+        editor. WordPress emits class `is-position-sticky` on the
+        group + auto-generates per-block CSS:
+          .wp-container-{N} {
+              top: calc(0px + var(--wp-admin--admin-bar--position-offset, 0px));
+              position: sticky;
+              z-index: 10;
+          }
+     3. The variable accounts for the WP admin bar height when the
+        user is logged in, so the sticky header doesn't hide
+        behind the admin bar.
+
+   Three things must be true for sticky to actually stick:
+     A. NO ancestor has overflow:hidden (or any non-visible
+        overflow that creates a scrolling context). Use clip
+        instead — clips overflow without establishing a scroll
+        container.
+     B. NO ancestor has `transform`, `filter`, or `perspective`
+        (those create new containing blocks that re-anchor sticky).
+     C. The element has a `top:` value (already provided by WP's
+        per-block CSS).
+   ============================================================ */
+
+/* (A) Defeat overflow blockers. Ollie + WP often emit
+   overflow-x: hidden on body/html/wp-site-blocks to prevent
+   horizontal scroll. The `hidden` value silently promotes the
+   y-axis to `auto`, killing sticky descendants. `clip` is the
+   modern equivalent that doesn't establish a scrolling container. */
 html,
 body,
-.wp-site-blocks {
+.wp-site-blocks,
+main.wp-block-group {
 	overflow-x: clip !important;
 	overflow-y: visible !important;
 }
 
+/* (B) Defeat containing-block creation. Sticky descendants are
+   anchored to the nearest scrolling ancestor — but `transform`,
+   `filter`, `perspective`, and `contain` on ancestors break that
+   anchoring by creating a new containing block. Force them off
+   on the page-level wrappers. */
+html,
+body,
+.wp-site-blocks {
+	transform: none !important;
+	filter: none !important;
+	perspective: none !important;
+	contain: none !important;
+}
+
+/* WP admin-bar offset variable — Ollie's pattern. Logged-in users
+   see a 32px (desktop) / 46px (mobile) admin bar at top; sticky
+   elements should offset by that height so they don't tuck under. */
+html :where(.is-position-sticky) {
+	--wp-admin--admin-bar--position-offset: var(--wp-admin--admin-bar--height, 0px);
+}
+@media screen and (max-width: 600px) {
+	html :where(.is-position-sticky) {
+		--wp-admin--admin-bar--position-offset: 0px;
+	}
+}
+
+/* Force-sticky rules: catches three cases —
+     1. .site-header rendered directly (template-part not wrapped)
+     2. Group block wrapping the header (Ollie's canonical pattern)
+     3. Any group user marks as sticky in the editor
+   All three get position:sticky + top:0 + admin-bar-aware offset
+   + z-index high enough to sit above page content but below the
+   reading-progress bar (z:9999) and pagination popovers. */
 .site-header,
-/* If user has wrapped header in a sticky group block, target both */
 .wp-block-group:has(> .site-header),
 .wp-block-group.is-position-sticky {
 	position: sticky !important;
-	top: 0 !important;
+	top: calc(0px + var(--wp-admin--admin-bar--position-offset, 0px)) !important;
 	z-index: 50 !important;
 	background: var(--cr-surface, var(--cr-printer-ivory, #fbfaf5));
+	/* Don't let the sticky element itself become a scrolling
+	   container — would break its own descendants' sticky behavior. */
+	overflow: visible !important;
 }
 :root[data-theme="dark"] .site-header,
 :root[data-theme="dark"] .wp-block-group:has(> .site-header),
