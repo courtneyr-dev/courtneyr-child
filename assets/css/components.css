@@ -761,6 +761,18 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 	align-items: center;
 }
 
+/* v0.5.10: brand gets a bit of breathing room from the left edge so
+   the wordmark doesn't kiss the screen border. Mirror with a small
+   right-side allowance on the controls so the search icon also isn't
+   flush against the screen edge. */
+.site-header__brand {
+	padding-left: var(--cr-space-md, 1rem);
+}
+
+.site-header__controls {
+	padding-right: var(--cr-space-sm, 0.5rem);
+}
+
 .site-header__brand .wp-block-site-title {
 	font-family: var(--wp--preset--font-family--secondary, serif);
 	letter-spacing: 0.01em;
@@ -801,6 +813,10 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 	min-width: 0 !important;
 	cursor: pointer;
 	transition: color 0.15s ease;
+	/* v0.5.10: kill button shadow + drop-shadow filter so the search
+	   icon reads as a flat icon, not a chip. */
+	box-shadow: none !important;
+	filter: none !important;
 }
 .site-header__search .wp-block-search__button svg {
 	width: 24px;
@@ -1141,7 +1157,10 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 	font-weight: 400;
 	line-height: 1;
 	color: var(--cr-ink, #241c4a);
-	text-decoration: none;
+	/* v0.5.10: !important needed because Ollie's parent anchor rule
+	   wins on cascade order otherwise — the wordmark rendered with
+	   the marker-orange underline of regular links. */
+	text-decoration: none !important;
 	letter-spacing: -0.01em;
 	display: inline-block;
 	padding: 0.1em 0.05em 0.2em; /* room for Rock Salt's irregular baseline */
@@ -1152,6 +1171,7 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 .cr-wordmark:focus-visible {
 	color: var(--cr-marker, #ffb703);
 	transform: rotate(-0.5deg);
+	text-decoration: none !important;
 }
 
 .cr-wordmark:focus-visible {
@@ -5046,4 +5066,150 @@ body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-
 }
 body.home .alignfull:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(4) {
 	transform: rotate(1.5deg);
+}
+
+
+/* ============================================================
+   v0.5.10 — Single post margin glyphs.
+     Carry the About page's scattered ✦/✺ flourishes into single
+     posts so long-form reading also feels zine-like. The About
+     pattern places two pseudo-elements on .cr-page__content (top-
+     left ✦, mid-right ✺). Here we extend it: every Nth direct
+     child of the post body gets its own gutter glyph, so the
+     decoration spreads down the page rather than clustering at
+     the top.
+
+     Color rotation through the design palette: yellow, cerulean,
+     orange (marker), glaucous, ut-orange, sky-blue. Sizes are
+     small enough to read as marginalia, not as content.
+
+     Hidden below 1100px (constrained body width + comfortable
+     gutter) to avoid colliding with the running text on narrower
+     viewports. Pseudo-elements are pointer-events:none so they
+     never trap clicks.
+   ============================================================ */
+
+@media (min-width: 1100px) {
+	/* Make every direct child of post body its own positioning
+	   context so absolute-positioned glyphs land in that block's
+	   own gutter, not relative to the article wrapper (which would
+	   stack them all at the top). */
+	body.single .single-post__content > p,
+	body.single .single-post__content > h2,
+	body.single .single-post__content > h3,
+	body.single .single-post__content > h4,
+	body.single .single-post__content > ul,
+	body.single .single-post__content > ol,
+	body.single .single-post__content > blockquote,
+	body.single .single-post__content > .wp-block-image {
+		position: relative;
+	}
+
+	/* (1) Body paragraph rhythm — ✦ on the left margin every 5th p.
+	   nth-of-type counts paragraphs only, skipping h2/h3/blockquotes. */
+	body.single .single-post__content > p:nth-of-type(5n+1)::before {
+		content: "✦";
+		position: absolute;
+		top: 0.1em;
+		left: -3rem;
+		font-family: var(--cr-font-accent);
+		font-size: 1.6rem;
+		line-height: 1;
+		color: var(--cr-selective-yellow, #ffb703);
+		transform: rotate(-12deg);
+		pointer-events: none;
+	}
+
+	/* (2) Right-side ✺ every 7th paragraph, offset from the ✦ rhythm
+	   so the eye sees scatter, not pattern. */
+	body.single .single-post__content > p:nth-of-type(7n+3)::after {
+		content: "✺";
+		position: absolute;
+		top: 0.4em;
+		right: -3rem;
+		font-family: var(--cr-font-accent);
+		font-size: 1.85rem;
+		line-height: 1;
+		color: var(--cr-cerulean, #126782);
+		transform: rotate(15deg);
+		pointer-events: none;
+	}
+
+	/* (3) Subheadings get their own marginalia — ✦ in marker orange
+	   beside body h2s, ✺ in glaucous beside h3s. These complement the
+	   cr-flank treatment on the post title (which stays exclusive to
+	   h2.cr-flank — body h2s typically don't carry that class). */
+	body.single .single-post__content > h2:not(.cr-flank)::before {
+		content: "✦";
+		position: absolute;
+		top: 0.35em;
+		left: -2.5rem;
+		font-family: var(--cr-font-accent);
+		font-size: 1.5rem;
+		line-height: 1;
+		color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+		transform: rotate(-8deg);
+		pointer-events: none;
+	}
+
+	body.single .single-post__content > h3::after {
+		content: "✺";
+		position: absolute;
+		top: 0.4em;
+		right: -2.25rem;
+		font-family: var(--cr-font-accent);
+		font-size: 1.25rem;
+		line-height: 1;
+		color: var(--cr-glaucous, #6c8eb8);
+		transform: rotate(20deg);
+		pointer-events: none;
+	}
+
+	/* (4) Article-level top + bottom flourish on the post wrapper —
+	   acts like opening + closing punctuation on the spread. Use the
+	   single-post__content as the relative container; positions are
+	   absolute relative to its full height so they bookend the body. */
+	body.single .single-post__content {
+		position: relative;
+	}
+	body.single .single-post__content::before {
+		content: "✺";
+		position: absolute;
+		top: -1.5rem;
+		right: -1rem;
+		font-family: var(--cr-font-accent);
+		font-size: 2.5rem;
+		line-height: 1;
+		color: var(--cr-ut-orange, #fb8500);
+		transform: rotate(-15deg);
+		pointer-events: none;
+	}
+	body.single .single-post__content::after {
+		content: "✦";
+		position: absolute;
+		bottom: -1.5rem;
+		left: -2rem;
+		font-family: var(--cr-font-accent);
+		font-size: 2.75rem;
+		line-height: 1;
+		color: var(--cr-sky-blue, #8ecae6);
+		transform: rotate(18deg);
+		pointer-events: none;
+	}
+
+	/* (5) Blockquote gets a small ✦ flourish in the right gutter —
+	   marks pulled-quote moments without competing with the quote's
+	   own treatment. */
+	body.single .single-post__content > blockquote::after {
+		content: "✦";
+		position: absolute;
+		top: 1rem;
+		right: -2.5rem;
+		font-family: var(--cr-font-accent);
+		font-size: 1.5rem;
+		line-height: 1;
+		color: var(--cr-prussian-blue, #023047);
+		transform: rotate(-10deg);
+		pointer-events: none;
+	}
 }
