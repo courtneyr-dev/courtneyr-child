@@ -3812,7 +3812,9 @@ body.blog button[type="submit"]:hover {
 
 /* Format chip — content + left-border color set per post-format,
    driven by the format-X class on the wrapper li. Default styling
-   matches cr-chip but content/color vary by format. */
+   matches cr-chip but content/color vary by format.
+   v0.5.8: un-scoped from .cr-archive, applies anywhere a format-X
+   ancestor is present (archive, single, home Recent Posts loop). */
 .cr-format-chip {
 	display: none;
 	font-family: var(--cr-font-accent);
@@ -3831,40 +3833,43 @@ body.blog button[type="submit"]:hover {
 /* Show the chip when a known format-X class is on the wrapper.
    Each format injects its label via ::before content + sets the
    chip's left-border to the format's design-system color. */
-.cr-archive .format-standard .cr-format-chip,
-.cr-archive .format-blog .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-blog); }
-.cr-archive .format-standard .cr-format-chip::before,
-.cr-archive .format-blog .cr-format-chip::before   { content: "Blog"; }
+/* v0.5.8: format chip rules un-scoped from .cr-archive so the same chip
+   shows on the home Recent Posts loop. The chip self-scopes via its
+   parent's format-X class — no surface needed. */
+.format-standard .cr-format-chip,
+.format-blog .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-blog); }
+.format-standard .cr-format-chip::before,
+.format-blog .cr-format-chip::before   { content: "Blog"; }
 
-.cr-archive .format-aside .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-aside); }
-.cr-archive .format-aside .cr-format-chip::before   { content: "Aside"; }
+.format-aside .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-aside); }
+.format-aside .cr-format-chip::before   { content: "Aside"; }
 
-.cr-archive .format-image .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-image); }
-.cr-archive .format-image .cr-format-chip::before   { content: "Image"; }
+.format-image .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-image); }
+.format-image .cr-format-chip::before   { content: "Image"; }
 
-.cr-archive .format-gallery .cr-format-chip { display: inline-block; border-left-color: var(--cr-type-gallery); }
-.cr-archive .format-gallery .cr-format-chip::before { content: "Gallery"; }
+.format-gallery .cr-format-chip { display: inline-block; border-left-color: var(--cr-type-gallery); }
+.format-gallery .cr-format-chip::before { content: "Gallery"; }
 
-.cr-archive .format-video .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-video); }
-.cr-archive .format-video .cr-format-chip::before   { content: "Video"; }
+.format-video .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-video); }
+.format-video .cr-format-chip::before   { content: "Video"; }
 
-.cr-archive .format-audio .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-audio); }
-.cr-archive .format-audio .cr-format-chip::before   { content: "Audio"; }
+.format-audio .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-audio); }
+.format-audio .cr-format-chip::before   { content: "Audio"; }
 
-.cr-archive .format-chat .cr-format-chip    { display: inline-block; border-left-color: var(--cr-type-chat); }
-.cr-archive .format-chat .cr-format-chip::before    { content: "Chat"; }
+.format-chat .cr-format-chip    { display: inline-block; border-left-color: var(--cr-type-chat); }
+.format-chat .cr-format-chip::before    { content: "Chat"; }
 
-.cr-archive .format-status .cr-format-chip  { display: inline-block; border-left-color: var(--cr-type-status); }
-.cr-archive .format-status .cr-format-chip::before  { content: "Status"; }
+.format-status .cr-format-chip  { display: inline-block; border-left-color: var(--cr-type-status); }
+.format-status .cr-format-chip::before  { content: "Status"; }
 
-.cr-archive .format-link .cr-format-chip    { display: inline-block; border-left-color: var(--cr-type-link); }
-.cr-archive .format-link .cr-format-chip::before    { content: "Link"; }
+.format-link .cr-format-chip    { display: inline-block; border-left-color: var(--cr-type-link); }
+.format-link .cr-format-chip::before    { content: "Link"; }
 
-.cr-archive .format-quote .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-quote); }
-.cr-archive .format-quote .cr-format-chip::before   { content: "Quote"; }
+.format-quote .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-quote); }
+.format-quote .cr-format-chip::before   { content: "Quote"; }
 
-.cr-archive .format-bookmark .cr-format-chip { display: inline-block; border-left-color: var(--cr-type-bookmark); }
-.cr-archive .format-bookmark .cr-format-chip::before { content: "Bookmark"; }
+.format-bookmark .cr-format-chip { display: inline-block; border-left-color: var(--cr-type-bookmark); }
+.format-bookmark .cr-format-chip::before { content: "Bookmark"; }
 
 /* (4d) Title — large condensed display, link inherits ink color,
    underline animates from transparent on hover (matches single-post
