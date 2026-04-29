@@ -16,12 +16,12 @@ declare( strict_types = 1 );
 <!-- wp:html -->
 <div class="cr-stream-filter" data-wp-interactive="courtneyr/stream-filter" data-wp-context='{"format":""}' data-wp-bind--data-active-format="context.format">
 	<div class="cr-stream-filter__chips" role="group" aria-label="Filter posts by format">
-		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="">All</button>
-		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="blog">Blog</button>
-		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="quote">Quote</button>
-		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="link">Link</button>
-		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="gallery">Gallery</button>
-		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="video">Video</button>
+		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="" aria-pressed="true">All</button>
+		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="blog" aria-pressed="false">Blog</button>
+		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="quote" aria-pressed="false">Quote</button>
+		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="link" aria-pressed="false">Link</button>
+		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="gallery" aria-pressed="false">Gallery</button>
+		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="video" aria-pressed="false">Video</button>
 	</div>
 <!-- /wp:html -->
 

@@ -63,6 +63,16 @@
      glaucous-dark   #3d527d  6.19:1    deeper than glaucous; chip-text safe
      sage            #658057  3.50:1    desaturated green for events
      mauve           #9d4e6c  4.47:1    dusty plum for review
+
+     v0.5.31 a11y audit (Q-4) WCAG 1.4.3 contrast caveats:
+     - sage (#658057) on ivory     = 4.21:1   FAILS as text foreground (need 4.5:1)
+     - sage (#658057) on white     = 4.39:1   FAILS as text foreground
+     - glaucous (#647baf) on ivory = 4.02:1   FAILS as text foreground
+     - ut-orange (#fb8500) on light = 2.38:1  FAILS at any size
+     - ut-orange-dark (#b85f00) ivory = 4.30:1 FAILS by 0.2 margin
+     Use these for non-text decoration (chip BACKGROUND, border-left
+     accent, separator, halftone wash) only. For inline text on light
+     surfaces use glaucous-dark or russian-violet.
   */}
 
 

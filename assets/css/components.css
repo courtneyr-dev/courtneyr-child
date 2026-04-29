@@ -1285,6 +1285,14 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 	background-repeat: no-repeat;
 	background-size: 0% 2px;
 	transition: background-size 0.2s ease, color 0.15s ease;
+	/* v0.5.32 — WCAG 2.5.8 minimum 24px touch target on mobile.
+	   Audit S-4 measured some nav links below 24px tall on the 375px
+	   viewport. Inline-flex + min-height ensures the click area
+	   always clears 24px, even when the underline gradient compresses
+	   the line-box. */
+	min-height: 24px;
+	display: inline-flex;
+	align-items: center;
 }
 
 .site-header__nav .wp-block-navigation-item__content:hover,
@@ -1640,11 +1648,26 @@ section.alignfull,
    has no wp:post-title, so dropping that single heading is enough to
    make "Home" never render. Body.home is added by WordPress on the
    front page. */
+/* v0.5.32 — was display:none, which removed the H1 from the AT tree
+   and produced WCAG 1.3.1 / 2.4.6 failures (axe: page-has-heading-one).
+   Switch to the visually-hidden pattern: H1 stays in the DOM and is
+   announced by screen readers, but never paints onscreen. Same pattern
+   as WP core's .screen-reader-text. */
 body.home .wp-block-post-content > .wp-block-heading:first-child,
 body.home .wp-block-post-content > h1:first-child,
 body.home .homepage__content > .wp-block-heading:first-child,
 body.home .homepage__content > h1:first-child {
-	display: none !important;
+	border: 0 !important;
+	clip: rect(1px, 1px, 1px, 1px) !important;
+	-webkit-clip-path: inset(50%) !important;
+	clip-path: inset(50%) !important;
+	height: 1px !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	padding: 0 !important;
+	position: absolute !important;
+	width: 1px !important;
+	white-space: nowrap !important;
 }
 
 /* (3) Homepage content — dark-mode-safe text colors.
@@ -1917,7 +1940,19 @@ body.home main.homepage > .homepage__content > .wp-block-heading:first-child,
 body.home main.homepage > .homepage__content > h1:first-child,
 body.home main.homepage > .wp-block-post-content > .wp-block-heading:first-child,
 body.home main.homepage > .wp-block-post-content > h1:first-child {
-	display: none !important;
+	/* v0.5.32 — visually-hidden instead of display:none so the H1
+	   stays in the AT tree (audit M-2 / WCAG 1.3.1 + 2.4.6). */
+	border: 0 !important;
+	clip: rect(1px, 1px, 1px, 1px) !important;
+	-webkit-clip-path: inset(50%) !important;
+	clip-path: inset(50%) !important;
+	height: 1px !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	padding: 0 !important;
+	position: absolute !important;
+	width: 1px !important;
+	white-space: nowrap !important;
 }
 
 /* Restore visibility for any home-stream-item titles that v0.2.5
@@ -5784,6 +5819,11 @@ body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow
 	transform: rotate(var(--cr-rotate-neg, -3deg));
 	transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
 	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+	/* v0.5.32 — WCAG 2.5.8: minimum 24px touch target. Audit measured
+	   the "All" chip at 51×23px on 375px mobile, 1px short of AA. */
+	min-height: 24px;
+	display: inline-flex;
+	align-items: center;
 }
 /* Alternate tilt direction across the chip row so the line of chips
    reads as hand-applied tape, not a row of identical buttons. */

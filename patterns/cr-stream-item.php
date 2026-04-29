@@ -15,9 +15,9 @@ declare( strict_types = 1 );
 <!-- wp:group {"tagName":"article","className":"cr-stream-item cr-stream-item--blog","layout":{"type":"constrained"}} -->
 <article class="wp-block-group cr-stream-item cr-stream-item--blog">
 
-	<!-- wp:paragraph {"className":"cr-stream-item__avatar"} -->
-	<p class="cr-stream-item__avatar">✦</p>
-	<!-- /wp:paragraph -->
+	<!-- wp:html -->
+	<p class="cr-stream-item__avatar" aria-hidden="true">✦</p>
+	<!-- /wp:html -->
 
 	<!-- wp:group {"className":"cr-stream-item__body","layout":{"type":"constrained"}} -->
 	<div class="wp-block-group cr-stream-item__body">

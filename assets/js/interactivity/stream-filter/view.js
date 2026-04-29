@@ -24,6 +24,20 @@ store( 'courtneyr/stream-filter', {
 			// (the chip text span, etc.) still read the button's
 			// data-format attribute.
 			ctx.format = event.currentTarget.dataset.format || '';
+
+			// v0.5.32 — toggle aria-pressed across the chip group so
+			// screen readers announce the active filter. CSS-only
+			// active state (via [data-active-format] attribute on the
+			// wrapper) was invisible to AT — this exposes it.
+			const group = event.currentTarget.closest( '.cr-stream-filter__chips' );
+			if ( group ) {
+				group.querySelectorAll( '.cr-stream-filter__chip' ).forEach( ( btn ) => {
+					btn.setAttribute(
+						'aria-pressed',
+						btn === event.currentTarget ? 'true' : 'false'
+					);
+				} );
+			}
 		},
 	},
 } );

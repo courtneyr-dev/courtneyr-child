@@ -89,12 +89,20 @@ function transform_callout_block( string $block_content, array $block ): string 
 		return $block_content;
 	}
 
+	// v0.5.32 — generate a per-callout unique id so the toggle button
+	// can carry aria-controls pointing to the body region. Static
+	// counter survives across multiple callouts on the same page.
+	static $callout_counter = 0;
+	$callout_counter++;
+	$callout_id = 'cr-callout-body-' . $callout_counter;
+
 	// Add IA directives to the outer wrapper. Uses single quotes
 	// inside the data-wp-context JSON so the attr's outer quotes can
-	// stay double; works in HTML5 without escaping.
+	// stay double; works in HTML5 without escaping. Also stamps the
+	// id on the wrapper so aria-controls below has a real target.
 	$block_content = preg_replace(
 		'/^(\s*<div\s+class="[^"]*cr-callout[^"]*")/i',
-		'$1 data-wp-interactive="courtneyr/callout" data-wp-context=\'{"open":true}\' data-wp-class--is-collapsed="state.isCollapsed"',
+		'$1 id="' . $callout_id . '" data-wp-interactive="courtneyr/callout" data-wp-context=\'{"open":true}\' data-wp-class--is-collapsed="state.isCollapsed"',
 		$block_content,
 		1
 	);
@@ -102,7 +110,10 @@ function transform_callout_block( string $block_content, array $block ): string 
 	// Rewrite the label paragraph as a real <button> so keyboard +
 	// screen-reader semantics work. Chevron rotates via CSS when the
 	// callout is collapsed (driven by the parent's is-collapsed class).
-	$button_open  = '<button type="button" class="cr-callout__toggle" data-wp-on--click="actions.toggle" data-wp-bind--aria-expanded="context.open" aria-expanded="true">';
+	// v0.5.32 — aria-controls points to the wrapper id; body content is
+	// every sibling of the toggle, so the wrapper is the load-bearing
+	// element ATs need to know about.
+	$button_open  = '<button type="button" class="cr-callout__toggle" data-wp-on--click="actions.toggle" data-wp-bind--aria-expanded="context.open" aria-expanded="true" aria-controls="' . $callout_id . '">';
 	$chevron      = '<svg class="cr-callout__chevron" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 	$button_close = '</button>';
 
@@ -238,10 +249,17 @@ function transform_pull_quote_block( string $block_content, array $block ): stri
 	// Wrap the quote in a container with IA wiring, append a copy
 	// button. context.copied=false initially; toggles to true for
 	// 2s after a successful clipboard write.
-	$button = '<button type="button" class="cr-pull-quote__copy" data-wp-on--click="actions.copyQuote" data-wp-class--is-copied="context.copied" aria-live="polite">'
-		. '<span class="cr-pull-quote__copy-default">Copy quote</span>'
+	// v0.5.32 — moved aria-live off the button (buttons aren't live
+	// regions; AT didn't announce the swap reliably). Now there's a
+	// dedicated visually-hidden status span next to the button that
+	// AT does watch — it picks up "Quote copied to clipboard" when
+	// state.copyStatus transitions from "" to non-empty after the
+	// click action flips context.copied.
+	$button = '<button type="button" class="cr-pull-quote__copy" data-wp-on--click="actions.copyQuote" data-wp-class--is-copied="context.copied" aria-label="Copy quote to clipboard">'
+		. '<span class="cr-pull-quote__copy-default" aria-hidden="true">Copy quote</span>'
 		. '<span class="cr-pull-quote__copy-confirm" aria-hidden="true">Copied</span>'
-		. '</button>';
+		. '</button>'
+		. '<span class="cr-pull-quote__status screen-reader-text" role="status" aria-live="polite" data-wp-text="state.copyStatus"></span>';
 
 	// Wrap the rendered block in an IA-aware container. Keep the
 	// original markup intact; just nest it.

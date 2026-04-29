@@ -16,6 +16,15 @@
 import { store, getContext } from '@wordpress/interactivity';
 
 store( 'courtneyr/pull-quote', {
+	state: {
+		// v0.5.32 — string the visually-hidden status span renders. AT
+		// announces the value when it transitions from "" to non-empty
+		// because the span carries aria-live="polite". Empty default
+		// keeps the page silent until the user actually copies.
+		get copyStatus() {
+			return getContext().copied ? 'Quote copied to clipboard' : '';
+		},
+	},
 	actions: {
 		copyQuote( event ) {
 			const btn = event.currentTarget;
