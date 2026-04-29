@@ -5435,33 +5435,48 @@ body.admin-bar {
 	}
 }
 
-/* Force-sticky rules: catches three cases —
-     1. .site-header rendered directly (template-part not wrapped)
-     2. Group block wrapping the header (Ollie's canonical pattern)
-     3. Any group user marks as sticky in the editor
-   All three get position:sticky + top:0 + admin-bar-aware offset
-   + z-index high enough to sit above page content but below the
-   reading-progress bar (z:9999) and pagination popovers.
+/* Force-sticky rules — three nested wrappers in production:
+     1. Outermost: <header class="...is-position-sticky"> — the Site
+        Editor-added Group wrapping the template-part (this is what
+        actually sticks during scroll)
+     2. Middle:    <header class="wp-block-template-part"> — the
+        template-part includes itself as <header>
+     3. Inner:     <div class="site-header"> — parts/header.html
+        contents (was <header> pre-v0.5.31, now <div> per landmark dedupe)
 
-   v0.5.29: nav surface uses ivory paper TEXTURE (cr-fiber +
-   cr-halftone gradient stack from tokens.css), not just a solid
-   color. Without the texture, the nav reads as a flat strip
-   floating over content; with it, the nav reads as the same
-   "paper" as the rest of the site so scrolling underneath doesn't
-   visually conflict. The bottom border + soft shadow gives a
-   clear separation edge as content slides under. !important
-   wins over any rotation-bg rule that might cascade in. */
+   v0.5.35: paint a SOLID opaque bg on ALL THREE layers. v0.5.29
+   only painted the .site-header inner div, but during scroll the
+   OUTER .is-position-sticky element is what physically covers the
+   viewport-top region. With that outer element transparent (image
+   #119 showed hero text + social icons bleeding through), content
+   underneath visually punched through the nav. Solid bg on every
+   wrapper closes those gaps.
+
+   Dropped the multiply blend mode — blend modes interact poorly
+   with stacked opaque backgrounds and the texture wasn't worth
+   the rendering complexity. Plain solid color now; texture moves
+   to a single inner layer if desired later. !important wins over
+   any rotation-bg rule that might cascade in. */
+.site-header,
+.wp-block-template-part:has(> .site-header),
+header.wp-block-template-part,
+.wp-block-group:has(> .site-header),
+.wp-block-group:has(.site-header),
+.wp-block-group.is-position-sticky,
+header.is-position-sticky {
+	background-color: var(--cr-surface, var(--cr-printer-ivory, #fbfaf5)) !important;
+	background-image: none !important;
+}
+
+/* Sticky positioning + z-index live on the outermost sticky element
+   only (the others ride along inside it). */
 .site-header,
 .wp-block-group:has(> .site-header),
-.wp-block-group.is-position-sticky {
+.wp-block-group.is-position-sticky,
+header.is-position-sticky {
 	position: sticky !important;
 	top: calc(0px + var(--wp-admin--admin-bar--position-offset, 0px)) !important;
 	z-index: 50 !important;
-	background-color: var(--cr-surface, var(--cr-printer-ivory, #fbfaf5)) !important;
-	background-image: var(--cr-fiber), var(--cr-halftone) !important;
-	background-size: auto, var(--cr-halftone-size, 12px 12px) !important;
-	background-blend-mode: multiply, multiply !important;
-	background-repeat: repeat, repeat !important;
 	border-bottom: 1px solid rgba(36, 28, 74, 0.12);
 	box-shadow: 0 4px 12px rgba(36, 28, 74, 0.08);
 	/* Don't let the sticky element itself become a scrolling
@@ -5469,19 +5484,31 @@ body.admin-bar {
 	overflow: visible !important;
 }
 :root[data-theme="dark"] .site-header,
+:root[data-theme="dark"] .wp-block-template-part:has(> .site-header),
+:root[data-theme="dark"] header.wp-block-template-part,
 :root[data-theme="dark"] .wp-block-group:has(> .site-header),
-:root[data-theme="dark"] .wp-block-group.is-position-sticky {
+:root[data-theme="dark"] .wp-block-group:has(.site-header),
+:root[data-theme="dark"] .wp-block-group.is-position-sticky,
+:root[data-theme="dark"] header.is-position-sticky {
 	background-color: var(--cr-night-elevated, #251f1c) !important;
 	border-bottom-color: rgba(251, 250, 245, 0.12);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme]) .site-header,
+	:root:not([data-theme]) .wp-block-template-part:has(> .site-header),
+	:root:not([data-theme]) header.wp-block-template-part,
 	:root:not([data-theme]) .wp-block-group:has(> .site-header),
+	:root:not([data-theme]) .wp-block-group:has(.site-header),
 	:root:not([data-theme]) .wp-block-group.is-position-sticky,
+	:root:not([data-theme]) header.is-position-sticky,
 	:root[data-theme="system"] .site-header,
+	:root[data-theme="system"] .wp-block-template-part:has(> .site-header),
+	:root[data-theme="system"] header.wp-block-template-part,
 	:root[data-theme="system"] .wp-block-group:has(> .site-header),
-	:root[data-theme="system"] .wp-block-group.is-position-sticky {
+	:root[data-theme="system"] .wp-block-group:has(.site-header),
+	:root[data-theme="system"] .wp-block-group.is-position-sticky,
+	:root[data-theme="system"] header.is-position-sticky {
 		background-color: var(--cr-night-elevated, #251f1c) !important;
 		border-bottom-color: rgba(251, 250, 245, 0.12);
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
