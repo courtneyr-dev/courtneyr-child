@@ -3859,9 +3859,21 @@ body.home .wp-block-post-template > li::after {
    Apply .cr-tape-pin-tl alongside .is-style-cr-tape-label to absolutely
    pin the label to the top-left corner of any cover block, with a
    counter-clockwise 30deg rotation that overrides the default -1.2deg
-   cr-tape rotation. The cover's `position: relative` makes it the
-   positioning context. transform-origin: center keeps the rotation
-   pivot at the label's centroid so the corner placement holds steady. */
+   cr-tape rotation.
+
+   v0.4.7: when a pinned tape is present, take .wp-block-cover__inner-
+   container out of the positioning chain. Without this, the inner-
+   container's WP-baked `position: relative` made IT the positioning
+   ancestor, so the tape pinned to top-left of the inner-container —
+   which sits at the bottom of the cover when contentPosition is
+   "bottom center". With static positioning the tape walks up to
+   .wp-block-cover (relative) and pins to the cover's actual top-left
+   corner. Scoped via :has() so only covers that contain a pinned
+   tape are affected. */
+.wp-block-cover:has(.cr-tape-pin-tl) > .wp-block-cover__inner-container {
+	position: static !important;
+}
+
 .wp-block-cover .is-style-cr-tape-label.cr-tape-pin-tl {
 	position: absolute !important;
 	top: 1rem;
