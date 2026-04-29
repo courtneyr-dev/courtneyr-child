@@ -5073,11 +5073,16 @@ body.home .homepage__content > .alignfull:has(#h-are-you-passionate-about) {
 	}
 }
 
-/* Newsletter Features — periwinkle in light, prussian-blue in dark.
-   v0.5.2: subtle paper texture (fiber + halftone) overlaid so the
-   surface reads as printed periwinkle paper, not flat color. */
+/* Newsletter Features — printer-ivory paper in light, photocopier-black
+   in dark. v0.5.33 — was glaucous-light (periwinkle) which clashed with
+   the white card surfaces and made user-attempted overrides via hashed
+   .wp-container-core-group-is-layout-{hash} selectors fail (hashes
+   regenerate on each post save, plus this rule's !important won the
+   cascade). Stable selector via :has() on the heading anchor — survives
+   any block reordering or save. Paper texture (fiber + halftone) carries
+   the brand surface vibe without competing with the cards. */
 body.home .homepage__content > .alignfull:has(#h-how-this-newsletter-can-help-you-grow) {
-	background-color: var(--cr-glaucous-light, #c7d3f3) !important;
+	background-color: var(--cr-printer-ivory, #fbfaf5) !important;
 	background-image: var(--cr-fiber), var(--cr-halftone) !important;
 	background-size: auto, var(--cr-halftone-size) !important;
 	background-blend-mode: multiply, multiply !important;
@@ -5085,13 +5090,13 @@ body.home .homepage__content > .alignfull:has(#h-how-this-newsletter-can-help-yo
 	color: var(--cr-russian-violet, #241c4a) !important;
 }
 :root[data-theme="dark"] body.home .homepage__content > .alignfull:has(#h-how-this-newsletter-can-help-you-grow) {
-	background-color: var(--cr-prussian-blue, #023047) !important;
+	background-color: var(--cr-photocopier-black, #1a1714) !important;
 	color: var(--cr-printer-ivory, #fbfaf5) !important;
 }
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme]) body.home .homepage__content > .alignfull:has(#h-how-this-newsletter-can-help-you-grow),
 	:root[data-theme="system"] body.home .homepage__content > .alignfull:has(#h-how-this-newsletter-can-help-you-grow) {
-		background-color: var(--cr-prussian-blue, #023047) !important;
+		background-color: var(--cr-photocopier-black, #1a1714) !important;
 		color: var(--cr-printer-ivory, #fbfaf5) !important;
 	}
 }
