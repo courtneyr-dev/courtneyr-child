@@ -816,36 +816,135 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 .site-header__nav .wp-block-navigation-item {
 	flex-shrink: 0;
 }
-/* Search block in the header — render as an icon-only button. */
+/* v0.5.40: search collapsed-to-icon disclosure pattern.
+   <details> + <summary> = native HTML disclosure widget with
+   keyboard + screen-reader semantics built in (Enter/Space to
+   toggle, announces "expanded/collapsed" automatically). When
+   open, the form pops out as a positioned dropdown below the
+   icon — saves horizontal space in the nav and lets surrounding
+   nav items breathe. */
 .site-header__search {
 	margin: 0 !important;
+	position: relative;
 }
-.site-header__search .wp-block-search__inside-wrapper {
-	border: 0 !important;
-	background: transparent !important;
-}
-.site-header__search .wp-block-search__button {
-	background: transparent !important;
-	color: var(--cr-ink, #241c4a) !important;
-	border: 0 !important;
-	padding: 0.4rem !important;
-	min-width: 0 !important;
+.site-header__search-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	cursor: pointer;
+	padding: 0.4rem;
+	color: var(--cr-ink, #241c4a);
 	transition: color 0.15s ease;
-	/* v0.5.10: kill button shadow + drop-shadow filter so the search
-	   icon reads as a flat icon, not a chip. */
-	box-shadow: none !important;
-	filter: none !important;
+	list-style: none;
+	min-height: 24px;
+	border-radius: 0.25rem;
 }
-.site-header__search .wp-block-search__button svg {
+/* Hide the default <details> disclosure triangle in WebKit + Firefox. */
+.site-header__search-toggle::-webkit-details-marker { display: none; }
+.site-header__search-toggle::marker { content: ""; }
+
+.site-header__search-toggle:hover,
+.site-header__search-toggle:focus-visible {
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	outline: none;
+}
+.site-header__search-toggle:focus-visible {
+	outline: 2px solid var(--cr-focus-ring, var(--cr-marker, #ffb703));
+	outline-offset: 2px;
+}
+.site-header__search-toggle svg {
 	width: 24px;
 	height: 24px;
 	fill: currentColor;
 }
-.site-header__search .wp-block-search__button:hover,
-.site-header__search .wp-block-search__button:focus-visible {
-	color: var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
-	background: transparent !important;
+/* When the user clicks the icon, browsers add `open` to the <details>.
+   Show the form as an absolutely-positioned popover anchored to the
+   right edge of the toggle so it always opens within the viewport on
+   any nav width. */
+.site-header__search[open] .site-header__search-form {
+	position: absolute;
+	right: 0;
+	top: calc(100% + 0.5rem);
+	z-index: 60;
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	background-color: var(--cr-surface, var(--cr-printer-ivory, #fbfaf5));
+	background-image: var(--cr-fiber), var(--cr-halftone);
+	background-size: auto, var(--cr-halftone-size, 12px 12px);
+	background-blend-mode: multiply, multiply;
+	background-repeat: repeat, repeat;
+	border: 2px solid var(--cr-russian-violet, #241c4a);
+	box-shadow: 4px 4px 0 var(--cr-russian-violet, #241c4a);
+	padding: 0.75rem;
+	min-width: 320px;
+	transform: rotate(-0.5deg);
+}
+.site-header__search:not([open]) .site-header__search-form {
+	display: none;
+}
+.site-header__search-form .wp-block-search__input {
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: 0.4rem 0.6rem !important;
+	border: 1.5px solid var(--cr-russian-violet, #241c4a);
+	background: var(--cr-printer-ivory, #fbfaf5);
+	color: var(--cr-russian-violet, #241c4a);
+	border-radius: 0;
+	font-family: var(--cr-font-body);
+}
+.site-header__search-form .wp-block-search__input:focus {
+	outline: 3px solid var(--cr-selective-yellow, #ffb703);
+	outline-offset: 2px;
+}
+.site-header__search-form .wp-block-search__button {
+	background: var(--cr-cta-bg, #fb8500) !important;
+	color: var(--cr-cta-ink, #023047) !important;
+	border: 2px solid var(--cr-russian-violet, #241c4a) !important;
+	border-radius: 0 !important;
+	padding: 0.4rem 0.6rem !important;
+	cursor: pointer;
+	transition: background 0.15s ease, color 0.15s ease;
+	box-shadow: 2px 2px 0 var(--cr-russian-violet, #241c4a) !important;
+	min-width: 0 !important;
+	flex-shrink: 0;
+}
+.site-header__search-form .wp-block-search__button svg {
+	width: 18px;
+	height: 18px;
+	fill: currentColor;
+}
+.site-header__search-form .wp-block-search__button:hover,
+.site-header__search-form .wp-block-search__button:focus-visible {
+	background: var(--cr-cta-bg-hover, #241c4a) !important;
+	color: var(--cr-cta-ink-hover, #8ecae6) !important;
+}
+
+/* Dark-mode popover surface */
+:root[data-theme="dark"] .site-header__search[open] .site-header__search-form {
+	background-color: var(--cr-night-elevated, #251f1c);
+	border-color: var(--cr-printer-ivory, #fbfaf5);
+	box-shadow: 4px 4px 0 var(--cr-printer-ivory, #fbfaf5);
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .site-header__search[open] .site-header__search-form,
+	:root[data-theme="system"] .site-header__search[open] .site-header__search-form {
+		background-color: var(--cr-night-elevated, #251f1c);
+		border-color: var(--cr-printer-ivory, #fbfaf5);
+		box-shadow: 4px 4px 0 var(--cr-printer-ivory, #fbfaf5);
+	}
+}
+
+/* v0.5.40: more breathing room in the nav now that the inline search
+   form is gone. Bump the gap between top-level controls + nav items
+   so the desktop bar reads as relaxed instead of cramped (image #125). */
+@media (min-width: 1024px) {
+	.site-header__controls {
+		gap: var(--cr-space-md, 1.25rem) !important;
+	}
+	.site-header__nav .wp-block-navigation__container {
+		gap: var(--cr-space-md, 1.25rem) !important;
+	}
 }
 
 /* On narrower viewports, allow the nav to collapse into its mobile
