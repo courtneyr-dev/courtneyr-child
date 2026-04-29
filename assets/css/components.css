@@ -3885,16 +3885,16 @@ body.home .wp-block-post-template > li::after {
 }
 
 /* Top-left — washi-tape strip diagonally crossing the corner.
-   v0.4.12: anchor the tape's CENTER to the cover's top-left corner
-   using top:0; left:0 + translate(-50%, -50%). The translate offsets
-   the element by half its own dimensions, so its center lands exactly
-   at (0, 0) of the cover regardless of how wide the tape ends up.
-   That keeps half on photo / half on bg perfectly symmetric.
-   Rotation eased from -50deg to -45deg (clockwise 5deg). */
+   v0.4.13: nudged the tape's center 0.75rem into the photo (down +
+   right) so the photo's corner peeks out above the tape's upper edge
+   instead of being hidden beneath the tape's center. The tape still
+   uses translate(-50%, -50%) for self-centering on its anchor point;
+   bumping top/left from 0 to 0.75rem shifts that anchor point
+   diagonally into the photo by an even amount on both axes. */
 .wp-block-cover .is-style-cr-tape-label.cr-tape-pin-tl {
 	position: absolute !important;
-	top: 0;
-	left: 0;
+	top: 0.75rem;
+	left: 0.75rem;
 	margin: 0 !important;
 	padding: 0.5em 2.25em !important;
 	background: var(--cr-tape, #f3e5b8) !important;
