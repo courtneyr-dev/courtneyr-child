@@ -1571,44 +1571,52 @@ body.home input[type="text"]:focus,
 	box-shadow: 4px 4px 0 var(--cr-russian-violet, #241c4a);
 }
 
-/* Newsletter form submit buttons — match the design-system cr-cta exactly.
-   v0.4.23: pull from --cr-cta-* tokens so the visual matches every other
-   primary CTA on the site (ut-orange in light mode, selective-yellow in
-   dark mode, russian-violet ink, hover flips to russian-violet bg + sky-
-   blue ink). Same hard-shadow + 2px translate active behavior as
-   .is-style-cr-cta > .wp-block-button__link. */
+/* Newsletter form submit buttons — match the design-system cr-cta.
+   v0.4.24: Chrome's `background: var(--token)` shorthand with a
+   custom-property doesn't decompose to background-color longhand for
+   <input type="submit">, leaving the UA-default transparent winning.
+   Same gotcha for `border: var(--token)`. Fix: use longhand properties
+   (background-color, border-width/style/color, padding-x/y) with
+   !important so the cascade is unambiguous. */
 body.home input[type="submit"],
 body.home button[type="submit"],
 .homepage input[type="submit"],
 .homepage button[type="submit"] {
-	background: var(--cr-cta-bg);
-	color: var(--cr-cta-ink);
-	border: var(--cr-border-thick, 2px solid var(--cr-russian-violet, #241c4a));
+	background-color: var(--cr-cta-bg, #fb8500) !important;
+	color: var(--cr-cta-ink, #023047) !important;
+	border-width: 2px !important;
+	border-style: solid !important;
+	border-color: var(--cr-russian-violet, #241c4a) !important;
+	border-radius: 0 !important;
 	font-family: var(--cr-font-accent, serif);
 	font-weight: var(--cr-weight-bold, 700);
 	font-size: var(--cr-text-md, 1rem);
 	letter-spacing: 0.02em;
-	padding: var(--cr-space-sm, 0.7em) var(--cr-space-lg, 1.5em);
+	padding-top: 0.75rem !important;
+	padding-bottom: 0.75rem !important;
+	padding-left: 1.5rem !important;
+	padding-right: 1.5rem !important;
 	cursor: pointer;
-	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-russian-violet, #241c4a));
-	transition: box-shadow 0.15s ease, transform 0.1s ease, background 0.15s ease, color 0.15s ease;
-	border-radius: 0;
+	box-shadow: 4px 4px 0 var(--cr-russian-violet, #241c4a) !important;
+	transition: box-shadow 0.15s ease, transform 0.1s ease, background-color 0.15s ease, color 0.15s ease;
+	-webkit-appearance: none;
+	appearance: none;
 }
 
 body.home input[type="submit"]:hover,
 body.home button[type="submit"]:hover,
 .homepage input[type="submit"]:hover,
 .homepage button[type="submit"]:hover {
-	background: var(--cr-cta-bg-hover);
-	color: var(--cr-cta-ink-hover);
-	box-shadow: 2px 2px 0 var(--cr-russian-violet, #241c4a);
+	background-color: var(--cr-cta-bg-hover, #241c4a) !important;
+	color: var(--cr-cta-ink-hover, #8ecae6) !important;
+	box-shadow: 2px 2px 0 var(--cr-russian-violet, #241c4a) !important;
 	transform: translate(2px, 2px);
 }
 
 body.home input[type="submit"]:active,
 body.home button[type="submit"]:active {
 	transform: translate(4px, 4px);
-	box-shadow: 0 0 0 var(--cr-russian-violet, #241c4a);
+	box-shadow: 0 0 0 var(--cr-russian-violet, #241c4a) !important;
 }
 
 /* (5) Recent-posts stream on home — cr-stream-item zine treatment.
