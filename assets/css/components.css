@@ -5483,6 +5483,26 @@ header.is-position-sticky {
 	   container — would break its own descendants' sticky behavior. */
 	overflow: visible !important;
 }
+
+/* v0.5.36: full-viewport width on the outermost sticky wrapper.
+   The Site Editor-saved Group wrapping the template-part inherits
+   the constrained content-size from .wp-site-blocks layout — so
+   the nav bar didn't extend to the screen edges, leaving periwinkle
+   gaps left + right of the ivory strip (image #120 close-up).
+   Negative-margin breakout technique forces the bar to span the
+   full viewport: 50vw - 50% on each side cancels any centering
+   constraint regardless of parent max-width. */
+.wp-block-group.is-position-sticky,
+header.is-position-sticky,
+.wp-block-group:has(> .site-header) {
+	margin-left: calc(50% - 50vw) !important;
+	margin-right: calc(50% - 50vw) !important;
+	width: 100vw !important;
+	max-width: 100vw !important;
+	padding-left: var(--wp--preset--spacing--md, 1rem) !important;
+	padding-right: var(--wp--preset--spacing--md, 1rem) !important;
+	box-sizing: border-box !important;
+}
 :root[data-theme="dark"] .site-header,
 :root[data-theme="dark"] .wp-block-template-part:has(> .site-header),
 :root[data-theme="dark"] header.wp-block-template-part,
