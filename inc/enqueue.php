@@ -77,6 +77,36 @@ function enqueue_baseline(): void {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_baseline' );
 
 /**
+ * v0.5.38 — force render-blocking (synchronous) load for the theme's
+ * baseline stylesheets, overriding WP 7.0's new default async-CSS
+ * pattern (`media="print" onload="this.media='all';..."`).
+ *
+ * The async pattern relies on the link element's onload event firing
+ * to swap media from "print" to "all". Behind Cloudflare with Rocket
+ * Loader enabled (staging is behind CF — verified via `server: cloudflare`
+ * response header), Rocket Loader rewrites inline event handlers and
+ * can prevent the onload swap from firing — leaving the stylesheet
+ * permanently in "print" media (image #123: logged-out homepage rendered
+ * with theme.json defaults only, no .cr-wordmark / .cr-theme-segment /
+ * .site-header__search styling).
+ *
+ * Logged-in users have additional inline admin-bar CSS that masks the
+ * un-painted state, so the issue only surfaces for the public.
+ *
+ * Strip media="print" + onload from our two baseline handles so they
+ * load render-blocking (~9KB tokens + 162KB components, both gzipped
+ * smaller — acceptable for a homepage paint).
+ */
+function force_sync_baseline_styles( string $tag, string $handle ): string {
+	if ( in_array( $handle, array( 'courtneyr-tokens', 'courtneyr-components' ), true ) ) {
+		$tag = str_replace( ' media="print"', '', $tag );
+		$tag = preg_replace( '/\s*onload="[^"]*"/', '', $tag ) ?? $tag;
+	}
+	return $tag;
+}
+add_filter( 'style_loader_tag', __NAMESPACE__ . '\\force_sync_baseline_styles', 999, 2 );
+
+/**
  * Register a per-block stylesheet for every block in BLOCK_STYLE_MAP.
  *
  * wp_enqueue_block_style() only loads the CSS when WordPress renders the
