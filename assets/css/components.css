@@ -3140,46 +3140,45 @@ body.home .wp-block-latest-posts li::before {
    ============================================================ */
 .cr-flank::before,
 .cr-flank::after {
-	content: "✦" !important;
-	color: var(--cr-ut-orange, #fb8500);
-	/* Layered text-shadow renders ghost sparkles in two more colors,
-	   so each pseudo-element resolves to 3 visible ✦s in different
-	   positions: orange (base) + yellow (up-right) + blue (down-left). */
-	text-shadow:
-		0.75em -0.35em 0 var(--cr-selective-yellow, #ffb703),
-		-0.55em 0.45em 0 var(--cr-cerulean, #126782);
 	font-size: 0.7em;
 	display: inline-block !important;
-	opacity: 0.95;
-	vertical-align: middle;
+	vertical-align: 0.15em;
 	font-family: var(--cr-font-accent);
+	color: var(--cr-ut-orange, #fb8500);   /* default: warm orange */
+	opacity: 0.95;
 }
+/* ✦ (4-pointed star) on the left, ✺ (16-pointed asterisk) on the right —
+   the design system pairs them as complementary zine glyphs. */
 .cr-flank::before {
+	content: "✦" !important;
 	margin-right: 0.45em;
-	transform: rotate(-12deg);
+	transform: rotate(-15deg);
 }
 .cr-flank::after {
+	content: "✺" !important;
 	margin-left: 0.45em;
-	transform: rotate(12deg);
+	transform: rotate(15deg);
 }
-/* Dark mode — flip the warm/cool roles so each sparkle stays AA on
-   the dark surfaces. Yellow + sky-blue are both AAA on prussian-blue. */
-:root[data-theme="dark"] .cr-flank::before,
-:root[data-theme="dark"] .cr-flank::after {
-	color: var(--cr-selective-yellow, #ffb703);
-	text-shadow:
-		0.75em -0.35em 0 var(--cr-sky-blue, #8ecae6),
-		-0.55em 0.45em 0 var(--cr-light-orange, #fee2c3);
+
+/* Color variants — pick one per heading for variety across the page,
+   not stacked on a single heading. */
+.cr-flank--yellow::before,
+.cr-flank--yellow::after { color: var(--cr-selective-yellow, #ffb703); }
+.cr-flank--blue::before,
+.cr-flank--blue::after   { color: var(--cr-cerulean, #126782); }
+
+/* Dark mode — cerulean fails contrast on dark surfaces, swap it for
+   sky-blue. Orange and yellow are both already AAA-readable on dark. */
+:root[data-theme="dark"] .cr-flank--blue::before,
+:root[data-theme="dark"] .cr-flank--blue::after {
+	color: var(--cr-sky-blue, #8ecae6);
 }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme]) .cr-flank::before,
-	:root:not([data-theme]) .cr-flank::after,
-	:root[data-theme="system"] .cr-flank::before,
-	:root[data-theme="system"] .cr-flank::after {
-		color: var(--cr-selective-yellow, #ffb703);
-		text-shadow:
-			0.75em -0.35em 0 var(--cr-sky-blue, #8ecae6),
-			-0.55em 0.45em 0 var(--cr-light-orange, #fee2c3);
+	:root:not([data-theme]) .cr-flank--blue::before,
+	:root:not([data-theme]) .cr-flank--blue::after,
+	:root[data-theme="system"] .cr-flank--blue::before,
+	:root[data-theme="system"] .cr-flank--blue::after {
+		color: var(--cr-sky-blue, #8ecae6);
 	}
 }
 
