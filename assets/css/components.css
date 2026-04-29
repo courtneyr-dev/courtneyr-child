@@ -3141,10 +3141,20 @@ body.home .has-tertiary-background-color h3 {
    `background-image`, which clobbered the is-style-cr-notebook ruled-
    paper gradient on the Footer section (which contains the newsletter
    form, so :has(form) matches it). The bg-color rule below is what we
-   actually wanted. */
-body.home .wp-block-group:has(form),
-body.home .wp-block-group:has(.tnp-subscription),
-body.home .wp-block-group:has(input[type="email"]),
+   actually wanted.
+   v0.5.48: exclude the sticky nav context. `:has(form)` was matching
+   the .is-position-sticky wrapper (which contains the search form via
+   the v0.5.40 collapsible disclosure) and its descendants, painting the
+   sticky transparent and letting the periwinkle homepage section show
+   through on the L/R padding edges (image #137). `body.home` adds 1
+   class to specificity, so this rule was beating the .is-position-sticky
+   ivory bg rule even with !important. Two exclusions: the sticky wrapper
+   itself, and any group whose subtree contains .site-header (covers the
+   intermediate template-part wrapper layers). Newsletter form groups
+   still match — they don't contain .site-header. */
+body.home .wp-block-group:not(.is-position-sticky):not(:has(.site-header)):has(form),
+body.home .wp-block-group:not(.is-position-sticky):not(:has(.site-header)):has(.tnp-subscription),
+body.home .wp-block-group:not(.is-position-sticky):not(:has(.site-header)):has(input[type="email"]),
 body.home .wp-block-columns:has(form) .wp-block-column:has(form) {
 	background-color: transparent !important;
 	box-shadow: none !important;
