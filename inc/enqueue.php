@@ -220,3 +220,23 @@ function enqueue_admin_styles(): void {
 	);
 }
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\enqueue_admin_styles' );
+
+/**
+ * v0.5.26 — Also load admin.css on the FRONT-END when the admin bar
+ * is showing (logged-in user viewing the public site). Without this,
+ * the WP admin bar at the top of front-end pages renders in default
+ * gray/blue and clashes with the courtneyr.dev brand palette. Same
+ * stylesheet drives both contexts.
+ */
+function enqueue_admin_bar_styles_frontend(): void {
+	if ( ! is_admin_bar_showing() ) {
+		return;
+	}
+	wp_enqueue_style(
+		'courtneyr-admin-bar',
+		COURTNEYR_CHILD_URI . '/assets/css/admin.css',
+		array(),
+		COURTNEYR_CHILD_VERSION
+	);
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_admin_bar_styles_frontend' );

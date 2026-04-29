@@ -5356,11 +5356,31 @@ body,
 	contain: none !important;
 }
 
-/* WP admin-bar offset variable — Ollie's pattern. Logged-in users
-   see a 32px (desktop) / 46px (mobile) admin bar at top; sticky
-   elements should offset by that height so they don't tuck under. */
-html :where(.is-position-sticky) {
-	--wp-admin--admin-bar--position-offset: var(--wp-admin--admin-bar--height, 0px);
+/* WP admin-bar offset — Ollie's pattern + multi-row defense.
+   Logged-in users get the 32px standard bar (46px mobile), but
+   plugins like Perfmatters and GoDaddy add their own rows below
+   it, making the actual admin-bar zone taller. WP's
+   `--wp-admin--admin-bar--height` only knows about the standard
+   bar, so sticky headers undershoot and get partially obscured
+   (image #107). Use a larger fallback covering the worst-case
+   GoDaddy + Perfmatters multi-row scenario. The
+   `--cr-admin-bar-extra` variable is set via JS in the admin-bar
+   measurement script (see inc/enqueue.php frontend bar enqueue);
+   defaults to 64px for the GoDaddy + Perfmatters multi-row case. */
+html :where(.is-position-sticky),
+html .site-header,
+html .wp-block-group:has(> .site-header) {
+	--wp-admin--admin-bar--position-offset: calc(
+		var(--wp-admin--admin-bar--height, 0px) + var(--cr-admin-bar-extra, 0px)
+	);
+}
+body.admin-bar {
+	--cr-admin-bar-extra: 64px;
+}
+@media screen and (max-width: 782px) {
+	body.admin-bar {
+		--cr-admin-bar-extra: 0px;
+	}
 }
 @media screen and (max-width: 600px) {
 	html :where(.is-position-sticky) {

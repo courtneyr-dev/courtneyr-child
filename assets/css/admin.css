@@ -52,11 +52,53 @@
 	background: var(--cr-admin-chrome-hover) !important;
 	color: var(--cr-admin-marker) !important;
 }
-#wpadminbar .ab-submenu .ab-item {
+#wpadminbar .ab-submenu .ab-item,
+#wpadminbar .ab-sub-wrapper .ab-item,
+#wpadminbar .ab-sub-wrapper a,
+#wpadminbar .quicklinks .ab-sub-wrapper > .ab-submenu .ab-item {
 	color: var(--cr-admin-ink-inverse) !important;
+	font-weight: 500 !important;
+	opacity: 1 !important;
 }
-#wpadminbar .ab-sub-wrapper {
+#wpadminbar .ab-sub-wrapper,
+#wpadminbar .ab-submenu {
 	background: var(--cr-admin-chrome-hover) !important;
+	border-color: rgba(251, 250, 245, 0.15) !important;
+}
+#wpadminbar .ab-submenu .ab-item:hover,
+#wpadminbar .ab-sub-wrapper .ab-item:hover,
+#wpadminbar .ab-sub-wrapper a:hover,
+#wpadminbar .quicklinks .ab-sub-wrapper > .ab-submenu .ab-item:hover {
+	background: var(--cr-admin-cta) !important;
+	color: var(--cr-admin-chrome) !important;
+}
+
+/* v0.5.26: GoDaddy / Perfmatters / other host-plugin quick-links
+   sub-rows. These render as <li class="ab-top-secondary"> children
+   of #wpadminbar with their own pale-text styling. Force consistent
+   ivory text + readable hover. */
+#wpadminbar .ab-top-secondary,
+#wpadminbar .ab-top-secondary > li,
+#wpadminbar .ab-top-secondary .ab-item,
+#wpadminbar .ab-top-secondary a,
+#wpadminbar [id*="wp-admin-bar-gd"],
+#wpadminbar [id*="wp-admin-bar-gd"] a,
+#wpadminbar [id*="wp-admin-bar-gd"] .ab-item,
+#wpadminbar [id*="wp-admin-bar-perfmatters"] a,
+#wpadminbar [id*="wp-admin-bar-perfmatters"] .ab-item {
+	color: var(--cr-admin-ink-inverse) !important;
+	opacity: 1 !important;
+}
+#wpadminbar [id*="wp-admin-bar-gd"]:hover .ab-item,
+#wpadminbar [id*="wp-admin-bar-perfmatters"]:hover .ab-item {
+	background: var(--cr-admin-cta) !important;
+	color: var(--cr-admin-chrome) !important;
+}
+
+/* Avatar in admin bar — ensure visible */
+#wpadminbar .avatar {
+	border-radius: 999px;
+	border: 1px solid rgba(251, 250, 245, 0.3);
 }
 
 /* ============ Sidebar menu (#adminmenu) ============ */
