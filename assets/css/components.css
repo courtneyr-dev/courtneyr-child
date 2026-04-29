@@ -5503,6 +5503,54 @@ header.is-position-sticky,
 	padding-right: var(--wp--preset--spacing--md, 1rem) !important;
 	box-sizing: border-box !important;
 }
+
+/* v0.5.37: cancel WP's `is-layout-constrained > *` 720px-centered
+   constraint INSIDE the sticky header. Image #121 showed ivory bg
+   only on the right portion, periwinkle showing where the wordmark
+   sits on the left. Cause: outer sticky is 100vw, but its first
+   child (the wp-block-template-part header) was being constrained
+   to var(--wp--style--global--content-size) = 720px and centered
+   by WP's universal layout-constrained rule, so the inner bg-painted
+   layers only covered 720px in the middle. With the wordmark on
+   far left and controls on far right via space-between, the
+   wordmark's portion fell OUTSIDE the inner 720px → periwinkle
+   from the section below shows through.
+   Fix: every direct + nested descendant inside the sticky element
+   forced to width:100% with no max-width and no auto margins, so
+   each inner wrapper fills its parent edge-to-edge regardless of
+   any layout-constrained ancestor in the chain. */
+.wp-block-group.is-position-sticky > *,
+header.is-position-sticky > *,
+.wp-block-group.is-position-sticky .wp-block-template-part,
+.wp-block-group.is-position-sticky .site-header,
+.wp-block-group.is-position-sticky .site-header__inner,
+header.is-position-sticky .wp-block-template-part,
+header.is-position-sticky .site-header,
+header.is-position-sticky .site-header__inner {
+	max-width: none !important;
+	width: 100% !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+	box-sizing: border-box !important;
+}
+
+/* Belt-and-suspenders: paint bg on the flex inner too so even if
+   some layer fails to fill, the bottom-most flex container still
+   covers behind the brand + controls children. */
+.site-header__inner,
+.wp-block-group.is-position-sticky .site-header__inner,
+header.is-position-sticky .site-header__inner {
+	background-color: var(--cr-surface, var(--cr-printer-ivory, #fbfaf5)) !important;
+}
+:root[data-theme="dark"] .site-header__inner {
+	background-color: var(--cr-night-elevated, #251f1c) !important;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .site-header__inner,
+	:root[data-theme="system"] .site-header__inner {
+		background-color: var(--cr-night-elevated, #251f1c) !important;
+	}
+}
 :root[data-theme="dark"] .site-header,
 :root[data-theme="dark"] .wp-block-template-part:has(> .site-header),
 :root[data-theme="dark"] header.wp-block-template-part,

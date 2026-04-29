@@ -28,13 +28,15 @@ store( 'courtneyr/pull-quote', {
 	actions: {
 		copyQuote( event ) {
 			const btn = event.currentTarget;
-			// .closest searches up to find the wrapper that contains
-			// the blockquote. Then we pull the text from the first
-			// <p> inside (the quote body) — citation handled
-			// separately if present.
-			const wrapper = btn.closest( '.cr-pull-quote, .wp-block-quote' );
+			// v0.5.37 — was searching for `.wp-block-quote` as an ancestor
+			// of the button, which never matched: in the IA-injected
+			// markup, the button is a SIBLING of the blockquote (both
+			// nested inside `.cr-pull-quote-wrap`). closest() walks up,
+			// so it never reached the sibling. Walk to the IA wrapper
+			// instead and query down for the blockquote's first <p>.
+			const wrapper = btn.closest( '.cr-pull-quote-wrap, .cr-pull-quote, .wp-block-quote' );
 			if ( ! wrapper ) return;
-			const para = wrapper.querySelector( 'p' );
+			const para = wrapper.querySelector( 'blockquote p, .wp-block-quote p, p' );
 			if ( ! para ) return;
 
 			const text = para.textContent.trim();
