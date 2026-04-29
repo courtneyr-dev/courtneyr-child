@@ -33,7 +33,12 @@ declare( strict_types = 1 );
 				<!-- wp:group {"className":"cr-stream-item__meta","style":{"spacing":{"blockGap":"var:preset|spacing|small"}},"layout":{"type":"flex","flexWrap":"wrap"}} -->
 				<div class="wp-block-group cr-stream-item__meta">
 					<!-- wp:post-date {"format":"F j, Y","fontSize":"small"} /-->
-					<!-- wp:post-terms {"term":"category","className":"cr-chip","fontSize":"xs"} /-->
+
+					<!-- wp:html -->
+					<span class="cr-format-chip" aria-hidden="true"></span>
+					<!-- /wp:html -->
+
+					<!-- wp:post-terms {"term":"category","className":"cr-stream-item__category","fontSize":"xs"} /-->
 				</div>
 				<!-- /wp:group -->
 

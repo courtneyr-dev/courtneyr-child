@@ -3311,6 +3311,156 @@ body.blog button[type="submit"]:hover {
 	transform: translate(2px, 2px);
 }
 
+/* (5b) Comments — chat-bubble redesign inspired by nerdy.dev.
+   Each comment renders as a rounded chat bubble; sides alternate
+   L/R via :nth-child so the thread reads like a conversation.
+   Avatar floats at the bubble's bottom corner pointing to the
+   speaker. Soft drop shadow. */
+
+.single-post__comments-wrapper {
+	background: transparent !important;
+	padding-block: var(--cr-space-2xl, 3rem) !important;
+}
+
+.single-post__comments-title {
+	font-family: var(--cr-font-condensed, var(--cr-font-accent));
+	font-size: var(--cr-text-2xl, 1.75rem);
+	margin-bottom: var(--cr-space-xs, 0.5rem);
+}
+
+.single-post__comments .wp-block-comments-title {
+	font-size: var(--cr-text-sm, 0.875rem);
+	color: var(--cr-ink-muted);
+	margin-bottom: var(--cr-space-lg, 1.5rem);
+}
+
+/* The wp-block-comment-template renders an <ol class="wp-block-comment-template">
+   with each top-level comment as a direct <li> child. Reset list, stack
+   bubbles vertically with breathing space. */
+.single-post__comments .wp-block-comment-template {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--cr-space-lg, 1.5rem);
+}
+
+/* Each comment-item is the bubble. Override the v0.x boxy treatment. */
+.single-post__comment-item {
+	background: var(--cr-base, #ffffff) !important;
+	border-radius: 18px !important;
+	padding: var(--cr-space-md, 1rem) var(--cr-space-lg, 1.5rem) !important;
+	box-shadow:
+		0 2px 6px rgba(36, 28, 74, 0.08),
+		0 8px 24px rgba(36, 28, 74, 0.06) !important;
+	max-width: 32rem;
+	margin: 0 !important;
+	position: relative;
+	color: var(--cr-ink, #241c4a);
+}
+
+/* Odd-positioned comments align LEFT, even-positioned align RIGHT.
+   Avatar sits in the corner closest to that side (left for left-aligned,
+   right for right-aligned). */
+.single-post__comments .wp-block-comment-template > li:nth-child(odd) .single-post__comment-item {
+	margin-right: auto !important;
+	border-bottom-left-radius: 6px !important;
+}
+.single-post__comments .wp-block-comment-template > li:nth-child(even) .single-post__comment-item {
+	margin-left: auto !important;
+	border-bottom-right-radius: 6px !important;
+}
+
+/* Author row — avatar + name+date stacked next to it. Reposition the
+   row so it appears BELOW the comment content (chat-bubble has speaker
+   ID at the bottom corner, not top). */
+.single-post__comment-item .single-post__comment-author {
+	order: 2;
+	margin-top: var(--cr-space-sm, 0.75rem);
+	padding-top: var(--cr-space-sm, 0.75rem);
+	border-top: 1px solid rgba(36, 28, 74, 0.06);
+	gap: var(--cr-space-sm, 0.75rem) !important;
+	align-items: center !important;
+}
+.single-post__comment-item .wp-block-avatar img {
+	width: 32px !important;
+	height: 32px !important;
+	border-radius: 100px !important;
+	box-shadow: 0 1px 3px rgba(36, 28, 74, 0.15);
+}
+.single-post__comment-item .wp-block-comment-author-name {
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold, 700);
+	font-size: var(--cr-text-sm, 0.875rem);
+	color: var(--cr-ink, #241c4a);
+}
+.single-post__comment-item .wp-block-comment-author-name a {
+	color: inherit;
+	text-decoration: none;
+}
+.single-post__comment-item .wp-block-comment-author-name a:hover {
+	color: var(--cr-marker, var(--cr-ut-orange));
+}
+.single-post__comment-item .wp-block-comment-date {
+	font-size: var(--cr-text-xs, 0.7rem);
+	color: var(--cr-ink-muted);
+	font-family: var(--cr-font-accent);
+}
+
+/* Comment content — the actual message. Make it the bubble's lead
+   element with display: order. */
+.single-post__comment-item .wp-block-comment-content {
+	order: 1;
+	font-size: var(--cr-text-base, 1rem);
+	line-height: var(--cr-leading-relaxed, 1.6);
+	color: var(--cr-ink, #241c4a);
+}
+.single-post__comment-item .wp-block-comment-content p:first-child { margin-top: 0; }
+.single-post__comment-item .wp-block-comment-content p:last-child { margin-bottom: 0; }
+
+/* Actions row (edit/reply) sits at the bottom corner, smaller and
+   muted unless hovered. */
+.single-post__comment-actions {
+	order: 3;
+	margin-top: var(--cr-space-xs, 0.5rem) !important;
+	font-size: var(--cr-text-xs, 0.7rem) !important;
+	color: var(--cr-ink-muted);
+	gap: var(--cr-space-sm, 0.75rem) !important;
+}
+.single-post__comment-actions a {
+	color: var(--cr-ink-muted);
+	text-decoration: none;
+	border-bottom: 1px solid transparent;
+	transition: border-color 0.15s ease, color 0.15s ease;
+}
+.single-post__comment-actions a:hover {
+	color: var(--cr-marker, var(--cr-ut-orange));
+	border-bottom-color: var(--cr-marker, var(--cr-ut-orange));
+}
+
+/* The comment-item's children need flex layout so order: applies. */
+.single-post__comment-item {
+	display: flex !important;
+	flex-direction: column !important;
+}
+
+/* Comments pagination — small, centered. */
+.single-post__comments .wp-block-comments-pagination {
+	margin-top: var(--cr-space-xl, 2rem);
+	font-size: var(--cr-text-sm, 0.875rem);
+}
+
+/* Mobile — full-width bubbles, no L/R offset. */
+@media (max-width: 600px) {
+	.single-post__comment-item {
+		max-width: 100%;
+		margin-left: 0 !important;
+		margin-right: 0 !important;
+	}
+}
+
+
 /* (6) Related Posts section — drop the peach tertiary look that the
    template used to ship with, swap heading prefix for the same
    marker-bar / eyebrow rhythm as the archive header. */
@@ -3467,7 +3617,11 @@ body.blog button[type="submit"]:hover {
 	gap: var(--cr-space-xs, 0.5rem);
 }
 
-/* (4c) Meta row — date + category chip side-by-side. */
+/* (4c) Meta row — date + format chip + category text side-by-side.
+   v0.5.4: format chip replaced the periwinkle category chip. The
+   chip's content + left-border color is determined by the post's
+   format-X class on the wrapper li (post_class()). Categories are
+   still shown but as plain uppercase text after the chip. */
 .cr-archive .cr-stream-item__meta {
 	display: flex;
 	flex-wrap: wrap;
@@ -3482,6 +3636,76 @@ body.blog button[type="submit"]:hover {
 	font-family: var(--cr-font-accent);
 	font-weight: 500;
 }
+.cr-archive .cr-stream-item__category {
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xs, 0.7rem);
+	font-weight: var(--cr-weight-bold, 700);
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+.cr-archive .cr-stream-item__category a {
+	color: var(--cr-ink-muted);
+	text-decoration: none;
+}
+.cr-archive .cr-stream-item__category a:hover {
+	color: var(--cr-marker, var(--cr-ut-orange));
+}
+
+/* Format chip — content + left-border color set per post-format,
+   driven by the format-X class on the wrapper li. Default styling
+   matches cr-chip but content/color vary by format. */
+.cr-format-chip {
+	display: none;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xs, 0.7rem);
+	font-weight: var(--cr-weight-bold, 700);
+	text-transform: uppercase;
+	letter-spacing: var(--cr-tracking-eyebrow, 0.05em);
+	background: var(--cr-tape, #f3e5b8);
+	color: var(--cr-tape-ink, var(--cr-russian-violet));
+	padding: var(--cr-space-3xs, 0.15em) var(--cr-space-sm, 0.7em);
+	border-left: 4px solid var(--cr-russian-violet);
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+	transform: rotate(var(--cr-rotate-neg, -3deg));
+	vertical-align: middle;
+}
+/* Show the chip when a known format-X class is on the wrapper.
+   Each format injects its label via ::before content + sets the
+   chip's left-border to the format's design-system color. */
+.cr-archive .format-standard .cr-format-chip,
+.cr-archive .format-blog .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-blog); }
+.cr-archive .format-standard .cr-format-chip::before,
+.cr-archive .format-blog .cr-format-chip::before   { content: "Blog"; }
+
+.cr-archive .format-aside .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-aside); }
+.cr-archive .format-aside .cr-format-chip::before   { content: "Aside"; }
+
+.cr-archive .format-image .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-image); }
+.cr-archive .format-image .cr-format-chip::before   { content: "Image"; }
+
+.cr-archive .format-gallery .cr-format-chip { display: inline-block; border-left-color: var(--cr-type-gallery); }
+.cr-archive .format-gallery .cr-format-chip::before { content: "Gallery"; }
+
+.cr-archive .format-video .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-video); }
+.cr-archive .format-video .cr-format-chip::before   { content: "Video"; }
+
+.cr-archive .format-audio .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-audio); }
+.cr-archive .format-audio .cr-format-chip::before   { content: "Audio"; }
+
+.cr-archive .format-chat .cr-format-chip    { display: inline-block; border-left-color: var(--cr-type-chat); }
+.cr-archive .format-chat .cr-format-chip::before    { content: "Chat"; }
+
+.cr-archive .format-status .cr-format-chip  { display: inline-block; border-left-color: var(--cr-type-status); }
+.cr-archive .format-status .cr-format-chip::before  { content: "Status"; }
+
+.cr-archive .format-link .cr-format-chip    { display: inline-block; border-left-color: var(--cr-type-link); }
+.cr-archive .format-link .cr-format-chip::before    { content: "Link"; }
+
+.cr-archive .format-quote .cr-format-chip   { display: inline-block; border-left-color: var(--cr-type-quote); }
+.cr-archive .format-quote .cr-format-chip::before   { content: "Quote"; }
+
+.cr-archive .format-bookmark .cr-format-chip { display: inline-block; border-left-color: var(--cr-type-bookmark); }
+.cr-archive .format-bookmark .cr-format-chip::before { content: "Bookmark"; }
 
 /* (4d) Title — large condensed display, link inherits ink color,
    underline animates from transparent on hover (matches single-post
