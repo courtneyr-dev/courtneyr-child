@@ -803,9 +803,18 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 }
 .site-header__controls .cr-theme-toggle,
 .site-header__controls .cr-theme-segments {
-	position: static !important;
+	/* v0.5.45: was `position: static !important` — but v0.5.41+ needs
+	   .cr-theme-segments to be `position: relative` so the absolutely-
+	   positioned sliding indicator stays contained inside the toggle
+	   pill. Static was leftover from the older single-button toggle.
+	   .cr-theme-toggle (the older single button) keeps static via
+	   inheritance from its block defaults; only the segments group
+	   needs relative. */
 	margin: 0 !important;
 	flex-shrink: 0;
+}
+.site-header__controls .cr-theme-toggle {
+	position: static !important;
 }
 .site-header__nav,
 .site-header__nav .wp-block-navigation__container,
