@@ -3400,13 +3400,45 @@ body.blog button[type="submit"]:hover {
 	margin: 0;
 }
 .cr-archive .wp-block-post {
-	border-bottom: 1px dashed var(--cr-rule, rgba(36, 28, 74, 0.15));
 	padding-block: var(--cr-space-lg, 1.5rem);
 	transition: transform 0.15s ease;
+	position: relative;
 }
-.cr-archive .wp-block-post:last-child { border-bottom: 0; }
+/* v0.5.4: orange cr-marker-bar between posts (not after the last one).
+   Replaces the dashed gray border with a chunky 6px ut-orange band that
+   reads as a hand-drawn highlighter swipe. */
+.cr-archive .wp-block-post:not(:last-child)::after {
+	content: "";
+	display: block;
+	width: 100%;
+	max-width: 60%;
+	height: 6px;
+	background-color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	margin: var(--cr-space-lg, 1.5rem) auto 0;
+	transform: rotate(-0.5deg);
+}
 .cr-archive .wp-block-post:hover {
 	transform: translate(-1px, -1px);
+}
+
+/* v0.5.4: featured image as a 16:9 banner above the meta row. Rounded
+   corners + slight rotation + hard shadow to match the zine card feel,
+   without dominating the layout. Hidden if the post has no featured
+   image (post-featured-image renders nothing in that case). */
+.cr-archive .cr-stream-item__featured {
+	margin-bottom: var(--cr-space-md, 1rem);
+}
+.cr-archive .cr-stream-item__featured img {
+	width: 100%;
+	height: auto;
+	border-radius: 6px;
+	box-shadow: 4px 4px 0 var(--cr-russian-violet, #241c4a);
+	transform: rotate(-0.4deg);
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.cr-archive .cr-stream-item__featured:hover img {
+	transform: rotate(0deg) translate(-2px, -2px);
+	box-shadow: 6px 6px 0 var(--cr-russian-violet, #241c4a);
 }
 
 .cr-archive .cr-stream-item {
@@ -3471,9 +3503,12 @@ body.blog button[type="submit"]:hover {
 	border-bottom-color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
 }
 
-/* (4e) Excerpt — 3-line clamp so cards stay even-height-ish. */
+/* (4e) Excerpt — dark ink (matches heading color), 3-line clamp.
+   v0.5.3: excerpt color was --cr-ink-muted but read as washed-out
+   gray vs the heading's dark russian-violet. Switched to --cr-ink
+   so excerpt + heading share the same dark purple. */
 .cr-archive .cr-stream-item__excerpt {
-	color: var(--cr-ink-muted);
+	color: var(--cr-ink, #241c4a);
 	font-size: var(--cr-text-base, 1rem);
 	line-height: var(--cr-leading-relaxed, 1.6);
 	display: -webkit-box;
@@ -3483,8 +3518,31 @@ body.blog button[type="submit"]:hover {
 	overflow: hidden;
 	margin: 0;
 }
-.cr-archive .cr-stream-item__excerpt p { margin: 0; }
+.cr-archive .cr-stream-item__excerpt p {
+	margin: 0;
+	color: inherit;
+}
 .cr-archive .cr-stream-item__excerpt a { color: var(--cr-marker, var(--cr-ut-orange)); }
+
+/* (4e-bis) Read-more link — shows on every stream item with the
+   excerpt, in marker color so it reads as the call-to-action. */
+.cr-archive .cr-stream-item__readmore {
+	margin: 0;
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold, 700);
+	font-size: var(--cr-text-sm, 0.875rem);
+	letter-spacing: 0.02em;
+}
+.cr-archive .cr-stream-item__readmore a {
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	text-decoration: none;
+	border-bottom: 2px solid transparent;
+	transition: border-color 0.15s ease;
+}
+.cr-archive .cr-stream-item__readmore a:hover,
+.cr-archive .cr-stream-item__readmore a:focus-visible {
+	border-bottom-color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+}
 
 /* (4f) Tag pills — the existing is-style-term-button rule already
    styles tag links as filled teal pills, but here we add a top-margin
