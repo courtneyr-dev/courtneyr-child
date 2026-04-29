@@ -263,6 +263,33 @@
 	background: transparent !important;
 }
 
+/* v0.5.47: WCAG fix — WP core's default rules paint
+   `.wp-submenu li.current` with `var(--wp-admin-theme-color)`, which
+   we themed to ut-orange (#fb8500). Yellow `--cr-admin-marker`
+   (#ffb703) text on ut-orange bg = ~1.7:1, fails WCAG 1.4.3 by a
+   wide margin (image #132 — "Available Tools" current submenu item).
+   Override the LI bg to dark navy (matches the rest of the submenu
+   surface) so the yellow text reads at ~12:1 against the chrome,
+   AND give the LI an orange left-border accent so the "current"
+   visual cue stays explicit without relying on bg color. */
+#adminmenu .wp-submenu li.current,
+#adminmenu .wp-submenu li.current:hover,
+#adminmenu .wp-submenu li.current:focus,
+#adminmenu .wp-submenu .current,
+#adminmenu .wp-submenu .current:hover,
+#adminmenu .wp-submenu .current:focus {
+	background: var(--cr-admin-chrome) !important;
+	background-color: var(--cr-admin-chrome) !important;
+	border-left: 3px solid var(--cr-admin-cta) !important;
+}
+#adminmenu .wp-submenu li.current a,
+#adminmenu .wp-submenu .current a {
+	color: var(--cr-admin-marker) !important;
+	background: transparent !important;
+	background-color: transparent !important;
+	font-weight: 600;
+}
+
 /* Collapse button at bottom of sidebar */
 #collapse-menu {
 	color: rgba(251, 250, 245, 0.7) !important;
