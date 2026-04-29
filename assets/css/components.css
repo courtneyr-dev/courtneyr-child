@@ -3131,6 +3131,32 @@ body.home .wp-block-latest-posts li::before {
 
 
 /* ============================================================
+   v0.4.18 — cr-flank: zine sparkle accents on either side of a heading.
+   Uses !important on `content` to defeat the v0.2.6.7 ::before/::after
+   nuke applied site-wide on home headings. Apply via className on
+   specific h2/h3 nodes, never globally.
+   ============================================================ */
+.cr-flank::before,
+.cr-flank::after {
+	content: "✦" !important;
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	font-size: 0.7em;
+	display: inline-block !important;
+	opacity: 0.85;
+	vertical-align: middle;
+	font-family: var(--cr-font-accent);
+}
+.cr-flank::before {
+	margin-right: 0.4em;
+	transform: rotate(-12deg);
+}
+.cr-flank::after {
+	margin-left: 0.4em;
+	transform: rotate(12deg);
+}
+
+
+/* ============================================================
    v0.2.6.8 — block styles + utility classes for sections
    ============================================================
    Stable architecture for color-contextual styling that doesn't
