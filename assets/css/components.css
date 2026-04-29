@@ -3876,19 +3876,21 @@ body.home .wp-block-post-template > li::after {
 	position: static !important;
 }
 
+/* Top-left — negative offsets so the tape OVERLAPS past the corner
+   edge, half on the photo and half on the surrounding background.
+   Visually reads as a tape strip affixing the photo to the page. */
 .wp-block-cover .is-style-cr-tape-label.cr-tape-pin-tl {
 	position: absolute !important;
-	top: 1rem;
-	left: 1rem;
+	top: -0.5rem;
+	left: -0.5rem;
 	margin: 0 !important;
 	transform: rotate(-30deg);
 	transform-origin: center;
 	z-index: 5;
 }
 
-/* Top-right — mirror of top-left, offsets are negative so the tape
-   extends past the corner edge (luggage-tag look). Rotation flipped
-   to +30deg clockwise so the tape leans outward from the corner. */
+/* Top-right — mirror of top-left. Rotation flipped to +30deg
+   clockwise so the tape leans outward from the corner. */
 .wp-block-cover .is-style-cr-tape-label.cr-tape-pin-tr {
 	position: absolute !important;
 	top: -0.5rem;
