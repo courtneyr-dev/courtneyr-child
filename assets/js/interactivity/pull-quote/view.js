@@ -13,7 +13,7 @@
  * the quote inline.
  */
 
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, withSyncEvent } from '@wordpress/interactivity';
 
 store( 'courtneyr/pull-quote', {
 	state: {
@@ -26,7 +26,14 @@ store( 'courtneyr/pull-quote', {
 		},
 	},
 	actions: {
-		copyQuote( event ) {
+		// v0.5.39 — WP 7.0 changed `data-wp-on--click` to fire actions
+		// asynchronously by default (was sync in 6.6). The Clipboard
+		// API requires synchronous user activation: by the time an
+		// async handler runs, browsers have lost the "user gesture"
+		// flag and `navigator.clipboard.writeText()` rejects silently.
+		// withSyncEvent() forces this action to run synchronously
+		// inside the click event so clipboard write succeeds.
+		copyQuote: withSyncEvent( ( event ) => {
 			const btn = event.currentTarget;
 			// v0.5.37 — was searching for `.wp-block-quote` as an ancestor
 			// of the button, which never matched: in the IA-injected
@@ -53,6 +60,6 @@ store( 'courtneyr/pull-quote', {
 				// no permission). Stay silent — no fallback needed
 				// for a nice-to-have feature.
 			} );
-		},
+		} ),
 	},
 } );
