@@ -796,7 +796,8 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 	gap: var(--cr-space-sm, 0.75rem);
 	flex-shrink: 0;
 }
-.site-header__controls .cr-theme-toggle {
+.site-header__controls .cr-theme-toggle,
+.site-header__controls .cr-theme-segments {
 	position: static !important;
 	margin: 0 !important;
 	flex-shrink: 0;
@@ -925,55 +926,75 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
    and updated by theme-toggle/view.js on click.
    ============================================================ */
 
-.cr-theme-toggle {
+/* v0.5.15: 3-segment theme toggle (light / dark / system).
+   Replaces the v0.5.x cycling single-button control. Each segment is
+   a real <button> with data-theme-set; clicking applies that theme.
+   The active segment gets a periwinkle pill highlight via .is-active
+   (managed by theme-toggle/view.js). */
+.cr-theme-segments {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.15rem;
+	padding: 0.2rem;
+	background: color-mix(in srgb, currentColor 8%, transparent);
+	border-radius: 999px;
+	border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.cr-theme-segment {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 0;
-	width: 2.25rem;
-	height: 2.25rem;
+	width: 1.85rem;
+	height: 1.85rem;
 	padding: 0;
 	background: transparent;
-	border: 1.5px solid var(--cr-border, currentColor);
+	border: 0;
 	border-radius: 999px;
 	color: inherit;
 	cursor: pointer;
-	transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+	transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 
-.cr-theme-toggle:hover {
-	border-color: var(--cr-marker, currentColor);
-	background: color-mix(in srgb, currentColor 6%, transparent);
+.cr-theme-segment:hover {
+	background: color-mix(in srgb, currentColor 10%, transparent);
 }
 
-.cr-theme-toggle:active {
+.cr-theme-segment:active {
 	transform: scale(0.95);
 }
 
-.cr-theme-toggle:focus-visible {
-	outline: 3px solid var(--cr-focus-ring, var(--cr-marker, dodgerblue));
+.cr-theme-segment:focus-visible {
+	outline: 2px solid var(--cr-focus-ring, var(--cr-marker, dodgerblue));
 	outline-offset: 2px;
 }
 
-.cr-theme-toggle__icon {
-	display: none;
-	width: 1.125rem;
-	height: 1.125rem;
+/* Active segment — periwinkle pill in light mode, russian-violet-soft
+   in dark mode for AA contrast against the toggle's tinted bg. */
+.cr-theme-segment.is-active {
+	background: var(--wp--preset--color--primary-accent, var(--cr-periwinkle, #bcb5e3));
+	color: var(--cr-russian-violet, #241c4a);
+}
+:root[data-theme="dark"] .cr-theme-segment.is-active {
+	background: var(--cr-russian-violet-soft, #3d2f6e);
+	color: var(--cr-printer-ivory, #fbfaf5);
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .cr-theme-segment.is-active,
+	:root[data-theme="system"] .cr-theme-segment.is-active {
+		background: var(--cr-russian-violet-soft, #3d2f6e);
+		color: var(--cr-printer-ivory, #fbfaf5);
+	}
+}
+
+.cr-theme-segment__icon {
+	width: 1rem;
+	height: 1rem;
 	stroke: currentColor;
 	fill: none;
 	stroke-width: 1.75;
 	stroke-linecap: round;
 	stroke-linejoin: round;
-}
-
-/* Show only the icon for the current data-theme.
-   :not([data-theme]) covers the brief moment before no-flash.js runs;
-   should never actually render to the user. */
-:root:not([data-theme]) .cr-theme-toggle__icon--system,
-:root[data-theme="system"] .cr-theme-toggle__icon--system,
-:root[data-theme="dark"]   .cr-theme-toggle__icon--dark,
-:root[data-theme="light"]  .cr-theme-toggle__icon--light {
-	display: inline-block;
 }
 
 /* Hide screen-reader-only label visually but keep accessible */

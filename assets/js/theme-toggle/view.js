@@ -1,60 +1,62 @@
-/* Theme toggle — cycles system → dark → light → system on click.
- * Persists choice to localStorage. Updates aria-label dynamically.
+/* Theme toggle — segmented control with explicit Light / Dark / System
+ * buttons. Replaces the v0.5.x cycling single-button implementation.
  *
- * The CSS in tokens.css drives the actual color-flips via [data-theme]
- * attribute on <html>. This file just manages state + accessibility.
+ * Each button carries data-theme-set="light|dark|system". Clicking a
+ * segment writes that value to localStorage + sets data-theme on <html>,
+ * which the token CSS reads to flip color values. The active segment
+ * gets `is-active` for styling.
+ *
+ * The pre-paint no-flash script in <head> handles the first-paint
+ * data-theme attribute. This file only handles user interaction +
+ * sync between segments and current state.
  */
 (function () {
 	var STORAGE_KEY = 'courtneyr-theme';
-	var ORDER       = [ 'system', 'dark', 'light' ];
-	var LABELS      = {
-		system: 'System (follows OS)',
-		dark:   'Dark',
-		light:  'Light'
-	};
-	var root = document.documentElement;
+	var VALUES      = { light: 1, dark: 1, system: 1 };
+	var root        = document.documentElement;
 
 	function getCurrent() {
 		var v = root.getAttribute( 'data-theme' );
-		return ( v === 'light' || v === 'dark' || v === 'system' ) ? v : 'system';
+		return ( v in VALUES ) ? v : 'system';
 	}
 
 	function applyTheme( value ) {
+		if ( ! ( value in VALUES ) ) return;
 		root.setAttribute( 'data-theme', value );
 		try { localStorage.setItem( STORAGE_KEY, value ); } catch ( e ) {}
-		updateButtons( value );
+		syncSegments( value );
 	}
 
-	function updateButtons( value ) {
-		var buttons = document.querySelectorAll( '[data-theme-toggle]' );
-		for ( var i = 0; i < buttons.length; i++ ) {
-			var current = LABELS[ value ] || value;
-			var nextValue = ORDER[ ( ORDER.indexOf( value ) + 1 ) % ORDER.length ];
-			var nextLabel = LABELS[ nextValue ];
-			buttons[ i ].setAttribute( 'aria-label',
-				'Theme: ' + current + '. Click to switch to ' + nextLabel + '.'
-			);
-			buttons[ i ].setAttribute( 'title', 'Theme: ' + current );
+	function syncSegments( value ) {
+		var segments = document.querySelectorAll( '[data-theme-set]' );
+		for ( var i = 0; i < segments.length; i++ ) {
+			var seg    = segments[ i ];
+			var target = seg.getAttribute( 'data-theme-set' );
+			if ( target === value ) {
+				seg.classList.add( 'is-active' );
+				seg.setAttribute( 'aria-pressed', 'true' );
+			} else {
+				seg.classList.remove( 'is-active' );
+				seg.setAttribute( 'aria-pressed', 'false' );
+			}
 		}
 	}
 
 	function onClick( ev ) {
-		var btn = ev.target.closest( '[data-theme-toggle]' );
+		var btn = ev.target.closest( '[data-theme-set]' );
 		if ( ! btn ) return;
 		ev.preventDefault();
-		var current = getCurrent();
-		var next    = ORDER[ ( ORDER.indexOf( current ) + 1 ) % ORDER.length ];
-		applyTheme( next );
+		applyTheme( btn.getAttribute( 'data-theme-set' ) );
 	}
 
-	// Wire on DOM ready
-	if ( document.readyState === 'loading' ) {
-		document.addEventListener( 'DOMContentLoaded', function () {
-			updateButtons( getCurrent() );
-			document.addEventListener( 'click', onClick );
-		} );
-	} else {
-		updateButtons( getCurrent() );
+	function ready() {
+		syncSegments( getCurrent() );
 		document.addEventListener( 'click', onClick );
+	}
+
+	if ( document.readyState === 'loading' ) {
+		document.addEventListener( 'DOMContentLoaded', ready );
+	} else {
+		ready();
 	}
 })();
