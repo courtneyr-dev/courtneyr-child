@@ -3147,10 +3147,12 @@ body.home .wp-block-latest-posts li::before {
 	color: var(--cr-ut-orange, #fb8500);   /* default: warm orange */
 	opacity: 0.95;
 }
-/* ✦ (4-pointed star) on the left, ✺ (16-pointed asterisk) on the right —
-   the design system pairs them as complementary zine glyphs. */
+/* ✺ (16-pointed asterisk) on both sides — leans into the asterisk
+   feel and avoids visual collision with ✦, which serves as the
+   list-bullet glyph in Recent Posts. Mirrored rotation gives a
+   hand-drawn feel without breaking the symmetry. */
 .cr-flank::before {
-	content: "✦" !important;
+	content: "✺" !important;
 	margin-right: 0.45em;
 	transform: rotate(-15deg);
 }
