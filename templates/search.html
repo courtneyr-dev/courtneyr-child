@@ -1,0 +1,33 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName":"main","metadata":{"name":"Search Results"},"align":"full","className":"cr-archive cr-search-results","style":{"spacing":{"padding":{"top":"var:preset|spacing|x-large","bottom":"var:preset|spacing|xx-large"},"margin":{"top":"0","bottom":"0"}}},"backgroundColor":"main-accent","layout":{"type":"constrained"}} -->
+<main class="wp-block-group alignfull cr-archive cr-search-results has-main-accent-background-color has-background" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--x-large);padding-bottom:var(--wp--preset--spacing--xx-large)">
+
+	<!-- wp:group {"metadata":{"name":"Search Header"},"align":"wide","className":"cr-archive__header","style":{"spacing":{"blockGap":"var:preset|spacing|small","padding":{"bottom":"var:preset|spacing|large"}}},"layout":{"type":"constrained"}} -->
+	<div class="wp-block-group alignwide cr-archive__header" style="padding-bottom:var(--wp--preset--spacing--large)">
+
+		<!-- wp:paragraph {"className":"is-style-cr-tape-label cr-archive__tape","fontSize":"sm"} -->
+		<p class="is-style-cr-tape-label cr-archive__tape has-sm-font-size">FIELD NOTES</p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:paragraph {"className":"is-style-cr-eyebrow"} -->
+		<p class="is-style-cr-eyebrow">searching the archive</p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:query-title {"type":"search","className":"cr-flank cr-flank--blue cr-archive__title","style":{"typography":{"letterSpacing":"-1px","lineHeight":"1.05"}},"fontSize":"x-large","fontFamily":"condensed"} /-->
+
+		<!-- wp:separator {"className":"is-style-cr-marker-bar-short"} -->
+		<hr class="wp-block-separator has-alpha-channel-opacity is-style-cr-marker-bar-short"/>
+		<!-- /wp:separator -->
+
+		<!-- wp:search {"label":"Refine your search","showLabel":false,"placeholder":"Search posts…","width":480,"widthUnit":"px","buttonText":"Search","buttonPosition":"button-outside","className":"cr-archive__search-refine","style":{"spacing":{"margin":{"top":"var:preset|spacing|medium"}}}} /-->
+
+	</div>
+	<!-- /wp:group -->
+
+	<!-- wp:pattern {"slug":"courtneyr-child/cr-stream-loop"} /-->
+
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

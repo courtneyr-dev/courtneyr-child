@@ -13,6 +13,18 @@
 
 declare( strict_types = 1 );
 ?>
+<!-- wp:html -->
+<div class="cr-stream-filter" data-wp-interactive="courtneyr/stream-filter" data-wp-context='{"format":""}' data-wp-bind--data-active-format="context.format">
+	<div class="cr-stream-filter__chips" role="group" aria-label="Filter posts by format">
+		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="">All</button>
+		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="blog">Blog</button>
+		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="quote">Quote</button>
+		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="link">Link</button>
+		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="gallery">Gallery</button>
+		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="video">Video</button>
+	</div>
+<!-- /wp:html -->
+
 <!-- wp:query {"queryId":42,"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"align":"wide","className":"cr-stream"} -->
 <div class="wp-block-query alignwide cr-stream">
 
@@ -72,3 +84,7 @@ declare( strict_types = 1 );
 
 </div>
 <!-- /wp:query -->
+
+<!-- wp:html -->
+</div>
+<!-- /wp:html -->
