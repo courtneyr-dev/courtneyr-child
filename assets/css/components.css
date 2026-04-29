@@ -4264,9 +4264,15 @@ body.home .homepage__content > .alignfull:has(#h-are-you-passionate-about) {
 	}
 }
 
-/* Newsletter Features — periwinkle in light, prussian-blue in dark */
+/* Newsletter Features — periwinkle in light, prussian-blue in dark.
+   v0.5.2: subtle paper texture (fiber + halftone) overlaid so the
+   surface reads as printed periwinkle paper, not flat color. */
 body.home .homepage__content > .alignfull:has(#h-how-this-newsletter-can-help-you-grow) {
 	background-color: var(--cr-glaucous-light, #c7d3f3) !important;
+	background-image: var(--cr-fiber), var(--cr-halftone) !important;
+	background-size: auto, var(--cr-halftone-size) !important;
+	background-blend-mode: multiply, multiply !important;
+	background-repeat: repeat, repeat !important;
 	color: var(--cr-russian-violet, #241c4a) !important;
 }
 :root[data-theme="dark"] body.home .homepage__content > .alignfull:has(#h-how-this-newsletter-can-help-you-grow) {
