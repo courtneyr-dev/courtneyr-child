@@ -3207,6 +3207,210 @@ body.home .wp-block-latest-posts li::before {
 
 
 /* ============================================================
+   v0.5.0 — Archive overhaul (blog index, category, tag, post-format
+   archives all share `templates/archive.html` + `templates/home.html`,
+   both rendering the cr-stream-loop pattern).
+
+   Goals:
+     - Ivory + paper-texture surface (matches home Field Notes /
+       Recent Posts), no peach.
+     - Each post: ✦ avatar, date + periwinkle category chip on a
+       meta row, h2 link title, 3-line excerpt, post tags as filled
+       teal pill chips.
+     - Marker-bar separator between items + hard-shadow on hover so
+       the stream reads as zine cards, not generic blog grid.
+     - Light + dark mode parity.
+     - Removes the v0.2.6.10 home-rotation (which only applied to
+       body.home) — archive uses explicit ivory + paper, no rotation.
+   ============================================================ */
+
+/* (1) Surface + paper texture on archive shells. The cr-archive class
+   is on the <main> in templates/archive.html and templates/home.html
+   so this catches every archive view (category, tag, post-format,
+   author, date, blog index). */
+.cr-archive {
+	background-image: var(--cr-fiber), var(--cr-halftone);
+	background-size: auto, var(--cr-halftone-size);
+	background-blend-mode: multiply, multiply;
+	background-repeat: repeat, repeat;
+}
+
+/* Dark-mode color override — keep main-accent sections as
+   night-elevated (same rule we used for home Field Notes/Recent Posts
+   sections in v0.4.17). */
+:root[data-theme="dark"] .cr-archive {
+	background-color: var(--cr-night-elevated, #251f1c) !important;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .cr-archive,
+	:root[data-theme="system"] .cr-archive {
+		background-color: var(--cr-night-elevated, #251f1c) !important;
+	}
+}
+
+/* (2) Header — FRESH/FIELD NOTES tape sits above the query-title.
+   The query-title has cr-flank applied per template, so it gets the
+   ✺ accent without anything special here. */
+.cr-archive__header {
+	max-width: var(--cr-measure, 720px);
+}
+
+/* (3) cr-stream wrapper inside archive — pull width inward so the
+   stream reads as a column even when the surrounding section is
+   alignwide. This avoids the squished grid look. */
+.cr-archive .cr-stream {
+	max-width: var(--cr-measure, 720px);
+	margin-inline: auto;
+}
+
+/* (4) Stream item layout — adapted from the v1.x cr-stream rule but
+   re-tuned for the Query Loop's <li> wrapper. WP Query Loop renders
+   each post inside `<li class="wp-block-post post-XXX format-XXX">`,
+   and our pattern's <article class="cr-stream-item"> sits inside
+   that li. Reset li bullet, add the marker-bar separator, hover
+   affordance. */
+.cr-archive .wp-block-post-template,
+.cr-archive .cr-stream__list {
+	list-style: none;
+	padding-left: 0;
+	margin: 0;
+}
+.cr-archive .wp-block-post {
+	border-bottom: 1px dashed var(--cr-rule, rgba(36, 28, 74, 0.15));
+	padding-block: var(--cr-space-lg, 1.5rem);
+	transition: transform 0.15s ease;
+}
+.cr-archive .wp-block-post:last-child { border-bottom: 0; }
+.cr-archive .wp-block-post:hover {
+	transform: translate(-1px, -1px);
+}
+
+.cr-archive .cr-stream-item {
+	display: grid;
+	grid-template-columns: 3rem 1fr;
+	gap: var(--cr-space-md, 1rem);
+	align-items: start;
+}
+
+/* (4a) Avatar column — ✦ glyph in marker color, slight rotation. */
+.cr-archive .cr-stream-item__avatar {
+	font-size: var(--cr-text-2xl, 1.75rem);
+	line-height: 1;
+	text-align: center;
+	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	transform: rotate(var(--cr-rotate-neg, -3deg));
+	margin: 0;
+	padding-top: 0.25em;
+}
+
+/* (4b) Body column — vertical stack. */
+.cr-archive .cr-stream-item__body {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--cr-space-xs, 0.5rem);
+}
+
+/* (4c) Meta row — date + category chip side-by-side. */
+.cr-archive .cr-stream-item__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--cr-space-sm, 0.75rem);
+	color: var(--cr-ink-muted);
+	font-size: var(--cr-text-sm, 0.875rem);
+}
+.cr-archive .cr-stream-item__meta time,
+.cr-archive .cr-stream-item__meta .wp-block-post-date {
+	color: inherit;
+	font-family: var(--cr-font-accent);
+	font-weight: 500;
+}
+
+/* (4d) Title — large condensed display, link inherits ink color,
+   underline animates from transparent on hover (matches single-post
+   title affordance). */
+.cr-archive .cr-stream-item__title {
+	font-family: var(--cr-font-condensed, var(--cr-font-accent));
+	font-weight: var(--cr-weight-bold, 700);
+	line-height: 1.15;
+	margin: 0;
+}
+.cr-archive .cr-stream-item__title a {
+	color: var(--cr-ink, #241c4a);
+	text-decoration: none;
+	border-bottom: 2px solid transparent;
+	transition: border-color 0.15s ease;
+}
+.cr-archive .cr-stream-item__title a:hover,
+.cr-archive .cr-stream-item__title a:focus-visible {
+	border-bottom-color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+}
+
+/* (4e) Excerpt — 3-line clamp so cards stay even-height-ish. */
+.cr-archive .cr-stream-item__excerpt {
+	color: var(--cr-ink-muted);
+	font-size: var(--cr-text-base, 1rem);
+	line-height: var(--cr-leading-relaxed, 1.6);
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	margin: 0;
+}
+.cr-archive .cr-stream-item__excerpt p { margin: 0; }
+.cr-archive .cr-stream-item__excerpt a { color: var(--cr-marker, var(--cr-ut-orange)); }
+
+/* (4f) Tag pills — the existing is-style-term-button rule already
+   styles tag links as filled teal pills, but here we add a top-margin
+   so the pills sit clearly below the excerpt. */
+.cr-archive .cr-stream-item__tags {
+	margin-top: var(--cr-space-xs, 0.5rem);
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cr-space-2xs, 0.35rem);
+}
+
+/* (5) Pagination — hard-edge buttons matching the design system. */
+.cr-archive .cr-stream__pagination {
+	margin-top: var(--cr-space-2xl, 3rem);
+	padding-top: var(--cr-space-lg, 1.5rem);
+	border-top: 1px dashed var(--cr-rule, rgba(36, 28, 74, 0.15));
+}
+.cr-archive .wp-block-query-pagination-numbers .page-numbers {
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold, 700);
+	padding: 0.35em 0.75em;
+	border: 2px solid var(--cr-russian-violet, #241c4a);
+	color: var(--cr-ink, #241c4a);
+	text-decoration: none;
+	margin-inline: 0.15em;
+	transition: background-color 0.15s ease, color 0.15s ease;
+}
+.cr-archive .wp-block-query-pagination-numbers .page-numbers.current {
+	background-color: var(--cr-russian-violet, #241c4a);
+	color: var(--cr-printer-ivory, #fbfaf5);
+}
+.cr-archive .wp-block-query-pagination-numbers .page-numbers:hover {
+	background-color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
+	color: var(--cr-russian-violet, #241c4a);
+}
+
+/* (6) Mobile — collapse the 3rem avatar column to inline above body. */
+@media (max-width: 600px) {
+	.cr-archive .cr-stream-item {
+		grid-template-columns: 1fr;
+		gap: var(--cr-space-xs, 0.5rem);
+	}
+	.cr-archive .cr-stream-item__avatar {
+		text-align: left;
+		padding-top: 0;
+	}
+}
+
+
+/* ============================================================
    v0.4.23 — card eyebrow tightening so labels fit on one line
    ============================================================ */
 
