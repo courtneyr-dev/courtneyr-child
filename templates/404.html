@@ -1,0 +1,92 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName":"main","metadata":{"name":"404 Not Found"},"align":"full","className":"cr-archive cr-404","style":{"spacing":{"padding":{"top":"var:preset|spacing|x-large","bottom":"var:preset|spacing|xx-large"},"margin":{"top":"0","bottom":"0"}}},"backgroundColor":"main-accent","layout":{"type":"constrained"}} -->
+<main class="wp-block-group alignfull cr-archive cr-404 has-main-accent-background-color has-background" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--x-large);padding-bottom:var(--wp--preset--spacing--xx-large)">
+
+	<!-- wp:group {"metadata":{"name":"404 Header"},"align":"wide","className":"cr-archive__header cr-404__header","style":{"spacing":{"blockGap":"var:preset|spacing|small","padding":{"bottom":"var:preset|spacing|large"}}},"layout":{"type":"constrained"}} -->
+	<div class="wp-block-group alignwide cr-archive__header cr-404__header" style="padding-bottom:var(--wp--preset--spacing--large)">
+
+		<!-- wp:paragraph {"className":"is-style-cr-tape-label cr-404__tape","fontSize":"sm"} -->
+		<p class="is-style-cr-tape-label cr-404__tape has-sm-font-size">404</p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:paragraph {"className":"is-style-cr-eyebrow"} -->
+		<p class="is-style-cr-eyebrow">field notes · off the path</p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:heading {"level":1,"className":"cr-flank cr-flank--orange cr-404__title","style":{"typography":{"letterSpacing":"-1px","lineHeight":"1.05"}},"fontSize":"x-large","fontFamily":"condensed"} -->
+		<h1 class="wp-block-heading cr-flank cr-flank--orange cr-404__title has-condensed-font-family has-x-large-font-size" style="letter-spacing:-1px;line-height:1.05">This page wandered off</h1>
+		<!-- /wp:heading -->
+
+		<!-- wp:separator {"className":"is-style-cr-marker-bar-short"} -->
+		<hr class="wp-block-separator has-alpha-channel-opacity is-style-cr-marker-bar-short"/>
+		<!-- /wp:separator -->
+
+		<!-- wp:paragraph {"className":"cr-404__lede","fontSize":"md"} -->
+		<p class="cr-404__lede has-md-font-size">The link you followed went looking for a page that isn't here — maybe the URL got garbled, maybe the post moved, maybe it's a draft I haven't published yet. Either way, here's how to get back on the path.</p>
+		<!-- /wp:paragraph -->
+
+	</div>
+	<!-- /wp:group -->
+
+	<!-- wp:group {"metadata":{"name":"404 Search"},"align":"wide","className":"cr-404__search-wrap","style":{"spacing":{"blockGap":"var:preset|spacing|small","padding":{"top":"var:preset|spacing|large","bottom":"var:preset|spacing|large"}}},"layout":{"type":"constrained"}} -->
+	<div class="wp-block-group alignwide cr-404__search-wrap" style="padding-top:var(--wp--preset--spacing--large);padding-bottom:var(--wp--preset--spacing--large)">
+
+		<!-- wp:heading {"level":2,"className":"cr-404__search-heading","fontSize":"large","fontFamily":"accent"} -->
+		<h2 class="wp-block-heading cr-404__search-heading has-accent-font-family has-large-font-size">Try searching the archive</h2>
+		<!-- /wp:heading -->
+
+		<!-- wp:search {"label":"Search","showLabel":false,"placeholder":"What were you looking for?","width":480,"widthUnit":"px","buttonText":"Search","buttonPosition":"button-outside","className":"cr-404__search"} /-->
+
+	</div>
+	<!-- /wp:group -->
+
+	<!-- wp:group {"metadata":{"name":"404 CTA"},"align":"wide","className":"cr-404__cta","style":{"spacing":{"blockGap":"var:preset|spacing|medium","padding":{"top":"var:preset|spacing|medium","bottom":"var:preset|spacing|large"}}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"left"}} -->
+	<div class="wp-block-group alignwide cr-404__cta" style="padding-top:var(--wp--preset--spacing--medium);padding-bottom:var(--wp--preset--spacing--large)">
+
+		<!-- wp:buttons {"layout":{"type":"flex","flexWrap":"wrap"}} -->
+		<div class="wp-block-buttons">
+
+			<!-- wp:button {"className":"is-style-cr-cta"} -->
+			<div class="wp-block-button is-style-cr-cta"><a class="wp-block-button__link wp-element-button" href="/">Back to home</a></div>
+			<!-- /wp:button -->
+
+			<!-- wp:button {"className":"is-style-cr-button-outline"} -->
+			<div class="wp-block-button is-style-cr-button-outline"><a class="wp-block-button__link wp-element-button" href="/blog/">Browse the field notes</a></div>
+			<!-- /wp:button -->
+
+		</div>
+		<!-- /wp:buttons -->
+
+	</div>
+	<!-- /wp:group -->
+
+	<!-- wp:group {"metadata":{"name":"404 Recent Posts"},"align":"wide","className":"cr-404__recent","style":{"spacing":{"blockGap":"var:preset|spacing|small","padding":{"top":"var:preset|spacing|large","bottom":"var:preset|spacing|large"}}},"layout":{"type":"constrained"}} -->
+	<div class="wp-block-group alignwide cr-404__recent" style="padding-top:var(--wp--preset--spacing--large);padding-bottom:var(--wp--preset--spacing--large)">
+
+		<!-- wp:heading {"level":2,"className":"cr-flank cr-flank--blue cr-404__recent-heading","fontSize":"large","fontFamily":"condensed"} -->
+		<h2 class="wp-block-heading cr-flank cr-flank--blue cr-404__recent-heading has-condensed-font-family has-large-font-size">Or pick from the latest</h2>
+		<!-- /wp:heading -->
+
+		<!-- wp:query {"queryId":404,"query":{"perPage":"5","pages":1,"offset":0,"postType":"post","order":"desc","orderBy":"date","sticky":"","inherit":false},"align":"wide","className":"cr-404__list"} -->
+		<div class="wp-block-query alignwide cr-404__list">
+			<!-- wp:post-template {"className":"cr-404__list-template","style":{"spacing":{"blockGap":"var:preset|spacing|small"}}} -->
+				<!-- wp:group {"className":"cr-404__list-item","style":{"spacing":{"blockGap":"var:preset|spacing|2-xs"}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"left"}} -->
+				<div class="wp-block-group cr-404__list-item">
+					<!-- wp:paragraph {"className":"cr-404__list-glyph","fontSize":"md"} -->
+					<p class="cr-404__list-glyph has-md-font-size" aria-hidden="true">✦</p>
+					<!-- /wp:paragraph -->
+					<!-- wp:post-title {"isLink":true,"className":"cr-404__list-title","style":{"typography":{"fontStyle":"normal","fontWeight":"600"}},"fontSize":"md","fontFamily":"accent"} /-->
+				</div>
+				<!-- /wp:group -->
+			<!-- /wp:post-template -->
+		</div>
+		<!-- /wp:query -->
+
+	</div>
+	<!-- /wp:group -->
+
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->
