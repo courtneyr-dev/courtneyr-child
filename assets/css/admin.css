@@ -31,6 +31,19 @@
 	--cr-admin-link-hover:   #fb8500;
 	--cr-admin-marker:       #ffb703;
 	--cr-admin-border:       #d4cfeb;
+
+	/* v0.5.27: override WP's built-in admin-theme color variables.
+	   These drive default hover/focus/active states across admin
+	   bar sub-menus, button focus rings, link colors, and various
+	   --wp-admin-theme-color descendants. Painting them in our
+	   palette stops the periwinkle/blue defaults bleeding through. */
+	--wp-admin-theme-color:           #fb8500 !important;
+	--wp-admin-theme-color--rgb:      251, 133, 0 !important;
+	--wp-admin-theme-color-darker-10: #e07700 !important;
+	--wp-admin-theme-color-darker-10--rgb: 224, 119, 0 !important;
+	--wp-admin-theme-color-darker-20: #c66800 !important;
+	--wp-admin-theme-color-darker-20--rgb: 198, 104, 0 !important;
+	--wp-admin-border-width-focus:    2px;
 }
 
 /* ============ Top admin bar ============ */
@@ -99,6 +112,94 @@
 #wpadminbar .avatar {
 	border-radius: 999px;
 	border: 1px solid rgba(251, 250, 245, 0.3);
+}
+
+/* v0.5.27: cover EVERY admin bar state. WP's defaults bleed
+   through wherever a selector isn't explicitly painted in our
+   palette — periwinkle hover, blue focus rings, white "current"
+   highlights, etc. Force russian-violet bg + ivory ink + cta
+   orange for hover/active across all nested submenu levels. */
+#wpadminbar,
+#wpadminbar *,
+#wpadminbar:before,
+#wpadminbar:after,
+#wpadminbar *:before,
+#wpadminbar *:after {
+	color: var(--cr-admin-ink-inverse);
+}
+#wpadminbar .ab-empty-item,
+#wpadminbar .ab-item,
+#wpadminbar a.ab-item {
+	background: transparent !important;
+}
+/* All hover/focus/current states on top-level + submenu items */
+#wpadminbar .ab-top-menu > li:hover > .ab-item,
+#wpadminbar .ab-top-menu > li.hover > .ab-item,
+#wpadminbar .ab-top-menu > li > .ab-item:focus,
+#wpadminbar .ab-top-menu > li > .ab-item:active,
+#wpadminbar .ab-top-secondary > li:hover > .ab-item,
+#wpadminbar .ab-top-secondary > li.hover > .ab-item,
+#wpadminbar .ab-top-secondary > li > .ab-item:focus,
+#wpadminbar:not(.mobile) .ab-top-menu > li:hover > .ab-item,
+#wpadminbar:not(.mobile) .ab-top-menu > li > .ab-item:focus,
+#wpadminbar.nojq .quicklinks .ab-top-menu > li > .ab-item:focus,
+#wpadminbar:not(.mobile) li:hover .ab-icon:before,
+#wpadminbar:not(.mobile) li:hover .ab-item:before,
+#wpadminbar:not(.mobile) li:hover #adminbarsearch:before {
+	background: var(--cr-admin-chrome-hover) !important;
+	color: var(--cr-admin-marker) !important;
+}
+/* Submenu items — every level + every state */
+#wpadminbar .ab-submenu .ab-item,
+#wpadminbar .ab-sub-wrapper .ab-item,
+#wpadminbar .ab-sub-wrapper a,
+#wpadminbar .quicklinks .ab-sub-wrapper .ab-submenu .ab-item,
+#wpadminbar .menupop.hover > .ab-sub-wrapper > .ab-submenu .ab-item,
+#wpadminbar .menupop.hover > .ab-sub-wrapper > .ab-submenu li > .ab-item {
+	background: transparent !important;
+	color: var(--cr-admin-ink-inverse) !important;
+}
+#wpadminbar .ab-submenu .ab-item:hover,
+#wpadminbar .ab-submenu .ab-item:focus,
+#wpadminbar .ab-sub-wrapper a:hover,
+#wpadminbar .ab-sub-wrapper a:focus,
+#wpadminbar .quicklinks .ab-sub-wrapper .ab-submenu .ab-item:hover,
+#wpadminbar .quicklinks .ab-sub-wrapper .ab-submenu .ab-item:focus,
+#wpadminbar .quicklinks .menupop ul li a:focus,
+#wpadminbar .quicklinks .menupop ul li a:focus strong,
+#wpadminbar .quicklinks .menupop ul li a:hover,
+#wpadminbar .quicklinks .menupop ul li a:hover strong,
+#wpadminbar .quicklinks .menupop.hover ul li a:focus,
+#wpadminbar .quicklinks .menupop.hover ul li a:hover {
+	background: var(--cr-admin-cta) !important;
+	color: var(--cr-admin-chrome) !important;
+}
+/* "Current" / active item in submenu */
+#wpadminbar .quicklinks .menupop ul li.current > .ab-item,
+#wpadminbar .quicklinks .menupop ul li.current.hover > .ab-item,
+#wpadminbar .quicklinks .menupop.hover ul li.current > .ab-item,
+#wpadminbar .ab-sub-wrapper .current.menupop > .ab-item {
+	background: var(--cr-admin-marker) !important;
+	color: var(--cr-admin-chrome) !important;
+}
+/* Strong/bold elements inside admin bar items */
+#wpadminbar .ab-submenu .ab-item strong,
+#wpadminbar .quicklinks .menupop ul li > a strong {
+	color: inherit !important;
+	font-weight: 700;
+}
+/* Search box in admin bar (rare but exists) */
+#wpadminbar #adminbarsearch input.adminbar-input {
+	background: var(--cr-admin-chrome-hover) !important;
+	color: var(--cr-admin-ink-inverse) !important;
+	border: 1px solid rgba(251, 250, 245, 0.3) !important;
+}
+/* Logo (the wp icon at far left) */
+#wpadminbar #wp-admin-bar-wp-logo > .ab-item .ab-icon:before {
+	color: var(--cr-admin-ink-inverse) !important;
+}
+#wpadminbar #wp-admin-bar-wp-logo:hover > .ab-item .ab-icon:before {
+	color: var(--cr-admin-marker) !important;
 }
 
 /* ============ Sidebar menu (#adminmenu) ============ */
