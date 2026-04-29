@@ -3855,22 +3855,24 @@ body.home .wp-block-post-template > li::after {
 	display: none !important;
 }
 
-/* v0.4.6: pinned tape label inside cover blocks.
-   Apply .cr-tape-pin-tl alongside .is-style-cr-tape-label to absolutely
-   pin the label to the top-left corner of any cover block, with a
-   counter-clockwise 30deg rotation that overrides the default -1.2deg
-   cr-tape rotation.
+/* v0.4.6/4.7/4.8: pinned tape label modifiers for cover blocks.
+   Apply one of .cr-tape-pin-tl / .cr-tape-pin-tr alongside
+   .is-style-cr-tape-label to absolutely pin the label to a corner of
+   any cover block. Each variant has its own rotation direction so
+   the tape "points outward" from the corner like a luggage tag.
 
-   v0.4.7: when a pinned tape is present, take .wp-block-cover__inner-
-   container out of the positioning chain. Without this, the inner-
-   container's WP-baked `position: relative` made IT the positioning
-   ancestor, so the tape pinned to top-left of the inner-container —
-   which sits at the bottom of the cover when contentPosition is
-   "bottom center". With static positioning the tape walks up to
-   .wp-block-cover (relative) and pins to the cover's actual top-left
-   corner. Scoped via :has() so only covers that contain a pinned
-   tape are affected. */
-.wp-block-cover:has(.cr-tape-pin-tl) > .wp-block-cover__inner-container {
+   v0.4.7: take .wp-block-cover__inner-container out of the positioning
+   chain when a pinned tape is present. Without this the WP-baked
+   position: relative on inner-container made IT the positioning
+   ancestor — and inner-container sits at the bottom of the cover when
+   contentPosition is bottom center, so the tape ended up mid-photo.
+
+   v0.4.8: added top-right (-tr) variant with mirrored rotation and
+   negative offsets so the tape overlaps past the corner edge. Updated
+   the inner-container override to match any cr-tape-pin-* variant
+   via attribute selector so future variants (-bl, -br) work without
+   another CSS edit. */
+.wp-block-cover:has([class*="cr-tape-pin-"]) > .wp-block-cover__inner-container {
 	position: static !important;
 }
 
@@ -3880,6 +3882,19 @@ body.home .wp-block-post-template > li::after {
 	left: 1rem;
 	margin: 0 !important;
 	transform: rotate(-30deg);
+	transform-origin: center;
+	z-index: 5;
+}
+
+/* Top-right — mirror of top-left, offsets are negative so the tape
+   extends past the corner edge (luggage-tag look). Rotation flipped
+   to +30deg clockwise so the tape leans outward from the corner. */
+.wp-block-cover .is-style-cr-tape-label.cr-tape-pin-tr {
+	position: absolute !important;
+	top: -0.5rem;
+	right: -0.5rem;
+	margin: 0 !important;
+	transform: rotate(30deg);
 	transform-origin: center;
 	z-index: 5;
 }
