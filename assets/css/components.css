@@ -3855,6 +3855,33 @@ body.home .wp-block-post-template > li::after {
 	display: none !important;
 }
 
+/* v0.4.14: cr-chip used with core/post-terms. The post-terms block
+   wraps its term links inside a div: `.wp-block-post-terms > a`.
+   Apply cr-chip styling to the wrapper, and inherit color into the
+   link so the russian-violet chip text reads correctly. Also tighten
+   the gap between multiple terms (separator span gets a small margin
+   instead of the post-terms default). Used on the home Recent Posts
+   list to label each item with its category. */
+.wp-block-post-terms.cr-chip {
+	/* base cr-chip styling already applies (bg, padding, transform).
+	   Override post-terms' default block display so the chip stays
+	   inline-block / content-width. */
+	display: inline-block !important;
+	margin-bottom: var(--cr-space-2xs);
+}
+
+.wp-block-post-terms.cr-chip a {
+	color: inherit !important;
+	text-decoration: none !important;
+	border-bottom: 0 !important;
+}
+
+.wp-block-post-terms.cr-chip a:hover {
+	text-decoration: underline !important;
+	text-decoration-thickness: 2px !important;
+	text-underline-offset: 0.18em !important;
+}
+
 /* v0.4.6/4.7/4.8: pinned tape label modifiers for cover blocks.
    Apply one of .cr-tape-pin-tl / .cr-tape-pin-tr alongside
    .is-style-cr-tape-label to absolutely pin the label to a corner of
