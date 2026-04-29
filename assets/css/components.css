@@ -6574,6 +6574,121 @@ body.page-newsletter .tnp-field,
 	margin-bottom: 1rem;
 }
 
+
+/* (3) v0.5.30 — accessible input text contrast on the Newsletter
+   Plugin form WHEREVER it renders.
+
+   The page-newsletter / cr-newsletter-form-wrap rules above only
+   match the /newsletter/ page and the cr-page wrapper. The same
+   plugin form also appears in the footer (every page including
+   single posts) and inside the homepage hero section. Image #118
+   shows the input text rendering in faint orange — caused by the
+   Newsletter Plugin's own CSS painting input values in its TNP
+   button-color (which we've themed to ut-orange via plugin
+   settings). On the ivory background that drops to ~2.4:1
+   contrast — fails WCAG AA (4.5:1 required for normal text).
+
+   Fix: target the plugin's own selectors (form.tnp,
+   .tnp-subscription, .wp-block-newsletter, .newsletter-inline-form)
+   so the rules win wherever the form lives. Cover three states:
+     - Default (typed value)
+     - ::placeholder (empty state hint)
+     - :-webkit-autofill (Chrome's pale-yellow autofill paint that
+       can also drop contrast below AA)
+
+   russian-violet at full opacity for typed values (>= 12:1 AAA),
+   russian-violet at 0.55 opacity for placeholders (~5.8:1 AA — WCAG
+   permits placeholder contrast to be lower than primary text but
+   still legible). */
+
+form.tnp input[type="email"],
+form.tnp input[type="text"],
+form.tnp input[type="url"],
+.tnp-subscription input[type="email"],
+.tnp-subscription input[type="text"],
+.tnp-subscription input[type="url"],
+.wp-block-newsletter input[type="email"],
+.wp-block-newsletter input[type="text"],
+.wp-block-newsletter input[type="url"],
+.newsletter-inline-form input[type="email"],
+.newsletter-inline-form input[type="text"],
+.newsletter-inline-form input[type="url"] {
+	background-color: var(--cr-printer-ivory, #fbfaf5) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+	border: 1.5px solid var(--cr-russian-violet, #241c4a) !important;
+	border-radius: 0 !important;
+	font-family: var(--cr-font-body, sans-serif) !important;
+	font-size: 1rem !important;
+	-webkit-text-fill-color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+/* Placeholder text — readable but visually subordinate to typed text */
+form.tnp input::placeholder,
+.tnp-subscription input::placeholder,
+.wp-block-newsletter input::placeholder,
+.newsletter-inline-form input::placeholder {
+	color: var(--cr-russian-violet, #241c4a) !important;
+	opacity: 0.55 !important;
+	-webkit-text-fill-color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+/* Chrome autofill — defeat the pale-yellow paint that drops contrast.
+   Use a giant inset box-shadow to mask Chrome's autofill background
+   without changing the actual background-color (which Chrome locks
+   during autofill). text-fill-color is the Chrome-specific way to
+   paint the autofilled text in our chosen color. */
+form.tnp input:-webkit-autofill,
+form.tnp input:-webkit-autofill:hover,
+form.tnp input:-webkit-autofill:focus,
+.tnp-subscription input:-webkit-autofill,
+.tnp-subscription input:-webkit-autofill:hover,
+.tnp-subscription input:-webkit-autofill:focus,
+.wp-block-newsletter input:-webkit-autofill,
+.wp-block-newsletter input:-webkit-autofill:hover,
+.wp-block-newsletter input:-webkit-autofill:focus,
+.newsletter-inline-form input:-webkit-autofill {
+	-webkit-box-shadow: 0 0 0 1000px var(--cr-printer-ivory, #fbfaf5) inset !important;
+	-webkit-text-fill-color: var(--cr-russian-violet, #241c4a) !important;
+	caret-color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+/* Same for any future-proofing: the modern :autofill (no -webkit-)
+   rolling out across browsers per CSS Selectors Level 4. */
+form.tnp input:autofill,
+.tnp-subscription input:autofill,
+.wp-block-newsletter input:autofill,
+.newsletter-inline-form input:autofill {
+	background-color: var(--cr-printer-ivory, #fbfaf5) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+/* Dark mode — placeholder + autofill stay readable on the dark
+   surface variant. Inputs themselves stay ivory (per L4910 dark
+   rules above) so typed text in russian-violet still contrasts. */
+:root[data-theme="dark"] form.tnp input::placeholder,
+:root[data-theme="dark"] .tnp-subscription input::placeholder,
+:root[data-theme="dark"] .wp-block-newsletter input::placeholder,
+:root[data-theme="dark"] .newsletter-inline-form input::placeholder {
+	color: var(--cr-russian-violet, #241c4a) !important;
+	opacity: 0.55 !important;
+	-webkit-text-fill-color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) form.tnp input::placeholder,
+	:root:not([data-theme]) .tnp-subscription input::placeholder,
+	:root:not([data-theme]) .wp-block-newsletter input::placeholder,
+	:root:not([data-theme]) .newsletter-inline-form input::placeholder,
+	:root[data-theme="system"] form.tnp input::placeholder,
+	:root[data-theme="system"] .tnp-subscription input::placeholder,
+	:root[data-theme="system"] .wp-block-newsletter input::placeholder,
+	:root[data-theme="system"] .newsletter-inline-form input::placeholder {
+		color: var(--cr-russian-violet, #241c4a) !important;
+		opacity: 0.55 !important;
+		-webkit-text-fill-color: var(--cr-russian-violet, #241c4a) !important;
+	}
+}
+
 /* Dark mode — ivory inputs + bright CTA still legible */
 :root[data-theme="dark"] body.page-newsletter input[type="email"],
 :root[data-theme="dark"] body.page-newsletter input[type="text"],
