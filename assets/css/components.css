@@ -6052,30 +6052,49 @@ input.wp-block-search__input:focus,
    relative + width:100% so it behaves like a regular <img>. The
    inner-container's `is-position-bottom-center` flex anchoring
    becomes irrelevant once we set the cover to display:block. */
+/* v0.5.24: stretch polaroid to fill the column height (image #106
+   feedback). Cover becomes flex-column; image grows to fill the
+   available vertical space; caption sits at the bottom in a fixed
+   strip. Parent column also forced to flex-column so the cover
+   has a determinate height to fill. */
+body.home .wp-block-columns:has(.wp-block-cover img[src*="courtney-pirate"]) {
+	align-items: stretch !important;
+}
+body.home .wp-block-columns:has(.wp-block-cover img[src*="courtney-pirate"]) > .wp-block-column:has(.wp-block-cover img[src*="courtney-pirate"]) {
+	display: flex !important;
+	flex-direction: column !important;
+}
+
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) {
 	background: #ffffff !important;
-	display: block !important;
+	display: flex !important;
+	flex-direction: column !important;
 	padding: 14px 14px 30px 14px !important;
 	border-radius: 0 !important;
 	min-height: 0 !important;
+	height: 100% !important;
+	flex: 1 1 auto !important;
 	aspect-ratio: unset !important;
-	/* v0.5.23: softened shadow — hard 12px russian-violet was too
-	   harsh per user feedback. Use a soft blur shadow (W3Docs
-	   reference) with a hint of russian-violet tint for brand
-	   continuity. */
 	box-shadow: 0 8px 20px rgba(36, 28, 74, 0.25), 0 2px 6px rgba(36, 28, 74, 0.18);
 	transform: rotate(-1.5deg);
 	transition: transform 0.3s ease, box-shadow 0.3s ease;
 	margin: 1.5rem !important;
 	text-align: center !important;
-	max-width: 420px;
+	max-width: 460px;
+	/* Kill cover's default text-shadow (white halo on captions
+	   designed for overlay readability — but we don't overlay). */
+	text-shadow: none !important;
 }
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]):hover {
 	transform: rotate(0deg);
 	box-shadow: 0 14px 28px rgba(36, 28, 74, 0.3), 0 4px 10px rgba(36, 28, 74, 0.2);
 }
 
-/* Image flows naturally — square aspect, full width of polaroid paper. */
+/* v0.5.24: image fills the available flex space (the column-height
+   polaroid minus the caption strip). flex:1 grows it; min-height:0
+   lets it shrink correctly inside the flex parent. Drop the
+   aspect-ratio constraint — height comes from the flex container,
+   not the image's intrinsic ratio. object-fit:cover crops to fill. */
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) > img.wp-block-cover__image-background {
 	position: relative !important;
 	top: auto !important;
@@ -6084,8 +6103,10 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) > img.wp-block-cover_
 	left: auto !important;
 	inset: auto !important;
 	width: 100% !important;
-	height: auto !important;
-	aspect-ratio: 1 !important;
+	height: 100% !important;
+	min-height: 0 !important;
+	flex: 1 1 auto !important;
+	aspect-ratio: unset !important;
 	display: block !important;
 	border-radius: 6px !important;
 	object-fit: cover !important;
@@ -6098,11 +6119,9 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) > .wp-block-cover__ba
 	display: none !important;
 }
 
-/* Caption flows below the image in document order, sitting in the
-   30px bottom padding strip. Pure black on white, hand-drawn font.
-   v0.5.23: target ONLY the heading/paragraph caption — don't blanket
-   override children of inner-container, or the She/Her tape inside
-   loses its yellow background. */
+/* Caption sits in a fixed strip below the image. position:relative
+   in flow (via flex:0 0 auto), no background, Rock Salt font, black
+   text. */
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container {
 	position: static !important;
 	display: block !important;
@@ -6110,33 +6129,45 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inne
 	padding: 0 !important;
 	background: transparent !important;
 	text-align: center !important;
+	flex: 0 0 auto !important;
+	text-shadow: none !important;
 	z-index: 2;
 }
-/* Caption heading/paragraph only — the actual caption text. */
+/* Caption heading/paragraph — black text in Rock Salt, no
+   background, no text-shadow. v0.5.24: explicit "Rock Salt"
+   font-family with full fallback chain so it wins regardless of
+   how the cr-font-display token is overridden in cover-block
+   inline styles. */
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h1,
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h2,
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3,
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4,
-body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label) {
+body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label),
+body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h1 *,
+body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h2 *,
+body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3 *,
+body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4 *,
+body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label) * {
 	color: #000 !important;
 	background: transparent !important;
+	background-color: transparent !important;
 	text-shadow: none !important;
-	font-family: var(--cr-font-display, var(--cr-font-accent, cursive)) !important;
-	font-size: 0.7rem !important;
-	font-weight: 700 !important;
-	line-height: 1.3 !important;
+	font-family: "Rock Salt", "Bradley Hand", cursive !important;
+	font-size: 0.85rem !important;
+	font-weight: 400 !important;
+	line-height: 1.4 !important;
 	margin: 0 !important;
 	padding: 0 !important;
-	letter-spacing: 0.01em;
+	letter-spacing: 0 !important;
 	text-align: center !important;
+	text-transform: none !important;
 }
-/* She/Her tape (and any other cr-tape inside the polaroid): KEEP the
-   tape color. v0.5.23: explicit override since the v0.5.20 inner-
-   container blanket rule had killed it. */
+/* She/Her tape: KEEP yellow + russian-violet (don't theme-flip). */
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .cr-tape,
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-label {
 	background: var(--cr-tape, #f3e5b8) !important;
 	color: var(--cr-tape-ink, var(--cr-russian-violet, #241c4a)) !important;
+	font-family: var(--cr-font-accent) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
