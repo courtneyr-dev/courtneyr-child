@@ -446,6 +446,39 @@ select:focus {
 	background: var(--cr-admin-surface) !important;
 }
 
+/* v0.5.28: editor List View — selected row was rendering with WP's
+   periwinkle/cyan default (image #113), unreadable. Force ink-color
+   text on a marker-yellow tint background for the selected row, with
+   chrome-dark text on cta-orange for hover/branch-selected. Block
+   icon also needs explicit color so it doesn't inherit default cyan. */
+.block-editor-list-view-block-contents.is-selected,
+.block-editor-list-view-leaf.is-selected,
+.block-editor-list-view-leaf.is-selected > .block-editor-list-view-block-contents,
+.block-editor-list-view-leaf.is-branch-selected > .block-editor-list-view-block-contents {
+	background: var(--cr-admin-marker) !important;
+	color: var(--cr-admin-chrome) !important;
+}
+.block-editor-list-view-block-contents:hover,
+.block-editor-list-view-leaf:hover > .block-editor-list-view-block-contents {
+	background: var(--cr-admin-cta) !important;
+	color: var(--cr-admin-chrome) !important;
+}
+.block-editor-list-view-block-contents.is-selected svg,
+.block-editor-list-view-block-contents.is-selected .block-editor-block-icon,
+.block-editor-list-view-leaf.is-selected svg,
+.block-editor-list-view-leaf.is-branch-selected svg,
+.block-editor-list-view-block-contents:hover svg {
+	fill: var(--cr-admin-chrome) !important;
+	color: var(--cr-admin-chrome) !important;
+}
+/* Default (non-selected) list view items — readable ink on surface */
+.block-editor-list-view-tree .block-editor-list-view-block-contents {
+	color: var(--cr-admin-ink) !important;
+}
+.block-editor-list-view-tree .block-editor-list-view-block-contents .block-editor-block-icon svg {
+	fill: var(--cr-admin-ink) !important;
+}
+
 /* ============ "Howdy, [user]" greeting + account chrome ============ */
 #wpadminbar #wp-admin-bar-my-account .display-name,
 #wpadminbar #wp-admin-bar-user-info .display-name,

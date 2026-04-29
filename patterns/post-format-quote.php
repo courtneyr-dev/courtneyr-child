@@ -5,8 +5,6 @@
  * Categories: cr-post-format, cr-indieweb
  * Description: A quote-format post with a torn-paper pull quote, citation, and source link.
  * Keywords: quote, indieweb, h-cite, post format
- * Block Types: core/post-content
- * Post Types: post
  * Inserter: yes
  *
  * Pattern overrides supported (WP 6.6+): the quote text and citation
