@@ -7443,15 +7443,15 @@ body.single-format-video main.single-post   { background-color: var(--cr-type-vi
    surface (WCAG 1.4.6 AAA-aligned). Single also gets an inline-start
    border in this mode to maintain parity with archive. */
 @media (prefers-contrast: more) {
-	body.format-aside main.single-post,
-	body.format-audio main.single-post,
-	body.format-chat main.single-post,
-	body.format-gallery main.single-post,
-	body.format-image main.single-post,
-	body.format-link main.single-post,
-	body.format-quote main.single-post,
-	body.format-status main.single-post,
-	body.format-video main.single-post,
+	body.single-format-aside main.single-post,
+	body.single-format-audio main.single-post,
+	body.single-format-chat main.single-post,
+	body.single-format-gallery main.single-post,
+	body.single-format-image main.single-post,
+	body.single-format-link main.single-post,
+	body.single-format-quote main.single-post,
+	body.single-format-status main.single-post,
+	body.single-format-video main.single-post,
 	.format-aside .cr-stream-item,
 	.format-audio .cr-stream-item,
 	.format-chat .cr-stream-item,
@@ -7463,13 +7463,13 @@ body.single-format-video main.single-post   { background-color: var(--cr-type-vi
 	.format-video .cr-stream-item {
 		background-color: transparent;
 	}
-	body.format-aside main.single-post   { border-inline-start: 6px solid var(--cr-type-aside,   #647baf); }
-	body.format-audio main.single-post   { border-inline-start: 6px solid var(--cr-type-audio,   #000000); }
-	body.format-chat main.single-post    { border-inline-start: 6px solid var(--cr-type-chat,    #647baf); }
-	body.format-gallery main.single-post { border-inline-start: 6px solid var(--cr-type-gallery, #219ebc); }
-	body.format-image main.single-post   { border-inline-start: 6px solid var(--cr-type-image,   #219ebc); }
-	body.format-link main.single-post    { border-inline-start: 6px solid var(--cr-type-link,    #126782); }
-	body.format-quote main.single-post   { border-inline-start: 6px solid var(--cr-type-quote,   #241c4a); }
-	body.format-status main.single-post  { border-inline-start: 6px solid var(--cr-type-status,  #647baf); }
-	body.format-video main.single-post   { border-inline-start: 6px solid var(--cr-type-video,   #219ebc); }
+	body.single-format-aside main.single-post   { border-inline-start: 6px solid var(--cr-type-aside,   #647baf); }
+	body.single-format-audio main.single-post   { border-inline-start: 6px solid var(--cr-type-audio,   #000000); }
+	body.single-format-chat main.single-post    { border-inline-start: 6px solid var(--cr-type-chat,    #647baf); }
+	body.single-format-gallery main.single-post { border-inline-start: 6px solid var(--cr-type-gallery, #219ebc); }
+	body.single-format-image main.single-post   { border-inline-start: 6px solid var(--cr-type-image,   #219ebc); }
+	body.single-format-link main.single-post    { border-inline-start: 6px solid var(--cr-type-link,    #126782); }
+	body.single-format-quote main.single-post   { border-inline-start: 6px solid var(--cr-type-quote,   #241c4a); }
+	body.single-format-status main.single-post  { border-inline-start: 6px solid var(--cr-type-status,  #647baf); }
+	body.single-format-video main.single-post   { border-inline-start: 6px solid var(--cr-type-video,   #219ebc); }
 }
