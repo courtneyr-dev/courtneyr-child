@@ -86,13 +86,23 @@ function trim_default_head_output(): void {
 add_action( 'init', __NAMESPACE__ . '\\trim_default_head_output' );
 
 /**
- * Add aria-current="page" to the active navigation item.
+ * Add aria-current="page" to the active navigation item — both forms.
  *
- * V0.5.84: WP core adds the `current-menu-item` class to the active
- * nav item but does NOT add aria-current. Without aria-current,
- * screen-reader users can't tell which page they're on while
- * navigating the menu. WCAG SC 4.1.2 (Name, Role, Value) is
- * satisfied; this strengthens it for orientation cues.
+ * V0.5.84/v0.5.85: screen-reader users can't tell which page they're
+ * on while navigating the menu without aria-current. This theme uses
+ * the block-based navigation (core/navigation), which does NOT fire
+ * the legacy nav_menu_link_attributes filter, so we register both:
+ *
+ *   1. nav_menu_link_attributes — for any wp_nav_menu()-based menus
+ *      (widgets, classic menus, custom code paths). Cheap to register;
+ *      no-op when not used.
+ *
+ *   2. render_block (core/navigation-link) — fires for the block-based
+ *      navigation. We compare the link's URL with the current request
+ *      URL and inject aria-current="page" into the rendered <a> tag
+ *      when they match.
+ *
+ * WCAG SC 4.1.2 (Name, Role, Value) — orientation cue.
  *
  * @param array        $atts HTML attributes applied to the menu item's <a> element.
  * @param WP_Post|null $item Menu item data object.
@@ -109,3 +119,42 @@ function add_aria_current_to_nav( $atts, $item ) {
 	return $atts;
 }
 add_filter( 'nav_menu_link_attributes', __NAMESPACE__ . '\\add_aria_current_to_nav', 10, 2 );
+
+/**
+ * Block-nav variant — adds aria-current="page" to the rendered <a>
+ * when its URL matches the current request URL.
+ *
+ * @param string $block_content Rendered block HTML.
+ * @param array  $block         Parsed block data.
+ * @return string Block HTML with aria-current added on a match.
+ */
+function add_aria_current_to_navigation_link( $block_content, $block ) {
+	if ( ! isset( $block['blockName'] ) || 'core/navigation-link' !== $block['blockName'] ) {
+		return $block_content;
+	}
+	$url = $block['attrs']['url'] ?? '';
+	if ( '' === $url ) {
+		return $block_content;
+	}
+	$current_path = isset( $_SERVER['REQUEST_URI'] )
+		? \wp_parse_url( \esc_url_raw( \wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH )
+		: '/';
+	$link_path    = \wp_parse_url( $url, PHP_URL_PATH );
+	if ( null === $link_path ) {
+		return $block_content;
+	}
+	$current_path = '/' . trim( (string) $current_path, '/' );
+	$link_path    = '/' . trim( (string) $link_path, '/' );
+	if ( $current_path !== $link_path ) {
+		return $block_content;
+	}
+	// Inject aria-current="page" into the first <a ...> in the block output.
+	$replaced = \preg_replace(
+		'/<a\b(?![^>]*\baria-current=)/',
+		'<a aria-current="page"',
+		$block_content,
+		1
+	);
+	return is_string( $replaced ) ? $replaced : $block_content;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\add_aria_current_to_navigation_link', 10, 2 );
