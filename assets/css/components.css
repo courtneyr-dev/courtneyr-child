@@ -7273,17 +7273,18 @@ body.pfbt-format-titleless .single-post__title {
 	height: 1.25rem;
 }
 
-/* For titleless formats (aside, status, quote) the avatar lives at
-   the start of wp-block-post-content, NOT inside the title. v0.5.66:
-   match the titled-format positioning — absolute, 5rem left of the
-   constrained content's left edge — so the icon shows up in the same
-   visual place regardless of format (image #166).
+/* For titleless formats (aside, status, quote) the avatar is injected
+   INSIDE the wp-block-post-content wrapper as its first child (see
+   inc/interactivity.php inject_avatar_before_post_content, v0.5.69).
+   The wrapper has WP's constrained-layout max-width: content-size, so
+   anchoring the avatar at `inset-inline-end: calc(100% + 5rem)` puts
+   it 5rem to the left of the prose column — visually identical to the
+   titled-format avatar's anchor against <h1 class="single-post__title">.
 
-   The constrained content's left edge sits at
-   `(post-content-width - content-size) / 2` from post-content's left.
-   `--wp--style--global--content-size` is set by WP's theme.json layout
-   resolver; fallback to 720px if absent. The avatar's left edge sits
-   that far minus 5rem (offset) minus 2.25rem (avatar's own width). */
+   Earlier (v0.5.66) versions positioned the avatar as a SIBLING of
+   post-content with calc-based gutter math; on wide viewports the
+   sibling fell back to the viewport edge (image #173). Single anchor
+   pattern across all single-post format views. */
 body.pfbt-format-titleless .wp-block-post-content {
 	position: relative;
 }
@@ -7291,11 +7292,7 @@ body.pfbt-format-titleless .wp-block-post-content {
 body.pfbt-format-titleless .wp-block-post-content > .single-post__format-avatar {
 	position: absolute;
 	inset-block-start: 0.25rem;
-	inset-inline-start: calc(
-		(100% - var(--wp--style--global--content-size, 720px)) / 2
-		- var(--pfbt-format-avatar-offset, 5rem)
-		- 2.25rem
-	);
+	inset-inline-end: calc(100% + var(--pfbt-format-avatar-offset, 5rem));
 	width: 2.25rem;
 	height: 2.25rem;
 	margin: 0;
@@ -7317,6 +7314,7 @@ body.pfbt-format-titleless .wp-block-post-content > .single-post__format-avatar 
 		position: static;
 		display: inline-flex;
 		inset-inline-start: auto;
+		inset-inline-end: auto;
 		margin-block-end: 0.5rem;
 		margin-inline-end: 0.6rem;
 		vertical-align: middle;

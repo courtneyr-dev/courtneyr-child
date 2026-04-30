@@ -549,7 +549,27 @@ function inject_avatar_before_post_content( string $block_content, array $block 
 	if ( '' === $avatar ) {
 		return $block_content;
 	}
-	return $avatar . $block_content;
+	// v0.5.69 — inject INSIDE post-content's wrapper div (as a child),
+	// not before it (as a sibling). The wrapper has the constrained
+	// layout's content-size max-width, so once the avatar is its child
+	// we can absolutely-position it 5rem to the left of the prose
+	// column edge using the same anchor pattern as the titled-format
+	// avatar inside <h1 class="single-post__title">. Sibling-prepend
+	// fell back to the viewport gutter on wide screens (image #173).
+	$injected = \preg_replace_callback(
+		'/^(\s*<div\b[^>]*\bwp-block-post-content\b[^>]*>)/',
+		static function ( array $m ) use ( $avatar ): string {
+			return $m[1] . $avatar;
+		},
+		$block_content,
+		1
+	);
+	if ( null === $injected || $injected === $block_content ) {
+		// Wrapper tag shape changed — fall back to sibling prepend
+		// rather than dropping the avatar entirely.
+		return $avatar . $block_content;
+	}
+	return $injected;
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\inject_avatar_before_post_content', 10, 2 );
 
