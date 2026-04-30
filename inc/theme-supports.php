@@ -84,3 +84,28 @@ function trim_default_head_output(): void {
 	// system tokens.css for context.
 }
 add_action( 'init', __NAMESPACE__ . '\\trim_default_head_output' );
+
+/**
+ * Add aria-current="page" to the active navigation item.
+ *
+ * V0.5.84: WP core adds the `current-menu-item` class to the active
+ * nav item but does NOT add aria-current. Without aria-current,
+ * screen-reader users can't tell which page they're on while
+ * navigating the menu. WCAG SC 4.1.2 (Name, Role, Value) is
+ * satisfied; this strengthens it for orientation cues.
+ *
+ * @param array        $atts HTML attributes applied to the menu item's <a> element.
+ * @param WP_Post|null $item Menu item data object.
+ * @return array Filtered attributes with aria-current added when active.
+ */
+function add_aria_current_to_nav( $atts, $item ) {
+	if ( isset( $item->classes ) && is_array( $item->classes ) ) {
+		if ( in_array( 'current-menu-item', $item->classes, true ) ) {
+			$atts['aria-current'] = 'page';
+		} elseif ( in_array( 'current-menu-ancestor', $item->classes, true ) ) {
+			$atts['aria-current'] = 'true';
+		}
+	}
+	return $atts;
+}
+add_filter( 'nav_menu_link_attributes', __NAMESPACE__ . '\\add_aria_current_to_nav', 10, 2 );
