@@ -87,18 +87,39 @@
 	background-color: var(--cr-admin-chrome);
 }
 
+/* v0.5.68 — push the right-side admin bar items (`.ab-top-secondary`)
+   to the right edge of the bar. WP-default in flex layout sets this
+   on `.ab-top-secondary` directly; v0.5.67 forgot to carry it forward
+   when locking flex-shrink to 0, so secondary items rendered inline
+   with the primary items in DOM order (image #168). */
+#wpadminbar > #wp-toolbar > .ab-top-secondary {
+	margin-inline-start: auto;
+}
+
 #wpadminbar #wp-toolbar > .ab-top-menu > li,
 #wpadminbar #wp-toolbar > .ab-top-secondary > li {
 	flex-shrink: 0;
 	background-color: var(--cr-admin-chrome);
 }
 
+/* v0.5.68 — Perfmatters showed as "Per" (image #168) because the
+   item's <a> child kept a flex/width/overflow constraint inherited
+   from somewhere — flex-shrink:0 on the parent <li> wasn't enough.
+   Force every item content node to natural width with overflow
+   visible so labels never get clipped. */
 #wpadminbar #wp-toolbar > * > li > .ab-item,
 #wpadminbar #wp-toolbar > * > li > a.ab-item,
-#wpadminbar #wp-toolbar > * > li > .ab-empty-item,
+#wpadminbar #wp-toolbar > * > li > .ab-empty-item {
+	flex: 0 0 auto;
+	min-width: max-content;
+	overflow: visible;
+	white-space: nowrap;
+}
+
 #wpadminbar .ab-label,
 #wpadminbar .display-name {
 	white-space: nowrap;
+	overflow: visible;
 }
 #wpadminbar .ab-top-menu > li > .ab-item,
 #wpadminbar .quicklinks > ul > li > a,
