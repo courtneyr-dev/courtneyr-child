@@ -7213,3 +7213,41 @@ form.tnp input:autofill,
 	outline: 3px solid var(--cr-marker, #ffb703) !important;
 	outline-offset: 2px !important;
 }
+
+/* v0.5.58 — visually hide post title on title-less formats.
+
+   PFBT_Format_Classes adds .pfbt-format-titleless to body + post on
+   aside, status, and quote formats (Twenty Thirteen convention: those
+   formats lead with their content, not a title). The theme's single
+   template renders <wp:post-title> regardless of format; this rule
+   removes the title from visible flow while keeping it in the DOM
+   and accessibility tree (h1 still contributes to the heading outline,
+   screen readers still announce the post's name when navigating).
+
+   Targets the post-title block AND its theme-specific decoration
+   classes (cr-flank wrappers) so the sparkle decorations don't render
+   either. */
+body.pfbt-format-titleless .wp-block-post-title,
+body.pfbt-format-titleless .single-post__title {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	clip-path: inset(50%) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+
+/* v0.5.58 — Related Posts section: light periwinkle band instead of
+   ivory paper. The "More from the blog" section is meant to read as
+   distinct from the post body — same paper texture made it blend.
+   Periwinkle gives the same warm-cool contrast pattern used on the
+   homepage Newsletter Features section, building visual rhythm. */
+.related-posts.has-primary-accent-background-color {
+	/* Color comes from theme.json palette token (primary-accent =
+	   periwinkle #bcb5e3). The class itself is added by WP from the
+	   block's backgroundColor:"primary-accent" in single.html. */
+}
