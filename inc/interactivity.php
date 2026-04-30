@@ -58,7 +58,8 @@ function pre_paint_theme(): void {
 }
 add_action( 'wp_head', __NAMESPACE__ . '\\pre_paint_theme', 1 );
 
-/* ============================================================
+/*
+============================================================
  * v0.5.14 — Callout collapse/expand (IA module #1).
  *
  * The callout patterns (cr-callout-note.php, cr-callout-warn.php)
@@ -93,7 +94,7 @@ function transform_callout_block( string $block_content, array $block ): string 
 	// can carry aria-controls pointing to the body region. Static
 	// counter survives across multiple callouts on the same page.
 	static $callout_counter = 0;
-	$callout_counter++;
+	++$callout_counter;
 	$callout_id = 'cr-callout-body-' . $callout_counter;
 
 	// Add IA directives to the outer wrapper. Uses single quotes
@@ -159,7 +160,8 @@ function maybe_enqueue_callout(): void {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\maybe_enqueue_callout' );
 
 
-/* ============================================================
+/*
+============================================================
  * v0.5.14 — Stream Loop format filter (IA module #2).
  *
  * The cr-stream-loop pattern wraps its query loop in a
@@ -198,7 +200,8 @@ function maybe_enqueue_stream_filter(): void {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\maybe_enqueue_stream_filter' );
 
 
-/* ============================================================
+/*
+============================================================
  * v0.5.18 — Reading-progress bar (IA module #3).
  *
  * Thin fixed-position bar at the top of single posts. Hooks window
@@ -227,7 +230,8 @@ function maybe_enqueue_reading_progress(): void {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\maybe_enqueue_reading_progress' );
 
 
-/* ============================================================
+/*
+============================================================
  * v0.5.18 — Pull-quote copy-to-clipboard (IA module #4).
  *
  * Adds a "Copy quote" button after every blockquote inside a
@@ -293,7 +297,8 @@ function maybe_enqueue_pull_quote(): void {
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\maybe_enqueue_pull_quote' );
 
-/* ============================================================
+/*
+============================================================
  * v0.5.51 — Stream-item avatar typing (post-format-aware).
  *
  * The cr-stream-loop pattern emits a static "blog" SVG avatar inside
@@ -317,13 +322,27 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\maybe_enqueue_pull_quote' )
  * ============================================================ */
 
 const STREAM_AVATAR_SOLID = array(
-	'blog', 'video', 'audio', 'link', 'bookmark',
-	'quote', 'speaking', 'like', 'reply', 'review',
+	'blog',
+	'video',
+	'audio',
+	'link',
+	'bookmark',
+	'quote',
+	'speaking',
+	'like',
+	'reply',
+	'review',
 );
 
 const STREAM_AVATAR_OUTLINE = array(
-	'aside', 'image', 'gallery', 'status',
-	'chat', 'repost', 'book', 'event',
+	'aside',
+	'image',
+	'gallery',
+	'status',
+	'chat',
+	'repost',
+	'book',
+	'event',
 );
 
 /**
@@ -405,7 +424,8 @@ function transform_stream_item_avatar( string $block_content, array $block ): st
 add_filter( 'render_block', __NAMESPACE__ . '\\transform_stream_item_avatar', 10, 2 );
 
 
-/* ============================================================
+/*
+============================================================
  * v0.5.59 — Single-post format avatar.
  *
  * Drops the same cr-icon-avatar that archives/streams render onto
