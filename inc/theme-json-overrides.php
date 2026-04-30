@@ -109,3 +109,29 @@ function override_theme_palette( \WP_Theme_JSON_Data $theme_json ): \WP_Theme_JS
 	return $theme_json->update_with( $data );
 }
 add_filter( 'wp_theme_json_data_theme', __NAMESPACE__ . '\\override_theme_palette', 999 );
+
+/**
+ * v0.5.53 — opt out of post-formats-for-block-themes' default styling.
+ *
+ * The PFBT plugin (v1.2.3+) ships two extension points so themes that
+ * already style post formats can suppress its defaults instead of
+ * fighting the cascade:
+ *
+ *   - `pfbt_enqueue_format_styles` — gates `styles/format-styles.css`.
+ *     Without opt-out, that stylesheet lands on every frontend page
+ *     using stock Gutenberg colors (#0073aa, #f0f0f1, #cccccc) on the
+ *     same `.format-X` body-class scopes the theme styles via
+ *     `.cr-format-chip` + `.cr-stream-item--X` with brand tokens.
+ *     Whichever stylesheet enqueues later wins → cascade fight.
+ *
+ *   - `pfbt_merge_format_palette` — gates the plugin's theme.json
+ *     palette merge (12 `format-X-bg` / `format-X-border` entries
+ *     with the same Gutenberg defaults). Without opt-out, those
+ *     show up in the WP color picker alongside the brand swatches.
+ *
+ * Theme has full coverage of all 18 post types via cr-icon-avatar +
+ * cr-chip families and the v0.5.51 stream avatar render filter, so
+ * the plugin's defaults are pure clutter here.
+ */
+add_filter( 'pfbt_enqueue_format_styles', '__return_false' );
+add_filter( 'pfbt_merge_format_palette', '__return_false' );
