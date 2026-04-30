@@ -156,3 +156,50 @@ add_filter( 'pfbt_merge_format_palette', '__return_false' );
  * plugin's template registration is pure interference here.
  */
 add_filter( 'pfbt_register_format_templates', '__return_false' );
+
+/**
+ * v0.5.57 — replace PFBT Format Badge's Dashicon with theme's hand-drawn SVG.
+ *
+ * The Format Badge block (post-formats/format-badge) auto-injects before
+ * core/post-title via Block Hooks for non-standard formats. Default
+ * markup is a Dashicon span (.dashicons-format-chat etc.). This site
+ * already ships its own hand-drawn 18-symbol post-type icon sprite at
+ * `assets/svg/icons.svg` with symbols like `#post-icon-chat`. The badge's
+ * 2.0.1 filter `pfbt_format_badge_icon` lets us swap.
+ *
+ * Returns the matching `<svg><use>` markup for any non-standard format.
+ * Falls back to the plugin's default dashicon if the format slug doesn't
+ * have a corresponding symbol in the theme's sprite (shouldn't happen
+ * since the theme ships all 18 symbols, but defensive).
+ *
+ * The theme's symbols use `pfbt-icon-fill` class for filled paths; the
+ * sprite's <style> in `assets/svg/icons.svg` paints them as currentColor.
+ * Stroke-based paths inherit currentColor automatically. Theme renders
+ * the icon at the surrounding text color — no extra paint needed.
+ */
+add_filter(
+	'pfbt_format_badge_icon',
+	function ( $default_markup, $format ) {
+		$slug_to_symbol = array(
+			'aside'    => 'post-icon-aside',
+			'audio'    => 'post-icon-audio',
+			'chat'     => 'post-icon-chat',
+			'gallery'  => 'post-icon-gallery',
+			'image'    => 'post-icon-image',
+			'link'     => 'post-icon-link',
+			'quote'    => 'post-icon-quote',
+			'status'   => 'post-icon-status',
+			'video'    => 'post-icon-video',
+		);
+		if ( ! isset( $slug_to_symbol[ $format ] ) ) {
+			return $default_markup;
+		}
+		return sprintf(
+			'<svg class="cr-format-badge-icon" viewBox="0 0 24 24" width="1.2em" height="1.2em" aria-hidden="true" focusable="false" style="vertical-align:-0.2em;margin-right:0.35em"><use href="%1$s/assets/svg/icons.svg#%2$s"></use></svg>',
+			esc_url( get_stylesheet_directory_uri() ),
+			esc_attr( $slug_to_symbol[ $format ] )
+		);
+	},
+	10,
+	2
+);
