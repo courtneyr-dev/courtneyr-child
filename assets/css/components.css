@@ -7251,3 +7251,59 @@ body.pfbt-format-titleless .single-post__title {
 	   periwinkle #bcb5e3). The class itself is added by WP from the
 	   block's backgroundColor:"primary-accent" in single.html. */
 }
+
+/* v0.5.59 — Single-post format avatar.
+
+   Injected by inc/interactivity.php's inject_avatar_before_post_title()
+   (titled formats) or inject_avatar_before_post_content() (titleless:
+   aside, status, quote). Positions the avatar to the left of the title
+   on wide viewports — at content-width boundaries it tucks into the
+   margin so the title's measure stays intact. On narrower screens the
+   avatar stacks above the title in normal flow.
+
+   Sizing: same 2.75rem the stream avatars use, so visual weight is
+   consistent between archive and single. The base `.cr-icon-avatar`
+   rule (above) handles all paint — bg, border, color, rotation. */
+.single-post__format-avatar {
+	display: inline-flex;
+	margin: 0 0.75rem 0.5rem 0;
+	vertical-align: middle;
+}
+
+/* On wider viewports, float the avatar to the left of the title block
+   so the title can wrap to its natural measure beside it. The title's
+   parent (.single-post__header) is a constrained-layout group, so
+   margin-based offsets work without reaching for absolute positioning. */
+@media (min-width: 600px) {
+	.single-post__format-avatar {
+		float: left;
+		margin: 0.25rem 1rem 0.5rem 0;
+	}
+
+	/* Clear the float after the immediate sibling's wrapping context.
+	   The title is the next sibling; the byline group below it should
+	   sit beneath the avatar, not wrap beside it. */
+	.single-post__header > .wp-block-post-title + .wp-block-group,
+	.single-post__header .single-post__byline {
+		clear: left;
+	}
+
+	/* For titleless formats, the avatar lives just before
+	   .wp-block-post-content. Float it; the post's first paragraph
+	   wraps around it. Subsequent paragraphs need a clear once the
+	   first paragraph passes the avatar's height. The single template
+	   wraps content in a constrained layout, so .wp-block-post-content
+	   children inherit the same column. */
+	body.pfbt-format-titleless .single-post__format-avatar {
+		float: left;
+		margin: 0 1rem 0.5rem 0;
+	}
+}
+
+/* The avatar inherits .cr-icon-avatar's rotate token, but the single
+   template uses a heavier scale than the stream items — bump the
+   shadow + bring the avatar slightly down so it visually aligns with
+   the title's cap-height instead of its top edge. */
+.single-post__format-avatar.cr-icon-avatar {
+	box-shadow: 3px 3px 0 var(--cr-ink);
+}

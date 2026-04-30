@@ -403,3 +403,137 @@ function transform_stream_item_avatar( string $block_content, array $block ): st
 	return $block_content;
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\transform_stream_item_avatar', 10, 2 );
+
+
+/* ============================================================
+ * v0.5.59 — Single-post format avatar.
+ *
+ * Drops the same cr-icon-avatar that archives/streams render onto
+ * single post views, positioned left of the post title (titled
+ * formats) or left of the post content (titleless formats: aside,
+ * status, quote — where the title is visually hidden via the PFBT
+ * `pfbt-format-titleless` body class).
+ *
+ * Reuses resolve_stream_item_type() above so the format → icon-slug
+ * mapping is identical to the archive treatment. The avatar markup
+ * matches the stream variant exactly so the same CSS rules paint
+ * both contexts; a `single-post__format-avatar` modifier lets the
+ * single template position it absolutely to the left.
+ *
+ * Two filters here:
+ *   - render_block on core/post-title — covers all titled formats
+ *     (standard, blog, video, audio, link, image, gallery, chat,
+ *     bookmark, etc.).
+ *   - render_block on core/post-content — used only when the post
+ *     format is titleless. The avatar floats left of the first
+ *     content line via CSS in components.css.
+ *
+ * The format-badge Block Hooks injection is suppressed via
+ * hooked_block_types (cr-icon-avatar covers it visually + the
+ * format remains discoverable through the chip in the meta row).
+ * ============================================================ */
+
+const SINGLE_POST_TITLELESS_FORMATS = array( 'aside', 'status', 'quote' );
+
+/**
+ * Build the cr-icon-avatar HTML for a given post id.
+ *
+ * Returns an empty string when:
+ *   - $post_id is invalid
+ *   - the post type isn't `post`
+ *   - the post format is Standard (no avatar — the chip carries enough)
+ *
+ * Solid vs outline variant matches transform_stream_item_avatar above.
+ */
+function render_single_post_avatar( int $post_id ): string {
+	if ( ! $post_id || 'post' !== \get_post_type( $post_id ) ) {
+		return '';
+	}
+	// Only paint the avatar when the post has a non-Standard format
+	// or maps to one of the cr-icon-avatar types via category.
+	$format = \get_post_format( $post_id );
+	if ( ! $format ) {
+		return '';
+	}
+	$type = resolve_stream_item_type( $post_id );
+
+	if ( in_array( $type, STREAM_AVATAR_OUTLINE, true ) ) {
+		$class = 'cr-icon-avatar cr-icon-avatar--outline single-post__format-avatar';
+		$style = sprintf( ' style="--type-color: var(--cr-type-%s);"', \esc_attr( $type ) );
+	} else {
+		$class = sprintf( 'cr-icon-avatar cr-icon-avatar--%s single-post__format-avatar', \esc_attr( $type ) );
+		$style = '';
+	}
+
+	return sprintf(
+		'<span class="%1$s" aria-hidden="true"%2$s><svg viewBox="0 0 24 24" width="1.5em" height="1.5em" focusable="false"><use href="%3$s/assets/svg/icons.svg#post-icon-%4$s"></use></svg></span>',
+		\esc_attr( $class ),
+		$style,
+		\esc_url( \get_stylesheet_directory_uri() ),
+		\esc_attr( $type )
+	);
+}
+
+/**
+ * Inject the format avatar before the post title on single post views
+ * (titled formats only).
+ */
+function inject_avatar_before_post_title( string $block_content, array $block ): string {
+	if ( ! isset( $block['blockName'] ) || 'core/post-title' !== $block['blockName'] ) {
+		return $block_content;
+	}
+	if ( ! \is_singular( 'post' ) ) {
+		return $block_content;
+	}
+	$post_id = \get_the_ID();
+	$format  = \get_post_format( $post_id );
+	if ( in_array( $format, SINGLE_POST_TITLELESS_FORMATS, true ) ) {
+		return $block_content;
+	}
+	$avatar = render_single_post_avatar( (int) $post_id );
+	if ( '' === $avatar ) {
+		return $block_content;
+	}
+	return $avatar . $block_content;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\inject_avatar_before_post_title', 10, 2 );
+
+/**
+ * Inject the format avatar before the post content on single post views
+ * (titleless formats only — aside, status, quote).
+ */
+function inject_avatar_before_post_content( string $block_content, array $block ): string {
+	if ( ! isset( $block['blockName'] ) || 'core/post-content' !== $block['blockName'] ) {
+		return $block_content;
+	}
+	if ( ! \is_singular( 'post' ) ) {
+		return $block_content;
+	}
+	$post_id = \get_the_ID();
+	$format  = \get_post_format( $post_id );
+	if ( ! in_array( $format, SINGLE_POST_TITLELESS_FORMATS, true ) ) {
+		return $block_content;
+	}
+	$avatar = render_single_post_avatar( (int) $post_id );
+	if ( '' === $avatar ) {
+		return $block_content;
+	}
+	return $avatar . $block_content;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\inject_avatar_before_post_content', 10, 2 );
+
+/**
+ * Suppress PFBT's format-badge Block Hooks injection. The cr-icon-avatar
+ * we render above carries the same signal (post format) and the chip
+ * in the meta row carries the format label; the badge becomes redundant.
+ */
+function suppress_format_badge_hook( $hooked_blocks, $position, $anchor_block ) {
+	if ( ! is_array( $hooked_blocks ) ) {
+		return $hooked_blocks;
+	}
+	if ( 'before' === $position && 'core/post-title' === $anchor_block ) {
+		return array_values( array_diff( $hooked_blocks, array( 'post-formats/format-badge' ) ) );
+	}
+	return $hooked_blocks;
+}
+add_filter( 'hooked_block_types', __NAMESPACE__ . '\\suppress_format_badge_hook', 20, 3 );
