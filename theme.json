@@ -377,7 +377,11 @@
 				{
 					"slug": "base",
 					"name": "Base",
-					"size": "1rem"
+					"size": "1.125rem",
+					"fluid": {
+						"min": "1.0625rem",
+						"max": "1.25rem"
+					}
 				},
 				{
 					"slug": "md",

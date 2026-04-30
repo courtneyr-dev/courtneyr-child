@@ -113,42 +113,46 @@ function enqueue_baseline(): void {
 		   v0.5.79 — also bump body paragraph font-size from 1rem to 1.15rem
 		   (~18px) on single-post prose. Original 16px read as tiny on
 		   wide-screen prose at desktop tiers. */
+		/* v0.5.81: widen content wrapper site-wide (not just body.single)
+		   per user direction "those widths and font sizes should apply
+		   site wide". Body font-size is now driven by theme.json `base`
+		   preset (1.125rem with fluid 1.0625–1.25rem), so no inline
+		   font-size rule needed — design-token-correct per Ollie skill.
+
+		   Width still requires CSS because theme.json layout values are
+		   compile-time fixed (cannot be responsive). Inline so Perfmatters
+		   Used CSS does not prune. */
 		@media (min-width: 1024px) {
-			body.single {
+			:root {
 				--wp--style--global--content-size: 80vw;
 				--wp--style--global--wide-size: 86vw;
 				--cr-measure: 80vw;
 				--cr-measure-wide: 86vw;
 			}
-			/* v0.5.80: widen ONLY the post-content wrapper, centered.
-			   v0.5.79 also widened main.single-post which is alignfull
-			   with margin-left: calc(50% - 50vw) — combined with max-width
-			   80vw the negative margins pulled the content off-center
-			   (image #188/189). Leave main.single-post alignfull; widen
-			   the inner wrapper instead. */
-			body.single .wp-block-post-content {
+			.wp-block-post-content {
 				max-width: 80vw !important;
 				margin-inline: auto !important;
 			}
-			body.single .wp-block-post-content > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
+			.wp-block-post-content > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
 				max-width: 100% !important;
 			}
-			/* Code blocks never need to be 80vw wide — keep them at the
-			   original prose measure for readability. min() keeps them
-			   from overflowing on narrow viewports. */
-			body.single .wp-block-post-content pre,
-			body.single .wp-block-post-content .wp-block-code,
-			body.single .wp-block-post-content .wp-block-code pre,
-			body.single .wp-block-post-content .wp-block-preformatted,
-			body.single .wp-block-post-content :is(pre, code).is-layout-flow {
+			.wp-block-post-content pre,
+			.wp-block-post-content .wp-block-code,
+			.wp-block-post-content .wp-block-code pre,
+			.wp-block-post-content .wp-block-preformatted {
 				max-width: min(72ch, 100%) !important;
 				margin-inline: auto !important;
 			}
 		}
-		body.single .wp-block-post-content,
-		body.single .wp-block-post-content p {
-			font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.25rem);
-			line-height: 1.65;
+		/* v0.5.81: hide the thin separator HRs on the homepage that
+		   create faint horizontal lines (image #182, #185, #191). The
+		   <hr is-style-separator-thin> elements are baked into a DB
+		   template customization (wp_template post 37371). CSS-hide is
+		   the non-destructive fix — when the DB customization is later
+		   removed, this rule is harmless because the file template
+		   has no separators. */
+		body.home hr.wp-block-separator.is-style-separator-thin {
+			display: none !important;
 		}'
 	);
 }
