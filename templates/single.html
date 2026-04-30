@@ -168,11 +168,18 @@
 		<!-- wp:query {"queryId":1,"query":{"perPage":"3","pages":"3","offset":0,"postType":"post","order":"desc","orderBy":"date","exclude":[],"sticky":"exclude","inherit":false},"align":"wide","className":"related-posts__query"} -->
 		<div class="wp-block-query alignwide related-posts__query">
 			<!-- wp:post-template {"className":"related-posts__list","style":{"spacing":{"blockGap":"var:preset|spacing|large"}},"layout":{"type":"grid","columnCount":3}} -->
-				<!-- wp:group {"className":"related-post","style":{"spacing":{"blockGap":"var:preset|spacing|small"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"left"}} -->
+				<!-- wp:group {"className":"related-post","style":{"spacing":{"blockGap":"var:preset|spacing|small"}},"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"center","justifyContent":"left"}} -->
 				<div class="wp-block-group related-post">
-					<!-- wp:post-terms {"term":"category","className":"related-post__category","style":{"typography":{"fontStyle":"normal","fontWeight":"500"}},"fontSize":"x-small"} /-->
-					<!-- wp:post-title {"isLink":true,"className":"related-post__title","style":{"spacing":{"margin":{"top":"0","bottom":"0"}},"typography":{"fontStyle":"normal","fontWeight":"600","textDecoration":"none","lineHeight":"1.3"}},"fontSize":"medium","fontFamily":"accent"} /-->
-					<!-- wp:post-date {"format":"F j, Y","className":"related-post__date","fontSize":"x-small"} /-->
+					<!-- wp:html -->
+					<span class="cr-icon-avatar cr-icon-avatar--blog related-post__avatar" aria-hidden="true" data-cr-related-avatar="placeholder"><svg viewBox="0 0 24 24" width="1.5em" height="1.5em" focusable="false"><use href="#post-icon-blog"></use></svg></span>
+					<!-- /wp:html -->
+
+					<!-- wp:group {"className":"related-post__text","style":{"spacing":{"blockGap":"var:preset|spacing|2x-small"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"left"}} -->
+					<div class="wp-block-group related-post__text">
+						<!-- wp:post-title {"isLink":true,"className":"related-post__title","style":{"spacing":{"margin":{"top":"0","bottom":"0"}},"typography":{"fontStyle":"normal","fontWeight":"600","textDecoration":"none","lineHeight":"1.3"}},"fontSize":"medium","fontFamily":"accent"} /-->
+						<!-- wp:post-date {"format":"F j, Y","className":"related-post__date","fontSize":"x-small"} /-->
+					</div>
+					<!-- /wp:group -->
 				</div>
 				<!-- /wp:group -->
 			<!-- /wp:post-template -->

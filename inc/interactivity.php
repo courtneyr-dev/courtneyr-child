@@ -523,6 +523,72 @@ function inject_avatar_before_post_content( string $block_content, array $block 
 add_filter( 'render_block', __NAMESPACE__ . '\\inject_avatar_before_post_content', 10, 2 );
 
 /**
+ * v0.5.60 — type the avatar inside Related Posts query items.
+ *
+ * The single template's Related Posts loop emits each item as a
+ * core/group with className `related-post`. Inside lives a wp:html
+ * placeholder carrying `data-cr-related-avatar` — matching the
+ * same general shape as the cr-stream-item avatar pattern.
+ *
+ * On render_block, we look up the current post's format → icon type
+ * via resolve_stream_item_type() (shared with archives + single
+ * post avatars so all three contexts paint identically), then swap
+ * the placeholder span + use-href to the right post-type avatar.
+ */
+function transform_related_post_avatar( string $block_content, array $block ): string {
+	if ( ! isset( $block['blockName'] ) || 'core/group' !== $block['blockName'] ) {
+		return $block_content;
+	}
+	$class = $block['attrs']['className'] ?? '';
+	if ( ! str_contains( $class, 'related-post' ) || str_contains( $class, 'related-post__' ) ) {
+		// Match only the OUTER `related-post` group, not the inner
+		// `related-post__text` group.
+		return $block_content;
+	}
+	if ( ! str_contains( $block_content, 'data-cr-related-avatar' ) ) {
+		return $block_content;
+	}
+	$post_id = \get_the_ID();
+	if ( ! $post_id ) {
+		return $block_content;
+	}
+	$type = resolve_stream_item_type( (int) $post_id );
+
+	if ( in_array( $type, STREAM_AVATAR_OUTLINE, true ) ) {
+		$replacement_open = sprintf(
+			'<span class="cr-icon-avatar cr-icon-avatar--outline related-post__avatar" aria-hidden="true" data-cr-related-avatar="%1$s" style="--type-color: var(--cr-type-%1$s);">',
+			\esc_attr( $type )
+		);
+	} else {
+		$replacement_open = sprintf(
+			'<span class="cr-icon-avatar cr-icon-avatar--%1$s related-post__avatar" aria-hidden="true" data-cr-related-avatar="%1$s">',
+			\esc_attr( $type )
+		);
+	}
+
+	$block_content = preg_replace(
+		'/<span class="cr-icon-avatar[^"]*related-post__avatar"[^>]*data-cr-related-avatar="[^"]*"[^>]*>/',
+		$replacement_open,
+		$block_content,
+		1
+	);
+	// Placeholder href is `#post-icon-blog` (bare fragment); swap to the
+	// full sprite URL with the per-post type fragment.
+	$block_content = preg_replace(
+		'/href="#post-icon-[a-z-]+"/',
+		sprintf(
+			'href="%s/assets/svg/icons.svg#post-icon-%s"',
+			\esc_url( \get_stylesheet_directory_uri() ),
+			\esc_attr( $type )
+		),
+		$block_content,
+		1
+	);
+	return $block_content;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\transform_related_post_avatar', 10, 2 );
+
+/**
  * Suppress PFBT's format-badge Block Hooks injection. The cr-icon-avatar
  * we render above carries the same signal (post format) and the chip
  * in the meta row carries the format label; the badge becomes redundant.
