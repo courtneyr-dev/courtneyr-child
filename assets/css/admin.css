@@ -51,6 +51,43 @@
 	background: var(--cr-admin-chrome) !important;
 	color: var(--cr-admin-ink-inverse);
 }
+
+/* v0.5.64 — front-of-site admin bar single-row enforcement.
+   Image #159 showed the front-of-site admin bar wrapping the
+   .ab-top-secondary items (Edit Page, Perfmatters, Accessibility
+   Checker, Take screenshot, GoDaddy Quick Links, Leave feedback) to
+   a SECOND row beneath the primary, with a paler purple band that
+   fell outside the dark chrome paint. The dashboard didn't wrap
+   because wp-admin's own layout pins the bar's children to a single
+   row.
+
+   Fix: force #wp-toolbar to flex-wrap:nowrap so the items stay on a
+   single line. Top-secondary items stay right-aligned via
+   margin-inline-start:auto. Defensive backstop: paint #wp-toolbar
+   itself dark so even a wrapped row inherits the chrome bg.
+
+   Selectors are chained at #wpadminbar > #wp-toolbar specificity
+   to beat WP's own admin-bar.css rule without !important. */
+#wpadminbar > #wp-toolbar {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: stretch;
+	background: var(--cr-admin-chrome);
+	width: 100%;
+}
+
+#wpadminbar > #wp-toolbar > .ab-top-secondary {
+	margin-inline-start: auto;
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: stretch;
+}
+
+#wpadminbar > #wp-toolbar > .ab-top-menu {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: stretch;
+}
 #wpadminbar .ab-top-menu > li > .ab-item,
 #wpadminbar .quicklinks > ul > li > a,
 #wpadminbar .ab-item,
