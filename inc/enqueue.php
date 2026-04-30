@@ -96,7 +96,23 @@ function enqueue_baseline(): void {
 		body.single-format-link main.single-post    { background-color: var(--cr-type-link-bg); }
 		body.single-format-quote main.single-post   { background-color: var(--cr-type-quote-bg); }
 		body.single-format-status main.single-post  { background-color: var(--cr-type-status-bg); }
-		body.single-format-video main.single-post   { background-color: var(--cr-type-video-bg); }'
+		body.single-format-video main.single-post   { background-color: var(--cr-type-video-bg); }
+		/* v0.5.77 — responsive single-post body width. Below 1024px (tablet
+		   portrait + phone) the theme.json defaults (content-size 720px,
+		   wide-size 1280px) apply unchanged. At ≥1024px, override the
+		   constrained-layout vars on the single-post body so the prose,
+		   header, and meta all widen together to 80% of the viewport
+		   (alignwide elements get 86vw for the wider tier). All constrained
+		   children inside .single-post pick up the new vars automatically
+		   via WPs is-layout-constrained CSS, which references
+		   var(--wp--style--global--content-size) and --wide-size. Inline
+		   so Perfmatters Used CSS does not prune the override. */
+		@media (min-width: 1024px) {
+			body.single {
+				--wp--style--global--content-size: 80vw;
+				--wp--style--global--wide-size: 86vw;
+			}
+		}'
 	);
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_baseline' );
