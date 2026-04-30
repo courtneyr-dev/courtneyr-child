@@ -120,14 +120,29 @@ function enqueue_baseline(): void {
 				--cr-measure: 80vw;
 				--cr-measure-wide: 86vw;
 			}
-			body.single main.single-post,
-			body.single .wp-block-post-content,
-			body.single .wp-block-post-content > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
+			/* v0.5.80: widen ONLY the post-content wrapper, centered.
+			   v0.5.79 also widened main.single-post which is alignfull
+			   with margin-left: calc(50% - 50vw) — combined with max-width
+			   80vw the negative margins pulled the content off-center
+			   (image #188/189). Leave main.single-post alignfull; widen
+			   the inner wrapper instead. */
+			body.single .wp-block-post-content {
 				max-width: 80vw !important;
+				margin-inline: auto !important;
 			}
-			body.single .wp-block-post-content > .alignwide,
-			body.single main.single-post > .alignwide {
-				max-width: 86vw !important;
+			body.single .wp-block-post-content > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
+				max-width: 100% !important;
+			}
+			/* Code blocks never need to be 80vw wide — keep them at the
+			   original prose measure for readability. min() keeps them
+			   from overflowing on narrow viewports. */
+			body.single .wp-block-post-content pre,
+			body.single .wp-block-post-content .wp-block-code,
+			body.single .wp-block-post-content .wp-block-code pre,
+			body.single .wp-block-post-content .wp-block-preformatted,
+			body.single .wp-block-post-content :is(pre, code).is-layout-flow {
+				max-width: min(72ch, 100%) !important;
+				margin-inline: auto !important;
 			}
 		}
 		body.single .wp-block-post-content,
