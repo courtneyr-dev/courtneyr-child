@@ -45,7 +45,7 @@ function read_canonical(): array {
 
 	$path = COURTNEYR_CHILD_DIR . '/theme.json';
 	if ( ! is_readable( $path ) ) {
-		$cache = array( 'palette' => array(), 'gradients' => array() );
+		$cache = array( 'palette' => array(), 'gradients' => array(), 'duotone' => array() );
 		return $cache;
 	}
 
@@ -53,6 +53,7 @@ function read_canonical(): array {
 	$cache   = array(
 		'palette'   => $decoded['settings']['color']['palette']   ?? array(),
 		'gradients' => $decoded['settings']['color']['gradients'] ?? array(),
+		'duotone'   => $decoded['settings']['color']['duotone']   ?? array(),
 	);
 	return $cache;
 }
@@ -101,6 +102,7 @@ function override_theme_palette( \WP_Theme_JSON_Data $theme_json ): \WP_Theme_JS
 
 	$data['settings']['color']['palette']          = $canonical['palette'];
 	$data['settings']['color']['gradients']        = $canonical['gradients'];
+	$data['settings']['color']['duotone']          = $canonical['duotone'];
 	$data['settings']['color']['defaultPalette']   = false;
 	$data['settings']['color']['defaultGradients'] = false;
 	$data['settings']['color']['defaultDuotone']   = false;

@@ -216,6 +216,68 @@
 					"name": "Brand Field",
 					"gradient": "linear-gradient(135deg, #fee2c3 0%, #126782 50%, #241c4a 100%)"
 				}
+			],
+			"duotone": [
+				{
+					"slug": "brand-warm",
+					"name": "Brand Warm",
+					"colors": ["#241c4a", "#fee2c3"]
+				},
+				{
+					"slug": "brand-cool",
+					"name": "Brand Cool",
+					"colors": ["#023047", "#8ecae6"]
+				},
+				{
+					"slug": "brand-fire",
+					"name": "Brand Fire",
+					"colors": ["#241c4a", "#fb8500"]
+				},
+				{
+					"slug": "brand-twilight",
+					"name": "Brand Twilight",
+					"colors": ["#241c4a", "#bcb5e3"]
+				},
+				{
+					"slug": "brand-press-ink",
+					"name": "Brand Press Ink",
+					"colors": ["#1a1714", "#fbfaf5"]
+				},
+				{
+					"slug": "brand-highlight",
+					"name": "Brand Highlight",
+					"colors": ["#241c4a", "#ffb703"]
+				},
+				{
+					"slug": "brand-drift",
+					"name": "Brand Drift",
+					"colors": ["#126782", "#8ecae6"]
+				},
+				{
+					"slug": "brand-glaucous-wash",
+					"name": "Brand Glaucous Wash",
+					"colors": ["#023047", "#bcb5e3"]
+				},
+				{
+					"slug": "brand-marker",
+					"name": "Brand Marker",
+					"colors": ["#126782", "#ffb703"]
+				},
+				{
+					"slug": "brand-field",
+					"name": "Brand Field",
+					"colors": ["#126782", "#fee2c3"]
+				},
+				{
+					"slug": "brand-stamp",
+					"name": "Brand Stamp",
+					"colors": ["#1a1714", "#219ebc"]
+				},
+				{
+					"slug": "brand-bookmark",
+					"name": "Brand Bookmark",
+					"colors": ["#1a1714", "#fb8500"]
+				}
 			]
 		},
 		"typography": {
