@@ -475,14 +475,26 @@ function render_single_post_avatar( int $post_id ): string {
 }
 
 /**
- * Inject the format avatar before the post title on single post views
+ * Inject the format avatar inside the post title on single post views
  * (titled formats only).
+ *
+ * v0.5.62: scope to post-titles whose className contains
+ * `single-post__title` so the filter doesn't fire for related-posts
+ * query loop iterations (which have className `related-post__title`
+ * and would otherwise also receive the single-post avatar). Also
+ * inject INSIDE the <h1> tag instead of before it, so the avatar
+ * flows inline next to the title text — no float, no fight against
+ * alignwide vs constrained layout.
  */
 function inject_avatar_before_post_title( string $block_content, array $block ): string {
 	if ( ! isset( $block['blockName'] ) || 'core/post-title' !== $block['blockName'] ) {
 		return $block_content;
 	}
 	if ( ! \is_singular( 'post' ) ) {
+		return $block_content;
+	}
+	$class_name = $block['attrs']['className'] ?? '';
+	if ( ! str_contains( $class_name, 'single-post__title' ) ) {
 		return $block_content;
 	}
 	$post_id = \get_the_ID();
@@ -494,19 +506,38 @@ function inject_avatar_before_post_title( string $block_content, array $block ):
 	if ( '' === $avatar ) {
 		return $block_content;
 	}
-	return $avatar . $block_content;
+	// Inject INSIDE the opening heading tag so the avatar flows inline
+	// with the title text. Matches `<h1 ...>` ... `<h6 ...>`, no greedy
+	// wildcards. Only the first opening heading tag in the rendered
+	// post-title block is matched.
+	$injected = preg_replace(
+		'/(<h[1-6]\b[^>]*>)/',
+		'$1' . $avatar,
+		$block_content,
+		1
+	);
+	return null === $injected ? $block_content : $injected;
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\inject_avatar_before_post_title', 10, 2 );
 
 /**
  * Inject the format avatar before the post content on single post views
  * (titleless formats only — aside, status, quote).
+ *
+ * v0.5.62: scope to post-content with className containing
+ * `single-post__content` so the filter only fires on the main single
+ * template's content block, not any other post-content block that
+ * might appear elsewhere on the page.
  */
 function inject_avatar_before_post_content( string $block_content, array $block ): string {
 	if ( ! isset( $block['blockName'] ) || 'core/post-content' !== $block['blockName'] ) {
 		return $block_content;
 	}
 	if ( ! \is_singular( 'post' ) ) {
+		return $block_content;
+	}
+	$class_name = $block['attrs']['className'] ?? '';
+	if ( ! str_contains( $class_name, 'single-post__content' ) ) {
 		return $block_content;
 	}
 	$post_id = \get_the_ID();
@@ -535,7 +566,7 @@ add_filter( 'render_block', __NAMESPACE__ . '\\inject_avatar_before_post_content
  * post avatars so all three contexts paint identically), then swap
  * the placeholder span + use-href to the right post-type avatar.
  */
-function transform_related_post_avatar( string $block_content, array $block ): string {
+function transform_related_post_avatar( string $block_content, array $block, $wp_block = null ): string {
 	if ( ! isset( $block['blockName'] ) || 'core/group' !== $block['blockName'] ) {
 		return $block_content;
 	}
@@ -548,11 +579,23 @@ function transform_related_post_avatar( string $block_content, array $block ): s
 	if ( ! str_contains( $block_content, 'data-cr-related-avatar' ) ) {
 		return $block_content;
 	}
-	$post_id = \get_the_ID();
+	// v0.5.62: prefer the WP_Block context['postId'] over get_the_ID().
+	// In a Query Loop iteration the context carries the iterated post id
+	// deterministically, while get_the_ID() can momentarily return the
+	// outer singular post id depending on render-tree timing — that
+	// caused stale-type avatars on the first card (the_post() vs filter
+	// firing race; see image #153).
+	$post_id = 0;
+	if ( $wp_block instanceof \WP_Block && isset( $wp_block->context['postId'] ) ) {
+		$post_id = (int) $wp_block->context['postId'];
+	}
+	if ( ! $post_id ) {
+		$post_id = (int) \get_the_ID();
+	}
 	if ( ! $post_id ) {
 		return $block_content;
 	}
-	$type = resolve_stream_item_type( (int) $post_id );
+	$type = resolve_stream_item_type( $post_id );
 
 	if ( in_array( $type, STREAM_AVATAR_OUTLINE, true ) ) {
 		$replacement_open = sprintf(
@@ -586,7 +629,7 @@ function transform_related_post_avatar( string $block_content, array $block ): s
 	);
 	return $block_content;
 }
-add_filter( 'render_block', __NAMESPACE__ . '\\transform_related_post_avatar', 10, 2 );
+add_filter( 'render_block', __NAMESPACE__ . '\\transform_related_post_avatar', 10, 3 );
 
 /**
  * Suppress PFBT's format-badge Block Hooks injection. The cr-icon-avatar
