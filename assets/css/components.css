@@ -7240,40 +7240,55 @@ body.pfbt-format-titleless .single-post__title {
 	   block's backgroundColor:"primary-accent" in single.html. */
 }
 
-/* v0.5.62 — Single-post format avatar.
+/* v0.5.65 — Single-post format avatar.
 
-   Injected by inc/interactivity.php:
-     - For titled formats: INSIDE the post-title h1, as the first child.
-       That makes the avatar flow inline with the title text — no float
-       required, no fight against alignwide vs constrained layout, no
-       drift to the screen edge.
-     - For titleless formats (aside, status, quote): prepended to
-       .wp-block-post-content. Sits above the first content line,
-       slightly inset to match the title's visual rhythm.
+   Injected by inc/interactivity.php INSIDE the post-title h1, as the
+   first child. v0.5.62 used inline-flex, which caused the avatar to
+   wrap below the cr-flank-decorated title at large heading sizes
+   (image #164). This rewrite uses absolute positioning anchored to
+   the h1, placing the avatar's right edge `--pfbt-format-avatar-offset`
+   (default 5rem) to the left of the h1's content-start — which is
+   where the cr-flank ::before asterisk renders. Override the offset
+   per-site via the custom property.
 
-   Sizing scaled down slightly (2.25rem) compared to archive stream
-   avatars (2.75rem) so the inline placement next to a heading-sized
-   title doesn't dominate the line. */
-.single-post__format-avatar.cr-icon-avatar {
+   Sizing 2.25rem matches the related-posts avatar so the visual
+   weight is consistent across single + archive + related contexts. */
+.single-post__title.wp-block-post-title {
+	position: relative;
+}
+
+.single-post__title .single-post__format-avatar.cr-icon-avatar {
+	position: absolute;
+	inset-block-start: 50%;
+	inset-inline-end: calc(100% + var(--pfbt-format-avatar-offset, 5rem));
+	transform: translateY(-50%);
 	width: 2.25rem;
 	height: 2.25rem;
-	display: inline-flex;
-	vertical-align: -0.35em;
-	margin-inline-end: 0.6rem;
+	margin: 0;
 	box-shadow: 2px 2px 0 var(--cr-ink);
 }
 
-.single-post__format-avatar.cr-icon-avatar svg {
+.single-post__title .single-post__format-avatar.cr-icon-avatar svg {
 	width: 1.25rem;
 	height: 1.25rem;
 }
 
-/* For titleless formats — the avatar sits at the start of
-   wp-block-post-content as a block-level marker. No float; just a
-   small block-end margin so the first paragraph clears it cleanly. */
+/* For titleless formats (aside, status, quote) the avatar lives at
+   the start of wp-block-post-content, NOT inside the title. Keep the
+   inline-flex display there so it sits next to the first content
+   line. The selector below is scoped to the titleless body class so
+   it never touches the titled-format absolute-positioned avatar. */
 body.pfbt-format-titleless .wp-block-post-content > .single-post__format-avatar {
 	display: inline-flex;
 	margin-block-end: 0.5rem;
 	margin-inline-end: 0.6rem;
 	vertical-align: middle;
+	width: 2.25rem;
+	height: 2.25rem;
+	box-shadow: 2px 2px 0 var(--cr-ink);
+}
+
+body.pfbt-format-titleless .wp-block-post-content > .single-post__format-avatar svg {
+	width: 1.25rem;
+	height: 1.25rem;
 }

@@ -52,41 +52,34 @@
 	color: var(--cr-admin-ink-inverse);
 }
 
-/* v0.5.64 — front-of-site admin bar single-row enforcement.
-   Image #159 showed the front-of-site admin bar wrapping the
-   .ab-top-secondary items (Edit Page, Perfmatters, Accessibility
-   Checker, Take screenshot, GoDaddy Quick Links, Leave feedback) to
-   a SECOND row beneath the primary, with a paler purple band that
-   fell outside the dark chrome paint. The dashboard didn't wrap
-   because wp-admin's own layout pins the bar's children to a single
-   row.
+/* v0.5.65 — front-of-site admin bar legibility (replaces v0.5.64).
+   The v0.5.64 attempt at flex-wrap:nowrap on #wp-toolbar squeezed
+   items to fit one row, which broke each item's TEXT into multiple
+   lines ("Edit Site" -> "Edit" / "Site", image #163). Reverted that
+   approach.
 
-   Fix: force #wp-toolbar to flex-wrap:nowrap so the items stay on a
-   single line. Top-secondary items stay right-aligned via
-   margin-inline-start:auto. Defensive backstop: paint #wp-toolbar
-   itself dark so even a wrapped row inherits the chrome bg.
+   New approach: ALLOW the bar to wrap whole items to a second row
+   when items don't fit (matching WP default), but:
+     1. Force white-space: nowrap on every item so text never breaks
+        WITHIN an item.
+     2. Paint EVERY wrapped row + every wrapping container with the
+        dark chrome bg so the second row visually merges with the
+        primary instead of falling onto a paler band (image #159).
 
-   Selectors are chained at #wpadminbar > #wp-toolbar specificity
-   to beat WP's own admin-bar.css rule without !important. */
-#wpadminbar > #wp-toolbar {
-	display: flex;
-	flex-wrap: nowrap;
-	align-items: stretch;
-	background: var(--cr-admin-chrome);
-	width: 100%;
-}
-
+   Selector specificity (#wpadminbar > #wp-toolbar) beats WP core's
+   admin-bar.css without !important. */
+#wpadminbar > #wp-toolbar,
+#wpadminbar > #wp-toolbar > .ab-top-menu,
 #wpadminbar > #wp-toolbar > .ab-top-secondary {
-	margin-inline-start: auto;
-	display: flex;
-	flex-wrap: nowrap;
-	align-items: stretch;
+	background-color: var(--cr-admin-chrome);
 }
 
-#wpadminbar > #wp-toolbar > .ab-top-menu {
-	display: flex;
-	flex-wrap: nowrap;
-	align-items: stretch;
+#wpadminbar #wp-toolbar > * > li > .ab-item,
+#wpadminbar #wp-toolbar > * > li > a.ab-item,
+#wpadminbar #wp-toolbar > * > li > .ab-empty-item,
+#wpadminbar .ab-label,
+#wpadminbar .display-name {
+	white-space: nowrap;
 }
 #wpadminbar .ab-top-menu > li > .ab-item,
 #wpadminbar .quicklinks > ul > li > a,
