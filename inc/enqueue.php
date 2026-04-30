@@ -55,7 +55,7 @@ const BLOCK_STYLE_MAP = array(
 /**
  * Enqueue the global tokens + components baseline on the front end.
  *
- * tokens.css comes first (defines --cr-*); components.css depends on it.
+ * Tokens.css comes first (defines --cr-*); components.css depends on it.
  * Both are versioned with the theme version so cache-busting on deploy
  * works the same way it does for the design system kit.
  */
@@ -75,18 +75,19 @@ function enqueue_baseline(): void {
 	);
 
 	/*
-	v0.5.76 — emit the per-format tint rules as INLINE CSS attached
-		to the components handle. Perfmatters' Used CSS optimizer
-		silently prunes the body.single-format-{slug} main.single-post
-		selectors out of the optimized inline stylesheet (its analyzer
-		doesn't seem to recognize compound body-class + element-class
-		chains as matched). Outputting these rules as inline CSS via
-		wp_add_inline_style sidesteps the Used CSS pipeline — inline
-		<style> tags aren't touched.
-
-		Same rules already exist in components.css for the case when
-		Used CSS is disabled or the rule survives pruning; this is a
-		redundant inline copy that always wins. */
+	 * V0.5.76 — emit the per-format tint rules as INLINE CSS attached
+	 * to the components handle. Perfmatters' Used CSS optimizer
+	 * silently prunes the body.single-format-{slug} main.single-post
+	 * selectors out of the optimized inline stylesheet (its analyzer
+	 * doesn't seem to recognize compound body-class + element-class
+	 * chains as matched). Outputting these rules as inline CSS via
+	 * wp_add_inline_style sidesteps the Used CSS pipeline — inline
+	 * <style> tags aren't touched.
+	 *
+	 * Same rules already exist in components.css for the case when
+	 * Used CSS is disabled or the rule survives pruning; this is a
+	 * redundant inline copy that always wins.
+	 */
 	wp_add_inline_style(
 		'courtneyr-components',
 		'body.single-format-aside main.single-post   { background-color: var(--cr-type-aside-bg); }
@@ -154,21 +155,47 @@ function enqueue_baseline(): void {
 		   has no separators. */
 		body.home hr.wp-block-separator.is-style-separator-thin {
 			display: none !important;
+		}
+		/* v0.5.82 — restore index-card sizing for groups containing
+		   multiple .is-style-cr-card.is-nowrap siblings (the audience
+		   cards on the homepage and similar patterns). v0.5.81 site-wide
+		   width override ballooned each card to fill 80vw, stacking
+		   them as horizontal bars (image #193). Put the parent in
+		   flex-row+wrap and cap each card at ~25% of a 1100px container,
+		   so 4 fit per row at index-card proportions. Below 1024px the
+		   cards stack naturally. */
+		@media (min-width: 1024px) {
+			.wp-block-group:has(> .is-style-cr-card.is-nowrap) {
+				display: flex !important;
+				flex-direction: row !important;
+				flex-wrap: wrap !important;
+				gap: var(--wp--preset--spacing--medium, 1rem);
+				justify-content: center;
+				max-width: 1100px !important;
+				margin-inline: auto !important;
+			}
+			.wp-block-group:has(> .is-style-cr-card.is-nowrap) > .is-style-cr-card {
+				flex: 0 1 calc(25% - 0.75rem);
+				max-width: 17rem;
+				min-width: 14rem;
+				margin: 0 !important;
+			}
 		}'
 	);
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_baseline' );
 
 /**
- * v0.5.38 — force render-blocking (synchronous) load for the theme's
- * baseline stylesheets, overriding WP 7.0's new default async-CSS
- * pattern (`media="print" onload="this.media='all';..."`).
+ * Force render-blocking (synchronous) load for the theme's baseline
+ * stylesheets, overriding WP 7.0's new default async-CSS pattern
+ * (`media="print" onload="this.media='all';..."`).
  *
- * The async pattern relies on the link element's onload event firing
- * to swap media from "print" to "all". Behind Cloudflare with Rocket
- * Loader enabled (staging is behind CF — verified via `server: cloudflare`
- * response header), Rocket Loader rewrites inline event handlers and
- * can prevent the onload swap from firing — leaving the stylesheet
+ * V0.5.38: the async pattern relies on the link element's onload event
+ * firing to swap media from "print" to "all". Behind Cloudflare with
+ * Rocket Loader enabled (staging is behind CF — verified via
+ * `server: cloudflare` response header), Rocket Loader rewrites inline
+ * event handlers and can prevent the onload swap from firing — leaving
+ * the stylesheet
  * permanently in "print" media (image #123: logged-out homepage rendered
  * with theme.json defaults only, no .cr-wordmark / .cr-theme-segment /
  * .site-header__search styling).
@@ -179,6 +206,13 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_baseline' );
  * Strip media="print" + onload from our two baseline handles so they
  * load render-blocking (~9KB tokens + 162KB components, both gzipped
  * smaller — acceptable for a homepage paint).
+ */
+/**
+ * Filter callback — strip async-CSS shims off our baseline handles.
+ *
+ * @param string $tag    Rendered <link> tag for the style.
+ * @param string $handle Style handle being filtered.
+ * @return string Tag with media="print" + onload stripped on our handles.
  */
 function force_sync_baseline_styles( string $tag, string $handle ): string {
 	if ( in_array( $handle, array( 'courtneyr-tokens', 'courtneyr-components' ), true ) ) {
@@ -192,7 +226,7 @@ add_filter( 'style_loader_tag', __NAMESPACE__ . '\\force_sync_baseline_styles', 
 /**
  * Register a per-block stylesheet for every block in BLOCK_STYLE_MAP.
  *
- * wp_enqueue_block_style() only loads the CSS when WordPress renders the
+ * Wp_enqueue_block_style() only loads the CSS when WordPress renders the
  * named block on the current page. For posts that contain only a heading
  * and a paragraph, only core-heading.css is loaded. For pages with the
  * full chip taxonomy, the relevant block CSS is loaded on demand.
@@ -311,7 +345,7 @@ function enqueue_icons_inject(): void {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_icons_inject' );
 
 /**
- * v0.5.49 — small site-UX a11y polish module: header search disclosure
+ * Small site-UX a11y polish module (v0.5.49): header search disclosure
  * (Escape + click-outside to close) and Complianz close-button Space-key
  * activation. See assets/js/site-ux.js for full rationale.
  *
@@ -335,7 +369,7 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_site_ux' );
 
 
 /**
- * v0.5.21 — Re-skin the wp-admin chrome in the courtneyr.dev palette.
+ * Re-skin the wp-admin chrome in the courtneyr.dev palette (v0.5.21).
  *
  * The admin runs on its own CSS and doesn't see tokens.css or
  * components.css. assets/css/admin.css inlines the design tokens as
@@ -358,7 +392,7 @@ function enqueue_admin_styles(): void {
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\enqueue_admin_styles' );
 
 /**
- * v0.5.26 — Also load admin.css on the FRONT-END when the admin bar
+ * Also load admin.css on the FRONT-END when the admin bar (v0.5.26)
  * is showing (logged-in user viewing the public site). Without this,
  * the WP admin bar at the top of front-end pages renders in default
  * gray/blue and clashes with the courtneyr.dev brand palette. Same
