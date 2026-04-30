@@ -517,3 +517,32 @@ select:focus {
 body.wp-admin {
 	color: var(--cr-admin-ink);
 }
+
+/* v0.5.54 — post-publish panel "View Post" button contrast (image #138).
+   The panel's primary button picks up russian-violet bg from
+   --wp-components-color-accent, but its text/icon stayed at the default
+   cerulean-ish link color, ~2.65:1 contrast — fails WCAG AA. Force ivory
+   text + chevron icon to ~17:1 contrast against the navy bg. Scope
+   limited to the post-publish panel so we don't flatten button styling
+   across the rest of the editor. */
+.editor-post-publish-panel .components-button,
+.editor-post-publish-panel__postpublish .components-button,
+.editor-post-publish-panel__postpublish-buttons .components-button.is-primary,
+.editor-post-publish-panel .components-button.is-primary {
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+.editor-post-publish-panel .components-button svg,
+.editor-post-publish-panel__postpublish .components-button svg,
+.editor-post-publish-panel__postpublish-buttons .components-button.is-primary svg,
+.editor-post-publish-panel .components-button.is-primary svg {
+	fill: currentColor !important;
+}
+/* Section labels in the panel ("What's next?", "POST ADDRESS",
+   "Yoast SEO") and link labels ("Facebook", "X") need to stay
+   in admin-ink for readability against the panel's white bg. */
+.editor-post-publish-panel__postpublish-header,
+.editor-post-publish-panel__postpublish-subheader,
+.editor-post-publish-panel__postpublish label,
+.editor-post-publish-panel__postpublish .post-publish-panel__postpublish-subheader {
+	color: var(--cr-admin-ink, #241c4a) !important;
+}

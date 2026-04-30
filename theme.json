@@ -155,6 +155,66 @@
 					"slug": "tape-gradient",
 					"name": "Masking Tape",
 					"gradient": "linear-gradient(180deg, #f3e5b8 0%, #ecdda6 100%)"
+				},
+				{
+					"slug": "brand-sunrise",
+					"name": "Brand Sunrise",
+					"gradient": "linear-gradient(135deg, #fbfaf5 0%, #fee2c3 50%, #fb8500 100%)"
+				},
+				{
+					"slug": "brand-sunset",
+					"name": "Brand Sunset",
+					"gradient": "linear-gradient(135deg, #fb8500 0%, #ffb703 50%, #fee2c3 100%)"
+				},
+				{
+					"slug": "brand-twilight",
+					"name": "Brand Twilight",
+					"gradient": "linear-gradient(135deg, #bcb5e3 0%, #241c4a 100%)"
+				},
+				{
+					"slug": "brand-press-night",
+					"name": "Brand Press Night",
+					"gradient": "linear-gradient(135deg, #241c4a 0%, #023047 50%, #1a1714 100%)"
+				},
+				{
+					"slug": "brand-sky",
+					"name": "Brand Sky",
+					"gradient": "linear-gradient(135deg, #8ecae6 0%, #219ebc 50%, #126782 100%)"
+				},
+				{
+					"slug": "brand-indie-web",
+					"name": "Brand Indie Web",
+					"gradient": "linear-gradient(135deg, #126782 0%, #8ecae6 100%)"
+				},
+				{
+					"slug": "brand-field-notes",
+					"name": "Brand Field Notes",
+					"gradient": "linear-gradient(135deg, #bcb5e3 0%, #fbfaf5 100%)"
+				},
+				{
+					"slug": "brand-marker",
+					"name": "Brand Marker",
+					"gradient": "linear-gradient(135deg, #ffb703 0%, #fb8500 100%)"
+				},
+				{
+					"slug": "brand-bookmark",
+					"name": "Brand Bookmark",
+					"gradient": "linear-gradient(135deg, #fb8500 0%, #241c4a 100%)"
+				},
+				{
+					"slug": "brand-page-tear",
+					"name": "Brand Page Tear",
+					"gradient": "linear-gradient(180deg, #fbfaf5 0%, #fee2c3 100%)"
+				},
+				{
+					"slug": "brand-cassette",
+					"name": "Brand Cassette",
+					"gradient": "linear-gradient(135deg, #ffb703 0%, #126782 100%)"
+				},
+				{
+					"slug": "brand-field",
+					"name": "Brand Field",
+					"gradient": "linear-gradient(135deg, #fee2c3 0%, #126782 50%, #241c4a 100%)"
 				}
 			]
 		},
