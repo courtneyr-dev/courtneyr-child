@@ -78,6 +78,42 @@
 	background: var(--cr-admin-chrome-hover) !important;
 	border-color: rgba(251, 250, 245, 0.15) !important;
 }
+
+/* v0.5.59 — frontend admin-bar dropdown backstop.
+   When the admin bar renders on the FRONT-END (logged-in user
+   viewing the live site), some plugin-injected dropdowns (notably
+   GoDaddy Quick Links and Perfmatters' Script Manager subpanel)
+   render their wrapper as a generic <div> that doesn't match
+   `.ab-sub-wrapper` / `.ab-submenu`. Without an explicit dark bg,
+   their white menu text falls onto the printer-ivory page surface
+   and disappears.
+
+   Belt-and-suspenders: paint every direct + nested container under
+   #wpadminbar that's neither the bar itself nor a top-level <li>.
+   The selector intentionally over-matches; transparent .ab-item /
+   a.ab-item rules above stop this from squashing hover paint. */
+#wpadminbar .menupop > .ab-sub-wrapper,
+#wpadminbar .menupop > .ab-sub-wrapper > .ab-submenu,
+#wpadminbar .menupop .ab-sub-wrapper *:not(.ab-item):not(a):not(.ab-icon):not(.ab-label):not(span):not(strong):not(svg):not(path):not(img),
+#wpadminbar [id^="wp-admin-bar-gd"] .ab-sub-wrapper,
+#wpadminbar [id^="wp-admin-bar-gd"] .ab-submenu,
+#wpadminbar [id^="wp-admin-bar-gd"] > .ab-sub-wrapper,
+#wpadminbar [id^="wp-admin-bar-perfmatters"] .ab-sub-wrapper,
+#wpadminbar [id^="wp-admin-bar-perfmatters"] .ab-submenu {
+	background-color: var(--cr-admin-chrome-hover) !important;
+}
+
+/* Ultimate backstop — if any plugin inserts a custom <div> wrapper
+   inside its admin-bar item that we haven't named above, this gives
+   the DIV itself a dark background so its white text stays legible.
+   Scoped to .menupop descendants so we don't touch the top-level
+   bar's flex layout or the user-info chunk on the right. */
+#wpadminbar .menupop .ab-sub-wrapper > div,
+#wpadminbar .menupop .ab-sub-wrapper > section,
+#wpadminbar .menupop .ab-sub-wrapper > ul,
+#wpadminbar [id^="wp-admin-bar-gd"] > div {
+	background-color: var(--cr-admin-chrome-hover) !important;
+}
 #wpadminbar .ab-submenu .ab-item:hover,
 #wpadminbar .ab-sub-wrapper .ab-item:hover,
 #wpadminbar .ab-sub-wrapper a:hover,
