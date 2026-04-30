@@ -7067,3 +7067,37 @@ form.tnp input:autofill,
 		box-shadow: 3px 3px 0 var(--cr-printer-ivory, #fbfaf5);
 	}
 }
+
+/* ==========================================================================
+   v0.5.49 — Complianz cookie banner a11y polish (audit B-6, B-9, B-10)
+   ==========================================================================
+   The Complianz plugin renders the cookie banner with default markup we
+   can't change without a plugin patch. Three small CSS tweaks fix the
+   WCAG findings the audit couldn't resolve from the plugin side. */
+
+/* B-6 (WCAG 2.5.8): inline cookie-policy links rendered at 18px because
+   `min-height: 24px` has no effect on `display: inline` elements. Switch
+   to inline-block so min-height applies; padding rounds out the 24px. */
+.cmplz-cookiebanner .cmplz-link,
+.cmplz-cookiebanner a {
+	display: inline-block;
+	min-height: 24px;
+	padding: 3px 0;
+	line-height: 1.5;
+}
+
+/* B-9 (WCAG 2.4.11): focus outline was 2px, spec says 3px minimum. */
+.cmplz-cookiebanner a:focus-visible,
+.cmplz-cookiebanner .cmplz-link:focus-visible {
+	outline: 3px solid var(--cr-marker, #ffb703) !important;
+	outline-offset: 2px !important;
+}
+
+/* B-10 (WCAG 2.4.7, 2.4.11): close button has no explicit focus-visible
+   outline. `<div role="button">` may inherit a default browser ring but
+   it's not guaranteed across themes/UAs. */
+.cmplz-cookiebanner .cmplz-close:focus-visible,
+.cmplz-close:focus-visible {
+	outline: 3px solid var(--cr-marker, #ffb703) !important;
+	outline-offset: 2px !important;
+}

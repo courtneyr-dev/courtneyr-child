@@ -227,6 +227,29 @@ function enqueue_icons_inject(): void {
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_icons_inject' );
 
+/**
+ * v0.5.49 — small site-UX a11y polish module: header search disclosure
+ * (Escape + click-outside to close) and Complianz close-button Space-key
+ * activation. See assets/js/site-ux.js for full rationale.
+ *
+ * Footer-deferred — none of this is render-blocking and all behaviors
+ * degrade gracefully (Escape/click-outside missing means user re-clicks
+ * the toggle; Space on Complianz close still works via Enter fallback).
+ */
+function enqueue_site_ux(): void {
+	wp_enqueue_script(
+		'courtneyr-site-ux',
+		COURTNEYR_CHILD_URI . '/assets/js/site-ux.js',
+		array(),
+		COURTNEYR_CHILD_VERSION,
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
+	);
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_site_ux' );
+
 
 /**
  * v0.5.21 — Re-skin the wp-admin chrome in the courtneyr.dev palette.
