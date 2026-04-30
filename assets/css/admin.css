@@ -52,24 +52,44 @@
 	color: var(--cr-admin-ink-inverse);
 }
 
-/* v0.5.66 — front-of-site admin bar legibility (replaces v0.5.65 paint).
-   v0.5.65's container-level paint didn't catch the wrap row because
-   when items wrap, they overflow below #wpadminbar's fixed 32px
-   height — outside the painted box (image #165 still showed a paler
-   band).
+/* v0.5.67 — front-of-site admin bar single-row enforcement.
+   Image #167 showed the bar still wrapping items to 3 rows on a 36"
+   monitor — viewport had room, but the WP-default flex-wrap:wrap
+   was triggering anyway.
 
-   New approach: paint each TOP-LEVEL <li> with the chrome bg so
-   wherever an item lands (primary row OR wrapped overflow row) it
-   carries its own dark surface. Same white-space: nowrap rule keeps
-   text intact within each item. */
-#wpadminbar #wp-toolbar > .ab-top-menu > li,
-#wpadminbar #wp-toolbar > .ab-top-secondary > li {
+   Lock single-row layout at every flex level by:
+     1. flex-wrap: nowrap on #wp-toolbar AND on the inner UL containers
+     2. flex-shrink: 0 on every nested item (.ab-top-menu, .ab-top-secondary,
+        and each <li>) so items keep their natural width — no squeeze
+     3. white-space: nowrap on the item content so text never breaks
+        within an item even if a single item is wide
+     4. per-<li> chrome-bg paint as a safety net
+
+   v0.5.64 tried (1) without (2) — items got flex-shrunk and their
+   text wrapped vertically (image #163). v0.5.65 backed off and let
+   items wrap to a 2nd row but the 2nd row landed on a paler band
+   (image #165). v0.5.66 painted every <li> dark — got the wrap row
+   chrome-colored, but didn't stop the wrap (image #167). This is
+   the union of all defenses. */
+#wpadminbar > #wp-toolbar {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: stretch;
 	background-color: var(--cr-admin-chrome);
 }
 
-#wpadminbar > #wp-toolbar,
 #wpadminbar > #wp-toolbar > .ab-top-menu,
 #wpadminbar > #wp-toolbar > .ab-top-secondary {
+	display: flex;
+	flex-wrap: nowrap;
+	flex-shrink: 0;
+	align-items: stretch;
+	background-color: var(--cr-admin-chrome);
+}
+
+#wpadminbar #wp-toolbar > .ab-top-menu > li,
+#wpadminbar #wp-toolbar > .ab-top-secondary > li {
+	flex-shrink: 0;
 	background-color: var(--cr-admin-chrome);
 }
 
