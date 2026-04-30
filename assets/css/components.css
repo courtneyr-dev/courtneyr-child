@@ -689,7 +689,10 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
   transform: translate(-2px, -2px);
 }
 
-.cr-stream-item__avatar {
+/* v0.5.51: scoped with :not(.cr-icon-avatar). Typographic-glyph
+   variant only — the SVG-based .cr-icon-avatar variant carries its
+   own typography via flex centering and shouldn't get this padding. */
+.cr-stream-item__avatar:not(.cr-icon-avatar) {
   font-size: var(--cr-text-2xl);
   line-height: 1;
   text-align: center;
@@ -4223,8 +4226,12 @@ body.blog button[type="submit"]:hover {
 	align-items: start;
 }
 
-/* (4a) Avatar column — ✦ glyph in marker color, slight rotation. */
-.cr-archive .cr-stream-item__avatar {
+/* (4a) Avatar column — ✦ glyph in marker color, slight rotation.
+   v0.5.51: scoped with :not(.cr-icon-avatar) so it only applies to the
+   typographic-glyph fallback variant. The new SVG-based avatar
+   (.cr-icon-avatar) carries its own bg/color/border via per-type
+   modifiers and must not be overridden here. */
+.cr-archive .cr-stream-item__avatar:not(.cr-icon-avatar) {
 	font-size: var(--cr-text-2xl, 1.75rem);
 	line-height: 1;
 	text-align: center;
@@ -4616,7 +4623,7 @@ body.single .single-post__tags a:nth-child(6n) {
 		grid-template-columns: 1fr;
 		gap: var(--cr-space-xs, 0.5rem);
 	}
-	.cr-archive .cr-stream-item__avatar {
+	.cr-archive .cr-stream-item__avatar:not(.cr-icon-avatar) {
 		text-align: left;
 		padding-top: 0;
 	}
