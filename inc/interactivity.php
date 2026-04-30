@@ -609,16 +609,25 @@ function transform_related_post_avatar( string $block_content, array $block, $wp
 		);
 	}
 
+	// v0.5.62: tighten both regexes to match the literal placeholder values
+	// only. If render_block fires for this outer group more than once
+	// during a single request (Block Hooks template hydration + the
+	// per-iteration render are documented to do this on some WP setups),
+	// the second run finds nothing to substitute and is a no-op. The
+	// previous regex `[^"]*` matched any value and would re-substitute
+	// the OPENING SPAN with stale state, producing the mismatched
+	// data-avatar="chat" vs use-icon=link seen on Link cards in image #153.
 	$block_content = preg_replace(
-		'/<span class="cr-icon-avatar[^"]*related-post__avatar"[^>]*data-cr-related-avatar="[^"]*"[^>]*>/',
+		'/<span class="cr-icon-avatar[^"]*related-post__avatar"[^>]*data-cr-related-avatar="placeholder"[^>]*>/',
 		$replacement_open,
 		$block_content,
 		1
 	);
-	// Placeholder href is `#post-icon-blog` (bare fragment); swap to the
-	// full sprite URL with the per-post type fragment.
+	// Placeholder href is `#post-icon-blog` (bare fragment, no path); swap
+	// to the full sprite URL with the per-post type fragment. The bare
+	// `#post-icon-blog` literal only exists in the unsubstituted placeholder.
 	$block_content = preg_replace(
-		'/href="#post-icon-[a-z-]+"/',
+		'/href="#post-icon-blog"/',
 		sprintf(
 			'href="%s/assets/svg/icons.svg#post-icon-%s"',
 			\esc_url( \get_stylesheet_directory_uri() ),
