@@ -188,6 +188,22 @@
 .cr-callout--warn a,
 .is-style-cr-callout-warn a { color: var(--cr-cerulean); }
 
+/* v0.5.50 — WARN callout label needs a contrasting tape because the
+   default cream tape (--cr-tape: #f3e5b8) on the WARN bg
+   (--cr-selective-yellow: #ffb703) is yellow-on-yellow (~1.6:1
+   contrast, fails 3:1 large-text AA — and visually "disappears"
+   regardless of tech contrast). Flip the label to russian-violet bg
+   with selective-yellow ink — luminance contrast is 14.45:1 AAA, and
+   the dark navy tape against the bright yellow callout reads as a
+   deliberate "stop" badge that matches WARN's semantic weight. */
+.cr-callout--warn .cr-callout__label,
+.cr-callout--warn .cr-callout__toggle,
+.is-style-cr-callout-warn .cr-callout__label,
+.is-style-cr-callout-warn .cr-callout__toggle {
+  background: var(--cr-russian-violet);
+  color: var(--cr-selective-yellow);
+}
+
 
 /* ============ Card ============
    Single zine variant. v1.x had .cr-card--elevated and --inverse;
@@ -6070,6 +6086,18 @@ body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow
 .cr-callout__toggle:hover,
 .cr-callout__toggle:focus-visible {
 	transform: rotate(0deg);
+}
+/* v0.5.50 — explicit focus ring (WCAG 2.4.7 / 2.4.11). The transform
+   alone isn't a strong-enough focus indicator. Use marker yellow on
+   dark callouts (NOTE), russian-violet on the WARN yellow bg so the
+   ring is visible against either family. */
+.cr-callout__toggle:focus-visible {
+	outline: 3px solid var(--cr-marker, #ffb703);
+	outline-offset: 3px;
+}
+.cr-callout--warn .cr-callout__toggle:focus-visible,
+.is-style-cr-callout-warn .cr-callout__toggle:focus-visible {
+	outline-color: var(--cr-russian-violet, #241c4a);
 }
 .cr-callout__toggle .cr-callout__chevron {
 	transition: transform 0.2s ease;

@@ -117,8 +117,14 @@ function transform_callout_block( string $block_content, array $block ): string 
 	$chevron      = '<svg class="cr-callout__chevron" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 	$button_close = '</button>';
 
+	// v0.5.50 — class regex made permissive: WP 6.5+ adds
+	// `wp-block-paragraph` to every <p> emitted by core/paragraph, so
+	// the previous `class="cr-callout__label"` pin never matched in
+	// production and the toggle button + aria-controls were silently
+	// dropped. Character-class match around the BEM hook is the right
+	// shape — works regardless of class order or what WP adds next.
 	$block_content = preg_replace(
-		'/<p\s+class="cr-callout__label">([^<]*)<\/p>/',
+		'/<p\s+class="[^"]*cr-callout__label[^"]*">([^<]*)<\/p>/',
 		$button_open . '<span class="cr-callout__label-text">$1</span>' . $chevron . $button_close,
 		$block_content,
 		1
