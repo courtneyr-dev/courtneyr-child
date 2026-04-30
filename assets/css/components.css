@@ -2257,7 +2257,9 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 .single-post__comments-wrapper {
 	background: var(--cr-surface-soft, #fbfaf5);
 	color: var(--cr-ink, #241c4a);
-	border-top: 2px solid var(--cr-border, #d4cfeb);
+	/* v0.5.78 — borderless. Top border was visible above the comments
+	   section as a faint lavender line (image #183); bg tone change
+	   carries the boundary cleanly on its own. */
 }
 
 .related-posts {
@@ -4082,7 +4084,9 @@ body.blog button[type="submit"]:hover {
    template used to ship with, swap heading prefix for the same
    marker-bar / eyebrow rhythm as the archive header. */
 .related-posts {
-	border-top: 1px dashed var(--cr-rule, rgba(36, 28, 74, 0.15));
+	/* v0.5.78 — borderless (was 1px dashed cr-rule). The periwinkle
+	   bg paint already separates this section from the comments
+	   surface above it; the dashed line read as design noise. */
 }
 .related-posts__heading {
 	font-family: var(--cr-font-condensed, var(--cr-font-accent));
@@ -6793,10 +6797,10 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
 	background-size: auto, var(--cr-halftone-size, 12px 12px) !important;
 	background-blend-mode: multiply, multiply !important;
 	background-repeat: repeat, repeat !important;
-	border-top: 2px solid var(--cr-russian-violet, #241c4a);
-	border-bottom: 2px solid var(--cr-russian-violet, #241c4a);
-	box-shadow: 0 4px 0 -1px var(--cr-russian-violet, #241c4a),
-	            0 -4px 0 -1px var(--cr-russian-violet, #241c4a);
+	/* v0.5.78 — borderless. The 2px russian-violet border-top + border-bottom
+	   plus the doubled box-shadow created four faint parallel lines around
+	   Field Notes on home + single (image #182, #183). Surface tone alone
+	   carries enough separation; the borders read as design noise. */
 	color: var(--cr-russian-violet, #241c4a);
 }
 
