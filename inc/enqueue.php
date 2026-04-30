@@ -181,40 +181,15 @@ function enqueue_baseline(): void {
 				margin: 0 !important;
 			}
 		}
-		/* v0.5.84 — cap prose line length at WCAG 1.4.8 (≤80 chars).
-		   v0.5.81 set post-content to 80vw; on a 1920px monitor that
-		   is ~127 chars per line, beyond the 45–80 char readability
-		   range. Cap individual prose elements (paragraphs, list items,
-		   blockquotes, headings) at clamp(45ch, 90ch, 100%) — wide
-		   media (alignwide, alignfull, figures, columns, audience
-		   cards) keep the 80vw stage. Centered margin so the prose
-		   column sits in the middle of the wider wrapper. */
-		@media (min-width: 1024px) {
-			.wp-block-post-content > p,
-			.wp-block-post-content > ul,
-			.wp-block-post-content > ol,
-			.wp-block-post-content > blockquote,
-			.wp-block-post-content > h1,
-			.wp-block-post-content > h2,
-			.wp-block-post-content > h3,
-			.wp-block-post-content > h4,
-			.wp-block-post-content > h5,
-			.wp-block-post-content > h6 {
-				max-width: clamp(45ch, 90ch, 100%);
-				margin-inline: auto;
-			}
-			/* Wide-aligned blocks override the cap and keep the wider stage. */
-			.wp-block-post-content > .alignwide,
-			.wp-block-post-content > .alignfull,
-			.wp-block-post-content > figure,
-			.wp-block-post-content > .wp-block-image,
-			.wp-block-post-content > .wp-block-cover,
-			.wp-block-post-content > .wp-block-columns,
-			.wp-block-post-content > .wp-block-gallery,
-			.wp-block-post-content > .wp-block-embed {
-				max-width: 100% !important;
-			}
-		}'
+		/* v0.5.86 — v0.5.84 prose cap rule reverted. The clamp(45ch, 90ch)
+		   cap on .wp-block-post-content > * cascaded into Query Loop
+		   archives (image #197 — empty boxes per post) and centered
+		   prose narrowly within the 80vw wrapper, leaving dead space
+		   on About and other pages (image #196). User feedback (image
+		   #198): "I actually loved the width of things on home" —
+		   restore the wider prose stage; revisit WCAG 1.4.8 line-length
+		   compliance later via theme.json contentSize per template part
+		   instead of bolt-on override CSS. */'
 	);
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_baseline' );
