@@ -73,6 +73,31 @@ function enqueue_baseline(): void {
 		array( 'courtneyr-tokens' ),
 		COURTNEYR_CHILD_VERSION
 	);
+
+	/* v0.5.76 — emit the per-format tint rules as INLINE CSS attached
+	   to the components handle. Perfmatters' Used CSS optimizer
+	   silently prunes the body.single-format-{slug} main.single-post
+	   selectors out of the optimized inline stylesheet (its analyzer
+	   doesn't seem to recognize compound body-class + element-class
+	   chains as matched). Outputting these rules as inline CSS via
+	   wp_add_inline_style sidesteps the Used CSS pipeline — inline
+	   <style> tags aren't touched.
+
+	   Same rules already exist in components.css for the case when
+	   Used CSS is disabled or the rule survives pruning; this is a
+	   redundant inline copy that always wins. */
+	wp_add_inline_style(
+		'courtneyr-components',
+		'body.single-format-aside main.single-post   { background-color: var(--cr-type-aside-bg); }
+		body.single-format-audio main.single-post   { background-color: var(--cr-type-audio-bg); }
+		body.single-format-chat main.single-post    { background-color: var(--cr-type-chat-bg); }
+		body.single-format-gallery main.single-post { background-color: var(--cr-type-gallery-bg); }
+		body.single-format-image main.single-post   { background-color: var(--cr-type-image-bg); }
+		body.single-format-link main.single-post    { background-color: var(--cr-type-link-bg); }
+		body.single-format-quote main.single-post   { background-color: var(--cr-type-quote-bg); }
+		body.single-format-status main.single-post  { background-color: var(--cr-type-status-bg); }
+		body.single-format-video main.single-post   { background-color: var(--cr-type-video-bg); }'
+	);
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_baseline' );
 
