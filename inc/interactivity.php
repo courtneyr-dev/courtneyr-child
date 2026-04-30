@@ -292,3 +292,114 @@ function maybe_enqueue_pull_quote(): void {
 	wp_enqueue_script_module( 'courtneyr/pull-quote' );
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\maybe_enqueue_pull_quote' );
+
+/* ============================================================
+ * v0.5.51 — Stream-item avatar typing (post-format-aware).
+ *
+ * The cr-stream-loop pattern emits a static "blog" SVG avatar inside
+ * each core/post-template item. This filter inspects the rendered
+ * post's get_post_format() and rewrites the avatar's class + use-href
+ * fragment so the right post-type icon + accent color appears for each
+ * post in the stream.
+ *
+ * Solid types (10): blog, video, audio, link, bookmark, quote,
+ * speaking, like, reply, review — accent passes AA as a fill.
+ *
+ * Outline types (8): aside, image, gallery, status, chat, repost, book,
+ * event — accent fails AA as a fill, so we use cr-icon-avatar--outline
+ * with style="--type-color: var(--cr-type-X);" instead.
+ *
+ * Map: WP post-format slug → our post-type avatar slug. WP only ships 9
+ * core formats (aside, image, gallery, link, quote, status, video,
+ * audio, chat). The other 9 (blog, bookmark, speaking, like, reply,
+ * repost, book, event, review) are mapped from category slugs or fall
+ * back to "blog" for Standard format posts.
+ * ============================================================ */
+
+const STREAM_AVATAR_SOLID = array(
+	'blog', 'video', 'audio', 'link', 'bookmark',
+	'quote', 'speaking', 'like', 'reply', 'review',
+);
+
+const STREAM_AVATAR_OUTLINE = array(
+	'aside', 'image', 'gallery', 'status',
+	'chat', 'repost', 'book', 'event',
+);
+
+/**
+ * Resolve a post's stream-item type slug (one of the 18 cr-icon-avatar
+ * variants) from its post format and categories.
+ */
+function resolve_stream_item_type( int $post_id ): string {
+	$format = \get_post_format( $post_id );
+	if ( $format && in_array( $format, array_merge( STREAM_AVATAR_SOLID, STREAM_AVATAR_OUTLINE ), true ) ) {
+		return $format;
+	}
+	// Some custom slugs (speaking, book, event, etc.) live as categories
+	// in this site's IA. Inspect category slugs for a hit.
+	$categories = \get_the_category( $post_id );
+	foreach ( $categories as $cat ) {
+		$slug = $cat->slug;
+		if ( in_array( $slug, array_merge( STREAM_AVATAR_SOLID, STREAM_AVATAR_OUTLINE ), true ) ) {
+			return $slug;
+		}
+	}
+	return 'blog';
+}
+
+/**
+ * Filter rendered post-template items in the cr-stream context to type
+ * the avatar markup based on the current post's format/category.
+ */
+function transform_stream_item_avatar( string $block_content, array $block ): string {
+	if ( ! isset( $block['blockName'] ) ) {
+		return $block_content;
+	}
+	// The stream-loop pattern produces core/group blocks tagged with
+	// .cr-stream-item. Match those, ignoring deeper nesting.
+	if ( 'core/group' !== $block['blockName'] ) {
+		return $block_content;
+	}
+	$class = $block['attrs']['className'] ?? '';
+	if ( ! str_contains( $class, 'cr-stream-item' ) ) {
+		return $block_content;
+	}
+	if ( ! str_contains( $block_content, 'data-cr-stream-avatar' ) ) {
+		return $block_content;
+	}
+	$post_id = \get_the_ID();
+	if ( ! $post_id ) {
+		return $block_content;
+	}
+	$type = resolve_stream_item_type( $post_id );
+
+	if ( in_array( $type, STREAM_AVATAR_OUTLINE, true ) ) {
+		// Outline variant — replace solid class + add type-color custom prop.
+		$replacement = sprintf(
+			'<span class="cr-icon-avatar cr-icon-avatar--outline cr-stream-item__avatar" aria-hidden="true" data-cr-stream-avatar="%1$s" style="--type-color: var(--cr-type-%1$s);">',
+			\esc_attr( $type )
+		);
+	} else {
+		$replacement = sprintf(
+			'<span class="cr-icon-avatar cr-icon-avatar--%1$s cr-stream-item__avatar" aria-hidden="true" data-cr-stream-avatar="%1$s">',
+			\esc_attr( $type )
+		);
+	}
+
+	// Swap the opening <span class="cr-icon-avatar..." for the typed version.
+	$block_content = preg_replace(
+		'/<span class="cr-icon-avatar[^"]*cr-stream-item__avatar"[^>]*data-cr-stream-avatar="[^"]*"[^>]*>/',
+		$replacement,
+		$block_content,
+		1
+	);
+	// Swap the use-href fragment to the right icon.
+	$block_content = preg_replace(
+		'/(icons\.svg)#post-icon-[a-z-]+/',
+		'$1#post-icon-' . preg_quote( $type, '/' ),
+		$block_content,
+		1
+	);
+	return $block_content;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\transform_stream_item_avatar', 10, 2 );

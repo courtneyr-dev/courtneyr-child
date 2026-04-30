@@ -737,10 +737,87 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
   margin-top: var(--cr-space-xs);
 }
 
-/* Per-type accent — the avatar adopts a soft post-type background */
+/* Per-type accent — the avatar adopts a soft post-type background.
+   Used when the avatar is the typographic-glyph variant (.cr-stream-item__avatar).
+   The SVG-based sibling .cr-icon-avatar below has its own per-type rules. */
 .cr-stream-item--blog  .cr-stream-item__avatar { color: var(--cr-type-blog); }
 .cr-stream-item--quote .cr-stream-item__avatar { color: var(--cr-type-quote); }
 .cr-stream-item--video .cr-stream-item__avatar { color: var(--cr-type-video); }
+
+/* ============ .cr-icon-avatar (v0.5.51) ============
+   SVG-based avatar that pairs with the icons.svg sprite. Replaces the
+   typographic ✦ glyph fallback used in v0.3.0–v0.5.50. Pulled from the
+   courtneyr-design-system (ui_kits/courtneyr-dev/stream.html) so the
+   theme matches the kit's stream component 1:1.
+
+   Two variants:
+   - SOLID (10 post types): post-type accent fills the bg + AA-passing
+     foreground. Only types whose accent color passes WCAG 1.4.3 against
+     a printable foreground (printer-ivory or prussian-blue).
+   - OUTLINE (8 post types): tape background + ink foreground +
+     post-type accent as the BORDER. Used for types whose accent fails
+     AA as a fill (aside, image, gallery, status, chat, repost, book,
+     event). Set --type-color inline on the element to apply the border.
+*/
+.cr-icon-avatar {
+	width: 2.75rem;
+	height: 2.75rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: var(--cr-border-thick);
+	background: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+	box-shadow: 2px 2px 0 var(--cr-ink);
+	transform: rotate(var(--cr-rotate-neg));
+	flex-shrink: 0;
+}
+.cr-icon-avatar svg {
+	width: 1.5rem;
+	height: 1.5rem;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.75;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+.cr-icon-avatar svg .cr-icon-fill {
+	fill: currentColor;
+	stroke: none;
+}
+
+/* Solid variants — only 10 types pass AA as a fill */
+.cr-icon-avatar--blog     { background: var(--cr-type-blog);     color: var(--cr-printer-ivory); }
+.cr-icon-avatar--video    { background: var(--cr-type-video);    color: var(--cr-prussian-blue); }
+.cr-icon-avatar--audio    { background: var(--cr-type-audio);    color: var(--cr-printer-ivory); }
+.cr-icon-avatar--link     { background: var(--cr-type-link);     color: var(--cr-printer-ivory); }
+.cr-icon-avatar--bookmark { background: var(--cr-type-bookmark); color: var(--cr-printer-ivory); }
+.cr-icon-avatar--quote    { background: var(--cr-type-quote);    color: var(--cr-printer-ivory); }
+.cr-icon-avatar--speaking { background: var(--cr-type-speaking); color: var(--cr-printer-ivory); }
+.cr-icon-avatar--like     { background: var(--cr-type-like);     color: var(--cr-printer-ivory); }
+.cr-icon-avatar--reply    { background: var(--cr-type-reply);    color: var(--cr-printer-ivory); }
+.cr-icon-avatar--review   { background: var(--cr-type-review);   color: var(--cr-printer-ivory); }
+
+/* Outline variant — for the 8 types whose accent fails AA as a fill.
+   Author sets --type-color inline (e.g., style="--type-color: var(--cr-type-chat);").
+   Border picks it up; bg + fg stay neutral. */
+.cr-icon-avatar--outline {
+	background: var(--cr-tape, #f3e5b8);
+	color: var(--cr-ink);
+	border-color: var(--type-color, var(--cr-ink));
+}
+
+/* Dark mode — the solid variants' post-type colors carry over via tokens.
+   Outline variant needs an adjusted bg for dark surfaces. */
+:root[data-theme="dark"] .cr-icon-avatar--outline {
+	background: var(--cr-tape, #4a3f1c);
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .cr-icon-avatar--outline,
+	:root[data-theme="system"] .cr-icon-avatar--outline {
+		background: var(--cr-tape, #4a3f1c);
+	}
+}
 
 
 /* ============ Reading layout ============ */
