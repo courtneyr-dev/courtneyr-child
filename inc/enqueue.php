@@ -97,21 +97,43 @@ function enqueue_baseline(): void {
 		body.single-format-quote main.single-post   { background-color: var(--cr-type-quote-bg); }
 		body.single-format-status main.single-post  { background-color: var(--cr-type-status-bg); }
 		body.single-format-video main.single-post   { background-color: var(--cr-type-video-bg); }
-		/* v0.5.77 — responsive single-post body width. Below 1024px (tablet
-		   portrait + phone) the theme.json defaults (content-size 720px,
-		   wide-size 1280px) apply unchanged. At ≥1024px, override the
-		   constrained-layout vars on the single-post body so the prose,
-		   header, and meta all widen together to 80% of the viewport
-		   (alignwide elements get 86vw for the wider tier). All constrained
-		   children inside .single-post pick up the new vars automatically
-		   via WPs is-layout-constrained CSS, which references
-		   var(--wp--style--global--content-size) and --wide-size. Inline
-		   so Perfmatters Used CSS does not prune the override. */
+		/* v0.5.77+v0.5.79 — responsive single-post body width. Below 1024px
+		   (tablet portrait + phone) the theme.json defaults apply unchanged.
+		   At ≥1024px, widen the single-post surface to 80vw.
+
+		   v0.5.79 sledgehammer fix: the v0.5.77 var override
+		   (--wp--style--global--content-size: 80vw at body.single) was on
+		   the page but didnt visibly widen anything (image #186). The theme
+		   uses its own --cr-measure (65ch) on several selectors AND WPs
+		   constrained-layout selectors emit hardcoded values in some paths.
+		   Targeting the post-content + its children directly with !important
+		   guarantees the widening regardless of which underlying variable
+		   path WP chose for this page.
+
+		   v0.5.79 — also bump body paragraph font-size from 1rem to 1.15rem
+		   (~18px) on single-post prose. Original 16px read as tiny on
+		   wide-screen prose at desktop tiers. */
 		@media (min-width: 1024px) {
 			body.single {
 				--wp--style--global--content-size: 80vw;
 				--wp--style--global--wide-size: 86vw;
+				--cr-measure: 80vw;
+				--cr-measure-wide: 86vw;
 			}
+			body.single main.single-post,
+			body.single .wp-block-post-content,
+			body.single .wp-block-post-content > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
+				max-width: 80vw !important;
+			}
+			body.single .wp-block-post-content > .alignwide,
+			body.single main.single-post > .alignwide {
+				max-width: 86vw !important;
+			}
+		}
+		body.single .wp-block-post-content,
+		body.single .wp-block-post-content p {
+			font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.25rem);
+			line-height: 1.65;
 		}'
 	);
 }
