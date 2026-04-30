@@ -7394,32 +7394,49 @@ body.format-quote main.single-post   { background-color: var(--cr-type-quote-bg)
 body.format-status main.single-post  { background-color: var(--cr-type-status-bg); }
 body.format-video main.single-post   { background-color: var(--cr-type-video-bg); }
 
-/* Archive stream-item — paint the card. cr-stream-item--{format} is
-   already on each card (set by template). Add a soft border-left in
-   the format's accent color for redundant non-color identification. */
-.cr-stream-item--aside,
-.cr-stream-item--audio,
-.cr-stream-item--chat,
-.cr-stream-item--gallery,
-.cr-stream-item--image,
-.cr-stream-item--link,
-.cr-stream-item--quote,
-.cr-stream-item--status,
-.cr-stream-item--video {
+/* Archive stream-item — paint the card. v0.5.73: target via the
+   ancestor `.format-{slug}` class that WordPress's post_class() adds
+   to the Query Loop's outer wrapper (verified in the rendered markup;
+   the inner cr-stream-item never gets a `--{format}` modifier). The
+   format-{slug} class wraps each post-template item, so a descendant
+   selector reaches the cr-stream-item card from there. Adds a 4px
+   border-inline-start in the format's accent color for redundant
+   non-color identification. */
+.format-aside .cr-stream-item,
+.format-audio .cr-stream-item,
+.format-chat .cr-stream-item,
+.format-gallery .cr-stream-item,
+.format-image .cr-stream-item,
+.format-link .cr-stream-item,
+.format-quote .cr-stream-item,
+.format-status .cr-stream-item,
+.format-video .cr-stream-item {
 	padding-inline: var(--wp--preset--spacing--medium, 1rem);
 	padding-block: var(--wp--preset--spacing--small, 0.75rem);
 	border-radius: 0.5rem;
 	border-inline-start: 4px solid currentColor;
 }
-.cr-stream-item--aside   { background-color: var(--cr-type-aside-bg);   border-inline-start-color: var(--cr-type-aside,   #647baf); }
-.cr-stream-item--audio   { background-color: var(--cr-type-audio-bg);   border-inline-start-color: var(--cr-type-audio,   #000000); }
-.cr-stream-item--chat    { background-color: var(--cr-type-chat-bg);    border-inline-start-color: var(--cr-type-chat,    #647baf); }
-.cr-stream-item--gallery { background-color: var(--cr-type-gallery-bg); border-inline-start-color: var(--cr-type-gallery, #219ebc); }
-.cr-stream-item--image   { background-color: var(--cr-type-image-bg);   border-inline-start-color: var(--cr-type-image,   #219ebc); }
-.cr-stream-item--link    { background-color: var(--cr-type-link-bg);    border-inline-start-color: var(--cr-type-link,    #126782); }
-.cr-stream-item--quote   { background-color: var(--cr-type-quote-bg);   border-inline-start-color: var(--cr-type-quote,   #241c4a); }
-.cr-stream-item--status  { background-color: var(--cr-type-status-bg);  border-inline-start-color: var(--cr-type-status,  #647baf); }
-.cr-stream-item--video   { background-color: var(--cr-type-video-bg);   border-inline-start-color: var(--cr-type-video,   #219ebc); }
+.format-aside .cr-stream-item   { background-color: var(--cr-type-aside-bg);   border-inline-start-color: var(--cr-type-aside,   #647baf); }
+.format-audio .cr-stream-item   { background-color: var(--cr-type-audio-bg);   border-inline-start-color: var(--cr-type-audio,   #000000); }
+.format-chat .cr-stream-item    { background-color: var(--cr-type-chat-bg);    border-inline-start-color: var(--cr-type-chat,    #647baf); }
+.format-gallery .cr-stream-item { background-color: var(--cr-type-gallery-bg); border-inline-start-color: var(--cr-type-gallery, #219ebc); }
+.format-image .cr-stream-item   { background-color: var(--cr-type-image-bg);   border-inline-start-color: var(--cr-type-image,   #219ebc); }
+.format-link .cr-stream-item    { background-color: var(--cr-type-link-bg);    border-inline-start-color: var(--cr-type-link,    #126782); }
+.format-quote .cr-stream-item   { background-color: var(--cr-type-quote-bg);   border-inline-start-color: var(--cr-type-quote,   #241c4a); }
+.format-status .cr-stream-item  { background-color: var(--cr-type-status-bg);  border-inline-start-color: var(--cr-type-status,  #647baf); }
+.format-video .cr-stream-item   { background-color: var(--cr-type-video-bg);   border-inline-start-color: var(--cr-type-video,   #219ebc); }
+
+/* v0.5.73 — hide the .cr-format-chip pill inside archive cards. The
+   format icon avatar (cr-icon-avatar / cr-stream-item__avatar) on the
+   left of each card already tells the reader what format the post is;
+   a second textual chip alongside it is redundant (image #176). The
+   chip's body class-driven text via ::before content is still rendered
+   in DOM but visually hidden, preserving any CSS rule that targets it
+   on other surfaces. Single posts' meta row keeps the chip — that
+   surface is single-post-specific and uses the chip differently. */
+.cr-stream-item .cr-format-chip {
+	display: none !important;
+}
 
 /* High-contrast preference: drop the tint, keep the border-inline-start
    so format identification stays visible without any color-fill on the
@@ -7435,15 +7452,15 @@ body.format-video main.single-post   { background-color: var(--cr-type-video-bg)
 	body.format-quote main.single-post,
 	body.format-status main.single-post,
 	body.format-video main.single-post,
-	.cr-stream-item--aside,
-	.cr-stream-item--audio,
-	.cr-stream-item--chat,
-	.cr-stream-item--gallery,
-	.cr-stream-item--image,
-	.cr-stream-item--link,
-	.cr-stream-item--quote,
-	.cr-stream-item--status,
-	.cr-stream-item--video {
+	.format-aside .cr-stream-item,
+	.format-audio .cr-stream-item,
+	.format-chat .cr-stream-item,
+	.format-gallery .cr-stream-item,
+	.format-image .cr-stream-item,
+	.format-link .cr-stream-item,
+	.format-quote .cr-stream-item,
+	.format-status .cr-stream-item,
+	.format-video .cr-stream-item {
 		background-color: transparent;
 	}
 	body.format-aside main.single-post   { border-inline-start: 6px solid var(--cr-type-aside,   #647baf); }
