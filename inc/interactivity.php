@@ -661,6 +661,63 @@ function transform_related_post_avatar( string $block_content, array $block, $wp
 add_filter( 'render_block', __NAMESPACE__ . '\\transform_related_post_avatar', 10, 3 );
 
 /**
+ * v0.5.71 — fallback link text for related-post titles whose post has
+ * no title (aside, status, quote formats). The post-title block with
+ * `isLink:true` renders an empty <a href="permalink"></a> for those
+ * posts — no visible click target AND no accessible name (WCAG 2.4.4).
+ *
+ * Substitute the first ~10 words of post_content as the anchor's
+ * text. The visible link doubles as preview text, and screen readers
+ * get a meaningful destination announcement.
+ *
+ * Scoped to core/post-title with className `related-post__title` so
+ * other empty-title contexts (which currently don't exist on this
+ * theme) aren't affected.
+ */
+function inject_related_post_title_fallback( string $block_content, array $block, $wp_block = null ): string {
+	if ( ! isset( $block['blockName'] ) || 'core/post-title' !== $block['blockName'] ) {
+		return $block_content;
+	}
+	$class_name = $block['attrs']['className'] ?? '';
+	if ( ! str_contains( $class_name, 'related-post__title' ) ) {
+		return $block_content;
+	}
+	if ( '' !== trim( \wp_strip_all_tags( $block_content ) ) ) {
+		// Title already has visible text — leave it alone.
+		return $block_content;
+	}
+	$post_id = isset( $wp_block ) && isset( $wp_block->context['postId'] )
+		? (int) $wp_block->context['postId']
+		: (int) \get_the_ID();
+	if ( $post_id <= 0 ) {
+		return $block_content;
+	}
+	$content  = (string) \get_post_field( 'post_content', $post_id );
+	$content  = \wp_strip_all_tags( $content );
+	$fallback = trim( \wp_trim_words( $content, 10, '…' ) );
+	if ( '' === $fallback ) {
+		$format   = \get_post_format( $post_id );
+		$fallback = sprintf(
+			/* translators: %s: post format slug (aside/status/quote/...) */
+			\__( 'Read this %s', 'courtneyr-child' ),
+			$format ? $format : 'post'
+		);
+	}
+	// The post-title block with isLink:true renders <h*><a ...></a></h*>.
+	// Inject fallback inside that empty anchor only.
+	$replaced = \preg_replace_callback(
+		'/(<a\b[^>]*>)(\s*)(<\/a>)/',
+		static function ( array $m ) use ( $fallback ): string {
+			return $m[1] . \esc_html( $fallback ) . $m[3];
+		},
+		$block_content,
+		1
+	);
+	return is_string( $replaced ) ? $replaced : $block_content;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\inject_related_post_title_fallback', 10, 3 );
+
+/**
  * Suppress PFBT's format-badge Block Hooks injection. The cr-icon-avatar
  * we render above carries the same signal (post format) and the chip
  * in the meta row carries the format label; the badge becomes redundant.

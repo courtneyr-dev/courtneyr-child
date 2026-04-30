@@ -1357,6 +1357,8 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 .related-post {
 	gap: var(--wp--preset--spacing--small, 0.75rem);
 	align-items: center;
+	/* v0.5.71 — anchor for the stretched-link below. */
+	position: relative;
 }
 
 /* Avatar — slightly smaller than the stream/single variants so it
@@ -1391,6 +1393,24 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 	text-decoration: underline;
 	text-underline-offset: 0.18em;
 	text-decoration-color: var(--cr-marker, currentColor);
+}
+
+/* v0.5.71 — stretched-link pattern. The post-title block with
+   isLink:true already provides the real <a href="permalink"> for
+   keyboard + screen-reader users; this ::after just extends the
+   click hit-zone over the entire .related-post card so the avatar
+   and date areas also navigate. Avatar is aria-hidden and date is
+   not an interactive element, so no other clickable region is
+   shadowed. Marker overlay rules above keep their natural stacking. */
+.related-post__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+.related-post__title a:focus-visible::after {
+	outline: 2px solid var(--cr-marker, currentColor);
+	outline-offset: 2px;
+	border-radius: 0.25rem;
 }
 
 /* Date — explicitly small, defeating any inheritance */
