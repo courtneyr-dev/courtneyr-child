@@ -7384,15 +7384,15 @@ body.pfbt-format-titleless .wp-block-post-content > .single-post__format-avatar 
 /* Single-post surface — paint the <main class="single-post"> element.
    Specificity (0,2,1 — body class + .single-post + main) beats WP's
    has-main-accent-background-color (0,1,0) so no !important needed. */
-body.format-aside main.single-post   { background-color: var(--cr-type-aside-bg); }
-body.format-audio main.single-post   { background-color: var(--cr-type-audio-bg); }
-body.format-chat main.single-post    { background-color: var(--cr-type-chat-bg); }
-body.format-gallery main.single-post { background-color: var(--cr-type-gallery-bg); }
-body.format-image main.single-post   { background-color: var(--cr-type-image-bg); }
-body.format-link main.single-post    { background-color: var(--cr-type-link-bg); }
-body.format-quote main.single-post   { background-color: var(--cr-type-quote-bg); }
-body.format-status main.single-post  { background-color: var(--cr-type-status-bg); }
-body.format-video main.single-post   { background-color: var(--cr-type-video-bg); }
+body.single-format-aside main.single-post   { background-color: var(--cr-type-aside-bg); }
+body.single-format-audio main.single-post   { background-color: var(--cr-type-audio-bg); }
+body.single-format-chat main.single-post    { background-color: var(--cr-type-chat-bg); }
+body.single-format-gallery main.single-post { background-color: var(--cr-type-gallery-bg); }
+body.single-format-image main.single-post   { background-color: var(--cr-type-image-bg); }
+body.single-format-link main.single-post    { background-color: var(--cr-type-link-bg); }
+body.single-format-quote main.single-post   { background-color: var(--cr-type-quote-bg); }
+body.single-format-status main.single-post  { background-color: var(--cr-type-status-bg); }
+body.single-format-video main.single-post   { background-color: var(--cr-type-video-bg); }
 
 /* Archive stream-item — paint the card. v0.5.73: target via the
    ancestor `.format-{slug}` class that WordPress's post_class() adds
