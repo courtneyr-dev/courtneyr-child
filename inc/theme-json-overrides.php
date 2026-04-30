@@ -137,3 +137,22 @@ add_filter( 'wp_theme_json_data_theme', __NAMESPACE__ . '\\override_theme_palett
  */
 add_filter( 'pfbt_enqueue_format_styles', '__return_false' );
 add_filter( 'pfbt_merge_format_palette', '__return_false' );
+
+/**
+ * v0.5.56 — third PFBT opt-out: block-template registration.
+ *
+ * PFBT's `add_block_templates` filter on `get_block_templates`
+ * `array_unshift`s the `single` template into the front of every
+ * wp_template query result, including the front-page and page-X
+ * resolution queries. The block-template renderer picks the first
+ * match, so on this site (which has its own templates/front-page.html)
+ * the homepage was rendering with templates/single.html — leaking
+ * the post-title "Home" h1, author byline, reading-progress bar,
+ * and related-posts section onto the front page.
+ *
+ * Theme has its own `single`, `page`, `archive`, `front-page`,
+ * `home`, `404`, and `search` templates plus full post-format
+ * coverage via cr-icon-avatar + cr-chip + cr-stream-item--X. The
+ * plugin's template registration is pure interference here.
+ */
+add_filter( 'pfbt_register_format_templates', '__return_false' );
