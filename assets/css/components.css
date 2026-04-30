@@ -7274,21 +7274,51 @@ body.pfbt-format-titleless .single-post__title {
 }
 
 /* For titleless formats (aside, status, quote) the avatar lives at
-   the start of wp-block-post-content, NOT inside the title. Keep the
-   inline-flex display there so it sits next to the first content
-   line. The selector below is scoped to the titleless body class so
-   it never touches the titled-format absolute-positioned avatar. */
+   the start of wp-block-post-content, NOT inside the title. v0.5.66:
+   match the titled-format positioning — absolute, 5rem left of the
+   constrained content's left edge — so the icon shows up in the same
+   visual place regardless of format (image #166).
+
+   The constrained content's left edge sits at
+   `(post-content-width - content-size) / 2` from post-content's left.
+   `--wp--style--global--content-size` is set by WP's theme.json layout
+   resolver; fallback to 720px if absent. The avatar's left edge sits
+   that far minus 5rem (offset) minus 2.25rem (avatar's own width). */
+body.pfbt-format-titleless .wp-block-post-content {
+	position: relative;
+}
+
 body.pfbt-format-titleless .wp-block-post-content > .single-post__format-avatar {
-	display: inline-flex;
-	margin-block-end: 0.5rem;
-	margin-inline-end: 0.6rem;
-	vertical-align: middle;
+	position: absolute;
+	inset-block-start: 0.25rem;
+	inset-inline-start: calc(
+		(100% - var(--wp--style--global--content-size, 720px)) / 2
+		- var(--pfbt-format-avatar-offset, 5rem)
+		- 2.25rem
+	);
 	width: 2.25rem;
 	height: 2.25rem;
+	margin: 0;
 	box-shadow: 2px 2px 0 var(--cr-ink);
+	transform: none;
+	vertical-align: baseline;
 }
 
 body.pfbt-format-titleless .wp-block-post-content > .single-post__format-avatar svg {
 	width: 1.25rem;
 	height: 1.25rem;
+}
+
+/* On narrow viewports, fall back to inline display so the avatar
+   doesn't overflow off-screen when there's no room left of the
+   constrained content area. */
+@media (max-width: 60rem) {
+	body.pfbt-format-titleless .wp-block-post-content > .single-post__format-avatar {
+		position: static;
+		display: inline-flex;
+		inset-inline-start: auto;
+		margin-block-end: 0.5rem;
+		margin-inline-end: 0.6rem;
+		vertical-align: middle;
+	}
 }

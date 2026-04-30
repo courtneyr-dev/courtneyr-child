@@ -52,22 +52,21 @@
 	color: var(--cr-admin-ink-inverse);
 }
 
-/* v0.5.65 — front-of-site admin bar legibility (replaces v0.5.64).
-   The v0.5.64 attempt at flex-wrap:nowrap on #wp-toolbar squeezed
-   items to fit one row, which broke each item's TEXT into multiple
-   lines ("Edit Site" -> "Edit" / "Site", image #163). Reverted that
-   approach.
+/* v0.5.66 — front-of-site admin bar legibility (replaces v0.5.65 paint).
+   v0.5.65's container-level paint didn't catch the wrap row because
+   when items wrap, they overflow below #wpadminbar's fixed 32px
+   height — outside the painted box (image #165 still showed a paler
+   band).
 
-   New approach: ALLOW the bar to wrap whole items to a second row
-   when items don't fit (matching WP default), but:
-     1. Force white-space: nowrap on every item so text never breaks
-        WITHIN an item.
-     2. Paint EVERY wrapped row + every wrapping container with the
-        dark chrome bg so the second row visually merges with the
-        primary instead of falling onto a paler band (image #159).
+   New approach: paint each TOP-LEVEL <li> with the chrome bg so
+   wherever an item lands (primary row OR wrapped overflow row) it
+   carries its own dark surface. Same white-space: nowrap rule keeps
+   text intact within each item. */
+#wpadminbar #wp-toolbar > .ab-top-menu > li,
+#wpadminbar #wp-toolbar > .ab-top-secondary > li {
+	background-color: var(--cr-admin-chrome);
+}
 
-   Selector specificity (#wpadminbar > #wp-toolbar) beats WP core's
-   admin-bar.css without !important. */
 #wpadminbar > #wp-toolbar,
 #wpadminbar > #wp-toolbar > .ab-top-menu,
 #wpadminbar > #wp-toolbar > .ab-top-secondary {
