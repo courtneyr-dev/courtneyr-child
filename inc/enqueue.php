@@ -189,7 +189,86 @@ function enqueue_baseline(): void {
 		   #198): "I actually loved the width of things on home" —
 		   restore the wider prose stage; revisit WCAG 1.4.8 line-length
 		   compliance later via theme.json contentSize per template part
-		   instead of bolt-on override CSS. */'
+		   instead of bolt-on override CSS. */
+
+		/* v0.5.87 — homepage refinements (images #199 + #200).
+		   className hooks added to homepage post 2651:
+		     .cr-home-hero        Newsletter Hero section (polaroid + welcome)
+		     .cr-home-features    Newsletter Features section (audience cards)
+		     .cr-home-fieldnotes  Blog Post List section (Field Notes query loop)
+		     .cr-home-closer      Footer/closer section (Start your journey CTA)
+		   All targeting below is scoped to those classes for stability. */
+
+		/* Hero: pull the polaroid column closer to the welcome/signup column.
+		   Default blockGap.left was x-large (~5rem); reduce to medium (~2rem). */
+		@media (min-width: 1024px) {
+			.cr-home-hero .wp-block-columns {
+				gap: var(--wp--preset--spacing--medium, 2rem) !important;
+			}
+		}
+		/* Hero: bump the "Join my newsletter…" intro paragraph and tighten
+		   margin to the subscribe form below. The paragraph is the second
+		   <p> inside the Titles group (after the bold "Open source…" lead).
+		   Use .has-border-dark-color for stable targeting. */
+		.cr-home-hero .has-border-dark-color {
+			font-size: var(--wp--preset--font-size--medium, 1.25rem);
+			line-height: 1.5;
+			margin-bottom: var(--wp--preset--spacing--xs, 0.5rem) !important;
+		}
+
+		/* Audience cards: 2x2 grid on desktop, single-column stack on
+		   mobile. Replaces v0.5.82 (which targeted .is-nowrap that the
+		   actual cards do not carry). The right column inside Newsletter
+		   Features holds 4 .is-style-cr-card siblings. Vertical-flex
+		   default would stack as wide bars (image #199). Convert to
+		   flex-row+wrap with each card at calc(50% - gap). DOM order is
+		   01 → 04, so mobile single-column reading order is preserved. */
+		@media (min-width: 1024px) {
+			.cr-home-features .wp-block-column:has(> .is-style-cr-card + .is-style-cr-card) {
+				display: flex !important;
+				flex-direction: row !important;
+				flex-wrap: wrap !important;
+				gap: var(--wp--preset--spacing--medium, 1.5rem);
+				align-content: flex-start;
+			}
+			.cr-home-features .wp-block-column:has(> .is-style-cr-card + .is-style-cr-card) > .is-style-cr-card {
+				flex: 0 1 calc(50% - 0.75rem);
+				min-width: 0;
+				margin: 0 !important;
+			}
+		}
+
+		/* Newsletter Features left column: bump the "Every Saturday…"
+		   intro paragraph + the "Looking for personalized guidance?"
+		   text-box paragraph. Both should read at the same size as the
+		   audience-card body copy so the two columns read in balance. */
+		.cr-home-features .wp-block-column:first-child p {
+			font-size: var(--wp--preset--font-size--medium, 1.25rem);
+			line-height: 1.55;
+		}
+
+		/* Field Notes: center each post row across the section width.
+		   Default 25%/75% columns at alignwide stretch full-width with
+		   short titles leaving dead space on the right (image #200).
+		   Cap each row at ~720px and center it. */
+		@media (min-width: 1024px) {
+			.cr-home-fieldnotes .wp-block-query .wp-block-post-template > li > .wp-block-columns,
+			.cr-home-fieldnotes .wp-block-query .wp-block-post-template .wp-block-columns,
+			.cr-home-fieldnotes .wp-block-query > .wp-block-post-template ~ .wp-block-separator,
+			.cr-home-fieldnotes .wp-block-query .wp-block-separator {
+				max-width: 720px !important;
+				margin-inline: auto !important;
+			}
+		}
+
+		/* Closer: bump the "Every Saturday…" body paragraph and add
+		   breathing room before the subscribe form below. */
+		.cr-home-closer p.has-secondary-color,
+		.cr-home-closer .wp-block-column:first-child > p {
+			font-size: var(--wp--preset--font-size--medium, 1.25rem);
+			line-height: 1.55;
+			margin-bottom: var(--wp--preset--spacing--large, 2.5rem) !important;
+		}'
 	);
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_baseline' );
