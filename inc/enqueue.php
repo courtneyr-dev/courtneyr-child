@@ -115,33 +115,41 @@ function enqueue_baseline(): void {
 		   v0.5.79 — also bump body paragraph font-size from 1rem to 1.15rem
 		   (~18px) on single-post prose. Original 16px read as tiny on
 		   wide-screen prose at desktop tiers. */
-		/* v0.5.81: widen content wrapper site-wide (not just body.single)
-		   per user direction "those widths and font sizes should apply
-		   site wide". Body font-size is now driven by theme.json `base`
-		   preset (1.125rem with fluid 1.0625–1.25rem), so no inline
-		   font-size rule needed — design-token-correct per Ollie skill.
+		/* v0.5.89 (revised v0.5.81): width strategy is now content-shape
+		   aware, not site-wide. User direction (image #202 vs #203):
+		   "I want some things to be closer to the older screenshot of
+		   the homepage, while posts that have more content should have
+		   a wider content area."
 
-		   Width still requires CSS because theme.json layout values are
-		   compile-time fixed (cannot be responsive). Inline so Perfmatters
-		   Used CSS does not prune. */
+		   Translation: theme.json defaults (contentSize 720px / wideSize
+		   1100px) are the right shape for the homepage and other
+		   component-heavy templates — narrower, design-paced. Long-form
+		   single posts read better at the wider 80vw stage where there
+		   is enough room for prose plus pullquotes and image alignwide.
+
+		   Scope: body.single ONLY. Static pages (body.page), home
+		   (body.home), archives (body.archive), search, 404, etc. all
+		   fall back to the theme.json 720/1100 defaults — restoring the
+		   image-202 layout. Inline so Perfmatters Used CSS does not
+		   prune the body.single scope. */
 		@media (min-width: 1024px) {
-			:root {
+			body.single {
 				--wp--style--global--content-size: 80vw;
 				--wp--style--global--wide-size: 86vw;
 				--cr-measure: 80vw;
 				--cr-measure-wide: 86vw;
 			}
-			.wp-block-post-content {
+			body.single .wp-block-post-content {
 				max-width: 80vw !important;
 				margin-inline: auto !important;
 			}
-			.wp-block-post-content > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
+			body.single .wp-block-post-content > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
 				max-width: 100% !important;
 			}
-			.wp-block-post-content pre,
-			.wp-block-post-content .wp-block-code,
-			.wp-block-post-content .wp-block-code pre,
-			.wp-block-post-content .wp-block-preformatted {
+			body.single .wp-block-post-content pre,
+			body.single .wp-block-post-content .wp-block-code,
+			body.single .wp-block-post-content .wp-block-code pre,
+			body.single .wp-block-post-content .wp-block-preformatted {
 				max-width: min(72ch, 100%) !important;
 				margin-inline: auto !important;
 			}
