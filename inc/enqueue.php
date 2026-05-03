@@ -115,33 +115,41 @@ function enqueue_baseline(): void {
 		   v0.5.79 — also bump body paragraph font-size from 1rem to 1.15rem
 		   (~18px) on single-post prose. Original 16px read as tiny on
 		   wide-screen prose at desktop tiers. */
-		/* v0.5.81: widen content wrapper site-wide (not just body.single)
-		   per user direction "those widths and font sizes should apply
-		   site wide". Body font-size is now driven by theme.json `base`
-		   preset (1.125rem with fluid 1.0625–1.25rem), so no inline
-		   font-size rule needed — design-token-correct per Ollie skill.
+		/* v0.5.89 (revised v0.5.81): width strategy is now content-shape
+		   aware, not site-wide. User direction (image #202 vs #203):
+		   "I want some things to be closer to the older screenshot of
+		   the homepage, while posts that have more content should have
+		   a wider content area."
 
-		   Width still requires CSS because theme.json layout values are
-		   compile-time fixed (cannot be responsive). Inline so Perfmatters
-		   Used CSS does not prune. */
+		   Translation: theme.json defaults (contentSize 720px / wideSize
+		   1100px) are the right shape for the homepage and other
+		   component-heavy templates — narrower, design-paced. Long-form
+		   single posts read better at the wider 80vw stage where there
+		   is enough room for prose plus pullquotes and image alignwide.
+
+		   Scope: body.single ONLY. Static pages (body.page), home
+		   (body.home), archives (body.archive), search, 404, etc. all
+		   fall back to the theme.json 720/1100 defaults — restoring the
+		   image-202 layout. Inline so Perfmatters Used CSS does not
+		   prune the body.single scope. */
 		@media (min-width: 1024px) {
-			:root {
+			body.single {
 				--wp--style--global--content-size: 80vw;
 				--wp--style--global--wide-size: 86vw;
 				--cr-measure: 80vw;
 				--cr-measure-wide: 86vw;
 			}
-			.wp-block-post-content {
+			body.single .wp-block-post-content {
 				max-width: 80vw !important;
 				margin-inline: auto !important;
 			}
-			.wp-block-post-content > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
+			body.single .wp-block-post-content > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
 				max-width: 100% !important;
 			}
-			.wp-block-post-content pre,
-			.wp-block-post-content .wp-block-code,
-			.wp-block-post-content .wp-block-code pre,
-			.wp-block-post-content .wp-block-preformatted {
+			body.single .wp-block-post-content pre,
+			body.single .wp-block-post-content .wp-block-code,
+			body.single .wp-block-post-content .wp-block-code pre,
+			body.single .wp-block-post-content .wp-block-preformatted {
 				max-width: min(72ch, 100%) !important;
 				margin-inline: auto !important;
 			}
@@ -181,39 +189,44 @@ function enqueue_baseline(): void {
 				margin: 0 !important;
 			}
 		}
-		/* v0.5.84 — cap prose line length at WCAG 1.4.8 (≤80 chars).
-		   v0.5.81 set post-content to 80vw; on a 1920px monitor that
-		   is ~127 chars per line, beyond the 45–80 char readability
-		   range. Cap individual prose elements (paragraphs, list items,
-		   blockquotes, headings) at clamp(45ch, 90ch, 100%) — wide
-		   media (alignwide, alignfull, figures, columns, audience
-		   cards) keep the 80vw stage. Centered margin so the prose
-		   column sits in the middle of the wider wrapper. */
-		@media (min-width: 1024px) {
-			.wp-block-post-content > p,
-			.wp-block-post-content > ul,
-			.wp-block-post-content > ol,
-			.wp-block-post-content > blockquote,
-			.wp-block-post-content > h1,
-			.wp-block-post-content > h2,
-			.wp-block-post-content > h3,
-			.wp-block-post-content > h4,
-			.wp-block-post-content > h5,
-			.wp-block-post-content > h6 {
-				max-width: clamp(45ch, 90ch, 100%);
-				margin-inline: auto;
-			}
-			/* Wide-aligned blocks override the cap and keep the wider stage. */
-			.wp-block-post-content > .alignwide,
-			.wp-block-post-content > .alignfull,
-			.wp-block-post-content > figure,
-			.wp-block-post-content > .wp-block-image,
-			.wp-block-post-content > .wp-block-cover,
-			.wp-block-post-content > .wp-block-columns,
-			.wp-block-post-content > .wp-block-gallery,
-			.wp-block-post-content > .wp-block-embed {
-				max-width: 100% !important;
-			}
+		/* v0.5.86 — v0.5.84 prose cap rule reverted. The clamp(45ch, 90ch)
+		   cap on .wp-block-post-content > * cascaded into Query Loop
+		   archives (image #197 — empty boxes per post) and centered
+		   prose narrowly within the 80vw wrapper, leaving dead space
+		   on About and other pages (image #196). User feedback (image
+		   #198): "I actually loved the width of things on home" —
+		   restore the wider prose stage; revisit WCAG 1.4.8 line-length
+		   compliance later via theme.json contentSize per template part
+		   instead of bolt-on override CSS. */
+
+		/* v0.5.88 — v0.5.87 layout/spacing refinements reverted per user
+		   request (image #201): "make the homepage look like this again"
+		   — image #201 matches image #198 (the loved state). Reverted:
+		   hero column gap reduction, audience-cards 2x2 grid, Field
+		   Notes row centering, closer body margin-bottom override.
+		   KEPT (per "keep the larger font though"): the medium-size
+		   font bumps on the four homepage prose paragraphs that read
+		   too small at the v0.5.86 site-wide width. */
+
+		/* Hero: bump "Join my newsletter…" intro paragraph. */
+		.cr-home-hero .has-border-dark-color {
+			font-size: var(--wp--preset--font-size--medium, 1.25rem);
+			line-height: 1.5;
+		}
+
+		/* Newsletter Features left column: bump "Every Saturday…" intro
+		   paragraph + "Looking for personalized guidance?" text-box copy. */
+		.cr-home-features .wp-block-column:first-child p {
+			font-size: var(--wp--preset--font-size--medium, 1.25rem);
+			line-height: 1.55;
+		}
+
+		/* Closer ("Start your journey today" CTA): bump "Every Saturday…"
+		   body paragraph. */
+		.cr-home-closer p.has-secondary-color,
+		.cr-home-closer .wp-block-column:first-child > p {
+			font-size: var(--wp--preset--font-size--medium, 1.25rem);
+			line-height: 1.55;
 		}'
 	);
 }
