@@ -6893,9 +6893,42 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
 	.cr-newsletter-banner__inner {
 		flex-direction: column;
 		align-items: flex-start;
+		gap: var(--wp--preset--spacing--medium, 1rem);
 	}
 	.cr-newsletter-banner__cta {
 		width: 100%;
+	}
+	/* v0.5.x — On mobile the banner was edge-to-edge with x-large
+	   vertical padding, which produced a tall empty card around the
+	   FIELD NOTES copy. Tighten the vertical rhythm and pull the
+	   banner in from the viewport edges so it visually sits inside
+	   the post body rather than dominating it.
+	   The `.alignfull` selector overrides WP's edge-breakout
+	   `margin-left: calc(50% - 50vw)` trick by reasserting non-calc
+	   margins; the `max-width: calc(...)` keeps the banner sized to
+	   match the visible viewport minus the new side margins.
+	   Inline `style=""` from the block markup uses var(--wp--preset
+	   --spacing--x-large) which the !important here overrides. */
+	.cr-newsletter-banner.alignfull,
+	.cr-newsletter-banner {
+		margin-left: var(--wp--preset--spacing--medium, 1rem) !important;
+		margin-right: var(--wp--preset--spacing--medium, 1rem) !important;
+		max-width: calc(100vw - 2 * var(--wp--preset--spacing--medium, 1rem)) !important;
+		width: auto !important;
+		padding-top: var(--wp--preset--spacing--medium, 1rem) !important;
+		padding-bottom: var(--wp--preset--spacing--medium, 1rem) !important;
+		padding-left: var(--wp--preset--spacing--medium, 1rem) !important;
+		padding-right: var(--wp--preset--spacing--medium, 1rem) !important;
+	}
+	.cr-newsletter-banner__copy {
+		flex: 0 0 auto;
+		min-width: 0;
+	}
+	.cr-newsletter-banner__title {
+		font-size: 1.4rem;
+	}
+	.cr-newsletter-banner__lede {
+		font-size: 0.95rem;
 	}
 }
 
