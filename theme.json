@@ -350,7 +350,7 @@
 							"fontFamily": "Rock Salt",
 							"fontWeight": "400",
 							"fontStyle": "normal",
-							"fontDisplay": "swap",
+							"fontDisplay": "optional",
 							"src": [
 								"file:./assets/fonts/rock-salt-400.woff2"
 							]
