@@ -294,7 +294,7 @@
 				{
 					"slug": "body",
 					"name": "Barlow (Body)",
-					"fontFamily": "\"Barlow\", \"Barlow Fallback\", system-ui, -apple-system, sans-serif",
+					"fontFamily": "\"Barlow\", system-ui, -apple-system, sans-serif",
 					"fontFace": [
 						{
 							"fontFamily": "Barlow",
@@ -322,20 +322,6 @@
 							"src": [
 								"file:./assets/fonts/barlow-700.woff2"
 							]
-						},
-						{
-							"fontFamily": "Barlow Fallback",
-							"fontWeight": "700",
-							"fontStyle": "normal",
-							"src": [
-								"local(\"Arial Bold\")",
-								"local(\"Helvetica Bold\")",
-								"local(\"Arial\")"
-							],
-							"ascentOverride": "96%",
-							"descentOverride": "24%",
-							"lineGapOverride": "0%",
-							"sizeAdjust": "107%"
 						}
 					]
 				},
