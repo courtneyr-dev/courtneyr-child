@@ -6739,7 +6739,13 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
    keeps its yellow color. A polaroid is a physical object; it
    doesn't theme-flip. v0.5.23: scope dark-mode color override to
    the caption heading/paragraph only, not blanket * — otherwise
-   the tape's yellow bg + dark ink get clobbered. */
+   the tape's yellow bg + dark ink get clobbered.
+   v0.5.92: mirror the day-mode descendant `*` selectors so inline
+   <strong>/<em>/<a> inside the caption inherit black too. Without
+   these, "Courtney Robertson:" wrapped in <strong> fell through to
+   the dark-mode body text token (ivory) — invisible on the white
+   polaroid background. The :not(.cr-tape):not(.is-style-cr-tape-label)
+   constraints keep the tape ink protected. */
 :root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) {
 	background: #ffffff !important;
 }
@@ -6747,7 +6753,12 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
 :root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h2,
 :root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3,
 :root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4,
-:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label) {
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label),
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h1 *,
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h2 *,
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3 *,
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4 *,
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label) * {
 	color: #000 !important;
 }
 @media (prefers-color-scheme: dark) {
@@ -6760,11 +6771,21 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
 	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3,
 	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4,
 	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label),
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h1 *,
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h2 *,
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3 *,
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4 *,
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label) *,
 	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h1,
 	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h2,
 	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3,
 	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4,
-	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label) {
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label),
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h1 *,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h2 *,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3 *,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4 *,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label) * {
 		color: #000 !important;
 	}
 }
