@@ -61,7 +61,7 @@ declare( strict_types = 1 );
 				</div>
 				<!-- /wp:group -->
 
-				<!-- wp:post-title {"isLink":true,"className":"cr-stream-item__title","style":{"typography":{"lineHeight":"1.2"}},"fontSize":"large","fontFamily":"condensed"} /-->
+				<!-- wp:post-title {"isLink":true,"className":"cr-stream-item__title","style":{"typography":{"lineHeight":"1.2"}},"fontSize":"large","fontFamily":"accent"} /-->
 
 				<!-- wp:post-excerpt {"className":"cr-stream-item__excerpt","excerptLength":40,"showMoreOnNewLine":false} /-->
 
