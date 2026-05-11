@@ -3294,26 +3294,18 @@ body.home .tnp-field label {
 	font-weight: 600;
 }
 
-/* v0.5.93 — CLS prevention on the Newsletter Plugin form.
-   PageSpeed Desktop identified this form as the primary CLS culprit
-   (0.119 of 0.124 total). Form HTML is server-rendered (inputs are
-   present at first paint), but input styling — padding .6em .8em,
-   border 1.5px, font-size 1rem from the theme tokens — arrives via
-   Perfmatters' async used-CSS load. Before styles land, inputs render
-   at browser-default ~30px; after, they grow to ~50px. Three growing
-   elements (email + first-name + submit) × ~20px ≈ 60px shift below
-   the form, which is the entire CLS contribution from this section.
-
-   Reserving min-height locks the form's footprint pre-CSS. 280px is
-   the measured rendered height of the stacked email + first-name +
-   submit + br spacing on desktop. Mobile is similar (inputs are
-   full-width on both viewports). Applies to BOTH the homepage
-   "Subscribe to my weekly newsletter" block AND the secondary form
-   in the closing column section — both use the same shortcode-emitted
-   markup. */
-body.home form.tnp-subscription {
-	min-height: 280px;
-}
+/* v0.5.93 (REVERTED in v0.5.94) — the min-height: 280px reservation
+   here caused a regression: mobile CLS spiked 0.002 → 0.285 because
+   the form is a CHILD of the hero "WELCOME" column (not a sibling),
+   and the form's locked height ripples up into the column's height,
+   pushing content below. At desktop it's worse — the columns container
+   uses flex with align-items: stretch, so both columns grow to match.
+   See PR-link for the live measurement data showing form growth of
+   4-12 px per viewport AND polaroid-column growth of 4 px at 1280 px.
+   The dominant CLS culprit was always font-swap on Barlow 700 and
+   Rock Salt (per Lighthouse's "Web font causes" attribution), not
+   the form's intrinsic height. Removing the locker; the real fix is
+   font-preload + size-adjust, tracked separately. */
 
 /* (6) FROM THE BLOG title — single h2, no eyebrow, NO yellow highlight.
    Override v0.2.6.3 highlight rule. */
