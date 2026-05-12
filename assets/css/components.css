@@ -3889,6 +3889,33 @@ main.cr-page {
 	}
 }
 
+/* v0.5.100 — Extend the paper texture to the nav menu surfaces too:
+   the site header bar (.site-header__inner) and the navigation submenu
+   dropdowns. Header bar's bg-color is already ivory in day mode and
+   night-elevated in dark mode (rules at lines 5874-5887); we only add
+   the texture overlay here.
+
+   Submenu containers use `background:` shorthand with !important at
+   line 1922, which would reset background-image to none — so the
+   texture overrides need !important per-property to win.
+
+   Day-mode color cascades through naturally; dark-mode color stays
+   handled by the existing rules. We only set image-related props. */
+.site-header__inner {
+	background-image: var(--cr-fiber), var(--cr-halftone);
+	background-size: auto, var(--cr-halftone-size);
+	background-blend-mode: multiply, multiply;
+	background-repeat: repeat, repeat;
+}
+
+.site-header__nav .wp-block-navigation__submenu-container,
+.site-header__nav .wp-block-navigation-submenu .wp-block-navigation__submenu-container {
+	background-image: var(--cr-fiber), var(--cr-halftone) !important;
+	background-size: auto, var(--cr-halftone-size) !important;
+	background-blend-mode: multiply, multiply !important;
+	background-repeat: repeat, repeat !important;
+}
+
 /* (2) Lede meta row — date + chip side by side.
    v0.5.9: enlarge gap so the WORDPRESS / BLOG chip doesn't crowd the
    date. Also enforce flex-start so items don't center on wide rows. */
