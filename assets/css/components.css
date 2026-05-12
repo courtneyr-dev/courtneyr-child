@@ -6754,24 +6754,35 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
    the caption heading/paragraph only, not blanket * — otherwise
    the tape's yellow bg + dark ink get clobbered.
    v0.5.92: mirror the day-mode descendant `*` selectors so inline
-   <strong>/<em>/<a> inside the caption inherit black too. Without
-   these, "Courtney Robertson:" wrapped in <strong> fell through to
-   the dark-mode body text token (ivory) — invisible on the white
-   polaroid background. The :not(.cr-tape):not(.is-style-cr-tape-label)
-   constraints keep the tape ink protected. */
+   <strong>/<em>/<a> inside the caption inherit black too.
+   v0.5.97: drop the `>` direct-child combinator on the caption
+   selectors. Live DOM inspection (Playwright, 2026-05-11) showed
+   the caption paragraphs are nested INSIDE a wp-block-group, not
+   direct children of .wp-block-cover__inner-container:
+       .wp-block-cover__inner-container
+         └─ p.is-style-cr-tape-label          (tape — direct child)
+         └─ div.wp-block-group.ollie-animate  (animated group wrapper)
+              └─ p.has-display-font-family    ("Courtney Robertson:")
+              └─ p.has-display-font-family    (description)
+   The `> p:not(...)` selectors from v0.5.92 never matched these
+   nested paragraphs, so the caption inherited body's ivory text
+   color in dark mode (invisible on the white polaroid). Day mode
+   worked anyway because body's color in light mode IS dark.
+   Descendant combinator `p:not(.cr-tape):not(.is-style-cr-tape-label)`
+   matches at any depth; the :not() filters still exclude the tape. */
 :root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) {
 	background: #ffffff !important;
 }
-:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h1,
-:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h2,
-:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3,
-:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4,
-:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label),
-:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h1 *,
-:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h2 *,
-:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3 *,
-:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4 *,
-:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label) * {
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h1,
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h2,
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h3,
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h4,
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container p:not(.cr-tape):not(.is-style-cr-tape-label),
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h1 *,
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h2 *,
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h3 *,
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h4 *,
+:root[data-theme="dark"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container p:not(.cr-tape):not(.is-style-cr-tape-label) * {
 	color: #000 !important;
 }
 @media (prefers-color-scheme: dark) {
@@ -6779,26 +6790,26 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
 	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) {
 		background: #ffffff !important;
 	}
-	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h1,
-	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h2,
-	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3,
-	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4,
-	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label),
-	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h1 *,
-	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h2 *,
-	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3 *,
-	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4 *,
-	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label) *,
-	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h1,
-	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h2,
-	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3,
-	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4,
-	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label),
-	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h1 *,
-	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h2 *,
-	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h3 *,
-	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > h4 *,
-	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container > p:not(.cr-tape):not(.is-style-cr-tape-label) * {
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h1,
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h2,
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h3,
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h4,
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container p:not(.cr-tape):not(.is-style-cr-tape-label),
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h1 *,
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h2 *,
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h3 *,
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h4 *,
+	:root:not([data-theme]) body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container p:not(.cr-tape):not(.is-style-cr-tape-label) *,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h1,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h2,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h3,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h4,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container p:not(.cr-tape):not(.is-style-cr-tape-label),
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h1 *,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h2 *,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h3 *,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container h4 *,
+	:root[data-theme="system"] body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .wp-block-cover__inner-container p:not(.cr-tape):not(.is-style-cr-tape-label) * {
 		color: #000 !important;
 	}
 }
