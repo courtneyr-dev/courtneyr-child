@@ -3865,6 +3865,30 @@ body.single .single-post__comments-wrapper {
 	}
 }
 
+/* v0.5.99 — Apply the same fiber+halftone paper texture to every
+   page rendered via templates/page.html (selector: main.cr-page).
+   Covers About, Newsletter, Contact, Connect, Cookie Policy, etc.
+   Base ivory color comes from the existing `has-main-accent-background-color`
+   class on the cr-page main element; this only adds the texture overlay
+   so pages match the surface treatment of single posts. */
+main.cr-page {
+	background-image: var(--cr-fiber), var(--cr-halftone);
+	background-size: auto, var(--cr-halftone-size);
+	background-blend-mode: multiply, multiply;
+	background-repeat: repeat, repeat;
+}
+
+/* Dark-mode parity — match the single-post night-elevated treatment. */
+:root[data-theme="dark"] main.cr-page {
+	background-color: var(--cr-night-elevated, #251f1c) !important;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) main.cr-page,
+	:root[data-theme="system"] main.cr-page {
+		background-color: var(--cr-night-elevated, #251f1c) !important;
+	}
+}
+
 /* (2) Lede meta row — date + chip side by side.
    v0.5.9: enlarge gap so the WORDPRESS / BLOG chip doesn't crowd the
    date. Also enforce flex-start so items don't center on wide rows. */
