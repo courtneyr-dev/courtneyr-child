@@ -1,31 +1,35 @@
 /* =============================================================================
    404 comic layer — scoped entirely under .cr-404 so it can never touch
    another template. Enqueued only on is_404() (see inc/enqueue.php).
-   Turns the editorial 404 into the zine/comic treatment: centered hero,
-   starburst 404, scattered onomatopoeia bursts, numbered hard-shadow cards.
+   Centered narrow column, starburst 404, comic onomatopoeia pinned to the
+   left/right margins, and numbered stacked cards for the recent-posts loop.
    All color/shape/type values come from the cr-* design tokens.
    ============================================================================= */
 
 .cr-404 {
 	position: relative;
-	overflow: hidden; /* keep the scattered bursts from causing horizontal scroll */
+	overflow: hidden; /* keep the edge bursts from causing horizontal scroll */
 }
 
-/* ---- center the hero stack ---- */
-.cr-404__header,
-.cr-404__search-wrap,
-.cr-404__cta {
+/* ---- narrow, centered content column (leaves margin room for edge bursts) ---- */
+.cr-404 .cr-404__header,
+.cr-404 .cr-404__search-wrap,
+.cr-404 .cr-404__cta,
+.cr-404 .cr-404__recent {
+	max-width: 720px;
+	margin-left: auto;
+	margin-right: auto;
 	text-align: center;
+	position: relative;
+	z-index: 1;
 }
-.cr-404__header { position: relative; z-index: 1; }
 .cr-404 .cr-404__lede {
 	margin-left: auto;
 	margin-right: auto;
-	max-width: 48ch;
+	max-width: 46ch;
 }
 .cr-404 .cr-404__cta .wp-block-buttons { justify-content: center; }
-.cr-404 .cr-404__search-wrap .wp-block-search { margin-left: auto; margin-right: auto; }
-/* the short marker bar reads better centered under a centered title */
+.cr-404 .cr-404__search-wrap .wp-block-search,
 .cr-404 .is-style-cr-marker-bar-short { margin-left: auto; margin-right: auto; }
 
 /* ---- big starburst 404 (re-skins the small tape label) ---- */
@@ -47,7 +51,6 @@
 	transform: rotate(-2deg);
 	z-index: 2;
 }
-/* sunburst rays behind the 404 */
 .cr-404 .cr-404__tape::before {
 	content: "";
 	position: absolute;
@@ -67,7 +70,7 @@
 	pointer-events: none;
 }
 
-/* ---- onomatopoeia comic bursts ---- */
+/* ---- onomatopoeia comic bursts, pinned to the margins ---- */
 .cr-404__onomat {
 	position: absolute;
 	inset: 0;
@@ -77,56 +80,66 @@
 .cr-404__onomat .cr-onomat {
 	position: absolute;
 	margin: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
 	font-family: var(--cr-font-accent);
 	font-weight: 900;
-	font-size: clamp(0.85rem, 1.9vw, 1.5rem);
+	font-size: clamp(0.7rem, 0.95vw, 1rem);
 	line-height: 1;
 	letter-spacing: 0.01em;
 	color: var(--cr-russian-violet);
 	background: var(--cr-selective-yellow);
-	border: 2px solid var(--cr-russian-violet);
-	border-radius: 7px;
-	padding: 0.16em 0.5em 0.22em;
-	box-shadow: 3px 3px 0 var(--cr-russian-violet);
+	padding: 1.25em 1.15em;
 	white-space: nowrap;
+	/* comic explosion shape — widest at the vertical centre so the word
+	   always sits on solid colour */
+	clip-path: polygon(
+		50% 0%, 63% 24%, 88% 18%, 75% 38%, 100% 50%, 75% 62%,
+		88% 82%, 63% 76%, 50% 100%, 37% 76%, 12% 82%, 25% 62%,
+		0% 50%, 25% 38%, 12% 18%, 37% 24%
+	);
 }
-/* color variants */
+/* colour variants */
 .cr-onomat--blue   { background: var(--cr-sky-blue); }
 .cr-onomat--orange { background: var(--cr-ut-orange); }
 .cr-onomat--peach  { background: var(--cr-light-orange); }
+.cr-onomat--purple { background: var(--wp--preset--color--primary-accent, #bcb5e3); }
 
-/* scatter + rotate — top band and side rails, away from the centered text column */
-.cr-onomat--1  { top: 3%;  left: 4%;   transform: rotate(-9deg); }
-.cr-onomat--2  { top: 6%;  right: 5%;  transform: rotate(7deg); }
-.cr-onomat--3  { top: 16%; left: 8%;   transform: rotate(5deg); }
-.cr-onomat--4  { top: 19%; right: 9%;  transform: rotate(-6deg); }
-.cr-onomat--5  { top: 30%; left: 3%;   transform: rotate(-4deg); }
-.cr-onomat--6  { top: 33%; right: 3%;  transform: rotate(8deg); }
-.cr-onomat--7  { top: 1%;  left: 38%;  transform: rotate(4deg); }
-.cr-onomat--8  { top: 2%;  right: 32%; transform: rotate(-7deg); }
-.cr-onomat--9  { top: 44%; left: 6%;   transform: rotate(6deg); }
-.cr-onomat--10 { top: 47%; right: 6%;  transform: rotate(-5deg); }
-.cr-onomat--11 { top: 11%; left: 22%;  transform: rotate(-3deg); }
-.cr-onomat--12 { top: 13%; right: 20%; transform: rotate(9deg); }
+/* left rail */
+.cr-onomat--1  { top: 4%;  left: 2%;   transform: rotate(-8deg); }
+.cr-onomat--3  { top: 18%; left: 1%;   transform: rotate(5deg); }
+.cr-onomat--5  { top: 32%; left: 2.5%; transform: rotate(-5deg); }
+.cr-onomat--7  { top: 46%; left: 1%;   transform: rotate(7deg); }
+.cr-onomat--9  { top: 60%; left: 2%;   transform: rotate(-6deg); }
+.cr-onomat--11 { top: 74%; left: 1.5%; transform: rotate(4deg); }
+/* right rail */
+.cr-onomat--2  { top: 4%;  right: 2%;   transform: rotate(7deg); }
+.cr-onomat--4  { top: 18%; right: 1%;   transform: rotate(-6deg); }
+.cr-onomat--6  { top: 32%; right: 2.5%; transform: rotate(5deg); }
+.cr-onomat--8  { top: 46%; right: 1%;   transform: rotate(-8deg); }
+.cr-onomat--10 { top: 60%; right: 2%;   transform: rotate(6deg); }
+.cr-onomat--12 { top: 74%; right: 1.5%; transform: rotate(-4deg); }
 
-/* ---- recent posts → numbered hard-shadow cards ---- */
-.cr-404 .cr-404__recent-heading,
-.cr-404 .cr-404__recent { text-align: center; }
+/* ---- recent posts → numbered stacked cards ---- */
+.cr-404 .cr-404__recent-heading { text-align: center; }
 .cr-404 .cr-404__list {
 	counter-reset: cr-404-num;
-	max-width: 660px;
+	max-width: 620px;
 	margin-left: auto;
 	margin-right: auto;
 }
 .cr-404 .cr-404__list-template {
 	display: grid;
-	gap: var(--cr-space-sm);
+	gap: var(--cr-space-md);
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
 .cr-404 .cr-404__list-item {
 	counter-increment: cr-404-num;
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: var(--cr-space-sm);
@@ -138,11 +151,14 @@
 	padding: var(--cr-space-sm) var(--cr-space-md);
 	transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
+/* slight hand-placed rotation, alternating */
+.cr-404 .cr-404__list-item:nth-child(odd)  { transform: rotate(-0.5deg); }
+.cr-404 .cr-404__list-item:nth-child(even) { transform: rotate(0.5deg); }
 .cr-404 .cr-404__list-item:hover {
-	transform: translate(-1px, -1px);
+	transform: rotate(0deg) translate(-1px, -1px);
 	box-shadow: 6px 6px 0 var(--cr-ink);
 }
-/* number badge from a CSS counter — no per-post markup needed */
+/* number badge from a CSS counter */
 .cr-404 .cr-404__list-item::before {
 	content: counter(cr-404-num);
 	flex-shrink: 0;
@@ -159,6 +175,23 @@
 	border: 2px solid var(--cr-russian-violet);
 	border-radius: 7px;
 }
+/* colored tab on the top-right corner, varied per card */
+.cr-404 .cr-404__list-item::after {
+	content: "";
+	position: absolute;
+	top: -9px;
+	right: 22px;
+	width: 30px;
+	height: 14px;
+	background: var(--cr-sky-blue);
+	border: 2px solid var(--cr-russian-violet);
+	border-bottom: none;
+	border-radius: 5px 5px 0 0;
+}
+.cr-404 .cr-404__list-item:nth-child(2)::after { background: var(--cr-ut-orange); }
+.cr-404 .cr-404__list-item:nth-child(3)::after { background: var(--wp--preset--color--primary-accent, #bcb5e3); }
+.cr-404 .cr-404__list-item:nth-child(4)::after { background: var(--cr-selective-yellow); }
+.cr-404 .cr-404__list-item:nth-child(5)::after { background: var(--cr-light-orange); }
 .cr-404 .cr-404__list-title { margin: 0; }
 .cr-404 .cr-404__list-title a { text-decoration: none; }
 .cr-404 .cr-404__list-title a:hover { text-decoration: underline; }
@@ -167,10 +200,8 @@
 @media (prefers-reduced-motion: reduce) {
 	.cr-404 .cr-404__list-item { transition: none; }
 }
-@media (max-width: 781px) {
-	/* thin the bursts on small screens so the column stays readable */
-	.cr-onomat--3, .cr-onomat--4, .cr-onomat--9,
-	.cr-onomat--10, .cr-onomat--11, .cr-onomat--12 { display: none; }
-	.cr-404__onomat .cr-onomat { font-size: 0.8rem; }
+/* hide the edge bursts when there isn't margin room beside the column */
+@media (max-width: 959px) {
+	.cr-404__onomat { display: none; }
 	.cr-404 .cr-404__tape::before { width: 220px; height: 220px; }
 }
