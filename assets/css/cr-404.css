@@ -36,7 +36,10 @@
 .cr-404 .cr-404__tape {
 	position: relative;
 	display: inline-block;
-	margin: 0 auto var(--cr-space-x-large);
+	/* !important + fixed value: the constrained block layout zeroes child
+	   margin-block, and a fluid token clamps below the starburst's reach on
+	   narrow screens — both would let the rays touch the eyebrow. */
+	margin: 0 auto 4.5rem !important;
 	font-family: var(--cr-font-accent);
 	font-weight: 900;
 	font-size: clamp(3.25rem, 11vw, 6.5rem);
@@ -57,8 +60,8 @@
 	z-index: -1;
 	top: 50%;
 	left: 50%;
-	width: 250px;
-	height: 250px;
+	width: 200px;
+	height: 200px;
 	transform: translate(-50%, -50%) rotate(-2deg);
 	background: repeating-conic-gradient(
 		from 0deg,
@@ -205,5 +208,5 @@
 /* hide the edge bursts when there isn't margin room beside the column */
 @media (max-width: 959px) {
 	.cr-404__onomat { display: none; }
-	.cr-404 .cr-404__tape::before { width: 180px; height: 180px; }
+	.cr-404 .cr-404__tape::before { width: 150px; height: 150px; }
 }
