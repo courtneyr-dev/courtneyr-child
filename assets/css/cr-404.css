@@ -1,0 +1,176 @@
+/* =============================================================================
+   404 comic layer — scoped entirely under .cr-404 so it can never touch
+   another template. Enqueued only on is_404() (see inc/enqueue.php).
+   Turns the editorial 404 into the zine/comic treatment: centered hero,
+   starburst 404, scattered onomatopoeia bursts, numbered hard-shadow cards.
+   All color/shape/type values come from the cr-* design tokens.
+   ============================================================================= */
+
+.cr-404 {
+	position: relative;
+	overflow: hidden; /* keep the scattered bursts from causing horizontal scroll */
+}
+
+/* ---- center the hero stack ---- */
+.cr-404__header,
+.cr-404__search-wrap,
+.cr-404__cta {
+	text-align: center;
+}
+.cr-404__header { position: relative; z-index: 1; }
+.cr-404 .cr-404__lede {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 48ch;
+}
+.cr-404 .cr-404__cta .wp-block-buttons { justify-content: center; }
+.cr-404 .cr-404__search-wrap .wp-block-search { margin-left: auto; margin-right: auto; }
+/* the short marker bar reads better centered under a centered title */
+.cr-404 .is-style-cr-marker-bar-short { margin-left: auto; margin-right: auto; }
+
+/* ---- big starburst 404 (re-skins the small tape label) ---- */
+.cr-404 .cr-404__tape {
+	position: relative;
+	display: inline-block;
+	margin: 0 auto var(--cr-space-sm);
+	font-family: var(--cr-font-accent);
+	font-weight: 900;
+	font-size: clamp(3.25rem, 11vw, 6.5rem);
+	line-height: 1;
+	letter-spacing: -0.03em;
+	color: var(--cr-russian-violet);
+	background: var(--cr-ut-orange);
+	border: 3px solid var(--cr-russian-violet);
+	border-radius: 14px;
+	padding: 0.08em 0.3em 0.14em;
+	box-shadow: var(--cr-shadow-hard);
+	transform: rotate(-2deg);
+	z-index: 2;
+}
+/* sunburst rays behind the 404 */
+.cr-404 .cr-404__tape::before {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	top: 50%;
+	left: 50%;
+	width: 320px;
+	height: 320px;
+	transform: translate(-50%, -50%) rotate(-2deg);
+	background: repeating-conic-gradient(
+		from 0deg,
+		var(--cr-selective-yellow) 0deg 9deg,
+		transparent 9deg 18deg
+	);
+	-webkit-mask-image: radial-gradient(circle, #000 32%, rgba(0,0,0,0.35) 52%, transparent 70%);
+	mask-image: radial-gradient(circle, #000 32%, rgba(0,0,0,0.35) 52%, transparent 70%);
+	pointer-events: none;
+}
+
+/* ---- onomatopoeia comic bursts ---- */
+.cr-404__onomat {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+}
+.cr-404__onomat .cr-onomat {
+	position: absolute;
+	margin: 0;
+	font-family: var(--cr-font-accent);
+	font-weight: 900;
+	font-size: clamp(0.85rem, 1.9vw, 1.5rem);
+	line-height: 1;
+	letter-spacing: 0.01em;
+	color: var(--cr-russian-violet);
+	background: var(--cr-selective-yellow);
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: 7px;
+	padding: 0.16em 0.5em 0.22em;
+	box-shadow: 3px 3px 0 var(--cr-russian-violet);
+	white-space: nowrap;
+}
+/* color variants */
+.cr-onomat--blue   { background: var(--cr-sky-blue); }
+.cr-onomat--orange { background: var(--cr-ut-orange); }
+.cr-onomat--peach  { background: var(--cr-light-orange); }
+
+/* scatter + rotate — top band and side rails, away from the centered text column */
+.cr-onomat--1  { top: 3%;  left: 4%;   transform: rotate(-9deg); }
+.cr-onomat--2  { top: 6%;  right: 5%;  transform: rotate(7deg); }
+.cr-onomat--3  { top: 16%; left: 8%;   transform: rotate(5deg); }
+.cr-onomat--4  { top: 19%; right: 9%;  transform: rotate(-6deg); }
+.cr-onomat--5  { top: 30%; left: 3%;   transform: rotate(-4deg); }
+.cr-onomat--6  { top: 33%; right: 3%;  transform: rotate(8deg); }
+.cr-onomat--7  { top: 1%;  left: 38%;  transform: rotate(4deg); }
+.cr-onomat--8  { top: 2%;  right: 32%; transform: rotate(-7deg); }
+.cr-onomat--9  { top: 44%; left: 6%;   transform: rotate(6deg); }
+.cr-onomat--10 { top: 47%; right: 6%;  transform: rotate(-5deg); }
+.cr-onomat--11 { top: 11%; left: 22%;  transform: rotate(-3deg); }
+.cr-onomat--12 { top: 13%; right: 20%; transform: rotate(9deg); }
+
+/* ---- recent posts → numbered hard-shadow cards ---- */
+.cr-404 .cr-404__recent-heading,
+.cr-404 .cr-404__recent { text-align: center; }
+.cr-404 .cr-404__list {
+	counter-reset: cr-404-num;
+	max-width: 660px;
+	margin-left: auto;
+	margin-right: auto;
+}
+.cr-404 .cr-404__list-template {
+	display: grid;
+	gap: var(--cr-space-sm);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.cr-404 .cr-404__list-item {
+	counter-increment: cr-404-num;
+	display: flex;
+	align-items: center;
+	gap: var(--cr-space-sm);
+	text-align: left;
+	background: var(--cr-surface);
+	border: var(--cr-border-thick);
+	border-radius: 10px;
+	box-shadow: var(--cr-shadow-hard);
+	padding: var(--cr-space-sm) var(--cr-space-md);
+	transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.cr-404 .cr-404__list-item:hover {
+	transform: translate(-1px, -1px);
+	box-shadow: 6px 6px 0 var(--cr-ink);
+}
+/* number badge from a CSS counter — no per-post markup needed */
+.cr-404 .cr-404__list-item::before {
+	content: counter(cr-404-num);
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.9em;
+	height: 1.9em;
+	font-family: var(--cr-font-accent);
+	font-weight: 900;
+	font-size: var(--cr-text-base);
+	color: var(--cr-russian-violet);
+	background: var(--cr-ut-orange);
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: 7px;
+}
+.cr-404 .cr-404__list-title { margin: 0; }
+.cr-404 .cr-404__list-title a { text-decoration: none; }
+.cr-404 .cr-404__list-title a:hover { text-decoration: underline; }
+
+/* ---- motion / responsive ---- */
+@media (prefers-reduced-motion: reduce) {
+	.cr-404 .cr-404__list-item { transition: none; }
+}
+@media (max-width: 781px) {
+	/* thin the bursts on small screens so the column stays readable */
+	.cr-onomat--3, .cr-onomat--4, .cr-onomat--9,
+	.cr-onomat--10, .cr-onomat--11, .cr-onomat--12 { display: none; }
+	.cr-404__onomat .cr-onomat { font-size: 0.8rem; }
+	.cr-404 .cr-404__tape::before { width: 220px; height: 220px; }
+}

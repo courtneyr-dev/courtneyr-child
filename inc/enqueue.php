@@ -74,6 +74,16 @@ function enqueue_baseline(): void {
 		COURTNEYR_CHILD_VERSION
 	);
 
+	// 404 comic layer — only loaded on the Not Found template.
+	if ( is_404() ) {
+		wp_enqueue_style(
+			'courtneyr-404',
+			COURTNEYR_CHILD_URI . '/assets/css/cr-404.css',
+			array( 'courtneyr-components' ),
+			COURTNEYR_CHILD_VERSION
+		);
+	}
+
 	/*
 	 * V0.5.76 — emit the per-format tint rules as INLINE CSS attached
 	 * to the components handle. Perfmatters' Used CSS optimizer
