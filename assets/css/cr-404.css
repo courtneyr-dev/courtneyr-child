@@ -49,7 +49,7 @@
 	padding: 0.08em 0.3em 0.14em;
 	box-shadow: var(--cr-shadow-hard);
 	transform: rotate(-2deg);
-	z-index: 2;
+	/* no positive z-index, so the starburst ::before sits behind the eyebrow too */
 }
 .cr-404 .cr-404__tape::before {
 	content: "";
@@ -141,7 +141,7 @@
 	counter-increment: cr-404-num;
 	position: relative;
 	display: flex;
-	align-items: center;
+	align-items: center !important; /* beat the legacy .cr-404__list-item baseline !important */
 	gap: var(--cr-space-sm);
 	text-align: left;
 	background: var(--cr-surface);
