@@ -74,10 +74,12 @@
 }
 
 /* ---- onomatopoeia comic bursts, pinned to the margins ---- */
-.cr-404__onomat {
+.cr-404 .cr-404__onomat {
 	position: absolute;
 	inset: 0;
 	z-index: 0;
+	max-width: none; /* defeat the constrained-layout width cap so bursts reach the page margins */
+	margin: 0;
 	pointer-events: none;
 }
 .cr-404__onomat .cr-onomat {
@@ -110,20 +112,22 @@
 .cr-onomat--peach  { background: var(--cr-light-orange); }
 .cr-onomat--purple { background: var(--wp--preset--color--primary-accent, #bcb5e3); }
 
+/* position + colour per burst — prefixed so it beats the base background.
+   left/right offsets are small so the bursts sit out in the page margins. */
 /* left rail */
-.cr-onomat--1  { top: 4%;  left: 2%;   transform: rotate(-8deg); }
-.cr-onomat--3  { top: 18%; left: 1%;   transform: rotate(5deg); }
-.cr-onomat--5  { top: 32%; left: 2.5%; transform: rotate(-5deg); }
-.cr-onomat--7  { top: 46%; left: 1%;   transform: rotate(7deg); }
-.cr-onomat--9  { top: 60%; left: 2%;   transform: rotate(-6deg); }
-.cr-onomat--11 { top: 74%; left: 1.5%; transform: rotate(4deg); }
+.cr-404__onomat .cr-onomat--1  { top: 4%;  left: 1.5%; transform: rotate(-9deg); background: var(--cr-selective-yellow); }
+.cr-404__onomat .cr-onomat--3  { top: 18%; left: 1%;   transform: rotate(5deg);  background: var(--wp--preset--color--primary-accent, #bcb5e3); }
+.cr-404__onomat .cr-onomat--5  { top: 32%; left: 2%;   transform: rotate(-5deg); background: var(--cr-sky-blue); }
+.cr-404__onomat .cr-onomat--7  { top: 46%; left: 1%;   transform: rotate(7deg);  background: var(--cr-ut-orange); }
+.cr-404__onomat .cr-onomat--9  { top: 60%; left: 1.5%; transform: rotate(-6deg); background: var(--cr-selective-yellow); }
+.cr-404__onomat .cr-onomat--11 { top: 74%; left: 1%;   transform: rotate(4deg);  background: var(--cr-sky-blue); }
 /* right rail */
-.cr-onomat--2  { top: 4%;  right: 2%;   transform: rotate(7deg); }
-.cr-onomat--4  { top: 18%; right: 1%;   transform: rotate(-6deg); }
-.cr-onomat--6  { top: 32%; right: 2.5%; transform: rotate(5deg); }
-.cr-onomat--8  { top: 46%; right: 1%;   transform: rotate(-8deg); }
-.cr-onomat--10 { top: 60%; right: 2%;   transform: rotate(6deg); }
-.cr-onomat--12 { top: 74%; right: 1.5%; transform: rotate(-4deg); }
+.cr-404__onomat .cr-onomat--2  { top: 4%;  right: 1.5%; transform: rotate(8deg);  background: var(--cr-sky-blue); }
+.cr-404__onomat .cr-onomat--4  { top: 18%; right: 1%;   transform: rotate(-6deg); background: var(--cr-ut-orange); }
+.cr-404__onomat .cr-onomat--6  { top: 32%; right: 2%;   transform: rotate(5deg);  background: var(--wp--preset--color--primary-accent, #bcb5e3); }
+.cr-404__onomat .cr-onomat--8  { top: 46%; right: 1%;   transform: rotate(-8deg); background: var(--cr-selective-yellow); }
+.cr-404__onomat .cr-onomat--10 { top: 60%; right: 1.5%; transform: rotate(6deg);  background: var(--cr-ut-orange); }
+.cr-404__onomat .cr-onomat--12 { top: 74%; right: 1%;   transform: rotate(-4deg); background: var(--wp--preset--color--primary-accent, #bcb5e3); }
 
 /* ---- recent posts → numbered stacked cards ---- */
 .cr-404 .cr-404__recent-heading { text-align: center; }
@@ -155,8 +159,11 @@
 	transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 /* slight hand-placed rotation, alternating */
-.cr-404 .cr-404__list-item:nth-child(odd)  { transform: rotate(-0.5deg); }
-.cr-404 .cr-404__list-item:nth-child(even) { transform: rotate(0.5deg); }
+.cr-404 .cr-404__list-item:nth-child(1) { transform: rotate(-1.5deg); }
+.cr-404 .cr-404__list-item:nth-child(2) { transform: rotate(1.2deg);  margin-left: 1.5rem; }
+.cr-404 .cr-404__list-item:nth-child(3) { transform: rotate(-0.7deg); margin-right: 1.2rem; }
+.cr-404 .cr-404__list-item:nth-child(4) { transform: rotate(1.6deg);  margin-left: 0.8rem; }
+.cr-404 .cr-404__list-item:nth-child(5) { transform: rotate(-1.1deg); }
 .cr-404 .cr-404__list-item:hover {
 	transform: rotate(0deg) translate(-1px, -1px);
 	box-shadow: 6px 6px 0 var(--cr-ink);
@@ -206,7 +213,7 @@
 	.cr-404 .cr-404__list-item { transition: none; }
 }
 /* hide the edge bursts when there isn't margin room beside the column */
-@media (max-width: 959px) {
+@media (max-width: 1023px) {
 	.cr-404__onomat { display: none; }
 	.cr-404 .cr-404__tape::before { width: 150px; height: 150px; }
 }
