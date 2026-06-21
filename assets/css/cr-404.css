@@ -36,7 +36,7 @@
 .cr-404 .cr-404__tape {
 	position: relative;
 	display: inline-block;
-	margin: 0 auto var(--cr-space-sm);
+	margin: 0 auto var(--cr-space-x-large);
 	font-family: var(--cr-font-accent);
 	font-weight: 900;
 	font-size: clamp(3.25rem, 11vw, 6.5rem);
@@ -57,8 +57,8 @@
 	z-index: -1;
 	top: 50%;
 	left: 50%;
-	width: 320px;
-	height: 320px;
+	width: 250px;
+	height: 250px;
 	transform: translate(-50%, -50%) rotate(-2deg);
 	background: repeating-conic-gradient(
 		from 0deg,
@@ -192,6 +192,8 @@
 .cr-404 .cr-404__list-item:nth-child(3)::after { background: var(--wp--preset--color--primary-accent, #bcb5e3); }
 .cr-404 .cr-404__list-item:nth-child(4)::after { background: var(--cr-selective-yellow); }
 .cr-404 .cr-404__list-item:nth-child(5)::after { background: var(--cr-light-orange); }
+/* suppress the post-format orange marker bar leaking onto the cards */
+.cr-404 .cr-404__list .wp-block-post::after { content: none !important; }
 .cr-404 .cr-404__list-title { margin: 0; }
 .cr-404 .cr-404__list-title a { text-decoration: none; }
 .cr-404 .cr-404__list-title a:hover { text-decoration: underline; }
@@ -203,5 +205,5 @@
 /* hide the edge bursts when there isn't margin room beside the column */
 @media (max-width: 959px) {
 	.cr-404__onomat { display: none; }
-	.cr-404 .cr-404__tape::before { width: 220px; height: 220px; }
+	.cr-404 .cr-404__tape::before { width: 180px; height: 180px; }
 }
