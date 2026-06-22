@@ -113,44 +113,6 @@ function override_theme_palette( \WP_Theme_JSON_Data $theme_json ): \WP_Theme_JS
 add_filter( 'wp_theme_json_data_theme', __NAMESPACE__ . '\\override_theme_palette', 999 );
 
 /**
- * v0.5.113 — force font-display:optional on the theme's web fonts.
- *
- * Ollie Pro's own wp_theme_json_data_theme filter (priority 10) re-emits the
- * font faces with font-display:swap, overriding the "optional" declared in
- * theme.json. Under mobile network throttling, swap is what produces the
- * font-swap reflow that dominates the page's CLS (the real font arrives after
- * first paint and re-wraps the text). Running at priority 1000 gives the child
- * the final say over the font-face data. Paired with the font preload in
- * inc/enqueue.php so real-connection visitors still get the brand type within
- * `optional`'s block window; the metric-matched fallbacks cover the rest.
- *
- * Layer: wp_theme_json_data_theme (origin: theme)
- */
-function force_font_display_optional( \WP_Theme_JSON_Data $theme_json ): \WP_Theme_JSON_Data {
-	$data = $theme_json->get_data();
-
-	if ( empty( $data['settings']['typography']['fontFamilies'] ) ) {
-		return $theme_json;
-	}
-
-	foreach ( $data['settings']['typography']['fontFamilies'] as &$family ) {
-		if ( empty( $family['fontFace'] ) || ! is_array( $family['fontFace'] ) ) {
-			continue;
-		}
-		foreach ( $family['fontFace'] as &$face ) {
-			$face['fontDisplay'] = 'optional';
-		}
-		unset( $face );
-	}
-	unset( $family );
-
-	$data['version'] = 3;
-
-	return $theme_json->update_with( $data );
-}
-add_filter( 'wp_theme_json_data_theme', __NAMESPACE__ . '\\force_font_display_optional', 1000 );
-
-/**
  * v0.5.53 — opt out of post-formats-for-block-themes' default styling.
  *
  * The PFBT plugin (v1.2.3+) ships two extension points so themes that

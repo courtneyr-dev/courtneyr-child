@@ -3323,9 +3323,16 @@ body.home .tnp-field label {
 @font-face {
 	font-family: "Barlow Fallback";
 	src: local("Arial"), local("Helvetica Neue"), local("Liberation Sans");
-	size-adjust: 82.93%;
-	ascent-override: 120.58%;
-	descent-override: 24.12%;
+	/* v0.5.114 — RE-DERIVED empirically (in-browser width + normal-line-height
+	   measurement). The prior size-adjust (82.93%) made the fallback ~14% too
+	   NARROW vs real Barlow, so text wrapped into fewer lines and every block was
+	   too short — the whole page grew ~575px when Barlow swapped in (the dominant
+	   mobile CLS). Measured: Barlow advance ÷ Arial advance = 95.96%; Barlow
+	   normal line-height = 1.20, so ascent/descent re-scaled to hold 1.20 at the
+	   new size-adjust. Page-height delta on swap: 575px → 13px. */
+	size-adjust: 95.96%;
+	ascent-override: 104.21%;
+	descent-override: 20.84%;
 	line-gap-override: 0%;
 }
 /* Accent font (Roboto Slab) drives the nav + headings; its swap reflowed the
@@ -3335,49 +3342,17 @@ body.home .tnp-field label {
    weighted xWidthAvg vs Times 0.5106). */
 @font-face {
 	font-family: "Roboto Slab Fallback";
-	src: local("Times New Roman"), local("Georgia"), local("Liberation Serif");
-	size-adjust: 94.78%;
-	ascent-override: 110.56%;
-	descent-override: 28.59%;
+	src: local("Times New Roman"), local("Liberation Serif"), local("Georgia");
+	/* v0.5.114 — RE-DERIVED empirically. Prior 94.78% was too narrow; measured
+	   Roboto Slab advance ÷ Times New Roman advance = 109.35%; Roboto Slab normal
+	   line-height = 1.32, ascent/descent re-scaled to hold it. (Times listed
+	   before Georgia: Georgia is wider, so Times is the closer base.) */
+	size-adjust: 109.35%;
+	ascent-override: 95.83%;
+	descent-override: 24.78%;
 	line-gap-override: 0%;
 }
 
-/* (5d) font-display:optional OVERRIDE (v0.5.113). Ollie Pro + the resolver
-   emit the theme web fonts with font-display:swap (the theme.json "optional"
-   never reaches the rendered @font-face). Under mobile throttling, swap is the
-   dominant CLS source: the real font lands after first paint and re-wraps the
-   text. CSS wins where the WP data layer can't — redeclaring each face here
-   (same family/weight/style/src, parsed after the inline global-styles) makes
-   `optional` the effective value, so the swap reflow can't happen. Paired with
-   the font preload (inc/enqueue.php) + the metric-matched fallbacks above. */
-@font-face {
-	font-family: "Barlow";
-	font-style: normal;
-	font-weight: 400;
-	font-display: optional;
-	src: url("../fonts/barlow-400.woff2") format("woff2");
-}
-@font-face {
-	font-family: "Barlow";
-	font-style: italic;
-	font-weight: 400;
-	font-display: optional;
-	src: url("../fonts/barlow-400-italic.woff2") format("woff2");
-}
-@font-face {
-	font-family: "Barlow";
-	font-style: normal;
-	font-weight: 700;
-	font-display: optional;
-	src: url("../fonts/barlow-700.woff2") format("woff2");
-}
-@font-face {
-	font-family: "Roboto Slab";
-	font-style: normal;
-	font-weight: 100 900;
-	font-display: optional;
-	src: url("../fonts/roboto-slab-variable.woff2") format("woff2");
-}
 :root {
 	/* Body text resolves via --cr-font-body (the theme token), so insert the
 	   metric-matched fallback there; mirror onto the WP preset vars too. */
