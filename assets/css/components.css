@@ -896,6 +896,11 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 	align-items: center;
 	gap: var(--cr-space-sm, 0.75rem);
 	flex-shrink: 0;
+	/* v0.5.111 — reserve the row height so late-settling nav content (web
+	   font / emoji metrics) can't grow the header and shift everything below
+	   it. This row is the homepage's measured CLS source (the theme-toggle
+	   indicator + brand rode a ~12px header growth on load). */
+	min-height: 3.95rem;
 }
 .site-header__controls .cr-theme-toggle,
 .site-header__controls .cr-theme-segments {
@@ -3323,8 +3328,26 @@ body.home .tnp-field label {
 	descent-override: 24.12%;
 	line-gap-override: 0%;
 }
+/* Accent font (Roboto Slab) drives the nav + headings; its swap reflowed the
+   nav WIDTH, nudging the right-aligned header controls sideways (the residual
+   horizontal CLS after the header min-height reservation). Metric-matched serif
+   fallback derived from roboto-slab-variable.woff2 (hhea 2146/-555 at 2048 upm;
+   weighted xWidthAvg vs Times 0.5106). */
+@font-face {
+	font-family: "Roboto Slab Fallback";
+	src: local("Times New Roman"), local("Georgia"), local("Liberation Serif");
+	size-adjust: 94.78%;
+	ascent-override: 110.56%;
+	descent-override: 28.59%;
+	line-gap-override: 0%;
+}
 :root {
+	/* Body text resolves via --cr-font-body (the theme token), so insert the
+	   metric-matched fallback there; mirror onto the WP preset vars too. */
+	--cr-font-body: "Barlow", "Barlow Fallback", system-ui, -apple-system, sans-serif !important;
+	--cr-font-accent: "Roboto Slab", "Roboto Slab Fallback", Georgia, serif !important;
 	--wp--preset--font-family--body: "Barlow", "Barlow Fallback", system-ui, -apple-system, sans-serif !important;
+	--wp--preset--font-family--accent: "Roboto Slab", "Roboto Slab Fallback", Georgia, serif !important;
 }
 
 /* (6) FROM THE BLOG title — single h2, no eyebrow, NO yellow highlight.
