@@ -3307,6 +3307,26 @@ body.home .tnp-field label {
    the form's intrinsic height. Removing the locker; the real fix is
    font-preload + size-adjust, tracked separately. */
 
+/* (5c) Font-swap CLS fix (v0.5.110) — the "size-adjust" half of the TODO above.
+   Barlow loads with font-display:swap, so the system-ui fallback (different
+   metrics) reflows the moment Barlow arrives — Lighthouse attributed the
+   homepage CLS to Barlow font-swap. This metric-matched fallback gives the
+   pre-swap box Barlow's exact dimensions, so the swap no longer shifts layout
+   (even under Lighthouse network throttling, which is what surfaces it).
+   Overrides derived from barlow-400.woff2: hhea ascent/descent 1000/-200 at
+   1000 upm; frequency-weighted xWidthAvg vs Arial (0.5283) → size-adjust. */
+@font-face {
+	font-family: "Barlow Fallback";
+	src: local("Arial"), local("Helvetica Neue"), local("Liberation Sans");
+	size-adjust: 82.93%;
+	ascent-override: 120.58%;
+	descent-override: 24.12%;
+	line-gap-override: 0%;
+}
+:root {
+	--wp--preset--font-family--body: "Barlow", "Barlow Fallback", system-ui, -apple-system, sans-serif !important;
+}
+
 /* (6) FROM THE BLOG title — single h2, no eyebrow, NO yellow highlight.
    Override v0.2.6.3 highlight rule. */
 .home-stream__head .cr-eyebrow,
