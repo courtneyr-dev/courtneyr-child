@@ -1,0 +1,386 @@
+- generic [active] [ref=e1]:
+  - dialog "Manage Consent" [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: Manage Consent
+      - button "Close dialog" [ref=e5] [cursor=pointer]:
+        - img [ref=e6]: times
+    - generic [ref=e9]: To provide the best experiences, we use technologies like cookies to store and/or access device information. Consenting to these technologies will allow us to process data such as browsing behavior or unique IDs on this site. Not consenting or withdrawing consent, may adversely affect certain features and functions.
+    - generic [ref=e10]:
+      - button "Accept" [ref=e11] [cursor=pointer]
+      - button "Deny" [ref=e12] [cursor=pointer]
+      - button "View preferences" [ref=e13] [cursor=pointer]
+    - list [ref=e15]:
+      - listitem [ref=e16]:
+        - link "Cookie Policy" [ref=e17] [cursor=pointer]:
+          - /url: https://qkf.b0d.myftpupload.com/cookie-policy-eu/
+      - listitem [ref=e18]:
+        - link "Cookie Policy" [ref=e19] [cursor=pointer]:
+          - /url: https://qkf.b0d.myftpupload.com/cookie-policy-eu/
+      - listitem
+  - link "Skip to content" [ref=e20] [cursor=pointer]:
+    - /url: "#wp--skip-link--target"
+  - generic [ref=e21]:
+    - banner [ref=e23]:
+      - banner [ref=e24]:
+        - generic [ref=e25]:
+          - link "courtneyr.dev — home" [ref=e27] [cursor=pointer]:
+            - /url: /
+            - text: courtneyr.dev
+          - generic [ref=e28]:
+            - group "Theme" [ref=e29]:
+              - button "Light theme" [ref=e30] [cursor=pointer]:
+                - img [ref=e31]
+              - button "Dark theme" [ref=e34] [cursor=pointer]:
+                - img [ref=e35]
+              - button "System theme (follows OS)" [pressed] [ref=e37] [cursor=pointer]:
+                - img [ref=e38]
+            - navigation "Sidebar" [ref=e41]:
+              - list [ref=e46]:
+                - listitem [ref=e47]:
+                  - link "🙋🏻‍♀️ About" [ref=e48] [cursor=pointer]:
+                    - /url: /about-courtney-robertson/
+                    - generic [ref=e49]: 🙋🏻‍♀️ About
+                - listitem [ref=e50]:
+                  - link "🤲 All" [ref=e51] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/blog/
+                    - generic [ref=e52]: 🤲 All
+                - listitem [ref=e53]:
+                  - button "📰 Blog submenu" [ref=e54] [cursor=pointer]:
+                    - generic [ref=e55]: 📰 Blog
+                  - generic:
+                    - img
+                - listitem [ref=e56]:
+                  - link "🗣️ Speaking" [ref=e57] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/category/speaking/
+                    - generic [ref=e58]: 🗣️ Speaking
+                - listitem [ref=e59]:
+                  - button "📝 Notes submenu" [ref=e60] [cursor=pointer]:
+                    - generic [ref=e61]: 📝 Notes
+                  - generic:
+                    - img
+                - listitem [ref=e62]:
+                  - link "📚 Stories" [ref=e63] [cursor=pointer]:
+                    - /url: /web-stories/
+                    - generic [ref=e64]: 📚 Stories
+            - search [ref=e65]:
+              - generic [ref=e66]: Search
+              - button "Expand search field" [ref=e68] [cursor=pointer]:
+                - img [ref=e69]
+    - main [ref=e71]:
+      - generic [ref=e72]:
+        - generic [ref=e73]:
+          - time [ref=e75]: September 9, 2025
+          - link "Speaking" [ref=e77] [cursor=pointer]:
+            - /url: https://qkf.b0d.myftpupload.com/category/speaking/
+        - 'heading "✺ This Week in WordPress 347: Evan ✺" [level=1] [ref=e78]'
+        - generic [ref=e80]:
+          - img "C for Courtney, the author" [ref=e82]
+          - paragraph [ref=e84]: Courtney Robertson
+      - figure [ref=e85]:
+        - img "This Week in WordPress episode 347 showing four participant video tiles" [ref=e86]
+      - generic [ref=e87]:
+        - text: ✺
+        - figure [ref=e88]
+        - figure [ref=e91]:
+          - blockquote [ref=e93]:
+            - 'link "This Week in WordPress #347" [ref=e94] [cursor=pointer]':
+              - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/
+        - 'heading "🎙️ Tech Troubles & WordPress Wins — My Take on “This Week in WordPress” #347" [level=2] [ref=e95]'
+        - paragraph [ref=e96]: "The episode opened with classic live-show gremlins—glitchy audio, misbehaving embeds, and post-WordCamp brain fog. The chaos set an oddly perfect tone: WordPress work is messy in real life, yet progress continues to happen. The links below point to the original sources Nathan gathered for the show, so you can jump straight to the good stuff."
+        - separator [ref=e97]
+        - heading "🔒 Security pulse" [level=2] [ref=e98]
+        - paragraph [ref=e99]:
+          - text: "Security stories landed fast and practical this week. Melapress published its 2025 survey, a crowdsourced snapshot of what WordPress pros actually worry about. An interesting tension emerged: uptime often takes priority over compliance on lists, even as regulations ramp up. Worth a skim if client conversations keep drifting to “just keep the site up.” ("
+          - link "Patchstack" [ref=e100] [cursor=pointer]:
+            - /url: https://patchstack.com/articles/sql-injection-vulnerability-patched-in-paid-membership-subscriptions-plugin
+          - text: )
+        - paragraph [ref=e101]:
+          - text: Patchstack flagged a critical SQL injection that’s already patched in the
+          - strong [ref=e102]: Paid Membership Subscriptions
+          - text: plugin. If the plugin resides in a stack, update it before finishing this paragraph.
+        - paragraph [ref=e103]:
+          - text: For a broad overview, SolidWP’s weekly report compiles plugin and theme vulnerabilities, providing the usual “is this in my stack?” triage value. (
+          - link "WP Builds" [ref=e104] [cursor=pointer]:
+            - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/?share=facebook
+          - text: )
+        - paragraph [ref=e105]:
+          - text: ✦ Beyond WordPress, Cloudflare detailed how an attacker used a Salesloft/Drift → Salesforce integration path to access data. The write-up serves as a sober reminder that vendor chains can create a significant blast radius. Audit who gets access to what, not just what runs on a server. (
+          - link "The Delta" [ref=e106] [cursor=pointer]:
+            - /url: https://www.delta.blog/wp-engine-thoughts-on-the-motion-to-dismiss-hearing
+          - text: )
+        - separator [ref=e107]
+        - heading "🧰 Tools & tinkering" [level=2] [ref=e108]
+        - paragraph [ref=e109]:
+          - text: Alex Kirk shipped a handy update to the
+          - strong [ref=e110]: Playground Step Library
+          - text: ": it’s now consumable as an npm package"
+          - emphasis [ref=e111]: and
+          - text: has a friendlier UI for crafting blueprints. Spinning up shareable, pre-configured WordPress sandboxes just got easier for demos, training, and support. (
+          - link "Alex Kirk" [ref=e112] [cursor=pointer]:
+            - /url: https://alex.kirk.at/2025/09/05/npm-install-playground-step-library
+          - text: )
+        - paragraph [ref=e113]:
+          - text: "Publishing pipeline pro-tip: the official"
+          - strong [ref=e114]: Google Docs → WordPress.com/Jetpack
+          - text: add-on still exists, quietly saving teams who draft in Docs and publish on WordPress. If collaboration happens in Docs today, this is “less yak-shaving, more shipping.” (
+          - link "WP Builds" [ref=e115] [cursor=pointer]:
+            - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/
+          - text: )
+        - paragraph [ref=e116]: "Two bite-size block/dev nuggets:"
+        - list [ref=e117]:
+          - listitem [ref=e118]:
+            - text: ✦
+            - strong [ref=e119]: block.json
+            - text: primer for plugin authors who want cleaner block registration and better runtime behavior. Tight, technical, functional. (
+            - link "WP Builds" [ref=e120] [cursor=pointer]:
+              - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/
+            - text: )
+          - listitem [ref=e121]:
+            - text: ✦
+            - strong [ref=e122]: BlaBlaBlocks Tabs
+            - text: adds accessible tabs to the editor with templates. Suitable for content teams that insist on “less scroll, more structure.” (
+            - link "WP Builds" [ref=e123] [cursor=pointer]:
+              - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/
+            - text: )
+        - paragraph [ref=e124]: "And a pair of utility updates:"
+        - list [ref=e125]:
+          - listitem [ref=e126]:
+            - text: ✦
+            - strong [ref=e127]: WooCommerce 10.2 pre-release
+            - text: is ready for testing (product collection carousel, faster Cart block, better onboarding). Staging sites love this kind of week. (
+            - link "WP Builds" [ref=e128] [cursor=pointer]:
+              - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/
+            - text: )
+          - listitem [ref=e129]:
+            - text: ✦
+            - strong [ref=e130]: DB Reset Pro
+            - text: offers one-click database resets while preserving uploads—useful for demo sites, but strictly for folks who respect backups. (
+            - link "WP Builds" [ref=e131] [cursor=pointer]:
+              - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/
+            - text: )
+        - separator [ref=e132]
+        - heading "🌐 AI & the wider web" [level=2] [ref=e133]
+        - paragraph [ref=e134]:
+          - text: For context-seekers, the
+          - strong [ref=e135]: Financial Times
+          - text: explainer on transformers remains a crisp on-ramp for understanding why modern AI feels different. Pair that with Simon Willison’s running list of “vibe-coded” AI-assisted tools if experimental dev workflows spark joy. (
+          - link "WP Builds" [ref=e136] [cursor=pointer]:
+            - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/
+          - text: )
+        - paragraph [ref=e137]:
+          - text: Publishers vs. crawlers continues to simmer. This op-ed walks through Cloudflare’s proposal to change the economics of AI scraping—food for thought for anyone whose content now fuels chat answers more than search clicks. (
+          - link "WP Builds" [ref=e138] [cursor=pointer]:
+            - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/
+          - text: ) ✺
+        - separator [ref=e139]
+        - heading "🧑‍🦯 Accessibility & community" [level=2] [ref=e140]
+        - paragraph [ref=e141]:
+          - text: Joe Dolson shipped
+          - strong [ref=e142]: WP Accessibility 2.2.0
+          - text: with notable changes, and the
+          - strong [ref=e143]: WP Accessibility Docs
+          - text: project posted an August update—a good pulse check for teams improving baseline a11y instead of bolting it on at the end. (
+          - link "WP Builds" [ref=e144] [cursor=pointer]:
+            - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/
+          - text: )
+        - paragraph [ref=e145]:
+          - text: The Accessibility Team also introduced new team representatives, with clear expectations about their roles. Community health beats shiny features in the long term; leadership clarity helps contributors pick a lane. (
+          - link "Make WordPress" [ref=e146] [cursor=pointer]:
+            - /url: https://make.wordpress.org/accessibility/2025/08/28/introducing-accessibility-team-reps-for-2025-2026
+          - text: )
+        - separator [ref=e147]
+        - heading "🌍 Multilingual & content ops" [level=2] [ref=e148]
+        - paragraph [ref=e149]:
+          - strong [ref=e150]: WPML 4.8
+          - text: leans into AI translation with a “better than human” claim and a credit-based model. Whether that line lands or not, translation quality continues to improve, and teams with big content catalogs finally have options beyond “someday.” (
+          - link "WP Builds" [ref=e151] [cursor=pointer]:
+            - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/
+          - text: )
+        - separator [ref=e152]
+        - heading "🗓️ Events & extras" [level=2] [ref=e153]
+        - paragraph [ref=e154]:
+          - strong [ref=e155]: LoopConf (London, Sept 25)
+          - text: brings a focused, dev-heavy lineup. If a trip is on the calendar,
+          - strong [ref=e156]: WPLDN
+          - text: (the evening before) is an easy add-on for hallway-track energy. (
+          - link "WP Builds" [ref=e157] [cursor=pointer]:
+            - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/
+          - text: )
+        - paragraph [ref=e158]: "Two bonus links from the “not WordPress, still delightful” shelf:"
+        - list [ref=e159]:
+          - listitem [ref=e160]:
+            - text: ✦
+            - strong [ref=e161]: Web Day Out
+            - text: "(Brighton, Mar 12, 2026): a one-day love letter to what browsers can do"
+            - emphasis [ref=e162]: today
+            - text: . Front-end folks, this scratches the right itch. (
+            - link "WP Builds" [ref=e163] [cursor=pointer]:
+              - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/
+            - text: )
+          - listitem [ref=e164]:
+            - text: ✦
+            - strong [ref=e165]: Mitch Ivin’s Windows XP portfolio
+            - text: ": pixel-perfect nostalgia as a portfolio site. Pure craft, pure fun. ("
+            - link "WP Builds" [ref=e166] [cursor=pointer]:
+              - /url: https://wpbuilds.com/2025/09/09/this-week-in-wordpress-347/
+            - text: )
+        - text: ✦
+      - generic [ref=e167]:
+        - link "Speaking" [ref=e169] [cursor=pointer]:
+          - /url: https://qkf.b0d.myftpupload.com/category/speaking/
+        - generic [ref=e170]:
+          - link "wcus" [ref=e171] [cursor=pointer]:
+            - /url: https://qkf.b0d.myftpupload.com/tag/wcus/
+          - link "wordpress" [ref=e172] [cursor=pointer]:
+            - /url: https://qkf.b0d.myftpupload.com/tag/wordpress/
+      - generic [ref=e174]:
+        - heading "More from the blog" [level=2] [ref=e175]
+        - list [ref=e177]:
+          - listitem [ref=e178]:
+            - generic [ref=e179]:
+              - generic [ref=e180]:
+                - text: ✦
+                - link "Productivity" [ref=e181] [cursor=pointer]:
+                  - /url: https://qkf.b0d.myftpupload.com/category/productivity/
+              - 'heading "LLM Wiki: From Brain Fog to AI-Organized Second Brain Clarity" [level=2] [ref=e182]':
+                - 'link "LLM Wiki: From Brain Fog to AI-Organized Second Brain Clarity" [ref=e183] [cursor=pointer]':
+                  - /url: https://qkf.b0d.myftpupload.com/2026/04/15/llm-wiki-ai-second-brain-obsidian/
+              - time [ref=e185]: April 15, 2026
+          - listitem [ref=e186]:
+            - generic [ref=e187]:
+              - generic [ref=e188]:
+                - text: ✦
+                - link "WordPress" [ref=e189] [cursor=pointer]:
+                  - /url: https://qkf.b0d.myftpupload.com/category/wptips/
+              - 'heading "The Web Remembers Who We Are: Building XFN for WordPress in 2025" [level=2] [ref=e190]':
+                - 'link "The Web Remembers Who We Are: Building XFN for WordPress in 2025" [ref=e191] [cursor=pointer]':
+                  - /url: https://qkf.b0d.myftpupload.com/2025/12/11/the-web-remembers-who-we-are-building-xfn-for-wordpress-in-2025/
+              - time [ref=e193]: December 11, 2025
+          - listitem [ref=e194]:
+            - generic [ref=e195]:
+              - generic [ref=e196]:
+                - text: ✦
+                - link "WordPress" [ref=e197] [cursor=pointer]:
+                  - /url: https://qkf.b0d.myftpupload.com/category/wptips/
+              - 'heading "Post Formats for Block Themes: My First WordPress Plugin After 11 Years" [level=2] [ref=e198]':
+                - 'link "Post Formats for Block Themes: My First WordPress Plugin After 11 Years" [ref=e199] [cursor=pointer]':
+                  - /url: https://qkf.b0d.myftpupload.com/2025/12/03/post-formats-for-block-themes/
+              - time [ref=e201]: December 3, 2025
+    - contentinfo [ref=e202]:
+      - generic [ref=e203]:
+        - heading "Find me elsewhere on the web" [level=2] [ref=e204]
+        - list [ref=e205]:
+          - listitem [ref=e206]:
+            - link "WordPress" [ref=e207] [cursor=pointer]:
+              - /url: https://profiles.wordpress.org/courane01/
+              - img [ref=e208]
+              - generic [ref=e210]: WordPress
+          - listitem [ref=e211]:
+            - link "Mastodon" [ref=e212] [cursor=pointer]:
+              - /url: https://m.courtneyr.co/@courtneyr
+              - img [ref=e213]
+              - generic [ref=e215]: Mastodon
+          - listitem [ref=e216]:
+            - link "Bluesky" [ref=e217] [cursor=pointer]:
+              - /url: https://bsky.app/profile/courtneyr.dev
+              - img [ref=e218]
+              - generic [ref=e220]: Bluesky
+          - listitem [ref=e221]:
+            - link "X" [ref=e222] [cursor=pointer]:
+              - /url: https://x.com/courtneyr_dev
+              - img [ref=e223]
+              - generic [ref=e225]: X
+          - listitem [ref=e226]:
+            - link "GitHub" [ref=e227] [cursor=pointer]:
+              - /url: https://github.com/courtneyr-dev
+              - img [ref=e228]
+              - generic [ref=e230]: GitHub
+          - listitem [ref=e231]:
+            - link "Amazon" [ref=e232] [cursor=pointer]:
+              - /url: https://www.amazon.com/hz/wishlist/ls/1T5OKLMTA0MZQ
+              - img [ref=e233]
+              - generic [ref=e235]: Amazon
+          - listitem [ref=e236]:
+            - link "Goodreads" [ref=e237] [cursor=pointer]:
+              - /url: https://www.goodreads.com/user/show/2768384-courtney-robertson
+              - img [ref=e238]
+              - generic [ref=e240]: Goodreads
+          - listitem [ref=e241]:
+            - link "TikTok" [ref=e242] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@courtneyr_dev
+              - img [ref=e243]
+              - generic [ref=e245]: TikTok
+          - listitem [ref=e246]:
+            - link "LinkedIn" [ref=e247] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/courtneyr-dev/
+              - img [ref=e248]
+              - generic [ref=e250]: LinkedIn
+          - listitem [ref=e251]:
+            - link "Instagram" [ref=e252] [cursor=pointer]:
+              - /url: https://www.instagram.com/courtneyr_dev
+              - img [ref=e253]
+              - generic [ref=e255]: Instagram
+          - listitem [ref=e256]:
+            - link "Threads" [ref=e257] [cursor=pointer]:
+              - /url: https://www.threads.net/@courtneyr_dev
+              - img [ref=e258]
+              - generic [ref=e260]: Threads
+          - listitem [ref=e261]:
+            - link "Facebook" [ref=e262] [cursor=pointer]:
+              - /url: https://www.facebook.com/streamlining
+              - img [ref=e263]
+              - generic [ref=e265]: Facebook
+          - listitem [ref=e266]:
+            - link "Flickr" [ref=e267] [cursor=pointer]:
+              - /url: https://www.flickr.com/photos/courane001/
+              - img [ref=e268]
+              - generic [ref=e270]: Flickr
+          - listitem [ref=e271]:
+            - link "YouTube" [ref=e272] [cursor=pointer]:
+              - /url: https://www.youtube.com/channel/UC1tidWhCHiaARk3_YHJwZLw
+              - img [ref=e273]
+              - generic [ref=e275]: YouTube
+          - listitem [ref=e276]:
+            - link "Twitch" [ref=e277] [cursor=pointer]:
+              - /url: https://www.twitch.tv/courtneyr_dev
+              - img [ref=e278]
+              - generic [ref=e280]: Twitch
+          - listitem [ref=e281]:
+            - link "Spotify" [ref=e282] [cursor=pointer]:
+              - /url: https://open.spotify.com/user/courtneyengle?nd=1&dlsi=10c4cfa6c4b04c54
+              - img [ref=e283]
+              - generic [ref=e285]: Spotify
+          - listitem [ref=e286]:
+            - link "Last.fm" [ref=e287] [cursor=pointer]:
+              - /url: https://www.last.fm/user/courane01
+              - img [ref=e288]
+              - generic [ref=e290]: Last.fm
+          - listitem [ref=e291]:
+            - link "Pinterest" [ref=e292] [cursor=pointer]:
+              - /url: https://www.pinterest.com/courtneyr_dev/
+              - img [ref=e293]
+              - generic [ref=e295]: Pinterest
+          - listitem [ref=e296]:
+            - link "Readwise" [ref=e297] [cursor=pointer]:
+              - /url: https://readwise.io/@courtneyrdev
+              - img [ref=e298]
+              - generic [ref=e300]: Readwise
+          - listitem [ref=e301]:
+            - link "BoardGameGeek" [ref=e302] [cursor=pointer]:
+              - /url: https://boardgamegeek.com/user/courtneyr_dev
+              - img [ref=e303]
+              - generic [ref=e305]: BoardGameGeek
+          - listitem [ref=e306]:
+            - link "Snipd" [ref=e307] [cursor=pointer]:
+              - /url: https://share.snipd.com/user/courtneyr_dev
+              - img [ref=e308]
+              - generic [ref=e310]: Snipd
+          - listitem [ref=e311]:
+            - link "OpenProfile.dev" [ref=e312] [cursor=pointer]:
+              - /url: https://openprofile.dev/profile/courtneyr
+              - img [ref=e313]
+              - generic [ref=e315]: OpenProfile.dev
+        - paragraph [ref=e317]:
+          - text: © 2026 Courtney Robertson · Built with WordPress · Powered by the
+          - link "IndieWeb" [ref=e318] [cursor=pointer]:
+            - /url: https://indieweb.org/

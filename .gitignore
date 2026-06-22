@@ -27,3 +27,4 @@ assets/fonts/.staging/
 
 # Temporary export folders
 /tmp-export/
+.gstack/

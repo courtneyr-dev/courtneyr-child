@@ -1,0 +1,313 @@
+- generic [active] [ref=e1]:
+  - dialog "Manage Consent" [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: Manage Consent
+      - button "Close dialog" [ref=e5] [cursor=pointer]:
+        - img [ref=e6]: times
+    - generic [ref=e9]: To provide the best experiences, we use technologies like cookies to store and/or access device information. Consenting to these technologies will allow us to process data such as browsing behavior or unique IDs on this site. Not consenting or withdrawing consent, may adversely affect certain features and functions.
+    - generic [ref=e10]:
+      - button "Accept" [ref=e11] [cursor=pointer]
+      - button "Deny" [ref=e12] [cursor=pointer]
+      - button "View preferences" [ref=e13] [cursor=pointer]
+    - list [ref=e15]:
+      - listitem [ref=e16]:
+        - link "Cookie Policy" [ref=e17] [cursor=pointer]:
+          - /url: https://qkf.b0d.myftpupload.com/cookie-policy-eu/
+      - listitem [ref=e18]:
+        - link "Cookie Policy" [ref=e19] [cursor=pointer]:
+          - /url: https://qkf.b0d.myftpupload.com/cookie-policy-eu/
+      - listitem
+  - link "Skip to content" [ref=e20] [cursor=pointer]:
+    - /url: "#wp--skip-link--target"
+  - generic [ref=e21]:
+    - banner [ref=e22]:
+      - banner [ref=e23]:
+        - generic [ref=e24]:
+          - link "courtneyr.dev — home" [ref=e26] [cursor=pointer]:
+            - /url: /
+            - text: courtneyr.dev
+          - generic [ref=e27]:
+            - group "Theme" [ref=e28]:
+              - button "Light theme" [ref=e29] [cursor=pointer]:
+                - img [ref=e30]
+              - button "Dark theme" [ref=e33] [cursor=pointer]:
+                - img [ref=e34]
+              - button "System theme (follows OS)" [pressed] [ref=e36] [cursor=pointer]:
+                - img [ref=e37]
+            - navigation "Sidebar" [ref=e40]:
+              - list [ref=e45]:
+                - listitem [ref=e46]:
+                  - link "🙋🏻‍♀️ About" [ref=e47] [cursor=pointer]:
+                    - /url: /about-courtney-robertson/
+                    - generic [ref=e48]: 🙋🏻‍♀️ About
+                - listitem [ref=e49]:
+                  - link "🤲 All" [ref=e50] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/blog/
+                    - generic [ref=e51]: 🤲 All
+                - listitem [ref=e52]:
+                  - button "📰 Blog submenu" [ref=e53] [cursor=pointer]:
+                    - generic [ref=e54]: 📰 Blog
+                  - generic:
+                    - img
+                - listitem [ref=e55]:
+                  - link "🗣️ Speaking" [ref=e56] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/category/speaking/
+                    - generic [ref=e57]: 🗣️ Speaking
+                - listitem [ref=e58]:
+                  - button "📝 Notes submenu" [ref=e59] [cursor=pointer]:
+                    - generic [ref=e60]: 📝 Notes
+                  - generic:
+                    - img
+                - listitem [ref=e61]:
+                  - link "📚 Stories" [ref=e62] [cursor=pointer]:
+                    - /url: /web-stories/
+                    - generic [ref=e63]: 📚 Stories
+            - search [ref=e64]:
+              - generic [ref=e65]: Search
+              - button "Expand search field" [ref=e67] [cursor=pointer]:
+                - img [ref=e68]
+    - main [ref=e70]:
+      - generic [ref=e71]:
+        - paragraph [ref=e72]: FIELD NOTES
+        - 'heading "✺ Tag: wordpress ✺" [level=1] [ref=e73]'
+        - separator [ref=e74]
+      - generic [ref=e75]:
+        - group "Filter posts by format" [ref=e76]:
+          - button "All" [pressed] [ref=e77] [cursor=pointer]
+          - button "Blog" [ref=e78] [cursor=pointer]
+          - button "Quote" [ref=e79] [cursor=pointer]
+          - button "Link" [ref=e80] [cursor=pointer]
+          - button "Gallery" [ref=e81] [cursor=pointer]
+          - button "Video" [ref=e82] [cursor=pointer]
+        - generic [ref=e83]:
+          - list [ref=e84]:
+            - listitem [ref=e85]:
+              - article [ref=e86]:
+                - paragraph [ref=e87]: ✦
+                - generic [ref=e88]:
+                  - figure [ref=e89]:
+                    - 'link "This Week in WordPress 347: Evan" [ref=e90] [cursor=pointer]':
+                      - /url: https://qkf.b0d.myftpupload.com/2025/09/09/this-week-in-wordpress-347-evan/
+                      - 'img "This Week in WordPress 347: Evan" [ref=e91]'
+                  - generic [ref=e92]:
+                    - time [ref=e94]: September 9, 2025
+                    - generic [ref=e95]: Blog
+                    - link "Speaking" [ref=e97] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/category/speaking/
+                  - 'heading "This Week in WordPress 347: Evan" [level=2] [ref=e98]':
+                    - 'link "This Week in WordPress 347: Evan" [ref=e99] [cursor=pointer]':
+                      - /url: https://qkf.b0d.myftpupload.com/2025/09/09/this-week-in-wordpress-347-evan/
+                  - paragraph [ref=e101]: "🎙️ Tech Troubles & WordPress Wins — My Take on “This Week in WordPress” #347 The episode opened with classic live-show gremlins—glitchy audio, misbehaving embeds, and post-WordCamp brain fog. The chaos set an oddly perfect tone: WordPress work is messy…"
+                  - 'link "Read more → : This Week in WordPress 347: Evan" [ref=e102] [cursor=pointer]':
+                    - /url: https://qkf.b0d.myftpupload.com/2025/09/09/this-week-in-wordpress-347-evan/
+                    - text: Read more →
+                    - generic [ref=e103]: ": This Week in WordPress 347: Evan"
+                  - generic [ref=e104]:
+                    - link "wcus" [ref=e105] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/tag/wcus/
+                    - link "wordpress" [ref=e107] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/tag/wordpress/
+            - listitem [ref=e108]:
+              - article [ref=e109]:
+                - paragraph [ref=e110]: ✦
+                - generic [ref=e111]:
+                  - generic [ref=e112]:
+                    - time [ref=e114]: April 21, 2022
+                    - generic [ref=e115]: Blog
+                    - link "Speaking" [ref=e117] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/category/speaking/
+                  - heading "Build Your Developer Network, Career and Business – Do_the Woo" [level=2] [ref=e118]:
+                    - link "Build Your Developer Network, Career and Business – Do_the Woo" [ref=e119] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/2022/04/21/build-your-developer-network-career-and-business/
+                  - generic:
+                    - paragraph
+                  - 'link "Read more → : Build Your Developer Network, Career and Business – Do_the Woo" [ref=e120] [cursor=pointer]':
+                    - /url: https://qkf.b0d.myftpupload.com/2022/04/21/build-your-developer-network-career-and-business/
+                    - text: Read more →
+                    - generic [ref=e121]: ": Build Your Developer Network, Career and Business – Do_the Woo"
+                  - generic [ref=e122]:
+                    - link "woocommerce" [ref=e123] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/tag/woocommerce/
+                    - link "wordpress" [ref=e125] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/tag/wordpress/
+            - listitem [ref=e126]:
+              - article [ref=e127]:
+                - paragraph [ref=e128]: ✦
+                - generic [ref=e129]:
+                  - generic [ref=e130]:
+                    - time [ref=e132]: March 15, 2022
+                    - generic [ref=e133]: Blog
+                    - link "Speaking" [ref=e135] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/category/speaking/
+                  - heading "Learn.WordPress So You Can Learn WooCommerce – Do_the Woo" [level=2] [ref=e136]:
+                    - link "Learn.WordPress So You Can Learn WooCommerce – Do_the Woo" [ref=e137] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/2022/03/15/learn-wordpress-so-you-can-learn-woocommerce/
+                  - generic:
+                    - paragraph
+                  - 'link "Read more → : Learn.WordPress So You Can Learn WooCommerce – Do_the Woo" [ref=e138] [cursor=pointer]':
+                    - /url: https://qkf.b0d.myftpupload.com/2022/03/15/learn-wordpress-so-you-can-learn-woocommerce/
+                    - text: Read more →
+                    - generic [ref=e139]: ": Learn.WordPress So You Can Learn WooCommerce – Do_the Woo"
+                  - generic [ref=e140]:
+                    - link "woocommerce" [ref=e141] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/tag/woocommerce/
+                    - link "wordpress" [ref=e143] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/tag/wordpress/
+            - listitem [ref=e144]:
+              - article [ref=e145]:
+                - paragraph [ref=e146]: ✦
+                - generic [ref=e147]:
+                  - figure [ref=e148]:
+                    - link "The WordPress Education Ecosystem Challenges and Opportunities – LifterLMS" [ref=e149] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/2022/03/02/the-wordpress-education-ecosystem-challenges-and-opportunities/
+                      - img "The WordPress Education Ecosystem Challenges and Opportunities – LifterLMS" [ref=e150]
+                  - generic [ref=e151]:
+                    - time [ref=e153]: March 2, 2022
+                    - generic [ref=e154]: Blog
+                    - link "Speaking" [ref=e156] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/category/speaking/
+                  - heading "The WordPress Education Ecosystem Challenges and Opportunities – LifterLMS" [level=2] [ref=e157]:
+                    - link "The WordPress Education Ecosystem Challenges and Opportunities – LifterLMS" [ref=e158] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/2022/03/02/the-wordpress-education-ecosystem-challenges-and-opportunities/
+                  - paragraph [ref=e160]: Learn about the WordPress education ecosystem challenges and opportunities with Courtney Robertson in this episode of the LMScast podcast hosted by Chris Badgett from LifterLMS.
+                  - 'link "Read more → : The WordPress Education Ecosystem Challenges and Opportunities – LifterLMS" [ref=e161] [cursor=pointer]':
+                    - /url: https://qkf.b0d.myftpupload.com/2022/03/02/the-wordpress-education-ecosystem-challenges-and-opportunities/
+                    - text: Read more →
+                    - generic [ref=e162]: ": The WordPress Education Ecosystem Challenges and Opportunities – LifterLMS"
+                  - generic [ref=e163]:
+                    - link "twitter" [ref=e164] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/tag/twitter/
+                    - link "wordpress" [ref=e166] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/tag/wordpress/
+          - navigation "Pagination" [ref=e167]:
+            - generic [ref=e168]:
+              - generic [ref=e169]: "1"
+              - link "2" [ref=e170] [cursor=pointer]:
+                - /url: https://qkf.b0d.myftpupload.com/tag/wordpress/page/2/
+              - link "3" [ref=e171] [cursor=pointer]:
+                - /url: https://qkf.b0d.myftpupload.com/tag/wordpress/page/3/
+              - generic [ref=e172]: …
+              - link "11" [ref=e173] [cursor=pointer]:
+                - /url: https://qkf.b0d.myftpupload.com/tag/wordpress/page/11/
+            - link "Next Page" [ref=e174] [cursor=pointer]:
+              - /url: https://qkf.b0d.myftpupload.com/tag/wordpress/page/2/
+              - text: Next Page
+              - generic [ref=e175]: →
+    - contentinfo [ref=e176]:
+      - generic [ref=e177]:
+        - heading "Find me elsewhere on the web" [level=2] [ref=e178]
+        - list [ref=e179]:
+          - listitem [ref=e180]:
+            - link "WordPress" [ref=e181] [cursor=pointer]:
+              - /url: https://profiles.wordpress.org/courane01/
+              - img [ref=e182]
+              - generic [ref=e184]: WordPress
+          - listitem [ref=e185]:
+            - link "Mastodon" [ref=e186] [cursor=pointer]:
+              - /url: https://m.courtneyr.co/@courtneyr
+              - img [ref=e187]
+              - generic [ref=e189]: Mastodon
+          - listitem [ref=e190]:
+            - link "Bluesky" [ref=e191] [cursor=pointer]:
+              - /url: https://bsky.app/profile/courtneyr.dev
+              - img [ref=e192]
+              - generic [ref=e194]: Bluesky
+          - listitem [ref=e195]:
+            - link "X" [ref=e196] [cursor=pointer]:
+              - /url: https://x.com/courtneyr_dev
+              - img [ref=e197]
+              - generic [ref=e199]: X
+          - listitem [ref=e200]:
+            - link "GitHub" [ref=e201] [cursor=pointer]:
+              - /url: https://github.com/courtneyr-dev
+              - img [ref=e202]
+              - generic [ref=e204]: GitHub
+          - listitem [ref=e205]:
+            - link "Amazon" [ref=e206] [cursor=pointer]:
+              - /url: https://www.amazon.com/hz/wishlist/ls/1T5OKLMTA0MZQ
+              - img [ref=e207]
+              - generic [ref=e209]: Amazon
+          - listitem [ref=e210]:
+            - link "Goodreads" [ref=e211] [cursor=pointer]:
+              - /url: https://www.goodreads.com/user/show/2768384-courtney-robertson
+              - img [ref=e212]
+              - generic [ref=e214]: Goodreads
+          - listitem [ref=e215]:
+            - link "TikTok" [ref=e216] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@courtneyr_dev
+              - img [ref=e217]
+              - generic [ref=e219]: TikTok
+          - listitem [ref=e220]:
+            - link "LinkedIn" [ref=e221] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/courtneyr-dev/
+              - img [ref=e222]
+              - generic [ref=e224]: LinkedIn
+          - listitem [ref=e225]:
+            - link "Instagram" [ref=e226] [cursor=pointer]:
+              - /url: https://www.instagram.com/courtneyr_dev
+              - img [ref=e227]
+              - generic [ref=e229]: Instagram
+          - listitem [ref=e230]:
+            - link "Threads" [ref=e231] [cursor=pointer]:
+              - /url: https://www.threads.net/@courtneyr_dev
+              - img [ref=e232]
+              - generic [ref=e234]: Threads
+          - listitem [ref=e235]:
+            - link "Facebook" [ref=e236] [cursor=pointer]:
+              - /url: https://www.facebook.com/streamlining
+              - img [ref=e237]
+              - generic [ref=e239]: Facebook
+          - listitem [ref=e240]:
+            - link "Flickr" [ref=e241] [cursor=pointer]:
+              - /url: https://www.flickr.com/photos/courane001/
+              - img [ref=e242]
+              - generic [ref=e244]: Flickr
+          - listitem [ref=e245]:
+            - link "YouTube" [ref=e246] [cursor=pointer]:
+              - /url: https://www.youtube.com/channel/UC1tidWhCHiaARk3_YHJwZLw
+              - img [ref=e247]
+              - generic [ref=e249]: YouTube
+          - listitem [ref=e250]:
+            - link "Twitch" [ref=e251] [cursor=pointer]:
+              - /url: https://www.twitch.tv/courtneyr_dev
+              - img [ref=e252]
+              - generic [ref=e254]: Twitch
+          - listitem [ref=e255]:
+            - link "Spotify" [ref=e256] [cursor=pointer]:
+              - /url: https://open.spotify.com/user/courtneyengle?nd=1&dlsi=10c4cfa6c4b04c54
+              - img [ref=e257]
+              - generic [ref=e259]: Spotify
+          - listitem [ref=e260]:
+            - link "Last.fm" [ref=e261] [cursor=pointer]:
+              - /url: https://www.last.fm/user/courane01
+              - img [ref=e262]
+              - generic [ref=e264]: Last.fm
+          - listitem [ref=e265]:
+            - link "Pinterest" [ref=e266] [cursor=pointer]:
+              - /url: https://www.pinterest.com/courtneyr_dev/
+              - img [ref=e267]
+              - generic [ref=e269]: Pinterest
+          - listitem [ref=e270]:
+            - link "Readwise" [ref=e271] [cursor=pointer]:
+              - /url: https://readwise.io/@courtneyrdev
+              - img [ref=e272]
+              - generic [ref=e274]: Readwise
+          - listitem [ref=e275]:
+            - link "BoardGameGeek" [ref=e276] [cursor=pointer]:
+              - /url: https://boardgamegeek.com/user/courtneyr_dev
+              - img [ref=e277]
+              - generic [ref=e279]: BoardGameGeek
+          - listitem [ref=e280]:
+            - link "Snipd" [ref=e281] [cursor=pointer]:
+              - /url: https://share.snipd.com/user/courtneyr_dev
+              - img [ref=e282]
+              - generic [ref=e284]: Snipd
+          - listitem [ref=e285]:
+            - link "OpenProfile.dev" [ref=e286] [cursor=pointer]:
+              - /url: https://openprofile.dev/profile/courtneyr
+              - img [ref=e287]
+              - generic [ref=e289]: OpenProfile.dev
+        - paragraph [ref=e291]:
+          - text: © 2026 Courtney Robertson · Built with WordPress · Powered by the
+          - link "IndieWeb" [ref=e292] [cursor=pointer]:
+            - /url: https://indieweb.org/

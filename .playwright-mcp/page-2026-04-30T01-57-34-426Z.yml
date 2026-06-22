@@ -1,0 +1,313 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#wp--skip-link--target"
+  - generic [ref=e3]:
+    - banner [ref=e5]:
+      - generic [ref=e7]:
+        - link "CourtneyR.dev — home" [ref=e9] [cursor=pointer]:
+          - /url: /
+          - text: CourtneyR.dev
+        - generic [ref=e10]:
+          - group "Theme" [ref=e11]:
+            - button "Light theme" [ref=e12] [cursor=pointer]:
+              - img [ref=e13]
+            - button "Dark theme" [ref=e16] [cursor=pointer]:
+              - img [ref=e17]
+            - button "System theme (follows OS)" [pressed] [ref=e19] [cursor=pointer]:
+              - img [ref=e20]
+          - navigation [ref=e23]:
+            - list [ref=e28]:
+              - listitem [ref=e29]:
+                - link "🙋🏻‍♀️ About" [ref=e30] [cursor=pointer]:
+                  - /url: /about-courtney-robertson/
+                  - generic [ref=e31]: 🙋🏻‍♀️ About
+              - listitem [ref=e32]:
+                - link "📰 Blog" [ref=e33] [cursor=pointer]:
+                  - /url: https://qkf.b0d.myftpupload.com/blog/
+                  - generic [ref=e34]: 📰 Blog
+                - button "📰 Blog submenu" [ref=e35] [cursor=pointer]:
+                  - img [ref=e36]
+              - listitem [ref=e38]:
+                - link "🗣️ Speaking" [ref=e39] [cursor=pointer]:
+                  - /url: https://qkf.b0d.myftpupload.com/category/speaking/
+                  - generic [ref=e40]: 🗣️ Speaking
+              - listitem [ref=e41]:
+                - link "📚 Stories" [ref=e42] [cursor=pointer]:
+                  - /url: /web-stories/
+                  - generic [ref=e43]: 📚 Stories
+          - group [ref=e44]:
+            - generic "Toggle search" [ref=e45] [cursor=pointer]:
+              - img [ref=e46]
+    - main [ref=e48]:
+      - heading "Courtney Robertson — Developer Relations in Open Source" [level=1] [ref=e49]
+      - generic [ref=e50]:
+        - generic [ref=e52]:
+          - generic [ref=e54]:
+            - img "Courtney Robertson, an open source developer relations advocate, is wearing a pirate hat, a DSLR camera, and a purple shirt" [ref=e55]
+            - generic [ref=e56]:
+              - paragraph [ref=e57]: She/Her
+              - paragraph [ref=e59]:
+                - strong [ref=e60]: Courtney Robertson is an Open Source Developer Advocate, professional educator, and WordPress Contributor
+          - generic [ref=e62]:
+            - generic [ref=e63]:
+              - paragraph [ref=e64]: Welcome
+              - heading "✺ Are you passionate about ✺" [level=2] [ref=e65]:
+                - text: ✺ Are you
+                - emphasis [ref=e66]:
+                  - strong [ref=e68]: passionate
+                - text: about ✺
+              - paragraph [ref=e69]:
+                - strong [ref=e70]: Open source, WordPress, teaching web development, community management, and developer relations?
+              - paragraph [ref=e71]: Join my newsletter for clear, practical insights from a developer advocate, professional educator, and WordPress contributor—delivered straight to your inbox with no fluff.
+            - generic [ref=e72]:
+              - heading "Subscribe to my weekly newsletter" [level=2] [ref=e73]:
+                - strong [ref=e74]: Subscribe to my weekly newsletter
+              - generic [ref=e77]:
+                - generic [ref=e78]:
+                  - generic [ref=e79]: Email
+                  - textbox "Email" [ref=e80]:
+                    - /placeholder: Email Address
+                - generic [ref=e81]:
+                  - generic [ref=e82]: First name
+                  - textbox "First name" [ref=e83]:
+                    - /placeholder: First Name
+                - button "Join Newsletter" [ref=e85] [cursor=pointer]
+        - generic [ref=e87]:
+          - generic [ref=e89]:
+            - generic [ref=e90]:
+              - heading "✺ How this newsletter can help you grow ✺" [level=2] [ref=e91]
+              - paragraph [ref=e92]: Every Saturday, I send a free weekly newsletter packed with practical tips, community insights, and real-world strategies designed for open source contributors, WordPress developers, educators, developer advocates, learners, and leaders alike.
+            - paragraph [ref=e94]:
+              - strong [ref=e95]: Looking for personalized guidance?
+              - text: Whether you’re a company wanting to build or grow your Developer Relations program, an educator seeking custom web development curriculum, or an organization eager to deepen your open source involvement, I’m here to help.
+              - button "Contact me now!" [ref=e96] [cursor=pointer]
+          - generic [ref=e97]:
+            - generic [ref=e98]:
+              - generic [ref=e99]:
+                - img [ref=e102]
+                - paragraph [ref=e104]: 01 CONTRIBUTORS
+              - generic [ref=e105]:
+                - heading "Empower your open source contributions with sustainable support" [level=3] [ref=e106]
+                - paragraph [ref=e107]: Discover practical approaches and community-driven funding models that help maintain vital projects and prevent burnout—so you can keep making an impact with confidence.
+            - generic [ref=e108]:
+              - generic [ref=e109]:
+                - img [ref=e112]
+                - paragraph [ref=e114]: 02 EDUCATORS
+              - generic [ref=e115]:
+                - heading "Equip educators with tools to inspire the next generation*" [level=3] [ref=e116]
+                - paragraph [ref=e117]: Get proven methods and resources to engage learners, foster collaboration, and create inclusive learning environments in coding and open source communities.
+            - generic [ref=e118]:
+              - generic [ref=e119]:
+                - img [ref=e122]
+                - paragraph [ref=e124]: 03 LEADERS
+              - generic [ref=e125]:
+                - heading "Support leaders in building empowered open source teams" [level=3] [ref=e126]
+                - paragraph [ref=e127]: Learn how to create sustainable funding strategies, foster open source participation within your organization, and amplify your company’s impact in the community.
+            - generic [ref=e128]:
+              - generic [ref=e129]:
+                - img [ref=e132]
+                - paragraph [ref=e134]: 04 DEVELOPERS
+              - generic [ref=e135]:
+                - heading "Advance your skills as a developer and lifelong learner" [level=3] [ref=e136]
+                - paragraph [ref=e137]: Receive actionable guidance on growing your technical expertise, contributing effectively, and navigating the evolving WordPress and open source ecosystems.
+        - generic [ref=e139]:
+          - paragraph [ref=e140]: FRESH
+          - paragraph [ref=e141]: field notes
+        - generic [ref=e143]:
+          - list [ref=e144]:
+            - listitem [ref=e145]:
+              - generic [ref=e146]:
+                - generic [ref=e148]:
+                  - text: ✦
+                  - time [ref=e149]: April 29, 2026
+                - generic [ref=e151]:
+                  - generic [ref=e152]: Aside
+                  - link "WordPress" [ref=e154] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/category/wptips/
+                  - heading "Aside" [level=2] [ref=e155]:
+                    - link "Aside" [ref=e156] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/2026/04/29/aside/
+            - listitem [ref=e157]:
+              - generic [ref=e158]:
+                - generic [ref=e160]:
+                  - text: ✦
+                  - time [ref=e161]: April 29, 2026
+                - generic [ref=e163]:
+                  - generic [ref=e164]: Blog
+                  - link "WordPress" [ref=e166] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/category/wptips/
+                  - heading "asdfasdf" [level=2] [ref=e167]:
+                    - link "asdfasdf" [ref=e168] [cursor=pointer]:
+                      - /url: https://qkf.b0d.myftpupload.com/2026/04/29/asdfasdf/
+            - listitem [ref=e169]:
+              - generic [ref=e170]:
+                - generic [ref=e172]:
+                  - text: ✦
+                  - time [ref=e173]: April 15, 2026
+                - generic [ref=e175]:
+                  - generic [ref=e176]: Blog
+                  - link "Productivity" [ref=e178] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/category/productivity/
+                  - 'heading "LLM Wiki: From Brain Fog to AI-Organized Second Brain Clarity" [level=2] [ref=e179]':
+                    - 'link "LLM Wiki: From Brain Fog to AI-Organized Second Brain Clarity" [ref=e180] [cursor=pointer]':
+                      - /url: https://qkf.b0d.myftpupload.com/2026/04/15/llm-wiki-ai-second-brain-obsidian/
+            - listitem [ref=e181]:
+              - generic [ref=e182]:
+                - generic [ref=e184]:
+                  - text: ✦
+                  - time [ref=e185]: December 11, 2025
+                - generic [ref=e187]:
+                  - generic [ref=e188]: Blog
+                  - link "WordPress" [ref=e190] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/category/wptips/
+                  - 'heading "The Web Remembers Who We Are: Building XFN for WordPress in 2025" [level=2] [ref=e191]':
+                    - 'link "The Web Remembers Who We Are: Building XFN for WordPress in 2025" [ref=e192] [cursor=pointer]':
+                      - /url: https://qkf.b0d.myftpupload.com/2025/12/11/the-web-remembers-who-we-are-building-xfn-for-wordpress-in-2025/
+          - navigation "Pagination" [ref=e193]:
+            - generic [ref=e194]:
+              - generic [ref=e195]: "1"
+              - link "2" [ref=e196] [cursor=pointer]:
+                - /url: "?query-76-page=2&cb=verify56"
+              - link "3" [ref=e197] [cursor=pointer]:
+                - /url: "?query-76-page=3&cb=verify56"
+              - generic [ref=e198]: …
+              - link "75" [ref=e199] [cursor=pointer]:
+                - /url: "?query-76-page=75&cb=verify56"
+            - link "Next Page" [ref=e200] [cursor=pointer]:
+              - /url: /?cb=verify56&query-76-page=2
+        - generic [ref=e202]:
+          - generic [ref=e203]:
+            - heading "✺ Start your journey today ✺" [level=2] [ref=e204]
+            - heading "✺ What are you waiting for? ✺" [level=3] [ref=e205]
+            - paragraph [ref=e206]: Every Saturday, I send a free weekly newsletter packed with practical tips, community insights, and real-world strategies designed for open source contributors, WordPress developers, educators, developer advocates, learners, and leaders alike.
+            - heading "Subscribe to my weekly newsletter" [level=2] [ref=e207]:
+              - strong [ref=e208]: Subscribe to my weekly newsletter
+          - generic [ref=e213]:
+            - generic [ref=e214]:
+              - generic [ref=e215]: Email
+              - textbox "Email" [ref=e216]:
+                - /placeholder: Email Address
+            - generic [ref=e217]:
+              - generic [ref=e218]: First name
+              - textbox "First name" [ref=e219]:
+                - /placeholder: First Name
+            - button "Join Newsletter" [ref=e221] [cursor=pointer]
+    - contentinfo [ref=e222]:
+      - generic [ref=e223]:
+        - heading "Find me elsewhere on the web" [level=2] [ref=e224]
+        - list [ref=e225]:
+          - listitem [ref=e226]:
+            - link "WordPress" [ref=e227] [cursor=pointer]:
+              - /url: https://profiles.wordpress.org/courane01/
+              - img [ref=e228]
+              - generic [ref=e230]: WordPress
+          - listitem [ref=e231]:
+            - link "Mastodon" [ref=e232] [cursor=pointer]:
+              - /url: https://m.courtneyr.co/@courtneyr
+              - img [ref=e233]
+              - generic [ref=e235]: Mastodon
+          - listitem [ref=e236]:
+            - link "Bluesky" [ref=e237] [cursor=pointer]:
+              - /url: https://bsky.app/profile/courtneyr.dev
+              - img [ref=e238]
+              - generic [ref=e240]: Bluesky
+          - listitem [ref=e241]:
+            - link "X" [ref=e242] [cursor=pointer]:
+              - /url: https://x.com/courtneyr_dev
+              - img [ref=e243]
+              - generic [ref=e245]: X
+          - listitem [ref=e246]:
+            - link "GitHub" [ref=e247] [cursor=pointer]:
+              - /url: https://github.com/courtneyr-dev
+              - img [ref=e248]
+              - generic [ref=e250]: GitHub
+          - listitem [ref=e251]:
+            - link "Amazon" [ref=e252] [cursor=pointer]:
+              - /url: https://www.amazon.com/hz/wishlist/ls/1T5OKLMTA0MZQ
+              - img [ref=e253]
+              - generic [ref=e255]: Amazon
+          - listitem [ref=e256]:
+            - link "Goodreads" [ref=e257] [cursor=pointer]:
+              - /url: https://www.goodreads.com/user/show/2768384-courtney-robertson
+              - img [ref=e258]
+              - generic [ref=e260]: Goodreads
+          - listitem [ref=e261]:
+            - link "TikTok" [ref=e262] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@courtneyr_dev
+              - img [ref=e263]
+              - generic [ref=e265]: TikTok
+          - listitem [ref=e266]:
+            - link "LinkedIn" [ref=e267] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/courtneyr-dev/
+              - img [ref=e268]
+              - generic [ref=e270]: LinkedIn
+          - listitem [ref=e271]:
+            - link "Instagram" [ref=e272] [cursor=pointer]:
+              - /url: https://www.instagram.com/courtneyr_dev
+              - img [ref=e273]
+              - generic [ref=e275]: Instagram
+          - listitem [ref=e276]:
+            - link "Threads" [ref=e277] [cursor=pointer]:
+              - /url: https://www.threads.net/@courtneyr_dev
+              - img [ref=e278]
+              - generic [ref=e280]: Threads
+          - listitem [ref=e281]:
+            - link "Facebook" [ref=e282] [cursor=pointer]:
+              - /url: https://www.facebook.com/streamlining
+              - img [ref=e283]
+              - generic [ref=e285]: Facebook
+          - listitem [ref=e286]:
+            - link "Flickr" [ref=e287] [cursor=pointer]:
+              - /url: https://www.flickr.com/photos/courane001/
+              - img [ref=e288]
+              - generic [ref=e290]: Flickr
+          - listitem [ref=e291]:
+            - link "YouTube" [ref=e292] [cursor=pointer]:
+              - /url: https://www.youtube.com/channel/UC1tidWhCHiaARk3_YHJwZLw
+              - img [ref=e293]
+              - generic [ref=e295]: YouTube
+          - listitem [ref=e296]:
+            - link "Twitch" [ref=e297] [cursor=pointer]:
+              - /url: https://www.twitch.tv/courtneyr_dev
+              - img [ref=e298]
+              - generic [ref=e300]: Twitch
+          - listitem [ref=e301]:
+            - link "Spotify" [ref=e302] [cursor=pointer]:
+              - /url: https://open.spotify.com/user/courtneyengle?nd=1&dlsi=10c4cfa6c4b04c54
+              - img [ref=e303]
+              - generic [ref=e305]: Spotify
+          - listitem [ref=e306]:
+            - link "Last.fm" [ref=e307] [cursor=pointer]:
+              - /url: https://www.last.fm/user/courane01
+              - img [ref=e308]
+              - generic [ref=e310]: Last.fm
+          - listitem [ref=e311]:
+            - link "Pinterest" [ref=e312] [cursor=pointer]:
+              - /url: https://www.pinterest.com/courtneyr_dev/
+              - img [ref=e313]
+              - generic [ref=e315]: Pinterest
+          - listitem [ref=e316]:
+            - link "Readwise" [ref=e317] [cursor=pointer]:
+              - /url: https://readwise.io/@courtneyrdev
+              - img [ref=e318]
+              - generic [ref=e320]: Readwise
+          - listitem [ref=e321]:
+            - link "BoardGameGeek" [ref=e322] [cursor=pointer]:
+              - /url: https://boardgamegeek.com/user/courtneyr_dev
+              - img [ref=e323]
+              - generic [ref=e325]: BoardGameGeek
+          - listitem [ref=e326]:
+            - link "Snipd" [ref=e327] [cursor=pointer]:
+              - /url: https://share.snipd.com/user/courtneyr_dev
+              - img [ref=e328]
+              - generic [ref=e330]: Snipd
+          - listitem [ref=e331]:
+            - link "OpenProfile.dev" [ref=e332] [cursor=pointer]:
+              - /url: https://openprofile.dev/profile/courtneyr
+              - img [ref=e333]
+              - generic [ref=e335]: OpenProfile.dev
+        - paragraph [ref=e337]:
+          - text: © 2026 Courtney Robertson · Built with WordPress · Powered by the
+          - link "IndieWeb" [ref=e338] [cursor=pointer]:
+            - /url: https://indieweb.org/
+  - button "Manage consent" [ref=e339] [cursor=pointer]

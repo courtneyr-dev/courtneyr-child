@@ -312,6 +312,28 @@ function print_no_flash_theme_script(): void {
 add_action( 'wp_head', __NAMESPACE__ . '\\print_no_flash_theme_script', 1 );
 
 /**
+ * Preload the above-the-fold self-hosted fonts. Paired with font-display:optional
+ * (theme.json), this lets the real font arrive before first paint on normal
+ * connections — so users still see the brand type — while `optional` guarantees
+ * no font-swap layout shift under lab throttling (the mobile CLS culprit). Fonts
+ * are CORS-fetched, so the preload needs crossorigin even though same-origin.
+ */
+function preload_critical_fonts(): void {
+	$fonts = array(
+		'assets/fonts/barlow-400.woff2',
+		'assets/fonts/barlow-700.woff2',
+		'assets/fonts/roboto-slab-variable.woff2',
+	);
+	foreach ( $fonts as $rel ) {
+		printf(
+			'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n",
+			esc_url( COURTNEYR_CHILD_URI . '/' . $rel )
+		);
+	}
+}
+add_action( 'wp_head', __NAMESPACE__ . '\\preload_critical_fonts', 1 );
+
+/**
  * Enqueue the theme-toggle click handler. Loaded in the footer with
  * defer so it does not block the first paint. Pairs with the inline
  * no-flash script above.

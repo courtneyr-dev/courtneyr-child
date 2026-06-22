@@ -1,0 +1,293 @@
+- generic [active] [ref=e1]:
+  - dialog "Manage Consent" [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: Manage Consent
+      - button "Close dialog" [ref=e5] [cursor=pointer]:
+        - img [ref=e6]: times
+    - generic [ref=e9]: To provide the best experiences, we use technologies like cookies to store and/or access device information. Consenting to these technologies will allow us to process data such as browsing behavior or unique IDs on this site. Not consenting or withdrawing consent, may adversely affect certain features and functions.
+    - generic [ref=e10]:
+      - button "Accept" [ref=e11] [cursor=pointer]
+      - button "Deny" [ref=e12] [cursor=pointer]
+      - button "View preferences" [ref=e13] [cursor=pointer]
+    - list [ref=e15]:
+      - listitem [ref=e16]:
+        - link "Cookie Policy" [ref=e17] [cursor=pointer]:
+          - /url: https://qkf.b0d.myftpupload.com/cookie-policy-eu/
+      - listitem [ref=e18]:
+        - link "Cookie Policy" [ref=e19] [cursor=pointer]:
+          - /url: https://qkf.b0d.myftpupload.com/cookie-policy-eu/
+      - listitem
+  - link "Skip to content" [ref=e20] [cursor=pointer]:
+    - /url: "#wp--skip-link--target"
+  - generic [ref=e21]:
+    - banner [ref=e22]:
+      - banner [ref=e23]:
+        - generic [ref=e24]:
+          - link "courtneyr.dev — home" [ref=e26] [cursor=pointer]:
+            - /url: /
+            - text: courtneyr.dev
+          - generic [ref=e27]:
+            - group "Theme" [ref=e28]:
+              - button "Light theme" [ref=e29] [cursor=pointer]:
+                - img [ref=e30]
+              - button "Dark theme" [ref=e33] [cursor=pointer]:
+                - img [ref=e34]
+              - button "System theme (follows OS)" [pressed] [ref=e36] [cursor=pointer]:
+                - img [ref=e37]
+            - navigation "Sidebar" [ref=e40]:
+              - list [ref=e45]:
+                - listitem [ref=e46]:
+                  - link "🙋🏻‍♀️ About" [ref=e47] [cursor=pointer]:
+                    - /url: /about-courtney-robertson/
+                    - generic [ref=e48]: 🙋🏻‍♀️ About
+                - listitem [ref=e49]:
+                  - link "🤲 All" [ref=e50] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/blog/
+                    - generic [ref=e51]: 🤲 All
+                - listitem [ref=e52]:
+                  - button "📰 Blog submenu" [ref=e53] [cursor=pointer]:
+                    - generic [ref=e54]: 📰 Blog
+                  - generic:
+                    - img
+                - listitem [ref=e55]:
+                  - link "🗣️ Speaking" [ref=e56] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/category/speaking/
+                    - generic [ref=e57]: 🗣️ Speaking
+                - listitem [ref=e58]:
+                  - button "📝 Notes submenu" [ref=e59] [cursor=pointer]:
+                    - generic [ref=e60]: 📝 Notes
+                  - generic:
+                    - img
+                - listitem [ref=e61]:
+                  - link "📚 Stories" [ref=e62] [cursor=pointer]:
+                    - /url: /web-stories/
+                    - generic [ref=e63]: 📚 Stories
+            - search [ref=e64]:
+              - generic [ref=e65]: Search
+              - button "Expand search field" [ref=e67] [cursor=pointer]:
+                - img [ref=e68]
+    - main [ref=e70]:
+      - generic [ref=e71]:
+        - heading "✺ Connect with Courtney ✺" [level=1] [ref=e72]
+        - separator [ref=e73]
+      - generic [ref=e74]:
+        - text: ✦
+        - paragraph [ref=e75]: CONNECT
+        - paragraph [ref=e76]: courtney · ways to reach me
+        - paragraph [ref=e77]: I write best when I’m writing for someone, so reach out. Whether you want to talk WordPress, open source contribution paths, mandolin chord charts, or what’s growing in the garden — I’d love to hear what you’re working on.
+        - separator [ref=e78]
+        - heading "✺ On the open web ✺" [level=2] [ref=e79]
+        - paragraph [ref=e80]: Most of my best conversations happen in the fediverse and on the IndieWeb. Reply to anything, no introduction needed.
+        - list [ref=e81]:
+          - listitem [ref=e82]:
+            - text: ✦
+            - strong [ref=e83]: Mastodon
+            - text: —
+            - link "@courtneyr@m.courtneyr.co" [ref=e84] [cursor=pointer]:
+              - /url: https://m.courtneyr.co/@courtneyr
+          - listitem [ref=e85]:
+            - text: ✦
+            - strong [ref=e86]: Bluesky
+            - text: —
+            - link "@courtneyr.dev" [ref=e87] [cursor=pointer]:
+              - /url: https://bsky.app/profile/courtneyr.dev
+          - listitem [ref=e88]:
+            - text: ✦
+            - strong [ref=e89]: GitHub
+            - text: —
+            - link "courtneyr-dev" [ref=e90] [cursor=pointer]:
+              - /url: https://github.com/courtneyr-dev
+          - listitem [ref=e91]:
+            - text: ✦
+            - strong [ref=e92]: WordPress.org
+            - text: —
+            - link "courane01" [ref=e93] [cursor=pointer]:
+              - /url: https://profiles.wordpress.org/courane01/
+          - listitem [ref=e94]:
+            - text: ✦
+            - strong [ref=e95]: LinkedIn
+            - text: —
+            - link "/in/courtneyr-dev" [ref=e96] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/courtneyr-dev/
+        - separator [ref=e97]
+        - heading "✺ By email or call ✺" [level=2] [ref=e98]
+        - paragraph [ref=e99]: "For deeper conversations, work inquiries, speaking engagements, or anything that needs a real reply window:"
+        - list [ref=e100]:
+          - listitem [ref=e101]:
+            - text: ✦
+            - strong [ref=e102]: Email
+            - text: —
+            - link "crobertson@godaddy.com" [ref=e103] [cursor=pointer]:
+              - /url: mailto:crobertson@godaddy.com
+            - text: (work)
+          - listitem [ref=e104]:
+            - text: ✦
+            - strong [ref=e105]: Schedule a call
+            - text: —
+            - link "calendly.com/courtneyr_dev" [ref=e106] [cursor=pointer]:
+              - /url: https://calendly.com/courtneyr_dev
+            - text: for office hours, mentoring, or a coffee chat about the WordPress contributor path
+          - listitem [ref=e107]:
+            - text: ✦
+            - strong [ref=e108]: Speaking inquiries
+            - text: — see my
+            - link "speaking history" [ref=e109] [cursor=pointer]:
+              - /url: /category/speaking/
+            - text: first; then email with date, audience, and topic
+        - separator [ref=e110]
+        - generic [ref=e111]:
+          - blockquote [ref=e112]:
+            - paragraph [ref=e113]: The web works because someone, somewhere, took the time to reply. I try to be one of those people.
+            - generic [ref=e114]: — — me, on most days
+          - button "Copy quote to clipboard" [ref=e115] [cursor=pointer]:
+            - generic [ref=e116]: Copy quote
+          - status [ref=e117]
+        - separator [ref=e118]
+        - heading "✺ Around the IndieWeb ✺" [level=2] [ref=e119]
+        - paragraph [ref=e120]: "If you’d rather follow than chat, here’s how I publish:"
+        - list [ref=e121]:
+          - listitem [ref=e122]:
+            - text: ✦
+            - strong [ref=e123]: Newsletter
+            - text: —
+            - link "subscribe" [ref=e124] [cursor=pointer]:
+              - /url: /newsletter/
+            - text: for monthly field notes (no spam, no AI summaries, real writing)
+          - listitem [ref=e125]:
+            - text: ✦
+            - strong [ref=e126]: RSS
+            - text: —
+            - link /feed/ [ref=e127] [cursor=pointer]:
+              - /url: /feed/
+            - text: if you live in your reader (everyone should)
+          - listitem [ref=e128]:
+            - text: ✦
+            - strong [ref=e129]: WordPress Community Collective
+            - text: —
+            - link "fund contributors" [ref=e130] [cursor=pointer]:
+              - /url: https://thewpcommunitycollective.com
+            - text: if you want to support the work directly
+        - generic [ref=e132]:
+          - link "Read the field notes" [ref=e134] [cursor=pointer]:
+            - /url: /blog/
+          - link "Subscribe to the newsletter" [ref=e136] [cursor=pointer]:
+            - /url: /newsletter/
+        - text: ✺
+    - contentinfo [ref=e137]:
+      - generic [ref=e138]:
+        - heading "Find me elsewhere on the web" [level=2] [ref=e139]
+        - list [ref=e140]:
+          - listitem [ref=e141]:
+            - link "WordPress" [ref=e142] [cursor=pointer]:
+              - /url: https://profiles.wordpress.org/courane01/
+              - img [ref=e143]
+              - generic [ref=e145]: WordPress
+          - listitem [ref=e146]:
+            - link "Mastodon" [ref=e147] [cursor=pointer]:
+              - /url: https://m.courtneyr.co/@courtneyr
+              - img [ref=e148]
+              - generic [ref=e150]: Mastodon
+          - listitem [ref=e151]:
+            - link "Bluesky" [ref=e152] [cursor=pointer]:
+              - /url: https://bsky.app/profile/courtneyr.dev
+              - img [ref=e153]
+              - generic [ref=e155]: Bluesky
+          - listitem [ref=e156]:
+            - link "X" [ref=e157] [cursor=pointer]:
+              - /url: https://x.com/courtneyr_dev
+              - img [ref=e158]
+              - generic [ref=e160]: X
+          - listitem [ref=e161]:
+            - link "GitHub" [ref=e162] [cursor=pointer]:
+              - /url: https://github.com/courtneyr-dev
+              - img [ref=e163]
+              - generic [ref=e165]: GitHub
+          - listitem [ref=e166]:
+            - link "Amazon" [ref=e167] [cursor=pointer]:
+              - /url: https://www.amazon.com/hz/wishlist/ls/1T5OKLMTA0MZQ
+              - img [ref=e168]
+              - generic [ref=e170]: Amazon
+          - listitem [ref=e171]:
+            - link "Goodreads" [ref=e172] [cursor=pointer]:
+              - /url: https://www.goodreads.com/user/show/2768384-courtney-robertson
+              - img [ref=e173]
+              - generic [ref=e175]: Goodreads
+          - listitem [ref=e176]:
+            - link "TikTok" [ref=e177] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@courtneyr_dev
+              - img [ref=e178]
+              - generic [ref=e180]: TikTok
+          - listitem [ref=e181]:
+            - link "LinkedIn" [ref=e182] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/courtneyr-dev/
+              - img [ref=e183]
+              - generic [ref=e185]: LinkedIn
+          - listitem [ref=e186]:
+            - link "Instagram" [ref=e187] [cursor=pointer]:
+              - /url: https://www.instagram.com/courtneyr_dev
+              - img [ref=e188]
+              - generic [ref=e190]: Instagram
+          - listitem [ref=e191]:
+            - link "Threads" [ref=e192] [cursor=pointer]:
+              - /url: https://www.threads.net/@courtneyr_dev
+              - img [ref=e193]
+              - generic [ref=e195]: Threads
+          - listitem [ref=e196]:
+            - link "Facebook" [ref=e197] [cursor=pointer]:
+              - /url: https://www.facebook.com/streamlining
+              - img [ref=e198]
+              - generic [ref=e200]: Facebook
+          - listitem [ref=e201]:
+            - link "Flickr" [ref=e202] [cursor=pointer]:
+              - /url: https://www.flickr.com/photos/courane001/
+              - img [ref=e203]
+              - generic [ref=e205]: Flickr
+          - listitem [ref=e206]:
+            - link "YouTube" [ref=e207] [cursor=pointer]:
+              - /url: https://www.youtube.com/channel/UC1tidWhCHiaARk3_YHJwZLw
+              - img [ref=e208]
+              - generic [ref=e210]: YouTube
+          - listitem [ref=e211]:
+            - link "Twitch" [ref=e212] [cursor=pointer]:
+              - /url: https://www.twitch.tv/courtneyr_dev
+              - img [ref=e213]
+              - generic [ref=e215]: Twitch
+          - listitem [ref=e216]:
+            - link "Spotify" [ref=e217] [cursor=pointer]:
+              - /url: https://open.spotify.com/user/courtneyengle?nd=1&dlsi=10c4cfa6c4b04c54
+              - img [ref=e218]
+              - generic [ref=e220]: Spotify
+          - listitem [ref=e221]:
+            - link "Last.fm" [ref=e222] [cursor=pointer]:
+              - /url: https://www.last.fm/user/courane01
+              - img [ref=e223]
+              - generic [ref=e225]: Last.fm
+          - listitem [ref=e226]:
+            - link "Pinterest" [ref=e227] [cursor=pointer]:
+              - /url: https://www.pinterest.com/courtneyr_dev/
+              - img [ref=e228]
+              - generic [ref=e230]: Pinterest
+          - listitem [ref=e231]:
+            - link "Readwise" [ref=e232] [cursor=pointer]:
+              - /url: https://readwise.io/@courtneyrdev
+              - img [ref=e233]
+              - generic [ref=e235]: Readwise
+          - listitem [ref=e236]:
+            - link "BoardGameGeek" [ref=e237] [cursor=pointer]:
+              - /url: https://boardgamegeek.com/user/courtneyr_dev
+              - img [ref=e238]
+              - generic [ref=e240]: BoardGameGeek
+          - listitem [ref=e241]:
+            - link "Snipd" [ref=e242] [cursor=pointer]:
+              - /url: https://share.snipd.com/user/courtneyr_dev
+              - img [ref=e243]
+              - generic [ref=e245]: Snipd
+          - listitem [ref=e246]:
+            - link "OpenProfile.dev" [ref=e247] [cursor=pointer]:
+              - /url: https://openprofile.dev/profile/courtneyr
+              - img [ref=e248]
+              - generic [ref=e250]: OpenProfile.dev
+        - paragraph [ref=e252]:
+          - text: © 2026 Courtney Robertson · Built with WordPress · Powered by the
+          - link "IndieWeb" [ref=e253] [cursor=pointer]:
+            - /url: https://indieweb.org/

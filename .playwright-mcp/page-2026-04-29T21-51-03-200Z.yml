@@ -1,0 +1,244 @@
+- generic [active] [ref=e1]:
+  - dialog "Manage Consent" [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: Manage Consent
+      - button "Close dialog" [ref=e5] [cursor=pointer]:
+        - img [ref=e6]: times
+    - generic [ref=e9]: To provide the best experiences, we use technologies like cookies to store and/or access device information. Consenting to these technologies will allow us to process data such as browsing behavior or unique IDs on this site. Not consenting or withdrawing consent, may adversely affect certain features and functions.
+    - generic [ref=e10]:
+      - button "Accept" [ref=e11] [cursor=pointer]
+      - button "Deny" [ref=e12] [cursor=pointer]
+      - button "View preferences" [ref=e13] [cursor=pointer]
+    - list [ref=e15]:
+      - listitem [ref=e16]:
+        - link "Cookie Policy" [ref=e17] [cursor=pointer]:
+          - /url: https://qkf.b0d.myftpupload.com/cookie-policy-eu/
+      - listitem [ref=e18]:
+        - link "Cookie Policy" [ref=e19] [cursor=pointer]:
+          - /url: https://qkf.b0d.myftpupload.com/cookie-policy-eu/
+      - listitem
+  - link "Skip to content" [ref=e20] [cursor=pointer]:
+    - /url: "#wp--skip-link--target"
+  - generic [ref=e21]:
+    - banner [ref=e22]:
+      - banner [ref=e23]:
+        - generic [ref=e24]:
+          - link "courtneyr.dev — home" [ref=e26] [cursor=pointer]:
+            - /url: /
+            - text: courtneyr.dev
+          - generic [ref=e27]:
+            - group "Theme" [ref=e28]:
+              - button "Light theme" [ref=e29] [cursor=pointer]:
+                - img [ref=e30]
+              - button "Dark theme" [ref=e33] [cursor=pointer]:
+                - img [ref=e34]
+              - button "System theme (follows OS)" [pressed] [ref=e36] [cursor=pointer]:
+                - img [ref=e37]
+            - navigation "Sidebar" [ref=e40]:
+              - list [ref=e45]:
+                - listitem [ref=e46]:
+                  - link "🙋🏻‍♀️ About" [ref=e47] [cursor=pointer]:
+                    - /url: /about-courtney-robertson/
+                    - generic [ref=e48]: 🙋🏻‍♀️ About
+                - listitem [ref=e49]:
+                  - link "🤲 All" [ref=e50] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/blog/
+                    - generic [ref=e51]: 🤲 All
+                - listitem [ref=e52]:
+                  - button "📰 Blog submenu" [ref=e53] [cursor=pointer]:
+                    - generic [ref=e54]: 📰 Blog
+                  - generic:
+                    - img
+                - listitem [ref=e55]:
+                  - link "🗣️ Speaking" [ref=e56] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/category/speaking/
+                    - generic [ref=e57]: 🗣️ Speaking
+                - listitem [ref=e58]:
+                  - link "📺 Shows" [ref=e59] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/podcast/
+                    - generic [ref=e60]: 📺 Shows
+                - listitem [ref=e61]:
+                  - button "📝 Notes submenu" [ref=e62] [cursor=pointer]:
+                    - generic [ref=e63]: 📝 Notes
+                  - generic:
+                    - img
+                - listitem [ref=e64]:
+                  - link "📚 Stories" [ref=e65] [cursor=pointer]:
+                    - /url: /web-stories/
+                    - generic [ref=e66]: 📚 Stories
+            - search [ref=e67]:
+              - generic [ref=e68]: Search
+              - button "Expand search field" [ref=e70] [cursor=pointer]:
+                - img [ref=e71]
+    - main [ref=e73]:
+      - text: ✺
+      - generic [ref=e74]:
+        - paragraph [ref=e75]: "404"
+        - paragraph [ref=e76]: field notes · off the path
+        - heading "✺ This page wandered off ✺" [level=1] [ref=e77]
+        - separator [ref=e78]
+        - paragraph [ref=e79]: The link you followed went looking for a page that isn’t here — maybe the URL got garbled, maybe the post moved, maybe it’s a draft I haven’t published yet. Either way, here’s how to get back on the path.
+      - generic [ref=e80]:
+        - heading "Try searching the archive" [level=2] [ref=e81]
+        - search [ref=e82]:
+          - generic [ref=e83]: Search
+          - generic [ref=e84]:
+            - searchbox "Search" [ref=e85]
+            - button "Search" [ref=e86] [cursor=pointer]
+      - generic [ref=e88]:
+        - link "Back to home" [ref=e90] [cursor=pointer]:
+          - /url: /
+        - link "Browse the field notes" [ref=e92] [cursor=pointer]:
+          - /url: /blog/
+      - generic [ref=e93]:
+        - heading "✺ Or pick from the latest ✺" [level=2] [ref=e94]
+        - list [ref=e96]:
+          - listitem [ref=e97]:
+            - generic [ref=e98]:
+              - paragraph [ref=e99]: ✦
+              - 'heading "LLM Wiki: From Brain Fog to AI-Organized Second Brain Clarity" [level=2] [ref=e100]':
+                - 'link "LLM Wiki: From Brain Fog to AI-Organized Second Brain Clarity" [ref=e101] [cursor=pointer]':
+                  - /url: https://qkf.b0d.myftpupload.com/2026/04/15/llm-wiki-ai-second-brain-obsidian/
+          - listitem [ref=e102]:
+            - generic [ref=e103]:
+              - paragraph [ref=e104]: ✦
+              - 'heading "The Web Remembers Who We Are: Building XFN for WordPress in 2025" [level=2] [ref=e105]':
+                - 'link "The Web Remembers Who We Are: Building XFN for WordPress in 2025" [ref=e106] [cursor=pointer]':
+                  - /url: https://qkf.b0d.myftpupload.com/2025/12/11/the-web-remembers-who-we-are-building-xfn-for-wordpress-in-2025/
+          - listitem [ref=e107]:
+            - generic [ref=e108]:
+              - paragraph [ref=e109]: ✦
+              - 'heading "Post Formats for Block Themes: My First WordPress Plugin After 11 Years" [level=2] [ref=e110]':
+                - 'link "Post Formats for Block Themes: My First WordPress Plugin After 11 Years" [ref=e111] [cursor=pointer]':
+                  - /url: https://qkf.b0d.myftpupload.com/2025/12/03/post-formats-for-block-themes/
+          - listitem [ref=e112]:
+            - generic [ref=e113]:
+              - paragraph [ref=e114]: ✦
+              - 'heading "This Week in WordPress 347: Evan" [level=2] [ref=e115]':
+                - 'link "This Week in WordPress 347: Evan" [ref=e116] [cursor=pointer]':
+                  - /url: https://qkf.b0d.myftpupload.com/2025/09/09/this-week-in-wordpress-347-evan/
+          - listitem [ref=e117]:
+            - generic [ref=e118]:
+              - paragraph [ref=e119]: ✦
+              - heading "Wearing Many Hats, Literally – WPBuilds This Week in WordPress 307" [level=2] [ref=e120]:
+                - link "Wearing Many Hats, Literally – WPBuilds This Week in WordPress 307" [ref=e121] [cursor=pointer]:
+                  - /url: https://qkf.b0d.myftpupload.com/2024/09/03/wearing-many-hats-literally-wpbuilds-this-week-in-wordpress-307/
+      - text: ✦
+    - contentinfo [ref=e122]:
+      - generic [ref=e123]:
+        - heading "Find me elsewhere on the web" [level=2] [ref=e124]
+        - list [ref=e125]:
+          - listitem [ref=e126]:
+            - link "WordPress" [ref=e127] [cursor=pointer]:
+              - /url: https://profiles.wordpress.org/courane01/
+              - img [ref=e128]
+              - generic [ref=e130]: WordPress
+          - listitem [ref=e131]:
+            - link "Mastodon" [ref=e132] [cursor=pointer]:
+              - /url: https://m.courtneyr.co/@courtneyr
+              - img [ref=e133]
+              - generic [ref=e135]: Mastodon
+          - listitem [ref=e136]:
+            - link "Bluesky" [ref=e137] [cursor=pointer]:
+              - /url: https://bsky.app/profile/courtneyr.dev
+              - img [ref=e138]
+              - generic [ref=e140]: Bluesky
+          - listitem [ref=e141]:
+            - link "X" [ref=e142] [cursor=pointer]:
+              - /url: https://x.com/courtneyr_dev
+              - img [ref=e143]
+              - generic [ref=e145]: X
+          - listitem [ref=e146]:
+            - link "GitHub" [ref=e147] [cursor=pointer]:
+              - /url: https://github.com/courtneyr-dev
+              - img [ref=e148]
+              - generic [ref=e150]: GitHub
+          - listitem [ref=e151]:
+            - link "Amazon" [ref=e152] [cursor=pointer]:
+              - /url: https://www.amazon.com/hz/wishlist/ls/1T5OKLMTA0MZQ
+              - img [ref=e153]
+              - generic [ref=e155]: Amazon
+          - listitem [ref=e156]:
+            - link "Goodreads" [ref=e157] [cursor=pointer]:
+              - /url: https://www.goodreads.com/user/show/2768384-courtney-robertson
+              - img [ref=e158]
+              - generic [ref=e160]: Goodreads
+          - listitem [ref=e161]:
+            - link "TikTok" [ref=e162] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@courtneyr_dev
+              - img [ref=e163]
+              - generic [ref=e165]: TikTok
+          - listitem [ref=e166]:
+            - link "LinkedIn" [ref=e167] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/courtneyr-dev/
+              - img [ref=e168]
+              - generic [ref=e170]: LinkedIn
+          - listitem [ref=e171]:
+            - link "Instagram" [ref=e172] [cursor=pointer]:
+              - /url: https://www.instagram.com/courtneyr_dev
+              - img [ref=e173]
+              - generic [ref=e175]: Instagram
+          - listitem [ref=e176]:
+            - link "Threads" [ref=e177] [cursor=pointer]:
+              - /url: https://www.threads.net/@courtneyr_dev
+              - img [ref=e178]
+              - generic [ref=e180]: Threads
+          - listitem [ref=e181]:
+            - link "Facebook" [ref=e182] [cursor=pointer]:
+              - /url: https://www.facebook.com/streamlining
+              - img [ref=e183]
+              - generic [ref=e185]: Facebook
+          - listitem [ref=e186]:
+            - link "Flickr" [ref=e187] [cursor=pointer]:
+              - /url: https://www.flickr.com/photos/courane001/
+              - img [ref=e188]
+              - generic [ref=e190]: Flickr
+          - listitem [ref=e191]:
+            - link "YouTube" [ref=e192] [cursor=pointer]:
+              - /url: https://www.youtube.com/channel/UC1tidWhCHiaARk3_YHJwZLw
+              - img [ref=e193]
+              - generic [ref=e195]: YouTube
+          - listitem [ref=e196]:
+            - link "Twitch" [ref=e197] [cursor=pointer]:
+              - /url: https://www.twitch.tv/courtneyr_dev
+              - img [ref=e198]
+              - generic [ref=e200]: Twitch
+          - listitem [ref=e201]:
+            - link "Spotify" [ref=e202] [cursor=pointer]:
+              - /url: https://open.spotify.com/user/courtneyengle?nd=1&dlsi=10c4cfa6c4b04c54
+              - img [ref=e203]
+              - generic [ref=e205]: Spotify
+          - listitem [ref=e206]:
+            - link "Last.fm" [ref=e207] [cursor=pointer]:
+              - /url: https://www.last.fm/user/courane01
+              - img [ref=e208]
+              - generic [ref=e210]: Last.fm
+          - listitem [ref=e211]:
+            - link "Pinterest" [ref=e212] [cursor=pointer]:
+              - /url: https://www.pinterest.com/courtneyr_dev/
+              - img [ref=e213]
+              - generic [ref=e215]: Pinterest
+          - listitem [ref=e216]:
+            - link "Readwise" [ref=e217] [cursor=pointer]:
+              - /url: https://readwise.io/@courtneyrdev
+              - img [ref=e218]
+              - generic [ref=e220]: Readwise
+          - listitem [ref=e221]:
+            - link "BoardGameGeek" [ref=e222] [cursor=pointer]:
+              - /url: https://boardgamegeek.com/user/courtneyr_dev
+              - img [ref=e223]
+              - generic [ref=e225]: BoardGameGeek
+          - listitem [ref=e226]:
+            - link "Snipd" [ref=e227] [cursor=pointer]:
+              - /url: https://share.snipd.com/user/courtneyr_dev
+              - img [ref=e228]
+              - generic [ref=e230]: Snipd
+          - listitem [ref=e231]:
+            - link "OpenProfile.dev" [ref=e232] [cursor=pointer]:
+              - /url: https://openprofile.dev/profile/courtneyr
+              - img [ref=e233]
+              - generic [ref=e235]: OpenProfile.dev
+        - paragraph [ref=e237]:
+          - text: © 2026 Courtney Robertson · Built with WordPress · Powered by the
+          - link "IndieWeb" [ref=e238] [cursor=pointer]:
+            - /url: https://indieweb.org/

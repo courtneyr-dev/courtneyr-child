@@ -3341,6 +3341,43 @@ body.home .tnp-field label {
 	descent-override: 28.59%;
 	line-gap-override: 0%;
 }
+
+/* (5d) font-display:optional OVERRIDE (v0.5.113). Ollie Pro + the resolver
+   emit the theme web fonts with font-display:swap (the theme.json "optional"
+   never reaches the rendered @font-face). Under mobile throttling, swap is the
+   dominant CLS source: the real font lands after first paint and re-wraps the
+   text. CSS wins where the WP data layer can't — redeclaring each face here
+   (same family/weight/style/src, parsed after the inline global-styles) makes
+   `optional` the effective value, so the swap reflow can't happen. Paired with
+   the font preload (inc/enqueue.php) + the metric-matched fallbacks above. */
+@font-face {
+	font-family: "Barlow";
+	font-style: normal;
+	font-weight: 400;
+	font-display: optional;
+	src: url("../fonts/barlow-400.woff2") format("woff2");
+}
+@font-face {
+	font-family: "Barlow";
+	font-style: italic;
+	font-weight: 400;
+	font-display: optional;
+	src: url("../fonts/barlow-400-italic.woff2") format("woff2");
+}
+@font-face {
+	font-family: "Barlow";
+	font-style: normal;
+	font-weight: 700;
+	font-display: optional;
+	src: url("../fonts/barlow-700.woff2") format("woff2");
+}
+@font-face {
+	font-family: "Roboto Slab";
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: optional;
+	src: url("../fonts/roboto-slab-variable.woff2") format("woff2");
+}
 :root {
 	/* Body text resolves via --cr-font-body (the theme token), so insert the
 	   metric-matched fallback there; mirror onto the WP preset vars too. */

@@ -1,0 +1,222 @@
+- generic [active] [ref=e1]:
+  - dialog "Manage Consent" [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: Manage Consent
+      - button "Close dialog" [ref=e5] [cursor=pointer]:
+        - img [ref=e6]: times
+    - generic [ref=e9]: To provide the best experiences, we use technologies like cookies to store and/or access device information. Consenting to these technologies will allow us to process data such as browsing behavior or unique IDs on this site. Not consenting or withdrawing consent, may adversely affect certain features and functions.
+    - generic [ref=e10]:
+      - button "Accept" [ref=e11] [cursor=pointer]
+      - button "Deny" [ref=e12] [cursor=pointer]
+      - button "View preferences" [ref=e13] [cursor=pointer]
+    - list [ref=e15]:
+      - listitem [ref=e16]:
+        - link "Cookie Policy" [ref=e17] [cursor=pointer]:
+          - /url: https://qkf.b0d.myftpupload.com/cookie-policy-eu/
+      - listitem [ref=e18]:
+        - link "Cookie Policy" [ref=e19] [cursor=pointer]:
+          - /url: https://qkf.b0d.myftpupload.com/cookie-policy-eu/
+      - listitem
+  - link "Skip to content" [ref=e20] [cursor=pointer]:
+    - /url: "#wp--skip-link--target"
+  - generic [ref=e21]:
+    - banner [ref=e22]:
+      - banner [ref=e23]:
+        - generic [ref=e24]:
+          - link "courtneyr.dev — home" [ref=e26] [cursor=pointer]:
+            - /url: /
+            - text: courtneyr.dev
+          - generic [ref=e27]:
+            - group "Theme" [ref=e28]:
+              - button "Light theme" [ref=e29] [cursor=pointer]:
+                - img [ref=e30]
+              - button "Dark theme" [ref=e33] [cursor=pointer]:
+                - img [ref=e34]
+              - button "System theme (follows OS)" [pressed] [ref=e36] [cursor=pointer]:
+                - img [ref=e37]
+            - navigation "Sidebar" [ref=e40]:
+              - list [ref=e45]:
+                - listitem [ref=e46]:
+                  - link "🙋🏻‍♀️ About" [ref=e47] [cursor=pointer]:
+                    - /url: /about-courtney-robertson/
+                    - generic [ref=e48]: 🙋🏻‍♀️ About
+                - listitem [ref=e49]:
+                  - link "🤲 All" [ref=e50] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/blog/
+                    - generic [ref=e51]: 🤲 All
+                - listitem [ref=e52]:
+                  - button "📰 Blog submenu" [ref=e53] [cursor=pointer]:
+                    - generic [ref=e54]: 📰 Blog
+                  - generic:
+                    - img
+                - listitem [ref=e55]:
+                  - link "🗣️ Speaking" [ref=e56] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/category/speaking/
+                    - generic [ref=e57]: 🗣️ Speaking
+                - listitem [ref=e58]:
+                  - link "📺 Shows" [ref=e59] [cursor=pointer]:
+                    - /url: https://qkf.b0d.myftpupload.com/podcast/
+                    - generic [ref=e60]: 📺 Shows
+                - listitem [ref=e61]:
+                  - button "📝 Notes submenu" [ref=e62] [cursor=pointer]:
+                    - generic [ref=e63]: 📝 Notes
+                  - generic:
+                    - img
+                - listitem [ref=e64]:
+                  - link "📚 Stories" [ref=e65] [cursor=pointer]:
+                    - /url: /web-stories/
+                    - generic [ref=e66]: 📚 Stories
+            - search [ref=e67]:
+              - generic [ref=e68]: Search
+              - button "Expand search field" [ref=e70] [cursor=pointer]:
+                - img [ref=e71]
+    - main [ref=e73]:
+      - generic [ref=e74]:
+        - heading "✺ About Courtney Robertson ✺" [level=1] [ref=e75]
+        - separator [ref=e76]
+      - generic [ref=e77]:
+        - text: ✦
+        - paragraph [ref=e78]: ABOUT
+        - paragraph [ref=e79]: courtney · the long version
+        - paragraph [ref=e80]: Meet Courtney Robertson, a passionate technology teacher who has been teaching basic through advanced software, hardware, and social media uses in plain English since 2001. Courtney’s ability to communicate complex technical information in a way that everyone can understand has made her a sought-after speaker for conferences, online training, and classrooms.
+        - separator [ref=e81]
+        - heading "✺ In the classroom ✺" [level=2] [ref=e82]
+        - paragraph [ref=e83]: With a teaching background that spans from elementary basic computer specials to high school computer technology shop — where she taught programming, networking, and hardware — Courtney has helped countless students develop the skills they need to succeed in the digital age. As a business education teacher, she has also taught web design, accounting, and more.
+        - paragraph [ref=e84]: Beyond the classroom, Courtney has served as a Career Development Coordinator, Department Chair, and Future Business Leaders of America advisor, plus WordPress Training Team Faculty Member — demonstrating her commitment to student success both in and out of the classroom. She continues to share her knowledge and expertise with adult learners through Continuing Adult Education programs.
+        - separator [ref=e85]
+        - heading "✺ Beyond the classroom ✺" [level=2] [ref=e86]
+        - paragraph [ref=e87]: Courtney’s talents go beyond technology education — she is also a gifted musician who played the violin and mandolin throughout school. After graduating from high school, Courtney attended Bloomsburg University, where she majored in Business, Computer, and Information Technology Education.
+        - generic [ref=e88]:
+          - blockquote [ref=e89]:
+            - paragraph [ref=e90]: Whether you’re a third-grader or a grandparent, a student or a business owner — the commitment to teaching in plain language and providing accountability is what makes the difference.
+            - generic [ref=e91]: — Courtney’s teaching ethos
+          - button "Copy quote to clipboard" [ref=e92] [cursor=pointer]:
+            - generic [ref=e93]: Copy quote
+          - status [ref=e94]
+        - separator [ref=e95]
+        - heading "✺ Let’s connect ✺" [level=2] [ref=e96]
+        - paragraph [ref=e97]: With a wealth of experience and dedication to helping people succeed, Courtney brings the same straightforward energy to every conversation — whether you’re looking to expand your own technology skills, build a developer relations practice, or grow as an open source contributor.
+        - generic [ref=e98]:
+          - link "Read the field notes" [ref=e100] [cursor=pointer]:
+            - /url: /blog/
+          - link "Join the newsletter" [ref=e102] [cursor=pointer]:
+            - /url: /newsletter/
+        - text: ✺
+    - contentinfo [ref=e103]:
+      - generic [ref=e104]:
+        - heading "Find me elsewhere on the web" [level=2] [ref=e105]
+        - list [ref=e106]:
+          - listitem [ref=e107]:
+            - link "WordPress" [ref=e108] [cursor=pointer]:
+              - /url: https://profiles.wordpress.org/courane01/
+              - img [ref=e109]
+              - generic [ref=e111]: WordPress
+          - listitem [ref=e112]:
+            - link "Mastodon" [ref=e113] [cursor=pointer]:
+              - /url: https://m.courtneyr.co/@courtneyr
+              - img [ref=e114]
+              - generic [ref=e116]: Mastodon
+          - listitem [ref=e117]:
+            - link "Bluesky" [ref=e118] [cursor=pointer]:
+              - /url: https://bsky.app/profile/courtneyr.dev
+              - img [ref=e119]
+              - generic [ref=e121]: Bluesky
+          - listitem [ref=e122]:
+            - link "X" [ref=e123] [cursor=pointer]:
+              - /url: https://x.com/courtneyr_dev
+              - img [ref=e124]
+              - generic [ref=e126]: X
+          - listitem [ref=e127]:
+            - link "GitHub" [ref=e128] [cursor=pointer]:
+              - /url: https://github.com/courtneyr-dev
+              - img [ref=e129]
+              - generic [ref=e131]: GitHub
+          - listitem [ref=e132]:
+            - link "Amazon" [ref=e133] [cursor=pointer]:
+              - /url: https://www.amazon.com/hz/wishlist/ls/1T5OKLMTA0MZQ
+              - img [ref=e134]
+              - generic [ref=e136]: Amazon
+          - listitem [ref=e137]:
+            - link "Goodreads" [ref=e138] [cursor=pointer]:
+              - /url: https://www.goodreads.com/user/show/2768384-courtney-robertson
+              - img [ref=e139]
+              - generic [ref=e141]: Goodreads
+          - listitem [ref=e142]:
+            - link "TikTok" [ref=e143] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@courtneyr_dev
+              - img [ref=e144]
+              - generic [ref=e146]: TikTok
+          - listitem [ref=e147]:
+            - link "LinkedIn" [ref=e148] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/courtneyr-dev/
+              - img [ref=e149]
+              - generic [ref=e151]: LinkedIn
+          - listitem [ref=e152]:
+            - link "Instagram" [ref=e153] [cursor=pointer]:
+              - /url: https://www.instagram.com/courtneyr_dev
+              - img [ref=e154]
+              - generic [ref=e156]: Instagram
+          - listitem [ref=e157]:
+            - link "Threads" [ref=e158] [cursor=pointer]:
+              - /url: https://www.threads.net/@courtneyr_dev
+              - img [ref=e159]
+              - generic [ref=e161]: Threads
+          - listitem [ref=e162]:
+            - link "Facebook" [ref=e163] [cursor=pointer]:
+              - /url: https://www.facebook.com/streamlining
+              - img [ref=e164]
+              - generic [ref=e166]: Facebook
+          - listitem [ref=e167]:
+            - link "Flickr" [ref=e168] [cursor=pointer]:
+              - /url: https://www.flickr.com/photos/courane001/
+              - img [ref=e169]
+              - generic [ref=e171]: Flickr
+          - listitem [ref=e172]:
+            - link "YouTube" [ref=e173] [cursor=pointer]:
+              - /url: https://www.youtube.com/channel/UC1tidWhCHiaARk3_YHJwZLw
+              - img [ref=e174]
+              - generic [ref=e176]: YouTube
+          - listitem [ref=e177]:
+            - link "Twitch" [ref=e178] [cursor=pointer]:
+              - /url: https://www.twitch.tv/courtneyr_dev
+              - img [ref=e179]
+              - generic [ref=e181]: Twitch
+          - listitem [ref=e182]:
+            - link "Spotify" [ref=e183] [cursor=pointer]:
+              - /url: https://open.spotify.com/user/courtneyengle?nd=1&dlsi=10c4cfa6c4b04c54
+              - img [ref=e184]
+              - generic [ref=e186]: Spotify
+          - listitem [ref=e187]:
+            - link "Last.fm" [ref=e188] [cursor=pointer]:
+              - /url: https://www.last.fm/user/courane01
+              - img [ref=e189]
+              - generic [ref=e191]: Last.fm
+          - listitem [ref=e192]:
+            - link "Pinterest" [ref=e193] [cursor=pointer]:
+              - /url: https://www.pinterest.com/courtneyr_dev/
+              - img [ref=e194]
+              - generic [ref=e196]: Pinterest
+          - listitem [ref=e197]:
+            - link "Readwise" [ref=e198] [cursor=pointer]:
+              - /url: https://readwise.io/@courtneyrdev
+              - img [ref=e199]
+              - generic [ref=e201]: Readwise
+          - listitem [ref=e202]:
+            - link "BoardGameGeek" [ref=e203] [cursor=pointer]:
+              - /url: https://boardgamegeek.com/user/courtneyr_dev
+              - img [ref=e204]
+              - generic [ref=e206]: BoardGameGeek
+          - listitem [ref=e207]:
+            - link "Snipd" [ref=e208] [cursor=pointer]:
+              - /url: https://share.snipd.com/user/courtneyr_dev
+              - img [ref=e209]
+              - generic [ref=e211]: Snipd
+          - listitem [ref=e212]:
+            - link "OpenProfile.dev" [ref=e213] [cursor=pointer]:
+              - /url: https://openprofile.dev/profile/courtneyr
+              - img [ref=e214]
+              - generic [ref=e216]: OpenProfile.dev
+        - paragraph [ref=e218]:
+          - text: © 2026 Courtney Robertson · Built with WordPress · Powered by the
+          - link "IndieWeb" [ref=e219] [cursor=pointer]:
+            - /url: https://indieweb.org/
