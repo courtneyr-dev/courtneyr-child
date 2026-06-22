@@ -9,6 +9,9 @@
 .cr-404 {
 	position: relative;
 	overflow: hidden; /* keep the edge bursts from causing horizontal scroll */
+	/* faint halftone dot grain behind the cream surface — newsprint, not flat fill */
+	background-image: radial-gradient(rgba(36, 28, 74, 0.06) 1.1px, transparent 1.3px);
+	background-size: 22px 22px;
 }
 
 /* ---- narrow, centered content column (leaves margin room for edge bursts) ---- */
@@ -158,13 +161,17 @@
 	padding: var(--cr-space-sm) var(--cr-space-md);
 	transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
-/* slight hand-placed rotation, alternating */
-.cr-404 .cr-404__list-item:nth-child(1) { transform: rotate(-1.5deg); }
-.cr-404 .cr-404__list-item:nth-child(2) { transform: rotate(1.2deg);  margin-left: 1.5rem; }
-.cr-404 .cr-404__list-item:nth-child(3) { transform: rotate(-0.7deg); margin-right: 1.2rem; }
-.cr-404 .cr-404__list-item:nth-child(4) { transform: rotate(1.6deg);  margin-left: 0.8rem; }
-.cr-404 .cr-404__list-item:nth-child(5) { transform: rotate(-1.1deg); }
-.cr-404 .cr-404__list-item:hover {
+/* Alternating "pinned clipping" tilt. Each card is the ONLY child of its own
+   <li.wp-block-post>, so :nth-child on the card always matches 1 and can't
+   alternate (the cause of the old all-lean-one-way look). Key it off the <li>
+   wrapper, whose siblings DO alternate. */
+.cr-404 .cr-404__list .wp-block-post:nth-child(odd) .cr-404__list-item {
+	transform: rotate(-2.2deg);
+}
+.cr-404 .cr-404__list .wp-block-post:nth-child(even) .cr-404__list-item {
+	transform: rotate(2.2deg);
+}
+.cr-404 .cr-404__list .wp-block-post .cr-404__list-item:hover {
 	transform: rotate(0deg) translate(-1px, -1px);
 	box-shadow: 6px 6px 0 var(--cr-ink);
 }
@@ -204,7 +211,7 @@
 .cr-404 .cr-404__list-item:nth-child(5)::after { background: var(--cr-light-orange); }
 /* suppress the post-format orange marker bar leaking onto the cards */
 .cr-404 .cr-404__list .wp-block-post::after { content: none !important; }
-.cr-404 .cr-404__list-title { margin: 0; }
+.cr-404 .cr-404__list-title { margin: 0; font-size: var(--wp--preset--font-size--lg) !important; }
 .cr-404 .cr-404__list-title a { text-decoration: none; }
 .cr-404 .cr-404__list-title a:hover { text-decoration: underline; }
 
