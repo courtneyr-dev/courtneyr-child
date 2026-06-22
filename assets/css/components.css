@@ -34,6 +34,18 @@
    ============================================================================= */
 
 
+/* ============ a11y: contrast in colored table-header cells (v0.5.116) ============
+   Table header cells (<th>) in this theme use a cerulean background with white
+   text. Some legacy content nests a heading/link inside a <th> (e.g. the CMS
+   comparison table), and the global heading/link color (dark) overrode the
+   cell's white — producing dark-on-cerulean (~2.8:1, fails WCAG AA). Make
+   headings/links inside header cells inherit the cell's (light) color. Scoped to
+   <th> only, so normal data-cell links keep their link color. */
+th h1, th h2, th h3, th h4, th h5, th h6,
+th a:not(.wp-element-button) {
+  color: inherit;
+}
+
 /* ============ Display heading (Rock Salt) ============ */
 .cr-display,
 .is-style-cr-display {
@@ -2339,6 +2351,12 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 .cr-prose table th {
 	background: var(--cr-callout-bg);
 	color: var(--cr-callout-ink);
+	/* Headings/links nested in a th (legacy comparison tables) get their color
+	   force-set by DesignSetGo via `color: var(--dsgo-text-color) !important`.
+	   Define the var here so that forced color resolves to the cell's own light
+	   ink instead of the dark default — fixes WCAG contrast without a specificity
+	   war. The `th h1..h6, th a` rule above covers the no-DesignSetGo case. */
+	--dsgo-text-color: var(--cr-callout-ink);
 	font-family: var(--cr-font-accent, serif);
 	font-weight: 700;
 	text-align: left;

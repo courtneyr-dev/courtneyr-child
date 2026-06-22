@@ -61,8 +61,14 @@ function read_canonical(): array {
 /**
  * Empty WP core's default palette, gradients, duotone presets.
  * Layer: wp_theme_json_data_default (origin: default)
+ *
+ * No param/return type hint: the active Gutenberg plugin passes its own
+ * WP_Theme_JSON_Data_Gutenberg, which does NOT extend core's WP_Theme_JSON_Data,
+ * so a strict hint throws a TypeError under declare(strict_types=1) whenever the
+ * theme.json cache is cold and these filters re-run. Both classes expose
+ * get_data()/update_with(), so duck typing is correct here.
  */
-function strip_core_defaults( \WP_Theme_JSON_Data $theme_json ): \WP_Theme_JSON_Data {
+function strip_core_defaults( $theme_json ) {
 	$data = $theme_json->get_data();
 
 	if ( ! isset( $data['settings']['color'] ) ) {
@@ -89,7 +95,7 @@ add_filter( 'wp_theme_json_data_default', __NAMESPACE__ . '\\strip_core_defaults
  * update_with() constructs a fresh WP_Theme_JSON from the data passed,
  * this effectively replaces (not merges) the palette for this layer.
  */
-function override_theme_palette( \WP_Theme_JSON_Data $theme_json ): \WP_Theme_JSON_Data {
+function override_theme_palette( $theme_json ) {
 	$canonical = read_canonical();
 	$data      = $theme_json->get_data();
 
