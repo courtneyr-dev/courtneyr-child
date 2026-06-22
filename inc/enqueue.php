@@ -334,6 +334,36 @@ function preload_critical_fonts(): void {
 add_action( 'wp_head', __NAMESPACE__ . '\\preload_critical_fonts', 1 );
 
 /**
+ * Fix WCAG 2.5.3 (Label in Name) on Complianz cookie-banner "read more" links.
+ * Complianz outputs e.g. visible "Read more about these purposes" with
+ * aria-label "Read more about TCF purposes on Cookie Database" — the accessible
+ * name doesn't contain the visible text, which fails voice-control activation
+ * and misleads screen-reader users. Where the aria-label doesn't contain the
+ * visible text, drop it so the visible text becomes the accessible name. The
+ * banner is plugin-rendered (and re-renders on interaction), so a small script
+ * that re-runs on Complianz's status event is the cleanest seam.
+ */
+function fix_consent_link_labels(): void {
+	?>
+<script id="cr-consent-a11y">
+(function(){
+	function fix(){
+		document.querySelectorAll('a.cmplz-link[aria-label], a[class*="cmplz-read-more"][aria-label]').forEach(function(a){
+			var vis=(a.textContent||'').trim().toLowerCase();
+			var lab=(a.getAttribute('aria-label')||'').trim().toLowerCase();
+			if(vis && lab && lab.indexOf(vis)===-1){ a.removeAttribute('aria-label'); }
+		});
+	}
+	if(document.readyState!=='loading'){fix();}else{document.addEventListener('DOMContentLoaded',fix);}
+	document.addEventListener('cmplz_banner_status',fix);
+	[600,1500,3000].forEach(function(t){setTimeout(fix,t);});
+})();
+</script>
+	<?php
+}
+add_action( 'wp_footer', __NAMESPACE__ . '\\fix_consent_link_labels', 100 );
+
+/**
  * Enqueue the theme-toggle click handler. Loaded in the footer with
  * defer so it does not block the first paint. Pairs with the inline
  * no-flash script above.
