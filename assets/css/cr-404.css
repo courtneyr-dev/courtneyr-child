@@ -1,25 +1,34 @@
 /* =============================================================================
-   404 comic layer — scoped entirely under .cr-404 so it can never touch
-   another template. Enqueued only on is_404() (see inc/enqueue.php).
-   Centered narrow column, starburst 404, comic onomatopoeia pinned to the
-   left/right margins, and numbered stacked cards for the recent-posts loop.
-   All color/shape/type values come from the cr-* design tokens.
+   404 comic layer — faithful reproduction of the Claude Design 404
+   (design project 755d010b / 404.dc.html). Scoped under .cr-404, enqueued
+   only on is_404() (see inc/enqueue.php). Sunburst 404 badge with spinning
+   rays, russian-violet-outlined comic bursts scattered in the margins, a
+   tape-labelled search card, and numbered post cards with kind chips.
+   The site header/footer come from the theme (the design's were mockups).
    ============================================================================= */
 
 .cr-404 {
+	/* design-specific tokens the base system doesn't define */
+	--cr-card:        var(--cr-surface-elevated);
+	--cr-shadow-ink:  var(--cr-russian-violet);
+	--cr-tab:         var(--cr-sky-blue);
+	--burst: polygon(50% 0%,61% 15%,79% 10%,80% 28%,98% 35%,87% 50%,98% 65%,80% 72%,79% 90%,61% 85%,50% 100%,39% 85%,21% 90%,20% 72%,2% 65%,13% 50%,2% 35%,20% 28%,21% 10%,39% 15%);
 	position: relative;
-	overflow: hidden; /* keep the edge bursts from causing horizontal scroll */
-	/* faint halftone dot grain behind the cream surface — newsprint, not flat fill */
-	background-image: radial-gradient(rgba(36, 28, 74, 0.06) 1.1px, transparent 1.3px);
-	background-size: 22px 22px;
+	overflow: hidden; /* edge bursts must not cause horizontal scroll */
+	background-image: var(--cr-halftone, radial-gradient(rgba(36,28,74,0.06) 1.1px, transparent 1.3px));
+	background-size: var(--cr-halftone-size, 13px 13px);
 }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .cr-404 { --cr-shadow-ink: var(--cr-selective-yellow); --cr-tab: var(--cr-cerulean); }
+}
+:root[data-theme="dark"] .cr-404 { --cr-shadow-ink: var(--cr-selective-yellow); --cr-tab: var(--cr-cerulean); }
 
-/* ---- narrow, centered content column (leaves margin room for edge bursts) ---- */
+/* ---- centred columns (design main ≈ 980px), bursts live in the margins ---- */
 .cr-404 .cr-404__header,
 .cr-404 .cr-404__search-wrap,
 .cr-404 .cr-404__cta,
 .cr-404 .cr-404__recent {
-	max-width: 720px;
+	max-width: 960px;
 	margin-left: auto;
 	margin-right: auto;
 	text-align: center;
@@ -27,61 +36,97 @@
 	z-index: 1;
 }
 .cr-404 .cr-404__lede {
-	margin-left: auto;
-	margin-right: auto;
-	max-width: 46ch;
+	margin: 0 auto;
+	max-width: 560px;
+	font-style: italic;
+	color: var(--cr-ink-muted);
 }
-.cr-404 .cr-404__cta .wp-block-buttons { justify-content: center; }
-.cr-404 .cr-404__search-wrap .wp-block-search,
-.cr-404 .is-style-cr-marker-bar-short { margin-left: auto; margin-right: auto; }
 
-/* ---- big starburst 404 (re-skins the small tape label) ---- */
+/* =============================================================================
+   Sunburst 404 badge
+   ============================================================================= */
+@keyframes cr-404-rays { to { transform: translate(-50%, -50%) rotate(360deg); } }
 .cr-404 .cr-404__tape {
 	position: relative;
 	display: inline-block;
-	/* !important + fixed value: the constrained block layout zeroes child
-	   margin-block, and a fluid token clamps below the starburst's reach on
-	   narrow screens — both would let the rays touch the eyebrow. */
-	margin: 0 auto 4.5rem !important;
+	/* fixed bottom margin so the rays clear the eyebrow on every width */
+	margin: 0 auto 5rem !important;
 	font-family: var(--cr-font-accent);
 	font-weight: 900;
-	font-size: clamp(3.25rem, 11vw, 6.5rem);
+	font-size: clamp(3.5rem, 12vw, 6rem);
 	line-height: 1;
-	letter-spacing: -0.03em;
+	letter-spacing: -0.04em;
 	color: var(--cr-russian-violet);
-	background: var(--cr-ut-orange);
-	border: 3px solid var(--cr-russian-violet);
-	border-radius: 14px;
-	padding: 0.08em 0.3em 0.14em;
-	box-shadow: var(--cr-shadow-hard);
-	transform: rotate(-2deg);
-	/* no positive z-index, so the starburst ::before sits behind the eyebrow too */
+	/* solid ut-orange + faint inner sunburst (the design's overlay) */
+	background:
+		repeating-conic-gradient(from 0deg at 50% 60%, rgba(255,183,3,0.55) 0deg 6deg, rgba(251,133,0,0) 6deg 12deg),
+		var(--cr-ut-orange);
+	border: 5px solid var(--cr-russian-violet);
+	border-radius: 0;
+	padding: 0.05em 0.34em 0.12em;
+	box-shadow: 7px 7px 0 var(--cr-russian-violet);
+	transform: rotate(-2.5deg);
+	overflow: hidden;
+	z-index: 1;
+	text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.25);
 }
-.cr-404 .cr-404__tape::before {
+/* Rays live on the HEADER (behind everything via isolation), not on the badge:
+   a negative-z-index ::before of the badge would paint over the badge's own
+   box + border. Centered on the badge (~3.6rem from the header top). */
+.cr-404 .cr-404__header { position: relative; isolation: isolate; }
+.cr-404 .cr-404__header::before {
 	content: "";
 	position: absolute;
 	z-index: -1;
-	top: 50%;
+	top: 3.6rem;
 	left: 50%;
-	width: 200px;
-	height: 200px;
-	transform: translate(-50%, -50%) rotate(-2deg);
+	width: 440px;
+	height: 440px;
+	transform: translate(-50%, -50%);
 	background: repeating-conic-gradient(
 		from 0deg,
-		var(--cr-selective-yellow) 0deg 9deg,
-		transparent 9deg 18deg
+		var(--cr-ut-orange) 0deg 5deg,
+		var(--cr-selective-yellow) 5deg 10deg
 	);
-	-webkit-mask-image: radial-gradient(circle, #000 32%, rgba(0,0,0,0.35) 52%, transparent 70%);
-	mask-image: radial-gradient(circle, #000 32%, rgba(0,0,0,0.35) 52%, transparent 70%);
+	-webkit-mask-image: radial-gradient(closest-side, #000 30%, rgba(0,0,0,0.55) 58%, transparent 82%);
+	mask-image: radial-gradient(closest-side, #000 30%, rgba(0,0,0,0.55) 58%, transparent 82%);
+	animation: cr-404-rays 40s linear infinite;
 	pointer-events: none;
 }
 
-/* ---- onomatopoeia comic bursts, pinned to the margins ---- */
+/* =============================================================================
+   Eyebrow · title (sparkles both sides) · marker bar · lede
+   ============================================================================= */
+/* left sparkle (right one comes from .cr-flank::after, orange) */
+.cr-404 .cr-404__title::before {
+	content: "✺";
+	display: inline-block;
+	margin-right: 0.45em;
+	color: var(--cr-blue-green);
+	font-size: 0.55em;
+	transform: rotate(-12deg);
+}
+/* marker bar under the title — design: 240×9, slight tilt */
+.cr-404 .cr-404__header hr {
+	width: 240px;
+	height: 9px;
+	max-width: 60%;
+	background: var(--cr-marker);
+	border: 0;
+	margin: 0.4rem auto 1.6rem;
+	transform: rotate(-1.5deg);
+	opacity: 1;
+}
+
+/* =============================================================================
+   Comic onomatopoeia bursts — russian-violet outline + hard comic lift,
+   scattered around the margins (not tidy rails).
+   ============================================================================= */
 .cr-404 .cr-404__onomat {
 	position: absolute;
 	inset: 0;
 	z-index: 0;
-	max-width: none; /* defeat the constrained-layout width cap so bursts reach the page margins */
+	max-width: none;
 	margin: 0;
 	pointer-events: none;
 }
@@ -94,55 +139,112 @@
 	text-align: center;
 	font-family: var(--cr-font-accent);
 	font-weight: 900;
-	font-size: clamp(0.7rem, 0.95vw, 1rem);
+	font-size: clamp(0.8rem, 1vw, 1.05rem);
 	line-height: 1;
 	letter-spacing: 0.01em;
 	color: var(--cr-russian-violet);
 	background: var(--cr-selective-yellow);
-	padding: 1.25em 1.15em;
+	padding: 1.55em 1.45em;
 	white-space: nowrap;
-	/* comic explosion shape — widest at the vertical centre so the word
-	   always sits on solid colour */
-	clip-path: polygon(
-		50% 0%, 63% 24%, 88% 18%, 75% 38%, 100% 50%, 75% 62%,
-		88% 82%, 63% 76%, 50% 100%, 37% 76%, 12% 82%, 25% 62%,
-		0% 50%, 25% 38%, 12% 18%, 37% 24%
-	);
+	clip-path: var(--burst);
+	/* fake the design's 2-layer burst: 4 directional shadows = violet outline,
+	   plus one offset = the hard comic lift. */
+	filter:
+		drop-shadow( 2px 0 0 var(--cr-shadow-ink, var(--cr-ink)))
+		drop-shadow(-2px 0 0 var(--cr-shadow-ink, var(--cr-ink)))
+		drop-shadow( 0 2px 0 var(--cr-shadow-ink, var(--cr-ink)))
+		drop-shadow( 0 -2px 0 var(--cr-shadow-ink, var(--cr-ink)))
+		drop-shadow( 4px 6px 0 var(--cr-shadow-ink, var(--cr-ink)));
 }
-/* colour variants */
-.cr-onomat--blue   { background: var(--cr-sky-blue); }
-.cr-onomat--orange { background: var(--cr-ut-orange); }
-.cr-onomat--peach  { background: var(--cr-light-orange); }
-.cr-onomat--purple { background: var(--wp--preset--color--primary-accent, #bcb5e3); }
+/* colour variants (set in the template per burst) — scoped under
+   .cr-404__onomat so they beat the base `.cr-404__onomat .cr-onomat`
+   background (0,2,0); without this they all stayed selective-yellow. */
+.cr-404__onomat .cr-onomat--blue   { background: var(--cr-sky-blue); }
+.cr-404__onomat .cr-onomat--orange { background: var(--cr-ut-orange); }
+.cr-404__onomat .cr-onomat--peach  { background: var(--cr-periwinkle); }
+/* scattered positions */
+.cr-404__onomat .cr-onomat--1  { top: 3%;  left: 3%;  transform: rotate(-12deg); }
+.cr-404__onomat .cr-onomat--2  { top: 1%;  right: 4%; transform: rotate(10deg); }
+.cr-404__onomat .cr-onomat--3  { top: 13%; right: 1%; transform: rotate(16deg); }
+.cr-404__onomat .cr-onomat--4  { top: 17%; left: 6%;  transform: rotate(-18deg); }
+.cr-404__onomat .cr-onomat--5  { top: 34%; left: 1%;  transform: rotate(-14deg); }
+.cr-404__onomat .cr-onomat--6  { top: 31%; right: 2%; transform: rotate(15deg); }
+.cr-404__onomat .cr-onomat--7  { top: 50%; left: 4%;  transform: rotate(7deg); }
+.cr-404__onomat .cr-onomat--8  { top: 47%; right: 3%; transform: rotate(-9deg); }
+.cr-404__onomat .cr-onomat--9  { top: 66%; left: 2%;  transform: rotate(-16deg); }
+.cr-404__onomat .cr-onomat--10 { top: 63%; right: 1%; transform: rotate(13deg); }
+.cr-404__onomat .cr-onomat--11 { top: 82%; left: 3%;  transform: rotate(10deg); }
+.cr-404__onomat .cr-onomat--12 { top: 84%; right: 4%; transform: rotate(-13deg); }
 
-/* position + colour per burst — prefixed so it beats the base background.
-   left/right offsets are small so the bursts sit out in the page margins. */
-/* left rail */
-.cr-404__onomat .cr-onomat--1  { top: 4%;  left: 1.5%; transform: rotate(-9deg); background: var(--cr-selective-yellow); }
-.cr-404__onomat .cr-onomat--3  { top: 18%; left: 1%;   transform: rotate(5deg);  background: var(--wp--preset--color--primary-accent, #bcb5e3); }
-.cr-404__onomat .cr-onomat--5  { top: 32%; left: 2%;   transform: rotate(-5deg); background: var(--cr-sky-blue); }
-.cr-404__onomat .cr-onomat--7  { top: 46%; left: 1%;   transform: rotate(7deg);  background: var(--cr-ut-orange); }
-.cr-404__onomat .cr-onomat--9  { top: 60%; left: 1.5%; transform: rotate(-6deg); background: var(--cr-selective-yellow); }
-.cr-404__onomat .cr-onomat--11 { top: 74%; left: 1%;   transform: rotate(4deg);  background: var(--cr-sky-blue); }
-/* right rail */
-.cr-404__onomat .cr-onomat--2  { top: 4%;  right: 1.5%; transform: rotate(8deg);  background: var(--cr-sky-blue); }
-.cr-404__onomat .cr-onomat--4  { top: 18%; right: 1%;   transform: rotate(-6deg); background: var(--cr-ut-orange); }
-.cr-404__onomat .cr-onomat--6  { top: 32%; right: 2%;   transform: rotate(5deg);  background: var(--wp--preset--color--primary-accent, #bcb5e3); }
-.cr-404__onomat .cr-onomat--8  { top: 46%; right: 1%;   transform: rotate(-8deg); background: var(--cr-selective-yellow); }
-.cr-404__onomat .cr-onomat--10 { top: 60%; right: 1.5%; transform: rotate(6deg);  background: var(--cr-ut-orange); }
-.cr-404__onomat .cr-onomat--12 { top: 74%; right: 1%;   transform: rotate(-4deg); background: var(--wp--preset--color--primary-accent, #bcb5e3); }
+/* =============================================================================
+   Search section — heading + tape-labelled card
+   ============================================================================= */
+.cr-404 .cr-404__search-wrap { margin-top: 4.5rem; }
+.cr-404 .cr-404__search-heading { text-align: center; margin-bottom: var(--cr-space-md); }
+.cr-404 .cr-404__search-card {
+	position: relative;
+	max-width: 640px;
+	margin: 0 auto;
+	background: var(--cr-card);
+	border: 3px solid var(--cr-ink);
+	box-shadow: 7px 7px 0 var(--cr-shadow-ink, var(--cr-ink));
+	padding: 26px 24px 24px;
+	transform: rotate(-0.8deg);
+	text-align: left;
+}
+.cr-404 .cr-404__search-tape {
+	position: absolute;
+	top: -15px;
+	left: 28px;
+	margin: 0 !important;
+	transform: rotate(-2.5deg);
+}
+.cr-404 .cr-404__search-card .wp-block-search { max-width: none; margin: 0; }
+.cr-404 .cr-404__search-card .wp-block-search__inside-wrapper { gap: 12px; border: 0; padding: 0; }
+.cr-404 .cr-404__search-card .wp-block-search__input {
+	background: var(--cr-surface-elevated);
+	border: 2px solid var(--cr-ink);
+	border-radius: 3px;
+	padding: 13px 14px;
+	font-size: 16px;
+	color: var(--cr-ink);
+}
+.cr-404 .cr-404__search-card .wp-block-search__button {
+	font-family: var(--cr-font-accent);
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	background: var(--cr-marker);
+	color: var(--cr-cta-ink);
+	border: 2px solid var(--cr-ink);
+	box-shadow: 4px 4px 0 var(--cr-shadow-ink, var(--cr-ink));
+	padding: 13px 26px;
+	margin: 0;
+	font-size: 15px;
+}
 
-/* ---- recent posts → numbered stacked cards ---- */
-.cr-404 .cr-404__recent-heading { text-align: center; }
+/* =============================================================================
+   CTA buttons — comic tilt
+   ============================================================================= */
+.cr-404 .cr-404__cta { margin-top: 2.5rem; }
+.cr-404 .cr-404__cta .wp-block-buttons { justify-content: center; gap: var(--cr-space-lg); }
+.cr-404 .cr-404__cta .wp-block-button:nth-child(odd)  { transform: rotate(-1.2deg); }
+.cr-404 .cr-404__cta .wp-block-button:nth-child(even) { transform: rotate(1.5deg); }
+
+/* =============================================================================
+   Recent posts → numbered comic cards with kind chips
+   ============================================================================= */
+.cr-404 .cr-404__recent { margin-top: 5rem; }
+.cr-404 .cr-404__recent-heading { text-align: center; margin-bottom: var(--cr-space-xl); }
 .cr-404 .cr-404__list {
 	counter-reset: cr-404-num;
-	max-width: 620px;
-	margin-left: auto;
-	margin-right: auto;
+	max-width: 760px;
+	margin: 0 auto;
 }
 .cr-404 .cr-404__list-template {
-	display: grid;
-	gap: var(--cr-space-md);
+	display: flex;
+	flex-direction: column;
+	gap: 30px;
 	list-style: none;
 	margin: 0;
 	padding: 0;
@@ -151,76 +253,98 @@
 	counter-increment: cr-404-num;
 	position: relative;
 	display: flex;
-	align-items: center !important; /* beat the legacy .cr-404__list-item baseline !important */
-	gap: var(--cr-space-sm);
+	align-items: flex-start !important;
+	gap: 20px;
 	text-align: left;
-	background: var(--cr-surface);
-	border: var(--cr-border-thick);
-	border-radius: 10px;
-	box-shadow: var(--cr-shadow-hard);
-	padding: var(--cr-space-sm) var(--cr-space-md);
+	background: var(--cr-card);
+	border: 3px solid var(--cr-ink);
+	box-shadow: 6px 6px 0 var(--cr-shadow-ink, var(--cr-ink));
+	padding: 24px 26px 22px;
 	transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
-/* Alternating "pinned clipping" tilt. Each card is the ONLY child of its own
-   <li.wp-block-post>, so :nth-child on the card always matches 1 and can't
-   alternate (the cause of the old all-lean-one-way look). Key it off the <li>
-   wrapper, whose siblings DO alternate. */
-.cr-404 .cr-404__list .wp-block-post:nth-child(odd) .cr-404__list-item {
-	transform: rotate(-2.2deg);
-}
-.cr-404 .cr-404__list .wp-block-post:nth-child(even) .cr-404__list-item {
-	transform: rotate(2.2deg);
-}
+/* alternate the tilt off the <li> wrapper (the card is its only child) */
+.cr-404 .cr-404__list .wp-block-post:nth-child(odd)  .cr-404__list-item { transform: rotate(-1.1deg); }
+.cr-404 .cr-404__list .wp-block-post:nth-child(even) .cr-404__list-item { transform: rotate(1.2deg); }
 .cr-404 .cr-404__list .wp-block-post .cr-404__list-item:hover {
-	transform: rotate(0deg) translate(-1px, -1px);
-	box-shadow: 6px 6px 0 var(--cr-ink);
+	transform: translate(-3px, -3px) rotate(0deg);
+	box-shadow: 9px 9px 0 var(--cr-shadow-ink, var(--cr-ink));
 }
-/* number badge from a CSS counter */
+/* number badge */
 .cr-404 .cr-404__list-item::before {
 	content: counter(cr-404-num);
 	flex-shrink: 0;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	min-width: 1.9em;
-	height: 1.9em;
+	width: 44px;
+	height: 44px;
 	font-family: var(--cr-font-accent);
 	font-weight: 900;
-	font-size: var(--cr-text-base);
-	color: var(--cr-russian-violet);
-	background: var(--cr-ut-orange);
-	border: 2px solid var(--cr-russian-violet);
-	border-radius: 7px;
+	font-size: 20px;
+	color: var(--cr-cta-ink);
+	background: var(--cr-marker);
+	border: 2px solid var(--cr-ink);
+	box-shadow: 2px 2px 0 var(--cr-shadow-ink, var(--cr-ink));
 }
-/* colored tab on the top-right corner, varied per card */
+/* colour tab on the top-right corner */
 .cr-404 .cr-404__list-item::after {
 	content: "";
 	position: absolute;
-	top: -9px;
-	right: 22px;
-	width: 30px;
-	height: 14px;
-	background: var(--cr-sky-blue);
-	border: 2px solid var(--cr-russian-violet);
-	border-bottom: none;
-	border-radius: 5px 5px 0 0;
+	top: -13px;
+	right: 34px;
+	width: 52px;
+	height: 24px;
+	background: var(--cr-tab);
+	border: 2px solid var(--cr-ink);
+	transform: rotate(3deg);
 }
 .cr-404 .cr-404__list-item:nth-child(2)::after { background: var(--cr-ut-orange); }
-.cr-404 .cr-404__list-item:nth-child(3)::after { background: var(--wp--preset--color--primary-accent, #bcb5e3); }
-.cr-404 .cr-404__list-item:nth-child(4)::after { background: var(--cr-selective-yellow); }
-.cr-404 .cr-404__list-item:nth-child(5)::after { background: var(--cr-light-orange); }
-/* suppress the post-format orange marker bar leaking onto the cards */
+.cr-404 .cr-404__list-item:nth-child(3)::after { background: var(--cr-periwinkle); }
+/* suppress the post-format marker bar leaking onto the cards */
 .cr-404 .cr-404__list .wp-block-post::after { content: none !important; }
-.cr-404 .cr-404__list-title { margin: 0; font-size: var(--wp--preset--font-size--lg) !important; }
-.cr-404 .cr-404__list-title a { text-decoration: none; }
-.cr-404 .cr-404__list-title a:hover { text-decoration: underline; }
+/* body column: kind chip + title */
+.cr-404 .cr-404__card-body {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+.cr-404 .cr-404__list-kind {
+	align-self: flex-start;
+	margin: 0;
+	font-family: var(--cr-font-accent);
+	font-weight: 700;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	background: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	padding: 2px 9px;
+	border-left: 4px solid var(--cr-marker);
+	transform: rotate(-2deg);
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+}
+.cr-404 .cr-404__list-kind a { color: inherit; text-decoration: none; }
+.cr-404 .cr-404__list-title {
+	margin: 0;
+	font-size: 21px !important;
+	line-height: 1.25;
+}
+.cr-404 .cr-404__list-title a { text-decoration: none; color: var(--cr-ink); }
+.cr-404 .cr-404__list-title a:hover {
+	text-decoration: underline;
+	text-decoration-thickness: 3px;
+	text-underline-offset: 3px;
+}
 
-/* ---- motion / responsive ---- */
+/* =============================================================================
+   Motion / responsive
+   ============================================================================= */
 @media (prefers-reduced-motion: reduce) {
+	.cr-404 .cr-404__header::before { animation: none; }
 	.cr-404 .cr-404__list-item { transition: none; }
 }
-/* hide the edge bursts when there isn't margin room beside the column */
 @media (max-width: 1023px) {
 	.cr-404__onomat { display: none; }
-	.cr-404 .cr-404__tape::before { width: 150px; height: 150px; }
+	.cr-404 .cr-404__header::before { width: 240px; height: 240px; }
 }

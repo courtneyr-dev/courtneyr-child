@@ -73,7 +73,16 @@
      Use these for non-text decoration (chip BACKGROUND, border-left
      accent, separator, halftone wash) only. For inline text on light
      surfaces use glaucous-dark or russian-violet.
-  */}
+  */
+  --cr-glaucous-light:      #5a7ea8;
+  --cr-russian-violet-soft: #3d2f6e;
+  --cr-ut-orange-dark:      #b85f00;
+  --cr-light-orange-dark:   #a87a45;
+  --cr-coral:               #d63240;
+  --cr-cerulean-light:      #3a8090;
+  --cr-sage:                #658057;
+  --cr-mauve:               #9d4e6c;
+}
 
 
 
@@ -299,24 +308,24 @@
    #f3e5b8 — every value below is verified ≥3:1 vs tape (WCAG 1.4.11).
    ============================================================================= */
 :root {
-  --cr-type-blog:     var(--cr-russian-violet);   /*  1 blog        — longform group */
-  --cr-type-aside:    var(--cr-glaucous);          /*  2 aside       — small group */
-  --cr-type-image:    var(--cr-blue-green);        /*  3 image       — media group */
-  --cr-type-gallery:  var(--cr-blue-green);        /*  4 gallery     — media group */
-  --cr-type-video:    var(--cr-blue-green);        /*  5 video       — media group */
-  --cr-type-audio:    #000000;                     /*  6 audio       — impact group */
-  --cr-type-chat:     var(--cr-glaucous);          /*  7 chat        — small group */
-  --cr-type-status:   var(--cr-glaucous);          /*  8 status      — small group */
-  --cr-type-link:     var(--cr-cerulean);          /*  9 link        — shares group */
-  --cr-type-bookmark: var(--cr-cerulean);          /* 10 bookmark    — shares group */
-  --cr-type-quote:    var(--cr-russian-violet);    /* 11 quote       — longform group */
-  --cr-type-speaking: var(--cr-prussian-blue);     /* 12 speaking    — events group */
-  --cr-type-book:     var(--cr-russian-violet);    /* 13 book        — longform group */
-  --cr-type-like:     #000000;                     /* 14 like        — impact group */
-  --cr-type-repost:   var(--cr-cerulean);          /* 15 repost      — shares group */
-  --cr-type-reply:    #000000;                     /* 16 reply       — impact group */
-  --cr-type-event:    var(--cr-prussian-blue);     /* 17 event       — events group */
-  --cr-type-review:   var(--cr-prussian-blue);     /* 18 review      — events group */
+  --cr-type-blog:     var(--cr-russian-violet);       /*  1 blog */
+  --cr-type-aside:    var(--cr-glaucous);             /*  2 aside */
+  --cr-type-image:    var(--cr-sky-blue);             /*  3 image */
+  --cr-type-gallery:  var(--cr-periwinkle);           /*  4 gallery */
+  --cr-type-video:    var(--cr-ut-orange);            /*  5 video */
+  --cr-type-audio:    var(--cr-selective-yellow);     /*  6 audio */
+  --cr-type-chat:     var(--cr-glaucous-light);       /*  7 chat */
+  --cr-type-status:   var(--cr-blue-green);           /*  8 status */
+  --cr-type-link:     var(--cr-cerulean);             /*  9 link */
+  --cr-type-bookmark: var(--cr-prussian-blue);        /* 10 bookmark */
+  --cr-type-quote:    var(--cr-russian-violet-soft);  /* 11 quote */
+  --cr-type-speaking: var(--cr-ut-orange-dark);       /* 12 speaking */
+  --cr-type-book:     var(--cr-light-orange-dark);    /* 13 book */
+  --cr-type-like:     var(--cr-coral);                /* 14 like */
+  --cr-type-repost:   var(--cr-cerulean-light);       /* 15 repost */
+  --cr-type-reply:    var(--cr-glaucous-dark);        /* 16 reply */
+  --cr-type-event:    var(--cr-sage);                 /* 17 event */
+  --cr-type-review:   var(--cr-mauve);                /* 18 review */
 }
 
 
@@ -423,24 +432,24 @@
        Each maps to a brighter variant of its light-mode color so the
        4px chip edge stays visible against dark tape (#4a3f1c).
        Every value below verified ≥3:1 vs dark tape. */
-    --cr-type-blog:     var(--cr-selective-yellow);  /*  1 blog (warm/inviting) */
-    --cr-type-aside:    var(--cr-glaucous);           /*  2 aside (works on both) */
-    --cr-type-image:    var(--cr-blue-green);         /*  3 image (works on both) */
-    --cr-type-gallery:  var(--cr-blue-green);         /*  4 gallery */
-    --cr-type-video:    var(--cr-blue-green);         /*  5 video */
-    --cr-type-audio:    #ffffff;                      /*  6 audio (impact - inverted to white) */
-    --cr-type-chat:     var(--cr-glaucous);           /*  7 chat */
-    --cr-type-status:   var(--cr-glaucous);           /*  8 status */
-    --cr-type-link:     var(--cr-sky-blue);           /*  9 link (cool, lighter than cerulean) */
-    --cr-type-bookmark: var(--cr-sky-blue);           /* 10 bookmark */
-    --cr-type-quote:    var(--cr-selective-yellow);   /* 11 quote */
-    --cr-type-speaking: var(--cr-periwinkle);         /* 12 speaking (lighter than prussian) */
-    --cr-type-book:     var(--cr-selective-yellow);   /* 13 book */
-    --cr-type-like:     #ffffff;                      /* 14 like */
-    --cr-type-repost:   var(--cr-sky-blue);           /* 15 repost */
-    --cr-type-reply:    #ffffff;                      /* 16 reply */
-    --cr-type-event:    var(--cr-periwinkle);         /* 17 event */
-    --cr-type-review:   var(--cr-periwinkle);         /* 18 review */
+    --cr-type-blog:     var(--cr-printer-ivory);     /*  1 blog */
+    --cr-type-aside:    #a8b9d4;                      /*  2 aside (brighter glaucous) */
+    --cr-type-image:    var(--cr-sky-blue);           /*  3 image */
+    --cr-type-gallery:  var(--cr-periwinkle);         /*  4 gallery */
+    --cr-type-video:    var(--cr-ut-orange);          /*  5 video */
+    --cr-type-audio:    var(--cr-selective-yellow);   /*  6 audio */
+    --cr-type-chat:     #a8b9d4;                      /*  7 chat (glaucous-light dark) */
+    --cr-type-status:   var(--cr-blue-green);         /*  8 status */
+    --cr-type-link:     var(--cr-sky-blue);           /*  9 link (lifted from cerulean) */
+    --cr-type-bookmark: var(--cr-sky-blue);           /* 10 bookmark (lifted from prussian) */
+    --cr-type-quote:    #9b8fc7;                      /* 11 quote (russian-violet-soft dark) */
+    --cr-type-speaking: #fda659;                      /* 12 speaking (ut-orange-dark dark) */
+    --cr-type-book:     #e0bd8a;                      /* 13 book (light-orange-dark dark) */
+    --cr-type-like:     #f37882;                      /* 14 like (coral dark) */
+    --cr-type-repost:   #7cc1d4;                      /* 15 repost (cerulean-light dark) */
+    --cr-type-reply:    #8da4cc;                      /* 16 reply (glaucous-dark dark) */
+    --cr-type-event:    #a8c098;                      /* 17 event (sage dark) */
+    --cr-type-review:   #d089a3;                      /* 18 review (mauve dark) */
   }
 }
 
@@ -511,24 +520,24 @@
        Each maps to a brighter variant of its light-mode color so the
        4px chip edge stays visible against dark tape (#4a3f1c).
        Every value below verified ≥3:1 vs dark tape. */
-    --cr-type-blog:     var(--cr-selective-yellow);  /*  1 blog (warm/inviting) */
-    --cr-type-aside:    var(--cr-glaucous);           /*  2 aside (works on both) */
-    --cr-type-image:    var(--cr-blue-green);         /*  3 image (works on both) */
-    --cr-type-gallery:  var(--cr-blue-green);         /*  4 gallery */
-    --cr-type-video:    var(--cr-blue-green);         /*  5 video */
-    --cr-type-audio:    #ffffff;                      /*  6 audio (impact - inverted to white) */
-    --cr-type-chat:     var(--cr-glaucous);           /*  7 chat */
-    --cr-type-status:   var(--cr-glaucous);           /*  8 status */
-    --cr-type-link:     var(--cr-sky-blue);           /*  9 link (cool, lighter than cerulean) */
-    --cr-type-bookmark: var(--cr-sky-blue);           /* 10 bookmark */
-    --cr-type-quote:    var(--cr-selective-yellow);   /* 11 quote */
-    --cr-type-speaking: var(--cr-periwinkle);         /* 12 speaking (lighter than prussian) */
-    --cr-type-book:     var(--cr-selective-yellow);   /* 13 book */
-    --cr-type-like:     #ffffff;                      /* 14 like */
-    --cr-type-repost:   var(--cr-sky-blue);           /* 15 repost */
-    --cr-type-reply:    #ffffff;                      /* 16 reply */
-    --cr-type-event:    var(--cr-periwinkle);         /* 17 event */
-    --cr-type-review:   var(--cr-periwinkle);         /* 18 review */
+    --cr-type-blog:     var(--cr-printer-ivory);     /*  1 blog */
+    --cr-type-aside:    #a8b9d4;                      /*  2 aside (brighter glaucous) */
+    --cr-type-image:    var(--cr-sky-blue);           /*  3 image */
+    --cr-type-gallery:  var(--cr-periwinkle);         /*  4 gallery */
+    --cr-type-video:    var(--cr-ut-orange);          /*  5 video */
+    --cr-type-audio:    var(--cr-selective-yellow);   /*  6 audio */
+    --cr-type-chat:     #a8b9d4;                      /*  7 chat (glaucous-light dark) */
+    --cr-type-status:   var(--cr-blue-green);         /*  8 status */
+    --cr-type-link:     var(--cr-sky-blue);           /*  9 link (lifted from cerulean) */
+    --cr-type-bookmark: var(--cr-sky-blue);           /* 10 bookmark (lifted from prussian) */
+    --cr-type-quote:    #9b8fc7;                      /* 11 quote (russian-violet-soft dark) */
+    --cr-type-speaking: #fda659;                      /* 12 speaking (ut-orange-dark dark) */
+    --cr-type-book:     #e0bd8a;                      /* 13 book (light-orange-dark dark) */
+    --cr-type-like:     #f37882;                      /* 14 like (coral dark) */
+    --cr-type-repost:   #7cc1d4;                      /* 15 repost (cerulean-light dark) */
+    --cr-type-reply:    #8da4cc;                      /* 16 reply (glaucous-dark dark) */
+    --cr-type-event:    #a8c098;                      /* 17 event (sage dark) */
+    --cr-type-review:   #d089a3;                      /* 18 review (mauve dark) */
 }
 
 

@@ -509,8 +509,8 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
   font-weight: var(--cr-weight-bold);
   text-transform: uppercase;
   letter-spacing: var(--cr-tracking-eyebrow);
-  background: var(--wp--preset--color--primary-accent, #bcb5e3);  /* periwinkle — AA-clean against russian-violet ink */
-  color: var(--cr-tape-ink);                       /* russian-violet — 8:1 on periwinkle */
+  background: var(--cr-tape, #f3e5b8);             /* cream masking tape — russian-violet ink = 12.47:1 AAA */
+  color: var(--cr-tape-ink);                       /* russian-violet (flips to selective-yellow in dark) */
   padding: var(--cr-space-3xs) var(--cr-space-sm);
   border-left: 4px solid transparent;              /* reserve the 4px; --type modifiers fill it */
   transform: rotate(var(--cr-rotate-neg));
@@ -555,78 +555,91 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
      • sage      — sage               (3.57:1 violet)
 */
 .cr-chip--solid {
-  background: var(--cr-ink);                       /* russian-violet → ivory in dark */
-  color: var(--cr-ink-inverse);                    /* ivory → russian-violet in dark — auto-flips */
   border-left-color: transparent;                  /* solid is a filled block; no edge accent */
 }
-/* Solid variants — grouped by post-type accent (v2.1).
-   Three small-group types (aside, chat, status — all glaucous) intentionally
-   have NO solid variant: glaucous fails AA against both light and dark text.
-   Backgrounds use --cr-type-* tokens so they auto-flip in dark mode (e.g.
-   russian-violet → selective-yellow for longform). The dark-mode @media block
-   below flips the text colors correspondingly. */
+/* Per-type solid fills (v2.1, synced to the design-system chip spec + tokens).
+   Each supported type fills with its OWN --cr-type-* token (auto-flips in dark)
+   and pairs the AA-vetted ink from the chip matrix. Only these 10 types support
+   --solid; the other 8 (aside, image, gallery, status, chat, repost, book,
+   event) fail AA as a fill and stay default-tape — no rule needed here. */
+.cr-chip--blog.cr-chip--solid     { background: var(--cr-type-blog);     color: var(--cr-printer-ivory); }  /* 15.00:1 AAA */
+.cr-chip--video.cr-chip--solid    { background: var(--cr-type-video);    color: var(--cr-prussian-blue);  }  /*  5.58:1 AA  */
+.cr-chip--audio.cr-chip--solid    { background: var(--cr-type-audio);    color: var(--cr-prussian-blue);  }  /*  7.93:1 AAA */
+.cr-chip--link.cr-chip--solid     { background: var(--cr-type-link);     color: var(--cr-printer-ivory); }  /*  6.11:1 AA  */
+.cr-chip--bookmark.cr-chip--solid { background: var(--cr-type-bookmark); color: var(--cr-printer-ivory); }  /* 13.25:1 AAA */
+.cr-chip--quote.cr-chip--solid    { background: var(--cr-type-quote);    color: var(--cr-printer-ivory); }  /* 10.98:1 AAA */
+.cr-chip--speaking.cr-chip--solid { background: var(--cr-type-speaking); color: var(--cr-printer-ivory); }  /*  4.30:1 AA  */
+.cr-chip--like.cr-chip--solid     { background: var(--cr-type-like);     color: var(--cr-printer-ivory); }  /*  4.58:1 AA  */
+.cr-chip--reply.cr-chip--solid    { background: var(--cr-type-reply);    color: var(--cr-printer-ivory); }  /*  7.44:1 AAA */
+.cr-chip--review.cr-chip--solid   { background: var(--cr-type-review);   color: var(--cr-printer-ivory); }  /*  5.37:1 AA  */
 
-/* longform group — light: russian-violet bg / dark: selective-yellow bg */
-.cr-chip--blog.cr-chip--solid,
-.cr-chip--book.cr-chip--solid,
-.cr-chip--quote.cr-chip--solid    { background: var(--cr-type-blog);     color: var(--cr-printer-ivory); } /* light 15:1 AAA */
-
-/* shares group — light: cerulean bg / dark: sky-blue bg */
-.cr-chip--link.cr-chip--solid,
-.cr-chip--bookmark.cr-chip--solid,
-.cr-chip--repost.cr-chip--solid   { background: var(--cr-type-link);     color: var(--cr-printer-ivory); } /* light 6.11:1 AA */
-
-/* events group — light: prussian-blue bg / dark: periwinkle bg */
-.cr-chip--speaking.cr-chip--solid,
-.cr-chip--event.cr-chip--solid,
-.cr-chip--review.cr-chip--solid   { background: var(--cr-type-speaking); color: var(--cr-printer-ivory); } /* light 13.25:1 AAA */
-
-/* media group — blue-green bg in BOTH modes; prussian-blue text works for both */
-.cr-chip--image.cr-chip--solid,
-.cr-chip--gallery.cr-chip--solid,
-.cr-chip--video.cr-chip--solid    { background: var(--cr-type-video);    color: var(--cr-prussian-blue);  } /* light/dark 4.57:1 AA */
-
-/* impact group — light: black bg / dark: white bg */
-.cr-chip--audio.cr-chip--solid,
-.cr-chip--reply.cr-chip--solid,
-.cr-chip--like.cr-chip--solid     { background: var(--cr-type-audio);    color: var(--cr-printer-ivory); } /* light 20:1 AAA */
-
-/* Dark-mode text overrides for solid chips —
-   when light-end accents become the chip bg in dark mode, text must flip to dark. */
+/* Dark mode: the 8 lighter-end accents brighten into the chip bg, so their ink
+   flips to russian-violet. video + audio keep prussian-blue (their bg stays a
+   mid orange/yellow in both modes). Covers OS dark + the manual [data-theme]. */
 @media (prefers-color-scheme: dark) {
-  /* OS-level dark mode — only when user hasn't explicitly chosen via [data-theme] */
   :root:not([data-theme]) .cr-chip--blog.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--book.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--quote.cr-chip--solid,
   :root:not([data-theme]) .cr-chip--link.cr-chip--solid,
   :root:not([data-theme]) .cr-chip--bookmark.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--repost.cr-chip--solid,
+  :root:not([data-theme]) .cr-chip--quote.cr-chip--solid,
   :root:not([data-theme]) .cr-chip--speaking.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--event.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--review.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--audio.cr-chip--solid,
+  :root:not([data-theme]) .cr-chip--like.cr-chip--solid,
   :root:not([data-theme]) .cr-chip--reply.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--like.cr-chip--solid    { color: var(--cr-russian-violet); }
+  :root:not([data-theme]) .cr-chip--review.cr-chip--solid { color: var(--cr-russian-violet); }
 }
-/* Manual dark-mode override (parallel to the @media block above) */
 :root[data-theme="dark"] .cr-chip--blog.cr-chip--solid,
-:root[data-theme="dark"] .cr-chip--book.cr-chip--solid,
-:root[data-theme="dark"] .cr-chip--quote.cr-chip--solid,
 :root[data-theme="dark"] .cr-chip--link.cr-chip--solid,
 :root[data-theme="dark"] .cr-chip--bookmark.cr-chip--solid,
-:root[data-theme="dark"] .cr-chip--repost.cr-chip--solid,
+:root[data-theme="dark"] .cr-chip--quote.cr-chip--solid,
 :root[data-theme="dark"] .cr-chip--speaking.cr-chip--solid,
-:root[data-theme="dark"] .cr-chip--event.cr-chip--solid,
-:root[data-theme="dark"] .cr-chip--review.cr-chip--solid,
-:root[data-theme="dark"] .cr-chip--audio.cr-chip--solid,
+:root[data-theme="dark"] .cr-chip--like.cr-chip--solid,
 :root[data-theme="dark"] .cr-chip--reply.cr-chip--solid,
-:root[data-theme="dark"] .cr-chip--like.cr-chip--solid    { color: var(--cr-russian-violet); }
-/* Contrast pairings (apply to either trigger):
-     longform: selective-yellow + russian-violet = 8.50:1 AAA
-     shares:   sky-blue         + russian-violet = 9.27:1 AAA
-     events:   periwinkle       + russian-violet = 7.93:1 AAA
-     impact:   white            + russian-violet = 15:1   AAA
-     media:    blue-green stays in both modes — no override needed */
+:root[data-theme="dark"] .cr-chip--review.cr-chip--solid { color: var(--cr-russian-violet); }
+
+/* ── Split term chips — one masking-tape chip per category term, each with its
+   own accent colour and tilt (paired with the split_term_chips render filter).
+   Reproduces the design's "colour variety + varied tilt + one chip per tag"
+   treatment (UI Kit Chips + stream meta row). The filter flags the post-terms
+   container .cr-has-term-chips and tags each term <a> with .cr-term-chip + a
+   stable-per-term --1..6 variant. Accents reuse the AA-vetted, dark-aware
+   --cr-type-* tokens so the chips stay legible in both themes. ───────────── */
+.cr-has-term-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cr-space-2xs);
+  /* shed the single-chip look the container carries (e.g. .cr-chip) */
+  background: none;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  transform: none;
+}
+.cr-term-chip {
+  display: inline-block;
+  font-family: var(--cr-font-accent);
+  font-size: var(--cr-text-xs);
+  font-weight: var(--cr-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--cr-tracking-eyebrow);
+  background: var(--cr-tape, #f3e5b8);
+  color: var(--cr-tape-ink);
+  padding: var(--cr-space-3xs) var(--cr-space-sm);
+  border-left: 4px solid var(--cr-marker);
+  box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+  text-decoration: none;
+  vertical-align: middle;
+}
+.cr-term-chip:hover,
+.cr-term-chip:focus-visible { color: var(--cr-tape-ink); text-decoration: none; }
+/* stable-per-term accent + lean → colour variety and varied tilt.
+   Six distinct hues (orange · teal · red · green · violet · blue) so adjacent
+   terms read as different colours even when the hash lands them side by side. */
+.cr-term-chip--1 { border-left-color: var(--cr-type-video); transform: rotate(-2.5deg); }
+.cr-term-chip--2 { border-left-color: var(--cr-type-link);  transform: rotate(1.8deg); }
+.cr-term-chip--3 { border-left-color: var(--cr-type-like);  transform: rotate(-1.2deg); }
+.cr-term-chip--4 { border-left-color: var(--cr-type-event); transform: rotate(2.6deg); }
+.cr-term-chip--5 { border-left-color: var(--cr-type-quote); transform: rotate(-1.8deg); }
+.cr-term-chip--6 { border-left-color: var(--cr-type-reply); transform: rotate(2.2deg); }
 
 
 /* ============ Hero layout ============
@@ -799,6 +812,20 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 .cr-icon-avatar svg .cr-icon-fill {
 	fill: currentColor;
 	stroke: none;
+}
+
+/* v0.5.134: home Recent Posts loop — the format chip is swapped for a small
+   icon badge (home_format_chip_to_icon filter). Size it down to sit in the
+   meta row next to the date + category chips. */
+.cr-home-format-icon.cr-icon-avatar {
+	width: 2rem;
+	height: 2rem;
+	box-shadow: 1.5px 1.5px 0 var(--cr-ink);
+	vertical-align: middle;
+}
+.cr-home-format-icon.cr-icon-avatar svg {
+	width: 1.15rem;
+	height: 1.15rem;
 }
 
 /* Solid variants — only 10 types pass AA as a fill */
@@ -1492,6 +1519,33 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 	line-height: 1.6;
 }
 
+/* Editor: list blocks show the canonical ✦ marker (UT orange), matching the
+   front end and the design system's long-form spec. The front-end ✦ rule is
+   scoped to .wp-block-post-content / .entry-content, which don't exist in the
+   editor canvas — so without this, the Snow Monkey Editor plugin's
+   is-style-sme-list-* styles paint a ※ here that never actually ships to the
+   front of site. Scoped to .wp-block-list so social-links / nav lists are
+   untouched; specificity (0,2,3) beats Snow Monkey's :where()-based (0,1,1). */
+.editor-styles-wrapper ul.wp-block-list {
+	list-style: none;
+}
+.editor-styles-wrapper ul.wp-block-list > li {
+	position: relative;
+	padding-left: var(--cr-space-lg, 1.5rem);
+}
+.editor-styles-wrapper ul.wp-block-list > li::before {
+	content: "✦";
+	position: absolute;
+	left: 0.25em;
+	top: 0.2em;
+	color: var(--cr-marker, #fb8500);
+	font-size: 0.85em;
+}
+.editor-styles-wrapper ul.wp-block-list ul.wp-block-list > li::before {
+	content: "•";
+	color: var(--cr-blue-green, #219ebc);
+}
+
 
 /* ============================================================
    Site wordmark — Rock Salt "courtneyr.dev" replacing wp:site-title.
@@ -1988,10 +2042,10 @@ body.home .has-primary-accent-background-color {
 	color: var(--cr-russian-violet, #241c4a);
 }
 
-body.home .has-tertiary-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color),
-body.home .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color),
-body.home .has-base-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color),
-body.home .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color) {
+body.home .has-tertiary-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar),
+body.home .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar),
+body.home .has-base-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar),
+body.home .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar) {
 	color: inherit;
 }
 
@@ -2296,10 +2350,10 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 	color: var(--cr-printer-ivory) !important;
 }
 
-:root[data-theme="dark"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
-:root[data-theme="dark"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
-:root[data-theme="dark"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
-:root[data-theme="dark"] .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button) {
+:root[data-theme="dark"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
+:root[data-theme="dark"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
+:root[data-theme="dark"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
+:root[data-theme="dark"] .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar) {
 	color: var(--cr-printer-ivory) !important;
 }
 
@@ -2321,12 +2375,12 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 		background-color: var(--cr-surface-soft) !important;
 		color: var(--cr-printer-ivory) !important;
 	}
-	:root:not([data-theme]) .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
-	:root:not([data-theme]) .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
-	:root:not([data-theme]) .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
-	:root[data-theme="system"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
-	:root[data-theme="system"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button),
-	:root[data-theme="system"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button) {
+	:root:not([data-theme]) .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
+	:root:not([data-theme]) .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
+	:root:not([data-theme]) .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
+	:root[data-theme="system"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
+	:root[data-theme="system"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
+	:root[data-theme="system"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar) {
 		color: var(--cr-printer-ivory) !important;
 	}
 }
@@ -4464,66 +4518,11 @@ body.home .wp-block-post-template > li .wp-block-group.is-vertical > .wp-block-p
 	margin-top: 0.5rem;
 }
 
-/* Format chip already has -3deg from base .cr-format-chip rule.
-   When it sits next to a category chip, flip the category chip to
-   +3deg so the pair reads as opposite-tilted hand-stuck labels. */
-body.home .wp-block-post-template .cr-format-chip + .wp-block-post-terms.cr-chip,
-body.home .wp-block-post-template .cr-format-chip + .wp-block-post-terms {
-	transform: rotate(var(--cr-rotate-2, 3deg));
-}
-
-/* Multi-term post-terms — split each anchor into its own chip with
-   alternating periwinkle / light-orange / sky-blue colors and
-   alternating tilt direction. Override the wrapper's chip styling
-   so the comma-list reads as multiple stuck labels instead. */
-body.home .wp-block-post-template .wp-block-post-terms.cr-chip:has(a + a),
-body.home .wp-block-post-template .wp-block-post-terms:has(a + a) {
-	background: transparent !important;
-	padding: 0 !important;
-	transform: none !important;
-	box-shadow: none !important;
-	display: inline-flex;
-	flex-wrap: wrap;
-	gap: 0.4rem;
-	border: 0 !important;
-}
-body.home .wp-block-post-template .wp-block-post-terms.cr-chip:has(a + a) a,
-body.home .wp-block-post-template .wp-block-post-terms:has(a + a) a {
-	display: inline-block;
-	font-family: var(--cr-font-accent);
-	font-size: var(--cr-text-xs, 0.7rem);
-	font-weight: var(--cr-weight-bold, 700);
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	padding: var(--cr-space-3xs, 0.15em) var(--cr-space-sm, 0.7em);
-	color: var(--cr-tape-ink, var(--cr-russian-violet, #241c4a));
-	text-decoration: none;
-	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
-	vertical-align: middle;
-}
-/* Color rotation across multiple terms — periwinkle, light-orange,
-   sky-blue, sage. Tilt alternates -3 / +3 so adjacent terms lean
-   opposite directions. */
-body.home .wp-block-post-template .wp-block-post-terms.cr-chip:has(a + a) a:nth-child(4n+1),
-body.home .wp-block-post-template .wp-block-post-terms:has(a + a) a:nth-child(4n+1) {
-	background: var(--wp--preset--color--primary-accent, #bcb5e3);
-	transform: rotate(var(--cr-rotate-neg, -3deg));
-}
-body.home .wp-block-post-template .wp-block-post-terms.cr-chip:has(a + a) a:nth-child(4n+2),
-body.home .wp-block-post-template .wp-block-post-terms:has(a + a) a:nth-child(4n+2) {
-	background: var(--wp--preset--color--tertiary, #fee2c3);
-	transform: rotate(var(--cr-rotate-2, 3deg));
-}
-body.home .wp-block-post-template .wp-block-post-terms.cr-chip:has(a + a) a:nth-child(4n+3),
-body.home .wp-block-post-template .wp-block-post-terms:has(a + a) a:nth-child(4n+3) {
-	background: var(--cr-sky-blue, #8ecae6);
-	transform: rotate(var(--cr-rotate-neg, -3deg));
-}
-body.home .wp-block-post-template .wp-block-post-terms.cr-chip:has(a + a) a:nth-child(4n+4),
-body.home .wp-block-post-template .wp-block-post-terms:has(a + a) a:nth-child(4n+4) {
-	background: var(--cr-tape, #f3e5b8);
-	transform: rotate(var(--cr-rotate-2, 3deg));
-}
+/* v0.5.133: the homepage-only multi-term split (body.home …:has(a + a) with
+   nth-child solid fills) is superseded by the global .cr-term-chip system above
+   + the split_term_chips render filter, which splits every category term list —
+   homepage, single, archive — into per-term tape chips with colour-varied
+   accents and varied tilt. Removed to keep one consistent chip treatment. */
 /* v0.5.9: Force left alignment on the body too — wp:group's
    constrained layout was centering content.
    v0.5.12: also force left-align on the meta row's children directly,
@@ -4542,36 +4541,11 @@ body.home .wp-block-post-template .wp-block-post-terms:has(a + a) a:nth-child(4n
 	font-weight: 500;
 }
 
-/* v0.5.12: Category as a chip (periwinkle tape) with opposite tilt to
-   the format chip — when both render in the same meta row, format
-   chip leans -3deg (left) and category chip leans +3deg (right) so
-   they read as two stuck-on labels, not stacked twins.
-
-   Was previously plain uppercase text. Image #86 user feedback: chip
-   styling reads better against the meta row, and the opposite tilt
-   makes the pair feel hand-applied. */
-.cr-archive .cr-stream-item__category {
-	display: inline-block;
-	font-family: var(--cr-font-accent);
-	font-size: var(--cr-text-xs, 0.7rem);
-	font-weight: var(--cr-weight-bold, 700);
-	letter-spacing: 0.05em;
-	text-transform: uppercase;
-	background: var(--wp--preset--color--primary-accent, #bcb5e3);
-	color: var(--cr-tape-ink, var(--cr-russian-violet, #241c4a));
-	padding: var(--cr-space-3xs, 0.15em) var(--cr-space-sm, 0.7em);
-	border-left: 4px solid transparent;
-	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
-	transform: rotate(var(--cr-rotate-2, 3deg));
-	vertical-align: middle;
-}
-.cr-archive .cr-stream-item__category a {
-	color: inherit;
-	text-decoration: none;
-}
-.cr-archive .cr-stream-item__category a:hover {
-	color: var(--cr-marker, var(--cr-ut-orange));
-}
+/* v0.5.134: the old single periwinkle (lilac) category chip on archives is
+   removed — it set a `primary-accent` background on the whole post-terms
+   container, which now shows as a lilac block *behind* the per-term
+   `.cr-term-chip`s (split_term_chips filter). The global cr-term-chip system
+   styles each archive category term as its own colour-coded tape chip. */
 
 /* Format chip — content + left-border color set per post-format,
    driven by the format-X class on the wrapper li. Default styling
@@ -6961,7 +6935,22 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
 /* (1) Pre-comments newsletter banner ------------------------------ */
 
 .cr-newsletter-banner {
-	background-color: var(--cr-surface, var(--cr-printer-ivory, #fbfaf5)) !important;
+	/* v0.5.122 — pale blue (sky-blue mixed toward raw ivory) per request. A
+	   FIXED light value (raw ivory, not the mode-flipping --cr-surface) so the
+	   banner stays pale in dark mode too, where its text is locked dark —
+	   ~11:1 contrast on the russian-violet heading. */
+	background-color: color-mix( in srgb, var(--cr-sky-blue, #8ecae6) 40%, var(--cr-printer-ivory, #fbfaf5) ) !important;
+	position: relative;
+	/* The inline x-large padding resolves to 0 here, so set our own. Generous
+	   block padding keeps the copy clear of the torn top + bottom edges;
+	   responsive inline padding gives side breathing room from the edges. */
+	padding: 2.75rem clamp( 1.5rem, 5vw, 3.5rem ) !important;
+	/* v0.5.125 — lay the scrap diagonally, bottom-left → upper-right (counter-
+	   clockwise). Extra margin gives the tilted corners room to clear the post
+	   content above and below. The small page slivers the tilt opens at the
+	   far corners read as the page showing through, matching the torn edges. */
+	transform: rotate( -1.5deg );
+	margin-block: 3rem !important;
 	background-image: var(--cr-fiber), var(--cr-halftone) !important;
 	background-size: auto, var(--cr-halftone-size, 12px 12px) !important;
 	background-blend-mode: multiply, multiply !important;
@@ -6972,6 +6961,28 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
 	   carries enough separation; the borders read as design noise. */
 	color: var(--cr-russian-violet, #241c4a);
 }
+
+/* Torn-paper top + bottom edges — the page behind "tears" into the banner.
+   Strips use --cr-surface (page bg, which flips in dark mode) so the tear
+   always matches what's behind. They sit in the banner's x-large vertical
+   padding, so they never clip the copy or buttons. */
+.cr-newsletter-banner::before,
+.cr-newsletter-banner::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 15px;
+	background: var(--cr-surface, var(--cr-printer-ivory, #fbfaf5));
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='15' preserveAspectRatio='none'%3E%3Cpath d='M0 0H160V6L150 10L139 5L128 11L116 6L105 10L93 5L82 11L70 6L59 10L47 5L36 11L24 6L13 10L0 5Z' fill='%23000'/%3E%3C/svg%3E") repeat-x;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='15' preserveAspectRatio='none'%3E%3Cpath d='M0 0H160V6L150 10L139 5L128 11L116 6L105 10L93 5L82 11L70 6L59 10L47 5L36 11L24 6L13 10L0 5Z' fill='%23000'/%3E%3C/svg%3E") repeat-x;
+	-webkit-mask-size: 160px 15px;
+	mask-size: 160px 15px;
+	z-index: 1;
+	pointer-events: none;
+}
+.cr-newsletter-banner::before { top: -1px; }
+.cr-newsletter-banner::after { bottom: -1px; transform: scaleY(-1); }
 
 .cr-newsletter-banner__inner {
 	gap: var(--cr-space-xl, 2.5rem);
@@ -7020,11 +7031,11 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
 
 /* Dark mode — flip surface to night-elevated, ivory ink */
 :root[data-theme="dark"] .cr-newsletter-banner {
-	background-color: var(--cr-night-elevated, #251f1c) !important;
-	border-top-color: var(--cr-printer-ivory, #fbfaf5);
-	border-bottom-color: var(--cr-printer-ivory, #fbfaf5);
-	box-shadow: 0 4px 0 -1px var(--cr-printer-ivory, #fbfaf5),
-	            0 -4px 0 -1px var(--cr-printer-ivory, #fbfaf5);
+	/* v0.5.124 — deep palette blue (was night-elevated) so the banner reads as
+	   the same blue field-note in dark mode; ivory text holds ~16:1. Box-shadow
+	   separator lines dropped — the torn edges are the edge treatment now. */
+	background-color: var(--cr-prussian-blue, #023047) !important;
+	box-shadow: none;
 	color: var(--cr-printer-ivory, #fbfaf5);
 }
 :root[data-theme="dark"] .cr-newsletter-banner__title,
@@ -7038,11 +7049,8 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme]) .cr-newsletter-banner,
 	:root[data-theme="system"] .cr-newsletter-banner {
-		background-color: var(--cr-night-elevated, #251f1c) !important;
-		border-top-color: var(--cr-printer-ivory, #fbfaf5);
-		border-bottom-color: var(--cr-printer-ivory, #fbfaf5);
-		box-shadow: 0 4px 0 -1px var(--cr-printer-ivory, #fbfaf5),
-		            0 -4px 0 -1px var(--cr-printer-ivory, #fbfaf5);
+		background-color: var(--cr-prussian-blue, #023047) !important;
+		box-shadow: none;
 		color: var(--cr-printer-ivory, #fbfaf5);
 	}
 	:root:not([data-theme]) .cr-newsletter-banner__title,

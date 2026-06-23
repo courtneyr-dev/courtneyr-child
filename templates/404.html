@@ -44,7 +44,7 @@
 		<!-- /wp:separator -->
 
 		<!-- wp:paragraph {"className":"cr-404__lede","fontSize":"md"} -->
-		<p class="cr-404__lede has-md-font-size">The link you followed went looking for a page that isn't here — maybe the URL got garbled, maybe the post moved, maybe it's a draft I haven't published yet. Either way, here's how to get back on the path.</p>
+		<p class="cr-404__lede has-md-font-size">You followed a link to a page that isn't here. Maybe the URL got garbled in transit, maybe the post moved when I reorganized, maybe it's still a draft sitting in my editor. No harm done — let's get you back on the path.</p>
 		<!-- /wp:paragraph -->
 
 	</div>
@@ -54,15 +54,25 @@
 	<div class="wp-block-group alignwide cr-404__search-wrap" style="padding-top:var(--wp--preset--spacing--large);padding-bottom:var(--wp--preset--spacing--large)">
 
 		<!-- wp:heading {"level":2,"className":"cr-404__search-heading","fontSize":"large","fontFamily":"accent"} -->
-		<h2 class="wp-block-heading cr-404__search-heading has-accent-font-family has-large-font-size">Try searching the archive</h2>
+		<h2 class="wp-block-heading cr-404__search-heading has-accent-font-family has-large-font-size">Dig through the archive</h2>
 		<!-- /wp:heading -->
 
-		<!-- wp:search {"label":"Search","showLabel":false,"placeholder":"What were you looking for?","width":480,"widthUnit":"px","buttonText":"Search","buttonPosition":"button-outside","className":"cr-404__search"} /-->
+		<!-- wp:group {"className":"cr-404__search-card","layout":{"type":"constrained"}} -->
+		<div class="wp-block-group cr-404__search-card">
+
+			<!-- wp:paragraph {"className":"is-style-cr-tape-label cr-404__search-tape","fontSize":"sm"} -->
+			<p class="is-style-cr-tape-label cr-404__search-tape has-sm-font-size">Field notes index</p>
+			<!-- /wp:paragraph -->
+
+			<!-- wp:search {"label":"Search","showLabel":false,"placeholder":"What were you looking for?","buttonText":"Search →","buttonPosition":"button-outside","className":"cr-404__search"} /-->
+
+		</div>
+		<!-- /wp:group -->
 
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:group {"metadata":{"name":"404 CTA"},"align":"wide","className":"cr-404__cta","style":{"spacing":{"blockGap":"var:preset|spacing|medium","padding":{"top":"var:preset|spacing|medium","bottom":"var:preset|spacing|large"}}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"left"}} -->
+	<!-- wp:group {"metadata":{"name":"404 CTA"},"align":"wide","className":"cr-404__cta","style":{"spacing":{"blockGap":"var:preset|spacing|medium","padding":{"top":"var:preset|spacing|medium","bottom":"var:preset|spacing|large"}}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"center"}} -->
 	<div class="wp-block-group alignwide cr-404__cta" style="padding-top:var(--wp--preset--spacing--medium);padding-bottom:var(--wp--preset--spacing--large)">
 
 		<!-- wp:buttons {"layout":{"type":"flex","flexWrap":"wrap"}} -->
@@ -89,12 +99,17 @@
 		<h2 class="wp-block-heading cr-flank cr-flank--blue cr-404__recent-heading has-accent-font-family has-large-font-size">Or pick from the latest</h2>
 		<!-- /wp:heading -->
 
-		<!-- wp:query {"queryId":404,"query":{"perPage":"5","pages":1,"offset":0,"postType":"post","order":"desc","orderBy":"date","sticky":"","inherit":false},"align":"wide","className":"cr-404__list"} -->
+		<!-- wp:query {"queryId":404,"query":{"perPage":"3","pages":1,"offset":0,"postType":"post","order":"desc","orderBy":"date","sticky":"","inherit":false},"align":"wide","className":"cr-404__list"} -->
 		<div class="wp-block-query alignwide cr-404__list">
 			<!-- wp:post-template {"className":"cr-404__list-template","style":{"spacing":{"blockGap":"var:preset|spacing|small"}}} -->
-				<!-- wp:group {"className":"cr-404__list-item","style":{"spacing":{"blockGap":"var:preset|spacing|2-xs"}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"left"}} -->
+				<!-- wp:group {"className":"cr-404__list-item","layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"left"}} -->
 				<div class="wp-block-group cr-404__list-item">
-					<!-- wp:post-title {"isLink":true,"className":"cr-404__list-title","style":{"typography":{"fontStyle":"normal","fontWeight":"600"}},"fontSize":"md","fontFamily":"accent"} /-->
+					<!-- wp:group {"className":"cr-404__card-body","layout":{"type":"constrained"}} -->
+					<div class="wp-block-group cr-404__card-body">
+						<!-- wp:post-terms {"term":"category","className":"cr-404__list-kind"} /-->
+						<!-- wp:post-title {"isLink":true,"className":"cr-404__list-title","style":{"typography":{"fontStyle":"normal","fontWeight":"700"}},"fontSize":"md","fontFamily":"accent"} /-->
+					</div>
+					<!-- /wp:group -->
 				</div>
 				<!-- /wp:group -->
 			<!-- /wp:post-template -->

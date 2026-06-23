@@ -752,3 +752,103 @@ function suppress_format_badge_hook( $hooked_blocks, $position, $anchor_block ) 
 	return $hooked_blocks;
 }
 add_filter( 'hooked_block_types', __NAMESPACE__ . '\\suppress_format_badge_hook', 20, 3 );
+
+/**
+ * v0.5.132 — split a category term list into one masking-tape chip per term,
+ * each with its own accent colour and tilt (the design system's "colour
+ * variety + varied tilt + one chip per tag" treatment — see UI Kit Chips and
+ * the stream meta row). Core's post-terms joins all terms into a single
+ * element with a separator; this strips the separator, tags each term anchor
+ * with `.cr-term-chip` + a `--1..6` variant (chosen by a stable hash of the
+ * term name, so a given category always keeps the same colour), and flags the
+ * container `.cr-has-term-chips` so CSS un-chips it and flexes the chips.
+ * Scoped to term=category; the 404 kind chip (its own single-chip style) and
+ * the term-button tags are left untouched.
+ */
+function split_term_chips( string $block_content, array $block ): string {
+	if ( ! isset( $block['blockName'] ) || 'core/post-terms' !== $block['blockName'] ) {
+		return $block_content;
+	}
+	if ( 'category' !== ( $block['attrs']['term'] ?? '' ) ) {
+		return $block_content;
+	}
+	if ( \str_contains( (string) ( $block['attrs']['className'] ?? '' ), 'cr-404' ) ) {
+		return $block_content;
+	}
+	if ( ! \str_contains( $block_content, '<a' ) ) {
+		return $block_content;
+	}
+	// Drop the separator (modern WP wraps it in a span; older renders inline).
+	$block_content = (string) \preg_replace( '#<span[^>]*wp-block-post-terms__separator[^>]*>.*?</span>#s', '', $block_content );
+	$block_content = (string) \preg_replace( '#</a>[^<]*<a#', '</a><a', $block_content );
+	// Chip + stable-per-term accent/tilt variant on each term anchor.
+	$block_content = (string) \preg_replace_callback(
+		'#<a\b([^>]*)>(.*?)</a>#s',
+		static function ( array $m ): string {
+			$variant = ( \abs( \crc32( \strtolower( \wp_strip_all_tags( $m[2] ) ) ) ) % 6 ) + 1;
+			$add     = 'cr-term-chip cr-term-chip--' . $variant;
+			$attrs   = $m[1];
+			if ( \preg_match( '#\sclass="#', $attrs ) ) {
+				$attrs = (string) \preg_replace( '#(\sclass=")#', '$1' . $add . ' ', $attrs, 1 );
+			} else {
+				$attrs .= ' class="' . $add . '"';
+			}
+			return '<a' . $attrs . '>' . $m[2] . '</a>';
+		},
+		$block_content
+	);
+	// Flag the container so CSS un-chips it and lays the chips out in a row.
+	$block_content = (string) \preg_replace(
+		'#(class="[^"]*\bwp-block-post-terms\b)#',
+		'$1 cr-has-term-chips',
+		$block_content,
+		1
+	);
+	return $block_content;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\split_term_chips', 10, 2 );
+
+/**
+ * v0.5.134 — on the front page's Recent Posts loop, render the post format as
+ * an ICON instead of the text `.cr-format-chip` (matches the archive stream's
+ * avatar and the design). The archive paints its own avatar already; the
+ * homepage loop is page-stored markup that only had the chip, so here we swap
+ * the (empty) chip span for the cr-icon-avatar at render time. Scoped to the
+ * front page so nothing else is affected; resolve_stream_item_type() always
+ * returns a type (blog for Standard), so every post gets an icon.
+ */
+function home_format_chip_to_icon( string $block_content, array $block ): string {
+	if ( ! \is_front_page() ) {
+		return $block_content;
+	}
+	if ( ! \str_contains( $block_content, 'cr-format-chip' ) ) {
+		return $block_content;
+	}
+	$post_id = (int) \get_the_ID();
+	if ( ! $post_id ) {
+		return $block_content;
+	}
+	$type = resolve_stream_item_type( $post_id );
+	if ( in_array( $type, STREAM_AVATAR_OUTLINE, true ) ) {
+		$class = 'cr-icon-avatar cr-icon-avatar--outline cr-home-format-icon';
+		$style = sprintf( ' style="--type-color: var(--cr-type-%s);"', \esc_attr( $type ) );
+	} else {
+		$class = sprintf( 'cr-icon-avatar cr-icon-avatar--%s cr-home-format-icon', \esc_attr( $type ) );
+		$style = '';
+	}
+	$icon = sprintf(
+		'<span class="%1$s" aria-hidden="true"%2$s><svg viewBox="0 0 24 24" width="1.5em" height="1.5em" focusable="false"><use href="%3$s/assets/svg/icons.svg#post-icon-%4$s"></use></svg></span>',
+		\esc_attr( $class ),
+		$style,
+		\esc_url( \get_stylesheet_directory_uri() ),
+		\esc_attr( $type )
+	);
+	$replaced = \preg_replace(
+		'#<span class="cr-format-chip"[^>]*>.*?</span>#s',
+		$icon,
+		$block_content,
+		1
+	);
+	return is_string( $replaced ) ? $replaced : $block_content;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\home_format_chip_to_icon', 10, 2 );
