@@ -4672,54 +4672,50 @@ body.home .wp-block-post-template > li .wp-block-group.is-vertical > .wp-block-p
 	border-bottom-color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
 }
 
-/* (4f) Tag pills — the existing is-style-term-button rule already
-   styles tag links as filled teal pills, but here we add a top-margin
-   so the pills sit clearly below the excerpt.
-   v0.5.9: cycle through 6 design-system colors via :nth-child so the
-   pill row reads as varied chip palette instead of flat teal repetition. */
-.cr-archive .cr-stream-item__tags {
+/* (4f) Tag pills as masking-tape chips (v0.5.137) — cream tape + russian-violet
+   ink (12.47:1 AAA) + a cycling accent border + tilt, matching the .cr-term-chip
+   category chips. Replaces the old solid nth-child pills, which read as low
+   contrast: a design-plugin rule (`.wp-block-group[class*="-background-color"] a`)
+   forced the cerulean link colour onto the dark fills. Fixes here:
+     • --dsgo-text-color points that plugin rule at the tape ink → legible.
+     • separator spans hidden + flex gap (so the comma list reads as chips).
+     • nth-OF-TYPE (not nth-child) so the cycle ignores the separator spans. */
+.cr-archive .cr-stream-item__tags,
+body.single .single-post__tags {
 	margin-top: var(--cr-space-xs, 0.5rem);
 	display: flex;
 	flex-wrap: wrap;
-	gap: var(--cr-space-2xs, 0.35rem);
+	align-items: center;
+	gap: var(--cr-space-2xs, 0.4rem);
+	--dsgo-text-color: var(--cr-tape-ink, #241c4a);
 }
+.cr-archive .cr-stream-item__tags .wp-block-post-terms__separator,
+body.single .single-post__tags .wp-block-post-terms__separator { display: none; }
 .cr-archive .cr-stream-item__tags a,
 body.single .single-post__tags a {
-	transition: transform 0.15s ease, background-color 0.15s ease;
+	display: inline-block;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xs, 0.7rem);
+	font-weight: var(--cr-weight-bold, 700);
+	text-transform: uppercase;
+	letter-spacing: var(--cr-tracking-eyebrow, 0.05em);
+	background: var(--cr-tape, #f3e5b8) !important;
+	color: var(--cr-tape-ink, #241c4a) !important;
+	padding: var(--cr-space-3xs, 0.15em) var(--cr-space-sm, 0.7em);
+	border-left: 4px solid var(--cr-marker, var(--cr-ut-orange));
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+	text-decoration: none;
+	transition: transform 0.15s ease;
 }
-.cr-archive .cr-stream-item__tags a:nth-child(6n+1),
-body.single .single-post__tags a:nth-child(6n+1) {
-	background: var(--cr-cerulean, #126782) !important;
-	color: var(--cr-printer-ivory, #fbfaf5) !important;
-}
-.cr-archive .cr-stream-item__tags a:nth-child(6n+2),
-body.single .single-post__tags a:nth-child(6n+2) {
-	background: var(--cr-russian-violet, #241c4a) !important;
-	color: var(--cr-selective-yellow, #ffb703) !important;
-}
-.cr-archive .cr-stream-item__tags a:nth-child(6n+3),
-body.single .single-post__tags a:nth-child(6n+3) {
-	background: var(--cr-prussian-blue, #023047) !important;
-	color: var(--cr-light-orange, #fee2c3) !important;
-}
-.cr-archive .cr-stream-item__tags a:nth-child(6n+4),
-body.single .single-post__tags a:nth-child(6n+4) {
-	background: var(--cr-ut-orange, #fb8500) !important;
-	color: var(--cr-russian-violet, #241c4a) !important;
-}
-.cr-archive .cr-stream-item__tags a:nth-child(6n+5),
-body.single .single-post__tags a:nth-child(6n+5) {
-	/* v0.5.31 — was glaucous (#647baf) on ivory (#fbfaf5) text =
-	   4.02:1, fails WCAG 1.4.3 AA at 4.5:1 (small text). glaucous-dark
-	   (#3d527d) on ivory = 7.44:1 AAA. Same hue family, deeper value. */
-	background: var(--cr-glaucous-dark, #3d527d) !important;
-	color: var(--cr-printer-ivory, #fbfaf5) !important;
-}
-.cr-archive .cr-stream-item__tags a:nth-child(6n),
-body.single .single-post__tags a:nth-child(6n) {
-	background: var(--cr-blue-green, #219ebc) !important;
-	color: var(--cr-russian-violet, #241c4a) !important;
-}
+.cr-archive .cr-stream-item__tags a:hover,
+body.single .single-post__tags a:hover { color: var(--cr-tape-ink, #241c4a) !important; }
+/* cycling accent + tilt — nth-of-type ignores the separator spans */
+.cr-archive .cr-stream-item__tags a:nth-of-type(6n+1), body.single .single-post__tags a:nth-of-type(6n+1) { border-left-color: var(--cr-type-video); transform: rotate(-2.5deg); }
+.cr-archive .cr-stream-item__tags a:nth-of-type(6n+2), body.single .single-post__tags a:nth-of-type(6n+2) { border-left-color: var(--cr-type-link);  transform: rotate(1.8deg); }
+.cr-archive .cr-stream-item__tags a:nth-of-type(6n+3), body.single .single-post__tags a:nth-of-type(6n+3) { border-left-color: var(--cr-type-like);  transform: rotate(-1.2deg); }
+.cr-archive .cr-stream-item__tags a:nth-of-type(6n+4), body.single .single-post__tags a:nth-of-type(6n+4) { border-left-color: var(--cr-type-event); transform: rotate(2.6deg); }
+.cr-archive .cr-stream-item__tags a:nth-of-type(6n+5), body.single .single-post__tags a:nth-of-type(6n+5) { border-left-color: var(--cr-type-quote); transform: rotate(-1.8deg); }
+.cr-archive .cr-stream-item__tags a:nth-of-type(6n),   body.single .single-post__tags a:nth-of-type(6n)   { border-left-color: var(--cr-type-reply); transform: rotate(2.2deg); }
 
 /* (5) Pagination — hard-edge buttons matching the design system. */
 .cr-archive .cr-stream__pagination {
