@@ -27,6 +27,9 @@
 		syncSegments( value );
 	}
 
+	var ORDER  = [ 'light', 'dark', 'system' ];
+	var LABELS = { light: 'light', dark: 'dark', system: 'system' };
+
 	function syncSegments( value ) {
 		var segments = document.querySelectorAll( '[data-theme-set]' );
 		for ( var i = 0; i < segments.length; i++ ) {
@@ -40,9 +43,25 @@
 				seg.setAttribute( 'aria-pressed', 'false' );
 			}
 		}
+		// Mobile single-icon control: keep its accessible name in sync with the
+		// current mode. The visible icon is swapped by CSS (keyed on data-theme).
+		var cycles = document.querySelectorAll( '[data-theme-cycle]' );
+		for ( var j = 0; j < cycles.length; j++ ) {
+			cycles[ j ].setAttribute(
+				'aria-label',
+				'Appearance: ' + ( LABELS[ value ] || 'system' ) + ' theme. Activate to change.'
+			);
+		}
 	}
 
 	function onClick( ev ) {
+		var cyc = ev.target.closest( '[data-theme-cycle]' );
+		if ( cyc ) {
+			ev.preventDefault();
+			var idx = ORDER.indexOf( getCurrent() );
+			applyTheme( ORDER[ ( idx + 1 ) % ORDER.length ] );
+			return;
+		}
 		var btn = ev.target.closest( '[data-theme-set]' );
 		if ( ! btn ) return;
 		ev.preventDefault();

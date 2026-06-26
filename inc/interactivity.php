@@ -423,6 +423,48 @@ function transform_stream_item_avatar( string $block_content, array $block ): st
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\transform_stream_item_avatar', 10, 2 );
 
+/**
+ * v0.5.159 — blog index (home.html) card grid: swap each card's .media-glyph
+ * post-format icon to match the post. The card markup ships a default
+ * `#post-icon-blog` placeholder + `data-cr-card-glyph` marker; this rewrites the
+ * <use> fragment and the aria-label per get_post_format(), leaving the
+ * .media-glyph class/box intact (unlike the avatar filter, which rebuilds the
+ * whole span). Keyed on the marker so it only touches blog cards.
+ */
+function transform_blog_card_glyph( string $block_content, array $block ): string {
+	if ( ! str_contains( $block_content, 'data-cr-card-glyph' ) ) {
+		return $block_content;
+	}
+	$post_id = \get_the_ID();
+	if ( ! $post_id ) {
+		return $block_content;
+	}
+	$type = resolve_stream_item_type( $post_id );
+
+	// v0.5.175: colour the card glyph by format, reusing the cr-icon-avatar
+	// variants (solid for the AA-safe types, outline + inline --type-color for
+	// the rest) — the same colour system as the front-page badge. The whole
+	// span is rebuilt so the class/style/icon/label all match the post.
+	if ( in_array( $type, STREAM_AVATAR_OUTLINE, true ) ) {
+		$class = 'media-glyph cr-icon-avatar cr-icon-avatar--outline';
+		$style = sprintf( ' style="--type-color: var(--cr-type-%s);"', \esc_attr( $type ) );
+	} else {
+		$class = sprintf( 'media-glyph cr-icon-avatar cr-icon-avatar--%s', \esc_attr( $type ) );
+		$style = '';
+	}
+	$glyph = sprintf(
+		'<span class="%1$s" role="img" aria-label="%2$s" data-cr-card-glyph="%3$s"%4$s><svg viewBox="0 0 24 24"><use href="%5$s/assets/svg/icons.svg#post-icon-%3$s"></use></svg></span>',
+		\esc_attr( $class ),
+		\esc_attr( sprintf( 'Post format: %s', $type ) ),
+		\esc_attr( $type ),
+		$style,
+		\esc_url( \get_stylesheet_directory_uri() )
+	);
+	$replaced = \preg_replace( '#<span class="media-glyph"[^>]*>.*?</span>#s', $glyph, $block_content, 1 );
+	return is_string( $replaced ) ? $replaced : $block_content;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\transform_blog_card_glyph', 10, 2 );
+
 
 /*
 ============================================================
@@ -816,6 +858,11 @@ add_filter( 'render_block', __NAMESPACE__ . '\\split_term_chips', 10, 2 );
  * the (empty) chip span for the cr-icon-avatar at render time. Scoped to the
  * front page so nothing else is affected; resolve_stream_item_type() always
  * returns a type (blog for Standard), so every post gets an icon.
+ *
+ * v0.5.157 — the icon is now a clickable link to its post-format archive
+ * (the chip block was also moved under the date in the page content, so the
+ * icon reads as a date-anchored badge rather than an unclickable tape sitting
+ * among the clickable category chips).
  */
 function home_format_chip_to_icon( string $block_content, array $block ): string {
 	if ( ! \is_front_page() ) {
@@ -836,8 +883,23 @@ function home_format_chip_to_icon( string $block_content, array $block ): string
 		$class = sprintf( 'cr-icon-avatar cr-icon-avatar--%s cr-home-format-icon', \esc_attr( $type ) );
 		$style = '';
 	}
+	// v0.5.157: make the icon a real link, for parity with the clickable
+	// category/tag chips beside it. Core post formats link to their
+	// /type/{format}/ archive; Standard posts fall back to the blog index.
+	$format = \get_post_format( $post_id );
+	if ( $format ) {
+		$href  = (string) \get_post_format_link( $format );
+		/* translators: %s: post format name, e.g. Video. */
+		$label = sprintf( \__( 'More %s posts', 'courtneyr-child' ), \ucfirst( $format ) );
+	} else {
+		$posts_page = (int) \get_option( 'page_for_posts' );
+		$href       = $posts_page ? (string) \get_permalink( $posts_page ) : \home_url( '/' );
+		$label      = \__( 'Browse all posts', 'courtneyr-child' );
+	}
 	$icon = sprintf(
-		'<span class="%1$s" aria-hidden="true"%2$s><svg viewBox="0 0 24 24" width="1.5em" height="1.5em" focusable="false"><use href="%3$s/assets/svg/icons.svg#post-icon-%4$s"></use></svg></span>',
+		'<a class="cr-home-format-icon-link" href="%1$s" aria-label="%2$s"><span class="%3$s" aria-hidden="true"%4$s><svg viewBox="0 0 24 24" width="1.5em" height="1.5em" focusable="false"><use href="%5$s/assets/svg/icons.svg#post-icon-%6$s"></use></svg></span></a>',
+		\esc_url( $href ),
+		\esc_attr( $label ),
 		\esc_attr( $class ),
 		$style,
 		\esc_url( \get_stylesheet_directory_uri() ),
@@ -852,3 +914,39 @@ function home_format_chip_to_icon( string $block_content, array $block ): string
 	return is_string( $replaced ) ? $replaced : $block_content;
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\home_format_chip_to_icon', 10, 2 );
+
+/**
+ * v0.5.178: inject a search field into the header navigation's mobile overlay.
+ *
+ * On mobile the desktop search box is hidden (CSS) and the nav collapses to a
+ * hamburger; this puts a real, labelled search field at the top of the open menu
+ * so search stays reachable without crowding the mobile header. It's hidden on
+ * desktop (the same <ul> is the inline nav there) and only revealed inside the
+ * open overlay (`.is-menu-open .cr-mobile-search-item`).
+ *
+ * @param string $block_content Rendered block HTML.
+ * @param array  $block         Parsed block.
+ * @return string
+ */
+function inject_header_search_into_nav( string $block_content, array $block ): string {
+	if ( empty( $block['blockName'] ) || 'core/navigation' !== $block['blockName'] ) {
+		return $block_content;
+	}
+	if ( ! str_contains( $block_content, 'site-header__nav' ) ) {
+		return $block_content;
+	}
+	$form = '<li class="wp-block-navigation-item cr-mobile-search-item">'
+		. '<form role="search" method="get" action="' . \esc_url( \home_url( '/' ) ) . '" class="cr-mobile-search">'
+		. '<label for="cr-mobile-search-field" class="screen-reader-text">' . \esc_html__( 'Search the site', 'courtneyr-child' ) . '</label>'
+		. '<span class="cr-mobile-search__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" focusable="false" fill="currentColor"><path d="M13.5 6C10.5 6 8 8.5 8 11.5c0 1.1.3 2.1.9 3l-3.4 3 1 1.1 3.4-3c1 .9 2.2 1.4 3.6 1.4 3 0 5.5-2.5 5.5-5.5C19 8.5 16.5 6 13.5 6zm0 9.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"></path></svg></span>'
+		. '<input type="search" id="cr-mobile-search-field" name="s" placeholder="' . \esc_attr__( 'Search…', 'courtneyr-child' ) . '" class="cr-mobile-search__input">'
+		. '</form></li>';
+	$replaced = \preg_replace(
+		'/(<ul[^>]*class="[^"]*wp-block-navigation__container[^"]*"[^>]*>)/',
+		'$1' . $form,
+		$block_content,
+		1
+	);
+	return is_string( $replaced ) ? $replaced : $block_content;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\inject_header_search_into_nav', 10, 2 );

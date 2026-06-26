@@ -1,0 +1,633 @@
+/* =============================================================================
+   Contact page — "Let's talk" comic-zine hero + Field Notes postcard form.
+   Faithful port of the Claude Design Contact.html (design project 2fe11712).
+   Scoped under .cr-contact (the page-contact.html <main> wrapper); enqueued
+   only on the contact page (see inc/enqueue.php). Leans entirely on the v2.0
+   design-system tokens already in tokens.css — adds nothing to :root. The
+   theme's header/footer + light/dark/auto toggle are reused (the mockup's
+   own nav/toggle/footer are dropped). The working CoBlocks form is kept and
+   restyled to the postcard look via element selectors (version-agnostic).
+   ============================================================================= */
+
+.cr-contact {
+	/* layered paper: fiber lines + halftone dots (mockup body treatment) */
+	background-image: var(--cr-fiber), var(--cr-halftone);
+	background-size: auto, var(--cr-halftone-size);
+	overflow-x: clip;
+}
+
+/* =============================================================================
+   Hero
+   ============================================================================= */
+.cr-contact .cr-contact__hero {
+	max-width: 60rem;
+	margin-inline: auto;
+	padding-block: var(--cr-space-3xl) var(--cr-space-2xl);
+	text-align: left;
+}
+.cr-contact .cr-contact__hero-tape {
+	display: inline-block;
+	margin: 0 0 var(--cr-space-md);
+	transform: rotate(var(--cr-rotate-neg));
+}
+.cr-contact .cr-contact__title {
+	font-family: var(--cr-font-display);
+	font-size: clamp(var(--cr-text-4xl), 11vw, 6rem);
+	line-height: 0.95;
+	letter-spacing: var(--cr-tracking-tight);
+	color: var(--cr-ink);
+	margin: 0 0 var(--cr-space-md);
+	max-width: 16ch;
+}
+.cr-contact .cr-contact__wave { display: inline-block; transform: rotate(8deg); }
+.cr-contact .cr-contact__lead {
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	line-height: var(--cr-leading-snug);
+	color: var(--cr-ink-muted);
+	max-width: 42ch;
+	margin: 0 0 var(--cr-space-xl);
+}
+
+/* =============================================================================
+   Note section — eyebrow + heading + hand-drawn arrow + the grid
+   ============================================================================= */
+.cr-contact .cr-contact__note {
+	max-width: 72rem;
+	margin-inline: auto;
+	padding-block: var(--cr-space-2xl);
+}
+.cr-contact .cr-contact__note > h2 { margin: 0 0 var(--cr-space-2xs); }
+.cr-contact .cr-contact__arrow {
+	display: flex;
+	align-items: center;
+	gap: var(--cr-space-sm);
+	font-family: var(--cr-font-display);
+	font-size: var(--cr-text-md);
+	color: var(--cr-marker);
+	transform: rotate(-3deg);
+	margin: var(--cr-space-xs) 0 var(--cr-space-xl);
+}
+.cr-contact .cr-contact__arrow svg { width: 3rem; height: 2rem; flex-shrink: 0; }
+
+.cr-contact .cr-contact__grid {
+	display: grid;
+	gap: var(--cr-space-2xl) var(--cr-space-xl);
+	grid-template-columns: 1fr;
+	align-items: start;
+}
+@media (min-width: 60rem) {
+	.cr-contact .cr-contact__grid { grid-template-columns: 1.5fr 1fr; }
+}
+
+/* =============================================================================
+   Postcard form
+   ============================================================================= */
+.cr-contact .cr-contact__postcard {
+	position: relative;
+	background: var(--cr-surface-elevated);
+	background-image: var(--cr-halftone);
+	background-size: var(--cr-halftone-size);
+	border: var(--cr-border-thick);
+	box-shadow: var(--cr-shadow-hard-2);
+	padding: var(--cr-space-xl);
+	transition: box-shadow 220ms var(--cr-ease-out, ease);
+}
+/* Straighten to perfectly horizontal while the visitor is using it — on hover
+   and while any field is focused (focus-within keeps it level as they type).
+   The resting tilt now lives on .cr-contact__flip (see "Postcard flip" section)
+   so both faces share it; here we only deepen the shadow on interaction. */
+.cr-contact .cr-contact__flip:hover .cr-contact__postcard,
+.cr-contact .cr-contact__flip:focus-within .cr-contact__postcard {
+	box-shadow: 10px 10px 0 var(--cr-ink);
+}
+/* Postcard chrome: a faint dashed inner frame (the card edge) and a little
+   dashed stamp in the top-right corner. Both decorative, mode-aware via tokens. */
+.cr-contact .cr-contact__postcard::before {
+	content: "";
+	position: absolute;
+	inset: var(--cr-space-2xs);
+	border: 1px dashed var(--cr-ink);
+	opacity: 0.28;
+	pointer-events: none;
+}
+/* v0.5.164 — the postmark circle now lives on the postcard, above the address
+   (name) area, replacing the small dashed ✦ corner stamp. */
+.cr-contact .cr-contact__postcard .cr-contact__postmark {
+	position: absolute;
+	top: var(--cr-space-sm);
+	right: var(--cr-space-md);
+	z-index: 2;
+	width: 5.5rem;
+	align-self: auto;
+	margin: 0;
+	pointer-events: none;
+	transform: rotate(-8deg);
+}
+.cr-contact .cr-contact__postcard .cr-contact__postmark span {
+	width: 4rem;
+	height: 4rem;
+	font-size: 0.46rem;
+}
+@media (prefers-reduced-motion: reduce) {
+	.cr-contact .cr-contact__postcard { transition: none; }
+}
+.cr-contact .cr-contact__postcard-tape {
+	position: absolute;
+	top: -0.9rem;
+	left: var(--cr-space-xl);
+	margin: 0;
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+/* the working CoBlocks form, restyled — element selectors so it survives
+   plugin markup changes. Tape labels, brutalist inputs, stamped CTA. */
+.cr-contact .cr-contact__postcard .coblocks-form,
+.cr-contact .cr-contact__postcard .wp-block-coblocks-form { margin: var(--cr-space-md) 0 0; }
+.cr-contact .cr-contact__postcard .coblocks-field { margin-bottom: var(--cr-space-lg); }
+.cr-contact .cr-contact__postcard label {
+	display: inline-block;
+	width: fit-content;
+	max-width: 100%;
+	margin: 0 0 var(--cr-space-2xs);
+	background: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-mono);
+	font-weight: var(--cr-weight-bold);
+	font-size: var(--cr-text-xs);
+	text-transform: uppercase;
+	letter-spacing: var(--cr-tracking-wide);
+	padding: var(--cr-space-3xs) var(--cr-space-sm);
+	transform: none;
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+}
+.cr-contact .cr-contact__postcard input[type="text"],
+.cr-contact .cr-contact__postcard input[type="email"],
+.cr-contact .cr-contact__postcard textarea {
+	width: 100%;
+	max-width: 100%;
+	background: var(--cr-surface);
+	color: var(--cr-ink);
+	border: var(--cr-border-thick);
+	border-radius: 0;
+	padding: var(--cr-space-sm) var(--cr-space-md);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-md);
+}
+.cr-contact .cr-contact__postcard textarea { min-height: 8rem; resize: vertical; line-height: var(--cr-leading-normal); }
+.cr-contact .cr-contact__postcard input:focus-visible,
+.cr-contact .cr-contact__postcard textarea:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+}
+/* The submit button → stamped "Send it" CTA. Scoped through .send-row so the
+   selector (0,4,0) outranks Ollie's .wp-site-blocks button[type="submit"]
+   reset (0,3,1), which otherwise forces a transparent bg + white (invisible) text. */
+.cr-contact .cr-contact__postcard .send-row .send-btn {
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-black);
+	font-size: var(--cr-text-lg);
+	text-transform: uppercase;
+	letter-spacing: var(--cr-tracking-wide);
+	background: var(--cr-ut-orange);
+	color: var(--cr-cta-ink);
+	border: var(--cr-border-thick);
+	border-radius: 0;
+	cursor: pointer;
+	padding: var(--cr-space-sm) var(--cr-space-xl);
+	box-shadow: var(--cr-shadow-hard-2);
+	transition: transform 80ms var(--cr-ease-out), box-shadow 80ms var(--cr-ease-out);
+}
+.cr-contact .cr-contact__postcard .send-row .send-btn:hover {
+	transform: translate(-1px, -1px);
+	box-shadow: 8px 8px 0 var(--cr-ink);
+	background: var(--cr-ut-orange);
+	color: var(--cr-cta-ink);
+}
+.cr-contact .cr-contact__postcard .send-row .send-btn:active {
+	transform: translate(3px, 3px);
+	box-shadow: 2px 2px 0 var(--cr-ink);
+}
+.cr-contact .cr-contact__postcard .send-row .send-btn:focus-visible {
+	outline: 3px solid var(--cr-focus-ring, currentColor);
+	outline-offset: 3px;
+}
+/* custom form layout helpers (the [cr_contact_form] shortcode markup —
+   labels/inputs/textarea/button are already styled by the element rules above) */
+.cr-contact .cr-contact__form { margin: var(--cr-space-md) 0 0; }
+.cr-contact .field { margin-bottom: var(--cr-space-lg); }
+.cr-contact .field__hint { font-size: var(--cr-text-xs); color: var(--cr-ink-muted); margin: var(--cr-space-2xs) 0 0; max-width: none; }
+.cr-contact .send-row { display: flex; align-items: center; gap: var(--cr-space-lg); flex-wrap: wrap; margin-top: var(--cr-space-lg); }
+.cr-contact .send-note {
+	font-family: var(--cr-font-accent);
+	font-style: italic;
+	color: var(--cr-ink-muted);
+	font-size: var(--cr-text-sm);
+	margin: 0;
+}
+
+/* =============================================================================
+   Divided postcard back (>=48rem). Maps the form onto a real postcard: the
+   message is the correspondence (left), name + email are ruled "address" lines
+   (right), a dashed center line divides them, and Send runs across the bottom.
+   :has() places the existing shortcode fields with no markup change; wrapped in
+   @supports so browsers without :has() keep the stacked single-column form.
+   ============================================================================= */
+@supports selector(:has(*)) {
+	@media (min-width: 48rem) {
+		.cr-contact .cr-contact__postcard .cr-contact__form {
+			display: grid;
+			grid-template-columns: 1.35fr 1fr;
+			grid-template-areas:
+				"message name"
+				"message email"
+				"send    send";
+			column-gap: var(--cr-space-xl);
+			row-gap: var(--cr-space-sm);
+			align-items: start;
+		}
+		.cr-contact .cr-contact__postcard .cr-contact__form .field { margin-bottom: 0; }
+
+		/* Correspondence side — the message, with the postcard centre divider. */
+		.cr-contact .cr-contact__postcard .cr-contact__form .field:has(#cr-message) {
+			grid-area: message;
+			align-self: stretch;
+			display: flex;
+			flex-direction: column;
+			border-right: 2px dashed var(--cr-ink);
+			padding-right: var(--cr-space-xl);
+		}
+		.cr-contact .cr-contact__postcard .cr-contact__form .field:has(#cr-message) textarea {
+			flex: 1;
+			min-height: 13rem;
+		}
+
+		/* Address side — name + email as ruled lines (underline, no box). The top
+		   padding clears the postmark circle that sits above the name. */
+		.cr-contact .cr-contact__postcard .cr-contact__form .field:has(#cr-name)  { grid-area: name; padding-top: 5rem; }
+		.cr-contact .cr-contact__postcard .cr-contact__form .field:has(#cr-email) { grid-area: email; }
+		.cr-contact .cr-contact__postcard .cr-contact__form .field:has(#cr-name) input,
+		.cr-contact .cr-contact__postcard .cr-contact__form .field:has(#cr-email) input {
+			background: transparent;
+			border: 0;
+			border-bottom: 2px solid var(--cr-ink);
+			border-radius: 0;
+			padding: var(--cr-space-2xs) var(--cr-space-3xs);
+		}
+
+		/* Send across the bottom, under a dashed rule. */
+		.cr-contact .cr-contact__postcard .cr-contact__form .send-row {
+			grid-area: send;
+			margin-top: var(--cr-space-sm);
+			padding-top: var(--cr-space-md);
+			border-top: 2px dashed var(--cr-ink);
+		}
+	}
+}
+/* =============================================================================
+   WS Form integration — postcard-back layout: message at left, name/email at
+   right, submit across the bottom. WS Form builds its DOM with JavaScript:
+     form.wsf-form
+       div.wsf-grid.wsf-sections
+         fieldset.wsf-section
+           div.wsf-grid.wsf-fields            <- the flex row we turn into a grid
+             div.wsf-field-wrapper (textarea)  <- :nth-child(1) message
+             div.wsf-field-wrapper (text)      <- :nth-child(2) name
+             div.wsf-field-wrapper (email)     <- :nth-child(3) email
+             div.wsf-field-wrapper (submit)    <- :nth-child(4) send
+   .wsf-extra-small-12 forces flex:0 0 100% on each tile; switching the parent
+   to display:grid makes those flex props inert, so the grid placement wins.
+   ============================================================================= */
+
+/* Tape-style labels (all breakpoints) */
+.cr-contact .cr-contact__postcard .wsf-label {
+	display: inline-block;
+	width: fit-content;
+	max-width: 100%;
+	margin: 0 0 var(--cr-space-2xs);
+	background: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-mono);
+	font-weight: var(--cr-weight-bold);
+	font-size: var(--cr-text-xs);
+	text-transform: uppercase;
+	letter-spacing: var(--cr-tracking-wide);
+	padding: var(--cr-space-3xs) var(--cr-space-sm);
+	transform: none;
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+}
+
+/* Default boxed input styling (all breakpoints; overridden to ruled lines on
+   the right-column fields at desktop below) */
+.cr-contact .cr-contact__postcard .wsf-field-wrapper input[type="text"],
+.cr-contact .cr-contact__postcard .wsf-field-wrapper input[type="email"],
+.cr-contact .cr-contact__postcard .wsf-field-wrapper textarea {
+	width: 100%;
+	max-width: 100%;
+	background: var(--cr-surface);
+	color: var(--cr-ink);
+	border: var(--cr-border-thick);
+	border-radius: 0;
+	padding: var(--cr-space-sm) var(--cr-space-md);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-md);
+}
+.cr-contact .cr-contact__postcard .wsf-field-wrapper textarea {
+	min-height: 8rem;
+	resize: vertical;
+	line-height: var(--cr-leading-normal);
+}
+.cr-contact .cr-contact__postcard .wsf-field-wrapper input:focus-visible,
+.cr-contact .cr-contact__postcard .wsf-field-wrapper textarea:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+}
+
+/* Submit button → stamped "Send it" CTA (the submit field renders an
+   input[type=submit].wsf-button inside its wrapper) */
+.cr-contact .cr-contact__postcard .wsf-field-wrapper input[type="submit"],
+.cr-contact .cr-contact__postcard .wsf-field-wrapper button[type="submit"],
+.cr-contact .cr-contact__postcard .wsf-button {
+	width: auto;
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-black);
+	font-size: var(--cr-text-lg);
+	text-transform: uppercase;
+	letter-spacing: var(--cr-tracking-wide);
+	background: var(--cr-ut-orange);
+	color: var(--cr-cta-ink);
+	border: var(--cr-border-thick);
+	border-radius: 0;
+	cursor: pointer;
+	padding: var(--cr-space-sm) var(--cr-space-xl);
+	box-shadow: var(--cr-shadow-hard-2);
+	transition: transform 80ms var(--cr-ease-out), box-shadow 80ms var(--cr-ease-out);
+}
+.cr-contact .cr-contact__postcard .wsf-field-wrapper input[type="submit"]:hover,
+.cr-contact .cr-contact__postcard .wsf-field-wrapper button[type="submit"]:hover,
+.cr-contact .cr-contact__postcard .wsf-button:hover {
+	transform: translate(-1px, -1px);
+	box-shadow: 8px 8px 0 var(--cr-ink);
+	background: var(--cr-ut-orange);
+	color: var(--cr-cta-ink);
+}
+.cr-contact .cr-contact__postcard .wsf-field-wrapper input[type="submit"]:active,
+.cr-contact .cr-contact__postcard .wsf-field-wrapper button[type="submit"]:active,
+.cr-contact .cr-contact__postcard .wsf-button:active {
+	transform: translate(3px, 3px);
+	box-shadow: 2px 2px 0 var(--cr-ink);
+}
+.cr-contact .cr-contact__postcard .wsf-field-wrapper input[type="submit"]:focus-visible,
+.cr-contact .cr-contact__postcard .wsf-field-wrapper button[type="submit"]:focus-visible,
+.cr-contact .cr-contact__postcard .wsf-button:focus-visible {
+	outline: 3px solid var(--cr-focus-ring, currentColor);
+	outline-offset: 3px;
+}
+
+/* Desktop: two-column postcard grid */
+@media (min-width: 48rem) {
+	/* Turn the WS Form flex row into our postcard grid */
+	.cr-contact .cr-contact__postcard .wsf-fields {
+		display: grid !important;
+		grid-template-columns: 1.35fr 1fr !important;
+		grid-template-rows: auto auto auto !important;
+		column-gap: var(--cr-space-xl) !important;
+		row-gap: var(--cr-space-sm) !important;
+		align-items: start !important;
+	}
+
+	/* Message (1) — left column, spans both right-column rows, dashed divider */
+	.cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(1) {
+		grid-column: 1 !important;
+		grid-row: 1 / 3 !important;
+		display: flex !important;
+		flex-direction: column !important;
+		align-self: stretch !important;
+		border-right: 2px dashed var(--cr-ink) !important;
+		padding-right: var(--cr-space-xl) !important;
+		margin-bottom: 0 !important;
+	}
+	.cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(1) textarea {
+		flex: 1 !important;
+		min-height: 13rem !important;
+	}
+
+	/* Name (2) — top right, ruled "address" line */
+	.cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(2) {
+		grid-column: 2 !important;
+		grid-row: 1 !important;
+		padding-top: 5rem !important;
+		margin-bottom: 0 !important;
+	}
+
+	/* Email (3) — middle right, ruled "address" line */
+	.cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(3) {
+		grid-column: 2 !important;
+		grid-row: 2 !important;
+		margin-bottom: 0 !important;
+	}
+
+	/* Name + email inputs → underline-only ruled lines (no box) */
+	.cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(2) input,
+	.cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(3) input {
+		background: transparent !important;
+		border: 0 !important;
+		border-bottom: 2px solid var(--cr-ink) !important;
+		border-radius: 0 !important;
+		padding: var(--cr-space-2xs) var(--cr-space-3xs) !important;
+	}
+
+	/* Submit (4) — spans both columns at the bottom under a dashed rule */
+	.cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(4) {
+		grid-column: 1 / 3 !important;
+		grid-row: 3 !important;
+		margin-top: var(--cr-space-sm) !important;
+		padding-top: var(--cr-space-md) !important;
+		border-top: 2px dashed var(--cr-ink) !important;
+		margin-bottom: 0 !important;
+	}
+}
+
+/* Mobile: single stacked column (boxed inputs throughout, no divider) */
+@media (max-width: 47.999rem) {
+	.cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper {
+		margin-bottom: var(--cr-space-lg) !important;
+	}
+}
+
+/* honeypot — visually hidden, off-screen, not announced */
+.cr-contact .cr-contact__hp {
+	position: absolute !important;
+	left: -9999px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+/* success / error notice */
+.cr-contact .cr-contact__notice {
+	border: var(--cr-border-thick);
+	box-shadow: var(--cr-shadow-hard);
+	padding: var(--cr-space-sm) var(--cr-space-md);
+	margin: 0 0 var(--cr-space-lg);
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-semibold);
+}
+.cr-contact .cr-contact__notice--ok  { background: var(--cr-accent-1-bg); color: var(--cr-accent-1-ink); }
+.cr-contact .cr-contact__notice--err { background: var(--cr-tape); color: var(--cr-tape-ink); }
+
+/* =============================================================================
+   Aside — postmark stamp + reassurance card
+   ============================================================================= */
+.cr-contact .cr-contact__aside { display: flex; flex-direction: column; gap: var(--cr-space-lg); }
+.cr-contact .cr-contact__postmark {
+	align-self: center;
+	width: 9rem;
+	aspect-ratio: 1;
+	display: grid;
+	place-items: center;
+	border: 3px solid var(--cr-ink);
+	border-radius: 50%;
+	color: var(--cr-ink);
+	text-align: center;
+	transform: rotate(-9deg);
+	font-family: var(--cr-font-mono);
+	font-weight: var(--cr-weight-bold);
+	font-size: var(--cr-text-xs);
+	text-transform: uppercase;
+	letter-spacing: var(--cr-tracking-wide);
+	background: repeating-conic-gradient(from 0deg, transparent 0 14deg, var(--cr-ink) 14deg 15deg) padding-box;
+}
+.cr-contact .cr-contact__postmark span {
+	background: var(--cr-surface-elevated);
+	border-radius: 50%;
+	width: 6.5rem;
+	height: 6.5rem;
+	display: grid;
+	place-items: center;
+	line-height: 1.3;
+	padding: var(--cr-space-xs);
+}
+.cr-contact .cr-contact__reassure {
+	background: var(--cr-accent-1-bg);
+	color: var(--cr-accent-1-ink);
+	border: var(--cr-border-thick);
+	box-shadow: var(--cr-shadow-hard);
+	padding: var(--cr-space-lg);
+	transform: rotate(1.5deg);
+}
+.cr-contact .cr-contact__reassure h3 { margin: 0 0 var(--cr-space-xs); font-size: var(--cr-text-lg); }
+.cr-contact .cr-contact__reassure p { margin: 0; font-size: var(--cr-text-sm); max-width: none; }
+
+/* =============================================================================
+   Motion / responsive
+   ============================================================================= */
+@media (prefers-reduced-motion: reduce) {
+	.cr-contact .cr-contact__postcard button { transition: none; }
+}
+@media (max-width: 40rem) {
+	.cr-contact .cr-contact__hero { padding-block: var(--cr-space-2xl) var(--cr-space-xl); }
+	.cr-contact .cr-contact__flip,
+	.cr-contact .cr-contact__postcard,
+	.cr-contact .cr-contact__reassure { transform: none; }
+	.cr-contact .cr-contact__postcard .cr-contact__postmark { display: none; }
+}
+
+/* =============================================================================
+   Postcard flip — on a successful WS Form submit, the postcard turns over to
+   reveal a scenic "front" (a travel-postcard thank-you). The flip is driven by
+   an inline transform set in JS (not a state class) so Perfmatters' Remove-
+   Unused-CSS can't strip it: every selector here matches an element that is in
+   the initial DOM (the front is present, just rotated to the backface).
+   ============================================================================= */
+.cr-contact .cr-contact__flip {
+	perspective: 2200px;
+	transform: rotate(-1deg);
+	transition: transform 220ms var(--cr-ease-out, ease);
+}
+.cr-contact .cr-contact__flip:hover,
+.cr-contact .cr-contact__flip:focus-within {
+	transform: rotate(0deg);
+}
+.cr-contact .cr-contact__flip-inner {
+	position: relative;
+	transform-style: preserve-3d;
+	transition: transform 0.95s cubic-bezier(0.45, 0.05, 0.2, 1);
+}
+/* Back face = the existing postcard (form). Front face = the scene. */
+.cr-contact .cr-contact__flip .cr-contact__postcard {
+	backface-visibility: hidden;
+}
+.cr-contact .cr-contact__front {
+	position: absolute;
+	inset: 0;
+	backface-visibility: hidden;
+	transform: rotateY(180deg);
+	overflow: hidden;
+	box-shadow: var(--cr-shadow-hard-2);
+}
+@media (prefers-reduced-motion: reduce) {
+	.cr-contact .cr-contact__flip,
+	.cr-contact .cr-contact__flip-inner { transition: none; }
+}
+
+/* --- the airmail postcard image (whole image shown, matted) --- */
+.cr-contact .cr-front__img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+	z-index: 0;
+}
+/* --- bottom control bar: submit confirmation + "back to the form" --- */
+.cr-contact .cr-front__bar {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cr-space-sm);
+	flex-wrap: wrap;
+	padding: var(--cr-space-sm) var(--cr-space-md);
+	background: linear-gradient(0deg, rgba(36, 28, 74, 0.94) 0%, rgba(36, 28, 74, 0.74) 62%, rgba(36, 28, 74, 0) 100%);
+}
+.cr-contact .cr-front__thanks {
+	margin: 0;
+	color: var(--cr-printer-ivory, #fbfaf5);
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-semibold);
+	font-size: var(--cr-text-sm);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.cr-contact .cr-front__back {
+	flex-shrink: 0;
+	font-family: var(--cr-font-mono);
+	font-weight: var(--cr-weight-bold);
+	font-size: var(--cr-text-xs);
+	text-transform: uppercase;
+	letter-spacing: var(--cr-tracking-wide);
+	background: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+	border: var(--cr-border-thick);
+	border-radius: 0;
+	cursor: pointer;
+	padding: var(--cr-space-2xs) var(--cr-space-md);
+	box-shadow: var(--cr-shadow-hard);
+	transition: transform 80ms var(--cr-ease-out), box-shadow 80ms var(--cr-ease-out);
+}
+.cr-contact .cr-front__back:hover {
+	transform: translate(-1px, -1px);
+	box-shadow: 6px 6px 0 var(--cr-ink);
+}
+.cr-contact .cr-front__back:active {
+	transform: translate(2px, 2px);
+	box-shadow: 1px 1px 0 var(--cr-ink);
+}
+.cr-contact .cr-front__back:focus-visible {
+	outline: 3px solid var(--cr-focus-ring, currentColor);
+	outline-offset: 2px;
+}

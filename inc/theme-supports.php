@@ -158,3 +158,27 @@ function add_aria_current_to_navigation_link( $block_content, $block ) {
 	return is_string( $replaced ) ? $replaced : $block_content;
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\add_aria_current_to_navigation_link', 10, 2 );
+
+/**
+ * Fill the zine card grid so it never ends on a lone card.
+ *
+ * The card grid (patterns/cr-blog-grid.php) renders a full-width featured lead
+ * (`li:first-child`) on EVERY page, then the rest as a 2-up grid. With the
+ * default 4 posts/page that is featured + 3 = one full row + a single lone card,
+ * leaving the lower-right cell empty. Bumping to 5 makes it featured + 4 = two
+ * full rows. 5 is odd, and the featured always consumes one slot, so the parity
+ * holds on paginated pages too (page 2+ = featured + 4 as well).
+ *
+ * Scoped to the surfaces that use the grid: blog home, archives, search.
+ *
+ * @param \WP_Query $query The query about to run.
+ */
+function fill_card_grid_post_count( $query ): void {
+	if ( is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+	if ( $query->is_home() || $query->is_archive() || $query->is_search() ) {
+		$query->set( 'posts_per_page', 5 );
+	}
+}
+add_action( 'pre_get_posts', __NAMESPACE__ . '\\fill_card_grid_post_count' );

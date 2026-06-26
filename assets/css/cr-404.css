@@ -15,8 +15,10 @@
 	--burst: polygon(50% 0%,61% 15%,79% 10%,80% 28%,98% 35%,87% 50%,98% 65%,80% 72%,79% 90%,61% 85%,50% 100%,39% 85%,21% 90%,20% 72%,2% 65%,13% 50%,2% 35%,20% 28%,21% 10%,39% 15%);
 	position: relative;
 	overflow: hidden; /* edge bursts must not cause horizontal scroll */
-	background-image: var(--cr-halftone, radial-gradient(rgba(36,28,74,0.06) 1.1px, transparent 1.3px));
-	background-size: var(--cr-halftone-size, 13px 13px);
+	/* halftone dots + fiber lines — matches the design's page-stage and the rest
+	   of the theme (which pairs --cr-fiber over --cr-halftone). */
+	background-image: var(--cr-fiber), var(--cr-halftone, radial-gradient(rgba(36,28,74,0.06) 1.1px, transparent 1.3px));
+	background-size: auto, var(--cr-halftone-size, 13px 13px);
 }
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme="light"]) .cr-404 { --cr-shadow-ink: var(--cr-selective-yellow); --cr-tab: var(--cr-cerulean); }
@@ -139,42 +141,65 @@
 	text-align: center;
 	font-family: var(--cr-font-accent);
 	font-weight: 900;
-	font-size: clamp(0.8rem, 1vw, 1.05rem);
+	font-size: clamp(0.66rem, 0.85vw, 0.82rem);
 	line-height: 1;
 	letter-spacing: 0.01em;
 	color: var(--cr-russian-violet);
-	background: var(--cr-selective-yellow);
-	padding: 1.55em 1.45em;
+	--burst-fill: var(--cr-selective-yellow);
+	/* fixed square so the star clip-path never stretches with word length
+	   (the design's bursts are square; content-sized boxes distort longer words). */
+	box-sizing: border-box;
+	width: 5.6rem;
+	height: 5.6rem;
+	padding: 0.3em;
 	white-space: nowrap;
+	/* fill + shadow are real stacked star layers (::after / ::before) so the
+	   brutalist drop shadow is a solid offset block, not a faint chained filter. */
+}
+/* the comic star fill, with a thin russian-violet ink outline (both modes) */
+.cr-404__onomat .cr-onomat::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background: var(--burst-fill);
 	clip-path: var(--burst);
-	/* fake the design's 2-layer burst: 4 directional shadows = violet outline,
-	   plus one offset = the hard comic lift. */
 	filter:
-		drop-shadow( 2px 0 0 var(--cr-shadow-ink, var(--cr-ink)))
-		drop-shadow(-2px 0 0 var(--cr-shadow-ink, var(--cr-ink)))
-		drop-shadow( 0 2px 0 var(--cr-shadow-ink, var(--cr-ink)))
-		drop-shadow( 0 -2px 0 var(--cr-shadow-ink, var(--cr-ink)))
-		drop-shadow( 4px 6px 0 var(--cr-shadow-ink, var(--cr-ink)));
+		drop-shadow( 1.5px 0 0 var(--cr-russian-violet))
+		drop-shadow(-1.5px 0 0 var(--cr-russian-violet))
+		drop-shadow( 0 1.5px 0 var(--cr-russian-violet))
+		drop-shadow( 0 -1.5px 0 var(--cr-russian-violet));
+}
+/* the hard BRUTALIST drop shadow: a solid star echoed down-right behind the
+   fill, in the theme shadow-ink (russian-violet light, selective-yellow dark). */
+.cr-404__onomat .cr-onomat::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -2;
+	background: var(--cr-shadow-ink, var(--cr-russian-violet));
+	clip-path: var(--burst);
+	transform: translate(7px, 8px);
 }
 /* colour variants (set in the template per burst) — scoped under
    .cr-404__onomat so they beat the base `.cr-404__onomat .cr-onomat`
    background (0,2,0); without this they all stayed selective-yellow. */
-.cr-404__onomat .cr-onomat--blue   { background: var(--cr-sky-blue); }
-.cr-404__onomat .cr-onomat--orange { background: var(--cr-ut-orange); }
-.cr-404__onomat .cr-onomat--peach  { background: var(--cr-periwinkle); }
-/* scattered positions */
-.cr-404__onomat .cr-onomat--1  { top: 3%;  left: 3%;  transform: rotate(-12deg); }
-.cr-404__onomat .cr-onomat--2  { top: 1%;  right: 4%; transform: rotate(10deg); }
-.cr-404__onomat .cr-onomat--3  { top: 13%; right: 1%; transform: rotate(16deg); }
-.cr-404__onomat .cr-onomat--4  { top: 17%; left: 6%;  transform: rotate(-18deg); }
-.cr-404__onomat .cr-onomat--5  { top: 34%; left: 1%;  transform: rotate(-14deg); }
-.cr-404__onomat .cr-onomat--6  { top: 31%; right: 2%; transform: rotate(15deg); }
-.cr-404__onomat .cr-onomat--7  { top: 50%; left: 4%;  transform: rotate(7deg); }
-.cr-404__onomat .cr-onomat--8  { top: 47%; right: 3%; transform: rotate(-9deg); }
-.cr-404__onomat .cr-onomat--9  { top: 66%; left: 2%;  transform: rotate(-16deg); }
-.cr-404__onomat .cr-onomat--10 { top: 63%; right: 1%; transform: rotate(13deg); }
-.cr-404__onomat .cr-onomat--11 { top: 82%; left: 3%;  transform: rotate(10deg); }
-.cr-404__onomat .cr-onomat--12 { top: 84%; right: 4%; transform: rotate(-13deg); }
+.cr-404__onomat .cr-onomat--blue   { --burst-fill: var(--cr-sky-blue); }
+.cr-404__onomat .cr-onomat--orange { --burst-fill: var(--cr-ut-orange); }
+.cr-404__onomat .cr-onomat--peach  { --burst-fill: var(--cr-periwinkle); }
+/* anchored positions — the design's 9 bursts hug each section's corners
+   (404.dc.html): hero badge (1,2), mid-hero (3,4), search (5,6), recent (7,8,9).
+   Rotations match the design exactly; placement is %-of-main (the overlay spans
+   the whole <main>) to approximate the design's per-section pixel anchoring. */
+.cr-404__onomat .cr-onomat--1 { top: 4%;  left: 3%;  transform: rotate(-12deg); } /* POW */
+.cr-404__onomat .cr-onomat--2 { top: 2%;  right: 4%; transform: rotate(10deg); }  /* KAPOW */
+.cr-404__onomat .cr-onomat--3 { top: 14%; right: 2%; transform: rotate(16deg); }  /* ZAP */
+.cr-404__onomat .cr-onomat--4 { top: 17%; left: 5%;  transform: rotate(-18deg); } /* BOOM */
+.cr-404__onomat .cr-onomat--5 { top: 50%; left: 3%;  transform: rotate(-14deg); } /* BANG */
+.cr-404__onomat .cr-onomat--6 { top: 44%; right: 3%; transform: rotate(15deg); }  /* WHAM */
+.cr-404__onomat .cr-onomat--7 { top: 71%; left: 3%;  transform: rotate(-16deg); } /* YIKES */
+.cr-404__onomat .cr-onomat--8 { top: 63%; right: 3%; transform: rotate(13deg); }  /* OOF */
+.cr-404__onomat .cr-onomat--9 { top: 85%; right: 4%; transform: rotate(-13deg); } /* THWACK */
 
 /* =============================================================================
    Search section — heading + tape-labelled card
@@ -325,6 +350,8 @@
 	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
 }
 .cr-404 .cr-404__list-kind a { color: inherit; text-decoration: none; }
+/* accent border cycles orange → cerulean → orange across the 3 cards (design 404.dc.html) */
+.cr-404 .cr-404__list .wp-block-post:nth-child(2) .cr-404__list-kind { border-left-color: var(--cr-cerulean); }
 .cr-404 .cr-404__list-title {
 	margin: 0;
 	font-size: 21px !important;

@@ -84,6 +84,26 @@ function enqueue_baseline(): void {
 		);
 	}
 
+	// Contact page — comic-zine "Let's talk" hero + Field Notes postcard form.
+	if ( is_page( 'contact' ) ) {
+		wp_enqueue_style(
+			'courtneyr-contact',
+			COURTNEYR_CHILD_URI . '/assets/css/cr-contact.css',
+			array( 'courtneyr-components' ),
+			COURTNEYR_CHILD_VERSION
+		);
+	}
+
+	// Blog index + all archives + search — the unified wide zine card grid.
+	if ( is_home() || is_archive() || is_search() ) {
+		wp_enqueue_style(
+			'courtneyr-blog',
+			COURTNEYR_CHILD_URI . '/assets/css/cr-blog.css',
+			array( 'courtneyr-components' ),
+			COURTNEYR_CHILD_VERSION
+		);
+	}
+
 	/*
 	 * V0.5.76 — emit the per-format tint rules as INLINE CSS attached
 	 * to the components handle. Perfmatters' Used CSS optimizer
@@ -310,6 +330,52 @@ function print_no_flash_theme_script(): void {
 	echo '<script id="courtneyr-theme-no-flash">' . $contents . "</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 add_action( 'wp_head', __NAMESPACE__ . '\\print_no_flash_theme_script', 1 );
+
+/**
+ * Keep Able Player's JS-built preference dialogs hidden until opened.
+ *
+ * Able Player creates the Captions / Audio Description / Keyboard / Transcript
+ * Preferences forms client-side and relies on its OWN stylesheet to keep them
+ * display:none. During navigation that stylesheet can apply late, so the raw
+ * forms flash visible at the bottom of the page (image reported 2026-06-23).
+ *
+ * This inline <head> rule is present before first paint and — unlike an enqueued
+ * stylesheet — is not deferred or pruned by Perfmatters, so the forms are hidden
+ * the instant Able Player builds them. Able Player sets an inline display:block to
+ * OPEN a dialog, which overrides this stylesheet rule, so dialogs still work.
+ * Same priority-1 inline-head technique as the no-flash theme script above.
+ */
+function print_able_player_dialog_guard(): void {
+	echo '<style id="cr-ableplayer-dialog-guard">.able-prefs-form{display:none;}</style>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+}
+add_action( 'wp_head', __NAMESPACE__ . '\\print_able_player_dialog_guard', 1 );
+
+/**
+ * Send a sane Cache-Control header for front-end page HTML.
+ *
+ * The host serves pages with `Cache-Control: public, max-age=2678400` (31 DAYS),
+ * so returning visitors' BROWSERS keep showing weeks-old HTML — which references
+ * older ?ver CSS/JS — long after a content/style update + server cache flush. That
+ * is why edits "show in the editor but not on the published page" (the editor is a
+ * fresh wp-admin render; the front end is the browser's month-old cached copy).
+ *
+ * Override it on document responses: logged-in users (editing/previewing) get a
+ * non-cached, always-fresh page; anonymous visitors get a 10-minute revalidating
+ * cache instead of 31 days. Versioned assets (?ver=) stay long-cached untouched.
+ * Runs on uncached responses (logged-in, or origin hits); fully taming anonymous
+ * CDN-cached hits is still a GoDaddy CDN cache-TTL setting.
+ */
+function revalidate_page_html(): void {
+	if ( is_admin() || is_feed() || is_robots() ) {
+		return;
+	}
+	if ( is_user_logged_in() ) {
+		header( 'Cache-Control: no-cache, must-revalidate, max-age=0', true );
+	} else {
+		header( 'Cache-Control: public, max-age=600, must-revalidate', true );
+	}
+}
+add_action( 'send_headers', __NAMESPACE__ . '\\revalidate_page_html', 99 );
 
 /**
  * Preload the above-the-fold self-hosted fonts. Paired with font-display:optional

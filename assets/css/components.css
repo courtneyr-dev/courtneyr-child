@@ -814,18 +814,65 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 	stroke: none;
 }
 
-/* v0.5.134: home Recent Posts loop — the format chip is swapped for a small
-   icon badge (home_format_chip_to_icon filter). Size it down to sit in the
-   meta row next to the date + category chips. */
+/* v0.5.134 / v0.5.157: home Recent Posts loop — the format chip is swapped for
+   a small icon badge (home_format_chip_to_icon filter). It now sits under the
+   date as a clickable link to the post-format archive, rather than as a chip in
+   the meta row beside the (clickable) category chips.
+   v0.5.161: unified with the blog cards' .media-glyph — a monochrome bordered
+   square (surface bg + ink icon), not the per-format colour badge, so the format
+   glyph reads the same on the front page, blog, and all archives. */
 .cr-home-format-icon.cr-icon-avatar {
-	width: 2rem;
-	height: 2rem;
-	box-shadow: 1.5px 1.5px 0 var(--cr-ink);
+	/* v0.5.173: 2x size (was 2rem) — a bolder format badge under the date. */
+	width: 4rem;
+	height: 4rem;
+	/* v0.5.171: use the per-format COLOR (the cr-icon-avatar--{type} solid/outline
+	   variants) — a coloured glyph like the talks list, not the monochrome square. */
+	box-shadow: 3px 3px 0 var(--cr-ink);
+	transform: rotate(var(--cr-rotate-1));
 	vertical-align: middle;
+	transition: transform 80ms var(--cr-ease-out, ease), box-shadow 80ms var(--cr-ease-out, ease);
+}
+/* Blog/Standard has no vibrant format colour (--cr-type-blog is the neutral ink,
+   which flips to ivory in dark → invisible icon). Pin it to a fixed navy square
+   with a white icon so it reads in both modes. */
+.cr-home-format-icon.cr-icon-avatar--blog {
+	background: var(--cr-russian-violet);
+	color: var(--cr-printer-ivory);
 }
 .cr-home-format-icon.cr-icon-avatar svg {
-	width: 1.15rem;
-	height: 1.15rem;
+	/* v0.5.173: scaled with the 2x badge to keep the icon-to-square ratio. */
+	width: 2.3rem;
+	height: 2.3rem;
+}
+/* v0.5.157: the link wrapper — keeps the badge inline under the date, drops the
+   underline, and adds the zine hover-lift + visible focus ring so it reads as
+   clickable like the category/tag chips. */
+/* v0.5.174: the date column becomes a max-content grid — the date (with its ✦
+   ::before) defines the single track's width, so the track's right edge is the
+   date TEXT's right edge. justify-self:end then lands the badge flush with the
+   year, PER ROW (each date is a different length). The column keeps its 25% flex
+   footprint, so the title column and every title stay aligned row-to-row. */
+.cr-home-fieldnotes .wp-block-column:has(.cr-home-format-icon-link) {
+	display: grid;
+	grid-template-columns: max-content;
+	justify-content: start;
+}
+.cr-home-format-icon-link {
+	display: flex;
+	justify-self: end;
+	margin-top: var(--cr-space-2xs, 0.35rem);
+	text-decoration: none;
+}
+.cr-home-format-icon-link:hover .cr-home-format-icon.cr-icon-avatar {
+	transform: rotate(var(--cr-rotate-neg)) translate(-1px, -1px);
+	box-shadow: 3px 3px 0 var(--cr-ink);
+}
+.cr-home-format-icon-link:focus-visible {
+	outline: 3px solid var(--cr-focus-ring, currentColor);
+	outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+	.cr-home-format-icon.cr-icon-avatar { transition: none; }
 }
 
 /* Solid variants — only 10 types pass AA as a fill */
@@ -972,65 +1019,59 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
    open, the form pops out as a positioned dropdown below the
    icon — saves horizontal space in the nav and lets surrounding
    nav items breathe. */
+/* v0.5.167 — the header search is an always-visible OUTLINED box with a leading
+   magnifying glass INSIDE the field. The box (the <form>) carries the border;
+   the input fills it borderless + transparent. Widens slightly on focus. */
 .site-header__search {
 	margin: 0 !important;
-	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	flex: none;
+	padding: 0.3rem 0.6rem;
+	background: var(--cr-surface, #fbfaf5);
+	border: 2px solid var(--cr-ink, #241c4a);
+	border-radius: 0;
 }
-.site-header__search-toggle {
+.site-header__search:focus-within {
+	outline: 2px solid var(--cr-focus-ring, var(--cr-marker, #fb8500));
+	outline-offset: 2px;
+}
+/* leading magnifying glass, inside the box */
+.site-header__search-icon {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	cursor: pointer;
-	padding: 0.4rem;
-	color: var(--cr-ink, #241c4a);
-	transition: color 0.15s ease;
-	list-style: none;
-	min-height: 24px;
-	border-radius: 0.25rem;
+	flex: none;
+	color: var(--cr-ink-muted, #647baf);
+	pointer-events: none;
 }
-/* Hide the default <details> disclosure triangle in WebKit + Firefox. */
-.site-header__search-toggle::-webkit-details-marker { display: none; }
-.site-header__search-toggle::marker { content: ""; }
-
-.site-header__search-toggle:hover,
-.site-header__search-toggle:focus-visible {
-	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
-	outline: none;
-}
-.site-header__search-toggle:focus-visible {
-	outline: 2px solid var(--cr-focus-ring, var(--cr-marker, #ffb703));
-	outline-offset: 2px;
-}
-.site-header__search-toggle svg {
-	width: 24px;
-	height: 24px;
+.site-header__search:focus-within .site-header__search-icon { color: var(--cr-ink, #241c4a); }
+.site-header__search-icon svg {
+	width: 18px;
+	height: 18px;
 	fill: currentColor;
 }
-/* When the user clicks the icon, browsers add `open` to the <details>.
-   Show the form as an absolutely-positioned popover anchored to the
-   right edge of the toggle so it always opens within the viewport on
-   any nav width. */
-.site-header__search[open] .site-header__search-form {
-	position: absolute;
-	right: 0;
-	top: calc(100% + 0.5rem);
-	z-index: 60;
-	display: flex;
-	gap: 0.5rem;
-	align-items: center;
-	background-color: var(--cr-surface, var(--cr-printer-ivory, #fbfaf5));
-	background-image: var(--cr-fiber), var(--cr-halftone);
-	background-size: auto, var(--cr-halftone-size, 12px 12px);
-	background-blend-mode: multiply, multiply;
-	background-repeat: repeat, repeat;
-	border: 2px solid var(--cr-russian-violet, #241c4a);
-	box-shadow: 4px 4px 0 var(--cr-russian-violet, #241c4a);
-	padding: 0.75rem;
-	min-width: 320px;
-	transform: rotate(-0.5deg);
+.site-header__search-input {
+	flex: 1 1 auto;
+	min-width: 0;
+	width: clamp(7rem, 12vw, 11rem);
+	padding: 0;
+	border: none !important;       /* the box draws the outline, not the field */
+	background: transparent !important;
+	color: var(--cr-ink, #241c4a);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	line-height: 1.4;
+	box-shadow: none !important;
+	transition: width 200ms var(--cr-ease-out, ease);
 }
-.site-header__search:not([open]) .site-header__search-form {
-	display: none;
+.site-header__search-input::placeholder { color: var(--cr-ink-muted, #647baf); opacity: 0.85; }
+.site-header__search-input:focus,
+.site-header__search-input:focus-visible { outline: none; }
+.site-header__search:focus-within .site-header__search-input { width: clamp(9rem, 16vw, 14rem); }
+@media (prefers-reduced-motion: reduce) {
+	.site-header__search-input { transition: none; }
 }
 .site-header__search-form .wp-block-search__input {
 	flex: 1 1 auto;
@@ -1101,6 +1142,130 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 @media (max-width: 768px) {
 	.site-header__controls {
 		gap: var(--cr-space-sm, 0.75rem);
+	}
+}
+
+/* ============================================================
+   v0.5.178 — Mobile header. The desktop header controls (inline nav +
+   3-button toggle + search box) are ~933px wide; below ~1120px they
+   overflow and `overflow-x: clip` was hiding the hamburger + search
+   OFF-SCREEN on phones (couldn't open the menu at all). Fix ≤1024px:
+   collapse the toggle to one cycle icon, hide the search box and move
+   search into the hamburger overlay, and force the nav into its drawer
+   (core only does that ≤480). Desktop (>1024px) is unchanged.
+   ============================================================ */
+
+/* Single-icon appearance toggle — desktop-hidden, shown only ≤1024px. */
+.cr-theme-cycle { display: none; }
+.cr-theme-cycle__icon { display: none; line-height: 0; }
+.cr-theme-cycle__icon svg { width: 22px; height: 22px; }
+.cr-theme-cycle__icon[data-icon="light"] svg,
+.cr-theme-cycle__icon[data-icon="system"] svg {
+	fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.cr-theme-cycle__icon[data-icon="dark"] svg { fill: currentColor; stroke: none; }
+:root[data-theme="light"]  .cr-theme-cycle__icon[data-icon="light"],
+:root[data-theme="dark"]   .cr-theme-cycle__icon[data-icon="dark"],
+:root[data-theme="system"] .cr-theme-cycle__icon[data-icon="system"],
+:root:not([data-theme])    .cr-theme-cycle__icon[data-icon="system"] { display: inline-block; }
+
+/* Search injected into the nav overlay (inc/interactivity.php). Hidden
+   everywhere by default — only revealed inside the OPEN hamburger menu.
+   !important: it's a nav <li>, and core's .wp-block-navigation-item display
+   (equal specificity, later in source) otherwise wins → a stray 2nd search
+   box appeared inline in the desktop nav. */
+.cr-mobile-search-item { display: none !important; }
+
+/* v0.5.183 — the Complianz consent banner (z 99999, position:fixed) showed
+   through the lower, transparent part of the open hamburger overlay and covered
+   menu items. While the nav modal is open WP core puts .has-modal-open on <html>;
+   hide the banner then. It returns the moment the menu closes, so consent is
+   never permanently blocked. */
+html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
+
+@media (max-width: 1024px) {
+	/* 1) collapse the appearance toggle to one 44px icon button */
+	.cr-theme-segments { display: none !important; }
+	.cr-theme-cycle {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		inline-size: 44px;
+		min-block-size: 44px;
+		padding: 0;
+		background: var(--cr-surface-elevated, #fbfaf5);
+		color: var(--cr-glaucous, #5d72a3);
+		border: none;
+		border-radius: 12px;
+		cursor: pointer;
+	}
+	.cr-theme-cycle:hover { color: var(--cr-russian-violet, #241c4a); }
+	.cr-theme-cycle:focus-visible { outline: 3px solid var(--cr-focus-ring, currentColor); outline-offset: 2px; }
+
+	/* 2) hide the desktop search box (search moves into the menu) */
+	.site-header__search { display: none !important; }
+
+	/* 3) force the nav into its hamburger drawer (core only does ≤480) */
+	.site-header__nav .wp-block-navigation__responsive-container-open { display: flex !important; }
+	.site-header__nav .wp-block-navigation__responsive-container:not(.is-menu-open) { display: none !important; }
+
+	/* 4) reveal + style the search at the top of the open menu */
+	.site-header__nav .wp-block-navigation__responsive-container.is-menu-open .cr-mobile-search-item {
+		display: block !important;
+		margin-block-end: var(--cr-space-md, 1rem);
+		width: 100%;
+	}
+	.cr-mobile-search {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+		max-width: 24rem;
+		padding: 0.55rem 0.8rem;
+		background: var(--cr-surface, #fff);
+		border: 2px solid var(--cr-ink, #241c4a);
+	}
+	.cr-mobile-search:focus-within { outline: 3px solid var(--cr-marker, #ffb703); outline-offset: 2px; }
+	.cr-mobile-search__icon { display: inline-flex; color: var(--cr-ink-muted, #555); flex: 0 0 auto; }
+	.cr-mobile-search__input {
+		flex: 1 1 auto;
+		min-width: 0;
+		border: none !important;
+		background: transparent !important;
+		box-shadow: none !important;
+		font: inherit;
+		color: inherit;
+		padding: 0;
+	}
+	.cr-mobile-search__input:focus { outline: none; }
+}
+
+/* ============================================================
+   v0.5.178 — Mobile reading margins. Full-bleed content sections
+   (heroes, coloured CTA/newsletter bands, the footer) bleed their
+   BACKGROUND to the edge via 100vw/alignfull, but their TEXT had no
+   inline padding on mobile, so body copy + headings clipped at the
+   left edge (e.g. "ot a WordPress…" on /contact/). Give the *text*
+   in those sections a safe inline margin while the background still
+   reaches the edge. Image/figure full-bleed assets are NOT padded —
+   they may run edge-to-edge per the editorial intent. Desktop (>782)
+   is untouched (its constrained inner already pads the text).
+   ============================================================ */
+@media (max-width: 782px) {
+	.cr-contact__hero,
+	.cr-speaking-hero,
+	.cr-home-hero,
+	.cr-home-fieldnotes,
+	.cr-home-closer,
+	main .wp-block-group.alignfull.has-background,
+	main .wp-block-group.alignfull[class*="background-color"],
+	.site-footer__inner,
+	.site-footer > .wp-block-group,
+	footer.wp-block-template-part > .wp-block-group {
+		/* !important: these sections carry has-global-padding, whose
+		   padding-left/right resolve to 0 (root-padding vars are empty) at
+		   equal specificity and would otherwise win. */
+		padding-inline: clamp(1rem, 5vw, 1.5rem) !important;
 	}
 }
 
@@ -1194,123 +1359,112 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
    on the buttons (per v0.5.15). The transition uses an overshoot
    easing curve so it lands with a slight bounce, reinforcing the
    "switch" feel vs. the previous "three buttons" feel. */
+/* v0.5.165 — Soft segmented pill (Claude Design "Theme Toggle"): a rounded
+   track with a hairline periwinkle border and a periwinkle rounded-square thumb
+   that glides between Day / Night / System. Icons only (no visible labels);
+   each button keeps its aria-label for screen readers. Keeps the existing
+   markup + theme-toggle JS — this is styling only. */
 .cr-theme-segments {
-	/* v0.5.43 — !important required to defeat the earlier
-	   .site-header__controls .cr-theme-segments rule at L804 which
-	   set position: static !important. Without this, the absolute-
-	   positioned indicator escapes to the next-up `position: relative`
-	   ancestor (the header), rendering as a giant pill behind the
-	   wordmark (image #129). */
+	/* position:relative !important defeats the .site-header__controls rule
+	   that sets position:static — without it the absolute thumb escapes to the
+	   header and renders as a giant pill behind the wordmark. */
 	position: relative !important;
-	display: inline-grid;
-	grid-template-columns: repeat(3, 1fr);
+	display: inline-flex;
 	align-items: center;
-	gap: 0;
-	padding: 0.2rem;
-	background: color-mix(in srgb, currentColor 8%, transparent);
-	border-radius: 999px;
-	border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
-	isolation: isolate; /* contain the absolutely-positioned indicator */
+	gap: 2px;
+	padding: 5px;
+	background: var(--cr-surface-elevated);
+	border: none;
+	border-radius: 14px;
+	box-shadow: none;
+	isolation: isolate; /* contain the absolutely-positioned thumb */
 }
 
-/* The sliding indicator — sits behind the buttons via z-index, snaps
-   to the active cell's column via translateX(). Width = 1/3 of the
-   inner area; left + right insets match the container padding so the
-   indicator stays inside the pill. */
+/* The gliding thumb — periwinkle rounded square that slides to the active
+   mode. Step = 42px button + 2px gap = 44px. */
 .cr-theme-segments__indicator {
 	position: absolute;
-	top: 0.2rem;
-	bottom: 0.2rem;
-	left: 0.2rem;
-	width: calc((100% - 0.4rem) / 3);
+	top: 5px;
+	left: 5px;
+	width: 42px;
+	height: 36px;
 	background: var(--cr-periwinkle, #bcb5e3);
-	border-radius: 999px;
-	box-shadow: 0 1px 3px rgba(36, 28, 74, 0.15);
-	transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-	            background 0.15s ease;
+	border-radius: 10px;
+	box-shadow: 0 4px 10px -3px rgba(36, 28, 74, 0.45);
+	transition: transform 0.3s cubic-bezier(0.4, 0.5, 0.2, 1), background 0.2s ease;
 	z-index: 0;
 	pointer-events: none;
 }
-/* Slide indicator based on which segment has aria-pressed="true".
-   Default position is "light" (translateX(0)). */
 .cr-theme-segments:has([data-theme-set="dark"][aria-pressed="true"]) .cr-theme-segments__indicator {
-	transform: translateX(100%);
+	transform: translateX(44px);
 }
 .cr-theme-segments:has([data-theme-set="system"][aria-pressed="true"]) .cr-theme-segments__indicator {
-	transform: translateX(200%);
+	transform: translateX(88px);
 }
 
-.cr-theme-segment {
+.cr-theme-segments .cr-theme-segment {
 	position: relative;
-	z-index: 1; /* sit above the indicator */
+	z-index: 1; /* sit above the thumb */
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 1.85rem;
-	height: 1.85rem;
+	width: 42px;
+	height: 36px;
 	padding: 0;
-	background: transparent;
+	/* override the global brutalist <button> defaults (navy cta bg + hard
+	   shadow) that otherwise bleed into the toggle segments */
+	background: none !important;
+	box-shadow: none !important;
 	border: 0;
-	border-radius: 999px;
-	color: inherit;
+	border-radius: 10px;
+	color: var(--cr-glaucous, #647baf);
 	cursor: pointer;
-	transition: color 0.18s ease, transform 0.1s ease;
+	transition: color 0.2s ease;
 }
-
-.cr-theme-segment:hover {
-	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
-}
-
-.cr-theme-segment:active {
-	transform: scale(0.94);
-}
-
+/* Scoped above the global button:hover colour so the icon stays clearly visible
+   on hover; active button keeps its dark-on-thumb colour even while hovered. */
+.cr-theme-segments .cr-theme-segment:not([aria-pressed="true"]):hover { color: var(--cr-russian-violet, #241c4a); }
+.cr-theme-segments .cr-theme-segment[aria-pressed="true"] { color: var(--cr-russian-violet, #241c4a); }
 .cr-theme-segment:focus-visible {
-	outline: 2px solid var(--cr-focus-ring, var(--cr-marker, dodgerblue));
+	outline: 2px solid var(--cr-focus-ring, var(--cr-selective-yellow, #ffb703));
 	outline-offset: 2px;
 }
 
-/* Active segment — icon flips to russian-violet so it reads against
-   the periwinkle indicator. Inactive segments inherit container text
-   color. */
-.cr-theme-segment[aria-pressed="true"] {
-	color: var(--cr-russian-violet, #241c4a);
+/* Dark header — track deepens to prussian-blue, idle icons go sky-blue; the
+   thumb stays lit periwinkle and the active icon stays dark so it reads. */
+:root[data-theme="dark"] .cr-theme-segments {
+	background: var(--cr-prussian-blue, #023047);
+	border-color: rgba(142, 202, 230, 0.25);
 }
-
-/* Dark-mode indicator — russian-violet-soft for AA contrast against
-   the dark page; ivory icon on top. */
-:root[data-theme="dark"] .cr-theme-segments__indicator {
-	background: var(--cr-russian-violet-soft, #3d2f6e);
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-}
-:root[data-theme="dark"] .cr-theme-segment[aria-pressed="true"] {
-	color: var(--cr-printer-ivory, #fbfaf5);
-}
+:root[data-theme="dark"] .cr-theme-segment { color: var(--cr-sky-blue, #8ecae6); }
+:root[data-theme="dark"] .cr-theme-segments .cr-theme-segment:not([aria-pressed="true"]):hover { color: var(--cr-printer-ivory, #fbfaf5); }
+:root[data-theme="dark"] .cr-theme-segments .cr-theme-segment[aria-pressed="true"] { color: var(--cr-russian-violet, #241c4a); }
+:root[data-theme="dark"] .cr-theme-segments__indicator { box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.45); }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme]) .cr-theme-segments__indicator,
-	:root[data-theme="system"] .cr-theme-segments__indicator {
-		background: var(--cr-russian-violet-soft, #3d2f6e);
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+	:root:not([data-theme]) .cr-theme-segments,
+	:root[data-theme="system"] .cr-theme-segments {
+		background: var(--cr-prussian-blue, #023047);
+		border-color: rgba(142, 202, 230, 0.25);
 	}
-	:root:not([data-theme]) .cr-theme-segment[aria-pressed="true"],
-	:root[data-theme="system"] .cr-theme-segment[aria-pressed="true"] {
-		color: var(--cr-printer-ivory, #fbfaf5);
-	}
+	:root:not([data-theme]) .cr-theme-segment,
+	:root[data-theme="system"] .cr-theme-segment { color: var(--cr-sky-blue, #8ecae6); }
+	:root:not([data-theme]) .cr-theme-segments .cr-theme-segment:not([aria-pressed="true"]):hover,
+	:root[data-theme="system"] .cr-theme-segments .cr-theme-segment:not([aria-pressed="true"]):hover { color: var(--cr-printer-ivory, #fbfaf5); }
+	:root:not([data-theme]) .cr-theme-segments .cr-theme-segment[aria-pressed="true"],
+	:root[data-theme="system"] .cr-theme-segments .cr-theme-segment[aria-pressed="true"] { color: var(--cr-russian-violet, #241c4a); }
 }
 
-/* Reduced-motion: snap instead of slide. */
+/* Reduced-motion: snap instead of glide. */
 @media (prefers-reduced-motion: reduce) {
-	.cr-theme-segments__indicator {
-		transition: transform 0s, background 0s;
-	}
+	.cr-theme-segments__indicator { transition: none; }
 }
 
 .cr-theme-segment__icon {
-	width: 1rem;
-	height: 1rem;
+	width: 19px;
+	height: 19px;
 	stroke: currentColor;
 	fill: none;
-	stroke-width: 1.75;
+	stroke-width: 1.9;
 	stroke-linecap: round;
 	stroke-linejoin: round;
 }
@@ -1666,6 +1820,9 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 .site-header__nav .current-menu-item .wp-block-navigation-item__content {
 	color: var(--cr-marker, #ffb703);
 	background-size: 100% 2px;
+	/* WP core underlines .current-menu-item > a; suppress it so only the theme's
+	   single gradient underline shows (consistent across all current nav items). */
+	text-decoration: none !important;
 }
 
 /* Submenu surfaces — soft elevated card, borderless, with marker accent on hover */
@@ -4324,12 +4481,16 @@ body.blog button[type="submit"]:hover {
 /* Dark-mode color override — keep main-accent sections as
    night-elevated (same rule we used for home Field Notes/Recent Posts
    sections in v0.4.17). */
-:root[data-theme="dark"] .cr-archive {
+/* v0.5.142 — the dark override must out-specify `body .wp-site-blocks
+   .wp-block-group.has-main-accent-background-color` (0,3,1) which otherwise forces
+   the light ivory preset in dark mode → glaring light panel + invisible light text.
+   Adding .has-main-accent-background-color makes this (0,4,0). */
+:root[data-theme="dark"] .cr-archive.has-main-accent-background-color {
 	background-color: var(--cr-night-elevated, #251f1c) !important;
 }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme]) .cr-archive,
-	:root[data-theme="system"] .cr-archive {
+	:root:not([data-theme]) .cr-archive.has-main-accent-background-color,
+	:root[data-theme="system"] .cr-archive.has-main-accent-background-color {
 		background-color: var(--cr-night-elevated, #251f1c) !important;
 	}
 }
@@ -4672,25 +4833,27 @@ body.home .wp-block-post-template > li .wp-block-group.is-vertical > .wp-block-p
 	border-bottom-color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
 }
 
-/* (4f) Tag pills as masking-tape chips (v0.5.137) — cream tape + russian-violet
-   ink (12.47:1 AAA) + a cycling accent border + tilt, matching the .cr-term-chip
-   category chips. Replaces the old solid nth-child pills, which read as low
-   contrast: a design-plugin rule (`.wp-block-group[class*="-background-color"] a`)
-   forced the cerulean link colour onto the dark fills. Fixes here:
-     • --dsgo-text-color points that plugin rule at the tape ink → legible.
-     • separator spans hidden + flex gap (so the comma list reads as chips).
-     • nth-OF-TYPE (not nth-child) so the cycle ignores the separator spans. */
+/* (4f) Tag pills as SOLID chips (v0.5.138) — sharp-cornered (not oval) solid
+   colour blocks, cycling 6 AA-vetted bg/text pairs + tilt, matching the design's
+   "Solid chips". Each chip also sets --dsgo-text-color so the design-plugin link
+   rule (`.wp-block-group[class*="-background-color"] a {color:var(--dsgo-text-color)
+   !important}`) resolves to the contrasting text colour. nth-OF-TYPE (not
+   nth-child) + hidden separator spans, since the separators are spans. */
 .cr-archive .cr-stream-item__tags,
 body.single .single-post__tags {
 	margin-top: var(--cr-space-xs, 0.5rem);
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: var(--cr-space-2xs, 0.4rem);
-	--dsgo-text-color: var(--cr-tape-ink, #241c4a);
+	gap: 0.6rem 0.85rem; /* a touch more room so the tilted solid chips don't touch */
 }
 .cr-archive .cr-stream-item__tags .wp-block-post-terms__separator,
 body.single .single-post__tags .wp-block-post-terms__separator { display: none; }
+
+/* Ollie's .is-style-term-button sets gap via --wp--preset--spacing--small, which this child
+   theme doesn't define (it uses --cr-space-*), so that gap collapses to 0 and the chips touch.
+   Beat Ollie's (0,3,0) rule on specificity + priority with a concrete value. */
+body.single .single-post__tags.is-style-term-button { gap: 0.6rem 0.85rem !important; }
 .cr-archive .cr-stream-item__tags a,
 body.single .single-post__tags a {
 	display: inline-block;
@@ -4699,23 +4862,23 @@ body.single .single-post__tags a {
 	font-weight: var(--cr-weight-bold, 700);
 	text-transform: uppercase;
 	letter-spacing: var(--cr-tracking-eyebrow, 0.05em);
-	background: var(--cr-tape, #f3e5b8) !important;
-	color: var(--cr-tape-ink, #241c4a) !important;
-	padding: var(--cr-space-3xs, 0.15em) var(--cr-space-sm, 0.7em);
-	border-left: 4px solid var(--cr-marker, var(--cr-ut-orange));
-	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+	padding: var(--cr-space-3xs, 0.2em) var(--cr-space-sm, 0.7em);
+	border: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: 2px 2px 0 rgba(36, 28, 74, 0.28);
 	text-decoration: none;
-	transition: transform 0.15s ease;
+	transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 .cr-archive .cr-stream-item__tags a:hover,
-body.single .single-post__tags a:hover { color: var(--cr-tape-ink, #241c4a) !important; }
-/* cycling accent + tilt — nth-of-type ignores the separator spans */
-.cr-archive .cr-stream-item__tags a:nth-of-type(6n+1), body.single .single-post__tags a:nth-of-type(6n+1) { border-left-color: var(--cr-type-video); transform: rotate(-2.5deg); }
-.cr-archive .cr-stream-item__tags a:nth-of-type(6n+2), body.single .single-post__tags a:nth-of-type(6n+2) { border-left-color: var(--cr-type-link);  transform: rotate(1.8deg); }
-.cr-archive .cr-stream-item__tags a:nth-of-type(6n+3), body.single .single-post__tags a:nth-of-type(6n+3) { border-left-color: var(--cr-type-like);  transform: rotate(-1.2deg); }
-.cr-archive .cr-stream-item__tags a:nth-of-type(6n+4), body.single .single-post__tags a:nth-of-type(6n+4) { border-left-color: var(--cr-type-event); transform: rotate(2.6deg); }
-.cr-archive .cr-stream-item__tags a:nth-of-type(6n+5), body.single .single-post__tags a:nth-of-type(6n+5) { border-left-color: var(--cr-type-quote); transform: rotate(-1.8deg); }
-.cr-archive .cr-stream-item__tags a:nth-of-type(6n),   body.single .single-post__tags a:nth-of-type(6n)   { border-left-color: var(--cr-type-reply); transform: rotate(2.2deg); }
+body.single .single-post__tags a:hover { box-shadow: 3px 3px 0 rgba(36, 28, 74, 0.32); }
+/* cycling SOLID fill + AA-contrast text (and matching --dsgo-text-color so the
+   design-plugin link rule lands the right colour) + tilt */
+.cr-archive .cr-stream-item__tags a:nth-of-type(6n+1), body.single .single-post__tags a:nth-of-type(6n+1) { background: var(--cr-cerulean, #126782) !important;      color: var(--cr-printer-ivory, #fbfaf5) !important;   --dsgo-text-color: var(--cr-printer-ivory, #fbfaf5);   transform: rotate(-2.5deg); }
+.cr-archive .cr-stream-item__tags a:nth-of-type(6n+2), body.single .single-post__tags a:nth-of-type(6n+2) { background: var(--cr-russian-violet, #241c4a) !important; color: var(--cr-selective-yellow, #ffb703) !important; --dsgo-text-color: var(--cr-selective-yellow, #ffb703); transform: rotate(1.8deg); }
+.cr-archive .cr-stream-item__tags a:nth-of-type(6n+3), body.single .single-post__tags a:nth-of-type(6n+3) { background: var(--cr-prussian-blue, #023047) !important;  color: var(--cr-light-orange, #fee2c3) !important;    --dsgo-text-color: var(--cr-light-orange, #fee2c3);   transform: rotate(-1.2deg); }
+.cr-archive .cr-stream-item__tags a:nth-of-type(6n+4), body.single .single-post__tags a:nth-of-type(6n+4) { background: var(--cr-ut-orange, #fb8500) !important;      color: var(--cr-russian-violet, #241c4a) !important;  --dsgo-text-color: var(--cr-russian-violet, #241c4a); transform: rotate(2.6deg); }
+.cr-archive .cr-stream-item__tags a:nth-of-type(6n+5), body.single .single-post__tags a:nth-of-type(6n+5) { background: var(--cr-glaucous-dark, #3d527d) !important;  color: var(--cr-printer-ivory, #fbfaf5) !important;   --dsgo-text-color: var(--cr-printer-ivory, #fbfaf5);   transform: rotate(-1.8deg); }
+.cr-archive .cr-stream-item__tags a:nth-of-type(6n),   body.single .single-post__tags a:nth-of-type(6n)   { background: var(--cr-blue-green, #219ebc) !important;     color: var(--cr-russian-violet, #241c4a) !important;  --dsgo-text-color: var(--cr-russian-violet, #241c4a); transform: rotate(2.2deg); }
 
 /* (5) Pagination — hard-edge buttons matching the design system. */
 .cr-archive .cr-stream__pagination {
@@ -5370,8 +5533,13 @@ body.home .homepage__content > .alignfull:has(#h-recent-posts) + .alignfull {
 .wp-block-query-pagination .page-numbers:hover,
 .wp-block-query-pagination .wp-block-query-pagination-previous:hover,
 .wp-block-query-pagination .wp-block-query-pagination-next:hover {
-	background: var(--cr-russian-violet, #241c4a);
-	color: var(--cr-sky-blue, #8ecae6);
+	background: var(--cr-russian-violet, #241c4a) !important;
+	color: var(--cr-sky-blue, #8ecae6) !important;
+	/* The dsgo plugin forces link color via `a { color: var(--dsgo-text-color)
+	   !important }` (the archive is a has-*-background-color group), which kept the
+	   text dark on this navy hover bg = unreadable. Set the var so dsgo resolves to
+	   sky-blue too. */
+	--dsgo-text-color: var(--cr-sky-blue, #8ecae6);
 }
 
 /* Dots between number ranges shouldn't get the chip treatment */
@@ -5493,7 +5661,10 @@ body.home .homepage__content > .alignfull:has(#h-are-you-passionate-about) {
    are filled in ivory, so contrast against the section bg is what
    makes the rip visible). */
 body.home .homepage__content > .alignfull:has(#h-how-this-newsletter-can-help-you-grow) {
-	background-color: var(--cr-glaucous-light, #c7d3f3) !important;
+	/* v0.5.141 — was --cr-glaucous-light (#5a7ea8); the dark body copy on it
+	   was 3.72:1 (fails AA). Lighten to a medium-light blue so the violet text
+	   passes (~6.8:1) while the white cards + ivory torn edge still read. */
+	background-color: color-mix( in srgb, var(--cr-sky-blue, #8ecae6) 70%, var(--cr-glaucous-light, #5a7ea8) ) !important;
 	background-image: var(--cr-fiber), var(--cr-halftone) !important;
 	background-size: auto, var(--cr-halftone-size) !important;
 	background-blend-mode: multiply, multiply !important;
@@ -5799,6 +5970,18 @@ body,
 main.wp-block-group {
 	overflow-x: clip !important;
 	overflow-y: visible !important;
+}
+
+/* (A2) v0.5.176 — reserve the vertical scrollbar gutter on EVERY page so the
+   layout viewport width is identical whether or not a page scrolls. The
+   alignfull sections are sized with 100vw / calc(50% - 50vw); when you navigate
+   between pages of different heights the scrollbar appears/disappears, the
+   content-box width changes, and every full-width section shifts sideways by the
+   scrollbar width — that's the "content jumps left, first character clipped"
+   glitch seen on navigation (e.g. clicking the logo to go home). A reserved
+   gutter keeps 50vw == 50% on every page, so nothing shifts. */
+html {
+	scrollbar-gutter: stable;
 }
 
 /* (B) Defeat containing-block creation. Sticky descendants are
@@ -6958,6 +7141,18 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
 	color: var(--cr-russian-violet, #241c4a);
 }
 
+/* v0.5.186 — on mobile the newsletter banner's blue runs edge-to-edge instead of
+   sitting inset. Width/margins only — the tilt, torn edges, inner padding, and
+   content are untouched (its inner padding keeps the copy off the screen edges). */
+@media (max-width: 782px) {
+	main .wp-block-group.alignfull.cr-newsletter-banner {
+		width: 100vw !important;
+		max-width: 100vw !important;
+		margin-left: calc(50% - 50vw) !important;
+		margin-right: calc(50% - 50vw) !important;
+	}
+}
+
 /* Torn-paper top + bottom edges — the page behind "tears" into the banner.
    Strips use --cr-surface (page bg, which flips in dark mode) so the tear
    always matches what's behind. They sit in the banner's x-large vertical
@@ -7682,4 +7877,161 @@ body.single-format-video main.single-post   { background-color: var(--cr-type-vi
 	body.single-format-quote main.single-post   { border-inline-start: 6px solid var(--cr-type-quote,   #241c4a); }
 	body.single-format-status main.single-post  { border-inline-start: 6px solid var(--cr-type-status,  #647baf); }
 	body.single-format-video main.single-post   { border-inline-start: 6px solid var(--cr-type-video,   #219ebc); }
+}
+
+/* ============================================================
+   v0.5.141 — design QA pass (appended; wins on source order)
+   ============================================================ */
+
+/* (1) "How this newsletter can help you grow" contrast fix lives on the
+   body.home …:has(#h-how-this-newsletter-…) rule (a higher-specificity :has()
+   selector controls this section's bg) — see the v0.5.141 note there. */
+
+/* (4) Field Notes "recessed paper" inset shadow REMOVED (v0.5.144). A rectangular
+   inset box-shadow can't follow the zigzag torn edge, so its inner edge left a faint
+   straight line in the blue just above the tear ("meh"). The torn ::before/::after
+   edges already carry the layering; for true depth without the line, a drop-shadow
+   ON the zigzag teeth would be the move. */
+
+/* (5) Content separators lean on the design-system rotation tokens and alternate
+   direction, instead of the old uniform ~1.5deg tilt. Skips the marker-bar. */
+.wp-block-post-content hr.wp-block-separator:not(.cr-marker-bar),
+.entry-content hr.wp-block-separator:not(.cr-marker-bar) {
+	/* v0.5.143 — constrain + center (like the marker-bar/archive divider) so the
+	   tilt reads as an intentional jaunty mark, not a full-width diagonal slash.
+	   Full-width alignfull + a 2.5deg tilt was lifting the ends ~46px → looked odd. */
+	width: 60% !important;
+	max-width: 30rem !important;
+	margin-inline: auto !important;
+	transform: rotate(var(--cr-rotate-neg, -2.5deg)) !important;
+}
+.wp-block-post-content hr.wp-block-separator:not(.cr-marker-bar):nth-of-type(even),
+.entry-content hr.wp-block-separator:not(.cr-marker-bar):nth-of-type(even) {
+	transform: rotate(var(--cr-rotate-neg2, 2.8deg)) !important;
+}
+
+/* (6) Full-bleed sticky header. The sticky wrapper (.is-position-sticky
+   .has-global-padding) applies the ~16px root padding, insetting the bar so its
+   bg + shadow stop short of the screen edges (the "weird layer"). Cancel that
+   padding on the header part so the bar + shadow reach edge to edge; the inner
+   .site-header keeps its own medium padding, so logo + nav stay aligned. */
+.wp-block-group.is-position-sticky.has-global-padding {
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+}
+
+/* (8) Able Player sits BEHIND the sticky header. The plugin's .able wrapper ships
+   z-index:5000 (so its controls overlay the video), which also lifts the whole
+   player above the sticky nav (z-index 100), letting the YouTube embed cover it on
+   scroll. Drop .able to a low, contained stacking context — its internal control
+   z-indexes stay relative to it, so the player still works but no longer covers the nav. */
+.able {
+	z-index: 1 !important;
+}
+
+/* (9) Bullets — force the canonical ✦ on every Snow Monkey Editor list style in
+   content and neutralize SME's arrow/check/remark markers (the arrow variant can
+   render via a ::before bg-image / ::after that the base ✦ rule didn't reset).
+   Belt-and-suspenders so the SME arrow can never survive regardless of cascade. */
+.wp-block-post-content ul.wp-block-list[class*="is-style-sme-list"] > li,
+.entry-content ul.wp-block-list[class*="is-style-sme-list"] > li,
+.cr-prose ul.wp-block-list[class*="is-style-sme-list"] > li {
+	list-style: none !important;
+}
+.wp-block-post-content ul.wp-block-list[class*="is-style-sme-list"] > li::before,
+.entry-content ul.wp-block-list[class*="is-style-sme-list"] > li::before,
+.cr-prose ul.wp-block-list[class*="is-style-sme-list"] > li::before {
+	content: "✦" !important;
+	background: none !important;
+	color: var(--cr-marker, #fb8500) !important;
+	/* Snow Monkey's arrow variant draws the chevron with BORDERS, not a glyph:
+	   ::before is a rotated bordered box (arrowhead), ::after a bordered line
+	   (shaft). Safari renders those next to our ✦. Reset the border-drawn arrow
+	   so ONLY the glyph shows, and un-clamp the 6px box so the ✦ isn't shrunk. */
+	border: 0 !important;
+	transform: none !important;
+	width: auto !important;
+	height: auto !important;
+	font-size: 0.95em !important;
+	line-height: 1 !important;
+}
+.wp-block-post-content ul.wp-block-list[class*="is-style-sme-list"] > li::after,
+.entry-content ul.wp-block-list[class*="is-style-sme-list"] > li::after,
+.cr-prose ul.wp-block-list[class*="is-style-sme-list"] > li::after {
+	content: none !important;
+	border: 0 !important;
+	display: none !important;
+}
+
+/* ===== v0.5.146 — Field Notes drop-shadow + dark-mode readability ===== */
+
+/* (A) Recessed "paper under the page" depth via a drop-shadow ON the zigzag teeth
+   (the ::before/::after torn edges). drop-shadow follows the masked zigzag shape,
+   so unlike a box-shadow it leaves no straight line. ::after is scaleY(-1), so the
+   same downward offset casts upward into the blue. */
+.cr-newsletter-banner::before,
+.cr-newsletter-banner::after {
+	filter: drop-shadow(0 3px 4px rgba(36, 28, 74, 0.30));
+}
+
+/* Dark-mode readability — light-mode-fixed elements that didn't flip:
+   (B) SME success alert (light-green bg + ivory text = invisible) → dark green-tinted bg.
+   (C) <mark> went ivory-on-ivory → restore a yellow highlight with dark text.
+   (D) Able Player transcript ships a fixed white bg → flip to a dark surface + light text. */
+:root[data-theme="dark"] .is-style-sme-alert-success {
+	background: color-mix(in srgb, #5fa052 20%, var(--cr-night-elevated, #251f1c)) !important;
+}
+:root[data-theme="dark"] .wp-block-post-content mark,
+:root[data-theme="dark"] .entry-content mark {
+	/* A broad dark rule forces ivory text on all content (0,4,0 !important), and the
+	   mark carries an inline light bg. Rather than out-specify both, give the mark a
+	   DARK-amber highlight bg the forced-ivory text reads on (~8:1). */
+	background-color: color-mix(in srgb, var(--cr-selective-yellow, #ffb703) 28%, var(--cr-night-elevated, #251f1c)) !important;
+}
+:root[data-theme="dark"] .able-transcript {
+	background-color: var(--cr-night-elevated, #251f1c) !important;
+}
+:root[data-theme="dark"] .able-transcript span,
+:root[data-theme="dark"] .able-transcript p {
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
+}
+:root[data-theme="dark"] .able-transcript .able-highlight {
+	background-color: var(--cr-selective-yellow, #ffb703) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+:root[data-theme="dark"] .able-alert {
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .is-style-sme-alert-success,
+	:root[data-theme="system"] .is-style-sme-alert-success {
+		background: color-mix(in srgb, #5fa052 20%, var(--cr-night-elevated, #251f1c)) !important;
+	}
+	:root:not([data-theme]) .wp-block-post-content mark,
+	:root[data-theme="system"] .wp-block-post-content mark,
+	:root:not([data-theme]) .entry-content mark,
+	:root[data-theme="system"] .entry-content mark {
+		background-color: color-mix(in srgb, var(--cr-selective-yellow, #ffb703) 28%, var(--cr-night-elevated, #251f1c)) !important;
+	}
+	:root:not([data-theme]) .able-transcript,
+	:root[data-theme="system"] .able-transcript {
+		background-color: var(--cr-night-elevated, #251f1c) !important;
+	}
+	:root:not([data-theme]) .able-transcript span,
+	:root[data-theme="system"] .able-transcript span,
+	:root:not([data-theme]) .able-transcript p,
+	:root[data-theme="system"] .able-transcript p {
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
+	}
+	:root:not([data-theme]) .able-alert,
+	:root[data-theme="system"] .able-alert {
+		color: var(--cr-russian-violet, #241c4a) !important;
+	}
+}
+
+/* (10) "More from the blog" — the 3 related posts sat in a gapless grid (touching).
+   Add a column + row gap so they breathe. */
+.related-posts__list {
+	gap: 2rem !important;
 }

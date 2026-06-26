@@ -1,0 +1,405 @@
+/* =============================================================================
+   Blog index — wide zine archive. Faithful port of the Claude Design Blog.html
+   (design project 2fe11712). Scoped under .cr-blog (the home.html <main>);
+   enqueued only on the blog posts index (see inc/enqueue.php). Leans entirely on
+   the v2.0 design-system tokens in tokens.css — adds nothing to :root. The
+   theme's header/footer + light/dark/auto toggle are reused (the mockup's own
+   nav/toggle/footer + its html[data-theme] re-assertion are dropped — tokens.css
+   already re-asserts every token under :root[data-theme="dark"]).
+
+   The point of this page: kill the skinny single-column archive. Posts flow in a
+   featured lead + 2-up card grid. The first post in the query is styled as the
+   featured lead via :first-child (one query → no duplicate post, pagination-safe).
+   Per-post format gradients come from WP's post_class() format-X on each <li>;
+   the media-glyph icon is swapped per post by transform_blog_card_glyph().
+   ============================================================================= */
+
+.cr-blog {
+	background-image: var(--cr-fiber), var(--cr-halftone);
+	background-size: auto, var(--cr-halftone-size);
+	overflow-x: clip;
+}
+.cr-blog__wrap { max-width: 72rem; margin-inline: auto; }
+
+/* =============================================================================
+   Masthead
+   ============================================================================= */
+.cr-blog .cr-blog__masthead {
+	max-width: 72rem;
+	margin-inline: auto;
+	padding-block: var(--cr-space-3xl) var(--cr-space-xl);
+}
+.cr-blog .cr-blog__tape {
+	display: inline-block;
+	transform: rotate(var(--cr-rotate-neg));
+	margin: 0 0 var(--cr-space-md);
+}
+.cr-blog .cr-blog__title {
+	font-family: var(--cr-font-display);
+	font-size: clamp(var(--cr-text-4xl), 9vw, 5rem);
+	line-height: 0.95;
+	letter-spacing: var(--cr-tracking-tight);
+	color: var(--cr-ink);
+	margin: 0 0 var(--cr-space-md);
+}
+.cr-blog .cr-blog__lead {
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	line-height: var(--cr-leading-snug);
+	color: var(--cr-ink-muted);
+	max-width: 50ch;
+	margin: 0;
+}
+
+/* =============================================================================
+   Post grid — featured lead (first child) + 2-up cards
+   ============================================================================= */
+.cr-blog .cr-blog__grid-head {
+	max-width: 72rem;
+	margin: var(--cr-space-2xl) auto var(--cr-space-lg);
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: var(--cr-space-md);
+}
+.cr-blog .cr-blog__grid-head h2 { margin: 0; }
+
+.cr-blog .post-grid {
+	max-width: 72rem;
+	margin-inline: auto;
+	display: grid;
+	gap: var(--cr-space-xl);
+	grid-template-columns: 1fr;
+	list-style: none;
+	padding: 0;
+}
+@media (min-width: 44rem) {
+	.cr-blog .post-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.cr-blog .post-grid > li { margin: 0; padding: 0; }
+.cr-blog .post-grid > li::before { content: none; }
+
+/* The card */
+.cr-blog .card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	background: var(--cr-surface-elevated);
+	border: var(--cr-border-thick);
+	box-shadow: var(--cr-shadow-hard);
+	transition: transform 120ms var(--cr-ease-out, ease), box-shadow 120ms var(--cr-ease-out, ease);
+}
+.cr-blog .post-grid > li:nth-child(odd) .card  { transform: rotate(-0.5deg); }
+.cr-blog .post-grid > li:nth-child(even) .card { transform: rotate(0.5deg); }
+.cr-blog .card:hover {
+	transform: translate(-3px, -3px) rotate(0deg);
+	box-shadow: 9px 9px 0 var(--cr-ink);
+}
+
+.cr-blog .card__media {
+	position: relative;
+	min-height: 9rem;
+	border-bottom: var(--cr-border-thick);
+	background: var(--cr-halftone), linear-gradient(135deg, var(--cr-light-orange), var(--cr-selective-yellow));
+	background-size: var(--cr-halftone-size), auto;
+	overflow: hidden;
+}
+/* Featured image fills the media area when the post has one; the gradient is the
+   fallback that shows through when it doesn't. */
+.cr-blog .card__media .wp-block-post-featured-image,
+.cr-blog .card__media figure { margin: 0; height: 100%; }
+.cr-blog .card__media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	min-height: 9rem;
+	object-fit: cover;
+}
+
+/* Per-format gradient fallbacks — WP post_class() puts format-X on each <li>. */
+.cr-blog .format-link    .card__media { background: var(--cr-halftone), linear-gradient(135deg, var(--cr-sky-blue), var(--cr-blue-green)); background-size: var(--cr-halftone-size), auto; }
+.cr-blog .format-video   .card__media { background: var(--cr-halftone), linear-gradient(135deg, var(--cr-periwinkle), var(--cr-cerulean)); background-size: var(--cr-halftone-size), auto; }
+.cr-blog .format-quote   .card__media { background: var(--cr-halftone), linear-gradient(135deg, var(--cr-periwinkle), var(--cr-russian-violet)); background-size: var(--cr-halftone-size), auto; }
+.cr-blog .format-audio   .card__media { background: var(--cr-halftone), linear-gradient(135deg, var(--cr-selective-yellow), var(--cr-ut-orange)); background-size: var(--cr-halftone-size), auto; }
+.cr-blog .format-gallery .card__media,
+.cr-blog .format-image   .card__media { background: var(--cr-halftone), linear-gradient(135deg, var(--cr-sky-blue), var(--cr-periwinkle)); background-size: var(--cr-halftone-size), auto; }
+
+/* Category chips — in the card body on the date line, to the right of the date.
+   The post-terms output gets .cr-term-chip via the split_term_chips filter. */
+.cr-blog .card__meta-row {
+	display: flex;
+	align-items: center;
+	gap: var(--cr-space-sm);
+	flex-wrap: wrap;
+}
+.cr-blog .card__meta-row .card__meta { margin: 0; }
+.cr-blog .card__chip { margin: 0; }
+
+/* The media-glyph — bordered square with the post-format icon, top-right. */
+.cr-blog .media-glyph {
+	position: absolute;
+	top: var(--cr-space-sm);
+	right: var(--cr-space-sm);
+	z-index: 2;
+	width: 2.5rem;
+	height: 2.5rem;
+	display: grid;
+	place-items: center;
+	/* v0.5.175: colour comes from the cr-icon-avatar--{type} variant the filter
+	   adds (background + color), so the glyph is colourful over the image.
+	   Border + hard shadow keep it readable on any photo. */
+	border: var(--cr-border-thick);
+	box-shadow: 2px 2px 0 var(--cr-ink);
+	transform: rotate(var(--cr-rotate-1));
+}
+/* Blog/Standard pin — its --cr-type-blog is the neutral ink that flips to ivory
+   in dark (invisible icon), so fix it to a navy square + white icon, both modes. */
+.cr-blog .media-glyph.cr-icon-avatar--blog {
+	background: var(--cr-russian-violet);
+	color: var(--cr-printer-ivory);
+}
+/* Outline types: let the format colour drive the border (variant sets bg/icon). */
+.cr-blog .media-glyph.cr-icon-avatar--outline {
+	border-color: var(--type-color, var(--cr-ink));
+}
+.cr-blog .media-glyph svg {
+	width: 1.45rem;
+	height: 1.45rem;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.75;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+.cr-blog .media-glyph svg .cr-icon-fill { fill: currentColor; stroke: none; }
+
+.cr-blog .card__body {
+	padding: var(--cr-space-lg);
+	display: flex;
+	flex-direction: column;
+	gap: var(--cr-space-xs);
+	flex: 1;
+}
+.cr-blog .card__body .wp-block-post-date,
+.cr-blog .card__meta {
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	color: var(--cr-ink-muted);
+	margin: 0;
+}
+.cr-blog .card__title {
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-extrabold, 800);
+	font-size: var(--cr-text-xl);
+	line-height: 1.2;
+	color: var(--cr-ink);
+	margin: 0;
+}
+.cr-blog .card__title a { color: inherit; text-decoration: none; }
+.cr-blog .card__title a:hover {
+	text-decoration: underline;
+	text-decoration-color: var(--cr-marker);
+	text-decoration-thickness: 3px;
+	text-underline-offset: 2px;
+}
+.cr-blog .card__excerpt {
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	line-height: var(--cr-leading-normal);
+	color: var(--cr-ink);
+	margin: 0;
+}
+.cr-blog .card__more {
+	margin-top: auto;
+	align-self: flex-start;
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold);
+	font-size: var(--cr-text-sm);
+	text-transform: uppercase;
+	letter-spacing: var(--cr-tracking-eyebrow);
+	color: var(--cr-link);
+	text-decoration: none;
+	padding-top: var(--cr-space-xs);
+}
+.cr-blog .card__more:hover { color: var(--cr-marker); }
+
+/* -------------------- Featured lead = the first/top post --------------------
+   Stacked: the featured image shows in FULL (no crop) on top, body underneath —
+   the content that's a side column on the lead is moved under the image here.
+   Only the top post; the rest stay 2-up grid thumbnails (cropped to 16/9). */
+.cr-blog .post-grid > li:first-child { grid-column: 1 / -1; }
+.cr-blog .post-grid > li:first-child .card {
+	transform: none;
+	flex-direction: column;
+	box-shadow: var(--cr-shadow-hard-2);
+}
+.cr-blog .post-grid > li:first-child .card:hover { transform: translate(-3px, -3px); }
+.cr-blog .post-grid > li:first-child .card__media {
+	border-right: 0;
+	border-bottom: var(--cr-border-thick);
+	background: none;
+}
+/* Show the whole image — override the post-featured-image 16/9 crop (the block
+   sets aspect-ratio + object-fit:cover inline, so !important is needed). */
+.cr-blog .post-grid > li:first-child .card__media img,
+.cr-blog .post-grid > li:first-child .card__media figure {
+	aspect-ratio: auto !important;
+	height: auto !important;
+	min-height: 0;
+	object-fit: contain;
+}
+.cr-blog .post-grid > li:first-child .card__body { padding: var(--cr-space-2xl); }
+@media (min-width: 56rem) {
+	.cr-blog .post-grid > li:first-child .card__title {
+		font-size: clamp(var(--cr-text-2xl), 3.5vw, var(--cr-text-4xl));
+		line-height: 1.1;
+	}
+	.cr-blog .post-grid > li:first-child .card__excerpt { font-size: var(--cr-text-md); }
+}
+/* "Latest" flag — blog home, page 1 only (archives/search/paged don't get it). */
+.cr-blog .post-grid > li:first-child .card::after { content: none; }
+body.blog:not(.paged) .cr-blog .post-grid > li:first-child .card::after {
+	content: "★ Latest ★";
+	position: absolute;
+	top: -0.85rem;
+	left: var(--cr-space-lg);
+	z-index: 3;
+	background: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-mono);
+	font-weight: var(--cr-weight-bold);
+	font-size: var(--cr-text-xs);
+	text-transform: uppercase;
+	letter-spacing: var(--cr-tracking-wide);
+	padding: var(--cr-space-3xs) var(--cr-space-sm);
+	transform: rotate(var(--cr-rotate-neg));
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+}
+
+/* =============================================================================
+   Pagination — style core query-pagination to the design's .pager look
+   ============================================================================= */
+.cr-blog .wp-block-query-pagination {
+	max-width: 72rem;
+	margin: var(--cr-space-3xl) auto var(--cr-space-2xl);
+	display: flex;
+	gap: var(--cr-space-sm);
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+.cr-blog .wp-block-query-pagination .wp-block-query-pagination-numbers { display: flex; gap: var(--cr-space-sm); flex-wrap: wrap; }
+.cr-blog .wp-block-query-pagination a,
+.cr-blog .wp-block-query-pagination .page-numbers {
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-extrabold, 800);
+	font-size: var(--cr-text-md);
+	min-width: 2.75rem;
+	text-align: center;
+	border: var(--cr-border-thick);
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	text-decoration: none;
+	color: var(--cr-ink);
+	background: var(--cr-surface-elevated);
+	box-shadow: 3px 3px 0 var(--cr-ink);
+	transition: transform 80ms var(--cr-ease-out, ease), box-shadow 80ms var(--cr-ease-out, ease);
+}
+.cr-blog .wp-block-query-pagination a:hover {
+	transform: translate(-1px, -1px);
+	box-shadow: 4px 4px 0 var(--cr-ink);
+}
+.cr-blog .wp-block-query-pagination .page-numbers.current {
+	background: var(--cr-marker);
+	color: var(--cr-cta-ink);
+}
+.cr-blog .wp-block-query-pagination .page-numbers.dots {
+	border: 0;
+	box-shadow: none;
+	background: transparent;
+	min-width: 0;
+}
+
+/* =============================================================================
+   Find me elsewhere
+   ============================================================================= */
+.cr-blog .cr-blog__elsewhere {
+	max-width: 72rem;
+	margin: var(--cr-space-2xl) auto var(--cr-space-3xl);
+	background: var(--cr-accent-1-bg);
+	color: var(--cr-accent-1-ink);
+	border: var(--cr-border-thick);
+	box-shadow: var(--cr-shadow-hard);
+	padding: var(--cr-space-xl);
+	transform: rotate(-0.6deg);
+	display: flex;
+	gap: var(--cr-space-lg);
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+}
+.cr-blog .cr-blog__elsewhere h2 { margin: 0; font-size: var(--cr-text-xl); }
+.cr-blog .cr-blog__elsewhere-links { display: flex; gap: var(--cr-space-md); flex-wrap: wrap; }
+.cr-blog .cr-blog__elsewhere-links a {
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold);
+	font-size: var(--cr-text-sm);
+	color: var(--cr-accent-1-ink);
+	text-decoration: none;
+	border-bottom: 3px solid currentColor;
+	padding-bottom: 1px;
+}
+.cr-blog .cr-blog__elsewhere-links a:hover { color: var(--cr-prussian-blue); }
+
+/* =============================================================================
+   Motion / responsive
+   ============================================================================= */
+@media (prefers-reduced-motion: reduce) {
+	.cr-blog .card { transition: none; }
+}
+@media (max-width: 40rem) {
+	.cr-blog .cr-blog__masthead { padding-block: var(--cr-space-2xl) var(--cr-space-lg); }
+	.cr-blog .post-grid > li:nth-child(odd) .card,
+	.cr-blog .post-grid > li:nth-child(even) .card { transform: none; }
+	.cr-blog .cr-blog__elsewhere { transform: none; }
+}
+
+/* =============================================================================
+   Speaking category hero (category-speaking.html) — sparkles, eyebrow, big
+   serif title with an orange accent, lead with highlight, CTA + outline buttons.
+   ============================================================================= */
+.cr-blog .cr-speaking-hero {
+	max-width: 54rem;
+	margin-inline: auto;
+	padding-block: var(--cr-space-3xl) var(--cr-space-lg);
+}
+.cr-blog .cr-speaking-hero__sparkles {
+	display: flex;
+	gap: var(--cr-space-xs);
+	font-size: var(--cr-text-lg);
+	line-height: 1;
+	margin: 0 0 var(--cr-space-sm);
+}
+.cr-blog .cr-speaking-hero__title {
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-black, 900);
+	font-size: clamp(var(--cr-text-3xl), 5vw, 3.5rem);
+	line-height: 1.05;
+	letter-spacing: var(--cr-tracking-tight);
+	color: var(--cr-ink);
+	margin: 0 0 var(--cr-space-md);
+}
+.cr-blog .cr-speaking-hero__accent { color: var(--cr-marker); }
+.cr-blog .cr-speaking-hero__lead {
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	line-height: var(--cr-leading-snug);
+	color: var(--cr-ink-muted);
+	max-width: 48ch;
+	margin: 0 0 var(--cr-space-lg);
+}
+.cr-blog .cr-speaking-hero__cta { gap: var(--cr-space-sm); }
+@media (max-width: 40rem) {
+	.cr-blog .cr-speaking-hero { padding-block: var(--cr-space-2xl) var(--cr-space-md); }
+}
