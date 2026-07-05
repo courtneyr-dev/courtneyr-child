@@ -294,6 +294,59 @@ function register_per_block_styles(): void {
 add_action( 'init', __NAMESPACE__ . '\\register_per_block_styles' );
 
 /**
+ * Post Kinds card blocks (post-kinds-for-indieweb). Each renders the shared
+ * `.pk-card` structure; this theme paints them via cr-post-kinds.css.
+ */
+const POST_KINDS_CARD_BLOCKS = array(
+	'post-kinds-indieweb/listen-card',
+	'post-kinds-indieweb/jam-card',
+	'post-kinds-indieweb/watch-card',
+	'post-kinds-indieweb/read-card',
+	'post-kinds-indieweb/play-card',
+	'post-kinds-indieweb/checkin-card',
+	'post-kinds-indieweb/eat-card',
+	'post-kinds-indieweb/drink-card',
+	'post-kinds-indieweb/mood-card',
+	'post-kinds-indieweb/acquisition-card',
+	'post-kinds-indieweb/like-card',
+	'post-kinds-indieweb/favorite-card',
+	'post-kinds-indieweb/reply-card',
+	'post-kinds-indieweb/repost-card',
+	'post-kinds-indieweb/bookmark-card',
+	'post-kinds-indieweb/rsvp-card',
+	'post-kinds-indieweb/wish-card',
+);
+
+/**
+ * Attach the courtneyr.dev card paint to every Post Kinds card block.
+ *
+ * One shared stylesheet (cr-post-kinds.css) maps the plugin's --pk-* paint
+ * variables to the site's --cr-* tokens. wp_enqueue_block_style() loads it
+ * only on pages where a card actually renders — same on-demand discipline as
+ * the per-block styles above.
+ */
+function register_post_kinds_card_paint(): void {
+	$file_path = COURTNEYR_CHILD_DIR . '/assets/css/cr-post-kinds.css';
+
+	if ( ! is_readable( $file_path ) ) {
+		return;
+	}
+
+	foreach ( POST_KINDS_CARD_BLOCKS as $block_name ) {
+		wp_enqueue_block_style(
+			$block_name,
+			array(
+				'handle' => 'courtneyr-post-kinds',
+				'src'    => COURTNEYR_CHILD_URI . '/assets/css/cr-post-kinds.css',
+				'path'   => $file_path,
+				'ver'    => COURTNEYR_CHILD_VERSION,
+			)
+		);
+	}
+}
+add_action( 'init', __NAMESPACE__ . '\\register_post_kinds_card_paint' );
+
+/**
  * Enqueue editor-specific styles so the block editor preview matches
  * the front end. Same per-block files are reused; this hook adds them
  * to the editor iframe.
@@ -303,6 +356,7 @@ function add_editor_assets(): void {
 		array(
 			'assets/css/tokens.css',
 			'assets/css/components.css',
+			'assets/css/cr-post-kinds.css',
 		)
 	);
 }

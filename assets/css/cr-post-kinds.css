@@ -1,0 +1,112 @@
+/**
+ * Post Kinds cards — courtneyr.dev PAINT layer.
+ *
+ * The plugin (post-kinds-for-indieweb) ships the STRUCTURE + neutral defaults
+ * for the two-layer `.pk-card` system. This file is the theme's PAINT: it maps
+ * the plugin's --pk-* paint variables onto the site's --cr-* design tokens, so
+ * every card inherits the courtneyr.dev palette, fonts, masking-tape label, and
+ * — because --cr-* tokens flip under [data-theme] — dark mode, with no extra
+ * work on the shared surfaces.
+ *
+ * Per-kind accent HUES come from the Post Kinds card design. Each kind stores
+ * both its light accent (--pk-kind) and a brightened dark accent
+ * (--pk-kind-dark) in one place; the dark-mode rules at the bottom do a single
+ * generic swap so the 17 kinds aren't duplicated per mode.
+ *
+ * Nothing here touches layout — structure stays owned by the plugin.
+ */
+
+/* ---- shared paint: pk-* → cr-* tokens (auto light/dark via --cr-*) ---- */
+.pk-card {
+	--pk-surface: var(--cr-surface);
+	--pk-ink: var(--cr-ink);
+	--pk-muted: var(--cr-ink-muted);
+	--pk-border: var(--cr-border-strong);
+	--pk-accent: var(--cr-link);
+	--pk-accent-ink: var(--cr-ink-inverse);
+
+	--pk-font-body: "Barlow", system-ui, -apple-system, sans-serif;
+	--pk-font-title: "Roboto Slab", Georgia, serif;
+	--pk-font-meta: ui-monospace, SFMono-Regular, Menlo, monospace;
+	--pk-title-weight: 700;
+	--pk-shadow: 0 1px 2px rgba(36, 28, 74, 0.08);
+
+	/* kind label = the site's masking tape (cream → dark amber in dark mode) */
+	--pk-label-bg: var(--cr-tape);
+	--pk-label-pad: 0.16rem 0.55rem;
+	--pk-label-rot: -2deg;
+	--pk-label-shadow: 1px 1px 0 rgba(36, 28, 74, 0.18);
+
+	/* linen paper behind rich embeds (light-mode signature; darkened below) */
+	--pk-paper:
+		repeating-linear-gradient(0deg, rgba(36, 28, 74, 0.05) 0 1px, transparent 1px 3px),
+		repeating-linear-gradient(90deg, rgba(36, 28, 74, 0.04) 0 1px, transparent 1px 3px),
+		#fee2c3;
+	--pk-paper-pad: 0.7rem;
+
+	/* source chip (venue / platform / price) = tape colors */
+	--pk-chip-bg: var(--cr-tape);
+	--pk-chip-ink: var(--cr-tape-ink);
+	--pk-chip-border: var(--cr-border);
+}
+
+/* the kind label reads in the display face + tape ink, matching the design */
+.pk-card .pk-kindlabel {
+	font-family: var(--pk-font-title);
+	color: var(--cr-tape-ink);
+}
+
+/* ---- per-kind accents: light hue + brightened dark hue in one place ----
+   badge ink defaults to white; overridden per-kind where the light accent is
+   too bright for white text. In dark mode every badge sits on a bright accent,
+   so the dark swap forces a dark badge ink globally. */
+.pk-card.k-listen      { --pk-kind: #241c4a; --pk-kind-dark: #9a8fe0; --pk-badge-ink: #fff; --pk-tint: #bcb5e3; }
+.pk-card.k-jam         { --pk-kind: #3f2f7a; --pk-kind-dark: #b0a0f0; --pk-badge-ink: #fff; --pk-tint: #cbc3ec; }
+.pk-card.k-watch       { --pk-kind: #126782; --pk-kind-dark: #6fc4dd; --pk-badge-ink: #fff; --pk-tint: #cfe8f0; }
+.pk-card.k-read        { --pk-kind: #7a5c2e; --pk-kind-dark: #d8b483; --pk-badge-ink: #fff; --pk-tint: #ecdcc2; }
+.pk-card.k-play        { --pk-kind: #5d72a3; --pk-kind-dark: #9fb0d8; --pk-badge-ink: #fff; --pk-tint: #dde3f0; }
+.pk-card.k-checkin     { --pk-kind: #4f6a43; --pk-kind-dark: #a7c295; --pk-badge-ink: #fff; --pk-tint: #dbe6d4; }
+.pk-card.k-eat         { --pk-kind: #c96a00; --pk-kind-dark: #ffa94d; --pk-badge-ink: #fff; --pk-tint: #fee2c3; }
+.pk-card.k-drink       { --pk-kind: #b26a00; --pk-kind-dark: #e0a353; --pk-badge-ink: #fff; --pk-tint: #fff0d0; }
+.pk-card.k-mood        { --pk-kind: #16697a; --pk-kind-dark: #6fc9e0; --pk-badge-ink: #fff; --pk-tint: #cdeaf1; }
+.pk-card.k-acquisition { --pk-kind: #023047; --pk-kind-dark: #6d9bb5; --pk-badge-ink: #fff; --pk-tint: #cfe0e6; }
+.pk-card.k-like        { --pk-kind: #b23a4c; --pk-kind-dark: #f37882; --pk-badge-ink: #fff; --pk-tint: #f4d4d8; }
+.pk-card.k-favorite    { --pk-kind: #96690a; --pk-kind-dark: #e6c05a; --pk-badge-ink: #fff; --pk-tint: #f1e4c0; }
+.pk-card.k-reply       { --pk-kind: #4a6a9d; --pk-kind-dark: #8da4cc; --pk-badge-ink: #fff; --pk-tint: #d7e0ef; }
+.pk-card.k-repost      { --pk-kind: #1d7a99; --pk-kind-dark: #7cc1d4; --pk-badge-ink: #fff; --pk-tint: #cfe8f0; }
+.pk-card.k-bookmark    { --pk-kind: #2c5f8a; --pk-kind-dark: #7db3e8; --pk-badge-ink: #fff; --pk-tint: #d5e2ee; }
+.pk-card.k-rsvp        { --pk-kind: #55743f; --pk-kind-dark: #a8c098; --pk-badge-ink: #fff; --pk-tint: #dde8d3; }
+.pk-card.k-wish        { --pk-kind: #8a4a6a; --pk-kind-dark: #d089a3; --pk-badge-ink: #fff; --pk-tint: #ecd6e0; }
+
+/* ============================================================================
+   DARK MODE — mirror the theme's dual contract:
+   - prefers-color-scheme when the site is on "system" / no stored choice
+   - the manual [data-theme="dark"] toggle
+   Both just swap the per-kind accent to its --pk-kind-dark, drop the light
+   tint wash, force a dark badge ink, and darken the embed paper. --cr-* driven
+   surfaces (surface / ink / border / tape / chip) flip on their own.
+   ============================================================================ */
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) .pk-card,
+	:root[data-theme="system"] .pk-card {
+		--pk-kind: var(--pk-kind-dark);
+		--pk-badge-ink: #14141a;
+		--pk-tint: transparent;
+		--pk-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+		--pk-paper:
+			repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
+			#2a2520;
+		--pk-label-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+	}
+}
+
+:root[data-theme="dark"] .pk-card {
+	--pk-kind: var(--pk-kind-dark);
+	--pk-badge-ink: #14141a;
+	--pk-tint: transparent;
+	--pk-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+	--pk-paper:
+		repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
+		#2a2520;
+	--pk-label-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+}
