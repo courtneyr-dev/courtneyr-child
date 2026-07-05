@@ -26,12 +26,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Substitute an Able Player embed for a watch/video card's YouTube URL.
  *
- * @param string|null $pre  Replacement embed HTML, or null to use oEmbed.
- * @param mixed       $url  The URL being embedded.
- * @param string      $kind The card kind slug.
+ * When the card supplies a WebVTT caption file (context['captions']), it's
+ * passed to Able Player, which renders accessible captions AND an interactive
+ * transcript from it — even for a YouTube video.
+ *
+ * @param string|null $pre     Replacement embed HTML, or null to use oEmbed.
+ * @param mixed       $url     The URL being embedded.
+ * @param string      $kind    The card kind slug.
+ * @param array       $context Extra card data (e.g. 'captions' => VTT URL).
  * @return string|null Able Player markup, or the incoming value to fall back.
  */
-function ableplayer_video_embed( $pre, $url, $kind ) {
+function ableplayer_video_embed( $pre, $url, $kind, $context = array() ) {
 	if ( null !== $pre ) {
 		return $pre;
 	}
@@ -54,14 +59,20 @@ function ableplayer_video_embed( $pre, $url, $kind ) {
 		return $pre;
 	}
 
+	$captions = '';
+	if ( isset( $context['captions'] ) && is_string( $context['captions'] ) && '' !== $context['captions'] ) {
+		$captions = sprintf( ' captions="%s"', esc_attr( $context['captions'] ) );
+	}
+
 	return do_shortcode(
 		sprintf(
-			'[ableplayer youtube-id="%s" youtube-nocookie="true"]',
-			esc_attr( $youtube_id )
+			'[ableplayer youtube-id="%s" youtube-nocookie="true"%s]',
+			esc_attr( $youtube_id ),
+			$captions
 		)
 	);
 }
-add_filter( 'pkiw_card_embed_html', __NAMESPACE__ . '\\ableplayer_video_embed', 10, 3 );
+add_filter( 'pkiw_card_embed_html', __NAMESPACE__ . '\\ableplayer_video_embed', 10, 4 );
 
 /**
  * Extract an 11-character YouTube video ID from common URL shapes
