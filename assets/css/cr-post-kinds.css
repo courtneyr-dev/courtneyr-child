@@ -18,6 +18,10 @@
 
 /* ---- shared paint: pk-* → cr-* tokens (auto light/dark via --cr-*) ---- */
 .pk-card {
+	/* courtneyr.dev: cards fill the content column, not the plugin's 38rem
+	   readable-width cap — the site's single-post measure is already wide. */
+	--pk-maxw: none;
+
 	--pk-surface: var(--cr-surface);
 	--pk-ink: var(--cr-ink);
 	--pk-muted: var(--cr-ink-muted);
