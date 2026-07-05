@@ -16,12 +16,18 @@
  * Nothing here touches layout — structure stays owned by the plugin.
  */
 
+/* courtneyr.dev: cards fill the content column, not the plugin's 38rem
+   readable-width cap — the single-post measure is already wide. Uses `body
+   .pk-card` (specificity 0,1,1) with a direct value, not a --pk-maxw override,
+   so it beats the plugin's `.pk-card` rule even after Perfmatters' Used-CSS
+   optimizer strips the plugin's :where() wrapper and reorders same-specificity
+   rules ahead of the theme's. */
+body .pk-card {
+	max-width: none;
+}
+
 /* ---- shared paint: pk-* → cr-* tokens (auto light/dark via --cr-*) ---- */
 .pk-card {
-	/* courtneyr.dev: cards fill the content column, not the plugin's 38rem
-	   readable-width cap — the site's single-post measure is already wide. */
-	--pk-maxw: none;
-
 	--pk-surface: var(--cr-surface);
 	--pk-ink: var(--cr-ink);
 	--pk-muted: var(--cr-ink-muted);
