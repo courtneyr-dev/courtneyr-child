@@ -31,6 +31,14 @@ body .pk-card {
 
 /* ---- shared paint: pk-* → cr-* tokens (auto light/dark via --cr-*) ---- */
 .pk-card {
+	/* Square corners, matching the zine's sharp-corner system. Overrides the
+	   plugin's --pk-radius:14px (front end) and --pkiw-card-border-radius:12px
+	   (editor). This file is loaded both front-end and via add_editor_style, so
+	   both contexts stay square. Per-card border-radius set through the block's
+	   Border support still wins (inline style beats these class-level tokens). */
+	--pk-radius: 0;
+	--pkiw-card-border-radius: 0;
+
 	--pk-surface: var(--cr-surface);
 	--pk-ink: var(--cr-ink);
 	--pk-muted: var(--cr-ink-muted);
