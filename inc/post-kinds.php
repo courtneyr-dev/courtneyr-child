@@ -1,16 +1,19 @@
 <?php
 /**
- * Post Kinds integration.
+ * Post Kinds + video accessibility integration.
  *
- * Renders watch/video Post Kinds card previews through Able Player instead of
- * the raw YouTube oEmbed iframe. Able Player gives an accessible, keyboard-
- * operable player and pulls YouTube's own captions into both closed captions
- * and an interactive transcript — matching how videos are embedded elsewhere
- * on the site.
+ * Renders YouTube videos through Able Player instead of the raw oEmbed iframe,
+ * so every video on the site is an accessible, keyboard-operable player with
+ * captions and (when a WebVTT file is supplied) an interactive transcript.
  *
- * Hooks the plugin's `pkiw_card_embed_html` short-circuit filter. Falls back to
- * the default oEmbed whenever Able Player is inactive or the URL isn't YouTube,
- * so nothing breaks if the plugin is present without Able Player.
+ * Three entry points, all sharing the same Able Player builder:
+ *   1. Post Kinds watch/video CARD previews — via the plugin's
+ *      `pkiw_card_embed_html` short-circuit filter (carries a caption file).
+ *   2. Core Embed BLOCKS (wp:embed) in post content — via `render_block`.
+ *   3. Bare-URL autoembeds — via `embed_oembed_html`.
+ *
+ * Everything falls back to the default embed whenever Able Player is inactive
+ * or the URL isn't YouTube, so nothing breaks without Able Player.
  *
  * @package CourtneyrChild
  */
@@ -21,6 +24,44 @@ namespace Courtneyr\Child\PostKinds;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+/**
+ * Build an Able Player embed for a YouTube video ID.
+ *
+ * @param string $youtube_id 11-character YouTube video ID.
+ * @param string $captions   Optional WebVTT caption file (URL or attachment ID).
+ * @return string Rendered Able Player markup.
+ */
+function ableplayer_youtube( string $youtube_id, string $captions = '' ): string {
+	$captions_attr = ( '' !== $captions )
+		? sprintf( ' captions="%s"', esc_attr( $captions ) )
+		: '';
+
+	return do_shortcode(
+		sprintf(
+			'[ableplayer youtube-id="%s" youtube-nocookie="true"%s]',
+			esc_attr( $youtube_id ),
+			$captions_attr
+		)
+	);
+}
+
+/**
+ * Extract an 11-character YouTube video ID from common URL shapes
+ * (watch?v=, youtu.be/, embed/, shorts/, live/).
+ *
+ * @param string $url The URL to parse.
+ * @return string The video ID, or '' when the URL isn't a YouTube video.
+ */
+function youtube_id( string $url ): string {
+	$pattern = '~(?:youtube\.com/(?:watch\?(?:.*&)?v=|embed/|shorts/|live/)|youtu\.be/)([A-Za-z0-9_-]{11})~';
+
+	if ( preg_match( $pattern, $url, $matches ) ) {
+		return $matches[1];
+	}
+
+	return '';
 }
 
 /**
@@ -36,7 +77,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param array       $context Extra card data (e.g. 'captions' => VTT URL).
  * @return string|null Able Player markup, or the incoming value to fall back.
  */
-function ableplayer_video_embed( $pre, $url, $kind, $context = array() ) {
+function card_embed( $pre, $url, $kind, $context = array() ) {
 	if ( null !== $pre ) {
 		return $pre;
 	}
@@ -59,34 +100,75 @@ function ableplayer_video_embed( $pre, $url, $kind, $context = array() ) {
 		return $pre;
 	}
 
-	$captions = '';
-	if ( isset( $context['captions'] ) && is_string( $context['captions'] ) && '' !== $context['captions'] ) {
-		$captions = sprintf( ' captions="%s"', esc_attr( $context['captions'] ) );
-	}
+	$captions = ( isset( $context['captions'] ) && is_string( $context['captions'] ) )
+		? $context['captions']
+		: '';
 
-	return do_shortcode(
-		sprintf(
-			'[ableplayer youtube-id="%s" youtube-nocookie="true"%s]',
-			esc_attr( $youtube_id ),
-			$captions
-		)
-	);
+	return ableplayer_youtube( $youtube_id, $captions );
 }
-add_filter( 'pkiw_card_embed_html', __NAMESPACE__ . '\\ableplayer_video_embed', 10, 4 );
+add_filter( 'pkiw_card_embed_html', __NAMESPACE__ . '\\card_embed', 10, 4 );
 
 /**
- * Extract an 11-character YouTube video ID from common URL shapes
- * (watch?v=, youtu.be/, embed/, shorts/).
+ * Render core Embed blocks (wp:embed) that point at YouTube through Able Player.
  *
- * @param string $url The URL to parse.
- * @return string The video ID, or '' when the URL isn't a YouTube video.
+ * Core embeds carry no caption file, so this gives the accessible player plus
+ * YouTube's own captions. For a local VTT transcript, use the watch card.
+ *
+ * @param string $content The block's rendered HTML.
+ * @param array  $block   The parsed block (blockName, attrs, …).
+ * @return string Able Player markup for YouTube embeds, else the original HTML.
  */
-function youtube_id( string $url ): string {
-	$pattern = '~(?:youtube\.com/(?:watch\?(?:.*&)?v=|embed/|shorts/|live/)|youtu\.be/)([A-Za-z0-9_-]{11})~';
-
-	if ( preg_match( $pattern, $url, $matches ) ) {
-		return $matches[1];
+function embed_block( $content, $block ) {
+	if ( ! is_array( $block ) || ( $block['blockName'] ?? '' ) !== 'core/embed' ) {
+		return $content;
 	}
 
-	return '';
+	if ( ! shortcode_exists( 'ableplayer' ) ) {
+		return $content;
+	}
+
+	$url = $block['attrs']['url'] ?? '';
+
+	if ( ! is_string( $url ) ) {
+		return $content;
+	}
+
+	$youtube_id = youtube_id( $url );
+
+	if ( '' === $youtube_id ) {
+		return $content;
+	}
+
+	return ableplayer_youtube( $youtube_id );
 }
+add_filter( 'render_block', __NAMESPACE__ . '\\embed_block', 10, 2 );
+
+/**
+ * Render bare-URL YouTube autoembeds through Able Player.
+ *
+ * Fires when WordPress builds oEmbed HTML for a URL on the front end (e.g. a
+ * YouTube link on its own line in content). Skipped in admin/REST so the block
+ * editor keeps its normal, editable embed preview.
+ *
+ * @param string $html The oEmbed HTML.
+ * @param string $url  The embedded URL.
+ * @return string Able Player markup for YouTube, else the original HTML.
+ */
+function oembed_html( $html, $url ) {
+	if ( is_admin() || ( function_exists( 'wp_is_json_request' ) && wp_is_json_request() ) ) {
+		return $html;
+	}
+
+	if ( ! shortcode_exists( 'ableplayer' ) || ! is_string( $url ) ) {
+		return $html;
+	}
+
+	$youtube_id = youtube_id( $url );
+
+	if ( '' === $youtube_id ) {
+		return $html;
+	}
+
+	return ableplayer_youtube( $youtube_id );
+}
+add_filter( 'embed_oembed_html', __NAMESPACE__ . '\\oembed_html', 10, 2 );
