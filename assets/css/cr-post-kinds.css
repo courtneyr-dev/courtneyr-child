@@ -24,6 +24,9 @@
    rules ahead of the theme's. */
 body .pk-card {
 	max-width: none;
+	/* Uniform thin border — drop the plugin's 3px dark left accent so the
+	   card leans on the site's hard shadow instead. */
+	border-left: 1px solid var(--pk-border);
 }
 
 /* ---- shared paint: pk-* → cr-* tokens (auto light/dark via --cr-*) ---- */
@@ -39,13 +42,13 @@ body .pk-card {
 	--pk-font-title: "Roboto Slab", Georgia, serif;
 	--pk-font-meta: ui-monospace, SFMono-Regular, Menlo, monospace;
 	--pk-title-weight: 700;
-	--pk-shadow: 0 1px 2px rgba(36, 28, 74, 0.08);
+	--pk-shadow: var(--cr-shadow-hard);
 
-	/* kind label = the site's masking tape (cream → dark amber in dark mode) */
-	--pk-label-bg: var(--cr-tape);
-	--pk-label-pad: 0.16rem 0.55rem;
-	--pk-label-rot: -2deg;
-	--pk-label-shadow: 1px 1px 0 rgba(36, 28, 74, 0.18);
+	/* kind label reads as a plain uppercase tag — no masking tape */
+	--pk-label-bg: transparent;
+	--pk-label-pad: 0;
+	--pk-label-rot: 0deg;
+	--pk-label-shadow: none;
 
 	/* linen paper behind rich embeds (light-mode signature; darkened below) */
 	--pk-paper:
@@ -62,8 +65,9 @@ body .pk-card {
 
 /* the kind label reads in the display face + tape ink, matching the design */
 .pk-card .pk-kindlabel {
-	font-family: var(--pk-font-title);
-	color: var(--cr-tape-ink);
+	font-family: var(--pk-font-meta);
+	color: var(--pk-muted);
+	letter-spacing: 0.08em;
 }
 
 /* ---- per-kind accents: light hue + brightened dark hue in one place ----
@@ -102,11 +106,9 @@ body .pk-card {
 		--pk-kind: var(--pk-kind-dark);
 		--pk-badge-ink: #14141a;
 		--pk-tint: transparent;
-		--pk-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 		--pk-paper:
 			repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
 			#2a2520;
-		--pk-label-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
 	}
 }
 
@@ -114,9 +116,7 @@ body .pk-card {
 	--pk-kind: var(--pk-kind-dark);
 	--pk-badge-ink: #14141a;
 	--pk-tint: transparent;
-	--pk-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 	--pk-paper:
 		repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
 		#2a2520;
-	--pk-label-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
 }
