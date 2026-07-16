@@ -149,6 +149,11 @@ function send_frontend_headers( \WP $wp ): void {
 	// semantically aligned ('self' <=> SAMEORIGIN).
 	if ( ! empty( $wp->query_vars['embed'] ) ) {
 		unset( $csp['frame-ancestors'] );
+		// A server-side plugin outside this repo also emits
+		// X-Frame-Options: SAMEORIGIN; strip it here (this callback runs
+		// last at priority 999) so /embed/ responses stay frameable
+		// cross-origin, which is the whole point of the endpoint.
+		header_remove( 'X-Frame-Options' );
 	} else {
 		header( 'X-Frame-Options: SAMEORIGIN' );
 	}
