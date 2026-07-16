@@ -142,6 +142,15 @@ function send_frontend_headers( \WP $wp ): void {
 
 	header( 'Permissions-Policy: interest-cohort=(), browsing-topics=()' );
 
+	// The Sucuri edge in front of courtneyr.dev injects
+	// Referrer-Policy: strict-origin-when-cross-origin on every response,
+	// and a server-side plugin emits the identical value at origin, so
+	// clients were seeing the header twice. Drop the origin copy here
+	// (runs last at priority 999); the edge copy remains the single
+	// authoritative one. If the site ever moves off Sucuri, replace this
+	// removal with an explicit header() call.
+	header_remove( 'Referrer-Policy' );
+
 	$csp = CSP_ENFORCED;
 
 	// /embed/ responses exist to be iframed by other sites: no framing
