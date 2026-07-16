@@ -32,3 +32,4 @@ require_once __DIR__ . '/inc/theme-json-overrides.php';
 require_once __DIR__ . '/inc/social-services.php';
 require_once __DIR__ . '/inc/post-kinds.php';
 require_once __DIR__ . '/inc/sloc-map-alt.php';
+require_once __DIR__ . '/inc/security-headers.php';
