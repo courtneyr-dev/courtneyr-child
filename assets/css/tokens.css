@@ -1025,4 +1025,18 @@ main, nav, header, footer, article, section, aside, hgroup {
     transition-duration: 0.001ms !important;
   }
   html { scroll-behavior: auto; }
+
+  /* View Transitions escape the universal kill switch above: the * selector
+     cannot match ::view-transition-* pseudo-elements, and the View Transitions
+     plugin only sets its 0.4s duration under no-preference — leaving the UA's
+     default 250ms animation (including geometric movement of the named
+     header/main/post-title groups) running for reduced-motion users. Suppress
+     the animation only; the navigation and DOM swap are untouched, so pages
+     still change — instantly. */
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
