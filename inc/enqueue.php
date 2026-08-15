@@ -601,3 +601,30 @@ function enqueue_admin_bar_styles_frontend(): void {
 	);
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_admin_bar_styles_frontend' );
+
+/**
+ * Drop Ollie Pro's scroll-resize frontend script (v0.5.200).
+ *
+ * Ollie Pro enqueues inc/extensions/build/scroll-resize-frontend.js
+ * (handle: ollie-pro-scroll-resize) on every front-end page. It binds a
+ * scroll listener and applies a per-frame inline scale() to elements
+ * carrying .has-scroll-resize — a class no template, pattern, or post on
+ * this site uses (checked across home, blog, single, stream, about,
+ * contact, speaking, web-stories, and 404). The inline per-frame
+ * transform also bypasses the reduced-motion kill switch in tokens.css,
+ * so if the class ever appeared it would animate for reduced-motion
+ * users.
+ *
+ * Dequeue-only (no deregister): this removes the script from the current
+ * request's queue while leaving its registration metadata in place, so
+ * the handle can still be referenced or re-enqueued. It does not protect
+ * anything that independently depends on the script actually loading.
+ * To use the Scroll Resize block setting again, delete this function and
+ * its add_action. (No supported Ollie Pro setting disables just this
+ * script — the Extensions page toggles whole extensions, and dashboard
+ * settings are per-environment state, not versioned code.)
+ */
+function dequeue_unused_scroll_resize(): void {
+	wp_dequeue_script( 'ollie-pro-scroll-resize' );
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\dequeue_unused_scroll_resize', 100 );
