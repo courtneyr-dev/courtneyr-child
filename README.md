@@ -48,18 +48,21 @@ courtneyr-child/
         └── deploy.yml.example  ← GoDaddy CI/CD template.
 ```
 
-## Design system sync
+## Design system sync — SUSPENDED
 
-`assets/css/tokens.css` and `assets/css/components.css` are copies from
-`courtneyr-design-system`. Keep them in sync until the
-`@courtneyr-dev/wp-design-bridge` converter package replaces this manual
-step.
+**This theme's `assets/css/tokens.css` and `assets/css/components.css` are
+the authoritative production CSS.** They began as copies from
+`courtneyr-design-system`, but that repository has not moved since
+2026-04-27 while these files carried months of theme releases (as of
+v0.5.200: 8,037 lines in components.css vs 659 upstream).
 
-To resync manually:
-```bash
-cp ../courtneyr-design-system/tokens/tokens.css         assets/css/tokens.css
-cp ../courtneyr-design-system/components/components.css assets/css/components.css
-```
+**Do not overwrite these files from the design-system repository.** The
+old copy commands previously documented here would erase that work,
+including the reduced-motion View Transition rule in tokens.css §13,
+which must be preserved.
+
+A future reverse-sync (theme → design system) or source-of-truth
+reconciliation is separate work, tracked outside this repo.
 
 ## WordPress 7 readiness
 
