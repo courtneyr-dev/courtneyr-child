@@ -1391,7 +1391,7 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
 	background: var(--cr-periwinkle, #bcb5e3);
 	border-radius: 10px;
 	box-shadow: 0 4px 10px -3px rgba(36, 28, 74, 0.45);
-	transition: transform 0.3s cubic-bezier(0.4, 0.5, 0.2, 1), background 0.2s ease;
+	transition: transform var(--cr-motion-base, 250ms) var(--cr-ease-in-out, ease-in-out), background var(--cr-motion-fast, 150ms) var(--cr-ease-out, ease);
 	z-index: 0;
 	pointer-events: none;
 }

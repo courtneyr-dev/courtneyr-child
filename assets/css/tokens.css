@@ -297,6 +297,13 @@
   --cr-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Named exceptions to the duration scale — intentional, do not "fix":
+   - 80ms button/chip press feedback (components.css, cr-blog.css) — below
+     --cr-motion-fast on purpose; press must feel instantaneous.
+   - 950ms contact postcard flip (cr-contact.css) — a one-off set piece.
+   - 400ms cross-document View Transition (View Transitions plugin CSS).
+   Everything else maps to --cr-motion-fast/base/slow. */
+
 
 /* =============================================================================
    8. POST-TYPE TOKENS

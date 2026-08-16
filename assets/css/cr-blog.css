@@ -89,7 +89,7 @@
 	background: var(--cr-surface-elevated);
 	border: var(--cr-border-thick);
 	box-shadow: var(--cr-shadow-hard);
-	transition: transform 120ms var(--cr-ease-out, ease), box-shadow 120ms var(--cr-ease-out, ease);
+	transition: transform var(--cr-motion-fast, 150ms) var(--cr-ease-out, ease), box-shadow var(--cr-motion-fast, 150ms) var(--cr-ease-out, ease);
 }
 .cr-blog .post-grid > li:nth-child(odd) .card  { transform: rotate(-0.5deg); }
 .cr-blog .post-grid > li:nth-child(even) .card { transform: rotate(0.5deg); }

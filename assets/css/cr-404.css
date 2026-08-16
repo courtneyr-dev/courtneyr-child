@@ -285,7 +285,7 @@
 	border: 3px solid var(--cr-ink);
 	box-shadow: 6px 6px 0 var(--cr-shadow-ink, var(--cr-ink));
 	padding: 24px 26px 22px;
-	transition: transform 0.12s ease, box-shadow 0.12s ease;
+	transition: transform var(--cr-motion-fast, 150ms) var(--cr-ease-out, ease), box-shadow var(--cr-motion-fast, 150ms) var(--cr-ease-out, ease);
 }
 /* alternate the tilt off the <li> wrapper (the card is its only child) */
 .cr-404 .cr-404__list .wp-block-post:nth-child(odd)  .cr-404__list-item { transform: rotate(-1.1deg); }
