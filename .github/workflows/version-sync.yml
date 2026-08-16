@@ -1,0 +1,36 @@
+# Fails whenever style.css's "Version:" header and functions.php's
+# COURTNEYR_CHILD_VERSION disagree. WordPress (wp theme list, the admin
+# Themes screen) reads ONLY the style.css header, so a release bump that
+# touches just the PHP constant under-reports the deployed version —
+# exactly what happened between v0.5.186 and v0.5.207.
+
+name: Version sync
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: style.css header matches COURTNEYR_CHILD_VERSION
+        run: |
+          css_version=$(sed -n 's/^Version:[[:space:]]*//p' style.css | head -1)
+          php_version=$(sed -n "s/.*define( 'COURTNEYR_CHILD_VERSION', '\([^']*\)' ).*/\1/p" functions.php | head -1)
+
+          echo "style.css:     ${css_version:-<not found>}"
+          echo "functions.php: ${php_version:-<not found>}"
+
+          if [ -z "$css_version" ] || [ -z "$php_version" ]; then
+            echo "::error::Could not extract one of the version strings."
+            exit 1
+          fi
+
+          if [ "$css_version" != "$php_version" ]; then
+            echo "::error file=style.css::Version header ($css_version) does not match COURTNEYR_CHILD_VERSION ($php_version). Bump both in the release commit — wp theme list only sees style.css."
+            exit 1
+          fi
