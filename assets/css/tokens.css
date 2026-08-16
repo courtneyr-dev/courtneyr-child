@@ -302,7 +302,10 @@
      --cr-motion-fast on purpose; press must feel instantaneous.
    - 950ms contact postcard flip (cr-contact.css) — a one-off set piece.
    - 400ms cross-document View Transition (View Transitions plugin CSS).
-   Everything else maps to --cr-motion-fast/base/slow. */
+   These are the named exceptions within the audited motion set (blog
+   card hover, 404 list-item hover, theme-toggle indicator). Other
+   legacy literal durations exist outside that audit and remain
+   unconverted — do not assume every declaration uses the tokens. */
 
 
 /* =============================================================================

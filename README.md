@@ -32,8 +32,8 @@ courtneyr-child/
 │                            JS toggle which overrides per-visitor.
 ├── assets/
 │   ├── css/
-│   │   ├── tokens.css     ← Synced from courtneyr-design-system.
-│   │   ├── components.css ← Synced from courtneyr-design-system.
+│   │   ├── tokens.css     ← Authoritative production CSS (see Design system sync).
+│   │   ├── components.css ← Authoritative production CSS (see Design system sync).
 │   │   ├── blocks/        ← Per-block CSS (loaded only when block renders)
 │   │   └── interactivity/ ← Theme toggle button styling.
 │   ├── fonts/             ← Self-hosted woff2 files (see fonts/README.md).
