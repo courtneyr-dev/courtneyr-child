@@ -8035,3 +8035,22 @@ body.single-format-video main.single-post   { background-color: var(--cr-type-vi
 .related-posts__list {
 	gap: 2rem !important;
 }
+
+/* ---- Homepage entrance pilot (v0.5.204) ------------------------------------
+   The 01–04 feature quartet carries ollie-animate-sequentially +
+   fadeInUp + once on its parent group (block-editor change, staging
+   pilot). Ollie's sequential JS copies these custom properties from the
+   parent's computed style to each child, so the tokened timing lives
+   here in versioned CSS, not in the database:
+   - duration: --cr-motion-slow (400ms) — audit "understand" tier cap
+   - distance: 12px — audit travel cap
+   - stagger:  120ms between cards
+   Deliberately NOT the on-scroll variant: .ollie-animate-on-scroll sets
+   opacity:0 in Ollie's CSS before JS runs, which would hide the cards
+   for no-JS visitors. The load-time sequential path never hides
+   anything without JS and is skipped entirely under reduced motion. */
+.cr-home-features .ollie-animate-sequentially {
+	--animation-duration: var(--cr-motion-slow, 400ms);
+	--animation-distance: 12px;
+	--sequential-delay: 0.12s;
+}
