@@ -168,7 +168,14 @@ function send_frontend_headers( \WP $wp ): void {
 	}
 
 	header( 'Content-Security-Policy: ' . build_policy( $csp ) );
-	header( 'Content-Security-Policy-Report-Only: ' . build_policy( array_merge( $csp, CSP_REPORT_ONLY_OVERRIDES ) ) );
+
+	// upgrade-insecure-requests only exists for enforced policies (W3C
+	// upgrade-insecure-requests spec §3.1): in a Report-Only header the
+	// browser ignores it and Chrome logs a console error on every page
+	// load, so it stays out of the trial policy.
+	$csp_report_only = array_merge( $csp, CSP_REPORT_ONLY_OVERRIDES );
+	unset( $csp_report_only['upgrade-insecure-requests'] );
+	header( 'Content-Security-Policy-Report-Only: ' . build_policy( $csp_report_only ) );
 }
 
 /**
