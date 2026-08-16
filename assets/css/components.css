@@ -8054,3 +8054,20 @@ body.single-format-video main.single-post   { background-color: var(--cr-type-vi
 	--animation-distance: 12px;
 	--sequential-delay: 0.12s;
 }
+
+/* v0.5.205 — content-availability guard. Ollie Pro pre-hides sequential
+   children under normal motion (@media no-preference:
+   .ollie-animate-sequentially > :not(.ollie-animate) { opacity: 0 })
+   and relies on its JS to reveal them — but Perfmatters delays that JS
+   until first interaction, so a visitor who loads and doesn't interact
+   would never see the cards. Keep them visible from first paint; when
+   the delayed script eventually distributes the .ollie-animate classes,
+   this selector stops matching and the staggered fade-up plays
+   normally. Trade-off: a user who first interacts while the quartet is
+   already on screen sees the cards restart their fade (fill-mode
+   backwards) — accepted over hidden content. */
+@media (prefers-reduced-motion: no-preference) {
+	.cr-home-features .ollie-animate-sequentially > :not(.ollie-animate) {
+		opacity: 1;
+	}
+}
