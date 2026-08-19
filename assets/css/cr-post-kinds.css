@@ -128,3 +128,436 @@ body .pk-card {
 		repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
 		#2a2520;
 }
+
+/* ============================================================
+   v0.5.214 — Stream.dc.html port (Claude Design "Stream and
+   Blog mocks review": SPEC.md /stream/ + 24-kind tables).
+   Scoped to body.cr-stream-page so kind cards embedded in
+   single posts keep the plugin's compact layout. Cover kinds
+   render as VHS/record/game boxes; scraps as pinned paper.
+   Raw violet/ivory hexes on the "physical objects" are
+   deliberate — a VHS box doesn't change color in dark mode.
+   ============================================================ */
+
+/* Collage: masonry columns, no card ever touching another. */
+.cr-stream-page .wp-block-post-template {
+	columns: 17rem;
+	column-gap: 2.25rem;
+	max-width: 72rem;
+	margin-inline: auto;
+	padding: 0;
+	list-style: none;
+}
+.cr-stream-page .wp-block-post-template > li {
+	break-inside: avoid;
+	display: block;
+	margin: 0.7rem 0 2.6rem;
+}
+.cr-stream-page .wp-block-post-template > li:nth-child(4n+1) .pk-card--stream { transform: rotate(var(--cr-rotate-1, -1.2deg)); }
+.cr-stream-page .wp-block-post-template > li:nth-child(4n+3) .pk-card--stream { transform: rotate(var(--cr-rotate-2, 1.5deg)); }
+
+/* Reset the plugin's compact shell on the stream. */
+.cr-stream-page .pk-card--stream {
+	display: block;
+	grid-template-columns: none;
+	max-width: none;
+	padding: 0;
+	border: 0;
+	border-left: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	position: relative;
+}
+.cr-stream-page .pk-card--stream::before { content: none; }
+.cr-stream-page .pk-card--stream .pk-body { display: flex; flex-direction: column; min-width: 0; }
+
+/* ---- Cover-hero kinds: the box shell ---- */
+.cr-stream-page .pk-card--stream.k-watch,
+.cr-stream-page .pk-card--stream.k-listen,
+.cr-stream-page .pk-card--stream.k-read,
+.cr-stream-page .pk-card--stream.k-jam,
+.cr-stream-page .pk-card--stream.k-play,
+.cr-stream-page .pk-card--stream.k-review,
+.cr-stream-page .pk-card--stream.k-wish,
+.cr-stream-page .pk-card--stream.k-acquisition {
+	background: #241c4a;
+	border-radius: 5px;
+	overflow: hidden;
+	box-shadow: var(--cr-shadow-hard-2, 6px 6px 0 var(--cr-ink, #241c4a));
+	color: #fbfaf5;
+}
+
+/* Art goes big, on top, edge to edge. */
+.cr-stream-page .pk-card--stream .pk-media {
+	order: -1;
+	display: block;
+	margin: 0;
+}
+.cr-stream-page .pk-card--stream .pk-media img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: 0;
+	border-bottom: 2px solid rgba(251, 250, 245, 0.7);
+	object-fit: cover;
+}
+.cr-stream-page .k-watch .pk-media img,
+.cr-stream-page .k-read .pk-media img,
+.cr-stream-page .k-wish .pk-media img { aspect-ratio: 2 / 3; }
+.cr-stream-page .k-listen .pk-media img,
+.cr-stream-page .k-jam .pk-media img { aspect-ratio: 1 / 1; }
+.cr-stream-page .k-play .pk-media img,
+.cr-stream-page .k-review .pk-media img,
+.cr-stream-page .k-acquisition .pk-media img { aspect-ratio: 4 / 3; }
+
+/* Caption band on the box. */
+.cr-stream-page .k-watch .pk-title,
+.cr-stream-page .k-listen .pk-title,
+.cr-stream-page .k-read .pk-title,
+.cr-stream-page .k-jam .pk-title,
+.cr-stream-page .k-play .pk-title,
+.cr-stream-page .k-review .pk-title,
+.cr-stream-page .k-wish .pk-title,
+.cr-stream-page .k-acquisition .pk-title {
+	color: #fbfaf5;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 700;
+	font-size: 0.95rem;
+	line-height: 1.25;
+	padding: 0.55rem 0.65rem 0;
+}
+.cr-stream-page .pk-card--stream .pk-title a { color: inherit; }
+.cr-stream-page .pk-card--stream .pk-sub {
+	padding: 0.15rem 0.65rem 0;
+	font-size: 0.8rem;
+}
+.cr-stream-page .k-watch .pk-sub,
+.cr-stream-page .k-listen .pk-sub,
+.cr-stream-page .k-read .pk-sub,
+.cr-stream-page .k-jam .pk-sub,
+.cr-stream-page .k-play .pk-sub,
+.cr-stream-page .k-review .pk-sub,
+.cr-stream-page .k-wish .pk-sub,
+.cr-stream-page .k-acquisition .pk-sub { color: rgba(251, 250, 245, 0.85); }
+.cr-stream-page .pk-card--stream .pk-stream-date time {
+	display: inline-block;
+	border: 1px solid rgba(251, 250, 245, 0.55);
+	border-radius: 2px;
+	padding: 0.15rem 0.35rem;
+	font-family: var(--cr-font-accent, serif);
+	font-size: 0.6rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+.cr-stream-page .pk-card--stream .pk-stars {
+	color: var(--cr-selective-yellow, #ffb703);
+	padding: 0.3rem 0.65rem 0;
+}
+.cr-stream-page .pk-card--stream .pk-meta { padding: 0.4rem 0.65rem 0.7rem; }
+.cr-stream-page .pk-card--stream .pk-excerpt { padding: 0.3rem 0.65rem 0; }
+.cr-stream-page .pk-card--stream .pk-link {
+	font-family: var(--cr-font-accent, serif);
+	font-size: 0.65rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+.cr-stream-page .k-watch .pk-link,
+.cr-stream-page .k-listen .pk-link,
+.cr-stream-page .k-play .pk-link { color: var(--cr-sky-blue, #8ecae6); }
+
+/* Kind badge: small avatar pinned to the art, ivory ring. */
+.cr-stream-page .pk-card--stream .pk-badge {
+	position: absolute;
+	top: 0.55rem;
+	left: 0.55rem;
+	z-index: 2;
+	box-shadow: 0 0 0 3px #fbfaf5;
+}
+
+/* Kind label → price sticker on the art (cover kinds only). */
+.cr-stream-page .k-watch .pk-kindlabel,
+.cr-stream-page .k-listen .pk-kindlabel,
+.cr-stream-page .k-read .pk-kindlabel,
+.cr-stream-page .k-jam .pk-kindlabel,
+.cr-stream-page .k-play .pk-kindlabel,
+.cr-stream-page .k-review .pk-kindlabel,
+.cr-stream-page .k-wish .pk-kindlabel,
+.cr-stream-page .k-acquisition .pk-kindlabel {
+	position: absolute;
+	top: 0.55rem;
+	right: 0.55rem;
+	z-index: 2;
+	display: grid;
+	place-items: center;
+	width: 3.4rem;
+	height: 3.4rem;
+	margin: 0;
+	padding: 0.2rem;
+	border-radius: 50%;
+	background: var(--cr-selective-yellow, #ffb703);
+	border: 2px solid var(--cr-ut-orange, #fb8500);
+	box-shadow: 0 0 0 3px #fbfaf5;
+	color: #023047;
+	font-size: 0.5rem;
+	font-weight: 900;
+	letter-spacing: 0.04em;
+	text-align: center;
+	line-height: 1.15;
+	transform: rotate(8deg);
+}
+
+/* Wish: not yet mine. */
+.cr-stream-page .k-wish .pk-media img { opacity: 0.75; }
+.cr-stream-page .pk-card--stream.k-wish { box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a); outline: 2px dashed rgba(251, 250, 245, 0.6); outline-offset: -6px; }
+
+/* Shelf shadow under every cover box. */
+.cr-stream-page .wp-block-post-template > li.kind-watch::after,
+.cr-stream-page .wp-block-post-template > li.kind-listen::after,
+.cr-stream-page .wp-block-post-template > li.kind-read::after,
+.cr-stream-page .wp-block-post-template > li.kind-jam::after,
+.cr-stream-page .wp-block-post-template > li.kind-play::after,
+.cr-stream-page .wp-block-post-template > li.kind-review::after,
+.cr-stream-page .wp-block-post-template > li.kind-wish::after,
+.cr-stream-page .wp-block-post-template > li.kind-acquisition::after {
+	content: "";
+	display: block;
+	height: 7px;
+	margin: 3px 8px 0;
+	background: radial-gradient(50% 100% at 50% 0, rgba(36, 28, 74, 0.35), transparent 70%);
+}
+
+/* No-art cover kinds → home-recorded cassette. */
+.cr-stream-page .pk-card--stream.k-watch:not(:has(.pk-media)),
+.cr-stream-page .pk-card--stream.k-listen:not(:has(.pk-media)) {
+	background: #1a1714;
+	border-radius: 8px;
+	overflow: visible;
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a);
+	padding: 0.7rem 0.7rem 3.6rem;
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)) .pk-body,
+.cr-stream-page .k-listen:not(:has(.pk-media)) .pk-body {
+	background: #fbfaf5;
+	border-radius: 3px;
+	padding: 0.55rem 0.7rem 0.5rem;
+	background-image: repeating-linear-gradient(180deg, transparent 0, transparent calc(1.5em - 1px), rgba(36, 28, 74, 0.15) calc(1.5em - 1px), rgba(36, 28, 74, 0.15) 1.5em);
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)) .pk-title,
+.cr-stream-page .k-listen:not(:has(.pk-media)) .pk-title {
+	color: #241c4a;
+	font-family: var(--cr-font-display, cursive);
+	font-size: 0.9rem;
+	line-height: 1.5;
+	padding: 0;
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)) .pk-sub,
+.cr-stream-page .k-listen:not(:has(.pk-media)) .pk-sub { color: #3d2f6e; padding: 0.15rem 0 0; }
+.cr-stream-page .k-watch:not(:has(.pk-media)) .pk-stream-date time,
+.cr-stream-page .k-listen:not(:has(.pk-media)) .pk-stream-date time { border: 0; padding: 0; color: #3d2f6e; }
+.cr-stream-page .k-watch:not(:has(.pk-media))::after,
+.cr-stream-page .k-listen:not(:has(.pk-media))::after {
+	content: "";
+	position: absolute;
+	left: 1.2rem;
+	right: 1.2rem;
+	bottom: 0.8rem;
+	height: 2.2rem;
+	border: 1px solid #3a342f;
+	border-radius: 999px;
+	background:
+		radial-gradient(circle 1.1rem at 1.4rem 50%, #0d0b09 40%, #3a342f 41% 100%, transparent 100%),
+		radial-gradient(circle 1.1rem at calc(100% - 1.4rem) 50%, #0d0b09 40%, #3a342f 41% 100%, transparent 100%),
+		linear-gradient(#3a342f, #3a342f) center / calc(100% - 5rem) 2px no-repeat;
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)) .pk-kindlabel,
+.cr-stream-page .k-listen:not(:has(.pk-media)) .pk-kindlabel {
+	position: static;
+	width: auto;
+	height: auto;
+	border-radius: 1px;
+	background: none;
+	border: 0;
+	box-shadow: none;
+	color: #3d2f6e;
+	transform: none;
+	font-size: 0.55rem;
+	letter-spacing: 0.2em;
+	padding: 0;
+	margin: 0 0 0.2rem;
+	display: block;
+}
+
+/* ---- Scrap kinds: pinned paper ---- */
+.cr-stream-page .pk-card--stream.k-note,
+.cr-stream-page .pk-card--stream.k-article,
+.cr-stream-page .pk-card--stream.k-reply,
+.cr-stream-page .pk-card--stream.k-like,
+.cr-stream-page .pk-card--stream.k-repost,
+.cr-stream-page .pk-card--stream.k-bookmark,
+.cr-stream-page .pk-card--stream.k-favorite,
+.cr-stream-page .pk-card--stream.k-recipe,
+.cr-stream-page .pk-card--stream.k-checkin {
+	background: var(--cr-surface-elevated, #fff);
+	border: 2px solid var(--cr-ink, #241c4a);
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
+	padding: 0.9rem 1rem 1rem;
+	width: 88%;
+}
+.cr-stream-page .wp-block-post-template > li:nth-child(even) .pk-card--stream.k-note,
+.cr-stream-page .wp-block-post-template > li:nth-child(even) .pk-card--stream.k-like,
+.cr-stream-page .wp-block-post-template > li:nth-child(even) .pk-card--stream.k-reply,
+.cr-stream-page .wp-block-post-template > li:nth-child(even) .pk-card--stream.k-bookmark { margin-left: auto; }
+.cr-stream-page .pk-card--stream.k-note .pk-title,
+.cr-stream-page .pk-card--stream.k-article .pk-title,
+.cr-stream-page .pk-card--stream.k-reply .pk-title,
+.cr-stream-page .pk-card--stream.k-like .pk-title,
+.cr-stream-page .pk-card--stream.k-repost .pk-title,
+.cr-stream-page .pk-card--stream.k-bookmark .pk-title,
+.cr-stream-page .pk-card--stream.k-favorite .pk-title,
+.cr-stream-page .pk-card--stream.k-recipe .pk-title,
+.cr-stream-page .pk-card--stream.k-checkin .pk-title { padding: 0; font-size: 1rem; }
+.cr-stream-page .pk-card--stream.k-note .pk-badge,
+.cr-stream-page .pk-card--stream.k-article .pk-badge,
+.cr-stream-page .pk-card--stream.k-reply .pk-badge,
+.cr-stream-page .pk-card--stream.k-like .pk-badge,
+.cr-stream-page .pk-card--stream.k-repost .pk-badge,
+.cr-stream-page .pk-card--stream.k-bookmark .pk-badge,
+.cr-stream-page .pk-card--stream.k-favorite .pk-badge,
+.cr-stream-page .pk-card--stream.k-recipe .pk-badge,
+.cr-stream-page .pk-card--stream.k-checkin .pk-badge {
+	position: absolute;
+	top: -0.9rem;
+	right: -0.6rem;
+	box-shadow: 0 0 0 3px var(--cr-printer-ivory, #fbfaf5);
+}
+/* note: sticky */
+.cr-stream-page .pk-card--stream.k-note { background: var(--cr-tape, #f3e5b8); border-width: 0; box-shadow: var(--cr-shadow-hard, 4px 4px 0 rgba(36, 28, 74, 0.35)); }
+/* bookmark: sky dog-ear */
+.cr-stream-page .pk-card--stream.k-bookmark::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	right: 0;
+	border-style: solid;
+	border-width: 0 1.4rem 1.4rem 0;
+	border-color: transparent var(--cr-sky-blue, #8ecae6) transparent transparent;
+}
+/* recipe: ruled index card, coral top rule */
+.cr-stream-page .pk-card--stream.k-recipe {
+	border-top: 4px double #d9604f;
+	background-image: repeating-linear-gradient(180deg, transparent 0, transparent calc(1.6em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) calc(1.6em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) 1.6em);
+}
+
+/* mood: no chrome at all */
+.cr-stream-page .pk-card--stream.k-mood {
+	background: none;
+	border: 0;
+	box-shadow: none;
+	text-align: center;
+	padding: 0.5rem 0;
+}
+.cr-stream-page .pk-card--stream.k-mood .pk-badge { position: static; margin: 0 auto 0.3rem; width: 2.6rem; height: 2.6rem; box-shadow: none; }
+.cr-stream-page .pk-card--stream.k-mood .pk-title { font-family: var(--cr-font-display, cursive); font-size: 1rem; padding: 0; }
+.cr-stream-page .pk-card--stream.k-mood .pk-kindlabel { display: none; }
+
+/* drink: coaster */
+.cr-stream-page .pk-card--stream.k-drink {
+	background: var(--cr-light-orange, #fee2c3);
+	border: 2px solid var(--cr-ink, #241c4a);
+	border-radius: 50%;
+	aspect-ratio: 1;
+	width: min(15rem, 100%);
+	margin-inline: auto;
+	display: grid;
+	place-content: center;
+	text-align: center;
+	padding: 1.4rem;
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
+	overflow: hidden;
+}
+.cr-stream-page .k-drink .pk-title { color: #241c4a; padding: 0; font-size: 0.95rem; }
+.cr-stream-page .k-drink .pk-sub { color: #126782; padding: 0; }
+.cr-stream-page .k-drink .pk-badge { position: static; margin: 0 auto 0.25rem; }
+.cr-stream-page .k-drink .pk-media { display: none; }
+.cr-stream-page .k-drink::after {
+	content: "";
+	position: absolute;
+	top: 0.6rem;
+	right: 1.4rem;
+	width: 2.4rem;
+	height: 2.4rem;
+	border: 5px solid rgba(168, 122, 69, 0.4);
+	border-radius: 50%;
+}
+
+/* eat: polaroid */
+.cr-stream-page .pk-card--stream.k-eat {
+	background: #fbfaf5;
+	border: 0;
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
+	padding: 0.7rem 0.7rem 0.9rem;
+	width: 92%;
+}
+.cr-stream-page .k-eat .pk-media { order: -1; margin: 0 0 0.5rem; }
+.cr-stream-page .k-eat .pk-media img { border-bottom: 0; aspect-ratio: 1; }
+.cr-stream-page .k-eat .pk-title { color: #241c4a; font-family: var(--cr-font-display, cursive); font-size: 0.85rem; padding: 0; }
+.cr-stream-page .k-eat .pk-sub { color: #126782; padding: 0.1rem 0 0; }
+.cr-stream-page .k-eat .pk-kindlabel { display: none; }
+.cr-stream-page .k-eat .pk-badge { position: absolute; top: auto; bottom: -0.8rem; left: 0.8rem; }
+
+/* event: gig-poster crest */
+.cr-stream-page .pk-card--stream.k-event {
+	background: #241c4a;
+	color: #fbfaf5;
+	text-align: center;
+	padding: 1.6rem 1.1rem 2rem;
+	border: 0;
+	box-shadow: none;
+	clip-path: polygon(0 5%, 50% 0, 100% 5%, 100% 84%, 50% 100%, 0 84%);
+	filter: drop-shadow(4px 4px 0 var(--cr-hard-color, #241c4a));
+}
+.cr-stream-page .k-event .pk-title { color: #fbfaf5; padding: 0; }
+.cr-stream-page .k-event .pk-stream-date time {
+	border: 0;
+	color: var(--cr-selective-yellow, #ffb703);
+	font-size: 1.6rem;
+	font-weight: 900;
+	letter-spacing: 0.02em;
+}
+.cr-stream-page .k-event .pk-sub { color: var(--cr-sky-blue, #8ecae6); }
+.cr-stream-page .k-event .pk-badge { position: static; margin: 0 auto 0.4rem; }
+
+/* rsvp: the ticket (mask + drop-shadow so notches show paper) */
+.cr-stream-page .pk-card--stream.k-rsvp {
+	filter: drop-shadow(4px 4px 0 var(--cr-hard-color, #241c4a));
+	transform: rotate(var(--cr-rotate-1, -1.2deg));
+}
+.cr-stream-page .k-rsvp .pk-body {
+	background: var(--cr-surface-elevated, #fff);
+	padding: 1rem 6rem 1rem 1.1rem;
+	position: relative;
+	-webkit-mask:
+		radial-gradient(circle 12px at 72% 0, transparent 98%, #000 100%) top / 100% 51% no-repeat,
+		radial-gradient(circle 12px at 72% 100%, transparent 98%, #000 100%) bottom / 100% 51% no-repeat;
+	mask:
+		radial-gradient(circle 12px at 72% 0, transparent 98%, #000 100%) top / 100% 51% no-repeat,
+		radial-gradient(circle 12px at 72% 100%, transparent 98%, #000 100%) bottom / 100% 51% no-repeat;
+}
+.cr-stream-page .k-rsvp .pk-body::after {
+	content: "";
+	position: absolute;
+	left: 72%;
+	top: 10px;
+	bottom: 10px;
+	border-left: 2px dashed rgba(36, 28, 74, 0.35);
+}
+.cr-stream-page .k-rsvp .pk-title { padding: 0; font-size: 1rem; }
+.cr-stream-page .k-rsvp .pk-kindlabel { position: static; width: auto; height: auto; border-radius: 1px; background: var(--cr-tape, #f3e5b8); border: 0; box-shadow: none; color: var(--cr-tape-ink, #241c4a); transform: rotate(-2deg); padding: 0.1rem 0.4rem; display: inline-block; }
+
+/* dark-mode hard-shadow color for the drop-shadow() cases */
+:root { --cr-hard-color: #241c4a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --cr-hard-color: #ffb703; } }

@@ -618,3 +618,19 @@ function enqueue_admin_bar_styles_frontend(): void {
 	);
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_admin_bar_styles_frontend' );
+
+/**
+ * Body class for the stream page so cr-post-kinds.css can scope the
+ * scrapbook collage layout to /stream/ without touching kind cards
+ * embedded in single posts.
+ *
+ * @param string[] $classes Body classes.
+ * @return string[]
+ */
+function stream_body_class( array $classes ): array {
+	if ( is_page( 'stream' ) ) {
+		$classes[] = 'cr-stream-page';
+	}
+	return $classes;
+}
+add_filter( 'body_class', __NAMESPACE__ . '\\stream_body_class' );
