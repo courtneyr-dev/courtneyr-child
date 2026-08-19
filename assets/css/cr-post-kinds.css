@@ -1920,7 +1920,9 @@ body .pk-card {
    perforation (mask + drop-shadow), bigger stamp. */
 .cr-stream-page .pk-card.k-rsvp {
 	box-shadow: none;
-	filter: drop-shadow(4px 4px 0 var(--cr-hard-color, #241c4a));
+	/* the mask below clips this element's own drop-shadow (same trap
+	   as clip-path), so the shadow is cast from the list item instead */
+	filter: none;
 	padding: 1.1rem 6.6rem 1.1rem 1.15rem;
 	-webkit-mask:
 		radial-gradient(circle 11px at calc(100% - 5.6rem) 0, transparent 98%, #000 100%) top / 100% 51% no-repeat,
@@ -1928,6 +1930,9 @@ body .pk-card {
 	mask:
 		radial-gradient(circle 11px at calc(100% - 5.6rem) 0, transparent 98%, #000 100%) top / 100% 51% no-repeat,
 		radial-gradient(circle 11px at calc(100% - 5.6rem) 100%, transparent 98%, #000 100%) bottom / 100% 51% no-repeat;
+}
+.cr-stream-page .wp-block-post-template > li:has(.pk-card.k-rsvp) {
+	filter: drop-shadow(4px 4px 0 var(--cr-hard-color, #241c4a));
 }
 .cr-stream-page .k-rsvp .pk-kindlabel,
 .cr-stream-page .k-rsvp .pk-stream-date,
