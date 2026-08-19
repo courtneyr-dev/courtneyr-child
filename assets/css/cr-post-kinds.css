@@ -2680,3 +2680,47 @@ body .pk-card {
 .cr-stream-page .pk-card.k-tag {
 	filter: drop-shadow(3px 3px 0 var(--cr-hard-color, #241c4a)) drop-shadow(2px 2px 0 var(--cr-hard-color, #241c4a));
 }
+
+/* ============================================================
+   v0.5.265 — torn edge, rebuilt for real shadows.
+   clip-path clips its own box-shadow, and stacked drop-shadows
+   read thin — so the tear is now PAINTED: paper teeth over an
+   ink band at the card's bottom, on a plain rectangle that takes
+   the standard 4x4 box-shadow like every other card.
+   ============================================================ */
+.cr-stream-page .pk-card.k-reply,
+.cr-stream-page .pk-card.k-like,
+.cr-stream-page .pk-card.k-repost,
+.cr-stream-page .pk-card.k-favorite,
+.cr-stream-page .pk-card.k-article,
+.cr-stream-page .pk-card.k-quote,
+.cr-stream-page .pk-card.k-follow,
+.cr-stream-page .pk-card.k-issue,
+.cr-stream-page .pk-card.k-tag {
+	clip-path: none;
+	filter: none;
+	box-shadow: 4px 4px 0 var(--cr-hard-color, #241c4a);
+	padding-bottom: 1.9rem;
+	background-color: transparent;
+	background-image:
+		/* paper teeth pointing down, gaps reveal the ink band */
+		conic-gradient(from 135deg at 50% 0%, var(--swi-paper, #ffffff) 0 90deg, transparent 90deg),
+		/* ink band the tear sits on */
+		linear-gradient(var(--cr-hard-color, #241c4a), var(--cr-hard-color, #241c4a)),
+		/* ruled lines */
+		repeating-linear-gradient(180deg, transparent 0, transparent calc(1.55em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) calc(1.55em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) 1.55em),
+		/* paper */
+		linear-gradient(var(--swi-paper, #ffffff), var(--swi-paper, #ffffff));
+	background-size: 16px 9px, 100% 9px, 100% calc(100% - 9px), 100% calc(100% - 9px);
+	background-position: bottom left, bottom left, top left, top left;
+	background-repeat: repeat-x, no-repeat, no-repeat, no-repeat;
+}
+.cr-stream-page .pk-card.k-article  { --swi-paper: #ffffff; }
+.cr-stream-page .pk-card.k-reply    { --swi-paper: #eaf4fa; }
+.cr-stream-page .pk-card.k-quote    { --swi-paper: #f0eef8; }
+.cr-stream-page .pk-card.k-issue    { --swi-paper: #fdf3e7; }
+.cr-stream-page .pk-card.k-favorite { --swi-paper: #fef7e0; }
+.cr-stream-page .pk-card.k-follow   { --swi-paper: #ffffff; }
+.cr-stream-page .pk-card.k-like     { --swi-paper: #ffffff; }
+.cr-stream-page .pk-card.k-repost   { --swi-paper: #ffffff; }
+.cr-stream-page .pk-card.k-tag      { --swi-paper: #e7f1f4; }
