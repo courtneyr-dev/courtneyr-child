@@ -1909,3 +1909,8 @@ body .pk-card {
 .cr-stream-page .pk-card.k-itinerary .pk-badge,
 .cr-stream-page .pk-card.k-video .pk-badge,
 .cr-stream-page .kind-photo .pk-card .pk-badge { display: none; }
+
+/* ---- v0.5.239: restore the no-touching gutter ----
+   The 0.5.237 padding fix trimmed vertical margins too far; round
+   stickers were bleeding onto the card below. */
+.cr-stream-page .wp-block-post-template > li { margin: 0 0 2.75rem; }
