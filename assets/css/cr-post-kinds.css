@@ -1262,3 +1262,129 @@ body .pk-card {
 .cr-stream-page .k-mood .pk-note,
 .cr-stream-page .k-mood .pk-excerpt,
 .cr-stream-page .k-mood .pk-meta { display: none; }
+
+/* ============================================================
+   v0.5.230 — the dropped threads, shipped:
+   photo polaroid w/ anchor corners; reply quote rail + TO-author
+   header; play dashed art inset; event kicker; hand-drawn margin
+   doodles + glyphs on the stream collage.
+   ============================================================ */
+
+/* PHOTO: polaroid pasted with violet anchor corners. */
+.cr-stream-page .pk-card.k-photo,
+.cr-stream-page .wp-block-post-template > li.kind-photo .pk-card {
+	background:
+		linear-gradient(135deg, #241c4a 12px, transparent 12px) top left,
+		linear-gradient(225deg, #241c4a 12px, transparent 12px) top right,
+		linear-gradient(45deg, #241c4a 12px, transparent 12px) bottom left,
+		linear-gradient(315deg, #241c4a 12px, transparent 12px) bottom right,
+		#fbfaf5;
+	background-repeat: no-repeat;
+	border: 0;
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a);
+	padding: 1.1rem 1.1rem 1rem;
+	width: 94%;
+}
+.cr-stream-page .kind-photo .pk-card .pk-media,
+.cr-stream-page .kind-photo .pk-card .pk-embed,
+.cr-stream-page .kind-photo .pk-card figure.wp-block-image {
+	order: -1;
+	margin: 0 0 0.6rem;
+}
+.cr-stream-page .kind-photo .pk-card img,
+.cr-stream-page .kind-photo .pk-card figure.wp-block-image img {
+	width: 100%;
+	aspect-ratio: 4 / 5;
+	object-fit: cover;
+	border: 2px dashed rgba(36, 28, 74, 0.45);
+	box-shadow: none;
+	display: block;
+}
+.cr-stream-page .kind-photo .pk-card .pk-title,
+.cr-stream-page .kind-photo .pk-card .pk-excerpt {
+	font-family: var(--cr-font-display, cursive);
+	font-size: 0.9rem;
+	color: #241c4a;
+	padding: 0;
+}
+.cr-stream-page .kind-photo .pk-card .pk-kindlabel { display: none; }
+.cr-stream-page .kind-photo .pk-card .pk-badge { position: absolute; bottom: 0.9rem; left: 1.1rem; top: auto; }
+
+/* REPLY: "to @author" header + railed clipped quote. */
+.cr-stream-page .k-reply .p-author {
+	display: block;
+	font-family: var(--cr-font-accent, serif);
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--cr-cerulean, #126782);
+	margin: 0 0 0.5rem;
+}
+.cr-stream-page .k-reply .p-author::before { content: "💬 to "; }
+.cr-stream-page .k-reply .pk-note,
+.cr-stream-page .k-reply .pk-sub {
+	display: block;
+	background: var(--cr-surface-soft, #f4f0e4);
+	border-left: 4px solid var(--cr-type-reply, #126782);
+	padding: 0.6rem 0.75rem;
+	margin: 0 0 0.6rem;
+	font-family: var(--cr-font-accent, serif);
+	font-style: italic;
+	font-size: 0.85rem;
+	color: var(--cr-ink, #241c4a);
+}
+.cr-stream-page .k-reply .pk-title { font-size: 0; padding: 0; }
+
+/* PLAY: dashed inset on the box art, like the mock. */
+.cr-stream-page .k-play .pk-media img { outline: 2px dashed rgba(251, 250, 245, 0.45); outline-offset: -8px; }
+
+/* EVENT: "upcoming" kicker from the kind label. */
+.cr-stream-page .k-event .pk-kindlabel {
+	display: block;
+	position: static;
+	width: auto;
+	height: auto;
+	margin: 0 0 0.3rem;
+	padding: 0;
+	background: none;
+	border: 0;
+	box-shadow: none;
+	transform: none;
+	color: var(--cr-sky-blue, #8ecae6);
+	font-size: 0.62rem;
+	letter-spacing: 0.18em;
+	text-align: center;
+}
+
+/* MARGIN DOODLES: hand-drawn squiggle arrow, heart, wave, sparkles,
+   dotted circle — scattered in the collage margins, aria-invisible. */
+.cr-stream-page .cr-page__content {
+	position: relative;
+}
+.cr-stream-page .cr-page__content::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+	background-image:
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 88 50' fill='none'%3E%3Cpath d='M4 40 C 14 8, 26 6, 32 22 C 36 33, 28 40, 22 34 C 16 28, 26 12, 44 12 C 60 12, 66 26, 60 36 C 56 43, 46 40, 48 30' stroke='%23126782' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M62 30 l 14 6 m -3 -9 l 3 9 l -9 2' stroke='%23126782' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60' fill='none'%3E%3Cpath d='M30 46 C 12 34, 8 20, 16 14 C 22 9, 29 13, 30 19 C 31 13, 38 9, 44 14 C 52 20, 48 34, 30 46 Z' stroke='%23fb8500' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 34' fill='none'%3E%3Cpath d='M4 26 c 10 -14, 16 -14, 20 -2 c 3 9, 12 9, 16 -2 c 4 -11, 12 -11, 16 0 c 3 9, 12 9, 18 -4' stroke='%23fb8500' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23126782' d='M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fb8500' d='M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none'%3E%3Ccircle cx='20' cy='20' r='16' stroke='%23b85f00' stroke-width='2.5' stroke-dasharray='4 5'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-size: 5rem 3rem, 3.5rem 3.5rem, 5rem 2rem, 1.3rem 1.3rem, 1rem 1rem, 2.2rem 2.2rem;
+	background-position:
+		left 0.5% top 7rem,
+		right 1% top 34rem,
+		left 1% top 58rem,
+		right 2.5% top 12rem,
+		left 3% top 40rem,
+		right 1.5% bottom 10rem;
+	opacity: 0.65;
+}
+.cr-stream-page .wp-block-post-template,
+.cr-stream-page .cr-page__content > .wp-block-query { position: relative; z-index: 1; }
