@@ -1034,3 +1034,7 @@ body .pk-card {
 		linear-gradient(90deg, #c9b06a, #e6d194 35%, #c9b06a 70%, #b89d55) left 0.9rem top 84% / calc(100% - 1.8rem) 9% no-repeat;
 	background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
 }
+
+/* ---- v0.5.224: drop the masthead postmark + airmail stripe ---- */
+.cr-stream-page .cr-page__header::before,
+.cr-stream-page .cr-page__header::after { content: none; display: none; }
