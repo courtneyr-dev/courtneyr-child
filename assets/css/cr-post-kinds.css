@@ -565,6 +565,7 @@ body .pk-card {
 /* ---- v0.5.215: close the gap to Stream.dc.html (Courtney's compare) ---- */
 
 /* The collage needs the full 72rem stage, not the page's prose column. */
+.cr-stream-page .cr-page__content,
 .cr-stream-page .cr-page__content > .wp-block-query {
 	max-width: min(72rem, 94vw) !important;
 	margin-inline: auto;
