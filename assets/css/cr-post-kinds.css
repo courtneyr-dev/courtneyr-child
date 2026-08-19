@@ -613,3 +613,27 @@ body .pk-card {
 }
 
 /* Cassette fallback fires ONLY when there is neither image nor embed. */
+
+/* ---- v0.5.218: readability + empty-item fixes ---- */
+
+/* Body text on the violet boxes must be ivory, not cerulean. */
+.cr-stream-page .k-watch .pk-excerpt,
+.cr-stream-page .k-listen .pk-excerpt,
+.cr-stream-page .k-read .pk-excerpt,
+.cr-stream-page .k-jam .pk-excerpt,
+.cr-stream-page .k-play .pk-excerpt,
+.cr-stream-page .k-review .pk-excerpt,
+.cr-stream-page .k-wish .pk-excerpt,
+.cr-stream-page .k-acquisition .pk-excerpt,
+.cr-stream-page .k-event .pk-excerpt { color: rgba(251, 250, 245, 0.88); }
+
+/* Kill every underline-ish treatment on stream card titles. */
+.cr-stream-page .pk-card .pk-title a {
+	text-decoration: none !important;
+	border-bottom: 0 !important;
+	box-shadow: none !important;
+}
+
+/* A stream item that produced no card and no content renders as a
+   stray sliver — hide it entirely. */
+.cr-stream-page .wp-block-post-template > li:not(:has(article)):not(:has(p)):not(:has(figure)):not(:has(img)) { display: none; }
