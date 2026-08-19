@@ -259,6 +259,23 @@ function enqueue_baseline(): void {
 			line-height: 1.55;
 		}'
 	);
+
+	/*
+	 * V0.5.210 — Atmosphere reactions facepile: quiet labels + avatar ring.
+	 * Same pipeline problem as the format tints above: the scoped
+	 * .reaction-label override exists in components.css but reaches the
+	 * browser with declarations pruned (Used CSS / host minify). Inline
+	 * copy sidesteps the pipeline and always wins. Without it the
+	 * "6 likes"/"6 reposts" buttons inherit the theme.json hard button
+	 * shadow, which reads far too heavy beside a row of avatars.
+	 */
+	wp_add_inline_style(
+		'courtneyr-components',
+		'.wp-block-atmosphere-reactions .reaction-label { box-shadow: none !important; background: none !important; border: 0 !important; text-transform: none !important; letter-spacing: normal !important; font-family: var(--cr-font-body, inherit); font-weight: 600; color: var(--cr-ink, #241c4a); padding: 0.25rem 0; }
+		.wp-block-atmosphere-reactions .reaction-label:hover { color: var(--cr-prussian-blue, #023047); text-decoration: underline; }
+		.wp-block-atmosphere-reactions .reaction-label:focus-visible { outline: 3px solid var(--cr-selective-yellow, #ffb703); outline-offset: 2px; box-shadow: none !important; }
+		.wp-block-atmosphere-reactions .reaction-avatar { border: 2px solid var(--cr-printer-ivory, #fbfaf5); box-shadow: 0 1px 2px rgba(36, 28, 74, 0.25); }'
+	);
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_baseline' );
 
