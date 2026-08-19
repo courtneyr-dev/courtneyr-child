@@ -2419,3 +2419,42 @@ body .pk-card {
 }
 .cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-sub:not(.pk-stream-date),
 .cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-note { display: none; }
+
+/* ---- v0.5.255: VHS realism pass ----
+   True 1.86:1 face, transparent windows showing glossy wound tape
+   (big mass left, spool right), two-tier flap, and a size split:
+   audio cassettes shrink to 82% so the VHS reads bigger. */
+.cr-stream-page .pk-card.k-audio,
+.cr-stream-page .pk-card.k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) {
+	width: 82%;
+	margin-inline: auto;
+}
+.cr-stream-page .pk-card.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) {
+	aspect-ratio: 1.86 / 1;
+	border-radius: 8px;
+	background:
+		/* left reel: sheen ring over big tape mass + white hub */
+		radial-gradient(circle 2.7rem at 16% 53%, transparent 0 44%, rgba(255, 255, 255, 0.09) 45% 58%, transparent 59%),
+		radial-gradient(circle 2.7rem at 16% 53%, #efece6 0 16%, #55504a 17% 21%, #17151d 22% 94%, transparent 95%),
+		/* right reel: prominent spool, thin tape */
+		radial-gradient(circle 2.2rem at 84% 53%, #efece6 0 30%, #55504a 31% 36%, #23202a 37% 72%, transparent 73%),
+		/* window glass streaks */
+		linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.07) 38%, transparent 48%) left 3% top 30% / 26% 46% no-repeat,
+		linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.07) 38%, transparent 48%) right 3% top 30% / 26% 46% no-repeat,
+		/* window panes: visibly translucent */
+		linear-gradient(rgba(168, 164, 178, 0.26), rgba(140, 136, 150, 0.16)) left 3% top 30% / 26% 46% no-repeat,
+		linear-gradient(rgba(168, 164, 178, 0.26), rgba(140, 136, 150, 0.16)) right 3% top 30% / 26% 46% no-repeat,
+		/* two-tier flap: text tier + ridged tier */
+		linear-gradient(#0c0b0f, #0c0b0f) top / 100% 13% no-repeat,
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 4px) left 0 top 13% / 100% 9% no-repeat,
+		/* shell ridges */
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 5px),
+		#17151b;
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-body {
+	left: 32%;
+	right: 32%;
+	top: 30%;
+	height: 46%;
+	border-radius: 10px;
+}
