@@ -2186,3 +2186,18 @@ body .pk-card {
 	margin: 0;
 }
 .cr-stream-page .k-mood .pk-meta > .dt-published { display: block; }
+
+/* ---- v0.5.249: the pin word is the note element ----
+   mood-card doesn't render its mood attribute; the note carries the
+   word instead. */
+.cr-stream-page .k-mood .pk-mood__note {
+	display: block;
+	margin: 0;
+	font-family: var(--cr-font-accent, "Roboto Slab", serif);
+	font-weight: 900;
+	font-size: 0.98rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #ffb703;
+	text-shadow: 1.5px 1.5px 0 #023047;
+}
