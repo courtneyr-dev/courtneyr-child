@@ -2618,9 +2618,9 @@ body .pk-card {
 		/* RIGHT — glass streak over everything */
 		linear-gradient(115deg, transparent 26%, rgba(255, 255, 255, 0.28) 34%, transparent 46%) right 3% top 26% / 27% 52% no-repeat,
 		/* RIGHT — spool on white (paints over the strip's top) */
-		radial-gradient(circle closest-side at 46% 52%, #ffffff 0 24%, #8a857e 25% 29%, #35313c 30% 44%, transparent 45%) right 3% top 26% / 27% 52% no-repeat,
+		radial-gradient(circle closest-side at 46% 52%, #ffffff 0 26%, #8a857e 27% 31%, #35313c 32% 40%, transparent 41%) right 3% top 26% / 27% 52% no-repeat,
 		/* RIGHT — film strip runs from under the spool to the window base */
-		linear-gradient(180deg, #35313c 0%, #221f2a 100%) right 12% top 50% / 3.5% 28% no-repeat,
+		linear-gradient(180deg, #35313c 0%, #221f2a 100%) right 12.3% top 50% / 3% 28% no-repeat,
 		/* RIGHT — near-white pane */
 		linear-gradient(rgba(238, 235, 242, 0.92), rgba(214, 210, 220, 0.85)) right 3% top 26% / 27% 52% no-repeat,
 		/* flap tiers */
