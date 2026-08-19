@@ -2224,3 +2224,15 @@ body .pk-card {
 	z-index: 4;
 	pointer-events: none;
 }
+
+/* ---- v0.5.251: pale palette papers for the clipping look-alikes ----
+   Very pale tints of the brand palette so each paper kind reads
+   distinct while ink text stays AAA. Article keeps true white as the
+   calm editorial baseline. */
+.cr-stream-page .pk-card.k-article  { background-color: #ffffff; }
+.cr-stream-page .pk-card.k-reply    { background-color: #eaf4fa; } /* pale sky blue */
+.cr-stream-page .pk-card.k-quote    { background-color: #f0eef8; } /* pale periwinkle */
+.cr-stream-page .pk-card.k-issue    { background-color: #fdf3e7; } /* pale light orange */
+.cr-stream-page .pk-card.k-favorite { background-color: #fef7e0; } /* pale selective yellow */
+.cr-stream-page .pk-card.k-craft    { background-color: #eaf5f2; } /* pale blue green */
+.cr-stream-page .pk-card.k-tag      { background-color: #e7f1f4; } /* pale cerulean */
