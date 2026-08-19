@@ -2062,7 +2062,7 @@ body .pk-card {
 	border-radius: 50%;
 	background: radial-gradient(circle at 32% 26%, #3d2f6e 0%, #241c4a 55%);
 	border: 3px solid #241c4a;
-	box-shadow: 0 0 0 4px #fbfaf5, 0 0 0 6px #241c4a, 0 5px 12px -3px rgba(36, 28, 74, 0.5);
+	box-shadow: 0 0 0 4px #fbfaf5, 0 0 0 6px #241c4a, 4px 4px 0 6px #241c4a;
 	overflow: hidden;
 	text-align: center;
 	transform: rotate(-1.5deg);
@@ -2511,7 +2511,7 @@ body .pk-card {
 	padding: 1rem;
 	border-radius: 50%;
 	border: 3px solid #241c4a;
-	box-shadow: 0 0 0 4px #fbfaf5, 0 0 0 6px #241c4a, 0 5px 12px -3px rgba(36, 28, 74, 0.5);
+	box-shadow: 0 0 0 4px #fbfaf5, 0 0 0 6px #241c4a, 4px 4px 0 6px #241c4a;
 	overflow: hidden;
 	text-align: center;
 	position: relative;
