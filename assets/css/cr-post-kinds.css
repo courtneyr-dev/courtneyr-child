@@ -2043,3 +2043,104 @@ body .pk-card {
 
 /* ---- v0.5.246: eat polaroid on white stock, not page ivory ---- */
 .cr-stream-page .pk-card.k-eat { background: #ffffff; }
+
+/* ============================================================
+   v0.5.247 — mood as an enamel pin (Courtney's revision).
+   Raw hexes deliberate: a physical pin looks identical in dark
+   mode. Face on the card, gloss + halftone on its pseudos, metal
+   clasp on the li's pseudo behind the card.
+   ============================================================ */
+.cr-stream-page .pk-card.k-mood {
+	display: inline-grid;
+	justify-items: center;
+	align-content: center;
+	gap: 0.3rem;
+	width: 9.5rem;
+	aspect-ratio: 1 / 1;
+	margin-inline: auto;
+	padding: 1rem;
+	border-radius: 50%;
+	background: radial-gradient(circle at 32% 26%, #3d2f6e 0%, #241c4a 55%);
+	border: 3px solid #241c4a;
+	box-shadow: 0 0 0 4px #fbfaf5, 0 0 0 6px #241c4a, 0 5px 12px -3px rgba(36, 28, 74, 0.5);
+	overflow: hidden;
+	text-align: center;
+	transform: rotate(-1.5deg);
+}
+.cr-stream-page .pk-card.k-mood::before {
+	content: "";
+	position: absolute;
+	top: 7%;
+	left: 14%;
+	width: 38%;
+	height: 20%;
+	border-radius: 50%;
+	border: 0;
+	background: rgba(251, 250, 245, 0.35);
+	transform: rotate(-24deg);
+	filter: blur(2px);
+	inset: auto;
+	top: 7%;
+	left: 14%;
+}
+.cr-stream-page .pk-card.k-mood::after {
+	content: "";
+	position: absolute;
+	bottom: -6%;
+	right: -8%;
+	width: 60%;
+	height: 55%;
+	border-radius: 50%;
+	background-image: radial-gradient(rgba(251, 250, 245, 0.28) 1.5px, transparent 2px);
+	background-size: 8px 8px;
+}
+.cr-stream-page .k-mood .pk-mood__emoji {
+	font-size: 2.1rem;
+	line-height: 1;
+	filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.4));
+	display: block;
+}
+.cr-stream-page .k-mood .pk-title,
+.cr-stream-page .k-mood .pk-mood .p-name {
+	font-family: var(--cr-font-accent, "Roboto Slab", serif);
+	font-weight: 900;
+	font-size: 0.98rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #ffb703;
+	text-shadow: 1.5px 1.5px 0 #023047;
+	padding: 0;
+}
+.cr-stream-page .k-mood .pk-title a { color: inherit; }
+.cr-stream-page .k-mood .pk-stream-date,
+.cr-stream-page .k-mood .pk-meta .dt-published {
+	display: block;
+	font-family: var(--cr-font-accent, "Roboto Slab", serif);
+	font-size: 0.6rem;
+	font-weight: 700;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: #8ecae6;
+	padding: 0;
+}
+.cr-stream-page .k-mood .pk-mood__note,
+.cr-stream-page .k-mood .pk-kindlabel,
+.cr-stream-page .k-mood .pk-badge { display: none; }
+/* metal clasp peeking from behind the pin */
+.cr-stream-page .wp-block-post-template > li.kind-mood { position: relative; }
+.cr-stream-page .wp-block-post-template > li.kind-mood::before {
+	content: "";
+	position: absolute;
+	top: 0.35rem;
+	left: 50%;
+	margin-left: -1.6rem;
+	width: 3.2rem;
+	height: 0.85rem;
+	border: 2.5px solid #9a958a;
+	border-radius: 999px;
+	background: linear-gradient(180deg, #d8d3c8, #a8a398);
+	box-shadow: 0 1px 2px rgba(36, 28, 74, 0.4);
+	transform: rotate(-4deg);
+	z-index: 0;
+}
+.cr-stream-page .wp-block-post-template > li.kind-mood .pk-card { position: relative; z-index: 1; }
