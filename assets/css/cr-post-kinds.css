@@ -1895,3 +1895,17 @@ body .pk-card {
 
 /* 6. Photo polaroid: one caption voice (excerpt), not title + excerpt. */
 .cr-stream-page .kind-photo .pk-card .pk-title { display: none; }
+
+/* ---- v0.5.238: no icons over words ----
+   Paper-family cards lose their badge circles entirely — the
+   small-caps kind label names the kind; pushpins/tape do the holding. */
+.cr-stream-page .pk-card.k-bookmark .pk-badge,
+.cr-stream-page .pk-card.k-checkin .pk-badge,
+.cr-stream-page .pk-card.k-recipe .pk-badge,
+.cr-stream-page .pk-card.k-exercise .pk-badge,
+.cr-stream-page .pk-card.k-craft .pk-badge,
+.cr-stream-page .pk-card.k-rsvp .pk-badge,
+.cr-stream-page .pk-card.k-trip .pk-badge,
+.cr-stream-page .pk-card.k-itinerary .pk-badge,
+.cr-stream-page .pk-card.k-video .pk-badge,
+.cr-stream-page .kind-photo .pk-card .pk-badge { display: none; }
