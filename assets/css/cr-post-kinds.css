@@ -2201,3 +2201,26 @@ body .pk-card {
 	color: #ffb703;
 	text-shadow: 1.5px 1.5px 0 #023047;
 }
+
+/* ---- v0.5.250: washi tape actually tapes the box down ----
+   The card's overflow:hidden clips anything crossing its edge, so the
+   tape lives on the list item: laid 45° across the top-right corner,
+   half on the box, both ends on the paper. */
+.cr-stream-page .pk-card.k-read::after,
+.cr-stream-page .pk-card.k-acquisition::after { content: none; }
+.cr-stream-page .wp-block-post-template > li.kind-read,
+.cr-stream-page .wp-block-post-template > li.kind-acquisition { position: relative; }
+.cr-stream-page .wp-block-post-template > li.kind-read::after,
+.cr-stream-page .wp-block-post-template > li.kind-acquisition::after {
+	content: "";
+	position: absolute;
+	top: 0.45rem;
+	right: 0.15rem;
+	width: 5rem;
+	height: 1.3rem;
+	transform: rotate(45deg);
+	background: repeating-linear-gradient(45deg, rgba(142, 202, 230, 0.8) 0 8px, rgba(251, 250, 245, 0.8) 8px 16px);
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.18);
+	z-index: 4;
+	pointer-events: none;
+}
