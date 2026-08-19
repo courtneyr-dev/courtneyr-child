@@ -2494,3 +2494,109 @@ body .pk-card {
 	top: 26%;
 	height: 52%;
 }
+
+/* ---- v0.5.257: sleep + weather join the enamel pin family ----
+   Same construction as the mood pin (collar, rim, gloss, halftone,
+   clasp); faces in prussian night (sleep) and cerulean (weather). */
+.cr-stream-page .pk-card.k-sleep,
+.cr-stream-page .pk-card.k-weather {
+	display: grid;
+	justify-items: center;
+	align-content: center;
+	gap: 0.25rem;
+	width: 9.5rem;
+	aspect-ratio: 1 / 1;
+	height: auto;
+	margin-inline: auto;
+	padding: 1rem;
+	border-radius: 50%;
+	border: 3px solid #241c4a;
+	box-shadow: 0 0 0 4px #fbfaf5, 0 0 0 6px #241c4a, 0 5px 12px -3px rgba(36, 28, 74, 0.5);
+	overflow: hidden;
+	text-align: center;
+	position: relative;
+}
+.cr-stream-page .pk-card.k-sleep { background: radial-gradient(circle at 32% 26%, #0b4a63 0%, #023047 55%); transform: rotate(1.5deg); }
+.cr-stream-page .pk-card.k-weather { background: radial-gradient(circle at 32% 26%, #1a7f9e 0%, #126782 55%); transform: rotate(-1.5deg); }
+.cr-stream-page .pk-card.k-sleep::before,
+.cr-stream-page .pk-card.k-weather::before {
+	content: "";
+	position: absolute;
+	inset: auto;
+	top: 7%;
+	left: 14%;
+	width: 38%;
+	height: 20%;
+	border-radius: 50%;
+	border: 0;
+	background: rgba(251, 250, 245, 0.32);
+	transform: rotate(-24deg);
+	filter: blur(2px);
+}
+.cr-stream-page .pk-card.k-sleep::after,
+.cr-stream-page .pk-card.k-weather::after {
+	content: "";
+	position: absolute;
+	inset: auto;
+	bottom: -6%;
+	right: -8%;
+	top: auto;
+	left: auto;
+	width: 60%;
+	height: 55%;
+	border: 0;
+	border-radius: 50%;
+	background-image: radial-gradient(rgba(251, 250, 245, 0.26) 1.5px, transparent 2px);
+	background-size: 8px 8px;
+}
+.cr-stream-page .k-sleep .pk-title,
+.cr-stream-page .k-weather .pk-title {
+	font-family: var(--cr-font-accent, "Roboto Slab", serif);
+	font-weight: 900;
+	font-size: 0.9rem;
+	line-height: 1.2;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	padding: 0;
+	text-shadow: 1.5px 1.5px 0 rgba(2, 48, 71, 0.9);
+}
+.cr-stream-page .k-sleep .pk-title, .cr-stream-page .k-sleep .pk-title a { color: #ffb703; }
+.cr-stream-page .k-weather .pk-title, .cr-stream-page .k-weather .pk-title a { color: #fbfaf5; }
+.cr-stream-page .k-sleep .pk-excerpt,
+.cr-stream-page .k-weather .pk-excerpt { display: none; }
+.cr-stream-page .k-sleep .pk-stream-date,
+.cr-stream-page .k-weather .pk-stream-date { display: block; margin: 0; padding: 0; }
+.cr-stream-page .k-sleep .pk-stream-date time,
+.cr-stream-page .k-weather .pk-stream-date time {
+	border: 0;
+	padding: 0;
+	font-size: 0.6rem;
+	font-weight: 700;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: #8ecae6;
+}
+.cr-stream-page .k-weather .pk-stream-date time { color: #d9eef5; }
+.cr-stream-page .k-sleep .pk-badge, .cr-stream-page .k-weather .pk-badge,
+.cr-stream-page .k-sleep .pk-kindlabel, .cr-stream-page .k-weather .pk-kindlabel,
+.cr-stream-page .k-sleep .pk-meta, .cr-stream-page .k-weather .pk-meta { display: none; }
+.cr-stream-page .wp-block-post-template > li.kind-sleep,
+.cr-stream-page .wp-block-post-template > li.kind-weather { position: relative; }
+.cr-stream-page .wp-block-post-template > li.kind-sleep::before,
+.cr-stream-page .wp-block-post-template > li.kind-weather::before {
+	content: "";
+	position: absolute;
+	top: 0.35rem;
+	left: 50%;
+	margin-left: -1.6rem;
+	width: 3.2rem;
+	height: 0.85rem;
+	border: 2.5px solid #9a958a;
+	border-radius: 999px;
+	background: linear-gradient(180deg, #d8d3c8, #a8a398);
+	box-shadow: 0 1px 2px rgba(36, 28, 74, 0.4);
+	transform: rotate(-4deg);
+	z-index: 0;
+}
+.cr-stream-page .wp-block-post-template > li.kind-sleep .pk-card,
+.cr-stream-page .wp-block-post-template > li.kind-weather .pk-card { position: relative; z-index: 1; }
