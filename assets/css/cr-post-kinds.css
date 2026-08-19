@@ -1490,3 +1490,59 @@ body .pk-card {
    printed the post's publish timestamp in the meta row. Hide the
    duplicate visually; dt-published stays in the markup for parsers. */
 .cr-stream-page .pk-card:has(.pk-stream-date) .pk-meta > .dt-published { display: none; }
+
+/* ---- v0.5.234: washi tape, marker, highlighter ---- */
+
+/* Highlighter: the jam title gets its selective-yellow swipe. */
+.cr-stream-page .k-jam .pk-title a {
+	background: linear-gradient(100deg, rgba(255, 183, 3, 0.15) 0%, rgba(255, 183, 3, 0.92) 4%, rgba(255, 183, 3, 0.92) 96%, rgba(255, 183, 3, 0.15) 100%);
+	color: var(--cr-prussian-blue, #023047);
+	padding: 0.05em 0.35em;
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+}
+
+/* Washi tape holding the collectibles down. Plain tape on the eat
+   polaroid + recipe card; striped washi on read + acquisition boxes. */
+.cr-stream-page .pk-card.k-eat::after,
+.cr-stream-page .pk-card.k-recipe::after {
+	content: "";
+	position: absolute;
+	top: -0.6rem;
+	left: 50%;
+	width: 4.5rem;
+	height: 1.3rem;
+	transform: translateX(-50%) rotate(-4deg);
+	background: rgba(243, 229, 184, 0.9);
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.18);
+	z-index: 3;
+	pointer-events: none;
+	border: 0;
+}
+.cr-stream-page .pk-card.k-recipe::after { left: 18%; transform: rotate(-8deg); }
+.cr-stream-page .pk-card.k-read::after,
+.cr-stream-page .pk-card.k-acquisition::after {
+	content: "";
+	position: absolute;
+	top: -0.55rem;
+	right: 1.2rem;
+	width: 4.2rem;
+	height: 1.25rem;
+	transform: rotate(6deg);
+	background: repeating-linear-gradient(45deg, rgba(142, 202, 230, 0.75) 0 8px, rgba(251, 250, 245, 0.75) 8px 16px);
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.18);
+	z-index: 3;
+	pointer-events: none;
+}
+
+/* Marker: an ut-orange stripe closes the collage, like a section rule. */
+.cr-stream-page .cr-page__content > .wp-block-query::after {
+	content: "";
+	display: block;
+	width: 6rem;
+	height: 0.5rem;
+	margin: 2.5rem auto 0;
+	background: var(--cr-ut-orange, #fb8500);
+	border-radius: 2px;
+	transform: rotate(-1.2deg);
+}
