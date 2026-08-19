@@ -2600,3 +2600,31 @@ body .pk-card {
 }
 .cr-stream-page .wp-block-post-template > li.kind-sleep .pk-card,
 .cr-stream-page .wp-block-post-template > li.kind-weather .pk-card { position: relative; z-index: 1; }
+
+/* ---- v0.5.258: VHS windows per the photo ----
+   Left window: wound tape fills the whole pane — concentric grooves,
+   sheen sweep, spoked hub. Right window: near-white backing with the
+   spool and film strip on it. */
+.cr-stream-page .pk-card.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) {
+	background:
+		/* LEFT — glass streak */
+		linear-gradient(115deg, transparent 26%, rgba(255, 255, 255, 0.14) 34%, transparent 46%) left 3% top 26% / 27% 52% no-repeat,
+		/* LEFT — spoked white hub */
+		radial-gradient(circle closest-side at 48% 52%, #f4f1ea 0 15%, #6a6560 16% 19%, transparent 20%) left 3% top 26% / 27% 52% no-repeat,
+		/* LEFT — sheen sweep */
+		conic-gradient(from 25deg at 48% 52%, rgba(255, 255, 255, 0.18) 0 38deg, transparent 38deg 150deg, rgba(255, 255, 255, 0.12) 150deg 190deg, transparent 190deg 360deg) left 3% top 26% / 27% 52% no-repeat,
+		/* LEFT — tape grooves filling the pane */
+		repeating-radial-gradient(circle at 48% 52%, #141218 0 2px, #201d26 2px 4px) left 3% top 26% / 27% 52% no-repeat,
+		/* RIGHT — film strip */
+		linear-gradient(90deg, transparent 76%, rgba(40, 37, 48, 0.5) 80% 92%, transparent 95%) right 3% top 26% / 27% 52% no-repeat,
+		/* RIGHT — spool on white */
+		radial-gradient(circle closest-side at 46% 52%, #ffffff 0 24%, #8a857e 25% 29%, #35313c 30% 44%, transparent 45%) right 3% top 26% / 27% 52% no-repeat,
+		/* RIGHT — near-white pane */
+		linear-gradient(rgba(238, 235, 242, 0.92), rgba(214, 210, 220, 0.85)) right 3% top 26% / 27% 52% no-repeat,
+		/* flap tiers */
+		linear-gradient(#0c0b0f, #0c0b0f) top / 100% 13% no-repeat,
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 4px) left 0 top 13% / 100% 9% no-repeat,
+		/* shell ridges */
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 5px),
+		#17151b;
+}
