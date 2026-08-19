@@ -1914,3 +1914,51 @@ body .pk-card {
    The 0.5.237 padding fix trimmed vertical margins too far; round
    stickers were bleeding onto the card below. */
 .cr-stream-page .wp-block-post-template > li { margin: 0 0 2.75rem; }
+
+/* ---- v0.5.240: rsvp ticket matched to the mock ----
+   Landscape strip: title + event line + №, die-cut notches at the
+   perforation (mask + drop-shadow), bigger stamp. */
+.cr-stream-page .pk-card.k-rsvp {
+	box-shadow: none;
+	filter: drop-shadow(4px 4px 0 var(--cr-hard-color, #241c4a));
+	padding: 1.1rem 6.6rem 1.1rem 1.15rem;
+	-webkit-mask:
+		radial-gradient(circle 11px at calc(100% - 5.6rem) 0, transparent 98%, #000 100%) top / 100% 51% no-repeat,
+		radial-gradient(circle 11px at calc(100% - 5.6rem) 100%, transparent 98%, #000 100%) bottom / 100% 51% no-repeat;
+	mask:
+		radial-gradient(circle 11px at calc(100% - 5.6rem) 0, transparent 98%, #000 100%) top / 100% 51% no-repeat,
+		radial-gradient(circle 11px at calc(100% - 5.6rem) 100%, transparent 98%, #000 100%) bottom / 100% 51% no-repeat;
+}
+.cr-stream-page .k-rsvp .pk-kindlabel,
+.cr-stream-page .k-rsvp .pk-stream-date,
+.cr-stream-page .k-rsvp .pk-note { display: none; }
+.cr-stream-page .k-rsvp .pk-event .pk-sub {
+	font-family: var(--cr-font-accent, serif);
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--cr-cerulean, #126782);
+	padding: 0;
+	margin: 0.35rem 0 0;
+}
+.cr-stream-page .k-rsvp .pk-event .pk-dot { display: none; }
+.cr-stream-page .k-rsvp .pk-chip.p-rsvp {
+	font-size: 1rem;
+	padding: 0.4rem 0.7rem;
+	right: 1rem;
+}
+.cr-stream-page .cr-page__content { counter-reset: swi-ticket 216; }
+.cr-stream-page .pk-card.k-rsvp { counter-increment: swi-ticket; }
+.cr-stream-page .k-rsvp .pk-meta {
+	padding: 0;
+	margin: 0.5rem 0 0;
+}
+.cr-stream-page .k-rsvp .pk-meta time { display: none; }
+.cr-stream-page .k-rsvp .pk-meta::before {
+	content: "№ 000" counter(swi-ticket);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: 0.7rem;
+	letter-spacing: 0.08em;
+	color: var(--cr-ink-muted, #126782);
+}
