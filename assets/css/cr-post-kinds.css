@@ -2000,3 +2000,26 @@ body .pk-card {
 		#ffffff;
 	background-repeat: no-repeat;
 }
+
+/* ---- v0.5.244: cassette text never hides under the window ----
+   Year/review lines compact into the label strip above the hub
+   window: one ellipsized line each, small, in label ink. */
+.cr-stream-page .k-audio .pk-sub:not(.pk-stream-date),
+.cr-stream-page .k-audio .pk-note,
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-sub:not(.pk-stream-date),
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-note,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-sub:not(.pk-stream-date),
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-note {
+	display: block;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-size: 0.58rem;
+	line-height: 1.5;
+	margin: 0.05rem 2.6rem 0 0;
+	padding: 0;
+	color: #3d2f6e;
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-note p,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-note p,
+.cr-stream-page .k-audio .pk-note p { display: inline; margin: 0; font-size: inherit; }
