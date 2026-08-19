@@ -1038,3 +1038,32 @@ body .pk-card {
 /* ---- v0.5.224: drop the masthead postmark + airmail stripe ---- */
 .cr-stream-page .cr-page__header::before,
 .cr-stream-page .cr-page__header::after { content: none; display: none; }
+
+/* ---- v0.5.225: cassette hub wheels + label fit ---- */
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed))::after,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed))::after {
+	height: 30%;
+	background:
+		/* left hub teeth notches */
+		radial-gradient(circle 0.09rem at calc(1.55rem + 0.5rem) 50%, #8f887a 98%, transparent),
+		radial-gradient(circle 0.09rem at calc(1.55rem - 0.5rem) 50%, #8f887a 98%, transparent),
+		radial-gradient(circle 0.09rem at 1.55rem calc(50% + 0.5rem), #8f887a 98%, transparent),
+		radial-gradient(circle 0.09rem at 1.55rem calc(50% - 0.5rem), #8f887a 98%, transparent),
+		/* right hub teeth notches */
+		radial-gradient(circle 0.09rem at calc(100% - 1.55rem + 0.5rem) 50%, #8f887a 98%, transparent),
+		radial-gradient(circle 0.09rem at calc(100% - 1.55rem - 0.5rem) 50%, #8f887a 98%, transparent),
+		radial-gradient(circle 0.09rem at calc(100% - 1.55rem) calc(50% + 0.5rem), #8f887a 98%, transparent),
+		radial-gradient(circle 0.09rem at calc(100% - 1.55rem) calc(50% - 0.5rem), #8f887a 98%, transparent),
+		/* left hub: hole + wide white ring + rim */
+		radial-gradient(circle 1rem at 1.55rem 50%, #0d0b09 34%, #ece8dd 36% 88%, #3a342f 90% 100%, transparent 100%),
+		/* right hub */
+		radial-gradient(circle 1rem at calc(100% - 1.55rem) 50%, #0d0b09 34%, #ece8dd 36% 88%, #3a342f 90% 100%, transparent 100%),
+		/* tape window between hubs */
+		linear-gradient(#100e0c, #100e0c) center / 30% 58% no-repeat,
+		#332e28;
+}
+/* Label fits its two title lines plus the date without clipping. */
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-body,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-body { height: 46%; }
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title { font-size: 0.72rem; line-height: 1.25; }
