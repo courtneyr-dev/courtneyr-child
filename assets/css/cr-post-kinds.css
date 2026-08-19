@@ -2615,8 +2615,8 @@ body .pk-card {
 		conic-gradient(from 25deg at 48% 52%, rgba(255, 255, 255, 0.18) 0 38deg, transparent 38deg 150deg, rgba(255, 255, 255, 0.12) 150deg 190deg, transparent 190deg 360deg) left 3% top 26% / 27% 52% no-repeat,
 		/* LEFT — tape grooves filling the pane */
 		repeating-radial-gradient(circle at 48% 52%, #141218 0 2px, #201d26 2px 4px) left 3% top 26% / 27% 52% no-repeat,
-		/* RIGHT — film strip */
-		linear-gradient(90deg, transparent 76%, rgba(40, 37, 48, 0.5) 80% 92%, transparent 95%) right 3% top 26% / 27% 52% no-repeat,
+		/* RIGHT — one tiny bit of film dropping from the spool */
+		linear-gradient(180deg, #35313c 0%, #221f2a 100%) right 12% top 62% / 3.5% 16% no-repeat,
 		/* RIGHT — spool on white */
 		radial-gradient(circle closest-side at 46% 52%, #ffffff 0 24%, #8a857e 25% 29%, #35313c 30% 44%, transparent 45%) right 3% top 26% / 27% 52% no-repeat,
 		/* RIGHT — near-white pane */
