@@ -1988,3 +1988,15 @@ body .pk-card {
 	align-self: stretch;
 	box-sizing: border-box;
 }
+
+/* ---- v0.5.243: polaroid frame is true white stock ---- */
+.cr-stream-page .pk-card.k-photo,
+.cr-stream-page .wp-block-post-template > li.kind-photo .pk-card {
+	background:
+		linear-gradient(135deg, #241c4a 12px, transparent 12px) top left,
+		linear-gradient(225deg, #241c4a 12px, transparent 12px) top right,
+		linear-gradient(45deg, #241c4a 12px, transparent 12px) bottom left,
+		linear-gradient(315deg, #241c4a 12px, transparent 12px) bottom right,
+		#ffffff;
+	background-repeat: no-repeat;
+}
