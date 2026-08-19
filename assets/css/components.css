@@ -8043,14 +8043,15 @@ body.single-format-video main.single-post   { background-color: var(--cr-type-vi
    Read them as quiet text beside the avatar row instead, and give the
    avatars the ivory ring used on faces elsewhere on the site. */
 .wp-block-atmosphere-reactions .reaction-label {
-	box-shadow: none;
-	background: none;
-	border: 0;
-	text-transform: none;
-	letter-spacing: normal;
+	box-shadow: none !important;
+	background: none !important;
+	border: 0 !important;
+	text-transform: none !important;
+	letter-spacing: normal !important;
 	font-family: var(--cr-font-body, inherit);
 	font-weight: 600;
 	color: var(--cr-ink, #241c4a);
+	padding: 0.25rem 0;
 }
 .wp-block-atmosphere-reactions .reaction-label:hover {
 	color: var(--cr-prussian-blue, #023047);
