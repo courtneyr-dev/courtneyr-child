@@ -729,3 +729,42 @@ body .pk-card {
 	opacity: 1;
 	border-radius: inherit;
 }
+
+/* Mood: a round sticker — white face, cerulean ring, dashed inner ring,
+   soft subtle shadow (the one deliberate exception to hard shadows). */
+.cr-stream-page .pk-card.k-mood {
+	background: var(--cr-surface-elevated, #fff);
+	border: 3px solid var(--cr-cerulean, #126782);
+	border-radius: 50%;
+	aspect-ratio: 1;
+	width: min(14rem, 90%);
+	margin-inline: auto;
+	display: grid;
+	place-content: center;
+	text-align: center;
+	padding: 1.6rem;
+	box-shadow: 0 3px 12px rgba(36, 28, 74, 0.18);
+	position: relative;
+}
+.cr-stream-page .pk-card.k-mood::after {
+	content: "";
+	position: absolute;
+	inset: 0.55rem;
+	border: 2px dashed var(--cr-cerulean, #126782);
+	border-radius: 50%;
+	pointer-events: none;
+}
+.cr-stream-page .pk-card.k-mood .pk-badge {
+	position: static;
+	margin: 0 auto 0.35rem;
+	box-shadow: none;
+}
+.cr-stream-page .pk-card.k-mood .pk-title {
+	font-family: var(--cr-font-display, cursive);
+	font-size: 1.05rem;
+	color: var(--cr-ink, #241c4a);
+	padding: 0;
+}
+.cr-stream-page .pk-card.k-mood .pk-sub,
+.cr-stream-page .pk-card.k-mood .pk-stream-date { color: var(--cr-cerulean, #126782); padding: 0; }
+.cr-stream-page .pk-card.k-mood .pk-stream-date time { border: 0; padding: 0; }
