@@ -2319,3 +2319,103 @@ body .pk-card {
 .cr-stream-page .pk-card.k-repost::before {
 	background: radial-gradient(circle at 32% 28%, #d8f0ec 0%, #5cb8a6 32%, #2a9d8f 68%, #1d6f65 100%);
 }
+
+/* ============================================================
+   v0.5.254 — artless WATCH renders as a VHS tape (top view),
+   per Courtney's reference. The audio cassette stays for audio
+   and artless listens. Watch posts with embeds keep the
+   embed-as-cover box.
+   ============================================================ */
+.cr-stream-page .pk-card.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) {
+	aspect-ratio: 1.5 / 1;
+	padding: 0;
+	border-radius: 6px;
+	display: block;
+	overflow: hidden;
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+	background:
+		/* left reel: full tape ring + white spool */
+		radial-gradient(circle 2.5rem at 15.5% 49%, #f0ede6 0 21%, #55504a 22% 26%, #14121a 27% 86%, #3a3644 87% 96%, transparent 97%),
+		/* right reel: thinner tape + white spool */
+		radial-gradient(circle 2.1rem at 84.5% 49%, #f0ede6 0 27%, #55504a 28% 33%, #221f28 34% 74%, #3a3644 75% 92%, transparent 93%),
+		/* smoky window panes */
+		linear-gradient(rgba(150, 146, 158, 0.16), rgba(130, 126, 140, 0.1)) left 3.5% top 27% / 24% 44% no-repeat,
+		linear-gradient(rgba(150, 146, 158, 0.16), rgba(130, 126, 140, 0.1)) right 3.5% top 27% / 24% 44% no-repeat,
+		/* top flap strip */
+		linear-gradient(#0d0c10, #121016) top / 100% 17% no-repeat,
+		/* shell ridges */
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 5px),
+		#17151b;
+}
+/* embossed flap text */
+.cr-stream-page .pk-card.k-watch:not(:has(.pk-media)):not(:has(.pk-embed))::before {
+	content: "insert this side into recorder \25B2  do not touch the tape inside" / "";
+	position: absolute;
+	inset: auto;
+	top: 4.5%;
+	left: 0;
+	right: 0;
+	height: auto;
+	text-align: center;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: 0.36rem;
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.26);
+	background: none;
+	pointer-events: none;
+}
+/* screws replace the audio hub window */
+.cr-stream-page .pk-card.k-watch:not(:has(.pk-media)):not(:has(.pk-embed))::after {
+	inset: 0;
+	top: 0;
+	left: 0;
+	width: auto;
+	height: auto;
+	transform: none;
+	border: 0;
+	border-radius: inherit;
+	background:
+		radial-gradient(circle 3px at 12px calc(100% - 10px), #3a3644 98%, transparent),
+		radial-gradient(circle 3px at calc(100% - 12px) calc(100% - 10px), #3a3644 98%, transparent),
+		radial-gradient(circle 3px at 50% calc(100% - 10px), #3a3644 98%, transparent);
+	background-repeat: no-repeat;
+	pointer-events: none;
+}
+/* white label centered between the reels */
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-body {
+	position: absolute;
+	left: 30.5%;
+	right: 30.5%;
+	top: 27%;
+	height: 44%;
+	width: auto;
+	flex: none;
+	background: #efece4;
+	background-image: none;
+	border-radius: 6px;
+	padding: 0.4rem 0.5rem;
+	overflow: hidden;
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-kindlabel {
+	position: static;
+	display: inline-block;
+	margin: 0 0 0.15rem;
+	font-size: 0.38rem;
+	padding: 0.05rem 0.2rem;
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title {
+	margin: 0;
+	font-size: 0.6rem;
+	line-height: 1.5;
+	border-bottom: 1.5px solid rgba(36, 28, 74, 0.45);
+	padding: 0 0 0.05rem;
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-stream-date {
+	position: static;
+	margin: 0.15rem 0 0;
+	font-size: 0.42rem;
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-sub:not(.pk-stream-date),
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-note { display: none; }
