@@ -2652,3 +2652,16 @@ body .pk-card {
 	font-style: normal;
 	font-size: 0.75rem;
 }
+
+/* ---- v0.5.263: clippings carry the standard 4x4 hard shadow ---- */
+.cr-stream-page .pk-card.k-reply,
+.cr-stream-page .pk-card.k-like,
+.cr-stream-page .pk-card.k-repost,
+.cr-stream-page .pk-card.k-favorite,
+.cr-stream-page .pk-card.k-article,
+.cr-stream-page .pk-card.k-quote,
+.cr-stream-page .pk-card.k-follow,
+.cr-stream-page .pk-card.k-issue,
+.cr-stream-page .pk-card.k-tag {
+	filter: drop-shadow(4px 4px 0 var(--cr-hard-color, #241c4a));
+}
