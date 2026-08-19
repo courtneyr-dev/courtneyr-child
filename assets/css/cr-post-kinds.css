@@ -1067,3 +1067,85 @@ body .pk-card {
 .cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-body { height: 46%; }
 .cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
 .cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title { font-size: 0.72rem; line-height: 1.25; }
+
+/* ---- v0.5.226: cassette proportions matched to the TDK reference ----
+   One small handwriting row (side-box + single ruled line + tiny date
+   in the N.R. corner); the big white label wraps AROUND the punched
+   hub window; gold stripe sits below the label. */
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-body,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-body {
+	height: 60%;
+	background: #f6f3ea;
+	background-image: none;
+	position: relative;
+	padding: 0.35rem 0.55rem;
+	border-radius: 4px;
+	overflow: visible;
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-kindlabel,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-kindlabel {
+	position: absolute;
+	top: 0.35rem;
+	left: 0.55rem;
+	margin: 0;
+	width: auto;
+	max-width: max-content;
+	font-size: 0.42rem;
+	padding: 0.1rem 0.25rem;
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title {
+	display: block;
+	margin: 0.1rem 3.2rem 0 2.9rem;
+	font-size: 0.68rem;
+	line-height: 1.5;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-webkit-line-clamp: unset;
+	line-clamp: unset;
+	border-bottom: 1.5px solid rgba(36, 28, 74, 0.45);
+	padding: 0 0 0.1rem;
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-stream-date,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-stream-date {
+	position: absolute;
+	top: 0.42rem;
+	right: 0.55rem;
+	margin: 0;
+	padding: 0;
+	font-size: 0.48rem;
+}
+/* Window: punched inside the label's lower half, hubs at its ends. */
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed))::after,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed))::after {
+	top: 30%;
+	height: 32%;
+	width: 54%;
+	z-index: 2;
+	background:
+		radial-gradient(circle 0.09rem at calc(1.7rem + 0.52rem) 50%, #8f887a 98%, transparent),
+		radial-gradient(circle 0.09rem at calc(1.7rem - 0.52rem) 50%, #8f887a 98%, transparent),
+		radial-gradient(circle 0.09rem at 1.7rem calc(50% + 0.52rem), #8f887a 98%, transparent),
+		radial-gradient(circle 0.09rem at 1.7rem calc(50% - 0.52rem), #8f887a 98%, transparent),
+		radial-gradient(circle 0.09rem at calc(100% - 1.7rem + 0.52rem) 50%, #8f887a 98%, transparent),
+		radial-gradient(circle 0.09rem at calc(100% - 1.7rem - 0.52rem) 50%, #8f887a 98%, transparent),
+		radial-gradient(circle 0.09rem at calc(100% - 1.7rem) calc(50% + 0.52rem), #8f887a 98%, transparent),
+		radial-gradient(circle 0.09rem at calc(100% - 1.7rem) calc(50% - 0.52rem), #8f887a 98%, transparent),
+		radial-gradient(circle 1.02rem at 1.7rem 50%, #0d0b09 33%, #ece8dd 35% 87%, #3a342f 89% 100%, transparent 100%),
+		radial-gradient(circle 1.02rem at calc(100% - 1.7rem) 50%, #0d0b09 33%, #ece8dd 35% 87%, #3a342f 89% 100%, transparent 100%),
+		linear-gradient(#100e0c, #100e0c) center / 26% 56% no-repeat,
+		#332e28;
+}
+/* Gold stripe below the label. */
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed))::before,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed))::before {
+	background:
+		radial-gradient(circle 3px at 11px 11px, #3a342f 98%, transparent),
+		radial-gradient(circle 3px at calc(100% - 11px) 11px, #3a342f 98%, transparent),
+		radial-gradient(circle 3px at 11px calc(100% - 9px), #3a342f 98%, transparent),
+		radial-gradient(circle 3px at calc(100% - 11px) calc(100% - 9px), #3a342f 98%, transparent),
+		radial-gradient(circle 3px at 50% calc(100% - 9px), #3a342f 98%, transparent),
+		linear-gradient(90deg, #c9b06a, #e6d194 35%, #c9b06a 70%, #b89d55) left 0.55rem top 76% / calc(100% - 1.1rem) 9% no-repeat;
+	background-repeat: no-repeat;
+}
