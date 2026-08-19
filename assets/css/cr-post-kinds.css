@@ -1184,3 +1184,62 @@ body .pk-card {
 	letter-spacing: 0.12em;
 	text-transform: uppercase;
 }
+
+/* ---- v0.5.228: drink coaster matched to the mock ---- */
+.cr-stream-page .pk-card.k-drink { overflow: visible; }
+.cr-stream-page .k-drink .pk-kindlabel,
+.cr-stream-page .k-drink .pk-stars,
+.cr-stream-page .k-drink .pk-note,
+.cr-stream-page .k-drink .pk-excerpt { display: none; }
+.cr-stream-page .k-drink .pk-badge {
+	position: static;
+	margin: 0 auto 0.2rem;
+	width: 1.7rem;
+	height: 1.7rem;
+	background: transparent;
+	color: #241c4a;
+	box-shadow: none;
+	border: 0;
+}
+.cr-stream-page .k-drink .pk-title { font-family: var(--cr-font-accent, serif); font-weight: 800; }
+.cr-stream-page .k-drink .pk-sub,
+.cr-stream-page .k-drink .pk-meta,
+.cr-stream-page .k-drink .pk-meta a,
+.cr-stream-page .k-drink .pk-link {
+	font-family: var(--cr-font-accent, serif);
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--cr-cerulean, #126782);
+	border: 0 !important;
+	border-radius: 0;
+	padding: 0;
+	display: inline;
+}
+.cr-stream-page .k-drink .pk-stream-date { display: block; margin-top: 0.15rem; }
+.cr-stream-page .k-drink .pk-stream-date time { border: 0; padding: 0; color: var(--cr-cerulean, #126782); }
+/* photo, when present: a small circle chip overlapping the rim */
+.cr-stream-page .k-drink .pk-media,
+.cr-stream-page .k-drink .pk-embed--photo {
+	display: block;
+	position: absolute;
+	top: -0.4rem;
+	left: -0.4rem;
+	width: 4.5rem;
+	height: 4.5rem;
+	margin: 0;
+	border-radius: 50%;
+	overflow: hidden;
+	border: 2px solid #241c4a;
+	z-index: 2;
+}
+.cr-stream-page .k-drink .pk-media img,
+.cr-stream-page .k-drink .pk-embed--photo img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	border: 0;
+	box-shadow: none;
+	aspect-ratio: auto;
+}
