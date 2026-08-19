@@ -1708,10 +1708,10 @@ body .pk-card {
 .cr-stream-page .k-itinerary .pk-title { font-family: var(--cr-font-mono, monospace); letter-spacing: 0.06em; }
 .cr-stream-page .k-itinerary .pk-excerpt { border-top: 2px dashed var(--cr-border-strong, rgba(36, 28, 74, 0.24)); padding-top: 0.5rem; margin-top: 0.4rem; }
 
-/* question → sticky note with the pushpin, sky tint. */
+/* question → sticky note with the pushpin, classic sticky-note yellow (v0.5.267, was sky tint). */
 .cr-stream-page .pk-card.k-question {
 	width: 80%;
-	background: #dceef5;
+	background: #fcf1c5;
 	border: 0;
 	box-shadow: var(--cr-shadow-hard, 4px 4px 0 rgba(36, 28, 74, 0.35));
 	padding: 0.9rem 1rem 1rem;
@@ -2715,15 +2715,19 @@ body .pk-card {
 	background-position: bottom left, bottom left, top left, top left;
 	background-repeat: repeat-x, no-repeat, no-repeat, no-repeat;
 }
-.cr-stream-page .pk-card.k-article  { --swi-paper: #ffffff; }
-.cr-stream-page .pk-card.k-reply    { --swi-paper: #eaf4fa; }
-.cr-stream-page .pk-card.k-quote    { --swi-paper: #f0eef8; }
-.cr-stream-page .pk-card.k-issue    { --swi-paper: #fdf3e7; }
-.cr-stream-page .pk-card.k-favorite { --swi-paper: #fef7e0; }
-.cr-stream-page .pk-card.k-follow   { --swi-paper: #ffffff; }
-.cr-stream-page .pk-card.k-like     { --swi-paper: #ffffff; }
-.cr-stream-page .pk-card.k-repost   { --swi-paper: #ffffff; }
-.cr-stream-page .pk-card.k-tag      { --swi-paper: #e7f1f4; }
+/* v0.5.267: one hue per kind — reply keeps the only blue.
+   Pale tints derived from the palette: sky blue, periwinkle,
+   orange (peach/blush), yellow (butter), cerulean (mint),
+   plus manila and newsprint neutrals. */
+.cr-stream-page .pk-card.k-article  { --swi-paper: #ffffff; } /* white — editorial */
+.cr-stream-page .pk-card.k-reply    { --swi-paper: #eaf4fa; } /* pale sky blue */
+.cr-stream-page .pk-card.k-quote    { --swi-paper: #f0eef8; } /* pale periwinkle */
+.cr-stream-page .pk-card.k-issue    { --swi-paper: #fdf3e7; } /* pale peach */
+.cr-stream-page .pk-card.k-favorite { --swi-paper: #fef7e0; } /* pale butter */
+.cr-stream-page .pk-card.k-follow   { --swi-paper: #e9f4ef; } /* pale mint (cerulean) */
+.cr-stream-page .pk-card.k-like     { --swi-paper: #fdeee6; } /* pale blush (orange) */
+.cr-stream-page .pk-card.k-repost   { --swi-paper: #f3f1ea; } /* newsprint ivory-gray */
+.cr-stream-page .pk-card.k-tag      { --swi-paper: #f6ead2; } /* manila tag stock */
 
 /* ---- v0.5.266: retire the torn edge ----
    Verdict after six rounds: a torn silhouette and a hard offset
