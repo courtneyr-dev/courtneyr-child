@@ -2458,3 +2458,39 @@ body .pk-card {
 	height: 46%;
 	border-radius: 10px;
 }
+
+/* ---- v0.5.256: properly transparent VHS windows ----
+   Bigger, brighter glass; tape mass nearly fills the left window with
+   conic sheen sweeps; right window is mostly white spool with a film
+   strip catch of light. All layers share each window's box. */
+.cr-stream-page .pk-card.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) {
+	background:
+		/* LEFT window — glass streak */
+		linear-gradient(115deg, transparent 26%, rgba(255, 255, 255, 0.12) 34%, transparent 46%) left 3% top 26% / 27% 52% no-repeat,
+		/* LEFT — white spoked hub */
+		radial-gradient(circle closest-side at 48% 52%, #f4f1ea 0 15%, #6a6560 16% 19%, transparent 20%) left 3% top 26% / 27% 52% no-repeat,
+		/* LEFT — sheen sweep across the tape */
+		conic-gradient(from 25deg at 48% 52%, rgba(255, 255, 255, 0.16) 0 38deg, transparent 38deg 150deg, rgba(255, 255, 255, 0.1) 150deg 190deg, transparent 190deg 360deg) left 3% top 26% / 27% 52% no-repeat,
+		/* LEFT — big tape mass */
+		radial-gradient(circle closest-side at 48% 52%, transparent 0 19%, #1a1820 20% 96%, transparent 97%) left 3% top 26% / 27% 52% no-repeat,
+		/* LEFT — bright pane */
+		linear-gradient(rgba(190, 186, 198, 0.38), rgba(150, 146, 158, 0.22)) left 3% top 26% / 27% 52% no-repeat,
+		/* RIGHT window — film strip catching light */
+		linear-gradient(90deg, transparent 78%, rgba(255, 255, 255, 0.16) 82% 94%, transparent 96%) right 3% top 26% / 27% 52% no-repeat,
+		/* RIGHT — dominant white spool + thin tape */
+		radial-gradient(circle closest-side at 50% 52%, #f2efe8 0 27%, #57524c 28% 32%, #262330 33% 60%, transparent 61%) right 3% top 26% / 27% 52% no-repeat,
+		/* RIGHT — brightest pane (least tape behind it) */
+		linear-gradient(rgba(205, 201, 212, 0.42), rgba(165, 161, 172, 0.26)) right 3% top 26% / 27% 52% no-repeat,
+		/* two-tier flap */
+		linear-gradient(#0c0b0f, #0c0b0f) top / 100% 13% no-repeat,
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 4px) left 0 top 13% / 100% 9% no-repeat,
+		/* shell ridges */
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 5px),
+		#17151b;
+}
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-body {
+	left: 32.5%;
+	right: 32.5%;
+	top: 26%;
+	height: 52%;
+}
