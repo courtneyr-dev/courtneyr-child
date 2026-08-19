@@ -2768,3 +2768,13 @@ body .pk-card {
 .cr-stream-page .pk-card.k-article {
 	border: 2px solid var(--cr-ink, #241c4a);
 }
+
+/* ---- v0.5.272: borders for the rest of the paper cards ----
+   eat, review, favorite, follow, issue join the bordered set. */
+.cr-stream-page .pk-card.k-eat,
+.cr-stream-page .pk-card.k-review,
+.cr-stream-page .pk-card.k-favorite,
+.cr-stream-page .pk-card.k-follow,
+.cr-stream-page .pk-card.k-issue {
+	border: 2px solid var(--cr-ink, #241c4a);
+}
