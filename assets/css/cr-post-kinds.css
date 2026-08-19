@@ -1372,7 +1372,7 @@ body .pk-card {
 		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 88 50' fill='none'%3E%3Cpath d='M4 40 C 14 8, 26 6, 32 22 C 36 33, 28 40, 22 34 C 16 28, 26 12, 44 12 C 60 12, 66 26, 60 36 C 56 43, 46 40, 48 30' stroke='%23126782' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M62 30 l 14 6 m -3 -9 l 3 9 l -9 2' stroke='%23126782' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
 		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60' fill='none'%3E%3Cpath d='M30 46 C 12 34, 8 20, 16 14 C 22 9, 29 13, 30 19 C 31 13, 38 9, 44 14 C 52 20, 48 34, 30 46 Z' stroke='%23fb8500' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E"),
 		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 34' fill='none'%3E%3Cpath d='M4 26 c 10 -14, 16 -14, 20 -2 c 3 9, 12 9, 16 -2 c 4 -11, 12 -11, 16 0 c 3 9, 12 9, 18 -4' stroke='%23fb8500' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E"),
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23126782' d='M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%238ecae6' d='M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z'/%3E%3C/svg%3E"),
 		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fb8500' d='M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z'/%3E%3C/svg%3E"),
 		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none'%3E%3Ccircle cx='20' cy='20' r='16' stroke='%23b85f00' stroke-width='2.5' stroke-dasharray='4 5'/%3E%3C/svg%3E");
 	background-repeat: no-repeat;
@@ -1381,7 +1381,7 @@ body .pk-card {
 		left 0.5% top 7rem,
 		right 1% top 34rem,
 		left 1% top 58rem,
-		right 2.5% top 12rem,
+		right 0.6% top 22rem,
 		left 3% top 40rem,
 		right 1.5% bottom 10rem;
 	opacity: 0.65;
