@@ -1742,3 +1742,156 @@ body .pk-card {
 	transform: rotate(8deg);
 }
 .cr-stream-page .k-question .pk-badge { display: none; }
+
+/* ============================================================
+   v0.5.237 — consistency audit fixes:
+   column clipping, scrap label clipping, cassette unification,
+   precise rsvp ticket, video styling, photo caption dedupe.
+   ============================================================ */
+
+/* 1. Rotated cards, tape, and shadows were clipped at column edges —
+   give each item internal breathing room inside its column box. */
+.cr-stream-page .wp-block-post-template > li {
+	padding: 0.8rem 0.9rem 0;
+	margin: 0 0 1.9rem;
+}
+
+/* 2. Scrap kind labels sat clipped against the card's top border. */
+.cr-stream-page .pk-card.k-note .pk-kindlabel,
+.cr-stream-page .pk-card.k-article .pk-kindlabel,
+.cr-stream-page .pk-card.k-reply .pk-kindlabel,
+.cr-stream-page .pk-card.k-like .pk-kindlabel,
+.cr-stream-page .pk-card.k-repost .pk-kindlabel,
+.cr-stream-page .pk-card.k-bookmark .pk-kindlabel,
+.cr-stream-page .pk-card.k-favorite .pk-kindlabel,
+.cr-stream-page .pk-card.k-recipe .pk-kindlabel,
+.cr-stream-page .pk-card.k-checkin .pk-kindlabel,
+.cr-stream-page .pk-card.k-quote .pk-kindlabel,
+.cr-stream-page .pk-card.k-follow .pk-kindlabel,
+.cr-stream-page .pk-card.k-issue .pk-kindlabel,
+.cr-stream-page .pk-card.k-tag .pk-kindlabel,
+.cr-stream-page .pk-card.k-trip .pk-kindlabel,
+.cr-stream-page .pk-card.k-itinerary .pk-kindlabel,
+.cr-stream-page .pk-card.k-exercise .pk-kindlabel,
+.cr-stream-page .pk-card.k-craft .pk-kindlabel,
+.cr-stream-page .pk-card.k-question .pk-kindlabel {
+	position: static;
+	display: block;
+	margin: 0 0 0.35rem;
+	transform: none;
+	background: none;
+	border: 0;
+	box-shadow: none;
+	width: auto;
+	height: auto;
+	padding: 0;
+	font-size: 0.58rem;
+	letter-spacing: 0.14em;
+	color: var(--cr-ink-muted, #126782);
+}
+
+/* 3. One cassette, three doors: audio and artless watch/listen share
+   identical geometry (they had drifted apart). */
+.cr-stream-page .pk-card.k-audio,
+.cr-stream-page .pk-card.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)),
+.cr-stream-page .pk-card.k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) {
+	aspect-ratio: 1.58 / 1;
+	padding: 0.6rem 0.9rem;
+	border-radius: 10px;
+}
+.cr-stream-page .k-audio .pk-body { height: 62%; }
+.cr-stream-page .k-audio .pk-title { font-size: 0.68rem; margin: 0.1rem 3.2rem 0 2.9rem; }
+.cr-stream-page .pk-card.k-audio::before {
+	background:
+		radial-gradient(circle 3px at 11px 11px, #3a342f 98%, transparent),
+		radial-gradient(circle 3px at calc(100% - 11px) 11px, #3a342f 98%, transparent),
+		radial-gradient(circle 3px at 11px calc(100% - 9px), #3a342f 98%, transparent),
+		radial-gradient(circle 3px at calc(100% - 11px) calc(100% - 9px), #3a342f 98%, transparent),
+		radial-gradient(circle 3px at 50% calc(100% - 9px), #3a342f 98%, transparent),
+		linear-gradient(90deg, #c9b06a, #e6d194 35%, #c9b06a 70%, #b89d55) left 0.55rem top 68% / calc(100% - 1.1rem) 8% no-repeat;
+	background-repeat: no-repeat;
+}
+
+/* 4. RSVP: the real ticket, on the card's actual structure. */
+.cr-stream-page .pk-card.k-rsvp {
+	width: 94%;
+	background: var(--cr-surface-elevated, #fff);
+	border: 2px solid var(--cr-ink, #241c4a);
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
+	filter: none;
+	clip-path: none;
+	transform: rotate(var(--cr-rotate-1, -1.2deg));
+	padding: 1rem 6.4rem 1rem 1.1rem;
+	position: relative;
+	background-image: none;
+}
+.cr-stream-page .k-rsvp .pk-body {
+	position: static;
+	background: none;
+	padding: 0;
+	-webkit-mask: none;
+	mask: none;
+}
+.cr-stream-page .k-rsvp .pk-body::after {
+	content: "";
+	position: absolute;
+	top: 0.6rem;
+	bottom: 0.6rem;
+	right: 5.6rem;
+	border-left: 2px dashed rgba(36, 28, 74, 0.35);
+}
+.cr-stream-page .k-rsvp .pk-chip.p-rsvp {
+	position: absolute;
+	top: 50%;
+	right: 0.7rem;
+	transform: translateY(-50%) rotate(-4deg);
+	border: 3px double var(--cr-ut-orange-dark, #b85f00);
+	color: var(--cr-ut-orange-dark, #b85f00);
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 900;
+	font-size: 0.8rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	padding: 0.3rem 0.55rem;
+	background: none;
+	border-radius: 2px;
+}
+.cr-stream-page .k-rsvp .pk-kindlabel {
+	position: static;
+	display: block;
+	margin: 0 0 0.35rem;
+	background: none;
+	border: 0;
+	box-shadow: none;
+	transform: none;
+	width: auto;
+	height: auto;
+	padding: 0;
+	font-size: 0.58rem;
+	letter-spacing: 0.14em;
+	color: var(--cr-ink-muted, #126782);
+}
+.cr-stream-page .k-rsvp .pk-title { padding: 0; font-size: 1rem; }
+.cr-stream-page .k-rsvp .pk-meta time { display: inline; }
+
+/* 5. Video: image-led thumb with a hand-drawn play sticker. */
+.cr-stream-page .pk-card.k-video {
+	width: 94%;
+	background: var(--cr-surface-elevated, #fff);
+	border: 2px solid var(--cr-ink, #241c4a);
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
+	padding: 0.8rem 0.9rem 0.9rem;
+}
+.cr-stream-page .k-video .pk-embed,
+.cr-stream-page .k-video figure.wp-block-embed,
+.cr-stream-page .k-video .pk-media {
+	order: -1;
+	margin: 0 0 0.6rem;
+	border: 2px solid var(--cr-ink, #241c4a);
+	border-radius: 0;
+}
+.cr-stream-page .k-video .pk-title { padding: 0; font-size: 1rem; color: var(--cr-ink, #241c4a); }
+.cr-stream-page .k-video .pk-kindlabel { position: static; display: block; margin: 0 0 0.3rem; background: none; border: 0; box-shadow: none; transform: none; width: auto; height: auto; padding: 0; font-size: 0.58rem; letter-spacing: 0.14em; color: var(--cr-ink-muted, #126782); }
+
+/* 6. Photo polaroid: one caption voice (excerpt), not title + excerpt. */
+.cr-stream-page .kind-photo .pk-card .pk-title { display: none; }
