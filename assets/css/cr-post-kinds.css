@@ -2023,3 +2023,20 @@ body .pk-card {
 .cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-note p,
 .cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-note p,
 .cr-stream-page .k-audio .pk-note p { display: inline; margin: 0; font-size: inherit; }
+
+/* ---- v0.5.245: true torn-page bottoms ----
+   No border on the torn edge (paper doesn't have an outline where it
+   rips); teeth back to a visible depth now the shadow hugs at 2x4. */
+.cr-stream-page .pk-card.k-reply,
+.cr-stream-page .pk-card.k-like,
+.cr-stream-page .pk-card.k-repost,
+.cr-stream-page .pk-card.k-favorite,
+.cr-stream-page .pk-card.k-article,
+.cr-stream-page .pk-card.k-quote,
+.cr-stream-page .pk-card.k-follow,
+.cr-stream-page .pk-card.k-issue,
+.cr-stream-page .pk-card.k-tag {
+	border-bottom: 0;
+	padding-bottom: 1.7rem;
+	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), 93% 100%, 85% calc(100% - 5px), 76% 100%, 67% calc(100% - 8px), 58% 100%, 49% calc(100% - 5px), 40% 100%, 31% calc(100% - 8px), 22% 100%, 14% calc(100% - 5px), 7% 100%, 0 calc(100% - 8px));
+}
