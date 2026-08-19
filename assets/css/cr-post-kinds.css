@@ -2236,3 +2236,37 @@ body .pk-card {
 .cr-stream-page .pk-card.k-favorite { background-color: #fef7e0; } /* pale selective yellow */
 .cr-stream-page .pk-card.k-craft    { background-color: #eaf5f2; } /* pale blue green */
 .cr-stream-page .pk-card.k-tag      { background-color: #e7f1f4; } /* pale cerulean */
+
+/* ---- v0.5.252: punchier pushpins, full quote glyph ---- */
+.cr-stream-page .pk-card.k-reply::before,
+.cr-stream-page .pk-card.k-like::before,
+.cr-stream-page .pk-card.k-repost::before,
+.cr-stream-page .pk-card.k-favorite::before,
+.cr-stream-page .pk-card.k-article::before,
+.cr-stream-page .pk-card.k-note::before,
+.cr-stream-page .pk-card.k-quote::before,
+.cr-stream-page .pk-card.k-follow::before,
+.cr-stream-page .pk-card.k-issue::before,
+.cr-stream-page .pk-card.k-tag::before {
+	width: 1rem;
+	height: 1rem;
+	background: radial-gradient(circle at 32% 28%, #d9eef5 0%, #4da3bd 32%, #126782 68%, #0b3f50 100%);
+	box-shadow: 0 2px 4px rgba(36, 28, 74, 0.55);
+}
+.cr-stream-page .pk-card.k-question::before {
+	width: 1rem;
+	height: 1rem;
+	background: radial-gradient(circle at 32% 28%, #ffd9a8 0%, #f0952f 35%, #b85f00 72%, #8a4700 100%);
+	box-shadow: 0 2px 4px rgba(36, 28, 74, 0.55);
+}
+/* Quote glyph: a typeface with full-bodied quotes, sized and seated
+   so the whole mark shows. */
+.cr-stream-page .pk-card.k-quote::after {
+	content: "\201C";
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 3.6rem;
+	line-height: 0.55;
+	top: 1.05rem;
+	right: 0.8rem;
+	color: var(--cr-periwinkle, #bcb5e3);
+}
