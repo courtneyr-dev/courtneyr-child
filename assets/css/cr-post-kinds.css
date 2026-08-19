@@ -2040,3 +2040,6 @@ body .pk-card {
 	padding-bottom: 1.7rem;
 	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), 93% 100%, 85% calc(100% - 5px), 76% 100%, 67% calc(100% - 8px), 58% 100%, 49% calc(100% - 5px), 40% 100%, 31% calc(100% - 8px), 22% 100%, 14% calc(100% - 5px), 7% 100%, 0 calc(100% - 8px));
 }
+
+/* ---- v0.5.246: eat polaroid on white stock, not page ivory ---- */
+.cr-stream-page .pk-card.k-eat { background: #ffffff; }
