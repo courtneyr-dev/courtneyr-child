@@ -1484,3 +1484,9 @@ body .pk-card {
 		left 2% bottom 4rem;
 	opacity: 0.75;
 }
+
+/* ---- v0.5.233: one date per card ----
+   Cards whose kind renders its own dateline (ateAt/checkinAt/…) also
+   printed the post's publish timestamp in the meta row. Hide the
+   duplicate visually; dt-published stays in the markup for parsers. */
+.cr-stream-page .pk-card:has(.pk-stream-date) .pk-meta > .dt-published { display: none; }
