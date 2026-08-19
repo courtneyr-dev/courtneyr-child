@@ -2270,3 +2270,52 @@ body .pk-card {
 	right: 0.8rem;
 	color: var(--cr-periwinkle, #bcb5e3);
 }
+
+/* ---- v0.5.253: uniform pushpin visibility, palette-colored heads ----
+   Same size, same specular structure (catchlight → mid → deep → rim),
+   same shadow on every pin; only the head color varies by kind. */
+.cr-stream-page .pk-card.k-reply::before,
+.cr-stream-page .pk-card.k-like::before,
+.cr-stream-page .pk-card.k-repost::before,
+.cr-stream-page .pk-card.k-favorite::before,
+.cr-stream-page .pk-card.k-article::before,
+.cr-stream-page .pk-card.k-note::before,
+.cr-stream-page .pk-card.k-quote::before,
+.cr-stream-page .pk-card.k-follow::before,
+.cr-stream-page .pk-card.k-issue::before,
+.cr-stream-page .pk-card.k-tag::before,
+.cr-stream-page .pk-card.k-question::before {
+	width: 1rem;
+	height: 1rem;
+	box-shadow: 0 2px 4px rgba(36, 28, 74, 0.55);
+	opacity: 1;
+}
+/* cerulean: reply, tag */
+.cr-stream-page .pk-card.k-reply::before,
+.cr-stream-page .pk-card.k-tag::before {
+	background: radial-gradient(circle at 32% 28%, #d9eef5 0%, #4da3bd 32%, #126782 68%, #0b3f50 100%);
+}
+/* russian violet: article, note */
+.cr-stream-page .pk-card.k-article::before,
+.cr-stream-page .pk-card.k-note::before {
+	background: radial-gradient(circle at 32% 28%, #d9d3ee 0%, #6a5fa8 32%, #3d2f6e 68%, #241c4a 100%);
+}
+/* ut orange: issue, question */
+.cr-stream-page .pk-card.k-issue::before,
+.cr-stream-page .pk-card.k-question::before {
+	background: radial-gradient(circle at 32% 28%, #ffd9a8 0%, #f0952f 35%, #b85f00 72%, #8a4700 100%);
+}
+/* selective yellow: favorite, follow */
+.cr-stream-page .pk-card.k-favorite::before,
+.cr-stream-page .pk-card.k-follow::before {
+	background: radial-gradient(circle at 32% 28%, #fff0c2 0%, #ffc93d 35%, #d99400 72%, #9c6a00 100%);
+}
+/* periwinkle: quote, craft-adjacent likes */
+.cr-stream-page .pk-card.k-quote::before,
+.cr-stream-page .pk-card.k-like::before {
+	background: radial-gradient(circle at 32% 28%, #efeaf9 0%, #a89ed6 32%, #7a6cc0 68%, #4b3f8c 100%);
+}
+/* blue green: repost */
+.cr-stream-page .pk-card.k-repost::before {
+	background: radial-gradient(circle at 32% 28%, #d8f0ec 0%, #5cb8a6 32%, #2a9d8f 68%, #1d6f65 100%);
+}
