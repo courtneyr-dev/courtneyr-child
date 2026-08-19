@@ -153,11 +153,11 @@ body .pk-card {
 	display: block;
 	margin: 0.7rem 0 2.6rem;
 }
-.cr-stream-page .wp-block-post-template > li:nth-child(4n+1) .pk-card--stream { transform: rotate(var(--cr-rotate-1, -1.2deg)); }
-.cr-stream-page .wp-block-post-template > li:nth-child(4n+3) .pk-card--stream { transform: rotate(var(--cr-rotate-2, 1.5deg)); }
+.cr-stream-page .wp-block-post-template > li:nth-child(4n+1) .pk-card { transform: rotate(var(--cr-rotate-1, -1.2deg)); }
+.cr-stream-page .wp-block-post-template > li:nth-child(4n+3) .pk-card { transform: rotate(var(--cr-rotate-2, 1.5deg)); }
 
 /* Reset the plugin's compact shell on the stream. */
-.cr-stream-page .pk-card--stream {
+.cr-stream-page .pk-card {
 	display: block;
 	grid-template-columns: none;
 	max-width: none;
@@ -169,18 +169,18 @@ body .pk-card {
 	box-shadow: none;
 	position: relative;
 }
-.cr-stream-page .pk-card--stream::before { content: none; }
-.cr-stream-page .pk-card--stream .pk-body { display: flex; flex-direction: column; min-width: 0; }
+.cr-stream-page .pk-card::before { content: none; }
+.cr-stream-page .pk-card .pk-body { display: flex; flex-direction: column; min-width: 0; }
 
 /* ---- Cover-hero kinds: the box shell ---- */
-.cr-stream-page .pk-card--stream.k-watch,
-.cr-stream-page .pk-card--stream.k-listen,
-.cr-stream-page .pk-card--stream.k-read,
-.cr-stream-page .pk-card--stream.k-jam,
-.cr-stream-page .pk-card--stream.k-play,
-.cr-stream-page .pk-card--stream.k-review,
-.cr-stream-page .pk-card--stream.k-wish,
-.cr-stream-page .pk-card--stream.k-acquisition {
+.cr-stream-page .pk-card.k-watch,
+.cr-stream-page .pk-card.k-listen,
+.cr-stream-page .pk-card.k-read,
+.cr-stream-page .pk-card.k-jam,
+.cr-stream-page .pk-card.k-play,
+.cr-stream-page .pk-card.k-review,
+.cr-stream-page .pk-card.k-wish,
+.cr-stream-page .pk-card.k-acquisition {
 	background: #241c4a;
 	border-radius: 5px;
 	overflow: hidden;
@@ -189,12 +189,12 @@ body .pk-card {
 }
 
 /* Art goes big, on top, edge to edge. */
-.cr-stream-page .pk-card--stream .pk-media {
+.cr-stream-page .pk-card .pk-media {
 	order: -1;
 	display: block;
 	margin: 0;
 }
-.cr-stream-page .pk-card--stream .pk-media img {
+.cr-stream-page .pk-card .pk-media img {
 	display: block;
 	width: 100%;
 	height: auto;
@@ -227,8 +227,8 @@ body .pk-card {
 	line-height: 1.25;
 	padding: 0.55rem 0.65rem 0;
 }
-.cr-stream-page .pk-card--stream .pk-title a { color: inherit; }
-.cr-stream-page .pk-card--stream .pk-sub {
+.cr-stream-page .pk-card .pk-title a { color: inherit; }
+.cr-stream-page .pk-card .pk-sub {
 	padding: 0.15rem 0.65rem 0;
 	font-size: 0.8rem;
 }
@@ -240,7 +240,7 @@ body .pk-card {
 .cr-stream-page .k-review .pk-sub,
 .cr-stream-page .k-wish .pk-sub,
 .cr-stream-page .k-acquisition .pk-sub { color: rgba(251, 250, 245, 0.85); }
-.cr-stream-page .pk-card--stream .pk-stream-date time {
+.cr-stream-page .pk-card .pk-stream-date time {
 	display: inline-block;
 	border: 1px solid rgba(251, 250, 245, 0.55);
 	border-radius: 2px;
@@ -252,13 +252,13 @@ body .pk-card {
 	text-transform: uppercase;
 	white-space: nowrap;
 }
-.cr-stream-page .pk-card--stream .pk-stars {
+.cr-stream-page .pk-card .pk-stars {
 	color: var(--cr-selective-yellow, #ffb703);
 	padding: 0.3rem 0.65rem 0;
 }
-.cr-stream-page .pk-card--stream .pk-meta { padding: 0.4rem 0.65rem 0.7rem; }
-.cr-stream-page .pk-card--stream .pk-excerpt { padding: 0.3rem 0.65rem 0; }
-.cr-stream-page .pk-card--stream .pk-link {
+.cr-stream-page .pk-card .pk-meta { padding: 0.4rem 0.65rem 0.7rem; }
+.cr-stream-page .pk-card .pk-excerpt { padding: 0.3rem 0.65rem 0; }
+.cr-stream-page .pk-card .pk-link {
 	font-family: var(--cr-font-accent, serif);
 	font-size: 0.65rem;
 	font-weight: 700;
@@ -270,7 +270,7 @@ body .pk-card {
 .cr-stream-page .k-play .pk-link { color: var(--cr-sky-blue, #8ecae6); }
 
 /* Kind badge: small avatar pinned to the art, ivory ring. */
-.cr-stream-page .pk-card--stream .pk-badge {
+.cr-stream-page .pk-card .pk-badge {
 	position: absolute;
 	top: 0.55rem;
 	left: 0.55rem;
@@ -312,7 +312,7 @@ body .pk-card {
 
 /* Wish: not yet mine. */
 .cr-stream-page .k-wish .pk-media img { opacity: 0.75; }
-.cr-stream-page .pk-card--stream.k-wish { box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a); outline: 2px dashed rgba(251, 250, 245, 0.6); outline-offset: -6px; }
+.cr-stream-page .pk-card.k-wish { box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a); outline: 2px dashed rgba(251, 250, 245, 0.6); outline-offset: -6px; }
 
 /* Shelf shadow under every cover box. */
 .cr-stream-page .wp-block-post-template > li.kind-watch::after,
@@ -331,8 +331,8 @@ body .pk-card {
 }
 
 /* No-art cover kinds → home-recorded cassette. */
-.cr-stream-page .pk-card--stream.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)),
-.cr-stream-page .pk-card--stream.k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) {
+.cr-stream-page .pk-card.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)),
+.cr-stream-page .pk-card.k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) {
 	background: #1a1714;
 	border-radius: 8px;
 	overflow: visible;
@@ -392,52 +392,52 @@ body .pk-card {
 }
 
 /* ---- Scrap kinds: pinned paper ---- */
-.cr-stream-page .pk-card--stream.k-note,
-.cr-stream-page .pk-card--stream.k-article,
-.cr-stream-page .pk-card--stream.k-reply,
-.cr-stream-page .pk-card--stream.k-like,
-.cr-stream-page .pk-card--stream.k-repost,
-.cr-stream-page .pk-card--stream.k-bookmark,
-.cr-stream-page .pk-card--stream.k-favorite,
-.cr-stream-page .pk-card--stream.k-recipe,
-.cr-stream-page .pk-card--stream.k-checkin {
+.cr-stream-page .pk-card.k-note,
+.cr-stream-page .pk-card.k-article,
+.cr-stream-page .pk-card.k-reply,
+.cr-stream-page .pk-card.k-like,
+.cr-stream-page .pk-card.k-repost,
+.cr-stream-page .pk-card.k-bookmark,
+.cr-stream-page .pk-card.k-favorite,
+.cr-stream-page .pk-card.k-recipe,
+.cr-stream-page .pk-card.k-checkin {
 	background: var(--cr-surface-elevated, #fff);
 	border: 2px solid var(--cr-ink, #241c4a);
 	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
 	padding: 0.9rem 1rem 1rem;
 	width: 88%;
 }
-.cr-stream-page .wp-block-post-template > li:nth-child(even) .pk-card--stream.k-note,
-.cr-stream-page .wp-block-post-template > li:nth-child(even) .pk-card--stream.k-like,
-.cr-stream-page .wp-block-post-template > li:nth-child(even) .pk-card--stream.k-reply,
-.cr-stream-page .wp-block-post-template > li:nth-child(even) .pk-card--stream.k-bookmark { margin-left: auto; }
-.cr-stream-page .pk-card--stream.k-note .pk-title,
-.cr-stream-page .pk-card--stream.k-article .pk-title,
-.cr-stream-page .pk-card--stream.k-reply .pk-title,
-.cr-stream-page .pk-card--stream.k-like .pk-title,
-.cr-stream-page .pk-card--stream.k-repost .pk-title,
-.cr-stream-page .pk-card--stream.k-bookmark .pk-title,
-.cr-stream-page .pk-card--stream.k-favorite .pk-title,
-.cr-stream-page .pk-card--stream.k-recipe .pk-title,
-.cr-stream-page .pk-card--stream.k-checkin .pk-title { padding: 0; font-size: 1rem; }
-.cr-stream-page .pk-card--stream.k-note .pk-badge,
-.cr-stream-page .pk-card--stream.k-article .pk-badge,
-.cr-stream-page .pk-card--stream.k-reply .pk-badge,
-.cr-stream-page .pk-card--stream.k-like .pk-badge,
-.cr-stream-page .pk-card--stream.k-repost .pk-badge,
-.cr-stream-page .pk-card--stream.k-bookmark .pk-badge,
-.cr-stream-page .pk-card--stream.k-favorite .pk-badge,
-.cr-stream-page .pk-card--stream.k-recipe .pk-badge,
-.cr-stream-page .pk-card--stream.k-checkin .pk-badge {
+.cr-stream-page .wp-block-post-template > li:nth-child(even) .pk-card.k-note,
+.cr-stream-page .wp-block-post-template > li:nth-child(even) .pk-card.k-like,
+.cr-stream-page .wp-block-post-template > li:nth-child(even) .pk-card.k-reply,
+.cr-stream-page .wp-block-post-template > li:nth-child(even) .pk-card.k-bookmark { margin-left: auto; }
+.cr-stream-page .pk-card.k-note .pk-title,
+.cr-stream-page .pk-card.k-article .pk-title,
+.cr-stream-page .pk-card.k-reply .pk-title,
+.cr-stream-page .pk-card.k-like .pk-title,
+.cr-stream-page .pk-card.k-repost .pk-title,
+.cr-stream-page .pk-card.k-bookmark .pk-title,
+.cr-stream-page .pk-card.k-favorite .pk-title,
+.cr-stream-page .pk-card.k-recipe .pk-title,
+.cr-stream-page .pk-card.k-checkin .pk-title { padding: 0; font-size: 1rem; }
+.cr-stream-page .pk-card.k-note .pk-badge,
+.cr-stream-page .pk-card.k-article .pk-badge,
+.cr-stream-page .pk-card.k-reply .pk-badge,
+.cr-stream-page .pk-card.k-like .pk-badge,
+.cr-stream-page .pk-card.k-repost .pk-badge,
+.cr-stream-page .pk-card.k-bookmark .pk-badge,
+.cr-stream-page .pk-card.k-favorite .pk-badge,
+.cr-stream-page .pk-card.k-recipe .pk-badge,
+.cr-stream-page .pk-card.k-checkin .pk-badge {
 	position: absolute;
 	top: -0.9rem;
 	right: -0.6rem;
 	box-shadow: 0 0 0 3px var(--cr-printer-ivory, #fbfaf5);
 }
 /* note: sticky */
-.cr-stream-page .pk-card--stream.k-note { background: var(--cr-tape, #f3e5b8); border-width: 0; box-shadow: var(--cr-shadow-hard, 4px 4px 0 rgba(36, 28, 74, 0.35)); }
+.cr-stream-page .pk-card.k-note { background: var(--cr-tape, #f3e5b8); border-width: 0; box-shadow: var(--cr-shadow-hard, 4px 4px 0 rgba(36, 28, 74, 0.35)); }
 /* bookmark: sky dog-ear */
-.cr-stream-page .pk-card--stream.k-bookmark::after {
+.cr-stream-page .pk-card.k-bookmark::after {
 	content: "";
 	position: absolute;
 	top: 0;
@@ -447,25 +447,25 @@ body .pk-card {
 	border-color: transparent var(--cr-sky-blue, #8ecae6) transparent transparent;
 }
 /* recipe: ruled index card, coral top rule */
-.cr-stream-page .pk-card--stream.k-recipe {
+.cr-stream-page .pk-card.k-recipe {
 	border-top: 4px double #d9604f;
 	background-image: repeating-linear-gradient(180deg, transparent 0, transparent calc(1.6em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) calc(1.6em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) 1.6em);
 }
 
 /* mood: no chrome at all */
-.cr-stream-page .pk-card--stream.k-mood {
+.cr-stream-page .pk-card.k-mood {
 	background: none;
 	border: 0;
 	box-shadow: none;
 	text-align: center;
 	padding: 0.5rem 0;
 }
-.cr-stream-page .pk-card--stream.k-mood .pk-badge { position: static; margin: 0 auto 0.3rem; width: 2.6rem; height: 2.6rem; box-shadow: none; }
-.cr-stream-page .pk-card--stream.k-mood .pk-title { font-family: var(--cr-font-display, cursive); font-size: 1rem; padding: 0; }
-.cr-stream-page .pk-card--stream.k-mood .pk-kindlabel { display: none; }
+.cr-stream-page .pk-card.k-mood .pk-badge { position: static; margin: 0 auto 0.3rem; width: 2.6rem; height: 2.6rem; box-shadow: none; }
+.cr-stream-page .pk-card.k-mood .pk-title { font-family: var(--cr-font-display, cursive); font-size: 1rem; padding: 0; }
+.cr-stream-page .pk-card.k-mood .pk-kindlabel { display: none; }
 
 /* drink: coaster */
-.cr-stream-page .pk-card--stream.k-drink {
+.cr-stream-page .pk-card.k-drink {
 	background: var(--cr-light-orange, #fee2c3);
 	border: 2px solid var(--cr-ink, #241c4a);
 	border-radius: 50%;
@@ -495,7 +495,7 @@ body .pk-card {
 }
 
 /* eat: polaroid */
-.cr-stream-page .pk-card--stream.k-eat {
+.cr-stream-page .pk-card.k-eat {
 	background: #fbfaf5;
 	border: 0;
 	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
@@ -510,7 +510,7 @@ body .pk-card {
 .cr-stream-page .k-eat .pk-badge { position: absolute; top: auto; bottom: -0.8rem; left: 0.8rem; }
 
 /* event: gig-poster crest */
-.cr-stream-page .pk-card--stream.k-event {
+.cr-stream-page .pk-card.k-event {
 	background: #241c4a;
 	color: #fbfaf5;
 	text-align: center;
@@ -532,7 +532,7 @@ body .pk-card {
 .cr-stream-page .k-event .pk-badge { position: static; margin: 0 auto 0.4rem; }
 
 /* rsvp: the ticket (mask + drop-shadow so notches show paper) */
-.cr-stream-page .pk-card--stream.k-rsvp {
+.cr-stream-page .pk-card.k-rsvp {
 	filter: drop-shadow(4px 4px 0 var(--cr-hard-color, #241c4a));
 	transform: rotate(var(--cr-rotate-1, -1.2deg));
 }
@@ -572,14 +572,14 @@ body .pk-card {
 }
 
 /* Titles: never underlined on stream cards; covers carry no read-more. */
-.cr-stream-page .pk-card--stream .pk-title a { text-decoration: none; }
-.cr-stream-page .pk-card--stream .more-link,
-.cr-stream-page .pk-card--stream .wp-block-read-more,
-.cr-stream-page .pk-card--stream .pk-readmore { display: none; }
+.cr-stream-page .pk-card .pk-title a { text-decoration: none; }
+.cr-stream-page .pk-card .more-link,
+.cr-stream-page .pk-card .wp-block-read-more,
+.cr-stream-page .pk-card .pk-meta .pk-link:not([target="_blank"]) { display: none; }
 
 /* Embedded video/audio counts as the cover art: pull it to the top,
    full bleed, and DON'T treat the card as artless. */
-.cr-stream-page .pk-card--stream .pk-embed {
+.cr-stream-page .pk-card .pk-embed {
 	order: -1;
 	margin: 0;
 	border-radius: 0;
@@ -588,23 +588,23 @@ body .pk-card {
 
 /* Badge only pins over actual art; on artless boxes it collided with
    the title — hide it there (the sticker still names the kind). */
-.cr-stream-page .pk-card--stream.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
-.cr-stream-page .pk-card--stream.k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
-.cr-stream-page .pk-card--stream.k-read:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
-.cr-stream-page .pk-card--stream.k-jam:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
-.cr-stream-page .pk-card--stream.k-play:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
-.cr-stream-page .pk-card--stream.k-review:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
-.cr-stream-page .pk-card--stream.k-wish:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
-.cr-stream-page .pk-card--stream.k-acquisition:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge { display: none; }
+.cr-stream-page .pk-card.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card.k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card.k-read:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card.k-jam:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card.k-play:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card.k-review:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card.k-wish:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card.k-acquisition:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge { display: none; }
 
 /* Artless boxes also give the title room where the sticker sits. */
-.cr-stream-page .pk-card--stream.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
-.cr-stream-page .pk-card--stream.k-jam:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
-.cr-stream-page .pk-card--stream.k-acquisition:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
-.cr-stream-page .pk-card--stream.k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title { padding: 0.9rem 4.4rem 0 0.65rem; }
+.cr-stream-page .pk-card.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
+.cr-stream-page .pk-card.k-jam:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
+.cr-stream-page .pk-card.k-acquisition:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
+.cr-stream-page .pk-card.k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title { padding: 0.9rem 4.4rem 0 0.65rem; }
 
 /* Sticker: long kind names (acquisition, review) must fit the circle. */
-.cr-stream-page .pk-card--stream .pk-kindlabel {
+.cr-stream-page .pk-card .pk-kindlabel {
 	font-size: 0.42rem;
 	letter-spacing: 0.02em;
 	line-height: 1.1;
