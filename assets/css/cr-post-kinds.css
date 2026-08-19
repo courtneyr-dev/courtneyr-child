@@ -1707,3 +1707,38 @@ body .pk-card {
 }
 .cr-stream-page .k-itinerary .pk-title { font-family: var(--cr-font-mono, monospace); letter-spacing: 0.06em; }
 .cr-stream-page .k-itinerary .pk-excerpt { border-top: 2px dashed var(--cr-border-strong, rgba(36, 28, 74, 0.24)); padding-top: 0.5rem; margin-top: 0.4rem; }
+
+/* question → sticky note with the pushpin, sky tint. */
+.cr-stream-page .pk-card.k-question {
+	width: 80%;
+	background: #dceef5;
+	border: 0;
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 rgba(36, 28, 74, 0.35));
+	padding: 0.9rem 1rem 1rem;
+	transform: rotate(var(--cr-rotate-1, -1.2deg));
+	position: relative;
+}
+.cr-stream-page .pk-card.k-question::before {
+	content: "";
+	position: absolute;
+	top: 0.35rem;
+	left: 50%;
+	margin-left: -0.45rem;
+	width: 0.9rem;
+	height: 0.9rem;
+	border-radius: 50%;
+	background: radial-gradient(circle at 35% 30%, #f0a04b, var(--cr-ut-orange-dark, #b85f00) 75%);
+	box-shadow: 0 2px 3px rgba(36, 28, 74, 0.45);
+	z-index: 4;
+}
+.cr-stream-page .pk-card.k-question::after {
+	content: "?";
+	position: absolute;
+	top: 0.45rem;
+	right: 0.9rem;
+	font-family: var(--cr-font-display, cursive);
+	font-size: 1.6rem;
+	color: var(--cr-cerulean, #126782);
+	transform: rotate(8deg);
+}
+.cr-stream-page .k-question .pk-badge { display: none; }
