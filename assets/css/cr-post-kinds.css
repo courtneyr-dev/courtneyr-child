@@ -2724,3 +2724,27 @@ body .pk-card {
 .cr-stream-page .pk-card.k-like     { --swi-paper: #ffffff; }
 .cr-stream-page .pk-card.k-repost   { --swi-paper: #ffffff; }
 .cr-stream-page .pk-card.k-tag      { --swi-paper: #e7f1f4; }
+
+/* ---- v0.5.266: retire the torn edge ----
+   Verdict after six rounds: a torn silhouette and a hard offset
+   shadow can't coexist cleanly (clip-path clips its own shadow;
+   painted teeth read as trim). Clippings are straight-edged paper
+   with the standard shadow; pins, tints, rules, and flourishes
+   carry the scrap character. */
+.cr-stream-page .pk-card.k-reply,
+.cr-stream-page .pk-card.k-like,
+.cr-stream-page .pk-card.k-repost,
+.cr-stream-page .pk-card.k-favorite,
+.cr-stream-page .pk-card.k-article,
+.cr-stream-page .pk-card.k-quote,
+.cr-stream-page .pk-card.k-follow,
+.cr-stream-page .pk-card.k-issue,
+.cr-stream-page .pk-card.k-tag {
+	padding-bottom: 1.2rem;
+	background-image:
+		repeating-linear-gradient(180deg, transparent 0, transparent calc(1.55em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) calc(1.55em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) 1.55em),
+		linear-gradient(var(--swi-paper, #ffffff), var(--swi-paper, #ffffff));
+	background-size: 100% 100%, 100% 100%;
+	background-position: top left;
+	background-repeat: no-repeat;
+}
