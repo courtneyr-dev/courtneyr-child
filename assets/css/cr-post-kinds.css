@@ -922,3 +922,38 @@ body .pk-card {
 @media (max-width: 44rem) {
 	.cr-stream-page .cr-page__header::before { display: none; }
 }
+
+/* ---- v0.5.222: restore the round post-format icon badges ----
+   The boxed caption emblem collided with the meta link badges (IMDb).
+   Back to the circle avatar pinned top-left on the art. */
+.cr-stream-page .k-watch .pk-badge,
+.cr-stream-page .k-listen .pk-badge,
+.cr-stream-page .k-read .pk-badge,
+.cr-stream-page .k-jam .pk-badge,
+.cr-stream-page .k-play .pk-badge,
+.cr-stream-page .k-review .pk-badge,
+.cr-stream-page .k-wish .pk-badge,
+.cr-stream-page .k-acquisition .pk-badge {
+	top: 0.55rem;
+	bottom: auto;
+	left: 0.55rem;
+	width: var(--pk-badge, 34px);
+	height: var(--pk-badge, 34px);
+	border-radius: 50%;
+	border: 0;
+	background: var(--pk-kind, #241c4a);
+	color: var(--pk-badge-ink, #fff);
+	box-shadow: 0 0 0 3px #fbfaf5;
+}
+.cr-stream-page .k-watch .pk-stream-date,
+.cr-stream-page .k-listen .pk-stream-date,
+.cr-stream-page .k-read .pk-stream-date,
+.cr-stream-page .k-jam .pk-stream-date,
+.cr-stream-page .k-play .pk-stream-date,
+.cr-stream-page .k-review .pk-stream-date,
+.cr-stream-page .k-wish .pk-stream-date,
+.cr-stream-page .k-acquisition .pk-stream-date {
+	margin-left: 0;
+	min-height: 0;
+	display: block;
+}
