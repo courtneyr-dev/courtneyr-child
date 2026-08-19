@@ -412,6 +412,9 @@ body.blog:not(.paged) .cr-blog .post-grid > li:first-child .card::after {
    foot. Selectors stay flat per the Used-CSS constraint.
    ============================================================ */
 
+/* v0.5.213: grid gap tightened per the quality pass (composed, not sparse). */
+.cr-blog .post-grid { gap: 2.25rem 2rem; }
+
 /* Card shell — heavier shadow; grid mostly straight with two accent skews
    (replaces the v1 alternating ±0.5° tilt). */
 .cr-blog .card {
@@ -423,7 +426,9 @@ body.blog:not(.paged) .cr-blog .post-grid > li:first-child .card::after {
 .cr-blog .post-grid > li:nth-child(odd) .card,
 .cr-blog .post-grid > li:nth-child(even) .card { transform: none; }
 .cr-blog .post-grid > li:nth-child(3n+2) .card { transform: rotate(var(--cr-rotate-1)); }
-.cr-blog .post-grid > li:nth-child(6n+5) .card { transform: rotate(calc(var(--cr-rotate-neg2) * -1)); }
+.cr-blog .post-grid > li:nth-child(6n+5) .card { transform: rotate(var(--cr-rotate-2)); }
+.cr-blog .post-grid > li:nth-child(3n+2) .card__media figure { transform: rotate(0.8deg); }
+.cr-blog .post-grid > li:nth-child(6n+5) .card__media figure { transform: rotate(-0.8deg); }
 .cr-blog .card:hover {
 	transform: translate(-3px, -3px);
 	box-shadow: 8px 8px 0 var(--cr-ink);
@@ -433,7 +438,7 @@ body.blog:not(.paged) .cr-blog .post-grid > li:first-child .card::after {
    Shape cycles circle (sky) / diamond (periwinkle) / arch (light-orange). */
 .cr-blog .card__media {
 	min-height: 0;
-	padding: 1.4rem 1.4rem 0;
+	padding: 1rem 1rem 0;
 	border-bottom: 0;
 	background: none;
 	overflow: visible;
@@ -489,13 +494,13 @@ body.blog:not(.paged) .cr-blog .post-grid > li:first-child .card::after {
    The chips stay in the meta-row markup; only their container moves. */
 .cr-blog .card .card__chip {
 	position: absolute;
-	top: -0.55rem;
-	left: -0.9rem;
+	top: -0.7rem;
+	left: 1rem;
 	z-index: 3;
 	margin: 0;
 	display: flex;
 	gap: 0.3rem;
-	transform: rotate(-14deg);
+	transform: rotate(-8deg);
 }
 .cr-blog .card__chip .cr-term-chip {
 	background: var(--cr-tape, #f3e5b8);
@@ -510,7 +515,7 @@ body.blog:not(.paged) .cr-blog .post-grid > li:first-child .card::after {
 	display: flex;
 	flex-direction: column;
 	gap: 0.6rem;
-	padding: 1.15rem 1.4rem 1.4rem;
+	padding: 1rem 1.15rem 1.2rem;
 	flex: 1;
 }
 .cr-blog .card__title {
