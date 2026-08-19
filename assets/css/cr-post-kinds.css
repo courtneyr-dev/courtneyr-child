@@ -2144,3 +2144,45 @@ body .pk-card {
 	z-index: 0;
 }
 .cr-stream-page .wp-block-post-template > li.kind-mood .pk-card { position: relative; z-index: 1; }
+
+/* ---- v0.5.248: enamel pin corrections ----
+   Neutralize the older mood-sticker rules still bleeding through. */
+.cr-stream-page .pk-card.k-mood {
+	display: grid;
+	width: 9.5rem;
+	margin-inline: auto;
+}
+.cr-stream-page .pk-card.k-mood::after {
+	inset: auto;
+	top: auto;
+	left: auto;
+	bottom: -6%;
+	right: -8%;
+	width: 60%;
+	height: 55%;
+	border: 0;
+}
+.cr-stream-page .pk-card.k-mood::before {
+	inset: auto;
+	top: 7%;
+	left: 14%;
+	bottom: auto;
+	right: auto;
+}
+.cr-stream-page .k-mood .pk-mood { display: contents; }
+.cr-stream-page .k-mood .p-name {
+	display: block;
+	font-family: var(--cr-font-accent, "Roboto Slab", serif);
+	font-weight: 900;
+	font-size: 0.98rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #ffb703;
+	text-shadow: 1.5px 1.5px 0 #023047;
+}
+.cr-stream-page .k-mood .pk-meta {
+	display: block;
+	padding: 0;
+	margin: 0;
+}
+.cr-stream-page .k-mood .pk-meta > .dt-published { display: block; }
