@@ -2852,3 +2852,57 @@ body .pk-card {
 		right 2.5% top 91%,
 		left 1% top 96%;
 }
+
+/* ---- v0.5.274: zine print-shop furniture ----
+   Comic and print-production doodles on the query wrapper's pseudos
+   (third + fourth doodle fields): starburst, speech bubble, lightning,
+   barcode, registration bar, stamp frame, staples, ink splat,
+   cut-here line, photo corners. Same z-index -1 trick. */
+.cr-stream-page .cr-page__content > .wp-block-query::before,
+.cr-stream-page .cr-page__content > .wp-block-query::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	z-index: -1;
+	background-repeat: no-repeat;
+	opacity: 0.75;
+}
+.cr-stream-page .cr-page__content > .wp-block-query::before {
+	background-image:
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60' fill='none'%3E%3Cpath d='M30 3 L35 20 L50 10 L41 25 L58 28 L42 34 L52 49 L35 41 L32 58 L26 41 L10 50 L19 34 L2 30 L19 26 L10 11 L25 20 Z' stroke='%23fb8500' stroke-width='2.5' stroke-linejoin='round' transform='rotate(-8 30 30)'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 52' fill='none'%3E%3Cpath d='M8 8 h 48 a 4 4 0 0 1 4 4 v 22 a 4 4 0 0 1 -4 4 H 30 l -10 10 l 2 -10 H 8 a 4 4 0 0 1 -4 -4 V 12 a 4 4 0 0 1 4 -4 Z' stroke='%23241c4a' stroke-width='2.5' stroke-linejoin='round' opacity='0.4' transform='rotate(4 32 26)'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 56' fill='none'%3E%3Cpath d='M22 3 L8 30 h 9 L12 53 L30 24 h -10 L28 3 Z' fill='%23ffb703' stroke='%23b85f00' stroke-width='2' stroke-linejoin='round' transform='rotate(10 18 28)'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 34' fill='none'%3E%3Cg stroke='%23b85f00' stroke-width='4' stroke-linecap='round' transform='rotate(-7 15 17)'%3E%3Cline x1='9' y1='4' x2='9' y2='20'/%3E%3Cline x1='21' y1='4' x2='21' y2='20'/%3E%3C/g%3E%3Cg fill='%23b85f00' transform='rotate(-7 15 17)'%3E%3Ccircle cx='9' cy='29' r='2.4'/%3E%3Ccircle cx='21' cy='29' r='2.4'/%3E%3C/g%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 110 26' fill='none'%3E%3Cg opacity='0.5'%3E%3Cline x1='30' y1='13' x2='108' y2='13' stroke='%23241c4a' stroke-width='2' stroke-dasharray='5 5'/%3E%3Ccircle cx='9' cy='7' r='4' stroke='%23241c4a' stroke-width='2'/%3E%3Ccircle cx='9' cy='19' r='4' stroke='%23241c4a' stroke-width='2'/%3E%3Cpath d='M12 9 L 28 13 L 12 17' stroke='%23241c4a' stroke-width='2' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 34'%3E%3Cg fill='%23241c4a' opacity='0.45'%3E%3Crect x='4' width='3' height='34'/%3E%3Crect x='9' width='1.5' height='34'/%3E%3Crect x='13' width='4' height='34'/%3E%3Crect x='20' width='1.5' height='34'/%3E%3Crect x='24' width='2.5' height='34'/%3E%3Crect x='29' width='5' height='34'/%3E%3Crect x='37' width='1.5' height='34'/%3E%3Crect x='41' width='3' height='34'/%3E%3Crect x='47' width='1.5' height='34'/%3E%3Crect x='51' width='4' height='34'/%3E%3Crect x='58' width='2' height='34'/%3E%3Crect x='63' width='3.5' height='34'/%3E%3C/g%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 20'%3E%3Cg transform='rotate(-3 45 10)'%3E%3Crect x='2' y='2' width='16' height='16' fill='%23fb8500'/%3E%3Crect x='20' y='2' width='16' height='16' fill='%23ffb703'/%3E%3Crect x='38' y='2' width='16' height='16' fill='%238ecae6'/%3E%3Crect x='56' y='2' width='16' height='16' fill='%23bcb5e3'/%3E%3Crect x='74' y='2' width='16' height='16' fill='%23241c4a'/%3E%3C/g%3E%3C/svg%3E");
+	background-size: 3.2rem 3.2rem, 3.4rem 2.8rem, 1.8rem 2.8rem, 1.5rem 1.7rem, 5.5rem 1.3rem, 3.4rem 1.7rem, 4.2rem 1rem;
+	background-position:
+		right 0.7% top 4%,
+		left 0.9% top 11%,
+		right 2% top 23%,
+		left 2.4% top 36%,
+		left 0.5% top 50%,
+		right 1.1% top 59%,
+		left 1% top 79%;
+}
+.cr-stream-page .cr-page__content > .wp-block-query::after {
+	background-image:
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 68' fill='none'%3E%3Crect x='4' y='4' width='48' height='60' stroke='%238ecae6' stroke-width='3' stroke-dasharray='0.1 9' stroke-linecap='round' transform='rotate(6 28 34)'/%3E%3Crect x='13' y='13' width='30' height='42' stroke='%238ecae6' stroke-width='2' transform='rotate(6 28 34)'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 20' fill='none'%3E%3Cg stroke='%23241c4a' stroke-width='3' stroke-linecap='round' opacity='0.55'%3E%3Cline x1='5' y1='6' x2='29' y2='4'/%3E%3Cline x1='6' y1='15' x2='30' y2='13'/%3E%3C/g%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 52' fill='none'%3E%3Cpath d='M30 10 C 40 4, 52 10, 50 22 C 56 24, 56 34, 48 36 C 50 46, 38 50, 30 44 C 20 50, 10 44, 12 34 C 4 32, 6 20, 14 20 C 12 10, 22 4, 30 10 Z' fill='%23bcb5e3' opacity='0.6'/%3E%3Ccircle cx='55' cy='14' r='2.5' fill='%23bcb5e3' opacity='0.6'/%3E%3Ccircle cx='8' cy='42' r='2' fill='%23bcb5e3' opacity='0.6'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='%23241c4a' opacity='0.4'%3E%3Cpath d='M2 2 h 14 L 2 16 Z'/%3E%3Cpath d='M38 24 v 14 H 24 Z'/%3E%3C/g%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath fill='%23ffb703' d='M15 1 L18 11 L28 8 L21 15 L28 22 L18 19 L15 29 L12 19 L2 22 L9 15 L2 8 L12 11 Z'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 24' fill='none'%3E%3Cg stroke-linecap='round' stroke-width='2.5'%3E%3Cg stroke='%238ecae6'%3E%3Cline x1='8' y1='4' x2='8' y2='14'/%3E%3Cline x1='3' y1='9' x2='13' y2='9'/%3E%3C/g%3E%3Cg stroke='%23fb8500'%3E%3Cline x1='30' y1='10' x2='30' y2='20'/%3E%3Cline x1='25' y1='15' x2='35' y2='15'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60' fill='none'%3E%3Cpath d='M30 3 L35 20 L50 10 L41 25 L58 28 L42 34 L52 49 L35 41 L32 58 L26 41 L10 50 L19 34 L2 30 L19 26 L10 11 L25 20 Z' stroke='%23126782' stroke-width='2.5' stroke-linejoin='round' transform='rotate(14 30 30)'/%3E%3C/svg%3E");
+	background-size: 3rem 3.6rem, 1.7rem 1rem, 3rem 2.6rem, 2rem 2rem, 1.4rem 1.4rem, 2.2rem 1.2rem, 2.6rem 2.6rem;
+	background-position:
+		left 0.6% top 7%,
+		right 2.6% top 16%,
+		right 0.6% top 43%,
+		left 1.8% top 61%,
+		right 2.2% top 76%,
+		left 0.9% top 88%,
+		right 0.8% top 96%;
+}
