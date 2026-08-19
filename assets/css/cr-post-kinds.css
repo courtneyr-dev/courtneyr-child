@@ -1243,3 +1243,22 @@ body .pk-card {
 	box-shadow: none;
 	aspect-ratio: auto;
 }
+
+/* ---- v0.5.229: remove shelf shadows; mood is a true circle ---- */
+.cr-stream-page .wp-block-post-template > li.kind-watch::after,
+.cr-stream-page .wp-block-post-template > li.kind-listen::after,
+.cr-stream-page .wp-block-post-template > li.kind-read::after,
+.cr-stream-page .wp-block-post-template > li.kind-jam::after,
+.cr-stream-page .wp-block-post-template > li.kind-play::after,
+.cr-stream-page .wp-block-post-template > li.kind-review::after,
+.cr-stream-page .wp-block-post-template > li.kind-wish::after,
+.cr-stream-page .wp-block-post-template > li.kind-acquisition::after { content: none; }
+
+.cr-stream-page .pk-card.k-mood {
+	aspect-ratio: 1 / 1;
+	height: auto;
+	overflow: hidden;
+}
+.cr-stream-page .k-mood .pk-note,
+.cr-stream-page .k-mood .pk-excerpt,
+.cr-stream-page .k-mood .pk-meta { display: none; }
