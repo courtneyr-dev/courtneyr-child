@@ -331,35 +331,35 @@ body .pk-card {
 }
 
 /* No-art cover kinds → home-recorded cassette. */
-.cr-stream-page .pk-card--stream.k-watch:not(:has(.pk-media)),
-.cr-stream-page .pk-card--stream.k-listen:not(:has(.pk-media)) {
+.cr-stream-page .pk-card--stream.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)),
+.cr-stream-page .pk-card--stream.k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) {
 	background: #1a1714;
 	border-radius: 8px;
 	overflow: visible;
 	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a);
 	padding: 0.7rem 0.7rem 3.6rem;
 }
-.cr-stream-page .k-watch:not(:has(.pk-media)) .pk-body,
-.cr-stream-page .k-listen:not(:has(.pk-media)) .pk-body {
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-body,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-body {
 	background: #fbfaf5;
 	border-radius: 3px;
 	padding: 0.55rem 0.7rem 0.5rem;
 	background-image: repeating-linear-gradient(180deg, transparent 0, transparent calc(1.5em - 1px), rgba(36, 28, 74, 0.15) calc(1.5em - 1px), rgba(36, 28, 74, 0.15) 1.5em);
 }
-.cr-stream-page .k-watch:not(:has(.pk-media)) .pk-title,
-.cr-stream-page .k-listen:not(:has(.pk-media)) .pk-title {
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title {
 	color: #241c4a;
 	font-family: var(--cr-font-display, cursive);
 	font-size: 0.9rem;
 	line-height: 1.5;
 	padding: 0;
 }
-.cr-stream-page .k-watch:not(:has(.pk-media)) .pk-sub,
-.cr-stream-page .k-listen:not(:has(.pk-media)) .pk-sub { color: #3d2f6e; padding: 0.15rem 0 0; }
-.cr-stream-page .k-watch:not(:has(.pk-media)) .pk-stream-date time,
-.cr-stream-page .k-listen:not(:has(.pk-media)) .pk-stream-date time { border: 0; padding: 0; color: #3d2f6e; }
-.cr-stream-page .k-watch:not(:has(.pk-media))::after,
-.cr-stream-page .k-listen:not(:has(.pk-media))::after {
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-sub,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-sub { color: #3d2f6e; padding: 0.15rem 0 0; }
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-stream-date time,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-stream-date time { border: 0; padding: 0; color: #3d2f6e; }
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed))::after,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed))::after {
 	content: "";
 	position: absolute;
 	left: 1.2rem;
@@ -373,8 +373,8 @@ body .pk-card {
 		radial-gradient(circle 1.1rem at calc(100% - 1.4rem) 50%, #0d0b09 40%, #3a342f 41% 100%, transparent 100%),
 		linear-gradient(#3a342f, #3a342f) center / calc(100% - 5rem) 2px no-repeat;
 }
-.cr-stream-page .k-watch:not(:has(.pk-media)) .pk-kindlabel,
-.cr-stream-page .k-listen:not(:has(.pk-media)) .pk-kindlabel {
+.cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-kindlabel,
+.cr-stream-page .k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-kindlabel {
 	position: static;
 	width: auto;
 	height: auto;
@@ -561,3 +561,54 @@ body .pk-card {
 /* dark-mode hard-shadow color for the drop-shadow() cases */
 :root { --cr-hard-color: #241c4a; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --cr-hard-color: #ffb703; } }
+
+/* ---- v0.5.215: close the gap to Stream.dc.html (Courtney's compare) ---- */
+
+/* The collage needs the full 72rem stage, not the page's prose column. */
+.cr-stream-page .cr-page__content > .wp-block-query {
+	max-width: min(72rem, 94vw) !important;
+	margin-inline: auto;
+}
+
+/* Titles: never underlined on stream cards; covers carry no read-more. */
+.cr-stream-page .pk-card--stream .pk-title a { text-decoration: none; }
+.cr-stream-page .pk-card--stream .more-link,
+.cr-stream-page .pk-card--stream .wp-block-read-more,
+.cr-stream-page .pk-card--stream .pk-readmore { display: none; }
+
+/* Embedded video/audio counts as the cover art: pull it to the top,
+   full bleed, and DON'T treat the card as artless. */
+.cr-stream-page .pk-card--stream .pk-embed {
+	order: -1;
+	margin: 0;
+	border-radius: 0;
+	border-bottom: 2px solid rgba(251, 250, 245, 0.7);
+}
+
+/* Badge only pins over actual art; on artless boxes it collided with
+   the title — hide it there (the sticker still names the kind). */
+.cr-stream-page .pk-card--stream.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card--stream.k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card--stream.k-read:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card--stream.k-jam:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card--stream.k-play:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card--stream.k-review:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card--stream.k-wish:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
+.cr-stream-page .pk-card--stream.k-acquisition:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge { display: none; }
+
+/* Artless boxes also give the title room where the sticker sits. */
+.cr-stream-page .pk-card--stream.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
+.cr-stream-page .pk-card--stream.k-jam:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
+.cr-stream-page .pk-card--stream.k-acquisition:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
+.cr-stream-page .pk-card--stream.k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title { padding: 0.9rem 4.4rem 0 0.65rem; }
+
+/* Sticker: long kind names (acquisition, review) must fit the circle. */
+.cr-stream-page .pk-card--stream .pk-kindlabel {
+	font-size: 0.42rem;
+	letter-spacing: 0.02em;
+	line-height: 1.1;
+	overflow: hidden;
+	overflow-wrap: anywhere;
+}
+
+/* Cassette fallback fires ONLY when there is neither image nor embed. */
