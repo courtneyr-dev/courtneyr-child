@@ -2906,3 +2906,34 @@ body .pk-card {
 		left 0.9% top 88%,
 		right 0.8% top 96%;
 }
+
+/* ---- v0.5.276: dark-mode contrast pass (WCAG AA) ----
+   These cards keep raw light paper in dark mode (paper is a physical
+   object), but their text inherited the flipped ivory/periwinkle
+   tokens — 1.0–1.9:1 on paper. Re-pin the ink tokens locally to the
+   light-mode values: identical rendering in light mode, dark ink on
+   paper in dark mode (>= 5.9:1 on the darkest paper, manila). */
+.cr-stream-page .pk-card.k-article,
+.cr-stream-page .pk-card.k-reply,
+.cr-stream-page .pk-card.k-quote,
+.cr-stream-page .pk-card.k-issue,
+.cr-stream-page .pk-card.k-favorite,
+.cr-stream-page .pk-card.k-follow,
+.cr-stream-page .pk-card.k-like,
+.cr-stream-page .pk-card.k-repost,
+.cr-stream-page .pk-card.k-tag,
+.cr-stream-page .pk-card.k-question,
+.cr-stream-page .pk-card.k-craft,
+.cr-stream-page .pk-card.k-exercise,
+.cr-stream-page .pk-card.k-eat,
+.cr-stream-page .pk-card.k-photo,
+.cr-stream-page .pk-card.k-review {
+	--cr-ink: #241c4a;
+	--cr-ink-muted: #126782;
+	--cr-ink-soft: #3d2f6e;
+	--cr-border: rgba(36, 28, 74, 0.12);
+	--cr-border-strong: rgba(36, 28, 74, 0.24);
+	--cr-link: #126782;
+}
+/* cassette label sub sits on the raw label paper in both modes */
+.cr-stream-page .k-audio .pk-sub { color: #126782; }
