@@ -2948,3 +2948,9 @@ body .pk-card {
 	color: #ffb703;
 	border-color: #ffb703;
 }
+
+/* ---- v0.5.278: masthead spacing + alignment ----
+   More air under the header bar; the constrained layout was centering
+   the 40rem lede while eyebrow and title sat left — align all three. */
+.cr-stream-page .cr-stream__masthead { margin-top: 4.25rem; }
+.cr-stream-page .cr-stream__masthead > * { margin-left: 0 !important; margin-right: auto !important; }
