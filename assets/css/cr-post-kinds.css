@@ -2924,10 +2924,8 @@ body .pk-card {
 .cr-stream-page .pk-card.k-tag,
 .cr-stream-page .pk-card.k-question,
 .cr-stream-page .pk-card.k-craft,
-.cr-stream-page .pk-card.k-exercise,
 .cr-stream-page .pk-card.k-eat,
-.cr-stream-page .pk-card.k-photo,
-.cr-stream-page .pk-card.k-review {
+.cr-stream-page .pk-card.k-photo {
 	--cr-ink: #241c4a;
 	--cr-ink-muted: #126782;
 	--cr-ink-soft: #3d2f6e;
@@ -2937,3 +2935,16 @@ body .pk-card {
 }
 /* cassette label sub sits on the raw label paper in both modes */
 .cr-stream-page .k-audio .pk-sub { color: #126782; }
+
+/* rsvp GOING stamp: burnt orange reads 3.6:1 on the dark ticket —
+   flip to selective yellow in dark mode only (~9:1). */
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .cr-stream-page .k-rsvp .pk-chip.p-rsvp {
+		color: #ffb703;
+		border-color: #ffb703;
+	}
+}
+:root[data-theme="dark"] .cr-stream-page .k-rsvp .pk-chip.p-rsvp {
+	color: #ffb703;
+	border-color: #ffb703;
+}
