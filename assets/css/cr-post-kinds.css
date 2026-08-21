@@ -3167,3 +3167,11 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-review, .kind-wish, .kind-acquisition).single .single-post__content .pk-card::after {
 	content: none;
 }
+
+/* ---- v0.6.3: cover-kind singles drop the header kind chip ----
+   The cover box's price sticker already announces the kind; the
+   header chip doubled it (and read as a stray outline). Card-less
+   kinds keep the chip — it's their only kind signal. */
+body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-review, .kind-wish, .kind-acquisition).single .single-post__kind {
+	display: none;
+}
