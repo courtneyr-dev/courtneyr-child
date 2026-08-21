@@ -2954,3 +2954,94 @@ body .pk-card {
    the 40rem lede while eyebrow and title sat left — align all three. */
 .cr-stream-page .cr-stream__masthead { margin-top: 4.25rem; }
 .cr-stream-page .cr-stream__masthead > * { margin-left: 0 !important; margin-right: auto !important; }
+
+/* ============================================================
+   v0.6.0 — SINGLE-POST SHELL, Phase 1.
+   Zine shell for every kind's permalink, scoped to the
+   body.kind-{slug} class from kind_body_class(). Regular pages
+   and non-kind views are untouched. Families and per-kind
+   carry-over land in later phases.
+   ============================================================ */
+
+/* Dotted paper ground, same grammar as the stream. */
+body[class*="kind-"].single .single-post {
+	background-image: radial-gradient(var(--cr-border, rgba(36, 28, 74, 0.12)) 1px, transparent 1px);
+	background-size: 22px 22px;
+}
+
+/* Kind chip rides the per-kind accent; category chip stays tape. */
+body[class*="kind-"].single .single-post__kind a {
+	background: var(--pk-kind, var(--cr-tape, #f3e5b8));
+	color: var(--pk-badge-ink, var(--cr-tape-ink, #241c4a));
+	border: 2px solid var(--cr-ink, #241c4a);
+	box-shadow: 2px 2px 0 var(--cr-hard-color, #241c4a);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-weight: 700;
+	transform: rotate(-2deg);
+	display: inline-block;
+}
+
+/* Marker bar under the post header, stream masthead energy. */
+body[class*="kind-"].single .single-post__header::after {
+	content: "";
+	display: block;
+	width: 7rem;
+	height: 0.45rem;
+	margin-top: 0.9rem;
+	background: var(--cr-ut-orange, #fb8500);
+	transform: rotate(-1.2deg);
+}
+
+/* Featured image pastes onto the page: ink border + hard shadow. */
+body[class*="kind-"].single .single-post__featured img {
+	border: 2px solid var(--cr-ink, #241c4a);
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
+}
+
+/* The in-content kind card gets the stream's paper baseline. */
+body[class*="kind-"].single .single-post__content .pk-card {
+	border: 2px solid var(--cr-ink, #241c4a);
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
+	background: var(--cr-surface-elevated, #fff);
+}
+
+/* One quiet margin doodle field — a fraction of the stream dose. */
+body[class*="kind-"].single .single-post {
+	position: relative;
+}
+
+body[class*="kind-"].single .single-post::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+	background-image:
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%238ecae6' d='M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none'%3E%3Ccircle cx='20' cy='20' r='16' stroke='%23b85f00' stroke-width='2.5' stroke-dasharray='4 5'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 30' fill='none'%3E%3Cpath d='M4 22 q 6 -18 12 0 q 6 18 12 0 q 6 -18 12 0 q 6 18 12 0 q 6 -18 12 0' stroke='%23fb8500' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none'%3E%3Cpath d='M20 32 C 8 24, 5 14, 11 10 C 15 7, 19 10, 20 14 C 21 10, 25 7, 29 10 C 35 14, 32 24, 20 32 Z' stroke='%23bcb5e3' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-size: 1.1rem 1.1rem, 2rem 2rem, 4rem 1.5rem, 2.2rem 2.2rem;
+	background-position:
+		left 2% top 9rem,
+		right 1.5% top 16rem,
+		left 1.2% top 55%,
+		right 2% top 78%;
+	opacity: 0.6;
+}
+
+body[class*="kind-"].single .single-post > * {
+	position: relative;
+	z-index: 1;
+}
+
+/* Checkin's OSM embed becomes a paper map (stays light both modes). */
+body.kind-checkin.single .pk-embed--map,
+body.kind-checkin.single .pk-embed--map iframe {
+	border: 2px solid #241c4a;
+	box-shadow: 4px 4px 0 var(--cr-hard-color, #241c4a);
+	transform: rotate(-0.8deg);
+	background: #fbfaf5;
+}

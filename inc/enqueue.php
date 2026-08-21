@@ -634,3 +634,22 @@ function stream_body_class( array $classes ): array {
 	return $classes;
 }
 add_filter( 'body_class', __NAMESPACE__ . '\\stream_body_class' );
+
+/**
+ * Adds `kind-{slug}` on singular posts so the single-post kind styling
+ * (cr-post-kinds.css) can scope per kind — PKIW's post_class filter never
+ * runs here because single.html has no post_class wrapper.
+ *
+ * @param string[] $classes Body classes.
+ * @return string[]
+ */
+function kind_body_class( array $classes ): array {
+	if ( is_singular( 'post' ) ) {
+		$terms = get_the_terms( get_queried_object_id(), 'kind' );
+		if ( $terms && ! is_wp_error( $terms ) ) {
+			$classes[] = 'kind-' . $terms[0]->slug;
+		}
+	}
+	return $classes;
+}
+add_filter( 'body_class', __NAMESPACE__ . '\\kind_body_class' );
