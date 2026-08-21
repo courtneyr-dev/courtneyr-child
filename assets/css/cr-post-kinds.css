@@ -3198,3 +3198,10 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 	order: -1;
 	margin: 0;
 }
+
+/* ---- v0.6.7: the base card's --pk-tint wash is an inset ::before
+   overlay — over the violet box it rendered as slate. Off for the
+   cover singles; the box IS the paint. ---- */
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition)::before {
+	content: none !important;
+}
