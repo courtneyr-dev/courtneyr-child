@@ -653,3 +653,18 @@ function kind_body_class( array $classes ): array {
 	return $classes;
 }
 add_filter( 'body_class', __NAMESPACE__ . '\\kind_body_class' );
+
+/**
+ * Icons for the site's custom kind terms in the editor's kind picker,
+ * via PKIW's postKindsIndieweb.kindIcons filter.
+ */
+function enqueue_kind_icons(): void {
+	wp_enqueue_script(
+		'courtneyr-kind-icons',
+		get_stylesheet_directory_uri() . '/assets/js/cr-kind-icons.js',
+		array( 'wp-hooks', 'wp-element' ),
+		COURTNEYR_CHILD_VERSION,
+		true
+	);
+}
+add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\enqueue_kind_icons' );
