@@ -3205,3 +3205,50 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 .single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition)::before {
 	content: none !important;
 }
+
+/* ---- v0.6.9: editor status chips get self-consistent colors ----
+   The plugin's editor cards paint .post-kinds-card__badge from
+   --pkiw-state-{info,success,error,warning} — tokens it never defines —
+   while the chip's text is `inherit`. Background and foreground are
+   decided independently, so the label can land dark-on-dark and vanish.
+   Define the state tokens from the palette AND pin a contrasting ink,
+   so the chip is legible whichever state it is. Editor-only: this class
+   exists only in the block editor's card markup. */
+.post-kinds-card__badge {
+	background: var(--cr-periwinkle, #bcb5e3) !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+	padding: 0.15rem 0.6rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+}
+
+.post-kinds-card__badge--reading,
+.post-kinds-card__badge--playing,
+.post-kinds-card__badge--movie,
+.post-kinds-card__badge--interested,
+.post-kinds-card__badge--remote {
+	background: var(--cr-sky-blue, #8ecae6) !important;
+}
+
+.post-kinds-card__badge--finished,
+.post-kinds-card__badge--completed,
+.post-kinds-card__badge--going,
+.post-kinds-card__badge--yes {
+	background: #cfe8d8 !important;
+}
+
+.post-kinds-card__badge--abandoned,
+.post-kinds-card__badge--no,
+.post-kinds-card__badge--not-going {
+	background: #f4d4d8 !important;
+}
+
+.post-kinds-card__badge--maybe {
+	background: var(--cr-selective-yellow, #ffb703) !important;
+}
+
+.post-kinds-card__badge--to-read,
+.post-kinds-card__badge--backlog,
+.post-kinds-card__badge--wishlist {
+	background: var(--cr-tape, #f3e5b8) !important;
+}
