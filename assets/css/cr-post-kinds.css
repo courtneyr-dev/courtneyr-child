@@ -3175,3 +3175,20 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-review, .kind-wish, .kind-acquisition).single .single-post__kind {
 	display: none;
 }
+
+/* ---- v0.6.4: dedicated cards nest pk-media INSIDE pk-body ----
+   (unlike the stream's generic card) — make the body the flex
+   column, kill its tint wash so the deep violet shows, and put
+   the art first so the badge/sticker land on it. */
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-body {
+	display: flex;
+	flex-direction: column;
+	background: none;
+	padding: 0;
+	margin: 0;
+}
+
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-body .pk-media {
+	order: -1;
+	margin: 0;
+}
