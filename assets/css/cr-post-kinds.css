@@ -3045,3 +3045,125 @@ body.kind-checkin.single .pk-embed--map iframe {
 	transform: rotate(-0.8deg);
 	background: #fbfaf5;
 }
+
+/* ============================================================
+   v0.6.2 — Phase 3a: media-log singles get the stream cover box.
+   Same recipe as the stream cover kinds (violet box, art on top
+   edge-to-edge, ivory caption band, price-sticker kind label),
+   hero-sized and centered in the post content.
+   ============================================================ */
+body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-review, .kind-wish, .kind-acquisition).single .single-post__content .pk-card {
+	display: flex;
+	flex-direction: column;
+	max-width: 24rem;
+	margin-inline: auto;
+	padding: 0;
+	background: #241c4a;
+	border: 0;
+	border-radius: 5px;
+	overflow: hidden;
+	box-shadow: var(--cr-shadow-hard-2, 6px 6px 0 var(--cr-ink, #241c4a));
+	color: #fbfaf5;
+	position: relative;
+}
+
+/* Art big, on top, edge to edge. */
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-media {
+	order: -1;
+	display: block;
+	margin: 0;
+}
+
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-media img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: 0;
+	border: 0;
+	border-bottom: 2px solid rgba(251, 250, 245, 0.7);
+	box-shadow: none;
+	object-fit: cover;
+}
+
+.single .single-post__content .pk-card:is(.k-watch, .k-read, .k-wish) .pk-media img { aspect-ratio: 2 / 3; }
+.single .single-post__content .pk-card:is(.k-listen, .k-jam) .pk-media img { aspect-ratio: 1 / 1; }
+.single .single-post__content .pk-card:is(.k-play, .k-review, .k-acquisition) .pk-media img { aspect-ratio: 4 / 3; }
+
+/* Caption band. */
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-title {
+	color: #fbfaf5;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 700;
+	font-size: 1.05rem;
+	line-height: 1.25;
+	padding: 0.6rem 0.75rem 0;
+}
+
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-title a { color: inherit; text-decoration: none; }
+
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-sub {
+	padding: 0.2rem 0.75rem 0;
+	font-size: 0.85rem;
+	color: rgba(251, 250, 245, 0.85);
+}
+
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-stars {
+	color: var(--cr-selective-yellow, #ffb703);
+	padding: 0.35rem 0.75rem 0;
+}
+
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-excerpt { padding: 0.3rem 0.75rem 0; }
+
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-meta { padding: 0.45rem 0.75rem 0.8rem; }
+
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-link {
+	font-family: var(--cr-font-accent, serif);
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--cr-sky-blue, #8ecae6);
+}
+
+/* Kind badge pinned to the art, ivory ring. */
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-badge {
+	position: absolute;
+	top: 0.55rem;
+	left: 0.55rem;
+	z-index: 2;
+	box-shadow: 0 0 0 3px #fbfaf5;
+}
+
+/* Kind label → price sticker. */
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-kindlabel {
+	position: absolute;
+	top: 0.55rem;
+	right: 0.55rem;
+	z-index: 2;
+	display: grid;
+	place-items: center;
+	width: 3.4rem;
+	height: 3.4rem;
+	margin: 0;
+	padding: 0.2rem;
+	border-radius: 50%;
+	background: var(--cr-selective-yellow, #ffb703);
+	border: 2px solid var(--cr-ut-orange, #fb8500);
+	box-shadow: 0 0 0 3px #fbfaf5;
+	color: #023047;
+	font-size: 0.5rem;
+	font-weight: 900;
+	letter-spacing: 0.04em;
+	text-align: center;
+	line-height: 1.15;
+	transform: rotate(8deg);
+}
+
+/* Wish: not yet mine. */
+.single .single-post__content .pk-card.k-wish .pk-media img { opacity: 0.75; }
+.single .single-post__content .pk-card.k-wish { outline: 2px dashed rgba(251, 250, 245, 0.6); outline-offset: -6px; }
+
+/* Shelf shadow under the hero box. */
+body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-review, .kind-wish, .kind-acquisition).single .single-post__content .pk-card::after {
+	content: none;
+}
