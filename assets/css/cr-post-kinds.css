@@ -3252,3 +3252,28 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 .post-kinds-card__badge--wishlist {
 	background: var(--cr-tape, #f3e5b8) !important;
 }
+
+/* ---- v0.6.10: cover-kind singles — one piece of artwork, sized right ----
+   1. The card already shows the cover; the shell's featured image repeats
+      it full-bleed above. The card is the hero, so the duplicate goes.
+   2. The plugin sizes book/poster art as a 48x70 thumbnail and lays
+      .pk-media out as a row. Inside the cover box the art is the hero:
+      neutralize the row and let the image fill the box. */
+body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-review, .kind-wish, .kind-acquisition).single .single-post__featured {
+	display: none !important;
+}
+
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-media {
+	display: block !important;
+	gap: 0 !important;
+	margin-top: 0 !important;
+}
+
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-media img,
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-thumb--poster,
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-thumb {
+	width: 100% !important;
+	height: auto !important;
+	max-width: none !important;
+	border-radius: 0 !important;
+}
