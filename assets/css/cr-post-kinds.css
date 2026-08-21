@@ -3277,3 +3277,17 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 	max-width: none !important;
 	border-radius: 0 !important;
 }
+
+/* ---- v0.6.11: cover box body stretches to the card edge ----
+   .pk-card carries align-items:start from the plugin's grid layout;
+   once the card is a column flex, that made .pk-body shrink to its
+   content (352px inside a 384px card) so the art stopped short of
+   the edge. Stretch it and the cover fills the box edge to edge. */
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) {
+	align-items: stretch !important;
+}
+
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play, .k-review, .k-wish, .k-acquisition) .pk-body {
+	width: 100% !important;
+	align-self: stretch !important;
+}
