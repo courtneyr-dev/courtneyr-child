@@ -3173,7 +3173,10 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
    header chip doubled it (and read as a stray outline). Card-less
    kinds keep the chip — it's their only kind signal. */
 body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-review, .kind-wish, .kind-acquisition).single .single-post__kind {
-	display: none;
+	/* !important: something in the 70-sheet cascade outranks the plain
+	   declaration (verified empirically); this is a binary decorative
+	   toggle, so the sledgehammer is safe. */
+	display: none !important;
 }
 
 /* ---- v0.6.4: dedicated cards nest pk-media INSIDE pk-body ----
