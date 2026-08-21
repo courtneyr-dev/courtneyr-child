@@ -631,16 +631,32 @@ body.wp-admin {
    text + chevron icon to ~17:1 contrast against the navy bg. Scope
    limited to the post-publish panel so we don't flatten button styling
    across the rest of the editor. */
-.editor-post-publish-panel .components-button,
-.editor-post-publish-panel__postpublish .components-button,
-.editor-post-publish-panel__postpublish-buttons .components-button.is-primary,
-.editor-post-publish-panel .components-button.is-primary {
+/* v0.6.8 — narrowed. The original selectors matched EVERY button in the
+   publish flow, including the pre-publish checklist's panel toggles
+   ("Visibility: Public", "Publish: Immediately", "Yoast SEO") and the
+   Cancel button, which sit on white — ivory on white is invisible.
+   Ivory belongs only on the buttons that actually have the violet fill. */
+.editor-post-publish-panel .components-button.is-primary,
+.editor-post-publish-panel__postpublish .components-button.is-primary,
+.editor-post-publish-panel__postpublish-buttons .components-button.is-primary {
 	color: var(--cr-printer-ivory, #fbfaf5) !important;
 }
-.editor-post-publish-panel .components-button svg,
-.editor-post-publish-panel__postpublish .components-button svg,
-.editor-post-publish-panel__postpublish-buttons .components-button.is-primary svg,
-.editor-post-publish-panel .components-button.is-primary svg {
+.editor-post-publish-panel .components-button.is-primary svg,
+.editor-post-publish-panel__postpublish .components-button.is-primary svg,
+.editor-post-publish-panel__postpublish-buttons .components-button.is-primary svg {
+	fill: currentColor !important;
+}
+
+/* Everything else in the publish flow reads as ink on white: panel
+   toggles, Cancel, and any tertiary/link buttons. */
+.editor-post-publish-panel .components-panel__body-toggle,
+.editor-post-publish-panel .components-button:not(.is-primary),
+.editor-post-publish-panel__prepublish .components-button:not(.is-primary),
+.editor-post-publish-panel__prepublish .components-panel__body-title {
+	color: var(--cr-admin-ink, #241c4a) !important;
+}
+.editor-post-publish-panel .components-panel__body-toggle svg,
+.editor-post-publish-panel .components-button:not(.is-primary) svg {
 	fill: currentColor !important;
 }
 /* Section labels in the panel ("What's next?", "POST ADDRESS",
