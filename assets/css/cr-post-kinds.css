@@ -3058,7 +3058,10 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 	max-width: 24rem;
 	margin-inline: auto;
 	padding: 0;
-	background: #241c4a;
+	/* Russian Violet from the theme palette — !important because a
+	   logged-in-session sheet outranked the plain declaration and
+	   rendered a slate fallback instead. */
+	background: var(--cr-russian-violet, #241c4a) !important;
 	border: 0;
 	border-radius: 5px;
 	overflow: hidden;
