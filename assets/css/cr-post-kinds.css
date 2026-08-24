@@ -3081,8 +3081,8 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
    clipped by the circle. Raw hexes on the pin deliberate: a
    physical pin looks identical in dark mode. Covers both card
    shapes: the mood-card block (micro-post) and the generic
-   stream card, whose emoji is injected by inc/post-kinds.php
-   (stream_card_mood_emoji).
+   stream card, whose emoji the plugin renders itself
+   (render_generic_stream_card, post-kinds-for-indieweb).
    ============================================================ */
 .cr-stream-page .pk-card.k-mood {
 	display: grid;
