@@ -452,18 +452,6 @@ body .pk-card {
 	background-image: repeating-linear-gradient(180deg, transparent 0, transparent calc(1.6em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) calc(1.6em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) 1.6em);
 }
 
-/* mood: no chrome at all */
-.cr-stream-page .pk-card.k-mood {
-	background: none;
-	border: 0;
-	box-shadow: none;
-	text-align: center;
-	padding: 0.5rem 0;
-}
-.cr-stream-page .pk-card.k-mood .pk-badge { position: static; margin: 0 auto 0.3rem; width: 2.6rem; height: 2.6rem; box-shadow: none; }
-.cr-stream-page .pk-card.k-mood .pk-title { font-family: var(--cr-font-display, cursive); font-size: 1rem; padding: 0; }
-.cr-stream-page .pk-card.k-mood .pk-kindlabel { display: none; }
-
 /* drink: coaster */
 .cr-stream-page .pk-card.k-drink {
 	background: var(--cr-light-orange, #fee2c3);
@@ -729,45 +717,6 @@ body .pk-card {
 	opacity: 1;
 	border-radius: inherit;
 }
-
-/* Mood: a round sticker — white face, cerulean ring, dashed inner ring,
-   soft subtle shadow (the one deliberate exception to hard shadows). */
-.cr-stream-page .pk-card.k-mood {
-	background: var(--cr-surface-elevated, #fff);
-	border: 3px solid var(--cr-cerulean, #126782);
-	border-radius: 50%;
-	aspect-ratio: 1;
-	width: min(14rem, 90%);
-	margin-inline: auto;
-	display: grid;
-	place-content: center;
-	text-align: center;
-	padding: 1.6rem;
-	box-shadow: 0 3px 12px rgba(36, 28, 74, 0.18);
-	position: relative;
-}
-.cr-stream-page .pk-card.k-mood::after {
-	content: "";
-	position: absolute;
-	inset: 0.55rem;
-	border: 2px dashed var(--cr-cerulean, #126782);
-	border-radius: 50%;
-	pointer-events: none;
-}
-.cr-stream-page .pk-card.k-mood .pk-badge {
-	position: static;
-	margin: 0 auto 0.35rem;
-	box-shadow: none;
-}
-.cr-stream-page .pk-card.k-mood .pk-title {
-	font-family: var(--cr-font-display, cursive);
-	font-size: 1.05rem;
-	color: var(--cr-ink, #241c4a);
-	padding: 0;
-}
-.cr-stream-page .pk-card.k-mood .pk-sub,
-.cr-stream-page .pk-card.k-mood .pk-stream-date { color: var(--cr-cerulean, #126782); padding: 0; }
-.cr-stream-page .pk-card.k-mood .pk-stream-date time { border: 0; padding: 0; }
 
 /* ---- v0.5.221: fidelity pass against Stream.dc.html exact recipes ---- */
 
@@ -1244,7 +1193,7 @@ body .pk-card {
 	aspect-ratio: auto;
 }
 
-/* ---- v0.5.229: remove shelf shadows; mood is a true circle ---- */
+/* ---- v0.5.229: remove shelf shadows ---- */
 .cr-stream-page .wp-block-post-template > li.kind-watch::after,
 .cr-stream-page .wp-block-post-template > li.kind-listen::after,
 .cr-stream-page .wp-block-post-template > li.kind-read::after,
@@ -1253,15 +1202,6 @@ body .pk-card {
 .cr-stream-page .wp-block-post-template > li.kind-review::after,
 .cr-stream-page .wp-block-post-template > li.kind-wish::after,
 .cr-stream-page .wp-block-post-template > li.kind-acquisition::after { content: none; }
-
-.cr-stream-page .pk-card.k-mood {
-	aspect-ratio: 1 / 1;
-	height: auto;
-	overflow: hidden;
-}
-.cr-stream-page .k-mood .pk-note,
-.cr-stream-page .k-mood .pk-excerpt,
-.cr-stream-page .k-mood .pk-meta { display: none; }
 
 /* ============================================================
    v0.5.230 — the dropped threads, shipped:
@@ -2048,164 +1988,6 @@ body .pk-card {
 
 /* ---- v0.5.246: eat polaroid on white stock, not page ivory ---- */
 .cr-stream-page .pk-card.k-eat { background: #ffffff; }
-
-/* ============================================================
-   v0.5.247 — mood as an enamel pin (Courtney's revision).
-   Raw hexes deliberate: a physical pin looks identical in dark
-   mode. Face on the card, gloss + halftone on its pseudos, metal
-   clasp on the li's pseudo behind the card.
-   ============================================================ */
-.cr-stream-page .pk-card.k-mood {
-	display: inline-grid;
-	justify-items: center;
-	align-content: center;
-	gap: 0.3rem;
-	width: 9.5rem;
-	aspect-ratio: 1 / 1;
-	margin-inline: auto;
-	padding: 1rem;
-	border-radius: 50%;
-	background: radial-gradient(circle at 32% 26%, #3d2f6e 0%, #241c4a 55%);
-	border: 3px solid #241c4a;
-	box-shadow: 0 0 0 4px #fbfaf5, 0 0 0 6px #241c4a, 4px 4px 0 6px #241c4a;
-	overflow: hidden;
-	text-align: center;
-	transform: rotate(-1.5deg);
-}
-.cr-stream-page .pk-card.k-mood::before {
-	content: "";
-	position: absolute;
-	top: 7%;
-	left: 14%;
-	width: 38%;
-	height: 20%;
-	border-radius: 50%;
-	border: 0;
-	background: rgba(251, 250, 245, 0.35);
-	transform: rotate(-24deg);
-	filter: blur(2px);
-	inset: auto;
-	top: 7%;
-	left: 14%;
-}
-.cr-stream-page .pk-card.k-mood::after {
-	content: "";
-	position: absolute;
-	bottom: -6%;
-	right: -8%;
-	width: 60%;
-	height: 55%;
-	border-radius: 50%;
-	background-image: radial-gradient(rgba(251, 250, 245, 0.28) 1.5px, transparent 2px);
-	background-size: 8px 8px;
-}
-.cr-stream-page .k-mood .pk-mood__emoji {
-	font-size: 2.1rem;
-	line-height: 1;
-	filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.4));
-	display: block;
-}
-.cr-stream-page .k-mood .pk-title,
-.cr-stream-page .k-mood .pk-mood .p-name {
-	font-family: var(--cr-font-accent, "Roboto Slab", serif);
-	font-weight: 900;
-	font-size: 0.98rem;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	color: #ffb703;
-	text-shadow: 1.5px 1.5px 0 #023047;
-	padding: 0;
-}
-.cr-stream-page .k-mood .pk-title a { color: inherit; }
-.cr-stream-page .k-mood .pk-stream-date,
-.cr-stream-page .k-mood .pk-meta .dt-published {
-	display: block;
-	font-family: var(--cr-font-accent, "Roboto Slab", serif);
-	font-size: 0.6rem;
-	font-weight: 700;
-	letter-spacing: 0.18em;
-	text-transform: uppercase;
-	color: #8ecae6;
-	padding: 0;
-}
-.cr-stream-page .k-mood .pk-mood__note,
-.cr-stream-page .k-mood .pk-kindlabel,
-.cr-stream-page .k-mood .pk-badge { display: none; }
-/* metal clasp peeking from behind the pin */
-.cr-stream-page .wp-block-post-template > li.kind-mood { position: relative; }
-.cr-stream-page .wp-block-post-template > li.kind-mood::before {
-	content: "";
-	position: absolute;
-	top: 0.35rem;
-	left: 50%;
-	margin-left: -1.6rem;
-	width: 3.2rem;
-	height: 0.85rem;
-	border: 2.5px solid #9a958a;
-	border-radius: 999px;
-	background: linear-gradient(180deg, #d8d3c8, #a8a398);
-	box-shadow: 0 1px 2px rgba(36, 28, 74, 0.4);
-	transform: rotate(-4deg);
-	z-index: 0;
-}
-.cr-stream-page .wp-block-post-template > li.kind-mood .pk-card { position: relative; z-index: 1; }
-
-/* ---- v0.5.248: enamel pin corrections ----
-   Neutralize the older mood-sticker rules still bleeding through. */
-.cr-stream-page .pk-card.k-mood {
-	display: grid;
-	width: 9.5rem;
-	margin-inline: auto;
-}
-.cr-stream-page .pk-card.k-mood::after {
-	inset: auto;
-	top: auto;
-	left: auto;
-	bottom: -6%;
-	right: -8%;
-	width: 60%;
-	height: 55%;
-	border: 0;
-}
-.cr-stream-page .pk-card.k-mood::before {
-	inset: auto;
-	top: 7%;
-	left: 14%;
-	bottom: auto;
-	right: auto;
-}
-.cr-stream-page .k-mood .pk-mood { display: contents; }
-.cr-stream-page .k-mood .p-name {
-	display: block;
-	font-family: var(--cr-font-accent, "Roboto Slab", serif);
-	font-weight: 900;
-	font-size: 0.98rem;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	color: #ffb703;
-	text-shadow: 1.5px 1.5px 0 #023047;
-}
-.cr-stream-page .k-mood .pk-meta {
-	display: block;
-	padding: 0;
-	margin: 0;
-}
-.cr-stream-page .k-mood .pk-meta > .dt-published { display: block; }
-
-/* ---- v0.5.249: the pin word is the note element ----
-   mood-card doesn't render its mood attribute; the note carries the
-   word instead. */
-.cr-stream-page .k-mood .pk-mood__note {
-	display: block;
-	margin: 0;
-	font-family: var(--cr-font-accent, "Roboto Slab", serif);
-	font-weight: 900;
-	font-size: 0.98rem;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	color: #ffb703;
-	text-shadow: 1.5px 1.5px 0 #023047;
-}
 
 /* ---- v0.5.250: washi tape actually tapes the box down ----
    The card's overflow:hidden clips anything crossing its edge, so the
@@ -3291,3 +3073,129 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 	width: 100% !important;
 	align-self: stretch !important;
 }
+
+/* ============================================================
+   v0.6.12 — mood, consolidated (retires the v0.5.229/238/247–249
+   mood layers). The emoji IS the enamel pin now; the title and
+   date read below it on the paper — legible, clickable, never
+   clipped by the circle. Raw hexes on the pin deliberate: a
+   physical pin looks identical in dark mode. Covers both card
+   shapes: the mood-card block (micro-post) and the generic
+   stream card, whose emoji is injected by inc/post-kinds.php
+   (stream_card_mood_emoji).
+   ============================================================ */
+.cr-stream-page .pk-card.k-mood {
+	display: grid;
+	justify-items: center;
+	align-content: start;
+	width: auto;
+	aspect-ratio: auto;
+	height: auto;
+	margin-inline: auto;
+	padding: 0.85rem 0.5rem 0.5rem;
+	background: none;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	overflow: visible;
+	text-align: center;
+	transform: none;
+}
+.cr-stream-page .pk-card.k-mood .pk-body { display: contents; }
+.cr-stream-page .pk-card.k-mood .pk-mood { display: contents; }
+.cr-stream-page .pk-card.k-mood .pk-badge,
+.cr-stream-page .pk-card.k-mood .pk-kindlabel,
+.cr-stream-page .pk-card.k-mood .pk-excerpt { display: none; }
+
+/* The pin: purple enamel face, paper-and-ink ring, gloss + halftone. */
+.cr-stream-page .pk-card.k-mood .pk-mood__emoji {
+	position: relative;
+	display: grid;
+	place-content: center;
+	width: 7.5rem;
+	aspect-ratio: 1;
+	margin-bottom: 0.7rem;
+	border-radius: 50%;
+	background: radial-gradient(circle at 32% 26%, #3d2f6e 0%, #241c4a 55%);
+	border: 3px solid #241c4a;
+	box-shadow: 0 0 0 4px #fbfaf5, 0 0 0 6px #241c4a, 0 5px 12px -3px rgba(36, 28, 74, 0.5);
+	overflow: hidden;
+	font-size: 3.4rem;
+	line-height: 1;
+	transform: rotate(-2deg);
+}
+.cr-stream-page .pk-card.k-mood .pk-mood__emoji::before {
+	content: "";
+	position: absolute;
+	top: 8%;
+	left: 12%;
+	width: 42%;
+	height: 22%;
+	border-radius: 50%;
+	background: rgba(251, 250, 245, 0.35);
+	transform: rotate(-24deg);
+	filter: blur(2px);
+}
+.cr-stream-page .pk-card.k-mood .pk-mood__emoji::after {
+	content: "";
+	position: absolute;
+	bottom: -6%;
+	right: -8%;
+	width: 60%;
+	height: 55%;
+	border-radius: 50%;
+	background-image: radial-gradient(rgba(251, 250, 245, 0.28) 1.5px, transparent 2px);
+	background-size: 8px 8px;
+}
+
+/* Caption on the paper: linked title (or the micro-post's mood word),
+   date underneath. */
+.cr-stream-page .pk-card.k-mood .pk-caption {
+	display: grid;
+	gap: 0.15rem;
+	justify-items: center;
+}
+.cr-stream-page .pk-card.k-mood .pk-title,
+.cr-stream-page .pk-card.k-mood .pk-mood__note {
+	font-family: var(--cr-font-accent, "Roboto Slab", serif);
+	font-weight: 700;
+	font-size: 0.95rem;
+	line-height: 1.25;
+	color: var(--cr-ink, #241c4a);
+	margin: 0;
+	padding: 0;
+}
+.cr-stream-page .pk-card.k-mood .pk-sub,
+.cr-stream-page .pk-card.k-mood .pk-stream-date,
+.cr-stream-page .pk-card.k-mood .pk-meta .dt-published {
+	display: block;
+	font-family: var(--cr-font-accent, "Roboto Slab", serif);
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--cr-cerulean, #126782);
+	margin: 0;
+	padding: 0;
+}
+.cr-stream-page .pk-card.k-mood .pk-stream-date time { border: 0; padding: 0; }
+.cr-stream-page .pk-card.k-mood .pk-meta { display: block; margin: 0; padding: 0; }
+
+/* Metal clasp peeking from behind the pin. */
+.cr-stream-page .wp-block-post-template > li.kind-mood { position: relative; }
+.cr-stream-page .wp-block-post-template > li.kind-mood::before {
+	content: "";
+	position: absolute;
+	top: 0.4rem;
+	left: 50%;
+	margin-left: -1.6rem;
+	width: 3.2rem;
+	height: 0.85rem;
+	border: 2.5px solid #9a958a;
+	border-radius: 999px;
+	background: linear-gradient(180deg, #d8d3c8, #a8a398);
+	box-shadow: 0 1px 2px rgba(36, 28, 74, 0.4);
+	transform: rotate(-4deg);
+	z-index: 0;
+}
+.cr-stream-page .wp-block-post-template > li.kind-mood .pk-card { position: relative; z-index: 1; }

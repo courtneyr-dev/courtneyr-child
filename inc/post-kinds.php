@@ -172,3 +172,81 @@ function oembed_html( $html, $url ) {
 	return ableplayer_youtube( $youtube_id );
 }
 add_filter( 'embed_oembed_html', __NAMESPACE__ . '\\oembed_html', 10, 2 );
+
+/**
+ * Surface the mood emoji on the Stream's generic card.
+ *
+ * A long-form mood post (a mood-card block plus real paragraphs) falls
+ * through to the plugin's generic stream card, which never reads the
+ * mood-card's attributes — the emoji vanishes from the Stream. Pull the
+ * emoji off the first mood-card block in the post body and drop it in
+ * front of the card's caption so cr-post-kinds.css can paint it as the
+ * enamel pin.
+ *
+ * @param string         $content  Rendered stream-card HTML.
+ * @param array          $block    Parsed block (unused).
+ * @param \WP_Block|null $instance Block instance, carries the loop post context.
+ * @return string Card HTML with the mood emoji injected.
+ */
+function stream_card_mood_emoji( $content, $block, $instance = null ) {
+	if ( ! is_string( $content ) || '' === $content || str_contains( $content, 'pk-mood__emoji' ) ) {
+		return $content;
+	}
+
+	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
+		? (int) $instance->context['postId']
+		: 0;
+	$post    = $post_id ? get_post( $post_id ) : get_post();
+
+	if ( ! $post instanceof \WP_Post || ! has_term( 'mood', 'kind', $post ) ) {
+		return $content;
+	}
+
+	$emoji = mood_card_emoji( (string) $post->post_content );
+	if ( '' === $emoji ) {
+		return $content;
+	}
+
+	$needle = '<div class="pk-caption">';
+	$pos    = strpos( $content, $needle );
+	if ( false === $pos ) {
+		return $content;
+	}
+
+	return substr( $content, 0, $pos )
+		. '<span class="pk-mood__emoji" aria-hidden="true">' . esc_html( $emoji ) . '</span>'
+		. substr( $content, $pos );
+}
+add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\stream_card_mood_emoji', 10, 3 );
+
+/**
+ * The emoji attribute of the first mood-card block in a post body.
+ *
+ * Mirrors the mood-card block's own default ('😊') when the block is
+ * present without an explicit emoji; a body with no mood-card block
+ * yields '' so the card renders without a pin rather than inventing one.
+ *
+ * @param string $post_content Raw post content.
+ * @return string The emoji, or '' when the body has no mood-card block.
+ */
+function mood_card_emoji( string $post_content ): string {
+	if ( ! str_contains( $post_content, 'post-kinds-indieweb/mood-card' ) ) {
+		return '';
+	}
+
+	$stack = parse_blocks( $post_content );
+	while ( $stack ) {
+		$block = array_shift( $stack );
+
+		if ( 'post-kinds-indieweb/mood-card' === ( $block['blockName'] ?? '' ) ) {
+			$emoji = trim( (string) ( $block['attrs']['emoji'] ?? '' ) );
+			return '' !== $emoji ? $emoji : '😊';
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			$stack = array_merge( $stack, $block['innerBlocks'] );
+		}
+	}
+
+	return '';
+}
