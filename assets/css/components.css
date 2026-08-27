@@ -389,11 +389,7 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
    button is the inner .wp-block-button__link, hence the descendant qualifier.
 */
 .cr-button,
-.cr-cta,
-.is-style-cr-cta > .wp-block-button__link,
-.is-style-cr-button-secondary > .wp-block-button__link,
-.is-style-cr-button-outline > .wp-block-button__link,
-.is-style-cr-button-soft > .wp-block-button__link {
+.cr-cta {
   display: inline-block;
   font-family: var(--cr-font-accent);
   font-weight: var(--cr-weight-bold);
@@ -409,76 +405,77 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
               box-shadow 80ms var(--cr-ease-out),
               background 80ms var(--cr-ease-out);
 }
-.cr-button:hover,
-.cr-cta:hover,
-.is-style-cr-cta > .wp-block-button__link:hover,
-.is-style-cr-button-secondary > .wp-block-button__link:hover,
-.is-style-cr-button-outline > .wp-block-button__link:hover,
-.is-style-cr-button-soft > .wp-block-button__link:hover {
-  background: var(--cr-russian-violet);
-  color: var(--cr-sky-blue);
+
+/* v0.7.0: visual styles for the .is-style-cr-* button variations moved to
+   theme.json (styles.blocks.core/button.variations — WP 7.1 pseudo-states).
+   CSS keeps only what theme.json can't express: the transition and the
+   :active press transform. The .cr-button/.cr-cta plain-class rules below
+   stay in full — patterns and templates use those classes directly. */
+.is-style-cr-cta > .wp-block-button__link,
+.is-style-cr-button-secondary > .wp-block-button__link,
+.is-style-cr-button-outline > .wp-block-button__link,
+.is-style-cr-button-soft > .wp-block-button__link {
+  transition: transform 80ms var(--cr-ease-out),
+              box-shadow 80ms var(--cr-ease-out),
+              background 80ms var(--cr-ease-out);
 }
-.cr-button:active,
-.cr-cta:active,
 .is-style-cr-cta > .wp-block-button__link:active,
 .is-style-cr-button-secondary > .wp-block-button__link:active,
 .is-style-cr-button-outline > .wp-block-button__link:active,
 .is-style-cr-button-soft > .wp-block-button__link:active {
   transform: translate(2px, 2px);
+}
+
+.cr-button:hover,
+.cr-cta:hover {
+  background: var(--cr-russian-violet);
+  color: var(--cr-sky-blue);
+}
+.cr-button:active,
+.cr-cta:active {
+  transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 var(--cr-ink);
 }
 .cr-button:focus-visible,
-.cr-cta:focus-visible,
-.is-style-cr-cta > .wp-block-button__link:focus-visible,
-.is-style-cr-button-secondary > .wp-block-button__link:focus-visible,
-.is-style-cr-button-outline > .wp-block-button__link:focus-visible,
-.is-style-cr-button-soft > .wp-block-button__link:focus-visible {
+.cr-cta:focus-visible {
   outline: 3px solid var(--cr-focus-ring);
   outline-offset: 2px;
 }
 
 .cr-button--primary,
-.cr-cta,
-.is-style-cr-cta > .wp-block-button__link {
+.cr-cta {
   background: var(--cr-cta-bg);
   color: var(--cr-cta-ink);
 }
 .cr-button--primary:hover,
-.cr-cta:hover,
-.is-style-cr-cta > .wp-block-button__link:hover {
+.cr-cta:hover {
   background: var(--cr-cta-bg-hover);
   color: var(--cr-cta-ink-hover);
 }
 
-.cr-button--secondary,
-.is-style-cr-button-secondary > .wp-block-button__link {
+.cr-button--secondary {
   background: var(--cr-russian-violet);
   color: var(--cr-sky-blue);
 }
-.cr-button--secondary:hover,
-.is-style-cr-button-secondary > .wp-block-button__link:hover {
+.cr-button--secondary:hover {
   background: var(--cr-cerulean);
   color: var(--cr-printer-ivory);
 }
 
-.cr-button--outline,
-.is-style-cr-button-outline > .wp-block-button__link {
+.cr-button--outline {
   background: transparent;
   color: var(--cr-ink);
 }
-.cr-button--outline:hover,
-.is-style-cr-button-outline > .wp-block-button__link:hover {
+.cr-button--outline:hover {
   background: var(--cr-ink);
   color: var(--cr-ink-inverse);                  /* auto-flips: ivory on dark, russian-violet on light */
 }
 
-.cr-button--soft,
-.is-style-cr-button-soft > .wp-block-button__link {
+.cr-button--soft {
   background: var(--cr-light-orange);
   color: var(--cr-russian-violet);
 }
-.cr-button--soft:hover,
-.is-style-cr-button-soft > .wp-block-button__link:hover {
+.cr-button--soft:hover {
   background: var(--cr-selective-yellow);
   color: var(--cr-prussian-blue);
 }
