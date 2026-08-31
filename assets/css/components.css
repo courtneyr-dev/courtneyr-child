@@ -603,7 +603,8 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--cr-space-2xs);
+  /* ≥8px between chips — tap targets need breathing room (WCAG 2.5.8) */
+  gap: var(--cr-space-xs);
   /* shed the single-chip look the container carries (e.g. .cr-chip) */
   background: none;
   border: 0;
@@ -612,7 +613,10 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
   transform: none;
 }
 .cr-term-chip {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  /* 24px minimum tap target (WCAG 2.5.8 / Lighthouse touch-target audit) */
+  min-block-size: 1.5rem;
   font-family: var(--cr-font-accent);
   font-size: var(--cr-text-xs);
   font-weight: var(--cr-weight-bold);
