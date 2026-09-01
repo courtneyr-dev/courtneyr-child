@@ -332,6 +332,13 @@ const POST_KINDS_CARD_BLOCKS = array(
 	'post-kinds-indieweb/bookmark-card',
 	'post-kinds-indieweb/rsvp-card',
 	'post-kinds-indieweb/wish-card',
+	// The Stream's own card block. Its render_callback falls back to a
+	// generic card — plain markup, not a nested card block — for any kind
+	// without a dedicated one, photo among them. Without this entry nothing
+	// enqueues the paint for those, so --pk-* stays undefined and the card
+	// draws its text invisibly against the page. Two photo posts read as
+	// blank white boxes on /stream until this was added.
+	'post-kinds-indieweb/stream-card',
 );
 
 /**
