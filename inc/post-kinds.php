@@ -172,3 +172,41 @@ function oembed_html( $html, $url ) {
 	return ableplayer_youtube( $youtube_id );
 }
 add_filter( 'embed_oembed_html', __NAMESPACE__ . '\\oembed_html', 10, 2 );
+
+/**
+ * Drop the featured image from a photo post's single view.
+ *
+ * `single.html` renders `wp:post-featured-image`, and a photo posted from
+ * Outpost already carries its picture in the body as a core/image block. Once
+ * Outpost starts setting a featured image so the Stream polaroid has something
+ * to show, that same picture would appear twice on the post itself: once above
+ * the title and once in the entry. Suppressing it here keeps the single view
+ * reading as one photo, and leaves the thumbnail free to do its real job in
+ * cards, archives, and previews.
+ *
+ * Scoped to the `photo` kind. Other kinds keep their featured image, since for
+ * them it is a lede rather than a duplicate of the body.
+ *
+ * @param string               $html  Rendered block HTML.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function suppress_featured_image_on_photo_single( string $html, array $block ): string {
+	if ( 'core/post-featured-image' !== ( $block['blockName'] ?? '' ) ) {
+		return $html;
+	}
+	if ( ! is_singular( 'post' ) ) {
+		return $html;
+	}
+
+	$post = get_post();
+	if ( ! $post instanceof \WP_Post ) {
+		return $html;
+	}
+	if ( ! has_term( 'photo', 'kind', $post ) ) {
+		return $html;
+	}
+
+	return '';
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\suppress_featured_image_on_photo_single', 10, 2 );
