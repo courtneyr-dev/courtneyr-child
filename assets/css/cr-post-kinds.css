@@ -1846,8 +1846,15 @@ body .pk-card {
 .cr-stream-page .k-video .pk-title { padding: 0; font-size: 1rem; color: var(--cr-ink, #241c4a); }
 .cr-stream-page .k-video .pk-kindlabel { position: static; display: block; margin: 0 0 0.3rem; background: none; border: 0; box-shadow: none; transform: none; width: auto; height: auto; padding: 0; font-size: 0.58rem; letter-spacing: 0.14em; color: var(--cr-ink-muted, #126782); }
 
-/* 6. Photo polaroid: one caption voice (excerpt), not title + excerpt. */
-.cr-stream-page .kind-photo .pk-card .pk-title { display: none; }
+/* 6. Photo polaroid: one caption voice (excerpt), not title + excerpt.
+   Only drop the title when the polaroid actually holds a picture. A photo
+   posted from Outpost keeps its image in the post body rather than as a
+   featured image, so its card has nothing to show, and hiding the title
+   left two blank white boxes at the top of the Stream. The :has() guard
+   keeps the single-voice look wherever there is an image and lets the
+   title carry the card wherever there isn't. Browsers without :has()
+   simply keep the previous behaviour. */
+.cr-stream-page .kind-photo .pk-card:has(img) .pk-title { display: none; }
 
 /* ---- v0.5.238: no icons over words ----
    Paper-family cards lose their badge circles entirely — the
