@@ -3283,3 +3283,9 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 	.cr-stream-page .kind-photo .pk-card .pk-title a:focus-visible { outline: none; }
 }
 
+/* Masthead air. Core's layout rule
+   `:root :where(.is-layout-constrained) > :first-child { margin-block-start: 0 }`
+   ties `.cr-stream-page .cr-stream__masthead` on specificity and prints
+   after the theme stylesheet, so 0.5.278's 4.25rem never applied — the
+   eyebrow sat 1px under the sticky header. One more class wins the tie. */
+.cr-stream-page .cr-page__content > .cr-stream__masthead { margin-block-start: 2rem; }
