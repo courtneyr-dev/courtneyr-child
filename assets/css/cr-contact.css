@@ -639,8 +639,12 @@
    handwritten title; the highlighter is one voice too many here, in both modes.
    !important because the dark-mode mark rules in components.css use it.
    ============================================================================= */
-.cr-contact mark,
-.cr-contact .cr-highlight {
+/* Specificity 0,4,1: the dark-mode mark rules in components.css are
+   `:root:not([data-theme]) .wp-block-post-content mark` (0,3,1) with
+   !important, so a plain `.cr-contact mark` loses the background-color
+   even with its own !important. The repeated class is deliberate. */
+:root .cr-contact.cr-contact.cr-contact mark,
+:root .cr-contact.cr-contact.cr-contact .cr-highlight {
 	background: none !important;
 	color: inherit !important;
 	padding: 0;
