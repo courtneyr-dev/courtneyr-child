@@ -593,8 +593,15 @@ a {
   text-decoration-color: currentColor;
   transition: color var(--cr-motion-fast) var(--cr-ease-out);
 }
-a:hover { color: var(--cr-link-hover); }
-a:visited { color: var(--cr-link-visited); }
+/* Buttons keep their own ink. theme.json's block-button styles are emitted
+   as `:root :where(...)` (specificity 0,1,0), so these two (0,1,1) rules used
+   to win on any button that was a visited link or under the pointer: a
+   visited "Back to home" turned periwinkle on selective yellow in dark
+   mode, and a hovered button's text took the link hover color on the hover
+   background. `:where()` keeps the specificity where it was, so nothing
+   else in the cascade moves. */
+a:hover:where(:not(.wp-element-button, .wp-block-button__link, .cr-cta)) { color: var(--cr-link-hover); }
+a:visited:where(:not(.wp-element-button, .wp-block-button__link, .cr-cta)) { color: var(--cr-link-visited); }
 a:focus-visible {
   outline: 3px solid var(--cr-focus-ring);
   outline-offset: 2px;

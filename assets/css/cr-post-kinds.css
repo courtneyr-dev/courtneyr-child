@@ -3219,3 +3219,73 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 	z-index: 0;
 }
 .cr-stream-page .wp-block-post-template > li.kind-mood .pk-card { position: relative; z-index: 1; }
+
+/* ============================================================
+   v0.7.5 — stream: polaroids open the post, caption carries the
+   title, and the masthead gets its air back.
+   ============================================================ */
+
+/* Polaroid = link. The plugin's stream card carries one permalink, on
+   the title. Stretch that anchor over the card so the photo, the frame,
+   and the caption all open the post — one link for assistive tech, no
+   duplicate target wrapped around the image. */
+.cr-stream-page .kind-photo .pk-card {
+	position: relative;
+	padding-bottom: 1.1rem;
+}
+.cr-stream-page .kind-photo .pk-card .pk-title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+/* Title + date in the white strip. 0.5.237's "one caption voice" hid
+   the title whenever the polaroid held a picture and left the excerpt to
+   speak — but a photo posted from Outpost has no excerpt, so the strip
+   showed the date alone. The title is the caption now, in the
+   handwriting face; the date sits under it as a small stamp. */
+.cr-stream-page .kind-photo .pk-card:has(img) .pk-title { display: block; }
+.cr-stream-page .kind-photo .pk-card .pk-caption { padding: 0.15rem 0.15rem 0; }
+.cr-stream-page .kind-photo .pk-card .pk-title {
+	font-family: var(--cr-font-display, cursive);
+	font-size: 0.95rem;
+	line-height: 1.45;
+	color: #241c4a;
+	margin: 0;
+	padding: 0;
+}
+.cr-stream-page .kind-photo .pk-card .pk-title a { text-decoration: none; }
+.cr-stream-page .kind-photo .pk-card .pk-sub { padding: 0.3rem 0 0; }
+.cr-stream-page .kind-photo .pk-card .pk-stream-date time {
+	border: 0;
+	padding: 0;
+	color: #126782;
+	letter-spacing: 0.14em;
+}
+/* Read more is hidden on the stream; its empty row shouldn't pad the strip. */
+.cr-stream-page .kind-photo .pk-card .pk-meta { padding: 0; }
+
+/* Hover / focus: the caption underlines and the photo's dashed mount
+   settles to a solid line. Focus ring rides on the whole polaroid. */
+.cr-stream-page .kind-photo .pk-card:has(.pk-title a:hover) .pk-title a,
+.cr-stream-page .kind-photo .pk-card:has(.pk-title a:focus-visible) .pk-title a {
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.15em;
+}
+.cr-stream-page .kind-photo .pk-card:has(.pk-title a:hover) img { border-style: solid; }
+.cr-stream-page .kind-photo .pk-card:has(.pk-title a:focus-visible) {
+	outline: 3px solid var(--cr-selective-yellow, #ffb703);
+	outline-offset: 3px;
+}
+@supports selector(:has(a)) {
+	.cr-stream-page .kind-photo .pk-card .pk-title a:focus-visible { outline: none; }
+}
+
+/* Masthead air. Core's layout rule
+   `:root :where(.is-layout-constrained) > :first-child { margin-block-start: 0 }`
+   ties `.cr-stream-page .cr-stream__masthead` on specificity and prints
+   after the theme stylesheet, so 0.5.278's 4.25rem never applied — the
+   eyebrow sat 1px under the sticky header. One more class wins the tie. */
+.cr-stream-page .cr-page__content > .cr-stream__masthead { margin-block-start: 2rem; }
