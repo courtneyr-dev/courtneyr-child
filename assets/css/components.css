@@ -1160,15 +1160,15 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 .cr-theme-cycle { display: none; }
 .cr-theme-cycle__icon { display: none; line-height: 0; }
 .cr-theme-cycle__icon svg { width: 22px; height: 22px; }
-.cr-theme-cycle__icon[data-icon="light"] svg,
-.cr-theme-cycle__icon[data-icon="system"] svg {
+.cr-theme-cycle__icon[data-theme-icon="light"] svg,
+.cr-theme-cycle__icon[data-theme-icon="system"] svg {
 	fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
 }
-.cr-theme-cycle__icon[data-icon="dark"] svg { fill: currentColor; stroke: none; }
-:root[data-theme="light"]  .cr-theme-cycle__icon[data-icon="light"],
-:root[data-theme="dark"]   .cr-theme-cycle__icon[data-icon="dark"],
-:root[data-theme="system"] .cr-theme-cycle__icon[data-icon="system"],
-:root:not([data-theme])    .cr-theme-cycle__icon[data-icon="system"] { display: inline-block; }
+.cr-theme-cycle__icon[data-theme-icon="dark"] svg { fill: currentColor; stroke: none; }
+:root[data-theme="light"]  .cr-theme-cycle__icon[data-theme-icon="light"],
+:root[data-theme="dark"]   .cr-theme-cycle__icon[data-theme-icon="dark"],
+:root[data-theme="system"] .cr-theme-cycle__icon[data-theme-icon="system"],
+:root:not([data-theme])    .cr-theme-cycle__icon[data-theme-icon="system"] { display: inline-block; }
 
 /* Search injected into the nav overlay (inc/interactivity.php). Hidden
    everywhere by default — only revealed inside the OPEN hamburger menu.
@@ -3925,55 +3925,65 @@ body.home .wp-block-latest-posts li::before {
 
 
 /* ============================================================
-   v0.4.18 — cr-flank: zine sparkle accents on either side of a heading.
-   Uses !important on `content` to defeat the v0.2.6.7 ::before/::after
-   nuke applied site-wide on home headings. Apply via className on
-   specific h2/h3 nodes, never globally.
+   v0.4.18 — cr-flank: zine sparkle accents flanking a heading.
+   v0.7.6: glyphs moved OUT of the text flow into the margins.
+   They are absolutely positioned against the heading box, so they
+   never wrap onto their own line or push the title around. Two
+   shapes (✺ leading, ✦ trailing) at two sizes; colours come from
+   --cr-flank-a / --cr-flank-b so variants only swap the tokens.
+   Hidden below 900px where there is no margin for them to sit in.
+   Uses !important on `content` to defeat the v0.2.6.7
+   ::before/::after nuke applied site-wide on home headings.
    ============================================================ */
+.cr-flank {
+	position: relative;
+	--cr-flank-a: var(--cr-ut-orange, #fb8500);
+	--cr-flank-b: var(--cr-selective-yellow, #ffb703);
+}
 .cr-flank::before,
 .cr-flank::after {
-	font-size: 0.7em;
-	display: inline-block !important;
-	vertical-align: 0.15em;
+	content: none;
+	position: absolute;
 	font-family: var(--cr-font-accent);
-	color: var(--cr-ut-orange, #fb8500);   /* default: warm orange */
+	line-height: 1;
 	opacity: 0.95;
+	pointer-events: none;
 }
-/* ✺ (16-pointed asterisk) on both sides — leans into the asterisk
-   feel and avoids visual collision with ✦, which serves as the
-   list-bullet glyph in Recent Posts. Mirrored rotation gives a
-   hand-drawn feel without breaking the symmetry. */
-.cr-flank::before {
-	content: "✺" !important;
-	margin-right: 0.45em;
-	transform: rotate(-15deg);
-}
-.cr-flank::after {
-	content: "✺" !important;
-	margin-left: 0.45em;
-	transform: rotate(15deg);
+@media (min-width: 900px) {
+	.cr-flank::before {
+		content: "✺" !important;
+		display: block !important;
+		top: -0.3em;
+		left: -1.5em;
+		font-size: 0.85em;
+		color: var(--cr-flank-a);
+		transform: rotate(-15deg);
+	}
+	.cr-flank::after {
+		content: "✦" !important;
+		display: block !important;
+		bottom: -0.2em;
+		right: -1.3em;
+		font-size: 0.7em;
+		color: var(--cr-flank-b);
+		transform: rotate(12deg);
+	}
 }
 
-/* Color variants — pick one per heading for variety across the page,
-   not stacked on a single heading. */
-.cr-flank--yellow::before,
-.cr-flank--yellow::after { color: var(--cr-selective-yellow, #ffb703); }
-.cr-flank--blue::before,
-.cr-flank--blue::after   { color: var(--cr-cerulean, #126782); }
+/* Colour variants — pick one per heading for variety across a page. */
+.cr-flank--yellow { --cr-flank-a: var(--cr-selective-yellow, #ffb703); --cr-flank-b: var(--cr-ut-orange, #fb8500); }
+.cr-flank--blue   { --cr-flank-a: var(--cr-cerulean, #126782);         --cr-flank-b: var(--cr-selective-yellow, #ffb703); }
+.cr-flank--orange { --cr-flank-a: var(--cr-ut-orange, #fb8500);        --cr-flank-b: var(--cr-cerulean, #126782); }
 
 /* Dark mode — cerulean fails contrast on dark surfaces, swap it for
    sky-blue. Orange and yellow are both already AAA-readable on dark. */
-:root[data-theme="dark"] .cr-flank--blue::before,
-:root[data-theme="dark"] .cr-flank--blue::after {
-	color: var(--cr-sky-blue, #8ecae6);
-}
+:root[data-theme="dark"] .cr-flank--blue   { --cr-flank-a: var(--cr-sky-blue, #8ecae6); }
+:root[data-theme="dark"] .cr-flank--orange { --cr-flank-b: var(--cr-sky-blue, #8ecae6); }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme]) .cr-flank--blue::before,
-	:root:not([data-theme]) .cr-flank--blue::after,
-	:root[data-theme="system"] .cr-flank--blue::before,
-	:root[data-theme="system"] .cr-flank--blue::after {
-		color: var(--cr-sky-blue, #8ecae6);
-	}
+	:root:not([data-theme]) .cr-flank--blue,
+	:root[data-theme="system"] .cr-flank--blue   { --cr-flank-a: var(--cr-sky-blue, #8ecae6); }
+	:root:not([data-theme]) .cr-flank--orange,
+	:root[data-theme="system"] .cr-flank--orange { --cr-flank-b: var(--cr-sky-blue, #8ecae6); }
 }
 
 

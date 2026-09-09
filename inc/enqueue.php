@@ -467,6 +467,10 @@ function preload_critical_fonts(): void {
 		'assets/fonts/barlow-400.woff2',
 		'assets/fonts/barlow-700.woff2',
 		'assets/fonts/roboto-slab-variable.woff2',
+		/* v0.7.6: the wordmark's Rock Salt was declared font-display:optional
+		   but never preloaded, so on a cold load it missed the ~100ms window
+		   and the browser committed to Bradley Hand for the whole visit. */
+		'assets/fonts/rock-salt-400.woff2',
 	);
 	foreach ( $fonts as $rel ) {
 		printf(
