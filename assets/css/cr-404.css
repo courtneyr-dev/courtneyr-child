@@ -99,15 +99,7 @@
 /* =============================================================================
    Eyebrow · title (sparkles both sides) · marker bar · lede
    ============================================================================= */
-/* left sparkle (right one comes from .cr-flank::after, orange) */
-.cr-404 .cr-404__title::before {
-	content: "✺";
-	display: inline-block;
-	margin-right: 0.45em;
-	color: var(--cr-blue-green);
-	font-size: 0.55em;
-	transform: rotate(-12deg);
-}
+/* sparkles both sides come from .cr-flank (--orange variant), v0.7.6 */
 /* marker bar under the title — design: 240×9, slight tilt */
 .cr-404 .cr-404__header hr {
 	width: 240px;
