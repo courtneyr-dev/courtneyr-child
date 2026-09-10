@@ -284,6 +284,7 @@ function media_card( string $html, array $block, $instance ): string {
 		$html  = false === $close ? $html . $date_html : substr( $html, 0, $close ) . $date_html . substr( $html, $close );
 	}
 
+	$html = \Courtneyr\Child\Journal\skip_lazy_iframes( $html );
 	$tags = new \WP_HTML_Tag_Processor( $html );
 	if ( $tags->next_tag( array( 'tag_name' => 'article', 'class_name' => 'pk-card' ) ) ) {
 		$tags->add_class( 'pk-card--stream' );

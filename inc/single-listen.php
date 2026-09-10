@@ -114,7 +114,7 @@ function decorate_listen_card( string $html, array $block ): string {
 		$links[] = array( 'https://musicbrainz.org/recording/' . rawurlencode( $mbid ), __( 'MusicBrainz', 'courtneyr-child' ) );
 	}
 	if ( empty( $links ) ) {
-		return $html;
+		return \Courtneyr\Child\Journal\skip_lazy_iframes( $html );
 	}
 
 	$row  = '<nav class="pk-sources" aria-label="' . esc_attr__( 'Listen or find it', 'courtneyr-child' ) . '">';
@@ -131,8 +131,8 @@ function decorate_listen_card( string $html, array $block ): string {
 
 	$meta = strpos( $html, '<div class="pk-meta">' );
 	if ( false === $meta ) {
-		return $html;
+		return \Courtneyr\Child\Journal\skip_lazy_iframes( $html );
 	}
-	return substr( $html, 0, $meta ) . $row . substr( $html, $meta );
+	return \Courtneyr\Child\Journal\skip_lazy_iframes( substr( $html, 0, $meta ) . $row . substr( $html, $meta ) );
 }
 add_filter( 'render_block_post-kinds-indieweb/listen-card', __NAMESPACE__ . '\\decorate_listen_card', 10, 2 );

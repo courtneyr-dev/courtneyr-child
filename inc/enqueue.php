@@ -724,3 +724,4 @@ function perfmatters_lazyload_exclusions( $exclusions ): array {
 	return array_values( array_unique( $exclusions ) );
 }
 add_filter( 'perfmatters_lazyload_exclusions', __NAMESPACE__ . '\\perfmatters_lazyload_exclusions' );
+add_filter( 'perfmatters_lazyload_iframe_exclusions', __NAMESPACE__ . '\\perfmatters_lazyload_exclusions' );

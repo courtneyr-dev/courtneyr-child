@@ -180,6 +180,30 @@ function card_attrs( \WP_Post $post, string $block_name, array $attrs ): array {
 }
 
 /**
+ * Mark a card's iframes so Perfmatters' lazy load leaves them alone.
+ *
+ * Complianz gates an embed with `src="about:blank"` and the real URL in
+ * `data-src-cmplz`; Perfmatters' iframe lazy load then keeps that blank
+ * source and writes it back on scroll, undoing the consent activation.
+ * Perfmatters honours the `skip-lazy` class and `data-skip-lazy`.
+ *
+ * @param string $html Card HTML.
+ * @return string
+ */
+function skip_lazy_iframes( string $html ): string {
+	if ( false === strpos( $html, '<iframe' ) ) {
+		return $html;
+	}
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	while ( $tags->next_tag( 'iframe' ) ) {
+		$tags->add_class( 'skip-lazy' );
+		$tags->set_attribute( 'data-skip-lazy', '1' );
+		$tags->set_attribute( 'data-no-lazy', '1' );
+	}
+	return $tags->get_updated_html();
+}
+
+/**
  * Wrap a card and what follows it in the journal grid.
  *
  * @param string $html  Content HTML containing one `<article … </article>`.
