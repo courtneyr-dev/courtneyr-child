@@ -127,27 +127,34 @@ function sources_row( array $links, string $kind ): string {
  * technology; never above the real player.
  *
  * @param string $kind 'watch' or 'listen'.
+ * @param bool   $wide Watch only: the taller, wider-windowed variant a
+ *                     playable card uses when it spans two stream columns.
  * @return string
  */
-function mech_svg( string $kind ): string {
+function mech_svg( string $kind, bool $wide = false ): string {
 	if ( 'watch' === $kind ) {
-		$reel = static function ( float $cx, float $mass ): string {
+		$h    = $wide ? 42 : 36;
+		$cy   = $h / 2;
+		$reel = static function ( float $cx, float $mass ) use ( $cy ): string {
 			$rings = '';
 			for ( $r = $mass - 1.5; $r > 4.5; $r -= 2 ) {
-				$rings .= '<circle cx="' . $cx . '" cy="18" r="' . $r . '" fill="none" stroke="#2a2731" stroke-width="0.5"/>';
+				$rings .= '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . $r . '" fill="none" stroke="#2a2731" stroke-width="0.5"/>';
 			}
-			return '<circle cx="' . $cx . '" cy="18" r="14.5" fill="#0b0a0e"/>'
-				. '<circle cx="' . $cx . '" cy="18" r="' . $mass . '" fill="#1a1820"/>' . $rings
-				. '<circle cx="' . $cx . '" cy="18" r="4.6" fill="none" stroke="#f4f1ea" stroke-width="1.7" stroke-dasharray="1.3 1.35"/>'
-				. '<circle cx="' . $cx . '" cy="18" r="3.4" fill="#f4f1ea"/>'
-				. '<circle cx="' . $cx . '" cy="18" r="1.1" fill="#6a6560"/>'
-				. '<path d="M' . ( $cx - 11 ) . ' 9.5Q' . $cx . ' 2.5 ' . ( $cx + 11 ) . ' 9.5L' . ( $cx + 9 ) . ' 12.5Q' . $cx . ' 7 ' . ( $cx - 9 ) . ' 12.5Z" fill="#fff" opacity="0.07"/>';
+			return '<circle cx="' . $cx . '" cy="' . $cy . '" r="14.5" fill="#0b0a0e"/>'
+				. '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . $mass . '" fill="#1a1820"/>' . $rings
+				. '<circle cx="' . $cx . '" cy="' . $cy . '" r="4.6" fill="none" stroke="#f4f1ea" stroke-width="1.7" stroke-dasharray="1.3 1.35"/>'
+				. '<circle cx="' . $cx . '" cy="' . $cy . '" r="3.4" fill="#f4f1ea"/>'
+				. '<circle cx="' . $cx . '" cy="' . $cy . '" r="1.1" fill="#6a6560"/>'
+				. '<path d="M' . ( $cx - 9 ) . ' ' . ( $cy - 7 ) . 'Q' . $cx . ' ' . ( $cy - 13 ) . ' ' . ( $cx + 9 ) . ' ' . ( $cy - 7 ) . 'L' . ( $cx + 7 ) . ' ' . ( $cy - 4.5 ) . 'Q' . $cx . ' ' . ( $cy - 9.5 ) . ' ' . ( $cx - 7 ) . ' ' . ( $cy - 4.5 ) . 'Z" fill="#fff" opacity="0.07"/>';
 		};
-		return '<svg class="cr-media__mech" viewBox="0 0 100 36" aria-hidden="true" focusable="false">'
-			. $reel( 16, 12.5 ) . $reel( 84, 8.5 )
-			. '<path d="M16 32.5L29.5 33.6H70.5L84 32.5" fill="none" stroke="#2b2833" stroke-width="1.7"/>'
-			. '<circle cx="29.5" cy="33.6" r="1.4" fill="#55504a"/><circle cx="70.5" cy="33.6" r="1.4" fill="#55504a"/>'
-			. '<rect x="29.5" y="3.5" width="41" height="26.5" rx="1.2" fill="#0d0c10" stroke="#2a2731" stroke-width="0.6"/>'
+		$reels = $wide ? array( 13, 87 ) : array( 16, 84 );
+		$win   = $wide ? array( 26, 48, 3, 34 ) : array( 29.5, 41, 3.5, 26.5 ); // x, width, y, height.
+		$path  = $h - 3.5;
+		return '<svg class="cr-media__mech' . ( $wide ? ' cr-media__mech--wide' : '' ) . '" viewBox="0 0 100 ' . $h . '" aria-hidden="true" focusable="false">'
+			. $reel( $reels[0], 12.5 ) . $reel( $reels[1], 8.5 )
+			. '<path d="M' . $reels[0] . ' ' . ( $path - 1 ) . 'L' . $win[0] . ' ' . $path . 'H' . ( $win[0] + $win[1] ) . 'L' . $reels[1] . ' ' . ( $path - 1 ) . '" fill="none" stroke="#2b2833" stroke-width="1.7"/>'
+			. '<circle cx="' . $win[0] . '" cy="' . $path . '" r="1.4" fill="#55504a"/><circle cx="' . ( $win[0] + $win[1] ) . '" cy="' . $path . '" r="1.4" fill="#55504a"/>'
+			. '<rect x="' . $win[0] . '" y="' . $win[2] . '" width="' . $win[1] . '" height="' . $win[3] . '" rx="1.2" fill="#0d0c10" stroke="#2a2731" stroke-width="0.6"/>'
 			. '</svg>';
 	}
 	$hub = static function ( float $cx, float $mass ): string {
@@ -192,6 +199,20 @@ function media_card( string $html, array $block, $instance ): string {
 	$card  = find_block( $post, 'post-kinds-indieweb/' . $kind . '-card' );
 	$attrs = (array) ( $card['attrs'] ?? array() );
 
+	// A watch card is "playable" when the plugin rendered a real player
+	// (a <video> for Able Player, or a provider iframe) in its video
+	// embed, as opposed to a poster only. The class lets the stream give
+	// that card two columns.
+	$playable = false;
+	if ( 'watch' === $kind ) {
+		$e_start = strpos( $html, '<div class="pk-embed pk-embed--video">' );
+		if ( false !== $e_start ) {
+			$e_end    = strpos( $html, '<div class="pk-meta">', $e_start );
+			$embed    = substr( $html, $e_start, false === $e_end ? null : $e_end - $e_start );
+			$playable = false !== strpos( $embed, '<video' ) || false !== strpos( $embed, '<iframe' );
+		}
+	}
+
 	// 1. A card without a title gets the post's, linked, in the caption.
 	if ( false === strpos( $html, 'pk-title' ) ) {
 		$cap = strpos( $html, '<div class="pk-caption">' );
@@ -219,7 +240,8 @@ function media_card( string $html, array $block, $instance ): string {
 		$lend = strpos( $html, '</p>', $lpos );
 		if ( false !== $lend ) {
 			$text = 'watch' === $kind ? __( 'Watch · VHS', 'courtneyr-child' ) : __( 'Listen · Cassette', 'courtneyr-child' );
-			$html = substr( $html, 0, $lpos ) . $label . esc_html( $text ) . '</p>' . mech_svg( $kind ) . substr( $html, $lend + 4 );
+			$mech = mech_svg( $kind ) . ( $playable ? mech_svg( $kind, true ) : '' );
+			$html = substr( $html, 0, $lpos ) . $label . esc_html( $text ) . '</p>' . $mech . substr( $html, $lend + 4 );
 		}
 	}
 
@@ -250,6 +272,9 @@ function media_card( string $html, array $block, $instance ): string {
 		$tags->add_class( 'pk-card--stream' );
 		$tags->add_class( 'watch' === $kind ? 'cr-vhs' : 'cr-cassette' );
 		$tags->add_class( 'watch' === $kind ? 'cr-vhs--stream' : 'cr-cassette--stream' );
+		if ( $playable ) {
+			$tags->add_class( 'has-video-player' );
+		}
 		$html = $tags->get_updated_html();
 	}
 	return $html;

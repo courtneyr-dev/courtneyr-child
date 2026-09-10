@@ -5213,13 +5213,81 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	:root:not([data-theme="light"]) .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stars { color: #ffb703; }
 }
 
-/* ---- v0.7.15: check-in single — no box inside the kind chip ----
+/* ---- v0.7.15 / v0.7.22: kind singles — no box inside the kind chip ----
    The tape chip already frames the word; the anchor's border and hard
-   shadow drew a second box inside it. */
-body.single-post.kind-checkin.single .single-post__kind a {
+   shadow drew a second box inside it (check-in first, then watch). */
+body.single-post[class*="kind-"].single .single-post__kind a {
 	border: 0;
 	box-shadow: none;
 	transform: none;
 	background: transparent;
 	color: inherit;
+}
+
+/* ============================================================
+   v0.7.22 — /stream/: a watch card with a real player spans two columns.
+   The post template is CSS multi-column (`columns: 19rem`), which has no
+   two-column span, so the playable card's list item becomes a column
+   spanner (`column-span: all`) capped at two columns' width and centred:
+   the masonry balances above and below it and the card reads as a
+   featured artifact. inc/stream-media.php marks the card
+   `has-video-player` when the plugin's video embed holds a <video>
+   (Able Player) or a provider iframe; poster-only cards are untouched.
+   At that width the VHS uses the wide mechanics SVG (42cqw window row)
+   and Able Player's video, controller and status bar all sit inside the
+   window recess, so the shell stays 60cqw tall (1.67:1). Under 42rem
+   there is one column and the v0.7.18 deck layout applies.
+   ============================================================ */
+.cr-stream-page .cr-media__mech--wide { display: none; }
+@media (min-width: 42rem) {
+	.cr-stream-page .wp-block-post-template > li:has(.pk-card.cr-vhs--stream.has-video-player) {
+		column-span: all;
+		break-inside: avoid;
+		width: min(100%, 40.25rem);
+		margin-inline: auto;
+		margin-block: 0.6rem 2.4rem;
+	}
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .cr-media__mech { display: none; }
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .cr-media__mech--wide { display: block; }
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-body {
+		grid-template-columns: 24cqw minmax(0, 1fr) 24cqw;
+		grid-template-rows: 5cqw 8cqw 42cqw 0 5cqw auto auto auto auto;
+		transform: rotate(0.3deg);
+	}
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-body::before {
+		background:
+			radial-gradient(circle 2.4px at 11px calc(100% - 8px), #3a3644 98%, transparent),
+			radial-gradient(circle 2.4px at calc(100% - 11px) calc(100% - 8px), #3a3644 98%, transparent),
+			radial-gradient(circle 2.4px at 50% calc(100% - 8px), #3a3644 98%, transparent),
+			linear-gradient(#f6f3ea, #f6f3ea) left 3cqw top 5.8cqw / calc(100% - 6cqw) 6.6cqw no-repeat,
+			linear-gradient(#0c0b0f, #0c0b0f) top / 100% 5cqw no-repeat,
+			repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 6px) left 0 bottom 0 / 100% 4cqw no-repeat,
+			repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 5px),
+			#17151b;
+	}
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-caption { margin: 0.4cqw 4.5cqw 0.5cqw; }
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-title { font-size: 0.9rem; }
+	/* The whole player lives in the recess: video, controller, status bar. */
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed {
+		grid-row: 3 / 4;
+		grid-column: 2;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		margin: 3cqw 2cqw 5cqw;
+		padding: 0.4rem;
+		border-radius: 3px;
+		background: #0d0c10;
+		box-shadow: none;
+		overflow: hidden;
+	}
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:has(.able) .able-vidcap-container {
+		margin: 0;
+		height: calc(34cqw - 0.8rem - 107px);
+		min-height: 6rem;
+		border-radius: 2px;
+	}
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:has(.able) .able-player { margin: 0.35rem 0 0; }
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:not(:has(.able)) > *,
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:not(:has(.able)) iframe { height: 100%; }
 }
