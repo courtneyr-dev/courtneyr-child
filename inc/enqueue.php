@@ -679,3 +679,26 @@ function enqueue_kind_icons(): void {
 	);
 }
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\enqueue_kind_icons' );
+
+/**
+ * Keep the theme's own CSS and JS out of Perfmatters' minify/combine.
+ *
+ * Perfmatters writes each minified file under wp-content/cache with a
+ * content hash and links it with a `?ver=…&` query. A deploy purges that
+ * cache while the host's page cache still serves HTML naming the old
+ * hashes; those misses fall through to WordPress, which answers with a
+ * canonical 301 that Sucuri then caches, and every theme stylesheet loops
+ * until the page cache refreshes (seen on 2026-09-10 after three deploys).
+ * The theme's files live at stable paths and are already versioned, so
+ * they are excluded and load directly.
+ *
+ * @param array<int, string> $exclusions URL fragments Perfmatters skips.
+ * @return array<int, string>
+ */
+function perfmatters_exclusions( $exclusions ): array {
+	$exclusions   = is_array( $exclusions ) ? $exclusions : array();
+	$exclusions[] = 'themes/courtneyr-child/';
+	return array_values( array_unique( $exclusions ) );
+}
+add_filter( 'perfmatters_minify_css_exclusions', __NAMESPACE__ . '\\perfmatters_exclusions' );
+add_filter( 'perfmatters_minify_js_exclusions', __NAMESPACE__ . '\\perfmatters_exclusions' );

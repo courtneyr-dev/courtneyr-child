@@ -6115,3 +6115,299 @@ body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem
 	:root:not([data-theme="light"]) body.single-post.kind-watch.single .single-post__content .pk-card.k-watch.cr-vhs :is(.pk-caption, .pk-caption *) { color: #241c4a !important; }
 	:root:not([data-theme="light"]) body.single-post.kind-watch.single .single-post__content .pk-card.k-watch.cr-vhs :is(.pk-sub, .pk-sub *) { color: #3d2f6e !important; }
 }
+
+/* ============================================================
+   v0.7.26 — /stream/: read cards are small books on a library slip.
+   inc/stream-read.php classes the plugin's read card `cr-book--stream`,
+   hangs a status tab on the cover, adds the rating value, a facts line,
+   a short handwritten mark and a dated stamp for finished books. The
+   card's body is the slip: ruled cream stock with an ink border and a
+   hard shadow; the real cover sits on it as a book (spine ::before,
+   page block ::after, a deterministic tilt and a whisper of
+   perspective, never a crop: the cover keeps its own ratio). The kind
+   label is a caption box on the book's corner. The plugin's dark cover
+   box, its 2:3 crop and its ivory caption band are all overridden here
+   for this kind only. Scope: .cr-stream-page li.kind-read.
+   ============================================================ */
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream {
+	display: block;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	overflow: visible;
+	aspect-ratio: auto;
+	transform: none;
+	color: #241c4a;
+	--cr-ink: #241c4a;
+	--cr-ink-muted: #126782;
+	--cr-ink-soft: #3d2f6e;
+	--cr-border: rgba(36, 28, 74, 0.12);
+	--cr-link: #126782;
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream::before,
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream::after { content: none; display: none; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-badge { display: none; }
+/* The slip. */
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-body {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	width: auto;
+	padding: 1.2rem 0.95rem 0.85rem;
+	background: #fbf7ea;
+	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.35rem - 1px), rgba(36, 28, 74, 0.1) calc(1.35rem - 1px) 1.35rem);
+	border: 1.5px solid #241c4a;
+	border-radius: 0;
+	box-shadow: 4px 4px 0 #241c4a;
+	transform: rotate(0.4deg);
+	overflow: visible;
+}
+/* Kind label: a caption box on the book's top corner. */
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-kindlabel {
+	display: block;
+	position: absolute;
+	top: 0.55rem;
+	left: 0.7rem;
+	right: auto;
+	bottom: auto;
+	z-index: 4;
+	width: max-content;
+	max-width: 60%;
+	height: auto;
+	margin: 0;
+	padding: 0.12rem 0.42rem;
+	border: 1.5px solid #241c4a;
+	border-radius: 0;
+	background: #fbfaf5;
+	box-shadow: 2px 2px 0 #241c4a;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.52rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.2em;
+	line-height: 1.2;
+	text-transform: uppercase;
+	text-align: left;
+	color: #241c4a;
+	transform: rotate(-2deg);
+	overflow: visible;
+}
+/* The book. */
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-media {
+	order: -1;
+	position: relative;
+	z-index: 1;
+	display: block;
+	width: 70%;
+	margin: 0.35rem auto 1.15rem;
+	transform: rotate(-1.2deg) perspective(900px) rotateY(-3deg);
+	transform-origin: left center;
+	overflow: visible;
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-media img {
+	display: block;
+	position: relative;
+	z-index: 2;
+	width: 100%;
+	height: auto;
+	aspect-ratio: auto;
+	object-fit: contain;
+	border: 0;
+	border-radius: 2px 5px 5px 2px;
+	box-shadow: inset 0 0 0 1px rgba(36, 28, 74, 0.3);
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-media::before {
+	content: "";
+	position: absolute;
+	top: 0.12rem;
+	bottom: -0.14rem;
+	left: -0.72rem;
+	width: 0.76rem;
+	z-index: 1;
+	border-radius: 3px 0 0 3px;
+	background-image: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 4px), linear-gradient(90deg, #17123a, #2d2560 55%, #241c4a);
+	box-shadow: inset -2px 0 0 rgba(255, 255, 255, 0.08), -2px 2px 0 rgba(36, 28, 74, 0.35);
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-media::after {
+	content: "";
+	position: absolute;
+	top: 0.42rem;
+	right: -0.5rem;
+	bottom: -0.46rem;
+	left: 0.45rem;
+	z-index: 0;
+	border-radius: 0 4px 4px 0;
+	background: repeating-linear-gradient(180deg, #f8f5ec 0 2px, #d8d3c5 2px 3px);
+	box-shadow: 4px 4px 0 #241c4a;
+}
+/* No stored cover: a typographic face (the page block is a solid offset
+   here, since a pseudo-element would paint over the face). */
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__cover--type {
+	aspect-ratio: 2 / 3;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	gap: 0.4rem;
+	padding: 1rem 0.9rem;
+	background: #241c4a;
+	color: #fbfaf5;
+	border-radius: 2px 5px 5px 2px;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0.45rem 0.45rem 0 #d8d3c5, calc(0.45rem + 4px) calc(0.45rem + 4px) 0 #241c4a;
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__cover--type::after { content: none; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__type-title { position: relative; z-index: 2; font-family: var(--cr-font-accent, serif); font-weight: 900; font-size: 1.15rem; line-height: 1.05; color: #fbfaf5; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__type-author { position: relative; z-index: 2; font-family: var(--cr-font-mono, monospace); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: #bcb5e3; }
+/* Status tab hung on the cover. */
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__tab {
+	position: absolute;
+	top: -0.45rem;
+	right: 9%;
+	z-index: 3;
+	padding: 0.85rem 0.28rem 0.5rem;
+	max-width: 1.5rem;
+	background: #fee2c3;
+	color: #241c4a;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.48rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	line-height: 1.05;
+	text-transform: uppercase;
+	writing-mode: vertical-rl;
+	text-orientation: mixed;
+	clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 0.4rem), 0 100%);
+	box-shadow: 2px 2px 0 rgba(36, 28, 74, 0.35);
+	pointer-events: none;
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__tab--reading { background: #ffb703; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__tab--finished { background: #8ecae6; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__tab--abandoned { background: #647baf; color: #fbfaf5; }
+/* The slip's text. */
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-caption {
+	order: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+	margin: 0;
+	padding: 0;
+	background: none;
+	border: 0;
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-title {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 800;
+	font-size: 1.15rem;
+	line-height: 1.15;
+	color: #241c4a;
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-title a { color: inherit; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-sub {
+	margin: 0;
+	padding: 0;
+	font-family: var(--cr-font-accent, serif);
+	font-style: italic;
+	font-size: 0.9rem;
+	color: #3d2f6e;
+	white-space: normal;
+}
+/* The plugin's "Status — Publisher, date" line: the facts line carries it. */
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-sub:not(:has(.p-author)) { display: none; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-stream-date {
+	display: block;
+	margin: 0.2rem 0 0;
+	padding: 0;
+	min-height: 0;
+	font-style: normal;
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-stream-date time {
+	display: inline-block;
+	border: 1.5px solid #241c4a;
+	border-radius: 2px;
+	padding: 0.1rem 0.4rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.55rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: #241c4a;
+	background: #fbfaf5;
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__facts {
+	order: 2;
+	margin: 0.45rem 0 0;
+	padding: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.58rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: #126782;
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-progress {
+	order: 3;
+	margin: 0.45rem 0 0;
+	padding: 0;
+	display: block;
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-progress-bar { height: 0.5rem; border: 1.5px solid #241c4a; border-radius: 2px; background: #fbfaf5; overflow: hidden; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-progress-fill { height: 100%; background: repeating-linear-gradient(-45deg, #fb8500 0 5px, #ffb703 5px 10px); }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-progress-text { display: block; margin-top: 0.25rem; font-family: var(--cr-font-mono, monospace); font-size: max(0.56rem, var(--cr-text-floor, 0.7rem)); letter-spacing: 0.12em; text-transform: uppercase; color: #3d2f6e; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-stars {
+	order: 4;
+	display: flex;
+	align-items: center;
+	gap: 0.1rem;
+	margin: 0.45rem 0 0;
+	padding: 0;
+	color: #c46200;
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-stars svg { width: 0.9rem; height: 0.9rem; flex: none; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-rating-value { margin-left: 0.4rem; font-family: var(--cr-font-mono, monospace); font-size: max(0.62rem, var(--cr-text-floor, 0.7rem)); font-weight: 700; letter-spacing: 0.1em; color: #241c4a; }
+/* Review excerpt: a clipped note, three lines at most. */
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-note {
+	order: 5;
+	margin: 0.6rem 0 0;
+	padding: 0 0 0 0.6rem;
+	border-left: 3px solid #bcb5e3;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 0.86rem;
+	line-height: 1.45;
+	color: #241c4a;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-note p { margin: 0; display: inline; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__hand {
+	order: 6;
+	margin: 0.55rem 0 0;
+	font-family: var(--cr-font-display, cursive);
+	font-size: 1rem;
+	line-height: 1.5;
+	color: #126782;
+	transform: rotate(-1.5deg);
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__stamp {
+	order: 7;
+	align-self: flex-end;
+	width: 5.6rem;
+	margin: -0.3rem -0.2rem 0 0;
+	mix-blend-mode: multiply;
+	pointer-events: none;
+}
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__stamp .cr-stamp { width: 100%; height: auto; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-meta,
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-excerpt { display: none; }
+@media (max-width: 40rem) {
+	.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-media { width: 62%; transform: rotate(-1deg); }
+	.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-body { transform: none; }
+}

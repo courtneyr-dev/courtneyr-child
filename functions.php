@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.25' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.26' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -40,5 +40,6 @@ require_once __DIR__ . '/inc/single-listen.php';
 require_once __DIR__ . '/inc/single-watch.php';
 require_once __DIR__ . '/inc/single-read.php';
 require_once __DIR__ . '/inc/stream-media.php';
+require_once __DIR__ . '/inc/stream-read.php';
 require_once __DIR__ . '/inc/sloc-map-alt.php';
 require_once __DIR__ . '/inc/security-headers.php';
