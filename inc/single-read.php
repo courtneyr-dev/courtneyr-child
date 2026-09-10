@@ -198,7 +198,7 @@ function add_title_lede( string $html, array $block ): string {
 	if ( null === $read ) {
 		return $html;
 	}
-	$a      = (array) ( $read['attrs'] ?? array() );
+	$a      = \Courtneyr\Child\Journal\card_attrs( $post, 'post-kinds-indieweb/read-card', (array) ( $read['attrs'] ?? array() ) );
 	$author = trim( (string) ( $a['authorName'] ?? '' ) );
 	$status = (string) ( $a['readStatus'] ?? 'to-read' );
 	$rating = (int) ( $a['rating'] ?? 0 );
@@ -292,13 +292,13 @@ function reading_record( array $a, \WP_Post $post ): string {
 		)
 	);
 
-	$out  = '<section class="cr-read__record"><h2 class="cr-read__record-title">' . esc_html__( 'Reading record', 'courtneyr-child' ) . '</h2>';
-	$out .= '<p class="cr-read__record-eyebrow">' . esc_html( sprintf( /* translators: %s: site name */ __( 'From the library of %s', 'courtneyr-child' ), get_bloginfo( 'name' ) ) ) . '</p>';
-	$out .= '<dl class="cr-read__record-rows">';
+	$out  = '<section class="cr-record"><h2 class="cr-record-title">' . esc_html__( 'Reading record', 'courtneyr-child' ) . '</h2>';
+	$out .= '<p class="cr-record-eyebrow">' . esc_html( sprintf( /* translators: %s: site name */ __( 'From the library of %s', 'courtneyr-child' ), get_bloginfo( 'name' ) ) ) . '</p>';
+	$out .= '<dl class="cr-record-rows">';
 	foreach ( $rows as $row ) {
-		$out .= '<div class="cr-read__record-row"><dt>' . esc_html( $row[0] ) . '</dt><dd>' . $row[1] . '</dd></div>';
+		$out .= '<div class="cr-record-row"><dt>' . esc_html( $row[0] ) . '</dt><dd>' . $row[1] . '</dd></div>';
 	}
-	$out .= '</dl><div class="cr-read__record-stamp">' . $stamp . '</div></section>';
+	$out .= '</dl><div class="cr-record-stamp">' . $stamp . '</div></section>';
 	return $out;
 }
 
@@ -361,7 +361,7 @@ function journal_page( string $html, array $block ): string {
 	if ( null === $read || false === strpos( $html, 'k-read' ) ) {
 		return $html;
 	}
-	$a      = (array) ( $read['attrs'] ?? array() );
+	$a      = \Courtneyr\Child\Journal\card_attrs( $post, 'post-kinds-indieweb/read-card', (array) ( $read['attrs'] ?? array() ) );
 	$status = (string) ( $a['readStatus'] ?? 'to-read' );
 	$seed   = seed( (string) $post->ID, (string) ( $a['isbn'] ?? '' ), (string) ( $a['bookTitle'] ?? '' ) );
 

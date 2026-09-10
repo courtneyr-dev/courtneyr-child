@@ -149,6 +149,37 @@ function meta_row( array $items ): string {
 }
 
 /**
+ * A card block's attributes with the plugin's post-meta fallback.
+ *
+ * The plugin mirrors card attributes into `_pkiw_*` meta (Card_Meta_Sync)
+ * and fills empty attributes from that meta when it renders, so a post
+ * whose block stores only some fields still shows the rest. Read them
+ * the same way. Numeric attributes come back as integers.
+ *
+ * @param \WP_Post             $post       Post.
+ * @param string               $block_name e.g. 'post-kinds-indieweb/read-card'.
+ * @param array<string, mixed> $attrs      Parsed block attributes.
+ * @return array<string, mixed>
+ */
+function card_attrs( \WP_Post $post, string $block_name, array $attrs ): array {
+	$map = array();
+	if ( class_exists( '\\PKIW\\Card_Meta_Sync' ) && defined( '\\PKIW\\Card_Meta_Sync::ATTR_META_MAP' ) ) {
+		$map = (array) ( \PKIW\Card_Meta_Sync::ATTR_META_MAP[ $block_name ] ?? array() );
+	}
+	$numeric = array( 'pageCount', 'currentPage', 'rating', 'seasonNumber', 'episodeNumber', 'releaseYear' );
+	foreach ( $map as $attr => $suffix ) {
+		if ( isset( $attrs[ $attr ] ) && '' !== $attrs[ $attr ] && 0 !== $attrs[ $attr ] ) {
+			continue;
+		}
+		$value = get_post_meta( $post->ID, '_pkiw_' . $suffix, true );
+		if ( is_string( $value ) && '' !== $value ) {
+			$attrs[ $attr ] = in_array( $attr, $numeric, true ) && is_numeric( $value ) ? (int) $value : $value;
+		}
+	}
+	return $attrs;
+}
+
+/**
  * Wrap a card and what follows it in the journal grid.
  *
  * @param string $html  Content HTML containing one `<article … </article>`.

@@ -172,7 +172,7 @@ function add_title_lede( string $html, array $block ): string {
 		return $html;
 	}
 	$watch = find_watch_block( $post );
-	$attrs = (array) ( $watch['attrs'] ?? array() );
+	$attrs = \Courtneyr\Child\Journal\card_attrs( $post, 'post-kinds-indieweb/watch-card', (array) ( $watch['attrs'] ?? array() ) );
 
 	$lede  = '<p class="cr-journal__lede">';
 	$lede .= '<time class="cr-journal__lede-date" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time>';
@@ -218,22 +218,20 @@ function journal_page( string $html, array $block ): string {
 	if ( null === $watch || false === strpos( $html, 'k-watch' ) ) {
 		return $html;
 	}
-	$attrs = (array) ( $watch['attrs'] ?? array() );
+	$attrs = \Courtneyr\Child\Journal\card_attrs( $post, 'post-kinds-indieweb/watch-card', (array) ( $watch['attrs'] ?? array() ) );
 	$s     = seed( (string) $post->ID, (string) ( $attrs['imdbId'] ?? '' ), (string) ( $attrs['tmdbId'] ?? '' ), (string) ( $attrs['mediaTitle'] ?? '' ) );
 
-	// 1. A long review leaves the cassette for the notes section.
+	// 1. The review always leaves the cassette for the notes section: the
+	//    label zone is for the tape's own facts.
 	$note_html = '';
-	$review    = trim( (string) ( $attrs['review'] ?? '' ) );
-	if ( mb_strlen( wp_strip_all_tags( $review ) ) > REVIEW_INLINE_LIMIT ) {
-		$n_open  = '<div class="pk-note p-content">';
-		$n_start = strpos( $html, $n_open );
-		if ( false !== $n_start ) {
-			$n_end = strpos( $html, '</div>', $n_start );
-			if ( false !== $n_end ) {
-				$n_end    += 6;
-				$note_html = substr( $html, $n_start, $n_end - $n_start );
-				$html      = substr( $html, 0, $n_start ) . substr( $html, $n_end );
-			}
+	$n_open    = '<div class="pk-note p-content">';
+	$n_start   = strpos( $html, $n_open );
+	if ( false !== $n_start ) {
+		$n_end = strpos( $html, '</div>', $n_start );
+		if ( false !== $n_end ) {
+			$n_end    += 6;
+			$note_html = substr( $html, $n_start, $n_end - $n_start );
+			$html      = substr( $html, 0, $n_start ) . substr( $html, $n_end );
 		}
 	}
 
@@ -262,9 +260,18 @@ function journal_page( string $html, array $block ): string {
 				. '<span class="pk-sources__arrow" aria-hidden="true">↗</span></a></li>';
 		}
 		$row .= '</ul></nav>';
-		$meta = strpos( $html, '<div class="pk-meta">' );
-		if ( false !== $meta ) {
-			$html = substr( $html, 0, $meta ) . $row . substr( $html, $meta );
+	}
+
+	// The plugin's meta line (watched time) leaves the shell too; the row
+	// and the meta sit on the page under the cassette.
+	$plugin_meta = '';
+	$m_start     = strpos( $html, '<div class="pk-meta">' );
+	if ( false !== $m_start ) {
+		$m_end = strpos( $html, '</div>', $m_start );
+		if ( false !== $m_end ) {
+			$m_end       += 6;
+			$plugin_meta  = substr( $html, $m_start, $m_end - $m_start );
+			$html         = substr( $html, 0, $m_start ) . substr( $html, $m_end );
 		}
 	}
 
@@ -278,17 +285,65 @@ function journal_page( string $html, array $block ): string {
 		}
 	}
 
-	// 4. Margin notes, notes section, meta row.
+	$ts = ! empty( $attrs['watchedAt'] ) ? (int) strtotime( (string) $attrs['watchedAt'] ) : 0;
+	$ts = $ts > 0 ? $ts : (int) get_post_time( 'U', true, $post );
+
+	// 3b. The paper label in the middle of the cassette: a handwritten
+	//     VHS-era line (decorative) and a checklist of the tape's facts.
+	$facts = array();
+	if ( 'tv' === ( $attrs['mediaType'] ?? 'movie' ) ) {
+		$facts[] = __( 'TV series', 'courtneyr-child' );
+		$season  = (int) ( $attrs['seasonNumber'] ?? 0 );
+		$episode = (int) ( $attrs['episodeNumber'] ?? 0 );
+		if ( $season > 0 ) {
+			$facts[] = sprintf( /* translators: %d: season */ __( 'Season %d', 'courtneyr-child' ), $season ) . ( $episode > 0 ? ' · ' . sprintf( /* translators: %d: episode */ __( 'Episode %d', 'courtneyr-child' ), $episode ) : '' );
+		}
+		$ep_title = trim( (string) ( $attrs['episodeTitle'] ?? '' ) );
+		if ( '' !== $ep_title ) {
+			$facts[] = $ep_title;
+		}
+	} else {
+		$facts[] = __( 'Film', 'courtneyr-child' );
+	}
+	$year = (int) ( $attrs['releaseYear'] ?? 0 );
+	if ( $year > 0 ) {
+		$facts[] = (string) $year;
+	}
+	$director = trim( (string) ( $attrs['director'] ?? '' ) );
+	if ( '' !== $director ) {
+		$facts[] = sprintf( /* translators: %s: director */ __( 'Directed by %s', 'courtneyr-child' ), $director );
+	}
+	$facts[] = sprintf( /* translators: %s: date */ __( 'Watched %s', 'courtneyr-child' ), (string) wp_date( get_option( 'date_format' ), $ts ) );
+	if ( ! empty( $attrs['isRewatch'] ) ) {
+		$facts[] = __( 'A rewatch', 'courtneyr-child' );
+	}
+	$label_block  = '<div class="cr-vhs__label">';
+	$label_block .= '<p class="cr-vhs__note cr-hand" aria-hidden="true">' . esc_html__( 'Be kind & rewind', 'courtneyr-child' ) . '</p>';
+	$label_block .= '<span class="cr-vhs__stripe" aria-hidden="true"></span>';
+	$label_block .= '<ul class="cr-vhs__facts">';
+	foreach ( $facts as $fact ) {
+		$label_block .= '<li>' . esc_html( $fact ) . '</li>';
+	}
+	$label_block .= '</ul></div>';
+	$c_open       = '<div class="pk-caption">';
+	$c_start      = strpos( $html, $c_open );
+	if ( false !== $c_start ) {
+		$c_end = strpos( $html, '</div>', $c_start );
+		if ( false !== $c_end ) {
+			$html = substr( $html, 0, $c_end ) . $label_block . substr( $html, $c_end );
+		}
+	}
+
+	// 4. Under the cassette: the row, the details card, the notes, the
+	//    margin marks, the meta row.
 	$copy  = margin_lines( $s, 'film' );
-	$after = aside( $copy[0], 1 );
+	$after = ( isset( $row ) ? $row : '' ) . $plugin_meta . aside( $copy[0], 1 );
 	if ( '' !== $note_html ) {
 		$after .= notes_section( __( 'Notes from this watch', 'courtneyr-child' ), $note_html );
 		$after .= aside( $copy[1], 2, 'cr-hand--orange' );
 	}
+	$after .= details_record( $attrs, $post, $ts );
 	$after .= aside( $copy[ '' !== $note_html ? 2 : 1 ], 3 );
-
-	$ts = ! empty( $attrs['watchedAt'] ) ? (int) strtotime( (string) $attrs['watchedAt'] ) : 0;
-	$ts = $ts > 0 ? $ts : (int) get_post_time( 'U', true, $post );
 
 	$items   = array();
 	$items[] = meta_item(
@@ -313,8 +368,77 @@ function journal_page( string $html, array $block ): string {
 	$tags = new \WP_HTML_Tag_Processor( $html );
 	if ( $tags->next_tag( array( 'tag_name' => 'article', 'class_name' => 'k-watch' ) ) ) {
 		$tags->add_class( 'cr-vhs' );
+		if ( false !== strpos( $html, 'pk-embed--video' ) ) {
+			$tags->add_class( 'cr-vhs--player' );
+		}
 		$html = $tags->get_updated_html();
 	}
 	return $html;
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\journal_page', 20, 2 );
+
+/**
+ * The details card: a rental-store inventory sheet of stored facts with
+ * a generated WATCHED seal.
+ *
+ * @param array<string, mixed> $attrs Watch-card attributes.
+ * @param \WP_Post             $post  Post.
+ * @param int                  $ts    Watched timestamp.
+ * @return string
+ */
+function details_record( array $attrs, \WP_Post $post, int $ts ): string {
+	$rows  = array();
+	$is_tv = 'tv' === ( $attrs['mediaType'] ?? 'movie' );
+	$rows[] = array( __( 'Type', 'courtneyr-child' ), esc_html( $is_tv ? __( 'TV series', 'courtneyr-child' ) : __( 'Film', 'courtneyr-child' ) ) );
+	$title  = trim( (string) ( $attrs['mediaTitle'] ?? '' ) );
+	if ( '' !== $title && 0 !== strcasecmp( $title, get_the_title( $post ) ) ) {
+		$rows[] = array( __( 'Title', 'courtneyr-child' ), esc_html( $title ) );
+	}
+	if ( $is_tv ) {
+		$show = trim( (string) ( $attrs['showTitle'] ?? '' ) );
+		if ( '' !== $show && 0 !== strcasecmp( $show, $title ) ) {
+			$rows[] = array( __( 'Show', 'courtneyr-child' ), esc_html( $show ) );
+		}
+		if ( (int) ( $attrs['seasonNumber'] ?? 0 ) > 0 ) {
+			$rows[] = array( __( 'Season', 'courtneyr-child' ), esc_html( (string) (int) $attrs['seasonNumber'] ) );
+		}
+		if ( (int) ( $attrs['episodeNumber'] ?? 0 ) > 0 ) {
+			$ep     = (string) (int) $attrs['episodeNumber'];
+			$ep_t   = trim( (string) ( $attrs['episodeTitle'] ?? '' ) );
+			$rows[] = array( __( 'Episode', 'courtneyr-child' ), esc_html( $ep . ( '' !== $ep_t ? ' · ' . $ep_t : '' ) ) );
+		}
+	}
+	if ( (int) ( $attrs['releaseYear'] ?? 0 ) > 0 ) {
+		$rows[] = array( __( 'Year', 'courtneyr-child' ), esc_html( (string) (int) $attrs['releaseYear'] ) );
+	}
+	$director = trim( (string) ( $attrs['director'] ?? '' ) );
+	if ( '' !== $director ) {
+		$rows[] = array( __( 'Director', 'courtneyr-child' ), esc_html( $director ) );
+	}
+	$rows[] = array( __( 'Watched', 'courtneyr-child' ), '<time datetime="' . esc_attr( (string) wp_date( 'c', $ts ) ) . '">' . esc_html( (string) wp_date( get_option( 'date_format' ), $ts ) ) . '</time>' . ( ! empty( $attrs['isRewatch'] ) ? ' · ' . esc_html__( 'rewatch', 'courtneyr-child' ) : '' ) );
+	$rating = (int) ( $attrs['rating'] ?? 0 );
+	if ( $rating > 0 ) {
+		$rows[] = array( __( 'Rating', 'courtneyr-child' ), esc_html( sprintf( '%d / 5', $rating ) ) );
+	}
+
+	$s     = seed( (string) $post->ID, (string) ( $attrs['imdbId'] ?? '' ), (string) ( $attrs['tmdbId'] ?? '' ), (string) $title );
+	$stamp = \Courtneyr\Child\Stamps\render(
+		array(
+			'shape'  => 'seal',
+			'big'    => __( 'Watched', 'courtneyr-child' ),
+			'small'  => gmdate( 'd M Y', $ts ),
+			'ring'   => $is_tv ? __( 'TV club', 'courtneyr-child' ) : __( 'Film club', 'courtneyr-child' ),
+			'ink'    => \Courtneyr\Child\Stamps\INKS[ \Courtneyr\Child\Stamps\pick( $s, 3, count( \Courtneyr\Child\Stamps\INKS ) ) ],
+			'tilt'   => \Courtneyr\Child\Stamps\pick( $s, 6, \Courtneyr\Child\Stamps\TILTS ),
+			'uid'    => 'cr-watch-seal-' . $post->ID,
+			'family' => 'watched',
+		)
+	);
+
+	$out  = '<section class="cr-record cr-vhs__record"><h2 class="cr-record-title">' . esc_html__( 'The details', 'courtneyr-child' ) . '</h2>';
+	$out .= '<p class="cr-record-eyebrow">' . esc_html__( 'Rental record', 'courtneyr-child' ) . '</p><dl class="cr-record-rows">';
+	foreach ( $rows as $r ) {
+		$out .= '<div class="cr-record-row"><dt>' . esc_html( $r[0] ) . '</dt><dd>' . $r[1] . '</dd></div>';
+	}
+	return $out . '</dl><div class="cr-record-stamp">' . $stamp . '</div></section>';
+}

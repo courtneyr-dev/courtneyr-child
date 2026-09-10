@@ -3654,38 +3654,38 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
    One SVG per stamp, ink from --cr-stamp-ink, fixed width per shape so a
    footer's height never depends on the variant. Tilts are the only
    transform; both the passport and the booth consume these rules. */
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp-mark { display: block; line-height: 0; mix-blend-mode: multiply; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp-mark--tilt-0 { transform: rotate(-3deg); }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp-mark--tilt-1 { transform: rotate(-1deg); }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp-mark--tilt-2 { transform: rotate(1.5deg); }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp-mark--tilt-3 { transform: rotate(3.5deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp-mark { display: block; line-height: 0; mix-blend-mode: multiply; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp-mark--tilt-0 { transform: rotate(-3deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp-mark--tilt-1 { transform: rotate(-1deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp-mark--tilt-2 { transform: rotate(1.5deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp-mark--tilt-3 { transform: rotate(3.5deg); }
 /* Stamps sit close, the second tucked against the first like real
    overprints; they only ever overlap each other, never content. */
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp-mark + .cr-stamp-mark { margin-left: -0.9rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp { display: block; height: auto; opacity: 0.9; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp--rect { width: 8.4rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp--seal,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp--octagon { width: 5.8rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp--postmark { width: 10rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp rect,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp circle,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp > path,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp .cr-stamp__waves { fill: none; stroke: var(--cr-stamp-ink, #241c4a); stroke-linecap: round; stroke-linejoin: round; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp text,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp .cr-stamp__glyph { fill: var(--cr-stamp-ink, #241c4a); }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp text {
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp-mark + .cr-stamp-mark { margin-left: -0.9rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp { display: block; height: auto; opacity: 0.9; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp--rect { width: 8.4rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp--seal,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp--octagon { width: 5.8rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp--postmark { width: 10rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp rect,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp circle,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp > path,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp .cr-stamp__waves { fill: none; stroke: var(--cr-stamp-ink, #241c4a); stroke-linecap: round; stroke-linejoin: round; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp text,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp .cr-stamp__glyph { fill: var(--cr-stamp-ink, #241c4a); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp text {
 	font-family: var(--cr-font-mono, monospace);
 	text-anchor: middle;
 	text-transform: uppercase;
 	font-weight: 700;
 }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__big { font-size: 21px; letter-spacing: 2px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__big--seal { font-size: 12.5px; letter-spacing: 1.4px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__mid { font-size: 11.5px; letter-spacing: 1.2px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__mid--seal { font-size: 10px; letter-spacing: 1px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__small { font-size: 9px; letter-spacing: 1px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__tiny { font-size: 8px; letter-spacing: 1px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__ring { font-size: 9.5px; letter-spacing: 2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__big { font-size: 21px; letter-spacing: 2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__big--seal { font-size: 12.5px; letter-spacing: 1.4px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__mid { font-size: 11.5px; letter-spacing: 1.2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__mid--seal { font-size: 10px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__small { font-size: 9px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__tiny { font-size: 8px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__ring { font-size: 9.5px; letter-spacing: 2px; }
 .cr-stream-page .cr-passport .cr-passport__entry {
 	flex: 1 1 100%;
 	margin: 0.1rem 0 0;
@@ -5360,7 +5360,7 @@ body.single-post.kind-read .cr-read__status-progress { color: var(--cr-ink, #241
 	}
 	body.single-post.kind-read .cr-journal > .cr-book { grid-column: 1; grid-row: 1 / span 2; }
 	body.single-post.kind-read .cr-journal > .cr-journal__notes { grid-column: 2; grid-row: 1; }
-	body.single-post.kind-read .cr-journal > .cr-read__record { grid-column: 2; grid-row: 2; }
+	body.single-post.kind-read .cr-journal > .cr-record { grid-column: 2; grid-row: 2; }
 	body.single-post.kind-read .cr-journal > .cr-read__sample { grid-column: 1 / 3; grid-row: 3; }
 	body.single-post.kind-read .cr-journal > .cr-journal__margin--1 { grid-column: 3; grid-row: 1; align-self: start; padding-top: 3.5rem; }
 	body.single-post.kind-read .cr-journal > .cr-journal__margin--2 { grid-column: 1; grid-row: 3; align-self: start; justify-self: end; padding-right: 1rem; }
@@ -5588,7 +5588,7 @@ body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sou
 body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources__arrow { font-family: var(--cr-font-body, sans-serif); }
 
 /* ---- Notes: a torn notebook sheet ---- */
-body.single-post.kind-read .cr-journal__notes {
+body.single-post:is(.kind-read, .kind-watch) .cr-journal__notes {
 	position: relative;
 	padding: 1.4rem 1.6rem 1.6rem 2.9rem;
 	background: #fbfaf5;
@@ -5599,7 +5599,7 @@ body.single-post.kind-read .cr-journal__notes {
 	transform: rotate(-0.5deg);
 	color: #241c4a;
 }
-body.single-post.kind-read .cr-journal__notes::before {
+body.single-post:is(.kind-read, .kind-watch) .cr-journal__notes::before {
 	content: "";
 	position: absolute;
 	top: 1rem;
@@ -5610,7 +5610,7 @@ body.single-post.kind-read .cr-journal__notes::before {
 	opacity: 0.85;
 	pointer-events: none;
 }
-body.single-post.kind-read .cr-journal__notes-title {
+body.single-post:is(.kind-read, .kind-watch) .cr-journal__notes-title {
 	display: block;
 	margin: 0 0 0.9rem;
 	padding: 0 0 0.3rem;
@@ -5625,18 +5625,18 @@ body.single-post.kind-read .cr-journal__notes-title {
 	color: #241c4a;
 	border-bottom: 2px solid #241c4a;
 }
-body.single-post.kind-read .cr-journal__notes .pk-note {
+body.single-post:is(.kind-read, .kind-watch) .cr-journal__notes .pk-note {
 	margin: 0;
 	font-family: var(--cr-font-mono, monospace);
 	font-size: 0.92rem;
 	line-height: 1.7rem;
 	color: #241c4a;
 }
-body.single-post.kind-read .cr-journal__notes .pk-note p { margin: 0 0 1.7rem; }
-body.single-post.kind-read .cr-journal__notes .pk-note p:last-child { margin-bottom: 0; }
+body.single-post:is(.kind-read, .kind-watch) .cr-journal__notes .pk-note p { margin: 0 0 1.7rem; }
+body.single-post:is(.kind-read, .kind-watch) .cr-journal__notes .pk-note p:last-child { margin-bottom: 0; }
 
 /* ---- Reading record: a library card ---- */
-body.single-post.kind-read .cr-read__record {
+body.single-post:is(.kind-read, .kind-watch) .cr-record {
 	position: relative;
 	padding: 1.1rem 1.4rem 1.6rem;
 	background: #fbf7ea;
@@ -5647,21 +5647,21 @@ body.single-post.kind-read .cr-read__record {
 	color: #241c4a;
 	font-family: var(--cr-font-mono, monospace);
 }
-body.single-post.kind-read .cr-read__record::before {
+body.single-post:is(.kind-read, .kind-watch) .cr-record::before {
 	content: "";
 	position: absolute;
 	inset: 0.45rem;
 	border: 1px solid rgba(36, 28, 74, 0.4);
 	pointer-events: none;
 }
-body.single-post.kind-read .cr-read__record-eyebrow {
+body.single-post:is(.kind-read, .kind-watch) .cr-record-eyebrow {
 	margin: 0;
 	font-size: max(0.6rem, var(--cr-text-floor, 0.7rem));
 	letter-spacing: 0.18em;
 	text-transform: uppercase;
 	color: #126782;
 }
-body.single-post.kind-read .cr-read__record-title {
+body.single-post:is(.kind-read, .kind-watch) .cr-record-title {
 	margin: 0.15rem 0 0.9rem;
 	padding-bottom: 0.45rem;
 	border-bottom: 2px solid #241c4a;
@@ -5672,8 +5672,8 @@ body.single-post.kind-read .cr-read__record-title {
 	text-transform: uppercase;
 	color: #241c4a;
 }
-body.single-post.kind-read .cr-read__record-rows { margin: 0; padding: 0; display: grid; gap: 0; }
-body.single-post.kind-read .cr-read__record-row {
+body.single-post:is(.kind-read, .kind-watch) .cr-record-rows { margin: 0; padding: 0; display: grid; gap: 0; }
+body.single-post:is(.kind-read, .kind-watch) .cr-record-row {
 	display: grid;
 	grid-template-columns: 7.5rem minmax(0, 1fr);
 	gap: 0.6rem;
@@ -5681,7 +5681,7 @@ body.single-post.kind-read .cr-read__record-row {
 	padding: 0.42rem 0;
 	border-bottom: 1px dotted rgba(36, 28, 74, 0.45);
 }
-body.single-post.kind-read .cr-read__record-row dt {
+body.single-post:is(.kind-read, .kind-watch) .cr-record-row dt {
 	margin: 0;
 	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
 	font-weight: 700;
@@ -5689,8 +5689,8 @@ body.single-post.kind-read .cr-read__record-row dt {
 	text-transform: uppercase;
 	color: #3d2f6e;
 }
-body.single-post.kind-read .cr-read__record-row dd { margin: 0; font-size: 0.86rem; color: #241c4a; overflow-wrap: anywhere; }
-body.single-post.kind-read .cr-read__record-stamp {
+body.single-post:is(.kind-read, .kind-watch) .cr-record-row dd { margin: 0; font-size: 0.86rem; color: #241c4a; overflow-wrap: anywhere; }
+body.single-post:is(.kind-read, .kind-watch) .cr-record-stamp {
 	position: absolute;
 	right: 0.9rem;
 	bottom: -1.2rem;
@@ -5698,8 +5698,8 @@ body.single-post.kind-read .cr-read__record-stamp {
 	mix-blend-mode: multiply;
 	pointer-events: none;
 }
-body.single-post.kind-read .cr-read__record-stamp .cr-stamp { width: 100%; height: auto; }
-body.single-post.kind-read .cr-read__record:has(.cr-read__record-stamp) .cr-read__record-rows { padding-right: 5.5rem; }
+body.single-post:is(.kind-read, .kind-watch) .cr-record-stamp .cr-stamp { width: 100%; height: auto; }
+body.single-post:is(.kind-read, .kind-watch) .cr-record:has(.cr-record-stamp) .cr-record-rows { padding-right: 5.5rem; }
 
 /* ---- Read a sample: the plugin's Kindle preview in a reading window ---- */
 body.single-post.kind-read .cr-read__sample {
@@ -5733,31 +5733,385 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-it
 	body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media { margin-inline: auto !important; width: min(100% - 2rem, 17rem); }
 	body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-kindlabel { font-size: 3rem; top: -2.5rem; left: 0; }
 	body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-progress { margin-inline: auto; }
-	body.single-post.kind-read .cr-journal__notes,
-	body.single-post.kind-read .cr-read__record,
+	body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources { align-self: center; width: min(100% - 2rem, 17rem); }
+	body.single-post:is(.kind-read, .kind-watch) .cr-journal__notes,
+	body.single-post:is(.kind-read, .kind-watch) .cr-record,
 	body.single-post.kind-read .cr-read__sample { transform: none; }
-	body.single-post.kind-read .cr-read__record-row { grid-template-columns: 6rem minmax(0, 1fr); }
-	body.single-post.kind-read .cr-read__record-stamp { width: 5.5rem; bottom: -0.9rem; }
+	body.single-post:is(.kind-read, .kind-watch) .cr-record-row { grid-template-columns: 6rem minmax(0, 1fr); }
+	body.single-post:is(.kind-read, .kind-watch) .cr-record-stamp { width: 5.5rem; bottom: -0.9rem; }
 }
 @media (max-width: 40rem) {
-	body.single-post.kind-read .cr-journal__notes { padding-left: 2.4rem; }
-	body.single-post.kind-read .cr-read__record:has(.cr-read__record-stamp) .cr-read__record-rows { padding-right: 0; padding-bottom: 3.6rem; }
+	body.single-post:is(.kind-read, .kind-watch) .cr-journal__notes { padding-left: 2.4rem; }
+	body.single-post:is(.kind-read, .kind-watch) .cr-record:has(.cr-record-stamp) .cr-record-rows { padding-right: 0; padding-bottom: 3.6rem; }
 }
 
 /* Dark page ground: the paper objects keep their ink. */
-:root[data-theme="dark"] body.single-post.kind-read.single .single-post__content :is(.cr-journal__notes, .cr-journal__notes *, .cr-read__record, .cr-read__record *, .cr-read__sample, .cr-read__sample *) { color: #241c4a !important; }
-:root[data-theme="dark"] body.single-post.kind-read.single .single-post__content :is(.cr-read__record-eyebrow, .cr-read__sample-note) { color: #126782 !important; }
+:root[data-theme="dark"] body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.cr-journal__notes, .cr-journal__notes *, .cr-record, .cr-record *, .cr-read__sample, .cr-read__sample *) { color: #241c4a !important; }
+:root[data-theme="dark"] body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.cr-record-eyebrow, .cr-read__sample-note) { color: #126782 !important; }
 :root[data-theme="dark"] body.single-post.kind-read.single .single-post__content :is(.cr-book__cover--type, .cr-book__cover--type *) { color: #fbfaf5 !important; }
 :root[data-theme="dark"] body.single-post.kind-read.single .single-post__content .cr-book__type-author { color: #bcb5e3 !important; }
-:root[data-theme="dark"] body.single-post.kind-read.single .single-post__content :is(.pk-sources__link, .pk-sources__link *) { color: #241c4a !important; }
+:root[data-theme="dark"] body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.pk-sources__link, .pk-sources__link *) { color: #241c4a !important; }
 :root[data-theme="dark"] body.single-post.kind-read.single .single-post .single-post__header .cr-read__status .cr-read__status-chip { color: #023047 !important; }
 :root[data-theme="dark"] body.single-post.kind-read.single .single-post .single-post__header :is(.cr-read__status--reading, .cr-read__status--abandoned, .cr-read__status--to-read) .cr-read__status-chip { color: #241c4a !important; }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content :is(.cr-journal__notes, .cr-journal__notes *, .cr-read__record, .cr-read__record *, .cr-read__sample, .cr-read__sample *) { color: #241c4a !important; }
-	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content :is(.cr-read__record-eyebrow, .cr-read__sample-note) { color: #126782 !important; }
+	:root:not([data-theme="light"]) body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.cr-journal__notes, .cr-journal__notes *, .cr-record, .cr-record *, .cr-read__sample, .cr-read__sample *) { color: #241c4a !important; }
+	:root:not([data-theme="light"]) body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.cr-record-eyebrow, .cr-read__sample-note) { color: #126782 !important; }
 	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content :is(.cr-book__cover--type, .cr-book__cover--type *) { color: #fbfaf5 !important; }
 	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content .cr-book__type-author { color: #bcb5e3 !important; }
-	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content :is(.pk-sources__link, .pk-sources__link *) { color: #241c4a !important; }
+	:root:not([data-theme="light"]) body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.pk-sources__link, .pk-sources__link *) { color: #241c4a !important; }
 	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post .single-post__header .cr-read__status .cr-read__status-chip { color: #023047 !important; }
 	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post .single-post__header :is(.cr-read__status--reading, .cr-read__status--abandoned, .cr-read__status--to-read) .cr-read__status-chip { color: #241c4a !important; }
+}
+
+/* ============================================================
+   v0.7.25 — single watch: a full VHS inside a zine spread.
+   The v0.7.13 shell was 46rem wide and ~1.56:1 only because the row
+   and the meta sat inside it; the mechanics row itself was 7.5rem
+   tall, so the tape read as a wide black strip. Now the card is the
+   shell alone (the row and the plugin's meta move under it on the
+   page) and its body is a container-unit grid: flap 5.5cqw · interior
+   46cqw · transport 8.5cqw = 60cqw, i.e. 1.67:1 at any width. Three
+   interior zones: the poster as a printed insert on the left over a
+   partial reel, the paper label in the middle (Rock Salt "Be kind &
+   rewind", colour stripe, a checklist of stored facts), and one large
+   reel window on the right. A tape ribbon runs across the transport
+   row between two rollers. Posts with a real player put it in the
+   centre-plus-right window instead. The body below leans on the same
+   sheet, card and margin primitives as the read single, plus an arrow
+   from each margin note and registration crosses on the page corners.
+   Scope: body.single-post.kind-watch.
+   ============================================================ */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs {
+	container-type: inline-size;
+	max-width: 48rem;
+	background:
+		linear-gradient(#0c0b0f, #0c0b0f) top / 100% 5.5cqw no-repeat,
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 4px) left 0 top 5.5cqw / 100% 1.6cqw no-repeat,
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 5px),
+		#17151b !important;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body {
+	display: grid;
+	grid-template-columns: 27cqw minmax(0, 1fr) 28cqw;
+	grid-template-rows: 5.5cqw minmax(46cqw, auto) 8.5cqw;
+	grid-template-areas:
+		"flap flap flap"
+		"poster label reel"
+		"tape tape tape";
+	gap: 0;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	overflow: hidden;
+	border-radius: inherit;
+	background:
+		/* tape ribbon between two rollers, across the transport row */
+		radial-gradient(circle 1.1cqw at 14cqw calc(100% - 4.2cqw), #6a6560 98%, transparent),
+		radial-gradient(circle 1.1cqw at calc(100% - 14cqw) calc(100% - 4.2cqw), #6a6560 98%, transparent),
+		linear-gradient(#2b2833, #2b2833) left 14cqw bottom 3.6cqw / calc(100% - 28cqw) 1.3cqw no-repeat,
+		linear-gradient(#0c0b0f, #0c0b0f) left 40cqw bottom 2cqw / 20cqw 4.6cqw no-repeat;
+	background-repeat: no-repeat;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-kindlabel {
+	grid-area: flap;
+	align-self: center;
+	padding: 0 3cqw;
+	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.26em;
+	color: #b9b5c4;
+}
+/* Left: the poster as a printed insert over a partial reel. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::before {
+	grid-area: poster;
+	align-self: end;
+	justify-self: start;
+	width: 20cqw;
+	height: 20cqw;
+	margin: 0 0 3cqw -5cqw;
+	border-radius: 50%;
+	background:
+		radial-gradient(circle closest-side, #f4f1ea 0 15%, #6a6560 16% 19%, transparent 20%),
+		repeating-radial-gradient(circle, #141218 0 2px, #201d26 2px 4px);
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+	z-index: 0;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media {
+	grid-area: poster;
+	position: relative;
+	z-index: 1;
+	align-self: center;
+	justify-self: center;
+	display: block;
+	margin: 3cqw 1.5cqw 3cqw 3cqw;
+	padding: 0.35rem;
+	min-height: 0;
+	background: #fbfaf5;
+	border-radius: 2px;
+	box-shadow: 4px 4px 0 #050408;
+	transform: rotate(-2deg);
+	overflow: visible;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media img {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-height: 40cqw;
+	object-fit: contain;
+	border-radius: 1px;
+}
+/* No poster stored: the left reel is a full window like the right one. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body:not(:has(.pk-media))::before {
+	align-self: center;
+	justify-self: center;
+	width: 22cqw;
+	height: 22cqw;
+	margin: 0;
+	box-shadow: 0 0 0 2cqw #0b0a0e, 0 0 0 calc(2cqw + 1px) rgba(255, 255, 255, 0.08);
+}
+/* Centre: the paper label. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-caption {
+	grid-area: label;
+	align-self: stretch;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	gap: 0;
+	margin: 3cqw 1.5cqw;
+	padding: 1.6cqw 2.4cqw 1.8cqw;
+	background: #f6f3ea;
+	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.5rem - 1px), rgba(36, 28, 74, 0.12) calc(1.5rem - 1px) 1.5rem);
+	background-position: 0 1.1rem;
+	border-radius: 3px;
+	box-shadow: 0 0 0 1px rgba(36, 28, 74, 0.35), 3px 3px 0 #050408;
+	color: #241c4a;
+	overflow: hidden;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-title {
+	margin: 0;
+	padding: 0;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 900;
+	font-size: clamp(0.95rem, 3.2cqw, 1.35rem);
+	line-height: 1.1;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	color: #241c4a;
+	border: 0;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-sub {
+	margin: 0.15rem 0 0;
+	padding: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: #3d2f6e;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__label { margin-top: auto; display: flex; flex-direction: column; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__note {
+	margin: 0.5rem 0 0.4rem;
+	font-family: var(--cr-font-display, cursive);
+	font-size: clamp(1rem, 3.6cqw, 1.55rem);
+	line-height: 1.45;
+	max-width: none;
+	color: #241c4a;
+	transform: rotate(-1.5deg);
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__stripe {
+	display: block;
+	height: 0.9rem;
+	margin: 0.3rem 0 0.7rem;
+	background: linear-gradient(90deg, #fb8500 0 28%, #ffb703 28% 52%, #8ecae6 52% 76%, #647baf 76%);
+	transform: skewX(-8deg);
+	opacity: 0.95;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__facts {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 0.28rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.7rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: #241c4a;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__facts li { margin: 0; padding: 0 0 0 1.4rem; position: relative; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__facts li::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0.15em;
+	width: 0.75em;
+	height: 0.45em;
+	border-left: 2.5px solid #241c4a;
+	border-bottom: 2.5px solid #241c4a;
+	transform: rotate(-48deg);
+}
+/* Right: one large reel window. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::after {
+	grid-area: reel;
+	align-self: center;
+	justify-self: center;
+	width: 22cqw;
+	height: 22cqw;
+	margin: 0;
+	border-radius: 50%;
+	background:
+		linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.14) 38%, transparent 48%),
+		radial-gradient(circle closest-side, #f4f1ea 0 14%, #6a6560 15% 18%, transparent 19%),
+		conic-gradient(from 25deg, rgba(255, 255, 255, 0.16) 0 38deg, transparent 38deg 150deg, rgba(255, 255, 255, 0.1) 150deg 190deg, transparent 190deg 360deg),
+		repeating-radial-gradient(circle, #141218 0 2px, #201d26 2px 4px);
+	box-shadow: 0 0 0 2cqw #0b0a0e, 0 0 0 calc(2cqw + 1px) rgba(255, 255, 255, 0.08);
+}
+/* Nothing else lives in the shell. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-note,
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-stars,
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-progress { display: none; }
+/* A real player takes the centre and right. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body {
+	grid-template-columns: 30cqw minmax(0, 1fr);
+	grid-template-areas:
+		"flap flap"
+		"label window"
+		"tape tape";
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body::before { grid-area: label; margin: 0 0 3cqw -8cqw; z-index: 0; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body::after { content: none; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-media { display: none; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-caption { position: relative; z-index: 1; margin: 3cqw 1cqw 3cqw 3cqw; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video {
+	grid-area: window;
+	align-self: center;
+	margin: 3cqw 3cqw 3cqw 1.5cqw;
+	padding: 0.4rem;
+	min-height: 0;
+	border-radius: 4px;
+	background: #0d0c10;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+	overflow: hidden;
+}
+
+/* ---- Under the cassette, on the page ---- */
+body.single-post.kind-watch .cr-journal > .pk-sources { margin: 1.2rem 0.2rem 0; }
+body.single-post.kind-watch .cr-journal > .pk-sources .pk-sources__label {
+	margin: 0 0 0.45rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--cr-ink-muted, #126782);
+}
+body.single-post.kind-watch .cr-journal > .pk-sources .pk-sources__list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.55rem 0.65rem; }
+body.single-post.kind-watch .cr-journal > .pk-sources .pk-sources__list li { margin: 0; padding: 0; }
+body.single-post.kind-watch .cr-journal > .pk-sources .pk-sources__list li::before,
+body.single-post.kind-watch .cr-journal > .pk-sources .pk-sources__list li::marker { content: none; }
+body.single-post.kind-watch .cr-journal > .pk-sources .pk-sources__link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	min-height: 1.9rem;
+	padding: 0.25rem 0.7rem;
+	border: 1.5px solid #241c4a;
+	border-radius: 2px;
+	background: #f6f3ea;
+	box-shadow: 3px 3px 0 #b89d55;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.7rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: #241c4a;
+	text-decoration: none;
+}
+body.single-post.kind-watch .cr-journal > .pk-sources .pk-sources__link--watch { background: #fee2c3; }
+body.single-post.kind-watch .cr-journal > .pk-sources .pk-sources__link:hover { background: #ffb703; }
+body.single-post.kind-watch .cr-journal > .pk-sources .pk-sources__link:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
+body.single-post.kind-watch .cr-journal > .pk-sources .pk-sources__arrow { font-family: var(--cr-font-body, sans-serif); }
+body.single-post.kind-watch .cr-journal > .pk-meta {
+	margin: 0.6rem 0.2rem 0;
+	padding: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--cr-ink-soft, #4a4566);
+}
+body.single-post.kind-watch .cr-journal > .pk-meta:not(:has(time)),
+body.single-post.kind-watch .cr-journal:has(.cr-journal__meta) > .pk-meta { display: none; }
+body.single-post.kind-watch .cr-journal > .pk-meta .pk-link,
+body.single-post.kind-watch .cr-journal > .pk-meta .pk-dot { display: none; }
+/* Comic cues on the page: an arrow from each margin note, registration crosses. */
+body.single-post.kind-watch .cr-journal { position: relative; }
+body.single-post.kind-watch .cr-journal::before,
+body.single-post.kind-watch .cr-journal::after {
+	content: "";
+	position: absolute;
+	width: 1.3rem;
+	height: 1.3rem;
+	background:
+		linear-gradient(var(--cr-ink, #241c4a), var(--cr-ink, #241c4a)) 50% 0 / 1.5px 100% no-repeat,
+		linear-gradient(var(--cr-ink, #241c4a), var(--cr-ink, #241c4a)) 0 50% / 100% 1.5px no-repeat,
+		radial-gradient(circle, transparent 38%, var(--cr-ink, #241c4a) 40% 46%, transparent 48%);
+	opacity: 0.55;
+	pointer-events: none;
+}
+body.single-post.kind-watch .cr-journal::before { left: -1.6rem; top: -1.2rem; }
+body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem; }
+@media (min-width: 64rem) {
+	body.single-post.kind-watch .cr-journal > .pk-sources,
+	body.single-post.kind-watch .cr-journal > .pk-meta { grid-column: 1; }
+	body.single-post.kind-watch .cr-journal__margin .cr-hand::before {
+		content: "";
+		display: block;
+		width: 2.6rem;
+		height: 1.5rem;
+		margin: 0 0 0.25rem -0.6rem;
+		background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 30' fill='none'%3E%3Cpath d='M48 22 C 36 6, 20 4, 6 12 m 9 -8 l -9 8 l 10 6' stroke='%23241c4a' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") left center / contain no-repeat;
+		opacity: 0.8;
+	}
+	:root[data-theme="dark"] body.single-post.kind-watch .cr-journal__margin .cr-hand::before { filter: invert(1) brightness(1.2); }
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) body.single-post.kind-watch .cr-journal__margin .cr-hand::before { filter: invert(1) brightness(1.2); }
+	}
+}
+
+/* Phones: the three zones stack; the reel window and tape stay. */
+@media (max-width: 48rem) {
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: 2.4rem auto auto 6rem 3rem;
+		grid-template-areas:
+			"flap"
+			"poster"
+			"label"
+			"reel"
+			"tape";
+		background:
+			radial-gradient(circle 0.4rem at 3rem calc(100% - 1.5rem), #6a6560 98%, transparent),
+			radial-gradient(circle 0.4rem at calc(100% - 3rem) calc(100% - 1.5rem), #6a6560 98%, transparent),
+			linear-gradient(#2b2833, #2b2833) left 3rem bottom 1.3rem / calc(100% - 6rem) 0.4rem no-repeat;
+	}
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-kindlabel { padding: 0 1rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::before { display: none; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media { width: min(100% - 2rem, 13rem); margin: 1rem auto 0.4rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media img { max-height: 18rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-caption { margin: 0.8rem 1rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::after { display: block; width: 4.6rem; height: 4.6rem; box-shadow: 0 0 0 0.5rem #0b0a0e, 0 0 0 calc(0.5rem + 1px) rgba(255, 255, 255, 0.08); }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: 2.4rem auto auto 3rem;
+		grid-template-areas: "flap" "window" "label" "tape";
+	}
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video { margin: 0.8rem 1rem 0; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__note { font-size: 1.15rem; }
+}
+/* Dark page ground: label ink and the paper objects keep their colour. */
+:root[data-theme="dark"] body.single-post.kind-watch.single .single-post__content .pk-card.k-watch.cr-vhs :is(.pk-caption, .pk-caption *) { color: #241c4a !important; }
+:root[data-theme="dark"] body.single-post.kind-watch.single .single-post__content .pk-card.k-watch.cr-vhs :is(.pk-sub, .pk-sub *) { color: #3d2f6e !important; }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) body.single-post.kind-watch.single .single-post__content .pk-card.k-watch.cr-vhs :is(.pk-caption, .pk-caption *) { color: #241c4a !important; }
+	:root:not([data-theme="light"]) body.single-post.kind-watch.single .single-post__content .pk-card.k-watch.cr-vhs :is(.pk-sub, .pk-sub *) { color: #3d2f6e !important; }
 }
