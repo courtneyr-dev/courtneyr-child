@@ -3654,38 +3654,38 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
    One SVG per stamp, ink from --cr-stamp-ink, fixed width per shape so a
    footer's height never depends on the variant. Tilts are the only
    transform; both the passport and the booth consume these rules. */
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp-mark { display: block; line-height: 0; mix-blend-mode: multiply; }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp-mark--tilt-0 { transform: rotate(-3deg); }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp-mark--tilt-1 { transform: rotate(-1deg); }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp-mark--tilt-2 { transform: rotate(1.5deg); }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp-mark--tilt-3 { transform: rotate(3.5deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp-mark { display: block; line-height: 0; mix-blend-mode: multiply; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp-mark--tilt-0 { transform: rotate(-3deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp-mark--tilt-1 { transform: rotate(-1deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp-mark--tilt-2 { transform: rotate(1.5deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp-mark--tilt-3 { transform: rotate(3.5deg); }
 /* Stamps sit close, the second tucked against the first like real
    overprints; they only ever overlap each other, never content. */
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp-mark + .cr-stamp-mark { margin-left: -0.9rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp { display: block; height: auto; opacity: 0.9; }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp--rect { width: 8.4rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp--seal,
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp--octagon { width: 5.8rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp--postmark { width: 10rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp rect,
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp circle,
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp > path,
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp .cr-stamp__waves { fill: none; stroke: var(--cr-stamp-ink, #241c4a); stroke-linecap: round; stroke-linejoin: round; }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp text,
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp .cr-stamp__glyph { fill: var(--cr-stamp-ink, #241c4a); }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp text {
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp-mark + .cr-stamp-mark { margin-left: -0.9rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp { display: block; height: auto; opacity: 0.9; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp--rect { width: 8.4rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp--seal,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp--octagon { width: 5.8rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp--postmark { width: 10rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp rect,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp circle,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp > path,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp .cr-stamp__waves { fill: none; stroke: var(--cr-stamp-ink, #241c4a); stroke-linecap: round; stroke-linejoin: round; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp text,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp .cr-stamp__glyph { fill: var(--cr-stamp-ink, #241c4a); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp text {
 	font-family: var(--cr-font-mono, monospace);
 	text-anchor: middle;
 	text-transform: uppercase;
 	font-weight: 700;
 }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__big { font-size: 21px; letter-spacing: 2px; }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__big--seal { font-size: 12.5px; letter-spacing: 1.4px; }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__mid { font-size: 11.5px; letter-spacing: 1.2px; }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__mid--seal { font-size: 10px; letter-spacing: 1px; }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__small { font-size: 9px; letter-spacing: 1px; }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__tiny { font-size: 8px; letter-spacing: 1px; }
-:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__ring { font-size: 9.5px; letter-spacing: 2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__big { font-size: 21px; letter-spacing: 2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__big--seal { font-size: 12.5px; letter-spacing: 1.4px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__mid { font-size: 11.5px; letter-spacing: 1.2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__mid--seal { font-size: 10px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__small { font-size: 9px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__tiny { font-size: 8px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read) .cr-stamp__ring { font-size: 9.5px; letter-spacing: 2px; }
 .cr-stream-page .cr-passport .cr-passport__entry {
 	flex: 1 1 100%;
 	margin: 0.1rem 0 0;
@@ -3715,19 +3715,19 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 
 /* Header: kind chip stays, the template date hides (the lede has it),
    the tag row goes. */
-body.single-post:is(.kind-checkin, .kind-watch) .single-post__lede-meta .single-post__date { display: none; }
-body.single-post:is(.kind-checkin, .kind-watch) .single-post__meta { display: none; }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__lede {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .single-post__lede-meta .single-post__date { display: none; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .single-post__meta { display: none; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__lede {
 	margin: 0.35rem 0 0;
 	font-family: var(--cr-font-accent, serif);
 	font-size: 1.05rem;
 	color: var(--cr-ink-soft, #4a4566);
 }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__lede-date {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__lede-date {
 	padding-bottom: 0.1rem;
 	box-shadow: inset 0 -0.55em 0 rgba(142, 202, 230, 0.4);
 }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__lede-place { font-weight: 700; color: var(--cr-ink, #241c4a); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__lede-place { font-weight: 700; color: var(--cr-ink, #241c4a); }
 
 /* A featured image the block does not carry stays, as a snapshot. */
 body.single-post.kind-checkin .single-post__featured {
@@ -3747,7 +3747,7 @@ body.single-post.kind-checkin .single-post__content p:has(> .p-trip) {
 }
 body.single-post.kind-checkin .single-post__content p:has(> .p-trip)::before { content: "Trip · "; }
 @media (min-width: 64rem) {
-	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal {
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) 11rem;
 		column-gap: 2.25rem;
@@ -3755,17 +3755,17 @@ body.single-post.kind-checkin .single-post__content p:has(> .p-trip)::before { c
 		grid-auto-flow: row dense;
 		align-items: start;
 	}
-	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal > * { grid-column: 1; margin-block: 0; }
-	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal > aside { grid-column: 2; }
-	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal > .cr-journal__margin--1 { align-self: start; padding-top: 2.5rem; }
-	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal > .cr-journal__margin--2 { align-self: center; }
-	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal > .cr-journal__margin--3 { align-self: center; }
-	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal > .cr-journal__meta { grid-column: 1 / -1; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal > * { grid-column: 1; margin-block: 0; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal > aside { grid-column: 2; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal > .cr-journal__margin--1 { align-self: start; padding-top: 2.5rem; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal > .cr-journal__margin--2 { align-self: center; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal > .cr-journal__margin--3 { align-self: center; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal > .cr-journal__meta { grid-column: 1 / -1; }
 }
 
 /* Handwriting: Rock Salt, page ink, short lines, two marks (a double
    underline and a heart). Never below 1rem. */
-body.single-post:is(.kind-checkin, .kind-watch) .cr-hand {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand {
 	font-family: var(--cr-font-display, "Rock Salt", cursive);
 	font-size: 1.05rem;
 	line-height: 1.75;
@@ -3773,12 +3773,12 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-hand {
 	margin: 0;
 	max-width: 14ch;
 }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-hand--orange { color: #b85f00; }
-:root[data-theme="dark"] body.single-post:is(.kind-checkin, .kind-watch) .cr-hand--orange { color: #fb8500; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand--orange { color: #b85f00; }
+:root[data-theme="dark"] body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand--orange { color: #fb8500; }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) body.single-post:is(.kind-checkin, .kind-watch) .cr-hand--orange { color: #fb8500; }
+	:root:not([data-theme="light"]) body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand--orange { color: #fb8500; }
 }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-hand--underline::after {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand--underline::after {
 	content: "";
 	display: block;
 	width: 4.5rem;
@@ -3789,12 +3789,12 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-hand--underline::after {
 	transform: rotate(-2deg);
 	opacity: 0.85;
 }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-hand__heart { font-family: var(--cr-font-body, sans-serif); color: #126782; }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__margin { margin: 0; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand__heart { font-family: var(--cr-font-body, sans-serif); color: #126782; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__margin { margin: 0; }
 @media (max-width: 63.98rem) {
-	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__margin { margin: 1.25rem 0; text-align: center; }
-	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__margin .cr-hand { max-width: none; font-size: 1rem; }
-	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__margin .cr-hand--underline::after { margin-inline: auto; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__margin { margin: 1.25rem 0; text-align: center; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__margin .cr-hand { max-width: none; font-size: 1rem; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__margin .cr-hand--underline::after { margin-inline: auto; }
 }
 
 /* The passport artifact. */
@@ -3959,8 +3959,8 @@ body.single-post.kind-checkin .cr-passport--single .cr-passport__entry {
 }
 
 /* Notes from this check-in. */
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__notes { margin: 0; }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__notes-title {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__notes { margin: 0; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__notes-title {
 	display: inline-block;
 	margin: 0 0 0.75rem;
 	padding: 0.15rem 0.5rem;
@@ -3972,11 +3972,11 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__notes-title {
 	text-transform: uppercase;
 	color: var(--cr-ink, #241c4a);
 }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__notes .pk-note { margin: 0; padding: 0; font-size: 1.05rem; line-height: 1.65; color: var(--cr-ink, #241c4a); }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__notes .pk-note p { margin: 0 0 0.75em; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__notes .pk-note { margin: 0; padding: 0; font-size: 1.05rem; line-height: 1.65; color: var(--cr-ink, #241c4a); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__notes .pk-note p { margin: 0 0 0.75em; }
 
 /* The snapshot: a pasted print, not a hero. */
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__photo {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__photo {
 	width: 62%;
 	max-width: 26rem;
 	margin: 0.5rem 0 0;
@@ -3987,7 +3987,7 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__photo {
 	transform: rotate(-1.3deg);
 	position: relative;
 }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__photo::before {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__photo::before {
 	content: "";
 	position: absolute;
 	top: -0.6rem;
@@ -3999,7 +3999,7 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__photo::before {
 	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
 	pointer-events: none;
 }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__photo img {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__photo img {
 	display: block;
 	width: 100%;
 	height: auto;
@@ -4007,16 +4007,16 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__photo img {
 	border-radius: 0;
 	box-shadow: none;
 }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__photo .cr-hand--caption { margin: 0.5rem 0.15rem 0; max-width: none; font-size: 1rem; line-height: 1.6; color: #241c4a; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__photo .cr-hand--caption { margin: 0.5rem 0.15rem 0; max-width: none; font-size: 1rem; line-height: 1.6; color: #241c4a; }
 @media (max-width: 40rem) {
-	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__photo { width: 100%; transform: rotate(-0.6deg); }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__photo { width: 100%; transform: rotate(-0.6deg); }
 	body.single-post.kind-checkin .single-post__content .pk-card.cr-passport--single { transform: none; padding: 0.85rem 0.9rem 0.8rem; }
 	body.single-post.kind-checkin .cr-passport--single .cr-passport__stamps { justify-content: flex-start; margin-inline: -0.9rem; padding-inline: 0.9rem; }
 }
 
 /* Time and place, quiet, at the bottom. Simple Location's raster map
    is redundant with the passport's map; its address line stays. */
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 1rem 3rem;
@@ -4024,7 +4024,7 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta {
 	padding: 1rem 0 0;
 	border-top: 1px solid rgba(36, 28, 74, 0.35);
 }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-item {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-item {
 	display: flex;
 	gap: 0.6rem;
 	align-items: flex-start;
@@ -4034,18 +4034,18 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-item {
 	line-height: 1.5;
 	color: var(--cr-ink, #241c4a);
 }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-icon {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-icon {
 	flex: 0 0 1.25rem;
 	width: 1.25rem;
 	height: 1.25rem;
 	margin-top: 0.15rem;
 	background: no-repeat center / contain;
 }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-item--time .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E"); }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-item--place .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z'/%3E%3Cpath d='M9 3v15M15 6v15'/%3E%3C/svg%3E"); }
-body.single-post:is(.kind-checkin, .kind-watch) .single-post__content .sloc-map,
-body.single-post:is(.kind-checkin, .kind-watch) .single-post__content a:has(> .sloc-map) { display: none; }
-body.single-post:is(.kind-checkin, .kind-watch) .single-post__content .sloc-display {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-item--time .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-item--place .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z'/%3E%3Cpath d='M9 3v15M15 6v15'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .single-post__content .sloc-map,
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .single-post__content a:has(> .sloc-map) { display: none; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .single-post__content .sloc-display {
 	margin: 0.6rem 0 0;
 	font-family: var(--cr-font-mono, monospace);
 	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
@@ -4433,18 +4433,18 @@ body.single-post.kind-listen .single-post__content .pk-card.k-listen:has(.pk-sou
    the watch URL is not embeddable. Scope: body.single-post.kind-watch.
    ============================================================ */
 body.single-post.kind-watch .single-post__kind { display: inline-block !important; }
-body.single-post.kind-watch .cr-journal__rating {
+body.single-post:is(.kind-watch, .kind-read) .cr-journal__rating {
 	display: flex;
 	align-items: center;
 	gap: 0.15rem;
 	margin: 0.45rem 0 0;
 	color: #ffb703;
 }
-body.single-post.kind-watch .cr-journal__star { display: inline-flex; width: 1.35rem; height: 1.35rem; filter: drop-shadow(0 0 0.5px #241c4a); }
-body.single-post.kind-watch .cr-journal__star svg { width: 100%; height: 100%; }
-body.single-post.kind-watch .cr-journal__star--off { color: transparent; }
-body.single-post.kind-watch .cr-journal__star--off svg path { stroke: #647baf; stroke-width: 1.5; }
-body.single-post.kind-watch .cr-journal__rating-value {
+body.single-post:is(.kind-watch, .kind-read) .cr-journal__star { display: inline-flex; width: 1.35rem; height: 1.35rem; filter: drop-shadow(0 0 0.5px #241c4a); }
+body.single-post:is(.kind-watch, .kind-read) .cr-journal__star svg { width: 100%; height: 100%; }
+body.single-post:is(.kind-watch, .kind-read) .cr-journal__star--off { color: transparent; }
+body.single-post:is(.kind-watch, .kind-read) .cr-journal__star--off svg path { stroke: #647baf; stroke-width: 1.5; }
+body.single-post:is(.kind-watch, .kind-read) .cr-journal__rating-value {
 	margin-left: 0.5rem;
 	font-family: var(--cr-font-mono, monospace);
 	font-size: max(0.72rem, var(--cr-text-floor, 0.7rem));
@@ -4660,8 +4660,8 @@ body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-me
 	color: rgba(251, 250, 245, 0.85);
 }
 /* Meta row glyph for the film item, and the small label under items. */
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-item--film .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Crect x='3' y='9' width='18' height='12' rx='1.5'/%3E%3Cpath d='M3 9l16-5 1 3.5L4 12.5z'/%3E%3Cpath d='M7 8l3-5M12 6.5l3-5'/%3E%3C/svg%3E"); }
-body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-item--film .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Crect x='3' y='9' width='18' height='12' rx='1.5'/%3E%3Cpath d='M3 9l16-5 1 3.5L4 12.5z'/%3E%3Cpath d='M7 8l3-5M12 6.5l3-5'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-label {
 	display: block;
 	margin-top: 0.15rem;
 	font-family: var(--cr-font-mono, monospace);
@@ -5290,4 +5290,474 @@ body.single-post[class*="kind-"].single .single-post__kind a {
 	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:has(.able) .able-player { margin: 0.35rem 0 0; }
 	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:not(:has(.able)) > *,
 	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:not(:has(.able)) iframe { height: 100%; }
+}
+
+/* ============================================================
+   v0.7.24 — single read: an opened reading-journal spread around a
+   physical book. inc/single-read.php puts author, rating and status
+   under the H1, wraps the real cover (the card's, else the featured
+   image, else a typographic cover) as a dimensional book with a spine,
+   page block and a status bookmark, adds the "Read / find it" row from
+   stored URLs, moves the review to "Notes from this read", prints a
+   library-card "Reading record" with a generated seal, shows the
+   plugin's Kindle preview as "Read a sample" only when its bridge
+   produced a real iframe, and hangs Rock Salt marks in the margins.
+   The journal grid, hand, notes, meta and stamp primitives are shared
+   with the check-in and watch singles. Scope: body.single-post.kind-read.
+   ============================================================ */
+
+/* Under the H1: author, stars, status. */
+body.single-post.kind-read .cr-read__author {
+	margin: 0.35rem 0 0;
+	font-family: var(--cr-font-accent, serif);
+	font-size: 1.35rem;
+	font-weight: 400;
+	color: var(--cr-ink, #241c4a);
+}
+body.single-post.kind-read .cr-read__author::after {
+	content: "";
+	display: block;
+	width: 6rem;
+	height: 0.3rem;
+	margin-top: 0.4rem;
+	background: var(--cr-cerulean, #126782);
+	transform: rotate(-1.2deg);
+	border-radius: 1px;
+}
+body.single-post.kind-read .cr-read__status {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem 0.8rem;
+	margin: 0.6rem 0 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.72rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--cr-ink-muted, #126782);
+}
+body.single-post.kind-read .cr-read__status-chip {
+	display: inline-block;
+	padding: 0.28rem 0.7rem;
+	background: #cfe8f0;
+	color: #023047;
+	font-weight: 700;
+	border-radius: 2px;
+}
+body.single-post.kind-read .cr-read__status--reading .cr-read__status-chip { background: #ffb703; color: #241c4a; }
+body.single-post.kind-read .cr-read__status--abandoned .cr-read__status-chip { background: #ebebeb; color: #241c4a; }
+body.single-post.kind-read .cr-read__status--to-read .cr-read__status-chip { background: #fee2c3; color: #241c4a; }
+body.single-post.kind-read .cr-read__status-when { color: var(--cr-ink-muted, #126782); }
+body.single-post.kind-read .cr-read__status-progress { color: var(--cr-ink, #241c4a); font-weight: 700; }
+
+/* The journal spread: book column, reading column, margin column. */
+@media (min-width: 64rem) {
+	body.single-post.kind-read .cr-journal {
+		grid-template-columns: minmax(17rem, 23rem) minmax(0, 1fr) 9.5rem;
+		column-gap: 2.75rem;
+		row-gap: 2rem;
+		align-items: start;
+	}
+	body.single-post.kind-read .cr-journal > .cr-book { grid-column: 1; grid-row: 1 / span 2; }
+	body.single-post.kind-read .cr-journal > .cr-journal__notes { grid-column: 2; grid-row: 1; }
+	body.single-post.kind-read .cr-journal > .cr-read__record { grid-column: 2; grid-row: 2; }
+	body.single-post.kind-read .cr-journal > .cr-read__sample { grid-column: 1 / 3; grid-row: 3; }
+	body.single-post.kind-read .cr-journal > .cr-journal__margin--1 { grid-column: 3; grid-row: 1; align-self: start; padding-top: 3.5rem; }
+	body.single-post.kind-read .cr-journal > .cr-journal__margin--2 { grid-column: 1; grid-row: 3; align-self: start; justify-self: end; padding-right: 1rem; }
+	body.single-post.kind-read .cr-journal > .cr-journal__margin--3 { grid-column: 3; grid-row: 2; align-self: center; }
+	body.single-post.kind-read .cr-journal:has(.cr-read__sample) > .cr-journal__margin--2 { grid-row: 4; grid-column: 3; justify-self: start; padding-right: 0; }
+	body.single-post.kind-read .cr-journal > .cr-journal__meta { grid-column: 1 / -1; grid-row: 5; }
+}
+
+/* ---- The book ---- */
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book {
+	display: block;
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding: 3.6rem 1.6rem 0 1.4rem;
+	position: relative;
+	background: transparent !important;
+	border: 0;
+	border-radius: 0;
+	overflow: visible;
+	box-shadow: none;
+	color: var(--cr-ink, #241c4a);
+	align-items: start !important;
+}
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-body {
+	display: flex !important;
+	flex-direction: column;
+	align-items: stretch;
+	width: auto !important;
+	padding: 0;
+	margin: 0;
+	background: none;
+	position: relative;
+}
+/* Book first, then the progress rail, then the row (the plugin prints
+   progress before the cover). */
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media { order: 1; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-progress { order: 2; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources { order: 3; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-badge,
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-caption,
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-stars,
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-meta { display: none; }
+/* The kind label is the page's oversized display word. */
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-kindlabel {
+	position: absolute;
+	top: -3.1rem;
+	left: -0.5rem;
+	z-index: 0;
+	width: auto;
+	height: auto;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	font-family: var(--cr-font-accent, serif);
+	font-size: 3.9rem;
+	font-weight: 900;
+	line-height: 0.9;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
+	color: var(--cr-ink, #241c4a);
+	transform: rotate(-4deg);
+	-webkit-mask-image: repeating-linear-gradient(-32deg, #000 0 6px, rgba(0, 0, 0, 0.55) 6px 7px);
+	mask-image: repeating-linear-gradient(-32deg, #000 0 6px, rgba(0, 0, 0, 0.55) 6px 7px);
+	opacity: 0.92;
+}
+/* The cover as a dimensional book. */
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media {
+	display: block !important;
+	position: relative;
+	z-index: 1;
+	width: min(100%, 19rem);
+	margin: 0.6rem 0 0 1.4rem !important;
+	gap: 0 !important;
+	transform: perspective(1200px) rotateY(-6deg) rotate(-1.5deg);
+	transform-origin: left center;
+}
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media img,
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media .cr-book__img {
+	display: block;
+	position: relative;
+	z-index: 2;
+	width: 100% !important;
+	height: auto !important;
+	max-width: none !important;
+	aspect-ratio: auto !important;
+	object-fit: contain;
+	border-radius: 2px 5px 5px 2px !important;
+	box-shadow: inset 0 0 0 1px rgba(36, 28, 74, 0.3);
+}
+/* Spine. */
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media::before {
+	content: "";
+	position: absolute;
+	top: 0.15rem;
+	bottom: -0.2rem;
+	left: -0.95rem;
+	width: 1rem;
+	z-index: 1;
+	background: linear-gradient(90deg, #17123a, #2d2560 55%, #241c4a);
+	border-radius: 4px 0 0 4px;
+	box-shadow: inset -2px 0 0 rgba(255, 255, 255, 0.08), -3px 3px 0 rgba(36, 28, 74, 0.35);
+	background-image: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 4px), linear-gradient(90deg, #17123a, #2d2560 55%, #241c4a);
+}
+/* Page block, right and bottom. */
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media::after {
+	content: "";
+	position: absolute;
+	top: 0.55rem;
+	right: -0.65rem;
+	bottom: -0.6rem;
+	left: 0.6rem;
+	z-index: 0;
+	border-radius: 0 4px 4px 0;
+	background: repeating-linear-gradient(180deg, #f8f5ec 0 2px, #d8d3c5 2px 3px);
+	box-shadow: 6px 6px 0 var(--cr-ink, #241c4a);
+}
+/* Typographic cover when no image is stored anywhere. */
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .cr-book__cover--type {
+	aspect-ratio: 2 / 3;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	gap: 0.6rem;
+	padding: 1.4rem 1.2rem;
+	background: #241c4a;
+	color: #fbfaf5;
+	border-radius: 2px 5px 5px 2px;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .cr-book__type-title {
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 900;
+	font-size: 1.6rem;
+	line-height: 1.05;
+	position: relative;
+	z-index: 2;
+}
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .cr-book__type-author {
+	font-family: var(--cr-font-mono, monospace);
+	font-size: 0.72rem;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: #bcb5e3;
+	position: relative;
+	z-index: 2;
+}
+/* Bookmark: reading hangs from the top, finished from the bottom, set aside is a short grey tab. */
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .cr-book__ribbon {
+	position: absolute;
+	right: 17%;
+	width: 1.15rem;
+	z-index: 3;
+	background: #219ebc;
+	clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 0.5rem), 0 100%);
+	box-shadow: 2px 2px 0 rgba(36, 28, 74, 0.35);
+	pointer-events: none;
+}
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .cr-book__ribbon--reading { top: -0.5rem; height: 44%; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .cr-book__ribbon--finished { bottom: -1.5rem; height: 3.2rem; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .cr-book__ribbon--abandoned { top: -0.5rem; height: 22%; background: #647baf; }
+/* Progress rail under the book (plugin markup, real progressbar). */
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-progress {
+	margin: 1.9rem 0 0 0.6rem;
+	padding: 0;
+	width: min(100%, 19rem);
+}
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-progress-bar {
+	height: 0.6rem;
+	border: 1.5px solid var(--cr-ink, #241c4a);
+	border-radius: 2px;
+	background: #f6f3ea;
+	overflow: hidden;
+}
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-progress-fill { height: 100%; background: repeating-linear-gradient(-45deg, #fb8500 0 6px, #ffb703 6px 12px); }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-progress-text {
+	display: block;
+	margin-top: 0.35rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.68rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--cr-ink-muted, #126782);
+}
+/* Read / find it: bookshop labels. */
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources { margin: 1.6rem 0 0 0.2rem; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-body:has(.pk-progress) .pk-sources { margin-top: 1.1rem; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources__label {
+	margin: 0 0 0.45rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--cr-ink-muted, #126782);
+}
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources__list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.55rem 0.65rem; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources__list li { margin: 0; padding: 0; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources__list li::before,
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources__list li::marker { content: none; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources__link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	min-height: 1.9rem;
+	padding: 0.25rem 0.7rem;
+	border: 1.5px solid #241c4a;
+	border-radius: 2px;
+	background: #f6f3ea;
+	box-shadow: 3px 3px 0 #b89d55;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.7rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: #241c4a;
+	text-decoration: none;
+}
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources__link--book { background: #fee2c3; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources__link:hover { background: #ffb703; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources__link:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-sources__arrow { font-family: var(--cr-font-body, sans-serif); }
+
+/* ---- Notes: a torn notebook sheet ---- */
+body.single-post.kind-read .cr-journal__notes {
+	position: relative;
+	padding: 1.4rem 1.6rem 1.6rem 2.9rem;
+	background: #fbfaf5;
+	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.7rem - 1px), rgba(36, 28, 74, 0.13) calc(1.7rem - 1px) 1.7rem);
+	background-position: 0 1.25rem;
+	border: 1.5px solid var(--cr-ink, #241c4a);
+	box-shadow: 5px 5px 0 var(--cr-ink, #241c4a);
+	transform: rotate(-0.5deg);
+	color: #241c4a;
+}
+body.single-post.kind-read .cr-journal__notes::before {
+	content: "";
+	position: absolute;
+	top: 1rem;
+	bottom: 1rem;
+	left: 0.85rem;
+	width: 0.9rem;
+	background: radial-gradient(circle 0.3rem at 50% 50%, #241c4a 0 55%, transparent 60%) 0 0 / 0.9rem 1.7rem repeat-y;
+	opacity: 0.85;
+	pointer-events: none;
+}
+body.single-post.kind-read .cr-journal__notes-title {
+	display: block;
+	margin: 0 0 0.9rem;
+	padding: 0 0 0.3rem;
+	background: none;
+	box-shadow: none;
+	font-family: var(--cr-font-display, cursive);
+	font-size: 1.3rem;
+	font-weight: 400;
+	line-height: 1.5;
+	letter-spacing: normal;
+	text-transform: none;
+	color: #241c4a;
+	border-bottom: 2px solid #241c4a;
+}
+body.single-post.kind-read .cr-journal__notes .pk-note {
+	margin: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: 0.92rem;
+	line-height: 1.7rem;
+	color: #241c4a;
+}
+body.single-post.kind-read .cr-journal__notes .pk-note p { margin: 0 0 1.7rem; }
+body.single-post.kind-read .cr-journal__notes .pk-note p:last-child { margin-bottom: 0; }
+
+/* ---- Reading record: a library card ---- */
+body.single-post.kind-read .cr-read__record {
+	position: relative;
+	padding: 1.1rem 1.4rem 1.6rem;
+	background: #fbf7ea;
+	background-image: repeating-linear-gradient(180deg, transparent 0 1.9rem, rgba(36, 28, 74, 0.08) 1.9rem calc(1.9rem + 1px));
+	border: 1.5px solid var(--cr-ink, #241c4a);
+	box-shadow: 4px 4px 0 var(--cr-ink, #241c4a);
+	transform: rotate(0.6deg);
+	color: #241c4a;
+	font-family: var(--cr-font-mono, monospace);
+}
+body.single-post.kind-read .cr-read__record::before {
+	content: "";
+	position: absolute;
+	inset: 0.45rem;
+	border: 1px solid rgba(36, 28, 74, 0.4);
+	pointer-events: none;
+}
+body.single-post.kind-read .cr-read__record-eyebrow {
+	margin: 0;
+	font-size: max(0.6rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: #126782;
+}
+body.single-post.kind-read .cr-read__record-title {
+	margin: 0.15rem 0 0.9rem;
+	padding-bottom: 0.45rem;
+	border-bottom: 2px solid #241c4a;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.82rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.24em;
+	text-transform: uppercase;
+	color: #241c4a;
+}
+body.single-post.kind-read .cr-read__record-rows { margin: 0; padding: 0; display: grid; gap: 0; }
+body.single-post.kind-read .cr-read__record-row {
+	display: grid;
+	grid-template-columns: 7.5rem minmax(0, 1fr);
+	gap: 0.6rem;
+	align-items: baseline;
+	padding: 0.42rem 0;
+	border-bottom: 1px dotted rgba(36, 28, 74, 0.45);
+}
+body.single-post.kind-read .cr-read__record-row dt {
+	margin: 0;
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: #3d2f6e;
+}
+body.single-post.kind-read .cr-read__record-row dd { margin: 0; font-size: 0.86rem; color: #241c4a; overflow-wrap: anywhere; }
+body.single-post.kind-read .cr-read__record-stamp {
+	position: absolute;
+	right: 0.9rem;
+	bottom: -1.2rem;
+	width: 7rem;
+	mix-blend-mode: multiply;
+	pointer-events: none;
+}
+body.single-post.kind-read .cr-read__record-stamp .cr-stamp { width: 100%; height: auto; }
+body.single-post.kind-read .cr-read__record:has(.cr-read__record-stamp) .cr-read__record-rows { padding-right: 5.5rem; }
+
+/* ---- Read a sample: the plugin's Kindle preview in a reading window ---- */
+body.single-post.kind-read .cr-read__sample {
+	position: relative;
+	padding: 1.2rem 1.4rem 1.6rem;
+	background: #fbfaf5;
+	border: 1.5px solid var(--cr-ink, #241c4a);
+	box-shadow: 5px 5px 0 var(--cr-ink, #241c4a);
+	color: #241c4a;
+}
+body.single-post.kind-read .cr-read__sample-title {
+	margin: 0 0 0.3rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.82rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.24em;
+	text-transform: uppercase;
+	color: #241c4a;
+}
+body.single-post.kind-read .cr-read__sample-note { margin: 0 0 0.9rem; font-size: 1rem; line-height: 1.6; color: #126782; }
+body.single-post.kind-read .cr-read__sample .wp-block-embed { margin: 0; }
+body.single-post.kind-read .cr-read__sample .wp-block-embed__wrapper { display: flex; justify-content: center; }
+body.single-post.kind-read .cr-read__sample iframe { max-width: 100%; border: 1.5px solid #241c4a; border-radius: 2px; background: #fff; }
+
+/* Meta row: the book glyph. */
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-item--book .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6.5A5 5 0 0 0 7 4H3v13h4a5 5 0 0 1 5 2.5A5 5 0 0 1 17 17h4V4h-4a5 5 0 0 0-5 2.5z'/%3E%3Cpath d='M12 6.5v13'/%3E%3C/svg%3E"); }
+
+/* Phones and tablets. */
+@media (max-width: 63.98rem) {
+	body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book { padding: 2.6rem 1.2rem 0 1.4rem; }
+	body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media { margin-inline: auto !important; width: min(100% - 2rem, 17rem); }
+	body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-kindlabel { font-size: 3rem; top: -2.5rem; left: 0; }
+	body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-progress { margin-inline: auto; }
+	body.single-post.kind-read .cr-journal__notes,
+	body.single-post.kind-read .cr-read__record,
+	body.single-post.kind-read .cr-read__sample { transform: none; }
+	body.single-post.kind-read .cr-read__record-row { grid-template-columns: 6rem minmax(0, 1fr); }
+	body.single-post.kind-read .cr-read__record-stamp { width: 5.5rem; bottom: -0.9rem; }
+}
+@media (max-width: 40rem) {
+	body.single-post.kind-read .cr-journal__notes { padding-left: 2.4rem; }
+	body.single-post.kind-read .cr-read__record:has(.cr-read__record-stamp) .cr-read__record-rows { padding-right: 0; padding-bottom: 3.6rem; }
+}
+
+/* Dark page ground: the paper objects keep their ink. */
+:root[data-theme="dark"] body.single-post.kind-read.single .single-post__content :is(.cr-journal__notes, .cr-journal__notes *, .cr-read__record, .cr-read__record *, .cr-read__sample, .cr-read__sample *) { color: #241c4a !important; }
+:root[data-theme="dark"] body.single-post.kind-read.single .single-post__content :is(.cr-read__record-eyebrow, .cr-read__sample-note) { color: #126782 !important; }
+:root[data-theme="dark"] body.single-post.kind-read.single .single-post__content :is(.cr-book__cover--type, .cr-book__cover--type *) { color: #fbfaf5 !important; }
+:root[data-theme="dark"] body.single-post.kind-read.single .single-post__content .cr-book__type-author { color: #bcb5e3 !important; }
+:root[data-theme="dark"] body.single-post.kind-read.single .single-post__content :is(.pk-sources__link, .pk-sources__link *) { color: #241c4a !important; }
+:root[data-theme="dark"] body.single-post.kind-read.single .single-post .single-post__header .cr-read__status .cr-read__status-chip { color: #023047 !important; }
+:root[data-theme="dark"] body.single-post.kind-read.single .single-post .single-post__header :is(.cr-read__status--reading, .cr-read__status--abandoned, .cr-read__status--to-read) .cr-read__status-chip { color: #241c4a !important; }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content :is(.cr-journal__notes, .cr-journal__notes *, .cr-read__record, .cr-read__record *, .cr-read__sample, .cr-read__sample *) { color: #241c4a !important; }
+	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content :is(.cr-read__record-eyebrow, .cr-read__sample-note) { color: #126782 !important; }
+	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content :is(.cr-book__cover--type, .cr-book__cover--type *) { color: #fbfaf5 !important; }
+	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content .cr-book__type-author { color: #bcb5e3 !important; }
+	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content :is(.pk-sources__link, .pk-sources__link *) { color: #241c4a !important; }
+	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post .single-post__header .cr-read__status .cr-read__status-chip { color: #023047 !important; }
+	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post .single-post__header :is(.cr-read__status--reading, .cr-read__status--abandoned, .cr-read__status--to-read) .cr-read__status-chip { color: #241c4a !important; }
 }
