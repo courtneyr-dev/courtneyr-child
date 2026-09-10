@@ -3715,19 +3715,19 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 
 /* Header: kind chip stays, the template date hides (the lede has it),
    the tag row goes. */
-body.single-post.kind-checkin .single-post__lede-meta .single-post__date { display: none; }
-body.single-post.kind-checkin .single-post__meta { display: none; }
-body.single-post.kind-checkin .cr-journal__lede {
+body.single-post:is(.kind-checkin, .kind-watch) .single-post__lede-meta .single-post__date { display: none; }
+body.single-post:is(.kind-checkin, .kind-watch) .single-post__meta { display: none; }
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__lede {
 	margin: 0.35rem 0 0;
 	font-family: var(--cr-font-accent, serif);
 	font-size: 1.05rem;
 	color: var(--cr-ink-soft, #4a4566);
 }
-body.single-post.kind-checkin .cr-journal__lede-date {
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__lede-date {
 	padding-bottom: 0.1rem;
 	box-shadow: inset 0 -0.55em 0 rgba(142, 202, 230, 0.4);
 }
-body.single-post.kind-checkin .cr-journal__lede-place { font-weight: 700; color: var(--cr-ink, #241c4a); }
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__lede-place { font-weight: 700; color: var(--cr-ink, #241c4a); }
 
 /* A featured image the block does not carry stays, as a snapshot. */
 body.single-post.kind-checkin .single-post__featured {
@@ -3747,7 +3747,7 @@ body.single-post.kind-checkin .single-post__content p:has(> .p-trip) {
 }
 body.single-post.kind-checkin .single-post__content p:has(> .p-trip)::before { content: "Trip · "; }
 @media (min-width: 64rem) {
-	body.single-post.kind-checkin .cr-journal {
+	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) 11rem;
 		column-gap: 2.25rem;
@@ -3755,17 +3755,17 @@ body.single-post.kind-checkin .single-post__content p:has(> .p-trip)::before { c
 		grid-auto-flow: row dense;
 		align-items: start;
 	}
-	body.single-post.kind-checkin .cr-journal > * { grid-column: 1; margin-block: 0; }
-	body.single-post.kind-checkin .cr-journal > aside { grid-column: 2; }
-	body.single-post.kind-checkin .cr-journal > .cr-journal__margin--1 { align-self: start; padding-top: 2.5rem; }
-	body.single-post.kind-checkin .cr-journal > .cr-journal__margin--2 { align-self: center; }
-	body.single-post.kind-checkin .cr-journal > .cr-journal__margin--3 { align-self: center; }
-	body.single-post.kind-checkin .cr-journal > .cr-journal__meta { grid-column: 1 / -1; }
+	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal > * { grid-column: 1; margin-block: 0; }
+	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal > aside { grid-column: 2; }
+	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal > .cr-journal__margin--1 { align-self: start; padding-top: 2.5rem; }
+	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal > .cr-journal__margin--2 { align-self: center; }
+	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal > .cr-journal__margin--3 { align-self: center; }
+	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal > .cr-journal__meta { grid-column: 1 / -1; }
 }
 
 /* Handwriting: Rock Salt, page ink, short lines, two marks (a double
    underline and a heart). Never below 1rem. */
-body.single-post.kind-checkin .cr-hand {
+body.single-post:is(.kind-checkin, .kind-watch) .cr-hand {
 	font-family: var(--cr-font-display, "Rock Salt", cursive);
 	font-size: 1.05rem;
 	line-height: 1.75;
@@ -3773,12 +3773,12 @@ body.single-post.kind-checkin .cr-hand {
 	margin: 0;
 	max-width: 14ch;
 }
-body.single-post.kind-checkin .cr-hand--orange { color: #b85f00; }
-:root[data-theme="dark"] body.single-post.kind-checkin .cr-hand--orange { color: #fb8500; }
+body.single-post:is(.kind-checkin, .kind-watch) .cr-hand--orange { color: #b85f00; }
+:root[data-theme="dark"] body.single-post:is(.kind-checkin, .kind-watch) .cr-hand--orange { color: #fb8500; }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) body.single-post.kind-checkin .cr-hand--orange { color: #fb8500; }
+	:root:not([data-theme="light"]) body.single-post:is(.kind-checkin, .kind-watch) .cr-hand--orange { color: #fb8500; }
 }
-body.single-post.kind-checkin .cr-hand--underline::after {
+body.single-post:is(.kind-checkin, .kind-watch) .cr-hand--underline::after {
 	content: "";
 	display: block;
 	width: 4.5rem;
@@ -3789,12 +3789,12 @@ body.single-post.kind-checkin .cr-hand--underline::after {
 	transform: rotate(-2deg);
 	opacity: 0.85;
 }
-body.single-post.kind-checkin .cr-hand__heart { font-family: var(--cr-font-body, sans-serif); color: #126782; }
-body.single-post.kind-checkin .cr-journal__margin { margin: 0; }
+body.single-post:is(.kind-checkin, .kind-watch) .cr-hand__heart { font-family: var(--cr-font-body, sans-serif); color: #126782; }
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__margin { margin: 0; }
 @media (max-width: 63.98rem) {
-	body.single-post.kind-checkin .cr-journal__margin { margin: 1.25rem 0; text-align: center; }
-	body.single-post.kind-checkin .cr-journal__margin .cr-hand { max-width: none; font-size: 1rem; }
-	body.single-post.kind-checkin .cr-journal__margin .cr-hand--underline::after { margin-inline: auto; }
+	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__margin { margin: 1.25rem 0; text-align: center; }
+	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__margin .cr-hand { max-width: none; font-size: 1rem; }
+	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__margin .cr-hand--underline::after { margin-inline: auto; }
 }
 
 /* The passport artifact. */
@@ -3959,8 +3959,8 @@ body.single-post.kind-checkin .cr-passport--single .cr-passport__entry {
 }
 
 /* Notes from this check-in. */
-body.single-post.kind-checkin .cr-journal__notes { margin: 0; }
-body.single-post.kind-checkin .cr-journal__notes-title {
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__notes { margin: 0; }
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__notes-title {
 	display: inline-block;
 	margin: 0 0 0.75rem;
 	padding: 0.15rem 0.5rem;
@@ -3972,11 +3972,11 @@ body.single-post.kind-checkin .cr-journal__notes-title {
 	text-transform: uppercase;
 	color: var(--cr-ink, #241c4a);
 }
-body.single-post.kind-checkin .cr-journal__notes .pk-note { margin: 0; padding: 0; font-size: 1.05rem; line-height: 1.65; color: var(--cr-ink, #241c4a); }
-body.single-post.kind-checkin .cr-journal__notes .pk-note p { margin: 0 0 0.75em; }
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__notes .pk-note { margin: 0; padding: 0; font-size: 1.05rem; line-height: 1.65; color: var(--cr-ink, #241c4a); }
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__notes .pk-note p { margin: 0 0 0.75em; }
 
 /* The snapshot: a pasted print, not a hero. */
-body.single-post.kind-checkin .cr-journal__photo {
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__photo {
 	width: 62%;
 	max-width: 26rem;
 	margin: 0.5rem 0 0;
@@ -3987,7 +3987,7 @@ body.single-post.kind-checkin .cr-journal__photo {
 	transform: rotate(-1.3deg);
 	position: relative;
 }
-body.single-post.kind-checkin .cr-journal__photo::before {
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__photo::before {
 	content: "";
 	position: absolute;
 	top: -0.6rem;
@@ -3999,7 +3999,7 @@ body.single-post.kind-checkin .cr-journal__photo::before {
 	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
 	pointer-events: none;
 }
-body.single-post.kind-checkin .cr-journal__photo img {
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__photo img {
 	display: block;
 	width: 100%;
 	height: auto;
@@ -4007,16 +4007,16 @@ body.single-post.kind-checkin .cr-journal__photo img {
 	border-radius: 0;
 	box-shadow: none;
 }
-body.single-post.kind-checkin .cr-journal__photo .cr-hand--caption { margin: 0.5rem 0.15rem 0; max-width: none; font-size: 1rem; line-height: 1.6; color: #241c4a; }
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__photo .cr-hand--caption { margin: 0.5rem 0.15rem 0; max-width: none; font-size: 1rem; line-height: 1.6; color: #241c4a; }
 @media (max-width: 40rem) {
-	body.single-post.kind-checkin .cr-journal__photo { width: 100%; transform: rotate(-0.6deg); }
+	body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__photo { width: 100%; transform: rotate(-0.6deg); }
 	body.single-post.kind-checkin .single-post__content .pk-card.cr-passport--single { transform: none; padding: 0.85rem 0.9rem 0.8rem; }
 	body.single-post.kind-checkin .cr-passport--single .cr-passport__stamps { justify-content: flex-start; margin-inline: -0.9rem; padding-inline: 0.9rem; }
 }
 
 /* Time and place, quiet, at the bottom. Simple Location's raster map
    is redundant with the passport's map; its address line stays. */
-body.single-post.kind-checkin .cr-journal__meta {
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 1rem 3rem;
@@ -4024,7 +4024,7 @@ body.single-post.kind-checkin .cr-journal__meta {
 	padding: 1rem 0 0;
 	border-top: 1px solid rgba(36, 28, 74, 0.35);
 }
-body.single-post.kind-checkin .cr-journal__meta-item {
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-item {
 	display: flex;
 	gap: 0.6rem;
 	align-items: flex-start;
@@ -4034,18 +4034,18 @@ body.single-post.kind-checkin .cr-journal__meta-item {
 	line-height: 1.5;
 	color: var(--cr-ink, #241c4a);
 }
-body.single-post.kind-checkin .cr-journal__meta-icon {
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-icon {
 	flex: 0 0 1.25rem;
 	width: 1.25rem;
 	height: 1.25rem;
 	margin-top: 0.15rem;
 	background: no-repeat center / contain;
 }
-body.single-post.kind-checkin .cr-journal__meta-item--time .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E"); }
-body.single-post.kind-checkin .cr-journal__meta-item--place .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z'/%3E%3Cpath d='M9 3v15M15 6v15'/%3E%3C/svg%3E"); }
-body.single-post.kind-checkin .single-post__content .sloc-map,
-body.single-post.kind-checkin .single-post__content a:has(> .sloc-map) { display: none; }
-body.single-post.kind-checkin .single-post__content .sloc-display {
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-item--time .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-item--place .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z'/%3E%3Cpath d='M9 3v15M15 6v15'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch) .single-post__content .sloc-map,
+body.single-post:is(.kind-checkin, .kind-watch) .single-post__content a:has(> .sloc-map) { display: none; }
+body.single-post:is(.kind-checkin, .kind-watch) .single-post__content .sloc-display {
 	margin: 0.6rem 0 0;
 	font-family: var(--cr-font-mono, monospace);
 	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
@@ -4316,11 +4316,11 @@ body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-rating-
 /* Listen / find it: label-maker tape under the player. Links only,
    never a stamp; the plugin's own Listen link in the meta row is
    redundant once this row exists. */
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources {
+body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is(.k-listen, .k-watch) .pk-sources {
 	order: 4;
 	margin: 0.9rem 0.2rem 0;
 }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources__label {
+body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is(.k-listen, .k-watch) .pk-sources__label {
 	margin: 0 0 0.4rem;
 	font-family: var(--cr-font-mono, monospace);
 	font-size: max(0.6rem, var(--cr-text-floor, 0.7rem));
@@ -4329,7 +4329,7 @@ body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources
 	text-transform: uppercase;
 	color: #8ecae6;
 }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources__list {
+body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is(.k-listen, .k-watch) .pk-sources__list {
 	list-style: none;
 	margin: 0;
 	padding: 0;
@@ -4337,7 +4337,7 @@ body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources
 	flex-wrap: wrap;
 	gap: 0.5rem 0.6rem;
 }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources__link {
+body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is(.k-listen, .k-watch) .pk-sources__link {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.3rem;
@@ -4355,15 +4355,275 @@ body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources
 	color: #241c4a;
 	text-decoration: none;
 }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources__link:hover { background: #ffb703; }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources__link:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources__arrow { font-family: var(--cr-font-body, sans-serif); }
+body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is(.k-listen, .k-watch) .pk-sources__link:hover { background: #ffb703; }
+body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is(.k-listen, .k-watch) .pk-sources__link:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
+body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is(.k-listen, .k-watch) .pk-sources__arrow { font-family: var(--cr-font-body, sans-serif); }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-meta { order: 5; }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen:has(.pk-sources) .pk-meta .pk-link { display: none; }
+body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is(.k-listen, .k-watch):has(.pk-sources) .pk-meta .pk-link { display: none; }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen:has(.pk-sources) .pk-meta:not(:has(time)) { display: none; }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources__list li { margin: 0; padding: 0; }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources__list li::before,
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources__list li::marker { content: none; }
+body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is(.k-listen, .k-watch) .pk-sources__list li { margin: 0; padding: 0; }
+body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is(.k-listen, .k-watch) .pk-sources__list li::before,
+body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is(.k-listen, .k-watch) .pk-sources__list li::marker { content: none; }
 /* The plugin prints a " · " text separator between its link and the
    time; with the link hidden only the time should show. */
 body.single-post.kind-listen .single-post__content .pk-card.k-listen:has(.pk-sources) .pk-meta { font-size: 0; }
+
+/* ============================================================
+   v0.7.13 — single watch: a film-journal page around a VHS.
+   inc/single-watch.php puts the rating and a date · year · type lede
+   under the H1, relabels the card's kind label as the flap, moves a
+   long review to "Notes from this watch", adds the shared "Watch /
+   find it" row, and wraps the card in the journal grid with Rock Salt
+   margin notes and a watched / film meta row. The card itself is the
+   cassette: the stream's VHS recipe (flap tiers, shell ridges, two
+   glass windows with wound tape and spool) grown into a grid whose
+   centre window holds the plugin's real player, or the poster when
+   the watch URL is not embeddable. Scope: body.single-post.kind-watch.
+   ============================================================ */
+body.single-post.kind-watch .single-post__kind { display: inline-block !important; }
+body.single-post.kind-watch .cr-journal__rating {
+	display: flex;
+	align-items: center;
+	gap: 0.15rem;
+	margin: 0.45rem 0 0;
+	color: #ffb703;
+}
+body.single-post.kind-watch .cr-journal__star { display: inline-flex; width: 1.35rem; height: 1.35rem; filter: drop-shadow(0 0 0.5px #241c4a); }
+body.single-post.kind-watch .cr-journal__star svg { width: 100%; height: 100%; }
+body.single-post.kind-watch .cr-journal__star--off { color: transparent; }
+body.single-post.kind-watch .cr-journal__star--off svg path { stroke: #647baf; stroke-width: 1.5; }
+body.single-post.kind-watch .cr-journal__rating-value {
+	margin-left: 0.5rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.72rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	color: var(--cr-ink, #241c4a);
+}
+
+/* The cassette shell. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs {
+	display: block;
+	max-width: 46rem;
+	margin-inline: auto;
+	padding: 0;
+	position: relative;
+	overflow: visible;
+	border: 0;
+	border-radius: 10px;
+	background:
+		linear-gradient(#0c0b0f, #0c0b0f) top / 100% 2.2rem no-repeat,
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 4px) left 0 top 2.2rem / 100% 0.9rem no-repeat,
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 5px),
+		#17151b !important;
+	box-shadow: var(--cr-shadow-hard-2, 6px 6px 0 #241c4a), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+	color: #fbfaf5;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-badge { display: none; }
+/* Screws on the bottom edge. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	pointer-events: none;
+	background:
+		radial-gradient(circle 3px at 14px calc(100% - 11px), #3a3644 98%, transparent),
+		radial-gradient(circle 3px at calc(100% - 14px) calc(100% - 11px), #3a3644 98%, transparent),
+		radial-gradient(circle 3px at 50% calc(100% - 11px), #3a3644 98%, transparent);
+	background-repeat: no-repeat;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body {
+	display: grid;
+	grid-template-columns: 22% minmax(0, 1fr) 22%;
+	grid-template-areas:
+		"flap flap flap"
+		"label label label"
+		"reelL window reelR"
+		"note note note"
+		"row row row"
+		"meta meta meta";
+	gap: 0;
+	margin: 0;
+	padding: 0 0 1rem;
+	background: none;
+	min-width: 0;
+}
+/* Flap marking. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-kindlabel {
+	grid-area: flap;
+	position: static;
+	display: block;
+	width: auto;
+	height: auto;
+	margin: 0;
+	padding: 0.7rem 1rem 0;
+	line-height: 1;
+	background: none;
+	border: 0;
+	box-shadow: none;
+	transform: none;
+	text-align: center;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.58rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.26em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.42);
+}
+/* Label strip. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-caption {
+	grid-area: label;
+	margin: 1.4rem 1.1rem 0.9rem;
+	padding: 0.55rem 0.9rem 0.6rem;
+	border-radius: 6px;
+	background: #efece4;
+	color: #241c4a;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-title {
+	margin: 0;
+	padding: 0 0 0.15rem;
+	border-bottom: 1.5px solid rgba(36, 28, 74, 0.45);
+	font-family: var(--cr-font-accent, serif);
+	font-size: 1.35rem;
+	line-height: 1.2;
+	font-weight: 700;
+	color: #241c4a;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-title a { color: inherit; text-decoration: none; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-title a:hover,
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-title a:focus-visible { text-decoration: underline; text-underline-offset: 0.15em; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-title a:focus-visible { outline: 3px solid #241c4a; outline-offset: 3px; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-sub {
+	margin: 0;
+	padding: 0.3rem 0 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: #3d2f6e;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-stars { display: none; }
+
+/* Windows: wound tape on the left, spool on the right, from the stream's recipe. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::before,
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::after {
+	content: "";
+	align-self: center;
+	height: 7.5rem;
+	border-radius: 6px;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::before {
+	grid-area: reelL;
+	margin: 0 0.7rem 0 1.1rem;
+	background:
+		linear-gradient(115deg, transparent 26%, rgba(255, 255, 255, 0.14) 34%, transparent 46%),
+		radial-gradient(circle closest-side at 48% 52%, #f4f1ea 0 15%, #6a6560 16% 19%, transparent 20%),
+		conic-gradient(from 25deg at 48% 52%, rgba(255, 255, 255, 0.18) 0 38deg, transparent 38deg 150deg, rgba(255, 255, 255, 0.12) 150deg 190deg, transparent 190deg 360deg),
+		repeating-radial-gradient(circle at 48% 52%, #141218 0 2px, #201d26 2px 4px);
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::after {
+	grid-area: reelR;
+	margin: 0 1.1rem 0 0.7rem;
+	background:
+		linear-gradient(115deg, transparent 26%, rgba(255, 255, 255, 0.28) 34%, transparent 46%),
+		radial-gradient(circle closest-side at 46% 52%, #ffffff 0 26%, #8a857e 27% 31%, #35313c 32% 40%, transparent 41%),
+		linear-gradient(180deg, #35313c 0%, #221f2a 100%) 60% 100% / 8% 40% no-repeat,
+		linear-gradient(rgba(238, 235, 242, 0.92), rgba(214, 210, 220, 0.85));
+}
+/* The centre window: the real player, or the poster when the watch URL
+   cannot embed. Nothing overlays it. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-embed--video,
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media {
+	grid-area: window;
+	order: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	padding: 0.4rem;
+	min-height: 11rem;
+	border-radius: 6px;
+	background: #0d0c10;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+	overflow: hidden;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-embed--video { display: block; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-embed--video iframe,
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-embed--video .cmplz-placeholder-parent {
+	display: block;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	height: auto;
+	min-height: 0;
+	border: 0;
+	border-radius: 4px;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-embed--video .able { width: 100%; max-width: none; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media img {
+	display: block;
+	width: auto;
+	height: auto;
+	max-width: 100%;
+	max-height: 22rem;
+	aspect-ratio: auto;
+	object-fit: contain;
+	border: 0;
+	border-radius: 2px;
+}
+/* A short review stays on the cassette as a printed note. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-note {
+	grid-area: note;
+	margin: 0.9rem 1.1rem 0;
+	padding: 0;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 0.95rem;
+	line-height: 1.55;
+	color: rgba(251, 250, 245, 0.9);
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-note p { margin: 0; }
+/* Watch / find it and the watched time. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-sources { grid-area: row; margin: 1rem 1.1rem 0; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-sources__link--watch { background: #fee2c3; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-meta {
+	grid-area: meta;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem 1rem;
+	padding: 0.6rem 1.1rem 0;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-meta:not(:has(time)) { display: none; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-meta .pk-dot { display: none; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-meta time {
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: rgba(251, 250, 245, 0.85);
+}
+/* Meta row glyph for the film item, and the small label under items. */
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-item--film .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Crect x='3' y='9' width='18' height='12' rx='1.5'/%3E%3Cpath d='M3 9l16-5 1 3.5L4 12.5z'/%3E%3Cpath d='M7 8l3-5M12 6.5l3-5'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
+	display: block;
+	margin-top: 0.15rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.56rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: var(--cr-ink-soft, #4a4566);
+}
+@media (max-width: 48rem) {
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas: "flap" "label" "window" "note" "row" "meta";
+	}
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::before,
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::after { display: none; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-embed--video,
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media { margin: 0 0.8rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-caption { margin: 1.2rem 0.8rem 0.8rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-sources,
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-note { margin-inline: 0.8rem; }
+}
