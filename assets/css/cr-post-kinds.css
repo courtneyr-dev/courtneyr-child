@@ -4784,10 +4784,8 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-body > * { position: relative; z-index: 1; min-width: 0; }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-body::before {
 	content: "";
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 0;
+	grid-column: 1 / -1;
+	position: relative;
 	z-index: 0;
 	pointer-events: none;
 }
@@ -4978,11 +4976,12 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
    36cqw row; the real player or poster sits in the recess. */
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-body {
 	grid-template-columns: 27cqw minmax(0, 1fr) 27cqw;
-	grid-template-rows: 6cqw 11cqw 36cqw 6cqw auto auto auto auto;
+	grid-template-rows: 6cqw 11cqw 36cqw auto 6cqw auto auto auto auto;
 	grid-template-areas:
 		"kind kind kind"
 		"caption caption caption"
 		"mech mech mech"
+		"deck deck deck"
 		"foot foot foot"
 		"stars stars stars"
 		"row row row"
@@ -4991,7 +4990,7 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	transform: rotate(0.4deg);
 }
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-body::before {
-	height: 59cqw;
+	grid-row: 1 / 6;
 	border-radius: 6px;
 	background:
 		/* bottom screws + a centre one */
@@ -5044,6 +5043,45 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	object-fit: contain;
 }
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed .cmplz-blocked-content-notice { font-size: 0.68rem; padding: 0.35rem 0.55rem; }
+/* Able Player stacks its controller under the video, which cannot fit
+   the recess at column width. The video stays in the recess; the
+   controller becomes the deck below it, still inside the shell, at the
+   full width its buttons need. */
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed:has(.able) {
+	grid-row: 3 / 5;
+	grid-column: 1 / -1;
+	display: block;
+	margin: 0;
+	padding: 0;
+	background: none;
+	box-shadow: none;
+	overflow: visible;
+}
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed:has(.able) .able-wrapper,
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed:has(.able) .able {
+	display: block;
+	width: auto;
+	max-width: none;
+	height: auto;
+	margin: 0;
+}
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed:has(.able) .able-vidcap-container {
+	box-sizing: border-box;
+	margin: 3.5cqw 29.5cqw 0;
+	height: 26.5cqw;
+	border-radius: 3px;
+	background: #0d0c10;
+	overflow: hidden;
+}
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed:has(.able) .able-media-container,
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed:has(.able) .able-media-container iframe,
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed:has(.able) .able-media-container video {
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+	max-width: none;
+}
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed:has(.able) .able-player { margin: 5.5cqw 3cqw 0.6cqw; }
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-media img {
 	display: block;
 	width: auto;
@@ -5075,7 +5113,7 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	transform: rotate(-0.5deg);
 }
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-body::before {
-	height: calc(31cqw + max(25cqw, 90px) + max(6cqw, 1.2rem));
+	grid-row: 1 / 5;
 	border-radius: 6px 6px 9px 9px;
 	background:
 		/* screws: top corners, bottom corners, bottom centre */

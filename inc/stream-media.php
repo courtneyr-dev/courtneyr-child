@@ -223,11 +223,15 @@ function media_card( string $html, array $block, $instance ): string {
 		}
 	}
 
-	// 4. The date leaves the label for the tail under the object.
+	// 4. The date leaves the label for the tail under the object. A card
+	//    the plugin could not date (it had no title to hang one on) gets
+	//    the post date here.
 	$date_html = '';
 	if ( preg_match( '/<p class="pk-sub pk-stream-date">.*?<\/p>/s', $html, $dm, PREG_OFFSET_CAPTURE ) ) {
 		$date_html = $dm[0][0];
 		$html      = substr( $html, 0, $dm[0][1] ) . substr( $html, $dm[0][1] + strlen( $date_html ) );
+	} elseif ( false === strpos( $html, 'dt-published' ) ) {
+		$date_html = '<p class="pk-sub pk-stream-date"><time class="dt-published" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time></p>';
 	}
 
 	// 5. Sources row from stored links only, then the date, ahead of the
