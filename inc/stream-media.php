@@ -18,11 +18,95 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\StreamMedia;
 
-use function Courtneyr\Child\SingleListen\provider_label;
-use function Courtneyr\Child\SingleWatch\classify;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+/**
+ * Listen provider labels by host. A host not listed falls back to "Listen".
+ *
+ * @return array<string, string>
+ */
+function providers(): array {
+	return array(
+		'open.spotify.com'  => 'Spotify',
+		'spotify.com'       => 'Spotify',
+		'music.apple.com'   => 'Apple Music',
+		'bandcamp.com'      => 'Bandcamp',
+		'soundcloud.com'    => 'SoundCloud',
+		'youtube.com'       => 'YouTube',
+		'www.youtube.com'   => 'YouTube',
+		'youtu.be'          => 'YouTube',
+		'music.youtube.com' => 'YouTube Music',
+		'tidal.com'         => 'Tidal',
+		'deezer.com'        => 'Deezer',
+		'last.fm'           => 'Last.fm',
+		'www.last.fm'       => 'Last.fm',
+		'musicbrainz.org'   => 'MusicBrainz',
+		'discogs.com'       => 'Discogs',
+		'www.discogs.com'   => 'Discogs',
+	);
+}
+
+/**
+ * The label a listen URL gets in the sources row.
+ *
+ * @param string $url External URL.
+ * @return string Provider name, or "Listen" when the host is not known.
+ */
+function provider_label( string $url ): string {
+	$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+	foreach ( providers() as $needle => $label ) {
+		if ( $host === $needle || str_ends_with( $host, '.' . $needle ) ) {
+			return $label;
+		}
+	}
+	return __( 'Listen', 'courtneyr-child' );
+}
+
+/**
+ * Streaming services by host, with the role each plays in the row.
+ *
+ * @return array<string, array{0: string, 1: string}> host => [label, role].
+ */
+function services(): array {
+	return array(
+		'netflix.com'          => array( 'Netflix', 'watch' ),
+		'hulu.com'             => array( 'Hulu', 'watch' ),
+		'disneyplus.com'       => array( 'Disney+', 'watch' ),
+		'max.com'              => array( 'Max', 'watch' ),
+		'hbomax.com'           => array( 'Max', 'watch' ),
+		'primevideo.com'       => array( 'Prime Video', 'watch' ),
+		'amazon.com'           => array( 'Prime Video', 'watch' ),
+		'tv.apple.com'         => array( 'Apple TV', 'watch' ),
+		'peacocktv.com'        => array( 'Peacock', 'watch' ),
+		'paramountplus.com'    => array( 'Paramount+', 'watch' ),
+		'crunchyroll.com'      => array( 'Crunchyroll', 'watch' ),
+		'kanopy.com'           => array( 'Kanopy', 'watch' ),
+		'criterionchannel.com' => array( 'Criterion Channel', 'watch' ),
+		'youtube.com'          => array( 'YouTube', 'trailer' ),
+		'youtu.be'             => array( 'YouTube', 'trailer' ),
+		'vimeo.com'            => array( 'Vimeo', 'trailer' ),
+		'imdb.com'             => array( 'IMDb', 'details' ),
+		'themoviedb.org'       => array( 'TMDb', 'details' ),
+		'letterboxd.com'       => array( 'Letterboxd', 'details' ),
+	);
+}
+
+/**
+ * Label and role for a watch URL. Unknown hosts are a generic "Watch".
+ *
+ * @param string $url External URL.
+ * @return array{0: string, 1: string}
+ */
+function classify( string $url ): array {
+	$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+	foreach ( services() as $needle => $meta ) {
+		if ( $host === $needle || str_ends_with( $host, '.' . $needle ) ) {
+			return $meta;
+		}
+	}
+	return array( __( 'Watch', 'courtneyr-child' ), 'watch' );
 }
 
 /**
