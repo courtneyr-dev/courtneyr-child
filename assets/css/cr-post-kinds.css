@@ -3309,10 +3309,12 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 .cr-stream-page .wp-block-post-template > li.format-gallery .pk-card--gallery {
 	width: min(100%, 13.75rem);
 	margin-inline: auto;
-	padding: 0.9rem 0.85rem 0.85rem;
-	background: #ffffff;
+	padding: 1.1rem 0.85rem 0.85rem;
+	/* Periwinkle stock (the gallery type token) so a strip never reads as
+	   a polaroid; the frames sit on a white print strip inside it. */
+	background: #ebe8f6;
 	box-shadow:
-		inset 0 0 0 0.3rem #ffffff,
+		inset 0 0 0 0.3rem #ebe8f6,
 		inset 0 0 0 calc(0.3rem + 1px) rgba(36, 28, 74, 0.55),
 		var(--cr-shadow-hard, 4px 4px 0 #241c4a);
 }
@@ -3320,20 +3322,6 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
    4n+1 / 4n+3 rotation rules, so those positions keep the rhythm. */
 .cr-stream-page .pk-card--gallery { transform: rotate(-0.5deg); }
 
-/* One strip of tape holds the print in the journal. */
-.cr-stream-page .pk-card--gallery::before {
-	content: "";
-	position: absolute;
-	top: -0.55rem;
-	left: 1.1rem;
-	width: 3.6rem;
-	height: 1.15rem;
-	transform: rotate(-6deg);
-	background: rgba(142, 202, 230, 0.72);
-	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.18);
-	z-index: 3;
-	pointer-events: none;
-}
 
 /* Frames: stacked, one width, a sliver of white stock between
    them. The window is 4:3 like a booth print; object-fit keeps
@@ -3342,7 +3330,8 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 .cr-stream-page .pk-card--gallery .cr-booth__frames {
 	list-style: none;
 	margin: 0;
-	padding: 0;
+	padding: 0.35rem;
+	background: #ffffff;
 	display: flex;
 	flex-direction: column;
 	gap: 0.4rem;
@@ -3436,15 +3425,17 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 0.6rem 0.6rem;
-	margin: 0.55rem -0.2rem 0;
-	padding: 0.55rem 0.2rem 0;
+	gap: 0 0;
+	margin: 0.5rem -0.2rem 0;
+	padding: 0.5rem 0.2rem 0;
 	border-top: 1px dashed rgba(36, 28, 74, 0.35);
 }
-.cr-stream-page .pk-card--gallery .cr-stamp--rect { width: 7.6rem; }
+.cr-stream-page .pk-card--gallery .cr-booth__stamps { flex-wrap: nowrap; align-items: center; }
+.cr-stream-page .pk-card--gallery .cr-stamp-mark + .cr-stamp-mark { margin: 0 0 0 -0.7rem; }
+.cr-stream-page .pk-card--gallery .cr-stamp--rect { width: 6.1rem; }
 .cr-stream-page .pk-card--gallery .cr-stamp--seal,
-.cr-stream-page .pk-card--gallery .cr-stamp--octagon { width: 5.2rem; }
-.cr-stream-page .pk-card--gallery .cr-stamp--postmark { width: 9rem; }
+.cr-stream-page .pk-card--gallery .cr-stamp--octagon { width: 4.6rem; }
+.cr-stream-page .pk-card--gallery .cr-stamp--postmark { width: 7.9rem; }
 
 /* Phones: the strip takes the column but keeps its paper edge. */
 @media (max-width: 40rem) {
@@ -3469,9 +3460,10 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 .cr-stream-page .pk-card.k-checkin.cr-passport {
 	width: 96%;
 	padding: 0.85rem 0.9rem 0.8rem;
+	/* Sky-blue page (a document, not a card) under faint security lines. */
 	background:
 		repeating-linear-gradient(0deg, rgba(36, 28, 74, 0.035) 0 1px, transparent 1px 7px),
-		#fbfaf5;
+		#eef5fa;
 	border: 2px solid #241c4a;
 	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a);
 	color: #241c4a;
@@ -3490,7 +3482,7 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 .cr-stream-page .cr-passport .pk-embed--map {
 	order: -3;
 	display: block;
-	margin: 0 0 0.7rem;
+	margin: 0.35rem 0 0.7rem;
 	padding: 0.25rem;
 	border: 1.5px solid #241c4a;
 	background: #ffffff;
@@ -3652,9 +3644,9 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 0.85rem 0.75rem;
-	margin: 0.85rem -0.9rem -0.8rem;
-	padding: 0.75rem 0.9rem 0.7rem;
+	gap: 0.35rem 0;
+	margin: 0.7rem -0.9rem -0.8rem;
+	padding: 0.6rem 0.9rem 0.55rem;
 	border-top: 1px dashed rgba(36, 28, 74, 0.45);
 	background: repeating-linear-gradient(-35deg, rgba(100, 123, 175, 0.09) 0 1px, transparent 1px 6px);
 }
@@ -3663,10 +3655,13 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
    footer's height never depends on the variant. Tilts are the only
    transform; both the passport and the booth consume these rules. */
 .cr-stream-page .cr-stamp-mark { display: block; line-height: 0; mix-blend-mode: multiply; }
-.cr-stream-page .cr-stamp-mark--tilt-0 { transform: rotate(-6deg); }
-.cr-stream-page .cr-stamp-mark--tilt-1 { transform: rotate(-2deg); }
-.cr-stream-page .cr-stamp-mark--tilt-2 { transform: rotate(3deg); }
-.cr-stream-page .cr-stamp-mark--tilt-3 { transform: rotate(7deg); }
+.cr-stream-page .cr-stamp-mark--tilt-0 { transform: rotate(-3deg); }
+.cr-stream-page .cr-stamp-mark--tilt-1 { transform: rotate(-1deg); }
+.cr-stream-page .cr-stamp-mark--tilt-2 { transform: rotate(1.5deg); }
+.cr-stream-page .cr-stamp-mark--tilt-3 { transform: rotate(3.5deg); }
+/* Stamps sit close, the second tucked against the first like real
+   overprints; they only ever overlap each other, never content. */
+.cr-stream-page .cr-stamp-mark + .cr-stamp-mark { margin-left: -0.9rem; }
 .cr-stream-page .cr-stamp { display: block; height: auto; opacity: 0.9; }
 .cr-stream-page .cr-stamp--rect { width: 8.4rem; }
 .cr-stream-page .cr-stamp--seal,
@@ -3706,3 +3701,58 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 @media (max-width: 40rem) {
 	.cr-stream-page .pk-card.k-checkin.cr-passport { width: 100%; }
 }
+
+/* ============================================================
+   v0.7.9 — kind tabs on the photo-family objects.
+   Three white-ish objects shared one paper and one silhouette; each
+   now carries the plugin's kind label as a tape tab on its corner,
+   coloured by the type token: sky for a photo, periwinkle for a
+   gallery, solid prussian for a check-in. Decorative placement of
+   text the card already had; the polaroid's label was hidden and
+   is shown again for this. Rotated less than the cards so it reads
+   as tape, not as a second object.
+   ============================================================ */
+.cr-stream-page .wp-block-post-template > li.kind-photo .pk-card .pk-kindlabel,
+.cr-stream-page .pk-card.k-checkin.cr-passport .pk-kindlabel {
+	position: absolute;
+	/* .pk-body is the containing block; negative top lifts the tab into
+	   the card's own top padding, clear of the first image. */
+	top: -1.5rem;
+	left: 0;
+	z-index: 3;
+	display: inline-block;
+	width: auto;
+	height: auto;
+	margin: 0;
+	padding: 0.14rem 0.55rem 0.12rem;
+	border: 0;
+	border-radius: 1px;
+	transform: rotate(-2deg);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.58rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	line-height: 1.3;
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+	pointer-events: none;
+}
+.cr-stream-page .wp-block-post-template > li.kind-photo:not(.format-gallery) .pk-card .pk-kindlabel {
+	background: rgba(142, 202, 230, 0.92);
+	color: #023047;
+}
+.cr-stream-page .wp-block-post-template > li.format-gallery .pk-card--gallery .pk-kindlabel {
+	background: rgba(188, 181, 227, 0.95);
+	color: #241c4a;
+}
+.cr-stream-page .pk-card.k-checkin.cr-passport .pk-kindlabel {
+	top: -0.45rem;
+	background: #023047;
+	color: #fbfaf5;
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.35);
+}
+/* The polaroid's tape overlaps its own top padding, not the photo. */
+.cr-stream-page .wp-block-post-template > li.kind-photo:not(.format-gallery) .pk-card { padding-top: 1.9rem; }
+.cr-stream-page .wp-block-post-template > li.format-gallery .pk-card--gallery { padding-top: 1.9rem; }
+.cr-stream-page .pk-card.k-checkin.cr-passport .pk-embed--map { margin-top: 1.25rem; }
+.cr-stream-page .pk-card.k-checkin.cr-passport:not(:has(.pk-embed--map)) .pk-body { padding-top: 1.1rem; }
