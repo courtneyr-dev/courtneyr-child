@@ -3289,3 +3289,173 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
    after the theme stylesheet, so 0.5.278's 4.25rem never applied — the
    eyebrow sat 1px under the sticky header. One more class wins the tie. */
 .cr-stream-page .cr-page__content > .cr-stream__masthead { margin-block-start: 2rem; }
+
+/* ============================================================
+   v0.7.7 — stream: gallery posts are photo-booth strips.
+   inc/stream-gallery.php swaps the plugin's featured image and
+   thumbnail row for an ordered list of frames (four at most) plus
+   a footer, and names the card .pk-card--gallery. The list item
+   still carries core's format-gallery and kind-photo, so every
+   polaroid rule above still matches — the rules below out-rank
+   the ones that make it a polaroid. A single-image photo post is
+   format-image, never gets the class, and stays a polaroid.
+   The strip is a physical print: white stock and violet ink in
+   both color schemes, like the other objects in the collage.
+   ============================================================ */
+
+/* Paper: narrow, vertical, white photo stock. A printed violet
+   rule runs just inside the paper edge, as on a booth print;
+   the hard offset shadow is the collage's own. */
+.cr-stream-page .wp-block-post-template > li.format-gallery .pk-card--gallery {
+	width: min(100%, 13.75rem);
+	margin-inline: auto;
+	padding: 0.9rem 0.85rem 0.85rem;
+	background: #ffffff;
+	box-shadow:
+		inset 0 0 0 0.3rem #ffffff,
+		inset 0 0 0 calc(0.3rem + 1px) rgba(36, 28, 74, 0.55),
+		var(--cr-shadow-hard, 4px 4px 0 #241c4a);
+}
+/* Sits a touch off-square. Lower specificity than the collage's
+   4n+1 / 4n+3 rotation rules, so those positions keep the rhythm. */
+.cr-stream-page .pk-card--gallery { transform: rotate(-0.5deg); }
+
+/* One strip of tape holds the print in the journal. */
+.cr-stream-page .pk-card--gallery::before {
+	content: "";
+	position: absolute;
+	top: -0.55rem;
+	left: 1.1rem;
+	width: 3.6rem;
+	height: 1.15rem;
+	transform: rotate(-6deg);
+	background: rgba(142, 202, 230, 0.72);
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.18);
+	z-index: 3;
+	pointer-events: none;
+}
+
+/* Frames: stacked, one width, a sliver of white stock between
+   them. The window is 4:3 like a booth print; object-fit keeps
+   portraits from stretching. No filters — the photos stay photos. */
+.cr-stream-page .kind-photo .pk-card--gallery .cr-booth { margin: 0; }
+.cr-stream-page .pk-card--gallery .cr-booth__frames {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+.cr-stream-page .pk-card--gallery .cr-booth__frame { margin: 0; line-height: 0; }
+.cr-stream-page .kind-photo .pk-card--gallery .cr-booth__img {
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
+	display: block;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	outline: 1px solid rgba(36, 28, 74, 0.3);
+	outline-offset: -1px;
+}
+
+/* Footer: the printed strip under the last frame. Handwritten
+   title, a stamped date, the first caption as a note, then the
+   print's serial line and the way to the rest of the roll. */
+.cr-stream-page .kind-photo .pk-card--gallery .pk-caption { padding: 0.65rem 0.1rem 0; }
+.cr-stream-page .kind-photo .pk-card--gallery .pk-title {
+	font-size: 1rem;
+	line-height: 1.4;
+}
+.cr-stream-page .kind-photo .pk-card--gallery .pk-sub { padding: 0.4rem 0 0; }
+.cr-stream-page .kind-photo .pk-card--gallery .pk-stream-date time {
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.6rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	color: #241c4a;
+	border: 1px solid rgba(36, 28, 74, 0.7);
+	border-radius: 2px;
+	padding: 0.1rem 0.4rem;
+	transform: rotate(-1.5deg);
+}
+.cr-stream-page .pk-card--gallery .cr-booth__footer {
+	position: relative;
+	padding: 0.35rem 0.1rem 0;
+	min-height: 2.2rem;
+}
+.cr-stream-page .pk-card--gallery .cr-booth__note {
+	font-family: var(--cr-font-accent, serif);
+	font-style: italic;
+	font-size: 0.8rem;
+	line-height: 1.4;
+	color: #3d2f6e;
+	margin: 0 0 0.35rem;
+	padding: 0;
+}
+.cr-stream-page .pk-card--gallery .cr-booth__count {
+	margin: 0;
+	padding: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.58rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: #3d2f6e;
+}
+
+/* The rest of the roll: a real link, raised above the title's
+   stretched hit area so it can be reached by pointer as well as
+   by keyboard. Violet focus ring — it sits on white paper. */
+.cr-stream-page .pk-card--gallery .cr-booth__more {
+	margin: 0.4rem 0 0;
+	padding: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.06em;
+}
+.cr-stream-page .pk-card--gallery .cr-booth__more-link {
+	position: relative;
+	z-index: 2;
+	display: inline-block;
+	padding: 0.35rem 0;
+	color: #126782;
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.18em;
+}
+.cr-stream-page .pk-card--gallery .cr-booth__more-link:hover { color: #241c4a; }
+.cr-stream-page .pk-card--gallery .cr-booth__more-link:focus-visible {
+	outline: 3px solid #241c4a;
+	outline-offset: 3px;
+}
+
+/* One small round stamp in the corner of the footer: a dashed
+   cerulean ring with a pine, the trail-badge nod. Decorative,
+   drawn by the stylesheet, invisible to assistive tech. */
+.cr-stream-page .pk-card--gallery .cr-booth__footer::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	width: 2.5rem;
+	height: 2.5rem;
+	transform: rotate(10deg);
+	opacity: 0.85;
+	pointer-events: none;
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none'%3E%3Ccircle cx='20' cy='20' r='18' stroke='%23126782' stroke-width='1.6' stroke-dasharray='2.6 2.2'/%3E%3Ccircle cx='20' cy='20' r='14' stroke='%23126782' stroke-width='1.2'/%3E%3Cpath d='M20 9 l6 8 h-3.5 l4.5 6 h-3.5 l4 5.5 h-15 l4 -5.5 h-3.5 l4.5 -6 h-3.5 z' fill='%23126782'/%3E%3Crect x='18.8' y='28.5' width='2.4' height='3.5' fill='%23126782'/%3E%3C/svg%3E");
+}
+/* A long note runs under the stamp otherwise. */
+.cr-stream-page .pk-card--gallery .cr-booth__note,
+.cr-stream-page .pk-card--gallery .cr-booth__count,
+.cr-stream-page .pk-card--gallery .cr-booth__more { padding-right: 2.7rem; }
+
+/* Phones: the strip takes the column but keeps its paper edge. */
+@media (max-width: 40rem) {
+	.cr-stream-page .wp-block-post-template > li.format-gallery .pk-card--gallery {
+		width: 100%;
+		padding: 0.8rem 0.75rem;
+	}
+}
