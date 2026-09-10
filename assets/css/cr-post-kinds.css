@@ -4729,18 +4729,22 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 }
 
 /* ============================================================
-   v0.7.15 — /stream/ watch and listen as physical media.
+   v0.7.17 — /stream/ watch and listen as physical media.
    inc/stream-media.php classes a watch card `cr-vhs--stream` and a
    listen card `cr-cassette--stream`, prints the rating value beside
-   the stars, relabels the kind as the object's marking, and adds a
-   compact "Watch / find it" / "Listen / find it" row. The article is
-   transparent; `.pk-body` is the one rotated wrapper. Its ::before
-   paints the shell (flap, ridges, windows or hub) sized in container
-   units so the object keeps its proportion at any column width:
-   VHS 64cqw tall (1.56:1), cassette 62cqw (1.61:1). The plugin's real
-   player or poster sits in the shell's window by grid area; the row
-   and the time sit under the object on the page ground. No masking
-   tape, no yellow sticker on these two kinds. Other kinds untouched.
+   the stars, relabels the kind as the object's marking, injects one
+   decorative SVG of the mechanics (`.cr-media__mech`), moves the date
+   under the object, and adds a compact "Watch / find it" / "Listen /
+   find it" row. The article is transparent; `.pk-body` is the one
+   rotated wrapper, so the real player rotates with the shell. Its
+   ::before paints the shell (flap, ridges, label paper, screws) in
+   container units so the object keeps its proportion at any column
+   width: VHS 59cqw tall (1.69:1), cassette 37cqw + the player row
+   (1.59:1 at column width). The plugin's real player or poster sits in
+   the VHS window recess drawn by the SVG; the Spotify iframe sits on a
+   recessed tray inside the cassette shell, at Spotify's 80px compact
+   height. Under the object: stars, the row, the date, the meta. No
+   masking tape, no sticker on these two kinds. Other kinds untouched.
    ============================================================ */
 
 /* ---- Shared: transparent card, rotated body, no badge ---- */
@@ -4758,7 +4762,7 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	aspect-ratio: auto;
 	transform: none;
 	filter: none;
-	color: #241c4a;
+	color: var(--cr-ink, #241c4a);
 }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream)::before,
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream)::after { content: none; display: none; }
@@ -4775,7 +4779,7 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	border-radius: 0;
 	overflow: visible;
 	isolation: isolate;
-	transform-origin: 50% 40%;
+	transform-origin: 50% 35%;
 }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-body > * { position: relative; z-index: 1; min-width: 0; }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-body::before {
@@ -4788,6 +4792,16 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	pointer-events: none;
 }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-body::after { content: none; }
+
+/* The mechanics: one SVG under the window, above the shell. */
+.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .cr-media__mech {
+	grid-area: mech;
+	display: block;
+	width: 100%;
+	height: 100%;
+	z-index: 0;
+	pointer-events: none;
+}
 
 /* Kind marking: the object's own print, not a sticker. */
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-kindlabel {
@@ -4805,7 +4819,7 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	transform: none;
 	align-self: center;
 	font-family: var(--cr-font-mono, monospace);
-	font-size: max(0.5rem, var(--cr-text-floor, 0.7rem));
+	font-size: max(0.48rem, var(--cr-text-floor, 0.7rem));
 	font-weight: 700;
 	letter-spacing: 0.22em;
 	line-height: 1;
@@ -4814,17 +4828,16 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	white-space: nowrap;
 	overflow-wrap: normal;
 	overflow: visible;
-	grid-column: 1 / -1;
-	grid-row: 1;
 }
 
-/* Title, sub, stars on the label paper. */
+/* Title and sub on the label paper: concise, one line each. */
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-caption {
 	grid-area: caption;
 	display: flex;
 	flex-direction: column;
-	gap: 0.1rem;
-	align-self: start;
+	justify-content: center;
+	gap: 0.05rem;
+	align-self: stretch;
 	margin: 0;
 	padding: 0;
 	overflow: hidden;
@@ -4836,13 +4849,10 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	color: #241c4a;
 	font-family: var(--cr-font-accent, serif);
 	font-weight: 700;
-	font-size: 0.82rem;
+	font-size: 0.8rem;
 	line-height: 1.2;
-	white-space: normal;
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	line-clamp: 2;
-	-webkit-box-orient: vertical;
+	display: block;
+	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
@@ -4852,62 +4862,42 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	margin: 0;
 	padding: 0;
 	color: #3d2f6e;
-	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
-	line-height: 1.3;
+	font-size: max(0.6rem, var(--cr-text-floor, 0.7rem));
+	line-height: 1.25;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	display: block;
 }
-.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stream-date {
-	grid-area: date;
-	position: static;
-	display: block;
-	margin: 0;
-	padding: 0;
-	min-height: 0;
-	align-self: center;
-	justify-self: end;
-	overflow: visible;
-}
-.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stream-date time {
-	border: 0;
-	padding: 0;
-	font-family: var(--cr-font-mono, monospace);
-	font-size: max(0.5rem, var(--cr-text-floor, 0.7rem));
-	font-weight: 700;
-	letter-spacing: 0.14em;
-	text-transform: uppercase;
-}
+.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-excerpt,
+.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-note { display: none; }
+
+/* ---- The tail under the object: stars, row, date, meta ---- */
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stars {
 	grid-area: stars;
 	display: flex;
 	align-items: center;
 	gap: 0.1rem;
-	align-self: end;
-	margin: 0;
+	margin: 0.55rem 0.15rem 0;
 	padding: 0;
-	color: #b85f00;
+	color: #c46200;
 }
-.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stars svg { width: 0.85rem; height: 0.85rem; flex: none; }
+.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stars svg { width: 0.9rem; height: 0.9rem; flex: none; }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-rating-value {
 	margin-left: 0.4rem;
 	font-family: var(--cr-font-mono, monospace);
-	font-size: max(0.6rem, var(--cr-text-floor, 0.7rem));
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
 	font-weight: 700;
 	letter-spacing: 0.1em;
-	color: #241c4a;
+	color: var(--cr-ink, #241c4a);
 }
-.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-excerpt,
-.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-note { display: none; }
-
-/* Under the object: the row, then the time. */
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-sources {
 	grid-area: row;
-	margin: 0.7rem 0.1rem 0;
+	margin: 0.4rem 0.15rem 0;
 }
+.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-body:not(:has(.pk-stars)) .pk-sources { margin-top: 0.55rem; }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-sources__label {
-	margin: 0 0 0.3rem;
+	margin: 0 0 0.25rem;
 	font-family: var(--cr-font-mono, monospace);
 	font-size: max(0.52rem, var(--cr-text-floor, 0.7rem));
 	font-weight: 700;
@@ -4921,7 +4911,7 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	padding: 0;
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.35rem 0.4rem;
+	gap: 0.3rem 0.35rem;
 }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-sources__list li { margin: 0; padding: 0; }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-sources__list li::before,
@@ -4948,86 +4938,94 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-sources__link:hover { background: #ffb703; }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-sources__link:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-sources__arrow { font-family: var(--cr-font-body, sans-serif); }
+.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stream-date {
+	grid-area: date;
+	position: static;
+	display: block;
+	margin: 0.4rem 0.15rem 0;
+	padding: 0;
+	min-height: 0;
+	overflow: visible;
+}
+.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stream-date time {
+	border: 0;
+	padding: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.55rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--cr-ink-soft, #4a4566);
+}
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-meta {
 	grid-area: meta;
 	display: block;
 	margin: 0;
-	padding: 0.4rem 0.1rem 0;
+	padding: 0.15rem 0.15rem 0;
 	font-size: max(0.6rem, var(--cr-text-floor, 0.7rem));
-	color: #3d2f6e;
+	color: var(--cr-ink-soft, #4a4566);
 }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-meta:empty,
+.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-meta:not(:has(*)),
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream):has(.pk-sources) .pk-meta .pk-link,
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream):has(.pk-sources) .pk-meta .pk-dot { display: none; }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream):has(.pk-sources) .pk-meta:not(:has(time)) { display: none; }
-.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-meta a { color: #126782; border-color: rgba(18, 103, 130, 0.4); }
+.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-meta a { color: var(--cr-ink-muted, #126782); border-color: currentColor; }
 
 /* ---- VHS (watch) ----
-   Rows: flap 8cqw · label 20cqw · windows 32cqw · shell foot 4cqw. */
+   Rows: flap 6 · label 11 · mechanics 36 · foot 6 = 59cqw (1.69:1).
+   The SVG draws the reel wells, tape path and window recess in that
+   36cqw row; the real player or poster sits in the recess. */
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-body {
-	grid-template-columns: 20cqw minmax(0, 1fr) 20cqw;
-	grid-template-rows: 7cqw 24cqw 30cqw 3cqw auto auto;
+	grid-template-columns: 27cqw minmax(0, 1fr) 27cqw;
+	grid-template-rows: 6cqw 11cqw 36cqw 6cqw auto auto auto auto;
 	grid-template-areas:
-		"kind kind date"
+		"kind kind kind"
 		"caption caption caption"
-		"reelL window reelR"
+		"mech mech mech"
 		"foot foot foot"
+		"stars stars stars"
 		"row row row"
+		"date date date"
 		"meta meta meta";
-	transform: rotate(0.5deg);
+	transform: rotate(0.4deg);
 }
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-body::before {
-	height: 64cqw;
-	border-radius: 7px;
+	height: 59cqw;
+	border-radius: 6px;
 	background:
-		/* bottom screws */
-		radial-gradient(circle 2.5px at 12px calc(100% - 9px), #3a3644 98%, transparent),
-		radial-gradient(circle 2.5px at calc(100% - 12px) calc(100% - 9px), #3a3644 98%, transparent),
-		radial-gradient(circle 2.5px at 50% calc(100% - 9px), #3a3644 98%, transparent),
-		/* LEFT window: glass streak, spoked hub, sheen, wound tape */
-		linear-gradient(115deg, transparent 26%, rgba(255, 255, 255, 0.14) 34%, transparent 46%) left 3cqw top 33cqw / 15cqw 24cqw no-repeat,
-		radial-gradient(circle closest-side at 50% 50%, #f4f1ea 0 15%, #6a6560 16% 19%, transparent 20%) left 3cqw top 33cqw / 15cqw 24cqw no-repeat,
-		conic-gradient(from 25deg at 50% 50%, rgba(255, 255, 255, 0.18) 0 38deg, transparent 38deg 150deg, rgba(255, 255, 255, 0.12) 150deg 190deg, transparent 190deg 360deg) left 3cqw top 33cqw / 15cqw 24cqw no-repeat,
-		repeating-radial-gradient(circle at 50% 50%, #141218 0 2px, #201d26 2px 4px) left 3cqw top 33cqw / 15cqw 24cqw no-repeat,
-		/* RIGHT window: streak, spool on near-white, film strip */
-		linear-gradient(115deg, transparent 26%, rgba(255, 255, 255, 0.28) 34%, transparent 46%) right 3cqw top 33cqw / 15cqw 24cqw no-repeat,
-		radial-gradient(circle closest-side at 48% 50%, #ffffff 0 26%, #8a857e 27% 31%, #35313c 32% 40%, transparent 41%) right 3cqw top 33cqw / 15cqw 24cqw no-repeat,
-		linear-gradient(180deg, #35313c 0%, #221f2a 100%) right 9cqw top 45cqw / 1.2cqw 12cqw no-repeat,
-		linear-gradient(rgba(238, 235, 242, 0.92), rgba(214, 210, 220, 0.85)) right 3cqw top 33cqw / 15cqw 24cqw no-repeat,
+		/* bottom screws + a centre one */
+		radial-gradient(circle 2.4px at 11px calc(100% - 8px), #3a3644 98%, transparent),
+		radial-gradient(circle 2.4px at calc(100% - 11px) calc(100% - 8px), #3a3644 98%, transparent),
+		radial-gradient(circle 2.4px at 50% calc(100% - 8px), #3a3644 98%, transparent),
 		/* label paper */
-		linear-gradient(#f6f3ea, #f6f3ea) left 3cqw top 8.5cqw / calc(100% - 6cqw) 22cqw no-repeat,
-		/* flap tiers */
-		linear-gradient(#0c0b0f, #0c0b0f) top / 100% 7cqw no-repeat,
-		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 4px) left 0 top 7cqw / 100% 1.5cqw no-repeat,
+		linear-gradient(#f6f3ea, #f6f3ea) left 3cqw top 6.8cqw / calc(100% - 6cqw) 9.6cqw no-repeat,
+		/* flap: dark tier + ridged tier */
+		linear-gradient(#0c0b0f, #0c0b0f) top / 100% 6cqw no-repeat,
+		/* lower casing: a moulded band with ribs */
+		repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 6px) left 0 bottom 0 / 100% 5cqw no-repeat,
 		/* shell ridges */
 		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 5px),
 		#17151b;
 	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-kindlabel { margin-left: 3cqw; color: #8e8a98; }
-.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-stream-date { margin-right: 3cqw; }
-.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-stream-date time { color: #b9b5c4; }
-.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-caption { margin: 2.3cqw 4.5cqw 0; }
-.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-stars {
-	grid-area: caption;
-	align-self: end;
-	justify-self: start;
-	margin: 0 4.5cqw 1.5cqw;
-}
-.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream:has(.pk-stars) .pk-caption { padding-bottom: 1.2rem; }
-/* The window: the real player, or the poster, on black. */
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-caption { margin: 0.6cqw 4.5cqw 0.8cqw; }
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-title { text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.74rem; }
+/* The window: the real player, or the poster, in the recess. */
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed,
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-media {
-	grid-area: window;
+	grid-area: mech;
+	grid-column: 2;
 	order: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin: 3cqw 1cqw;
+	margin: 3.5cqw 2.5cqw 6cqw;
 	padding: 0;
-	border-radius: 4px;
-	background: #0d0c10;
-	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+	border-radius: 3px;
+	background: transparent;
+	box-shadow: none;
 	overflow: hidden;
 }
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed { display: block; }
@@ -5045,84 +5043,73 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	border-radius: 0;
 	object-fit: contain;
 }
-.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed .cmplz-blocked-content-notice { font-size: 0.7rem; padding: 0.4rem 0.6rem; }
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed .cmplz-blocked-content-notice { font-size: 0.68rem; padding: 0.35rem 0.55rem; }
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-media img {
 	display: block;
-	width: 100%;
+	width: auto;
 	height: 100%;
+	max-width: 100%;
 	aspect-ratio: auto;
 	max-height: none;
-	object-fit: cover;
-	object-position: center 22%;
+	object-fit: contain;
 	border: 0;
 	border-radius: 0;
 }
 
 /* ---- Compact cassette (listen) ----
-   Rows: label 30cqw (kind 6 · caption 24) · hub window 24cqw ·
-   shell foot 8cqw; then the player on its deck, the row, the time. */
+   Rows: label 13 · tape window 18 · player tray max(25cqw, 90px) ·
+   foot max(6cqw, 1.2rem) = 62cqw at column width (1.61:1). The SVG draws the window and
+   hubs; the Spotify iframe sits in the tray at its 80px compact size. */
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-body {
-	grid-template-columns: 18cqw minmax(0, 1fr);
-	grid-template-rows: 7.5cqw 22.5cqw 24cqw 8cqw auto auto auto;
+	grid-template-columns: 16cqw minmax(0, 1fr);
+	grid-template-rows: 13cqw 18cqw max(25cqw, 90px) max(6cqw, 1.2rem) auto auto auto auto;
 	grid-template-areas:
-		"kind kind"
 		"art caption"
-		"window window"
-		"foot foot"
+		"mech mech"
 		"player player"
+		"kind kind"
+		"stars stars"
 		"row row"
+		"date date"
 		"meta meta";
-	transform: rotate(-0.7deg);
+	transform: rotate(-0.5deg);
 }
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-body::before {
-	height: 62cqw;
+	height: calc(31cqw + max(25cqw, 90px) + max(6cqw, 1.2rem));
 	border-radius: 6px 6px 9px 9px;
 	background:
 		/* screws: top corners, bottom corners, bottom centre */
-		radial-gradient(circle 2.5px at 10px 9px, #120e2a 98%, transparent),
-		radial-gradient(circle 2.5px at calc(100% - 10px) 9px, #120e2a 98%, transparent),
-		radial-gradient(circle 2.5px at 10px calc(100% - 9px), #120e2a 98%, transparent),
-		radial-gradient(circle 2.5px at calc(100% - 10px) calc(100% - 9px), #120e2a 98%, transparent),
-		radial-gradient(circle 2.5px at 50% calc(100% - 9px), #120e2a 98%, transparent),
-		/* hub window: two toothed reels over wound tape, tape run between */
-		radial-gradient(circle 5.2cqw at 22% 50%, #17140f 0 24%, #ece8dd 27% 60%, #17140f 62% 66%, #ece8dd 68% 82%, #17140f 84% 100%, transparent 100%) left 10cqw top 30cqw / calc(100% - 20cqw) 24cqw no-repeat,
-		radial-gradient(circle 5.2cqw at 78% 50%, #17140f 0 24%, #ece8dd 27% 60%, #17140f 62% 66%, #ece8dd 68% 82%, #17140f 84% 100%, transparent 100%) left 10cqw top 30cqw / calc(100% - 20cqw) 24cqw no-repeat,
-		repeating-radial-gradient(circle at 22% 50%, #1d1913 0 2px, #2b2620 2px 4px) left 10cqw top 30cqw / calc(100% - 20cqw) 24cqw no-repeat,
-		linear-gradient(#0d0b09, #0d0b09) left 10cqw top 30cqw / calc(100% - 20cqw) 24cqw no-repeat,
-		/* label paper with ruled lines and the two colour stripes */
-		linear-gradient(90deg, #8ecae6 0 50%, #fb8500 50%) left 3cqw top 3cqw / calc(100% - 6cqw) 0.9cqw no-repeat,
-		repeating-linear-gradient(180deg, transparent 0 calc(1.15rem - 1px), rgba(36, 28, 74, 0.14) calc(1.15rem - 1px) 1.15rem) left 3cqw top 9cqw / calc(100% - 6cqw) 19cqw no-repeat,
-		linear-gradient(#f6f3ea, #f6f3ea) left 3cqw top 3cqw / calc(100% - 6cqw) 25.5cqw no-repeat,
+		radial-gradient(circle 2.4px at 9px 8px, #120e2a 98%, transparent),
+		radial-gradient(circle 2.4px at calc(100% - 9px) 8px, #120e2a 98%, transparent),
+		radial-gradient(circle 2.4px at 9px calc(100% - 8px), #120e2a 98%, transparent),
+		radial-gradient(circle 2.4px at calc(100% - 9px) calc(100% - 8px), #120e2a 98%, transparent),
+		radial-gradient(circle 2.4px at 50% calc(100% - 8px), #120e2a 98%, transparent),
+		/* label paper wrapping the window: colour stripe, ruled lines */
+		linear-gradient(90deg, #8ecae6 0 50%, #fb8500 50%) left 3cqw top 2.2cqw / calc(100% - 6cqw) 0.9cqw no-repeat,
+		repeating-linear-gradient(180deg, transparent 0 calc(1rem - 1px), rgba(36, 28, 74, 0.14) calc(1rem - 1px) 1rem) left 3cqw top 4cqw / calc(100% - 6cqw) 9cqw no-repeat,
+		linear-gradient(#f6f3ea, #f6f3ea) left 3cqw top 2.2cqw / calc(100% - 6cqw) 30cqw no-repeat,
 		/* shell */
 		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 5px),
 		#2b2357;
 	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
-.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-kindlabel { align-self: end; margin: 0 0 0.6cqw 5cqw; color: #126782; }
-.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-stream-date { margin: 1.5cqw 5cqw 0 0; }
-.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-stream-date time { color: #3d2f6e; }
-.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-caption { margin: 0.5cqw 5cqw 0 1.5cqw; }
+.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-kindlabel { margin-left: 4cqw; color: #b9b5c4; }
+.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-caption { margin: 3.4cqw 5cqw 0 1cqw; }
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-title {
 	font-family: var(--cr-font-display, cursive);
 	font-weight: 400;
-	font-size: 0.72rem;
-	line-height: 1.5;
+	font-size: 0.7rem;
+	line-height: 1.4;
 }
-.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-stars {
-	grid-area: caption;
-	align-self: end;
-	justify-self: start;
-	margin: 0 5cqw 1.2cqw 1.5cqw;
-}
-.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream:has(.pk-stars) .pk-caption { padding-bottom: 1rem; }
+.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-sub { text-transform: uppercase; letter-spacing: 0.08em; font-size: max(0.55rem, var(--cr-text-floor, 0.7rem)); }
 /* Album art: a small print pasted on the label. */
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-media {
 	grid-area: art;
 	order: 0;
 	display: block;
-	margin: 0.5cqw 0 0 5cqw;
-	width: 12cqw;
-	height: 12cqw;
+	margin: 3.6cqw 0 0 5cqw;
+	width: 9cqw;
+	height: 9cqw;
 	border: 1px solid rgba(36, 28, 74, 0.35);
 	background: #fff;
 	overflow: hidden;
@@ -5137,16 +5124,16 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	border-radius: 0;
 }
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream:not(:has(.pk-media)) .pk-body { grid-template-columns: 0 minmax(0, 1fr); }
-.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream:not(:has(.pk-media)) .pk-caption,
-.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream:not(:has(.pk-media)) .pk-stars { margin-left: 5cqw; }
-/* The player on its deck, under the tape. */
+.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream:not(:has(.pk-media)) .pk-caption { margin-left: 5cqw; }
+/* The player tray, inside the shell under the label. */
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-embed {
 	grid-area: player;
-	margin: 0.55rem 0.35rem 0;
-	padding: 0.35rem;
-	border-radius: 6px;
-	background: #17140f;
-	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a);
+	align-self: center;
+	margin: 0 3cqw;
+	padding: 3px;
+	border-radius: 5px;
+	background: #0d0b09;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 1px 0 rgba(255, 255, 255, 0.06);
 	overflow: hidden;
 }
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-embed iframe,
@@ -5154,26 +5141,38 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	display: block;
 	width: 100%;
 	max-width: none;
+	height: 80px;
 	min-height: 0;
 	margin: 0;
 	border: 0;
 	border-radius: 4px;
 }
-.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-embed .cmplz-placeholder-parent { min-height: 152px; }
+.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-embed .cmplz-placeholder-parent { background-size: cover; background-position: center; }
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-embed .cmplz-blocked-content-notice {
 	font-family: var(--cr-font-body, sans-serif);
-	font-size: 0.72rem;
-	line-height: 1.35;
-	padding: 0.45rem 0.7rem;
-	border-radius: 6px;
+	font-size: 0.66rem;
+	line-height: 1.3;
+	padding: 0.35rem 0.6rem;
+	border-radius: 5px;
 	background: rgba(36, 28, 74, 0.94);
 	color: #fbfaf5;
 	cursor: pointer;
 }
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-embed:focus-within { outline: 3px solid #ffb703; outline-offset: 2px; }
+/* No player stored: the tray stays as bare shell, same silhouette. */
 
+/* Phones: less tilt. */
+@media (max-width: 40rem) {
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-body { transform: rotate(0.25deg); }
+	.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-body { transform: rotate(-0.3deg); }
+}
 @media (prefers-reduced-motion: no-preference) {
 	.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-body { transition: transform 200ms ease; }
+}
+/* Dark page ground: the tail's stars warm up; the objects keep their own colours. */
+:root[data-theme="dark"] .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stars { color: #ffb703; }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stars { color: #ffb703; }
 }
 
 /* ---- v0.7.15: check-in single — no box inside the kind chip ----

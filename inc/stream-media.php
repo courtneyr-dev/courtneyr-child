@@ -120,6 +120,51 @@ function sources_row( array $links, string $kind ): string {
 }
 
 /**
+ * The object's mechanics as one decorative inline SVG: reel wells,
+ * toothed hubs, tape mass, the tape path and the window recess for a
+ * VHS; the tape window with two hubs for a compact cassette. Sized by
+ * the grid row it sits in (cr-post-kinds.css); hidden from assistive
+ * technology; never above the real player.
+ *
+ * @param string $kind 'watch' or 'listen'.
+ * @return string
+ */
+function mech_svg( string $kind ): string {
+	if ( 'watch' === $kind ) {
+		$reel = static function ( float $cx, float $mass ): string {
+			$rings = '';
+			for ( $r = $mass - 1.5; $r > 4.5; $r -= 2 ) {
+				$rings .= '<circle cx="' . $cx . '" cy="18" r="' . $r . '" fill="none" stroke="#2a2731" stroke-width="0.5"/>';
+			}
+			return '<circle cx="' . $cx . '" cy="18" r="14.5" fill="#0b0a0e"/>'
+				. '<circle cx="' . $cx . '" cy="18" r="' . $mass . '" fill="#1a1820"/>' . $rings
+				. '<circle cx="' . $cx . '" cy="18" r="4.6" fill="none" stroke="#f4f1ea" stroke-width="1.7" stroke-dasharray="1.3 1.35"/>'
+				. '<circle cx="' . $cx . '" cy="18" r="3.4" fill="#f4f1ea"/>'
+				. '<circle cx="' . $cx . '" cy="18" r="1.1" fill="#6a6560"/>'
+				. '<path d="M' . ( $cx - 11 ) . ' 9.5Q' . $cx . ' 2.5 ' . ( $cx + 11 ) . ' 9.5L' . ( $cx + 9 ) . ' 12.5Q' . $cx . ' 7 ' . ( $cx - 9 ) . ' 12.5Z" fill="#fff" opacity="0.07"/>';
+		};
+		return '<svg class="cr-media__mech" viewBox="0 0 100 36" aria-hidden="true" focusable="false">'
+			. $reel( 16, 12.5 ) . $reel( 84, 8.5 )
+			. '<path d="M16 32.5L29.5 33.6H70.5L84 32.5" fill="none" stroke="#2b2833" stroke-width="1.7"/>'
+			. '<circle cx="29.5" cy="33.6" r="1.4" fill="#55504a"/><circle cx="70.5" cy="33.6" r="1.4" fill="#55504a"/>'
+			. '<rect x="29.5" y="3.5" width="41" height="26.5" rx="1.2" fill="#0d0c10" stroke="#2a2731" stroke-width="0.6"/>'
+			. '</svg>';
+	}
+	$hub = static function ( float $cx, float $mass ): string {
+		return '<circle cx="' . $cx . '" cy="9" r="' . $mass . '" fill="#1d1913"/>'
+			. '<circle cx="' . $cx . '" cy="9" r="' . ( $mass - 1.4 ) . '" fill="none" stroke="#2b2620" stroke-width="0.4"/>'
+			. '<circle cx="' . $cx . '" cy="9" r="3.6" fill="none" stroke="#ece8dd" stroke-width="1.3" stroke-dasharray="1 1.1"/>'
+			. '<circle cx="' . $cx . '" cy="9" r="2.6" fill="#ece8dd"/>'
+			. '<circle cx="' . $cx . '" cy="9" r="0.9" fill="#17140f"/>';
+	};
+	return '<svg class="cr-media__mech" viewBox="0 0 100 18" aria-hidden="true" focusable="false">'
+		. '<rect x="21" y="1.2" width="58" height="15.6" rx="1.6" fill="#17140f" stroke="#0d0b09" stroke-width="0.6"/>'
+		. '<rect x="34" y="6.8" width="32" height="4.4" fill="#100e0b"/>'
+		. $hub( 34, 6.6 ) . $hub( 66, 5.2 )
+		. '</svg>';
+}
+
+/**
  * Dress a watch or listen stream card as its object.
  *
  * @param string    $html     Rendered stream card.
@@ -166,24 +211,34 @@ function media_card( string $html, array $block, $instance ): string {
 		}
 	}
 
-	// 3. The kind label is the object's printed marking.
+	// 3. The kind label is the object's printed marking; the mechanics
+	//    follow it in the DOM so they paint under everything else.
 	$label = '<p class="pk-kindlabel">';
 	$lpos  = strpos( $html, $label );
 	if ( false !== $lpos ) {
 		$lend = strpos( $html, '</p>', $lpos );
 		if ( false !== $lend ) {
 			$text = 'watch' === $kind ? __( 'Watch · VHS', 'courtneyr-child' ) : __( 'Listen · Cassette', 'courtneyr-child' );
-			$html = substr( $html, 0, $lpos ) . $label . esc_html( $text ) . substr( $html, $lend );
+			$html = substr( $html, 0, $lpos ) . $label . esc_html( $text ) . '</p>' . mech_svg( $kind ) . substr( $html, $lend + 4 );
 		}
 	}
 
-	// 4. Sources row from stored links only, ahead of the plugin's meta.
-	$row = sources_row( 'watch' === $kind ? watch_links( $attrs ) : listen_links( $attrs ), $kind );
-	if ( '' !== $row ) {
-		$meta = strpos( $html, '<div class="pk-meta">' );
-		if ( false !== $meta ) {
-			$html = substr( $html, 0, $meta ) . $row . substr( $html, $meta );
-		}
+	// 4. The date leaves the label for the tail under the object.
+	$date_html = '';
+	if ( preg_match( '/<p class="pk-sub pk-stream-date">.*?<\/p>/s', $html, $dm, PREG_OFFSET_CAPTURE ) ) {
+		$date_html = $dm[0][0];
+		$html      = substr( $html, 0, $dm[0][1] ) . substr( $html, $dm[0][1] + strlen( $date_html ) );
+	}
+
+	// 5. Sources row from stored links only, then the date, ahead of the
+	//    plugin's meta.
+	$row  = sources_row( 'watch' === $kind ? watch_links( $attrs ) : listen_links( $attrs ), $kind );
+	$meta = strpos( $html, '<div class="pk-meta">' );
+	if ( false !== $meta ) {
+		$html = substr( $html, 0, $meta ) . $row . $date_html . substr( $html, $meta );
+	} elseif ( '' !== $date_html ) {
+		$close = strrpos( $html, '</article>' );
+		$html  = false === $close ? $html . $date_html : substr( $html, 0, $close ) . $date_html . substr( $html, $close );
 	}
 
 	$tags = new \WP_HTML_Tag_Processor( $html );

@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.16' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.17' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
