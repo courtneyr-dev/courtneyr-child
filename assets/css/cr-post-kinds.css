@@ -4070,75 +4070,90 @@ body.single-post.kind-checkin.pfbt-format-titleless .single-post__title {
 body.single-post.kind-checkin .single-post__content > .single-post__format-avatar { display: none; }
 
 /* ============================================================
-   v0.7.12 — single listen: the expanded cassette.
+   v0.7.12 / v0.7.14 — single listen: a compact cassette.
    The Spotify player was always there: oEmbed returns the iframe and
    the CSP allows open.spotify.com. Complianz swaps it for a marketing-
    consent placeholder and wraps it in .cmplz-placeholder-parent, so
    the plugin's `.pk-embed--audio > iframe { height: 152px }` no longer
-   matched and the region collapsed to 90px; the badge also sat on the
-   title. This scope rebuilds the single Listen card as a cassette on
-   the stream's recipe (violet shell, ivory label, punched hub window,
-   gold stripe, corner screws) with the real player docked under the
-   label. The plugin nests the player and the link inside .pk-body, so
-   the label is painted on the three label children (kind label,
-   caption, stars) rather than on the body. Spotify provides the
-   player; the theme provides the tape. Scope: single listen only.
+   matched and the region collapsed to 90px. v0.7.14 rebuilt the shell:
+   the card is transparent and .pk-body is a grid whose ::before is
+   the moulded violet shell spanning the label, the hub window and the
+   player rows only, and whose ::after is the hub window (two large
+   toothed reels over wound tape). The kind label, caption and stars
+   share one paper label; the player is inset into the lower body; the
+   "Listen / find it" row and the time sit under the object on the page.
+   Everything, player included, rotates with the body as one object.
+   Spotify provides the player; the theme provides the tape.
    ============================================================ */
 body.single-post.kind-listen .single-post__content .pk-card.k-listen {
 	display: block;
+	width: 100%;
 	max-width: 40rem;
 	margin-inline: auto;
-	padding: 0.9rem 0.9rem 1rem;
+	padding: 0;
 	position: relative;
 	overflow: visible;
 	border: 0;
-	border-radius: 12px;
-	background: #241c4a !important;
-	box-shadow: var(--cr-shadow-hard-2, 6px 6px 0 #241c4a), inset 0 0 0 1px rgba(251, 250, 245, 0.12);
-	color: #fbfaf5;
-}
-/* Corner screws. */
-body.single-post.kind-listen .single-post__content .pk-card.k-listen::before {
-	content: "";
-	position: absolute;
-	inset: 0;
-	border-radius: inherit;
-	pointer-events: none;
-	z-index: 1;
-	background:
-		radial-gradient(circle 3.5px at 12px 12px, #3a342f 98%, transparent),
-		radial-gradient(circle 3.5px at calc(100% - 12px) 12px, #3a342f 98%, transparent),
-		radial-gradient(circle 3.5px at 12px calc(100% - 12px), #3a342f 98%, transparent),
-		radial-gradient(circle 3.5px at calc(100% - 12px) calc(100% - 12px), #3a342f 98%, transparent);
+	border-radius: 0;
+	background: none !important;
+	box-shadow: none;
+	color: var(--cr-ink, #241c4a);
 }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-badge { display: none; }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-body {
-	display: flex;
-	flex-direction: column;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-areas: "label" "caption" "stars" "window" "player" "row" "meta";
 	position: relative;
 	min-width: 0;
 	padding: 0;
 	background: none;
+	transform: rotate(-0.6deg);
 }
+/* The shell: violet moulded plastic under the label, window and player,
+   chamfered corners, ridges, five screws. */
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-body::before {
+	content: "";
+	grid-area: label / 1 / player / -1;
+	grid-row: 1 / 6;
+	z-index: 0;
+	margin: 0 0 -0.9rem;
+	border-radius: 10px 10px 14px 14px / 10px 10px 18px 18px;
+	background:
+		radial-gradient(circle 3.5px at 14px 12px, #3a3644 98%, transparent),
+		radial-gradient(circle 3.5px at calc(100% - 14px) 12px, #3a3644 98%, transparent),
+		radial-gradient(circle 3.5px at 14px calc(100% - 12px), #3a3644 98%, transparent),
+		radial-gradient(circle 3.5px at calc(100% - 14px) calc(100% - 12px), #3a3644 98%, transparent),
+		radial-gradient(circle 3.5px at 50% calc(100% - 12px), #3a3644 98%, transparent),
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 6px),
+		linear-gradient(180deg, #2a2158, #241c4a 55%, #1d1640);
+	box-shadow: var(--cr-shadow-hard-2, 6px 6px 0 #241c4a), inset 0 0 0 1px rgba(251, 250, 245, 0.14), inset 0 -0.35rem 0 rgba(0, 0, 0, 0.25);
+}
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-body > * { position: relative; z-index: 1; }
 
-/* The label: kind label, caption and stars share one ivory paper. */
+/* Label stock: ruled cream paper, sky and orange stripes, across the
+   kind label, caption and stars. */
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-kindlabel,
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-caption,
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-stars {
-	background: #f6f3ea;
+	margin: 0 1.1rem;
+	background:
+		repeating-linear-gradient(180deg, transparent 0 calc(1.45em - 1px), rgba(36, 28, 74, 0.12) calc(1.45em - 1px), rgba(36, 28, 74, 0.12) 1.45em),
+		#f6f3ea;
 	color: #241c4a;
-	margin: 0;
+	box-shadow: inset 2px 0 0 rgba(36, 28, 74, 0.35), inset -2px 0 0 rgba(36, 28, 74, 0.35);
 }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-kindlabel {
-	order: 0;
-	position: static;
+	grid-area: label;
+	position: relative;
 	display: block;
 	width: auto;
 	height: auto;
-	padding: 0.8rem 1rem 0;
+	margin-top: 1rem;
+	padding: 0.9rem 1rem 0;
 	border: 0;
-	border-radius: 5px 5px 0 0;
-	box-shadow: none;
+	border-radius: 4px 4px 0 0;
+	box-shadow: inset 2px 0 0 rgba(36, 28, 74, 0.35), inset -2px 0 0 rgba(36, 28, 74, 0.35), inset 0 2px 0 rgba(36, 28, 74, 0.35);
 	transform: none;
 	text-align: left;
 	font-family: var(--cr-font-mono, monospace);
@@ -4148,69 +4163,59 @@ body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-kindlab
 	text-transform: uppercase;
 	color: #126782;
 }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-caption { order: 1; padding: 0.2rem 1rem 0; }
+/* Two accent stripes along the label's top edge. */
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-kindlabel::before {
+	content: "";
+	position: absolute;
+	left: 2px;
+	right: 2px;
+	top: 2px;
+	height: 0.45rem;
+	background: linear-gradient(180deg, #8ecae6 0 50%, #fb8500 50% 100%);
+	pointer-events: none;
+}
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-caption { grid-area: caption; padding: 0.15rem 1rem 0; }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-title {
 	margin: 0;
-	padding: 0 0 0.15rem;
-	border-bottom: 1.5px solid rgba(36, 28, 74, 0.45);
-	font-family: var(--cr-font-accent, serif);
-	font-size: 1.45rem;
-	line-height: 1.2;
-	font-weight: 700;
+	padding: 0 0 0.1rem;
+	border: 0;
+	font-family: var(--cr-font-display, "Rock Salt", cursive);
+	font-size: 1.3rem;
+	line-height: 1.6;
+	font-weight: 400;
 	color: #241c4a;
 }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-title a { color: inherit; text-decoration: none; }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-title a:hover,
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-title a:focus-visible { text-decoration: underline; text-underline-offset: 0.15em; }
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-title a:focus-visible { text-decoration: underline; text-underline-offset: 0.2em; }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-title a:focus-visible { outline: 3px solid #241c4a; outline-offset: 3px; }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sub {
-	padding: 0.35rem 0 0;
-	font-family: var(--cr-font-body, sans-serif);
+	margin: 0;
+	padding: 0;
+	font-family: var(--cr-font-accent, serif);
 	font-size: 0.95rem;
+	line-height: 1.45;
 	color: #3d2f6e;
 }
-/* The last label child carries the punched window and the gold stripe. */
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-stars,
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-body:not(:has(.pk-stars)) .pk-caption {
-	position: relative;
-	padding-bottom: 6.4rem;
-	border-radius: 0 0 12px 12px;
-	box-shadow: 0 0.55rem 0 0 #d9c27a, 0 0.55rem 0 1px #b89d55;
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-stars {
+	grid-area: stars;
+	padding: 0.2rem 1rem 0.75rem;
+	border-radius: 0 0 4px 4px;
+	box-shadow: inset 2px 0 0 rgba(36, 28, 74, 0.35), inset -2px 0 0 rgba(36, 28, 74, 0.35), inset 0 -2px 0 rgba(36, 28, 74, 0.35);
+	color: #b85f00;
 }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-stars { order: 2; padding-top: 0.45rem; padding-inline: 1rem; color: #b85f00; }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-stars::after,
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-body:not(:has(.pk-stars)) .pk-caption::after {
-	content: "";
-	position: absolute;
-	left: 50%;
-	bottom: 0.85rem;
-	transform: translateX(-50%);
-	width: min(60%, 20rem);
-	height: 4.6rem;
-	border-radius: 8px;
-	border: 1px solid #3a342f;
-	background:
-		radial-gradient(circle 0.1rem at calc(20% + 0.55rem) 50%, #9a9384 98%, transparent),
-		radial-gradient(circle 0.1rem at calc(20% - 0.55rem) 50%, #9a9384 98%, transparent),
-		radial-gradient(circle 0.1rem at 20% calc(50% + 0.55rem), #9a9384 98%, transparent),
-		radial-gradient(circle 0.1rem at 20% calc(50% - 0.55rem), #9a9384 98%, transparent),
-		radial-gradient(circle 0.1rem at calc(80% + 0.55rem) 50%, #9a9384 98%, transparent),
-		radial-gradient(circle 0.1rem at calc(80% - 0.55rem) 50%, #9a9384 98%, transparent),
-		radial-gradient(circle 0.1rem at 80% calc(50% + 0.55rem), #9a9384 98%, transparent),
-		radial-gradient(circle 0.1rem at 80% calc(50% - 0.55rem), #9a9384 98%, transparent),
-		radial-gradient(circle 1.4rem at 20% 50%, #17140f 30%, #f2efe6 32% 90%, #3a342f 92% 100%, transparent 100%),
-		radial-gradient(circle 1.4rem at 80% 50%, #17140f 30%, #f2efe6 32% 90%, #3a342f 92% 100%, transparent 100%),
-		repeating-linear-gradient(180deg, #23201a 0 2px, #14110d 2px 4px) center / 26% 60% no-repeat,
-		#17140f;
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-body:not(:has(.pk-stars)) .pk-caption {
+	padding-bottom: 0.75rem;
+	border-radius: 0 0 4px 4px;
+	box-shadow: inset 2px 0 0 rgba(36, 28, 74, 0.35), inset -2px 0 0 rgba(36, 28, 74, 0.35), inset 0 -2px 0 rgba(36, 28, 74, 0.35);
 }
 /* Cover art, when there is any, is a small print pinned to the label. */
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-media {
-	order: 1;
-	position: absolute;
-	right: 1rem;
-	top: 0.8rem;
-	width: 4.5rem;
-	margin: 0;
+	grid-area: caption;
+	justify-self: end;
+	align-self: start;
+	width: 4.2rem;
+	margin: 0.2rem 1.9rem 0 0;
 	padding: 0.15rem;
 	border: 1.5px solid #241c4a;
 	background: #fff;
@@ -4220,19 +4225,65 @@ body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-media i
 body.single-post.kind-listen .single-post__content .pk-card.k-listen:has(.pk-media) .pk-title,
 body.single-post.kind-listen .single-post__content .pk-card.k-listen:has(.pk-media) .pk-sub { margin-right: 5.5rem; }
 
-/* The player: docked under the label in the shell. Complianz wraps the
-   iframe, so size the wrapper and the frame alike; Spotify's track
-   embed is 152px tall. */
+/* The hub window: a dark tape window across the middle of the shell,
+   two large white reels with teeth, wound tape behind them and a run
+   of tape between. */
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-body::after {
+	content: "";
+	grid-area: window;
+	z-index: 1;
+	justify-self: center;
+	width: min(100% - 2.2rem, 30rem);
+	height: 6.2rem;
+	margin: 0.9rem 0 0;
+	border-radius: 10px;
+	border: 2px solid #100e0c;
+	box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.08);
+	background:
+		/* left hub teeth */
+		radial-gradient(circle 0.14rem at calc(22% + 0.95rem) 50%, #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at calc(22% - 0.95rem) 50%, #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at 22% calc(50% + 0.95rem), #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at 22% calc(50% - 0.95rem), #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at calc(22% + 0.67rem) calc(50% + 0.67rem), #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at calc(22% - 0.67rem) calc(50% - 0.67rem), #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at calc(22% + 0.67rem) calc(50% - 0.67rem), #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at calc(22% - 0.67rem) calc(50% + 0.67rem), #2a2530 98%, transparent),
+		/* right hub teeth */
+		radial-gradient(circle 0.14rem at calc(78% + 0.95rem) 50%, #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at calc(78% - 0.95rem) 50%, #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at 78% calc(50% + 0.95rem), #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at 78% calc(50% - 0.95rem), #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at calc(78% + 0.67rem) calc(50% + 0.67rem), #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at calc(78% - 0.67rem) calc(50% - 0.67rem), #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at calc(78% + 0.67rem) calc(50% - 0.67rem), #2a2530 98%, transparent),
+		radial-gradient(circle 0.14rem at calc(78% - 0.67rem) calc(50% + 0.67rem), #2a2530 98%, transparent),
+		/* hubs: hole, white gear, rim */
+		radial-gradient(circle 1.55rem at 22% 50%, #17140f 0 22%, #f2efe6 24% 88%, #3a342f 90% 100%, transparent 100%),
+		radial-gradient(circle 1.55rem at 78% 50%, #17140f 0 22%, #f2efe6 24% 88%, #3a342f 90% 100%, transparent 100%),
+		/* wound tape: full left spool, thin right spool */
+		repeating-radial-gradient(circle at 22% 50%, #2b2318 0 2px, #1a150f 2px 4px) left / 44% 100% no-repeat,
+		radial-gradient(circle 2.1rem at 78% 50%, #2b2318 0 96%, transparent 100%),
+		/* the tape run between the hubs, and the glass */
+		linear-gradient(180deg, transparent 0 40%, #2b2318 40% 60%, transparent 60%) center / 46% 100% no-repeat,
+		linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.06) 40%, transparent 52%),
+		#100e0c;
+}
+
+/* The player: inset into the lower body, same width as the window
+   stock, no separate panel. Complianz wraps the iframe, so the wrapper
+   and the frame are sized alike; Spotify's track embed is 152px tall. */
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-embed--audio {
-	order: 3;
+	grid-area: player;
 	display: block;
-	margin: 1.4rem 0 0;
-	padding: 0.35rem;
+	margin: 0.9rem 1.1rem 1.6rem;
+	padding: 0.3rem;
 	border-radius: 10px;
 	background: #100e0c;
-	box-shadow: inset 0 0 0 1px rgba(251, 250, 245, 0.12);
+	box-shadow: inset 0 0 0 1px rgba(251, 250, 245, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.35);
 	overflow: hidden;
 }
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-body:not(:has(.pk-embed--audio))::before { grid-row: 1 / 5; margin-bottom: -1.6rem; }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-embed--audio iframe,
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-embed--audio .cmplz-placeholder-parent {
 	display: block;
@@ -4243,10 +4294,7 @@ body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-embed--
 	border: 0;
 	border-radius: 8px;
 }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-embed--audio .cmplz-placeholder-parent {
-	background-size: cover;
-	background-position: center;
-}
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-embed--audio .cmplz-placeholder-parent { background-size: cover; background-position: center; }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-embed--audio .cmplz-blocked-content-notice {
 	font-family: var(--cr-font-body, sans-serif);
 	font-size: 0.9rem;
@@ -4260,15 +4308,17 @@ body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-embed--
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-embed--audio .cmplz-blocked-content-notice:focus-visible,
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-embed--audio:focus-within { outline: 3px solid #ffb703; outline-offset: 2px; }
 
-/* Listen link and the listened-at time close the shell. */
+/* Under the object: the row and the time, on the page ground. */
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources { grid-area: row; margin: 1.6rem 0.2rem 0; }
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-body:not(:has(.pk-embed--audio)) .pk-sources { margin-top: 2.2rem; }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-meta {
-	order: 4;
+	grid-area: meta;
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: space-between;
 	gap: 0.5rem 1rem;
-	padding: 0.85rem 0.2rem 0;
+	padding: 0.6rem 0.2rem 0;
 }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-link {
 	display: inline-flex;
@@ -4279,26 +4329,26 @@ body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-link {
 	font-weight: 700;
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: #8ecae6;
+	color: var(--cr-link, #126782);
 	text-decoration: underline;
 	text-underline-offset: 0.2em;
 }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-link:hover { color: #ffb703; }
-body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-link:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-link:focus-visible { outline: 3px solid #241c4a; outline-offset: 3px; }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-meta time {
 	font-family: var(--cr-font-mono, monospace);
 	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	color: rgba(251, 250, 245, 0.85);
+	color: var(--cr-ink-soft, #4a4566);
 }
 @media (max-width: 40rem) {
-	body.single-post.kind-listen .single-post__content .pk-card.k-listen { padding: 0.6rem 0.6rem 0.8rem; }
-	body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-stars,
-	body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-body:not(:has(.pk-stars)) .pk-caption { padding-bottom: 5.6rem; }
-	body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-stars::after,
-	body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-body:not(:has(.pk-stars)) .pk-caption::after { height: 4rem; width: 70%; }
-	body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-title { font-size: 1.25rem; }
+	body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-body { transform: rotate(-0.3deg); }
+	body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-kindlabel,
+	body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-caption,
+	body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-stars { margin-inline: 0.75rem; }
+	body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-embed--audio { margin-inline: 0.75rem; }
+	body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-body::after { height: 5rem; width: calc(100% - 1.5rem); }
+	body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-title { font-size: 1.1rem; }
 }
 
 /* Rating value beside the stars (inc/single-listen.php). */
@@ -4329,6 +4379,7 @@ body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is
 	text-transform: uppercase;
 	color: #8ecae6;
 }
+body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-sources__label { color: var(--cr-ink-muted, #126782); }
 body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is(.k-listen, .k-watch) .pk-sources__list {
 	list-style: none;
 	margin: 0;
