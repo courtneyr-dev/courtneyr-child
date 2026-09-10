@@ -73,12 +73,30 @@ function book_card( string $html, array $block, $instance ): string {
 		? (int) $instance->context['postId']
 		: (int) get_the_ID();
 	$post    = $post_id ? get_post( $post_id ) : null;
-	if ( ! $post instanceof \WP_Post || ! has_term( 'read', 'kind', $post ) || false === strpos( $html, 'pk-card k-read' ) ) {
+	if ( ! $post instanceof \WP_Post || ! has_term( 'read', 'kind', $post ) ) {
 		return $html;
 	}
 	$read = find_read_block( $post );
 	if ( null === $read ) {
 		return $html;
+	}
+
+	// A read whose body holds more than the card (an empty paragraph, a
+	// Kindle block) gets the plugin's generic stream card. Render the
+	// read card itself instead, with the plugin's own stream helpers for
+	// the title link and the date, so the book is the card.
+	if ( false === strpos( $html, 'pk-card k-read' ) ) {
+		$card = render_block( $read );
+		if ( '' === $card || false === strpos( $card, 'pk-card k-read' ) ) {
+			return $html;
+		}
+		if ( function_exists( '\\PKIW\\link_title_to_post' ) ) {
+			$card = \PKIW\link_title_to_post( $card, $post );
+		}
+		if ( false === strpos( $card, 'dt-published' ) && function_exists( '\\PKIW\\inject_post_date_into_card' ) ) {
+			$card = \PKIW\inject_post_date_into_card( $card, $post );
+		}
+		$html = $card;
 	}
 	$a      = card_attrs( $post, 'post-kinds-indieweb/read-card', (array) ( $read['attrs'] ?? array() ) );
 	$status = (string) ( $a['readStatus'] ?? 'to-read' );
@@ -98,10 +116,16 @@ function book_card( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
-	// 2. No stored cover: a typographic cover so the book still has a face.
+	// 2. No stored cover: the post's featured image (the plugin's generic
+	//    card showed it too), else a typographic cover so the book still
+	//    has a face.
 	$insert = '';
 	if ( false === strpos( $html, 'class="pk-media"' ) ) {
-		$insert .= '<div class="pk-media cr-book__cover cr-book__cover--type" aria-hidden="true"><span class="cr-book__type-title">' . esc_html( (string) ( $a['bookTitle'] ?? $post->post_title ) ) . '</span><span class="cr-book__type-author">' . esc_html( (string) ( $a['authorName'] ?? '' ) ) . '</span></div>';
+		if ( has_post_thumbnail( $post ) ) {
+			$insert .= '<div class="pk-media cr-book__cover cr-book__cover--featured">' . get_the_post_thumbnail( $post, 'medium_large', array( 'class' => 'cr-book__img u-photo', 'loading' => 'lazy' ) ) . '</div>';
+		} else {
+			$insert .= '<div class="pk-media cr-book__cover cr-book__cover--type" aria-hidden="true"><span class="cr-book__type-title">' . esc_html( (string) ( $a['bookTitle'] ?? $post->post_title ) ) . '</span><span class="cr-book__type-author">' . esc_html( (string) ( $a['authorName'] ?? '' ) ) . '</span></div>';
+		}
 	}
 
 	// 3. Facts line: status, pages, and the finished date when there is one.

@@ -318,6 +318,9 @@ function journal_page( string $html, array $block ): string {
 		$facts[] = __( 'A rewatch', 'courtneyr-child' );
 	}
 	$label_block  = '<div class="cr-vhs__label">';
+	// VHS-era stock marks: plainly decorative (a real tape's SIDE A / SP
+	// speed panel), never data.
+	$label_block .= '<span class="cr-vhs__marks" aria-hidden="true"><span>Side A</span><span>SP</span></span>';
 	$label_block .= '<p class="cr-vhs__note cr-hand" aria-hidden="true">' . esc_html__( 'Be kind & rewind', 'courtneyr-child' ) . '</p>';
 	$label_block .= '<span class="cr-vhs__stripe" aria-hidden="true"></span>';
 	$label_block .= '<ul class="cr-vhs__facts">';

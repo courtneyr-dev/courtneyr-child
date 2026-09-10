@@ -5977,7 +5977,7 @@ body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs
 		"label window"
 		"tape tape";
 }
-body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body::before { grid-area: label; margin: 0 0 3cqw -8cqw; z-index: 0; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body::before { grid-area: label; align-self: start; justify-self: start; width: 20cqw; height: 20cqw; margin: 1.5cqw 0 0 -7cqw; z-index: 0; }
 body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body::after { content: none; }
 body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-media { display: none; }
 body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-caption { position: relative; z-index: 1; margin: 3cqw 1cqw 3cqw 3cqw; }
@@ -6410,4 +6410,140 @@ body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem
 @media (max-width: 40rem) {
 	.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-media { width: 62%; transform: rotate(-1deg); }
 	.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-body { transform: none; }
+}
+
+/* ============================================================
+   v0.7.27 — single watch: refinement pass on the v0.7.25 VHS.
+   Same structure; the shell grows to 64.5cqw (1.55:1) so the interior
+   has room; the poster shrinks and sits low-right in the left zone
+   with the left reel window fully visible above it; the right reel
+   gets a deeper well, a toothed hub ring and a wider recessed rim; the
+   transport row carries a legible tape ribbon, two guide posts and a
+   slot; the label tightens (finer rules, less padding, decorative
+   SIDE A / SP stock marks); Watch / find it pulls up under the shell;
+   the first margin note becomes the editorial beat between the row
+   and the details card, with its arrow turned toward the card.
+   ============================================================ */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body {
+	grid-template-columns: 27cqw minmax(0, 1fr) 29cqw;
+	grid-template-rows: 5.5cqw minmax(50cqw, auto) 9cqw;
+	background:
+		/* guide posts */
+		radial-gradient(circle 1.3cqw at 13cqw calc(100% - 4.6cqw), #8a857e 0 40%, #3a3644 42% 96%, transparent 100%),
+		radial-gradient(circle 1.3cqw at calc(100% - 13cqw) calc(100% - 4.6cqw), #8a857e 0 40%, #3a3644 42% 96%, transparent 100%),
+		/* tape ribbon */
+		linear-gradient(#332f3d, #332f3d) left 13cqw bottom 3.7cqw / calc(100% - 26cqw) 1.9cqw no-repeat,
+		linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)) left 13cqw bottom 5.5cqw / calc(100% - 26cqw) 1px no-repeat,
+		/* transport slot */
+		linear-gradient(#0c0b0f, #0c0b0f) left 38cqw bottom 1.6cqw / 24cqw 6cqw no-repeat,
+		linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)) left 38cqw bottom 7.6cqw / 24cqw 1px no-repeat;
+	background-repeat: no-repeat;
+}
+/* Left: the reel window is fully visible; the poster is a smaller insert low-right. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::before {
+	align-self: start;
+	justify-self: start;
+	width: 17cqw;
+	height: 17cqw;
+	margin: 4cqw 0 0 3.2cqw;
+	border-radius: 50%;
+	background:
+		linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.12) 38%, transparent 48%),
+		radial-gradient(circle closest-side, #f4f1ea 0 14%, transparent 14.5%),
+		radial-gradient(circle closest-side, transparent 0 20%, #6a6560 20.5% 22%, #141218 22.5% 100%),
+		repeating-conic-gradient(from 0deg, #e8e4da 0 8deg, #201d26 8deg 20deg),
+		repeating-radial-gradient(circle, #141218 0 2px, #201d26 2px 4px);
+	box-shadow: 0 0 0 1.6cqw #0b0a0e, 0 0 0 calc(1.6cqw + 1px) rgba(255, 255, 255, 0.08), inset 0 0 1.5cqw rgba(0, 0, 0, 0.7);
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media {
+	align-self: end;
+	justify-self: end;
+	width: 18.5cqw;
+	margin: 0 0.8cqw 4cqw 0;
+	padding: 0.3rem;
+	transform: rotate(-2.5deg);
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media img { max-height: 30cqw; }
+/* Right: a deeper well, teeth on the hub, a wider rim. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::after {
+	width: 22cqw;
+	height: 22cqw;
+	background:
+		linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.14) 38%, transparent 48%),
+		conic-gradient(from 25deg, rgba(255, 255, 255, 0.16) 0 38deg, transparent 38deg 150deg, rgba(255, 255, 255, 0.1) 150deg 190deg, transparent 190deg 360deg),
+		radial-gradient(circle closest-side, #f4f1ea 0 13%, transparent 13.5%),
+		radial-gradient(circle closest-side, transparent 0 19%, #6a6560 19.5% 21%, transparent 21.5% 23%, #141218 23.5% 100%),
+		repeating-conic-gradient(from 0deg, #e8e4da 0 7deg, #201d26 7deg 18deg),
+		repeating-radial-gradient(circle, #141218 0 2px, #201d26 2px 4px);
+	box-shadow: 0 0 0 2.6cqw #0b0a0e, 0 0 0 calc(2.6cqw + 1px) rgba(255, 255, 255, 0.1), 0 0 0 3.4cqw #131118, inset 0 0 2cqw rgba(0, 0, 0, 0.75);
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body:not(:has(.pk-media))::before { width: 22cqw; height: 22cqw; box-shadow: 0 0 0 2.6cqw #0b0a0e, 0 0 0 calc(2.6cqw + 1px) rgba(255, 255, 255, 0.1), 0 0 0 3.4cqw #131118, inset 0 0 2cqw rgba(0, 0, 0, 0.75); }
+/* Centre: tighter VHS stock. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-caption {
+	margin: 4cqw 1cqw 4cqw 1.5cqw;
+	padding: 1.3cqw 2cqw 1.5cqw;
+	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.2rem - 1px), rgba(36, 28, 74, 0.14) calc(1.2rem - 1px) 1.2rem);
+	background-position: 0 0.9rem;
+	box-shadow: 0 0 0 1px rgba(36, 28, 74, 0.4), inset 0 0 0 0.35rem #f6f3ea, inset 0 0 0 calc(0.35rem + 1px) rgba(36, 28, 74, 0.25), 3px 3px 0 #050408;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__marks {
+	display: flex;
+	justify-content: space-between;
+	gap: 0.5rem;
+	margin: 0.15rem 0 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.58rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: #3d2f6e;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__marks span { padding: 0.05rem 0.35rem; border: 1.5px solid #3d2f6e; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__note { margin: 0.35rem 0 0.25rem; font-size: clamp(0.95rem, 3.2cqw, 1.4rem); }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__stripe { height: 0.7rem; margin: 0.25rem 0 0.55rem; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__facts { gap: 0.2rem; font-size: max(0.66rem, var(--cr-text-floor, 0.7rem)); }
+/* Under the shell: the row pulls up; the first margin note is the beat. */
+body.single-post.kind-watch .cr-journal > .pk-sources { margin-top: 0.35rem; }
+body.single-post.kind-watch .cr-journal > .cr-journal__margin--1 { margin: 0.5rem 0 0 1rem; }
+@media (min-width: 64rem) {
+	body.single-post.kind-watch .cr-journal { row-gap: 1.25rem; }
+	body.single-post.kind-watch .cr-journal > .cr-journal__margin--1 { grid-column: 1; justify-self: start; align-self: start; padding-top: 0; margin: 0.4rem 0 0.2rem 1.4rem; }
+	body.single-post.kind-watch .cr-journal > .cr-journal__margin--1 .cr-hand { max-width: 22ch; }
+	body.single-post.kind-watch .cr-journal > .cr-journal__margin--1 .cr-hand::before { transform: scaleX(-1) rotate(-40deg); margin-left: 0.2rem; }
+}
+body.single-post:is(.kind-read, .kind-watch) .cr-record { padding: 1rem 1.25rem 1.4rem; }
+body.single-post.kind-watch .cr-record { background-image: repeating-linear-gradient(180deg, transparent 0 1.9rem, rgba(36, 28, 74, 0.12) 1.9rem calc(1.9rem + 1px), transparent calc(1.9rem + 1px) calc(1.9rem + 2px), rgba(36, 28, 74, 0.05) calc(1.9rem + 2px) calc(1.9rem + 3px)); }
+@media (max-width: 48rem) {
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body { grid-template-rows: 2.4rem auto auto 6.5rem 3.2rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media { width: min(100% - 2rem, 12rem); margin: 1rem auto 0.4rem; transform: rotate(-2deg); justify-self: center; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::after { width: 4.8rem; height: 4.8rem; box-shadow: 0 0 0 0.55rem #0b0a0e, 0 0 0 calc(0.55rem + 1px) rgba(255, 255, 255, 0.1), 0 0 0 0.8rem #131118, inset 0 0 0.5rem rgba(0, 0, 0, 0.75); }
+}
+/* v0.7.27 phones: the refinement's zone rules above must yield to the stack. */
+@media (max-width: 48rem) {
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas:
+			"flap"
+			"poster"
+			"label"
+			"reel"
+			"tape";
+		background:
+			radial-gradient(circle 0.45rem at 3rem calc(100% - 1.5rem), #8a857e 0 40%, #3a3644 42% 96%, transparent 100%),
+			radial-gradient(circle 0.45rem at calc(100% - 3rem) calc(100% - 1.5rem), #8a857e 0 40%, #3a3644 42% 96%, transparent 100%),
+			linear-gradient(#332f3d, #332f3d) left 3rem bottom 1.2rem / calc(100% - 6rem) 0.6rem no-repeat,
+			linear-gradient(#0c0b0f, #0c0b0f) left 50% bottom 0.5rem / 7rem 2rem no-repeat;
+		background-repeat: no-repeat;
+	}
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::before { display: none; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media { align-self: center; justify-self: center; width: min(100% - 2rem, 12rem); margin: 1rem auto 0.4rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media img { max-height: 18rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-caption { margin: 0.8rem 1rem; padding: 0.7rem 0.9rem 0.8rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__note { font-size: 1.15rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas: "flap" "window" "label" "tape";
+		grid-template-rows: 2.4rem auto auto 3.2rem;
+	}
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body::before { display: none; }
 }
