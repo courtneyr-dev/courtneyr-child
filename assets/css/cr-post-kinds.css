@@ -4146,6 +4146,7 @@ body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-stars {
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-kindlabel {
 	grid-area: label;
 	position: relative;
+	inset: auto;
 	display: block;
 	width: auto;
 	height: auto;
@@ -4681,4 +4682,48 @@ body.single-post:is(.kind-checkin, .kind-watch) .cr-journal__meta-label {
 	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-caption { margin: 1.2rem 0.8rem 0.8rem; }
 	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-sources,
 	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-note { margin-inline: 0.8rem; }
+}
+
+/* ---- Paper stays paper in dark mode ----
+   components.css repaints every descendant of the single-post wrapper
+   ivory in dark mode (an !important rule at 0,8,0). The cassette label,
+   the VHS label and the passport page are light paper, so their ink is
+   pinned back here for all three dark-mode paths at higher specificity. */
+:root[data-theme="dark"] body.single-post .single-post__content .pk-card.k-listen .pk-body .pk-kindlabel { color: #126782 !important; }
+:root[data-theme="dark"] body.single-post .single-post__content .pk-card.k-listen .pk-body :is(.pk-title, .pk-title a, .pk-rating-value, .pk-sources__link) { color: #241c4a !important; }
+:root[data-theme="dark"] body.single-post .single-post__content .pk-card.k-listen .pk-body .pk-sub { color: #3d2f6e !important; }
+:root[data-theme="dark"] body.single-post .single-post__content .pk-card.k-listen .pk-body .pk-stars { color: #b85f00 !important; }
+:root[data-theme="dark"] body.single-post .single-post__content .pk-card.k-watch.cr-vhs .pk-body :is(.pk-title, .pk-title a, .pk-sources__link) { color: #241c4a !important; }
+:root[data-theme="dark"] body.single-post .single-post__content .pk-card.k-watch.cr-vhs .pk-body .pk-sub { color: #3d2f6e !important; }
+:root[data-theme="dark"] body.single-post .single-post__content .cr-passport--single .pk-body :is(.pk-kindlabel, .pk-map-link) { color: #126782 !important; }
+:root[data-theme="dark"] body.single-post .single-post__content .cr-passport--single .pk-body :is(.cr-passport__title a, .pk-title, .pk-title a, .pk-note, .p-street-address, .pk-sub .pk-sub-parts) { color: #241c4a !important; }
+:root[data-theme="dark"] body.single-post .single-post__content .cr-passport--single .pk-body :is(.pk-sub.p-location, .pk-map-note) { color: #3d2f6e !important; }
+:root[data-theme="dark"] body.single-post .single-post__content .cr-passport--single .pk-body :is(.pk-stream-date time, .pk-meta time) { color: #023047 !important; }
+:root[data-theme="dark"] body.single-post .single-post__content .cr-passport--single :is(.cr-passport__entry, .cr-passport__note, .cr-passport__count) { color: #3d2f6e !important; }
+:root[data-theme="dark"] body.single-post .single-post__content .cr-journal .cr-journal__photo .cr-hand--caption { color: #241c4a !important; }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) body.single-post .single-post__content .pk-card.k-listen .pk-body .pk-kindlabel { color: #126782 !important; }
+	:root[data-theme="system"] body.single-post .single-post__content .pk-card.k-listen .pk-body .pk-kindlabel { color: #126782 !important; }
+	:root:not([data-theme]) body.single-post .single-post__content .pk-card.k-listen .pk-body :is(.pk-title, .pk-title a, .pk-rating-value, .pk-sources__link) { color: #241c4a !important; }
+	:root[data-theme="system"] body.single-post .single-post__content .pk-card.k-listen .pk-body :is(.pk-title, .pk-title a, .pk-rating-value, .pk-sources__link) { color: #241c4a !important; }
+	:root:not([data-theme]) body.single-post .single-post__content .pk-card.k-listen .pk-body .pk-sub { color: #3d2f6e !important; }
+	:root[data-theme="system"] body.single-post .single-post__content .pk-card.k-listen .pk-body .pk-sub { color: #3d2f6e !important; }
+	:root:not([data-theme]) body.single-post .single-post__content .pk-card.k-listen .pk-body .pk-stars { color: #b85f00 !important; }
+	:root[data-theme="system"] body.single-post .single-post__content .pk-card.k-listen .pk-body .pk-stars { color: #b85f00 !important; }
+	:root:not([data-theme]) body.single-post .single-post__content .pk-card.k-watch.cr-vhs .pk-body :is(.pk-title, .pk-title a, .pk-sources__link) { color: #241c4a !important; }
+	:root[data-theme="system"] body.single-post .single-post__content .pk-card.k-watch.cr-vhs .pk-body :is(.pk-title, .pk-title a, .pk-sources__link) { color: #241c4a !important; }
+	:root:not([data-theme]) body.single-post .single-post__content .pk-card.k-watch.cr-vhs .pk-body .pk-sub { color: #3d2f6e !important; }
+	:root[data-theme="system"] body.single-post .single-post__content .pk-card.k-watch.cr-vhs .pk-body .pk-sub { color: #3d2f6e !important; }
+	:root:not([data-theme]) body.single-post .single-post__content .cr-passport--single .pk-body :is(.pk-kindlabel, .pk-map-link) { color: #126782 !important; }
+	:root[data-theme="system"] body.single-post .single-post__content .cr-passport--single .pk-body :is(.pk-kindlabel, .pk-map-link) { color: #126782 !important; }
+	:root:not([data-theme]) body.single-post .single-post__content .cr-passport--single .pk-body :is(.cr-passport__title a, .pk-title, .pk-title a, .pk-note, .p-street-address, .pk-sub .pk-sub-parts) { color: #241c4a !important; }
+	:root[data-theme="system"] body.single-post .single-post__content .cr-passport--single .pk-body :is(.cr-passport__title a, .pk-title, .pk-title a, .pk-note, .p-street-address, .pk-sub .pk-sub-parts) { color: #241c4a !important; }
+	:root:not([data-theme]) body.single-post .single-post__content .cr-passport--single .pk-body :is(.pk-sub.p-location, .pk-map-note) { color: #3d2f6e !important; }
+	:root[data-theme="system"] body.single-post .single-post__content .cr-passport--single .pk-body :is(.pk-sub.p-location, .pk-map-note) { color: #3d2f6e !important; }
+	:root:not([data-theme]) body.single-post .single-post__content .cr-passport--single .pk-body :is(.pk-stream-date time, .pk-meta time) { color: #023047 !important; }
+	:root[data-theme="system"] body.single-post .single-post__content .cr-passport--single .pk-body :is(.pk-stream-date time, .pk-meta time) { color: #023047 !important; }
+	:root:not([data-theme]) body.single-post .single-post__content .cr-passport--single :is(.cr-passport__entry, .cr-passport__note, .cr-passport__count) { color: #3d2f6e !important; }
+	:root[data-theme="system"] body.single-post .single-post__content .cr-passport--single :is(.cr-passport__entry, .cr-passport__note, .cr-passport__count) { color: #3d2f6e !important; }
+	:root:not([data-theme]) body.single-post .single-post__content .cr-journal .cr-journal__photo .cr-hand--caption { color: #241c4a !important; }
+	:root[data-theme="system"] body.single-post .single-post__content .cr-journal .cr-journal__photo .cr-hand--caption { color: #241c4a !important; }
 }
