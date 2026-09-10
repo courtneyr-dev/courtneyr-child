@@ -4404,8 +4404,12 @@ body.single-post.kind-watch .cr-journal__rating-value {
 /* The cassette shell. */
 body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs {
 	display: block;
+	width: 100%;
 	max-width: 46rem;
-	margin-inline: auto;
+	/* Auto inline margins would shrink a grid item to its content;
+	   the journal grid centres it instead. */
+	margin-inline: 0;
+	justify-self: center;
 	padding: 0;
 	position: relative;
 	overflow: visible;
