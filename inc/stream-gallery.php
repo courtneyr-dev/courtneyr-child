@@ -26,6 +26,12 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\StreamGallery;
 
+use function Courtneyr\Child\Stamps\pick;
+use function Courtneyr\Child\Stamps\render;
+use function Courtneyr\Child\Stamps\seed;
+use const Courtneyr\Child\Stamps\INKS;
+use const Courtneyr\Child\Stamps\TILTS;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -76,6 +82,132 @@ function gallery_image_ids( \WP_Post $post ): array {
 	}
 
 	return array_values( array_unique( array_filter( $ids ) ) );
+}
+
+/**
+ * The photo-lab vocabulary: stamp facts a gallery may print.
+ *
+ * Frame count is the real number of images in the post, date is the
+ * publication date, category is the post's first category name, and place
+ * is the Simple Location address only when that plugin marked the post's
+ * location public. Nothing else is inferred; an absent fact is omitted.
+ *
+ * @param \WP_Post $post  Post being rendered.
+ * @param int      $total Number of images in the gallery.
+ * @return array{frames: string, date: string, category: string, place: string, seed: int}
+ */
+function stamp_facts( \WP_Post $post, int $total ): array {
+	$cats     = get_the_category( $post->ID );
+	$category = ( ! empty( $cats ) && 'uncategorized' !== $cats[0]->slug ) ? (string) $cats[0]->name : '';
+
+	$place = '';
+	if ( '1' === (string) get_post_meta( $post->ID, 'geo_public', true ) ) {
+		$place = trim( (string) get_post_meta( $post->ID, 'geo_address', true ) );
+	}
+
+	return array(
+		'frames'   => sprintf(
+			/* translators: %d: number of images in the gallery. */
+			_n( '%d frame', '%d frames', $total, 'courtneyr-child' ),
+			$total
+		),
+		'date'     => strtoupper( (string) wp_date( 'd M Y', (int) get_post_time( 'U', true, $post ) ) ),
+		'category' => $category,
+		'place'    => $place,
+		'seed'     => seed( (string) $post->ID, (string) get_post_time( 'U', true, $post ) ),
+	);
+}
+
+/**
+ * Photo-lab stamp families on the shared primitive.
+ *
+ * @param string                    $family One of photo-log, field-notes, contact-sheet, postmark.
+ * @param array<string, string|int> $f      Facts from stamp_facts().
+ * @param string                    $ink    Ink colour.
+ * @param int                       $tilt   Tilt index.
+ * @param string                    $uid    Unique id fragment for seals.
+ * @return string Stamp markup.
+ */
+function gallery_stamp( string $family, array $f, string $ink, int $tilt, string $uid ): string {
+	$where = '' !== $f['place'] ? (string) $f['place'] : (string) $f['category'];
+
+	switch ( $family ) {
+		case 'field-notes':
+			$spec = array(
+				'shape' => 'seal',
+				'ring'  => 'FIELD NOTES',
+				'glyph' => 'pine',
+				'big'   => (string) $f['frames'],
+				'small' => (string) $f['date'],
+				'tiny'  => $where,
+			);
+			break;
+		case 'postmark':
+			$spec = array(
+				'shape'    => 'seal',
+				'postmark' => true,
+				'ring'     => '' !== $where ? $where : 'PHOTO LOG',
+				'glyph'    => 'camera',
+				'big'      => (string) $f['frames'],
+				'small'    => (string) $f['date'],
+			);
+			break;
+		case 'contact-sheet':
+			$spec = array(
+				'shape' => 'octagon',
+				'glyph' => 'film',
+				'big'   => 'ON FILM',
+				'mid'   => (string) $f['frames'],
+				'small' => (string) $f['date'],
+			);
+			break;
+		default:
+			$spec = array(
+				'shape' => 'rect',
+				'glyph' => 'camera',
+				'big'   => 'PHOTO LOG',
+				'mid'   => (string) $f['frames'],
+				'small' => (string) $f['date'],
+			);
+	}
+
+	$spec['family'] = 'gallery-' . $family;
+	$spec['ink']    = $ink;
+	$spec['tilt']   = $tilt;
+	$spec['uid']    = $uid;
+
+	return render( $spec );
+}
+
+/**
+ * The strip's stamp zone: one lead stamp and, one time in three, a second
+ * of a different silhouette. The strip is narrow, so a second stamp stacks
+ * under the first and is kept rare. Frame count and date are already printed as
+ * text in the footer above it, so the stamps add no unique facts.
+ *
+ * @param \WP_Post $post  Post being rendered.
+ * @param int      $total Number of images in the gallery.
+ * @return string Stamp zone markup.
+ */
+function render_stamps( \WP_Post $post, int $total ): string {
+	$f    = stamp_facts( $post, $total );
+	$seed = (int) $f['seed'];
+
+	$families = array( 'photo-log', 'field-notes', 'contact-sheet', 'postmark' );
+	$lead     = $families[ pick( $seed, 0, 4 ) ];
+	$ink_a    = INKS[ pick( $seed, 3, 3 ) ];
+	$ink_b    = INKS[ ( pick( $seed, 3, 3 ) + 1 ) % 3 ];
+	$second   = 0 === pick( $seed, 12, 3 );
+	$uid      = 'cr-roll-' . $post->ID;
+
+	$out  = '<div class="cr-booth__stamps cr-stamps">';
+	$out .= gallery_stamp( $lead, $f, $ink_a, pick( $seed, 6, TILTS ), $uid );
+	if ( $second ) {
+		$out .= gallery_stamp( 'photo-log' === $lead ? 'field-notes' : 'photo-log', $f, $ink_b, pick( $seed, 9, TILTS ), $uid . '-b' );
+	}
+	$out .= '</div>';
+
+	return $out;
 }
 
 /**
@@ -168,6 +300,7 @@ function render_strip( \WP_Post $post, array $ids ): string {
 			. '<span class="cr-booth__arrow" aria-hidden="true"> →</span>'
 			. '</a></p>';
 	}
+	$out .= render_stamps( $post, $total );
 	$out .= '</div>';
 
 	return $out;
