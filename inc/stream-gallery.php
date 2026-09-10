@@ -345,17 +345,6 @@ function booth_strip_card( string $html, array $block, $instance ): string {
 
 	$html = substr( $html, 0, $start ) . $strip . substr( $html, $end );
 
-	// The plugin labels the kind ("Photo"); the strip is a gallery, and the
-	// tab on its corner should say so.
-	$label = '<p class="pk-kindlabel">';
-	$lpos  = strpos( $html, $label );
-	if ( false !== $lpos ) {
-		$lend = strpos( $html, '</p>', $lpos );
-		if ( false !== $lend ) {
-			$html = substr( $html, 0, $lpos ) . $label . esc_html__( 'Gallery', 'courtneyr-child' ) . substr( $html, $lend );
-		}
-	}
-
 	// Name the object so the stylesheet can paint it without guessing from
 	// image counts: pk-card--gallery beside the plugin's own pk-card--stream.
 	$tags = new \WP_HTML_Tag_Processor( $html );

@@ -3654,38 +3654,38 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
    One SVG per stamp, ink from --cr-stamp-ink, fixed width per shape so a
    footer's height never depends on the variant. Tilts are the only
    transform; both the passport and the booth consume these rules. */
-.cr-stream-page .cr-stamp-mark { display: block; line-height: 0; mix-blend-mode: multiply; }
-.cr-stream-page .cr-stamp-mark--tilt-0 { transform: rotate(-3deg); }
-.cr-stream-page .cr-stamp-mark--tilt-1 { transform: rotate(-1deg); }
-.cr-stream-page .cr-stamp-mark--tilt-2 { transform: rotate(1.5deg); }
-.cr-stream-page .cr-stamp-mark--tilt-3 { transform: rotate(3.5deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp-mark { display: block; line-height: 0; mix-blend-mode: multiply; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp-mark--tilt-0 { transform: rotate(-3deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp-mark--tilt-1 { transform: rotate(-1deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp-mark--tilt-2 { transform: rotate(1.5deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp-mark--tilt-3 { transform: rotate(3.5deg); }
 /* Stamps sit close, the second tucked against the first like real
    overprints; they only ever overlap each other, never content. */
-.cr-stream-page .cr-stamp-mark + .cr-stamp-mark { margin-left: -0.9rem; }
-.cr-stream-page .cr-stamp { display: block; height: auto; opacity: 0.9; }
-.cr-stream-page .cr-stamp--rect { width: 8.4rem; }
-.cr-stream-page .cr-stamp--seal,
-.cr-stream-page .cr-stamp--octagon { width: 5.8rem; }
-.cr-stream-page .cr-stamp--postmark { width: 10rem; }
-.cr-stream-page .cr-stamp rect,
-.cr-stream-page .cr-stamp circle,
-.cr-stream-page .cr-stamp > path,
-.cr-stream-page .cr-stamp .cr-stamp__waves { fill: none; stroke: var(--cr-stamp-ink, #241c4a); stroke-linecap: round; stroke-linejoin: round; }
-.cr-stream-page .cr-stamp text,
-.cr-stream-page .cr-stamp .cr-stamp__glyph { fill: var(--cr-stamp-ink, #241c4a); }
-.cr-stream-page .cr-stamp text {
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp-mark + .cr-stamp-mark { margin-left: -0.9rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp { display: block; height: auto; opacity: 0.9; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp--rect { width: 8.4rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp--seal,
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp--octagon { width: 5.8rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp--postmark { width: 10rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp rect,
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp circle,
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp > path,
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp .cr-stamp__waves { fill: none; stroke: var(--cr-stamp-ink, #241c4a); stroke-linecap: round; stroke-linejoin: round; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp text,
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp .cr-stamp__glyph { fill: var(--cr-stamp-ink, #241c4a); }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp text {
 	font-family: var(--cr-font-mono, monospace);
 	text-anchor: middle;
 	text-transform: uppercase;
 	font-weight: 700;
 }
-.cr-stream-page .cr-stamp__big { font-size: 21px; letter-spacing: 2px; }
-.cr-stream-page .cr-stamp__big--seal { font-size: 12.5px; letter-spacing: 1.4px; }
-.cr-stream-page .cr-stamp__mid { font-size: 11.5px; letter-spacing: 1.2px; }
-.cr-stream-page .cr-stamp__mid--seal { font-size: 10px; letter-spacing: 1px; }
-.cr-stream-page .cr-stamp__small { font-size: 9px; letter-spacing: 1px; }
-.cr-stream-page .cr-stamp__tiny { font-size: 8px; letter-spacing: 1px; }
-.cr-stream-page .cr-stamp__ring { font-size: 9.5px; letter-spacing: 2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__big { font-size: 21px; letter-spacing: 2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__big--seal { font-size: 12.5px; letter-spacing: 1.4px; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__mid { font-size: 11.5px; letter-spacing: 1.2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__mid--seal { font-size: 10px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__small { font-size: 9px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__tiny { font-size: 8px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin) .cr-stamp__ring { font-size: 9.5px; letter-spacing: 2px; }
 .cr-stream-page .cr-passport .cr-passport__entry {
 	flex: 1 1 100%;
 	margin: 0.1rem 0 0;
@@ -3701,3 +3701,370 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 @media (max-width: 40rem) {
 	.cr-stream-page .pk-card.k-checkin.cr-passport { width: 100%; }
 }
+
+/* ============================================================
+   v0.7.11 — single check-in: an opened travel-journal page.
+   inc/single-checkin.php drops the duplicate featured image, adds a
+   date · place lede under the H1, turns the plugin card into the
+   passport artifact (photo lifted out, long note moved below, shared
+   stamps appended), and adds handwritten margin notes, a pasted
+   snapshot with a caption, and a time / place row. Paper objects stay
+   light in both schemes; handwriting uses the page ink so it flips.
+   Scope: body.single-post.kind-checkin only.
+   ============================================================ */
+
+/* Header: kind chip stays, the template date hides (the lede has it),
+   the tag row goes. */
+body.single-post.kind-checkin .single-post__lede-meta .single-post__date { display: none; }
+body.single-post.kind-checkin .single-post__meta { display: none; }
+body.single-post.kind-checkin .cr-journal__lede {
+	margin: 0.35rem 0 0;
+	font-family: var(--cr-font-accent, serif);
+	font-size: 1.05rem;
+	color: var(--cr-ink-soft, #4a4566);
+}
+body.single-post.kind-checkin .cr-journal__lede-date {
+	padding-bottom: 0.1rem;
+	box-shadow: inset 0 -0.55em 0 rgba(142, 202, 230, 0.4);
+}
+body.single-post.kind-checkin .cr-journal__lede-place { font-weight: 700; color: var(--cr-ink, #241c4a); }
+
+/* A featured image the block does not carry stays, as a snapshot. */
+body.single-post.kind-checkin .single-post__featured {
+	max-width: 24rem;
+	margin: var(--wp--preset--spacing--medium, 1.5rem) auto 1rem;
+	transform: rotate(-1.2deg);
+}
+
+/* The page grid: entry column plus a handwriting margin on wide screens. */
+body.single-post.kind-checkin .single-post__content p:has(> .p-trip) {
+	margin: 0 0 0.6rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--cr-ink-muted, #126782);
+}
+body.single-post.kind-checkin .single-post__content p:has(> .p-trip)::before { content: "Trip · "; }
+@media (min-width: 64rem) {
+	body.single-post.kind-checkin .cr-journal {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 11rem;
+		column-gap: 2.25rem;
+		row-gap: 1.75rem;
+		grid-auto-flow: row dense;
+		align-items: start;
+	}
+	body.single-post.kind-checkin .cr-journal > * { grid-column: 1; margin-block: 0; }
+	body.single-post.kind-checkin .cr-journal > aside { grid-column: 2; }
+	body.single-post.kind-checkin .cr-journal > .cr-journal__margin--1 { align-self: start; padding-top: 2.5rem; }
+	body.single-post.kind-checkin .cr-journal > .cr-journal__margin--2 { align-self: center; }
+	body.single-post.kind-checkin .cr-journal > .cr-journal__margin--3 { align-self: center; }
+	body.single-post.kind-checkin .cr-journal > .cr-journal__meta { grid-column: 1 / -1; }
+}
+
+/* Handwriting: Rock Salt, page ink, short lines, two marks (a double
+   underline and a heart). Never below 1rem. */
+body.single-post.kind-checkin .cr-hand {
+	font-family: var(--cr-font-display, "Rock Salt", cursive);
+	font-size: 1.05rem;
+	line-height: 1.75;
+	color: var(--cr-ink, #241c4a);
+	margin: 0;
+	max-width: 14ch;
+}
+body.single-post.kind-checkin .cr-hand--orange { color: #b85f00; }
+:root[data-theme="dark"] body.single-post.kind-checkin .cr-hand--orange { color: #fb8500; }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) body.single-post.kind-checkin .cr-hand--orange { color: #fb8500; }
+}
+body.single-post.kind-checkin .cr-hand--underline::after {
+	content: "";
+	display: block;
+	width: 4.5rem;
+	height: 0.45rem;
+	margin-top: 0.35rem;
+	border-top: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	transform: rotate(-2deg);
+	opacity: 0.85;
+}
+body.single-post.kind-checkin .cr-hand__heart { font-family: var(--cr-font-body, sans-serif); color: #126782; }
+body.single-post.kind-checkin .cr-journal__margin { margin: 0; }
+@media (max-width: 63.98rem) {
+	body.single-post.kind-checkin .cr-journal__margin { margin: 1.25rem 0; text-align: center; }
+	body.single-post.kind-checkin .cr-journal__margin .cr-hand { max-width: none; font-size: 1rem; }
+	body.single-post.kind-checkin .cr-journal__margin .cr-hand--underline::after { margin-inline: auto; }
+}
+
+/* The passport artifact. */
+body.single-post.kind-checkin .single-post__content .pk-card.cr-passport--single {
+	display: block;
+	grid-template-columns: none;
+	max-width: none;
+	padding: 1rem 1.2rem 0.9rem;
+	position: relative;
+	background:
+		repeating-linear-gradient(0deg, rgba(36, 28, 74, 0.035) 0 1px, transparent 1px 7px),
+		#eef5fa;
+	border: 2px solid #241c4a;
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a);
+	color: #241c4a;
+	transform: rotate(-0.4deg);
+}
+body.single-post.kind-checkin .cr-passport--single .pk-badge { display: none; }
+body.single-post.kind-checkin .cr-passport--single .pk-body { display: flex; flex-direction: column; min-width: 0; }
+body.single-post.kind-checkin .cr-passport--single .pk-embed--map { order: -3; }
+body.single-post.kind-checkin .cr-passport--single .pk-kindlabel { order: -2; }
+body.single-post.kind-checkin .cr-passport--single .pk-caption { order: -1; }
+body.single-post.kind-checkin .cr-passport--single .pk-note { order: 1; }
+body.single-post.kind-checkin .cr-passport--single .pk-meta { order: 2; }
+body.single-post.kind-checkin .cr-passport--single .cr-passport__stamps { order: 3; }
+
+body.single-post.kind-checkin .cr-passport--single .pk-embed--map,
+body.single-post.kind-checkin .cr-passport--single .pk-embed--map iframe {
+	transform: none;
+	box-shadow: none;
+}
+body.single-post.kind-checkin .cr-passport--single .pk-embed--map {
+	display: block;
+	margin: 0 0 0.9rem;
+	padding: 0.3rem;
+	border: 1.5px solid #241c4a;
+	background: #ffffff;
+	box-shadow: inset 0 0 0 0.3rem #ffffff, inset 0 0 0 calc(0.3rem + 1px) rgba(36, 28, 74, 0.35);
+}
+body.single-post.kind-checkin .cr-passport--single .pk-embed--map iframe,
+body.single-post.kind-checkin .cr-passport--single .pk-embed--map .cmplz-placeholder-parent {
+	display: block;
+	width: calc(100% - 0.6rem);
+	max-width: none;
+	margin: 0.3rem;
+	aspect-ratio: 16 / 9;
+	height: auto;
+	border: 0;
+	background: #fbfaf5;
+}
+body.single-post.kind-checkin .cr-passport--single .pk-map-link,
+body.single-post.kind-checkin .cr-passport--single .pk-map-note {
+	display: block;
+	margin: 0.35rem 0.4rem 0.2rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: #126782;
+}
+body.single-post.kind-checkin .cr-passport--single .pk-map-note { text-transform: none; letter-spacing: 0.02em; font-style: italic; color: #3d2f6e; }
+body.single-post.kind-checkin .cr-passport--single .pk-map-link:focus-visible,
+body.single-post.kind-checkin .cr-passport--single .pk-embed--map:focus-within { outline: 3px solid #241c4a; outline-offset: 2px; }
+
+body.single-post.kind-checkin .cr-passport--single .pk-kindlabel {
+	position: static;
+	display: block;
+	margin: 0.2rem 0 0.15rem;
+	padding: 0;
+	width: auto;
+	height: auto;
+	background: none;
+	border: 0;
+	box-shadow: none;
+	transform: none;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: #126782;
+}
+body.single-post.kind-checkin .cr-passport--single .pk-caption { padding: 0; }
+body.single-post.kind-checkin .cr-passport--single .pk-title {
+	margin: 0 0 0.5rem;
+	padding: 0;
+	font-family: var(--cr-font-accent, serif);
+	font-size: 1.45rem;
+	font-weight: 700;
+	line-height: 1.2;
+	color: #241c4a;
+}
+body.single-post.kind-checkin .cr-passport--single .pk-title a { color: inherit; }
+body.single-post.kind-checkin .cr-passport--single .pk-sub.p-location {
+	position: relative;
+	margin: 0;
+	padding: 0 0 0 1.5rem;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 0.95rem;
+	line-height: 1.5;
+	color: #3d2f6e;
+}
+body.single-post.kind-checkin .cr-passport--single .pk-sub.p-location::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0.2em;
+	width: 1rem;
+	height: 1rem;
+	background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23126782' d='M12 2C7.6 2 4 5.6 4 10c0 6.5 8 12 8 12s8-5.5 8-12c0-4.4-3.6-8-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+body.single-post.kind-checkin .cr-passport--single .pk-sub.p-location .p-street-address { display: block; color: #241c4a; font-weight: 600; }
+body.single-post.kind-checkin .cr-passport--single .pk-note {
+	margin: 0.8rem 0 0 1.5rem;
+	padding: 0;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 1rem;
+	line-height: 1.55;
+	color: #241c4a;
+}
+body.single-post.kind-checkin .cr-passport--single .pk-note p { margin: 0; }
+body.single-post.kind-checkin .cr-passport--single .pk-note .dashicons { display: none; }
+body.single-post.kind-checkin .cr-passport--single .pk-meta { padding: 0.6rem 0 0 1.5rem; }
+body.single-post.kind-checkin .cr-passport--single .pk-meta:empty { display: none; }
+body.single-post.kind-checkin .cr-passport--single .pk-meta time {
+	display: inline-block;
+	padding: 0.15rem 0.45rem;
+	background: rgba(142, 202, 230, 0.35);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: #023047;
+}
+
+/* Stamp zone: right-aligned on wide cards, its own row under a dashed
+   rule, entry number as text. */
+body.single-post.kind-checkin .cr-passport--single .cr-passport__stamps {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.35rem 0;
+	margin: 1rem -1.2rem -0.9rem;
+	padding: 0.7rem 1.2rem 0.65rem;
+	border-top: 1px dashed rgba(36, 28, 74, 0.45);
+	background: repeating-linear-gradient(-35deg, rgba(100, 123, 175, 0.09) 0 1px, transparent 1px 6px);
+}
+body.single-post.kind-checkin .cr-passport--single .cr-stamp--rect { width: 10rem; }
+body.single-post.kind-checkin .cr-passport--single .cr-stamp--seal,
+body.single-post.kind-checkin .cr-passport--single .cr-stamp--octagon { width: 7rem; }
+body.single-post.kind-checkin .cr-passport--single .cr-stamp--postmark { width: 12rem; }
+body.single-post.kind-checkin .cr-passport--single .cr-passport__entry {
+	flex: 1 1 100%;
+	margin: 0.15rem 0 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.58rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: #3d2f6e;
+}
+
+/* Notes from this check-in. */
+body.single-post.kind-checkin .cr-journal__notes { margin: 0; }
+body.single-post.kind-checkin .cr-journal__notes-title {
+	display: inline-block;
+	margin: 0 0 0.75rem;
+	padding: 0.15rem 0.5rem;
+	background: rgba(142, 202, 230, 0.4);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.8rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--cr-ink, #241c4a);
+}
+body.single-post.kind-checkin .cr-journal__notes .pk-note { margin: 0; padding: 0; font-size: 1.05rem; line-height: 1.65; color: var(--cr-ink, #241c4a); }
+body.single-post.kind-checkin .cr-journal__notes .pk-note p { margin: 0 0 0.75em; }
+
+/* The snapshot: a pasted print, not a hero. */
+body.single-post.kind-checkin .cr-journal__photo {
+	width: 62%;
+	max-width: 26rem;
+	margin: 0.5rem 0 0;
+	padding: 0.45rem 0.45rem 0.55rem;
+	background: #ffffff;
+	border: 1.5px solid #241c4a;
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a);
+	transform: rotate(-1.3deg);
+	position: relative;
+}
+body.single-post.kind-checkin .cr-journal__photo::before {
+	content: "";
+	position: absolute;
+	top: -0.6rem;
+	left: 1.4rem;
+	width: 4.2rem;
+	height: 1.2rem;
+	transform: rotate(-5deg);
+	background: rgba(243, 229, 184, 0.9);
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+	pointer-events: none;
+}
+body.single-post.kind-checkin .cr-journal__photo img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+}
+body.single-post.kind-checkin .cr-journal__photo .cr-hand--caption { margin: 0.5rem 0.15rem 0; max-width: none; font-size: 1rem; line-height: 1.6; color: #241c4a; }
+@media (max-width: 40rem) {
+	body.single-post.kind-checkin .cr-journal__photo { width: 100%; transform: rotate(-0.6deg); }
+	body.single-post.kind-checkin .single-post__content .pk-card.cr-passport--single { transform: none; padding: 0.85rem 0.9rem 0.8rem; }
+	body.single-post.kind-checkin .cr-passport--single .cr-passport__stamps { justify-content: flex-start; margin-inline: -0.9rem; padding-inline: 0.9rem; }
+}
+
+/* Time and place, quiet, at the bottom. Simple Location's raster map
+   is redundant with the passport's map; its address line stays. */
+body.single-post.kind-checkin .cr-journal__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem 3rem;
+	margin: 1.5rem 0 0;
+	padding: 1rem 0 0;
+	border-top: 1px solid rgba(36, 28, 74, 0.35);
+}
+body.single-post.kind-checkin .cr-journal__meta-item {
+	display: flex;
+	gap: 0.6rem;
+	align-items: flex-start;
+	margin: 0;
+	font-family: var(--cr-font-accent, serif);
+	font-size: 0.95rem;
+	line-height: 1.5;
+	color: var(--cr-ink, #241c4a);
+}
+body.single-post.kind-checkin .cr-journal__meta-icon {
+	flex: 0 0 1.25rem;
+	width: 1.25rem;
+	height: 1.25rem;
+	margin-top: 0.15rem;
+	background: no-repeat center / contain;
+}
+body.single-post.kind-checkin .cr-journal__meta-item--time .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E"); }
+body.single-post.kind-checkin .cr-journal__meta-item--place .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z'/%3E%3Cpath d='M9 3v15M15 6v15'/%3E%3C/svg%3E"); }
+body.single-post.kind-checkin .single-post__content .sloc-map,
+body.single-post.kind-checkin .single-post__content a:has(> .sloc-map) { display: none; }
+body.single-post.kind-checkin .single-post__content .sloc-display {
+	margin: 0.6rem 0 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.06em;
+	color: var(--cr-ink-soft, #4a4566);
+}
+
+/* A check-in arrives as the Status format, which the theme treats as
+   title-less. This page opens with its title, so undo that here (the
+   hiding rule is !important) and drop the floating format avatar the
+   title-less path injects — the passport is the page's identity. */
+body.single-post.kind-checkin.pfbt-format-titleless .single-post__title {
+	position: relative !important;
+	width: auto !important;
+	height: auto !important;
+	margin: 0 !important;
+	overflow: visible !important;
+	clip: auto !important;
+	clip-path: none !important;
+	white-space: normal !important;
+}
+body.single-post.kind-checkin .single-post__content > .single-post__format-avatar { display: none; }
