@@ -6547,3 +6547,139 @@ body.single-post.kind-watch .cr-record { background-image: repeating-linear-grad
 	}
 	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body::before { display: none; }
 }
+
+/* ============================================================
+   v0.7.28 — single watch geometry: reels first, an equal-height insert
+   between them, a shell sized from width.
+   Body grid: `reelL poster label reelR` on one 46cqw row between a 6cqw
+   flap and a 10.5cqw transport row = 62.5cqw, 1.6:1 regardless of
+   content; the rows are fixed, so nothing inside can stretch the shell.
+   The reel zones are 23cqw columns holding the reel windows; the poster
+   column is 26cqw (a 2:3 poster at the row's height) and the label takes
+   the rest; both stretch to the row and sit side by side. The Rental
+   Record reserves a stamp zone in its padding so the seal stays inside.
+   ============================================================ */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body {
+	grid-template-columns: 23cqw 26cqw minmax(0, 1fr) 23cqw;
+	grid-template-rows: 6cqw 46cqw 10.5cqw;
+	grid-template-areas:
+		"flap flap flap flap"
+		"reelL poster label reelR"
+		"tape tape tape tape";
+	align-items: stretch;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::before {
+	grid-area: reelL;
+	align-self: center;
+	justify-self: center;
+	width: 17cqw;
+	height: 17cqw;
+	margin: 0;
+	box-shadow: 0 0 0 2.2cqw #0b0a0e, 0 0 0 calc(2.2cqw + 1px) rgba(255, 255, 255, 0.1), 0 0 0 2.9cqw #131118, inset 0 0 1.5cqw rgba(0, 0, 0, 0.7);
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body:not(:has(.pk-media))::before { width: 17cqw; height: 17cqw; box-shadow: 0 0 0 2.2cqw #0b0a0e, 0 0 0 calc(2.2cqw + 1px) rgba(255, 255, 255, 0.1), 0 0 0 2.9cqw #131118, inset 0 0 1.5cqw rgba(0, 0, 0, 0.7); }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::after {
+	grid-area: reelR;
+	align-self: center;
+	justify-self: center;
+	width: 17cqw;
+	height: 17cqw;
+	box-shadow: 0 0 0 2.2cqw #0b0a0e, 0 0 0 calc(2.2cqw + 1px) rgba(255, 255, 255, 0.1), 0 0 0 2.9cqw #131118, inset 0 0 1.5cqw rgba(0, 0, 0, 0.7);
+}
+/* Poster: an insert the exact height of the row, the image contained inside its mat. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media {
+	grid-area: poster;
+	align-self: stretch;
+	justify-self: stretch;
+	/* !important: the v0.6.10 cover-box rules pin display and margin-top. */
+	display: flex !important;
+	align-items: center;
+	justify-content: center;
+	width: auto;
+	margin: 3.5cqw 0 3.5cqw 0.5cqw !important;
+	padding: 0.3rem;
+	min-height: 0;
+	transform: rotate(-1.2deg);
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media img {
+	width: 100% !important;
+	height: 100% !important;
+	max-height: none;
+	object-fit: contain;
+}
+/* Label: the same row, no taller than the poster; dense VHS stock. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-caption {
+	grid-area: label;
+	align-self: stretch;
+	justify-content: flex-start;
+	margin: 3.5cqw 1cqw 3.5cqw 1.5cqw;
+	padding: 1cqw 1.8cqw 1.2cqw;
+	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.05rem - 1px), rgba(36, 28, 74, 0.13) calc(1.05rem - 1px) 1.05rem);
+	background-position: 0 0.75rem;
+	overflow: hidden;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-title { font-size: clamp(0.85rem, 2.6cqw, 1.1rem); line-height: 1.08; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-sub { margin-top: 0.1rem; font-size: max(0.6rem, var(--cr-text-floor, 0.7rem)); }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__label { margin-top: 0.35rem; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__marks { margin: 0; font-size: max(0.52rem, var(--cr-text-floor, 0.7rem)); }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__marks span { padding: 0.02rem 0.28rem; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__note { margin: 0.2rem 0 0.1rem; font-size: clamp(0.9rem, 2.7cqw, 1.2rem); line-height: 1.35; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__stripe { height: 0.55rem; margin: 0.2rem 0 0.4rem; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__facts { gap: 0.12rem; font-size: max(0.6rem, var(--cr-text-floor, 0.7rem)); line-height: 1.3; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__facts li { padding-left: 1.2rem; }
+/* Transport row: ribbon between the reel zones. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body {
+	background:
+		radial-gradient(circle 1.3cqw at 11.5cqw calc(100% - 5.4cqw), #8a857e 0 40%, #3a3644 42% 96%, transparent 100%),
+		radial-gradient(circle 1.3cqw at calc(100% - 11.5cqw) calc(100% - 5.4cqw), #8a857e 0 40%, #3a3644 42% 96%, transparent 100%),
+		linear-gradient(#332f3d, #332f3d) left 11.5cqw bottom 4.5cqw / calc(100% - 23cqw) 1.9cqw no-repeat,
+		linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)) left 11.5cqw bottom 6.3cqw / calc(100% - 23cqw) 1px no-repeat,
+		linear-gradient(#0c0b0f, #0c0b0f) left 38cqw bottom 2cqw / 24cqw 7cqw no-repeat,
+		linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)) left 38cqw bottom 9cqw / 24cqw 1px no-repeat;
+	background-repeat: no-repeat;
+}
+/* Player posts: label and window share the insert; rows can grow only there. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body {
+	grid-template-columns: 23cqw 24cqw minmax(0, 1fr);
+	grid-template-rows: 6cqw minmax(46cqw, auto) 10.5cqw;
+	grid-template-areas:
+		"flap flap flap"
+		"reelL label window"
+		"tape tape tape";
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body::before { grid-area: reelL; align-self: center; justify-self: center; width: 17cqw; height: 17cqw; margin: 0; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-caption { margin: 3.5cqw 1cqw 3.5cqw 0.5cqw; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video { grid-area: window; margin: 3.5cqw 3cqw 3.5cqw 1cqw; }
+/* Rental record and reading record: a reserved stamp zone inside the card. */
+body.single-post:is(.kind-read, .kind-watch) .cr-record { padding: 1rem 1.25rem 1.2rem; }
+body.single-post:is(.kind-read, .kind-watch) .cr-record:has(.cr-record-stamp) { padding-right: 8.4rem; min-height: 9.5rem; }
+body.single-post:is(.kind-read, .kind-watch) .cr-record:has(.cr-record-stamp) .cr-record-rows { padding-right: 0; }
+body.single-post:is(.kind-read, .kind-watch) .cr-record-stamp {
+	position: absolute;
+	right: 1rem;
+	bottom: 0.9rem;
+	width: 6.4rem;
+}
+@media (max-width: 48rem) {
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: 2.4rem auto auto 6.5rem 3.2rem;
+		grid-template-areas: "flap" "poster" "label" "reel" "tape";
+		background:
+			radial-gradient(circle 0.45rem at 3rem calc(100% - 1.5rem), #8a857e 0 40%, #3a3644 42% 96%, transparent 100%),
+			radial-gradient(circle 0.45rem at calc(100% - 3rem) calc(100% - 1.5rem), #8a857e 0 40%, #3a3644 42% 96%, transparent 100%),
+			linear-gradient(#332f3d, #332f3d) left 3rem bottom 1.2rem / calc(100% - 6rem) 0.6rem no-repeat,
+			linear-gradient(#0c0b0f, #0c0b0f) left 50% bottom 0.5rem / 7rem 2rem no-repeat;
+		background-repeat: no-repeat;
+	}
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::before { display: none; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::after { grid-area: reel; width: 4.8rem; height: 4.8rem; box-shadow: 0 0 0 0.55rem #0b0a0e, 0 0 0 calc(0.55rem + 1px) rgba(255, 255, 255, 0.1), 0 0 0 0.8rem #131118, inset 0 0 0.5rem rgba(0, 0, 0, 0.75); }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media { grid-area: poster; align-self: center; justify-self: center; display: block; width: min(100% - 2rem, 12rem); margin: 1rem auto 0.4rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media img { height: auto; max-height: 18rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-caption { grid-area: label; margin: 0.8rem 1rem; padding: 0.7rem 0.9rem 0.8rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: 2.4rem auto auto 3.2rem; grid-template-areas: "flap" "window" "label" "tape"; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body::before { display: none; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video { grid-area: window; margin: 0.8rem 1rem 0; }
+	body.single-post:is(.kind-read, .kind-watch) .cr-record:has(.cr-record-stamp) { padding-right: 1.25rem; padding-bottom: 6.2rem; }
+	body.single-post:is(.kind-read, .kind-watch) .cr-record-stamp { width: 5.6rem; right: 0.9rem; bottom: 0.7rem; }
+}

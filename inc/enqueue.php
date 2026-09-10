@@ -702,3 +702,25 @@ function perfmatters_exclusions( $exclusions ): array {
 }
 add_filter( 'perfmatters_minify_css_exclusions', __NAMESPACE__ . '\\perfmatters_exclusions' );
 add_filter( 'perfmatters_minify_js_exclusions', __NAMESPACE__ . '\\perfmatters_exclusions' );
+
+/**
+ * Keep consent-gated and Able Player embeds out of Perfmatters' lazy load.
+ *
+ * Complianz renders a gated iframe with `src="about:blank"` and the real
+ * URL in `data-src-cmplz`. Perfmatters' iframe lazy load then stores that
+ * blank source in `data-src`, and when the frame scrolls into view it
+ * writes it back, undoing the source Complianz set on consent: the
+ * Spotify player on /stream/ and on listen singles ends as a black box
+ * (verified 2026-09-10). Able Player builds its own frames at runtime.
+ *
+ * @param array<int, string> $exclusions Markup fragments Perfmatters skips.
+ * @return array<int, string>
+ */
+function perfmatters_lazyload_exclusions( $exclusions ): array {
+	$exclusions = is_array( $exclusions ) ? $exclusions : array();
+	foreach ( array( 'cmplz-placeholder-element', 'data-src-cmplz', 'data-able-player' ) as $needle ) {
+		$exclusions[] = $needle;
+	}
+	return array_values( array_unique( $exclusions ) );
+}
+add_filter( 'perfmatters_lazyload_exclusions', __NAMESPACE__ . '\\perfmatters_lazyload_exclusions' );

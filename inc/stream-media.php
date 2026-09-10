@@ -20,6 +20,8 @@ namespace Courtneyr\Child\StreamMedia;
 
 use function Courtneyr\Child\SingleListen\provider_label;
 use function Courtneyr\Child\SingleWatch\classify;
+use function Courtneyr\Child\Stamps\pick;
+use function Courtneyr\Child\Stamps\seed;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -129,9 +131,10 @@ function sources_row( array $links, string $kind ): string {
  * @param string $kind 'watch' or 'listen'.
  * @param bool   $wide Watch only: the taller, wider-windowed variant a
  *                     playable card uses when it spans two stream columns.
+ * @param int    $seed Listen only: fixes which reel carries the tape.
  * @return string
  */
-function mech_svg( string $kind, bool $wide = false ): string {
+function mech_svg( string $kind, bool $wide = false, int $seed = 0 ): string {
 	if ( 'watch' === $kind ) {
 		$h    = $wide ? 42 : 36;
 		$cy   = $h / 2;
@@ -158,17 +161,30 @@ function mech_svg( string $kind, bool $wide = false ): string {
 			. '<rect x="' . $win[0] . '" y="' . $win[2] . '" width="' . $win[1] . '" height="' . $win[3] . '" rx="1.2" fill="#0d0c10" stroke="#2a2731" stroke-width="0.6"/>'
 			. '</svg>';
 	}
-	$hub = static function ( float $cx, float $mass ): string {
-		return '<circle cx="' . $cx . '" cy="9" r="' . $mass . '" fill="#1d1913"/>'
-			. '<circle cx="' . $cx . '" cy="9" r="' . ( $mass - 1.4 ) . '" fill="none" stroke="#2b2620" stroke-width="0.4"/>'
+	// A compact cassette part-way through: the tape mass sits mostly on
+	// one reel (which one is fixed per post by the seed), the other reel
+	// is nearly bare, a run of tape crosses between them, and the window
+	// is clear enough to see the hubs and a glass sheen.
+	$heavy_left = 0 === pick( $seed, 5, 2 );
+	$hub        = static function ( float $cx, float $mass ): string {
+		$rings = '';
+		for ( $r = $mass - 1.2; $r > 4.2; $r -= 1.1 ) {
+			$rings .= '<circle cx="' . $cx . '" cy="9" r="' . $r . '" fill="none" stroke="#2b2620" stroke-width="0.35"/>';
+		}
+		return '<circle cx="' . $cx . '" cy="9" r="' . $mass . '" fill="#1d1913"/>' . $rings
 			. '<circle cx="' . $cx . '" cy="9" r="3.6" fill="none" stroke="#ece8dd" stroke-width="1.3" stroke-dasharray="1 1.1"/>'
 			. '<circle cx="' . $cx . '" cy="9" r="2.6" fill="#ece8dd"/>'
 			. '<circle cx="' . $cx . '" cy="9" r="0.9" fill="#17140f"/>';
 	};
+	$lm         = $heavy_left ? 7.2 : 4.1;
+	$rm         = $heavy_left ? 4.1 : 7.2;
 	return '<svg class="cr-media__mech" viewBox="0 0 100 18" aria-hidden="true" focusable="false">'
-		. '<rect x="21" y="1.2" width="58" height="15.6" rx="1.6" fill="#17140f" stroke="#0d0b09" stroke-width="0.6"/>'
-		. '<rect x="34" y="6.8" width="32" height="4.4" fill="#100e0b"/>'
-		. $hub( 34, 6.6 ) . $hub( 66, 5.2 )
+		. '<rect x="21" y="1.2" width="58" height="15.6" rx="1.6" fill="#2a2620" stroke="#0d0b09" stroke-width="0.6"/>'
+		. '<rect x="34" y="7.6" width="32" height="2.8" fill="#100e0b"/>'
+		. '<path d="M' . ( 34 + $lm ) . ' ' . ( 9 - $lm + 1.2 ) . 'L' . ( 66 - $rm ) . ' ' . ( 9 - $rm + 1.2 ) . '" stroke="#100e0b" stroke-width="1.1" fill="none"/>'
+		. $hub( 34, $lm ) . $hub( 66, $rm )
+		. '<path d="M23 3.2Q50 -0.5 77 3.2L76 6.4Q50 3.4 24 6.4Z" fill="#fff" opacity="0.1"/>'
+		. '<rect x="21" y="1.2" width="58" height="15.6" rx="1.6" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="0.5"/>'
 		. '</svg>';
 }
 
@@ -241,7 +257,7 @@ function media_card( string $html, array $block, $instance ): string {
 		$lend = strpos( $html, '</p>', $lpos );
 		if ( false !== $lend ) {
 			$text = 'watch' === $kind ? __( 'Watch · VHS', 'courtneyr-child' ) : __( 'Listen · Cassette', 'courtneyr-child' );
-			$mech = mech_svg( $kind ) . ( $playable ? mech_svg( $kind, true ) : '' );
+			$mech = mech_svg( $kind, false, seed( (string) $post->ID, (string) ( $attrs['listenUrl'] ?? '' ) ) ) . ( $playable ? mech_svg( $kind, true ) : '' );
 			$html = substr( $html, 0, $lpos ) . $label . esc_html( $text ) . '</p>' . $mech . substr( $html, $lend + 4 );
 		}
 	}
