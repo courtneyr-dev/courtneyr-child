@@ -240,7 +240,7 @@ function journal_page( string $html, array $block ): string {
 	// 2. Watch / find it: only stored links, classified by service.
 	$links = array();
 	$url   = trim( (string) ( $attrs['watchUrl'] ?? '' ) );
-	if ( '' !== $url && false !== wp_parse_url( $url, PHP_URL_HOST ) ) {
+	if ( '' !== $url && '' !== (string) wp_parse_url( $url, PHP_URL_HOST ) && in_array( wp_parse_url( $url, PHP_URL_SCHEME ), array( 'http', 'https' ), true ) ) {
 		$links[] = array_merge( array( $url ), classify( $url ) );
 	}
 	$imdb = trim( (string) ( $attrs['imdbId'] ?? '' ) );

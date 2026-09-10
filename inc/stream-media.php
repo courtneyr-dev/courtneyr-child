@@ -61,7 +61,7 @@ function find_block( \WP_Post $post, string $name ): ?array {
 function watch_links( array $attrs ): array {
 	$links = array();
 	$url   = trim( (string) ( $attrs['watchUrl'] ?? '' ) );
-	if ( '' !== $url && false !== wp_parse_url( $url, PHP_URL_HOST ) ) {
+	if ( '' !== $url && '' !== (string) wp_parse_url( $url, PHP_URL_HOST ) && in_array( wp_parse_url( $url, PHP_URL_SCHEME ), array( 'http', 'https' ), true ) ) {
 		$links[] = array_merge( array( $url ), classify( $url ) );
 	}
 	$imdb = trim( (string) ( $attrs['imdbId'] ?? '' ) );
@@ -85,7 +85,7 @@ function watch_links( array $attrs ): array {
 function listen_links( array $attrs ): array {
 	$links = array();
 	$url   = trim( (string) ( $attrs['listenUrl'] ?? '' ) );
-	if ( '' !== $url && false !== wp_parse_url( $url, PHP_URL_HOST ) ) {
+	if ( '' !== $url && '' !== (string) wp_parse_url( $url, PHP_URL_HOST ) && in_array( wp_parse_url( $url, PHP_URL_SCHEME ), array( 'http', 'https' ), true ) ) {
 		$links[] = array( $url, provider_label( $url ), 'listen' );
 	}
 	$mbid = trim( (string) ( $attrs['musicbrainzId'] ?? '' ) );
