@@ -33,6 +33,7 @@ use function Courtneyr\Child\Journal\meta_item;
 use function Courtneyr\Child\Journal\meta_row;
 use function Courtneyr\Child\Journal\notes_section;
 use function Courtneyr\Child\Journal\wrap;
+use function Courtneyr\Child\Stamps\pick;
 use function Courtneyr\Child\Stamps\seed;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -204,10 +205,25 @@ add_filter( 'render_block', __NAMESPACE__ . '\\add_title_lede', 20, 2 );
  *
  * @return string
  */
-function vhs_mechanics(): string {
-	return '<span class="cr-vhs__reel cr-vhs__reel--l" aria-hidden="true"></span>'
-		. '<span class="cr-vhs__reel cr-vhs__reel--r" aria-hidden="true"></span>'
+function vhs_mechanics( bool $heavy_left = true ): string {
+	// A tape part-way through: one reel carries the pack, the other is
+	// nearly bare (a real VHS never shows both reels full).
+	$l = $heavy_left ? 'full' : 'bare';
+	$r = $heavy_left ? 'bare' : 'full';
+	return '<span class="cr-vhs__reel cr-vhs__reel--l cr-vhs__reel--' . $l . '" aria-hidden="true"></span>'
+		. '<span class="cr-vhs__reel cr-vhs__reel--r cr-vhs__reel--' . $r . '" aria-hidden="true"></span>'
 		. '<span class="cr-vhs__tape" aria-hidden="true"></span>';
+}
+
+/**
+ * Which reel carries the tape, fixed per post so the /stream card and
+ * the single agree.
+ *
+ * @param \WP_Post $post Post.
+ * @return bool True when the left reel is the full one.
+ */
+function heavy_left( \WP_Post $post ): bool {
+	return 0 === pick( seed( (string) $post->ID ), 7, 2 );
 }
 
 /**
@@ -376,7 +392,7 @@ function journal_page( string $html, array $block ): string {
 	$k_start = strpos( $html, '<p class="pk-kindlabel">' );
 	$k_end   = false !== $k_start ? strpos( $html, '</p>', $k_start ) : false;
 	if ( false !== $k_end ) {
-		$html = substr( $html, 0, $k_end + 4 ) . vhs_mechanics() . substr( $html, $k_end + 4 );
+		$html = substr( $html, 0, $k_end + 4 ) . vhs_mechanics( heavy_left( $post ) ) . substr( $html, $k_end + 4 );
 	}
 
 	// 4. Under the cassette: the row, the details card, the notes, the

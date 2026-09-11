@@ -7158,3 +7158,25 @@ body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs
 	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .cr-vhs__label { display: none; }
 	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:has(.able) .able-vidcap-container { margin-left: 24cqw; }
 }
+
+/* ---- v0.7.32: a tape part-way through ----
+   A real VHS never shows both reels full: one reel carries the pack,
+   the other shows a small pack round the hub and the bare flange (faint
+   spokes and moulded rings) out to the well. inc/single-watch.php marks
+   the reels `--full` / `--bare`, the side fixed per post, so the /stream
+   card and the single agree. The teeth are boxed to the hub so they do
+   not show on the empty flange. */
+.pk-card.k-watch.cr-vhs {
+	--vhs-reel-paint-bare:
+		linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.14) 38%, transparent 48%),
+		conic-gradient(from 25deg, rgba(255, 255, 255, 0.16) 0 38deg, transparent 38deg 150deg, rgba(255, 255, 255, 0.1) 150deg 190deg, transparent 190deg 360deg),
+		radial-gradient(circle closest-side, #f4f1ea 0 13%, transparent 13.5%),
+		radial-gradient(circle closest-side, transparent 0 19%, #6a6560 19.5% 21%, transparent 21.5% 23%, #141218 23.5% 41%, rgba(255, 255, 255, 0.16) 41.5% 42.5%, transparent 43%),
+		repeating-conic-gradient(from 0deg, #e8e4da 0 7deg, #201d26 7deg 18deg) center / 28% 28% no-repeat,
+		repeating-conic-gradient(from 15deg, rgba(255, 255, 255, 0.07) 0 2.5deg, transparent 2.5deg 30deg),
+		radial-gradient(circle closest-side, transparent 0 94%, #0b0a0e 96% 100%),
+		repeating-radial-gradient(circle, #1a1720 0 2px, #221e28 2px 4px);
+}
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__reel--bare {
+	background: var(--vhs-reel-paint-bare);
+}

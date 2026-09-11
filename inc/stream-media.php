@@ -21,6 +21,7 @@ namespace Courtneyr\Child\StreamMedia;
 use function Courtneyr\Child\SingleListen\provider_label;
 use function Courtneyr\Child\SingleWatch\classify;
 use function Courtneyr\Child\SingleWatch\film_facts;
+use function Courtneyr\Child\SingleWatch\heavy_left;
 use function Courtneyr\Child\SingleWatch\vhs_label;
 use function Courtneyr\Child\SingleWatch\vhs_mechanics;
 use function Courtneyr\Child\Stamps\pick;
@@ -288,7 +289,7 @@ function media_card( string $html, array $block, $instance ): string {
 			// the single (inc/single-watch.php); a playable card has room for
 			// the stored facts on its label, a poster card does not.
 			$mech = 'watch' === $kind
-				? vhs_mechanics() . vhs_label( $playable ? film_facts( $attrs ) : array() )
+				? vhs_mechanics( heavy_left( $post ) ) . vhs_label( $playable ? film_facts( $attrs ) : array() )
 				: mech_svg( seed( (string) $post->ID, (string) ( $attrs['listenUrl'] ?? '' ) ) );
 			$html = substr( $html, 0, $lpos ) . $label . esc_html( $text ) . '</p>' . $mech . substr( $html, $lend + 4 );
 		}
