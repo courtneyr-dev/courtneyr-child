@@ -113,6 +113,29 @@ function rerender_with_meta( string $html, \WP_Post $post, string $kind, array $
 }
 
 /**
+ * Simple Location's public place for a post: the address line it prints
+ * and its coordinates. The plugin's card data wins; this is the fallback
+ * for a post whose card carries no location but which was geotagged
+ * (the same meta the stream's gallery strip reads).
+ *
+ * @param \WP_Post $post Post.
+ * @return array{address: string, lat: float, lon: float}
+ */
+function sloc_place( \WP_Post $post ): array {
+	$none = array( 'address' => '', 'lat' => 0.0, 'lon' => 0.0 );
+	if ( '1' !== (string) get_post_meta( $post->ID, 'geo_public', true ) ) {
+		return $none;
+	}
+	$lat = (string) get_post_meta( $post->ID, 'geo_latitude', true );
+	$lon = (string) get_post_meta( $post->ID, 'geo_longitude', true );
+	return array(
+		'address' => trim( (string) get_post_meta( $post->ID, 'geo_address', true ) ),
+		'lat'     => is_numeric( $lat ) ? (float) $lat : 0.0,
+		'lon'     => is_numeric( $lon ) ? (float) $lon : 0.0,
+	);
+}
+
+/**
  * The map: the same OpenStreetMap embed the plugin's check-in card
  * builds (public precision, a marker, a larger-map link), from the
  * card's stored coordinates.
@@ -313,10 +336,23 @@ function journal_page( string $html, array $block ): string {
 		$html       = substr( $html, 0, $w_start ) . substr( $html, $w_end );
 	}
 
-	// 4. The map, from the stored coordinates.
-	$lat = (float) ( $a['geoLatitude'] ?? 0 );
-	$lon = (float) ( $a['geoLongitude'] ?? 0 );
-	$map = ( 0.0 !== $lat || 0.0 !== $lon ) ? map_html( $lat, $lon, trim( (string) ( $a['locationName'] ?? '' ) ) ) : '';
+	// 4. The map, from the card's coordinates; a card without a location
+	//    falls back to Simple Location's public place (address and point).
+	$lat  = (float) ( $a['geoLatitude'] ?? 0 );
+	$lon  = (float) ( $a['geoLongitude'] ?? 0 );
+	$name = trim( (string) ( $a['locationName'] ?? '' ) );
+	if ( '' === $where_html ) {
+		$sl = sloc_place( $post );
+		if ( '' !== $sl['address'] ) {
+			$where_html = '<p class="pk-sub cr-placemat__place">' . esc_html( $sl['address'] ) . '</p>';
+			$name       = '' !== $name ? $name : trim( (string) strtok( $sl['address'], ',' ) );
+		}
+		if ( 0.0 === $lat && 0.0 === $lon ) {
+			$lat = $sl['lat'];
+			$lon = $sl['lon'];
+		}
+	}
+	$map = ( 0.0 !== $lat || 0.0 !== $lon ) ? map_html( $lat, $lon, $name ) : '';
 
 	// 5. WHERE, between the note and the receipt, only when it has content.
 	if ( '' !== $where_html || '' !== $map ) {

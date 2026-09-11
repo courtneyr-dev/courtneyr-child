@@ -142,9 +142,25 @@ function placemat_card( string $html, array $block, $instance ): string {
 		$html = (string) preg_replace( '/<span class="p-location h-card"><span class="p-name">' . preg_quote( esc_html( $restaurant ), '/' ) . '<\/span><\/span>\s*(?:&mdash;\s*)?/', '', $html, 1 );
 	}
 
-	// 3. A map link instead of a map, when coordinates exist.
+	// 3. A map link instead of a map, when coordinates exist. A card with no
+	//    location borrows Simple Location's public place: its address as the
+	//    WHERE line (after the sub line) and its point for the link.
 	$lat = (float) ( $a['geoLatitude'] ?? 0 );
 	$lon = (float) ( $a['geoLongitude'] ?? 0 );
+	if ( ! $has_where ) {
+		$sl = \Courtneyr\Child\SinglePlacemat\sloc_place( $post );
+		$c_open = '<div class="pk-caption">';
+		$c_pos  = strpos( $html, $c_open );
+		$c_end  = false !== $c_pos ? strpos( $html, '</div>', $c_pos ) : false;
+		if ( '' !== $sl['address'] && false !== $c_end ) {
+			$html      = substr( $html, 0, $c_end ) . '<p class="pk-sub p-location cr-mat__place">' . esc_html( $sl['address'] ) . '</p>' . substr( $html, $c_end );
+			$has_where = true;
+		}
+		if ( 0.0 === $lat && 0.0 === $lon ) {
+			$lat = $sl['lat'];
+			$lon = $sl['lon'];
+		}
+	}
 	$map = '';
 	if ( 0.0 !== $lat || 0.0 !== $lon ) {
 		$map = '<a class="cr-mat__map" href="' . esc_url( sprintf( 'https://www.openstreetmap.org/?mlat=%F&mlon=%F#map=16/%F/%F', $lat, $lon, $lat, $lon ) ) . '" target="_blank" rel="noopener noreferrer">'

@@ -7927,3 +7927,9 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 	.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-body { grid-template-columns: minmax(0, 1fr) 42%; }
 	.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-mat__hand { display: none; }
 }
+
+/* v0.7.34: a card without its own location borrows Simple Location's public
+   place; the plugin's line below the sheet then hides (its markup stays). */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content:has(.cr-placemat--has-where) .sloc-display { display: none; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__place { display: block; margin: 0; padding: 0; font-family: var(--cr-font-accent, serif); font-weight: 700; font-size: 1.05rem; line-height: 1.35; color: var(--mat-ink); overflow-wrap: anywhere; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-caption .cr-mat__place { display: block; margin: 0.25rem 0 0; padding: 0; font-family: var(--cr-font-body, sans-serif); font-size: 0.9rem; font-weight: 600; line-height: 1.35; color: var(--mat-ink); overflow-wrap: anywhere; }
