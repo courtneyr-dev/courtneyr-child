@@ -20,6 +20,9 @@ namespace Courtneyr\Child\StreamMedia;
 
 use function Courtneyr\Child\SingleListen\provider_label;
 use function Courtneyr\Child\SingleWatch\classify;
+use function Courtneyr\Child\SingleWatch\film_facts;
+use function Courtneyr\Child\SingleWatch\vhs_label;
+use function Courtneyr\Child\SingleWatch\vhs_mechanics;
 use function Courtneyr\Child\Stamps\pick;
 use function Courtneyr\Child\Stamps\seed;
 
@@ -122,45 +125,14 @@ function sources_row( array $links, string $kind ): string {
 }
 
 /**
- * The object's mechanics as one decorative inline SVG: reel wells,
- * toothed hubs, tape mass, the tape path and the window recess for a
- * VHS; the tape window with two hubs for a compact cassette. Sized by
- * the grid row it sits in (cr-post-kinds.css); hidden from assistive
- * technology; never above the real player.
+ * The compact cassette's mechanics SVG for a listen card: hubs, a run of
+ * tape and a clear window. (A watch card draws its reels and transport
+ * with the spans from inc/single-watch.php, shared with the single.)
  *
- * @param string $kind 'watch' or 'listen'.
- * @param bool   $wide Watch only: the taller, wider-windowed variant a
- *                     playable card uses when it spans two stream columns.
- * @param int    $seed Listen only: fixes which reel carries the tape.
+ * @param int $seed Fixes which reel carries the tape.
  * @return string
  */
-function mech_svg( string $kind, bool $wide = false, int $seed = 0 ): string {
-	if ( 'watch' === $kind ) {
-		$h    = $wide ? 42 : 36;
-		$cy   = $h / 2;
-		$well = $wide ? 11.5 : 14.5;
-		$reel = static function ( float $cx, float $mass ) use ( $cy, $well ): string {
-			$rings = '';
-			for ( $r = $mass - 1.5; $r > 4.5; $r -= 2 ) {
-				$rings .= '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . $r . '" fill="none" stroke="#2a2731" stroke-width="0.5"/>';
-			}
-			return '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . $well . '" fill="#0b0a0e"/>'
-				. '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . $mass . '" fill="#1a1820"/>' . $rings
-				. '<circle cx="' . $cx . '" cy="' . $cy . '" r="4.6" fill="none" stroke="#f4f1ea" stroke-width="1.7" stroke-dasharray="1.3 1.35"/>'
-				. '<circle cx="' . $cx . '" cy="' . $cy . '" r="3.4" fill="#f4f1ea"/>'
-				. '<circle cx="' . $cx . '" cy="' . $cy . '" r="1.1" fill="#6a6560"/>'
-				. '<path d="M' . ( $cx - 9 ) . ' ' . ( $cy - 7 ) . 'Q' . $cx . ' ' . ( $cy - 13 ) . ' ' . ( $cx + 9 ) . ' ' . ( $cy - 7 ) . 'L' . ( $cx + 7 ) . ' ' . ( $cy - 4.5 ) . 'Q' . $cx . ' ' . ( $cy - 9.5 ) . ' ' . ( $cx - 7 ) . ' ' . ( $cy - 4.5 ) . 'Z" fill="#fff" opacity="0.07"/>';
-		};
-		$reels = $wide ? array( 11.5, 88.5 ) : array( 16, 84 );
-		$win   = $wide ? array( 22.5, 55, 3, 34 ) : array( 29.5, 41, 3.5, 26.5 ); // x, width, y, height.
-		$path  = $h - 3.5;
-		return '<svg class="cr-media__mech' . ( $wide ? ' cr-media__mech--wide' : '' ) . '" viewBox="0 0 100 ' . $h . '" aria-hidden="true" focusable="false">'
-			. $reel( $reels[0], $wide ? 9.8 : 12.5 ) . $reel( $reels[1], $wide ? 7 : 8.5 )
-			. '<path d="M' . $reels[0] . ' ' . ( $path - 1 ) . 'L' . $win[0] . ' ' . $path . 'H' . ( $win[0] + $win[1] ) . 'L' . $reels[1] . ' ' . ( $path - 1 ) . '" fill="none" stroke="#2b2833" stroke-width="1.7"/>'
-			. '<circle cx="' . $win[0] . '" cy="' . $path . '" r="1.4" fill="#55504a"/><circle cx="' . ( $win[0] + $win[1] ) . '" cy="' . $path . '" r="1.4" fill="#55504a"/>'
-			. '<rect x="' . $win[0] . '" y="' . $win[2] . '" width="' . $win[1] . '" height="' . $win[3] . '" rx="1.2" fill="#0d0c10" stroke="#2a2731" stroke-width="0.6"/>'
-			. '</svg>';
-	}
+function mech_svg( int $seed = 0 ): string {
 	// A compact cassette part-way through: the tape mass sits mostly on
 	// one reel (which one is fixed per post by the seed), the other reel
 	// is nearly bare, a run of tape crosses between them, and the window
@@ -257,7 +229,12 @@ function media_card( string $html, array $block, $instance ): string {
 		$lend = strpos( $html, '</p>', $lpos );
 		if ( false !== $lend ) {
 			$text = 'watch' === $kind ? __( 'Watch · VHS', 'courtneyr-child' ) : __( 'Listen · Cassette', 'courtneyr-child' );
-			$mech = mech_svg( $kind, false, seed( (string) $post->ID, (string) ( $attrs['listenUrl'] ?? '' ) ) ) . ( $playable ? mech_svg( $kind, true ) : '' );
+			// A VHS draws the same reels, transport and handwritten label as
+			// the single (inc/single-watch.php); a playable card has room for
+			// the stored facts on its label, a poster card does not.
+			$mech = 'watch' === $kind
+				? vhs_mechanics() . vhs_label( $playable ? film_facts( $attrs ) : array() )
+				: mech_svg( seed( (string) $post->ID, (string) ( $attrs['listenUrl'] ?? '' ) ) );
 			$html = substr( $html, 0, $lpos ) . $label . esc_html( $text ) . '</p>' . $mech . substr( $html, $lend + 4 );
 		}
 	}

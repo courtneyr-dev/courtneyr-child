@@ -6683,3 +6683,478 @@ body.single-post:is(.kind-read, .kind-watch) .cr-record-stamp {
 	body.single-post:is(.kind-read, .kind-watch) .cr-record:has(.cr-record-stamp) { padding-right: 1.25rem; padding-bottom: 6.2rem; }
 	body.single-post:is(.kind-read, .kind-watch) .cr-record-stamp { width: 5.6rem; right: 0.9rem; bottom: 0.7rem; }
 }
+
+/* ============================================================
+   v0.7.30 — one cassette, two sizes: the 187 : 103 VHS face.
+   A VHS face is 187 mm by 103 mm, so the shell's height comes from
+   `--cr-vhs-face` (tokens.css) and never from what sits inside it. The
+   single Watch shell and the /stream watch card now share one geometry
+   in container units and one set of parts: two reel windows and a
+   transport row (spans painted here), a poster as a matted print, and
+   the handwritten label (T-120 / SP stock marks, "Be kind & rewind" in
+   Rock Salt, a colour stripe, then stored facts). Rows: a 5cqw flap, the
+   interior, and the transport (9cqw single, 8cqw stream, with an 11cqw
+   title strip on the stream) always sum to 55.08cqw. The interior
+   reserves a 23cqw reel zone each side; the poster column is sized from
+   the insert height for a 2:3 print, and the label takes the rest. On
+   the single the insert height is clamped in mixed units so the label
+   (rem type) stays dense while the shell (cqw) grows; on the stream the
+   insert is the interior less a small inset. Playable cards keep the
+   left reel, give the label a narrow column and the window the rest;
+   Able Player's video fills the window and its controller becomes a
+   deck under the shell, so the cassette keeps its face. Under 44rem the
+   single stacks poster + label, a reel band and the transport, which is
+   as close to the face as 11px type allows.
+   ============================================================ */
+/* ---- Shared geometry and parts (single shell and /stream card) ---- */
+.pk-card.k-watch.cr-vhs {
+	--vhs-flap: 5cqw;
+	--vhs-strip: 0cqw;
+	--vhs-tape: 9cqw;
+	--vhs-zone: 23cqw;
+	--vhs-reel: 17cqw;
+	/* The insert (poster + label) height: about 190px from a 607px card to a 768px one. */
+	--vhs-inset: clamp(2.5cqw, 20.5cqw - 5.93rem, 8.5cqw);
+	--vhs-main: calc(100cqw * 103 / 187 - var(--vhs-flap) - var(--vhs-strip) - var(--vhs-tape));
+	--vhs-insert: calc(var(--vhs-main) - 2 * var(--vhs-inset));
+	--vhs-poster: calc(var(--vhs-insert) / 1.5 + 0.6rem);
+	--vhs-reel-paint:
+		linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.14) 38%, transparent 48%),
+		conic-gradient(from 25deg, rgba(255, 255, 255, 0.16) 0 38deg, transparent 38deg 150deg, rgba(255, 255, 255, 0.1) 150deg 190deg, transparent 190deg 360deg),
+		radial-gradient(circle closest-side, #f4f1ea 0 13%, transparent 13.5%),
+		radial-gradient(circle closest-side, transparent 0 19%, #6a6560 19.5% 21%, transparent 21.5% 23%, #141218 23.5% 100%),
+		repeating-conic-gradient(from 0deg, #e8e4da 0 7deg, #201d26 7deg 18deg),
+		repeating-radial-gradient(circle, #141218 0 2px, #201d26 2px 4px);
+	--vhs-reel-ring: 0 0 0 2.2cqw #0b0a0e, 0 0 0 calc(2.2cqw + 1px) rgba(255, 255, 255, 0.1), 0 0 0 2.9cqw #131118, inset 0 0 1.5cqw rgba(0, 0, 0, 0.7);
+	--vhs-tape-paint:
+		radial-gradient(circle 1.2cqw at 11.5cqw calc(100% - 4.4cqw), #8a857e 0 40%, #3a3644 42% 96%, transparent 100%),
+		radial-gradient(circle 1.2cqw at calc(100% - 11.5cqw) calc(100% - 4.4cqw), #8a857e 0 40%, #3a3644 42% 96%, transparent 100%),
+		linear-gradient(#332f3d, #332f3d) left 11.5cqw bottom 3.6cqw / calc(100% - 23cqw) 1.6cqw no-repeat,
+		linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)) left 11.5cqw bottom 5.2cqw / calc(100% - 23cqw) 1px no-repeat,
+		linear-gradient(#0c0b0f, #0c0b0f) left 38cqw bottom 1.3cqw / 24cqw 5.6cqw no-repeat,
+		linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)) left 38cqw bottom 6.9cqw / 24cqw 1px no-repeat;
+}
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__reel {
+	display: block;
+	align-self: center;
+	justify-self: center;
+	width: var(--vhs-reel);
+	height: var(--vhs-reel);
+	margin: 0;
+	border-radius: 50%;
+	background: var(--vhs-reel-paint);
+	box-shadow: var(--vhs-reel-ring);
+	pointer-events: none;
+}
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__reel--l { grid-area: reelL; }
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__reel--r { grid-area: reelR; }
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__tape {
+	grid-area: tape;
+	display: block;
+	align-self: stretch;
+	justify-self: stretch;
+	margin: 0;
+	background: var(--vhs-tape-paint);
+	background-repeat: no-repeat;
+	pointer-events: none;
+}
+/* The poster: a matted print, the exact height of the insert, the image contained. */
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .pk-media {
+	grid-area: poster;
+	order: 0;
+	align-self: stretch;
+	justify-self: stretch;
+	position: relative;
+	z-index: 1;
+	/* !important: the v0.6.10 cover-box rules pin display and margin-top. */
+	display: flex !important;
+	align-items: center;
+	justify-content: center;
+	width: auto;
+	height: auto;
+	min-height: 0;
+	margin: var(--vhs-inset) 0 var(--vhs-inset) 0.5cqw !important;
+	padding: max(2px, 0.62cqw);
+	background: #fbfaf5;
+	border-radius: 2px;
+	box-shadow: max(2px, 0.52cqw) max(2px, 0.52cqw) 0 #050408;
+	transform: rotate(-1.2deg);
+	overflow: visible;
+}
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .pk-media img {
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+	max-width: none;
+	max-height: none;
+	aspect-ratio: auto;
+	object-fit: contain;
+	border: 0;
+	border-radius: 1px;
+	box-shadow: none;
+	transform: none;
+}
+/* The handwritten label: paper stock beside the poster, the same height. */
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__label {
+	grid-area: label;
+	position: relative;
+	z-index: 1;
+	align-self: stretch;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	gap: 0;
+	min-width: 0;
+	min-height: 0;
+	margin: var(--vhs-inset) 1cqw var(--vhs-inset) 1.5cqw;
+	padding: max(0.3rem, 1cqw) max(0.45rem, 1.5cqw) max(0.35rem, 1.1cqw);
+	background: #f6f3ea;
+	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.05rem - 1px), rgba(36, 28, 74, 0.13) calc(1.05rem - 1px) 1.05rem);
+	background-position: 0 0.75rem;
+	border-radius: 3px;
+	box-shadow: 0 0 0 1px rgba(36, 28, 74, 0.4), inset 0 0 0 max(0.15rem, 0.45cqw) #f6f3ea, inset 0 0 0 calc(max(0.15rem, 0.45cqw) + 1px) rgba(36, 28, 74, 0.25), max(2px, 0.4cqw) max(2px, 0.4cqw) 0 #050408;
+	color: #241c4a;
+	overflow: hidden;
+	transform: none;
+}
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__marks {
+	display: flex;
+	justify-content: space-between;
+	gap: 0.5rem;
+	margin: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.55rem, 1.3cqw);
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	color: #3d2f6e;
+}
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__marks span { padding: 0.12em 0.4em 0.08em; border: max(1px, 0.18cqw) solid #3d2f6e; }
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__note {
+	margin: max(0.15rem, 0.35cqw) 0 max(0.1rem, 0.2cqw);
+	font-family: var(--cr-font-display, cursive);
+	font-size: clamp(0.7rem, 2.8cqw, 1.4rem);
+	line-height: 1.3;
+	/* Two lines at every size ("Be kind &" / "rewind"), so the mark reads the same on the card and the single. */
+	max-width: 6.6em;
+	color: #241c4a;
+	transform: rotate(-1.5deg);
+}
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__stripe {
+	display: block;
+	height: max(0.3rem, 0.7cqw);
+	margin: max(0.15rem, 0.3cqw) 0 max(0.3rem, 0.55cqw);
+	background: linear-gradient(90deg, #fb8500 0 28%, #ffb703 28% 52%, #8ecae6 52% 76%, #647baf 76%);
+	transform: skewX(-8deg);
+	opacity: 0.95;
+}
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__facts {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 0.1rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.7rem, 1.75cqw);
+	line-height: 1.3;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: #241c4a;
+}
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__facts li { margin: 0; padding: 0 0 0 1.1em; position: relative; }
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__facts li::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0.2em;
+	width: 0.65em;
+	height: 0.4em;
+	border-left: 2px solid #241c4a;
+	border-bottom: 2px solid #241c4a;
+	transform: rotate(-48deg);
+}
+/* Four or more facts (a series, a director, a rewatch): the label tightens
+   (smaller note and facts, less padding) instead of clipping. */
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__label:has(.cr-vhs__facts li:nth-child(4)) { padding: max(0.25rem, 0.8cqw) max(0.4rem, 1.2cqw) max(0.3rem, 0.9cqw); }
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__label:has(.cr-vhs__facts li:nth-child(4)) .cr-vhs__note { font-size: clamp(0.7rem, 2.4cqw, 1.2rem); margin-top: 0.1rem; }
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__label:has(.cr-vhs__facts li:nth-child(4)) .cr-vhs__stripe { margin-bottom: max(0.2rem, 0.35cqw); }
+:is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__facts:has(li:nth-child(4)) { font-size: max(0.7rem, 1.5cqw); line-height: 1.25; gap: 0.05rem; }
+/* The label is paper: its ink does not follow the page's dark mode. */
+:root[data-theme="dark"] :is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) :is(.cr-vhs__label, .cr-vhs__label *) { color: #241c4a !important; }
+:root[data-theme="dark"] :is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) :is(.cr-vhs__marks, .cr-vhs__marks *) { color: #3d2f6e !important; }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) :is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) :is(.cr-vhs__label, .cr-vhs__label *) { color: #241c4a !important; }
+	:root:not([data-theme="light"]) :is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) :is(.cr-vhs__marks, .cr-vhs__marks *) { color: #3d2f6e !important; }
+}
+
+/* ---- The single Watch shell ---- */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs {
+	background:
+		linear-gradient(#0c0b0f, #0c0b0f) top / 100% 5cqw no-repeat,
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 4px) left 0 top 5cqw / 100% 1.4cqw no-repeat,
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 5px),
+		#17151b !important;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body {
+	/* The face ratio sets the height; the three rows are fixed container
+	   units that sum to it, so no content (a player, a long label) can
+	   grow the interior: an fr row would, because a ratio-derived height
+	   is not definite for track sizing. */
+	aspect-ratio: var(--cr-vhs-face, 187 / 103);
+	min-height: 0;
+	grid-template-columns: var(--vhs-zone) calc(var(--vhs-poster) + 0.5cqw) minmax(0, 1fr) var(--vhs-zone);
+	grid-template-rows: var(--vhs-flap) var(--vhs-main) var(--vhs-tape);
+	grid-template-areas:
+		"flap flap flap flap"
+		"reelL poster label reelR"
+		"tape tape tape tape";
+	align-items: stretch;
+	background: none;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::before,
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body::after,
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body:not(:has(.pk-media))::before { content: none; display: none; }
+/* The plugin's caption (h-cite title link, year) stays for the microformats; the H1 and Watch / find it show both. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-caption { display: none; }
+/* No poster stored: the label takes the poster's column too. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body:not(:has(.pk-media)):not(:has(.pk-embed--video)) .cr-vhs__label { grid-area: 2 / 2 / 3 / 4; margin-left: 1.5cqw; }
+/* A real player: the left reel stays, the label narrows, the window takes the rest. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body {
+	grid-template-columns: var(--vhs-zone) minmax(0, 24cqw) minmax(0, 1fr);
+	grid-template-rows: var(--vhs-flap) var(--vhs-main) var(--vhs-tape);
+	grid-template-areas:
+		"flap flap flap"
+		"reelL label window"
+		"tape tape tape";
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .cr-vhs__reel--r { display: none; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-media { display: none !important; }
+/* No poster to match here: the label takes the window's height. */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .cr-vhs__label { margin: 2cqw 1cqw 2cqw 0.5cqw; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video {
+	grid-area: window;
+	align-self: stretch;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	margin: 2cqw 2.5cqw 2cqw 1cqw;
+	padding: 0.4rem;
+	min-height: 0;
+	border-radius: 4px;
+	background: #0d0c10;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+	overflow: hidden;
+}
+/* Able Player: the video takes the window less its controller and status bar (about 101px). */
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video .able-wrapper,
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video .able { display: block; width: auto; max-width: none; height: auto; margin: 0; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video .able-vidcap-container {
+	box-sizing: border-box;
+	height: calc(var(--vhs-main) - 4cqw - 0.8rem - 101px);
+	min-height: 5rem;
+	margin: 0;
+	overflow: hidden;
+}
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video .able-media-container,
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video .able-media-container iframe,
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video .able-media-container video { display: block; width: 100% !important; height: 100% !important; max-width: none; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video .able-player { margin: 0.35rem 0 0; }
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video:not(:has(.able)) > *,
+body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video:not(:has(.able)) iframe { display: block; width: 100%; height: 100%; max-width: none; border: 0; }
+
+/* Phones (under 44rem, which is also 200% zoom on a 1440 screen): the
+   face cannot hold 11px type beside a poster, so the interior stacks as
+   poster + label (equal height), a band with both reels, then the
+   transport. The tablet range above keeps the face. */
+@media (max-width: 43.99rem) {
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs {
+		background:
+			linear-gradient(#0c0b0f, #0c0b0f) top / 100% 2.2rem no-repeat,
+			repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 4px) left 0 top 2.2rem / 100% 0.5rem no-repeat,
+			repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 5px),
+			#17151b !important;
+	}
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body {
+		aspect-ratio: auto;
+		grid-template-columns: minmax(0, 34%) minmax(0, 1fr);
+		grid-template-rows: 2.2rem auto 5.4rem 2.6rem;
+		grid-template-areas:
+			"flap flap"
+			"poster label"
+			"reelL reelR"
+			"tape tape";
+	}
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-kindlabel { padding: 0 1rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media { margin: 0.9rem 0 0.9rem 0.9rem !important; padding: 0.25rem; box-shadow: 3px 3px 0 #050408; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-media img { height: auto !important; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__label { margin: 0.9rem 0.9rem 0.9rem 0.6rem; padding: 0.45rem 0.6rem 0.5rem; box-shadow: 0 0 0 1px rgba(36, 28, 74, 0.4), inset 0 0 0 0.15rem #f6f3ea, inset 0 0 0 calc(0.15rem + 1px) rgba(36, 28, 74, 0.25), 2px 2px 0 #050408; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-body:not(:has(.pk-media)):not(:has(.pk-embed--video)) .cr-vhs__label { grid-area: poster / poster / label / label; margin-left: 0.9rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__marks { font-size: 0.55rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__note { font-size: 0.85rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__stripe { height: 0.3rem; margin: 0.15rem 0 0.3rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__facts { font-size: 0.7rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__reel {
+		grid-area: 3 / 1 / 4 / -1;
+		width: 3.6rem;
+		height: 3.6rem;
+		box-shadow: 0 0 0 0.45rem #0b0a0e, 0 0 0 calc(0.45rem + 1px) rgba(255, 255, 255, 0.1), 0 0 0 0.65rem #131118, inset 0 0 0.4rem rgba(0, 0, 0, 0.7);
+	}
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__reel--l { justify-self: start; margin-left: 20%; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__reel--r { justify-self: end; margin-right: 20%; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .cr-vhs__tape {
+		background:
+			radial-gradient(circle 0.4rem at 2.6rem calc(100% - 1.3rem), #8a857e 0 40%, #3a3644 42% 96%, transparent 100%),
+			radial-gradient(circle 0.4rem at calc(100% - 2.6rem) calc(100% - 1.3rem), #8a857e 0 40%, #3a3644 42% 96%, transparent 100%),
+			linear-gradient(#332f3d, #332f3d) left 2.6rem bottom 1.05rem / calc(100% - 5.2rem) 0.5rem no-repeat,
+			linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)) left 2.6rem bottom 1.55rem / calc(100% - 5.2rem) 1px no-repeat,
+			linear-gradient(#0c0b0f, #0c0b0f) left 50% bottom 0.35rem / 7rem 1.9rem no-repeat;
+		background-repeat: no-repeat;
+	}
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-body {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		grid-template-rows: 2.2rem auto auto 5.4rem 2.6rem;
+		grid-template-areas:
+			"flap flap"
+			"window window"
+			"label label"
+			"reelL reelR"
+			"tape tape";
+	}
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .cr-vhs__reel--r { display: block; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .cr-vhs__label { margin: 0 0.9rem 0.9rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video { margin: 0.8rem 0.9rem 0.7rem; }
+	body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs--player .pk-embed--video .able-vidcap-container { height: calc((100cqw - 2.6rem) * 9 / 16); min-height: 0; }
+}
+
+/* ---- The /stream card: the same cassette, small ---- */
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream {
+	--vhs-strip: 11cqw;
+	--vhs-tape: 8cqw;
+	--vhs-inset: 2.5cqw;
+}
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-body {
+	grid-template-columns: var(--vhs-zone) calc(var(--vhs-poster) + 0.5cqw) minmax(0, 1fr) var(--vhs-zone);
+	grid-template-rows: var(--vhs-flap) var(--vhs-strip) var(--vhs-main) var(--vhs-tape) auto auto auto auto auto;
+	grid-template-areas:
+		"kind kind kind kind"
+		"caption caption caption caption"
+		"reelL poster label reelR"
+		"tape tape tape tape"
+		"deck deck deck deck"
+		"stars stars stars stars"
+		"row row row row"
+		"date date date date"
+		"meta meta meta meta";
+}
+/* The shell spans flap, strip, interior and transport: 55.08cqw. */
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-body::before {
+	grid-row: 1 / 5;
+	background:
+		radial-gradient(circle 2.4px at 11px calc(100% - 8px), #3a3644 98%, transparent),
+		radial-gradient(circle 2.4px at calc(100% - 11px) calc(100% - 8px), #3a3644 98%, transparent),
+		radial-gradient(circle 2.4px at 50% calc(100% - 8px), #3a3644 98%, transparent),
+		linear-gradient(#f6f3ea, #f6f3ea) left 3cqw top 5.6cqw / calc(100% - 6cqw) 9.8cqw no-repeat,
+		linear-gradient(#0c0b0f, #0c0b0f) top / 100% 5cqw no-repeat,
+		repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 6px) left 0 bottom 0 / 100% 4cqw no-repeat,
+		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 5px),
+		#17151b;
+}
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-caption { margin: 0.4cqw 4.5cqw 0.6cqw; }
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-title { font-size: 0.78rem; }
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .cr-media__mech,
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .cr-media__mech--wide { display: none; }
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream:not(.has-video-player) .pk-body:not(:has(.pk-media)) .cr-vhs__label { grid-area: 3 / 2 / 4 / 4; margin-left: 1.5cqw; }
+/* Playable cards: left reel, label, window; the right reel and any poster go. */
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-body {
+	grid-template-columns: var(--vhs-zone) minmax(0, 22cqw) minmax(0, 1fr);
+	grid-template-rows: var(--vhs-flap) var(--vhs-strip) var(--vhs-main) var(--vhs-tape) auto auto auto auto auto;
+	grid-template-areas:
+		"kind kind kind"
+		"caption caption caption"
+		"reelL label window"
+		"tape tape tape"
+		"deck deck deck"
+		"stars stars stars"
+		"row row row"
+		"date date date"
+		"meta meta meta";
+}
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .cr-vhs__reel--r,
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-media { display: none !important; }
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .cr-vhs__label { grid-area: label; margin: var(--vhs-inset) 1cqw var(--vhs-inset) 0.5cqw; }
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed {
+	grid-area: window;
+	order: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-self: stretch;
+	margin: 2cqw 2.5cqw 2cqw 1cqw;
+	padding: 0.4rem;
+	border-radius: 3px;
+	background: #0d0c10;
+	box-shadow: none;
+	overflow: hidden;
+}
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:not(:has(.able)) > *,
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:not(:has(.able)) iframe { display: block; width: 100%; height: 100%; max-width: none; border: 0; }
+/* Able Player: the video sits in the window; its controller and status bar are the deck under the shell. */
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:has(.able) {
+	grid-area: auto;
+	grid-row: 3 / 6;
+	grid-column: 1 / -1;
+	display: block;
+	margin: 0;
+	padding: 0;
+	background: none;
+	box-shadow: none;
+	overflow: visible;
+}
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:has(.able) .able-vidcap-container {
+	box-sizing: border-box;
+	margin: 2cqw 2.5cqw 0 46cqw;
+	height: calc(var(--vhs-main) - 4cqw);
+	min-height: 0;
+	padding: 0.4rem;
+	border-radius: 3px;
+	background: #0d0c10;
+	overflow: hidden;
+}
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:has(.able) .able-player { margin: calc(2cqw + var(--vhs-tape) + 0.8cqw) 3cqw 0.6cqw; }
+@media (min-width: 42rem) {
+	/* Two columns wide: a shorter title strip; the label carries the stored facts. */
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player { --vhs-strip: 8cqw; }
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-body { transform: rotate(0.3deg); }
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-body::before {
+		background:
+			radial-gradient(circle 2.4px at 11px calc(100% - 8px), #3a3644 98%, transparent),
+			radial-gradient(circle 2.4px at calc(100% - 11px) calc(100% - 8px), #3a3644 98%, transparent),
+			radial-gradient(circle 2.4px at 50% calc(100% - 8px), #3a3644 98%, transparent),
+			linear-gradient(#f6f3ea, #f6f3ea) left 3cqw top 5.5cqw / calc(100% - 6cqw) 7cqw no-repeat,
+			linear-gradient(#0c0b0f, #0c0b0f) top / 100% 5cqw no-repeat,
+			repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 6px) left 0 bottom 0 / 100% 4cqw no-repeat,
+			repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 5px),
+			#17151b;
+	}
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-caption { margin: 0.4cqw 4.5cqw 0.5cqw; }
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-title { font-size: 0.9rem; }
+}
+@media (max-width: 41.99rem) {
+	/* One column: the window takes the centre; the label and its facts wait for the single. */
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-body {
+		grid-template-columns: var(--vhs-zone) minmax(0, 1fr);
+		grid-template-areas:
+			"kind kind"
+			"caption caption"
+			"reelL window"
+			"tape tape"
+			"deck deck"
+			"stars stars"
+			"row row"
+			"date date"
+			"meta meta";
+	}
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .cr-vhs__label { display: none; }
+	.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-embed:has(.able) .able-vidcap-container { margin-left: 24cqw; }
+}

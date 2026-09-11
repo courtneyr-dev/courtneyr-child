@@ -281,6 +281,11 @@
   --cr-rotate-2:     1.5deg;
   --cr-rotate-neg:  -2.5deg;
   --cr-rotate-neg2:  2.8deg;
+
+  /* Physical media — one cassette, every size. A VHS face is 187 mm by
+     103 mm (1.816:1); the /stream card and the single Watch shell both
+     take their height from this ratio, never from their contents. */
+  --cr-vhs-face: 187 / 103;
 }
 
 

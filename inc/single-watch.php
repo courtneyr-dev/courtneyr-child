@@ -197,6 +197,46 @@ function add_title_lede( string $html, array $block ): string {
 add_filter( 'render_block', __NAMESPACE__ . '\\add_title_lede', 20, 2 );
 
 /**
+ * The cassette's moving parts: two reel windows and the transport row as
+ * empty decorative spans. cr-post-kinds.css paints them in container
+ * units, so the single Watch shell and the /stream card draw one cassette
+ * at two sizes.
+ *
+ * @return string
+ */
+function vhs_mechanics(): string {
+	return '<span class="cr-vhs__reel cr-vhs__reel--l" aria-hidden="true"></span>'
+		. '<span class="cr-vhs__reel cr-vhs__reel--r" aria-hidden="true"></span>'
+		. '<span class="cr-vhs__tape" aria-hidden="true"></span>';
+}
+
+/**
+ * The handwritten VHS label: stock marks, the Rock Salt note, a colour
+ * stripe, then any facts. Shared by the single and the /stream card.
+ *
+ * The stock marks are plainly decorative (a blank tape's T-120 length
+ * grade and SP speed panel), never data. No "Side A": a VHS has one
+ * side; only audio cassettes flip.
+ *
+ * @param string[] $facts Real stored facts, plain text; may be empty.
+ * @return string
+ */
+function vhs_label( array $facts = array() ): string {
+	$out  = '<div class="cr-vhs__label">';
+	$out .= '<span class="cr-vhs__marks" aria-hidden="true"><span>T-120</span><span>SP</span></span>';
+	$out .= '<p class="cr-vhs__note cr-hand" aria-hidden="true">' . esc_html__( 'Be kind & rewind', 'courtneyr-child' ) . '</p>';
+	$out .= '<span class="cr-vhs__stripe" aria-hidden="true"></span>';
+	if ( ! empty( $facts ) ) {
+		$out .= '<ul class="cr-vhs__facts">';
+		foreach ( $facts as $fact ) {
+			$out .= '<li>' . esc_html( $fact ) . '</li>';
+		}
+		$out .= '</ul>';
+	}
+	return $out . '</div>';
+}
+
+/**
  * Rebuild the post body into the film-journal page.
  *
  * Splices at plugin markup emitted in a fixed order: `.pk-note.p-content`,
@@ -313,28 +353,30 @@ function journal_page( string $html, array $block ): string {
 	if ( '' !== $director ) {
 		$facts[] = sprintf( /* translators: %s: director */ __( 'Directed by %s', 'courtneyr-child' ), $director );
 	}
-	$facts[] = sprintf( /* translators: %s: date */ __( 'Watched %s', 'courtneyr-child' ), (string) wp_date( get_option( 'date_format' ), $ts ) );
+	// Label stock is narrow: a short month keeps the date on one line. The
+	// Rental Record and the meta row keep the site's full date format.
+	$facts[] = sprintf( /* translators: %s: date */ __( 'Watched %s', 'courtneyr-child' ), (string) wp_date( 'M j, Y', $ts ) );
 	if ( ! empty( $attrs['isRewatch'] ) ) {
 		$facts[] = __( 'A rewatch', 'courtneyr-child' );
 	}
-	$label_block  = '<div class="cr-vhs__label">';
-	// VHS-era stock marks: plainly decorative (a real tape's SIDE A / SP
-	// speed panel), never data.
-	$label_block .= '<span class="cr-vhs__marks" aria-hidden="true"><span>Side A</span><span>SP</span></span>';
-	$label_block .= '<p class="cr-vhs__note cr-hand" aria-hidden="true">' . esc_html__( 'Be kind & rewind', 'courtneyr-child' ) . '</p>';
-	$label_block .= '<span class="cr-vhs__stripe" aria-hidden="true"></span>';
-	$label_block .= '<ul class="cr-vhs__facts">';
-	foreach ( $facts as $fact ) {
-		$label_block .= '<li>' . esc_html( $fact ) . '</li>';
-	}
-	$label_block .= '</ul></div>';
-	$c_open       = '<div class="pk-caption">';
-	$c_start      = strpos( $html, $c_open );
+	// The label is its own grid item beside the poster; the plugin's
+	// caption (the h-cite title link and year) stays in the DOM for the
+	// microformats and is hidden, since the H1 and the Watch / find it row
+	// already carry both. The caption holds no nested div, so its first
+	// closing tag is its own.
+	$c_open  = '<div class="pk-caption">';
+	$c_start = strpos( $html, $c_open );
 	if ( false !== $c_start ) {
 		$c_end = strpos( $html, '</div>', $c_start );
 		if ( false !== $c_end ) {
-			$html = substr( $html, 0, $c_end ) . $label_block . substr( $html, $c_end );
+			$html = substr( $html, 0, $c_end + 6 ) . vhs_label( $facts ) . substr( $html, $c_end + 6 );
 		}
+	}
+	// The reels and transport paint under everything else: first in the body.
+	$k_start = strpos( $html, '<p class="pk-kindlabel">' );
+	$k_end   = false !== $k_start ? strpos( $html, '</p>', $k_start ) : false;
+	if ( false !== $k_end ) {
+		$html = substr( $html, 0, $k_end + 4 ) . vhs_mechanics() . substr( $html, $k_end + 4 );
 	}
 
 	// 4. Under the cassette: the row, the details card, the notes, the
