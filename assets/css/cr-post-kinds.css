@@ -447,8 +447,6 @@ body .pk-card {
 	right: -0.6rem;
 	box-shadow: 0 0 0 3px var(--cr-printer-ivory, #fbfaf5);
 }
-/* note: sticky */
-.cr-stream-page .pk-card.k-note { background: var(--cr-tape, #f3e5b8); border-width: 0; box-shadow: var(--cr-shadow-hard, 4px 4px 0 rgba(36, 28, 74, 0.35)); }
 /* bookmark: sky dog-ear */
 .cr-stream-page .pk-card.k-bookmark::after {
 	content: "";
@@ -798,8 +796,7 @@ body .pk-card {
 .cr-stream-page .pk-card.k-like::before,
 .cr-stream-page .pk-card.k-repost::before,
 .cr-stream-page .pk-card.k-favorite::before,
-.cr-stream-page .pk-card.k-article::before,
-.cr-stream-page .pk-card.k-note::before {
+.cr-stream-page .pk-card.k-article::before {
 	content: "";
 	position: absolute;
 	top: 0.35rem;
@@ -831,17 +828,6 @@ body .pk-card {
 	font-size: 1.6rem;
 	line-height: 1;
 	transform: rotate(10deg);
-}
-/* note: sticky with a folded corner (pushpin shared above) */
-.cr-stream-page .pk-card.k-note { width: 80%; transform: rotate(var(--cr-rotate-2, 1.5deg)); }
-.cr-stream-page .pk-card.k-note::after {
-	content: "";
-	position: absolute;
-	right: 0;
-	bottom: 0;
-	border-style: solid;
-	border-width: 0 0 1.1rem 1.1rem;
-	border-color: transparent transparent rgba(36, 28, 74, 0.18) transparent;
 }
 .cr-stream-page .pk-card.k-note .pk-badge { display: none; }
 
@@ -2050,7 +2036,6 @@ body .pk-card {
 .cr-stream-page .pk-card.k-repost::before,
 .cr-stream-page .pk-card.k-favorite::before,
 .cr-stream-page .pk-card.k-article::before,
-.cr-stream-page .pk-card.k-note::before,
 .cr-stream-page .pk-card.k-quote::before,
 .cr-stream-page .pk-card.k-follow::before,
 .cr-stream-page .pk-card.k-issue::before,
@@ -2086,7 +2071,6 @@ body .pk-card {
 .cr-stream-page .pk-card.k-repost::before,
 .cr-stream-page .pk-card.k-favorite::before,
 .cr-stream-page .pk-card.k-article::before,
-.cr-stream-page .pk-card.k-note::before,
 .cr-stream-page .pk-card.k-quote::before,
 .cr-stream-page .pk-card.k-follow::before,
 .cr-stream-page .pk-card.k-issue::before,
@@ -2102,9 +2086,8 @@ body .pk-card {
 .cr-stream-page .pk-card.k-tag::before {
 	background: radial-gradient(circle at 32% 28%, #d9eef5 0%, #4da3bd 32%, #126782 68%, #0b3f50 100%);
 }
-/* russian violet: article, note */
-.cr-stream-page .pk-card.k-article::before,
-.cr-stream-page .pk-card.k-note::before {
+/* russian violet: article */
+.cr-stream-page .pk-card.k-article::before {
 	background: radial-gradient(circle at 32% 28%, #d9d3ee 0%, #6a5fa8 32%, #3d2f6e 68%, #241c4a 100%);
 }
 /* ut orange: issue, question */
@@ -2582,7 +2565,6 @@ body .pk-card {
 }
 
 /* ---- v0.5.273: note joins the bordered set; second doodle field ---- */
-.cr-stream-page .pk-card.k-note { border: 2px solid var(--cr-ink, #241c4a); }
 
 /* A much denser layer of margin furniture, drawn on the post grid
    itself so % positions span the full collage height. z-index -1
@@ -8060,16 +8042,13 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 	padding: 1.15rem 1.35rem 1.6rem 1.9rem;
 	border: 0;
 	background: none;
-	filter: drop-shadow(4px 4px 0 var(--cr-ink, #241c4a));
 	transform: rotate(var(--cr-note-tilt, 0deg));
 	color: var(--cr-ink, #241c4a);
 	overflow: visible;
 }
-/* The paper is a layer under the text: ruled, punched, torn along the
-   bottom. The clip-path lives on this layer, not on the article, so the
-   article's drop shadow follows the torn silhouette instead of being cut
-   off at the box edge (filter runs before clip-path on one element), and
-   the bottom padding above keeps every line clear of the 8px teeth. */
+/* The paper is a layer under the text: ruled, punched, straight-edged
+   (v0.7.40: the torn bottom is gone), carrying the hard zine shadow so
+   paper and shadow share one rectangle. */
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note::before {
 	content: "";
 	display: block;
@@ -8090,7 +8069,7 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 		repeating-linear-gradient(180deg, transparent 0 calc(1.45rem - 1px), rgba(36, 28, 74, 0.13) calc(1.45rem - 1px) 1.45rem),
 		#fbfaf5;
 	background-position: 0 0.35rem, 0 1.05rem, 0 0;
-	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), 93% 100%, 85% calc(100% - 5px), 76% 100%, 67% calc(100% - 8px), 58% 100%, 49% calc(100% - 5px), 40% 100%, 31% calc(100% - 8px), 22% 100%, 14% calc(100% - 5px), 6% 100%, 0 calc(100% - 6px));
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
 }
 .cr-stream-page .wp-block-post-template > li:nth-child(4n+1) .pk-card.cr-note,
 .cr-stream-page .wp-block-post-template > li:nth-child(4n+3) .pk-card.cr-note { transform: rotate(var(--cr-note-tilt, 0deg)); }
@@ -8105,22 +8084,19 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 	align-items: center;
 }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-body > * { grid-column: 1 / -1; min-width: 0; }
+/* The kind label stays for assistive tech; the marks and the sheet say
+   "quote" to everyone else (v0.7.40). */
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-kindlabel {
-	display: block;
-	position: static;
-	margin: 0 0 0.3rem 1.45rem;
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
 	padding: 0;
 	border: 0;
-	background: none;
-	box-shadow: none;
-	transform: none;
-	font-family: var(--cr-font-mono, monospace);
-	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
-	font-weight: 700;
-	line-height: 1;
-	letter-spacing: 0.24em;
-	text-transform: uppercase;
-	color: var(--cr-glaucous-dark, #3d527d);
+	overflow: hidden;
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	white-space: nowrap;
 }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-caption { margin: 0; padding: 0; }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-title {
@@ -8230,7 +8206,6 @@ body.single-post.kind-quote .single-post__content .cr-note.cr-note--single {
 	padding: 2.2rem 2.6rem 1.9rem 3.4rem;
 	border: 0;
 	background: none;
-	filter: drop-shadow(6px 6px 0 var(--cr-ink, #241c4a));
 	transform: rotate(var(--cr-note-tilt, 0deg));
 	color: #241c4a;
 }
@@ -8248,7 +8223,7 @@ body.single-post.kind-quote .single-post__content .cr-note.cr-note--single::befo
 		repeating-linear-gradient(0deg, rgba(36, 28, 74, 0.02) 0 1px, transparent 1px 5px),
 		#fbfaf5;
 	background-position: 0 0.4rem, 0 1.3rem, 0 0, 0 0;
-	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 9px), 94% 100%, 87% calc(100% - 6px), 79% 100%, 71% calc(100% - 10px), 63% 100%, 55% calc(100% - 6px), 47% 100%, 39% calc(100% - 10px), 31% 100%, 23% calc(100% - 6px), 15% 100%, 8% calc(100% - 9px), 0 100%);
+	box-shadow: var(--cr-shadow-hard-2, 6px 6px 0 var(--cr-ink, #241c4a));
 }
 body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__mark { top: 1rem; left: 2.2rem; font-size: 5.6rem; }
 body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__label {
@@ -8374,7 +8349,8 @@ body.single-post.kind-quote .single-post__content .syndication-links .syn-link:f
 }
 /* Phones. */
 @media (max-width: 47.99rem) {
-	body.single-post.kind-quote .single-post__content .cr-note.cr-note--single { padding: 2rem 1.3rem 1.6rem 2.4rem; filter: drop-shadow(4px 4px 0 var(--cr-ink, #241c4a)); }
+	body.single-post.kind-quote .single-post__content .cr-note.cr-note--single { padding: 2rem 1.3rem 1.6rem 2.4rem; }
+	body.single-post.kind-quote .single-post__content .cr-note.cr-note--single::before { box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a)); }
 	.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note { padding: 1.1rem 1.1rem 1.5rem 1.7rem; }
 	body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__mark { font-size: 4.2rem; left: 1.4rem; }
 	body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__label { margin-left: 2.2rem; }
@@ -8412,7 +8388,7 @@ body.single-post.kind-quote .single-post__content .syndication-links .syn-link:f
 }
 /* ---- Note single: a short note reads as one handwritten thought ---- */
 /* Only the note's own paragraphs and list items: anything inside a figure, an embed or a kind card keeps its typeset face. */
-body.single-post.kind-note.cr-hand-short .single-post__content :is(p, li):not(:is(figure, .wp-block-embed, .pk-card, blockquote) *) {
+body.single-post.kind-note.cr-hand-short .single-post__content :is(p, li):not(:is(figure, .wp-block-embed, .pk-card, blockquote) *):not(.cr-sticky__date) {
 	max-width: 30em;
 	font-family: var(--cr-font-display, "Rock Salt", cursive);
 	font-size: clamp(1rem, 0.9rem + 0.4vw, 1.15rem);
@@ -8430,3 +8406,236 @@ body.single-post.kind-quote.cr-hand-short .single-post__content .cr-note--single
 	overflow-wrap: anywhere;
 }
 body.single-post.kind-quote.cr-hand-short .single-post__content .cr-note--single blockquote p:last-of-type { margin-bottom: 0; }
+
+/* ============================================================
+   v0.7.40 — Note: an adhesive sticky note lifting at one corner.
+   inc/sticky-note.php wraps the plugin's note stream card, and the
+   content of a short text-only Note single, in div.cr-sticky-artifact:
+   the artifact carries the seeded paper tint and tilt and the hard
+   shadow as a drop-shadow filter, so the shadow follows the cut
+   corner; the paper (.cr-sticky) is straight-edged except one diagonal
+   cut at the bottom right; the curl (.cr-sticky__curl) lays the lifted
+   underside over that cut with its own small shadow. No push pin: the
+   adhesive strip along the top is the metaphor, and the Quote keeps its
+   pin so the two never read alike. The thought is handwritten (Rock
+   Salt, rules further up); metadata stays typeset. The plugin's kind
+   label and a heading that only repeats the thought stay in the DOM
+   for assistive tech and hide visually.
+   Scope: .cr-sticky-artifact on /stream, body.single-post.kind-note.
+   ============================================================ */
+.cr-sticky-artifact {
+	--cr-sticky-paper: #ffe8a6;
+	--cr-sticky-tilt: 0deg;
+	--cr-sticky-curl: 2.6rem;
+	position: relative;
+	isolation: isolate;
+	box-sizing: border-box;
+	filter: drop-shadow(4px 4px 0 var(--cr-ink, #241c4a));
+	transform: rotate(var(--cr-sticky-tilt));
+}
+.cr-sticky,
+.cr-stream-page .cr-sticky-artifact--stream .pk-card.k-note.cr-sticky,
+body.single-post.kind-note .single-post__content .cr-sticky--single {
+	position: relative;
+	box-sizing: border-box;
+	color: #241c4a;
+	background:
+		linear-gradient(180deg, rgba(36, 28, 74, 0.09), rgba(36, 28, 74, 0) 13%),
+		var(--cr-sticky-paper);
+	clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cr-sticky-curl)), calc(100% - var(--cr-sticky-curl)) 100%, 0 100%);
+}
+/* The lifted corner: the underside, lit at the bend, darker where it
+   turns under, sitting over the paper's cut with a soft cast shadow. */
+.cr-sticky__curl {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	z-index: 2;
+	display: block;
+	width: var(--cr-sticky-curl);
+	height: var(--cr-sticky-curl);
+	background: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--cr-sticky-paper) 88%, #241c4a) 0%,
+		color-mix(in srgb, var(--cr-sticky-paper) 70%, #241c4a) 30%,
+		color-mix(in srgb, var(--cr-sticky-paper) 62%, #ffffff) 46%,
+		color-mix(in srgb, var(--cr-sticky-paper) 40%, #ffffff) 49.6%,
+		transparent 50.4%
+	);
+	border-bottom-left-radius: 22%;
+	filter: drop-shadow(-2px -3px 3px rgba(36, 28, 74, 0.3));
+	pointer-events: none;
+}
+
+/* ---- /stream ---- */
+.cr-stream-page .cr-sticky-artifact--stream { width: 82%; }
+.cr-stream-page .wp-block-post-template > li:nth-child(even) .cr-sticky-artifact--stream { margin-left: auto; }
+.cr-stream-page .cr-sticky-artifact--stream .pk-card.k-note.cr-sticky {
+	width: 100%;
+	min-height: 13rem;
+	margin: 0;
+	padding: 1.15rem 1.15rem 1.2rem;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	transform: none;
+	overflow: visible;
+}
+.cr-stream-page .cr-sticky .pk-badge,
+.cr-stream-page .cr-sticky::before,
+.cr-stream-page .cr-sticky::after { display: none; content: none; }
+.cr-stream-page .cr-sticky .pk-body {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0;
+	min-width: 0;
+}
+.cr-stream-page .cr-sticky .pk-caption { display: contents; }
+/* Visually hidden, kept for assistive tech: the plugin's kind label, its
+   synthetic "Note" heading on a title-less note, and a heading the
+   thought already opens with. */
+.cr-stream-page .cr-sticky .pk-kindlabel,
+.cr-stream-page .cr-sticky.cr-sticky--untitled .pk-title,
+.cr-stream-page .cr-sticky.cr-sticky--dup-title .pk-title {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+.cr-stream-page .cr-sticky .pk-title {
+	order: 1;
+	margin: 0 0 0.35rem;
+	padding: 0;
+	border: 0;
+	font-family: var(--cr-font-accent, "Roboto Slab", serif);
+	font-size: 0.95rem;
+	font-weight: 700;
+	line-height: 1.3;
+	color: #241c4a;
+}
+.cr-stream-page .cr-sticky .pk-title a { color: inherit; text-decoration: none; }
+.cr-stream-page .cr-sticky .pk-title a:hover { text-decoration: underline; text-decoration-color: var(--cr-cerulean, #126782); text-decoration-thickness: 2px; }
+/* The thought: handwritten. The excerpt, or the title when there is no
+   excerpt (a link post whose title is the whole note). */
+.cr-stream-page .cr-sticky .pk-excerpt {
+	order: 2;
+	margin: 0.15rem 0 0;
+	padding: 0.2rem 0 0;
+	color: #241c4a;
+}
+.cr-stream-page .cr-sticky.cr-sticky--thought-title .pk-title {
+	margin: 0.2rem 0 0;
+	font-family: var(--cr-font-display, "Rock Salt", cursive);
+	font-size: 0.95rem;
+	font-weight: 400;
+	line-height: 1.85;
+	letter-spacing: 0.01em;
+	overflow-wrap: anywhere;
+}
+.cr-stream-page .cr-sticky .pk-stream-date {
+	order: 3;
+	margin: auto 0 0;
+	padding: 1.1rem 0 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: #241c4a;
+}
+.cr-stream-page .cr-sticky .pk-stream-date time { border: 0; padding: 0; background: none; color: inherit; }
+.cr-stream-page .cr-sticky .pk-meta {
+	order: 4;
+	position: static;
+	margin: 0.45rem calc(var(--cr-sticky-curl) + 0.4rem) 0 0;
+	padding: 0;
+}
+.cr-stream-page .cr-sticky .pk-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	margin: 0;
+	padding: 0.1rem 0.4rem;
+	border: 1.5px solid #241c4a;
+	border-radius: 2px;
+	background: rgba(251, 250, 245, 0.55);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.58rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: #241c4a;
+	text-decoration: none;
+}
+.cr-stream-page .cr-sticky .pk-link::after { content: "↗"; font-family: var(--cr-font-body, sans-serif); }
+.cr-stream-page .cr-sticky .pk-link:hover { background: var(--cr-selective-yellow, #ffb703); }
+.cr-stream-page .cr-sticky :is(.pk-title a, .pk-link):focus-visible { outline: 3px solid #241c4a; outline-offset: 3px; }
+.cr-stream-page .cr-sticky .pk-media { order: 3; margin: 0.5rem 0 0; max-width: 100%; }
+
+/* ---- Single: a larger sticky in the reading column ---- */
+body.single-post.kind-note .single-post__content .cr-sticky-artifact--single {
+	--cr-sticky-curl: 3.4rem;
+	width: min(100%, 30rem);
+	max-width: 30rem;
+	margin: 1.2rem 0 2rem;
+	filter: drop-shadow(6px 6px 0 var(--cr-ink, #241c4a));
+}
+body.single-post.kind-note .single-post__content .cr-sticky--single {
+	min-height: 22rem;
+	padding: 2.1rem 2.3rem 2.4rem;
+}
+body.single-post.kind-note .single-post__content .cr-sticky--single :is(p, li) { color: #241c4a; }
+body.single-post.kind-note .single-post__content .cr-sticky--single :is(p, li):not(.cr-sticky__date) { max-width: none; }
+body.single-post.kind-note .single-post__content .cr-sticky--single > :last-of-type:not(.cr-sticky__date) { margin-bottom: 0; }
+body.single-post.kind-note .single-post__content .cr-sticky__date {
+	margin: 1.6rem calc(var(--cr-sticky-curl) + 0.5rem) 0 0;
+	padding: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.68rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: #241c4a;
+}
+body.single-post.kind-note:has(.cr-sticky-artifact--single) .single-post__lede-meta .single-post__date { display: none; }
+
+/* ---- Dark mode: the paper is a physical object and stays pastel; the
+   ink on it stays violet; the hard shadow flips with the page. ---- */
+:root[data-theme="dark"] .cr-sticky :is(.pk-title, .pk-title a, .pk-excerpt, .pk-stream-date, .pk-stream-date time, .pk-link, .cr-sticky__date, p, li) { color: #241c4a !important; }
+:root[data-theme="dark"] .cr-sticky-artifact { filter: drop-shadow(4px 4px 0 var(--cr-selective-yellow, #ffb703)); }
+:root[data-theme="dark"] .cr-stream-page .cr-sticky-artifact--stream .pk-card.k-note.cr-sticky,
+:root[data-theme="dark"] body.single-post.kind-note .single-post__content .cr-sticky--single { background: linear-gradient(180deg, rgba(36, 28, 74, 0.09), rgba(36, 28, 74, 0) 13%), var(--cr-sticky-paper) !important; }
+:root[data-theme="dark"] body.single-post.kind-note .single-post__content .cr-sticky-artifact--single { filter: drop-shadow(6px 6px 0 var(--cr-selective-yellow, #ffb703)); }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .cr-sticky :is(.pk-title, .pk-title a, .pk-excerpt, .pk-stream-date, .pk-stream-date time, .pk-link, .cr-sticky__date, p, li) { color: #241c4a !important; }
+	:root:not([data-theme="light"]) .cr-sticky-artifact { filter: drop-shadow(4px 4px 0 var(--cr-selective-yellow, #ffb703)); }
+	:root:not([data-theme="light"]) .cr-stream-page .cr-sticky-artifact--stream .pk-card.k-note.cr-sticky,
+	:root:not([data-theme="light"]) body.single-post.kind-note .single-post__content .cr-sticky--single { background: linear-gradient(180deg, rgba(36, 28, 74, 0.09), rgba(36, 28, 74, 0) 13%), var(--cr-sticky-paper) !important; }
+	:root:not([data-theme="light"]) body.single-post.kind-note .single-post__content .cr-sticky-artifact--single { filter: drop-shadow(6px 6px 0 var(--cr-selective-yellow, #ffb703)); }
+}
+@media (max-width: 40rem) {
+	.cr-stream-page .cr-sticky-artifact--stream { width: 100%; }
+	body.single-post.kind-note .single-post__content .cr-sticky--single { padding: 1.7rem 1.4rem 2.2rem; }
+}
+
+/* Visually hidden, announced: the same pattern as WP core's
+   .screen-reader-text (v0.7.40, first used for the Quote sheet's label). */
+.cr-sr-only {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	margin: -1px !important;
+	padding: 0 !important;
+	border: 0 !important;
+	overflow: hidden !important;
+	clip: rect(1px, 1px, 1px, 1px) !important;
+	clip-path: inset(50%) !important;
+	white-space: nowrap !important;
+}

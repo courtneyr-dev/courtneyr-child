@@ -276,7 +276,7 @@ function note_page( string $html, array $block ): string {
 
 	$sheet  = '<div class="cr-note-artifact cr-note-artifact--single" ' . note_style( $s ) . '>' . pin_svg();
 	$sheet .= '<div class="cr-note cr-note--single">' . mark();
-	$sheet .= '<p class="cr-note__label">' . esc_html__( 'Quote', 'courtneyr-child' ) . '</p>';
+	$sheet .= '<p class="cr-note__label cr-sr-only">' . esc_html__( 'Quote', 'courtneyr-child' ) . '</p>';
 	$sheet .= $courtneyr_quote_title;
 	$sheet .= substr( $html, $q_start, $q_end - $q_start );
 	$sheet .= '<p class="cr-note__date"><time datetime="' . esc_attr( (string) wp_date( 'c', $ts ) ) . '">' . esc_html( (string) wp_date( get_option( 'date_format' ), $ts ) ) . '</time></p>';
