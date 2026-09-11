@@ -161,6 +161,32 @@ function mech_svg( int $seed = 0 ): string {
 }
 
 /**
+ * Remove one element from the card's HTML: the block that starts with
+ * `$open` up to its matching `</div>`, counting nested divs. Returns the
+ * HTML unchanged when the opening tag is absent or unbalanced.
+ *
+ * @param string $html Card HTML.
+ * @param string $open Exact opening tag of a <div>.
+ * @return string
+ */
+function cut_div( string $html, string $open ): string {
+	$start = strpos( $html, $open );
+	if ( false === $start ) {
+		return $html;
+	}
+	$depth = 0;
+	$pos   = $start;
+	while ( preg_match( '/<div\b|<\/div>/', $html, $m, PREG_OFFSET_CAPTURE, $pos ) ) {
+		$pos    = (int) $m[0][1] + strlen( $m[0][0] );
+		$depth += '<div' === substr( $m[0][0], 0, 4 ) ? 1 : -1;
+		if ( 0 === $depth ) {
+			return substr( $html, 0, $start ) . substr( $html, $pos );
+		}
+	}
+	return $html;
+}
+
+/**
  * Dress a watch or listen stream card as its object.
  *
  * @param string    $html     Rendered stream card.
@@ -194,11 +220,40 @@ function media_card( string $html, array $block, $instance ): string {
 	// that card two columns.
 	$playable = false;
 	if ( 'watch' === $kind ) {
-		$e_start = strpos( $html, '<div class="pk-embed pk-embed--video">' );
+		$e_open  = '<div class="pk-embed pk-embed--video">';
+		$e_start = strpos( $html, $e_open );
 		if ( false !== $e_start ) {
 			$e_end    = strpos( $html, '<div class="pk-meta">', $e_start );
 			$embed    = substr( $html, $e_start, false === $e_end ? null : $e_end - $e_start );
 			$playable = false !== strpos( $embed, '<video' ) || false !== strpos( $embed, '<iframe' );
+		}
+		/**
+		 * Whether a /stream watch card embeds its player. Off: the stream
+		 * shows every watch as a poster card and playing happens on the
+		 * single (Courtney, 2026-09-10). The deck layout in
+		 * cr-post-kinds.css (v0.7.30) is ready if this is ever turned on.
+		 *
+		 * @param bool     $allow Default false.
+		 * @param \WP_Post $post  The post.
+		 */
+		if ( $playable && ! apply_filters( 'courtneyr_child_stream_watch_player', false, $post ) ) {
+			$html     = cut_div( $html, $e_open );
+			$playable = false;
+		}
+		// The print slot shows the post's featured image when it has one
+		// (in place of the plugin's poster art), as the generic stream card
+		// did; a post without one keeps whatever the plugin rendered.
+		if ( has_post_thumbnail( $post ) ) {
+			$thumb = '<div class="pk-media pk-media--stream">' . get_the_post_thumbnail( $post, 'medium_large', array( 'class' => 'u-photo', 'loading' => 'lazy' ) ) . '</div>';
+			$m_pos = strpos( $html, '<div class="pk-media' );
+			if ( false !== $m_pos ) {
+				$m_open = substr( $html, $m_pos, strpos( $html, '>', $m_pos ) - $m_pos + 1 );
+				$html   = cut_div( $html, $m_open );
+				$html   = substr( $html, 0, $m_pos ) . $thumb . substr( $html, $m_pos );
+			} else {
+				$meta = strpos( $html, '<div class="pk-meta">' );
+				$html = false === $meta ? $html : substr( $html, 0, $meta ) . $thumb . substr( $html, $meta );
+			}
 		}
 	}
 
