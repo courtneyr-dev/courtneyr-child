@@ -305,6 +305,8 @@ function journal_page( string $html, array $block ): string {
 		$html = $tags->get_updated_html();
 	}
 
-	return $html;
+	// The map frame is consent-gated; Perfmatters' lazy loader must not
+	// re-blank it after Complianz sets the real source (see journal.php).
+	return \Courtneyr\Child\Journal\skip_lazy_iframes( $html );
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\journal_page', 20, 2 );

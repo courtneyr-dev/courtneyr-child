@@ -289,6 +289,6 @@ function passport_card( string $html, array $block, $instance ): string {
 		$card = $tags->get_updated_html();
 	}
 
-	return $card;
+	return \Courtneyr\Child\Journal\skip_lazy_iframes( $card );
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\passport_card', 10, 3 );
