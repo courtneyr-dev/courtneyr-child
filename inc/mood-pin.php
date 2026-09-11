@@ -39,22 +39,22 @@ const BLOCK = 'post-kinds-indieweb/mood-card';
  * and stored in the catalog, so a mood always prints the same way.
  */
 const PALETTES = array(
-	array( '#bcb5e3', '#241c4a', '#ffb703' ),
-	array( '#023047', '#8ecae6', '#bcb5e3' ),
-	array( '#fee2c3', '#241c4a', '#fb8500' ),
-	array( '#bcb5e3', '#241c4a', '#647baf' ),
-	array( '#ebebeb', '#241c4a', '#fb8500' ),
-	array( '#ffb703', '#241c4a', '#ebebeb' ),
-	array( '#8ecae6', '#023047', '#fb8500' ),
-	array( '#fb8500', '#241c4a', '#fee2c3' ),
-	array( '#241c4a', '#ebebeb', '#ffb703' ),
-	array( '#126782', '#ebebeb', '#8ecae6' ),
-	array( '#219ebc', '#241c4a', '#fee2c3' ),
-	array( '#fee2c3', '#023047', '#219ebc' ),
-	array( '#bcb5e3', '#023047', '#fb8500' ),
-	array( '#ebebeb', '#126782', '#ffb703' ),
-	array( '#8ecae6', '#241c4a', '#ebebeb' ),
-	array( '#ffb703', '#023047', '#241c4a' ),
+	array( '#bcb5e3', '#241c4a', '#ffb703' ), // 0 curious: periwinkle · violet · yellow
+	array( '#023047', '#8ecae6', '#bcb5e3' ), // 1 nostalgic: Prussian · sky · periwinkle
+	array( '#fee2c3', '#241c4a', '#fb8500' ), // 2 productive: light orange · violet · UT orange
+	array( '#126782', '#fee2c3', '#bcb5e3' ), // 3 melancholy: cerulean · light orange · periwinkle
+	array( '#ebebeb', '#241c4a', '#fb8500' ), // 4 quixotic: light gray (the one intentional neutral) · violet · UT orange
+	array( '#ffb703', '#241c4a', '#126782' ), // 5 yellow · violet · cerulean
+	array( '#8ecae6', '#023047', '#fb8500' ), // 6 sky · Prussian · UT orange
+	array( '#fb8500', '#241c4a', '#fee2c3' ), // 7 UT orange · violet · light orange
+	array( '#241c4a', '#fee2c3', '#8ecae6' ), // 8 violet · light orange · sky
+	array( '#126782', '#ebebeb', '#ffb703' ), // 9 cerulean · light gray · yellow
+	array( '#219ebc', '#241c4a', '#ffb703' ), // 10 blue-green · violet · yellow
+	array( '#fee2c3', '#023047', '#219ebc' ), // 11 light orange · Prussian · blue-green
+	array( '#bcb5e3', '#023047', '#fb8500' ), // 12 periwinkle · Prussian · UT orange
+	array( '#023047', '#ffb703', '#8ecae6' ), // 13 Prussian · yellow · sky
+	array( '#ffb703', '#023047', '#fb8500' ), // 14 yellow · Prussian · UT orange
+	array( '#8ecae6', '#241c4a', '#fb8500' ), // 15 sky · violet · UT orange
 );
 
 /** Rim shells (highlight, shadow): violet, Prussian, glaucous, and one light rim. */
@@ -201,7 +201,7 @@ function face_svg( array $spec, int $uid ): string {
 	$label  = (string) $spec['label'];
 	$font   = (string) $spec['font'];
 	$layout = (string) $spec['layout'];
-	$word   = printed_word( $label, $font );
+	$word   = ! empty( $spec['word_below'] ) ? '' : printed_word( $label, $font );
 	$seed   = crc32( $label );
 	$angle  = $seed % 360;
 	$ht     = 'crht' . $uid;
@@ -209,12 +209,12 @@ function face_svg( array $spec, int $uid ): string {
 
 	// Motif placement and word band per layout: [scale, cx, cy, word y, usable, base].
 	$placement = array(
-		'icon-word' => array( 0.54, 50, 41, 81, 64, 11.5 ),
-		'crooked'   => array( 0.54, 50, 41, 81, 62, 11.5 ),
-		'icon-arc'  => array( 0.56, 50, 44, 0, 80, 11 ),
-		'arc-top'   => array( 0.52, 50, 58, 0, 80, 11 ),
-		'word-big'  => array( 0.3, 50, 28, 66, 78, 20 ),
-		'stacked'   => array( 0.3, 50, 26, 66, 72, 15 ),
+		'icon-word' => array( 0.64, 50, 40, 82, 64, 12 ),
+		'crooked'   => array( 0.6, 50, 39, 81, 60, 12.5 ),
+		'icon-arc'  => array( 0.64, 50, 44, 0, 80, 12 ),
+		'arc-top'   => array( 0.6, 50, 58, 0, 80, 12 ),
+		'word-big'  => array( 0.34, 50, 27, 67, 78, 22 ),
+		'stacked'   => array( 0.34, 50, 25, 66, 72, 16 ),
 	);
 	list( $scale, $cx, $cy, $wy, $usable, $base ) = $placement[ $layout ] ?? $placement['icon-word'];
 	if ( 'hand' === $font ) {
@@ -222,7 +222,7 @@ function face_svg( array $spec, int $uid ): string {
 	}
 
 	$svg  = '<svg class="cr-pin__art" viewBox="0 0 100 100" aria-hidden="true" focusable="false">';
-	$svg .= '<defs><pattern id="' . $ht . '" width="5.5" height="5.5" patternUnits="userSpaceOnUse" patternTransform="rotate(' . ( $angle % 45 ) . ')"><circle class="a" cx="2.75" cy="2.75" r="1.25"/></pattern>';
+	$svg .= '<defs><pattern id="' . $ht . '" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(' . ( $angle % 45 ) . ')"><circle class="a" cx="3" cy="3" r="1.7"/></pattern>';
 	if ( 'icon-arc' === $layout ) {
 		$svg .= '<path id="' . $arc . '" d="M16 62A36 36 0 0 0 84 62"/>';
 	} elseif ( 'arc-top' === $layout ) {
@@ -230,12 +230,29 @@ function face_svg( array $spec, int $uid ): string {
 	}
 	$svg .= '</defs>';
 
-	// Halftone field: a quarter of the face, where the seed turns it; the
-	// 'rays' seed adds short ink ticks around the motif instead.
-	if ( 'rays' === $spec['pattern'] ) {
-		$svg .= '<g class="cr-pin__rays" transform="rotate(' . ( $angle % 30 ) . ' 50 50)"><path class="i" stroke-width="2.4" d="M50 6v7M50 87v7M6 50h7M87 50h7M19 19l5 5M76 76l5 5M19 81l5-5M76 24l5-5"/></g>';
-	} else {
-		$svg .= '<path class="cr-pin__halftone" transform="rotate(' . ( $angle % 360 ) . ' 50 50)" d="M50 50L98 50A48 48 0 0 1 50 98z" fill="url(#' . $ht . ')"/>';
+	// Halftone field, one shape per pattern seed so the collection varies:
+	// a quarter wedge, a half face, a diagonal band, an offset block, a ring
+	// of dots by the rim; the 'rays' seed prints short ink ticks instead.
+	$fill = 'fill="url(#' . $ht . ')"';
+	$turn = 'transform="rotate(' . ( $angle % 360 ) . ' 50 50)"';
+	switch ( (string) $spec['pattern'] ) {
+		case 'rays':
+			$svg .= '<g class="cr-pin__rays" transform="rotate(' . ( $angle % 30 ) . ' 50 50)"><path class="i" stroke-width="2.6" d="M50 5v8M50 87v8M5 50h8M87 50h8M18 18l6 6M76 76l6 6M18 82l6-6M76 24l6-6"/></g>';
+			break;
+		case 'top-halftone':
+			$svg .= '<path class="cr-pin__halftone" ' . $turn . ' d="M2 50A48 48 0 0 1 98 50z" ' . $fill . '/>';
+			break;
+		case 'diagonal-lines':
+			$svg .= '<path class="cr-pin__halftone" ' . $turn . ' d="M-10 30h120v26h-120z" ' . $fill . '/>';
+			break;
+		case 'corner-stripe':
+			$svg .= '<path class="cr-pin__halftone" ' . $turn . ' d="M56 4h60v52H56z" ' . $fill . '/>';
+			break;
+		case 'edge-dots':
+			$svg .= '<path class="cr-pin__halftone" ' . $turn . ' d="M50 2A48 48 0 1 1 49.9 2zM50 14A36 36 0 1 0 50.1 14z" fill-rule="evenodd" ' . $fill . '/>';
+			break;
+		default:
+			$svg .= '<path class="cr-pin__halftone" ' . $turn . ' d="M50 50L98 50A48 48 0 0 1 50 98z" ' . $fill . '/>';
 	}
 	// Registration mark on the upper rim, clear of any word on the lower arc.
 	$svg .= '<path class="i cr-pin__reg" stroke-width="1.5" transform="rotate(' . ( ( ( $seed >> 2 ) % 120 ) - 60 ) . ' 50 50)" d="M50 6v6M47 9h6"/>';
@@ -244,8 +261,8 @@ function face_svg( array $spec, int $uid ): string {
 		$art = motif( (string) $spec['motif'] );
 		if ( '' !== $art ) {
 			$t    = sprintf( 'translate(%.2f %.2f) scale(%.2f)', $cx - 50 * $scale, $cy - 50 * $scale, $scale );
-			$svg .= '<g class="cr-pin__plate cr-pin__plate--a" stroke-width="7" transform="translate(1.4 1.1) ' . $t . '">' . $art . '</g>';
-			$svg .= '<g class="cr-pin__plate cr-pin__plate--i" stroke-width="7" filter="url(#cr-ink-rough)" transform="' . $t . '">' . $art . '</g>';
+			$svg .= '<g class="cr-pin__plate cr-pin__plate--a" stroke-width="8" transform="translate(2.2 1.6) ' . $t . '">' . $art . '</g>';
+			$svg .= '<g class="cr-pin__plate cr-pin__plate--i" stroke-width="8" filter="url(#cr-ink-rough)" transform="' . $t . '">' . $art . '</g>';
 		}
 	}
 
@@ -260,7 +277,7 @@ function face_svg( array $spec, int $uid ): string {
 			$svg  .= '<text class="' . $class . '" font-size="' . $size . '" text-anchor="middle" x="50" y="' . ( $wy - $size * 0.55 ) . '">' . esc_html( $lines[0] ) . '<tspan x="50" dy="' . ( $size * 1.15 ) . '">' . esc_html( $lines[1] ) . '</tspan></text>';
 		} else {
 			$size = word_size( $word, $font, $usable, $base );
-			$attr = 'crooked' === $layout ? ' transform="rotate(-6 50 ' . $wy . ')"' : '';
+			$attr = 'crooked' === $layout ? ' transform="rotate(-11 50 ' . $wy . ')"' : '';
 			$svg .= '<text class="' . $class . '" font-size="' . $size . '" text-anchor="middle" x="50" y="' . $wy . '"' . $attr . '>' . esc_html( $word ) . '</text>';
 		}
 	}
@@ -303,28 +320,33 @@ function render( array $spec, string $size ): string {
 	$p     = $spec['palette'];
 	$r     = $spec['rim'];
 
-	$classes = array( 'cr-pin', 'cr-pin--' . $size, 'cr-pin--l-' . $spec['layout'], 'cr-pin--f-' . $spec['font'] );
+	// A custom mood longer than the face can hold prints its word under the
+	// pin, as real text, instead of inside the artwork.
+	$spec['word_below'] = ! empty( $spec['custom'] ) && mb_strlen( $label ) > 14;
+	$classes            = array( 'cr-pin', 'cr-pin--' . $size, 'cr-pin--l-' . $spec['layout'], 'cr-pin--f-' . $spec['font'] );
 	if ( ! empty( $spec['custom'] ) ) {
 		$classes[] = 'cr-pin--custom';
 	}
 	if ( '' !== $spec['family'] ) {
 		$classes[] = 'cr-pin--fam-' . $spec['family'];
 	}
-	$style = sprintf(
-		'--pin-face:%s;--pin-ink:%s;--pin-accent:%s;--pin-rim-hi:%s;--pin-rim-lo:%s;--pin-tilt:%s;--pin-wear:%ddeg',
+	$scales = array( '0.95', '1', '1.1' );
+	$style  = sprintf(
+		'--pin-face:%s;--pin-ink:%s;--pin-accent:%s;--pin-rim-hi:%s;--pin-rim-lo:%s;--pin-tilt:%s;--pin-wear:%ddeg;--pin-scale:%s',
 		$p[0],
 		$p[1],
 		$p[2],
 		$r[0],
 		$r[1],
 		TILTS[ $seed % count( TILTS ) ],
-		$seed % 360
+		$seed % 360,
+		$scales[ ( $seed >> 5 ) % count( $scales ) ]
 	);
 
 	$html  = ink_defs();
 	$html .= '<span class="cr-pin-set cr-pin-set--' . $size . '">';
 	$html .= '<span class="' . esc_attr( implode( ' ', $classes ) ) . '" style="' . esc_attr( $style ) . '">';
-	if ( '' !== $label ) {
+	if ( '' !== $label && ! $spec['word_below'] ) {
 		$html .= '<span class="cr-sr-only cr-pin__name">' . esc_html( $label ) . '</span>';
 	}
 	$html .= '<span class="cr-pin__rim" aria-hidden="true"></span>';
@@ -335,6 +357,9 @@ function render( array $spec, string $size ): string {
 	$html .= '<span class="cr-pin__gloss" aria-hidden="true"></span></span>';
 	$html .= '<span class="cr-pin__wear" aria-hidden="true"></span>';
 	$html .= '</span>';
+	if ( $spec['word_below'] ) {
+		$html .= '<span class="cr-pin__name cr-pin__word-below">' . esc_html( $label ) . '</span>';
+	}
 	if ( 'single' === $size && '' !== $spec['family'] ) {
 		$html .= '<span class="cr-pin__family"><span class="cr-sr-only">' . esc_html__( 'Mood family:', 'courtneyr-child' ) . ' </span>' . esc_html( $spec['family'] ) . '</span>';
 	}
@@ -424,7 +449,7 @@ function mood_card( string $html, array $block ): string {
 
 	// A card-only micro-post on /stream with no moodAt has no date of its
 	// own; the post's date joins it, in the plugin's own meta markup.
-	if ( ! is_singular( 'post' ) && false === strpos( $html, 'dt-published' ) ) {
+	if ( is_page( 'stream' ) && false === strpos( $html, 'dt-published' ) ) {
 		$post = get_post();
 		if ( $post instanceof \WP_Post ) {
 			$date = '<div class="pk-meta"><time class="dt-published" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( (string) get_the_date( '', $post ) ) . '</time></div>';
