@@ -375,7 +375,9 @@ add_action( 'init', __NAMESPACE__ . '\\register_post_kinds_card_paint' );
  * above would load the paint; the pinned note (inc/quote-note.php) needs it.
  */
 function enqueue_card_paint_for_quote_single(): void {
-	if ( ! is_singular( 'post' ) || ! has_term( 'quote', 'kind', get_queried_object_id() ) ) {
+	// Quote and Note singles have no card block, but their handwriting and
+	// the Quote sheet live in cr-post-kinds.css.
+	if ( ! is_singular( 'post' ) || ! has_term( array( 'quote', 'note' ), 'kind', get_queried_object_id() ) ) {
 		return;
 	}
 	// wp_enqueue_block_style() registers the handle only when one of its
@@ -678,6 +680,37 @@ function kind_body_class( array $classes ): array {
 	return $classes;
 }
 add_filter( 'body_class', __NAMESPACE__ . '\\kind_body_class' );
+
+/**
+ * Words a Note or Quote single may run to and still be set in handwriting.
+ *
+ * Rock Salt is a caps-only marker face: a sticky note's worth reads fine,
+ * an article's worth does not. Above this count the single keeps the body
+ * face (body.cr-hand-long); at or below it, body.cr-hand-short lets
+ * cr-post-kinds.css set the thought in Rock Salt.
+ */
+const HAND_MAX_WORDS = 120;
+
+/**
+ * Adds `cr-hand-short` or `cr-hand-long` on Note and Quote singles.
+ *
+ * @param string[] $classes Body classes.
+ * @return string[]
+ */
+function hand_length_body_class( array $classes ): array {
+	if ( ! is_singular( 'post' ) ) {
+		return $classes;
+	}
+	$post  = get_post( get_queried_object_id() );
+	$terms = $post instanceof \WP_Post ? get_the_terms( $post, 'kind' ) : false;
+	if ( ! $terms || is_wp_error( $terms ) || ! in_array( $terms[0]->slug, array( 'note', 'quote' ), true ) ) {
+		return $classes;
+	}
+	$words     = str_word_count( wp_strip_all_tags( strip_shortcodes( (string) $post->post_content ), true ) );
+	$classes[] = $words > HAND_MAX_WORDS ? 'cr-hand-long' : 'cr-hand-short';
+	return $classes;
+}
+add_filter( 'body_class', __NAMESPACE__ . '\\hand_length_body_class' );
 
 /**
  * Icons for the site's custom kind terms in the editor's kind picker,

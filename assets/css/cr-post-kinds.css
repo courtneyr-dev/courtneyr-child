@@ -8119,22 +8119,43 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 	box-sizing: border-box;
 	width: 100%;
 	margin: 0;
-	padding: 1.05rem 1rem 0.95rem 1.7rem;
+	padding: 1.15rem 1.35rem 1.6rem 1.9rem;
+	border: 0;
+	background: none;
+	filter: drop-shadow(4px 4px 0 var(--cr-ink, #241c4a));
+	transform: rotate(var(--cr-note-tilt, 0deg));
+	color: var(--cr-ink, #241c4a);
+	overflow: visible;
+}
+/* The paper is a layer under the text: ruled, punched, torn along the
+   bottom. The clip-path lives on this layer, not on the article, so the
+   article's drop shadow follows the torn silhouette instead of being cut
+   off at the box edge (filter runs before clip-path on one element), and
+   the bottom padding above keeps every line clear of the 8px teeth. */
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note::before {
+	content: "";
+	display: block;
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	width: auto;
+	height: auto;
+	margin: 0;
 	border: 1px solid rgba(36, 28, 74, 0.3);
+	border-radius: 0;
+	box-shadow: none;
+	opacity: 1;
+	transform: none;
+	pointer-events: none;
 	background:
 		radial-gradient(circle at 0.55rem 1.1rem, var(--cr-surface, #fbfaf5) 0 0.2rem, rgba(36, 28, 74, 0.35) 0.24rem 0.3rem, transparent 0.34rem) 0 0 / 100% 1.4rem repeat-y,
 		repeating-linear-gradient(180deg, transparent 0 calc(1.45rem - 1px), rgba(36, 28, 74, 0.13) calc(1.45rem - 1px) 1.45rem),
 		#fbfaf5;
 	background-position: 0 0.35rem, 0 1.05rem, 0 0;
-	filter: drop-shadow(4px 4px 0 var(--cr-ink, #241c4a));
 	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), 93% 100%, 85% calc(100% - 5px), 76% 100%, 67% calc(100% - 8px), 58% 100%, 49% calc(100% - 5px), 40% 100%, 31% calc(100% - 8px), 22% 100%, 14% calc(100% - 5px), 6% 100%, 0 calc(100% - 6px));
-	transform: rotate(var(--cr-note-tilt, 0deg));
-	color: var(--cr-ink, #241c4a);
-	overflow: visible;
 }
 .cr-stream-page .wp-block-post-template > li:nth-child(4n+1) .pk-card.cr-note,
 .cr-stream-page .wp-block-post-template > li:nth-child(4n+3) .pk-card.cr-note { transform: rotate(var(--cr-note-tilt, 0deg)); }
-.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note::before,
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note::after { content: none; display: none; }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-badge { display: none; }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-body {
@@ -8181,19 +8202,20 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-excerpt {
 	display: -webkit-box;
 	-webkit-box-orient: vertical;
-	-webkit-line-clamp: 4;
+	-webkit-line-clamp: 3;
 	overflow: hidden;
-	margin: 0.45rem 0 0;
+	margin: 0.7rem 0 0;
 	padding: 0;
 	border: 0;
 	background: none;
-	font-family: var(--cr-font-accent, serif);
-	font-size: 0.97rem;
-	line-height: 1.42;
+	font-family: var(--cr-font-display, "Rock Salt", cursive);
+	font-size: 1rem;
+	line-height: 1.9;
+	letter-spacing: 0.01em;
 	color: var(--cr-ink, #241c4a);
 }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .cr-note__cite {
-	margin: 0.45rem 0 0;
+	margin: 0.85rem 0 0;
 	padding: 0;
 	font-family: var(--cr-font-body, sans-serif);
 	font-weight: 600;
@@ -8206,7 +8228,7 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-stream-date {
 	display: block;
 	grid-column: 1;
-	margin: 0.5rem 0 0;
+	margin: 0.95rem 0 0;
 	padding: 0;
 	font-family: var(--cr-font-mono, monospace);
 	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
@@ -8215,7 +8237,7 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 	color: var(--cr-ink, #241c4a);
 }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-stream-date time { border: 0; padding: 0; background: none; color: inherit; }
-.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-meta { grid-column: 2; justify-self: end; position: static; margin: 0.5rem 0 0; padding: 0; }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-meta { grid-column: 2; justify-self: end; position: static; margin: 0.95rem 0 0; padding: 0; }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-link {
 	display: inline-flex;
 	align-items: center;
@@ -8267,18 +8289,28 @@ body.single-post.kind-quote .single-post__content .cr-note.cr-note--single {
 	box-sizing: border-box;
 	width: 100%;
 	margin: 0;
-	padding: 2.2rem 2.6rem 1.7rem 3.4rem;
+	padding: 2.2rem 2.6rem 1.9rem 3.4rem;
+	border: 0;
+	background: none;
+	filter: drop-shadow(6px 6px 0 var(--cr-ink, #241c4a));
+	transform: rotate(var(--cr-note-tilt, 0deg));
+	color: #241c4a;
+}
+body.single-post.kind-quote .single-post__content .cr-note.cr-note--single::before {
+	content: "";
+	display: block;
+	position: absolute;
+	inset: 0;
+	z-index: -1;
 	border: 1px solid rgba(36, 28, 74, 0.3);
+	pointer-events: none;
 	background:
-		radial-gradient(circle at 1.1rem 1.3rem, var(--cr-surface, #fbfaf5) 0 0.32rem, rgba(36, 28, 74, 0.35) 0.38rem 0.45rem, transparent 0.5rem) 0 0 / 100% 2.2rem repeat-y,
-		repeating-linear-gradient(180deg, transparent 0 calc(1.85rem - 1px), rgba(36, 28, 74, 0.13) calc(1.85rem - 1px) 1.85rem),
+		radial-gradient(circle at 1.1rem 1.3rem, var(--cr-surface, #fbfaf5) 0 0.32rem, rgba(36, 28, 74, 0.35) 0.38rem 0.45rem, transparent 0.5rem) 0 0 / 100% 2.1rem repeat-y,
+		repeating-linear-gradient(180deg, transparent 0 calc(2.1rem - 1px), rgba(36, 28, 74, 0.13) calc(2.1rem - 1px) 2.1rem),
 		repeating-linear-gradient(0deg, rgba(36, 28, 74, 0.02) 0 1px, transparent 1px 5px),
 		#fbfaf5;
 	background-position: 0 0.4rem, 0 1.3rem, 0 0, 0 0;
-	filter: drop-shadow(6px 6px 0 var(--cr-ink, #241c4a));
 	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 9px), 94% 100%, 87% calc(100% - 6px), 79% 100%, 71% calc(100% - 10px), 63% 100%, 55% calc(100% - 6px), 47% 100%, 39% calc(100% - 10px), 31% 100%, 23% calc(100% - 6px), 15% 100%, 8% calc(100% - 9px), 0 100%);
-	transform: rotate(var(--cr-note-tilt, 0deg));
-	color: #241c4a;
 }
 body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__mark { top: 1rem; left: 2.2rem; font-size: 5.6rem; }
 body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__label {
@@ -8404,10 +8436,58 @@ body.single-post.kind-quote .single-post__content .syndication-links .syn-link:f
 }
 /* Phones. */
 @media (max-width: 47.99rem) {
-	body.single-post.kind-quote .single-post__content .cr-note.cr-note--single { padding: 2rem 1.3rem 1.4rem 2.4rem; filter: drop-shadow(4px 4px 0 var(--cr-ink, #241c4a)); }
+	body.single-post.kind-quote .single-post__content .cr-note.cr-note--single { padding: 2rem 1.3rem 1.6rem 2.4rem; filter: drop-shadow(4px 4px 0 var(--cr-ink, #241c4a)); }
+	.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note { padding: 1.1rem 1.1rem 1.5rem 1.7rem; }
 	body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__mark { font-size: 4.2rem; left: 1.4rem; }
 	body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__label { margin-left: 2.2rem; }
 	body.single-post.kind-quote .single-post__content .cr-note-artifact--single::before,
 	body.single-post.kind-quote .single-post__content .cr-note-artifact--single::after { display: none; }
 	.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note { transform: none; }
 }
+
+/* ============================================================
+   v0.7.37 — Handwriting: Notes and Quotes speak in Rock Salt.
+   The site's display face (Rock Salt, caps-only marker writing) carries
+   the thought itself: the stream Note's excerpt, a short Note's body on
+   its single, the Quote's text on the stream preview and on the sheet.
+   Everything that is metadata stays typeset: kind labels and dates in
+   mono, titles in Roboto Slab, citations in Barlow, links as they were.
+   Rock Salt needs room, so it is set larger with a tall line and a
+   short measure. Long posts keep the body face: inc/enqueue.php adds
+   body.cr-hand-long when a Note or Quote single runs past
+   HAND_MAX_WORDS, and only .cr-hand-short singles go handwritten.
+   Scope: .k-note on the stream, body.single-post.kind-note, the Quote
+   surfaces already scoped above.
+   ============================================================ */
+/* ---- Note on the stream: the sticky's thought is handwritten ---- */
+.cr-stream-page .pk-card.k-note .pk-excerpt {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 7;
+	overflow: hidden;
+	padding: 0.45rem 0.65rem 0;
+	font-family: var(--cr-font-display, "Rock Salt", cursive);
+	font-size: 0.95rem;
+	line-height: 1.85;
+	letter-spacing: 0.01em;
+	overflow-wrap: anywhere;
+}
+/* ---- Note single: a short note reads as one handwritten thought ---- */
+body.single-post.kind-note.cr-hand-short .single-post__content :is(p, li) {
+	max-width: 30em;
+	font-family: var(--cr-font-display, "Rock Salt", cursive);
+	font-size: clamp(1rem, 0.9rem + 0.4vw, 1.15rem);
+	line-height: 1.95;
+	letter-spacing: 0.01em;
+	overflow-wrap: anywhere;
+}
+/* ---- Quote single: the words on the sheet are handwritten; the cite stays typeset ---- */
+body.single-post.kind-quote.cr-hand-short .single-post__content .cr-note--single blockquote p {
+	font-family: var(--cr-font-display, "Rock Salt", cursive);
+	font-size: clamp(0.98rem, 0.86rem + 0.5vw, 1.15rem);
+	line-height: 2.1rem;
+	letter-spacing: 0.01em;
+	margin: 0 0 2.1rem;
+	overflow-wrap: anywhere;
+}
+body.single-post.kind-quote.cr-hand-short .single-post__content .cr-note--single blockquote p:last-of-type { margin-bottom: 0; }
