@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Handwritten margin lines, in sets of three so a page never repeats a
  * line. Short, place-neutral, time-neutral: nothing here claims a fact.
  *
- * @param string $flavour 'travel', 'film' or 'read'.
+ * @param string $flavour 'travel', 'film', 'read', 'food' or 'drink'.
  * @return array<int, array<int, string>>
  */
 function margin_copy( string $flavour ): array {
@@ -45,6 +45,44 @@ function margin_copy( string $flavour ): array {
 			array(
 				__( 'Watched. Noted. Kept.', 'courtneyr-child' ),
 				__( 'Small screen, big feelings.', 'courtneyr-child' ),
+				__( 'Still thinking about it.', 'courtneyr-child' ),
+			),
+		);
+	}
+	if ( 'food' === $flavour ) {
+		return array(
+			array(
+				__( 'Good food. Brighter days.', 'courtneyr-child' ),
+				__( 'Worth the trip.', 'courtneyr-child' ),
+				__( 'Another one for the books.', 'courtneyr-child' ),
+			),
+			array(
+				__( 'Good food, better company.', 'courtneyr-child' ),
+				__( 'Support local eateries.', 'courtneyr-child' ),
+				__( 'Eat well, wander often.', 'courtneyr-child' ),
+			),
+			array(
+				__( 'Notes from the table.', 'courtneyr-child' ),
+				__( 'Small plates, big days.', 'courtneyr-child' ),
+				__( 'Still thinking about it.', 'courtneyr-child' ),
+			),
+		);
+	}
+	if ( 'drink' === $flavour ) {
+		return array(
+			array(
+				__( 'Good drinks. Brighter days.', 'courtneyr-child' ),
+				__( 'Sip slowly.', 'courtneyr-child' ),
+				__( 'Another one for the books.', 'courtneyr-child' ),
+			),
+			array(
+				__( 'Good drinks, better company.', 'courtneyr-child' ),
+				__( 'Worth the pour.', 'courtneyr-child' ),
+				__( 'Raise a glass.', 'courtneyr-child' ),
+			),
+			array(
+				__( 'Notes from the table.', 'courtneyr-child' ),
+				__( 'Small cups, big days.', 'courtneyr-child' ),
 				__( 'Still thinking about it.', 'courtneyr-child' ),
 			),
 		);
@@ -91,7 +129,7 @@ function margin_copy( string $flavour ): array {
  * Pick one set of margin lines for a seed.
  *
  * @param int    $seed    Stable seed.
- * @param string $flavour 'travel', 'film' or 'read'.
+ * @param string $flavour 'travel', 'film', 'read', 'food' or 'drink'.
  * @return string[] Three lines.
  */
 function margin_lines( int $seed, string $flavour ): array {
@@ -149,6 +187,47 @@ function meta_row( array $items ): string {
 }
 
 /**
+ * Meta fallbacks the plugin's Card_Meta_Sync does not map yet: eat and
+ * drink meta (class-meta-fields.php) by block attribute. A post whose
+ * block is thin (Micropub, an import) still keeps its venue, photo and
+ * coordinates here.
+ */
+const THEME_META_MAP = array(
+	'post-kinds-indieweb/eat-card'   => array(
+		'name'             => 'eat_name',
+		'cuisine'          => 'eat_cuisine',
+		'restaurant'       => 'eat_restaurant',
+		'restaurantUrl'    => 'eat_restaurant_url',
+		'photo'            => 'eat_photo',
+		'rating'           => 'eat_rating',
+		'notes'            => 'eat_notes',
+		'locationName'     => 'eat_location_name',
+		'locationAddress'  => 'eat_location_address',
+		'locationLocality' => 'eat_location_locality',
+		'locationRegion'   => 'eat_location_region',
+		'locationCountry'  => 'eat_location_country',
+		'geoLatitude'      => 'eat_geo_latitude',
+		'geoLongitude'     => 'eat_geo_longitude',
+	),
+	'post-kinds-indieweb/drink-card' => array(
+		'name'             => 'drink_name',
+		'drinkType'        => 'drink_type',
+		'brand'            => 'drink_brewery',
+		'venueUrl'         => 'drink_venue_url',
+		'photo'            => 'drink_photo',
+		'rating'           => 'drink_rating',
+		'notes'            => 'drink_notes',
+		'locationName'     => 'drink_location_name',
+		'locationAddress'  => 'drink_location_address',
+		'locationLocality' => 'drink_location_locality',
+		'locationRegion'   => 'drink_location_region',
+		'locationCountry'  => 'drink_location_country',
+		'geoLatitude'      => 'drink_geo_latitude',
+		'geoLongitude'     => 'drink_geo_longitude',
+	),
+);
+
+/**
  * A card block's attributes with the plugin's post-meta fallback.
  *
  * The plugin mirrors card attributes into `_pkiw_*` meta (Card_Meta_Sync)
@@ -166,13 +245,23 @@ function card_attrs( \WP_Post $post, string $block_name, array $attrs ): array {
 	if ( class_exists( '\\PKIW\\Card_Meta_Sync' ) && defined( '\\PKIW\\Card_Meta_Sync::ATTR_META_MAP' ) ) {
 		$map = (array) ( \PKIW\Card_Meta_Sync::ATTR_META_MAP[ $block_name ] ?? array() );
 	}
+	if ( empty( $map ) ) {
+		$map = (array) ( THEME_META_MAP[ $block_name ] ?? array() );
+	}
 	$numeric = array( 'pageCount', 'currentPage', 'rating', 'seasonNumber', 'episodeNumber', 'releaseYear' );
+	$floats  = array( 'geoLatitude', 'geoLongitude' );
 	foreach ( $map as $attr => $suffix ) {
-		if ( isset( $attrs[ $attr ] ) && '' !== $attrs[ $attr ] && 0 !== $attrs[ $attr ] ) {
+		if ( isset( $attrs[ $attr ] ) && '' !== $attrs[ $attr ] && 0 !== $attrs[ $attr ] && 0.0 !== $attrs[ $attr ] ) {
 			continue;
 		}
 		$value = get_post_meta( $post->ID, '_pkiw_' . $suffix, true );
 		if ( is_string( $value ) && '' !== $value ) {
+			if ( in_array( $attr, $floats, true ) ) {
+				if ( is_numeric( $value ) ) {
+					$attrs[ $attr ] = (float) $value;
+				}
+				continue;
+			}
 			$attrs[ $attr ] = in_array( $attr, $numeric, true ) && is_numeric( $value ) ? (int) $value : $value;
 		}
 	}

@@ -3654,38 +3654,38 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
    One SVG per stamp, ink from --cr-stamp-ink, fixed width per shape so a
    footer's height never depends on the variant. Tilts are the only
    transform; both the passport and the booth consume these rules. */
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp-mark { display: block; line-height: 0; mix-blend-mode: multiply; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp-mark--tilt-0 { transform: rotate(-3deg); }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp-mark--tilt-1 { transform: rotate(-1deg); }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp-mark--tilt-2 { transform: rotate(1.5deg); }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp-mark--tilt-3 { transform: rotate(3.5deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp-mark { display: block; line-height: 0; mix-blend-mode: multiply; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp-mark--tilt-0 { transform: rotate(-3deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp-mark--tilt-1 { transform: rotate(-1deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp-mark--tilt-2 { transform: rotate(1.5deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp-mark--tilt-3 { transform: rotate(3.5deg); }
 /* Stamps sit close, the second tucked against the first like real
    overprints; they only ever overlap each other, never content. */
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp-mark + .cr-stamp-mark { margin-left: -0.9rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp { display: block; height: auto; opacity: 0.9; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp--rect { width: 8.4rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp--seal,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp--octagon { width: 5.8rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp--postmark { width: 10rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp rect,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp circle,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp > path,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp .cr-stamp__waves { fill: none; stroke: var(--cr-stamp-ink, #241c4a); stroke-linecap: round; stroke-linejoin: round; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp text,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp .cr-stamp__glyph { fill: var(--cr-stamp-ink, #241c4a); }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp text {
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp-mark + .cr-stamp-mark { margin-left: -0.9rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp { display: block; height: auto; opacity: 0.9; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp--rect { width: 8.4rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp--seal,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp--octagon { width: 5.8rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp--postmark { width: 10rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp rect,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp circle,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp > path,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp .cr-stamp__waves { fill: none; stroke: var(--cr-stamp-ink, #241c4a); stroke-linecap: round; stroke-linejoin: round; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp text,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp .cr-stamp__glyph { fill: var(--cr-stamp-ink, #241c4a); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp text {
 	font-family: var(--cr-font-mono, monospace);
 	text-anchor: middle;
 	text-transform: uppercase;
 	font-weight: 700;
 }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__big { font-size: 21px; letter-spacing: 2px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__big--seal { font-size: 12.5px; letter-spacing: 1.4px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__mid { font-size: 11.5px; letter-spacing: 1.2px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__mid--seal { font-size: 10px; letter-spacing: 1px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__small { font-size: 9px; letter-spacing: 1px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__tiny { font-size: 8px; letter-spacing: 1px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch) .cr-stamp__ring { font-size: 9.5px; letter-spacing: 2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__big { font-size: 21px; letter-spacing: 2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__big--seal { font-size: 12.5px; letter-spacing: 1.4px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__mid { font-size: 11.5px; letter-spacing: 1.2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__mid--seal { font-size: 10px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__small { font-size: 9px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__tiny { font-size: 8px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__ring { font-size: 9.5px; letter-spacing: 2px; }
 .cr-stream-page .cr-passport .cr-passport__entry {
 	flex: 1 1 100%;
 	margin: 0.1rem 0 0;
@@ -3715,19 +3715,19 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 
 /* Header: kind chip stays, the template date hides (the lede has it),
    the tag row goes. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .single-post__lede-meta .single-post__date { display: none; }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .single-post__meta { display: none; }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__lede {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .single-post__lede-meta .single-post__date { display: none; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .single-post__meta { display: none; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__lede {
 	margin: 0.35rem 0 0;
 	font-family: var(--cr-font-accent, serif);
 	font-size: 1.05rem;
 	color: var(--cr-ink-soft, #4a4566);
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__lede-date {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__lede-date {
 	padding-bottom: 0.1rem;
 	box-shadow: inset 0 -0.55em 0 rgba(142, 202, 230, 0.4);
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__lede-place { font-weight: 700; color: var(--cr-ink, #241c4a); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__lede-place { font-weight: 700; color: var(--cr-ink, #241c4a); }
 
 /* A featured image the block does not carry stays, as a snapshot. */
 body.single-post.kind-checkin .single-post__featured {
@@ -3747,7 +3747,7 @@ body.single-post.kind-checkin .single-post__content p:has(> .p-trip) {
 }
 body.single-post.kind-checkin .single-post__content p:has(> .p-trip)::before { content: "Trip · "; }
 @media (min-width: 64rem) {
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal {
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) 11rem;
 		column-gap: 2.25rem;
@@ -3755,17 +3755,17 @@ body.single-post.kind-checkin .single-post__content p:has(> .p-trip)::before { c
 		grid-auto-flow: row dense;
 		align-items: start;
 	}
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal > * { grid-column: 1; margin-block: 0; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal > aside { grid-column: 2; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal > .cr-journal__margin--1 { align-self: start; padding-top: 2.5rem; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal > .cr-journal__margin--2 { align-self: center; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal > .cr-journal__margin--3 { align-self: center; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal > .cr-journal__meta { grid-column: 1 / -1; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal > * { grid-column: 1; margin-block: 0; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal > aside { grid-column: 2; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal > .cr-journal__margin--1 { align-self: start; padding-top: 2.5rem; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal > .cr-journal__margin--2 { align-self: center; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal > .cr-journal__margin--3 { align-self: center; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal > .cr-journal__meta { grid-column: 1 / -1; }
 }
 
 /* Handwriting: Rock Salt, page ink, short lines, two marks (a double
    underline and a heart). Never below 1rem. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-hand {
 	font-family: var(--cr-font-display, "Rock Salt", cursive);
 	font-size: 1.05rem;
 	line-height: 1.75;
@@ -3773,12 +3773,12 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand {
 	margin: 0;
 	max-width: 14ch;
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand--orange { color: #b85f00; }
-:root[data-theme="dark"] body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand--orange { color: #fb8500; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-hand--orange { color: #b85f00; }
+:root[data-theme="dark"] body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-hand--orange { color: #fb8500; }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand--orange { color: #fb8500; }
+	:root:not([data-theme="light"]) body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-hand--orange { color: #fb8500; }
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand--underline::after {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-hand--underline::after {
 	content: "";
 	display: block;
 	width: 4.5rem;
@@ -3789,12 +3789,12 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand--underline:
 	transform: rotate(-2deg);
 	opacity: 0.85;
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-hand__heart { font-family: var(--cr-font-body, sans-serif); color: #126782; }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__margin { margin: 0; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-hand__heart { font-family: var(--cr-font-body, sans-serif); color: #126782; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__margin { margin: 0; }
 @media (max-width: 63.98rem) {
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__margin { margin: 1.25rem 0; text-align: center; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__margin .cr-hand { max-width: none; font-size: 1rem; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__margin .cr-hand--underline::after { margin-inline: auto; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__margin { margin: 1.25rem 0; text-align: center; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__margin .cr-hand { max-width: none; font-size: 1rem; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__margin .cr-hand--underline::after { margin-inline: auto; }
 }
 
 /* The passport artifact. */
@@ -3959,8 +3959,8 @@ body.single-post.kind-checkin .cr-passport--single .cr-passport__entry {
 }
 
 /* Notes from this check-in. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__notes { margin: 0; }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__notes-title {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__notes { margin: 0; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__notes-title {
 	display: inline-block;
 	margin: 0 0 0.75rem;
 	padding: 0.15rem 0.5rem;
@@ -3972,11 +3972,11 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__notes-t
 	text-transform: uppercase;
 	color: var(--cr-ink, #241c4a);
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__notes .pk-note { margin: 0; padding: 0; font-size: 1.05rem; line-height: 1.65; color: var(--cr-ink, #241c4a); }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__notes .pk-note p { margin: 0 0 0.75em; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__notes .pk-note { margin: 0; padding: 0; font-size: 1.05rem; line-height: 1.65; color: var(--cr-ink, #241c4a); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__notes .pk-note p { margin: 0 0 0.75em; }
 
 /* The snapshot: a pasted print, not a hero. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__photo {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__photo {
 	width: 62%;
 	max-width: 26rem;
 	margin: 0.5rem 0 0;
@@ -3987,7 +3987,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__photo {
 	transform: rotate(-1.3deg);
 	position: relative;
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__photo::before {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__photo::before {
 	content: "";
 	position: absolute;
 	top: -0.6rem;
@@ -3999,7 +3999,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__photo::
 	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
 	pointer-events: none;
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__photo img {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__photo img {
 	display: block;
 	width: 100%;
 	height: auto;
@@ -4007,16 +4007,16 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__photo i
 	border-radius: 0;
 	box-shadow: none;
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__photo .cr-hand--caption { margin: 0.5rem 0.15rem 0; max-width: none; font-size: 1rem; line-height: 1.6; color: #241c4a; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__photo .cr-hand--caption { margin: 0.5rem 0.15rem 0; max-width: none; font-size: 1rem; line-height: 1.6; color: #241c4a; }
 @media (max-width: 40rem) {
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__photo { width: 100%; transform: rotate(-0.6deg); }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__photo { width: 100%; transform: rotate(-0.6deg); }
 	body.single-post.kind-checkin .single-post__content .pk-card.cr-passport--single { transform: none; padding: 0.85rem 0.9rem 0.8rem; }
 	body.single-post.kind-checkin .cr-passport--single .cr-passport__stamps { justify-content: flex-start; margin-inline: -0.9rem; padding-inline: 0.9rem; }
 }
 
 /* Time and place, quiet, at the bottom. Simple Location's raster map
    is redundant with the passport's map; its address line stays. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 1rem 3rem;
@@ -4024,7 +4024,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta {
 	padding: 1rem 0 0;
 	border-top: 1px solid rgba(36, 28, 74, 0.35);
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-item {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-item {
 	display: flex;
 	gap: 0.6rem;
 	align-items: flex-start;
@@ -4034,18 +4034,18 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-it
 	line-height: 1.5;
 	color: var(--cr-ink, #241c4a);
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-icon {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-icon {
 	flex: 0 0 1.25rem;
 	width: 1.25rem;
 	height: 1.25rem;
 	margin-top: 0.15rem;
 	background: no-repeat center / contain;
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-item--time .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E"); }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-item--place .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z'/%3E%3Cpath d='M9 3v15M15 6v15'/%3E%3C/svg%3E"); }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .single-post__content .sloc-map,
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .single-post__content a:has(> .sloc-map) { display: none; }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .single-post__content .sloc-display {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-item--time .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-item--place .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z'/%3E%3Cpath d='M9 3v15M15 6v15'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .single-post__content .sloc-map,
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .single-post__content a:has(> .sloc-map) { display: none; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .single-post__content .sloc-display {
 	margin: 0.6rem 0 0;
 	font-family: var(--cr-font-mono, monospace);
 	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
@@ -4660,8 +4660,8 @@ body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-me
 	color: rgba(251, 250, 245, 0.85);
 }
 /* Meta row glyph for the film item, and the small label under items. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-item--film .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Crect x='3' y='9' width='18' height='12' rx='1.5'/%3E%3Cpath d='M3 9l16-5 1 3.5L4 12.5z'/%3E%3Cpath d='M7 8l3-5M12 6.5l3-5'/%3E%3C/svg%3E"); }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-label {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-item--film .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Crect x='3' y='9' width='18' height='12' rx='1.5'/%3E%3Cpath d='M3 9l16-5 1 3.5L4 12.5z'/%3E%3Cpath d='M7 8l3-5M12 6.5l3-5'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-label {
 	display: block;
 	margin-top: 0.15rem;
 	font-family: var(--cr-font-mono, monospace);
@@ -5725,7 +5725,7 @@ body.single-post.kind-read .cr-read__sample .wp-block-embed__wrapper { display: 
 body.single-post.kind-read .cr-read__sample iframe { max-width: 100%; border: 1.5px solid #241c4a; border-radius: 2px; background: #fff; }
 
 /* Meta row: the book glyph. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read) .cr-journal__meta-item--book .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6.5A5 5 0 0 0 7 4H3v13h4a5 5 0 0 1 5 2.5A5 5 0 0 1 17 17h4V4h-4a5 5 0 0 0-5 2.5z'/%3E%3Cpath d='M12 6.5v13'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-item--book .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6.5A5 5 0 0 0 7 4H3v13h4a5 5 0 0 1 5 2.5A5 5 0 0 1 17 17h4V4h-4a5 5 0 0 0-5 2.5z'/%3E%3Cpath d='M12 6.5v13'/%3E%3C/svg%3E"); }
 
 /* Phones and tablets. */
 @media (max-width: 63.98rem) {
@@ -7179,4 +7179,751 @@ body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs
 }
 :is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__reel--bare {
 	background: var(--vhs-reel-paint-bare);
+}
+
+/* ============================================================
+   v0.7.33 — single eat and drink: a diner placemat.
+   inc/single-eat-drink.php keeps the plugin's article and rebuilds it:
+   the kind label is the order-box header, the location block moves into
+   a WHERE column with a real OpenStreetMap embed from the stored
+   coordinates, the photo gets a handwritten caption, a long note becomes
+   "Notes from the table", the timestamp becomes the receipt line, and a
+   dated seal plus four hand-drawn doodles finish the sheet. The paper is
+   one printed placemat: cream stock with photocopy lines, an ink border,
+   a hard offset shadow and two checker strips in the kind's accent
+   (orange for eat, cerulean for drink). The body is a grid whose right
+   column exists only when the card has a location or coordinates; the
+   photo sits under the order box on the left and the map under the venue
+   on the right, and each module renders only when its data exists, so
+   the sheet reflows for photo + map, photo only, map only and neither.
+   Under 48rem it stacks in the card's own order: identity, rating,
+   photo, note, WHERE and map, receipt. The shared journal scaffolding
+   (lede, margin handwriting, grid, stamps) now includes both kinds.
+   Scope: body.single-post.kind-eat / .kind-drink.
+   ============================================================ */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat {
+	--mat-ink: #241c4a;
+	--mat-paper: #fbf7ec;
+	--mat-accent: #fb8500;
+	--mat-accent-2: #ffb703;
+	--mat-accent-soft: #fee2c3;
+	--mat-check: rgba(251, 133, 0, 0.55);
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: none;
+	margin: 0.9rem 0 0;
+	padding: 4rem 3.4rem 2.6rem;
+	background:
+		repeating-linear-gradient(180deg, rgba(36, 28, 74, 0.028) 0 1px, transparent 1px 7px),
+		radial-gradient(circle at 14% 6%, rgba(36, 28, 74, 0.06), transparent 32%),
+		radial-gradient(circle at 88% 92%, rgba(36, 28, 74, 0.05), transparent 30%),
+		var(--mat-paper);
+	border: 1.5px solid var(--mat-ink);
+	border-radius: 3px;
+	box-shadow: 6px 6px 0 var(--mat-ink);
+	color: var(--mat-ink);
+	overflow: visible;
+	transform: none;
+	container-type: inline-size;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat.cr-placemat--drink {
+	--mat-accent: #126782;
+	--mat-accent-2: #219ebc;
+	--mat-accent-soft: #d5ecf5;
+	--mat-check: rgba(18, 103, 130, 0.5);
+}
+/* Two printed checker strips, one each side. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat::before,
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat::after {
+	content: "";
+	position: absolute;
+	inset: 1.1rem auto 1.1rem 1.1rem;
+	width: 0.85rem;
+	height: auto;
+	border-radius: 0;
+	opacity: 1;
+	z-index: 0;
+	background: repeating-conic-gradient(var(--mat-check) 0 25%, transparent 0 50%) 0 0 / 0.85rem 0.85rem;
+	pointer-events: none;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat::after { inset: 1.1rem 1.1rem 1.1rem auto; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-badge { display: none; }
+/* Doodles in the paper's margins; the seal in the bottom-right corner. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodles { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodle {
+	position: absolute;
+	width: 3.4rem;
+	height: 3.4rem;
+	color: var(--mat-ink);
+	opacity: 0.82;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodle--tl { top: 0.55rem; left: 2.5rem; transform: rotate(-7deg); }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodle--tr { top: 0.55rem; right: 2.5rem; transform: rotate(6deg); }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodle--bl { bottom: 0.45rem; left: 2.5rem; transform: rotate(4deg); }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodle--br { bottom: 0.45rem; right: 10rem; transform: rotate(-5deg); }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__stamp { position: absolute; right: 2.4rem; bottom: 0.4rem; width: 6.6rem; z-index: 1; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__stamp .cr-stamp { width: 100%; height: auto; }
+/* The sheet's grid: order box and photo on the left, WHERE on the right. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-body {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(15rem, 34%);
+	grid-template-areas:
+		"label where"
+		"cap where"
+		"stars where"
+		"note where"
+		"photo where"
+		"longnote longnote"
+		"receipt receipt";
+	column-gap: 2.2rem;
+	row-gap: 0.45rem;
+	align-items: start;
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat:not(.cr-placemat--has-where) .pk-body {
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-areas:
+		"label"
+		"cap"
+		"stars"
+		"note"
+		"photo"
+		"longnote"
+		"receipt";
+}
+/* Order box. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-kindlabel,
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__label {
+	display: block;
+	position: static;
+	width: auto;
+	margin: 0;
+	padding: 0 0 0.35rem;
+	border: 0;
+	border-bottom: 1.5px solid var(--mat-ink);
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	transform: none;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.72rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	line-height: 1.3;
+	letter-spacing: 0.24em;
+	text-transform: uppercase;
+	color: var(--mat-ink);
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-kindlabel { grid-area: label; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-caption { grid-area: cap; margin: 0.4rem 0 0; padding: 0; display: block; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-title {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 900;
+	font-size: clamp(1.5rem, 4cqw, 2.1rem);
+	line-height: 1.1;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--mat-ink);
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-caption .pk-sub {
+	margin: 0.4rem 0 0;
+	padding: 0;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 1rem;
+	line-height: 1.45;
+	color: #4a4566;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-caption .pk-sub em { font-style: italic; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-stars {
+	grid-area: stars;
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	margin: 0.4rem 0 0;
+	color: var(--mat-accent);
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-stars svg { width: 18px; height: 18px; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-stars .off { opacity: 0.25; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-rating-value {
+	margin-left: 0.55rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.72rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	color: var(--mat-ink);
+}
+/* A short note is handwriting in the order box; a long one is a labelled sheet across the bottom. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-note {
+	grid-area: note;
+	max-width: 30ch;
+	margin: 0.5rem 0 0;
+	padding: 0;
+	font-family: var(--cr-font-display, cursive);
+	font-size: 1.05rem;
+	line-height: 1.75;
+	color: var(--mat-ink);
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat.cr-placemat--long-note .pk-note {
+	grid-area: longnote;
+	max-width: 64ch;
+	margin: 1.2rem 0 0;
+	padding: 0.9rem 0 0;
+	border-top: 1.5px dashed rgba(36, 28, 74, 0.35);
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 1.05rem;
+	line-height: 1.65;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat.cr-placemat--long-note .pk-note::before {
+	content: attr(data-label);
+	display: inline-block;
+	margin: 0 0 0.6rem;
+	padding: 0.12rem 0.5rem;
+	background: var(--mat-accent-soft);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.72rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--mat-ink);
+}
+/* The photo: a printed snapshot taped to the sheet, its own ratio kept. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-embed.pk-embed--photo {
+	grid-area: photo;
+	grid-column: photo;
+	justify-self: start;
+	position: relative;
+	width: min(100%, 34rem);
+	margin: 1.1rem 0 0.5rem;
+	padding: 0.45rem 0.45rem 0.35rem;
+	background: #fbfaf5;
+	border: 1px solid rgba(36, 28, 74, 0.25);
+	border-radius: 2px;
+	box-shadow: 5px 5px 0 var(--mat-ink);
+	transform: rotate(-1.2deg);
+	overflow: visible;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-embed--photo::before {
+	content: "";
+	position: absolute;
+	top: -0.7rem;
+	left: 50%;
+	width: 5.5rem;
+	height: 1.3rem;
+	transform: translateX(-50%) rotate(-2deg);
+	background: var(--cr-tape, #f3e5b8);
+	opacity: 0.9;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-embed--photo img {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-height: none;
+	aspect-ratio: auto;
+	object-fit: contain;
+	margin: 0;
+	border: 0;
+	border-radius: 1px;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__caption {
+	display: block;
+	margin: 0.45rem 0 0.15rem;
+	max-width: none;
+	text-align: center;
+	font-family: var(--cr-font-display, cursive);
+	font-size: 1rem;
+	line-height: 1.5;
+	color: var(--mat-ink);
+}
+/* WHERE: the venue as a receipt label, the address, the map under it. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where {
+	grid-area: where;
+	align-self: start;
+	min-width: 0;
+	margin: 0;
+	padding: 0 0 0 1.4rem;
+	border-left: 1.5px dashed rgba(36, 28, 74, 0.35);
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where .cr-placemat__label { margin-bottom: 0.5rem; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where .pk-sub {
+	display: block;
+	margin: 0;
+	padding: 0;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 0.98rem;
+	line-height: 1.4;
+	color: var(--mat-ink);
+	overflow-wrap: anywhere;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where .pk-chip {
+	display: block;
+	margin: 0 0 0.3rem;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 700;
+	font-size: 1.05rem;
+	line-height: 1.3;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--mat-ink);
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where a.pk-chip {
+	display: inline;
+	text-decoration: underline;
+	text-decoration-color: var(--mat-accent);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.2em;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where a.pk-chip:hover { background: var(--mat-accent-soft); }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where a.pk-chip:focus-visible,
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-map-link:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where .p-street-address { display: block; margin: 0 0 0.1rem; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where .p-locality,
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where .p-region { display: inline; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where .p-locality:has(+ .p-region)::after { content: ","; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where .p-country-name { display: block; margin: 0.1rem 0 0; font-size: 0.85rem; color: #4a4566; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where .p-geo { display: none; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-embed.pk-embed--map {
+	grid-area: auto;
+	grid-column: auto;
+	position: relative;
+	margin: 0.9rem 0 0;
+	padding: 0.35rem;
+	background: #fbfaf5;
+	border: 1.5px solid var(--mat-ink);
+	border-radius: 2px;
+	box-shadow: 4px 4px 0 var(--mat-ink);
+	overflow: visible;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-embed--map iframe {
+	display: block;
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	height: auto;
+	border: 0;
+	border-radius: 1px;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-map-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	margin: 0.65rem 0 0;
+	padding: 0.22rem 0.55rem;
+	border: 1.5px solid var(--mat-ink);
+	border-radius: 2px;
+	background: var(--mat-accent-soft);
+	box-shadow: 2px 2px 0 var(--mat-ink);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--mat-ink);
+	text-decoration: none;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-map-link:hover { background: var(--mat-accent-2); }
+/* The receipt line. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-meta {
+	grid-area: receipt;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.35rem 0.9rem;
+	margin: 1.3rem 7.5rem 0 0;
+	padding: 0.7rem 0 0;
+	border-top: 2px dashed rgba(36, 28, 74, 0.45);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.7rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--mat-ink);
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-meta:not(:has(time)) { display: none; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__receipt-label { padding: 0.05rem 0.4rem; background: var(--mat-accent-soft); font-weight: 700; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-meta time { margin: 0; padding: 0; border: 0; background: none; color: inherit; }
+/* Paper stays paper in dark mode; the stars keep the kind's ink. */
+:root[data-theme="dark"] body.single-post:is(.kind-eat, .kind-drink) .single-post__content :is(.cr-placemat, .cr-placemat *) { color: #241c4a !important; }
+:root[data-theme="dark"] body.single-post:is(.kind-eat, .kind-drink) .single-post__content .cr-placemat .pk-stars { color: var(--mat-accent) !important; }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) body.single-post:is(.kind-eat, .kind-drink) .single-post__content :is(.cr-placemat, .cr-placemat *) { color: #241c4a !important; }
+	:root:not([data-theme="light"]) body.single-post:is(.kind-eat, .kind-drink) .single-post__content .cr-placemat .pk-stars { color: var(--mat-accent) !important; }
+}
+/* Phones: one column in the card's own order, fewer doodles, the seal in flow. */
+@media (max-width: 47.99rem) {
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat { padding: 3.1rem 1.5rem 1.6rem; box-shadow: 4px 4px 0 var(--mat-ink); }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat::before,
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat::after { width: 0.6rem; background-size: 0.6rem 0.6rem; inset: 0.8rem auto 0.8rem 0.45rem; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat::after { inset: 0.8rem 0.45rem 0.8rem auto; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-body { display: flex; flex-direction: column; gap: 0.5rem; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodle { width: 2.6rem; height: 2.6rem; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodle--tl { left: 1.4rem; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodle--tr { right: 1.4rem; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodle--bl,
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodle--br { display: none; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__stamp { position: static; width: 5.4rem; margin: 0.9rem 0 0 auto; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-title { font-size: 1.5rem; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-note { max-width: none; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-embed.pk-embed--photo { width: 100%; margin: 1.1rem 0 0.4rem; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where { padding: 0.9rem 0 0; border-left: 0; border-top: 1.5px dashed rgba(36, 28, 74, 0.35); }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-meta { margin: 1rem 0 0; }
+}
+
+/* ============================================================
+   v0.7.33 — /stream: eat and drink cards as compact diner placemats.
+   inc/stream-eat-drink.php keeps the plugin's eat-card / drink-card
+   (rendering it itself when a post got the generic card) and adds the
+   rating number, a "View on map" link when coordinates exist, the date
+   without its time, and an art corner (one doodle, a small generic
+   stamp, one handwritten line). The card body is a grid: kind badge +
+   label and the date across the top, identity / venue / rating / note
+   down the left, the photo (a taped snapshot at about 40% of the width)
+   and the art corner on the right; without a photo the right column
+   holds the art only. The plugin's street and country stay in the DOM
+   for the h-card but do not print; the map stays on the single. Eat is
+   orange, drink cerulean. Overrides the v0.5.x polaroid and coaster.
+   Scope: .cr-stream-page li.kind-eat / li.kind-drink .cr-mat.
+   ============================================================ */
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat {
+	--mat-ink: #241c4a;
+	--mat-paper: #fbf7ec;
+	--mat-accent: #fb8500;
+	--mat-accent-2: #ffb703;
+	--mat-accent-soft: #fee2c3;
+	--mat-check: rgba(251, 133, 0, 0.55);
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	aspect-ratio: auto;
+	margin: 0;
+	padding: 0.85rem 1.35rem 0.9rem;
+	background:
+		repeating-linear-gradient(180deg, rgba(36, 28, 74, 0.03) 0 1px, transparent 1px 6px),
+		var(--mat-paper);
+	border: 1.5px solid var(--mat-ink);
+	border-radius: 2px;
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a);
+	color: var(--mat-ink);
+	text-align: left;
+	place-content: normal;
+	overflow: visible;
+	container-type: inline-size;
+}
+.cr-stream-page li.kind-drink .pk-card.pk-card--stream.cr-mat {
+	--mat-accent: #126782;
+	--mat-accent-2: #219ebc;
+	--mat-accent-soft: #d5ecf5;
+	--mat-check: rgba(18, 103, 130, 0.5);
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat::before,
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat::after {
+	content: "";
+	position: absolute;
+	inset: 0.55rem auto 0.55rem 0.4rem;
+	width: 0.5rem;
+	height: auto;
+	border: 0;
+	border-radius: 0;
+	opacity: 1;
+	background: repeating-conic-gradient(var(--mat-check) 0 25%, transparent 0 50%) 0 0 / 0.5rem 0.5rem;
+	pointer-events: none;
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat::after { inset: 0.55rem 0.4rem 0.55rem auto; }
+/* The kind badge: a small filled circle by the label. */
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-badge {
+	position: absolute;
+	top: 0.8rem;
+	left: 1.35rem;
+	bottom: auto;
+	width: 1.7rem;
+	height: 1.7rem;
+	margin: 0;
+	display: grid;
+	place-items: center;
+	border: 0;
+	border-radius: 50%;
+	background: var(--mat-accent);
+	color: #fff;
+	box-shadow: none;
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-badge svg { width: 0.95rem; height: 0.95rem; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-body {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 40%;
+	grid-template-areas:
+		"label date"
+		"cap photo"
+		"stars photo"
+		"note photo"
+		"map art"
+		"meta meta";
+	column-gap: 0.8rem;
+	row-gap: 0.15rem;
+	align-items: start;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat:not(.cr-mat--has-photo) .pk-body {
+	grid-template-columns: minmax(0, 1fr) minmax(5.5rem, 34%);
+	grid-template-areas:
+		"label date"
+		"cap cap"
+		"stars stars"
+		"note art"
+		"map art"
+		"meta meta";
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-kindlabel {
+	grid-area: label;
+	display: block;
+	position: static;
+	width: auto;
+	margin: 0 0 0.4rem 2.2rem;
+	padding: 0.35rem 0 0;
+	border: 0;
+	background: none;
+	box-shadow: none;
+	transform: none;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: 0.24em;
+	text-transform: uppercase;
+	color: var(--mat-accent);
+}
+.cr-stream-page li.kind-drink .pk-card.pk-card--stream.cr-mat .pk-kindlabel { color: var(--mat-accent); }
+/* The date, top right, as receipt print; the pk-meta box itself is that date. */
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-meta {
+	grid-area: date;
+	justify-self: end;
+	align-self: start;
+	display: block;
+	margin: 0;
+	padding: 0.4rem 0 0;
+	border: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--mat-ink);
+	text-align: right;
+	white-space: nowrap;
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-meta time,
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-meta a { display: inline; margin: 0; padding: 0; border: 0 !important; border-radius: 0; background: none; color: inherit; font: inherit; letter-spacing: inherit; text-decoration: none; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-meta:not(:has(time)) { display: none; }
+/* Identity: dish or drink, then the venue and town. */
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-caption { grid-area: cap; display: block; margin: 0; padding: 0; min-width: 0; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-title {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 900;
+	font-size: clamp(1.15rem, 6.5cqw, 1.45rem);
+	line-height: 1.12;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--mat-ink);
+	overflow-wrap: anywhere;
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-title a { color: inherit; text-decoration: none; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-title a:hover { text-decoration: underline; text-decoration-color: var(--mat-accent); text-decoration-thickness: 2px; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-title a:focus-visible,
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-chip:focus-visible,
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-mat__map:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-caption .pk-sub {
+	display: block;
+	margin: 0.3rem 0 0;
+	padding: 0;
+	border: 0;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 0.86rem;
+	font-weight: 400;
+	line-height: 1.4;
+	letter-spacing: 0;
+	text-transform: none;
+	color: #4a4566;
+	overflow-wrap: anywhere;
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-caption .pk-sub.p-location { margin-top: 0.25rem; color: var(--mat-ink); }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-caption .pk-sub.p-location .pk-chip {
+	display: block;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 0.9rem;
+	font-weight: 600;
+	line-height: 1.35;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--mat-ink);
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-caption .pk-sub.p-location a.pk-chip { display: inline; text-decoration: underline; text-decoration-color: var(--mat-accent); text-decoration-thickness: 1.5px; text-underline-offset: 0.18em; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-caption .pk-sub.p-location .p-street-address,
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-caption .pk-sub.p-location .p-country-name,
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-caption .pk-sub.p-location .p-geo { display: none; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-caption .pk-sub.p-location .p-locality,
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-caption .pk-sub.p-location .p-region { display: inline; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-caption .pk-sub.p-location .p-locality:has(+ .p-region)::after { content: ","; }
+/* Rating. */
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-stars {
+	grid-area: stars;
+	display: inline-flex;
+	align-items: center;
+	gap: 1px;
+	margin: 0.4rem 0 0;
+	color: var(--mat-accent);
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-stars svg { width: 15px; height: 15px; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-stars .off { opacity: 0.25; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-rating-value {
+	margin-left: 0.45rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	color: var(--mat-ink);
+}
+/* The note: three lines at most. */
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-note {
+	grid-area: note;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+	overflow: hidden;
+	margin: 0.5rem 0 0;
+	padding: 0;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 0.9rem;
+	line-height: 1.45;
+	color: var(--mat-ink);
+}
+/* The photo: a taped snapshot on the right, its own ratio kept. */
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-embed.pk-embed--photo {
+	grid-area: photo;
+	grid-column: photo;
+	justify-self: end;
+	position: relative;
+	width: 100%;
+	margin: 0.55rem 0 0;
+	padding: 0.3rem 0.3rem 0.35rem;
+	background: #fbfaf5;
+	border: 1px solid rgba(36, 28, 74, 0.25);
+	border-radius: 2px;
+	box-shadow: 3px 3px 0 var(--mat-ink);
+	transform: rotate(1.5deg);
+	overflow: visible;
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-embed--photo::before {
+	content: "";
+	position: absolute;
+	top: -0.5rem;
+	left: 50%;
+	width: 3rem;
+	height: 0.9rem;
+	transform: translateX(-50%) rotate(-3deg);
+	background: var(--cr-tape, #f3e5b8);
+	opacity: 0.9;
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-embed--photo img {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-height: 11rem;
+	aspect-ratio: auto;
+	object-fit: contain;
+	margin: 0;
+	border: 0;
+	border-radius: 1px;
+}
+/* The map link: a small sticker. */
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-mat__map {
+	grid-area: map;
+	justify-self: start;
+	align-self: end;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	margin: 0.6rem 0 0;
+	padding: 0.18rem 0.5rem 0.18rem 0.4rem;
+	border: 1.5px solid var(--mat-ink);
+	border-radius: 2px;
+	background: var(--mat-accent-soft);
+	box-shadow: 2px 2px 0 var(--mat-ink);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--mat-ink);
+	text-decoration: none;
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-mat__map:hover { background: var(--mat-accent-2); }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-mat__pin { width: 0.8rem; height: 0.8rem; color: var(--mat-accent); flex: none; }
+/* The art corner: the handwritten line, then one doodle beside a small stamp. */
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-mat__art {
+	grid-area: art;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	grid-template-areas:
+		"hand hand"
+		"doodle stamp";
+	align-items: end;
+	justify-self: stretch;
+	align-self: end;
+	row-gap: 0.3rem;
+	column-gap: 0.25rem;
+	margin: 0.6rem 0 0;
+	min-width: 0;
+	pointer-events: none;
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-placemat__doodles { display: contents; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-placemat__doodle { display: none; width: 2.1rem; height: 2.1rem; color: var(--mat-ink); opacity: 0.85; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-placemat__doodle--tl { display: block; grid-area: doodle; transform: rotate(-8deg); }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-mat__stamp { grid-area: stamp; justify-self: end; width: min(4.2rem, 100%); }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-mat__stamp .cr-stamp { width: 100%; height: auto; }
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-mat__hand {
+	grid-area: hand;
+	justify-self: end;
+	margin: 0;
+	max-width: 100%;
+	font-family: var(--cr-font-display, cursive);
+	font-size: 0.7rem;
+	line-height: 1.45;
+	text-align: right;
+	color: var(--mat-ink);
+	transform: rotate(-2deg);
+}
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-mat__hand::before { content: "↘ "; font-family: var(--cr-font-body, sans-serif); color: var(--mat-accent); }
+/* Nothing else from the plugin's generic card prints here. */
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-excerpt,
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-link,
+.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-media { display: none; }
+/* Dark mode: paper stays paper. */
+:root[data-theme="dark"] .cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat :is(.pk-title, .pk-title a, .pk-sub, .pk-sub *, .pk-note, .pk-meta, .pk-meta *, .pk-rating-value, .cr-mat__map, .cr-mat__hand, .cr-placemat__doodle) { color: #241c4a !important; }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat :is(.pk-title, .pk-title a, .pk-sub, .pk-sub *, .pk-note, .pk-meta, .pk-meta *, .pk-rating-value, .cr-mat__map, .cr-mat__hand, .cr-placemat__doodle) { color: #241c4a !important; }
+}
+/* Narrow columns (the one-column stream on phones is wider, not narrower, so only the art corner tightens). */
+@media (max-width: 26rem) {
+	.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-body { grid-template-columns: minmax(0, 1fr) 42%; }
+	.cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .cr-mat__hand { display: none; }
 }
