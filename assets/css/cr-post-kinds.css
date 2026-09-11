@@ -8608,13 +8608,17 @@ body.single-post.kind-note:has(.cr-sticky-artifact--single) .single-post__lede-m
 
 /* ---- Dark mode: the paper is a physical object and stays pastel; the
    ink on it stays violet; the hard shadow flips with the page. ---- */
-:root[data-theme="dark"] .cr-sticky :is(.pk-title, .pk-title a, .pk-excerpt, .pk-stream-date, .pk-stream-date time, .pk-link, .cr-sticky__date, p, li) { color: #241c4a !important; }
+/* The ink stays violet on the paper. Specificity beats tokens.css's dark rule for
+   .has-*-background-color descendants (six :not()s), which otherwise turns it ivory. */
+:root[data-theme="dark"] .cr-stream-page .cr-sticky-artifact--stream .pk-card.k-note.cr-sticky :is(.pk-title, .pk-title a, .pk-excerpt, .pk-stream-date, .pk-stream-date time, .pk-link, p, li),
+:root[data-theme="dark"] body.single-post.kind-note.single .single-post__content .cr-sticky-artifact--single .cr-sticky--single :is(.cr-sticky__date, .cr-sticky__date time, p, li, a) { color: #241c4a !important; }
 :root[data-theme="dark"] .cr-sticky-artifact { filter: drop-shadow(4px 4px 0 var(--cr-selective-yellow, #ffb703)); }
 :root[data-theme="dark"] .cr-stream-page .cr-sticky-artifact--stream .pk-card.k-note.cr-sticky,
 :root[data-theme="dark"] body.single-post.kind-note .single-post__content .cr-sticky--single { background: linear-gradient(180deg, rgba(36, 28, 74, 0.09), rgba(36, 28, 74, 0) 13%), var(--cr-sticky-paper) !important; }
 :root[data-theme="dark"] body.single-post.kind-note .single-post__content .cr-sticky-artifact--single { filter: drop-shadow(6px 6px 0 var(--cr-selective-yellow, #ffb703)); }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) .cr-sticky :is(.pk-title, .pk-title a, .pk-excerpt, .pk-stream-date, .pk-stream-date time, .pk-link, .cr-sticky__date, p, li) { color: #241c4a !important; }
+	:root:not([data-theme="light"]) .cr-stream-page .cr-sticky-artifact--stream .pk-card.k-note.cr-sticky :is(.pk-title, .pk-title a, .pk-excerpt, .pk-stream-date, .pk-stream-date time, .pk-link, p, li),
+	:root:not([data-theme="light"]) body.single-post.kind-note.single .single-post__content .cr-sticky-artifact--single .cr-sticky--single :is(.cr-sticky__date, .cr-sticky__date time, p, li, a) { color: #241c4a !important; }
 	:root:not([data-theme="light"]) .cr-sticky-artifact { filter: drop-shadow(4px 4px 0 var(--cr-selective-yellow, #ffb703)); }
 	:root:not([data-theme="light"]) .cr-stream-page .cr-sticky-artifact--stream .pk-card.k-note.cr-sticky,
 	:root:not([data-theme="light"]) body.single-post.kind-note .single-post__content .cr-sticky--single { background: linear-gradient(180deg, rgba(36, 28, 74, 0.09), rgba(36, 28, 74, 0) 13%), var(--cr-sticky-paper) !important; }
