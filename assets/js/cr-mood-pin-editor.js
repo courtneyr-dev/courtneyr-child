@@ -24,7 +24,7 @@
 	var BLOCK = 'post-kinds-indieweb/mood-card';
 
 	var options = data.moods.map( function ( mood ) {
-		return { value: mood.label, label: mood.emoji + ' ' + mood.label };
+		return { value: mood.label, label: mood.emoji + ' ' + mood.label + ( mood.family ? '  ·  ' + mood.family : '' ) };
 	} );
 
 	function normalize( mood ) {

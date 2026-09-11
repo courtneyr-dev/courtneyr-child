@@ -1,3167 +1,3764 @@
 {
-	"schemaVersion": 2,
-	"source": "mood-button-handoff moods.json 2026-09-11",
+	"schemaVersion": 3,
+	"source": "LiveJournal (132) + Facebook (119) mood lists, 57 exact overlaps deduplicated → 194; handoff moods.json 2026-09-11; visual v3 2026-09-11",
+	"families": [
+		"joy",
+		"calm",
+		"energy",
+		"thoughtful",
+		"uncertain",
+		"sad",
+		"angry",
+		"anxious",
+		"social",
+		"physical",
+		"work",
+		"playful",
+		"other"
+	],
 	"entries": [
 		{
 			"label": "accomplished",
+			"slug": "accomplished",
 			"emoji": "🏅",
-			"asset": "1f3c5.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "work",
+			"emotionml": null,
+			"visual": {
+				"motif": "medal",
+				"layout": "icon-arc",
+				"font": "condensed",
+				"palette": 4,
+				"rim": 6,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "aggravated",
+			"slug": "aggravated",
 			"emoji": "😠",
-			"asset": "1f620.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "steam",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 10,
+				"rim": 3,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "alone",
+			"slug": "alone",
 			"emoji": "🧍",
-			"asset": "1f9cd.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "moon",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 1,
+				"rim": 2,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "amazed",
+			"slug": "amazed",
 			"emoji": "😲",
-			"asset": "1f632.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "burst",
+				"layout": "arc-top",
+				"font": "condensed",
+				"palette": 3,
+				"rim": 4,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "amazing",
+			"slug": "amazing",
 			"emoji": "🤩",
-			"asset": "1f929.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "sparkles",
+				"layout": "word-big",
+				"font": "slab",
+				"palette": 3,
+				"rim": 0,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "amused",
+			"slug": "amused",
 			"emoji": "😄",
-			"asset": "1f604.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "grin-crooked",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 11,
+				"rim": 6,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "angry",
+			"slug": "angry",
 			"emoji": "😠",
-			"asset": "1f620.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "steam",
+				"layout": "crooked",
+				"font": "condensed",
+				"palette": 7,
+				"rim": 3,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "annoyed",
+			"slug": "annoyed",
 			"emoji": "😒",
-			"asset": "1f612.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "brow",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 14,
+				"rim": 1,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "anxious",
+			"slug": "anxious",
 			"emoji": "😰",
-			"asset": "1f630.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "vibrate",
+				"layout": "icon-arc",
+				"font": "mono",
+				"palette": 13,
+				"rim": 3,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "apathetic",
+			"slug": "apathetic",
 			"emoji": "😐",
-			"asset": "1f610.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "flat",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 7,
+				"rim": 5,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "artistic",
+			"slug": "artistic",
 			"emoji": "🎨",
-			"asset": "1f3a8.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#ffb703",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "thoughtful",
+			"emotionml": null,
+			"visual": {
+				"motif": "brush",
+				"layout": "icon-arc",
+				"font": "hand",
+				"palette": 6,
+				"rim": 6,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "awake",
+			"slug": "awake",
 			"emoji": "👀",
-			"asset": "1f440.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "energy",
+			"emotionml": null,
+			"visual": {
+				"motif": "alarm",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 3,
+				"rim": 4,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "awesome",
+			"slug": "awesome",
 			"emoji": "😎",
-			"asset": "1f60e.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "burst",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 9,
+				"rim": 4,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "beautiful",
+			"slug": "beautiful",
 			"emoji": "😍",
-			"asset": "1f60d.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "flower",
+				"layout": "icon-arc",
+				"font": "slab",
+				"palette": 4,
+				"rim": 4,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "better",
+			"slug": "better",
 			"emoji": "🙂",
-			"asset": "1f642.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "arrow-up",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 10,
+				"rim": 6,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "bitchy",
+			"slug": "bitchy",
 			"emoji": "🙄",
-			"asset": "1f644.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "side-eye",
+				"layout": "crooked",
+				"font": "mono",
+				"palette": 9,
+				"rim": 5,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "blah",
+			"slug": "blah",
 			"emoji": "😑",
-			"asset": "1f611.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "other",
+			"emotionml": null,
+			"visual": {
+				"motif": "flat",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 8,
+				"rim": 0,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "blank",
+			"slug": "blank",
 			"emoji": "😶",
-			"asset": "1f636.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "other",
+			"emotionml": null,
+			"visual": {
+				"motif": "ellipsis",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 1,
+				"rim": 2,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "blessed",
+			"slug": "blessed",
 			"emoji": "🙏",
-			"asset": "1f64f.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "social",
+			"emotionml": null,
+			"visual": {
+				"motif": "hands-pray",
+				"layout": "icon-arc",
+				"font": "slab",
+				"palette": 14,
+				"rim": 2,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "blissful",
+			"slug": "blissful",
 			"emoji": "😌",
-			"asset": "1f60c.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "smile-closed",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 8,
+				"rim": 5,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "bored",
+			"slug": "bored",
 			"emoji": "🥱",
-			"asset": "1f971.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "clock",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 13,
+				"rim": 1,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "bouncy",
+			"slug": "bouncy",
 			"emoji": "🤸",
-			"asset": "1f938.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "energy",
+			"emotionml": null,
+			"visual": {
+				"motif": "spring",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 0,
+				"rim": 4,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "broken",
+			"slug": "broken",
 			"emoji": "💔",
-			"asset": "1f494.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#bcb5e3",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "heart-broken",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 13,
+				"rim": 5,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "busy",
+			"slug": "busy",
 			"emoji": "🏃",
-			"asset": "1f3c3.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "work",
+			"emotionml": null,
+			"visual": {
+				"motif": "clock",
+				"layout": "crooked",
+				"font": "mono",
+				"palette": 4,
+				"rim": 5,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "calm",
+			"slug": "calm",
 			"emoji": "😌",
-			"asset": "1f60c.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "waves",
+				"layout": "icon-arc",
+				"font": "slab",
+				"palette": 13,
+				"rim": 5,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "cheerful",
+			"slug": "cheerful",
 			"emoji": "😊",
-			"asset": "1f60a.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#241c4a",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "sun",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 2,
+				"rim": 4,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "chill",
+			"slug": "chill",
 			"emoji": "😎",
-			"asset": "1f60e.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "waves",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 0,
+				"rim": 0,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "chipper",
+			"slug": "chipper",
 			"emoji": "😄",
-			"asset": "1f604.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "smile",
+				"layout": "arc-top",
+				"font": "condensed",
+				"palette": 3,
+				"rim": 1,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "cold",
+			"slug": "cold",
 			"emoji": "🥶",
-			"asset": "1f976.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "snowflake",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 3,
+				"rim": 5,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "complacent",
+			"slug": "complacent",
 			"emoji": "😏",
-			"asset": "1f60f.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#023047",
-				"ink": "#ebebeb",
-				"accent": "#ffb703",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "smile-closed",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 12,
+				"rim": 1,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "concerned",
+			"slug": "concerned",
 			"emoji": "😟",
-			"asset": "1f61f.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#241c4a",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "brow",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 10,
+				"rim": 5,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "confident",
+			"slug": "confident",
 			"emoji": "😎",
-			"asset": "1f60e.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#647baf",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "energy",
+			"emotionml": null,
+			"visual": {
+				"motif": "fist",
+				"layout": "arc-top",
+				"font": "condensed",
+				"palette": 2,
+				"rim": 0,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "confused",
+			"slug": "confused",
 			"emoji": "😕",
-			"asset": "1f615.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "uncertain",
+			"emotionml": null,
+			"visual": {
+				"motif": "tangle",
+				"layout": "icon-arc",
+				"font": "mono",
+				"palette": 2,
+				"rim": 6,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "contemplative",
+			"slug": "contemplative",
 			"emoji": "🤔",
-			"asset": "1f914.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "thoughtful",
+			"emotionml": null,
+			"visual": {
+				"motif": "thought-lines",
+				"layout": "stacked",
+				"font": "slab",
+				"palette": 1,
+				"rim": 3,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "content",
+			"slug": "content",
 			"emoji": "☺️",
-			"asset": "263a.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "smile-closed",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 14,
+				"rim": 3,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "cool",
+			"slug": "cool",
 			"emoji": "😎",
-			"asset": "1f60e.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "glasses",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 14,
+				"rim": 3,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "cranky",
+			"slug": "cranky",
 			"emoji": "😤",
-			"asset": "1f624.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#241c4a",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "steam",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 14,
+				"rim": 1,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "crappy",
+			"slug": "crappy",
 			"emoji": "😖",
-			"asset": "1f616.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#bcb5e3",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "cloud",
+				"layout": "crooked",
+				"font": "mono",
+				"palette": 9,
+				"rim": 4,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "crazy",
+			"slug": "crazy",
 			"emoji": "🤪",
-			"asset": "1f92a.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#647baf",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "spiral-eyes",
+				"layout": "word-big",
+				"font": "hand",
+				"palette": 11,
+				"rim": 1,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "creative",
+			"slug": "creative",
 			"emoji": "🎨",
-			"asset": "1f3a8.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "thoughtful",
+			"emotionml": null,
+			"visual": {
+				"motif": "pencil-spark",
+				"layout": "icon-arc",
+				"font": "hand",
+				"palette": 3,
+				"rim": 4,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "crushed",
+			"slug": "crushed",
 			"emoji": "💔",
-			"asset": "1f494.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "heart-broken",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 3,
+				"rim": 1,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "curious",
+			"slug": "curious",
 			"emoji": "🧐",
-			"asset": "1f9d0.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#bcb5e3",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "thoughtful",
+			"emotionml": null,
+			"visual": {
+				"motif": "magnifier",
+				"layout": "icon-arc",
+				"font": "hand",
+				"palette": 0,
+				"rim": 0,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "cute",
+			"slug": "cute",
 			"emoji": "🥰",
-			"asset": "1f970.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "social",
+			"emotionml": null,
+			"visual": {
+				"motif": "heart",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 7,
+				"rim": 5,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "cynical",
+			"slug": "cynical",
 			"emoji": "🙄",
-			"asset": "1f644.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#647baf",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "uncertain",
+			"emotionml": null,
+			"visual": {
+				"motif": "side-eye",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 10,
+				"rim": 3,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "delighted",
+			"slug": "delighted",
 			"emoji": "😁",
-			"asset": "1f601.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "sparkles",
+				"layout": "arc-top",
+				"font": "slab",
+				"palette": 4,
+				"rim": 3,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "depressed",
+			"slug": "depressed",
 			"emoji": "😞",
-			"asset": "1f61e.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "rain-cloud",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 6,
+				"rim": 5,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "determined",
+			"slug": "determined",
 			"emoji": "😤",
-			"asset": "1f624.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "work",
+			"emotionml": null,
+			"visual": {
+				"motif": "fist",
+				"layout": "crooked",
+				"font": "condensed",
+				"palette": 11,
+				"rim": 1,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "devious",
+			"slug": "devious",
 			"emoji": "😈",
-			"asset": "1f608.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "grin-crooked",
+				"layout": "arc-top",
+				"font": "mono",
+				"palette": 6,
+				"rim": 2,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "dirty",
+			"slug": "dirty",
 			"emoji": "😏",
-			"asset": "1f60f.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "scribble",
+				"layout": "crooked",
+				"font": "mono",
+				"palette": 10,
+				"rim": 5,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "disappointed",
+			"slug": "disappointed",
 			"emoji": "😞",
-			"asset": "1f61e.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "frown",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 7,
+				"rim": 3,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "discontent",
+			"slug": "discontent",
 			"emoji": "🙁",
-			"asset": "1f641.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#ffb703",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "flat",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 0,
+				"rim": 1,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "disgusted",
+			"slug": "disgusted",
 			"emoji": "🤢",
-			"asset": "1f922.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "tongue",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 14,
+				"rim": 3,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "distressed",
+			"slug": "distressed",
 			"emoji": "😫",
-			"asset": "1f62b.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "vibrate",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 10,
+				"rim": 5,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "ditzy",
+			"slug": "ditzy",
 			"emoji": "😵‍💫",
-			"asset": "1f635-200d-1f4ab.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "spiral",
+				"layout": "icon-word",
+				"font": "hand",
+				"palette": 8,
+				"rim": 2,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "dorky",
+			"slug": "dorky",
 			"emoji": "🤓",
-			"asset": "1f913.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#647baf",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "glasses",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 6,
+				"rim": 5,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "down",
+			"slug": "down",
 			"emoji": "😔",
-			"asset": "1f614.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "arrow-down",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 4,
+				"rim": 0,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "drained",
+			"slug": "drained",
 			"emoji": "🪫",
-			"asset": "1faab.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#647baf",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "battery-empty",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 12,
+				"rim": 4,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "drunk",
+			"slug": "drunk",
 			"emoji": "🥴",
-			"asset": "1f974.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#fb8500",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "spiral-eyes",
+				"layout": "crooked",
+				"font": "hand",
+				"palette": 2,
+				"rim": 3,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "ecstatic",
+			"slug": "ecstatic",
 			"emoji": "🤩",
-			"asset": "1f929.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "burst",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 8,
+				"rim": 3,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "embarrassed",
+			"slug": "embarrassed",
 			"emoji": "😳",
-			"asset": "1f633.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "grimace",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 15,
+				"rim": 0,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "emotional",
+			"slug": "emotional",
 			"emoji": "🥹",
-			"asset": "1f979.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#647baf",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "tears",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 11,
+				"rim": 5,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "energetic",
+			"slug": "energetic",
 			"emoji": "⚡",
-			"asset": "26a1.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "energy",
+			"emotionml": null,
+			"visual": {
+				"motif": "lightning",
+				"layout": "icon-arc",
+				"font": "condensed",
+				"palette": 2,
+				"rim": 1,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "energised",
+			"slug": "energised",
 			"emoji": "⚡",
-			"asset": "26a1.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "energy",
+			"emotionml": null,
+			"visual": {
+				"motif": "lightning",
+				"layout": "arc-top",
+				"font": "condensed",
+				"palette": 4,
+				"rim": 5,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "enraged",
+			"slug": "enraged",
 			"emoji": "🤬",
-			"asset": "1f92c.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "burst",
+				"layout": "crooked",
+				"font": "condensed",
+				"palette": 7,
+				"rim": 6,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "entertained",
+			"slug": "entertained",
 			"emoji": "😆",
-			"asset": "1f606.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "grin",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 2,
+				"rim": 6,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "enthralled",
+			"slug": "enthralled",
 			"emoji": "🤩",
-			"asset": "1f929.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#ffb703",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "stars",
+				"layout": "icon-arc",
+				"font": "slab",
+				"palette": 7,
+				"rim": 5,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "envious",
+			"slug": "envious",
 			"emoji": "😒",
-			"asset": "1f612.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#bcb5e3",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "eye",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 6,
+				"rim": 6,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "exanimate",
+			"slug": "exanimate",
 			"emoji": "🪫",
-			"asset": "1faab.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "other",
+			"emotionml": null,
+			"visual": {
+				"motif": "x-eyes",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 7,
+				"rim": 3,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "excited",
+			"slug": "excited",
 			"emoji": "🤩",
-			"asset": "1f929.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "energy",
+			"emotionml": null,
+			"visual": {
+				"motif": "burst",
+				"layout": "word-big",
+				"font": "hand",
+				"palette": 5,
+				"rim": 4,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "exhausted",
+			"slug": "exhausted",
 			"emoji": "😩",
-			"asset": "1f629.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#219ebc",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "battery-empty",
+				"layout": "crooked",
+				"font": "mono",
+				"palette": 12,
+				"rim": 2,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "fabulous",
+			"slug": "fabulous",
 			"emoji": "💅",
-			"asset": "1f485.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "sparkles",
+				"layout": "word-big",
+				"font": "slab",
+				"palette": 9,
+				"rim": 6,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "fantastic",
+			"slug": "fantastic",
 			"emoji": "🤩",
-			"asset": "1f929.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "stars",
+				"layout": "arc-top",
+				"font": "condensed",
+				"palette": 5,
+				"rim": 3,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "fed up",
+			"slug": "fed-up",
 			"emoji": "😤",
-			"asset": "1f624.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "brow",
+				"layout": "stacked",
+				"font": "mono",
+				"palette": 15,
+				"rim": 3,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "festive",
+			"slug": "festive",
 			"emoji": "🥳",
-			"asset": "1f973.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "social",
+			"emotionml": null,
+			"visual": {
+				"motif": "confetti",
+				"layout": "icon-arc",
+				"font": "slab",
+				"palette": 12,
+				"rim": 4,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "flirty",
+			"slug": "flirty",
 			"emoji": "😉",
-			"asset": "1f609.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "social",
+			"emotionml": null,
+			"visual": {
+				"motif": "wink",
+				"layout": "crooked",
+				"font": "slab",
+				"palette": 13,
+				"rim": 5,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "free",
+			"slug": "free",
 			"emoji": "🕊️",
-			"asset": "1f54a.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "wind",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 13,
+				"rim": 3,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "fresh",
+			"slug": "fresh",
 			"emoji": "🌿",
-			"asset": "1f33f.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "energy",
+			"emotionml": null,
+			"visual": {
+				"motif": "sprout",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 13,
+				"rim": 2,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "frustrated",
+			"slug": "frustrated",
 			"emoji": "😣",
-			"asset": "1f623.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "scribble",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 15,
+				"rim": 5,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "full",
+			"slug": "full",
 			"emoji": "😋",
-			"asset": "1f60b.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#647baf",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "plate-fork",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 13,
+				"rim": 1,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "funny",
+			"slug": "funny",
 			"emoji": "😂",
-			"asset": "1f602.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#219ebc",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "grin",
+				"layout": "word-big",
+				"font": "hand",
+				"palette": 12,
+				"rim": 0,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "furious",
+			"slug": "furious",
 			"emoji": "😡",
-			"asset": "1f621.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "burst",
+				"layout": "crooked",
+				"font": "condensed",
+				"palette": 11,
+				"rim": 5,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "geeky",
+			"slug": "geeky",
 			"emoji": "🤓",
-			"asset": "1f913.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#ffb703",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "brackets",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 5,
+				"rim": 6,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "giddy",
+			"slug": "giddy",
 			"emoji": "😆",
-			"asset": "1f606.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "spiral",
+				"layout": "arc-top",
+				"font": "hand",
+				"palette": 5,
+				"rim": 0,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "giggly",
+			"slug": "giggly",
 			"emoji": "🤭",
-			"asset": "1f92d.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "grin",
+				"layout": "icon-word",
+				"font": "hand",
+				"palette": 8,
+				"rim": 6,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "gloomy",
+			"slug": "gloomy",
 			"emoji": "😔",
-			"asset": "1f614.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#bcb5e3",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "cloud",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 0,
+				"rim": 2,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "good",
+			"slug": "good",
 			"emoji": "🙂",
-			"asset": "1f642.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "smile",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 2,
+				"rim": 1,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "grateful",
+			"slug": "grateful",
 			"emoji": "🙏",
-			"asset": "1f64f.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#219ebc",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "social",
+			"emotionml": null,
+			"visual": {
+				"motif": "heart-rays",
+				"layout": "icon-arc",
+				"font": "slab",
+				"palette": 2,
+				"rim": 3,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "great",
+			"slug": "great",
 			"emoji": "😃",
-			"asset": "1f603.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "thumbs-up",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 15,
+				"rim": 4,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "groggy",
+			"slug": "groggy",
 			"emoji": "😪",
-			"asset": "1f62a.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "sleepy",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 3,
+				"rim": 4,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "grumpy",
+			"slug": "grumpy",
 			"emoji": "😠",
-			"asset": "1f620.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#bcb5e3",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "frown",
+				"layout": "crooked",
+				"font": "condensed",
+				"palette": 11,
+				"rim": 0,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "guilty",
+			"slug": "guilty",
 			"emoji": "😓",
-			"asset": "1f613.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "side-eye",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 12,
+				"rim": 5,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "happy",
+			"slug": "happy",
 			"emoji": "😊",
-			"asset": "1f60a.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#023047",
-				"ink": "#ebebeb",
-				"accent": "#ffb703",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "smile",
+				"layout": "arc-top",
+				"font": "slab",
+				"palette": 9,
+				"rim": 4,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "heartbroken",
+			"slug": "heartbroken",
 			"emoji": "💔",
-			"asset": "1f494.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "heart-broken",
+				"layout": "stacked",
+				"font": "slab",
+				"palette": 9,
+				"rim": 1,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "high",
+			"slug": "high",
 			"emoji": "😶‍🌫️",
-			"asset": "1f636-200d-1f32b-fe0f.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "spiral",
+				"layout": "word-big",
+				"font": "hand",
+				"palette": 2,
+				"rim": 2,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "hopeful",
+			"slug": "hopeful",
 			"emoji": "🤞",
-			"asset": "1f91e.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "thoughtful",
+			"emotionml": null,
+			"visual": {
+				"motif": "horizon-sun",
+				"layout": "icon-arc",
+				"font": "slab",
+				"palette": 14,
+				"rim": 1,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "hopeless",
+			"slug": "hopeless",
 			"emoji": "😞",
-			"asset": "1f61e.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#bcb5e3",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "rain-cloud",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 13,
+				"rim": 3,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "horny",
+			"slug": "horny",
 			"emoji": "😏",
-			"asset": "1f60f.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "flame",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 8,
+				"rim": 0,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "hot",
+			"slug": "hot",
 			"emoji": "🥵",
-			"asset": "1f975.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "flame",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 4,
+				"rim": 6,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "hung-over",
+			"slug": "hung-over",
 			"emoji": "🤕",
-			"asset": "1f915.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "bandage",
+				"layout": "crooked",
+				"font": "mono",
+				"palette": 9,
+				"rim": 3,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "hungry",
+			"slug": "hungry",
 			"emoji": "🤤",
-			"asset": "1f924.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "plate-fork",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 15,
+				"rim": 0,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "hurt",
+			"slug": "hurt",
 			"emoji": "😢",
-			"asset": "1f622.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#241c4a",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "bandage",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 7,
+				"rim": 1,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "hyper",
+			"slug": "hyper",
 			"emoji": "🤪",
-			"asset": "1f92a.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#219ebc",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "energy",
+			"emotionml": null,
+			"visual": {
+				"motif": "zigzag",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 15,
+				"rim": 0,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "ill",
+			"slug": "ill",
 			"emoji": "🤒",
-			"asset": "1f912.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#ffb703",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "thermometer",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 2,
+				"rim": 6,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "impatient",
+			"slug": "impatient",
 			"emoji": "😤",
-			"asset": "1f624.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "hourglass",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 1,
+				"rim": 6,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "impressed",
+			"slug": "impressed",
 			"emoji": "🤩",
-			"asset": "1f929.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "open",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 15,
+				"rim": 6,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "in love",
+			"slug": "in-love",
 			"emoji": "😍",
-			"asset": "1f60d.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "social",
+			"emotionml": null,
+			"visual": {
+				"motif": "heart",
+				"layout": "stacked",
+				"font": "hand",
+				"palette": 14,
+				"rim": 0,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "incomplete",
+			"slug": "incomplete",
 			"emoji": "🧩",
-			"asset": "1f9e9.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "uncertain",
+			"emotionml": null,
+			"visual": {
+				"motif": "puzzle",
+				"layout": "stacked",
+				"font": "mono",
+				"palette": 4,
+				"rim": 3,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "indescribable",
+			"slug": "indescribable",
 			"emoji": "🫥",
-			"asset": "1fae5.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#647baf",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "other",
+			"emotionml": null,
+			"visual": {
+				"motif": "ellipsis",
+				"layout": "stacked",
+				"font": "mono",
+				"palette": 9,
+				"rim": 0,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "indifferent",
+			"slug": "indifferent",
 			"emoji": "😐",
-			"asset": "1f610.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "flat",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 4,
+				"rim": 3,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "infuriated",
+			"slug": "infuriated",
 			"emoji": "😡",
-			"asset": "1f621.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "burst",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 3,
+				"rim": 5,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "inspired",
+			"slug": "inspired",
 			"emoji": "💡",
-			"asset": "1f4a1.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "thoughtful",
+			"emotionml": null,
+			"visual": {
+				"motif": "bulb",
+				"layout": "icon-arc",
+				"font": "slab",
+				"palette": 4,
+				"rim": 5,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "intimidated",
+			"slug": "intimidated",
 			"emoji": "😨",
-			"asset": "1f628.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#bcb5e3",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "open",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 11,
+				"rim": 6,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "irate",
+			"slug": "irate",
 			"emoji": "😡",
-			"asset": "1f621.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#241c4a",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "steam",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 2,
+				"rim": 6,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "irritated",
+			"slug": "irritated",
 			"emoji": "😒",
-			"asset": "1f612.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#219ebc",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "zigzag",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 8,
+				"rim": 3,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "jealous",
+			"slug": "jealous",
 			"emoji": "😒",
-			"asset": "1f612.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "eye",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 0,
+				"rim": 6,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "joyful",
+			"slug": "joyful",
 			"emoji": "😄",
-			"asset": "1f604.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "sun",
+				"layout": "arc-top",
+				"font": "slab",
+				"palette": 7,
+				"rim": 2,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "jubilant",
+			"slug": "jubilant",
 			"emoji": "🙌",
-			"asset": "1f64c.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "confetti",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 11,
+				"rim": 2,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "lazy",
+			"slug": "lazy",
 			"emoji": "🦥",
-			"asset": "1f9a5.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#ffb703",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "moon-zzz",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 9,
+				"rim": 0,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "lethargic",
+			"slug": "lethargic",
 			"emoji": "😪",
-			"asset": "1f62a.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "battery-empty",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 2,
+				"rim": 0,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "listless",
+			"slug": "listless",
 			"emoji": "😑",
-			"asset": "1f611.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "flat",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 13,
+				"rim": 0,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "lonely",
+			"slug": "lonely",
 			"emoji": "🥺",
-			"asset": "1f97a.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "moon",
+				"layout": "crooked",
+				"font": "mono",
+				"palette": 15,
+				"rim": 3,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "lost",
+			"slug": "lost",
 			"emoji": "😕",
-			"asset": "1f615.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#219ebc",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "uncertain",
+			"emotionml": null,
+			"visual": {
+				"motif": "question",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 14,
+				"rim": 4,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "loved",
+			"slug": "loved",
 			"emoji": "🥰",
-			"asset": "1f970.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#647baf",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "social",
+			"emotionml": null,
+			"visual": {
+				"motif": "heart-rays",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 13,
+				"rim": 6,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "lovely",
+			"slug": "lovely",
 			"emoji": "🥰",
-			"asset": "1f970.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "social",
+			"emotionml": null,
+			"visual": {
+				"motif": "flower",
+				"layout": "icon-arc",
+				"font": "slab",
+				"palette": 14,
+				"rim": 4,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "low",
+			"slug": "low",
 			"emoji": "😔",
-			"asset": "1f614.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "arrow-down",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 10,
+				"rim": 4,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "lucky",
+			"slug": "lucky",
 			"emoji": "🍀",
-			"asset": "1f340.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "dice",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 2,
+				"rim": 5,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "meh",
+			"slug": "meh",
 			"emoji": "😑",
-			"asset": "1f611.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "other",
+			"emotionml": null,
+			"visual": {
+				"motif": "flat",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 5,
+				"rim": 4,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "melancholy",
+			"slug": "melancholy",
 			"emoji": "😔",
-			"asset": "1f614.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "rain-cloud",
+				"layout": "icon-arc",
+				"font": "slab",
+				"palette": 3,
+				"rim": 6,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "mellow",
+			"slug": "mellow",
 			"emoji": "😌",
-			"asset": "1f60c.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "waves",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 7,
+				"rim": 0,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "mischievous",
+			"slug": "mischievous",
 			"emoji": "😜",
-			"asset": "1f61c.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#023047",
-				"ink": "#ebebeb",
-				"accent": "#ffb703",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "grin-crooked",
+				"layout": "crooked",
+				"font": "hand",
+				"palette": 11,
+				"rim": 2,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "moody",
+			"slug": "moody",
 			"emoji": "😒",
-			"asset": "1f612.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "uncertain",
+			"emotionml": null,
+			"visual": {
+				"motif": "cloud",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 6,
+				"rim": 5,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "morose",
+			"slug": "morose",
 			"emoji": "😞",
-			"asset": "1f61e.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#241c4a",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "frown",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 12,
+				"rim": 5,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "motivated",
+			"slug": "motivated",
 			"emoji": "💪",
-			"asset": "1f4aa.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "work",
+			"emotionml": null,
+			"visual": {
+				"motif": "arrow-up",
+				"layout": "arc-top",
+				"font": "condensed",
+				"palette": 8,
+				"rim": 0,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "naughty",
+			"slug": "naughty",
 			"emoji": "😈",
-			"asset": "1f608.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "wink",
+				"layout": "crooked",
+				"font": "mono",
+				"palette": 5,
+				"rim": 1,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "nauseated",
+			"slug": "nauseated",
 			"emoji": "🤢",
-			"asset": "1f922.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "spiral",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 7,
+				"rim": 6,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "nerdy",
+			"slug": "nerdy",
 			"emoji": "🤓",
-			"asset": "1f913.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "glasses",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 12,
+				"rim": 2,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "nervous",
+			"slug": "nervous",
 			"emoji": "😬",
-			"asset": "1f62c.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "vibrate",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 11,
+				"rim": 1,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "nostalgic",
+			"slug": "nostalgic",
 			"emoji": "🥹",
-			"asset": "1f979.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "thoughtful",
+			"emotionml": null,
+			"visual": {
+				"motif": "cassette",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 1,
+				"rim": 1,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "numb",
+			"slug": "numb",
 			"emoji": "😶",
-			"asset": "1f636.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "other",
+			"emotionml": null,
+			"visual": {
+				"motif": "flat",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 5,
+				"rim": 0,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "okay",
+			"slug": "okay",
 			"emoji": "🙂",
-			"asset": "1f642.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "other",
+			"emotionml": null,
+			"visual": {
+				"motif": "thumbs-up",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 2,
+				"rim": 2,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "old",
+			"slug": "old",
 			"emoji": "🧓",
-			"asset": "1f9d3.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "hourglass",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 2,
+				"rim": 6,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "optimistic",
+			"slug": "optimistic",
 			"emoji": "😊",
-			"asset": "1f60a.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#bcb5e3",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "thoughtful",
+			"emotionml": null,
+			"visual": {
+				"motif": "horizon-sun",
+				"layout": "arc-top",
+				"font": "slab",
+				"palette": 7,
+				"rim": 5,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "pained",
+			"slug": "pained",
 			"emoji": "😣",
-			"asset": "1f623.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "bandage",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 12,
+				"rim": 4,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "peaceful",
+			"slug": "peaceful",
 			"emoji": "😌",
-			"asset": "1f60c.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#bcb5e3",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "waves",
+				"layout": "icon-arc",
+				"font": "slab",
+				"palette": 15,
+				"rim": 5,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "pensive",
+			"slug": "pensive",
 			"emoji": "🤔",
-			"asset": "1f914.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#ffb703",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "thoughtful",
+			"emotionml": null,
+			"visual": {
+				"motif": "thought-lines",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 9,
+				"rim": 2,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "perplexed",
+			"slug": "perplexed",
 			"emoji": "😕",
-			"asset": "1f615.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "uncertain",
+			"emotionml": null,
+			"visual": {
+				"motif": "question",
+				"layout": "icon-arc",
+				"font": "mono",
+				"palette": 5,
+				"rim": 3,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "pessimistic",
+			"slug": "pessimistic",
 			"emoji": "🙁",
-			"asset": "1f641.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#ffb703",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "cloud",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 13,
+				"rim": 0,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "pissed",
+			"slug": "pissed",
 			"emoji": "🤬",
-			"asset": "1f92c.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "angry",
+			"emotionml": null,
+			"visual": {
+				"motif": "steam",
+				"layout": "crooked",
+				"font": "condensed",
+				"palette": 4,
+				"rim": 4,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "pleased",
+			"slug": "pleased",
 			"emoji": "☺️",
-			"asset": "263a.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#bcb5e3",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "smile-closed",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 5,
+				"rim": 5,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "positive",
+			"slug": "positive",
 			"emoji": "😃",
-			"asset": "1f603.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "sun",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 5,
+				"rim": 5,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "predatory",
+			"slug": "predatory",
 			"emoji": "🐺",
-			"asset": "1f43a.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "other",
+			"emotionml": null,
+			"visual": {
+				"motif": "eye",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 11,
+				"rim": 4,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "productive",
+			"slug": "productive",
 			"emoji": "✅",
-			"asset": "2705.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "work",
+			"emotionml": null,
+			"visual": {
+				"motif": "checkbox",
+				"layout": "icon-arc",
+				"font": "condensed",
+				"palette": 2,
+				"rim": 4,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "proud",
+			"slug": "proud",
 			"emoji": "😌",
-			"asset": "1f60c.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "medal",
+				"layout": "arc-top",
+				"font": "slab",
+				"palette": 10,
+				"rim": 2,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "pumped",
+			"slug": "pumped",
 			"emoji": "💪",
-			"asset": "1f4aa.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "energy",
+			"emotionml": null,
+			"visual": {
+				"motif": "fist",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 10,
+				"rim": 4,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "quixotic",
+			"slug": "quixotic",
 			"emoji": "🦄",
-			"asset": "1f984.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "thoughtful",
+			"emotionml": null,
+			"visual": {
+				"motif": "windmill",
+				"layout": "icon-arc",
+				"font": "hand",
+				"palette": 4,
+				"rim": 3,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "ready",
+			"slug": "ready",
 			"emoji": "👍",
-			"asset": "1f44d.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "work",
+			"emotionml": null,
+			"visual": {
+				"motif": "checkbox",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 1,
+				"rim": 4,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "recumbent",
+			"slug": "recumbent",
 			"emoji": "🛌",
-			"asset": "1f6cc.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "moon-zzz",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 0,
+				"rim": 2,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "refreshed",
+			"slug": "refreshed",
 			"emoji": "😌",
-			"asset": "1f60c.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "energy",
+			"emotionml": null,
+			"visual": {
+				"motif": "sprout",
+				"layout": "arc-top",
+				"font": "condensed",
+				"palette": 13,
+				"rim": 0,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "rejected",
+			"slug": "rejected",
 			"emoji": "😥",
-			"asset": "1f625.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#ffb703",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "heart-broken",
+				"layout": "crooked",
+				"font": "mono",
+				"palette": 14,
+				"rim": 3,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "rejuvenated",
+			"slug": "rejuvenated",
 			"emoji": "🌱",
-			"asset": "1f331.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#ffb703",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "energy",
+			"emotionml": null,
+			"visual": {
+				"motif": "sprout",
+				"layout": "icon-arc",
+				"font": "condensed",
+				"palette": 3,
+				"rim": 3,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "relaxed",
+			"slug": "relaxed",
 			"emoji": "😌",
-			"asset": "1f60c.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "waves",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 9,
+				"rim": 2,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "relieved",
+			"slug": "relieved",
 			"emoji": "😮‍💨",
-			"asset": "1f62e-200d-1f4a8.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#bcb5e3",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "smile-closed",
+				"layout": "arc-top",
+				"font": "slab",
+				"palette": 0,
+				"rim": 0,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "restless",
+			"slug": "restless",
 			"emoji": "😣",
-			"asset": "1f623.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "loop-arrows",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 8,
+				"rim": 3,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "rushed",
+			"slug": "rushed",
 			"emoji": "🏃",
-			"asset": "1f3c3.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "work",
+			"emotionml": null,
+			"visual": {
+				"motif": "alarm",
+				"layout": "crooked",
+				"font": "condensed",
+				"palette": 1,
+				"rim": 5,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "sad",
+			"slug": "sad",
 			"emoji": "😢",
-			"asset": "1f622.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#023047",
-				"ink": "#ebebeb",
-				"accent": "#ffb703",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "tears",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 5,
+				"rim": 4,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "sarcastic",
+			"slug": "sarcastic",
 			"emoji": "🙃",
-			"asset": "1f643.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "side-eye",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 9,
+				"rim": 1,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "satisfied",
+			"slug": "satisfied",
 			"emoji": "😌",
-			"asset": "1f60c.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "smile-closed",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 13,
+				"rim": 0,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "scared",
+			"slug": "scared",
 			"emoji": "😨",
-			"asset": "1f628.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#ffb703",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "open",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 13,
+				"rim": 0,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "shattered",
+			"slug": "shattered",
 			"emoji": "💔",
-			"asset": "1f494.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "heart-broken",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 14,
+				"rim": 1,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "shocked",
+			"slug": "shocked",
 			"emoji": "😱",
-			"asset": "1f631.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#ffb703",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "open",
+				"layout": "arc-top",
+				"font": "condensed",
+				"palette": 15,
+				"rim": 3,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "sick",
+			"slug": "sick",
 			"emoji": "🤒",
-			"asset": "1f912.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "thermometer",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 2,
+				"rim": 2,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "silly",
+			"slug": "silly",
 			"emoji": "🤪",
-			"asset": "1f92a.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "tongue",
+				"layout": "word-big",
+				"font": "hand",
+				"palette": 3,
+				"rim": 5,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "sleepy",
+			"slug": "sleepy",
 			"emoji": "😴",
-			"asset": "1f634.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "calm",
+			"emotionml": null,
+			"visual": {
+				"motif": "moon-zzz",
+				"layout": "icon-arc",
+				"font": "mono",
+				"palette": 9,
+				"rim": 6,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "sore",
+			"slug": "sore",
 			"emoji": "🤕",
-			"asset": "1f915.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ffb703",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "bandage",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 13,
+				"rim": 5,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "sorry",
+			"slug": "sorry",
 			"emoji": "😔",
-			"asset": "1f614.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "frown",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 14,
+				"rim": 0,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "special",
+			"slug": "special",
 			"emoji": "🌟",
-			"asset": "1f31f.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fee2c3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "stars",
+				"layout": "icon-arc",
+				"font": "slab",
+				"palette": 3,
+				"rim": 5,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "stressed",
+			"slug": "stressed",
 			"emoji": "😫",
-			"asset": "1f62b.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#ffb703",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "tangle",
+				"layout": "icon-word",
+				"font": "condensed",
+				"palette": 0,
+				"rim": 6,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "strong",
+			"slug": "strong",
 			"emoji": "💪",
-			"asset": "1f4aa.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#219ebc",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "energy",
+			"emotionml": null,
+			"visual": {
+				"motif": "fist",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 5,
+				"rim": 2,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "stuffed",
+			"slug": "stuffed",
 			"emoji": "😮‍💨",
-			"asset": "1f62e-200d-1f4a8.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#bcb5e3",
-				"ink": "#241c4a",
-				"accent": "#ebebeb",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "plate-fork",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 11,
+				"rim": 3,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "stupid",
+			"slug": "stupid",
 			"emoji": "🤦",
-			"asset": "1f926.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "other",
+			"emotionml": null,
+			"visual": {
+				"motif": "scribble",
+				"layout": "word-big",
+				"font": "mono",
+				"palette": 14,
+				"rim": 6,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "super",
+			"slug": "super",
 			"emoji": "🦸",
-			"asset": "1f9b8.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#8ecae6",
-				"ink": "#023047",
-				"accent": "#ebebeb",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "burst",
+				"layout": "word-big",
+				"font": "condensed",
+				"palette": 14,
+				"rim": 1,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "surprised",
+			"slug": "surprised",
 			"emoji": "😮",
-			"asset": "1f62e.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "open",
+				"layout": "arc-top",
+				"font": "condensed",
+				"palette": 5,
+				"rim": 1,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "sympathetic",
+			"slug": "sympathetic",
 			"emoji": "🫂",
-			"asset": "1fac2.svg",
-			"pattern": "edge-dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#023047",
-				"accent": "#219ebc",
-				"labelText": "#023047"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "social",
+			"emotionml": null,
+			"visual": {
+				"motif": "heart",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 12,
+				"rim": 5,
+				"pattern": "edge-dots"
+			}
 		},
 		{
 			"label": "thankful",
+			"slug": "thankful",
 			"emoji": "🙏",
-			"asset": "1f64f.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "social",
+			"emotionml": null,
+			"visual": {
+				"motif": "hands-pray",
+				"layout": "arc-top",
+				"font": "slab",
+				"palette": 10,
+				"rim": 2,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "thirsty",
+			"slug": "thirsty",
 			"emoji": "🥤",
-			"asset": "1f964.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "glass-drop",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 6,
+				"rim": 6,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "thoughtful",
+			"slug": "thoughtful",
 			"emoji": "🤔",
-			"asset": "1f914.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "thoughtful",
+			"emotionml": null,
+			"visual": {
+				"motif": "thought-lines",
+				"layout": "icon-arc",
+				"font": "slab",
+				"palette": 3,
+				"rim": 3,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "tired",
+			"slug": "tired",
 			"emoji": "🥱",
-			"asset": "1f971.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#126782",
-				"ink": "#ebebeb",
-				"accent": "#ebebeb",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "physical",
+			"emotionml": null,
+			"visual": {
+				"motif": "sleepy",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 3,
+				"rim": 1,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "touched",
+			"slug": "touched",
 			"emoji": "🥹",
-			"asset": "1f979.svg",
-			"pattern": "corner-stripe",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#8ecae6",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "social",
+			"emotionml": null,
+			"visual": {
+				"motif": "heart-rays",
+				"layout": "icon-word",
+				"font": "slab",
+				"palette": 8,
+				"rim": 5,
+				"pattern": "corner-stripe"
+			}
 		},
 		{
 			"label": "uncomfortable",
+			"slug": "uncomfortable",
 			"emoji": "😬",
-			"asset": "1f62c.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#023047",
-				"ink": "#ebebeb",
-				"accent": "#ffb703",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "grimace",
+				"layout": "stacked",
+				"font": "mono",
+				"palette": 8,
+				"rim": 0,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "upset",
+			"slug": "upset",
 			"emoji": "😖",
-			"asset": "1f616.svg",
-			"pattern": "top-halftone",
-			"palette": {
-				"face": "#fee2c3",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "sad",
+			"emotionml": null,
+			"visual": {
+				"motif": "frown",
+				"layout": "crooked",
+				"font": "mono",
+				"palette": 9,
+				"rim": 4,
+				"pattern": "top-halftone"
+			}
 		},
 		{
 			"label": "weird",
+			"slug": "weird",
 			"emoji": "👽",
-			"asset": "1f47d.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#241c4a",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "playful",
+			"emotionml": null,
+			"visual": {
+				"motif": "spiral",
+				"layout": "word-big",
+				"font": "hand",
+				"palette": 0,
+				"rim": 2,
+				"pattern": "rays"
+			}
 		},
 		{
 			"label": "wonderful",
+			"slug": "wonderful",
 			"emoji": "🤩",
-			"asset": "1f929.svg",
-			"pattern": "diagonal-lines",
-			"palette": {
-				"face": "#241c4a",
-				"ink": "#ebebeb",
-				"accent": "#8ecae6",
-				"labelText": "#ebebeb"
-			},
 			"sources": [
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "joy",
+			"emotionml": null,
+			"visual": {
+				"motif": "sparkles",
+				"layout": "arc-top",
+				"font": "slab",
+				"palette": 9,
+				"rim": 6,
+				"pattern": "diagonal-lines"
+			}
 		},
 		{
 			"label": "working",
+			"slug": "working",
 			"emoji": "💻",
-			"asset": "1f4bb.svg",
-			"pattern": "dots",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#bcb5e3",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal"
 			],
-			"art": "motif"
+			"aliases": [],
+			"family": "work",
+			"emotionml": null,
+			"visual": {
+				"motif": "wrench",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 6,
+				"rim": 6,
+				"pattern": "dots"
+			}
 		},
 		{
 			"label": "worried",
+			"slug": "worried",
 			"emoji": "😟",
-			"asset": "1f61f.svg",
-			"pattern": "rays",
-			"palette": {
-				"face": "#ebebeb",
-				"ink": "#241c4a",
-				"accent": "#fb8500",
-				"labelText": "#241c4a"
-			},
 			"sources": [
 				"LiveJournal",
 				"Facebook"
 			],
-			"art": "face"
+			"aliases": [],
+			"family": "anxious",
+			"emotionml": null,
+			"visual": {
+				"motif": "brow",
+				"layout": "icon-word",
+				"font": "mono",
+				"palette": 3,
+				"rim": 4,
+				"pattern": "rays"
+			}
 		}
 	]
 }

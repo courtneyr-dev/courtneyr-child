@@ -1,30 +1,32 @@
 /* ============================================================
-   Mood pin — a pin-back button from the comic-shop counter.
+   Mood pin — a pin-back button from the comic-shop counter (v0.7.41).
 
-   Layers, inside out: the face (printed paper under worn laminate:
-   a shallow dome, the emoji as ink, a faint pattern seed, a narrow
-   gloss arc), the rim (rolled metal, thicker on the lower right),
-   the word printed on the face, the wear (grain and scuffs crossing
-   face and word alike), and the contact shadow on the rim, outside
-   the clipped face. Raw hexes on the pin are deliberate: a physical
-   pin looks the same in dark mode; only its shadow on the page changes.
-   Per-pin inks arrive as custom properties from inc/mood-pin.php.
+   The shell is CSS: a rolled rim in a palette shade, a shallow dome,
+   grain and scuffs, and a contact shadow outside the clipped face.
+   The face is one inline SVG from inc/mood-pin.php: a halftone field,
+   a registration mark, the motif printed in two plates (the accent
+   plate nudged under the ink plate, the ink plate roughened by a
+   shared displacement filter), and the mood word set by layout —
+   along the lower or upper rim, big and centered, stacked, or a touch
+   crooked. Raw hexes on the pin are deliberate: a physical pin looks
+   the same in dark mode; only its shadow on the page changes. The
+   inks arrive as custom properties from inc/mood-pin.php.
    ============================================================ */
 
 .cr-pin-set {
 	display: inline-grid;
 	justify-items: center;
-	gap: 0.4rem;
+	gap: 0.35rem;
 	vertical-align: middle;
 }
 
 .cr-pin {
-	--pin-size: 8rem;
-	--pin-word: 0.75rem;
+	--pin-size: 7.5rem;
 	--pin-face: #ebebeb;
 	--pin-ink: #241c4a;
-	--pin-accent: #8ecae6;
-	--pin-label: #241c4a;
+	--pin-accent: #fb8500;
+	--pin-rim-hi: #7a6fb8;
+	--pin-rim-lo: #241c4a;
 	--pin-tilt: 0deg;
 	--pin-wear: 0deg;
 	--pin-shadow: 36, 28, 74;
@@ -33,20 +35,17 @@
 	width: var(--pin-size);
 	height: var(--pin-size);
 	flex: none;
-	margin: 0.35rem 0 0.6rem;
+	margin: 0.3rem 0 0.35rem;
 	transform: rotate(var(--pin-tilt));
-	font-family: var(--cr-font-body, "Barlow", system-ui, sans-serif);
 	line-height: 1;
 	color: var(--pin-ink);
 }
 .cr-pin--single {
 	--pin-size: 12rem;
-	--pin-word: 0.875rem;
 }
 
 .cr-pin__rim,
 .cr-pin__face,
-.cr-pin__pattern,
 .cr-pin__gloss,
 .cr-pin__wear {
 	position: absolute;
@@ -55,181 +54,137 @@
 	border-radius: 50%;
 }
 
-/* Rolled metal edge, lit from the upper left. The face sits up and to the
-   left inside it, so the lower-right lip shows as thickness. The contact
-   shadow lives here, outside the face's clip. */
+/* Rolled edge in the pin's rim shade, lit from the upper left; the face
+   sits up and to the left inside it, so the lower-right lip reads as
+   thickness. The contact shadow lives here, outside the face's clip. */
 .cr-pin__rim {
 	background: conic-gradient(
 		from 215deg,
-		#f2f1ec,
-		#a29cb4 22%,
-		#dedbe8 40%,
-		#5f5876 58%,
-		#c9c5d6 74%,
-		#f2f1ec
+		var(--pin-rim-hi),
+		var(--pin-rim-lo) 24%,
+		color-mix(in srgb, var(--pin-rim-hi) 55%, var(--pin-rim-lo)) 42%,
+		var(--pin-rim-lo) 60%,
+		color-mix(in srgb, var(--pin-rim-hi) 70%, var(--pin-rim-lo)) 76%,
+		var(--pin-rim-hi)
 	);
 	box-shadow:
-		inset 0 0 0 1px rgba(36, 28, 74, 0.45),
-		inset -2px -3px 3px rgba(36, 28, 74, 0.5),
-		inset 1px 1px 2px rgba(255, 255, 255, 0.7),
-		0 1px 0 rgba(var(--pin-shadow), 0.6),
-		0 2px 2px -1px rgba(var(--pin-shadow), 0.6),
-		0 5px 6px -3px rgba(var(--pin-shadow), 0.42),
-		0 12px 16px -10px rgba(var(--pin-shadow), 0.35);
+		inset 0 0 0 1px rgba(36, 28, 74, 0.4),
+		inset -2px -3px 3px rgba(36, 28, 74, 0.45),
+		inset 1px 1px 2px rgba(255, 255, 255, 0.5),
+		0 1px 0 rgba(var(--pin-shadow), 0.55),
+		0 2px 2px -1px rgba(var(--pin-shadow), 0.55),
+		0 5px 6px -3px rgba(var(--pin-shadow), 0.38),
+		0 12px 16px -10px rgba(var(--pin-shadow), 0.3);
 }
 
-/* The face: paper under laminate. A broad light-to-dark sweep makes the
-   dome; the inset shadows tuck it into the crimp. Everything printed is
-   clipped to the circle. */
+/* The face: printed paper under matte laminate. The dome is one quiet
+   light-to-dark sweep (v0.7.41: about a third softer than before). */
 .cr-pin__face {
 	inset: 2.6% 4.6% 4.6% 2.6%;
 	overflow: hidden;
 	background:
-		linear-gradient(148deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.06) 38%, rgba(36, 28, 74, 0) 52%, rgba(36, 28, 74, 0.14) 100%),
-		radial-gradient(circle at 76% 86%, rgba(36, 28, 74, 0.12), rgba(36, 28, 74, 0) 55%),
+		linear-gradient(148deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04) 40%, rgba(36, 28, 74, 0) 55%, rgba(36, 28, 74, 0.1) 100%),
 		var(--pin-face);
 	box-shadow:
-		inset -2px -4px 6px -3px rgba(36, 28, 74, 0.3),
-		inset 2px 3px 5px -3px rgba(255, 255, 255, 0.45),
-		inset 0 0 0 1px rgba(36, 28, 74, 0.18);
+		inset -2px -3px 5px -3px rgba(36, 28, 74, 0.24),
+		inset 2px 2px 4px -3px rgba(255, 255, 255, 0.3),
+		inset 0 0 0 1px rgba(36, 28, 74, 0.16);
 }
 
-/* The emoji, printed as ink. A face (its disk removed in the asset) prints
-   larger than a complete motif so the features read at stream size. */
-.cr-pin__art,
+/* ---- The printed face ---- */
+.cr-pin__art {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	display: block;
+	overflow: visible;
+	color: var(--pin-ink);
+}
+/* Stroke widths live on the SVG as attributes (a plate's default of 7 is
+   inherited; a motif's own thinner lines win), so the CSS sets only inks. */
+.cr-pin__art .i { fill: none; stroke: var(--pin-ink); stroke-linecap: round; stroke-linejoin: round; }
+.cr-pin__art .if { fill: var(--pin-ink); stroke: none; }
+.cr-pin__art .a { fill: var(--pin-accent); stroke: none; }
+.cr-pin__art .as { fill: none; stroke: var(--pin-accent); stroke-linecap: round; stroke-linejoin: round; }
+/* The accent plate, printed first and a hair off register. */
+.cr-pin__plate--a { opacity: 0.55; }
+.cr-pin__plate--a .i,
+.cr-pin__plate--a .as { stroke: var(--pin-accent); fill: none; }
+.cr-pin__plate--a .if,
+.cr-pin__plate--a .a { fill: var(--pin-accent); stroke: none; }
+.cr-pin__halftone { opacity: 0.6; }
+.cr-pin__rays { opacity: 0.85; }
+.cr-pin__reg { opacity: 0.5; }
+
+/* The word, set in the face's units so it scales with the pin. */
+.cr-pin__word {
+	fill: var(--pin-ink);
+	font-weight: 700;
+	paint-order: stroke fill;
+	stroke: var(--pin-face);
+	stroke-width: 0.9;
+	stroke-linejoin: round;
+}
+.cr-pin__word--mono {
+	font-family: var(--cr-font-mono, ui-monospace, Menlo, monospace);
+	letter-spacing: 0.08em;
+}
+.cr-pin__word--condensed {
+	font-family: var(--cr-font-body, "Barlow", system-ui, sans-serif);
+	font-weight: 800;
+	letter-spacing: 0.04em;
+}
+.cr-pin__word--slab {
+	font-family: var(--cr-font-accent, "Roboto Slab", serif);
+	font-weight: 800;
+	letter-spacing: 0.005em;
+}
+.cr-pin__word--hand {
+	font-family: var(--cr-font-display, "Rock Salt", cursive);
+	font-weight: 400;
+	stroke-width: 0.6;
+}
+
+/* A saved emoji with no catalog entry prints as a text glyph over the
+   art (the word still comes from the SVG). */
 .cr-pin__glyph {
 	position: absolute;
-	top: 43%;
+	top: 41%;
 	left: 50%;
-	width: 62%;
-	height: 62%;
-	transform: translate(-50%, -50%);
-	z-index: 1;
-}
-.cr-pin__art {
-	overflow: visible;
-}
-.cr-pin--art-face .cr-pin__art {
-	width: 76%;
-	height: 76%;
-}
-.cr-pin__glyph {
 	display: grid;
 	place-items: center;
-	font-size: calc(var(--pin-size) * 0.46);
+	width: 56%;
+	height: 56%;
+	transform: translate(-50%, -50%);
+	font-size: calc(var(--pin-size) * 0.4);
 	line-height: 1;
 	font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+	filter: saturate(0.75) contrast(1.05);
 }
+.cr-pin--l-word-big .cr-pin__glyph { top: 30%; font-size: calc(var(--pin-size) * 0.26); }
 
-/* The word, printed on the lower face: real text, never clipped. */
-.cr-pin__word {
-	position: absolute;
-	right: 11%;
-	bottom: 10%;
-	left: 11%;
-	z-index: 2;
-	display: block;
-	text-align: center;
-	font-size: var(--pin-word);
-	font-weight: 700;
-	letter-spacing: 0.01em;
-	text-transform: lowercase;
-	white-space: nowrap;
-	color: var(--pin-label);
-}
-.cr-pin__word--below {
-	position: static;
-	max-width: 14rem;
-	white-space: normal;
-	font-family: var(--cr-font-body, "Barlow", system-ui, sans-serif);
-	font-size: 0.8rem;
-	font-weight: 700;
-	letter-spacing: 0.02em;
-	text-transform: lowercase;
-	color: var(--cr-ink, #241c4a);
-}
-
-/* Pattern seeds: one quiet device per catalog pattern, in the accent
-   ink, under the artwork. */
-.cr-pin__pattern {
-	z-index: 0;
-	opacity: 0.5;
-	pointer-events: none;
-}
-.cr-pin--p-dots .cr-pin__pattern {
-	background: radial-gradient(circle, var(--pin-accent) 1.2px, transparent 1.8px) 0 0 / 10px 10px;
-	-webkit-mask-image: radial-gradient(circle at 78% 74%, #000 0 20%, transparent 52%);
-	mask-image: radial-gradient(circle at 78% 74%, #000 0 20%, transparent 52%);
-}
-.cr-pin--p-corner-stripe .cr-pin__pattern {
-	background: linear-gradient(
-		135deg,
-		var(--pin-accent) 0 5%,
-		transparent 5% 8%,
-		var(--pin-accent) 8% 11%,
-		transparent 11%
-	);
-	opacity: 0.5;
-}
-.cr-pin--p-diagonal-lines .cr-pin__pattern {
-	background: repeating-linear-gradient(-45deg, var(--pin-accent) 0 1.4px, transparent 1.4px 7px);
-	opacity: 0.4;
-	-webkit-mask-image: linear-gradient(to top right, #000 0 22%, transparent 55%);
-	mask-image: linear-gradient(to top right, #000 0 22%, transparent 55%);
-}
-.cr-pin--p-top-halftone .cr-pin__pattern {
-	background: radial-gradient(circle, var(--pin-accent) 1.4px, transparent 2px) 0 0 / 8px 8px;
-	-webkit-mask-image: linear-gradient(#000 8%, transparent 42%);
-	mask-image: linear-gradient(#000 8%, transparent 42%);
-}
-.cr-pin--p-rays .cr-pin__pattern {
-	background: repeating-conic-gradient(from 8deg, var(--pin-ink) 0 1.4deg, transparent 1.4deg 30deg);
-	opacity: 0.8;
-	-webkit-mask-image:
-		radial-gradient(circle closest-side, transparent 0 84%, #000 86% 94%, transparent 96%),
-		linear-gradient(#000 66%, transparent 74%);
-	-webkit-mask-composite: source-in;
-	mask-image:
-		radial-gradient(circle closest-side, transparent 0 84%, #000 86% 94%, transparent 96%),
-		linear-gradient(#000 66%, transparent 74%);
-	mask-composite: intersect;
-	transform: rotate(var(--pin-wear));
-}
-.cr-pin--p-edge-dots .cr-pin__pattern {
-	background: radial-gradient(circle, var(--pin-accent) 1.3px, transparent 1.9px) 4px 4px / 9px 9px;
-	-webkit-mask-image:
-		radial-gradient(circle closest-side, transparent 0 84%, #000 87% 100%),
-		linear-gradient(#000 64%, transparent 74%);
-	-webkit-mask-composite: source-in;
-	mask-image:
-		radial-gradient(circle closest-side, transparent 0 84%, #000 87% 100%),
-		linear-gradient(#000 64%, transparent 74%);
-	mask-composite: intersect;
-}
-
-/* The laminate: an irregular, narrow reflection along the upper-left
-   curve. Blurred a touch and faded to one side so it never reads as a
-   ring. */
+/* The laminate: one narrow reflection along the upper-left curve,
+   faded to one side so it never reads as a ring. */
 .cr-pin__gloss {
 	inset: 4% 7% 7% 4%;
 	border: 2px solid transparent;
-	border-top-color: rgba(255, 255, 255, 0.62);
-	border-left-color: rgba(255, 255, 255, 0.22);
+	border-top-color: rgba(255, 255, 255, 0.4);
+	border-left-color: rgba(255, 255, 255, 0.14);
 	transform: rotate(-32deg);
 	filter: blur(0.6px);
-	-webkit-mask-image: linear-gradient(105deg, #000 18%, rgba(0, 0, 0, 0.35) 46%, transparent 62%);
-	mask-image: linear-gradient(105deg, #000 18%, rgba(0, 0, 0, 0.35) 46%, transparent 62%);
+	-webkit-mask-image: linear-gradient(105deg, #000 18%, rgba(0, 0, 0, 0.3) 46%, transparent 60%);
+	mask-image: linear-gradient(105deg, #000 18%, rgba(0, 0, 0, 0.3) 46%, transparent 60%);
 	pointer-events: none;
 }
 
-/* Wear: ink speckle multiplied over face and word, then a sparser light
-   abrasion screened over everything, plus two laminate scratches. Two
-   small SVG noise tiles, repeated; the angle comes from the pin's seed
-   so the same tile reads differently on every pin. */
+/* Wear: photocopy grain multiplied over face and word, a sparser light
+   abrasion screened over everything, and two laminate scratches. Two
+   tiny SVG noise tiles; the angle comes from the pin's seed. */
 .cr-pin__wear {
 	z-index: 3;
 	pointer-events: none;
-	opacity: 0.2;
+	opacity: 0.18;
 	mix-blend-mode: multiply;
 	background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.14 0 0 0 0 0.11 0 0 0 0 0.29 0 0 0 7 -3.6'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23g)'/%3E%3C/svg%3E") center / 120px 120px;
 	transform: rotate(var(--pin-wear));
@@ -239,11 +194,11 @@
 	position: absolute;
 	inset: 0;
 	border-radius: 50%;
-	opacity: 0.9;
+	opacity: 0.8;
 	mix-blend-mode: screen;
 	background:
-		linear-gradient(118deg, transparent 43%, rgba(255, 255, 255, 0.34) 43.5%, transparent 44.1%),
-		linear-gradient(62deg, transparent 71%, rgba(255, 255, 255, 0.28) 71.4%, transparent 71.9%),
+		linear-gradient(118deg, transparent 43%, rgba(255, 255, 255, 0.3) 43.5%, transparent 44.1%),
+		linear-gradient(62deg, transparent 71%, rgba(255, 255, 255, 0.24) 71.4%, transparent 71.9%),
 		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.7' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 9 -5.2'/%3E%3C/filter%3E%3Crect width='96' height='96' filter='url(%23s)'/%3E%3C/svg%3E") center / 96px 96px;
 }
 
@@ -256,6 +211,22 @@
 	:root:not([data-theme="light"]) .cr-pin {
 		--pin-shadow: 0, 0, 0;
 	}
+}
+
+/* Family sticker under the single's pin: navigation metadata, kept small. */
+.cr-pin__family {
+	display: inline-block;
+	margin-top: 0.1rem;
+	padding: 0.12rem 0.5rem;
+	border-radius: 1px;
+	background: var(--cr-tape, #f3e5b8);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: #241c4a;
+	transform: rotate(var(--cr-rotate-1, -1.2deg));
 }
 
 /* ---- Where the pin sits ---------------------------------------------- */
@@ -311,8 +282,23 @@ body.single-post .pk-card.k-mood .pk-meta .dt-published {
 	color: var(--cr-cerulean, #126782);
 }
 
-/* Stream: a note that only repeats the word on the pin stays out of
-   the caption. */
+/* Stream: the pin is the hero but the title and date sit close under it;
+   a note that only repeats the word on the pin stays out of the caption. */
+.cr-stream-page .pk-card.k-mood .cr-pin-set { margin-bottom: 0.1rem; }
+/* The plugin's synthetic "Mood" heading on a title-less post stays the
+   card's link for assistive tech and hides visually. */
+.cr-stream-page .pk-card.k-mood.cr-pin-card--untitled .pk-title {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
 .cr-stream-page .pk-card.k-mood .pk-mood__note.cr-pin-note-dup {
 	display: none;
 }

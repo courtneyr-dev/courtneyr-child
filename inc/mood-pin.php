@@ -1,17 +1,20 @@
 <?php
 /**
- * Mood pins: the mood-card's emoji and mood word printed on a pin-back
- * button, on the single and on /stream.
+ * Mood pins: the mood word and a printed motif on a pin-back button, on
+ * the single and on /stream.
  *
  * The plugin's mood-card block stores the mood as free text (`mood`) and a
  * Unicode emoji (`emoji`). Both of its renderers — render.php on the single
  * (and for a card-only micro-post on /stream) and the generic stream card —
  * emit one `<span class="pk-mood__emoji">`. This module swaps that span for
- * the pin: the mood word looked up in the theme's catalog
- * (assets/data/moods.json — 194 moods, each with a Twemoji-derived SVG in
- * assets/svg/emoji/, a pattern seed and a palette), with a readable fallback
- * for any mood the catalog doesn't know. Storage is untouched: the block
- * keeps its attributes and their meaning. cr-mood-pin.css paints the pin.
+ * the pin. A catalog mood (assets/data/moods.json: 194 moods, each with a
+ * family, a motif from inc/mood-motifs.php, a word layout, a face, and a
+ * deterministic two-or-three-ink palette) prints as screen-printed art:
+ * the motif in two plates, a halftone field, the word set into the
+ * composition. Anything off the catalog prints the saved word and, when
+ * there is one, the saved emoji as a text glyph. Storage is untouched: the
+ * block keeps its attributes and their meaning. cr-mood-pin.css paints the
+ * shell (rim, dome, wear, contact shadow).
  *
  * @package CourtneyrChild
  */
@@ -20,59 +23,87 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\MoodPin;
 
+use function Courtneyr\Child\MoodMotifs\motif;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 const BLOCK = 'post-kinds-indieweb/mood-card';
 
-/** Catalog pattern seeds; a custom mood draws one by hash. */
-const PATTERNS = array( 'dots', 'corner-stripe', 'diagonal-lines', 'top-halftone', 'rays', 'edge-dots' );
+/**
+ * Spot-ink combinations: face, line ink (also the word), accent. Every
+ * ink-on-face pair clears WCAG AA for the word (checked in the vault note).
+ * Indices 0–4 are the brief's examples (curious, nostalgic, productive,
+ * melancholy, quixotic); the rest are picked per mood by hash at build time
+ * and stored in the catalog, so a mood always prints the same way.
+ */
+const PALETTES = array(
+	array( '#bcb5e3', '#241c4a', '#ffb703' ),
+	array( '#023047', '#8ecae6', '#bcb5e3' ),
+	array( '#fee2c3', '#241c4a', '#fb8500' ),
+	array( '#bcb5e3', '#241c4a', '#647baf' ),
+	array( '#ebebeb', '#241c4a', '#fb8500' ),
+	array( '#ffb703', '#241c4a', '#ebebeb' ),
+	array( '#8ecae6', '#023047', '#fb8500' ),
+	array( '#fb8500', '#241c4a', '#fee2c3' ),
+	array( '#241c4a', '#ebebeb', '#ffb703' ),
+	array( '#126782', '#ebebeb', '#8ecae6' ),
+	array( '#219ebc', '#241c4a', '#fee2c3' ),
+	array( '#fee2c3', '#023047', '#219ebc' ),
+	array( '#bcb5e3', '#023047', '#fb8500' ),
+	array( '#ebebeb', '#126782', '#ffb703' ),
+	array( '#8ecae6', '#241c4a', '#ebebeb' ),
+	array( '#ffb703', '#023047', '#241c4a' ),
+);
+
+/** Rim shells (highlight, shadow): violet, Prussian, glaucous, and one light rim. */
+const RIMS = array(
+	array( '#7a6fb8', '#241c4a' ),
+	array( '#5f5389', '#1a1436' ),
+	array( '#3a6a86', '#023047' ),
+	array( '#4f7f9b', '#022a3d' ),
+	array( '#a8b6d8', '#3f5285' ),
+	array( '#8ea0cc', '#4a5f96' ),
+	array( '#f5f4ef', '#8f86c4' ),
+);
 
 /** The four locked rotation tokens (tokens.css --cr-rotate-*). */
 const TILTS = array( '-1.2deg', '1.5deg', '-2.5deg', '2.8deg' );
 
-/** A custom mood prints on light gray with violet ink and one of these accents. */
-const DEFAULT_PALETTE = array(
-	'face'      => '#ebebeb',
-	'ink'       => '#241c4a',
-	'accent'    => '#8ecae6',
-	'labelText' => '#241c4a',
-);
-const ACCENTS         = array( '#8ecae6', '#fb8500', '#fee2c3', '#bcb5e3', '#ffb703' );
+const LAYOUTS = array( 'icon-word', 'icon-arc', 'arc-top', 'word-big', 'stacked', 'crooked' );
+const FONTS   = array( 'mono', 'condensed', 'slab', 'hand' );
 
-/** Longest word printed on the face (the catalog's longest is 13); longer words sit under the pin. */
-const ON_FACE_MAX = 13;
+/** Average advance per glyph, in em, used to fit a word to its band. */
+const GLYPH_WIDTH = array(
+	'mono'      => 0.74,
+	'condensed' => 0.66,
+	'slab'      => 0.66,
+	'hand'      => 0.92,
+);
+
+/** Smallest word size in face units (100 = the face); 10 is 12px on a 7.5rem pin. */
+const WORD_MIN = 10.0;
 
 /**
- * The mood catalog, keyed by normalized label, plus an emoji → asset map so
- * a custom mood that picked a catalog emoji still prints the artwork.
+ * The mood catalog, keyed by normalized label.
  *
- * @return array{by_label: array<string, array<string, mixed>>, by_emoji: array<string, string>}
+ * @return array<string, array<string, mixed>>
  */
 function catalog(): array {
 	static $catalog = null;
 	if ( null !== $catalog ) {
 		return $catalog;
 	}
-	$catalog = array(
-		'by_label' => array(),
-		'by_emoji' => array(),
-	);
+	$catalog = array();
 	$file    = COURTNEYR_CHILD_DIR . '/assets/data/moods.json';
 	$json    = is_readable( $file ) ? (string) file_get_contents( $file ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- theme-bundled data file.
 	$data    = '' !== $json ? json_decode( $json, true ) : null;
 	foreach ( (array) ( $data['entries'] ?? array() ) as $entry ) {
-		if ( empty( $entry['label'] ) || empty( $entry['asset'] ) ) {
+		if ( empty( $entry['label'] ) ) {
 			continue;
 		}
-		$entry['palette'] = array_map( 'strtolower', array_merge( DEFAULT_PALETTE, (array) ( $entry['palette'] ?? array() ) ) );
-		$key              = normalize_label( (string) $entry['label'] );
-		$catalog['by_label'][ $key ] = $entry;
-		$emoji = (string) ( $entry['emoji'] ?? '' );
-		if ( '' !== $emoji && ! isset( $catalog['by_emoji'][ $emoji ] ) ) {
-			$catalog['by_emoji'][ $emoji ] = (string) $entry['asset'];
-		}
+		$catalog[ normalize_label( (string) $entry['label'] ) ] = $entry;
 	}
 	return $catalog;
 }
@@ -93,139 +124,219 @@ function normalize_label( string $mood ): string {
 /**
  * What to print for a saved mood + emoji.
  *
- * A catalog mood prints its own artwork, pattern and palette. Anything else
- * prints the saved word as typed (lowercased) with the saved emoji — as the
- * catalog's SVG when that emoji is in the catalog, as a text glyph otherwise —
- * on the default palette with a hashed accent, pattern and tilt, so the same
- * custom mood always looks the same.
- *
  * @param string $mood  Saved mood text.
  * @param string $emoji Saved emoji.
- * @return array{label: string, asset: string, art: string, glyph: string, pattern: string, palette: array<string, string>, custom: bool}
+ * @return array{label: string, family: string, motif: string, layout: string, font: string, palette: array<int, string>, rim: array<int, string>, glyph: string, pattern: string, custom: bool}
  */
 function resolve( string $mood, string $emoji ): array {
-	$label   = normalize_label( $mood );
-	$emoji   = trim( wp_strip_all_tags( $emoji ) );
-	$catalog = catalog();
-	$entry   = $catalog['by_label'][ $label ] ?? null;
+	$label = normalize_label( $mood );
+	$emoji = trim( wp_strip_all_tags( $emoji ) );
+	$entry = catalog()[ $label ] ?? null;
+	$seed  = crc32( $label . '|' . $emoji );
 	if ( null !== $entry ) {
+		$v = (array) ( $entry['visual'] ?? array() );
 		return array(
 			'label'   => (string) $entry['label'],
-			'asset'   => (string) $entry['asset'],
-			'art'     => (string) ( $entry['art'] ?? 'motif' ),
+			'family'  => (string) ( $entry['family'] ?? 'other' ),
+			'motif'   => (string) ( $v['motif'] ?? '' ),
+			'layout'  => in_array( $v['layout'] ?? '', LAYOUTS, true ) ? (string) $v['layout'] : 'icon-word',
+			'font'    => in_array( $v['font'] ?? '', FONTS, true ) ? (string) $v['font'] : 'mono',
+			'palette' => PALETTES[ (int) ( $v['palette'] ?? 0 ) % count( PALETTES ) ],
+			'rim'     => RIMS[ (int) ( $v['rim'] ?? 0 ) % count( RIMS ) ],
 			'glyph'   => '',
-			'pattern' => in_array( $entry['pattern'] ?? '', PATTERNS, true ) ? (string) $entry['pattern'] : PATTERNS[0],
-			'palette' => $entry['palette'],
+			'pattern' => (string) ( $v['pattern'] ?? 'dots' ),
 			'custom'  => false,
 		);
 	}
-	$seed              = crc32( $label . '|' . $emoji );
-	$asset             = $catalog['by_emoji'][ $emoji ] ?? '';
-	$palette           = DEFAULT_PALETTE;
-	$palette['accent'] = ACCENTS[ $seed % count( ACCENTS ) ];
 	return array(
 		'label'   => $label,
-		'asset'   => $asset,
-		'art'     => 'face',
-		'glyph'   => '' === $asset ? $emoji : '',
-		'pattern' => PATTERNS[ ( $seed >> 3 ) % count( PATTERNS ) ],
-		'palette' => $palette,
+		'family'  => '',
+		'motif'   => '',
+		'layout'  => '' !== $emoji ? 'icon-word' : 'word-big',
+		'font'    => 'mono',
+		'palette' => PALETTES[ $seed % count( PALETTES ) ],
+		'rim'     => RIMS[ ( $seed >> 3 ) % count( RIMS ) ],
+		'glyph'   => $emoji,
+		'pattern' => 'dots',
 		'custom'  => true,
 	);
 }
 
 /**
- * The emoji artwork as inline SVG, printed in the pin's inks.
+ * A word's size in face units so it fits its band.
  *
- * The bundled SVGs already lost their yellow face disk (assets/svg/emoji/
- * README.md). Here the Russian violet features take the pin's ink, and on a
- * pin whose ink is light gray the artwork's light gray takes the accent so
- * whites and features stay two inks. Anything else keeps its palette color;
- * an element the color of the face simply doesn't print, the way a
- * screen-printed knock-out reads.
- *
- * @param string                $asset   File name from the catalog.
- * @param array<string, string> $palette Pin palette.
- * @return string Inline SVG, or '' when the asset is unavailable.
+ * @param string $word   The word.
+ * @param string $font   Font key.
+ * @param float  $usable Band width in face units.
+ * @param float  $base   Size when the band is not the constraint.
+ * @return float
  */
-function art( string $asset, array $palette ): string {
-	static $cache = array();
-	$name = basename( $asset );
-	$key  = $name . '|' . implode( ',', $palette );
-	if ( isset( $cache[ $key ] ) ) {
-		return $cache[ $key ];
+function word_size( string $word, string $font, float $usable, float $base ): float {
+	$len = max( 1, mb_strlen( $word ) );
+	$fit = $usable / ( $len * ( GLYPH_WIDTH[ $font ] ?? 0.6 ) );
+	return round( max( WORD_MIN, min( $base, $fit ) ), 1 );
+}
+
+/**
+ * The word as printed: uppercase for the typewriter and condensed faces.
+ *
+ * @param string $word Word.
+ * @param string $font Font key.
+ * @return string
+ */
+function printed_word( string $word, string $font ): string {
+	return in_array( $font, array( 'mono', 'condensed' ), true ) ? mb_strtoupper( $word ) : $word;
+}
+
+/**
+ * The face artwork: halftone field, registration mark, the motif in two
+ * plates (accent nudged under ink), and the word set by layout. One SVG in
+ * a 100×100 box; the shell around it is CSS.
+ *
+ * @param array<string, mixed> $spec From resolve().
+ * @param int                  $uid  Per-pin id for pattern/path ids.
+ * @return string
+ */
+function face_svg( array $spec, int $uid ): string {
+	$label  = (string) $spec['label'];
+	$font   = (string) $spec['font'];
+	$layout = (string) $spec['layout'];
+	$word   = printed_word( $label, $font );
+	$seed   = crc32( $label );
+	$angle  = $seed % 360;
+	$ht     = 'crht' . $uid;
+	$arc    = 'crarc' . $uid;
+
+	// Motif placement and word band per layout: [scale, cx, cy, word y, usable, base].
+	$placement = array(
+		'icon-word' => array( 0.54, 50, 41, 81, 64, 11.5 ),
+		'crooked'   => array( 0.54, 50, 41, 81, 62, 11.5 ),
+		'icon-arc'  => array( 0.56, 50, 44, 0, 80, 11 ),
+		'arc-top'   => array( 0.52, 50, 58, 0, 80, 11 ),
+		'word-big'  => array( 0.3, 50, 28, 66, 78, 20 ),
+		'stacked'   => array( 0.3, 50, 26, 66, 72, 15 ),
+	);
+	list( $scale, $cx, $cy, $wy, $usable, $base ) = $placement[ $layout ] ?? $placement['icon-word'];
+	if ( 'hand' === $font ) {
+		$base = min( $base, 15 );
 	}
-	$file = COURTNEYR_CHILD_DIR . '/assets/svg/emoji/' . $name;
-	if ( ! preg_match( '/^[0-9a-f-]+\.svg$/', $name ) || ! is_readable( $file ) ) {
-		$cache[ $key ] = '';
+
+	$svg  = '<svg class="cr-pin__art" viewBox="0 0 100 100" aria-hidden="true" focusable="false">';
+	$svg .= '<defs><pattern id="' . $ht . '" width="5.5" height="5.5" patternUnits="userSpaceOnUse" patternTransform="rotate(' . ( $angle % 45 ) . ')"><circle class="a" cx="2.75" cy="2.75" r="1.25"/></pattern>';
+	if ( 'icon-arc' === $layout ) {
+		$svg .= '<path id="' . $arc . '" d="M16 62A36 36 0 0 0 84 62"/>';
+	} elseif ( 'arc-top' === $layout ) {
+		$svg .= '<path id="' . $arc . '" d="M16 38A36 36 0 0 1 84 38"/>';
+	}
+	$svg .= '</defs>';
+
+	// Halftone field: a quarter of the face, where the seed turns it; the
+	// 'rays' seed adds short ink ticks around the motif instead.
+	if ( 'rays' === $spec['pattern'] ) {
+		$svg .= '<g class="cr-pin__rays" transform="rotate(' . ( $angle % 30 ) . ' 50 50)"><path class="i" stroke-width="2.4" d="M50 6v7M50 87v7M6 50h7M87 50h7M19 19l5 5M76 76l5 5M19 81l5-5M76 24l5-5"/></g>';
+	} else {
+		$svg .= '<path class="cr-pin__halftone" transform="rotate(' . ( $angle % 360 ) . ' 50 50)" d="M50 50L98 50A48 48 0 0 1 50 98z" fill="url(#' . $ht . ')"/>';
+	}
+	// Registration mark on the upper rim, clear of any word on the lower arc.
+	$svg .= '<path class="i cr-pin__reg" stroke-width="1.5" transform="rotate(' . ( ( ( $seed >> 2 ) % 120 ) - 60 ) . ' 50 50)" d="M50 6v6M47 9h6"/>';
+
+	if ( '' !== $spec['motif'] ) {
+		$art = motif( (string) $spec['motif'] );
+		if ( '' !== $art ) {
+			$t    = sprintf( 'translate(%.2f %.2f) scale(%.2f)', $cx - 50 * $scale, $cy - 50 * $scale, $scale );
+			$svg .= '<g class="cr-pin__plate cr-pin__plate--a" stroke-width="7" transform="translate(1.4 1.1) ' . $t . '">' . $art . '</g>';
+			$svg .= '<g class="cr-pin__plate cr-pin__plate--i" stroke-width="7" filter="url(#cr-ink-rough)" transform="' . $t . '">' . $art . '</g>';
+		}
+	}
+
+	if ( '' !== $word ) {
+		$class = 'cr-pin__word cr-pin__word--' . $font;
+		if ( in_array( $layout, array( 'icon-arc', 'arc-top' ), true ) ) {
+			$size = word_size( $word, $font, $usable, $base );
+			$svg .= '<text class="' . $class . '" font-size="' . $size . '"><textPath href="#' . $arc . '" startOffset="50%" text-anchor="middle">' . esc_html( $word ) . '</textPath></text>';
+		} elseif ( 'stacked' === $layout && false !== strpos( $word, ' ' ) ) {
+			$lines = explode( ' ', $word, 2 );
+			$size  = min( word_size( $lines[0], $font, $usable, $base ), word_size( $lines[1], $font, $usable, $base ) );
+			$svg  .= '<text class="' . $class . '" font-size="' . $size . '" text-anchor="middle" x="50" y="' . ( $wy - $size * 0.55 ) . '">' . esc_html( $lines[0] ) . '<tspan x="50" dy="' . ( $size * 1.15 ) . '">' . esc_html( $lines[1] ) . '</tspan></text>';
+		} else {
+			$size = word_size( $word, $font, $usable, $base );
+			$attr = 'crooked' === $layout ? ' transform="rotate(-6 50 ' . $wy . ')"' : '';
+			$svg .= '<text class="' . $class . '" font-size="' . $size . '" text-anchor="middle" x="50" y="' . $wy . '"' . $attr . '>' . esc_html( $word ) . '</text>';
+		}
+	}
+	return $svg . '</svg>';
+}
+
+/**
+ * The shared rough-ink filter, printed once per document before the first
+ * pin (inline SVGs reference it by id).
+ *
+ * @return string
+ */
+function ink_defs(): string {
+	static $printed = false;
+	if ( $printed ) {
 		return '';
 	}
-	$svg = trim( (string) file_get_contents( $file ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- theme-bundled asset.
-	$map = array( '#241c4a' => $palette['ink'] );
-	if ( '#ebebeb' === $palette['ink'] && $palette['accent'] !== $palette['ink'] ) {
-		$map['#ebebeb'] = $palette['accent'];
-	}
-	$svg           = strtr( $svg, $map );
-	$svg           = (string) preg_replace( '/<svg\b/', '<svg class="cr-pin__art" aria-hidden="true" focusable="false"', $svg, 1 );
-	$cache[ $key ] = $svg;
-	return $svg;
+	$printed = true;
+	return '<svg class="cr-pin-defs" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden"><filter id="cr-ink-rough" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.4" xChannelSelector="R" yChannelSelector="G"/></filter></svg>';
 }
 
 /**
  * The pin.
  *
- * Reading order carries the mood word once, as real text; every other layer
- * (rim, artwork, pattern, gloss, wear) is decorative and hidden from
- * assistive tech. A saved emoji with no artwork prints as a text glyph, and
- * that glyph stays exposed when there is no word to name the mood.
+ * Reading order carries the mood word once, as real (visually hidden) text;
+ * the face artwork, including the printed word, is decorative. A saved
+ * emoji with no catalog entry prints as a text glyph, exposed only when
+ * there is no word to name the mood.
  *
  * @param array<string, mixed> $spec From resolve().
- * @param string               $size 'single' (12rem) or 'stream' (8rem).
+ * @param string               $size 'single' (12rem) or 'stream' (7.5rem).
  * @return string
  */
 function render( array $spec, string $size ): string {
-	$p = $spec['palette'];
-	foreach ( $p as $k => $v ) {
-		if ( ! preg_match( '/^#[0-9a-f]{6}$/', (string) $v ) ) {
-			$p[ $k ] = DEFAULT_PALETTE[ $k ] ?? '#241c4a';
-		}
-	}
-	$label   = (string) $spec['label'];
-	$seed    = crc32( $label . '|' . $spec['glyph'] . '|' . $spec['asset'] );
-	$on_face = '' !== $label && mb_strlen( $label ) <= ON_FACE_MAX;
-	$size    = 'single' === $size ? 'single' : 'stream';
+	static $uid = 0;
+	++$uid;
+	$label = (string) $spec['label'];
+	$seed  = crc32( $label . '|' . $spec['glyph'] );
+	$size  = 'single' === $size ? 'single' : 'stream';
+	$p     = $spec['palette'];
+	$r     = $spec['rim'];
 
-	$classes = array( 'cr-pin', 'cr-pin--' . $size, 'cr-pin--p-' . $spec['pattern'], 'cr-pin--art-' . ( 'face' === $spec['art'] ? 'face' : 'motif' ) );
+	$classes = array( 'cr-pin', 'cr-pin--' . $size, 'cr-pin--l-' . $spec['layout'], 'cr-pin--f-' . $spec['font'] );
 	if ( ! empty( $spec['custom'] ) ) {
 		$classes[] = 'cr-pin--custom';
 	}
+	if ( '' !== $spec['family'] ) {
+		$classes[] = 'cr-pin--fam-' . $spec['family'];
+	}
 	$style = sprintf(
-		'--pin-face:%s;--pin-ink:%s;--pin-accent:%s;--pin-label:%s;--pin-tilt:%s;--pin-wear:%ddeg',
-		$p['face'],
-		$p['ink'],
-		$p['accent'],
-		$p['labelText'],
+		'--pin-face:%s;--pin-ink:%s;--pin-accent:%s;--pin-rim-hi:%s;--pin-rim-lo:%s;--pin-tilt:%s;--pin-wear:%ddeg',
+		$p[0],
+		$p[1],
+		$p[2],
+		$r[0],
+		$r[1],
 		TILTS[ $seed % count( TILTS ) ],
 		$seed % 360
 	);
 
-	$art = '' !== $spec['asset'] ? art( (string) $spec['asset'], $p ) : '';
-	if ( '' === $art && '' !== $spec['glyph'] ) {
-		$art = '<span class="cr-pin__glyph"' . ( '' !== $label ? ' aria-hidden="true"' : '' ) . '>' . esc_html( (string) $spec['glyph'] ) . '</span>';
-	}
-	$word = '' !== $label ? esc_html( $label ) : '';
-
-	$html  = '<span class="cr-pin-set cr-pin-set--' . $size . '">';
+	$html  = ink_defs();
+	$html .= '<span class="cr-pin-set cr-pin-set--' . $size . '">';
 	$html .= '<span class="' . esc_attr( implode( ' ', $classes ) ) . '" style="' . esc_attr( $style ) . '">';
-	$html .= '<span class="cr-pin__rim" aria-hidden="true"></span>';
-	$html .= '<span class="cr-pin__face">' . $art . '<span class="cr-pin__pattern" aria-hidden="true"></span><span class="cr-pin__gloss" aria-hidden="true"></span></span>';
-	if ( $on_face ) {
-		$html .= '<span class="cr-pin__word">' . $word . '</span>';
+	if ( '' !== $label ) {
+		$html .= '<span class="cr-sr-only cr-pin__name">' . esc_html( $label ) . '</span>';
 	}
+	$html .= '<span class="cr-pin__rim" aria-hidden="true"></span>';
+	$html .= '<span class="cr-pin__face">' . face_svg( $spec, $uid );
+	if ( '' !== $spec['glyph'] ) {
+		$html .= '<span class="cr-pin__glyph"' . ( '' !== $label ? ' aria-hidden="true"' : '' ) . '>' . esc_html( (string) $spec['glyph'] ) . '</span>';
+	}
+	$html .= '<span class="cr-pin__gloss" aria-hidden="true"></span></span>';
 	$html .= '<span class="cr-pin__wear" aria-hidden="true"></span>';
 	$html .= '</span>';
-	if ( '' !== $word && ! $on_face ) {
-		$html .= '<span class="cr-pin__word cr-pin__word--below">' . $word . '</span>';
+	if ( 'single' === $size && '' !== $spec['family'] ) {
+		$html .= '<span class="cr-pin__family"><span class="cr-sr-only">' . esc_html__( 'Mood family:', 'courtneyr-child' ) . ' </span>' . esc_html( $spec['family'] ) . '</span>';
 	}
 	$html .= '</span>';
 	return $html;
@@ -251,7 +362,14 @@ function replace_emoji_span( string $html, string $pin ): string {
 		$count
 	);
 	if ( 0 === $count ) {
-		$out = (string) preg_replace( '/(<div class="pk-mood">)/', '$1' . str_replace( '$', '\\$', $pin ), $html, 1 );
+		$out = (string) preg_replace_callback(
+			'/<div class="pk-mood">/',
+			static function ( array $m ) use ( $pin ): string {
+				return $m[0] . $pin;
+			},
+			$html,
+			1
+		);
 	}
 	return $out;
 }
@@ -304,6 +422,22 @@ function mood_card( string $html, array $block ): string {
 	$spec  = resolve( $mood, (string) ( $attrs['emoji'] ?? '' ) );
 	$html  = replace_emoji_span( $html, render( $spec, is_singular( 'post' ) ? 'single' : 'stream' ) );
 
+	// A card-only micro-post on /stream with no moodAt has no date of its
+	// own; the post's date joins it, in the plugin's own meta markup.
+	if ( ! is_singular( 'post' ) && false === strpos( $html, 'dt-published' ) ) {
+		$post = get_post();
+		if ( $post instanceof \WP_Post ) {
+			$date = '<div class="pk-meta"><time class="dt-published" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( (string) get_the_date( '', $post ) ) . '</time></div>';
+			$at   = strpos( $html, '<data class="p-name"' );
+			if ( false === $at ) {
+				$at = strrpos( $html, '</article>' );
+			}
+			if ( false !== $at ) {
+				$html = substr( $html, 0, $at ) . $date . substr( $html, $at );
+			}
+		}
+	}
+
 	$note = (string) ( $attrs['note'] ?? '' );
 	if ( '' !== $note && normalize_label( $note ) === normalize_label( $mood ) ) {
 		$html = (string) preg_replace( '/<p class="pk-mood__note p-content">/', '<p class="pk-mood__note p-content cr-pin-note-dup">', $html, 1 );
@@ -337,7 +471,17 @@ function stream_card( string $html, array $block, $instance ): string {
 	if ( '' === $emoji && preg_match( '/<span class="pk-mood__emoji"[^>]*>(.*?)<\/span>/su', $html, $m ) ) {
 		$emoji = (string) $m[1];
 	}
-	return replace_emoji_span( $html, render( resolve( (string) ( $attrs['mood'] ?? '' ), $emoji ), 'stream' ) );
+	$html = replace_emoji_span( $html, render( resolve( (string) ( $attrs['mood'] ?? '' ), $emoji ), 'stream' ) );
+	// A title-less post gets the plugin's synthetic kind-label heading as its
+	// link; under a mood pin that reads "Mood" twice, so it hides visually.
+	if ( false === strpos( $html, 'pk-title p-name' ) ) {
+		$tags = new \WP_HTML_Tag_Processor( $html );
+		if ( $tags->next_tag( array( 'tag_name' => 'article', 'class_name' => 'pk-card' ) ) ) {
+			$tags->add_class( 'cr-pin-card--untitled' );
+			$html = $tags->get_updated_html();
+		}
+	}
+	return $html;
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\stream_card', 10, 3 );
 
@@ -380,10 +524,11 @@ function enqueue_editor(): void {
 		true
 	);
 	$moods = array();
-	foreach ( catalog()['by_label'] as $entry ) {
+	foreach ( catalog() as $entry ) {
 		$moods[] = array(
-			'label' => (string) $entry['label'],
-			'emoji' => (string) $entry['emoji'],
+			'label'  => (string) $entry['label'],
+			'emoji'  => (string) ( $entry['emoji'] ?? '' ),
+			'family' => (string) ( $entry['family'] ?? '' ),
 		);
 	}
 	wp_add_inline_script( 'courtneyr-mood-pin-editor', 'window.courtneyrMoodPins = ' . wp_json_encode( array( 'moods' => $moods ) ) . ';', 'before' );
@@ -419,6 +564,7 @@ function register_rest_route(): void {
 				return array(
 					'html'   => render( $spec, 'single' ),
 					'custom' => (bool) $spec['custom'],
+					'family' => (string) $spec['family'],
 				);
 			},
 		)

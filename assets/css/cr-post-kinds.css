@@ -3104,14 +3104,27 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 .cr-stream-page .pk-card.k-mood .pk-body { display: contents; }
 .cr-stream-page .pk-card.k-mood .pk-mood { display: contents; }
 .cr-stream-page .pk-card.k-mood .pk-badge,
-.cr-stream-page .pk-card.k-mood .pk-kindlabel,
-.cr-stream-page .pk-card.k-mood .pk-excerpt { display: none; }
+.cr-stream-page .pk-card.k-mood .pk-kindlabel { display: none; }
+/* An authored excerpt stays, small and clamped; the pin and the date lead. */
+.cr-stream-page .pk-card.k-mood .pk-excerpt {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+	max-width: 15rem;
+	margin: 0.3rem 0 0;
+	padding: 0;
+	font-family: var(--cr-font-body, "Barlow", sans-serif);
+	font-size: 0.82rem;
+	line-height: 1.4;
+	color: var(--cr-ink, #241c4a);
+}
 
 /* Caption on the paper: linked title (or the micro-post's note),
    date underneath. */
 .cr-stream-page .pk-card.k-mood .pk-caption {
 	display: grid;
-	gap: 0.15rem;
+	gap: 0.1rem;
 	justify-items: center;
 }
 .cr-stream-page .pk-card.k-mood .pk-title,
