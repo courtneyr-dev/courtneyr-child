@@ -8063,65 +8063,69 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 }
 
 /* ============================================================
-   v0.7.35 — Quote: a note pinned to a bulletin board.
-   inc/quote-note.php adds a push pin (inline SVG thumbtack coloured by
-   the post's seed from the site palette), an opening mark in the
-   top-left, the citation, and a date to the plugin's generic /stream
-   card, and turns the single's quote block into a larger pinned
-   notebook sheet carrying the H1, the blockquote with its cite, and the
-   date, beside two handwritten margin notes. Ruled paper with punched
-   holes and a torn bottom, a slight seeded tilt, a hard zine shadow; on
-   /stream the list item behind the note is a small cork patch. The
-   earlier clipping's pseudo pin and top-right glyph are switched off
-   for these cards only. Scope: li.kind-quote on the stream,
-   body.single-post.kind-quote on the single.
+   v0.7.36 — Quote: a note pinned into the zine page.
+   inc/quote-note.php wraps each Quote surface in an artifact
+   (div.cr-note-artifact): the push pin (inline SVG thumbtack coloured
+   by the post's seed from the site palette) sits first inside the
+   artifact, above the paper, in space the artifact reserves with
+   padding; the paper (the plugin's stream card on /stream, the
+   quote block with its H1, cite and date on the single) follows and
+   keeps its own torn bottom (clip-path), ruled lines, punched holes,
+   hard shadow and seeded tilt. Nothing hangs outside a clipped box,
+   so nothing clips: the pin is inside the artifact's layout box, the
+   clip-path lives on the paper only, and the paper swings around the
+   pin (transform-origin at the pin). The page's own background shows
+   around the paper; there is no board. Scope: li.kind-quote on the
+   stream, body.single-post.kind-quote on the single.
    ============================================================ */
-/* ---- The pin and the mark (shared) ---- */
-:is(.cr-stream-page li.kind-quote, body.single-post.kind-quote .single-post__content) .cr-note .cr-note__pin {
+/* ---- The artifact, the pin and the mark (shared) ---- */
+:is(.cr-stream-page li.kind-quote, body.single-post.kind-quote .single-post__content) .cr-note-artifact {
+	--pin-h: clamp(2rem, 1.4rem + 1.2vw, 2.7rem);
+	--pin-x: 50%;
+	position: relative;
+	isolation: isolate;
+	box-sizing: border-box;
+	padding-top: calc(var(--pin-h) * 0.5);
+	overflow: visible;
+}
+:is(.cr-stream-page li.kind-quote, body.single-post.kind-quote .single-post__content) .cr-note-artifact .cr-note__pin {
 	position: absolute;
-	top: -1.35rem;
-	left: 50%;
-	width: 2.2rem;
-	height: 3rem;
-	margin-left: -0.6rem;
-	z-index: 5;
+	top: 0;
+	left: var(--pin-x);
+	width: calc(var(--pin-h) * 44 / 60);
+	height: var(--pin-h);
+	transform: translateX(-50%);
+	z-index: 2;
 	filter: drop-shadow(1px 3px 2px rgba(36, 28, 74, 0.35));
 	pointer-events: none;
 }
+:is(.cr-stream-page li.kind-quote, body.single-post.kind-quote .single-post__content) .cr-note {
+	transform-origin: var(--pin-x) 0;
+}
 :is(.cr-stream-page li.kind-quote, body.single-post.kind-quote .single-post__content) .cr-note .cr-note__mark {
 	position: absolute;
-	top: 0.55rem;
-	left: 1.1rem;
+	top: 0.3rem;
+	left: 0.95rem;
 	font-family: Georgia, "Times New Roman", serif;
-	font-size: 4rem;
+	font-size: 3.5rem;
 	line-height: 0.6;
 	color: var(--cr-periwinkle, #bcb5e3);
 	pointer-events: none;
 	z-index: 0;
 }
-/* ---- /stream: the card is the note; the item is a cork patch ---- */
-.cr-stream-page .wp-block-post-template > li.kind-quote {
-	position: relative;
-	padding: 1.1rem 0.9rem 1rem;
-	border-radius: 3px;
-	background:
-		radial-gradient(circle at 20% 30%, rgba(120, 82, 34, 0.32) 0 1px, transparent 1.6px) 0 0 / 11px 13px,
-		radial-gradient(circle at 70% 60%, rgba(120, 82, 34, 0.25) 0 1px, transparent 1.6px) 3px 5px / 17px 19px,
-		radial-gradient(circle at 45% 80%, rgba(255, 240, 210, 0.35) 0 1px, transparent 1.6px) 6px 2px / 23px 21px,
-		linear-gradient(160deg, #e2c393, #cfa86e);
-	box-shadow: inset 0 0 0 1px rgba(90, 60, 20, 0.35);
-}
+/* ---- /stream: the card is the paper; the list item stays bare ---- */
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note {
 	position: relative;
+	box-sizing: border-box;
 	width: 100%;
 	margin: 0;
-	padding: 1.7rem 1.1rem 1rem 1.9rem;
+	padding: 1.05rem 1rem 0.95rem 1.7rem;
 	border: 1px solid rgba(36, 28, 74, 0.3);
 	background:
-		radial-gradient(circle at 0.55rem 1.1rem, #cfa86e 0 0.22rem, transparent 0.3rem) 0 0 / 100% 1.4rem repeat-y,
+		radial-gradient(circle at 0.55rem 1.1rem, var(--cr-surface, #fbfaf5) 0 0.2rem, rgba(36, 28, 74, 0.35) 0.24rem 0.3rem, transparent 0.34rem) 0 0 / 100% 1.4rem repeat-y,
 		repeating-linear-gradient(180deg, transparent 0 calc(1.45rem - 1px), rgba(36, 28, 74, 0.13) calc(1.45rem - 1px) 1.45rem),
 		#fbfaf5;
-	background-position: 0 0.35rem, 0 1.1rem, 0 0;
+	background-position: 0 0.35rem, 0 1.05rem, 0 0;
 	filter: drop-shadow(4px 4px 0 var(--cr-ink, #241c4a));
 	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), 93% 100%, 85% calc(100% - 5px), 76% 100%, 67% calc(100% - 8px), 58% 100%, 49% calc(100% - 5px), 40% 100%, 31% calc(100% - 8px), 22% 100%, 14% calc(100% - 5px), 6% 100%, 0 calc(100% - 6px));
 	transform: rotate(var(--cr-note-tilt, 0deg));
@@ -8133,11 +8137,19 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note::before,
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note::after { content: none; display: none; }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-badge { display: none; }
-.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-body { position: relative; z-index: 1; display: block; }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-body {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	column-gap: 0.6rem;
+	align-items: center;
+}
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-body > * { grid-column: 1 / -1; min-width: 0; }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-kindlabel {
 	display: block;
 	position: static;
-	margin: 0 0 0.35rem 1.6rem;
+	margin: 0 0 0.3rem 1.45rem;
 	padding: 0;
 	border: 0;
 	background: none;
@@ -8158,7 +8170,7 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 	border: 0;
 	font-family: var(--cr-font-accent, serif);
 	font-weight: 900;
-	font-size: 1.3rem;
+	font-size: 1.22rem;
 	line-height: 1.15;
 	letter-spacing: 0;
 	text-transform: none;
@@ -8171,17 +8183,17 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 	-webkit-box-orient: vertical;
 	-webkit-line-clamp: 4;
 	overflow: hidden;
-	margin: 0.55rem 0 0;
+	margin: 0.45rem 0 0;
 	padding: 0;
 	border: 0;
 	background: none;
 	font-family: var(--cr-font-accent, serif);
-	font-size: 1rem;
-	line-height: 1.45;
+	font-size: 0.97rem;
+	line-height: 1.42;
 	color: var(--cr-ink, #241c4a);
 }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .cr-note__cite {
-	margin: 0.55rem 0 0;
+	margin: 0.45rem 0 0;
 	padding: 0;
 	font-family: var(--cr-font-body, sans-serif);
 	font-weight: 600;
@@ -8190,9 +8202,11 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 	color: var(--cr-cerulean, #126782);
 }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .cr-note__cite a { color: inherit; text-decoration: underline; text-underline-offset: 0.15em; }
+/* The last row: the date on the left, the small Read more label on the right. */
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-stream-date {
 	display: block;
-	margin: 0.6rem 0 0;
+	grid-column: 1;
+	margin: 0.5rem 0 0;
 	padding: 0;
 	font-family: var(--cr-font-mono, monospace);
 	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
@@ -8201,7 +8215,7 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 	color: var(--cr-ink, #241c4a);
 }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-stream-date time { border: 0; padding: 0; background: none; color: inherit; }
-.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-meta { position: absolute; right: 0.9rem; bottom: 0.95rem; margin: 0; padding: 0; }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-meta { grid-column: 2; justify-self: end; position: static; margin: 0.5rem 0 0; padding: 0; }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-link {
 	display: inline-flex;
 	align-items: center;
@@ -8223,13 +8237,37 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-link:hover { background: var(--cr-selective-yellow, #ffb703); }
 .cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note :is(.pk-title a, .pk-link, .cr-note__cite a):focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
 /* ---- Single: a larger notebook sheet in the journal grid ---- */
+body.single-post.kind-quote .single-post__content .cr-note-artifact--single {
+	--pin-h: clamp(2.6rem, 1.9rem + 1.6vw, 3.6rem);
+	--pin-x: 58%;
+	width: 100%;
+	max-width: 46rem;
+	margin: 1.4rem 0 0;
+}
+/* Registration crosses above the sheet's corners, in the pin's row. */
+body.single-post.kind-quote .single-post__content .cr-note-artifact--single::before,
+body.single-post.kind-quote .single-post__content .cr-note-artifact--single::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	width: 0.9rem;
+	height: 0.9rem;
+	background:
+		linear-gradient(currentColor, currentColor) 50% 0 / 1.5px 100% no-repeat,
+		linear-gradient(currentColor, currentColor) 0 50% / 100% 1.5px no-repeat,
+		radial-gradient(circle, transparent 34%, currentColor 36% 46%, transparent 48%);
+	color: var(--cr-ink, #241c4a);
+	opacity: 0.55;
+	pointer-events: none;
+}
+body.single-post.kind-quote .single-post__content .cr-note-artifact--single::before { left: 0.3rem; }
+body.single-post.kind-quote .single-post__content .cr-note-artifact--single::after { right: 0.3rem; }
 body.single-post.kind-quote .single-post__content .cr-note.cr-note--single {
 	position: relative;
 	box-sizing: border-box;
 	width: 100%;
-	max-width: 46rem;
-	margin: 1.4rem 0 0;
-	padding: 2.4rem 2.6rem 1.7rem 3.4rem;
+	margin: 0;
+	padding: 2.2rem 2.6rem 1.7rem 3.4rem;
 	border: 1px solid rgba(36, 28, 74, 0.3);
 	background:
 		radial-gradient(circle at 1.1rem 1.3rem, var(--cr-surface, #fbfaf5) 0 0.32rem, rgba(36, 28, 74, 0.35) 0.38rem 0.45rem, transparent 0.5rem) 0 0 / 100% 2.2rem repeat-y,
@@ -8242,8 +8280,7 @@ body.single-post.kind-quote .single-post__content .cr-note.cr-note--single {
 	transform: rotate(var(--cr-note-tilt, 0deg));
 	color: #241c4a;
 }
-body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__pin { top: -1.7rem; left: 58%; width: 3rem; height: 4.1rem; }
-body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__mark { top: 1.1rem; left: 2.2rem; font-size: 5.6rem; }
+body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__mark { top: 1rem; left: 2.2rem; font-size: 5.6rem; }
 body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__label {
 	margin: 0 0 0.6rem 2.9rem;
 	padding: 0;
@@ -8315,21 +8352,35 @@ body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__dat
 /* The header's own date hides (the sheet has it); the tag row stays as is. */
 body.single-post.kind-quote .single-post__lede-meta .single-post__date { display: none; }
 body.single-post.kind-quote .single-post__meta { display: block; }
-/* A sticky-note margin aside. */
-body.single-post.kind-quote .single-post__content .cr-journal__margin .cr-hand--sticky {
-	position: relative;
-	max-width: 11ch;
-	padding: 0.9rem 0.9rem 1rem;
-	background: var(--cr-sky-blue, #8ecae6);
-	box-shadow: 4px 4px 0 rgba(36, 28, 74, 0.35);
-	font-size: 0.95rem;
-	line-height: 1.6;
-	text-transform: uppercase;
-	transform: rotate(2deg);
-	color: #241c4a;
+/* Marginalia: two short Rock Salt lines; the first points at the sheet
+   with a hand-drawn arrow, the second carries the double underline. */
+body.single-post.kind-quote .single-post__content .cr-journal__margin .cr-hand--arrow { position: relative; }
+@media (min-width: 64rem) {
+	body.single-post.kind-quote .single-post__content .cr-journal__margin .cr-hand--arrow { max-width: 12ch; }
 }
-body.single-post.kind-quote .single-post__content .cr-journal__margin .cr-hand--sticky::before { content: ""; position: absolute; top: -0.5rem; left: 50%; width: 2.6rem; height: 0.9rem; transform: translateX(-50%) rotate(-3deg); background: var(--cr-tape, #f3e5b8); opacity: 0.9; }
-body.single-post.kind-quote .single-post__content .cr-journal__margin .cr-hand--sticky::after { content: " ♡"; font-family: var(--cr-font-body, sans-serif); color: var(--cr-cerulean, #126782); }
+body.single-post.kind-quote .single-post__content .cr-journal__margin .cr-hand--arrow::before {
+	content: "";
+	position: absolute;
+	top: 0.75rem;
+	left: -2.4rem;
+	width: 1.9rem;
+	height: 0;
+	border-top: 2px solid currentColor;
+	transform: rotate(-8deg);
+	opacity: 0.85;
+}
+body.single-post.kind-quote .single-post__content .cr-journal__margin .cr-hand--arrow::after {
+	content: "";
+	position: absolute;
+	top: 0.5rem;
+	left: -2.45rem;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-top: 2px solid currentColor;
+	border-left: 2px solid currentColor;
+	transform: rotate(-52deg);
+	opacity: 0.85;
+}
 /* Syndication links below the sheet: tiny zine footer labels. */
 body.single-post.kind-quote .single-post__content .syndication-links { margin: 1.4rem 0 0; font-family: var(--cr-font-mono, monospace); font-size: max(0.7rem, var(--cr-text-floor, 0.7rem)); letter-spacing: 0.12em; text-transform: uppercase; }
 body.single-post.kind-quote .single-post__content .syndication-links .relsyn { display: inline-flex; flex-wrap: wrap; gap: 0.4rem 0.5rem; margin: 0 0 0 0.5rem; padding: 0; list-style: none; vertical-align: middle; }
@@ -8337,27 +8388,26 @@ body.single-post.kind-quote .single-post__content .syndication-links .relsyn li 
 body.single-post.kind-quote .single-post__content .syndication-links .syn-link { display: inline-block; padding: 0.15rem 0.5rem; border: 1.5px solid var(--cr-ink, #241c4a); border-radius: 2px; background: var(--cr-light-orange, #fee2c3); box-shadow: 2px 2px 0 var(--cr-ink, #241c4a); color: var(--cr-ink, #241c4a); text-decoration: none; }
 body.single-post.kind-quote .single-post__content .syndication-links .syn-link:hover { background: var(--cr-selective-yellow, #ffb703); }
 body.single-post.kind-quote .single-post__content .syndication-links .syn-link:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
-/* Dark mode: paper and ink stay physical. */
+/* Dark mode: paper and ink stay physical; the citation keeps its cerulean. */
 :root[data-theme="dark"] body.single-post.kind-quote .single-post__content :is(.cr-note--single, .cr-note--single *:not(.cr-note__mark):not(cite):not(cite *)) { color: #241c4a !important; }
+:root[data-theme="dark"] body.single-post.kind-quote .single-post__content .cr-note--single blockquote :is(cite, cite *) { color: #126782 !important; }
 :root[data-theme="dark"] .cr-stream-page li.kind-quote .cr-note :is(.pk-title, .pk-title a, .pk-excerpt, .pk-stream-date, .pk-stream-date time, .pk-link) { color: #241c4a !important; }
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme="light"]) body.single-post.kind-quote .single-post__content :is(.cr-note--single, .cr-note--single *:not(.cr-note__mark):not(cite):not(cite *)) { color: #241c4a !important; }
+	:root:not([data-theme="light"]) body.single-post.kind-quote .single-post__content .cr-note--single blockquote :is(cite, cite *) { color: #126782 !important; }
 	:root:not([data-theme="light"]) .cr-stream-page li.kind-quote .cr-note :is(.pk-title, .pk-title a, .pk-excerpt, .pk-stream-date, .pk-stream-date time, .pk-link) { color: #241c4a !important; }
+}
+/* Below the journal grid the asides stack under the sheet: no arrow. */
+@media (max-width: 63.98rem) {
+	body.single-post.kind-quote .single-post__content .cr-journal__margin .cr-hand--arrow::before,
+	body.single-post.kind-quote .single-post__content .cr-journal__margin .cr-hand--arrow::after { display: none; }
 }
 /* Phones. */
 @media (max-width: 47.99rem) {
-	body.single-post.kind-quote .single-post__content .cr-note.cr-note--single { padding: 2.2rem 1.3rem 1.4rem 2.4rem; filter: drop-shadow(4px 4px 0 var(--cr-ink, #241c4a)); }
-	body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__pin { width: 2.4rem; height: 3.3rem; top: -1.4rem; }
+	body.single-post.kind-quote .single-post__content .cr-note.cr-note--single { padding: 2rem 1.3rem 1.4rem 2.4rem; filter: drop-shadow(4px 4px 0 var(--cr-ink, #241c4a)); }
 	body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__mark { font-size: 4.2rem; left: 1.4rem; }
 	body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__label { margin-left: 2.2rem; }
-	.cr-stream-page .wp-block-post-template > li.kind-quote { padding: 1rem 0.7rem 0.8rem; }
+	body.single-post.kind-quote .single-post__content .cr-note-artifact--single::before,
+	body.single-post.kind-quote .single-post__content .cr-note-artifact--single::after { display: none; }
 	.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note { transform: none; }
 }
-/* v0.7.35 fixes: the citation keeps its cerulean in dark mode, and on the
-   stream the cite and date leave room for the Read more label. */
-:root[data-theme="dark"] body.single-post.kind-quote .single-post__content .cr-note--single blockquote :is(cite, cite *) { color: #126782 !important; }
-@media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) body.single-post.kind-quote .single-post__content .cr-note--single blockquote :is(cite, cite *) { color: #126782 !important; }
-}
-.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .cr-note__cite,
-.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-stream-date { padding-right: 6.6rem; }

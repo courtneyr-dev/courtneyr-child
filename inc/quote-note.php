@@ -1,6 +1,6 @@
 <?php
 /**
- * Quote kind: a note pinned to a bulletin board.
+ * Quote kind: a note pinned into the zine page.
  *
  * The Quote kind has no plugin card. A single is the plugin's h-entry
  * wrapper around a core quote block (paragraphs and a <cite>) followed
@@ -50,7 +50,6 @@ const PALETTE = array(
 	'selective-yellow' => array( '#ffb703', '#ffe08a', '#b57f00' ),
 	'ut-orange'        => array( '#fb8500', '#ffb066', '#b25c00' ),
 	'light-orange'     => array( '#fee2c3', '#fff1df', '#d9a86e' ),
-	'light-gray'       => array( '#ebebeb', '#ffffff', '#b8b8b8' ),
 );
 
 /**
@@ -68,7 +67,8 @@ function is_quote_single(): bool {
 }
 
 /**
- * The note's inline custom properties: pin colours and tilt, fixed per post.
+ * The artifact's inline custom properties: pin colours and tilt, fixed per
+ * post; the paper inherits them.
  *
  * @param int $seed Stable seed.
  * @return string A style attribute.
@@ -175,13 +175,14 @@ function stream_card( string $html, array $block, $instance ): string {
 	}
 	$s = seed( (string) $post->ID, $post->post_title );
 
-	// The pin and the mark, first in the article.
+	// The mark, first in the article (the paper); the pin comes later, on
+	// the artifact wrapper outside the paper's clipped box.
 	$open = strpos( $html, '<article' );
 	$gt   = false !== $open ? strpos( $html, '>', $open ) : false;
 	if ( false === $gt ) {
 		return $html;
 	}
-	$html = substr( $html, 0, $gt + 1 ) . pin_svg() . mark() . substr( $html, $gt + 1 );
+	$html = substr( $html, 0, $gt + 1 ) . mark() . substr( $html, $gt + 1 );
 
 	// The date leaves the caption; the citation and the date go before the footer.
 	$date = '';
@@ -201,11 +202,11 @@ function stream_card( string $html, array $block, $instance ): string {
 		if ( '' !== $cite ) {
 			$tags->add_class( 'cr-note--cited' );
 		}
-		$style = (string) $tags->get_attribute( 'style' );
-		$tags->set_attribute( 'style', trim( $style . ( '' !== $style && ';' !== substr( $style, -1 ) ? ';' : '' ) . substr( note_style( $s ), 7, -1 ) ) );
 		$html = $tags->get_updated_html();
 	}
-	return $html;
+	// The artifact: pin colours and tilt on the wrapper (custom properties
+	// inherit into the paper), the pin above the paper, overflow visible.
+	return '<div class="cr-note-artifact cr-note-artifact--stream" ' . note_style( $s ) . '>' . pin_svg() . $html . '</div>';
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\stream_card', 10, 3 );
 
@@ -273,17 +274,18 @@ function note_page( string $html, array $block ): string {
 	$s      = seed( (string) $post->ID, $post->post_title );
 	$ts     = (int) get_post_time( 'U', true, $post );
 
-	$sheet  = '<div class="cr-note cr-note--single" ' . note_style( $s ) . '>' . pin_svg() . mark();
+	$sheet  = '<div class="cr-note-artifact cr-note-artifact--single" ' . note_style( $s ) . '>' . pin_svg();
+	$sheet .= '<div class="cr-note cr-note--single">' . mark();
 	$sheet .= '<p class="cr-note__label">' . esc_html__( 'Quote', 'courtneyr-child' ) . '</p>';
 	$sheet .= $courtneyr_quote_title;
 	$sheet .= substr( $html, $q_start, $q_end - $q_start );
 	$sheet .= '<p class="cr-note__date"><time datetime="' . esc_attr( (string) wp_date( 'c', $ts ) ) . '">' . esc_html( (string) wp_date( get_option( 'date_format' ), $ts ) ) . '</time></p>';
-	$sheet .= '</div>';
+	$sheet .= '</div></div>';
 	$courtneyr_quote_title = '';
 
 	$lines = margin_lines( $s, 'quote' );
 	$page  = '<div class="cr-journal">' . $sheet
-		. aside( $lines[0], 1, 'cr-hand--sticky' )
+		. aside( $lines[0], 1, 'cr-hand--arrow' )
 		. aside( $lines[1], 2, 'cr-hand--underline' )
 		. '</div>';
 
