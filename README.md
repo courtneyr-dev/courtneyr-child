@@ -116,3 +116,10 @@ performance benefit.
 
 **v1.0**: Validated against `@courtneyr-dev/wp-design-bridge`. Output
 of converter matches Path B (this theme) for the same brand.json input.
+
+## Third-party assets
+
+- `assets/svg/emoji/` — 103 emoji from [Twemoji](https://github.com/jdecked/twemoji)
+  (Twitter and contributors), CC BY 4.0, recolored to the site palette with
+  the face disks removed so they print on the mood pins. License copy and
+  the full list of changes: `assets/svg/emoji/README.md`.

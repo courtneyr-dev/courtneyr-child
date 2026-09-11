@@ -3095,14 +3095,12 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 }
 
 /* ============================================================
-   v0.6.12 — mood, consolidated (retires the v0.5.229/238/247–249
-   mood layers). The emoji IS the enamel pin now; the title and
-   date read below it on the paper — legible, clickable, never
-   clipped by the circle. Raw hexes on the pin deliberate: a
-   physical pin looks identical in dark mode. Covers both card
-   shapes: the mood-card block (micro-post) and the generic
-   stream card, whose emoji the plugin renders itself
-   (render_generic_stream_card, post-kinds-for-indieweb).
+   v0.7.39 — mood on /stream: the pin-back button (cr-mood-pin.css
+   draws the pin itself; inc/mood-pin.php prints it). This block only
+   lays the card out: no card box, the pin centered, the linked title
+   (or the micro-post's note) and the date on the paper beneath. Covers
+   both card shapes: the mood-card block (micro-post) and the generic
+   stream card. The v0.6.12 enamel pin and its clasp are retired.
    ============================================================ */
 .cr-stream-page .pk-card.k-mood {
 	display: grid;
@@ -3127,48 +3125,7 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 .cr-stream-page .pk-card.k-mood .pk-kindlabel,
 .cr-stream-page .pk-card.k-mood .pk-excerpt { display: none; }
 
-/* The pin: purple enamel face, paper-and-ink ring, gloss + halftone. */
-.cr-stream-page .pk-card.k-mood .pk-mood__emoji {
-	position: relative;
-	display: grid;
-	place-content: center;
-	width: 7.5rem;
-	aspect-ratio: 1;
-	margin-bottom: 0.7rem;
-	border-radius: 50%;
-	background: radial-gradient(circle at 32% 26%, #3d2f6e 0%, #241c4a 55%);
-	border: 3px solid #241c4a;
-	box-shadow: 0 0 0 4px #fbfaf5, 0 0 0 6px #241c4a, 0 5px 12px -3px rgba(36, 28, 74, 0.5);
-	overflow: hidden;
-	font-size: 3.4rem;
-	line-height: 1;
-	transform: rotate(-2deg);
-}
-.cr-stream-page .pk-card.k-mood .pk-mood__emoji::before {
-	content: "";
-	position: absolute;
-	top: 8%;
-	left: 12%;
-	width: 42%;
-	height: 22%;
-	border-radius: 50%;
-	background: rgba(251, 250, 245, 0.35);
-	transform: rotate(-24deg);
-	filter: blur(2px);
-}
-.cr-stream-page .pk-card.k-mood .pk-mood__emoji::after {
-	content: "";
-	position: absolute;
-	bottom: -6%;
-	right: -8%;
-	width: 60%;
-	height: 55%;
-	border-radius: 50%;
-	background-image: radial-gradient(rgba(251, 250, 245, 0.28) 1.5px, transparent 2px);
-	background-size: 8px 8px;
-}
-
-/* Caption on the paper: linked title (or the micro-post's mood word),
+/* Caption on the paper: linked title (or the micro-post's note),
    date underneath. */
 .cr-stream-page .pk-card.k-mood .pk-caption {
 	display: grid;
@@ -3200,25 +3157,6 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 }
 .cr-stream-page .pk-card.k-mood .pk-stream-date time { border: 0; padding: 0; }
 .cr-stream-page .pk-card.k-mood .pk-meta { display: block; margin: 0; padding: 0; }
-
-/* Metal clasp peeking from behind the pin. */
-.cr-stream-page .wp-block-post-template > li.kind-mood { position: relative; }
-.cr-stream-page .wp-block-post-template > li.kind-mood::before {
-	content: "";
-	position: absolute;
-	top: 0.4rem;
-	left: 50%;
-	margin-left: -1.6rem;
-	width: 3.2rem;
-	height: 0.85rem;
-	border: 2.5px solid #9a958a;
-	border-radius: 999px;
-	background: linear-gradient(180deg, #d8d3c8, #a8a398);
-	box-shadow: 0 1px 2px rgba(36, 28, 74, 0.4);
-	transform: rotate(-4deg);
-	z-index: 0;
-}
-.cr-stream-page .wp-block-post-template > li.kind-mood .pk-card { position: relative; z-index: 1; }
 
 /* ============================================================
    v0.7.5 — stream: polaroids open the post, caption carries the
