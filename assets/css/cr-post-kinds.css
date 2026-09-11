@@ -3715,19 +3715,19 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 
 /* Header: kind chip stays, the template date hides (the lede has it),
    the tag row goes. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .single-post__lede-meta .single-post__date { display: none; }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .single-post__meta { display: none; }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__lede {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .single-post__lede-meta .single-post__date { display: none; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .single-post__meta { display: none; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__lede {
 	margin: 0.35rem 0 0;
 	font-family: var(--cr-font-accent, serif);
 	font-size: 1.05rem;
 	color: var(--cr-ink-soft, #4a4566);
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__lede-date {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__lede-date {
 	padding-bottom: 0.1rem;
 	box-shadow: inset 0 -0.55em 0 rgba(142, 202, 230, 0.4);
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__lede-place { font-weight: 700; color: var(--cr-ink, #241c4a); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__lede-place { font-weight: 700; color: var(--cr-ink, #241c4a); }
 
 /* A featured image the block does not carry stays, as a snapshot. */
 body.single-post.kind-checkin .single-post__featured {
@@ -3747,7 +3747,7 @@ body.single-post.kind-checkin .single-post__content p:has(> .p-trip) {
 }
 body.single-post.kind-checkin .single-post__content p:has(> .p-trip)::before { content: "Trip · "; }
 @media (min-width: 64rem) {
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal {
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) 11rem;
 		column-gap: 2.25rem;
@@ -3755,17 +3755,17 @@ body.single-post.kind-checkin .single-post__content p:has(> .p-trip)::before { c
 		grid-auto-flow: row dense;
 		align-items: start;
 	}
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal > * { grid-column: 1; margin-block: 0; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal > aside { grid-column: 2; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal > .cr-journal__margin--1 { align-self: start; padding-top: 2.5rem; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal > .cr-journal__margin--2 { align-self: center; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal > .cr-journal__margin--3 { align-self: center; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal > .cr-journal__meta { grid-column: 1 / -1; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal > * { grid-column: 1; margin-block: 0; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal > aside { grid-column: 2; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal > .cr-journal__margin--1 { align-self: start; padding-top: 2.5rem; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal > .cr-journal__margin--2 { align-self: center; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal > .cr-journal__margin--3 { align-self: center; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal > .cr-journal__meta { grid-column: 1 / -1; }
 }
 
 /* Handwriting: Rock Salt, page ink, short lines, two marks (a double
    underline and a heart). Never below 1rem. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-hand {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-hand {
 	font-family: var(--cr-font-display, "Rock Salt", cursive);
 	font-size: 1.05rem;
 	line-height: 1.75;
@@ -3773,12 +3773,12 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	margin: 0;
 	max-width: 14ch;
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-hand--orange { color: #b85f00; }
-:root[data-theme="dark"] body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-hand--orange { color: #fb8500; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-hand--orange { color: #b85f00; }
+:root[data-theme="dark"] body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-hand--orange { color: #fb8500; }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-hand--orange { color: #fb8500; }
+	:root:not([data-theme="light"]) body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-hand--orange { color: #fb8500; }
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-hand--underline::after {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-hand--underline::after {
 	content: "";
 	display: block;
 	width: 4.5rem;
@@ -3789,12 +3789,12 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	transform: rotate(-2deg);
 	opacity: 0.85;
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-hand__heart { font-family: var(--cr-font-body, sans-serif); color: #126782; }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__margin { margin: 0; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-hand__heart { font-family: var(--cr-font-body, sans-serif); color: #126782; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__margin { margin: 0; }
 @media (max-width: 63.98rem) {
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__margin { margin: 1.25rem 0; text-align: center; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__margin .cr-hand { max-width: none; font-size: 1rem; }
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__margin .cr-hand--underline::after { margin-inline: auto; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__margin { margin: 1.25rem 0; text-align: center; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__margin .cr-hand { max-width: none; font-size: 1rem; }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__margin .cr-hand--underline::after { margin-inline: auto; }
 }
 
 /* The passport artifact. */
@@ -3959,8 +3959,8 @@ body.single-post.kind-checkin .cr-passport--single .cr-passport__entry {
 }
 
 /* Notes from this check-in. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__notes { margin: 0; }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__notes-title {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__notes { margin: 0; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__notes-title {
 	display: inline-block;
 	margin: 0 0 0.75rem;
 	padding: 0.15rem 0.5rem;
@@ -3972,11 +3972,11 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	text-transform: uppercase;
 	color: var(--cr-ink, #241c4a);
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__notes .pk-note { margin: 0; padding: 0; font-size: 1.05rem; line-height: 1.65; color: var(--cr-ink, #241c4a); }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__notes .pk-note p { margin: 0 0 0.75em; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__notes .pk-note { margin: 0; padding: 0; font-size: 1.05rem; line-height: 1.65; color: var(--cr-ink, #241c4a); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__notes .pk-note p { margin: 0 0 0.75em; }
 
 /* The snapshot: a pasted print, not a hero. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__photo {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__photo {
 	width: 62%;
 	max-width: 26rem;
 	margin: 0.5rem 0 0;
@@ -3987,7 +3987,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	transform: rotate(-1.3deg);
 	position: relative;
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__photo::before {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__photo::before {
 	content: "";
 	position: absolute;
 	top: -0.6rem;
@@ -3999,7 +3999,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
 	pointer-events: none;
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__photo img {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__photo img {
 	display: block;
 	width: 100%;
 	height: auto;
@@ -4007,16 +4007,16 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	border-radius: 0;
 	box-shadow: none;
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__photo .cr-hand--caption { margin: 0.5rem 0.15rem 0; max-width: none; font-size: 1rem; line-height: 1.6; color: #241c4a; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__photo .cr-hand--caption { margin: 0.5rem 0.15rem 0; max-width: none; font-size: 1rem; line-height: 1.6; color: #241c4a; }
 @media (max-width: 40rem) {
-	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__photo { width: 100%; transform: rotate(-0.6deg); }
+	body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__photo { width: 100%; transform: rotate(-0.6deg); }
 	body.single-post.kind-checkin .single-post__content .pk-card.cr-passport--single { transform: none; padding: 0.85rem 0.9rem 0.8rem; }
 	body.single-post.kind-checkin .cr-passport--single .cr-passport__stamps { justify-content: flex-start; margin-inline: -0.9rem; padding-inline: 0.9rem; }
 }
 
 /* Time and place, quiet, at the bottom. Simple Location's raster map
    is redundant with the passport's map; its address line stays. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__meta {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 1rem 3rem;
@@ -4024,7 +4024,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	padding: 1rem 0 0;
 	border-top: 1px solid rgba(36, 28, 74, 0.35);
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-item {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__meta-item {
 	display: flex;
 	gap: 0.6rem;
 	align-items: flex-start;
@@ -4034,18 +4034,18 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	line-height: 1.5;
 	color: var(--cr-ink, #241c4a);
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-icon {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__meta-icon {
 	flex: 0 0 1.25rem;
 	width: 1.25rem;
 	height: 1.25rem;
 	margin-top: 0.15rem;
 	background: no-repeat center / contain;
 }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-item--time .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E"); }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-item--place .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z'/%3E%3Cpath d='M9 3v15M15 6v15'/%3E%3C/svg%3E"); }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .single-post__content .sloc-map,
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .single-post__content a:has(> .sloc-map) { display: none; }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .single-post__content .sloc-display {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__meta-item--time .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__meta-item--place .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z'/%3E%3Cpath d='M9 3v15M15 6v15'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .single-post__content .sloc-map,
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .single-post__content a:has(> .sloc-map) { display: none; }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .single-post__content .sloc-display {
 	margin: 0.6rem 0 0;
 	font-family: var(--cr-font-mono, monospace);
 	font-size: max(0.66rem, var(--cr-text-floor, 0.7rem));
@@ -4660,8 +4660,8 @@ body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs .pk-me
 	color: rgba(251, 250, 245, 0.85);
 }
 /* Meta row glyph for the film item, and the small label under items. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-item--film .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Crect x='3' y='9' width='18' height='12' rx='1.5'/%3E%3Cpath d='M3 9l16-5 1 3.5L4 12.5z'/%3E%3Cpath d='M7 8l3-5M12 6.5l3-5'/%3E%3C/svg%3E"); }
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-label {
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__meta-item--film .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linejoin='round'%3E%3Crect x='3' y='9' width='18' height='12' rx='1.5'/%3E%3Cpath d='M3 9l16-5 1 3.5L4 12.5z'/%3E%3Cpath d='M7 8l3-5M12 6.5l3-5'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__meta-label {
 	display: block;
 	margin-top: 0.15rem;
 	font-family: var(--cr-font-mono, monospace);
@@ -5725,7 +5725,7 @@ body.single-post.kind-read .cr-read__sample .wp-block-embed__wrapper { display: 
 body.single-post.kind-read .cr-read__sample iframe { max-width: 100%; border: 1.5px solid #241c4a; border-radius: 2px; background: #fff; }
 
 /* Meta row: the book glyph. */
-body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink) .cr-journal__meta-item--book .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6.5A5 5 0 0 0 7 4H3v13h4a5 5 0 0 1 5 2.5A5 5 0 0 1 17 17h4V4h-4a5 5 0 0 0-5 2.5z'/%3E%3Cpath d='M12 6.5v13'/%3E%3C/svg%3E"); }
+body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-drink, .kind-quote) .cr-journal__meta-item--book .cr-journal__meta-icon { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23126782' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6.5A5 5 0 0 0 7 4H3v13h4a5 5 0 0 1 5 2.5A5 5 0 0 1 17 17h4V4h-4a5 5 0 0 0-5 2.5z'/%3E%3Cpath d='M12 6.5v13'/%3E%3C/svg%3E"); }
 
 /* Phones and tablets. */
 @media (max-width: 63.98rem) {
@@ -7933,3 +7933,431 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 body.single-post:is(.kind-eat, .kind-drink) .single-post__content:has(.cr-placemat--has-where) .sloc-display { display: none; }
 body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__place { display: block; margin: 0; padding: 0; font-family: var(--cr-font-accent, serif); font-weight: 700; font-size: 1.05rem; line-height: 1.35; color: var(--mat-ink); overflow-wrap: anywhere; }
 .cr-stream-page li:is(.kind-eat, .kind-drink) .pk-card.pk-card--stream.cr-mat .pk-caption .cr-mat__place { display: block; margin: 0.25rem 0 0; padding: 0; font-family: var(--cr-font-body, sans-serif); font-size: 0.9rem; font-weight: 600; line-height: 1.35; color: var(--mat-ink); overflow-wrap: anywhere; }
+/* v0.7.35: without a receipt row the seal has nothing reserving the sheet's
+   bottom-right corner, so the body itself leaves room for it. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-body:not(:has(.pk-meta time)) { padding-bottom: 5.2rem; }
+@media (max-width: 47.99rem) {
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-body:not(:has(.pk-meta time)) { padding-bottom: 0; }
+}
+
+/* ============================================================
+   v0.7.35 — single eat/drink placemat, correction pass: the meal
+   leads. Photo up to the main column's width (WHERE narrows to 30%,
+   map capped); the venue reads as a name and a town line; an ephemera
+   block (handwritten caption with an arrow toward WHERE, a decorative
+   "Support local" stamp) fills the left column; a fifth doodle sits in
+   the left column only on map-only sheets; registration crosses at two
+   corners; the receipt always prints (post time when the card has none);
+   body copy after the card joins the sheet as notes or leaves when it
+   repeats the card's note.
+   ============================================================ */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-body {
+	grid-template-columns: minmax(0, 1fr) minmax(13rem, 30%);
+	grid-template-areas:
+		"label where"
+		"cap where"
+		"stars where"
+		"note where"
+		"photo where"
+		"eph where"
+		"longnote longnote"
+		"notes notes"
+		"receipt receipt";
+	column-gap: 2.4rem;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat:not(.cr-placemat--has-where) .pk-body {
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-areas:
+		"label"
+		"cap"
+		"stars"
+		"note"
+		"photo"
+		"eph"
+		"longnote"
+		"notes"
+		"receipt";
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-embed.pk-embed--photo { width: min(100%, 40rem); }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-embed.pk-embed--map { max-width: 19rem; }
+/* WHERE: the venue as a name, then the town. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where .pk-chip,
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__place-name { display: block; font-family: var(--cr-font-accent, serif); font-weight: 700; font-size: 1.12rem; line-height: 1.3; color: var(--mat-ink); }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__where a.pk-chip { display: inline; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__place-rest { display: block; margin-top: 0.15rem; font-family: var(--cr-font-body, sans-serif); font-weight: 400; font-size: 0.98rem; }
+/* Ephemera: handwritten caption with an arrow, and the support stamp. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__ephemera {
+	grid-area: eph;
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 1rem;
+	margin: 0.9rem 0 0;
+	padding-right: 0.5rem;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__caption-line {
+	margin: 0;
+	max-width: 16ch;
+	font-family: var(--cr-font-display, cursive);
+	font-size: 0.95rem;
+	line-height: 1.6;
+	color: var(--mat-ink);
+	transform: rotate(-2deg);
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat.cr-placemat--has-where .cr-placemat__caption-line::after { content: " →"; font-family: var(--cr-font-body, sans-serif); color: var(--mat-accent); }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__support { width: 7.2rem; flex: none; opacity: 0.85; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__support .cr-stamp { width: 100%; height: auto; }
+/* Notes folded in from the body: the sheet's own paragraphs. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__notes {
+	grid-area: notes;
+	max-width: 64ch;
+	margin: 1.2rem 0 0;
+	padding: 0.9rem 0 0;
+	border-top: 1.5px dashed rgba(36, 28, 74, 0.35);
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 1.05rem;
+	line-height: 1.65;
+	color: var(--mat-ink);
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__notes::before {
+	content: attr(data-label);
+	display: inline-block;
+	margin: 0 0 0.6rem;
+	padding: 0.12rem 0.5rem;
+	background: var(--mat-accent-soft);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.72rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__notes p { margin: 0 0 0.7rem; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__notes p:last-child { margin-bottom: 0; }
+/* The fifth doodle takes the left column's spare room on map-only sheets. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodle--ml { display: none; left: 34%; bottom: 8.6rem; width: 3rem; height: 3rem; transform: rotate(8deg); }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat.cr-placemat--has-where:not(.cr-placemat--has-photo) .cr-placemat__doodle--ml { display: block; }
+/* Registration crosses on two corners of the sheet. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodles::before,
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodles::after {
+	content: "";
+	position: absolute;
+	width: 1.1rem;
+	height: 1.1rem;
+	background:
+		linear-gradient(var(--mat-ink), var(--mat-ink)) 50% 0 / 1.5px 100% no-repeat,
+		linear-gradient(var(--mat-ink), var(--mat-ink)) 0 50% / 100% 1.5px no-repeat,
+		radial-gradient(circle, transparent 36%, var(--mat-ink) 38% 46%, transparent 48%);
+	opacity: 0.55;
+}
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodles::before { top: 0.75rem; left: 50%; }
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodles::after { bottom: 0.75rem; left: 46%; }
+/* The receipt always prints now (post time when the card has none); the seal reserve goes back to the receipt's right margin. */
+body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-body:not(:has(.pk-meta time)) { padding-bottom: 0; }
+@media (max-width: 47.99rem) {
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__ephemera { margin: 0.7rem 0 0; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__support { width: 6rem; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodle--ml { display: none; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodles::before,
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .cr-placemat__doodles::after { display: none; }
+	body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-placemat .pk-embed.pk-embed--map { max-width: none; }
+}
+
+/* ============================================================
+   v0.7.35 — Quote: a note pinned to a bulletin board.
+   inc/quote-note.php adds a push pin (inline SVG thumbtack coloured by
+   the post's seed from the site palette), an opening mark in the
+   top-left, the citation, and a date to the plugin's generic /stream
+   card, and turns the single's quote block into a larger pinned
+   notebook sheet carrying the H1, the blockquote with its cite, and the
+   date, beside two handwritten margin notes. Ruled paper with punched
+   holes and a torn bottom, a slight seeded tilt, a hard zine shadow; on
+   /stream the list item behind the note is a small cork patch. The
+   earlier clipping's pseudo pin and top-right glyph are switched off
+   for these cards only. Scope: li.kind-quote on the stream,
+   body.single-post.kind-quote on the single.
+   ============================================================ */
+/* ---- The pin and the mark (shared) ---- */
+:is(.cr-stream-page li.kind-quote, body.single-post.kind-quote .single-post__content) .cr-note .cr-note__pin {
+	position: absolute;
+	top: -1.35rem;
+	left: 50%;
+	width: 2.2rem;
+	height: 3rem;
+	margin-left: -0.6rem;
+	z-index: 5;
+	filter: drop-shadow(1px 3px 2px rgba(36, 28, 74, 0.35));
+	pointer-events: none;
+}
+:is(.cr-stream-page li.kind-quote, body.single-post.kind-quote .single-post__content) .cr-note .cr-note__mark {
+	position: absolute;
+	top: 0.55rem;
+	left: 1.1rem;
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 4rem;
+	line-height: 0.6;
+	color: var(--cr-periwinkle, #bcb5e3);
+	pointer-events: none;
+	z-index: 0;
+}
+/* ---- /stream: the card is the note; the item is a cork patch ---- */
+.cr-stream-page .wp-block-post-template > li.kind-quote {
+	position: relative;
+	padding: 1.1rem 0.9rem 1rem;
+	border-radius: 3px;
+	background:
+		radial-gradient(circle at 20% 30%, rgba(120, 82, 34, 0.32) 0 1px, transparent 1.6px) 0 0 / 11px 13px,
+		radial-gradient(circle at 70% 60%, rgba(120, 82, 34, 0.25) 0 1px, transparent 1.6px) 3px 5px / 17px 19px,
+		radial-gradient(circle at 45% 80%, rgba(255, 240, 210, 0.35) 0 1px, transparent 1.6px) 6px 2px / 23px 21px,
+		linear-gradient(160deg, #e2c393, #cfa86e);
+	box-shadow: inset 0 0 0 1px rgba(90, 60, 20, 0.35);
+}
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note {
+	position: relative;
+	width: 100%;
+	margin: 0;
+	padding: 1.7rem 1.1rem 1rem 1.9rem;
+	border: 1px solid rgba(36, 28, 74, 0.3);
+	background:
+		radial-gradient(circle at 0.55rem 1.1rem, #cfa86e 0 0.22rem, transparent 0.3rem) 0 0 / 100% 1.4rem repeat-y,
+		repeating-linear-gradient(180deg, transparent 0 calc(1.45rem - 1px), rgba(36, 28, 74, 0.13) calc(1.45rem - 1px) 1.45rem),
+		#fbfaf5;
+	background-position: 0 0.35rem, 0 1.1rem, 0 0;
+	filter: drop-shadow(4px 4px 0 var(--cr-ink, #241c4a));
+	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), 93% 100%, 85% calc(100% - 5px), 76% 100%, 67% calc(100% - 8px), 58% 100%, 49% calc(100% - 5px), 40% 100%, 31% calc(100% - 8px), 22% 100%, 14% calc(100% - 5px), 6% 100%, 0 calc(100% - 6px));
+	transform: rotate(var(--cr-note-tilt, 0deg));
+	color: var(--cr-ink, #241c4a);
+	overflow: visible;
+}
+.cr-stream-page .wp-block-post-template > li:nth-child(4n+1) .pk-card.cr-note,
+.cr-stream-page .wp-block-post-template > li:nth-child(4n+3) .pk-card.cr-note { transform: rotate(var(--cr-note-tilt, 0deg)); }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note::before,
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note::after { content: none; display: none; }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-badge { display: none; }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-body { position: relative; z-index: 1; display: block; }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-kindlabel {
+	display: block;
+	position: static;
+	margin: 0 0 0.35rem 1.6rem;
+	padding: 0;
+	border: 0;
+	background: none;
+	box-shadow: none;
+	transform: none;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: 0.24em;
+	text-transform: uppercase;
+	color: var(--cr-glaucous-dark, #3d527d);
+}
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-caption { margin: 0; padding: 0; }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-title {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 900;
+	font-size: 1.3rem;
+	line-height: 1.15;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--cr-ink, #241c4a);
+}
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-title a { color: inherit; text-decoration: none; }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-title a:hover { text-decoration: underline; text-decoration-color: var(--cr-cerulean, #126782); text-decoration-thickness: 2px; }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-excerpt {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 4;
+	overflow: hidden;
+	margin: 0.55rem 0 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	font-family: var(--cr-font-accent, serif);
+	font-size: 1rem;
+	line-height: 1.45;
+	color: var(--cr-ink, #241c4a);
+}
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .cr-note__cite {
+	margin: 0.55rem 0 0;
+	padding: 0;
+	font-family: var(--cr-font-body, sans-serif);
+	font-weight: 600;
+	font-size: 0.92rem;
+	line-height: 1.35;
+	color: var(--cr-cerulean, #126782);
+}
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .cr-note__cite a { color: inherit; text-decoration: underline; text-underline-offset: 0.15em; }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-stream-date {
+	display: block;
+	margin: 0.6rem 0 0;
+	padding: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--cr-ink, #241c4a);
+}
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-stream-date time { border: 0; padding: 0; background: none; color: inherit; }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-meta { position: absolute; right: 0.9rem; bottom: 0.95rem; margin: 0; padding: 0; }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	margin: 0;
+	padding: 0.1rem 0.4rem;
+	border: 1.5px solid var(--cr-ink, #241c4a);
+	border-radius: 2px;
+	background: #fbfaf5;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.58rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--cr-ink, #241c4a);
+	text-decoration: none;
+}
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-link::after { content: "↗"; font-family: var(--cr-font-body, sans-serif); }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-link:hover { background: var(--cr-selective-yellow, #ffb703); }
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note :is(.pk-title a, .pk-link, .cr-note__cite a):focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
+/* ---- Single: a larger notebook sheet in the journal grid ---- */
+body.single-post.kind-quote .single-post__content .cr-note.cr-note--single {
+	position: relative;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 46rem;
+	margin: 1.4rem 0 0;
+	padding: 2.4rem 2.6rem 1.7rem 3.4rem;
+	border: 1px solid rgba(36, 28, 74, 0.3);
+	background:
+		radial-gradient(circle at 1.1rem 1.3rem, var(--cr-surface, #fbfaf5) 0 0.32rem, rgba(36, 28, 74, 0.35) 0.38rem 0.45rem, transparent 0.5rem) 0 0 / 100% 2.2rem repeat-y,
+		repeating-linear-gradient(180deg, transparent 0 calc(1.85rem - 1px), rgba(36, 28, 74, 0.13) calc(1.85rem - 1px) 1.85rem),
+		repeating-linear-gradient(0deg, rgba(36, 28, 74, 0.02) 0 1px, transparent 1px 5px),
+		#fbfaf5;
+	background-position: 0 0.4rem, 0 1.3rem, 0 0, 0 0;
+	filter: drop-shadow(6px 6px 0 var(--cr-ink, #241c4a));
+	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 9px), 94% 100%, 87% calc(100% - 6px), 79% 100%, 71% calc(100% - 10px), 63% 100%, 55% calc(100% - 6px), 47% 100%, 39% calc(100% - 10px), 31% 100%, 23% calc(100% - 6px), 15% 100%, 8% calc(100% - 9px), 0 100%);
+	transform: rotate(var(--cr-note-tilt, 0deg));
+	color: #241c4a;
+}
+body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__pin { top: -1.7rem; left: 58%; width: 3rem; height: 4.1rem; }
+body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__mark { top: 1.1rem; left: 2.2rem; font-size: 5.6rem; }
+body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__label {
+	margin: 0 0 0.6rem 2.9rem;
+	padding: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.7rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.26em;
+	text-transform: uppercase;
+	color: var(--cr-glaucous-dark, #3d527d);
+}
+/* Post Formats for Block Themes hides the title on quote-format posts; on
+   the sheet it is the title, so the hiding is undone here. */
+body.single-post.kind-quote .single-post__content .cr-note--single .single-post__title,
+body.single-post.kind-quote .single-post__content .cr-note--single h1 {
+	position: static !important;
+	display: block !important;
+	width: auto !important;
+	height: auto !important;
+	clip: auto !important;
+	clip-path: none !important;
+	overflow: visible !important;
+	white-space: normal !important;
+	margin: 0 0 1rem !important;
+	padding: 0;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 900;
+	font-size: clamp(1.7rem, 4.2vw, 2.5rem);
+	line-height: 1.08;
+	color: #241c4a;
+}
+body.single-post.kind-quote .single-post__content .cr-note--single blockquote,
+body.single-post.kind-quote .single-post__content .cr-note--single .wp-block-quote {
+	position: relative;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	box-shadow: none;
+	font-family: var(--cr-font-accent, serif);
+	font-size: clamp(1.15rem, 2.1vw, 1.4rem);
+	line-height: 1.55;
+	color: #241c4a;
+}
+body.single-post.kind-quote .single-post__content .cr-note--single blockquote p { margin: 0 0 0.85rem; padding: 0; font: inherit; color: inherit; }
+body.single-post.kind-quote .single-post__content .cr-note--single blockquote p:last-of-type { margin-bottom: 0; }
+body.single-post.kind-quote .single-post__content .cr-note--single blockquote cite {
+	display: block;
+	margin: 0.9rem 0 0;
+	font-family: var(--cr-font-body, sans-serif);
+	font-style: normal;
+	font-weight: 700;
+	font-size: 1.02rem;
+	line-height: 1.4;
+	color: var(--cr-cerulean, #126782);
+}
+body.single-post.kind-quote .single-post__content .cr-note--single blockquote cite::before { content: "\2014\00a0"; }
+body.single-post.kind-quote .single-post__content .cr-note--single blockquote cite a { color: inherit; text-decoration: underline; text-underline-offset: 0.15em; }
+body.single-post.kind-quote .single-post__content .cr-note--single blockquote cite a:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
+body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__date {
+	margin: 1.4rem 0 0;
+	padding: 0.6rem 0 0;
+	border-top: 1.5px dashed rgba(36, 28, 74, 0.3);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.68rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: #241c4a;
+}
+/* The header's own date hides (the sheet has it); the tag row stays as is. */
+body.single-post.kind-quote .single-post__lede-meta .single-post__date { display: none; }
+body.single-post.kind-quote .single-post__meta { display: block; }
+/* A sticky-note margin aside. */
+body.single-post.kind-quote .single-post__content .cr-journal__margin .cr-hand--sticky {
+	position: relative;
+	max-width: 11ch;
+	padding: 0.9rem 0.9rem 1rem;
+	background: var(--cr-sky-blue, #8ecae6);
+	box-shadow: 4px 4px 0 rgba(36, 28, 74, 0.35);
+	font-size: 0.95rem;
+	line-height: 1.6;
+	text-transform: uppercase;
+	transform: rotate(2deg);
+	color: #241c4a;
+}
+body.single-post.kind-quote .single-post__content .cr-journal__margin .cr-hand--sticky::before { content: ""; position: absolute; top: -0.5rem; left: 50%; width: 2.6rem; height: 0.9rem; transform: translateX(-50%) rotate(-3deg); background: var(--cr-tape, #f3e5b8); opacity: 0.9; }
+body.single-post.kind-quote .single-post__content .cr-journal__margin .cr-hand--sticky::after { content: " ♡"; font-family: var(--cr-font-body, sans-serif); color: var(--cr-cerulean, #126782); }
+/* Syndication links below the sheet: tiny zine footer labels. */
+body.single-post.kind-quote .single-post__content .syndication-links { margin: 1.4rem 0 0; font-family: var(--cr-font-mono, monospace); font-size: max(0.7rem, var(--cr-text-floor, 0.7rem)); letter-spacing: 0.12em; text-transform: uppercase; }
+body.single-post.kind-quote .single-post__content .syndication-links .relsyn { display: inline-flex; flex-wrap: wrap; gap: 0.4rem 0.5rem; margin: 0 0 0 0.5rem; padding: 0; list-style: none; vertical-align: middle; }
+body.single-post.kind-quote .single-post__content .syndication-links .relsyn li { margin: 0; padding: 0; }
+body.single-post.kind-quote .single-post__content .syndication-links .syn-link { display: inline-block; padding: 0.15rem 0.5rem; border: 1.5px solid var(--cr-ink, #241c4a); border-radius: 2px; background: var(--cr-light-orange, #fee2c3); box-shadow: 2px 2px 0 var(--cr-ink, #241c4a); color: var(--cr-ink, #241c4a); text-decoration: none; }
+body.single-post.kind-quote .single-post__content .syndication-links .syn-link:hover { background: var(--cr-selective-yellow, #ffb703); }
+body.single-post.kind-quote .single-post__content .syndication-links .syn-link:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
+/* Dark mode: paper and ink stay physical. */
+:root[data-theme="dark"] body.single-post.kind-quote .single-post__content :is(.cr-note--single, .cr-note--single *:not(.cr-note__mark):not(cite):not(cite *)) { color: #241c4a !important; }
+:root[data-theme="dark"] .cr-stream-page li.kind-quote .cr-note :is(.pk-title, .pk-title a, .pk-excerpt, .pk-stream-date, .pk-stream-date time, .pk-link) { color: #241c4a !important; }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) body.single-post.kind-quote .single-post__content :is(.cr-note--single, .cr-note--single *:not(.cr-note__mark):not(cite):not(cite *)) { color: #241c4a !important; }
+	:root:not([data-theme="light"]) .cr-stream-page li.kind-quote .cr-note :is(.pk-title, .pk-title a, .pk-excerpt, .pk-stream-date, .pk-stream-date time, .pk-link) { color: #241c4a !important; }
+}
+/* Phones. */
+@media (max-width: 47.99rem) {
+	body.single-post.kind-quote .single-post__content .cr-note.cr-note--single { padding: 2.2rem 1.3rem 1.4rem 2.4rem; filter: drop-shadow(4px 4px 0 var(--cr-ink, #241c4a)); }
+	body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__pin { width: 2.4rem; height: 3.3rem; top: -1.4rem; }
+	body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__mark { font-size: 4.2rem; left: 1.4rem; }
+	body.single-post.kind-quote .single-post__content .cr-note--single .cr-note__label { margin-left: 2.2rem; }
+	.cr-stream-page .wp-block-post-template > li.kind-quote { padding: 1rem 0.7rem 0.8rem; }
+	.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note { transform: none; }
+}
+/* v0.7.35 fixes: the citation keeps its cerulean in dark mode, and on the
+   stream the cite and date leave room for the Read more label. */
+:root[data-theme="dark"] body.single-post.kind-quote .single-post__content .cr-note--single blockquote :is(cite, cite *) { color: #126782 !important; }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) body.single-post.kind-quote .single-post__content .cr-note--single blockquote :is(cite, cite *) { color: #126782 !important; }
+}
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .cr-note__cite,
+.cr-stream-page li.kind-quote .pk-card.pk-card--stream.k-quote.cr-note .pk-stream-date { padding-right: 6.6rem; }

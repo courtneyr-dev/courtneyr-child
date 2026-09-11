@@ -371,6 +371,20 @@ function register_post_kinds_card_paint(): void {
 add_action( 'init', __NAMESPACE__ . '\\register_post_kinds_card_paint' );
 
 /**
+ * A Quote single has no card block (its quote is a core block), so nothing
+ * above would load the paint; the pinned note (inc/quote-note.php) needs it.
+ */
+function enqueue_card_paint_for_quote_single(): void {
+	if ( ! is_singular( 'post' ) || ! has_term( 'quote', 'kind', get_queried_object_id() ) ) {
+		return;
+	}
+	// wp_enqueue_block_style() registers the handle only when one of its
+	// blocks renders, so register it here with the same handle and version.
+	wp_enqueue_style( 'courtneyr-post-kinds', COURTNEYR_CHILD_URI . '/assets/css/cr-post-kinds.css', array(), COURTNEYR_CHILD_VERSION );
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_card_paint_for_quote_single' );
+
+/**
  * Enqueue editor-specific styles so the block editor preview matches
  * the front end. Same per-block files are reused; this hook adds them
  * to the editor iframe.

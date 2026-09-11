@@ -188,22 +188,24 @@ function doodles( string $kind, string $type ): string {
 		'straw'    => '<path d="M14 12h20l-2 29H16z"/><path d="M28 4l4 13"/><circle cx="20" cy="27" r="1.6"/><circle cx="25" cy="32" r="1.3"/><circle cx="22" cy="21" r="1.1"/>',
 		'cup'      => '<path d="M14 15h20l-2 26H16z"/><path d="M12 15a12 8 0 0 1 24 0"/><path d="M26 4l4 12"/>',
 		'droplet'  => '<path d="M24 6c-5 7-8 11-8 15a8 8 0 0 0 16 0c0-4-3-8-8-15z"/>',
+		'salt'     => '<path d="M17 18h14l2 24H15z"/><path d="M19 18v-6a5 5 0 0 1 10 0v6"/><circle cx="21.5" cy="9" r="1" fill="currentColor" stroke="none"/><circle cx="26.5" cy="9" r="1" fill="currentColor" stroke="none"/><circle cx="24" cy="6.5" r="1" fill="currentColor" stroke="none"/><path d="M19 30h10"/>',
+		'steam'    => '<path d="M16 34c-3-4 3-8 0-12M24 34c-3-4 3-8 0-12M32 34c-3-4 3-8 0-12"/><path d="M10 40h28"/>',
 	);
 	$sets = array(
-		'eat'      => array( 'fish', 'fries', 'cutlery', 'lemon' ),
-		'coffee'   => array( 'mug', 'bean', 'cutlery', 'mug' ),
-		'tea'      => array( 'teacup', 'leaf', 'leaf', 'teacup' ),
-		'beer'     => array( 'pint', 'hop', 'hop', 'pint' ),
-		'wine'     => array( 'wine', 'grapes', 'grapes', 'wine' ),
-		'cocktail' => array( 'coupe', 'citrus', 'lemon', 'coupe' ),
-		'juice'    => array( 'glass', 'citrus', 'lemon', 'glass' ),
-		'soda'     => array( 'straw', 'citrus', 'droplet', 'straw' ),
-		'smoothie' => array( 'cup', 'grapes', 'citrus', 'cup' ),
-		'water'    => array( 'glass', 'droplet', 'droplet', 'glass' ),
-		'other'    => array( 'glass', 'citrus', 'plate', 'glass' ),
+		'eat'      => array( 'fish', 'fries', 'cutlery', 'lemon', 'salt' ),
+		'coffee'   => array( 'mug', 'bean', 'cutlery', 'mug', 'steam' ),
+		'tea'      => array( 'teacup', 'leaf', 'leaf', 'teacup', 'steam' ),
+		'beer'     => array( 'pint', 'hop', 'hop', 'pint', 'plate' ),
+		'wine'     => array( 'wine', 'grapes', 'grapes', 'wine', 'plate' ),
+		'cocktail' => array( 'coupe', 'citrus', 'lemon', 'coupe', 'straw' ),
+		'juice'    => array( 'glass', 'citrus', 'lemon', 'glass', 'droplet' ),
+		'soda'     => array( 'straw', 'citrus', 'droplet', 'straw', 'glass' ),
+		'smoothie' => array( 'cup', 'grapes', 'citrus', 'cup', 'straw' ),
+		'water'    => array( 'glass', 'droplet', 'droplet', 'glass', 'plate' ),
+		'other'    => array( 'glass', 'citrus', 'plate', 'glass', 'droplet' ),
 	);
 	$key   = 'eat' === $kind ? 'eat' : ( isset( $sets[ $type ] ) ? $type : 'other' );
-	$spots = array( 'tl', 'tr', 'bl', 'br' );
+	$spots = array( 'tl', 'tr', 'bl', 'br', 'ml' );
 	$out   = '<span class="cr-placemat__doodles" aria-hidden="true">';
 	foreach ( $sets[ $key ] as $i => $name ) {
 		$out .= '<svg class="cr-placemat__doodle cr-placemat__doodle--' . $spots[ $i ] . ' cr-placemat__doodle--' . esc_attr( $name ) . '" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false">' . $art[ $name ] . '</svg>';
@@ -336,6 +338,13 @@ function journal_page( string $html, array $block ): string {
 		$html       = substr( $html, 0, $w_start ) . substr( $html, $w_end );
 	}
 
+	// 3b. A restaurant that only repeats the venue leaves the sub line
+	//     (the WHERE column names it once); the cuisine stays.
+	$restaurant = trim( (string) ( $a['restaurant'] ?? '' ) );
+	if ( '' !== $where_html && '' !== $restaurant && $restaurant === trim( (string) ( $a['locationName'] ?? '' ) ) ) {
+		$html = (string) preg_replace( '/<span class="p-location h-card"><span class="p-name">' . preg_quote( esc_html( $restaurant ), '/' ) . '<\/span><\/span>\s*(?:&mdash;\s*)?/', '', $html, 1 );
+	}
+
 	// 4. The map, from the card's coordinates; a card without a location
 	//    falls back to Simple Location's public place (address and point).
 	$lat  = (float) ( $a['geoLatitude'] ?? 0 );
@@ -344,8 +353,10 @@ function journal_page( string $html, array $block ): string {
 	if ( '' === $where_html ) {
 		$sl = sloc_place( $post );
 		if ( '' !== $sl['address'] ) {
-			$where_html = '<p class="pk-sub cr-placemat__place">' . esc_html( $sl['address'] ) . '</p>';
-			$name       = '' !== $name ? $name : trim( (string) strtok( $sl['address'], ',' ) );
+			$parts      = array_map( 'trim', explode( ',', $sl['address'], 2 ) );
+			$where_html = '<p class="pk-sub cr-placemat__place"><span class="cr-placemat__place-name">' . esc_html( $parts[0] ) . '</span>'
+				. ( isset( $parts[1] ) && '' !== $parts[1] ? '<span class="cr-placemat__place-rest">' . esc_html( $parts[1] ) . '</span>' : '' ) . '</p>';
+			$name       = '' !== $name ? $name : $parts[0];
 		}
 		if ( 0.0 === $lat && 0.0 === $lon ) {
 			$lat = $sl['lat'];
@@ -375,8 +386,40 @@ function journal_page( string $html, array $block ): string {
 		$html = str_replace( '<p class="pk-note p-content">', '<p class="pk-note p-content" data-label="' . esc_attr__( 'Notes from the table', 'courtneyr-child' ) . '">', $html );
 	}
 
-	// 8. The receipt line: the kind word before the plugin's timestamp.
-	$html = before( $html, '<time class="dt-published"', '<span class="cr-placemat__receipt-label">' . esc_html( $is_eat ? __( 'Ate', 'courtneyr-child' ) : __( 'Drank', 'courtneyr-child' ) ) . '</span>' );
+	// 8. The receipt line, inside the card's own .pk-meta: the kind word,
+	//    then the plugin's timestamp, or the post's own time when the card
+	//    stores none (a plain <time>: the h-entry already carries dt-published).
+	$m_open = '<div class="pk-meta">';
+	$m_pos  = strpos( $html, $m_open );
+	$m_end  = false !== $m_pos ? strpos( $html, '</div>', $m_pos ) : false;
+	if ( false !== $m_end ) {
+		$inner = substr( $html, $m_pos + strlen( $m_open ), $m_end - $m_pos - strlen( $m_open ) );
+		if ( false === strpos( $inner, '<time' ) ) {
+			$pts   = (int) get_post_time( 'U', true, $post );
+			$inner = '<time datetime="' . esc_attr( (string) wp_date( 'c', $pts ) ) . '">' . esc_html( (string) wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $pts ) ) . '</time>';
+		}
+		$inner = '<span class="cr-placemat__receipt-label">' . esc_html( $is_eat ? __( 'Ate', 'courtneyr-child' ) : __( 'Drank', 'courtneyr-child' ) ) . '</span>' . $inner;
+		$html  = substr( $html, 0, $m_pos + strlen( $m_open ) ) . $inner . substr( $html, $m_end );
+	}
+
+	// 8b. Sheet ephemera in the left column: a short handwritten line with an
+	//     arrow toward the WHERE column, and a decorative diner stamp.
+	$eph_lines = $is_eat
+		? array( __( 'Good company, good plates.', 'courtneyr-child' ), __( 'One for the books.', 'courtneyr-child' ), __( 'Notes from the table.', 'courtneyr-child' ) )
+		: array( __( 'Good company, good cups.', 'courtneyr-child' ), __( 'One for the books.', 'courtneyr-child' ), __( 'Notes from the table.', 'courtneyr-child' ) );
+	$eph  = '<div class="cr-placemat__ephemera" aria-hidden="true">';
+	$eph .= '<p class="cr-hand cr-placemat__caption-line">' . esc_html( $eph_lines[ pick( $s, 8, 3 ) ] ) . '</p>';
+	$eph .= '<div class="cr-placemat__support">' . render(
+		array(
+			'shape'  => 'rect',
+			'big'    => $is_eat ? __( 'Support local', 'courtneyr-child' ) : __( 'Drink local', 'courtneyr-child' ),
+			'mid'    => $is_eat ? __( 'eateries', 'courtneyr-child' ) : __( 'pours', 'courtneyr-child' ),
+			'ink'    => INKS[ pick( $s, 9, count( INKS ) ) ],
+			'tilt'   => pick( $s, 10, TILTS ),
+			'family' => 'placemat-support',
+		)
+	) . '</div></div>';
+	$html = before( $html, '<div class="pk-meta">', $eph );
 
 	// 9. A dated seal, then the doodles, both inside the article.
 	$when = (string) ( $a[ $is_eat ? 'ateAt' : 'drankAt' ] ?? '' );
@@ -401,7 +444,31 @@ function journal_page( string $html, array $block ): string {
 		$html = substr( $html, 0, $gt + 1 ) . doodles( $kind, (string) ( $a['drinkType'] ?? 'other' ) ) . substr( $html, $gt + 1 );
 	}
 
-	// 10. Margin notes in the journal grid.
+	// 10. Body copy after the card (a composer's second group of paragraphs)
+	//     joins the sheet as its notes, or leaves when it only repeats the
+	//     card's note. It stays inside the plugin's e-content either way.
+	$body_html = '';
+	$close_pos = strpos( $html, '</article>' );
+	if ( false !== $close_pos && preg_match( '/<div class="wp-block-group e-content[^"]*"[^>]*>(.*?)<\/div>/s', $html, $bm, PREG_OFFSET_CAPTURE, $close_pos ) ) {
+		$body_html = trim( $bm[1][0] );
+		$html      = substr( $html, 0, (int) $bm[0][1] ) . substr( $html, (int) $bm[0][1] + strlen( $bm[0][0] ) );
+	} elseif ( false !== $close_pos && preg_match( '/^(?:\s*<\/div>)?\s*((?:<p class="wp-block-paragraph"[^>]*>.*?<\/p>\s*)+)/s', substr( $html, $close_pos + 10 ), $pm, PREG_OFFSET_CAPTURE ) ) {
+		// Bare paragraphs straight after the card (no composer group).
+		$body_html = trim( $pm[1][0] );
+		$abs       = $close_pos + 10 + (int) $pm[1][1];
+		$html      = substr( $html, 0, $abs ) . substr( $html, $abs + strlen( $pm[1][0] ) );
+	}
+	if ( '' !== $body_html ) {
+		$norm = static fn( string $t ): string => strtolower( trim( (string) preg_replace( '/\s+/', ' ', html_entity_decode( wp_strip_all_tags( $t ) ) ) ) );
+		if ( '' === $norm( $body_html ) || $norm( $body_html ) === $norm( $note ) ) {
+			$body_html = '';
+		}
+	}
+	if ( '' !== $body_html ) {
+		$html = before( $html, '<div class="pk-meta">', '<div class="cr-placemat__notes" data-label="' . esc_attr__( 'Notes from the table', 'courtneyr-child' ) . '">' . $body_html . '</div>' );
+	}
+
+	// 11. Margin notes in the journal grid.
 	$lines = margin_lines( $s, $is_eat ? 'food' : 'drink' );
 	$html  = wrap( $html, aside( $lines[0], 1 ) . aside( $lines[1], 2, 'cr-hand--orange' ) . aside( $lines[2], 3 ) );
 
@@ -423,6 +490,9 @@ function journal_page( string $html, array $block ): string {
 		}
 		if ( $long ) {
 			$tags->add_class( 'cr-placemat--long-note' );
+		}
+		if ( '' !== $body_html ) {
+			$tags->add_class( 'cr-placemat--has-notes' );
 		}
 		$html = $tags->get_updated_html();
 	}
