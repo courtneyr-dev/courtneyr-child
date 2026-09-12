@@ -326,8 +326,11 @@
 	white-space: nowrap;
 }
 .cr-fieldnotes .cr-fieldnotes__lane-title--stream { background: var(--cr-sky-blue); }
-.cr-fieldnotes .cr-fieldnotes__lane-title--blog::before { content: "📰" / ""; margin-inline-end: 0.4em; }
-.cr-fieldnotes .cr-fieldnotes__lane-title--stream::before { content: "🌊" / ""; margin-inline-end: 0.4em; }
+/* The nav's 📰 / 🌊 lead the lane titles. The plain declaration renders
+   everywhere; browsers that know the alt-text form take the second one and
+   keep the emoji out of the accessible name. */
+.cr-fieldnotes .cr-fieldnotes__lane-title--blog::before { content: "📰"; content: "📰" / ""; margin-inline-end: 0.4em; }
+.cr-fieldnotes .cr-fieldnotes__lane-title--stream::before { content: "🌊"; content: "🌊" / ""; margin-inline-end: 0.4em; }
 .cr-fieldnotes .cr-fieldnotes__caption {
 	margin: -0.75rem 0 1.75rem;
 	font-size: 1.0625rem;
@@ -553,4 +556,29 @@
 	:root:not([data-theme="light"]) .cr-fieldnotes {
 		--cr-chip-ink: var(--cr-ink-inverse, #241c4a);
 	}
+}
+
+/* ---- Panels wiggle like the hero polaroid ----
+   Same recipe as `body.home .wp-block-cover:has(img[src*="courtney-pirate"])`
+   in components.css: a resting tilt, hover / focus-within straightens it and
+   lifts the shadow, transform + shadow transition over 0.3s. The four resting
+   angles are the ones the previous newsletter cards used (components.css
+   v0.5.19), alternating direction so the grid does not read as one tilt.
+   Reduced motion keeps the tilt and drops the transition. */
+.cr-reasons .cr-reasons__panel {
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.cr-reasons .cr-reasons__panel:nth-child(1) { transform: rotate(-1.8deg); }
+.cr-reasons .cr-reasons__panel:nth-child(2) { transform: rotate(1.2deg); }
+.cr-reasons .cr-reasons__panel:nth-child(3) { transform: rotate(-0.7deg); }
+.cr-reasons .cr-reasons__panel:nth-child(4) { transform: rotate(1.5deg); }
+.cr-reasons .cr-reasons__panel:hover,
+.cr-reasons .cr-reasons__panel:focus-within {
+	transform: rotate(0deg);
+	box-shadow: var(--cr-shadow-hard-2, 6px 6px 0 var(--cr-reasons-ink)), 0 14px 28px rgba(36, 28, 74, 0.18);
+}
+@media (prefers-reduced-motion: reduce) {
+	.cr-reasons .cr-reasons__panel { transition: none; }
+	.cr-reasons .cr-reasons__panel:hover,
+	.cr-reasons .cr-reasons__panel:focus-within { transform: revert; box-shadow: revert; }
 }

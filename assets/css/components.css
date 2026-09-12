@@ -3904,10 +3904,12 @@ body.home main.homepage p:not(.has-text-align-center) {
    v0.2.6.6 may have left elsewhere. Recent Posts sparkles use the
    .wp-block-latest-posts li::before selector and are preserved.
    v0.4.19: explicit opt-out for .cr-flank so headings tagged with that
-   class can still emit sparkle pseudo-elements. */
-body.home main.homepage > .wp-block-post-content h2.wp-block-heading:not(.cr-flank)::before,
-body.home main.homepage > .wp-block-post-content h1.wp-block-heading:not(.cr-flank)::before,
-body.home main.homepage > .wp-block-post-content h3.wp-block-heading:not(.cr-flank)::before,
+   class can still emit sparkle pseudo-elements.
+   v0.7.44: the newsletter reasons / Field Notes sections are excluded too;
+   their lane titles carry the nav's 📰 / 🌊 as ::before content. */
+body.home main.homepage > .wp-block-post-content h2.wp-block-heading:not(.cr-flank):not(.cr-reasons *):not(.cr-fieldnotes *)::before,
+body.home main.homepage > .wp-block-post-content h1.wp-block-heading:not(.cr-flank):not(.cr-reasons *):not(.cr-fieldnotes *)::before,
+body.home main.homepage > .wp-block-post-content h3.wp-block-heading:not(.cr-flank):not(.cr-reasons *):not(.cr-fieldnotes *)::before,
 body.home main.homepage > .alignfull:not(.wp-block-latest-posts)::after,
 body.home main.homepage > .alignfull:not(.wp-block-latest-posts)::before,
 body.home main.homepage > .wp-block-cover::after,
