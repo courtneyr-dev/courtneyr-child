@@ -116,6 +116,13 @@
 .cr-pin__plate--a .if,
 .cr-pin__plate--a .a { fill: var(--pin-accent); stroke: none; }
 .cr-pin__halftone { opacity: 0.9; }
+.cr-pin__echo { fill: var(--pin-accent); opacity: 0.6; stroke: none; }
+.cr-pin__void { fill: var(--pin-face); opacity: 0.55; }
+/* Print-defect levels from the seed: clean pins skip the grain, the
+   off-register subset gets more of it. */
+.cr-pin--print-0 .cr-pin__wear { opacity: 0.06; }
+.cr-pin--print-2 .cr-pin__wear { opacity: 0.22; }
+.cr-pin--print-2 .cr-pin__plate--a { opacity: 0.95; }
 .cr-pin__rays { opacity: 0.85; }
 .cr-pin__reg { opacity: 0.5; }
 

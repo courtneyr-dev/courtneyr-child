@@ -148,12 +148,13 @@ function resolve( string $mood, string $emoji ): array {
 			'custom'  => false,
 		);
 	}
+	$with_glyph = array( 'icon-word', 'crooked', 'icon-arc', 'arc-top' );
 	return array(
 		'label'   => $label,
 		'family'  => '',
 		'motif'   => '',
-		'layout'  => '' !== $emoji ? 'icon-word' : 'word-big',
-		'font'    => 'mono',
+		'layout'  => '' !== $emoji ? $with_glyph[ ( $seed >> 2 ) % 4 ] : ( false !== strpos( $label, ' ' ) ? 'stacked' : 'word-big' ),
+		'font'    => array( 'mono', 'condensed', 'slab' )[ ( $seed >> 4 ) % 3 ],
 		'palette' => PALETTES[ $seed % count( PALETTES ) ],
 		'rim'     => RIMS[ ( $seed >> 3 ) % count( RIMS ) ],
 		'glyph'   => $emoji,
@@ -188,10 +189,41 @@ function printed_word( string $word, string $font ): string {
 	return in_array( $font, array( 'mono', 'condensed' ), true ) ? mb_strtoupper( $word ) : $word;
 }
 
+/** Motifs allowed to fill the face and run toward the rim. */
+const BIG_MOTIFS = array( 'lightning', 'battery-empty', 'cassette', 'moon', 'moon-zzz', 'cloud', 'rain-cloud', 'flower', 'magnifier', 'mug', 'sun', 'horizon-sun', 'burst', 'windmill', 'checkbox', 'waves', 'sprout', 'heart', 'heart-rays', 'snowflake', 'flame', 'medal', 'alarm', 'clock', 'bulb', 'thermometer', 'hourglass' );
+
+/** Editorial stacks for single words: where the two lines break. */
+const STACKS = array(
+	'restless'      => array( 'rest', 'less' ),
+	'indescribable' => array( 'in', 'describable' ),
+	'uncomfortable' => array( 'un', 'comfortable' ),
+	'contemplative' => array( 'con', 'templative' ),
+	'heartbroken'   => array( 'heart', 'broken' ),
+	'incomplete'    => array( 'in', 'complete' ),
+	'exanimate'     => array( 'ex', 'animate' ),
+	'hung-over'     => array( 'hung', 'over' ),
+	'rejuvenated'   => array( 're', 'juvenated' ),
+	'disappointed'  => array( 'dis', 'appointed' ),
+	'accomplished'  => array( 'accom', 'plished' ),
+);
+
+/**
+ * Print-defect level from the seed: 0 clean (~10%), 1 subtle (~65%), 2
+ * visibly off-register (~25%).
+ *
+ * @param int $seed Stable seed.
+ * @return int
+ */
+function defect_level( int $seed ): int {
+	$n = ( $seed >> 7 ) % 20;
+	return $n < 2 ? 0 : ( $n < 15 ? 1 : 2 );
+}
+
 /**
  * The face artwork: halftone field, registration mark, the motif in two
  * plates (accent nudged under ink), and the word set by layout. One SVG in
- * a 100×100 box; the shell around it is CSS.
+ * a 100×100 box; the shell around it is CSS. Every choice below comes
+ * from the mood's seed, so a mood always prints the same way.
  *
  * @param array<string, mixed> $spec From resolve().
  * @param int                  $uid  Per-pin id for pattern/path ids.
@@ -204,82 +236,140 @@ function face_svg( array $spec, int $uid ): string {
 	$word   = ! empty( $spec['word_below'] ) ? '' : printed_word( $label, $font );
 	$seed   = crc32( $label );
 	$angle  = $seed % 360;
+	$defect = defect_level( $seed );
+	$side   = ( ( $seed >> 11 ) % 2 ) ? 1 : -1;
+	$big    = in_array( $spec['motif'], BIG_MOTIFS, true );
 	$ht     = 'crht' . $uid;
 	$arc    = 'crarc' . $uid;
+	$dirs   = array( array( 1, 1 ), array( -1, 1 ), array( 1, -1 ), array( -1, -0.6 ) );
+	$dir    = $dirs[ ( $seed >> 9 ) % 4 ];
+	$nudge  = array( 0.8, 2.2, 3.4 )[ $defect ];
 
-	// Motif placement and word band per layout: [scale, cx, cy, word y, usable, base].
-	$placement = array(
-		'icon-word' => array( 0.64, 50, 40, 82, 64, 12 ),
-		'crooked'   => array( 0.6, 50, 39, 81, 60, 12.5 ),
-		'icon-arc'  => array( 0.64, 50, 44, 0, 80, 12 ),
-		'arc-top'   => array( 0.6, 50, 58, 0, 80, 12 ),
-		'word-big'  => array( 0.34, 50, 27, 67, 78, 22 ),
-		'stacked'   => array( 0.34, 50, 25, 66, 72, 16 ),
-	);
-	list( $scale, $cx, $cy, $wy, $usable, $base ) = $placement[ $layout ] ?? $placement['icon-word'];
-	if ( 'hand' === $font ) {
-		$base = min( $base, 15 );
+	// Placement per layout: motif scale, centre, rotation; word band.
+	switch ( $layout ) {
+		case 'crooked':
+			$scale = $big ? 0.72 : 0.62;
+			$cx    = 50 - $side * 9;
+			$cy    = 37;
+			$rot   = -8 * $side;
+			break;
+		case 'icon-arc':
+			$scale = $big ? 0.7 : 0.62;
+			$cx    = 50 + $side * 2;
+			$cy    = 43;
+			$rot   = 0;
+			break;
+		case 'arc-top':
+			$scale = $big ? 0.58 : 0.52;
+			$cx    = 50 - $side * 3;
+			$cy    = 63;
+			$rot   = 0;
+			break;
+		case 'word-big':
+			$scale = 0.24;
+			$cx    = 50 + $side * 22;
+			$cy    = 21;
+			$rot   = 12 * $side;
+			break;
+		case 'stacked':
+			$scale = 0.22;
+			$cx    = 50 - $side * 26;
+			$cy    = 19;
+			$rot   = -10 * $side;
+			break;
+		default: // icon-word
+			$scale = $big ? 0.84 : 0.72;
+			$cx    = 50 + $side * ( $big ? 5 : 3 );
+			$cy    = 40;
+			$rot   = 0;
 	}
 
 	$svg  = '<svg class="cr-pin__art" viewBox="0 0 100 100" aria-hidden="true" focusable="false">';
-	$svg .= '<defs><pattern id="' . $ht . '" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(' . ( $angle % 45 ) . ')"><circle class="a" cx="3" cy="3" r="1.7"/></pattern>';
+	$svg .= '<defs><pattern id="' . $ht . '" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(' . ( $angle % 45 ) . ')"><circle class="a" cx="3" cy="3" r="' . ( 2 === $defect ? 2 : 1.7 ) . '"/></pattern>';
 	if ( 'icon-arc' === $layout ) {
-		$svg .= '<path id="' . $arc . '" d="M16 62A36 36 0 0 0 84 62"/>';
+		$svg .= '<path id="' . $arc . '" d="M13 60A39 39 0 0 0 87 60"/>';
 	} elseif ( 'arc-top' === $layout ) {
-		$svg .= '<path id="' . $arc . '" d="M16 38A36 36 0 0 1 84 38"/>';
+		$svg .= '<path id="' . $arc . '" d="M14 41.8A38 38 0 0 1 86 41.8"/>';
 	}
 	$svg .= '</defs>';
 
-	// Halftone field, one shape per pattern seed so the collection varies:
-	// a quarter wedge, a half face, a diagonal band, an offset block, a ring
-	// of dots by the rim; the 'rays' seed prints short ink ticks instead.
+	// Halftone field: one of eight shapes by seed, turned by seed, cropped
+	// by the face; the 'rays' pattern seed prints short ink ticks instead.
 	$fill = 'fill="url(#' . $ht . ')"';
-	$turn = 'transform="rotate(' . ( $angle % 360 ) . ' 50 50)"';
-	switch ( (string) $spec['pattern'] ) {
-		case 'rays':
-			$svg .= '<g class="cr-pin__rays" transform="rotate(' . ( $angle % 30 ) . ' 50 50)"><path class="i" stroke-width="2.6" d="M50 5v8M50 87v8M5 50h8M87 50h8M18 18l6 6M76 76l6 6M18 82l6-6M76 24l6-6"/></g>';
-			break;
-		case 'top-halftone':
-			$svg .= '<path class="cr-pin__halftone" ' . $turn . ' d="M2 50A48 48 0 0 1 98 50z" ' . $fill . '/>';
-			break;
-		case 'diagonal-lines':
-			$svg .= '<path class="cr-pin__halftone" ' . $turn . ' d="M-10 30h120v26h-120z" ' . $fill . '/>';
-			break;
-		case 'corner-stripe':
-			$svg .= '<path class="cr-pin__halftone" ' . $turn . ' d="M56 4h60v52H56z" ' . $fill . '/>';
-			break;
-		case 'edge-dots':
-			$svg .= '<path class="cr-pin__halftone" ' . $turn . ' d="M50 2A48 48 0 1 1 49.9 2zM50 14A36 36 0 1 0 50.1 14z" fill-rule="evenodd" ' . $fill . '/>';
-			break;
-		default:
-			$svg .= '<path class="cr-pin__halftone" ' . $turn . ' d="M50 50L98 50A48 48 0 0 1 50 98z" ' . $fill . '/>';
+	$turn = 'transform="rotate(' . $angle . ' 50 50)"';
+	if ( 'rays' === $spec['pattern'] ) {
+		$svg .= '<g class="cr-pin__rays" transform="rotate(' . ( $angle % 30 ) . ' 50 50)"><path class="i" stroke-width="2.6" d="M50 5v8M50 87v8M5 50h8M87 50h8M18 18l6 6M76 76l6 6M18 82l6-6M76 24l6-6"/></g>';
+	} else {
+		$shapes = array(
+			'M50 50L98 50A48 48 0 0 1 50 98z',            // quarter wedge
+			'M2 50A48 48 0 0 1 98 50z',                    // half face
+			'M-10 30h120v24h-120z',                        // band across
+			'M56 4h60v52H56z',                             // offset block
+			'M50 2A48 48 0 1 1 49.9 2zM50 14A36 36 0 1 0 50.1 14z', // ring by the rim
+			'M76 -10h40v120H76z',                          // narrow side strip
+			'M-10 41h120v18h-120z',                        // central band
+			'M50 2A48 48 0 1 1 49.9 2zM62 6A44 44 0 1 0 62.1 6z',   // crescent
+		);
+		$shape  = $shapes[ ( $seed >> 13 ) % count( $shapes ) ];
+		$evenodd = ( false !== strpos( $shape, 'M50 14' ) || false !== strpos( $shape, 'M62 6' ) ) ? ' fill-rule="evenodd"' : '';
+		$svg   .= '<path class="cr-pin__halftone" ' . $turn . ' d="' . $shape . '"' . $evenodd . ' ' . $fill . '/>';
 	}
-	// Registration mark on the upper rim, clear of any word on the lower arc.
+	// Registration mark on the upper rim; a second one on the strong-defect subset.
 	$svg .= '<path class="i cr-pin__reg" stroke-width="1.5" transform="rotate(' . ( ( ( $seed >> 2 ) % 120 ) - 60 ) . ' 50 50)" d="M50 6v6M47 9h6"/>';
+	if ( 2 === $defect ) {
+		$svg .= '<path class="i cr-pin__reg" stroke-width="1.5" transform="rotate(' . ( 120 + ( ( $seed >> 3 ) % 120 ) ) . ' 50 50)" d="M50 6v6M47 9h6"/>';
+	}
 
 	if ( '' !== $spec['motif'] ) {
 		$art = motif( (string) $spec['motif'] );
 		if ( '' !== $art ) {
-			$t    = sprintf( 'translate(%.2f %.2f) scale(%.2f)', $cx - 50 * $scale, $cy - 50 * $scale, $scale );
-			$svg .= '<g class="cr-pin__plate cr-pin__plate--a" stroke-width="8" transform="translate(2.2 1.6) ' . $t . '">' . $art . '</g>';
-			$svg .= '<g class="cr-pin__plate cr-pin__plate--i" stroke-width="8" filter="url(#cr-ink-rough)" transform="' . $t . '">' . $art . '</g>';
+			$t      = sprintf( 'translate(%.2f %.2f) rotate(%d 50 50) scale(%.2f)', $cx - 50 * $scale, $cy - 50 * $scale, $rot, $scale );
+			$filter = $defect > 0 ? ' filter="url(#cr-ink-rough)"' : '';
+			$svg   .= '<g class="cr-pin__plate cr-pin__plate--a" stroke-width="8" transform="translate(' . ( $nudge * $dir[0] ) . ' ' . ( $nudge * $dir[1] ) . ') ' . $t . '">' . $art . '</g>';
+			$svg   .= '<g class="cr-pin__plate cr-pin__plate--i" stroke-width="8"' . $filter . ' transform="' . $t . '">' . $art . '</g>';
+			if ( 2 === $defect ) {
+				// A patch where the ink didn't take.
+				$svg .= '<ellipse class="cr-pin__void" cx="' . ( $cx + $side * 9 ) . '" cy="' . ( $cy + 6 ) . '" rx="7" ry="3.5" transform="rotate(' . ( $angle % 60 - 30 ) . ' ' . $cx . ' ' . $cy . ')"/>';
+			}
 		}
 	}
 
 	if ( '' !== $word ) {
 		$class = 'cr-pin__word cr-pin__word--' . $font;
+		$lean  = 2 === $defect ? ( ( ( $seed >> 15 ) % 2 ) ? 1.5 : -1.5 ) : 0;
 		if ( in_array( $layout, array( 'icon-arc', 'arc-top' ), true ) ) {
-			$size = word_size( $word, $font, $usable, $base );
+			$size = word_size( $word, $font, 84, 'hand' === $font ? 11 : 13 );
 			$svg .= '<text class="' . $class . '" font-size="' . $size . '"><textPath href="#' . $arc . '" startOffset="50%" text-anchor="middle">' . esc_html( $word ) . '</textPath></text>';
-		} elseif ( 'stacked' === $layout && false !== strpos( $word, ' ' ) ) {
-			$lines = explode( ' ', $word, 2 );
-			$size  = min( word_size( $lines[0], $font, $usable, $base ), word_size( $lines[1], $font, $usable, $base ) );
-			$svg  .= '<text class="' . $class . '" font-size="' . $size . '" text-anchor="middle" x="50" y="' . ( $wy - $size * 0.55 ) . '">' . esc_html( $lines[0] ) . '<tspan x="50" dy="' . ( $size * 1.15 ) . '">' . esc_html( $lines[1] ) . '</tspan></text>';
+		} elseif ( 'stacked' === $layout ) {
+			$parts = STACKS[ $label ] ?? ( false !== strpos( $word, ' ' ) ? explode( ' ', $word, 2 ) : array( $word ) );
+			$parts = array_map( static fn( $x ) => printed_word( (string) $x, $font ), $parts );
+			$s1    = word_size( $parts[0], $font, 82, mb_strlen( $parts[0] ) <= 4 ? 30 : 22 );
+			$svg  .= '<text class="' . $class . '" font-size="' . $s1 . '" text-anchor="middle" x="' . ( 50 - $side * 4 ) . '" y="' . ( isset( $parts[1] ) ? 52 : 62 ) . '" transform="rotate(' . $lean . ' 50 50)">' . esc_html( $parts[0] ) . '</text>';
+			if ( isset( $parts[1] ) ) {
+				$s2   = word_size( $parts[1], $font, 82, 18 );
+				$svg .= '<text class="' . $class . '" font-size="' . $s2 . '" text-anchor="middle" x="' . ( 50 + $side * 3 ) . '" y="' . ( 52 + $s2 * 1.15 ) . '" transform="rotate(' . $lean . ' 50 50)">' . esc_html( $parts[1] ) . '</text>';
+				$svg .= '<path class="as" stroke-width="2.5" d="M' . ( 50 - $side * 18 ) . ' ' . ( 58 + $s2 * 1.15 ) . 'h' . ( 26 + ( $seed >> 4 ) % 12 ) . '"/>';
+			}
+		} elseif ( 'word-big' === $layout ) {
+			$size = word_size( $word, $font, 84, 'hand' === $font ? 22 : 30 );
+			$svg .= '<text class="' . $class . '" font-size="' . $size . '" text-anchor="middle" x="50" y="' . ( 60 + $size * 0.3 ) . '" transform="rotate(' . $lean . ' 50 60)">' . esc_html( $word ) . '</text>';
+			if ( ( $seed >> 6 ) % 2 ) {
+				// An echo of the word in the accent plate, like a second pull of the screen.
+				$svg .= '<text class="' . $class . ' cr-pin__echo" font-size="' . round( $size * 0.5, 1 ) . '" text-anchor="middle" x="' . ( 50 + $side * 12 ) . '" y="' . ( 60 + $size * 0.3 + $size * 0.62 ) . '" transform="rotate(' . ( -6 * $side ) . ' 50 70)">' . esc_html( $word ) . '</text>';
+			} else {
+				$svg .= '<path class="as" stroke-width="3" d="M' . ( 50 - $side * 22 ) . ' ' . ( 64 + $size * 0.3 + 4 ) . 'h' . ( 24 + ( $seed >> 4 ) % 14 ) . '"/>';
+			}
+		} elseif ( 'crooked' === $layout ) {
+			$size = word_size( $word, $font, 58, 12.5 );
+			$svg .= '<text class="' . $class . '" font-size="' . $size . '" text-anchor="middle" x="' . ( 50 + $side * 7 ) . '" y="80" transform="rotate(' . ( -13 * $side + $lean ) . ' ' . ( 50 + $side * 7 ) . ' 80)">' . esc_html( $word ) . '</text>';
+			$svg .= '<path class="a" transform="translate(' . ( 50 + $side * 30 ) . ' 16) rotate(' . ( $angle % 40 ) . ')" d="M0-5l1.5 3.5 3.5 1.5-3.5 1.5L0 5l-1.5-3.5L-5 0l3.5-1.5z"/>';
 		} else {
-			$size = word_size( $word, $font, $usable, $base );
-			$attr = 'crooked' === $layout ? ' transform="rotate(-11 50 ' . $wy . ')"' : '';
-			$svg .= '<text class="' . $class . '" font-size="' . $size . '" text-anchor="middle" x="50" y="' . $wy . '"' . $attr . '>' . esc_html( $word ) . '</text>';
+			$size = word_size( $word, $font, 62, 10.5 );
+			$svg .= '<text class="' . $class . '" font-size="' . $size . '" text-anchor="middle" x="50" y="86" transform="rotate(' . $lean . ' 50 86)">' . esc_html( $word ) . '</text>';
 		}
+	}
+	if ( 'arc-top' === $layout ) {
+		$svg .= '<path class="a" d="M' . ( 50 - $side * 10 ) . ' 88a2.6 2.6 0 1 0 .1 0zM' . ( 50 - $side * 2 ) . ' 88a2.6 2.6 0 1 0 .1 0zM' . ( 50 + $side * 6 ) . ' 88a2.6 2.6 0 1 0 .1 0z"/>';
 	}
 	return $svg . '</svg>';
 }
@@ -330,6 +420,7 @@ function render( array $spec, string $size ): string {
 	if ( '' !== $spec['family'] ) {
 		$classes[] = 'cr-pin--fam-' . $spec['family'];
 	}
+	$classes[] = 'cr-pin--print-' . defect_level( crc32( $label ) );
 	$scales = array( '0.95', '1', '1.1' );
 	$style  = sprintf(
 		'--pin-face:%s;--pin-ink:%s;--pin-accent:%s;--pin-rim-hi:%s;--pin-rim-lo:%s;--pin-tilt:%s;--pin-wear:%ddeg;--pin-scale:%s',

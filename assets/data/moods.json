@@ -30,7 +30,7 @@
 			"emotionml": null,
 			"visual": {
 				"motif": "medal",
-				"layout": "icon-arc",
+				"layout": "stacked",
 				"font": "condensed",
 				"palette": 4,
 				"rim": 6,
@@ -417,7 +417,7 @@
 			"emotionml": null,
 			"visual": {
 				"motif": "clock",
-				"layout": "icon-word",
+				"layout": "word-big",
 				"font": "mono",
 				"palette": 13,
 				"rim": 1,
@@ -802,7 +802,7 @@
 			"emotionml": null,
 			"visual": {
 				"motif": "heart-broken",
-				"layout": "icon-word",
+				"layout": "word-big",
 				"font": "condensed",
 				"palette": 3,
 				"rim": 1,
@@ -977,7 +977,7 @@
 			"emotionml": null,
 			"visual": {
 				"motif": "frown",
-				"layout": "icon-word",
+				"layout": "stacked",
 				"font": "mono",
 				"palette": 7,
 				"rim": 3,
@@ -1322,7 +1322,7 @@
 			"emotionml": null,
 			"visual": {
 				"motif": "x-eyes",
-				"layout": "word-big",
+				"layout": "stacked",
 				"font": "mono",
 				"palette": 7,
 				"rim": 3,
@@ -1420,7 +1420,7 @@
 			"visual": {
 				"motif": "brow",
 				"layout": "stacked",
-				"font": "mono",
+				"font": "condensed",
 				"palette": 15,
 				"rim": 3,
 				"pattern": "corner-stripe"
@@ -1920,7 +1920,7 @@
 			"emotionml": null,
 			"visual": {
 				"motif": "bandage",
-				"layout": "crooked",
+				"layout": "stacked",
 				"font": "mono",
 				"palette": 9,
 				"rim": 3,
@@ -2553,8 +2553,8 @@
 			"emotionml": null,
 			"visual": {
 				"motif": "frown",
-				"layout": "icon-word",
-				"font": "mono",
+				"layout": "word-big",
+				"font": "slab",
 				"palette": 12,
 				"rim": 5,
 				"pattern": "dots"
@@ -2939,7 +2939,7 @@
 			"visual": {
 				"motif": "checkbox",
 				"layout": "icon-arc",
-				"font": "condensed",
+				"font": "mono",
 				"palette": 2,
 				"rim": 4,
 				"pattern": "top-halftone"
@@ -2995,7 +2995,7 @@
 			"emotionml": null,
 			"visual": {
 				"motif": "windmill",
-				"layout": "icon-arc",
+				"layout": "word-big",
 				"font": "hand",
 				"palette": 4,
 				"rim": 3,
@@ -3091,7 +3091,7 @@
 			"emotionml": null,
 			"visual": {
 				"motif": "sprout",
-				"layout": "icon-arc",
+				"layout": "stacked",
 				"font": "condensed",
 				"palette": 3,
 				"rim": 3,
@@ -3150,8 +3150,8 @@
 			"emotionml": null,
 			"visual": {
 				"motif": "loop-arrows",
-				"layout": "icon-word",
-				"font": "mono",
+				"layout": "stacked",
+				"font": "condensed",
 				"palette": 8,
 				"rim": 3,
 				"pattern": "dots"
@@ -3169,7 +3169,7 @@
 			"emotionml": null,
 			"visual": {
 				"motif": "alarm",
-				"layout": "crooked",
+				"layout": "word-big",
 				"font": "condensed",
 				"palette": 1,
 				"rim": 5,
@@ -3425,7 +3425,7 @@
 			"emotionml": null,
 			"visual": {
 				"motif": "tangle",
-				"layout": "icon-word",
+				"layout": "word-big",
 				"font": "condensed",
 				"palette": 0,
 				"rim": 6,
