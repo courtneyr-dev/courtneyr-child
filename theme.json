@@ -1043,5 +1043,27 @@
 				}
 			}
 		}
-	}
+	},
+	"templateParts": [
+		{
+			"name": "header",
+			"title": "Header",
+			"area": "header"
+		},
+		{
+			"name": "footer",
+			"title": "Footer",
+			"area": "footer"
+		},
+		{
+			"name": "sidebar",
+			"title": "Sidebar",
+			"area": "sidebar"
+		},
+		{
+			"name": "newsletter-cta",
+			"title": "Newsletter CTA (Field Notes)",
+			"area": "uncategorized"
+		}
+	]
 }
