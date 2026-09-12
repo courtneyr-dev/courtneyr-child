@@ -163,7 +163,7 @@ function citation( \WP_Post $post ): string {
  * @return string
  */
 function stream_card( string $html, array $block, $instance ): string {
-	if ( ! is_page( 'stream' ) || false === strpos( $html, 'k-quote' ) ) {
+	if ( ! \Courtneyr\Child\HomeSections\is_stream_surface() || false === strpos( $html, 'k-quote' ) ) {
 		return $html;
 	}
 	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )

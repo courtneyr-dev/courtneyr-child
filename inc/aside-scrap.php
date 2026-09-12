@@ -133,7 +133,7 @@ function title_state( \WP_Post $post ): string {
  * @return string
  */
 function stream_card( string $html, array $block, $instance ): string {
-	if ( ! is_page( 'stream' ) || ! preg_match( '/pk-card--stream k-(?:note|article)\b/', $html ) ) {
+	if ( ! \Courtneyr\Child\HomeSections\is_stream_surface() || ! preg_match( '/pk-card--stream k-(?:note|article)\b/', $html ) ) {
 		return $html;
 	}
 	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )

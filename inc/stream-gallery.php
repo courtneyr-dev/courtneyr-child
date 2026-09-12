@@ -316,7 +316,7 @@ function render_strip( \WP_Post $post, array $ids ): string {
  * @return string
  */
 function booth_strip_card( string $html, array $block, $instance ): string {
-	if ( ! is_page( 'stream' ) ) {
+	if ( ! \Courtneyr\Child\HomeSections\is_stream_surface() ) {
 		return $html;
 	}
 

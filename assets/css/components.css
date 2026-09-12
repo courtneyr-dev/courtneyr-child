@@ -2044,8 +2044,8 @@ section.alignfull,
 	color: var(--cr-russian-violet, #241c4a);
 }
 
-.has-tertiary-background-color a:not(.wp-element-button):not(.cr-cta),
-.has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta),
+.has-tertiary-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
+.has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
 .related-posts a:not(.wp-element-button):not(.cr-cta),
 .single-post__comments-wrapper a:not(.wp-element-button):not(.cr-cta) {
 	color: var(--cr-russian-violet, #241c4a);
@@ -2058,8 +2058,8 @@ section.alignfull,
 	color: var(--cr-russian-violet-soft, #3d2f6e);
 }
 
-.has-tertiary-background-color a:hover:not(.wp-element-button):not(.cr-cta),
-.has-main-accent-background-color a:hover:not(.wp-element-button):not(.cr-cta),
+.has-tertiary-background-color a:hover:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
+.has-main-accent-background-color a:hover:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
 .related-posts a:hover:not(.wp-element-button):not(.cr-cta),
 .single-post__comments-wrapper a:hover:not(.wp-element-button):not(.cr-cta) {
 	color: var(--cr-ut-orange-dark, #b85f00);
@@ -2068,14 +2068,14 @@ section.alignfull,
 }
 
 /* Headings inside light-bg sections — same dark-text lock */
-.has-tertiary-background-color h1,
-.has-tertiary-background-color h2,
-.has-tertiary-background-color h3,
-.has-tertiary-background-color h4,
-.has-main-accent-background-color h1,
-.has-main-accent-background-color h2,
-.has-main-accent-background-color h3,
-.has-main-accent-background-color h4,
+.has-tertiary-background-color h1:not(.cr-reasons *):not(.cr-fieldnotes *),
+.has-tertiary-background-color h2:not(.cr-reasons *):not(.cr-fieldnotes *),
+.has-tertiary-background-color h3:not(.cr-reasons *):not(.cr-fieldnotes *),
+.has-tertiary-background-color h4:not(.cr-reasons *):not(.cr-fieldnotes *),
+.has-main-accent-background-color h1:not(.cr-reasons *):not(.cr-fieldnotes *),
+.has-main-accent-background-color h2:not(.cr-reasons *):not(.cr-fieldnotes *),
+.has-main-accent-background-color h3:not(.cr-reasons *):not(.cr-fieldnotes *),
+.has-main-accent-background-color h4:not(.cr-reasons *):not(.cr-fieldnotes *),
 .related-posts h1,
 .related-posts h2,
 .related-posts h3,
@@ -2191,7 +2191,12 @@ body.home .homepage__content > h1:first-child {
    hero sections. In dark mode the page background flips dark but
    palette-color sections stay light, leaving the SEMANTIC text
    tokens (which also flip to light) unreadable on those light bgs.
-   Lock dark text inside any homepage palette-color surface. */
+   Lock dark text inside any homepage palette-color surface.
+   v0.7.44: the rules stop at .cr-reasons / .cr-fieldnotes (homepage
+   newsletter reasons + Field Notes). Those sections nest components with
+   their own ink (stream cards, chips, glyph panels, audience strips) and
+   the forced inherit / !important ivory painted them ivory-on-ivory in
+   dark mode and ink-on-ink in light; they style themselves, as on /stream/. */
 body.home .has-tertiary-background-color,
 body.home .has-main-accent-background-color,
 body.home .has-base-background-color,
@@ -2200,25 +2205,25 @@ body.home .has-primary-accent-background-color {
 	color: var(--cr-russian-violet, #241c4a);
 }
 
-body.home .has-tertiary-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar),
-body.home .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar),
-body.home .has-base-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar),
-body.home .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar) {
+body.home .has-tertiary-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-base-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *) {
 	color: inherit;
 }
 
-body.home .has-tertiary-background-color a:not(.wp-element-button):not(.cr-cta),
-body.home .has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta),
-body.home .has-base-background-color a:not(.wp-element-button):not(.cr-cta) {
+body.home .has-tertiary-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-base-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *) {
 	color: var(--cr-russian-violet, #241c4a);
 	text-decoration: underline;
 	text-underline-offset: 0.15em;
 	text-decoration-thickness: 1px;
 }
 
-body.home .has-tertiary-background-color a:hover:not(.wp-element-button):not(.cr-cta),
-body.home .has-main-accent-background-color a:hover:not(.wp-element-button):not(.cr-cta),
-body.home .has-base-background-color a:hover:not(.wp-element-button):not(.cr-cta) {
+body.home .has-tertiary-background-color a:hover:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-main-accent-background-color a:hover:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-base-background-color a:hover:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *) {
 	color: var(--cr-ut-orange-dark, #b85f00);
 }
 
@@ -2508,16 +2513,16 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 	color: var(--cr-printer-ivory) !important;
 }
 
-:root[data-theme="dark"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
-:root[data-theme="dark"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
-:root[data-theme="dark"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
-:root[data-theme="dark"] .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar) {
+:root[data-theme="dark"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
+:root[data-theme="dark"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
+:root[data-theme="dark"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
+:root[data-theme="dark"] .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *) {
 	color: var(--cr-printer-ivory) !important;
 }
 
-:root[data-theme="dark"] .has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta),
-:root[data-theme="dark"] .has-tertiary-background-color  a:not(.wp-element-button):not(.cr-cta),
-:root[data-theme="dark"] .has-base-background-color      a:not(.wp-element-button):not(.cr-cta) {
+:root[data-theme="dark"] .has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
+:root[data-theme="dark"] .has-tertiary-background-color  a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
+:root[data-theme="dark"] .has-base-background-color      a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *) {
 	color: var(--cr-sky-blue, #8ecae6) !important;
 }
 
@@ -2533,12 +2538,12 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 		background-color: var(--cr-surface-soft) !important;
 		color: var(--cr-printer-ivory) !important;
 	}
-	:root:not([data-theme]) .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
-	:root:not([data-theme]) .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
-	:root:not([data-theme]) .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
-	:root[data-theme="system"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
-	:root[data-theme="system"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar),
-	:root[data-theme="system"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar) {
+	:root:not([data-theme]) .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
+	:root:not([data-theme]) .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
+	:root:not([data-theme]) .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
+	:root[data-theme="system"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
+	:root[data-theme="system"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
+	:root[data-theme="system"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *) {
 		color: var(--cr-printer-ivory) !important;
 	}
 }
@@ -3348,7 +3353,7 @@ body.home .wp-block-cover.has-tertiary-background-color > .wp-block-cover__backg
 	color: var(--cr-russian-violet, #241c4a) !important;
 }
 
-body.home .wp-block-cover.has-tertiary-background-color *,
+body.home .wp-block-cover.has-tertiary-background-color *:not(.cr-reasons *):not(.cr-fieldnotes *),
 body.home .wp-block-cover.has-tertiary-background-color svg,
 body.home .wp-block-cover.has-tertiary-background-color svg * {
 	color: var(--cr-russian-violet, #241c4a) !important;
@@ -3392,10 +3397,10 @@ body.home {
 
 /* Belt-and-suspenders: force dark text on body paragraphs/lists
    inside light-bg sections of the homepage. */
-body.home .wp-block-post-content p:not([class*="cerulean"]):not([class*="primary-alt"]),
-body.home .wp-block-post-content li:not([class*="cerulean"]):not([class*="primary-alt"]),
-body.home .homepage__content p:not([class*="cerulean"]):not([class*="primary-alt"]),
-body.home .homepage__content li:not([class*="cerulean"]):not([class*="primary-alt"]) {
+body.home .wp-block-post-content p:not([class*="cerulean"]):not([class*="primary-alt"]):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .wp-block-post-content li:not([class*="cerulean"]):not([class*="primary-alt"]):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .homepage__content p:not([class*="cerulean"]):not([class*="primary-alt"]):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .homepage__content li:not([class*="cerulean"]):not([class*="primary-alt"]):not(.cr-reasons *):not(.cr-fieldnotes *) {
 	color: var(--cr-ink, #241c4a);
 }
 
@@ -3447,9 +3452,9 @@ body.home .wp-block-heading + .wp-block-latest-posts {
 }
 
 body.home .has-tertiary-background-color.wp-block-heading,
-body.home .has-tertiary-background-color h1,
-body.home .has-tertiary-background-color h2,
-body.home .has-tertiary-background-color h3 {
+body.home .has-tertiary-background-color h1:not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-tertiary-background-color h2:not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-tertiary-background-color h3:not(.cr-reasons *):not(.cr-fieldnotes *) {
 	margin-bottom: 0 !important;
 	padding-bottom: var(--wp--preset--spacing--medium, 1rem) !important;
 }
@@ -3631,20 +3636,20 @@ body.home .home-stream h2.home-stream__title {
 
 /* (7) Make the "Start your journey today" peach section text dark
    (it's on peach bg so dark text reads). Same fix as periwinkle. */
-body.home .has-tertiary-background-color p,
-body.home .has-tertiary-background-color li,
-body.home .has-main-accent-background-color p,
-body.home .has-main-accent-background-color li,
-body.home .has-base-background-color p,
-body.home .has-base-background-color li {
+body.home .has-tertiary-background-color p:not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-tertiary-background-color li:not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-main-accent-background-color p:not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-main-accent-background-color li:not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-base-background-color p:not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .has-base-background-color li:not(.cr-reasons *):not(.cr-fieldnotes *) {
 	color: var(--cr-russian-violet, #241c4a) !important;
 }
 
 /* But in dark mode where these flip to dark surface, text goes ivory */
-:root[data-theme="dark"] body.home .has-tertiary-background-color p,
-:root[data-theme="dark"] body.home .has-tertiary-background-color li,
-:root[data-theme="dark"] body.home .has-main-accent-background-color p,
-:root[data-theme="dark"] body.home .has-base-background-color p {
+:root[data-theme="dark"] body.home .has-tertiary-background-color p:not(.cr-reasons *):not(.cr-fieldnotes *),
+:root[data-theme="dark"] body.home .has-tertiary-background-color li:not(.cr-reasons *):not(.cr-fieldnotes *),
+:root[data-theme="dark"] body.home .has-main-accent-background-color p:not(.cr-reasons *):not(.cr-fieldnotes *),
+:root[data-theme="dark"] body.home .has-base-background-color p:not(.cr-reasons *):not(.cr-fieldnotes *) {
 	color: var(--cr-printer-ivory, #fbfaf5) !important;
 }
 
@@ -5419,12 +5424,12 @@ body.home .homepage__content > .alignfull.has-main-accent-background-color {
    the rule's specificity (0,0,2,2) beat .has-base-color (0,0,1,0) and
    forced strong/p to inherit the section color instead of rendering
    in their explicit class color. */
-body.home .homepage__content > .alignfull p:not(.has-text-color),
-body.home .homepage__content > .alignfull li:not(.has-text-color),
-body.home .homepage__content > .alignfull h1:not(.has-text-color),
-body.home .homepage__content > .alignfull h2:not(.has-text-color),
-body.home .homepage__content > .alignfull h3:not(.has-text-color),
-body.home .homepage__content > .alignfull h4:not(.has-text-color),
+body.home .homepage__content > .alignfull p:not(.has-text-color):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .homepage__content > .alignfull li:not(.has-text-color):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .homepage__content > .alignfull h1:not(.has-text-color):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .homepage__content > .alignfull h2:not(.has-text-color):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .homepage__content > .alignfull h3:not(.has-text-color):not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .homepage__content > .alignfull h4:not(.has-text-color):not(.cr-reasons *):not(.cr-fieldnotes *),
 body.home .homepage__content > .alignfull strong:not(.has-text-color),
 body.home .homepage__content > .alignfull label:not(.has-text-color) {
 	color: inherit;

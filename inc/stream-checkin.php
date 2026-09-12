@@ -220,7 +220,7 @@ function render_stamps( array $attrs, \WP_Post $post ): string {
  * @return string
  */
 function passport_card( string $html, array $block, $instance ): string {
-	if ( ! is_page( 'stream' ) ) {
+	if ( ! \Courtneyr\Child\HomeSections\is_stream_surface() ) {
 		return $html;
 	}
 

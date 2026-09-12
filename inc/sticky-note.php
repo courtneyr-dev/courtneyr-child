@@ -91,7 +91,7 @@ function plain( string $html ): string {
  * @return string
  */
 function stream_card( string $html, array $block, $instance ): string {
-	if ( ! is_page( 'stream' ) || false === strpos( $html, 'pk-card--stream k-note' ) ) {
+	if ( ! \Courtneyr\Child\HomeSections\is_stream_surface() || false === strpos( $html, 'pk-card--stream k-note' ) ) {
 		return $html;
 	}
 	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )

@@ -196,7 +196,7 @@ function cut_div( string $html, string $open ): string {
  * @return string
  */
 function media_card( string $html, array $block, $instance ): string {
-	if ( ! is_page( 'stream' ) ) {
+	if ( ! \Courtneyr\Child\HomeSections\is_stream_surface() ) {
 		return $html;
 	}
 	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )

@@ -540,7 +540,7 @@ function mood_card( string $html, array $block ): string {
 
 	// A card-only micro-post on /stream with no moodAt has no date of its
 	// own; the post's date joins it, in the plugin's own meta markup.
-	if ( is_page( 'stream' ) && false === strpos( $html, 'dt-published' ) ) {
+	if ( \Courtneyr\Child\HomeSections\is_stream_surface() && false === strpos( $html, 'dt-published' ) ) {
 		$post = get_post();
 		if ( $post instanceof \WP_Post ) {
 			$date = '<div class="pk-meta"><time class="dt-published" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( (string) get_the_date( '', $post ) ) . '</time></div>';

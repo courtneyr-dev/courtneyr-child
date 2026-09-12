@@ -77,7 +77,7 @@ function stamp_line( string $kind, string $type ): string {
  * @return string
  */
 function placemat_card( string $html, array $block, $instance ): string {
-	if ( ! is_page( 'stream' ) ) {
+	if ( ! \Courtneyr\Child\HomeSections\is_stream_surface() ) {
 		return $html;
 	}
 	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )

@@ -66,7 +66,7 @@ function find_read_block( \WP_Post $post ): ?array {
  * @return string
  */
 function book_card( string $html, array $block, $instance ): string {
-	if ( ! is_page( 'stream' ) ) {
+	if ( ! \Courtneyr\Child\HomeSections\is_stream_surface() ) {
 		return $html;
 	}
 	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
