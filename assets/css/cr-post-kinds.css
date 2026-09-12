@@ -8656,3 +8656,308 @@ body.single-post.kind-note:has(.cr-sticky-artifact--single) .single-post__lede-m
 	clip-path: inset(50%) !important;
 	white-space: nowrap !important;
 }
+
+/* ============================================================
+   v0.7.43 — Aside format: a margin scrap, not a sticky note.
+   inc/aside-scrap.php wraps the plugin's generic card (a Note, an
+   Article, or a kind-less post whose format is aside) and the content
+   of an Aside single in div.cr-scrap-artifact: the artifact carries the
+   seeded paper stock and a small tilt; the paper (.cr-scrap) carries a
+   light hard shadow as a drop-shadow filter; its ::before layer paints
+   pale grid stock with a glaucous side rule and tears the outer edge
+   (the clip-path lives on the layer so the shadow follows the tear).
+   Typeset throughout: the Note is the handwritten thought, the Aside
+   is the typed remark in the margin. A title that is empty or only
+   repeats the body stays in the DOM and hides from view. Scope:
+   li.format-aside on the stream, body.single-format-aside on the
+   single; other kinds with the aside format keep their own artifact.
+   ============================================================ */
+/* ---- The artifact and the paper (shared) ---- */
+:is(.cr-stream-page li.format-aside, body.single-post.single-format-aside .single-post__content) .cr-scrap-artifact {
+	--cr-scrap-paper: #efeaf9;
+	--cr-scrap-tilt: 0deg;
+	position: relative;
+	isolation: isolate;
+	box-sizing: border-box;
+	transform: rotate(var(--cr-scrap-tilt));
+}
+:is(.cr-stream-page li.format-aside, body.single-post.single-format-aside .single-post__content) .cr-scrap {
+	position: relative;
+	box-sizing: border-box;
+	margin: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	transform: none;
+	color: #241c4a;
+	filter: drop-shadow(2px 2px 0 rgba(36, 28, 74, 0.5));
+	overflow: visible;
+}
+:is(.cr-stream-page li.format-aside, body.single-post.single-format-aside .single-post__content) .cr-scrap::before {
+	content: "";
+	display: block;
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	width: auto;
+	height: auto;
+	margin: 0;
+	border: 1px solid rgba(36, 28, 74, 0.28);
+	border-left: 3px solid var(--cr-glaucous, #647baf);
+	border-radius: 0;
+	box-shadow: none;
+	opacity: 1;
+	transform: none;
+	pointer-events: none;
+	background:
+		repeating-linear-gradient(0deg, rgba(36, 28, 74, 0.07) 0 1px, transparent 1px 0.9rem),
+		repeating-linear-gradient(90deg, rgba(36, 28, 74, 0.07) 0 1px, transparent 1px 0.9rem),
+		var(--cr-scrap-paper);
+	clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 8%, calc(100% - 4px) 17%, 100% 26%, calc(100% - 7px) 35%, 100% 44%, calc(100% - 3px) 53%, 100% 62%, calc(100% - 6px) 71%, 100% 80%, calc(100% - 4px) 89%, 100% 100%, 0 100%);
+}
+:is(.cr-stream-page li.format-aside, body.single-post.single-format-aside .single-post__content) .cr-scrap::after { content: none; display: none; }
+/* ---- /stream: a narrow scrap tucked to one side of the column ---- */
+.cr-stream-page li.format-aside .cr-scrap-artifact--stream { width: 74%; }
+.cr-stream-page .wp-block-post-template > li.format-aside:nth-child(even) .cr-scrap-artifact--stream { margin-left: auto; }
+.cr-stream-page li.format-aside .pk-card.cr-scrap--stream {
+	width: 100%;
+	padding: 0.8rem 1rem 0.85rem 1.1rem;
+}
+.cr-stream-page .wp-block-post-template > li.format-aside:nth-child(4n+1) .pk-card.cr-scrap,
+.cr-stream-page .wp-block-post-template > li.format-aside:nth-child(4n+3) .pk-card.cr-scrap { transform: none; }
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-badge { display: none; }
+/* Reading order on the scrap: label, title, remark, then the date and the
+   small Read more on one row. The caption's box dissolves so its title and
+   date place themselves. */
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-body {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	column-gap: 0.6rem;
+	align-items: center;
+}
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-body > * { grid-column: 1 / -1; min-width: 0; }
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-caption { display: contents; }
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-kindlabel {
+	order: 0;
+	display: block;
+	position: static;
+	margin: 0 0 0.35rem;
+	padding: 0;
+	border: 0;
+	background: none;
+	box-shadow: none;
+	transform: none;
+	overflow: visible;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.6rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	line-height: 1.2;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--cr-glaucous-dark, #3d527d);
+}
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-kindlabel::before { content: "\21B3\00a0"; font-family: var(--cr-font-body, sans-serif); font-weight: 400; letter-spacing: 0; }
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-title {
+	order: 1;
+	grid-column: 1 / -1;
+	margin: 0 0 0.3rem;
+	padding: 0;
+	border: 0;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 700;
+	font-size: 0.95rem;
+	line-height: 1.25;
+	letter-spacing: 0;
+	text-transform: none;
+	color: #241c4a;
+}
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-title a { color: inherit; text-decoration: none; }
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-title a:hover { text-decoration: underline; text-decoration-color: var(--cr-glaucous, #647baf); text-decoration-thickness: 2px; }
+/* An empty or repeated title stays the card's link for assistive tech, hidden from view. */
+.cr-stream-page li.format-aside .pk-card.cr-scrap:is(.cr-scrap--none, .cr-scrap--dup) .pk-title {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	margin: -1px !important;
+	padding: 0 !important;
+	border: 0 !important;
+	overflow: hidden !important;
+	clip: rect(1px, 1px, 1px, 1px) !important;
+	clip-path: inset(50%) !important;
+	white-space: nowrap !important;
+}
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-excerpt {
+	order: 2;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 6;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 0.9rem;
+	line-height: 1.5;
+	letter-spacing: 0;
+	color: #241c4a;
+}
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-stream-date {
+	order: 3;
+	grid-column: 1;
+	display: block;
+	margin: 0.6rem 0 0;
+	padding: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.6rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: #241c4a;
+}
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-stream-date time { display: inline; border: 0; padding: 0; background: none; color: inherit; font: inherit; letter-spacing: inherit; }
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-meta { order: 4; grid-column: 2; justify-self: end; margin: 0.6rem 0 0; padding: 0; }
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-link {
+	display: inline-block;
+	margin: 0;
+	padding: 0.05rem 0.3rem;
+	border: 1px solid rgba(36, 28, 74, 0.6);
+	border-radius: 2px;
+	background: none;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.56rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: #241c4a;
+	text-decoration: none;
+}
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-link::after { content: "\00a0\2197"; font-family: var(--cr-font-body, sans-serif); }
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-link:hover { background: var(--cr-selective-yellow, #ffb703); }
+.cr-stream-page li.format-aside .pk-card.cr-scrap :is(.pk-title a, .pk-link):focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
+/* ---- Single: a larger margin note, off the main axis on wide screens ---- */
+body.single-post.single-format-aside .single-post__content .cr-scrap-artifact--single {
+	width: min(100%, 34rem);
+	margin: 1.2rem 0 0;
+}
+body.single-post.single-format-aside .single-post__content .cr-scrap--single {
+	padding: 1.5rem 1.9rem 1.5rem 2rem;
+	filter: drop-shadow(3px 3px 0 rgba(36, 28, 74, 0.5));
+}
+body.single-post.single-format-aside .single-post__content .cr-scrap--single::before { border-left-width: 4px; }
+body.single-post.single-format-aside .single-post__content .cr-scrap__label {
+	margin: 0 0 0.7rem;
+	padding: 0;
+	font-family: var(--cr-font-display, "Rock Salt", cursive);
+	font-size: 1.05rem;
+	line-height: 1.4;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--cr-glaucous-dark, #3d527d);
+}
+body.single-post.single-format-aside .single-post__content .cr-scrap__label::before { content: "\21B3\00a0"; font-family: var(--cr-font-body, sans-serif); }
+/* A real title moves onto the paper: undo the titleless-format hiding and
+   the flank glyphs the header gave it. */
+body.single-post.single-format-aside .single-post__content .cr-scrap--single h1.single-post__title {
+	position: static !important;
+	display: block !important;
+	width: auto !important;
+	height: auto !important;
+	margin: 0 0 0.7rem !important;
+	padding: 0 !important;
+	border: 0 !important;
+	overflow: visible !important;
+	clip: auto !important;
+	clip-path: none !important;
+	white-space: normal !important;
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 700;
+	font-size: clamp(1.3rem, 1.1rem + 1vw, 1.7rem);
+	line-height: 1.15;
+	letter-spacing: 0;
+	color: #241c4a;
+}
+body.single-post.single-format-aside .single-post__content .cr-scrap--single h1.single-post__title::before,
+body.single-post.single-format-aside .single-post__content .cr-scrap--single h1.single-post__title::after { content: none; display: none; }
+body.single-post.single-format-aside .single-post__content .cr-scrap__body :is(p, li) {
+	max-width: 32em;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: 1rem;
+	line-height: 1.6;
+	letter-spacing: 0;
+	color: #241c4a;
+}
+body.single-post.single-format-aside .single-post__content .cr-scrap__body > p { margin: 0 0 0.85rem; }
+body.single-post.single-format-aside .single-post__content .cr-scrap__body > :last-child { margin-bottom: 0; }
+body.single-post.single-format-aside .single-post__content .cr-scrap__body a { color: var(--cr-cerulean, #126782); text-decoration: underline; text-underline-offset: 0.15em; }
+body.single-post.single-format-aside .single-post__content .cr-scrap__body a:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
+body.single-post.single-format-aside .single-post__content .cr-scrap__date {
+	margin: 1.1rem 0 0;
+	padding: 0.5rem 0 0;
+	border-top: 1px dashed rgba(36, 28, 74, 0.35);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.68rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: #241c4a;
+}
+/* The header's own date hides; the paper has it. */
+body.single-post.single-format-aside:has(.cr-scrap-artifact--single) .single-post__lede-meta .single-post__date { display: none; }
+/* Wide screens: off the main axis, with a hand-drawn arrow from the margin. */
+@media (min-width: 64rem) {
+	body.single-post.single-format-aside .single-post__content .cr-scrap-artifact--single { margin-left: 3rem; }
+	body.single-post.single-format-aside .single-post__content .cr-scrap-artifact--single::before {
+		content: "";
+		position: absolute;
+		top: 1.55rem;
+		left: -2.9rem;
+		width: 2.1rem;
+		height: 0;
+		border-top: 2px solid var(--cr-ink, #241c4a);
+		transform: rotate(6deg);
+		opacity: 0.85;
+		pointer-events: none;
+	}
+	body.single-post.single-format-aside .single-post__content .cr-scrap-artifact--single::after {
+		content: "";
+		position: absolute;
+		top: 1.35rem;
+		left: -1.35rem;
+		width: 0.5rem;
+		height: 0.5rem;
+		border-top: 2px solid var(--cr-ink, #241c4a);
+		border-right: 2px solid var(--cr-ink, #241c4a);
+		transform: rotate(50deg);
+		opacity: 0.85;
+		pointer-events: none;
+	}
+}
+/* Dark mode: the scrap is paper; its ink stays violet, its rule glaucous. */
+:root[data-theme="dark"] :is(.cr-stream-page li.format-aside, body.single-post.single-format-aside .single-post__content) .cr-scrap :is(.pk-title, .pk-title a, .pk-excerpt, .pk-stream-date, .pk-stream-date time, .pk-link, h1, .cr-scrap__body, .cr-scrap__body *:not(a), .cr-scrap__date) { color: #241c4a !important; }
+:root[data-theme="dark"] :is(.cr-stream-page li.format-aside, body.single-post.single-format-aside .single-post__content) .cr-scrap :is(.pk-kindlabel, .cr-scrap__label) { color: #3d527d !important; }
+:root[data-theme="dark"] body.single-post.single-format-aside .single-post__content .cr-scrap__body a { color: #126782 !important; }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) :is(.cr-stream-page li.format-aside, body.single-post.single-format-aside .single-post__content) .cr-scrap :is(.pk-title, .pk-title a, .pk-excerpt, .pk-stream-date, .pk-stream-date time, .pk-link, h1, .cr-scrap__body, .cr-scrap__body *:not(a), .cr-scrap__date) { color: #241c4a !important; }
+	:root:not([data-theme="light"]) :is(.cr-stream-page li.format-aside, body.single-post.single-format-aside .single-post__content) .cr-scrap :is(.pk-kindlabel, .cr-scrap__label) { color: #3d527d !important; }
+	:root:not([data-theme="light"]) body.single-post.single-format-aside .single-post__content .cr-scrap__body a { color: #126782 !important; }
+}
+/* The plugin's own .pk-sr-only rule hides the link's "Read more: title"
+   suffix; this copy keeps it hidden if that stylesheet ever fails to load. */
+.cr-stream-page li.format-aside .pk-card.cr-scrap .pk-link .pk-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+/* Phones: the scrap takes the column, sits straight, and the arrow goes. */
+@media (max-width: 47.99rem) {
+	.cr-stream-page li.format-aside .cr-scrap-artifact--stream { width: 100%; transform: none; }
+	body.single-post.single-format-aside .single-post__content .cr-scrap-artifact--single { transform: none; }
+	body.single-post.single-format-aside .single-post__content .cr-scrap--single { padding: 1.3rem 1.2rem 1.3rem 1.4rem; }
+}

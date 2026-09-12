@@ -377,7 +377,7 @@ add_action( 'init', __NAMESPACE__ . '\\register_post_kinds_card_paint' );
 function enqueue_card_paint_for_quote_single(): void {
 	// Quote and Note singles have no card block, but their handwriting and
 	// the Quote sheet live in cr-post-kinds.css.
-	if ( ! is_singular( 'post' ) || ! has_term( array( 'quote', 'note' ), 'kind', get_queried_object_id() ) ) {
+	if ( ! is_singular( 'post' ) || ( ! has_term( array( 'quote', 'note' ), 'kind', get_queried_object_id() ) && ! \Courtneyr\Child\AsideScrap\is_aside_single() ) ) {
 		return;
 	}
 	// wp_enqueue_block_style() registers the handle only when one of its
@@ -704,6 +704,10 @@ function hand_length_body_class( array $classes ): array {
 	$post  = get_post( get_queried_object_id() );
 	$terms = $post instanceof \WP_Post ? get_the_terms( $post, 'kind' ) : false;
 	if ( ! $terms || is_wp_error( $terms ) || ! in_array( $terms[0]->slug, array( 'note', 'quote' ), true ) ) {
+		return $classes;
+	}
+	// An Aside is typeset (inc/aside-scrap.php): no handwriting class at all.
+	if ( \Courtneyr\Child\AsideScrap\applies( $post ) ) {
 		return $classes;
 	}
 	$words     = str_word_count( wp_strip_all_tags( strip_shortcodes( (string) $post->post_content ), true ) );

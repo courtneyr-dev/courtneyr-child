@@ -9,7 +9,9 @@
  * strip is the metaphor; the Quote keeps the pin), a bottom-right corner
  * that curls up, and the thought handwritten. The plugin's kind label and
  * a heading that only repeats the thought stay in the DOM for assistive
- * technology and hide visually. cr-post-kinds.css paints it.
+ * technology and hide visually. cr-post-kinds.css paints it. A Note whose
+ * format is Aside is a margin scrap instead (inc/aside-scrap.php) and is
+ * left alone here.
  *
  * @package CourtneyrChild
  */
@@ -96,7 +98,7 @@ function stream_card( string $html, array $block, $instance ): string {
 		? (int) $instance->context['postId']
 		: (int) get_the_ID();
 	$post    = $post_id ? get_post( $post_id ) : null;
-	if ( ! $post instanceof \WP_Post ) {
+	if ( ! $post instanceof \WP_Post || \Courtneyr\Child\AsideScrap\applies( $post ) ) {
 		return $html;
 	}
 	$s = seed( (string) $post->ID, $post->post_title );
@@ -168,7 +170,7 @@ function single_sticky( string $html, array $block ): string {
 		return $html;
 	}
 	$post = \get_post();
-	if ( ! $post instanceof \WP_Post || ! is_text_only( $post ) ) {
+	if ( ! $post instanceof \WP_Post || \Courtneyr\Child\AsideScrap\applies( $post ) || ! is_text_only( $post ) ) {
 		return $html;
 	}
 	$words = str_word_count( wp_strip_all_tags( strip_shortcodes( (string) $post->post_content ), true ) );
