@@ -1,0 +1,42 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "courtneyr/term-chips",
+	"version": "0.7.46",
+	"title": "Term chips",
+	"category": "theme",
+	"icon": "tag",
+	"description": "The post's categories as masking-tape chips, coloured by the theme's term resolver. Renders identically in the editor and on the front end.",
+	"keywords": [
+		"category",
+		"chips",
+		"terms",
+		"tags"
+	],
+	"textdomain": "courtneyr-child",
+	"ancestor": [
+		"core/post-template",
+		"core/group"
+	],
+	"usesContext": [
+		"postId",
+		"postType"
+	],
+	"supports": {
+		"html": false,
+		"reusable": false,
+		"customClassName": true
+	},
+	"attributes": {
+		"term": {
+			"type": "string",
+			"default": "category"
+		},
+		"fontSize": {
+			"type": "string",
+			"default": "xs"
+		}
+	},
+	"editorScript": "file:./editor.js",
+	"render": "file:./render.php"
+}

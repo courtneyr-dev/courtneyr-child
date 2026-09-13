@@ -94,6 +94,18 @@ function cr_upgrade_blocks( array $blocks, int &$drawings, int &$glyphs ): array
 				continue;
 			}
 		}
+		if ( 'core/post-terms' === ( $block['blockName'] ?? '' ) && str_contains( (string) ( $block['attrs']['className'] ?? '' ), 'cr-home-story__chips' ) ) {
+			// 0.7.46: the chips block renders the same Core post-terms + theme
+			// resolver on the server, so the editor preview matches the front end.
+			$blocks[ $i ] = array(
+				'blockName'    => 'courtneyr/term-chips',
+				'attrs'        => array( 'className' => 'cr-home-story__chips' ),
+				'innerBlocks'  => array(),
+				'innerHTML'    => '',
+				'innerContent' => array(),
+			);
+			continue;
+		}
 		if ( 'core/post-title' === ( $block['blockName'] ?? '' ) ) {
 			$class = (string) ( $block['attrs']['className'] ?? '' );
 			if ( str_contains( $class, 'cr-home-story__title' ) && ! str_contains( $class, 'cr-u-url' ) ) {

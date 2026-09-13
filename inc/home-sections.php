@@ -76,6 +76,15 @@ function is_stream_card_preview_request(): bool {
  * @return array<int|string, mixed> A meta_query clause.
  */
 function surface_meta_clause( string $surface ): array {
+	// The site's routing policy (cr-content-surfaces 1.2.0) owns the exact
+	// clauses; reuse them when present so the homepage matches /blog/ and
+	// /stream/, including the Recipe/Event preview overlap.
+	if ( SURFACE_STREAM === $surface && function_exists( 'cr_content_surfaces_stream_meta_query' ) ) {
+		return cr_content_surfaces_stream_meta_query();
+	}
+	if ( SURFACE_MAIN === $surface && function_exists( 'cr_content_surfaces_main_meta_query' ) ) {
+		return cr_content_surfaces_main_meta_query();
+	}
 	if ( SURFACE_STREAM === $surface ) {
 		return array(
 			'key'   => '_pkiw_surface',
@@ -253,5 +262,6 @@ add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_section_styles' )
  */
 function register_blocks(): void {
 	register_block_type( COURTNEYR_CHILD_DIR . '/blocks/post-glyph' );
+	register_block_type( COURTNEYR_CHILD_DIR . '/blocks/term-chips' );
 }
 add_action( 'init', __NAMESPACE__ . '\\register_blocks' );

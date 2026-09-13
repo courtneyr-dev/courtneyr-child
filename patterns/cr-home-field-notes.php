@@ -63,7 +63,7 @@ declare( strict_types = 1 );
 
 						<!-- wp:post-date {"className":"cr-home-story__date cr-dt-published screen-reader-text"} /-->
 
-						<!-- wp:post-terms {"term":"category","className":"cr-home-story__chips","fontSize":"xs"} /-->
+						<!-- wp:courtneyr/term-chips {"className":"cr-home-story__chips"} /-->
 
 						<!-- wp:post-excerpt {"excerptLength":18,"showMoreOnNewLine":false,"className":"cr-home-story__excerpt"} /-->
 					</article>
@@ -93,7 +93,7 @@ declare( strict_types = 1 );
 
 						<!-- wp:post-date {"className":"cr-home-story__date cr-dt-published screen-reader-text"} /-->
 
-						<!-- wp:post-terms {"term":"category","className":"cr-home-story__chips","fontSize":"xs"} /-->
+						<!-- wp:courtneyr/term-chips {"className":"cr-home-story__chips"} /-->
 					</article>
 					<!-- /wp:group -->
 				<!-- /wp:post-template -->
