@@ -76,15 +76,15 @@ echo "## 6. Stream page: Browse all"
 w eval-file "$BROWSE" preview "$STREAM_ID"
 w eval-file "$BROWSE" apply "$STREAM_ID"
 
-echo "## 7. post-format intros (export current values first; restore with rollback-terms.sh)"
+echo "## 7. post-format intros (export current values first; restore with rollback-terms.sh; remote calls read /dev/null so ssh cannot swallow the list)"
 w term list post_format --fields=term_id,slug,description --format=json > "$RUN_DIR/post_format-terms-before.json"
 [[ -s "$RUN_DIR/post_format-terms-before.json" ]] || die "term export is empty"
 while IFS='|' read -r slug desc; do
-	current="$(wv term get post_format "post-format-$slug" --by=slug --field=description 2>/dev/null || echo '__missing__')"
+	current="$(wv term get post_format "post-format-$slug" --by=slug --field=description < /dev/null || echo '__missing__')"
 	if [[ "$current" == "__missing__" ]]; then echo "term post-format-$slug absent here; skipped"; continue; fi
 	if [[ "$current" == "$desc" ]]; then echo "post-format-$slug already: $desc"; continue; fi
 	echo "post-format-$slug: '$current' -> '$desc'"
-	w term update post_format "post-format-$slug" --by=slug --description="$desc"
+	w term update post_format "post-format-$slug" --by=slug --description="$desc" < /dev/null
 done <<'DESC'
 quote|Lines worth keeping, with their source.
 status|Short updates from the day.
