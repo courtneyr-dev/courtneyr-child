@@ -663,7 +663,7 @@
 		},
 		"typography": {
 			"fontFamily": "var:preset|font-family|body",
-			"fontSize": "var:preset|font-size|base",
+			"fontSize": "var(--cr-text-base)",
 			"lineHeight": "var(--cr-leading-normal, 1.55)"
 		},
 		"spacing": {
@@ -689,32 +689,32 @@
 			},
 			"h1": {
 				"typography": {
-					"fontSize": "var:preset|font-size|5xl"
+					"fontSize": "var(--cr-text-4xl)"
 				}
 			},
 			"h2": {
 				"typography": {
-					"fontSize": "var:preset|font-size|4xl"
+					"fontSize": "var(--cr-text-3xl)"
 				}
 			},
 			"h3": {
 				"typography": {
-					"fontSize": "var:preset|font-size|3xl"
+					"fontSize": "var(--cr-text-2xl)"
 				}
 			},
 			"h4": {
 				"typography": {
-					"fontSize": "var:preset|font-size|2xl"
+					"fontSize": "var(--cr-text-xl)"
 				}
 			},
 			"h5": {
 				"typography": {
-					"fontSize": "var:preset|font-size|xl"
+					"fontSize": "var(--cr-text-lg)"
 				}
 			},
 			"h6": {
 				"typography": {
-					"fontSize": "var:preset|font-size|lg"
+					"fontSize": "var(--cr-text-md)"
 				}
 			},
 			"link": {

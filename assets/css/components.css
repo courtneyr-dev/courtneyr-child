@@ -1637,12 +1637,12 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
    visual gap between the editing experience and the published page.
    ============================================================ */
 
-/* 0.7.46: loop titles (Query Loop cards) keep their own preset size; only the
-   page/post title input and the template-level title get the x-large lock. */
+/* 0.7.46: the classic title input keeps the lock. The template's post-title
+   block in the canvas carries the template classes (.single-post__title,
+   .cr-page__title, .cr-archive__title), so it takes the same rules as the
+   front end — no size lock, or the canvas shows 42 px where readers see 52. */
 .editor-post-title,
-.editor-post-title__input,
-.editor-styles-wrapper .wp-block-post-title:not(.wp-block-post-template *),
-.edit-post-visual-editor .wp-block-post-title:not(.wp-block-post-template *) {
+.editor-post-title__input {
 	font-family: var(--cr-font-accent, serif) !important;
 	font-size: var(--wp--preset--font-size--x-large, 2.25rem) !important;
 	line-height: 1.15 !important;
