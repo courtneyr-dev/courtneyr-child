@@ -210,7 +210,7 @@ function add_title_lede( string $html, array $block ): string {
 		$out .= '<p class="cr-journal__lede cr-read__author">' . esc_html( $author ) . '</p>';
 	}
 	if ( $rating > 0 ) {
-		$out .= '<p class="cr-journal__rating" aria-label="' . esc_attr( sprintf( /* translators: %d: rating */ __( 'Rated %d of 5', 'courtneyr-child' ), $rating ) ) . '">';
+		$out .= '<p class="cr-journal__rating" role="img" aria-label="' . esc_attr( sprintf( /* translators: %d: rating */ __( 'Rated %d of 5', 'courtneyr-child' ), $rating ) ) . '">';
 		for ( $i = 1; $i <= 5; $i++ ) {
 			$out .= '<span class="cr-journal__star' . ( $i <= $rating ? '' : ' cr-journal__star--off' ) . '" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" focusable="false"><path d="M12 2l3 6.5 7 .6-5.3 4.6 1.6 6.8L12 17l-6.9 3.5 1.6-6.8L1.4 9.1l7-.6z"/></svg></span>';
 		}

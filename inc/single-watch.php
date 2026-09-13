@@ -186,9 +186,9 @@ function add_title_lede( string $html, array $block ): string {
 	$rating = (int) ( $attrs['rating'] ?? 0 );
 	if ( $rating > 0 ) {
 		$star  = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3 6.5 7 .6-5.3 4.6 1.6 6.8L12 17l-6.9 3.5 1.6-6.8L1.4 9.1l7-.6z"/></svg>';
-		$lede .= '<p class="cr-journal__rating" aria-label="' . esc_attr( sprintf( /* translators: %d: rating out of five. */ __( 'Rated %d of 5', 'courtneyr-child' ), $rating ) ) . '">';
+		$lede .= '<p class="cr-journal__rating" role="img" aria-label="' . esc_attr( sprintf( /* translators: %d: rating out of five. */ __( 'Rated %d of 5', 'courtneyr-child' ), $rating ) ) . '">';
 		for ( $i = 1; $i <= 5; $i++ ) {
-			$lede .= '<span class="cr-journal__star' . ( $i <= $rating ? '' : ' cr-journal__star--off' ) . '">' . $star . '</span>';
+			$lede .= '<span class="cr-journal__star' . ( $i <= $rating ? '' : ' cr-journal__star--off' ) . '" aria-hidden="true">' . $star . '</span>';
 		}
 		$lede .= '<span class="cr-journal__rating-value" aria-hidden="true">' . esc_html( sprintf( '%d / 5', $rating ) ) . '</span></p>';
 	}

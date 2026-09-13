@@ -6748,7 +6748,7 @@ body.single-post:is(.kind-read, .kind-watch) .cr-record-stamp {
 	border-radius: 3px;
 	box-shadow: 0 0 0 1px rgba(36, 28, 74, 0.4), inset 0 0 0 max(0.15rem, 0.45cqw) #f6f3ea, inset 0 0 0 calc(max(0.15rem, 0.45cqw) + 1px) rgba(36, 28, 74, 0.25), max(2px, 0.4cqw) max(2px, 0.4cqw) 0 #050408;
 	color: #241c4a;
-	overflow: hidden;
+	overflow: visible; /* v0.7.46: never clip label text; the strip row grows instead */
 	transform: none;
 }
 :is(body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs, .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream) .cr-vhs__marks {
@@ -6969,7 +6969,7 @@ body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs
 }
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-body {
 	grid-template-columns: var(--vhs-zone) calc(var(--vhs-poster) + 0.5cqw) minmax(0, 1fr) var(--vhs-zone);
-	grid-template-rows: var(--vhs-flap) var(--vhs-strip) var(--vhs-main) var(--vhs-tape) auto auto auto auto auto;
+	grid-template-rows: var(--vhs-flap) minmax(var(--vhs-strip), auto) var(--vhs-main) var(--vhs-tape) auto auto auto auto auto; /* v0.7.46: strip is a minimum so text spacing grows the row */
 	grid-template-areas:
 		"kind kind kind kind"
 		"caption caption caption caption"
@@ -7002,7 +7002,7 @@ body.single-post.kind-watch .single-post__content .pk-card.k-watch.cr-vhs.cr-vhs
 /* Playable cards: left reel, label, window; the right reel and any poster go. */
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream.has-video-player .pk-body {
 	grid-template-columns: var(--vhs-zone) minmax(0, 22cqw) minmax(0, 1fr);
-	grid-template-rows: var(--vhs-flap) var(--vhs-strip) var(--vhs-main) var(--vhs-tape) auto auto auto auto auto;
+	grid-template-rows: var(--vhs-flap) minmax(var(--vhs-strip), auto) var(--vhs-main) var(--vhs-tape) auto auto auto auto auto; /* v0.7.46: strip is a minimum so text spacing grows the row */
 	grid-template-areas:
 		"kind kind kind"
 		"caption caption caption"
