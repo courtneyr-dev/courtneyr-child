@@ -8062,3 +8062,14 @@ figure.wp-block-image.is-style-overlay-caption figcaption {
 		}
 	}
 }
+
+/* 0.7.46: the title input in the canvas follows the post type the way the
+   templates do — posts use the single-post title clamp, pages the h1 token —
+   so the canvas shows the size readers get (52 px / 48 px at 1440). */
+.editor-styles-wrapper.post-type-post .editor-post-title__input {
+	font-size: clamp(2rem, 1.5rem + 2vw, 3.25rem) !important;
+	line-height: 1.05 !important;
+}
+.editor-styles-wrapper.post-type-page .editor-post-title__input {
+	font-size: var(--cr-text-4xl, 3rem) !important;
+}
