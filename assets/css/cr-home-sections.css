@@ -630,3 +630,73 @@
 .editor-styles-wrapper .cr-post-glyph-editor { display: contents; }
 .editor-styles-wrapper .pkiw-stream-card-editor { display: contents; }
 .editor-styles-wrapper .pkiw-stream-card-editor__placeholder { font-family: var(--cr-font-mono, monospace); font-size: 0.75rem; opacity: 0.7; }
+
+/* ------------------------------------------------------------------
+   Refinement accepted 2026-09-13 (issue 13): tighter rhythm and the small
+   zine marks. Formerly the injected prototype sheet prototypes/home-refined.css.
+   ------------------------------------------------------------------ */
+
+/* ---- Newsletter reasons: tighter vertical rhythm ---- */
+.cr-reasons { padding-block: clamp(2.25rem, 2rem + 1.5vw, 3.25rem); }
+.cr-reasons .cr-reasons__intro { margin-block-end: 1.75rem; }
+.cr-reasons .cr-reasons__panels { gap: 1.75rem 1.5rem; }
+.cr-reasons .cr-reasons__panel { padding-block-end: 1.25rem; }
+.cr-reasons .cr-reasons__contact { margin-block-start: 2rem; padding-block-start: 1.25rem; }
+/* caption-box kicker in the intro (comic caption device the stream already uses) */
+.cr-reasons .cr-reasons__kicker {
+	display: inline-block; padding: 0.15rem 0.5rem; border: 1.5px solid var(--cr-reasons-ink);
+	background: var(--cr-reasons-paper); font-family: var(--cr-font-mono, monospace); font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.14em; text-transform: uppercase; box-shadow: 2px 2px 0 var(--cr-reasons-ink);
+}
+/* halftone fragment behind the intro corner (existing --cr-halftone token) */
+.cr-reasons .cr-reasons__intro { position: relative; }
+.cr-reasons .cr-reasons__intro::after {
+	content: ""; position: absolute; right: -1.25rem; top: -1rem; width: 7rem; height: 4.5rem;
+	background-image: var(--cr-halftone); background-size: var(--cr-halftone-size); opacity: 0.35; pointer-events: none;
+	-webkit-mask-image: linear-gradient(135deg, #000 40%, transparent 85%); mask-image: linear-gradient(135deg, #000 40%, transparent 85%);
+}
+
+/* ---- Field Notes: masthead, lanes and archive actions closer together ---- */
+.cr-fieldnotes { padding-block: clamp(2rem, 1.75rem + 1.25vw, 3rem); }
+.cr-fieldnotes .cr-fieldnotes__masthead { margin-block-end: 1.25rem; padding-block-end: 0.5rem; }
+.cr-fieldnotes .cr-fieldnotes__lane-head { margin-block-end: 0.35rem; }
+.cr-fieldnotes .cr-fieldnotes__caption { margin: 0 0 1rem; }
+.cr-fieldnotes .cr-fieldnotes__lane-link { margin-block-start: 1rem; }
+.cr-fieldnotes .cr-fieldnotes__lane--stream { margin-block-start: 2rem; padding-block-start: 1.5rem; }
+.cr-fieldnotes .cr-fieldnotes__blog-row { gap: 1.5rem 2rem; }
+/* marker underline under the lane titles (existing sky/orange inks) */
+.cr-fieldnotes .cr-fieldnotes__lane-title { position: relative; }
+.cr-fieldnotes .cr-fieldnotes__lane-head::after { height: 3px; background: var(--cr-fn-ink); }
+/* a drawn arrow from the Blog caption toward the lead story (existing hand-arrow device) */
+.cr-fieldnotes .cr-fieldnotes__lane--blog .cr-fieldnotes__caption { padding-inline-end: 3rem; position: relative; }
+.cr-fieldnotes .cr-fieldnotes__lane--blog .cr-fieldnotes__caption::after {
+	content: ""; position: absolute; right: 0.25rem; top: 50%; width: 2.25rem; height: 0.9rem;
+	border-bottom: 2px solid var(--cr-ut-orange); border-right: 2px solid var(--cr-ut-orange);
+	transform: translateY(-60%) skewX(-30deg) rotate(-8deg); opacity: 0.9;
+}
+/* registration cross at the masthead corner (page-level zine mark) */
+.cr-fieldnotes .cr-fieldnotes__masthead { position: relative; }
+.cr-fieldnotes .cr-fieldnotes__masthead::before {
+	content: ""; position: absolute; left: -1.75rem; top: 0.2rem; width: 0.9rem; height: 0.9rem;
+	background:
+		linear-gradient(var(--cr-fn-ink), var(--cr-fn-ink)) center / 100% 1px no-repeat,
+		linear-gradient(var(--cr-fn-ink), var(--cr-fn-ink)) center / 1px 100% no-repeat;
+	opacity: 0.7;
+}
+
+/* ---- Stream packing: tighter columns, no arbitrary row gaps ---- */
+.cr-home-stream .cr-home-stream__list { column-gap: 1.5rem; }
+.cr-home-stream .cr-home-stream__list > li { margin-block-end: 1.25rem; }
+.cr-home-stream .pk-card--stream { margin-block: 0; }
+
+/* ---- Gap before the closing signup section ---- */
+.cr-home-fieldnotes { padding-block-end: clamp(1.5rem, 1rem + 1.5vw, 2.5rem) !important; }
+
+/* narrow screens: keep touch/focus clearance */
+@media (max-width: 43.75em) {
+	.cr-reasons .cr-reasons__panels { gap: 1.25rem; }
+	.cr-fieldnotes .cr-fieldnotes__lane--blog .cr-fieldnotes__caption { padding-inline-end: 0; }
+	.cr-fieldnotes .cr-fieldnotes__lane--blog .cr-fieldnotes__caption::after,
+	.cr-fieldnotes .cr-fieldnotes__masthead::before,
+	.cr-reasons .cr-reasons__intro::after { display: none; }
+}
