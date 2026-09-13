@@ -2768,8 +2768,11 @@ body.home .wp-block-latest-posts__post-date {
 	}
 }
 
-.related-post__date {
-	color: var(--cr-ink-muted) !important;
+/* 0.7.46: the related band is periwinkle in light mode, where the muted ink
+   measured 3.3:1; the band ink token clears AA in both schemes. */
+.related-posts .related-post__date,
+.related-posts .related-post__date time {
+	color: var(--cr-ink, #241c4a) !important;
 }
 
 
