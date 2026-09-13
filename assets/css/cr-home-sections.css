@@ -172,20 +172,48 @@
 	line-height: 1.45;
 	max-width: 40ch;
 }
+/* Drawings: an empty, locked Group painted through two SVG masks from
+   assets/svg/reasons/ (spot fill on the element, line work on ::before). No
+   SVG lives in the saved page, so an Editor-role save keeps the artwork and
+   the editor canvas paints the same drawing from the same stylesheet. */
 .cr-reasons .cr-reasons__drawing {
+	--cr-drawing-spot: var(--cr-selective-yellow);
+	position: relative;
 	display: block;
 	width: 4.75rem;
 	height: 5.375rem;
-	stroke: var(--cr-reasons-ink);
-	stroke-width: 2.3;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-	fill: none;
-	overflow: visible;
+	margin: 0;
 }
-.cr-reasons .cr-reasons__drawing .spot { fill: var(--cr-selective-yellow); stroke: none; }
-.cr-reasons .cr-reasons__panel:nth-child(2) .cr-reasons__drawing .spot,
-.cr-reasons .cr-reasons__panel:nth-child(3) .cr-reasons__drawing .spot { fill: var(--cr-sky-blue); }
+/* Both inks sit on pseudo-elements: a mask on the element itself would clip
+   the line work to the spot shape. ::before = spot fill, ::after = lines. */
+.cr-reasons .cr-reasons__drawing::before,
+.cr-reasons .cr-reasons__drawing::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	-webkit-mask-position: center;
+	mask-position: center;
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+}
+.cr-reasons .cr-reasons__drawing::before {
+	background-color: var(--cr-drawing-spot);
+	-webkit-mask-image: var(--cr-drawing-spot-mask);
+	mask-image: var(--cr-drawing-spot-mask);
+}
+.cr-reasons .cr-reasons__drawing::after {
+	background-color: var(--cr-reasons-ink);
+	-webkit-mask-image: var(--cr-drawing-lines-mask);
+	mask-image: var(--cr-drawing-lines-mask);
+}
+.cr-reasons .cr-reasons__drawing--01 { --cr-drawing-spot-mask: url("../svg/reasons/01-spot.svg"); --cr-drawing-lines-mask: url("../svg/reasons/01-lines.svg"); }
+.cr-reasons .cr-reasons__drawing--02 { --cr-drawing-spot-mask: url("../svg/reasons/02-spot.svg"); --cr-drawing-lines-mask: url("../svg/reasons/02-lines.svg"); --cr-drawing-spot: var(--cr-sky-blue); }
+.cr-reasons .cr-reasons__drawing--03 { --cr-drawing-spot-mask: url("../svg/reasons/03-spot.svg"); --cr-drawing-lines-mask: url("../svg/reasons/03-lines.svg"); --cr-drawing-spot: var(--cr-sky-blue); }
+.cr-reasons .cr-reasons__drawing--04 { --cr-drawing-spot-mask: url("../svg/reasons/04-spot.svg"); --cr-drawing-lines-mask: url("../svg/reasons/04-lines.svg"); }
+/* The empty Group must not grow an appender or padding in the canvas. */
+.cr-reasons .cr-reasons__drawing > * { display: none; }
 
 /* Personalized guidance */
 .cr-reasons .cr-reasons__contact {
@@ -582,3 +610,37 @@
 	.cr-reasons .cr-reasons__panel:hover,
 	.cr-reasons .cr-reasons__panel:focus-within { transform: revert; box-shadow: revert; }
 }
+
+/* ---- Editor canvas ----
+   The band paint and the chips are keyed on saved classes here, not on
+   body.home / the PHP chip filter, so the block editor shows them too. */
+/* !important on purpose: the saved preset class has-base-background-color
+   paints with !important, and the frontend band rule in components.css
+   already overrides it the same way. */
+.wp-block-group.cr-home-features {
+	position: relative;
+	background-color: color-mix(in srgb, var(--cr-sky-blue, #8ecae6) 70%, var(--cr-glaucous-light, #5a7ea8)) !important;
+	background-image: var(--cr-fiber), var(--cr-halftone) !important;
+	background-size: auto, var(--cr-halftone-size) !important;
+	background-blend-mode: multiply, multiply !important;
+	background-repeat: repeat, repeat !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+.editor-styles-wrapper .cr-fieldnotes .cr-home-story__chips .wp-block-post-terms__separator { display: none; }
+.editor-styles-wrapper .cr-fieldnotes .cr-home-story__chips a:not(.cr-term-chip) {
+	display: inline-block;
+	margin: 0 0.35rem 0.35rem 0;
+	padding: 0.15rem 0.55rem;
+	border: 1px solid var(--cr-fn-ink);
+	background: var(--cr-tape, #f3e5b8);
+	color: var(--cr-tape-ink, var(--cr-fn-ink));
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	text-decoration: none;
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+}
+.editor-styles-wrapper .cr-post-glyph-editor { display: contents; }
+.editor-styles-wrapper .pkiw-stream-card-editor { display: contents; }
+.editor-styles-wrapper .pkiw-stream-card-editor__placeholder { font-family: var(--cr-font-mono, monospace); font-size: 0.75rem; opacity: 0.7; }

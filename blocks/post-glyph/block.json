@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "courtneyr/post-glyph",
+	"version": "0.7.46",
+	"title": "Post glyph",
+	"category": "theme",
+	"icon": "format-image",
+	"description": "The post-format glyph the blog cards use (format first, then the site's category types, then the Blog glyph). Renders the same markup in the editor and on the front end.",
+	"keywords": [
+		"format",
+		"icon",
+		"glyph",
+		"blog"
+	],
+	"textdomain": "courtneyr-child",
+	"ancestor": [
+		"core/post-template"
+	],
+	"usesContext": [
+		"postId",
+		"postType"
+	],
+	"supports": {
+		"html": false,
+		"reusable": false,
+		"customClassName": true
+	},
+	"attributes": {},
+	"editorScript": "file:./editor.js",
+	"render": "file:./render.php"
+}

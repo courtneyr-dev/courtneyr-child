@@ -41,16 +41,16 @@ declare( strict_types = 1 );
 
 				<!-- wp:group {"className":"card__meta-row","layout":{"type":"flex","flexWrap":"wrap"}} -->
 				<div class="wp-block-group card__meta-row">
-					<!-- wp:post-date {"format":"F j, Y","className":"card__meta","fontSize":"xs"} /-->
+					<!-- wp:post-date {"format":"F j, Y","className":"card__meta cr-dt-published","fontSize":"xs"} /-->
 					<!-- wp:post-terms {"term":"category","className":"card__chip","fontSize":"xs"} /-->
 				</div>
 				<!-- /wp:group -->
 
-				<!-- wp:post-title {"isLink":true,"className":"card__title","style":{"typography":{"lineHeight":"1.2"}},"fontFamily":"accent"} /-->
+				<!-- wp:post-title {"isLink":true,"className":"card__title p-name cr-u-url","style":{"typography":{"lineHeight":"1.2"}},"fontFamily":"accent"} /-->
 
 				<!-- wp:post-excerpt {"className":"card__excerpt","excerptLength":26,"showMoreOnNewLine":false} /-->
 
-				<!-- wp:read-more {"content":"Read more →","className":"card__more"} /-->
+				<!-- wp:read-more {"content":"<?php echo esc_html__( 'Read more →', 'courtneyr-child' ); ?>","className":"card__more"} /-->
 
 			</div>
 			<!-- /wp:group -->
@@ -62,7 +62,7 @@ declare( strict_types = 1 );
 
 	<!-- wp:query-no-results -->
 		<!-- wp:paragraph -->
-		<p>No posts in this stream yet. Check back soon, or head <a href="/">home</a>.</p>
+		<p><?php printf( wp_kses_post( /* translators: %s: home URL */ __( 'No posts in this stream yet. Check back soon, or head <a href="%s">home</a>.', 'courtneyr-child' ) ), esc_url( home_url( '/' ) ) ); ?></p>
 		<!-- /wp:paragraph -->
 	<!-- /wp:query-no-results -->
 

@@ -10,6 +10,12 @@
  *   wp eval-file migrate-homepage-sections.php dry-run [post_id]
  *   wp eval-file migrate-homepage-sections.php apply   [post_id]
  *   wp eval-file migrate-homepage-sections.php rollback <backup-file> [post_id]
+ *   wp eval-file migrate-homepage-sections.php upgrade  [post_id]
+ *
+ * `upgrade` (0.7.46) walks the saved page and swaps only the 0.7.44 html
+ * placeholders: the four inline-SVG drawings become locked drawing Groups and
+ * the two format-glyph spans become courtneyr/post-glyph blocks. Every other
+ * block, including later editorial edits, is left byte-for-byte as saved.
  *
  * post_id defaults to the page set as the static front page. `apply` writes a
  * timestamped backup of the previous content to wp-content/cr-homepage-migration/
@@ -39,6 +45,125 @@ if ( ! $cr_post instanceof WP_Post || 'page' !== $cr_post->post_type ) {
 WP_CLI::log( sprintf( 'Target: page %d "%s" (%s)', $cr_post->ID, $cr_post->post_title, get_permalink( $cr_post ) ) );
 
 $cr_backup_dir = WP_CONTENT_DIR . '/cr-homepage-migration';
+
+/**
+ * Upgrade: targeted block transforms, everything else untouched.
+ *
+ * @param array $blocks Parsed blocks.
+ * @param int   $drawings Running count of drawings seen (by reference).
+ * @param int   $glyphs   Running count of glyphs seen (by reference).
+ * @return array
+ */
+function cr_upgrade_blocks( array $blocks, int &$drawings, int &$glyphs ): array {
+	foreach ( $blocks as $i => $block ) {
+		if ( 'core/html' === ( $block['blockName'] ?? '' ) ) {
+			$html = (string) ( $block['innerHTML'] ?? '' );
+			if ( str_contains( $html, 'cr-reasons__drawing' ) ) {
+				++$drawings;
+				$class     = sprintf( 'cr-reasons__drawing cr-reasons__drawing--%02d', $drawings );
+				$markup    = sprintf( '<div class="wp-block-group %s"></div>', $class );
+				$blocks[ $i ] = array(
+					'blockName'    => 'core/group',
+					'attrs'        => array(
+						'className'    => $class,
+						'templateLock' => 'all',
+						'layout'       => array( 'type' => 'default' ),
+					),
+					'innerBlocks'  => array(),
+					'innerHTML'    => $markup,
+					'innerContent' => array( $markup ),
+				);
+				continue;
+			}
+			if ( str_contains( $html, 'data-cr-card-glyph' ) ) {
+				++$glyphs;
+				$blocks[ $i ] = array(
+					'blockName'    => 'courtneyr/post-glyph',
+					'attrs'        => array(),
+					'innerBlocks'  => array(),
+					'innerHTML'    => '',
+					'innerContent' => array(),
+				);
+				continue;
+			}
+		}
+		if ( 'core/post-title' === ( $block['blockName'] ?? '' ) ) {
+			$class = (string) ( $block['attrs']['className'] ?? '' );
+			if ( str_contains( $class, 'cr-home-story__title' ) && ! str_contains( $class, 'cr-u-url' ) ) {
+				$blocks[ $i ]['attrs']['className'] = trim( $class . ' cr-u-url' );
+			}
+		}
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			$blocks[ $i ]['innerBlocks'] = cr_upgrade_blocks( $block['innerBlocks'], $drawings, $glyphs );
+			// A homepage story without a date block gets the screen-reader-only
+			// dt-published date right after its title row.
+			if ( 'core/group' === ( $block['blockName'] ?? '' ) && str_contains( (string) ( $block['attrs']['className'] ?? '' ), 'cr-home-story' ) ) {
+				$has_date = false;
+				$row      = -1;
+				foreach ( $blocks[ $i ]['innerBlocks'] as $j => $inner ) {
+					if ( 'core/post-date' === ( $inner['blockName'] ?? '' ) ) {
+						$has_date = true;
+					}
+					if ( 'core/group' === ( $inner['blockName'] ?? '' ) && str_contains( (string) ( $inner['attrs']['className'] ?? '' ), 'cr-home-story__title-row' ) ) {
+						$row = $j;
+					}
+				}
+				if ( ! $has_date && $row >= 0 ) {
+					$date = array(
+						'blockName'    => 'core/post-date',
+						'attrs'        => array( 'className' => 'cr-home-story__date cr-dt-published screen-reader-text' ),
+						'innerBlocks'  => array(),
+						'innerHTML'    => '',
+						'innerContent' => array(),
+					);
+					array_splice( $blocks[ $i ]['innerBlocks'], $row + 1, 0, array( $date ) );
+					// innerContent holds one null per inner block; add a slot for the new block.
+					$slot = array_search( null, $blocks[ $i ]['innerContent'], true );
+					$nulls = array_keys( $blocks[ $i ]['innerContent'], null, true );
+					if ( isset( $nulls[ $row ] ) ) {
+						array_splice( $blocks[ $i ]['innerContent'], $nulls[ $row ] + 1, 0, array( null ) );
+					}
+				}
+			}
+		}
+	}
+	return $blocks;
+}
+
+if ( 'upgrade' === $cr_mode ) {
+	if ( ! $cr_post instanceof WP_Post ) {
+		WP_CLI::error( 'No target page.' );
+	}
+	$cr_drawings = 0;
+	$cr_glyphs   = 0;
+	$cr_blocks   = cr_upgrade_blocks( parse_blocks( $cr_post->post_content ), $cr_drawings, $cr_glyphs );
+	WP_CLI::log( sprintf( 'Target: page %d "%s" — %d drawing placeholder(s), %d glyph placeholder(s) found.', $cr_post->ID, $cr_post->post_title, $cr_drawings, $cr_glyphs ) );
+	$cr_new = serialize_blocks( $cr_blocks );
+	if ( $cr_new === $cr_post->post_content ) {
+		WP_CLI::success( 'Nothing to upgrade; the page already has the 0.7.46 shape.' );
+		return;
+	}
+	if ( ! wp_mkdir_p( $cr_backup_dir ) ) {
+		WP_CLI::error( 'Cannot create the backup directory.' );
+	}
+	$cr_backup = sprintf( '%s/page-%d-%s.html', $cr_backup_dir, $cr_post->ID, gmdate( 'Ymd-His' ) );
+	file_put_contents( $cr_backup, $cr_post->post_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+	file_put_contents( $cr_backup_dir . '/index.php', "<?php // Silence is golden.\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+	$cr_result = wp_update_post(
+		wp_slash(
+			array(
+				'ID'           => $cr_post->ID,
+				'post_content' => $cr_new,
+			)
+		),
+		true
+	);
+	if ( is_wp_error( $cr_result ) ) {
+		WP_CLI::error( $cr_result->get_error_message() );
+	}
+	WP_CLI::success( sprintf( 'Upgraded page %d. Backup: %s (also available as a revision).', $cr_post->ID, $cr_backup ) );
+	return;
+}
 
 if ( 'rollback' === $cr_mode ) {
 	$cr_file = (string) ( $args[1] ?? '' );
