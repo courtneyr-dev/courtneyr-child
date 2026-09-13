@@ -3211,6 +3211,7 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 .cr-stream-page .kind-photo .pk-card:has(.pk-title a:focus-visible) {
 	outline: 3px solid var(--cr-selective-yellow, #ffb703);
 	outline-offset: 3px;
+	box-shadow: 0 0 0 8px var(--cr-focus-halo, var(--cr-ink, #241c4a)); /* 0.7.46: two-tone ring */
 }
 @supports selector(:has(a)) {
 	.cr-stream-page .kind-photo .pk-card .pk-title a:focus-visible { outline: none; }

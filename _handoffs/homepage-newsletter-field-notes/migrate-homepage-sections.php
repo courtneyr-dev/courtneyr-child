@@ -11,6 +11,13 @@
  *   wp eval-file migrate-homepage-sections.php apply   [post_id]
  *   wp eval-file migrate-homepage-sections.php rollback <backup-file> [post_id]
  *   wp eval-file migrate-homepage-sections.php upgrade  [post_id]
+ *   wp eval-file migrate-homepage-sections.php upgrade-templates
+ *
+ * `upgrade-templates` (0.7.46) patches a saved `single` template override of
+ * the active theme, if one exists, so its related-posts Query Loop carries
+ * `pkiwSurface: main` and its title/date blocks carry the microformat
+ * markers — the same edits templates/single.html received. Nothing else in
+ * the override changes; a backup and a revision are written.
  *
  * `upgrade` (0.7.46) walks the saved page and swaps only the 0.7.44 html
  * placeholders: the four inline-SVG drawings become locked drawing Groups and
@@ -128,6 +135,73 @@ function cr_upgrade_blocks( array $blocks, int &$drawings, int &$glyphs ): array
 		}
 	}
 	return $blocks;
+}
+
+if ( 'upgrade-templates' === $cr_mode ) {
+	$cr_q = new WP_Query(
+		array(
+			'post_type'      => 'wp_template',
+			'post_status'    => 'publish',
+			'name'           => 'single',
+			'posts_per_page' => 1,
+			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				array(
+					'taxonomy' => 'wp_theme',
+					'field'    => 'name',
+					'terms'    => get_stylesheet(),
+				),
+			),
+		)
+	);
+	if ( empty( $cr_q->posts ) ) {
+		WP_CLI::success( 'No saved single template override for ' . get_stylesheet() . '; the theme file applies as is.' );
+		return;
+	}
+	$cr_tpl     = $cr_q->posts[0];
+	$cr_content = $cr_tpl->post_content;
+	$cr_new     = $cr_content;
+	// Related loop: add the surface key to the first query that lacks one inside the related-posts group.
+	$cr_new = preg_replace_callback(
+		'/(<!-- wp:query \{[^\n]*?"className":"related-posts__query"[^\n]*? -->)/',
+		static function ( $m ) {
+			$open = $m[1];
+			if ( str_contains( $open, 'pkiwSurface' ) ) {
+				return $open;
+			}
+			return str_replace( '"inherit":false}', '"inherit":false,"pkiwSurface":"main"}', $open );
+		},
+		$cr_new,
+		1
+	);
+	// Older overrides may carry the query attrs before the className; try the generic shape too.
+	if ( ! str_contains( $cr_new, 'pkiwSurface' ) ) {
+		$cr_new = preg_replace( '/("className":"related-posts__query")/', '$1', $cr_new );
+		$cr_new = preg_replace_callback(
+			'/<!-- wp:query \{("queryId":1,)?[^\n]*"query":\{[^}]*"inherit":false\}[^\n]*related-posts__query[^\n]*-->/',
+			static function ( $m ) {
+				return str_replace( '"inherit":false}', '"inherit":false,"pkiwSurface":"main"}', $m[0] );
+			},
+			$cr_new,
+			1
+		);
+	}
+	$cr_new = str_replace( '"className":"related-post__title is-style-show-format-title"', '"className":"related-post__title is-style-show-format-title p-name cr-u-url"', $cr_new );
+	$cr_new = str_replace( '"className":"related-post__date"', '"className":"related-post__date cr-dt-published"', $cr_new );
+	if ( $cr_new === $cr_content ) {
+		WP_CLI::success( sprintf( 'Single template override %d already has the 0.7.46 shape (or its related loop was not recognised — inspect it).', $cr_tpl->ID ) );
+		return;
+	}
+	if ( ! wp_mkdir_p( $cr_backup_dir ) ) {
+		WP_CLI::error( 'Cannot create the backup directory.' );
+	}
+	$cr_backup = sprintf( '%s/template-single-%d-%s.html', $cr_backup_dir, $cr_tpl->ID, gmdate( 'Ymd-His' ) );
+	file_put_contents( $cr_backup, $cr_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+	$cr_result = wp_update_post( wp_slash( array( 'ID' => $cr_tpl->ID, 'post_content' => $cr_new ) ), true );
+	if ( is_wp_error( $cr_result ) ) {
+		WP_CLI::error( $cr_result->get_error_message() );
+	}
+	WP_CLI::success( sprintf( 'Patched single template override %d (pkiwSurface on the related loop, microformat markers). Backup: %s.', $cr_tpl->ID, $cr_backup ) );
+	return;
 }
 
 if ( 'upgrade' === $cr_mode ) {
