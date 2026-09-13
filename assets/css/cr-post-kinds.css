@@ -8964,3 +8964,11 @@ body.single-post.single-format-aside:has(.cr-scrap-artifact--single) .single-pos
 	body.single-post.single-format-aside .single-post__content .cr-scrap-artifact--single { transform: none; }
 	body.single-post.single-format-aside .single-post__content .cr-scrap--single { padding: 1.3rem 1.2rem 1.3rem 1.4rem; }
 }
+
+/* WCAG 2.5.8: a narrow card (the 375px Stream sticky notes, the homepage lane)
+   can shrink a one-image thumbnail strip until its focusable "Show image"
+   button is 2x4px. Every thumbnail button keeps at least a 24px target. */
+.pk-media__thumb-button {
+	min-width: 24px;
+	min-height: 24px;
+}
