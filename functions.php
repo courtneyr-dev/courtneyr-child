@@ -31,6 +31,7 @@ require_once __DIR__ . '/inc/interactivity.php';
 require_once __DIR__ . '/inc/home-sections.php';
 require_once __DIR__ . '/inc/microformats.php';
 require_once __DIR__ . '/inc/archives.php';
+require_once __DIR__ . '/inc/outpost-appearance.php';
 require_once __DIR__ . '/inc/theme-json-overrides.php';
 require_once __DIR__ . '/inc/social-services.php';
 require_once __DIR__ . '/inc/post-kinds.php';

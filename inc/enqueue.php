@@ -424,6 +424,8 @@ function print_no_flash_theme_script(): void {
 	echo '<script id="courtneyr-theme-no-flash">' . $contents . "</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 add_action( 'wp_head', __NAMESPACE__ . '\\print_no_flash_theme_script', 1 );
+// 0.7.46 (issue 17): the admin reads the same stored preference before first paint.
+add_action( 'admin_head', __NAMESPACE__ . '\\print_no_flash_theme_script', 1 );
 
 /**
  * Keep Able Player's JS-built preference dialogs hidden until opened.

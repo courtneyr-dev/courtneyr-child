@@ -46,6 +46,126 @@
 	--wp-admin-border-width-focus:    2px;
 }
 
+/* ============ Dark scheme (0.7.46, issue 17) ============
+   The admin follows the same stored preference as the front end
+   (localStorage "courtneyr-theme", set on <html data-theme> by the
+   no-flash script that inc/enqueue.php now prints in admin_head).
+   Explicit dark, or system + OS dark, flips the surface tokens; the
+   violet chrome, orange CTAs and yellow marker stay. */
+html[data-theme="dark"] {
+	--cr-admin-surface:      #1a1714;
+	--cr-admin-surface-alt:  #251f1c;
+	--cr-admin-ink:          #fbfaf5;
+	--cr-admin-link:         #8ecae6;
+	--cr-admin-link-hover:   #ffb703;
+	--cr-admin-border:       #3d3630;
+	color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+	html:not([data-theme="light"]):not([data-theme="dark"]) {
+		--cr-admin-surface:      #1a1714;
+		--cr-admin-surface-alt:  #251f1c;
+		--cr-admin-ink:          #fbfaf5;
+		--cr-admin-link:         #8ecae6;
+		--cr-admin-link-hover:   #ffb703;
+		--cr-admin-border:       #3d3630;
+		color-scheme: dark;
+	}
+}
+/* Core surfaces that carry their own white/grey: paint them from the tokens
+   so the dark scheme reaches tables, cards, inputs, notices and the editor
+   chrome. Light mode keeps the same tokens, so nothing changes there. */
+#wpcontent,
+#wpfooter,
+.wrap,
+.widefat,
+.widefat thead th,
+.widefat tfoot th,
+.striped > tbody > :nth-child(odd),
+ul.striped > :nth-child(odd),
+.alternate,
+.card,
+.welcome-panel-column,
+.health-check-body,
+.plugin-card,
+.notice,
+.wp-core-ui .notice,
+#screen-meta,
+#screen-options-wrap,
+#contextual-help-wrap,
+.tablenav,
+input[type="text"],
+input[type="search"],
+input[type="url"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+input[type="password"],
+textarea,
+select,
+.form-table,
+.interface-interface-skeleton__header,
+.interface-interface-skeleton__sidebar,
+.interface-interface-skeleton__secondary-sidebar,
+.interface-interface-skeleton__footer,
+.edit-post-meta-boxes-area,
+.editor-sidebar,
+.components-panel,
+.components-panel__body {
+	background-color: var(--cr-admin-surface);
+	color: var(--cr-admin-ink);
+}
+.widefat thead th,
+.widefat tfoot th,
+.postbox-header,
+.components-panel__header,
+.interface-interface-skeleton__header,
+.striped > tbody > :nth-child(odd),
+ul.striped > :nth-child(odd),
+.alternate {
+	background-color: var(--cr-admin-surface-alt);
+}
+.widefat,
+.widefat td,
+.widefat th,
+.card,
+.plugin-card,
+.notice,
+.form-table td,
+.form-table th,
+input[type="text"],
+input[type="search"],
+input[type="url"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+input[type="password"],
+textarea,
+select,
+.interface-interface-skeleton__header,
+.interface-interface-skeleton__sidebar,
+.components-panel__body {
+	border-color: var(--cr-admin-border);
+}
+.widefat td,
+.widefat th,
+.form-table th,
+.form-table td,
+.wrap p,
+.wrap li,
+.wrap label,
+.postbox .inside,
+.description,
+.components-panel__body,
+.components-base-control__label {
+	color: var(--cr-admin-ink);
+}
+html[data-theme="dark"] .welcome-panel,
+html[data-theme="dark"] #wpbody-content .welcome-panel-content {
+	background-color: var(--cr-admin-surface-alt);
+	color: var(--cr-admin-ink);
+}
+
 /* ============ Top admin bar ============ */
 #wpadminbar {
 	background: var(--cr-admin-chrome) !important;
