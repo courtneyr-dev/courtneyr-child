@@ -7,9 +7,11 @@
  * Keywords: quote, indieweb, h-cite, post format
  * Inserter: yes
  *
- * Pattern overrides supported (WP 6.6+): the quote text and citation
- * use metadata.bindings so the same pattern can carry different content
- * across posts.
+ * 0.7.46 (gap review G-11): the quote and citation are plain editable blocks.
+ * The earlier core/post-meta bindings pointed at meta keys (quote_body,
+ * quote_source) that nothing registers, so the bound blocks rendered empty
+ * and could not be edited. The quote's source name is the <cite>; Post Formats
+ * for Block Themes reads it as `quote_attribution` where a binding is wanted.
  */
 
 declare( strict_types = 1 );
@@ -21,14 +23,14 @@ declare( strict_types = 1 );
 	<p class="is-style-cr-eyebrow has-sm-font-size">Quoted</p>
 	<!-- /wp:paragraph -->
 
-	<!-- wp:quote {"className":"is-style-cr-torn-paper","metadata":{"name":"quote-body","bindings":{"content":{"source":"core/post-meta","args":{"key":"quote_body"}}}}} -->
+	<!-- wp:quote {"className":"is-style-cr-torn-paper","metadata":{"name":"Quote"}} -->
 	<blockquote class="wp-block-quote is-style-cr-torn-paper">
 		<!-- wp:paragraph -->
 		<p>Replace this with the quote you are sharing.</p>
 		<!-- /wp:paragraph -->
 
 		<cite>
-			<!-- wp:paragraph {"metadata":{"name":"quote-source","bindings":{"content":{"source":"core/post-meta","args":{"key":"quote_source"}}}}} -->
+			<!-- wp:paragraph {"metadata":{"name":"Source"}} -->
 			<p>Source name</p>
 			<!-- /wp:paragraph -->
 		</cite>

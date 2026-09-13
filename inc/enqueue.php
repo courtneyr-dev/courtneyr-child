@@ -473,7 +473,9 @@ function revalidate_page_html(): void {
 	if ( is_admin() || is_feed() || is_robots() ) {
 		return;
 	}
-	if ( is_user_logged_in() ) {
+	if ( is_user_logged_in() || ( is_singular() && post_password_required() ) ) {
+		// R-09: a password-protected post must never be publicly cacheable —
+		// the form and, after the cookie, the content are per-visitor.
 		header( 'Cache-Control: no-cache, must-revalidate, max-age=0', true );
 	} else {
 		header( 'Cache-Control: public, max-age=600, must-revalidate', true );

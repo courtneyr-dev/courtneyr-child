@@ -67,3 +67,22 @@ function indieblocks_body_class( string $class ): string {
 	return $class;
 }
 add_filter( 'indieblocks_body_class', __NAMESPACE__ . '\\indieblocks_body_class' );
+
+/**
+ * R-02 on archives: IndieBlocks (and any other emitter) adds `h-entry` to the
+ * Query Loop item through post_class. When the Post Kinds stream card inside
+ * that item already carries the entry root, the item must not: parsers would
+ * see two entries per card. Runs after every other post_class callback.
+ *
+ * @param string[] $classes Post classes.
+ * @param string[] $class   Extra classes (unused).
+ * @param int      $post_id Post ID.
+ * @return string[]
+ */
+function single_entry_root_per_item( array $classes, array $class, int $post_id ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	if ( ! empty( $GLOBALS['pkiw_stream_card_root_seen'][ $post_id ] ) ) {
+		$classes = array_values( array_diff( $classes, array( 'h-entry', 'hentry' ) ) );
+	}
+	return $classes;
+}
+add_filter( 'post_class', __NAMESPACE__ . '\\single_entry_root_per_item', 100, 3 );
