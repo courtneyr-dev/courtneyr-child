@@ -265,3 +265,20 @@ function register_blocks(): void {
 	register_block_type( COURTNEYR_CHILD_DIR . '/blocks/term-chips' );
 }
 add_action( 'init', __NAMESPACE__ . '\\register_blocks' );
+
+/**
+ * Layout protection (0.7.46, issue 04): the two homepage section roots ship
+ * `templateLock: all` plus move/remove locks, so copy and block settings stay
+ * editable while nothing inside can be inserted, moved or removed (Core's
+ * content-only lock was measured to hand editors a temporary "Edit pattern"
+ * unlock, so it is not used). Only users who can edit the theme
+ * (administrators) get the editor's lock/unlock controls.
+ *
+ * @param array $settings Editor settings.
+ * @return array
+ */
+function restrict_block_locking( array $settings ): array {
+	$settings['canLockBlocks'] = current_user_can( 'edit_theme_options' );
+	return $settings;
+}
+add_filter( 'block_editor_settings_all', __NAMESPACE__ . '\\restrict_block_locking' );

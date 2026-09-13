@@ -13,7 +13,7 @@
 
 declare( strict_types = 1 );
 ?>
-<!-- wp:group {"metadata":{"name":"Field Notes"},"align":"wide","className":"cr-fieldnotes","layout":{"type":"default"}} -->
+<!-- wp:group {"templateLock":"all","lock":{"move":true,"remove":true},"metadata":{"name":"Field Notes"},"align":"wide","className":"cr-fieldnotes","layout":{"type":"default"}} -->
 <div class="wp-block-group alignwide cr-fieldnotes">
 
 	<!-- wp:group {"metadata":{"name":"Field Notes Masthead"},"className":"cr-fieldnotes__masthead","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between","verticalAlignment":"bottom"}} -->

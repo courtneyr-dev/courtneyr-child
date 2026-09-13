@@ -12,6 +12,13 @@
  *   wp eval-file migrate-homepage-sections.php rollback <backup-file> [post_id]
  *   wp eval-file migrate-homepage-sections.php upgrade  [post_id]
  *   wp eval-file migrate-homepage-sections.php upgrade-templates
+ *   wp eval-file migrate-homepage-sections.php lock     [post_id]
+ *   wp eval-file migrate-homepage-sections.php unlock   [post_id]
+ *
+ * `lock` / `unlock` (0.7.46, issue 04) add or remove `templateLock: all`
+ * and the move/remove lock on the two section root Groups (the direct child of
+ * each wrapper with class cr-reasons / cr-fieldnotes). Nothing else changes; a
+ * backup and a revision are written.
  *
  * `upgrade-templates` (0.7.46) patches a saved `single` template override of
  * the active theme, if one exists, so its related-posts Query Loop carries
@@ -213,6 +220,51 @@ if ( 'upgrade-templates' === $cr_mode ) {
 		WP_CLI::error( $cr_result->get_error_message() );
 	}
 	WP_CLI::success( sprintf( 'Patched single template override %d (pkiwSurface on the related loop, microformat markers). Backup: %s.', $cr_tpl->ID, $cr_backup ) );
+	return;
+}
+
+if ( 'lock' === $cr_mode || 'unlock' === $cr_mode ) {
+	if ( ! $cr_post instanceof WP_Post ) {
+		WP_CLI::error( 'No target page.' );
+	}
+	$cr_roots  = array( 'cr-reasons', 'cr-fieldnotes' );
+	$cr_hits   = 0;
+	$cr_walker = static function ( array $blocks ) use ( &$cr_walker, &$cr_hits, $cr_roots, $cr_mode ): array {
+		foreach ( $blocks as $i => $block ) {
+			$classes = preg_split( '/\s+/', trim( (string) ( $block['attrs']['className'] ?? '' ) ) );
+			if ( 'core/group' === ( $block['blockName'] ?? '' ) && is_array( $classes ) && array_intersect( $classes, $cr_roots ) ) {
+				if ( 'lock' === $cr_mode ) {
+					$blocks[ $i ]['attrs'] = array_merge( array( 'templateLock' => 'all', 'lock' => array( 'move' => true, 'remove' => true ) ), $block['attrs'] );
+					$blocks[ $i ]['attrs']['templateLock'] = 'all';
+					$blocks[ $i ]['attrs']['lock']         = array( 'move' => true, 'remove' => true );
+				} else {
+					unset( $blocks[ $i ]['attrs']['templateLock'], $blocks[ $i ]['attrs']['lock'] );
+				}
+				++$cr_hits;
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$blocks[ $i ]['innerBlocks'] = $cr_walker( $block['innerBlocks'] );
+			}
+		}
+		return $blocks;
+	};
+	$cr_blocks = $cr_walker( parse_blocks( $cr_post->post_content ) );
+	$cr_new    = serialize_blocks( $cr_blocks );
+	WP_CLI::log( sprintf( 'Target: page %d "%s" — %d section root(s) found.', $cr_post->ID, $cr_post->post_title, $cr_hits ) );
+	if ( $cr_new === $cr_post->post_content ) {
+		WP_CLI::success( 'Nothing to change.' );
+		return;
+	}
+	if ( ! wp_mkdir_p( $cr_backup_dir ) ) {
+		WP_CLI::error( 'Cannot create the backup directory.' );
+	}
+	$cr_backup = sprintf( '%s/page-%d-%s-%s.html', $cr_backup_dir, $cr_post->ID, $cr_mode, gmdate( 'Ymd-His' ) );
+	file_put_contents( $cr_backup, $cr_post->post_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+	$cr_result = wp_update_post( wp_slash( array( 'ID' => $cr_post->ID, 'post_content' => $cr_new ) ), true );
+	if ( is_wp_error( $cr_result ) ) {
+		WP_CLI::error( $cr_result->get_error_message() );
+	}
+	WP_CLI::success( sprintf( '%s applied to page %d. Backup: %s (also a revision).', ucfirst( $cr_mode ), $cr_post->ID, $cr_backup ) );
 	return;
 }
 

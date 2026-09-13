@@ -81,6 +81,6 @@
 
 /* Inside the collage the blog-grid separators and hover lift do not apply:
    the cards are the plugin's objects, spaced by the masonry rules. */
-.cr-archive .cr-archive-stream .wp-block-post::after { content: none; }
+.cr-archive .cr-archive-stream .wp-block-post:not(:last-child)::after { content: none; }
 .cr-archive .cr-archive-stream .wp-block-post { padding-block: 0; }
 .cr-archive .cr-archive-stream .wp-block-post:hover { transform: none; }

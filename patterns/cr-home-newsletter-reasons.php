@@ -13,7 +13,7 @@
 
 declare( strict_types = 1 );
 ?>
-<!-- wp:group {"metadata":{"name":"Newsletter reasons"},"align":"wide","className":"cr-reasons","layout":{"type":"default"}} -->
+<!-- wp:group {"templateLock":"all","lock":{"move":true,"remove":true},"metadata":{"name":"Newsletter reasons"},"align":"wide","className":"cr-reasons","layout":{"type":"default"}} -->
 <div class="wp-block-group alignwide cr-reasons">
 
 	<!-- wp:group {"metadata":{"name":"Intro"},"className":"cr-reasons__intro","layout":{"type":"default"}} -->
