@@ -99,6 +99,14 @@ function resolve_identity(): array {
 		} else {
 			$kicker = __( 'Blog · Archive', 'courtneyr-child' );
 		}
+	} elseif ( $object instanceof \WP_Post_Type ) {
+		if ( 'web-story' === $object->name ) {
+			$family = 'stories';
+			$kicker = __( 'Stories', 'courtneyr-child' );
+			$type   = 'gallery';
+		} else {
+			$kicker = $object->labels->name;
+		}
 	} elseif ( is_date() ) {
 		$kicker = __( 'Blog · Date', 'courtneyr-child' );
 	} elseif ( is_author() ) {
@@ -118,6 +126,10 @@ function resolve_identity(): array {
 			$type   = 'quote';
 		} elseif ( str_starts_with( $template, 'category' ) ) {
 			$kicker = __( 'Blog · Topic', 'courtneyr-child' );
+		} elseif ( str_starts_with( $template, 'archive-web-story' ) ) {
+			$family = 'stories';
+			$kicker = __( 'Stories', 'courtneyr-child' );
+			$type   = 'gallery';
 		}
 	}
 
@@ -157,3 +169,45 @@ function enqueue_styles(): void {
 	);
 }
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_styles' );
+
+/**
+ * The Stories archive is theme-rendered (poster grid, playback on the story
+ * URL), so the plugin's standalone amp-story-player assets are dead weight
+ * there — and a third-party host (cdn.ampproject.org) the page never uses.
+ */
+function dequeue_story_player_on_archive(): void {
+	if ( ! is_post_type_archive( 'web-story' ) ) {
+		return;
+	}
+	wp_dequeue_script( 'standalone-amp-story-player' );
+	wp_dequeue_style( 'standalone-amp-story-player' );
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\dequeue_story_player_on_archive', 100 );
+
+/**
+ * The plugin enqueues the player while rendering the archive's excerpt/content
+ * filters (after wp_enqueue_scripts), so also drop it at print time and remove
+ * its dns-prefetch hint.
+ */
+function drop_story_player_at_print(): void {
+	if ( is_post_type_archive( 'web-story' ) ) {
+		wp_dequeue_script( 'standalone-amp-story-player' );
+		wp_dequeue_style( 'standalone-amp-story-player' );
+	}
+}
+add_action( 'wp_print_scripts', __NAMESPACE__ . '\\drop_story_player_at_print', 100 );
+add_action( 'wp_print_styles', __NAMESPACE__ . '\\drop_story_player_at_print', 100 );
+add_action( 'wp_print_footer_scripts', __NAMESPACE__ . '\\drop_story_player_at_print', 1 );
+
+/**
+ * @param string[] $urls Resource hint URLs.
+ * @param string   $relation_type Hint type.
+ * @return string[]
+ */
+function drop_story_player_hints( array $urls, string $relation_type ): array {
+	if ( 'dns-prefetch' === $relation_type && is_post_type_archive( 'web-story' ) ) {
+		$urls = array_values( array_filter( $urls, static fn( $u ) => ! str_contains( is_array( $u ) ? (string) ( $u['href'] ?? '' ) : (string) $u, 'ampproject.org' ) ) );
+	}
+	return $urls;
+}
+add_filter( 'wp_resource_hints', __NAMESPACE__ . '\\drop_story_player_hints', 20, 2 );

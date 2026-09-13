@@ -81,6 +81,51 @@
 
 /* Inside the collage the blog-grid separators and hover lift do not apply:
    the cards are the plugin's objects, spaced by the masonry rules. */
-.cr-archive .cr-archive-stream .wp-block-post:not(:last-child)::after { content: none; }
-.cr-archive .cr-archive-stream .wp-block-post { padding-block: 0; }
-.cr-archive .cr-archive-stream .wp-block-post:hover { transform: none; }
+.cr-archive :is(.cr-archive-stream, .cr-stories) .wp-block-post:not(:last-child)::after { content: none; }
+.cr-archive :is(.cr-archive-stream, .cr-stories) .wp-block-post { padding-block: 0; }
+.cr-archive :is(.cr-archive-stream, .cr-stories) .wp-block-post:hover { transform: none; }
+
+/* Stories archive: 9:16 posters as pinned prints; the plugin owns playback on
+   the story URL. A story without a poster shows its title on ruled paper. */
+.cr-archive--stories .cr-archive__header { max-width: 72rem; }
+.cr-stories .cr-stories__list { gap: 2.25rem 1.75rem; }
+.cr-stories .cr-stories__card {
+	background: var(--cr-surface, #fbfaf5);
+	border: 2px solid var(--cr-ink, #241c4a);
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
+	padding: 0.6rem 0.6rem 0.9rem;
+	transform: rotate(var(--cr-rotate-1, -1.2deg));
+}
+.cr-stories .cr-stories__list > li:nth-child(even) .cr-stories__card { transform: rotate(var(--cr-rotate-2, 1.5deg)); }
+.cr-stories .cr-stories__card:has(a:focus-visible) { outline: 3px solid var(--cr-selective-yellow, #ffb703); outline-offset: 4px; }
+.cr-stories .cr-stories__poster { margin: 0; }
+.cr-stories .cr-stories__poster img { display: block; inline-size: 100%; block-size: auto; object-fit: cover; }
+/* no poster: keep the 9:16 slot as ruled paper so the grid stays even */
+.cr-stories .cr-stories__poster:empty,
+.cr-stories .cr-stories__card > .cr-stories__label:first-child::before {
+	content: "";
+	display: block;
+	aspect-ratio: 9 / 16;
+	background:
+		repeating-linear-gradient(to bottom, transparent 0 1.4rem, color-mix(in srgb, var(--cr-ink, #241c4a) 18%, transparent) 1.4rem calc(1.4rem + 1px)),
+		var(--cr-halftone), var(--cr-surface, #fbfaf5);
+	background-size: auto, var(--cr-halftone-size), auto;
+	border: 1.5px dashed var(--cr-ink, #241c4a);
+	margin-block-end: 0.6rem;
+}
+.cr-stories .cr-stories__label { margin-block-start: 0.6rem; }
+.cr-stories .cr-stories__title { margin: 0; line-height: 1.2; font-size: var(--wp--preset--font-size--medium, 1.25rem); }
+.cr-stories .cr-stories__title a { color: var(--cr-ink, #241c4a); text-decoration: none; }
+.cr-stories .cr-stories__title a:hover { text-decoration: underline; text-decoration-thickness: 2px; }
+.cr-stories .cr-stories__date {
+	margin: 0.35rem 0 0;
+	font-family: var(--cr-font-mono, monospace);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--cr-ink, #241c4a);
+}
+.cr-stories__empty { font-family: var(--cr-font-accent, serif); font-size: var(--wp--preset--font-size--medium, 1.125rem); }
+@media (prefers-reduced-motion: no-preference) {
+	.cr-stories .cr-stories__card { transition: transform 0.15s ease; }
+	.cr-stories .cr-stories__card:hover { transform: rotate(0deg) translateY(-2px); }
+}

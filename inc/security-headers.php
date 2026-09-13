@@ -153,6 +153,17 @@ function send_frontend_headers( \WP $wp ): void {
 
 	$csp = CSP_ENFORCED;
 
+	// Web Stories singles are AMP documents: the runtime, the amp-story
+	// component and its stylesheet load from cdn.ampproject.org. Without
+	// these two sources the story never upgrades and the boilerplate keeps
+	// the body hidden (measured on live 0.7.45: blank page, 4 violations).
+	// Scoped to the story documents only; the archive never uses the host.
+	if ( is_singular( 'web-story' ) ) {
+		$csp['script-src']  .= ' https://cdn.ampproject.org';
+		$csp['style-src']   .= ' https://cdn.ampproject.org';
+		$csp['connect-src'] .= ' https://cdn.ampproject.org';
+	}
+
 	// /embed/ responses exist to be iframed by other sites: no framing
 	// restriction there. Everywhere else, CSP and X-Frame-Options stay
 	// semantically aligned ('self' <=> SAMEORIGIN).
