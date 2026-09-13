@@ -161,7 +161,11 @@ function send_frontend_headers( \WP $wp ): void {
 	if ( is_singular( 'web-story' ) ) {
 		$csp['script-src']  .= ' https://cdn.ampproject.org';
 		$csp['style-src']   .= ' https://cdn.ampproject.org';
-		$csp['connect-src'] .= ' https://cdn.ampproject.org';
+		// The runtime fetches story metadata and the AMP media cache lives on
+		// per-origin subdomains (videos-files-wordpress-com.cdn.ampproject.org);
+		// the stories' own video is hosted on videos.files.wordpress.com.
+		$csp['connect-src'] .= ' https://cdn.ampproject.org https://*.cdn.ampproject.org';
+		$csp['media-src']   .= ' https://*.cdn.ampproject.org https://videos.files.wordpress.com';
 	}
 
 	// /embed/ responses exist to be iframed by other sites: no framing
