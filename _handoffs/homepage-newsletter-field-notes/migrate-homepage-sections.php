@@ -17,7 +17,7 @@
  *
  * Append `preview` to upgrade, lock, unlock or upgrade-templates to run the
  * exact same transform, print a line-diff summary and write nothing (G-04).
- * Backups are verified and immutable (cr-migration-backup.php, G-03).
+ * Backups are hash-verified and read-only where the filesystem allows (cr-migration-backup.php, G-03).
  *
  * `lock` / `unlock` (0.7.46, issue 04) add or remove `templateLock: all`
  * and the move/remove lock on the two section root Groups (the direct child of
