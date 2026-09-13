@@ -8,6 +8,11 @@
  * Viewport Width: 1100
  * Block Types: core/post-template, core/query
  *
+ * Card media: the core/html glyph placeholder is swapped per post by
+ * transform_blog_card_glyph() (inc/interactivity.php). Keep explanations in
+ * this docblock — an HTML comment between blocks fails block validation in
+ * the editor (0.7.46 fix; every card group used to warn).
+ *
  * @package CourtneyrChild
  */
 
@@ -26,9 +31,6 @@ declare( strict_types = 1 );
 
 				<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"16/9"} /-->
 
-				<!-- v0.5.159: post-format glyph. transform_blog_card_glyph()
-				     (inc/interactivity.php) swaps the #post-icon-* fragment +
-				     aria-label per post at render time; default is blog. -->
 				<!-- wp:html -->
 				<span class="media-glyph" role="img" aria-label="Post format: blog post" data-cr-card-glyph="blog"><svg viewBox="0 0 24 24"><use href="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/assets/svg/icons.svg#post-icon-blog"></use></svg></span>
 				<!-- /wp:html -->

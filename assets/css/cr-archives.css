@@ -1,0 +1,86 @@
+/* Archive family (0.7.46). Identity block, stream-family collage inside
+   archives, Browse-all directory. Tokens only; the accent comes from the
+   block's --cr-archive-accent (a --cr-type-* token), so dark mode follows
+   the token flips in tokens.css. Editor and front end load this sheet. */
+
+.cr-archive-identity {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-block-end: 0.5rem;
+}
+.cr-archive-identity__glyph {
+	flex: none;
+	inline-size: 2.75rem;
+	block-size: 2.75rem;
+	display: inline-grid;
+	place-items: center;
+	border-radius: 50%;
+	background: var(--cr-surface, #fbfaf5);
+	color: var(--cr-ink, #241c4a);
+	box-shadow: 0 0 0 2px var(--cr-ink, #241c4a), 3px 3px 0 var(--cr-archive-accent, var(--cr-cerulean));
+	transform: rotate(var(--cr-rotate-1, -1.2deg));
+}
+.cr-archive-identity__glyph svg { inline-size: 1.5rem; block-size: 1.5rem; }
+.cr-archive-identity__kicker { margin: 0; }
+.cr-archive-identity--stream .cr-archive-identity__kicker { --cr-tape-bg: var(--cr-archive-accent); }
+.cr-archive-identity-editor { display: block; }
+
+/* The h1 keeps its ✺ flank; the accent tints the short marker bar below it. */
+.cr-archive__header hr.is-style-cr-marker-bar-short { background-color: var(--cr-archive-accent, var(--cr-ut-orange)); }
+
+/* Stream-family archives: the collage owns the wide column, cards keep the
+   plugin's own paint (cr-post-kinds.css). */
+.cr-archive--stream .cr-archive__header { max-width: 72rem; }
+.cr-archive-stream__empty {
+	font-family: var(--cr-font-accent, serif);
+	font-size: var(--wp--preset--font-size--medium, 1.125rem);
+	max-width: var(--cr-measure, 65ch);
+}
+
+/* Browse all: three term lists as pill rows. Core's Terms List markup. */
+.cr-browse-all {
+	margin-block-start: var(--wp--preset--spacing--x-large, 4rem);
+	padding-block-start: var(--wp--preset--spacing--large, 2.5rem);
+	border-block-start: 3px solid var(--cr-ink, #241c4a);
+}
+.cr-browse-all__title { margin-block: 0 1rem; }
+.cr-browse-all__group {
+	font-family: var(--cr-font-mono, monospace);
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	margin-block: 0 0.5rem;
+}
+.cr-browse-all ul.cr-browse-all__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+.cr-browse-all ul.cr-browse-all__list li {
+	margin: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.72rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	border: 1.5px solid var(--cr-ink, #241c4a);
+	background: var(--cr-surface, #fbfaf5);
+	color: var(--cr-ink, #241c4a);
+	padding: 0.2rem 0.55rem;
+	box-shadow: 2px 2px 0 var(--cr-ink, #241c4a);
+}
+.cr-browse-all ul.cr-browse-all__list li a { color: inherit; text-decoration: none; }
+.cr-browse-all ul.cr-browse-all__list li a:hover,
+.cr-browse-all ul.cr-browse-all__list li a:focus-visible { text-decoration: underline; text-decoration-thickness: 2px; }
+.cr-browse-all ul.cr-browse-all__list ul.children { display: contents; }
+@media (max-width: 48em) {
+	.cr-browse-all__columns { flex-direction: column; gap: 1.25rem; }
+}
+
+/* Inside the collage the blog-grid separators and hover lift do not apply:
+   the cards are the plugin's objects, spaced by the masonry rules. */
+.cr-archive .cr-archive-stream .wp-block-post::after { content: none; }
+.cr-archive .cr-archive-stream .wp-block-post { padding-block: 0; }
+.cr-archive .cr-archive-stream .wp-block-post:hover { transform: none; }
