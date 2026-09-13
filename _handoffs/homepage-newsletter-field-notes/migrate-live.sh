@@ -80,8 +80,9 @@ echo "## 7. post-format intros (export current values first; restore with rollba
 w term list post_format --fields=term_id,slug,description --format=json > "$RUN_DIR/post_format-terms-before.json"
 [[ -s "$RUN_DIR/post_format-terms-before.json" ]] || die "term export is empty"
 while IFS='|' read -r slug desc; do
-	current="$(wv term get post_format "post-format-$slug" --by=slug --field=description < /dev/null || echo '__missing__')"
-	if [[ "$current" == "__missing__" ]]; then echo "term post-format-$slug absent here; skipped"; continue; fi
+	if ! w term get post_format "post-format-$slug" --by=slug --field=term_id < /dev/null > /dev/null 2>&1; then echo "term post-format-$slug absent here; skipped"; continue; fi
+	current="$(wv term get post_format "post-format-$slug" --by=slug --field=description < /dev/null)"
+	current="${current//[$'\r\n']/}"
 	if [[ "$current" == "$desc" ]]; then echo "post-format-$slug already: $desc"; continue; fi
 	echo "post-format-$slug: '$current' -> '$desc'"
 	w term update post_format "post-format-$slug" --by=slug --description="$desc" < /dev/null
