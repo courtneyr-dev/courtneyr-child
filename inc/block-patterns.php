@@ -38,6 +38,9 @@ const PATTERN_CATEGORIES = array(
 	'cr-post-format' => 'Post Format (Courtneyr)',
 	'cr-zine'        => 'Zine Layouts (Courtneyr)',
 	'cr-indieweb'    => 'IndieWeb (Courtneyr)',
+	'cr-sections'    => 'Courtneyr · Sections',
+	'cr-marks'       => 'Courtneyr · Cards and marks',
+	'cr-loops'       => 'Courtneyr · Loops and directories',
 );
 
 /**

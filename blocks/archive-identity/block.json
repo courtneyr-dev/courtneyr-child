@@ -1,0 +1,16 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "courtneyr/archive-identity",
+	"version": "0.7.46",
+	"title": "Archive identity",
+	"category": "theme",
+	"icon": "tag",
+	"description": "The queried term's family kicker (Blog · Topic, Stream · Format, Stream · Kind), glyph and accent colour, resolved on the server from the same format/kind data the cards use.",
+	"keywords": [ "archive", "category", "format", "kind", "identity" ],
+	"textdomain": "courtneyr-child",
+	"supports": { "html": false, "reusable": false, "customClassName": true },
+	"attributes": {},
+	"editorScript": "file:./editor.js",
+	"render": "file:./render.php"
+}

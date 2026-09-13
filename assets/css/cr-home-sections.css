@@ -172,20 +172,48 @@
 	line-height: 1.45;
 	max-width: 40ch;
 }
+/* Drawings: an empty, locked Group painted through two SVG masks from
+   assets/svg/reasons/ (spot fill on the element, line work on ::before). No
+   SVG lives in the saved page, so an Editor-role save keeps the artwork and
+   the editor canvas paints the same drawing from the same stylesheet. */
 .cr-reasons .cr-reasons__drawing {
+	--cr-drawing-spot: var(--cr-selective-yellow);
+	position: relative;
 	display: block;
 	width: 4.75rem;
 	height: 5.375rem;
-	stroke: var(--cr-reasons-ink);
-	stroke-width: 2.3;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-	fill: none;
-	overflow: visible;
+	margin: 0;
 }
-.cr-reasons .cr-reasons__drawing .spot { fill: var(--cr-selective-yellow); stroke: none; }
-.cr-reasons .cr-reasons__panel:nth-child(2) .cr-reasons__drawing .spot,
-.cr-reasons .cr-reasons__panel:nth-child(3) .cr-reasons__drawing .spot { fill: var(--cr-sky-blue); }
+/* Both inks sit on pseudo-elements: a mask on the element itself would clip
+   the line work to the spot shape. ::before = spot fill, ::after = lines. */
+.cr-reasons .cr-reasons__drawing::before,
+.cr-reasons .cr-reasons__drawing::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	-webkit-mask-position: center;
+	mask-position: center;
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+}
+.cr-reasons .cr-reasons__drawing::before {
+	background-color: var(--cr-drawing-spot);
+	-webkit-mask-image: var(--cr-drawing-spot-mask);
+	mask-image: var(--cr-drawing-spot-mask);
+}
+.cr-reasons .cr-reasons__drawing::after {
+	background-color: var(--cr-reasons-ink);
+	-webkit-mask-image: var(--cr-drawing-lines-mask);
+	mask-image: var(--cr-drawing-lines-mask);
+}
+.cr-reasons .cr-reasons__drawing--01 { --cr-drawing-spot-mask: url("../svg/reasons/01-spot.svg"); --cr-drawing-lines-mask: url("../svg/reasons/01-lines.svg"); }
+.cr-reasons .cr-reasons__drawing--02 { --cr-drawing-spot-mask: url("../svg/reasons/02-spot.svg"); --cr-drawing-lines-mask: url("../svg/reasons/02-lines.svg"); --cr-drawing-spot: var(--cr-sky-blue); }
+.cr-reasons .cr-reasons__drawing--03 { --cr-drawing-spot-mask: url("../svg/reasons/03-spot.svg"); --cr-drawing-lines-mask: url("../svg/reasons/03-lines.svg"); --cr-drawing-spot: var(--cr-sky-blue); }
+.cr-reasons .cr-reasons__drawing--04 { --cr-drawing-spot-mask: url("../svg/reasons/04-spot.svg"); --cr-drawing-lines-mask: url("../svg/reasons/04-lines.svg"); }
+/* The empty Group must not grow an appender or padding in the canvas. */
+.cr-reasons .cr-reasons__drawing > * { display: none; }
 
 /* Personalized guidance */
 .cr-reasons .cr-reasons__contact {
@@ -515,21 +543,7 @@
 	.cr-fieldnotes .cr-fieldnotes__lane--stream { margin-block-start: 1.75rem; padding-block-start: 1.8125rem; border-top: 3px solid var(--cr-fn-ink); }
 }
 
-/* ---- Focus: two-tone ring ----
-   tokens.css:610 gives every link a 3px selective-yellow ring. Measured on
-   these sections it reads 1.67:1 against the ivory sheets and 1.30:1 against
-   the blue band, under the 3:1 that WCAG 1.4.11 asks of a focus indicator.
-   An ink halo outside the yellow ring puts a 3:1 boundary on both edges
-   (yellow/ink 8.6:1). Scoped to the links this stylesheet owns; the stream
-   cards keep the plugin and theme adapter treatment they have on /stream/. */
-.cr-reasons :is(a, button):focus-visible,
-.cr-fieldnotes :is(.cr-home-story a, .cr-fieldnotes__lane-link a):focus-visible {
-	outline: 3px solid var(--cr-focus-ring, #ffb703);
-	outline-offset: 2px;
-	box-shadow: 0 0 0 7px var(--cr-ink, #241c4a);
-	box-decoration-break: clone;
-	-webkit-box-decoration-break: clone;
-}
+/* Focus: the shared two-tone ring lives in tokens.css (0.7.46). */
 
 /* ---- Paper sheets carry their own ink ----
    Measured in dark mode before this rule: panel text rgb(251,250,245) on a
@@ -581,4 +595,108 @@
 	.cr-reasons .cr-reasons__panel { transition: none; }
 	.cr-reasons .cr-reasons__panel:hover,
 	.cr-reasons .cr-reasons__panel:focus-within { transform: revert; box-shadow: revert; }
+}
+
+/* ---- Editor canvas ----
+   The band paint and the chips are keyed on saved classes here, not on
+   body.home / the PHP chip filter, so the block editor shows them too. */
+/* !important on purpose: the saved preset class has-base-background-color
+   paints with !important, and the frontend band rule in components.css
+   already overrides it the same way. */
+.wp-block-group.cr-home-features {
+	position: relative;
+	background-color: color-mix(in srgb, var(--cr-sky-blue, #8ecae6) 70%, var(--cr-glaucous-light, #5a7ea8)) !important;
+	background-image: var(--cr-fiber), var(--cr-halftone) !important;
+	background-size: auto, var(--cr-halftone-size) !important;
+	background-blend-mode: multiply, multiply !important;
+	background-repeat: repeat, repeat !important;
+	color: var(--cr-russian-violet, #241c4a) !important;
+}
+.editor-styles-wrapper .cr-fieldnotes .cr-home-story__chips .wp-block-post-terms__separator { display: none; }
+.editor-styles-wrapper .cr-fieldnotes .cr-home-story__chips a:not(.cr-term-chip) {
+	display: inline-block;
+	margin: 0 0.35rem 0.35rem 0;
+	padding: 0.15rem 0.55rem;
+	border: 1px solid var(--cr-fn-ink);
+	background: var(--cr-tape, #f3e5b8);
+	color: var(--cr-tape-ink, var(--cr-fn-ink));
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	text-decoration: none;
+	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
+}
+.editor-styles-wrapper .cr-post-glyph-editor { display: contents; }
+.editor-styles-wrapper .pkiw-stream-card-editor { display: contents; }
+.editor-styles-wrapper .pkiw-stream-card-editor__placeholder { font-family: var(--cr-font-mono, monospace); font-size: 0.75rem; opacity: 0.7; }
+
+/* ------------------------------------------------------------------
+   Refinement accepted 2026-09-13 (issue 13): tighter rhythm and the small
+   zine marks. Formerly the injected prototype sheet prototypes/home-refined.css.
+   ------------------------------------------------------------------ */
+
+/* ---- Newsletter reasons: tighter vertical rhythm ---- */
+.cr-reasons { padding-block: clamp(2.25rem, 2rem + 1.5vw, 3.25rem); }
+.cr-reasons .cr-reasons__intro { margin-block-end: 1.75rem; }
+.cr-reasons .cr-reasons__panels { gap: 1.75rem 1.5rem; }
+.cr-reasons .cr-reasons__panel { padding-block-end: 1.25rem; }
+.cr-reasons .cr-reasons__contact { margin-block-start: 2rem; padding-block-start: 1.25rem; }
+/* caption-box kicker in the intro (comic caption device the stream already uses) */
+.cr-reasons .cr-reasons__kicker {
+	display: inline-block; padding: 0.15rem 0.5rem; border: 1.5px solid var(--cr-reasons-ink);
+	background: var(--cr-reasons-paper); font-family: var(--cr-font-mono, monospace); font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	letter-spacing: 0.14em; text-transform: uppercase; box-shadow: 2px 2px 0 var(--cr-reasons-ink);
+}
+/* halftone fragment behind the intro corner (existing --cr-halftone token) */
+.cr-reasons .cr-reasons__intro { position: relative; }
+.cr-reasons .cr-reasons__intro::after {
+	content: ""; position: absolute; right: -1.25rem; top: -1rem; width: 7rem; height: 4.5rem;
+	background-image: var(--cr-halftone); background-size: var(--cr-halftone-size); opacity: 0.35; pointer-events: none;
+	-webkit-mask-image: linear-gradient(135deg, #000 40%, transparent 85%); mask-image: linear-gradient(135deg, #000 40%, transparent 85%);
+}
+
+/* ---- Field Notes: masthead, lanes and archive actions closer together ---- */
+.cr-fieldnotes { padding-block: clamp(2rem, 1.75rem + 1.25vw, 3rem); }
+.cr-fieldnotes .cr-fieldnotes__masthead { margin-block-end: 1.25rem; padding-block-end: 0.5rem; }
+.cr-fieldnotes .cr-fieldnotes__lane-head { margin-block-end: 0.35rem; }
+.cr-fieldnotes .cr-fieldnotes__caption { margin: 0 0 1rem; }
+.cr-fieldnotes .cr-fieldnotes__lane-link { margin-block-start: 1rem; }
+.cr-fieldnotes .cr-fieldnotes__lane--stream { margin-block-start: 2rem; padding-block-start: 1.5rem; }
+.cr-fieldnotes .cr-fieldnotes__blog-row { gap: 1.5rem 2rem; }
+/* marker underline under the lane titles (existing sky/orange inks) */
+.cr-fieldnotes .cr-fieldnotes__lane-title { position: relative; }
+.cr-fieldnotes .cr-fieldnotes__lane-head::after { height: 3px; background: var(--cr-fn-ink); }
+/* a drawn arrow from the Blog caption toward the lead story (existing hand-arrow device) */
+.cr-fieldnotes .cr-fieldnotes__lane--blog .cr-fieldnotes__caption { padding-inline-end: 3rem; position: relative; }
+.cr-fieldnotes .cr-fieldnotes__lane--blog .cr-fieldnotes__caption::after {
+	content: ""; position: absolute; right: 0.25rem; top: 50%; width: 2.25rem; height: 0.9rem;
+	border-bottom: 2px solid var(--cr-ut-orange); border-right: 2px solid var(--cr-ut-orange);
+	transform: translateY(-60%) skewX(-30deg) rotate(-8deg); opacity: 0.9;
+}
+/* registration cross at the masthead corner (page-level zine mark) */
+.cr-fieldnotes .cr-fieldnotes__masthead { position: relative; }
+.cr-fieldnotes .cr-fieldnotes__masthead::before {
+	content: ""; position: absolute; left: -1.75rem; top: 0.2rem; width: 0.9rem; height: 0.9rem;
+	background:
+		linear-gradient(var(--cr-fn-ink), var(--cr-fn-ink)) center / 100% 1px no-repeat,
+		linear-gradient(var(--cr-fn-ink), var(--cr-fn-ink)) center / 1px 100% no-repeat;
+	opacity: 0.7;
+}
+
+/* ---- Stream packing: tighter columns, no arbitrary row gaps ---- */
+.cr-home-stream .cr-home-stream__list { column-gap: 1.5rem; }
+.cr-home-stream .cr-home-stream__list > li { margin-block-end: 1.25rem; }
+.cr-home-stream .pk-card--stream { margin-block: 0; }
+
+/* ---- Gap before the closing signup section ---- */
+.cr-home-fieldnotes { padding-block-end: clamp(1.5rem, 1rem + 1.5vw, 2.5rem) !important; }
+
+/* narrow screens: keep touch/focus clearance */
+@media (max-width: 43.75em) {
+	.cr-reasons .cr-reasons__panels { gap: 1.25rem; }
+	.cr-fieldnotes .cr-fieldnotes__lane--blog .cr-fieldnotes__caption { padding-inline-end: 0; }
+	.cr-fieldnotes .cr-fieldnotes__lane--blog .cr-fieldnotes__caption::after,
+	.cr-fieldnotes .cr-fieldnotes__masthead::before,
+	.cr-reasons .cr-reasons__intro::after { display: none; }
 }

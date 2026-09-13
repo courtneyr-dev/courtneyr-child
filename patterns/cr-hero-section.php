@@ -2,7 +2,7 @@
 /**
  * Title: Hero — Section
  * Slug: courtneyr-child/cr-hero-section
- * Categories: cr-zine
+ * Categories: cr-zine, cr-sections
  * Description: Shorter hero for index-page section headers, archive lists, and tag landings. Uses Roboto Slab 800 with marker-color accent on the title — calmer than the full display variant.
  * Keywords: hero, section, archive, index, accent
  * Block Types: core/post-content

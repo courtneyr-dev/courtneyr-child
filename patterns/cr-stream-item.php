@@ -2,7 +2,7 @@
 /**
  * Title: Stream Item
  * Slug: courtneyr-child/cr-stream-item
- * Categories: cr-zine
+ * Categories: cr-zine, cr-marks
  * Description: Single mixed-feed entry — SVG post-type avatar, chip, date, title, and intro. Mirrors the design-system stream component 1:1.
  * Keywords: stream, feed, item, post, indieweb, zine
  * Viewport Width: 720

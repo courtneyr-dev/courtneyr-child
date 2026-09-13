@@ -431,20 +431,15 @@ add_filter( 'render_block', __NAMESPACE__ . '\\transform_stream_item_avatar', 10
  * .media-glyph class/box intact (unlike the avatar filter, which rebuilds the
  * whole span). Keyed on the marker so it only touches blog cards.
  */
-function transform_blog_card_glyph( string $block_content, array $block ): string {
-	if ( ! str_contains( $block_content, 'data-cr-card-glyph' ) ) {
-		return $block_content;
-	}
-	$post_id = \get_the_ID();
-	if ( ! $post_id ) {
-		return $block_content;
-	}
+function build_post_glyph( int $post_id ): string {
 	$type = resolve_stream_item_type( $post_id );
 
 	// v0.5.175: colour the card glyph by format, reusing the cr-icon-avatar
 	// variants (solid for the AA-safe types, outline + inline --type-color for
 	// the rest) — the same colour system as the front-page badge. The whole
 	// span is rebuilt so the class/style/icon/label all match the post.
+	// v0.7.46: extracted so the courtneyr/post-glyph block and the blog-grid
+	// render filter emit identical markup.
 	if ( in_array( $type, STREAM_AVATAR_OUTLINE, true ) ) {
 		$class = 'media-glyph cr-icon-avatar cr-icon-avatar--outline';
 		$style = sprintf( ' style="--type-color: var(--cr-type-%s);"', \esc_attr( $type ) );
@@ -460,7 +455,22 @@ function transform_blog_card_glyph( string $block_content, array $block ): strin
 		$style,
 		\esc_url( \get_stylesheet_directory_uri() )
 	);
-	$replaced = \preg_replace( '#<span class="media-glyph"[^>]*>.*?</span>#s', $glyph, $block_content, 1 );
+	return $glyph;
+}
+
+/**
+ * Blog-grid cards still ship the `data-cr-card-glyph` placeholder; swap it for
+ * the real glyph at render time (courtneyr/post-glyph renders it directly).
+ */
+function transform_blog_card_glyph( string $block_content, array $block ): string {
+	if ( ! str_contains( $block_content, 'data-cr-card-glyph' ) ) {
+		return $block_content;
+	}
+	$post_id = \get_the_ID();
+	if ( ! $post_id ) {
+		return $block_content;
+	}
+	$replaced = \preg_replace( '#<span class="media-glyph"[^>]*>.*?</span>#s', build_post_glyph( $post_id ), $block_content, 1 );
 	return is_string( $replaced ) ? $replaced : $block_content;
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\transform_blog_card_glyph', 10, 2 );

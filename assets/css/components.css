@@ -437,9 +437,11 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
   box-shadow: 2px 2px 0 var(--cr-ink);
 }
 .cr-button:focus-visible,
-.cr-cta:focus-visible {
+.cr-cta:focus-visible,
+.wp-block-button .wp-block-button__link:focus-visible {
   outline: 3px solid var(--cr-focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 7px var(--cr-focus-halo, var(--cr-ink));
 }
 
 .cr-button--primary,
@@ -1635,10 +1637,12 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
    visual gap between the editing experience and the published page.
    ============================================================ */
 
+/* 0.7.46: the classic title input keeps the lock. The template's post-title
+   block in the canvas carries the template classes (.single-post__title,
+   .cr-page__title, .cr-archive__title), so it takes the same rules as the
+   front end — no size lock, or the canvas shows 42 px where readers see 52. */
 .editor-post-title,
-.editor-post-title__input,
-.editor-styles-wrapper .wp-block-post-title,
-.edit-post-visual-editor .wp-block-post-title {
+.editor-post-title__input {
 	font-family: var(--cr-font-accent, serif) !important;
 	font-size: var(--wp--preset--font-size--x-large, 2.25rem) !important;
 	line-height: 1.15 !important;
@@ -1876,41 +1880,14 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
    v0.2.3 — additional fixes after Apr 27 visual review
    ============================================================ */
 
-/* (a) Editor heading scale — make h1-h6 in the post-editor match
-   what readers see on the front of the site. Without these explicit
-   sizes the editor renders headings at user-agent defaults, which
-   makes h2 look almost the same as body and breaks the WYSIWYG
-   contract for writers. */
-.editor-styles-wrapper h1.wp-block-heading,
-.editor-styles-wrapper h1.editor-post-title__input,
-.editor-styles-wrapper .wp-block-post-title {
-	font-size: clamp(2rem, 1.6rem + 1vw, 2.5rem) !important;
-	line-height: 1.15 !important;
-}
-.editor-styles-wrapper h2,
-.editor-styles-wrapper h2.wp-block-heading {
-	font-size: clamp(1.5rem, 1.3rem + 0.7vw, 1.875rem) !important;
-	line-height: 1.2 !important;
-}
-.editor-styles-wrapper h3,
-.editor-styles-wrapper h3.wp-block-heading {
-	font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem) !important;
-	line-height: 1.25 !important;
-}
-.editor-styles-wrapper h4,
-.editor-styles-wrapper h4.wp-block-heading {
-	font-size: clamp(1.1rem, 1rem + 0.3vw, 1.25rem) !important;
-	line-height: 1.3 !important;
-}
-.editor-styles-wrapper h5,
-.editor-styles-wrapper h5.wp-block-heading {
-	font-size: 1.125rem !important;
-	line-height: 1.35 !important;
-}
-.editor-styles-wrapper h6,
+/* (a) Editor heading scale — 0.7.46: the v0.2.3 `!important` size locks are
+   gone. They predate the theme.json global styles the editor now applies,
+   and they forced every heading in the canvas to a smaller scale than the
+   front end (Field Notes title 29 px in the canvas vs 76 px published;
+   content h2 30 px vs 48 px). Headings now take the same rules in both
+   contexts; only the page/post title input keeps its lock (above). h6 keeps
+   its small-caps treatment as a plain rule. */
 .editor-styles-wrapper h6.wp-block-heading {
-	font-size: 1rem !important;
-	line-height: 1.4 !important;
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
 }
@@ -2037,45 +2014,40 @@ section.alignfull,
    are present, regardless of [data-theme] state. AA-passing across
    light, dark, and system modes. */
 
+/* 0.7.46 (R-40): band text is the ink token, so dark mode flips it without a
+   second, !important override; components inside a band keep their own ink
+   because nothing here targets descendants any more. Links use the band-link
+   tokens (tokens.css) at :where() specificity so any component link rule wins. */
 .has-tertiary-background-color,
 .has-main-accent-background-color,
 .related-posts,
 .single-post__comments-wrapper {
-	color: var(--cr-russian-violet, #241c4a);
+	color: var(--cr-ink, #241c4a);
 }
 
-.has-tertiary-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
-.has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
-.related-posts a:not(.wp-element-button):not(.cr-cta),
-.single-post__comments-wrapper a:not(.wp-element-button):not(.cr-cta) {
-	color: var(--cr-russian-violet, #241c4a);
+:where(.has-tertiary-background-color, .has-main-accent-background-color, .related-posts, .single-post__comments-wrapper) a {
+	color: var(--cr-band-link, var(--cr-ink, #241c4a));
 }
 
-.has-tertiary-background-color a:visited:not(.wp-element-button):not(.cr-cta),
-.has-main-accent-background-color a:visited:not(.wp-element-button):not(.cr-cta),
-.related-posts a:visited:not(.wp-element-button):not(.cr-cta),
-.single-post__comments-wrapper a:visited:not(.wp-element-button):not(.cr-cta) {
-	color: var(--cr-russian-violet-soft, #3d2f6e);
+:where(.has-tertiary-background-color, .has-main-accent-background-color, .related-posts, .single-post__comments-wrapper) a:visited {
+	color: var(--cr-band-link-visited, var(--cr-russian-violet-soft, #3d2f6e));
 }
 
-.has-tertiary-background-color a:hover:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
-.has-main-accent-background-color a:hover:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
-.related-posts a:hover:not(.wp-element-button):not(.cr-cta),
-.single-post__comments-wrapper a:hover:not(.wp-element-button):not(.cr-cta) {
-	color: var(--cr-ut-orange-dark, #b85f00);
+:where(.has-tertiary-background-color, .has-main-accent-background-color, .related-posts, .single-post__comments-wrapper) a:hover {
+	color: var(--cr-band-link-hover, var(--cr-ut-orange-dark, #b85f00));
 	text-decoration: underline;
 	text-underline-offset: 0.18em;
 }
 
 /* Headings inside light-bg sections — same dark-text lock */
-.has-tertiary-background-color h1:not(.cr-reasons *):not(.cr-fieldnotes *),
-.has-tertiary-background-color h2:not(.cr-reasons *):not(.cr-fieldnotes *),
-.has-tertiary-background-color h3:not(.cr-reasons *):not(.cr-fieldnotes *),
-.has-tertiary-background-color h4:not(.cr-reasons *):not(.cr-fieldnotes *),
-.has-main-accent-background-color h1:not(.cr-reasons *):not(.cr-fieldnotes *),
-.has-main-accent-background-color h2:not(.cr-reasons *):not(.cr-fieldnotes *),
-.has-main-accent-background-color h3:not(.cr-reasons *):not(.cr-fieldnotes *),
-.has-main-accent-background-color h4:not(.cr-reasons *):not(.cr-fieldnotes *),
+.has-tertiary-background-color h1,
+.has-tertiary-background-color h2,
+.has-tertiary-background-color h3,
+.has-tertiary-background-color h4,
+.has-main-accent-background-color h1,
+.has-main-accent-background-color h2,
+.has-main-accent-background-color h3,
+.has-main-accent-background-color h4,
 .related-posts h1,
 .related-posts h2,
 .related-posts h3,
@@ -2084,7 +2056,7 @@ section.alignfull,
 .single-post__comments-wrapper h2,
 .single-post__comments-wrapper h3,
 .single-post__comments-wrapper h4 {
-	color: var(--cr-russian-violet, #241c4a);
+	color: var(--cr-ink, #241c4a);
 }
 
 /* Comments-form labels and inputs inside the cream comments wrapper —
@@ -2202,29 +2174,18 @@ body.home .has-main-accent-background-color,
 body.home .has-base-background-color,
 body.home .has-secondary-background-color,
 body.home .has-primary-accent-background-color {
-	color: var(--cr-russian-violet, #241c4a);
+	color: var(--cr-ink, #241c4a);
 }
 
-body.home .has-tertiary-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-base-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(.has-text-color):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *) {
-	color: inherit;
-}
-
-body.home .has-tertiary-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-base-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *) {
-	color: var(--cr-russian-violet, #241c4a);
+:where(body.home .has-tertiary-background-color, body.home .has-main-accent-background-color, body.home .has-base-background-color) a {
+	color: var(--cr-band-link, var(--cr-ink, #241c4a));
 	text-decoration: underline;
 	text-underline-offset: 0.15em;
 	text-decoration-thickness: 1px;
 }
 
-body.home .has-tertiary-background-color a:hover:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-main-accent-background-color a:hover:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-base-background-color a:hover:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *) {
-	color: var(--cr-ut-orange-dark, #b85f00);
+:where(body.home .has-tertiary-background-color, body.home .has-main-accent-background-color, body.home .has-base-background-color) a:hover {
+	color: var(--cr-band-link-hover, var(--cr-ut-orange-dark, #b85f00));
 }
 
 /* (4) Newsletter form fields — readable across light/dark, zine framing */
@@ -2510,21 +2471,9 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 :root[data-theme="dark"] .has-base-background-color,
 :root[data-theme="dark"] .has-secondary-background-color {
 	background-color: var(--cr-surface-soft) !important;
-	color: var(--cr-printer-ivory) !important;
+	color: var(--cr-ink, #fbfaf5);
 }
 
-:root[data-theme="dark"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-:root[data-theme="dark"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-:root[data-theme="dark"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-:root[data-theme="dark"] .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *) {
-	color: var(--cr-printer-ivory) !important;
-}
-
-:root[data-theme="dark"] .has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
-:root[data-theme="dark"] .has-tertiary-background-color  a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
-:root[data-theme="dark"] .has-base-background-color      a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *) {
-	color: var(--cr-sky-blue, #8ecae6) !important;
-}
 
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme]) .has-main-accent-background-color,
@@ -2536,15 +2485,7 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 	:root[data-theme="system"] .has-base-background-color,
 	:root[data-theme="system"] .has-secondary-background-color {
 		background-color: var(--cr-surface-soft) !important;
-		color: var(--cr-printer-ivory) !important;
-	}
-	:root:not([data-theme]) .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-	:root:not([data-theme]) .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-	:root:not([data-theme]) .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-	:root[data-theme="system"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-	:root[data-theme="system"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-	:root[data-theme="system"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *) {
-		color: var(--cr-printer-ivory) !important;
+		color: var(--cr-ink, #fbfaf5);
 	}
 }
 
@@ -2802,8 +2743,11 @@ body.home .wp-block-latest-posts__post-date {
 	}
 }
 
-.related-post__date {
-	color: var(--cr-ink-muted) !important;
+/* 0.7.46: the related band is periwinkle in light mode, where the muted ink
+   measured 3.3:1; the band ink token clears AA in both schemes. */
+.related-posts .related-post__date,
+.related-posts .related-post__date time {
+	color: var(--cr-ink, #241c4a) !important;
 }
 
 
@@ -3353,7 +3297,7 @@ body.home .wp-block-cover.has-tertiary-background-color > .wp-block-cover__backg
 	color: var(--cr-russian-violet, #241c4a) !important;
 }
 
-body.home .wp-block-cover.has-tertiary-background-color *:not(.cr-reasons *):not(.cr-fieldnotes *),
+body.home .wp-block-cover.has-tertiary-background-color *,
 body.home .wp-block-cover.has-tertiary-background-color svg,
 body.home .wp-block-cover.has-tertiary-background-color svg * {
 	color: var(--cr-russian-violet, #241c4a) !important;
@@ -3395,14 +3339,9 @@ body.home {
 	--cr-ink-muted: var(--cr-ink-soft, #d4cfeb);
 }
 
-/* Belt-and-suspenders: force dark text on body paragraphs/lists
-   inside light-bg sections of the homepage. */
-body.home .wp-block-post-content p:not([class*="cerulean"]):not([class*="primary-alt"]):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .wp-block-post-content li:not([class*="cerulean"]):not([class*="primary-alt"]):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .homepage__content p:not([class*="cerulean"]):not([class*="primary-alt"]):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .homepage__content li:not([class*="cerulean"]):not([class*="primary-alt"]):not(.cr-reasons *):not(.cr-fieldnotes *) {
-	color: var(--cr-ink, #241c4a);
-}
+/* 0.7.46 (R-40): the homepage paragraph/list colour lock is gone; band roots
+   carry --cr-ink and descendants inherit it (a rule of any specificity would
+   override a component's own ink, e.g. the audience strip). */
 
 /* Inside a dark-bg section, paragraphs flip to ivory */
 body.home .has-cerulean-background-color p,
@@ -3452,9 +3391,9 @@ body.home .wp-block-heading + .wp-block-latest-posts {
 }
 
 body.home .has-tertiary-background-color.wp-block-heading,
-body.home .has-tertiary-background-color h1:not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-tertiary-background-color h2:not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-tertiary-background-color h3:not(.cr-reasons *):not(.cr-fieldnotes *) {
+body.home .has-tertiary-background-color h1,
+body.home .has-tertiary-background-color h2,
+body.home .has-tertiary-background-color h3 {
 	margin-bottom: 0 !important;
 	padding-bottom: var(--wp--preset--spacing--medium, 1rem) !important;
 }
@@ -3636,22 +3575,8 @@ body.home .home-stream h2.home-stream__title {
 
 /* (7) Make the "Start your journey today" peach section text dark
    (it's on peach bg so dark text reads). Same fix as periwinkle. */
-body.home .has-tertiary-background-color p:not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-tertiary-background-color li:not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-main-accent-background-color p:not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-main-accent-background-color li:not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-base-background-color p:not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .has-base-background-color li:not(.cr-reasons *):not(.cr-fieldnotes *) {
-	color: var(--cr-russian-violet, #241c4a) !important;
-}
-
-/* But in dark mode where these flip to dark surface, text goes ivory */
-:root[data-theme="dark"] body.home .has-tertiary-background-color p:not(.cr-reasons *):not(.cr-fieldnotes *),
-:root[data-theme="dark"] body.home .has-tertiary-background-color li:not(.cr-reasons *):not(.cr-fieldnotes *),
-:root[data-theme="dark"] body.home .has-main-accent-background-color p:not(.cr-reasons *):not(.cr-fieldnotes *),
-:root[data-theme="dark"] body.home .has-base-background-color p:not(.cr-reasons *):not(.cr-fieldnotes *) {
-	color: var(--cr-printer-ivory, #fbfaf5) !important;
-}
+/* 0.7.46: paragraphs and list items inherit the band's ink token; the light
+   !important lock and its dark-mode counter-lock are gone. */
 
 
 /* ============================================================
@@ -3907,9 +3832,9 @@ body.home main.homepage p:not(.has-text-align-center) {
    class can still emit sparkle pseudo-elements.
    v0.7.44: the newsletter reasons / Field Notes sections are excluded too;
    their lane titles carry the nav's 📰 / 🌊 as ::before content. */
-body.home main.homepage > .wp-block-post-content h2.wp-block-heading:not(.cr-flank):not(.cr-reasons *):not(.cr-fieldnotes *)::before,
-body.home main.homepage > .wp-block-post-content h1.wp-block-heading:not(.cr-flank):not(.cr-reasons *):not(.cr-fieldnotes *)::before,
-body.home main.homepage > .wp-block-post-content h3.wp-block-heading:not(.cr-flank):not(.cr-reasons *):not(.cr-fieldnotes *)::before,
+body.home main.homepage > .wp-block-post-content h2.wp-block-heading:not(.cr-flank)::before,
+body.home main.homepage > .wp-block-post-content h1.wp-block-heading:not(.cr-flank)::before,
+body.home main.homepage > .wp-block-post-content h3.wp-block-heading:not(.cr-flank)::before,
 body.home main.homepage > .alignfull:not(.wp-block-latest-posts)::after,
 body.home main.homepage > .alignfull:not(.wp-block-latest-posts)::before,
 body.home main.homepage > .wp-block-cover::after,
@@ -5240,7 +5165,9 @@ body.home .has-sky-blue-background-color h2,
 body.home .has-sky-blue-background-color h3,
 body.home .has-sky-blue-background-color h4,
 body.home .has-sky-blue-background-color strong {
-	color: var(--cr-russian-violet, #241c4a) !important;
+	/* 0.7.46 (R-40): the ink token flips with the scheme, so the dark-mode
+	   counter-rules (which also missed label/li/h1/h3/h4 in system mode) are gone. */
+	color: var(--cr-ink, #241c4a) !important;
 }
 
 /* In dark mode flip the section to cerulean (deeper blue) with ivory text */
@@ -5248,31 +5175,10 @@ body.home .has-sky-blue-background-color strong {
 	background-color: var(--cr-cerulean, #126782) !important;
 }
 
-:root[data-theme="dark"] body.home .has-sky-blue-background-color,
-:root[data-theme="dark"] body.home .has-sky-blue-background-color p,
-:root[data-theme="dark"] body.home .has-sky-blue-background-color li,
-:root[data-theme="dark"] body.home .has-sky-blue-background-color label,
-:root[data-theme="dark"] body.home .has-sky-blue-background-color h1,
-:root[data-theme="dark"] body.home .has-sky-blue-background-color h2,
-:root[data-theme="dark"] body.home .has-sky-blue-background-color h3,
-:root[data-theme="dark"] body.home .has-sky-blue-background-color strong {
-	color: var(--cr-printer-ivory, #fbfaf5) !important;
-}
-
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme]) body.home .has-sky-blue-background-color,
 	:root[data-theme="system"] body.home .has-sky-blue-background-color {
 		background-color: var(--cr-cerulean, #126782) !important;
-	}
-	:root:not([data-theme]) body.home .has-sky-blue-background-color,
-	:root:not([data-theme]) body.home .has-sky-blue-background-color p,
-	:root:not([data-theme]) body.home .has-sky-blue-background-color h2,
-	:root:not([data-theme]) body.home .has-sky-blue-background-color strong,
-	:root[data-theme="system"] body.home .has-sky-blue-background-color,
-	:root[data-theme="system"] body.home .has-sky-blue-background-color p,
-	:root[data-theme="system"] body.home .has-sky-blue-background-color h2,
-	:root[data-theme="system"] body.home .has-sky-blue-background-color strong {
-		color: var(--cr-printer-ivory, #fbfaf5) !important;
 	}
 }
 
@@ -5426,16 +5332,7 @@ body.home .homepage__content > .alignfull.has-main-accent-background-color {
    the rule's specificity (0,0,2,2) beat .has-base-color (0,0,1,0) and
    forced strong/p to inherit the section color instead of rendering
    in their explicit class color. */
-body.home .homepage__content > .alignfull p:not(.has-text-color):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .homepage__content > .alignfull li:not(.has-text-color):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .homepage__content > .alignfull h1:not(.has-text-color):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .homepage__content > .alignfull h2:not(.has-text-color):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .homepage__content > .alignfull h3:not(.has-text-color):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .homepage__content > .alignfull h4:not(.has-text-color):not(.cr-reasons *):not(.cr-fieldnotes *),
-body.home .homepage__content > .alignfull strong:not(.has-text-color),
-body.home .homepage__content > .alignfull label:not(.has-text-color) {
-	color: inherit;
-}
+/* 0.7.46: the .alignfull inherit lock is gone — descendants inherit the band ink by default. */
 
 /* (4) Form widgets transparent so the section bg shows through */
 body.home .homepage__content form,
@@ -5901,16 +5798,16 @@ body.home .wp-block-cover .has-main-accent-color > a:not(.wp-element-button):not
    and direction. The 4 Feature divs are siblings in the same column
    with <hr> separators between them; nth-of-type for div skips the
    hrs and counts Features 1..4 directly. */
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(1) {
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:nth-of-type(1) {
 	transform: rotate(-1.8deg);
 }
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(2) {
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:nth-of-type(2) {
 	transform: rotate(1.2deg);
 }
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(3) {
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:nth-of-type(3) {
 	transform: rotate(-0.7deg);
 }
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(4) {
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:nth-of-type(4) {
 	transform: rotate(1.5deg);
 }
 
@@ -5918,31 +5815,31 @@ body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow
    opposite direction at the same magnitude. Transform-only, short
    transition, respects prefers-reduced-motion (WCAG 2.3.3 AAA).
    :focus-within keyboard parity. */
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card {
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card {
 	transition: transform 0.3s ease;
 }
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(1):hover,
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(1):focus-within {
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:nth-of-type(1):hover,
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:nth-of-type(1):focus-within {
 	transform: rotate(1.8deg);
 }
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(2):hover,
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(2):focus-within {
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:nth-of-type(2):hover,
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:nth-of-type(2):focus-within {
 	transform: rotate(-1.2deg);
 }
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(3):hover,
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(3):focus-within {
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:nth-of-type(3):hover,
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:nth-of-type(3):focus-within {
 	transform: rotate(0.7deg);
 }
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(4):hover,
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:nth-of-type(4):focus-within {
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:nth-of-type(4):hover,
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:nth-of-type(4):focus-within {
 	transform: rotate(-1.5deg);
 }
 @media (prefers-reduced-motion: reduce) {
-	body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card {
+	:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card {
 		transition: none;
 	}
-	body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:hover,
-	body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) .is-style-cr-card:focus-within {
+	:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:hover,
+	:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) .is-style-cr-card:focus-within {
 		transform: revert;
 	}
 }
@@ -6312,15 +6209,17 @@ header.is-position-sticky .site-header__inner {
 
      The :has() selector pins this to one specific section — the one
      containing the section's anchor heading — so the effect doesn't
-     leak to other periwinkle/primary-accent surfaces.
+     leak to other periwinkle/primary-accent surfaces. v0.7.46: the saved
+     wrapper class .cr-home-features is an alternate key so the editor
+     canvas (no body.home) tears the same edges.
    ============================================================ */
 
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow) {
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features) {
 	position: relative;
 }
 
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow)::before,
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow)::after {
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features)::before,
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features)::after {
 	content: "";
 	position: absolute;
 	left: 0;
@@ -6333,11 +6232,11 @@ body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow
 	z-index: 1;
 }
 
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow)::before {
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features)::before {
 	top: 0;
 }
 
-body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow)::after {
+:is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features)::after {
 	bottom: 0;
 	transform: scaleY(-1);
 }
@@ -6345,15 +6244,15 @@ body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow
 /* Dark-mode tear: ivory above flips to night-elevated, so the SVG
    fill must flip too. Three paths (explicit, default-system,
    prefers-media) match the project's standard dark-mode trio. */
-:root[data-theme="dark"] body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow)::before,
-:root[data-theme="dark"] body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow)::after {
+:root[data-theme="dark"] :is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features)::before,
+:root[data-theme="dark"] :is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features)::after {
 	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 14' preserveAspectRatio='none'><path fill='%23251f1c' d='M0,0 L320,0 L320,7 L312,4 L305,9 L296,5 L287,2 L278,8 L269,4 L259,9 L249,5 L240,7 L230,3 L220,8 L210,5 L200,9 L190,4 L180,7 L170,3 L160,8 L150,5 L140,9 L130,4 L120,7 L110,3 L100,8 L90,5 L80,9 L70,4 L60,7 L50,3 L40,8 L30,5 L20,9 L10,4 L0,7 Z'/></svg>");
 }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme]) body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow)::before,
-	:root:not([data-theme]) body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow)::after,
-	:root[data-theme="system"] body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow)::before,
-	:root[data-theme="system"] body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow)::after {
+	:root:not([data-theme]) :is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features)::before,
+	:root:not([data-theme]) :is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features)::after,
+	:root[data-theme="system"] :is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features)::before,
+	:root[data-theme="system"] :is(body.home .alignfull.has-background:has(#h-how-this-newsletter-can-help-you-grow), .wp-block-group.cr-home-features)::after {
 		background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 14' preserveAspectRatio='none'><path fill='%23251f1c' d='M0,0 L320,0 L320,7 L312,4 L305,9 L296,5 L287,2 L278,8 L269,4 L259,9 L249,5 L240,7 L230,3 L220,8 L210,5 L200,9 L190,4 L180,7 L170,3 L160,8 L150,5 L140,9 L130,4 L120,7 L110,3 L100,8 L90,5 L80,9 L70,4 L60,7 L50,3 L40,8 L30,5 L20,9 L10,4 L0,7 Z'/></svg>");
 	}
 }
@@ -8162,4 +8061,15 @@ figure.wp-block-image.is-style-overlay-caption figcaption {
 			background-color: var(--cr-surface-elevated, #1d1b26);
 		}
 	}
+}
+
+/* 0.7.46: the title input in the canvas follows the post type the way the
+   templates do — posts use the single-post title clamp, pages the h1 token —
+   so the canvas shows the size readers get (52 px / 48 px at 1440). */
+.editor-styles-wrapper.post-type-post .editor-post-title__input {
+	font-size: clamp(2rem, 1.5rem + 2vw, 3.25rem) !important;
+	line-height: 1.05 !important;
+}
+.editor-styles-wrapper.post-type-page .editor-post-title__input {
+	font-size: var(--cr-text-4xl, 3rem) !important;
 }

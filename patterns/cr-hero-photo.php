@@ -2,7 +2,7 @@
 /**
  * Title: Hero — Photo
  * Slug: courtneyr-child/cr-hero-photo
- * Categories: cr-zine
+ * Categories: cr-zine, cr-sections
  * Description: Two-column hero with portrait cover image on the left and brand-voice headline + lead on the right. Adapted from the live home page. Swap the image after inserting.
  * Keywords: hero, photo, cover, image, courtney, home
  * Block Types: core/post-content

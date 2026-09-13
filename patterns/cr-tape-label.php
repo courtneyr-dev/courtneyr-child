@@ -2,7 +2,7 @@
 /**
  * Title: Tape Label
  * Slug: courtneyr-child/cr-tape-label
- * Categories: cr-zine
+ * Categories: cr-zine, cr-marks
  * Description: Inline masking-tape style label. Drop next to a card or section heading to badge it "NEW" / "FRESH" / "PINNED" / etc.
  * Keywords: tape, label, badge, chip, zine
  * Viewport Width: 320

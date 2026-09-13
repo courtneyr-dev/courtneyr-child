@@ -2,7 +2,7 @@
 /**
  * Title: Hero — Display
  * Slug: courtneyr-child/cr-hero-display
- * Categories: cr-zine
+ * Categories: cr-zine, cr-sections
  * Description: Full display hero with Rock Salt brand-voice heading, lead, and paired CTA + outline buttons. Use once per page — the brand voice does not scale.
  * Keywords: hero, display, brand, rock salt, courtney
  * Block Types: core/post-content

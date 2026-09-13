@@ -2,7 +2,7 @@
 /**
  * Title: Field Notes (Blog lane + Stream lane)
  * Slug: courtneyr-child/cr-home-field-notes
- * Categories: cr-zine
+ * Categories: cr-zine, cr-sections
  * Description: Homepage Field Notes: masthead, a Blog lane (one featured post plus three supporting previews from the main surface) and a full-width Stream lane (six newest stream-surface entries rendered by the Post Kinds stream card). Insert inside the homepage's Field Notes section.
  * Keywords: home, field notes, blog, stream, query
  * Viewport Width: 1200
@@ -13,17 +13,17 @@
 
 declare( strict_types = 1 );
 ?>
-<!-- wp:group {"metadata":{"name":"Field Notes"},"align":"wide","className":"cr-fieldnotes","layout":{"type":"default"}} -->
+<!-- wp:group {"templateLock":"all","lock":{"move":true,"remove":true},"metadata":{"name":"Field Notes"},"align":"wide","className":"cr-fieldnotes","layout":{"type":"default"}} -->
 <div class="wp-block-group alignwide cr-fieldnotes">
 
 	<!-- wp:group {"metadata":{"name":"Field Notes Masthead"},"className":"cr-fieldnotes__masthead","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between","verticalAlignment":"bottom"}} -->
 	<div class="wp-block-group cr-fieldnotes__masthead">
 		<!-- wp:heading {"level":2,"className":"cr-fieldnotes__title","fontFamily":"accent"} -->
-		<h2 class="wp-block-heading cr-fieldnotes__title has-accent-font-family">Field notes</h2>
+		<h2 class="wp-block-heading cr-fieldnotes__title has-accent-font-family"><?php esc_html_e( 'Field notes', 'courtneyr-child' ); ?></h2>
 		<!-- /wp:heading -->
 
 		<!-- wp:paragraph {"className":"cr-hand cr-fieldnotes__hand"} -->
-		<p class="cr-hand cr-fieldnotes__hand">Collected along the way</p>
+		<p class="cr-hand cr-fieldnotes__hand"><?php esc_html_e( 'Collected along the way', 'courtneyr-child' ); ?></p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:group -->
@@ -34,13 +34,13 @@ declare( strict_types = 1 );
 		<!-- wp:group {"className":"cr-fieldnotes__lane-head","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"center"}} -->
 		<div class="wp-block-group cr-fieldnotes__lane-head">
 			<!-- wp:heading {"level":3,"className":"cr-fieldnotes__lane-title cr-fieldnotes__lane-title--blog","fontFamily":"accent"} -->
-			<h3 class="wp-block-heading cr-fieldnotes__lane-title cr-fieldnotes__lane-title--blog has-accent-font-family">Blog</h3>
+			<h3 class="wp-block-heading cr-fieldnotes__lane-title cr-fieldnotes__lane-title--blog has-accent-font-family"><?php esc_html_e( 'Blog', 'courtneyr-child' ); ?></h3>
 			<!-- /wp:heading -->
 		</div>
 		<!-- /wp:group -->
 
 		<!-- wp:paragraph {"className":"cr-fieldnotes__caption"} -->
-		<p class="cr-fieldnotes__caption">Longer reads on WordPress and open source.</p>
+		<p class="cr-fieldnotes__caption"><?php esc_html_e( 'Longer reads on WordPress and open source.', 'courtneyr-child' ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:group {"metadata":{"name":"Blog row"},"className":"cr-fieldnotes__blog-row","layout":{"type":"default"}} -->
@@ -55,15 +55,15 @@ declare( strict_types = 1 );
 
 						<!-- wp:group {"className":"cr-home-story__title-row","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"stretch"}} -->
 						<div class="wp-block-group cr-home-story__title-row">
-							<!-- wp:html -->
-							<span class="media-glyph" role="img" aria-label="Post format: blog post" data-cr-card-glyph="blog"><svg viewBox="0 0 24 24"><use href="#post-icon-blog"></use></svg></span>
-							<!-- /wp:html -->
+							<!-- wp:courtneyr/post-glyph /-->
 
-							<!-- wp:post-title {"level":4,"isLink":true,"className":"cr-home-story__title p-name","fontFamily":"accent"} /-->
+							<!-- wp:post-title {"level":4,"isLink":true,"className":"cr-home-story__title p-name cr-u-url","fontFamily":"accent"} /-->
 						</div>
 						<!-- /wp:group -->
 
-						<!-- wp:post-terms {"term":"category","className":"cr-home-story__chips","fontSize":"xs"} /-->
+						<!-- wp:post-date {"className":"cr-home-story__date cr-dt-published screen-reader-text"} /-->
+
+						<!-- wp:courtneyr/term-chips {"className":"cr-home-story__chips"} /-->
 
 						<!-- wp:post-excerpt {"excerptLength":18,"showMoreOnNewLine":false,"className":"cr-home-story__excerpt"} /-->
 					</article>
@@ -72,7 +72,7 @@ declare( strict_types = 1 );
 
 				<!-- wp:query-no-results -->
 					<!-- wp:paragraph {"className":"cr-fieldnotes__empty"} -->
-					<p class="cr-fieldnotes__empty">No blog posts yet.</p>
+					<p class="cr-fieldnotes__empty"><?php esc_html_e( 'No blog posts yet.', 'courtneyr-child' ); ?></p>
 					<!-- /wp:paragraph -->
 				<!-- /wp:query-no-results -->
 			</div>
@@ -85,15 +85,15 @@ declare( strict_types = 1 );
 					<article class="wp-block-group cr-home-story">
 						<!-- wp:group {"className":"cr-home-story__title-row","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"stretch"}} -->
 						<div class="wp-block-group cr-home-story__title-row">
-							<!-- wp:html -->
-							<span class="media-glyph" role="img" aria-label="Post format: blog post" data-cr-card-glyph="blog"><svg viewBox="0 0 24 24"><use href="#post-icon-blog"></use></svg></span>
-							<!-- /wp:html -->
+							<!-- wp:courtneyr/post-glyph /-->
 
-							<!-- wp:post-title {"level":4,"isLink":true,"className":"cr-home-story__title p-name","fontFamily":"accent"} /-->
+							<!-- wp:post-title {"level":4,"isLink":true,"className":"cr-home-story__title p-name cr-u-url","fontFamily":"accent"} /-->
 						</div>
 						<!-- /wp:group -->
 
-						<!-- wp:post-terms {"term":"category","className":"cr-home-story__chips","fontSize":"xs"} /-->
+						<!-- wp:post-date {"className":"cr-home-story__date cr-dt-published screen-reader-text"} /-->
+
+						<!-- wp:courtneyr/term-chips {"className":"cr-home-story__chips"} /-->
 					</article>
 					<!-- /wp:group -->
 				<!-- /wp:post-template -->
@@ -106,7 +106,7 @@ declare( strict_types = 1 );
 		<!-- wp:buttons {"className":"cr-fieldnotes__lane-link cr-fieldnotes__lane-link--blog"} -->
 		<div class="wp-block-buttons cr-fieldnotes__lane-link cr-fieldnotes__lane-link--blog">
 			<!-- wp:button {"className":"is-style-cr-cta"} -->
-			<div class="wp-block-button is-style-cr-cta"><a class="wp-block-button__link wp-element-button" href="/blog/">All blog posts</a></div>
+			<div class="wp-block-button is-style-cr-cta"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( home_url( '/blog/' ) ); ?>"><?php esc_html_e( 'All blog posts', 'courtneyr-child' ); ?></a></div>
 			<!-- /wp:button -->
 		</div>
 		<!-- /wp:buttons -->
@@ -120,13 +120,13 @@ declare( strict_types = 1 );
 		<!-- wp:group {"className":"cr-fieldnotes__lane-head","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"center"}} -->
 		<div class="wp-block-group cr-fieldnotes__lane-head">
 			<!-- wp:heading {"level":3,"className":"cr-fieldnotes__lane-title cr-fieldnotes__lane-title--stream","fontFamily":"accent"} -->
-			<h3 class="wp-block-heading cr-fieldnotes__lane-title cr-fieldnotes__lane-title--stream has-accent-font-family">Stream</h3>
+			<h3 class="wp-block-heading cr-fieldnotes__lane-title cr-fieldnotes__lane-title--stream has-accent-font-family"><?php esc_html_e( 'Stream', 'courtneyr-child' ); ?></h3>
 			<!-- /wp:heading -->
 		</div>
 		<!-- /wp:group -->
 
 		<!-- wp:paragraph {"className":"cr-fieldnotes__caption"} -->
-		<p class="cr-fieldnotes__caption">Snapshots, reading, and everyday discoveries.</p>
+		<p class="cr-fieldnotes__caption"><?php esc_html_e( 'Snapshots, reading, and everyday discoveries.', 'courtneyr-child' ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:group {"metadata":{"name":"Stream objects"},"className":"cr-home-stream cr-stream-page","layout":{"type":"default"}} -->
@@ -139,7 +139,7 @@ declare( strict_types = 1 );
 
 				<!-- wp:query-no-results -->
 					<!-- wp:paragraph {"className":"cr-fieldnotes__empty"} -->
-					<p class="cr-fieldnotes__empty">Nothing in the stream yet.</p>
+					<p class="cr-fieldnotes__empty"><?php esc_html_e( 'Nothing in the stream yet.', 'courtneyr-child' ); ?></p>
 					<!-- /wp:paragraph -->
 				<!-- /wp:query-no-results -->
 			</div>
@@ -150,7 +150,7 @@ declare( strict_types = 1 );
 		<!-- wp:buttons {"className":"cr-fieldnotes__lane-link cr-fieldnotes__lane-link--stream"} -->
 		<div class="wp-block-buttons cr-fieldnotes__lane-link cr-fieldnotes__lane-link--stream">
 			<!-- wp:button {"className":"is-style-cr-button-outline"} -->
-			<div class="wp-block-button is-style-cr-button-outline"><a class="wp-block-button__link wp-element-button" href="/stream/">All stream updates</a></div>
+			<div class="wp-block-button is-style-cr-button-outline"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( home_url( '/stream/' ) ); ?>"><?php esc_html_e( 'All stream updates', 'courtneyr-child' ); ?></a></div>
 			<!-- /wp:button -->
 		</div>
 		<!-- /wp:buttons -->

@@ -411,8 +411,8 @@
 					}
 				},
 				{
-					"slug": "2xl",
-					"name": "2X Large",
+					"slug": "xxl",
+					"name": "XX Large",
 					"size": "1.875rem",
 					"fluid": {
 						"min": "1.5rem",
@@ -420,8 +420,8 @@
 					}
 				},
 				{
-					"slug": "3xl",
-					"name": "3X Large",
+					"slug": "xxxl",
+					"name": "XXX Large",
 					"size": "2.25rem",
 					"fluid": {
 						"min": "1.75rem",
@@ -429,8 +429,8 @@
 					}
 				},
 				{
-					"slug": "4xl",
-					"name": "4X Large",
+					"slug": "display",
+					"name": "Display",
 					"size": "3rem",
 					"fluid": {
 						"min": "2.25rem",
@@ -438,8 +438,8 @@
 					}
 				},
 				{
-					"slug": "5xl",
-					"name": "5X Large",
+					"slug": "display-lg",
+					"name": "Display Large",
 					"size": "3.75rem",
 					"fluid": {
 						"min": "2.5rem",
@@ -663,7 +663,7 @@
 		},
 		"typography": {
 			"fontFamily": "var:preset|font-family|body",
-			"fontSize": "var:preset|font-size|base",
+			"fontSize": "var(--cr-text-base)",
 			"lineHeight": "var(--cr-leading-normal, 1.55)"
 		},
 		"spacing": {
@@ -689,32 +689,32 @@
 			},
 			"h1": {
 				"typography": {
-					"fontSize": "var:preset|font-size|5xl"
+					"fontSize": "var(--cr-text-4xl)"
 				}
 			},
 			"h2": {
 				"typography": {
-					"fontSize": "var:preset|font-size|4xl"
+					"fontSize": "var(--cr-text-3xl)"
 				}
 			},
 			"h3": {
 				"typography": {
-					"fontSize": "var:preset|font-size|3xl"
+					"fontSize": "var(--cr-text-2xl)"
 				}
 			},
 			"h4": {
 				"typography": {
-					"fontSize": "var:preset|font-size|2xl"
+					"fontSize": "var(--cr-text-xl)"
 				}
 			},
 			"h5": {
 				"typography": {
-					"fontSize": "var:preset|font-size|xl"
+					"fontSize": "var(--cr-text-lg)"
 				}
 			},
 			"h6": {
 				"typography": {
-					"fontSize": "var:preset|font-size|lg"
+					"fontSize": "var(--cr-text-md)"
 				}
 			},
 			"link": {
@@ -1023,7 +1023,7 @@
 			"core/pullquote": {
 				"typography": {
 					"fontFamily": "var:preset|font-family|accent",
-					"fontSize": "var:preset|font-size|2xl",
+					"fontSize": "var:preset|font-size|xxl",
 					"fontStyle": "italic"
 				},
 				"color": {

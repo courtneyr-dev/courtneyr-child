@@ -282,10 +282,21 @@ function passport_card( string $html, array $block, $instance ): string {
 	}
 	$card = substr( $card, 0, $close ) . render_stamps( (array) ( $checkin['attrs'] ?? array() ), $post ) . substr( $card, $close );
 
+	// 0.7.46 (R-43): the homepage preview and the editor's card preview keep the
+	// venue's map *link* but drop the map embed, so no map provider is contacted
+	// before the reader acts. /stream/ keeps its embed (that decision is separate).
+	$no_embed = is_front_page() || \Courtneyr\Child\HomeSections\is_stream_card_preview_request();
+	if ( $no_embed && false !== strpos( $card, '<iframe' ) ) {
+		$card = (string) preg_replace( '#<iframe\b[^>]*>.*?</iframe>#is', '', $card );
+	}
+
 	$tags = new \WP_HTML_Tag_Processor( $card );
 	if ( $tags->next_tag( array( 'tag_name' => 'article', 'class_name' => 'pk-card' ) ) ) {
 		$tags->add_class( 'pk-card--stream' );
 		$tags->add_class( 'cr-passport' );
+		if ( $no_embed ) {
+			$tags->add_class( 'cr-passport--no-embed' );
+		}
 		$card = $tags->get_updated_html();
 	}
 

@@ -2,11 +2,14 @@
 /**
  * Title: Stream Loop (Query Loop)
  * Slug: courtneyr-child/cr-stream-loop
- * Categories: cr-zine
+ * Categories: cr-zine, cr-loops
  * Description: Query Loop styled as a vertical zine stream — SVG post-type avatar, date + category chip meta row, post title, excerpt, and tag pills. Drives the archive, category, tag, and home (blog) page templates.
  * Keywords: stream, feed, query, archive, posts, zine, indieweb
  * Viewport Width: 720
  * Block Types: core/post-template, core/query
+ *
+ * Avatar: the core/html span is the fallback; transform_stream_item_avatar()
+ * (inc/interactivity.php) swaps the post-format variant at render time.
  *
  * @package CourtneyrChild
  */
@@ -33,11 +36,6 @@ declare( strict_types = 1 );
 		<!-- wp:group {"tagName":"article","className":"cr-stream-item","style":{"spacing":{"blockGap":"var:preset|spacing|small"}},"layout":{"type":"constrained"}} -->
 		<article class="wp-block-group cr-stream-item">
 
-			<!-- v0.5.51: SVG avatar default. The render_block filter
-			     `transform_stream_item_avatar` (inc/interactivity.php) swaps
-			     in the right post-format variant at render time based on
-			     each post's get_post_format(). The default markup here is
-			     the fallback used when no format is set (Standard = "blog"). -->
 			<!-- wp:html -->
 			<span class="cr-icon-avatar cr-icon-avatar--blog cr-stream-item__avatar" aria-hidden="true" data-cr-stream-avatar="">
 				<svg viewBox="0 0 24 24"><use href="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/assets/svg/icons.svg#post-icon-blog"></use></svg>

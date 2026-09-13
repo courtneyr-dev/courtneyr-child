@@ -3211,6 +3211,7 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 .cr-stream-page .kind-photo .pk-card:has(.pk-title a:focus-visible) {
 	outline: 3px solid var(--cr-selective-yellow, #ffb703);
 	outline-offset: 3px;
+	box-shadow: 0 0 0 8px var(--cr-focus-halo, var(--cr-ink, #241c4a)); /* 0.7.46: two-tone ring */
 }
 @supports selector(:has(a)) {
 	.cr-stream-page .kind-photo .pk-card .pk-title a:focus-visible { outline: none; }
@@ -8171,6 +8172,8 @@ body.single-post:is(.kind-eat, .kind-drink) .single-post__content .pk-card.cr-pl
 	gap: 0.25rem;
 	margin: 0;
 	padding: 0.1rem 0.4rem;
+	min-height: 1.5rem; /* 0.7.46: 24 px target (WCAG 2.5.8); measured 22 px before */
+	box-sizing: border-box;
 	border: 1.5px solid var(--cr-ink, #241c4a);
 	border-radius: 2px;
 	background: #fbfaf5;

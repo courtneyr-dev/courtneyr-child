@@ -424,6 +424,16 @@ function print_no_flash_theme_script(): void {
 	echo '<script id="courtneyr-theme-no-flash">' . $contents . "</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 add_action( 'wp_head', __NAMESPACE__ . '\\print_no_flash_theme_script', 1 );
+// 0.7.46 (issue 17): the admin reads the same stored preference before first paint.
+add_action( 'admin_head', __NAMESPACE__ . '\\print_no_flash_theme_script', 1 );
+
+/**
+ * G-07: mirror the document's data-theme into the iframed editor canvas.
+ */
+function enqueue_editor_canvas_theme(): void {
+	wp_enqueue_script( 'courtneyr-editor-canvas-theme', COURTNEYR_CHILD_URI . '/assets/js/editor-canvas-theme.js', array(), COURTNEYR_CHILD_VERSION, true );
+}
+add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\enqueue_editor_canvas_theme' );
 
 /**
  * Keep Able Player's JS-built preference dialogs hidden until opened.
@@ -463,7 +473,9 @@ function revalidate_page_html(): void {
 	if ( is_admin() || is_feed() || is_robots() ) {
 		return;
 	}
-	if ( is_user_logged_in() ) {
+	if ( is_user_logged_in() || ( is_singular() && post_password_required() ) ) {
+		// R-09: a password-protected post must never be publicly cacheable —
+		// the form and, after the cookie, the content are per-visitor.
 		header( 'Cache-Control: no-cache, must-revalidate, max-age=0', true );
 	} else {
 		header( 'Cache-Control: public, max-age=600, must-revalidate', true );

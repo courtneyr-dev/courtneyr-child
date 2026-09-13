@@ -45,7 +45,26 @@ const SURFACE_MAIN   = 'main';
  * @return bool
  */
 function is_stream_surface(): bool {
-	return is_page( 'stream' ) || is_front_page();
+	if ( is_page( 'stream' ) || is_front_page() ) {
+		return true;
+	}
+	// Editor preview: the stream card's ServerSideRender asks the block
+	// renderer for one card; that request is a Stream surface too, so the
+	// artifact adapters paint the same gallery / Polaroid / book / note.
+	return is_stream_card_preview_request();
+}
+
+/**
+ * True while the REST block-renderer endpoint renders the Post Kinds stream
+ * card (the editor's ServerSideRender request).
+ */
+function is_stream_card_preview_request(): bool {
+	if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
+		return false;
+	}
+	$uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- compared, never output.
+	$route = isset( $_GET['rest_route'] ) ? (string) wp_unslash( $_GET['rest_route'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Recommended -- read-only routing check.
+	return str_contains( $uri, '/block-renderer/post-kinds-indieweb/stream-card' ) || str_contains( $route, '/block-renderer/post-kinds-indieweb/stream-card' );
 }
 
 /**
@@ -57,6 +76,15 @@ function is_stream_surface(): bool {
  * @return array<int|string, mixed> A meta_query clause.
  */
 function surface_meta_clause( string $surface ): array {
+	// The site's routing policy (cr-content-surfaces 1.2.0) owns the exact
+	// clauses; reuse them when present so the homepage matches /blog/ and
+	// /stream/, including the Recipe/Event preview overlap.
+	if ( SURFACE_STREAM === $surface && function_exists( 'cr_content_surfaces_stream_meta_query' ) ) {
+		return cr_content_surfaces_stream_meta_query();
+	}
+	if ( SURFACE_MAIN === $surface && function_exists( 'cr_content_surfaces_main_meta_query' ) ) {
+		return cr_content_surfaces_main_meta_query();
+	}
 	if ( SURFACE_STREAM === $surface ) {
 		return array(
 			'key'   => '_pkiw_surface',
@@ -206,21 +234,51 @@ add_filter( 'get_block_type_variations', __NAMESPACE__ . '\\query_variations', 1
  * singular's content carries one of the two wrapper classes.
  */
 function enqueue_section_styles(): void {
-	if ( ! is_singular() ) {
-		return;
-	}
-	$post = get_post();
-	if ( ! $post instanceof \WP_Post ) {
-		return;
-	}
-	if ( ! str_contains( $post->post_content, 'cr-reasons' ) && ! str_contains( $post->post_content, 'cr-fieldnotes' ) ) {
-		return;
+	// The editor canvas always gets the sheet (enqueue_block_assets runs
+	// inside the iframe), so the sections look the same while editing.
+	if ( ! is_admin() ) {
+		if ( ! is_singular() ) {
+			return;
+		}
+		$post = get_post();
+		if ( ! $post instanceof \WP_Post ) {
+			return;
+		}
+		if ( ! str_contains( $post->post_content, 'cr-reasons' ) && ! str_contains( $post->post_content, 'cr-fieldnotes' ) ) {
+			return;
+		}
 	}
 	wp_enqueue_style(
 		'courtneyr-home-sections',
 		COURTNEYR_CHILD_URI . '/assets/css/cr-home-sections.css',
-		array( 'courtneyr-components' ),
+		is_admin() ? array() : array( 'courtneyr-components' ),
 		COURTNEYR_CHILD_VERSION
 	);
 }
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_section_styles' );
+add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_section_styles' );
+
+/**
+ * courtneyr/post-glyph: the format glyph as a dynamic block (blocks/post-glyph).
+ */
+function register_blocks(): void {
+	register_block_type( COURTNEYR_CHILD_DIR . '/blocks/post-glyph' );
+	register_block_type( COURTNEYR_CHILD_DIR . '/blocks/term-chips' );
+}
+add_action( 'init', __NAMESPACE__ . '\\register_blocks' );
+
+/**
+ * Layout protection (0.7.46, issue 04): the two homepage section roots ship
+ * `templateLock: all` plus move/remove locks, so copy and block settings stay
+ * editable while nothing inside can be inserted, moved or removed (Core's
+ * content-only lock was measured to hand editors a temporary "Edit pattern"
+ * unlock, so it is not used). Only users who can edit the theme
+ * (administrators) get the editor's lock/unlock controls.
+ *
+ * @param array $settings Editor settings.
+ * @return array
+ */
+function restrict_block_locking( array $settings ): array {
+	$settings['canLockBlocks'] = current_user_can( 'edit_theme_options' );
+	return $settings;
+}
+add_filter( 'block_editor_settings_all', __NAMESPACE__ . '\\restrict_block_locking' );
