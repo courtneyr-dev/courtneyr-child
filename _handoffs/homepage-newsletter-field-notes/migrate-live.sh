@@ -2,7 +2,7 @@
 # courtneyr.dev 0.7.46 content/config migrations — live.
 # Run from the Mac. Every step previews the exact operation it then applies;
 # the script stops on the first failed command (set -e, pipefail). Backups are
-# verified and immutable on the server (wp-content/cr-homepage-migration, with
+# hash-verified and made read-only where the filesystem allows (wp-content/cr-homepage-migration, with
 # manifest.jsonl); term descriptions are exported here before they change.
 # W_CMD overrides the wp binary for recorder tests (gap review G-02).
 set -e
