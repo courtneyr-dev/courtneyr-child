@@ -48,3 +48,22 @@ function post_date_dt_published( string $content, array $block ): string {
 	return add_class_to_tag( $content, 'time', 'dt-published' );
 }
 add_filter( 'render_block_core/post-date', __NAMESPACE__ . '\\post_date_dt_published', 10, 2 );
+
+/**
+ * R-02 (one microformats root per page): IndieBlocks' "Enable microformats"
+ * option adds `h-entry` to <body> on every singular view, which wraps the
+ * Stream page's cards and the single post's own entry root in a second,
+ * property-less entry. The card/entry roots are owned by Post Kinds and the
+ * theme; keep IndieBlocks' `h-feed` on archives and drop the body-level
+ * `h-entry`/`h-recipe`/`h-review`/`h-event` on singular views.
+ *
+ * @param string $class Class IndieBlocks wants to add.
+ * @return string
+ */
+function indieblocks_body_class( string $class ): string {
+	if ( is_singular() ) {
+		return '';
+	}
+	return $class;
+}
+add_filter( 'indieblocks_body_class', __NAMESPACE__ . '\\indieblocks_body_class' );
