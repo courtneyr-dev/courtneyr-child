@@ -13,3 +13,12 @@
 		document.documentElement.setAttribute('data-theme', 'system');
 	}
 })();
+// G-07: another tab changing the stored preference updates this document too
+// (the toggle script, when present, keeps its own controls in sync from here).
+try {
+	window.addEventListener( 'storage', function ( e ) {
+		if ( e.key !== 'courtneyr-theme' ) { return; }
+		var v = e.newValue;
+		document.documentElement.setAttribute( 'data-theme', ( v === 'light' || v === 'dark' || v === 'system' ) ? v : 'system' );
+	} );
+} catch ( e ) {}

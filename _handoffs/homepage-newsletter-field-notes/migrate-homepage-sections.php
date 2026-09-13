@@ -15,6 +15,10 @@
  *   wp eval-file migrate-homepage-sections.php lock     [post_id]
  *   wp eval-file migrate-homepage-sections.php unlock   [post_id]
  *
+ * Append `preview` to upgrade, lock, unlock or upgrade-templates to run the
+ * exact same transform, print a line-diff summary and write nothing (G-04).
+ * Backups are verified and immutable (cr-migration-backup.php, G-03).
+ *
  * `lock` / `unlock` (0.7.46, issue 04) add or remove `templateLock: all`
  * and the move/remove lock on the two section root Groups (the direct child of
  * each wrapper with class cr-reasons / cr-fieldnotes). Nothing else changes; a
@@ -42,12 +46,16 @@
  * @package CourtneyrChild
  */
 
+require_once __DIR__ . '/cr-migration-backup.php';
+
 $cr_mode    = (string) ( $args[0] ?? 'dry-run' );
+$cr_preview = in_array( 'preview', array_map( 'strval', $args ), true ); // G-04: preview runs the same transform and writes nothing.
 $cr_targets = array(
 	'cr-home-features'   => 'courtneyr-child/cr-home-newsletter-reasons',
 	'cr-home-fieldnotes' => 'courtneyr-child/cr-home-field-notes',
 );
-$cr_post_id = (int) ( 'rollback' === $cr_mode ? ( $args[2] ?? 0 ) : ( $args[1] ?? 0 ) );
+$cr_args    = array_values( array_filter( array_slice( $args, 1 ), static fn( $a ) => 'preview' !== $a ) );
+$cr_post_id = (int) ( 'rollback' === $cr_mode ? ( $cr_args[1] ?? 0 ) : ( $cr_args[0] ?? 0 ) );
 if ( ! $cr_post_id ) {
 	$cr_post_id = (int) get_option( 'page_on_front' );
 }
@@ -207,18 +215,23 @@ if ( 'upgrade-templates' === $cr_mode ) {
 	$cr_new = str_replace( '"className":"related-post__title is-style-show-format-title"', '"className":"related-post__title is-style-show-format-title p-name cr-u-url"', $cr_new );
 	$cr_new = str_replace( '"className":"related-post__date"', '"className":"related-post__date cr-dt-published"', $cr_new );
 	if ( $cr_new === $cr_content ) {
-		WP_CLI::success( sprintf( 'Single template override %d already has the 0.7.46 shape (or its related loop was not recognised — inspect it).', $cr_tpl->ID ) );
-		return;
+		if ( str_contains( $cr_content, '"pkiwSurface":"main"' ) && str_contains( $cr_content, 'cr-dt-published' ) ) {
+			WP_CLI::success( sprintf( 'Single template override %d already has the 0.7.46 shape.', $cr_tpl->ID ) );
+			return;
+		}
+		WP_CLI::error( sprintf( 'Single template override %d does not contain the expected related-posts Query Loop (className related-posts__query with inherit:false); inspect it before migrating. Nothing changed.', $cr_tpl->ID ) );
 	}
 	if ( ! wp_mkdir_p( $cr_backup_dir ) ) {
 		WP_CLI::error( 'Cannot create the backup directory.' );
 	}
 	$cr_backup = sprintf( '%s/template-single-%d-%s.html', $cr_backup_dir, $cr_tpl->ID, gmdate( 'Ymd-His' ) );
-	file_put_contents( $cr_backup, $cr_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-	$cr_result = wp_update_post( wp_slash( array( 'ID' => $cr_tpl->ID, 'post_content' => $cr_new ) ), true );
-	if ( is_wp_error( $cr_result ) ) {
-		WP_CLI::error( $cr_result->get_error_message() );
+	WP_CLI::log( cr_migration_diff_summary( $cr_content, $cr_new ) );
+	if ( $cr_preview ) {
+		WP_CLI::success( 'Preview only; nothing written.' );
+		return;
 	}
+	$cr_backup = cr_migration_write_backup( sprintf( 'template-%d-single-override', $cr_tpl->ID ), $cr_content, 'wp_template:' . $cr_tpl->ID );
+	cr_migration_update_content( $cr_tpl->ID, $cr_new );
 	WP_CLI::success( sprintf( 'Patched single template override %d (pkiwSurface on the related loop, microformat markers). Backup: %s.', $cr_tpl->ID, $cr_backup ) );
 	return;
 }
@@ -255,15 +268,13 @@ if ( 'lock' === $cr_mode || 'unlock' === $cr_mode ) {
 		WP_CLI::success( 'Nothing to change.' );
 		return;
 	}
-	if ( ! wp_mkdir_p( $cr_backup_dir ) ) {
-		WP_CLI::error( 'Cannot create the backup directory.' );
+	WP_CLI::log( cr_migration_diff_summary( $cr_post->post_content, $cr_new ) );
+	if ( $cr_preview ) {
+		WP_CLI::success( 'Preview only; nothing written.' );
+		return;
 	}
-	$cr_backup = sprintf( '%s/page-%d-%s-%s.html', $cr_backup_dir, $cr_post->ID, $cr_mode, gmdate( 'Ymd-His' ) );
-	file_put_contents( $cr_backup, $cr_post->post_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-	$cr_result = wp_update_post( wp_slash( array( 'ID' => $cr_post->ID, 'post_content' => $cr_new ) ), true );
-	if ( is_wp_error( $cr_result ) ) {
-		WP_CLI::error( $cr_result->get_error_message() );
-	}
+	$cr_backup = cr_migration_write_backup( sprintf( 'page-%d-%s', $cr_post->ID, $cr_mode ), $cr_post->post_content, 'post:' . $cr_post->ID );
+	cr_migration_update_content( $cr_post->ID, $cr_new );
 	WP_CLI::success( sprintf( '%s applied to page %d. Backup: %s (also a revision).', ucfirst( $cr_mode ), $cr_post->ID, $cr_backup ) );
 	return;
 }
@@ -281,24 +292,13 @@ if ( 'upgrade' === $cr_mode ) {
 		WP_CLI::success( 'Nothing to upgrade; the page already has the 0.7.46 shape.' );
 		return;
 	}
-	if ( ! wp_mkdir_p( $cr_backup_dir ) ) {
-		WP_CLI::error( 'Cannot create the backup directory.' );
+	WP_CLI::log( cr_migration_diff_summary( $cr_post->post_content, $cr_new ) );
+	if ( $cr_preview ) {
+		WP_CLI::success( 'Preview only; nothing written.' );
+		return;
 	}
-	$cr_backup = sprintf( '%s/page-%d-%s.html', $cr_backup_dir, $cr_post->ID, gmdate( 'Ymd-His' ) );
-	file_put_contents( $cr_backup, $cr_post->post_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-	file_put_contents( $cr_backup_dir . '/index.php', "<?php // Silence is golden.\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-	$cr_result = wp_update_post(
-		wp_slash(
-			array(
-				'ID'           => $cr_post->ID,
-				'post_content' => $cr_new,
-			)
-		),
-		true
-	);
-	if ( is_wp_error( $cr_result ) ) {
-		WP_CLI::error( $cr_result->get_error_message() );
-	}
+	$cr_backup = cr_migration_write_backup( sprintf( 'page-%d-upgrade', $cr_post->ID ), $cr_post->post_content, 'post:' . $cr_post->ID );
+	cr_migration_update_content( $cr_post->ID, $cr_new );
 	WP_CLI::success( sprintf( 'Upgraded page %d. Backup: %s (also available as a revision).', $cr_post->ID, $cr_backup ) );
 	return;
 }
@@ -308,19 +308,9 @@ if ( 'rollback' === $cr_mode ) {
 	if ( '' === $cr_file || ! is_readable( $cr_file ) ) {
 		WP_CLI::error( 'rollback needs a readable backup file path.' );
 	}
-	$cr_result = wp_update_post(
-		wp_slash(
-			array(
-				'ID'           => $cr_post->ID,
-				'post_content' => (string) file_get_contents( $cr_file ),
-			)
-		),
-		true
-	);
-	if ( is_wp_error( $cr_result ) ) {
-		WP_CLI::error( $cr_result->get_error_message() );
-	}
-	WP_CLI::success( sprintf( 'Restored %s into page %d.', basename( $cr_file ), $cr_post->ID ) );
+	$cr_contents = (string) file_get_contents( $cr_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	cr_migration_update_content( $cr_post->ID, $cr_contents );
+	WP_CLI::success( sprintf( 'Restored %s into page %d (sha256 %s).', basename( $cr_file ), $cr_post->ID, substr( hash( 'sha256', $cr_contents ), 0, 12 ) ) );
 	return;
 }
 
@@ -366,23 +356,6 @@ if ( empty( $cr_replaced ) ) {
 	WP_CLI::error( 'Nothing to replace; aborting.' );
 }
 
-if ( ! wp_mkdir_p( $cr_backup_dir ) ) {
-	WP_CLI::error( 'Cannot create ' . $cr_backup_dir );
-}
-$cr_backup = sprintf( '%s/page-%d-%s.html', $cr_backup_dir, $cr_post->ID, gmdate( 'Ymd-His' ) );
-file_put_contents( $cr_backup, $cr_post->post_content );
-file_put_contents( $cr_backup_dir . '/index.php', "<?php // Silence is golden.\n" );
-
-$cr_result = wp_update_post(
-	wp_slash(
-		array(
-			'ID'           => $cr_post->ID,
-			'post_content' => serialize_blocks( $cr_blocks ),
-		)
-	),
-	true
-);
-if ( is_wp_error( $cr_result ) ) {
-	WP_CLI::error( $cr_result->get_error_message() );
-}
+$cr_backup = cr_migration_write_backup( sprintf( 'page-%d-apply', $cr_post->ID ), $cr_post->post_content, 'post:' . $cr_post->ID );
+cr_migration_update_content( $cr_post->ID, serialize_blocks( $cr_blocks ) );
 WP_CLI::success( sprintf( 'Migrated page %d. Backup: %s (also available as a revision).', $cr_post->ID, $cr_backup ) );

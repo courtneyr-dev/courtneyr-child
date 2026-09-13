@@ -428,6 +428,14 @@ add_action( 'wp_head', __NAMESPACE__ . '\\print_no_flash_theme_script', 1 );
 add_action( 'admin_head', __NAMESPACE__ . '\\print_no_flash_theme_script', 1 );
 
 /**
+ * G-07: mirror the document's data-theme into the iframed editor canvas.
+ */
+function enqueue_editor_canvas_theme(): void {
+	wp_enqueue_script( 'courtneyr-editor-canvas-theme', COURTNEYR_CHILD_URI . '/assets/js/editor-canvas-theme.js', array(), COURTNEYR_CHILD_VERSION, true );
+}
+add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\enqueue_editor_canvas_theme' );
+
+/**
  * Keep Able Player's JS-built preference dialogs hidden until opened.
  *
  * Able Player creates the Captions / Audio Description / Keyboard / Transcript
