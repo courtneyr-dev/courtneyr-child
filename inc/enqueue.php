@@ -484,11 +484,17 @@ function revalidate_page_html(): void {
 add_action( 'send_headers', __NAMESPACE__ . '\\revalidate_page_html', 99 );
 
 /**
- * Preload the above-the-fold self-hosted fonts. Paired with font-display:optional
- * (theme.json), this lets the real font arrive before first paint on normal
- * connections — so users still see the brand type — while `optional` guarantees
- * no font-swap layout shift under lab throttling (the mobile CLS culprit). Fonts
- * are CORS-fetched, so the preload needs crossorigin even though same-origin.
+ * Preload the self-hosted theme.json fonts on every theme-rendered HTML route:
+ * pages, singles, archives, search and 404. This is the only font preload
+ * owner. site-performance-security 1.7.2 dropped its singular/home copy, so
+ * each file gets one link. wp_head doesn't run for admin, login, REST, AJAX,
+ * feeds, sitemaps, embeds or Web Stories documents, so those get none.
+ *
+ * theme.json declares font-display:optional. Hosted output currently serves
+ * Barlow and Roboto Slab as swap and Rock Salt as optional; the fixture without
+ * Perfmatters keeps optional. Either way the preload lets the file arrive
+ * before first paint. Fonts are CORS-fetched, so the preload needs crossorigin
+ * even though same-origin.
  */
 function preload_critical_fonts(): void {
 	$fonts = array(
