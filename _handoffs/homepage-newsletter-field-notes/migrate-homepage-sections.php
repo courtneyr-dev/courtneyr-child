@@ -9,7 +9,7 @@
  *
  *   wp eval-file migrate-homepage-sections.php dry-run [post_id]
  *   wp eval-file migrate-homepage-sections.php apply   [post_id]
- *   wp eval-file migrate-homepage-sections.php rollback <backup-file> [post_id]
+ *   wp eval-file migrate-homepage-sections.php rollback <backup-file> [preview]
  *   wp eval-file migrate-homepage-sections.php upgrade  [post_id]
  *   wp eval-file migrate-homepage-sections.php upgrade-templates
  *   wp eval-file migrate-homepage-sections.php lock     [post_id]
@@ -38,8 +38,12 @@
  * post_id defaults to the page set as the static front page. `apply` writes a
  * timestamped backup of the previous content to wp-content/cr-homepage-migration/
  * and updates the page through wp_update_post(), which also creates a revision.
- * `rollback` restores a backup file. Run locally first; production needs its own
- * authorization.
+ * `rollback` restores a backup file into the object the backup manifest recorded
+ * for it (`post:<id>` for pages, `wp_template:<id>` for the saved single
+ * override). It refuses unless the file's sha256 matches its manifest line and
+ * the object still exists with the recorded type, backs up the current content
+ * first (so the rollback is itself reversible), and verifies the stored bytes.
+ * Run locally first; production needs its own authorization.
  *
  * No strict_types declaration: WP-CLI eval-file evaluates this file inside its own scope.
  *
@@ -55,7 +59,54 @@ $cr_targets = array(
 	'cr-home-fieldnotes' => 'courtneyr-child/cr-home-field-notes',
 );
 $cr_args    = array_values( array_filter( array_slice( $args, 1 ), static fn( $a ) => 'preview' !== $a ) );
-$cr_post_id = (int) ( 'rollback' === $cr_mode ? ( $cr_args[1] ?? 0 ) : ( $cr_args[0] ?? 0 ) );
+if ( 'rollback' === $cr_mode ) {
+	$cr_file = (string) ( $cr_args[0] ?? '' );
+	if ( '' === $cr_file || ! is_readable( $cr_file ) ) {
+		WP_CLI::error( 'rollback needs a readable backup file path.' );
+	}
+	$cr_contents = (string) file_get_contents( $cr_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	$cr_manifest = dirname( $cr_file ) . '/manifest.jsonl';
+	$cr_entry    = null;
+	foreach ( is_readable( $cr_manifest ) ? (array) file( $cr_manifest, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES ) : array() as $cr_line ) {
+		$cr_row = json_decode( (string) $cr_line, true );
+		if ( is_array( $cr_row ) && ( $cr_row['file'] ?? '' ) === basename( $cr_file ) ) {
+			$cr_entry = $cr_row;
+		}
+	}
+	if ( ! $cr_entry ) {
+		WP_CLI::error( sprintf( '%s has no line in %s; refusing to guess its target.', basename( $cr_file ), $cr_manifest ) );
+	}
+	if ( ! hash_equals( (string) ( $cr_entry['sha256'] ?? '' ), hash( 'sha256', $cr_contents ) ) ) {
+		WP_CLI::error( sprintf( '%s does not match its manifest sha256; refusing to restore.', basename( $cr_file ) ) );
+	}
+	if ( untrailingslashit( (string) ( $cr_entry['home'] ?? '' ) ) !== untrailingslashit( home_url( '/' ) ) ) {
+		WP_CLI::error( sprintf( 'Backup was taken on %s, not %s; refusing to restore.', $cr_entry['home'] ?? '?', home_url( '/' ) ) );
+	}
+	if ( ! preg_match( '/^(post|wp_template):(\d+)$/', (string) ( $cr_entry['object'] ?? '' ), $cr_m ) ) {
+		WP_CLI::error( sprintf( 'Manifest object "%s" is not a restorable post or template.', $cr_entry['object'] ?? '' ) );
+	}
+	$cr_target = get_post( (int) $cr_m[2] );
+	$cr_types  = 'wp_template' === $cr_m[1] ? array( 'wp_template' ) : array( 'page', 'post' );
+	if ( ! $cr_target instanceof WP_Post || ! in_array( $cr_target->post_type, $cr_types, true ) ) {
+		WP_CLI::error( sprintf( 'Target %s no longer exists with the recorded type; nothing changed.', $cr_entry['object'] ) );
+	}
+	WP_CLI::log( sprintf( 'Target: %s %d "%s"', $cr_target->post_type, $cr_target->ID, $cr_target->post_title ) );
+	if ( $cr_target->post_content === $cr_contents ) {
+		WP_CLI::success( sprintf( '%s %d already matches %s; nothing to restore.', $cr_target->post_type, $cr_target->ID, basename( $cr_file ) ) );
+		return;
+	}
+	WP_CLI::log( cr_migration_diff_summary( $cr_target->post_content, $cr_contents ) );
+	if ( $cr_preview ) {
+		WP_CLI::success( 'Preview only; nothing written.' );
+		return;
+	}
+	$cr_before = cr_migration_write_backup( sprintf( '%s-%d-before-rollback', $cr_target->post_type, $cr_target->ID ), $cr_target->post_content, $cr_entry['object'] );
+	cr_migration_update_content( $cr_target->ID, $cr_contents );
+	WP_CLI::success( sprintf( 'Restored %s into %s %d (sha256 %s). Pre-rollback content: %s.', basename( $cr_file ), $cr_target->post_type, $cr_target->ID, substr( hash( 'sha256', $cr_contents ), 0, 12 ), basename( $cr_before ) ) );
+	return;
+}
+
+$cr_post_id = (int) ( $cr_args[0] ?? 0 );
 if ( ! $cr_post_id ) {
 	$cr_post_id = (int) get_option( 'page_on_front' );
 }
@@ -303,16 +354,6 @@ if ( 'upgrade' === $cr_mode ) {
 	return;
 }
 
-if ( 'rollback' === $cr_mode ) {
-	$cr_file = (string) ( $args[1] ?? '' );
-	if ( '' === $cr_file || ! is_readable( $cr_file ) ) {
-		WP_CLI::error( 'rollback needs a readable backup file path.' );
-	}
-	$cr_contents = (string) file_get_contents( $cr_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-	cr_migration_update_content( $cr_post->ID, $cr_contents );
-	WP_CLI::success( sprintf( 'Restored %s into page %d (sha256 %s).', basename( $cr_file ), $cr_post->ID, substr( hash( 'sha256', $cr_contents ), 0, 12 ) ) );
-	return;
-}
 
 $cr_registry = WP_Block_Patterns_Registry::get_instance();
 $cr_blocks   = parse_blocks( $cr_post->post_content );
