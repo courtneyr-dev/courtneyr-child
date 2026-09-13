@@ -8167,3 +8167,14 @@ figure.wp-block-image.is-style-overlay-caption figcaption {
 .cr-hcard { display: flex; justify-content: center; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0; }
 .cr-hcard__photo { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
 .cr-hcard .p-note { opacity: 0.85; }
+
+/* R-17: keep focused and anchored targets clear of the sticky header
+   (WCAG 2.4.11), and give standalone card links a 24px target (2.5.8). */
+html { scroll-padding-top: calc(4rem + var(--wp--preset--spacing--small, 1rem)); }
+.pk-card .pk-link,
+.pk-card .pk-map-link {
+	display: inline-flex;
+	align-items: center;
+	min-height: 24px;
+	min-width: 24px;
+}
