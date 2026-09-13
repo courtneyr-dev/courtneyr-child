@@ -19,31 +19,33 @@ RUN_DIR="$VAULT/release/runs/$ENV-$(date -u +%Y%m%dT%H%M%SZ)"
 mkdir -p "$RUN_DIR"
 exec > >(tee -a "$RUN_DIR/log.txt") 2>&1
 w() { "$W_CMD" "@$ENV" "$@"; }
+# value capture: the remote PHP prints warnings around WP-CLI output (a twice-defined WP_DEBUG on the host), so take the last stdout line only.
+wv() { "$W_CMD" "@$ENV" "$@" 2>/dev/null | tail -n 1; }
 die() { echo "ABORT: $*"; exit 1; }
 PENDING=()
 
 echo "## 0. preflight — exact environment and candidate identity ($ENV, $(date -u +%FT%TZ))"
-home="$(w option get home)"; siteurl="$(w option get siteurl)"
+home="$(wv option get home)"; siteurl="$(wv option get siteurl)"
 [[ "$home" == "$EXPECT_HOME" && "$siteurl" == "$EXPECT_HOME" ]] || die "home/siteurl are $home / $siteurl, expected $EXPECT_HOME"
-abspath="$(w eval 'echo ABSPATH;')"; echo "document root: $abspath"
-theme_row="$(w theme list --status=active --fields=name,version --format=csv | grep -x "courtneyr-child,$EXPECT_THEME_VERSION" || true)"
+abspath="$(wv eval 'echo ABSPATH;')"; echo "document root: $abspath"
+theme_row="$(w theme list --status=active --fields=name,version --format=csv 2>/dev/null | grep -x "courtneyr-child,$EXPECT_THEME_VERSION" || true)"
 [[ -n "$theme_row" ]] || die "active theme is not courtneyr-child $EXPECT_THEME_VERSION"
 for expect in "${EXPECT_PLUGINS[@]}"; do
 	slug="${expect%%,*}"
-	row="$(w plugin list --name="$slug" --fields=name,version,status --format=csv | grep -x "$expect" || true)"
+	row="$(w plugin list --name="$slug" --fields=name,version,status --format=csv 2>/dev/null | grep -x "$expect" || true)"
 	[[ -n "$row" ]] || die "plugin $slug is not '$expect' (got: $(w plugin list --name="$slug" --fields=name,version,status --format=csv | tail -1))"
 done
-THEME_DIR="$(w eval 'echo get_stylesheet_directory();')"
+THEME_DIR="$(wv eval 'echo get_stylesheet_directory();')"
 for f in theme.json inc/security-headers.php assets/css/cr-home-sections.css _handoffs/homepage-newsletter-field-notes/migrate-homepage-sections.php _handoffs/homepage-newsletter-field-notes/fix-entry-wrappers.php _handoffs/homepage-newsletter-field-notes/build-navigation.php _handoffs/homepage-newsletter-field-notes/cr-migration-backup.php; do
 	local_sha="$(shasum -a 256 "$THEME_SRC/$f" | cut -d' ' -f1)"
-	remote_sha="$(w eval "echo hash_file('sha256', '$THEME_DIR/$f');")"
+	remote_sha="$(wv eval "echo hash_file('sha256', '$THEME_DIR/$f');")"
 	[[ "$local_sha" == "$remote_sha" ]] || die "served $f ($remote_sha) differs from the candidate ($local_sha)"
 done
 echo "served theme files match the candidate checkout ($(git -C "$THEME_SRC" rev-parse --short HEAD))"
-[[ "$(w option get page_on_front)" == "$HOME_ID" ]] || die "front page is not $HOME_ID"
-[[ "$(w post get $MENU_ID --field=post_type)" == "wp_navigation" ]] || die "$MENU_ID is not a navigation post"
-STREAM_ID="$(w eval 'echo get_page_by_path("stream")->ID ?? 0;')"; [[ "$STREAM_ID" -gt 0 ]] || die "no page at /stream/"
-[[ "$(w post get $TPL_ID --field=post_name)" == "single" ]] || die "$TPL_ID is not the saved single template"
+[[ "$(wv option get page_on_front)" == "$HOME_ID" ]] || die "front page is not $HOME_ID"
+[[ "$(wv post get $MENU_ID --field=post_type)" == "wp_navigation" ]] || die "$MENU_ID is not a navigation post"
+STREAM_ID="$(wv eval 'echo get_page_by_path("stream")->ID ?? 0;')"; [[ "$STREAM_ID" -gt 0 ]] || die "no page at /stream/"
+[[ "$(wv post get $TPL_ID --field=post_name)" == "single" ]] || die "$TPL_ID is not the saved single template"
 w eval 'wp_get_theme()->delete_pattern_cache(); echo "pattern cache cleared\n";'
 MIG="$THEME_DIR/_handoffs/homepage-newsletter-field-notes/migrate-homepage-sections.php"
 FIX="$THEME_DIR/_handoffs/homepage-newsletter-field-notes/fix-entry-wrappers.php"
@@ -78,7 +80,7 @@ echo "## 7. post-format intros (export current values first; restore with rollba
 w term list post_format --fields=term_id,slug,description --format=json > "$RUN_DIR/post_format-terms-before.json"
 [[ -s "$RUN_DIR/post_format-terms-before.json" ]] || die "term export is empty"
 while IFS='|' read -r slug desc; do
-	current="$(w term get post_format "post-format-$slug" --by=slug --field=description 2>/dev/null || echo '__missing__')"
+	current="$(wv term get post_format "post-format-$slug" --by=slug --field=description 2>/dev/null || echo '__missing__')"
 	if [[ "$current" == "__missing__" ]]; then echo "term post-format-$slug absent here; skipped"; continue; fi
 	if [[ "$current" == "$desc" ]]; then echo "post-format-$slug already: $desc"; continue; fi
 	echo "post-format-$slug: '$current' -> '$desc'"
@@ -99,7 +101,7 @@ w eval 'echo \PKIW\Post_Surface::backfill(), " posts recomputed\n";'
 
 echo "## 9. story posters (manual in the Web Stories editor)"
 for sid in 7532 7517; do
-	poster="$(w post meta get "$sid" _thumbnail_id 2>/dev/null || true)"
+	poster="$(wv post meta get "$sid" _thumbnail_id || true)"
 	[[ -n "$poster" ]] || PENDING+=("story $sid has no poster (Web Stories editor > Document > Poster image)")
 done
 
