@@ -2,9 +2,12 @@
 /**
  * Shared, verified backups for the 0.7.46 content migrations.
  *
- * Every write first stores the previous value as an immutable file whose bytes
- * are read back and hashed; a manifest line records environment, object,
- * bytes and sha256. Any failure aborts before the WordPress write.
+ * Every write first stores the previous value as a file whose bytes are read
+ * back and hashed, then made read-only (0444) where the filesystem allows; a
+ * manifest line records environment, object, bytes, sha256 and the verified
+ * file mode. Read-only is not immutable: the owning account can still change
+ * or delete the file, so the sha256 in the manifest is the integrity check.
+ * Any failure to write or verify the bytes aborts before the WordPress write.
  *
  * Included by the migration scripts (WP-CLI eval-file scope, no strict_types).
  *
@@ -23,7 +26,7 @@ if ( ! function_exists( 'cr_migration_backup_dir' ) ) {
 	}
 
 	/**
-	 * Write an immutable, verified backup; abort on any failure.
+	 * Write a hash-verified backup, made read-only where possible; abort if the bytes do not verify.
 	 *
 	 * @param string $label    File label (e.g. "page-2651-upgrade").
 	 * @param string $contents Previous value.
@@ -52,6 +55,11 @@ if ( ! function_exists( 'cr_migration_backup_dir' ) ) {
 			WP_CLI::error( sprintf( 'Backup %s does not read back identically; nothing was changed.', $file ) );
 		}
 		@chmod( $file, 0444 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+		clearstatcache( true, $file );
+		$mode = substr( sprintf( '%o', (int) fileperms( $file ) ), -4 );
+		if ( '0444' !== $mode ) {
+			WP_CLI::warning( sprintf( 'Backup %s stays mode %s (chmod 0444 did not take effect); its manifest sha256 remains the integrity check.', basename( $file ), $mode ) );
+		}
 		$line = wp_json_encode(
 			array(
 				'time'   => gmdate( 'c' ),
@@ -60,12 +68,13 @@ if ( ! function_exists( 'cr_migration_backup_dir' ) ) {
 				'file'   => basename( $file ),
 				'bytes'  => strlen( $contents ),
 				'sha256' => hash( 'sha256', $contents ),
+				'mode'   => $mode,
 			)
 		) . "\n";
 		if ( false === file_put_contents( $dir . '/manifest.jsonl', $line, FILE_APPEND | LOCK_EX ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 			WP_CLI::error( 'Cannot append to the backup manifest; nothing was changed.' );
 		}
-		WP_CLI::log( sprintf( 'backup: %s (%d bytes, sha256 %s)', basename( $file ), strlen( $contents ), substr( hash( 'sha256', $contents ), 0, 12 ) ) );
+		WP_CLI::log( sprintf( 'backup: %s (%d bytes, sha256 %s, mode %s)', basename( $file ), strlen( $contents ), substr( hash( 'sha256', $contents ), 0, 12 ), $mode ) );
 		return $file;
 	}
 

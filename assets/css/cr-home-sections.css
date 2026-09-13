@@ -700,3 +700,11 @@
 	.cr-fieldnotes .cr-fieldnotes__masthead::before,
 	.cr-reasons .cr-reasons__intro::after { display: none; }
 }
+
+/* WCAG 2.5.8: the lane's narrow photo card shrinks the thumbnail strip until
+   a one-image "Show image" button is 6x7px while still focusable. Keep every
+   thumbnail button at least 24px so the control stays operable. */
+.cr-fieldnotes .pk-media__thumb-button {
+	min-width: 24px;
+	min-height: 24px;
+}

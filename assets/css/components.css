@@ -949,7 +949,11 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 .site-header__inner {
 	gap: var(--wp--preset--spacing--medium);
 	align-items: center;
-	flex-wrap: nowrap !important;
+	/* v0.7.46: wrap instead of nowrap so the controls row drops under the
+	   brand when it no longer fits (WCAG 1.4.12 text spacing, 200% zoom)
+	   rather than being clipped by the overflow-x: clip on main/body.
+	   At normal widths the row still fits, so nothing moves. */
+	flex-wrap: wrap !important;
 }
 
 /* v0.5.10: brand gets a bit of breathing room from the left edge so
@@ -3834,7 +3838,7 @@ body.home main.homepage p:not(.has-text-align-center) {
    their lane titles carry the nav's 📰 / 🌊 as ::before content. */
 body.home main.homepage > .wp-block-post-content h2.wp-block-heading:not(.cr-flank)::before,
 body.home main.homepage > .wp-block-post-content h1.wp-block-heading:not(.cr-flank)::before,
-body.home main.homepage > .wp-block-post-content h3.wp-block-heading:not(.cr-flank)::before,
+body.home main.homepage > .wp-block-post-content h3.wp-block-heading:not(.cr-flank):not(.cr-fieldnotes__lane-title)::before,
 body.home main.homepage > .alignfull:not(.wp-block-latest-posts)::after,
 body.home main.homepage > .alignfull:not(.wp-block-latest-posts)::before,
 body.home main.homepage > .wp-block-cover::after,
@@ -8072,4 +8076,106 @@ figure.wp-block-image.is-style-overlay-caption figcaption {
 }
 .editor-styles-wrapper.post-type-page .editor-post-title__input {
 	font-size: var(--cr-text-4xl, 3rem) !important;
+}
+
+/* ============================================================
+   v0.7.46 — accessibility set (staging gap audit SG-10)
+   ============================================================ */
+
+/* Forced colors (Windows High Contrast): the theme toggle's active segment
+   was color/background only, so both segments computed identically. Keep
+   aria-pressed visible with a system-color outline + underline; give
+   background-only card boundaries a real border. */
+@media (forced-colors: active) {
+	.cr-theme-segments .cr-theme-segment[aria-pressed="true"] {
+		outline: 2px solid CanvasText;
+		outline-offset: -2px;
+		text-decoration: underline;
+	}
+	.cr-theme-segments__indicator { forced-color-adjust: none; background: Highlight; }
+	/* Background-only boundaries vanish in forced colors: give every card,
+	   chip and the toggle group a real system-color border. !important is
+	   deliberate here — component sheets zero these borders at higher
+	   specificity, and forced-colors mode is the one place a border must win. */
+	.pk-card,
+	.pk-card--stream,
+	.cr-home-story,
+	.cr-blog-card,
+	.cr-chip,
+	.cr-term-chip,
+	.cr-theme-segments,
+	.cr-fieldnotes__lane-title,
+	.site-header__search {
+		border: 1px solid CanvasText !important;
+	}
+	/* The theme's focus styles lean on box-shadow halos, which forced
+	   colors drop; a system Highlight outline keeps every focus visible. */
+	:focus-visible {
+		outline: 3px solid Highlight !important;
+		outline-offset: 2px !important;
+	}
+}
+
+/* No JavaScript: the Interactivity-API "Open menu" button is inert, so show
+   the navigation inline below the breakpoint, and drop the two theme
+   controls whose state only script can set. */
+@media (scripting: none) {
+	.site-header__nav .wp-block-navigation__responsive-container-open { display: none !important; }
+	/* Same specificity as the max-width 1024px rule that hides the closed
+	   container (class + class + :not(class)); later in the file, so it wins. */
+	.site-header__nav .wp-block-navigation__responsive-container:not(.is-menu-open) {
+		display: flex !important;
+		position: static !important;
+		inset: auto !important;
+		background: transparent !important;
+		width: auto !important;
+		height: auto !important;
+	}
+	.site-header__nav .wp-block-navigation__responsive-container .wp-block-navigation__responsive-close,
+	.site-header__nav .wp-block-navigation__responsive-container .wp-block-navigation__responsive-dialog {
+		display: contents;
+	}
+	.site-header__nav .wp-block-navigation__responsive-container-close { display: none !important; }
+	.site-header__nav .wp-block-navigation__responsive-container-content,
+	.site-header__nav .wp-block-navigation__responsive-container-content .wp-block-navigation__container {
+		display: flex !important;
+		flex-wrap: wrap !important;
+		flex-direction: row !important;
+		gap: var(--wp--preset--spacing--small) !important;
+		align-items: center !important;
+	}
+	.site-header__nav .wp-block-navigation__responsive-container .wp-block-navigation-item,
+	.site-header__nav .wp-block-navigation__responsive-container .wp-block-navigation-item__content { display: inline-flex !important; font-size: inherit !important; }
+	.site-header__nav .wp-block-navigation__submenu-container { display: none !important; }
+	.site-header__nav .wp-block-navigation__responsive-container .wp-block-navigation-submenu__toggle { display: none !important; }
+	.cr-theme-segments,
+	.cr-theme-cycle { display: none !important; }
+	/* Below the menu breakpoint, give the links a full row under the brand
+	   so all top-level items fit instead of running past the right edge. */
+	@media (max-width: 1024px) {
+		.site-header__controls {
+			flex-wrap: wrap !important;
+			flex-shrink: 1 !important;
+			flex-basis: 100% !important;
+			justify-content: flex-start !important;
+		}
+		.site-header__nav { flex-basis: 100% !important; min-width: 0 !important; }
+	}
+}
+
+/* Representative h-card in the footer colophon (R-21). */
+.cr-hcard { display: flex; justify-content: center; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0; }
+.cr-hcard__photo { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+.cr-hcard .p-note { opacity: 0.85; }
+.cr-hcard .u-url { display: inline-flex; align-items: center; min-height: 24px; } /* WCAG 2.5.8: 24px target */
+
+/* R-17: keep focused and anchored targets clear of the sticky header
+   (WCAG 2.4.11), and give standalone card links a 24px target (2.5.8). */
+html { scroll-padding-top: calc(4rem + var(--wp--preset--spacing--small, 1rem)); }
+.pk-card .pk-link,
+.pk-card .pk-map-link {
+	display: inline-flex;
+	align-items: center;
+	min-height: 24px;
+	min-width: 24px;
 }
