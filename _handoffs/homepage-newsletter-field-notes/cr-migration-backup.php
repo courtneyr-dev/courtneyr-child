@@ -26,7 +26,7 @@ if ( ! function_exists( 'cr_migration_backup_dir' ) ) {
 	}
 
 	/**
-	 * Write an immutable, verified backup; abort on any failure.
+	 * Write a hash-verified backup, made read-only where possible; abort if the bytes do not verify.
 	 *
 	 * @param string $label    File label (e.g. "page-2651-upgrade").
 	 * @param string $contents Previous value.

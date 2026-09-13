@@ -16,7 +16,7 @@
  * each matching Group — the `className` value inside its block comment and the
  * `class` attribute of its opening tag. Nothing is re-serialized, so every
  * other byte of the post (quoted prose, whitespace, other attributes, nested
- * Groups, h-cite objects) is untouched. Backups are verified and immutable
+ * Groups, h-cite objects) is untouched. Backups are hash-verified and read-only where the filesystem allows
  * (cr-migration-backup.php); a second application reports nothing to change.
  *
  * @package CourtneyrChild
