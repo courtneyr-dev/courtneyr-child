@@ -2,7 +2,7 @@
 /**
  * Title: Stream Loop (Query Loop)
  * Slug: courtneyr-child/cr-stream-loop
- * Categories: cr-zine
+ * Categories: cr-zine, cr-loops
  * Description: Query Loop styled as a vertical zine stream — SVG post-type avatar, date + category chip meta row, post title, excerpt, and tag pills. Drives the archive, category, tag, and home (blog) page templates.
  * Keywords: stream, feed, query, archive, posts, zine, indieweb
  * Viewport Width: 720

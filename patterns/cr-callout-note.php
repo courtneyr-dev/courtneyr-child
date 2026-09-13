@@ -2,7 +2,7 @@
 /**
  * Title: Callout — Note
  * Slug: courtneyr-child/cr-callout-note
- * Categories: cr-zine
+ * Categories: cr-zine, cr-marks
  * Description: Prussian-blue surface, light-orange ink. For asides that should sit calmer on the page — context, side notes, footnotes that can't fit in a footnote.
  * Keywords: callout, note, aside, info, zine
  * Viewport Width: 720

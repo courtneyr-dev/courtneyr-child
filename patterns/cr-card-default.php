@@ -2,7 +2,7 @@
 /**
  * Title: Card (Zine)
  * Slug: courtneyr-child/cr-card-default
- * Categories: cr-zine
+ * Categories: cr-zine, cr-marks
  * Description: Hard-shadowed card with -1.2° rotation and 6×6 ink shadow. Surface-elevated reads slightly lifted from the ivory page. One variant only — v2.0 collapsed --elevated and --inverse into a single zine card.
  * Keywords: card, zine, post, intro
  * Block Types: core/post-content

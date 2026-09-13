@@ -788,3 +788,44 @@ body.wp-admin {
 .editor-post-publish-panel__postpublish .post-publish-panel__postpublish-subheader {
 	color: var(--cr-admin-ink, #241c4a) !important;
 }
+
+/* Dark scheme only: plugin notices and the welcome panel columns ship their
+   own white, so they need the stronger hand; screen-meta buttons sit on the
+   chrome and need the ink. */
+html[data-theme="dark"] .welcome-panel-column-container,
+html[data-theme="dark"] .welcome-panel-column,
+html[data-theme="dark"] .notice,
+html[data-theme="dark"] .yoast-notification,
+html[data-theme="dark"] .cmplz-notice,
+html[data-theme="dark"] .updated,
+html[data-theme="dark"] .error,
+html[data-theme="dark"] #screen-meta-links .show-settings,
+html[data-theme="dark"] .postbox .inside,
+html[data-theme="dark"] .components-popover__content,
+html[data-theme="dark"] .components-dropdown-menu__menu {
+	background: var(--cr-admin-surface-alt) !important;
+	color: var(--cr-admin-ink) !important;
+}
+@media (prefers-color-scheme: dark) {
+	html:not([data-theme="light"]):not([data-theme="dark"]) .welcome-panel-column-container,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .welcome-panel-column,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .notice,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .yoast-notification,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .cmplz-notice,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .updated,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .error,
+	html:not([data-theme="light"]):not([data-theme="dark"]) #screen-meta-links .show-settings,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .postbox .inside,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .components-popover__content,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .components-dropdown-menu__menu {
+		background: var(--cr-admin-surface-alt) !important;
+		color: var(--cr-admin-ink) !important;
+	}
+}
+html[data-theme="dark"] .welcome-panel-column h3,
+html[data-theme="dark"] .welcome-panel-column p,
+html[data-theme="dark"] .notice p,
+html[data-theme="dark"] .postbox .inside p,
+html[data-theme="dark"] .postbox .inside li {
+	color: var(--cr-admin-ink) !important;
+}

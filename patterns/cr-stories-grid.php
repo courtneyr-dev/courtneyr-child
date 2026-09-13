@@ -2,7 +2,8 @@
 /**
  * Title: Stories poster grid
  * Slug: courtneyr-child/cr-stories-grid
- * Categories: cr-zine
+ * Categories: cr-zine, cr-loops
+ * Viewport Width: 1200
  * Description: Query Loop for the Web Stories archive — each story as a 9:16 poster card (the plugin's poster is the featured image) with title and date; playback stays on the plugin's story URL.
  * Keywords: stories, web stories, archive, posters
  * Block Types: core/query

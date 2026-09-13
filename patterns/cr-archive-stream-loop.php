@@ -2,7 +2,8 @@
 /**
  * Title: Archive stream loop
  * Slug: courtneyr-child/cr-archive-stream-loop
- * Categories: cr-zine
+ * Categories: cr-zine, cr-loops
+ * Viewport Width: 1200
  * Description: Query Loop for kind and Stream-format archives — inherits the archive query and renders the plugin's stream cards in the Stream collage.
  * Keywords: stream, archive, kind, format, query
  * Block Types: core/query

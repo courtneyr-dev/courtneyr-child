@@ -2,7 +2,8 @@
 /**
  * Title: Browse all topics, formats and kinds
  * Slug: courtneyr-child/cr-browse-all
- * Categories: cr-zine
+ * Categories: cr-zine, cr-loops
+ * Viewport Width: 1200
  * Description: Native Terms List directory of every non-empty category, post format and kind, with counts. Lives at the foot of the archive family and on the Stream page.
  * Keywords: browse, directory, categories, formats, kinds, terms
  * Block Types: core/categories

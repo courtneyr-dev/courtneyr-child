@@ -2,7 +2,7 @@
 /**
  * Title: Callout — Warn
  * Slug: courtneyr-child/cr-callout-warn
- * Categories: cr-zine
+ * Categories: cr-zine, cr-marks
  * Description: Selective-yellow surface, prussian-blue ink. For deprecation notices, accessibility failures, sharp warnings the reader must not miss.
  * Keywords: callout, warn, warning, deprecation, alert, zine
  * Viewport Width: 720

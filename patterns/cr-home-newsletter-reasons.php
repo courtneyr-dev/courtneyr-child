@@ -2,7 +2,7 @@
 /**
  * Title: Newsletter reasons (four panels)
  * Slug: courtneyr-child/cr-home-newsletter-reasons
- * Categories: cr-zine
+ * Categories: cr-zine, cr-sections
  * Description: Homepage “How this newsletter can help you grow”: intro with the Every Saturday label, four audience panels with line drawings, and the personalized-guidance contact row. Insert inside the homepage's blue newsletter section; the section keeps its own background and torn edges.
  * Keywords: home, newsletter, reasons, panels
  * Viewport Width: 1200

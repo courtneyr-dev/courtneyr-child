@@ -2,7 +2,7 @@
 /**
  * Title: Blog Grid (Query Loop)
  * Slug: courtneyr-child/cr-blog-grid
- * Categories: cr-zine
+ * Categories: cr-zine, cr-loops
  * Description: Wide zine blog index — featured lead (first post) + 2-up card grid. Each card has a per-format gradient media area, category chip, post-format media-glyph, date, title, excerpt, and read-more. Drives the home (blog posts index) template only.
  * Keywords: blog, archive, query, posts, grid, cards, zine
  * Viewport Width: 1100

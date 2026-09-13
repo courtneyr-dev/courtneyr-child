@@ -2,7 +2,7 @@
 /**
  * Title: Field Notes (Blog lane + Stream lane)
  * Slug: courtneyr-child/cr-home-field-notes
- * Categories: cr-zine
+ * Categories: cr-zine, cr-sections
  * Description: Homepage Field Notes: masthead, a Blog lane (one featured post plus three supporting previews from the main surface) and a full-width Stream lane (six newest stream-surface entries rendered by the Post Kinds stream card). Insert inside the homepage's Field Notes section.
  * Keywords: home, field notes, blog, stream, query
  * Viewport Width: 1200

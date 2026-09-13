@@ -2,7 +2,7 @@
 /**
  * Title: Pull Quote (Zine)
  * Slug: courtneyr-child/cr-pull-quote
- * Categories: cr-zine
+ * Categories: cr-zine, cr-marks
  * Description: Big italic block quote with a 4-side UT-orange marker frame. Roboto Slab italic at 1.5rem. Cite renders with em-dash prefix.
  * Keywords: quote, pullquote, blockquote, zine, marker
  * Block Types: core/post-content
