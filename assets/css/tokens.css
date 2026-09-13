@@ -169,6 +169,11 @@
 
   /* Focus ring */
   --cr-focus-ring: var(--cr-selective-yellow);
+  /* 0.7.46: the ring is two-tone. Selective yellow alone reads 1.67:1 on
+     ivory and 1.30:1 on the homepage blue (WCAG 1.4.11 wants 3:1); an ink
+     halo outside the ring gives every edge a 3:1 boundary in both schemes
+     (--cr-ink flips with the scheme). */
+  --cr-focus-halo: var(--cr-ink);
 
   /* Code */
   --cr-code-bg:  #efece1;
@@ -611,6 +616,7 @@ a:focus-visible {
   outline: 3px solid var(--cr-focus-ring);
   outline-offset: 2px;
   border-radius: var(--cr-radius-xs);
+  box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 
 /* Inline semantics */
@@ -803,9 +809,10 @@ input[type="password"], input[type="number"], input[type="tel"], textarea, selec
   width: 100%;
   max-width: 30rem;
 }
-input:focus-visible, textarea:focus-visible, select:focus-visible {
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible {
   outline: 3px solid var(--cr-focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 button, input[type="submit"], input[type="button"] {
   font-family: var(--cr-font-accent);

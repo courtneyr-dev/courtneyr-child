@@ -543,21 +543,7 @@
 	.cr-fieldnotes .cr-fieldnotes__lane--stream { margin-block-start: 1.75rem; padding-block-start: 1.8125rem; border-top: 3px solid var(--cr-fn-ink); }
 }
 
-/* ---- Focus: two-tone ring ----
-   tokens.css:610 gives every link a 3px selective-yellow ring. Measured on
-   these sections it reads 1.67:1 against the ivory sheets and 1.30:1 against
-   the blue band, under the 3:1 that WCAG 1.4.11 asks of a focus indicator.
-   An ink halo outside the yellow ring puts a 3:1 boundary on both edges
-   (yellow/ink 8.6:1). Scoped to the links this stylesheet owns; the stream
-   cards keep the plugin and theme adapter treatment they have on /stream/. */
-.cr-reasons :is(a, button):focus-visible,
-.cr-fieldnotes :is(.cr-home-story a, .cr-fieldnotes__lane-link a):focus-visible {
-	outline: 3px solid var(--cr-focus-ring, #ffb703);
-	outline-offset: 2px;
-	box-shadow: 0 0 0 7px var(--cr-ink, #241c4a);
-	box-decoration-break: clone;
-	-webkit-box-decoration-break: clone;
-}
+/* Focus: the shared two-tone ring lives in tokens.css (0.7.46). */
 
 /* ---- Paper sheets carry their own ink ----
    Measured in dark mode before this rule: panel text rgb(251,250,245) on a

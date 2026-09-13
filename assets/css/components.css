@@ -440,6 +440,7 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 .cr-cta:focus-visible {
   outline: 3px solid var(--cr-focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 7px var(--cr-focus-halo, var(--cr-ink));
 }
 
 .cr-button--primary,
