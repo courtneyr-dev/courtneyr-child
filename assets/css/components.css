@@ -8093,11 +8093,26 @@ figure.wp-block-image.is-style-overlay-caption figcaption {
 		text-decoration: underline;
 	}
 	.cr-theme-segments__indicator { forced-color-adjust: none; background: Highlight; }
+	/* Background-only boundaries vanish in forced colors: give every card,
+	   chip and the toggle group a real system-color border. !important is
+	   deliberate here — component sheets zero these borders at higher
+	   specificity, and forced-colors mode is the one place a border must win. */
 	.pk-card,
 	.pk-card--stream,
 	.cr-home-story,
-	.cr-blog-card {
-		border: 1px solid CanvasText;
+	.cr-blog-card,
+	.cr-chip,
+	.cr-term-chip,
+	.cr-theme-segments,
+	.cr-fieldnotes__lane-title,
+	.site-header__search {
+		border: 1px solid CanvasText !important;
+	}
+	/* The theme's focus styles lean on box-shadow halos, which forced
+	   colors drop; a system Highlight outline keeps every focus visible. */
+	:focus-visible {
+		outline: 3px solid Highlight !important;
+		outline-offset: 2px !important;
 	}
 }
 
@@ -8106,7 +8121,9 @@ figure.wp-block-image.is-style-overlay-caption figcaption {
    controls whose state only script can set. */
 @media (scripting: none) {
 	.site-header__nav .wp-block-navigation__responsive-container-open { display: none !important; }
-	.site-header__nav .wp-block-navigation__responsive-container {
+	/* Same specificity as the max-width 1024px rule that hides the closed
+	   container (class + class + :not(class)); later in the file, so it wins. */
+	.site-header__nav .wp-block-navigation__responsive-container:not(.is-menu-open) {
 		display: flex !important;
 		position: static !important;
 		inset: auto !important;
@@ -8119,9 +8136,31 @@ figure.wp-block-image.is-style-overlay-caption figcaption {
 		display: contents;
 	}
 	.site-header__nav .wp-block-navigation__responsive-container-close { display: none !important; }
-	.site-header__nav .wp-block-navigation__responsive-container-content { display: flex; flex-wrap: wrap; gap: var(--wp--preset--spacing--small); }
+	.site-header__nav .wp-block-navigation__responsive-container-content,
+	.site-header__nav .wp-block-navigation__responsive-container-content .wp-block-navigation__container {
+		display: flex !important;
+		flex-wrap: wrap !important;
+		flex-direction: row !important;
+		gap: var(--wp--preset--spacing--small) !important;
+		align-items: center !important;
+	}
+	.site-header__nav .wp-block-navigation__responsive-container .wp-block-navigation-item,
+	.site-header__nav .wp-block-navigation__responsive-container .wp-block-navigation-item__content { display: inline-flex !important; font-size: inherit !important; }
+	.site-header__nav .wp-block-navigation__submenu-container { display: none !important; }
+	.site-header__nav .wp-block-navigation__responsive-container .wp-block-navigation-submenu__toggle { display: none !important; }
 	.cr-theme-segments,
 	.cr-theme-cycle { display: none !important; }
+	/* Below the menu breakpoint, give the links a full row under the brand
+	   so all top-level items fit instead of running past the right edge. */
+	@media (max-width: 1024px) {
+		.site-header__controls {
+			flex-wrap: wrap !important;
+			flex-shrink: 1 !important;
+			flex-basis: 100% !important;
+			justify-content: flex-start !important;
+		}
+		.site-header__nav { flex-basis: 100% !important; min-width: 0 !important; }
+	}
 }
 
 /* Representative h-card in the footer colophon (R-21). */
