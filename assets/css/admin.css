@@ -829,3 +829,45 @@ html[data-theme="dark"] .postbox .inside p,
 html[data-theme="dark"] .postbox .inside li {
 	color: var(--cr-admin-ink) !important;
 }
+
+/* Dark scheme: list-table cells and secondary buttons carry core's own ink
+   at higher specificity; force the tokens there. */
+html[data-theme="dark"] .widefat td,
+html[data-theme="dark"] .widefat th,
+html[data-theme="dark"] .widefat td p,
+html[data-theme="dark"] .widefat .column-date,
+html[data-theme="dark"] .subsubsub,
+html[data-theme="dark"] .tablenav .displaying-num,
+html[data-theme="dark"] .tablenav-pages,
+html[data-theme="dark"] .wp-core-ui .button,
+html[data-theme="dark"] .wp-core-ui .button-secondary,
+html[data-theme="dark"] .wp-core-ui select,
+html[data-theme="dark"] .wp-core-ui input[type="search"] {
+	color: var(--cr-admin-ink) !important;
+}
+html[data-theme="dark"] .wp-core-ui .button,
+html[data-theme="dark"] .wp-core-ui .button-secondary,
+html[data-theme="dark"] .wp-core-ui select {
+	background: var(--cr-admin-surface-alt) !important;
+	border-color: var(--cr-admin-border) !important;
+}
+@media (prefers-color-scheme: dark) {
+	html:not([data-theme="light"]):not([data-theme="dark"]) .widefat td,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .widefat th,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .widefat td p,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .subsubsub,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .tablenav .displaying-num,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .tablenav-pages,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .wp-core-ui .button,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .wp-core-ui .button-secondary,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .wp-core-ui select,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .wp-core-ui input[type="search"] {
+		color: var(--cr-admin-ink) !important;
+	}
+	html:not([data-theme="light"]):not([data-theme="dark"]) .wp-core-ui .button,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .wp-core-ui .button-secondary,
+	html:not([data-theme="light"]):not([data-theme="dark"]) .wp-core-ui select {
+		background: var(--cr-admin-surface-alt) !important;
+		border-color: var(--cr-admin-border) !important;
+	}
+}

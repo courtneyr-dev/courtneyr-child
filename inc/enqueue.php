@@ -778,3 +778,34 @@ function perfmatters_lazyload_exclusions( $exclusions ): array {
 }
 add_filter( 'perfmatters_lazyload_exclusions', __NAMESPACE__ . '\\perfmatters_lazyload_exclusions' );
 add_filter( 'perfmatters_lazyload_iframe_exclusions', __NAMESPACE__ . '\\perfmatters_lazyload_exclusions' );
+
+/**
+ * Posts list (0.7.46, issue 17): twenty-one columns from six plugins squeeze
+ * the title to a few characters. Hide the per-plugin columns by default so
+ * the list reads; Screen Options still turns any of them on per user
+ * (default_hidden_columns only applies before a user saves a preference).
+ *
+ * @param string[]   $hidden Column ids hidden by default.
+ * @param \WP_Screen $screen Current screen.
+ * @return string[]
+ */
+function default_hidden_post_columns( array $hidden, \WP_Screen $screen ): array {
+	if ( 'edit-post' !== $screen->id ) {
+		return $hidden;
+	}
+	return array_values( array_unique( array_merge( $hidden, array(
+		'taxonomy-location',
+		'taxonomy-pkiw_venue',
+		'outpost_syndication',
+		'pkiw_atmosphere',
+		'location',
+		'cmplz_scan',
+		'atmosphere_bluesky',
+		'wpseo-score-readability',
+		'wpseo-title',
+		'wpseo-metadesc',
+		'wpseo-focuskw',
+		'wpseo-links',
+	) ) ) );
+}
+add_filter( 'default_hidden_columns', __NAMESPACE__ . '\\default_hidden_post_columns', 10, 2 );
