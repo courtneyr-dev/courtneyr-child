@@ -157,13 +157,15 @@ w eval "if (!defined('VARNISH_SERVERS')) define('VARNISH_SERVERS','$GATEWAY'); \
 inv="$(wv eval 'echo (string)(new \WPaaS\API())->flush_cdn();')"
 [[ -n "$inv" ]] || die "CDN flush returned no invalidation id; purge from wp-admin (Flush Cache) and rerun cache-probe.sh"
 echo "cdn invalidation $inv"
+# (zsh: never name a local "path" — it aliases $PATH and every command vanishes)
 verify_cache() {
-	local ok=1 path age media body
-	for path in / /stream/ /kind/mood/ /type/quote/; do
-		body="$(curl -s -D "$RUN_DIR/headers.tmp" -A 'Mozilla/5.0 cr-migration-verify' "$EXPECT_HOME$path")"
+	local ok=1 route age media body
+	for route in / /stream/ /kind/mood/ /type/quote/; do
+		body="$(curl -s -D "$RUN_DIR/headers.tmp" -A 'Mozilla/5.0 cr-migration-verify' "$EXPECT_HOME$route")"
 		age="$(tr -d '\r' < "$RUN_DIR/headers.tmp" | grep -i '^age:' | awk '{print $2}')"
 		media="$(printf '%s' "$body" | grep -o "<link[^>]*cr-\(home-sections\|archives\|post-kinds\).css[^>]*>" | grep -o "media=[\"'][a-z]*[\"']" | sort -u | tr '\n' ' ')"
-		echo "  $path age=${age:-none} sheets=${media:-none}"
+		echo "  $route age=${age:-none} sheets=${media:-none}"
+		[[ -n "$body" && -n "$media" ]] || ok=0   # a response with none of the theme sheets is not a verified page
 		[[ -z "$age" || "$age" -lt 120 ]] || ok=0
 		[[ "$media" != *print* ]] || ok=0
 	done
