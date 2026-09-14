@@ -1145,6 +1145,13 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 	display: contents;
 }
 
+/* Paragraph blocks that read as one run of text (the footer copyright line,
+   the listen rating): each block stays editable, the text flows inline. */
+.cr-inline-run > p {
+	display: inline;
+	margin: 0;
+}
+
 /* v0.5.40: more breathing room in the nav now that the inline search
    form is gone. Bump the gap between top-level controls + nav items
    so the desktop bar reads as relaxed instead of cramped (image #125). */

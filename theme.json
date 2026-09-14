@@ -1069,6 +1069,16 @@
 			"name": "appearance-toggle",
 			"title": "Appearance toggle",
 			"area": "uncategorized"
+		},
+		{
+			"name": "kind",
+			"title": "Kind part (renders the post kind's part)",
+			"area": "uncategorized"
+		},
+		{
+			"name": "kind-listen",
+			"title": "Kind: Listen",
+			"area": "uncategorized"
 		}
 	]
 }
