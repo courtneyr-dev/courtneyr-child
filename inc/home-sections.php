@@ -62,7 +62,7 @@ function is_stream_card_preview_request(): bool {
 	if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
 		return false;
 	}
-	$uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- compared, never output.
+	$uri   = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- compared, never output.
 	$route = isset( $_GET['rest_route'] ) ? (string) wp_unslash( $_GET['rest_route'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Recommended -- read-only routing check.
 	return str_contains( $uri, '/block-renderer/post-kinds-indieweb/stream-card' ) || str_contains( $route, '/block-renderer/post-kinds-indieweb/stream-card' );
 }
@@ -223,6 +223,47 @@ function query_variations( array $variations, \WP_Block_Type $block_type ): arra
 		'scope'       => array( 'inserter' ),
 		'innerBlocks' => array(
 			array( 'core/post-template', array(), array( array( 'post-kinds-indieweb/stream-card' ) ) ),
+		),
+	);
+	$variations[] = array(
+		'name'        => 'courtneyr/related-posts',
+		'title'       => __( 'Related posts (main surface)', 'courtneyr-child' ),
+		'description' => __( 'The three newest blog posts for the "More from the blog" band on singles; stream-surface posts stay out.', 'courtneyr-child' ),
+		'attributes'  => array(
+			'namespace' => 'courtneyr/related-posts',
+			'className' => 'related-posts__query',
+			'align'     => 'wide',
+			'query'     => array_merge(
+				$base_query,
+				array(
+					'perPage'     => 3,
+					'pkiwSurface' => SURFACE_MAIN,
+				)
+			),
+		),
+		'isActive'    => array( 'namespace' ),
+		'scope'       => array( 'inserter' ),
+		'innerBlocks' => array(
+			array(
+				'core/post-template',
+				array(
+					'className' => 'related-posts__list',
+					'layout'    => array(
+						'type'        => 'grid',
+						'columnCount' => 3,
+					),
+				),
+				array(
+					array(
+						'core/post-title',
+						array(
+							'isLink'    => true,
+							'className' => 'related-post__title p-name cr-u-url',
+						),
+					),
+					array( 'core/post-date', array( 'className' => 'related-post__date cr-dt-published' ) ),
+				),
+			),
 		),
 	);
 	return $variations;
