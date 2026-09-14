@@ -18,13 +18,13 @@
 		"assets/css/components.css": {
 			"at-rule-empty-line-before": 27,
 			"color-hex-length": 13,
-			"comment-empty-line-before": 94,
+			"comment-empty-line-before": 92,
 			"declaration-block-no-duplicate-properties": 1,
 			"declaration-block-no-shorthand-property-overrides": 4,
 			"length-zero-no-unit": 2,
-			"no-descending-specificity": 406,
-			"no-duplicate-selectors": 49,
-			"rule-empty-line-before": 385,
+			"no-descending-specificity": 408,
+			"no-duplicate-selectors": 48,
+			"rule-empty-line-before": 386,
 			"value-keyword-case": 19
 		},
 		"assets/css/cr-404.css": {
