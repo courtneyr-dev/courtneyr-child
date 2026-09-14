@@ -1,0 +1,46 @@
+# PHPCS (WordPress Coding Standards) and stylelint against their checked-in
+# baselines, plus the theme.json schema check. The evidence and Playwright
+# capture scripts need a running site, so they stay local (docs/testing.md).
+
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: PHPCS, stylelint, theme.json schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          tools: composer:v2
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Install PHP lint tooling
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Install Node lint tooling
+        run: npm install --no-audit --no-fund
+
+      - name: PHPCS against tests/lint/phpcs-baseline.json
+        run: npm run lint:php
+
+      - name: stylelint against tests/lint/stylelint-baseline.json
+        if: ${{ !cancelled() }}
+        run: npm run lint:css
+
+      - name: theme.json and styles/*.json against the pinned schema
+        if: ${{ !cancelled() }}
+        run: npm run lint:theme-json
