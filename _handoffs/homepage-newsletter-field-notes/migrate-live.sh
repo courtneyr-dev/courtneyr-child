@@ -147,7 +147,7 @@ want_excl=$'cr-home-sections.css\ncr-archives.css\ncr-post-kinds.css'
 if [[ "$before_excl" == "$want_excl" ]]; then echo "rucss exclusions already set"; else
 	w option patch update perfmatters_options assets rucss_excluded_stylesheets "$want_excl"
 	now_excl="$(wv eval 'echo str_replace("\n","|",(string)((get_option("perfmatters_options")["assets"]["rucss_excluded_stylesheets"] ?? "")));')"
-	[[ "$now_excl" == "cr-home-sections.css|cr-archives.css|cr-post-kinds.css" ]] || die "rucss exclusions did not store ($now_excl); restore from $RUN_DIR/perfmatters_options-before.json"
+	[[ "$now_excl" == "cr-home-sections.css|cr-archives.css|cr-post-kinds.css" ]] || die "rucss exclusions did not store ($now_excl); restore with: wp @$ENV eval-file $THEME_DIR/_handoffs/homepage-newsletter-field-notes/restore-option.php <option backup in wp-content/cr-homepage-migration> (verified backup-option.php file)"
 	echo "rucss exclusions set (were: '${before_excl//$'\n'/|}')"
 fi
 w eval 'if (class_exists("Perfmatters\\CSS")) { \Perfmatters\CSS::clear_used_css(); echo "perfmatters used css cleared\n"; } else { echo "perfmatters not active; nothing to clear\n"; }'

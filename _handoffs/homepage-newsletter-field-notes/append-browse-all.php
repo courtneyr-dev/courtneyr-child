@@ -4,7 +4,7 @@
  *
  *   wp eval-file append-browse-all.php preview <page_id>
  *   wp eval-file append-browse-all.php apply   <page_id>
- *   wp eval-file append-browse-all.php rollback <page_id> <backup-file>
+ *   wp eval-file append-browse-all.php rollback <page_id> <backup-file> [preview]
  *
  * @package CourtneyrChild
  */
@@ -18,12 +18,20 @@ if ( ! $cr_post instanceof WP_Post || 'page' !== $cr_post->post_type || 'stream'
 	WP_CLI::error( 'Pass the id of the page whose slug is "stream".' );
 }
 if ( 'rollback' === $cr_mode ) {
-	$cr_file = (string) ( $args[2] ?? '' );
-	if ( '' === $cr_file || ! is_readable( $cr_file ) ) {
-		WP_CLI::error( 'rollback needs a readable backup file.' );
+	$cr_file     = (string) ( $args[2] ?? '' );
+	$cr_contents = cr_migration_read_verified_backup( $cr_file, 'post:' . $cr_id );
+	if ( $cr_post->post_content === $cr_contents ) {
+		WP_CLI::success( sprintf( 'Page %d already matches %s; nothing to restore.', $cr_id, basename( $cr_file ) ) );
+		return;
 	}
-	cr_migration_update_content( $cr_id, (string) file_get_contents( $cr_file ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-	WP_CLI::success( sprintf( 'Restored page %d from %s.', $cr_id, basename( $cr_file ) ) );
+	WP_CLI::log( cr_migration_diff_summary( $cr_post->post_content, $cr_contents ) );
+	if ( in_array( 'preview', array_map( 'strval', $args ), true ) ) {
+		WP_CLI::success( 'Preview only; nothing written.' );
+		return;
+	}
+	$cr_before = cr_migration_write_backup( sprintf( 'page-%d-before-rollback', $cr_id ), $cr_post->post_content, 'post:' . $cr_id );
+	cr_migration_update_content( $cr_id, $cr_contents );
+	WP_CLI::success( sprintf( 'Restored page %d from %s. Pre-rollback content: %s.', $cr_id, basename( $cr_file ), basename( $cr_before ) ) );
 	return;
 }
 if ( ! WP_Block_Patterns_Registry::get_instance()->is_registered( 'courtneyr-child/cr-browse-all' ) ) {

@@ -5,7 +5,7 @@
  *
  *   wp eval-file build-navigation.php preview <menu_id>
  *   wp eval-file build-navigation.php apply   <menu_id>
- *   wp eval-file build-navigation.php rollback <menu_id> <backup-file>
+ *   wp eval-file build-navigation.php rollback <menu_id> <backup-file> [preview]
  *
  * Reads the existing wp_navigation post, keeps every top-level item verbatim
  * except the "Blog" submenu and the "Stream" link, which are rebuilt as native
@@ -28,12 +28,20 @@ if ( ! $cr_post instanceof WP_Post || 'wp_navigation' !== $cr_post->post_type ) 
 }
 
 if ( 'rollback' === $cr_mode ) {
-	$cr_file = (string) ( $args[2] ?? '' );
-	if ( '' === $cr_file || ! is_readable( $cr_file ) ) {
-		WP_CLI::error( 'rollback needs a readable backup file.' );
+	$cr_file     = (string) ( $args[2] ?? '' );
+	$cr_contents = cr_migration_read_verified_backup( $cr_file, 'wp_navigation:' . $cr_menu );
+	if ( $cr_post->post_content === $cr_contents ) {
+		WP_CLI::success( sprintf( 'Menu %d already matches %s; nothing to restore.', $cr_menu, basename( $cr_file ) ) );
+		return;
 	}
-	cr_migration_update_content( $cr_menu, (string) file_get_contents( $cr_file ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-	WP_CLI::success( sprintf( 'Restored menu %d from %s.', $cr_menu, basename( $cr_file ) ) );
+	WP_CLI::log( cr_migration_diff_summary( $cr_post->post_content, $cr_contents ) );
+	if ( in_array( 'preview', array_map( 'strval', $args ), true ) ) {
+		WP_CLI::success( 'Preview only; nothing written.' );
+		return;
+	}
+	$cr_before = cr_migration_write_backup( sprintf( 'menu-%d-before-rollback', $cr_menu ), $cr_post->post_content, 'wp_navigation:' . $cr_menu );
+	cr_migration_update_content( $cr_menu, $cr_contents );
+	WP_CLI::success( sprintf( 'Restored menu %d from %s. Pre-rollback content: %s.', $cr_menu, basename( $cr_file ), basename( $cr_before ) ) );
 	return;
 }
 

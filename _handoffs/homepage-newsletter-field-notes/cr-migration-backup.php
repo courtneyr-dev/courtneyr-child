@@ -96,6 +96,44 @@ if ( ! function_exists( 'cr_migration_backup_dir' ) ) {
 	}
 
 	/**
+	 * Read a backup for restore only after proving it is the manifest-recorded
+	 * backup of $object on this site: the file has a manifest line, its sha256
+	 * matches that line, the line's home is this site and its object is exactly
+	 * $object. Any mismatch stops with nothing changed.
+	 *
+	 * @param string $file   Backup file path.
+	 * @param string $object Expected manifest object (e.g. "wp_navigation:9960").
+	 * @return string Backup contents.
+	 */
+	function cr_migration_read_verified_backup( string $file, string $object ): string {
+		if ( '' === $file || ! is_readable( $file ) ) {
+			WP_CLI::error( 'restore needs a readable backup file path.' );
+		}
+		$contents = (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$manifest = dirname( $file ) . '/manifest.jsonl';
+		$entry    = null;
+		foreach ( is_readable( $manifest ) ? (array) file( $manifest, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES ) : array() as $line ) {
+			$row = json_decode( (string) $line, true );
+			if ( is_array( $row ) && ( $row['file'] ?? '' ) === basename( $file ) ) {
+				$entry = $row;
+			}
+		}
+		if ( ! $entry ) {
+			WP_CLI::error( sprintf( '%s has no line in %s; refusing to guess its target.', basename( $file ), $manifest ) );
+		}
+		if ( ! hash_equals( (string) ( $entry['sha256'] ?? '' ), hash( 'sha256', $contents ) ) ) {
+			WP_CLI::error( sprintf( '%s does not match its manifest sha256; refusing to restore.', basename( $file ) ) );
+		}
+		if ( untrailingslashit( (string) ( $entry['home'] ?? '' ) ) !== untrailingslashit( home_url( '/' ) ) ) {
+			WP_CLI::error( sprintf( 'Backup was taken on %s, not %s; refusing to restore.', $entry['home'] ?? '?', home_url( '/' ) ) );
+		}
+		if ( (string) ( $entry['object'] ?? '' ) !== $object ) {
+			WP_CLI::error( sprintf( '%s was recorded for %s, not %s; refusing to restore.', basename( $file ), $entry['object'] ?? '?', $object ) );
+		}
+		return $contents;
+	}
+
+	/**
 	 * Line diff summary for previews: changed line count and the first changed lines.
 	 *
 	 * @param string $before Before.

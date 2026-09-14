@@ -7,7 +7,7 @@
  *
  *   wp eval-file fix-entry-wrappers.php dry-run  [post_id ...]
  *   wp eval-file fix-entry-wrappers.php apply    [post_id ...]
- *   wp eval-file fix-entry-wrappers.php rollback <post_id> [backup-file]
+ *   wp eval-file fix-entry-wrappers.php rollback <post_id> [backup-file] [preview]
  *
  * Without ids, every published/draft/private/pending/future post whose content
  * carries "className":"…h-entry…" on a Group is a candidate.
@@ -30,17 +30,28 @@ $cr_ids  = array_map( 'intval', array_slice( $args, 1 ) );
 if ( 'rollback' === $cr_mode ) {
 	$cr_id   = (int) ( $args[1] ?? 0 );
 	$cr_file = (string) ( $args[2] ?? '' );
-	if ( '' === $cr_file ) {
+	if ( '' === $cr_file || 'preview' === $cr_file ) {
 		$cr_files = glob( sprintf( '%s/post-%d-entry-wrapper-*.html', cr_migration_backup_dir(), $cr_id ) ) ?: array();
 		sort( $cr_files );
 		$cr_file = (string) end( $cr_files );
 	}
-	if ( ! $cr_id || '' === $cr_file || ! is_readable( $cr_file ) ) {
-		WP_CLI::error( 'rollback needs a post id with a readable backup.' );
+	$cr_target = $cr_id ? get_post( $cr_id ) : null;
+	if ( ! $cr_target instanceof WP_Post ) {
+		WP_CLI::error( 'rollback needs an existing post id.' );
 	}
-	$cr_contents = (string) file_get_contents( $cr_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	$cr_contents = cr_migration_read_verified_backup( $cr_file, 'post:' . $cr_id );
+	if ( $cr_target->post_content === $cr_contents ) {
+		WP_CLI::success( sprintf( 'Post %d already matches %s; nothing to restore.', $cr_id, basename( $cr_file ) ) );
+		return;
+	}
+	WP_CLI::log( cr_migration_diff_summary( $cr_target->post_content, $cr_contents ) );
+	if ( in_array( 'preview', array_map( 'strval', $args ), true ) ) {
+		WP_CLI::success( 'Preview only; nothing written.' );
+		return;
+	}
+	$cr_before = cr_migration_write_backup( sprintf( 'post-%d-before-rollback', $cr_id ), $cr_target->post_content, 'post:' . $cr_id );
 	cr_migration_update_content( $cr_id, $cr_contents );
-	WP_CLI::success( sprintf( 'Restored post %d from %s (sha256 %s).', $cr_id, basename( $cr_file ), substr( hash( 'sha256', $cr_contents ), 0, 12 ) ) );
+	WP_CLI::success( sprintf( 'Restored post %d from %s (sha256 %s). Pre-rollback content: %s.', $cr_id, basename( $cr_file ), substr( hash( 'sha256', $cr_contents ), 0, 12 ), basename( $cr_before ) ) );
 	return;
 }
 

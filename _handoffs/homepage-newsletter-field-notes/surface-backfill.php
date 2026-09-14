@@ -186,6 +186,7 @@ switch ( $cr_mode ) {
 		break;
 
 	case 'rollback':
+		cr_migration_read_verified_backup( (string) $cr_arg, 'meta:_pkiw_surface' );
 		$cr_data     = cr_surface_read_backup( $cr_arg );
 		$cr_wanted   = array();
 		foreach ( $cr_data['posts'] as $cr_p ) {
