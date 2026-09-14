@@ -598,13 +598,11 @@ function enqueue_icons_inject(): void {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_icons_inject' );
 
 /**
- * Small site-UX a11y polish module (v0.5.49): header search disclosure
- * (Escape + click-outside to close) and Complianz close-button Space-key
- * activation. See assets/js/site-ux.js for full rationale.
+ * Small site-UX a11y polish module (v0.5.49): Complianz close-button
+ * Space-key activation. See assets/js/site-ux.js for full rationale.
  *
- * Footer-deferred — none of this is render-blocking and all behaviors
- * degrade gracefully (Escape/click-outside missing means user re-clicks
- * the toggle; Space on Complianz close still works via Enter fallback).
+ * Footer-deferred — not render-blocking, and it degrades gracefully
+ * (Space on Complianz close still works via the Enter fallback).
  */
 function enqueue_site_ux(): void {
 	wp_enqueue_script(
