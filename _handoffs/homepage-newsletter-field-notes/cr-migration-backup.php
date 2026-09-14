@@ -16,13 +16,36 @@
 
 if ( ! function_exists( 'cr_migration_backup_dir' ) ) {
 	/**
-	 * Backup directory (overridable for tests via CR_MIGRATION_BACKUP_DIR).
+	 * Backup directory, outside the web root.
+	 *
+	 * Defaults to a folder beside the WordPress root (on GoDaddy Managed WordPress,
+	 * the account home above html/). CR_MIGRATION_BACKUP_DIR overrides it for tests
+	 * and fixtures. Backups hold previous content and option values, so a folder
+	 * inside ABSPATH or WP_CONTENT_DIR is refused: the web server would serve a
+	 * backup to anyone who guesses its timestamped name.
 	 *
 	 * @return string
 	 */
 	function cr_migration_backup_dir(): string {
 		$env = getenv( 'CR_MIGRATION_BACKUP_DIR' );
-		return is_string( $env ) && '' !== $env ? $env : WP_CONTENT_DIR . '/cr-homepage-migration';
+		$dir = is_string( $env ) && '' !== $env ? $env : dirname( untrailingslashit( ABSPATH ) ) . '/cr-homepage-migration';
+		$dir = untrailingslashit( wp_normalize_path( $dir ) );
+
+		// Resolve the nearest existing ancestor so symlinks and not-yet-created folders compare correctly.
+		$probe = $dir;
+		while ( ! file_exists( $probe ) && dirname( $probe ) !== $probe ) {
+			$probe = dirname( $probe );
+		}
+		$resolved = realpath( $probe );
+		$resolved = trailingslashit( wp_normalize_path( false !== $resolved ? $resolved : $probe ) );
+		foreach ( array( ABSPATH, WP_CONTENT_DIR ) as $web_dir ) {
+			$web = realpath( $web_dir );
+			$web = trailingslashit( wp_normalize_path( false !== $web ? $web : $web_dir ) );
+			if ( str_starts_with( $resolved, $web ) ) {
+				WP_CLI::error( sprintf( 'Backup directory %s is inside the web root (%s); set CR_MIGRATION_BACKUP_DIR to a folder outside it. Nothing was changed.', $dir, $web ) );
+			}
+		}
+		return $dir;
 	}
 
 	/**
