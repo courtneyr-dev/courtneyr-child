@@ -565,46 +565,72 @@ function enqueue_theme_toggle(): void {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_theme_toggle' );
 
 /**
- * Enqueue the icon-injector script that converts <use href> references
- * into inline SVGs from the post-type icon sprite. Required for the
- * cr-icon-avatar pattern to render its icon glyphs.
- *
- * Only enqueued when the icon sprite is present on disk.
+ * Print the post-type icon sprite once, server-side, as the first child
+ * of <body> (R-26). icons-inject.js used to insert the same markup there
+ * after DOMContentLoaded; printing it keeps that DOM position and makes
+ * `<use href="#post-icon-*">` resolve without JavaScript. wp_footer is the
+ * fallback for a template that never calls wp_body_open.
  */
-function enqueue_icons_inject(): void {
+function print_icon_sprite(): void {
+	static $printed = false;
+	if ( $printed ) {
+		return;
+	}
 	$path = COURTNEYR_CHILD_DIR . '/assets/svg/icons.svg';
 	if ( ! is_readable( $path ) ) {
 		return;
 	}
-	wp_enqueue_script(
-		'courtneyr-icons-inject',
-		COURTNEYR_CHILD_URI . '/assets/js/icons-inject.js',
-		array(),
-		COURTNEYR_CHILD_VERSION,
-		array(
-			'in_footer' => true,
-			'strategy'  => 'defer',
-		)
-	);
-	// Pass the sprite URL as a JS global so icons-inject knows where to fetch.
-	wp_add_inline_script(
-		'courtneyr-icons-inject',
-		'window.COURTNEYR_ICONS_SPRITE_URL = ' . wp_json_encode(
-			COURTNEYR_CHILD_URI . '/assets/svg/icons.svg?ver=' . COURTNEYR_CHILD_VERSION
-		) . ';',
-		'before'
-	);
+	$svg   = (string) file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	$start = strpos( $svg, '<svg' );
+	if ( false === $start ) {
+		return;
+	}
+	$printed = true;
+	echo substr( $svg, $start ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the theme's own static sprite file.
 }
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_icons_inject' );
+add_action( 'wp_body_open', __NAMESPACE__ . '\\print_icon_sprite', 0 );
+add_action( 'wp_footer', __NAMESPACE__ . '\\print_icon_sprite', 0 );
 
 /**
- * Small site-UX a11y polish module (v0.5.49): header search disclosure
- * (Escape + click-outside to close) and Complianz close-button Space-key
- * activation. See assets/js/site-ux.js for full rationale.
+ * Point sprite references at the printed sprite, once, on the finished
+ * HTML document. Mirrors the rewrite icons-inject.js ran after
+ * DOMContentLoaded: a `<use>` whose href contains `icons.svg#` becomes the
+ * same-document fragment. Running on the whole document rather than per
+ * block keeps every render_block filter seeing the file URLs it matches
+ * on (transform_stream_item_avatar() and transform_related_post_avatar()
+ * key off them). Documents without the printed sprite (embeds) are left
+ * alone, and REST, admin and feed responses never reach this filter.
  *
- * Footer-deferred — none of this is render-blocking and all behaviors
- * degrade gracefully (Escape/click-outside missing means user re-clicks
- * the toggle; Space on Complianz close still works via Enter fallback).
+ * @param string $html Buffered template output.
+ * @return string Output with same-document sprite references.
+ */
+function localize_icon_sprite_refs( string $html ): string {
+	if ( ! str_contains( $html, 'icons.svg#' ) || ! str_contains( $html, '<symbol id="post-icon-blog"' ) ) {
+		return $html;
+	}
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	while ( $tags->next_tag( 'use' ) ) {
+		foreach ( array( 'href', 'xlink:href' ) as $attribute ) {
+			$value = $tags->get_attribute( $attribute );
+			if ( ! is_string( $value ) || ! str_contains( $value, 'icons.svg#' ) ) {
+				continue;
+			}
+			$tags->set_attribute( 'href', substr( $value, (int) strpos( $value, '#' ) ) );
+			if ( 'xlink:href' === $attribute ) {
+				$tags->remove_attribute( 'xlink:href' );
+			}
+		}
+	}
+	return $tags->get_updated_html();
+}
+add_filter( 'wp_template_enhancement_output_buffer', __NAMESPACE__ . '\\localize_icon_sprite_refs' );
+
+/**
+ * Small site-UX a11y polish module (v0.5.49): Complianz close-button
+ * Space-key activation. See assets/js/site-ux.js for full rationale.
+ *
+ * Footer-deferred — not render-blocking, and it degrades gracefully
+ * (Space on Complianz close still works via the Enter fallback).
  */
 function enqueue_site_ux(): void {
 	wp_enqueue_script(
