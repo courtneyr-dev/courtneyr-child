@@ -6,64 +6,18 @@
 
 		<!-- wp:group {"className":"site-header__brand","style":{"spacing":{"blockGap":"0"}},"layout":{"type":"constrained"}} -->
 		<div class="wp-block-group site-header__brand">
-			<!-- wp:html -->
-			<a class="cr-wordmark" href="/" rel="home" aria-label="CourtneyR.dev — home">CourtneyR.dev</a>
-			<!-- /wp:html -->
+			<!-- wp:site-title {"level":0,"className":"is-style-cr-wordmark"} /-->
 		</div>
 		<!-- /wp:group -->
 
 		<!-- wp:group {"className":"site-header__controls","style":{"spacing":{"blockGap":"var:preset|spacing|small"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"right"}} -->
 		<div class="wp-block-group site-header__controls">
 
-			<!-- wp:html -->
-			<div class="cr-theme-segments" role="group" aria-label="Theme">
-				<span class="cr-theme-segments__indicator" aria-hidden="true"></span>
-				<button type="button" class="cr-theme-segment" data-theme-set="light" aria-pressed="false" aria-label="Light theme" title="Light">
-					<svg class="cr-theme-segment__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-						<circle cx="12" cy="12" r="4"/>
-						<path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>
-					</svg>
-				</button>
-				<button type="button" class="cr-theme-segment" data-theme-set="dark" aria-pressed="false" aria-label="Dark theme" title="Dark">
-					<svg class="cr-theme-segment__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-						<path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z"/>
-					</svg>
-				</button>
-				<button type="button" class="cr-theme-segment" data-theme-set="system" aria-pressed="false" aria-label="System theme (follows OS)" title="System">
-					<svg class="cr-theme-segment__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-						<rect x="3" y="4" width="18" height="13" rx="1.5"/>
-						<path d="M9 21h6M12 17v4"/>
-					</svg>
-				</button>
-			</div>
-			<!-- v0.5.178: mobile-only single-icon toggle. Cycles light → dark →
-			     system. Icon shown reflects the current data-theme (CSS-driven);
-			     view.js cycles the value + keeps the accessible name in sync.
-			     Shown only ≤900px; the segmented control above is desktop-only. -->
-			<button type="button" class="cr-theme-cycle" data-theme-cycle aria-label="Appearance: system theme. Activate to change.">
-				<span class="cr-theme-cycle__icon" data-theme-icon="light" aria-hidden="true">
-					<svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/></svg>
-				</span>
-				<span class="cr-theme-cycle__icon" data-theme-icon="dark" aria-hidden="true">
-					<svg viewBox="0 0 24 24" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z"/></svg>
-				</span>
-				<span class="cr-theme-cycle__icon" data-theme-icon="system" aria-hidden="true">
-					<svg viewBox="0 0 24 24" focusable="false"><rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M9 21h6M12 17v4"/></svg>
-				</span>
-			</button>
-			<!-- /wp:html -->
+			<!-- wp:template-part {"slug":"appearance-toggle","tagName":"div","className":"site-header__appearance"} /-->
 
 			<!-- wp:navigation {"className":"site-header__nav","openSubmenusOnClick":false,"icon":"menu","style":{"spacing":{"blockGap":"var:preset|spacing|small"}},"fontSize":"medium"} /-->
 
-			<!-- wp:html -->
-			<form role="search" method="get" action="/" class="site-header__search">
-				<label for="cr-header-search" class="screen-reader-text">Search the site</label>
-				<span class="site-header__search-icon" aria-hidden="true">
-					<svg class="search-icon" viewBox="0 0 24 24" width="24" height="24" focusable="false" fill="currentColor"><path d="M13.5 6C10.5 6 8 8.5 8 11.5c0 1.1.3 2.1.9 3l-3.4 3 1 1.1 3.4-3c1 .9 2.2 1.4 3.6 1.4 3 0 5.5-2.5 5.5-5.5C19 8.5 16.5 6 13.5 6zm0 9.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"></path></svg>
-				</span>
-				<input type="search" id="cr-header-search" name="s" placeholder="Search…" class="site-header__search-input">
-			</form>
-			<!-- /wp:html -->
+			<!-- wp:search {"label":"Search the site","showLabel":false,"placeholder":"Search…","buttonText":"Search","buttonPosition":"no-button","className":"site-header__search is-style-cr-header-search"} /-->
 
 		</div>
 		<!-- /wp:group -->

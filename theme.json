@@ -1064,6 +1064,11 @@
 			"name": "newsletter-cta",
 			"title": "Newsletter CTA (Field Notes)",
 			"area": "uncategorized"
+		},
+		{
+			"name": "appearance-toggle",
+			"title": "Appearance toggle",
+			"area": "uncategorized"
 		}
 	]
 }

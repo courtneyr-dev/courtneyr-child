@@ -231,5 +231,25 @@ add_action(
 				'label' => __( 'Display (Rock Salt)', 'courtneyr-child' ),
 			)
 		);
+
+		// Site Title — the all-paths wordmark asset painted over the site
+		// link (parts/header.html). inc/site-title-wordmark.php names the link.
+		register_block_style(
+			'core/site-title',
+			array(
+				'name'  => 'cr-wordmark',
+				'label' => __( 'Wordmark', 'courtneyr-child' ),
+			)
+		);
+
+		// Search — the header's outlined box with a leading glyph and no
+		// button; Enter submits.
+		register_block_style(
+			'core/search',
+			array(
+				'name'  => 'cr-header-search',
+				'label' => __( 'Header search', 'courtneyr-child' ),
+			)
+		);
 	}
 );

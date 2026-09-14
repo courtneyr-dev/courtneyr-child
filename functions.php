@@ -43,6 +43,7 @@ require_once __DIR__ . '/inc/stream-gallery.php';
 require_once __DIR__ . '/inc/stream-checkin.php';
 require_once __DIR__ . '/inc/single-checkin.php';
 require_once __DIR__ . '/inc/single-listen.php';
+require_once __DIR__ . '/inc/site-title-wordmark.php';
 require_once __DIR__ . '/inc/single-watch.php';
 require_once __DIR__ . '/inc/single-read.php';
 require_once __DIR__ . '/inc/stream-media.php';
