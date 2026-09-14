@@ -2470,6 +2470,49 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 	}
 }
 
+/* 0.7.46.1: band Groups render with an inline
+   `color: var(--wp--preset--color--main) !important` (DesignSetGo's
+   --dsgo-text-color output). R-40 removed the descendant !important locks
+   that hid it, so post body text rendered #1a1714 on the dark surface. No
+   stylesheet rule outranks an inline !important, so dark mode re-points the
+   preset that declaration reads. Newsletter fields keep their ivory paper,
+   so their text takes --cr-ink-inverse instead of the flipped ink. The
+   comment-form labels were hard-coded violet under the same locks. */
+:root[data-theme="dark"] :is(.has-main-accent-background-color, .has-tertiary-background-color, .has-base-background-color, .has-secondary-background-color) {
+	--wp--preset--color--main: var(--cr-ink);
+}
+:root[data-theme="dark"] .related-posts {
+	--wp--preset--color--main: var(--cr-callout-ink);
+}
+:root[data-theme="dark"] :is(.has-main-accent-background-color, .has-tertiary-background-color, .has-base-background-color, .has-secondary-background-color, .related-posts) :is(input, textarea, select):not([type="submit"], [type="button"], [type="checkbox"], [type="radio"]) {
+	color: var(--cr-ink-inverse);
+}
+:root[data-theme="dark"] .single-post__comments-wrapper label,
+:root[data-theme="dark"] .single-post__comments-wrapper legend {
+	color: var(--cr-ink);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) :is(.has-main-accent-background-color, .has-tertiary-background-color, .has-base-background-color, .has-secondary-background-color),
+	:root[data-theme="system"] :is(.has-main-accent-background-color, .has-tertiary-background-color, .has-base-background-color, .has-secondary-background-color) {
+		--wp--preset--color--main: var(--cr-ink);
+	}
+	:root:not([data-theme]) .related-posts,
+	:root[data-theme="system"] .related-posts {
+		--wp--preset--color--main: var(--cr-callout-ink);
+	}
+	:root:not([data-theme]) :is(.has-main-accent-background-color, .has-tertiary-background-color, .has-base-background-color, .has-secondary-background-color, .related-posts) :is(input, textarea, select):not([type="submit"], [type="button"], [type="checkbox"], [type="radio"]),
+	:root[data-theme="system"] :is(.has-main-accent-background-color, .has-tertiary-background-color, .has-base-background-color, .has-secondary-background-color, .related-posts) :is(input, textarea, select):not([type="submit"], [type="button"], [type="checkbox"], [type="radio"]) {
+		color: var(--cr-ink-inverse);
+	}
+	:root:not([data-theme]) .single-post__comments-wrapper label,
+	:root:not([data-theme]) .single-post__comments-wrapper legend,
+	:root[data-theme="system"] .single-post__comments-wrapper label,
+	:root[data-theme="system"] .single-post__comments-wrapper legend {
+		color: var(--cr-ink);
+	}
+}
+
 /* (4) Tables — semantic surface tokens with zebra striping + dark mode
    flip. Default Ollie tables had no bg in dark mode = invisible body
    cells. Now they get cr-surface-elevated bg, cr-callout-bg header,
