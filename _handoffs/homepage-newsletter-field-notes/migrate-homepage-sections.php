@@ -36,7 +36,7 @@
  * block, including later editorial edits, is left byte-for-byte as saved.
  *
  * post_id defaults to the page set as the static front page. `apply` writes a
- * timestamped backup of the previous content to wp-content/cr-homepage-migration/
+ * timestamped backup of the previous content to cr_migration_backup_dir() (outside the web root)
  * and updates the page through wp_update_post(), which also creates a revision.
  * `rollback` restores a backup file into the object the backup manifest recorded
  * for it (`post:<id>` for pages, `wp_template:<id>` for the saved single
@@ -117,7 +117,7 @@ if ( ! $cr_post instanceof WP_Post || 'page' !== $cr_post->post_type ) {
 }
 WP_CLI::log( sprintf( 'Target: page %d "%s" (%s)', $cr_post->ID, $cr_post->post_title, get_permalink( $cr_post ) ) );
 
-$cr_backup_dir = WP_CONTENT_DIR . '/cr-homepage-migration';
+$cr_backup_dir = cr_migration_backup_dir();
 
 /**
  * Upgrade: targeted block transforms, everything else untouched.
