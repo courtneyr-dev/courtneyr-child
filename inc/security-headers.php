@@ -189,6 +189,12 @@ function send_frontend_headers( \WP $wp ): void {
 	// browser ignores it and Chrome logs a console error on every page
 	// load, so it stays out of the trial policy.
 	$csp_report_only = array_merge( $csp, CSP_REPORT_ONLY_OVERRIDES );
+	// The trial script-src replaces the enforced one wholesale, so the AMP
+	// runtime source added for story singles above has to be re-added here or
+	// every story view logs report-only violations for its own runtime.
+	if ( is_singular( 'web-story' ) ) {
+		$csp_report_only['script-src'] .= ' https://cdn.ampproject.org';
+	}
 	unset( $csp_report_only['upgrade-insecure-requests'] );
 	header( 'Content-Security-Policy-Report-Only: ' . build_policy( $csp_report_only ) );
 }
