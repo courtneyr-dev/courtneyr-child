@@ -3,18 +3,29 @@
  * Mood pins: the mood word and a printed motif on a pin-back button, on
  * the single and on /stream.
  *
- * The plugin's mood-card block stores the mood as free text (`mood`) and a
- * Unicode emoji (`emoji`). Both of its renderers — render.php on the single
- * (and for a card-only micro-post on /stream) and the generic stream card —
- * emit one `<span class="pk-mood__emoji">`. This module swaps that span for
- * the pin. A catalog mood (assets/data/moods.json: 194 moods, each with a
- * family, a motif from inc/mood-motifs.php, a word layout, a face, and a
- * deterministic two-or-three-ink palette) prints as screen-printed art:
- * the motif in two plates, a halftone field, the word set into the
- * composition. Anything off the catalog prints the saved word and, when
- * there is one, the saved emoji as a text glyph. Storage is untouched: the
- * block keeps its attributes and their meaning. cr-mood-pin.css paints the
- * shell (rim, dome, wear, contact shadow).
+ * The plugin's mood-card block stores the mood as free text (`mood`), a
+ * Unicode emoji (`emoji`) and, for a mood picked from Post Kinds for
+ * IndieWeb's vocabulary, that mood's stable key (`moodKey`). Both of its
+ * renderers — render.php on the single (and for a card-only micro-post on
+ * /stream) and the generic stream card — emit one
+ * `<span class="pk-mood__emoji">`. This module swaps that span for the pin.
+ * A `moodKey` (or, with none, saved text matching one of the plugin's known
+ * spellings) picks the catalog entry by that mood's identity rather than by
+ * literal text, for its *visuals* only. The pin's word — accessible name,
+ * visible word, and printed face word — becomes
+ * `Mood_Vocabulary::display_label()` only when the block has a *stored*
+ * `moodKey`, matching the plugin's own `p-name` exactly (it never infers a
+ * key from text either): #207 keeps typed text separate from generated
+ * labels, so a key-less mood, even one whose text matches the plugin's
+ * vocabulary, renders exactly as saved. A catalog mood
+ * (assets/data/moods.json: 194 moods, each with a family, a motif from
+ * inc/mood-motifs.php, a word layout, a face, and a deterministic
+ * two-or-three-ink palette) prints as screen-printed art: the motif in two
+ * plates, a halftone field, the word set into the composition. Anything off
+ * the catalog prints the saved word, as authored, and, when there is one,
+ * the saved emoji as a text glyph. Storage is untouched: the block keeps
+ * its attributes and their meaning. cr-mood-pin.css paints the shell (rim,
+ * dome, wear, contact shadow).
  *
  * @package CourtneyrChild
  */
@@ -109,6 +120,20 @@ function catalog(): array {
 }
 
 /**
+ * A mood string trimmed and tidied, but not cased: tags and entities gone,
+ * whitespace collapsed, original case kept. Used for the accessible name of
+ * a custom mood, which prints exactly as authored.
+ *
+ * @param string $mood Saved mood text.
+ * @return string
+ */
+function authored_label( string $mood ): string {
+	$mood = wp_strip_all_tags( html_entity_decode( $mood, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+	$mood = (string) preg_replace( '/\s+/u', ' ', $mood );
+	return trim( $mood );
+}
+
+/**
  * A mood string as the catalog keys it: tags and entities gone, whitespace
  * collapsed, lowercase. "In Love" and "in love" are the same mood.
  *
@@ -116,27 +141,131 @@ function catalog(): array {
  * @return string
  */
 function normalize_label( string $mood ): string {
-	$mood = wp_strip_all_tags( html_entity_decode( $mood, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
-	$mood = (string) preg_replace( '/\s+/u', ' ', $mood );
-	return mb_strtolower( trim( $mood ) );
+	return mb_strtolower( authored_label( $mood ) );
+}
+
+/**
+ * A Post Kinds for IndieWeb mood by its stable key.
+ *
+ * @param string $mood_key Mood key.
+ * @return array{key: string, label: string, variants: list<string>}|null Null when Post Kinds is absent or the key is unknown.
+ */
+function vocabulary_mood( string $mood_key ): ?array {
+	if ( '' === $mood_key || ! class_exists( '\PKIW\Mood_Vocabulary' ) ) {
+		return null;
+	}
+	foreach ( \PKIW\Mood_Vocabulary::get_moods() as $mood ) {
+		if ( (string) $mood['key'] === $mood_key ) {
+			return $mood;
+		}
+	}
+	return null;
+}
+
+/**
+ * The Post Kinds mood key whose known spellings include a normalized label.
+ *
+ * @param string $normalized Normalized mood text (see normalize_label()).
+ * @return string Mood key, or '' when no Post Kinds mood matches.
+ */
+function vocabulary_key_for_label( string $normalized ): string {
+	if ( '' === $normalized || ! class_exists( '\PKIW\Mood_Vocabulary' ) ) {
+		return '';
+	}
+	foreach ( \PKIW\Mood_Vocabulary::get_moods() as $mood ) {
+		foreach ( (array) ( $mood['variants'] ?? array() ) as $variant ) {
+			if ( normalize_label( (string) $variant ) === $normalized ) {
+				return (string) $mood['key'];
+			}
+		}
+	}
+	return '';
+}
+
+/**
+ * The catalog entry a Post Kinds mood key's known spellings (source US
+ * label, UK label, current label) resolve to.
+ *
+ * @param string $mood_key Post Kinds mood key.
+ * @return array<string, mixed>|null
+ */
+function catalog_entry_for_vocabulary_key( string $mood_key ): ?array {
+	$mood = vocabulary_mood( $mood_key );
+	if ( null === $mood ) {
+		return null;
+	}
+	foreach ( (array) ( $mood['variants'] ?? array( $mood['label'] ) ) as $variant ) {
+		$entry = catalog()[ normalize_label( (string) $variant ) ] ?? null;
+		if ( null !== $entry ) {
+			return $entry;
+		}
+	}
+	return null;
 }
 
 /**
  * What to print for a saved mood + emoji.
  *
- * @param string $mood  Saved mood text.
- * @param string $emoji Saved emoji.
- * @return array{label: string, family: string, motif: string, layout: string, font: string, palette: array<int, string>, rim: array<int, string>, glyph: string, pattern: string, custom: bool}
+ * The label only ever resolves through a *stored* mood key — #207 keeps
+ * typed text separate from generated labels, and the plugin's own
+ * `p-name` resolves the same way (`Mood_Vocabulary::display_label()`
+ * called with only the block's actual `moodKey`). A block with no stored
+ * key renders its saved text exactly as authored, even when that text
+ * happens to match one of the plugin's known spellings.
+ *
+ * Catalog *visuals* (family, motif, layout, palette) are looked up more
+ * generously: a known Post Kinds mood key (stored, or — with none —
+ * inferred from saved text that matches a Post Kinds mood's known
+ * spellings) picks the catalog entry by that mood's US/UK/current
+ * variants. That inferred key never feeds the label, only the entry
+ * lookup. A custom mood (no catalog entry, no Post Kinds match) keeps
+ * its printed face word as today (lowercase) and its accessible name is
+ * the authored text, trimmed and not lowercased.
+ *
+ * @param string $mood     Saved mood text.
+ * @param string $emoji    Saved emoji.
+ * @param string $mood_key Saved Post Kinds mood key ('' when none).
+ * @return array{label: string, name: string, family: string, motif: string, layout: string, font: string, palette: array<int, string>, rim: array<int, string>, glyph: string, pattern: string, custom: bool}
  */
-function resolve( string $mood, string $emoji ): array {
-	$label = normalize_label( $mood );
-	$emoji = trim( wp_strip_all_tags( $emoji ) );
-	$entry = catalog()[ $label ] ?? null;
-	$seed  = crc32( $label . '|' . $emoji );
+function resolve( string $mood, string $emoji, string $mood_key = '' ): array {
+	$authored   = authored_label( $mood );
+	$label      = mb_strtolower( $authored );
+	$emoji      = trim( wp_strip_all_tags( $emoji ) );
+	$stored_key = sanitize_key( $mood_key );
+
+	// Catalog-entry lookup only: the stored key when valid, else — with
+	// none — text that matches one of Post Kinds' known spellings.
+	$vocab_key = '';
+	if ( '' !== $stored_key && null !== vocabulary_mood( $stored_key ) ) {
+		$vocab_key = $stored_key;
+	} elseif ( '' === $stored_key ) {
+		$vocab_key = vocabulary_key_for_label( $label );
+	}
+
+	// The label: only a *stored* key resolves it, matching the plugin's
+	// own p-name exactly (it never infers a key from text either).
+	$resolved_label = ( '' !== $stored_key && class_exists( '\PKIW\Mood_Vocabulary' ) )
+		? \PKIW\Mood_Vocabulary::display_label( $mood, $stored_key )
+		: '';
+
+	$entry = '' !== $vocab_key ? catalog_entry_for_vocabulary_key( $vocab_key ) : null;
+	if ( null === $entry ) {
+		$entry = catalog()[ $label ] ?? null;
+	}
+
+	$seed = crc32( $label . '|' . $emoji );
 	if ( null !== $entry ) {
 		$v = (array) ( $entry['visual'] ?? array() );
+		if ( '' !== $resolved_label ) {
+			$name = $resolved_label; // A stored key: the plugin's resolved label.
+		} elseif ( '' !== $vocab_key ) {
+			$name = $authored; // A key-less Post Kinds mood: renders exactly as saved.
+		} else {
+			$name = (string) $entry['label']; // A catalog-only mood: the catalog's own case, as today.
+		}
 		return array(
-			'label'   => (string) $entry['label'],
+			'label'   => $name,
+			'name'    => $name,
 			'family'  => (string) ( $entry['family'] ?? 'other' ),
 			'motif'   => (string) ( $v['motif'] ?? '' ),
 			'layout'  => in_array( $v['layout'] ?? '', LAYOUTS, true ) ? (string) $v['layout'] : 'icon-word',
@@ -151,6 +280,7 @@ function resolve( string $mood, string $emoji ): array {
 	$with_glyph = array( 'icon-word', 'crooked', 'icon-arc', 'arc-top' );
 	return array(
 		'label'   => $label,
+		'name'    => '' !== $resolved_label ? $resolved_label : $authored,
 		'family'  => '',
 		'motif'   => '',
 		'layout'  => '' !== $emoji ? $with_glyph[ ( $seed >> 2 ) % 4 ] : ( false !== strpos( $label, ' ' ) ? 'stacked' : 'word-big' ),
@@ -405,6 +535,7 @@ function render( array $spec, string $size ): string {
 	static $uid = 0;
 	++$uid;
 	$label = (string) $spec['label'];
+	$name  = isset( $spec['name'] ) ? (string) $spec['name'] : $label;
 	$seed  = crc32( $label . '|' . $spec['glyph'] );
 	$size  = 'single' === $size ? 'single' : 'stream';
 	$p     = $spec['palette'];
@@ -437,8 +568,8 @@ function render( array $spec, string $size ): string {
 	$html  = ink_defs();
 	$html .= '<span class="cr-pin-set cr-pin-set--' . $size . '">';
 	$html .= '<span class="' . esc_attr( implode( ' ', $classes ) ) . '" style="' . esc_attr( $style ) . '">';
-	if ( '' !== $label && ! $spec['word_below'] ) {
-		$html .= '<span class="cr-sr-only cr-pin__name">' . esc_html( $label ) . '</span>';
+	if ( '' !== $name && ! $spec['word_below'] ) {
+		$html .= '<span class="cr-sr-only cr-pin__name">' . esc_html( $name ) . '</span>';
 	}
 	$html .= '<span class="cr-pin__rim" aria-hidden="true"></span>';
 	$html .= '<span class="cr-pin__face">' . face_svg( $spec, $uid );
@@ -449,7 +580,7 @@ function render( array $spec, string $size ): string {
 	$html .= '<span class="cr-pin__wear" aria-hidden="true"></span>';
 	$html .= '</span>';
 	if ( $spec['word_below'] ) {
-		$html .= '<span class="cr-pin__name cr-pin__word-below">' . esc_html( $label ) . '</span>';
+		$html .= '<span class="cr-pin__name cr-pin__word-below">' . esc_html( $name ) . '</span>';
 	}
 	if ( 'single' === $size && '' !== $spec['family'] ) {
 		$html .= '<span class="cr-pin__family"><span class="cr-sr-only">' . esc_html__( 'Mood family:', 'courtneyr-child' ) . ' </span>' . esc_html( $spec['family'] ) . '</span>';
@@ -535,7 +666,7 @@ function mood_card( string $html, array $block ): string {
 	}
 	$attrs = (array) ( $block['attrs'] ?? array() );
 	$mood  = (string) ( $attrs['mood'] ?? '' );
-	$spec  = resolve( $mood, (string) ( $attrs['emoji'] ?? '' ) );
+	$spec  = resolve( $mood, (string) ( $attrs['emoji'] ?? '' ), (string) ( $attrs['moodKey'] ?? '' ) );
 	$html  = replace_emoji_span( $html, render( $spec, is_singular( 'post' ) ? 'single' : 'stream' ) );
 
 	// A card-only micro-post on /stream with no moodAt has no date of its
@@ -587,7 +718,7 @@ function stream_card( string $html, array $block, $instance ): string {
 	if ( '' === $emoji && preg_match( '/<span class="pk-mood__emoji"[^>]*>(.*?)<\/span>/su', $html, $m ) ) {
 		$emoji = (string) $m[1];
 	}
-	$html = replace_emoji_span( $html, render( resolve( (string) ( $attrs['mood'] ?? '' ), $emoji ), 'stream' ) );
+	$html = replace_emoji_span( $html, render( resolve( (string) ( $attrs['mood'] ?? '' ), $emoji, (string) ( $attrs['moodKey'] ?? '' ) ), 'stream' ) );
 	// A title-less post gets the plugin's synthetic kind-label heading as its
 	// link; under a mood pin that reads "Mood" twice, so it hides visually.
 	if ( false === strpos( $html, 'pk-title p-name' ) ) {
@@ -652,7 +783,7 @@ function enqueue_editor(): void {
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\enqueue_editor' );
 
 /**
- * GET /courtneyr/v1/mood-pin?mood=&emoji= → { html } for the editor preview.
+ * GET /courtneyr/v1/mood-pin?mood=&emoji=&moodKey= → { html } for the editor preview.
  */
 function register_rest_route(): void {
 	\register_rest_route(
@@ -664,19 +795,24 @@ function register_rest_route(): void {
 				return current_user_can( 'edit_posts' );
 			},
 			'args'                => array(
-				'mood'  => array(
+				'mood'    => array(
 					'type'              => 'string',
 					'default'           => '',
 					'sanitize_callback' => 'sanitize_text_field',
 				),
-				'emoji' => array(
+				'emoji'   => array(
 					'type'              => 'string',
 					'default'           => '',
 					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'moodKey' => array(
+					'type'              => 'string',
+					'default'           => '',
+					'sanitize_callback' => 'sanitize_key',
 				),
 			),
 			'callback'            => static function ( \WP_REST_Request $request ): array {
-				$spec = resolve( (string) $request['mood'], (string) $request['emoji'] );
+				$spec = resolve( (string) $request['mood'], (string) $request['emoji'], (string) $request['moodKey'] );
 				return array(
 					'html'   => render( $spec, 'single' ),
 					'custom' => (bool) $spec['custom'],
