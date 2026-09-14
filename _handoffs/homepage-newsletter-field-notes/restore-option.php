@@ -16,7 +16,9 @@
  * keys for taxonomies that aren't registered). The script runs the same
  * sanitizer without writing, reports those keys as sanitizer_changes, refuses
  * to write unless allow-sanitized names exactly that set, and then verifies the
- * stored value equals the sanitized backup.
+ * stored value equals the sanitized backup. Comparisons sort associative keys,
+ * because sanitizers such as Yoast's rebuild the array in a different key order
+ * without changing any value.
  *
  * @package CourtneyrChild
  */
@@ -41,7 +43,17 @@ cr_migration_read_verified_backup( $cr_file, 'option:' . $cr_name );
 $cr_exists  = ! empty( $cr_data['exists'] );
 $cr_value   = $cr_data['value'] ?? null;
 $cr_current = get_option( $cr_name, null );
-$cr_enc     = static fn( $v ) => (string) wp_json_encode( $v, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+$cr_norm    = static function ( $v ) use ( &$cr_norm ) {
+	if ( ! is_array( $v ) ) {
+		return $v;
+	}
+	$v = array_map( $cr_norm, $v );
+	if ( array_keys( $v ) !== range( 0, count( $v ) - 1 ) ) {
+		ksort( $v, SORT_STRING );
+	}
+	return $v;
+};
+$cr_enc     = static fn( $v ) => (string) wp_json_encode( $cr_norm( $v ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 $cr_diff    = static function ( $a, $b ) use ( $cr_enc ) {
 	if ( ! is_array( $a ) || ! is_array( $b ) ) {
 		return $cr_enc( $a ) === $cr_enc( $b ) ? array() : array( '(value)' );
