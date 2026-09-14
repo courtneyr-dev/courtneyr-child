@@ -472,9 +472,25 @@ function revalidate_page_html(): void {
 	if ( is_admin() || is_feed() || is_robots() ) {
 		return;
 	}
-	if ( is_user_logged_in() || ( is_singular() && post_password_required() ) ) {
-		// R-09: a password-protected post must never be publicly cacheable —
-		// the form and, after the cookie, the content are per-visitor.
+
+	$post_password_set = false;
+	if ( is_singular() ) {
+		$post              = get_post();
+		$post_password_set = $post && '' !== (string) $post->post_password;
+	}
+
+	if ( $post_password_set ) {
+		// R-09: a password-protected post must never be shared-cacheable. Gate on
+		// the post HAVING a password, not post_password_required() — that helper
+		// returns false once the visitor's wp-postpass_ cookie is valid, but the
+		// response still varies by that cookie (form vs. content), so it's still
+		// a per-visitor response. The host replaces Cache-Control on HTML unless
+		// the value contains "private" (/wp-login.php keeps its "...private"
+		// suffix; this branch previously didn't, and reached browsers as
+		// "public, max-age=2678400" — staging evidence 2026-09-14, FAIL 3), so
+		// "private" here is load-bearing, not decorative.
+		header( 'Cache-Control: private, no-cache, no-store, must-revalidate, max-age=0', true );
+	} elseif ( is_user_logged_in() ) {
 		header( 'Cache-Control: no-cache, must-revalidate, max-age=0', true );
 	} else {
 		header( 'Cache-Control: public, max-age=600, must-revalidate', true );
