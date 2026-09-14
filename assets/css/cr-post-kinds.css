@@ -4286,6 +4286,42 @@ body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-meta ti
 	body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-title { font-size: 1.1rem; }
 }
 
+/* Listen sources (R-15): parts/kind-listen.html renders the cr-listen-sources
+   pattern below the post content. Its rating and link come from Post Kinds
+   bindings (post-kinds/kind-meta); an empty value hides its row, and the whole
+   group hides when neither value is stored. */
+body.single-post .cr-listen-sources {
+	gap: 0.5rem 0.9rem;
+	margin-block: var(--wp--preset--spacing--medium, 1rem);
+}
+
+body.single-post .cr-listen-sources__label {
+	margin: 0;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.6rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--cr-ink-muted, #126782);
+}
+
+body.single-post .cr-listen-sources__rating {
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.72rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.1em;
+}
+
+body.single-post .cr-listen-sources__links {
+	margin: 0;
+}
+
+body.single-post .cr-listen-sources__rating:has(> .cr-listen-sources__value:empty),
+body.single-post .cr-listen-sources__link:has(> a:not([href])),
+body.single-post .cr-listen-sources:not(:has(a[href], .cr-listen-sources__value:not(:empty))) {
+	display: none;
+}
+
 /* Rating value beside the stars (inc/single-listen.php). */
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-stars { display: flex; align-items: center; gap: 0.15rem; }
 body.single-post.kind-listen .single-post__content .pk-card.k-listen .pk-stars svg { width: 1.1rem; height: 1.1rem; }

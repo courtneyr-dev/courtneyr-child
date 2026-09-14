@@ -18,7 +18,6 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\StreamMedia;
 
-use function Courtneyr\Child\SingleListen\provider_label;
 use function Courtneyr\Child\SingleWatch\classify;
 use function Courtneyr\Child\SingleWatch\film_facts;
 use function Courtneyr\Child\SingleWatch\heavy_left;
@@ -80,6 +79,49 @@ function watch_links( array $attrs ): array {
 		$links[] = array( 'https://www.themoviedb.org/' . $type . '/' . rawurlencode( $tmdb ), 'TMDb', 'details' );
 	}
 	return $links;
+}
+
+/**
+ * Provider labels by host for listen links. A host not listed falls back to
+ * "Listen". Moved here with R-15, when inc/single-listen.php was deleted.
+ *
+ * @return array<string, string>
+ */
+function listen_providers(): array {
+	return array(
+		'open.spotify.com'  => 'Spotify',
+		'spotify.com'       => 'Spotify',
+		'music.apple.com'   => 'Apple Music',
+		'bandcamp.com'      => 'Bandcamp',
+		'soundcloud.com'    => 'SoundCloud',
+		'youtube.com'       => 'YouTube',
+		'www.youtube.com'   => 'YouTube',
+		'youtu.be'          => 'YouTube',
+		'music.youtube.com' => 'YouTube Music',
+		'tidal.com'         => 'Tidal',
+		'deezer.com'        => 'Deezer',
+		'last.fm'           => 'Last.fm',
+		'www.last.fm'       => 'Last.fm',
+		'musicbrainz.org'   => 'MusicBrainz',
+		'discogs.com'       => 'Discogs',
+		'www.discogs.com'   => 'Discogs',
+	);
+}
+
+/**
+ * The label a listen URL gets in the stream sources row.
+ *
+ * @param string $url External URL.
+ * @return string Provider name, or "Listen" when the host is not known.
+ */
+function provider_label( string $url ): string {
+	$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+	foreach ( listen_providers() as $needle => $label ) {
+		if ( $host === $needle || str_ends_with( $host, '.' . $needle ) ) {
+			return $label;
+		}
+	}
+	return __( 'Listen', 'courtneyr-child' );
 }
 
 /**

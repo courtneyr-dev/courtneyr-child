@@ -161,20 +161,19 @@ function enqueue_baseline(): void {
 		   (body.home), archives (body.archive), search, 404, etc. all
 		   fall back to the theme.json 720/1100 defaults — restoring the
 		   image-202 layout. Inline so Perfmatters Used CSS does not
-		   prune the body.single scope. */
+		   prune the body.single scope.
+
+		   R-24: the width reaches the article through block layout. The
+		   Single Post group is a constrained layout sized by the content-size
+		   property below, and the Post Content block (templates/single.html)
+		   sets contentSize 100% so its children fill that column. The two
+		   max-width !important rules that used to force it are gone. */
 		@media (min-width: 1024px) {
 			body.single {
 				--wp--style--global--content-size: 80vw;
 				--wp--style--global--wide-size: 86vw;
 				--cr-measure: 80vw;
 				--cr-measure-wide: 86vw;
-			}
-			body.single .wp-block-post-content {
-				max-width: 80vw !important;
-				margin-inline: auto !important;
-			}
-			body.single .wp-block-post-content > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
-				max-width: 100% !important;
 			}
 			body.single .wp-block-post-content pre,
 			body.single .wp-block-post-content .wp-block-code,

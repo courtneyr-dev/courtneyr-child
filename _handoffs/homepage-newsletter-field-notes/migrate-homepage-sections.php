@@ -40,7 +40,7 @@
  * and updates the page through wp_update_post(), which also creates a revision.
  * `rollback` restores a backup file into the object the backup manifest recorded
  * for it (`post:<id>` for pages, `wp_template:<id>` for the saved single
- * override). It refuses unless the file's sha256 matches its manifest line and
+ * override, `wp_template_part:<id>` for a saved template part). It refuses unless the file's sha256 matches its manifest line and
  * the object still exists with the recorded type, backs up the current content
  * first (so the rollback is itself reversible), and verifies the stored bytes.
  * Run locally first; production needs its own authorization.
@@ -82,12 +82,12 @@ if ( 'rollback' === $cr_mode ) {
 	if ( untrailingslashit( (string) ( $cr_entry['home'] ?? '' ) ) !== untrailingslashit( home_url( '/' ) ) ) {
 		WP_CLI::error( sprintf( 'Backup was taken on %s, not %s; refusing to restore.', $cr_entry['home'] ?? '?', home_url( '/' ) ) );
 	}
-	if ( ! preg_match( '/^(post|wp_template):(\d+)$/', (string) ( $cr_entry['object'] ?? '' ), $cr_m ) ) {
-		WP_CLI::error( sprintf( 'Manifest object "%s" is not a restorable post or template.', $cr_entry['object'] ?? '' ) );
+	$cr_object = cr_migration_parse_object( (string) ( $cr_entry['object'] ?? '' ) );
+	if ( null === $cr_object ) {
+		WP_CLI::error( sprintf( 'Manifest object "%s" is not a restorable post, template or template part.', $cr_entry['object'] ?? '' ) );
 	}
-	$cr_target = get_post( (int) $cr_m[2] );
-	$cr_types  = 'wp_template' === $cr_m[1] ? array( 'wp_template' ) : array( 'page', 'post' );
-	if ( ! $cr_target instanceof WP_Post || ! in_array( $cr_target->post_type, $cr_types, true ) ) {
+	$cr_target = get_post( $cr_object['id'] );
+	if ( ! $cr_target instanceof WP_Post || ! in_array( $cr_target->post_type, $cr_object['post_types'], true ) ) {
 		WP_CLI::error( sprintf( 'Target %s no longer exists with the recorded type; nothing changed.', $cr_entry['object'] ) );
 	}
 	WP_CLI::log( sprintf( 'Target: %s %d "%s"', $cr_target->post_type, $cr_target->ID, $cr_target->post_title ) );
@@ -220,7 +220,9 @@ if ( 'upgrade-templates' === $cr_mode ) {
 		array(
 			'post_type'      => 'wp_template',
 			'post_status'    => 'publish',
-			'name'           => 'single',
+			// post_name__in, not name: a name query is singular and WP_Query skips tax_query for it,
+			// which let another theme's newer single override win.
+			'post_name__in'  => array( 'single' ),
 			'posts_per_page' => 1,
 			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				array(
