@@ -251,9 +251,14 @@ const THEME_META_MAP = array(
  * corresponding key in the array returned by
  * `pkiw_get_visible_location_fields()`. Attributes not listed here are
  * not location data and are always eligible to fill from meta.
+ *
+ * `name` is the dish (eat) or beverage (drink), not the venue, so it
+ * isn't listed. `restaurant` is the eat card's deprecated venue-name
+ * field and is gated with `locationName`. `brand` is the drink's
+ * producer, not where it was drunk.
  */
 const LOCATION_ATTR_VISIBILITY_MAP = array(
-	'name'             => 'name',
+	'restaurant'       => 'name',
 	'locationName'     => 'name',
 	'locationAddress'  => 'street',
 	'locationLocality' => 'locality',
