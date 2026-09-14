@@ -140,7 +140,13 @@ function send_baseline_headers(): void {
 function send_frontend_headers( \WP $wp ): void {
 	send_baseline_headers();
 
-	header( 'Permissions-Policy: interest-cohort=(), browsing-topics=()' );
+	// R-29: deny powerful features no front-end page uses. Site code calls only
+	// navigator.clipboard (pull quotes) and navigator.share (Outpost), which
+	// stay available; geolocation keeps same-origin for Outpost and future
+	// check-in capture (the Post Kinds check-in picker runs in wp-admin, which
+	// these front-end headers do not reach). Embed iframes keep their default
+	// autoplay/fullscreen/picture-in-picture/encrypted-media allowances.
+	header( 'Permissions-Policy: accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=(), browsing-topics=()' );
 
 	// The Sucuri edge in front of courtneyr.dev injects
 	// Referrer-Policy: strict-origin-when-cross-origin on every response,
