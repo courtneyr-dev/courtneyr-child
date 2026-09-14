@@ -10,9 +10,16 @@
  * every location-tagged post.
  *
  * Simple Location appends the map to the_content at priority 11. This runs at
- * 12 and injects a descriptive alt (built from the post's geo_address) into any
- * sloc-map image that doesn't already have one. Runs before Perfmatters' lazy
- * pass, so the alt survives onto the final markup.
+ * 12 and injects a descriptive alt into any sloc-map image that doesn't
+ * already have one. Runs before Perfmatters' lazy pass, so the alt survives
+ * onto the final markup.
+ *
+ * Simple Location's own `geo_public` gates whether it renders the map image
+ * at all, but not Post Kinds for IndieWeb's separate, potentially stricter
+ * `_pkiw_geo_privacy`. This file only ever decides how much of the address
+ * to name in the alt text, via `pkiw_get_visible_location_fields()`; it never
+ * decides whether the map image itself shows — that stays Simple Location's
+ * call. Post Kinds absent means a fully generic alt with no location text.
  *
  * @package CourtneyrChild
  */
@@ -38,11 +45,7 @@ function add_map_alt( string $content ): string {
 		return $content;
 	}
 
-	$place = get_post_meta( (int) get_the_ID(), 'geo_address', true );
-	$label = is_string( $place ) && '' !== trim( $place )
-		? sprintf( 'Map showing %s', wp_strip_all_tags( $place ) )
-		: "Map showing this post's location";
-	$alt = esc_attr( $label );
+	$alt = esc_attr( map_alt_label() );
 
 	return (string) preg_replace_callback(
 		'/<img\b[^>]*>/i',
@@ -55,4 +58,43 @@ function add_map_alt( string $content ): string {
 		},
 		$content
 	);
+}
+
+/**
+ * The alt text's label, gated by `pkiw_get_visible_location_fields()`: the
+ * full street address when `street` is visible, else the coarsest place
+ * text its locality/region/country tiers allow, else a generic label that
+ * names no location. Post Kinds absent (or the post carries no ID) also
+ * gets the generic label — "nothing location-related" per its safe fallback.
+ *
+ * @return string
+ */
+function map_alt_label(): string {
+	$post_id = (int) get_the_ID();
+	if ( $post_id <= 0 || ! function_exists( 'pkiw_get_visible_location_fields' ) ) {
+		return 'Map';
+	}
+
+	$visible = pkiw_get_visible_location_fields( $post_id );
+
+	$place = '';
+	if ( ! empty( $visible['street'] ) ) {
+		$place = trim( (string) get_post_meta( $post_id, 'geo_address', true ) );
+	}
+	if ( '' === $place ) {
+		$place = implode(
+			', ',
+			array_filter(
+				array(
+					! empty( $visible['locality'] ) ? trim( (string) get_post_meta( $post_id, 'geo_locality', true ) ) : '',
+					! empty( $visible['region'] ) ? trim( (string) get_post_meta( $post_id, 'geo_region', true ) ) : '',
+					! empty( $visible['country'] ) ? trim( (string) get_post_meta( $post_id, 'geo_country_name', true ) ) : '',
+				)
+			)
+		);
+	}
+
+	return '' !== $place
+		? sprintf( 'Map showing %s', wp_strip_all_tags( $place ) )
+		: "Map showing this post's location";
 }

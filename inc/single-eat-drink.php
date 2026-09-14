@@ -118,20 +118,41 @@ function rerender_with_meta( string $html, \WP_Post $post, string $kind, array $
  * for a post whose card carries no location but which was geotagged
  * (the same meta the stream's gallery strip reads).
  *
+ * Gated entirely by Post Kinds for IndieWeb's `pkiw_get_visible_location_fields()`
+ * — not Simple Location's own `geo_public` — so a post whose Post Kinds
+ * privacy is stricter than its Simple Location setting still stays hidden.
+ * `street` gates the full address line (it is the most precise text this
+ * function can return); `coordinates` gates the point. Post Kinds absent
+ * or unable to answer means nothing prints.
+ *
  * @param \WP_Post $post Post.
  * @return array{address: string, lat: float, lon: float}
  */
 function sloc_place( \WP_Post $post ): array {
 	$none = array( 'address' => '', 'lat' => 0.0, 'lon' => 0.0 );
-	if ( '1' !== (string) get_post_meta( $post->ID, 'geo_public', true ) ) {
+	if ( ! function_exists( 'pkiw_get_visible_location_fields' ) ) {
 		return $none;
 	}
-	$lat = (string) get_post_meta( $post->ID, 'geo_latitude', true );
-	$lon = (string) get_post_meta( $post->ID, 'geo_longitude', true );
+	$visible = pkiw_get_visible_location_fields( $post->ID );
+
+	$address = '';
+	if ( ! empty( $visible['street'] ) ) {
+		$address = trim( (string) get_post_meta( $post->ID, 'geo_address', true ) );
+	}
+
+	$lat = 0.0;
+	$lon = 0.0;
+	if ( ! empty( $visible['coordinates'] ) ) {
+		$lat_raw = (string) get_post_meta( $post->ID, 'geo_latitude', true );
+		$lon_raw = (string) get_post_meta( $post->ID, 'geo_longitude', true );
+		$lat     = is_numeric( $lat_raw ) ? (float) $lat_raw : 0.0;
+		$lon     = is_numeric( $lon_raw ) ? (float) $lon_raw : 0.0;
+	}
+
 	return array(
-		'address' => trim( (string) get_post_meta( $post->ID, 'geo_address', true ) ),
-		'lat'     => is_numeric( $lat ) ? (float) $lat : 0.0,
-		'lon'     => is_numeric( $lon ) ? (float) $lon : 0.0,
+		'address' => $address,
+		'lat'     => $lat,
+		'lon'     => $lon,
 	);
 }
 
@@ -345,11 +366,14 @@ function journal_page( string $html, array $block ): string {
 		$html = (string) preg_replace( '/<span class="p-location h-card"><span class="p-name">' . preg_quote( esc_html( $restaurant ), '/' ) . '<\/span><\/span>\s*(?:&mdash;\s*)?/', '', $html, 1 );
 	}
 
-	// 4. The map, from the card's coordinates; a card without a location
-	//    falls back to Simple Location's public place (address and point).
-	$lat  = (float) ( $a['geoLatitude'] ?? 0 );
-	$lon  = (float) ( $a['geoLongitude'] ?? 0 );
-	$name = trim( (string) ( $a['locationName'] ?? '' ) );
+	// 4. The map, from the card's coordinates or Simple Location's place —
+	//    both gated by pkiw_get_visible_location_fields() (coordinates/map).
+	$visible = function_exists( 'pkiw_get_visible_location_fields' )
+		? pkiw_get_visible_location_fields( $post->ID )
+		: array();
+	$lat     = ! empty( $visible['coordinates'] ) ? (float) ( $a['geoLatitude'] ?? 0 ) : 0.0;
+	$lon     = ! empty( $visible['coordinates'] ) ? (float) ( $a['geoLongitude'] ?? 0 ) : 0.0;
+	$name    = trim( (string) ( $a['locationName'] ?? '' ) );
 	if ( '' === $where_html ) {
 		$sl = sloc_place( $post );
 		if ( '' !== $sl['address'] ) {
@@ -363,7 +387,7 @@ function journal_page( string $html, array $block ): string {
 			$lon = $sl['lon'];
 		}
 	}
-	$map = ( 0.0 !== $lat || 0.0 !== $lon ) ? map_html( $lat, $lon, $name ) : '';
+	$map = ( ! empty( $visible['map'] ) && ( 0.0 !== $lat || 0.0 !== $lon ) ) ? map_html( $lat, $lon, $name ) : '';
 
 	// 5. WHERE, between the note and the receipt, only when it has content.
 	if ( '' !== $where_html || '' !== $map ) {

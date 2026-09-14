@@ -68,23 +68,26 @@ function find_checkin_block( \WP_Post $post ): ?array {
 /**
  * The facts a stamp is allowed to print for this check-in.
  *
- * Mirrors the plugin's privacy gates: public and approximate check-ins show
- * locality, region and country as text, so a stamp may repeat them; the
- * postal code is public-only; a private check-in shows no place at all.
- * Coordinates, street address and venue name never reach a stamp.
+ * Calls the plugin's own privacy gate, `pkiw_get_visible_location_fields()`,
+ * keyed on the post ID rather than the block's `locationPrivacy` attribute:
+ * a stamp may repeat locality, region and country only when their tiers are
+ * visible, and the postal code only when its own tier is. Coordinates,
+ * street address and venue name never reach a stamp. Post Kinds absent
+ * means no place at all.
  *
  * @param array<string, mixed> $attrs Block attributes.
  * @param \WP_Post             $post  Post being rendered.
  * @return array{place: string, country: string, postal: string, date: string, iso: string, entry: string, seed: int}
  */
 function stamp_facts( array $attrs, \WP_Post $post ): array {
-	$privacy = (string) ( $attrs['locationPrivacy'] ?? 'approximate' );
-	$private = 'private' === $privacy;
+	$visible = function_exists( 'pkiw_get_visible_location_fields' )
+		? pkiw_get_visible_location_fields( $post->ID )
+		: array();
 
-	$locality = $private ? '' : trim( (string) ( $attrs['locality'] ?? '' ) );
-	$region   = $private ? '' : trim( (string) ( $attrs['region'] ?? '' ) );
-	$country  = $private ? '' : trim( (string) ( $attrs['country'] ?? '' ) );
-	$postal   = 'public' === $privacy ? trim( (string) ( $attrs['postalCode'] ?? '' ) ) : '';
+	$locality = ! empty( $visible['locality'] ) ? trim( (string) ( $attrs['locality'] ?? '' ) ) : '';
+	$region   = ! empty( $visible['region'] ) ? trim( (string) ( $attrs['region'] ?? '' ) ) : '';
+	$country  = ! empty( $visible['country'] ) ? trim( (string) ( $attrs['country'] ?? '' ) ) : '';
+	$postal   = ! empty( $visible['postal_code'] ) ? trim( (string) ( $attrs['postalCode'] ?? '' ) ) : '';
 
 	$place = implode( ', ', array_filter( array( $locality, $region ) ) );
 
