@@ -1,0 +1,231 @@
+{
+	"tool": "phpcs",
+	"regenerate": "npm run lint:php:baseline",
+	"total": 478,
+	"files": {
+		"_handoffs/homepage-newsletter-field-notes/append-browse-all.php": {
+			"Generic.Commenting.DocComment.LongNotCapital": 1,
+			"Squiz.Commenting.FileComment.Missing": 1
+		},
+		"_handoffs/homepage-newsletter-field-notes/backup-option.php": {
+			"Squiz.Commenting.FileComment.Missing": 1,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 2
+		},
+		"_handoffs/homepage-newsletter-field-notes/backup-terms.php": {
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 2,
+			"Squiz.Commenting.FileComment.Missing": 1,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1,
+			"WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode": 1
+		},
+		"_handoffs/homepage-newsletter-field-notes/build-navigation.php": {
+			"Generic.Commenting.DocComment.LongNotCapital": 1,
+			"Squiz.Commenting.FileComment.Missing": 1,
+			"Squiz.Commenting.InlineComment.InvalidEndChar": 1,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 16
+		},
+		"_handoffs/homepage-newsletter-field-notes/cr-migration-backup.php": {
+			"Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound": 2,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1,
+			"WordPress.PHP.DevelopmentFunctions.error_log_var_export": 1,
+			"WordPress.PHP.YodaConditions.NotYoda": 1,
+			"WordPress.WP.AlternativeFunctions.file_system_operations_is_writable": 1
+		},
+		"_handoffs/homepage-newsletter-field-notes/fix-entry-wrappers.php": {
+			"Generic.Commenting.DocComment.LongNotCapital": 1,
+			"Squiz.Commenting.FileComment.Missing": 1,
+			"Universal.Operators.DisallowShortTernary.Found": 3
+		},
+		"_handoffs/homepage-newsletter-field-notes/migrate-homepage-sections.php": {
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 4,
+			"Squiz.Commenting.FileComment.Missing": 1,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 3
+		},
+		"_handoffs/homepage-newsletter-field-notes/restore-option.php": {
+			"Squiz.Commenting.FileComment.Missing": 1,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 3
+		},
+		"_handoffs/homepage-newsletter-field-notes/restore-term.php": {
+			"WordPress.PHP.DevelopmentFunctions.error_log_var_export": 2,
+			"WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode": 1,
+			"WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode": 3
+		},
+		"_handoffs/homepage-newsletter-field-notes/surface-backfill.php": {
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 6,
+			"Squiz.Commenting.FileComment.Missing": 1,
+			"Universal.Operators.DisallowShortTernary.Found": 1,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 10,
+			"WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned": 10
+		},
+		"blocks/archive-identity/editor.asset.php": {
+			"Squiz.Commenting.FileComment.Missing": 1,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1,
+			"WordPress.Files.FileName.NotHyphenatedLowercase": 1
+		},
+		"blocks/archive-identity/render.php": {
+			"Generic.Commenting.DocComment.ShortNotCapital": 1,
+			"Squiz.Commenting.FileComment.MissingPackageTag": 1,
+			"WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound": 1
+		},
+		"blocks/post-glyph/editor.asset.php": {
+			"Squiz.Commenting.FileComment.Missing": 1,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1,
+			"WordPress.Files.FileName.NotHyphenatedLowercase": 1
+		},
+		"blocks/post-glyph/render.php": {
+			"Generic.Commenting.DocComment.ShortNotCapital": 1,
+			"Squiz.Commenting.FileComment.MissingPackageTag": 1,
+			"WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound": 1
+		},
+		"blocks/term-chips/editor.asset.php": {
+			"Squiz.Commenting.FileComment.Missing": 1,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1,
+			"WordPress.Files.FileName.NotHyphenatedLowercase": 1
+		},
+		"blocks/term-chips/render.php": {
+			"Generic.Commenting.DocComment.ShortNotCapital": 1,
+			"Squiz.Commenting.FileComment.MissingPackageTag": 1,
+			"WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound": 3
+		},
+		"inc/archives.php": {
+			"Generic.Commenting.DocComment.MissingShort": 1,
+			"Squiz.Commenting.FunctionComment.MissingParamTag": 1
+		},
+		"inc/aside-scrap.php": {
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 1,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1,
+			"WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound": 3
+		},
+		"inc/enqueue.php": {
+			"Generic.Commenting.DocComment.LongNotCapital": 1,
+			"Squiz.Commenting.BlockComment.NoNewLine": 1,
+			"Universal.WhiteSpace.PrecisionAlignment.Found": 2
+		},
+		"inc/home-sections.php": {
+			"Generic.Commenting.DocComment.ShortNotCapital": 1,
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 1
+		},
+		"inc/interactivity.php": {
+			"Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed": 2,
+			"Generic.Commenting.DocComment.LongNotCapital": 4,
+			"Generic.Commenting.DocComment.ShortNotCapital": 6,
+			"Generic.Formatting.MultipleStatementAlignment.IncorrectWarning": 1,
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 2,
+			"Squiz.Commenting.BlockComment.CloserSameLine": 6,
+			"Squiz.Commenting.FunctionComment.Missing": 3,
+			"Squiz.Commenting.FunctionComment.MissingParamTag": 28,
+			"Squiz.Commenting.FunctionComment.WrongStyle": 1
+		},
+		"inc/journal.php": {
+			"Generic.Formatting.MultipleStatementAlignment.IncorrectWarning": 1
+		},
+		"inc/microformats.php": {
+			"Generic.Commenting.DocComment.ShortNotCapital": 1,
+			"Squiz.Commenting.FunctionComment.Missing": 2,
+			"Squiz.Commenting.FunctionComment.MissingParamTag": 3,
+			"Universal.NamingConventions.NoReservedKeywordParameterNames.classFound": 3
+		},
+		"inc/mood-motifs.php": {
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 2,
+			"WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned": 75
+		},
+		"inc/mood-pin.php": {
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 5,
+			"Squiz.Commenting.InlineComment.InvalidEndChar": 9,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1
+		},
+		"inc/outpost-appearance.php": {
+			"Generic.Commenting.DocComment.MissingShort": 1
+		},
+		"inc/quote-note.php": {
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 8,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 2,
+			"WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound": 4
+		},
+		"inc/security-headers.php": {
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 2
+		},
+		"inc/single-checkin.php": {
+			"Squiz.Commenting.InlineComment.SpacingBefore": 3,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1
+		},
+		"inc/single-eat-drink.php": {
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 7,
+			"Squiz.Commenting.InlineComment.SpacingBefore": 9,
+			"Universal.Operators.StrictComparisons.LooseEqual": 1,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 2,
+			"WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned": 21,
+			"WordPress.PHP.YodaConditions.NotYoda": 2
+		},
+		"inc/single-read.php": {
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 5,
+			"Squiz.Commenting.InlineComment.SpacingBefore": 6,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 3,
+			"WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned": 15
+		},
+		"inc/single-watch.php": {
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 7,
+			"Squiz.Commenting.FunctionComment.MissingParamTag": 1,
+			"Squiz.Commenting.InlineComment.SpacingBefore": 3,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1,
+			"WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned": 18
+		},
+		"inc/sloc-map-alt.php": {
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 1
+		},
+		"inc/social-services.php": {
+			"Universal.WhiteSpace.CommaSpacing.SpaceBefore": 4,
+			"WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned": 3
+		},
+		"inc/sticky-note.php": {
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1
+		},
+		"inc/stream-checkin.php": {
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1
+		},
+		"inc/stream-eat-drink.php": {
+			"Generic.Formatting.MultipleStatementAlignment.IncorrectWarning": 1,
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 5,
+			"Squiz.Commenting.InlineComment.SpacingBefore": 5,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1,
+			"WordPress.PHP.YodaConditions.NotYoda": 1
+		},
+		"inc/stream-gallery.php": {
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1
+		},
+		"inc/stream-media.php": {
+			"Squiz.Commenting.FunctionComment.SpacingAfterParamType": 1,
+			"Squiz.Commenting.InlineComment.SpacingBefore": 4,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 2,
+			"WordPress.PHP.YodaConditions.NotYoda": 1
+		},
+		"inc/stream-read.php": {
+			"Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 3,
+			"Squiz.Commenting.InlineComment.SpacingBefore": 3,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 2
+		},
+		"inc/theme-json-overrides.php": {
+			"Generic.Commenting.DocComment.ShortNotCapital": 3,
+			"Squiz.Commenting.FunctionComment.MissingParamTag": 2,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1,
+			"WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned": 9,
+			"WordPress.PHP.YodaConditions.NotYoda": 1,
+			"WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents": 1,
+			"WordPress.WhiteSpace.OperatorSpacing.SpacingBefore": 2
+		},
+		"index.php": {
+			"Squiz.Commenting.FileComment.MissingPackageTag": 1,
+			"Squiz.Commenting.FileComment.SpacingAfterComment": 1
+		},
+		"patterns/cr-hcard.php": {
+			"Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace": 1,
+			"WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound": 3
+		},
+		"patterns/cr-stream-item.php": {
+			"Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed": 8,
+			"Universal.WhiteSpace.PrecisionAlignment.Found": 8
+		},
+		"patterns/post-format-quote.php": {
+			"Squiz.Commenting.FileComment.MissingPackageTag": 1
+		}
+	}
+}

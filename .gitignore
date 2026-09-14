@@ -28,3 +28,6 @@ assets/fonts/.staging/
 # Temporary export folders
 /tmp-export/
 .gstack/
+
+# Test tooling output (see docs/testing.md)
+tests/output/
