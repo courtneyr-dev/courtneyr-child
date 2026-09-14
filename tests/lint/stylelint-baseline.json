@@ -1,0 +1,91 @@
+{
+	"tool": "stylelint",
+	"regenerate": "npm run lint:css:baseline",
+	"total": 3772,
+	"files": {
+		"assets/css/admin.css": {
+			"at-rule-empty-line-before": 3,
+			"comment-empty-line-before": 10,
+			"no-descending-specificity": 83,
+			"rule-empty-line-before": 51,
+			"selector-pseudo-element-colon-notation": 17,
+			"value-keyword-case": 2
+		},
+		"assets/css/blocks/core-quote.css": {
+			"color-hex-length": 1,
+			"rule-empty-line-before": 2
+		},
+		"assets/css/components.css": {
+			"at-rule-empty-line-before": 27,
+			"color-hex-length": 13,
+			"comment-empty-line-before": 94,
+			"declaration-block-no-duplicate-properties": 1,
+			"declaration-block-no-shorthand-property-overrides": 4,
+			"length-zero-no-unit": 2,
+			"no-descending-specificity": 406,
+			"no-duplicate-selectors": 49,
+			"rule-empty-line-before": 385,
+			"value-keyword-case": 19
+		},
+		"assets/css/cr-404.css": {
+			"at-rule-empty-line-before": 2,
+			"comment-empty-line-before": 19,
+			"rule-empty-line-before": 36
+		},
+		"assets/css/cr-archives.css": {
+			"at-rule-empty-line-before": 2,
+			"comment-empty-line-before": 1,
+			"no-descending-specificity": 3,
+			"rule-empty-line-before": 30
+		},
+		"assets/css/cr-blog.css": {
+			"at-rule-empty-line-before": 4,
+			"comment-empty-line-before": 6,
+			"no-descending-specificity": 4,
+			"rule-empty-line-before": 53,
+			"value-keyword-case": 3
+		},
+		"assets/css/cr-contact.css": {
+			"at-rule-empty-line-before": 5,
+			"comment-empty-line-before": 12,
+			"no-descending-specificity": 3,
+			"rule-empty-line-before": 55
+		},
+		"assets/css/cr-home-sections.css": {
+			"at-rule-empty-line-before": 6,
+			"comment-empty-line-before": 14,
+			"function-url-quotes": 8,
+			"no-descending-specificity": 5,
+			"no-duplicate-selectors": 17,
+			"rule-empty-line-before": 152,
+			"value-keyword-case": 2
+		},
+		"assets/css/cr-mood-pin.css": {
+			"at-rule-empty-line-before": 1,
+			"comment-empty-line-before": 4,
+			"no-descending-specificity": 3,
+			"rule-empty-line-before": 30
+		},
+		"assets/css/cr-post-kinds.css": {
+			"at-rule-empty-line-before": 34,
+			"color-hex-length": 20,
+			"comment-empty-line-before": 170,
+			"declaration-block-no-duplicate-properties": 1,
+			"declaration-property-unit-allowed-list": 2,
+			"length-zero-no-unit": 1,
+			"no-descending-specificity": 526,
+			"no-duplicate-selectors": 165,
+			"rule-empty-line-before": 1073,
+			"value-keyword-case": 14
+		},
+		"assets/css/tokens.css": {
+			"color-hex-length": 2,
+			"comment-empty-line-before": 12,
+			"length-zero-no-unit": 3,
+			"no-descending-specificity": 5,
+			"no-duplicate-selectors": 10,
+			"rule-empty-line-before": 80,
+			"value-keyword-case": 5
+		}
+	}
+}

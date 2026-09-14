@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<ruleset name="courtneyr-child">
+	<description>WordPress Coding Standards for the courtneyr-child theme PHP. CI compares results with tests/lint/phpcs-baseline.json; see docs/testing.md.</description>
+
+	<file>.</file>
+
+	<!-- Installed tooling and dependencies. -->
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<exclude-pattern>/node_modules/*</exclude-pattern>
+	<!-- Retired templates and parts kept for reference. -->
+	<exclude-pattern>/_archive/*</exclude-pattern>
+	<exclude-pattern>*/_archive/*</exclude-pattern>
+	<!-- Test tooling and local output. -->
+	<exclude-pattern>/tests/*</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="basepath" value="."/>
+	<arg name="parallel" value="8"/>
+	<arg value="s"/>
+
+	<config name="minimum_wp_version" value="7.1"/>
+
+	<rule ref="WordPress"/>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="courtneyr-child"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="Courtneyr\Child"/>
+				<element value="courtneyr_child"/>
+			</property>
+		</properties>
+		<!-- `wp eval-file` includes these scripts inside a function scope, so their top-level variables are not globals. -->
+		<exclude-pattern>/_handoffs/*</exclude-pattern>
+	</rule>
+</ruleset>
