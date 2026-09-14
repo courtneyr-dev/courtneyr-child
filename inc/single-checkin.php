@@ -95,22 +95,29 @@ function is_checkin_single(): bool {
 }
 
 /**
- * The place a page may print, by the block's privacy setting.
+ * The place a page may print, gated by Post Kinds for IndieWeb's
+ * `pkiw_get_visible_location_fields( $post_id )` — the authoritative
+ * privacy decision for this post — not the block's `locationPrivacy`
+ * attribute, which a check-in saved before that gate existed (or synced
+ * from elsewhere) may lack. Each of locality, region and country prints
+ * only when its own tier is visible. Post Kinds absent means nothing.
  *
- * @param array<string, mixed> $attrs Block attributes.
+ * @param array<string, mixed> $attrs   Block attributes (text values).
+ * @param int                  $post_id Post ID (the privacy decision).
  * @return string "Locality, Region, Country" as far as privacy allows, or ''.
  */
-function safe_place( array $attrs ): string {
-	if ( 'private' === ( $attrs['locationPrivacy'] ?? 'approximate' ) ) {
+function safe_place( array $attrs, int $post_id ): string {
+	if ( ! function_exists( 'pkiw_get_visible_location_fields' ) ) {
 		return '';
 	}
+	$visible = pkiw_get_visible_location_fields( $post_id );
 	return implode(
 		', ',
 		array_filter(
 			array(
-				trim( (string) ( $attrs['locality'] ?? '' ) ),
-				trim( (string) ( $attrs['region'] ?? '' ) ),
-				trim( (string) ( $attrs['country'] ?? '' ) ),
+				! empty( $visible['locality'] ) ? trim( (string) ( $attrs['locality'] ?? '' ) ) : '',
+				! empty( $visible['region'] ) ? trim( (string) ( $attrs['region'] ?? '' ) ) : '',
+				! empty( $visible['country'] ) ? trim( (string) ( $attrs['country'] ?? '' ) ) : '',
 			)
 		)
 	);
@@ -176,7 +183,7 @@ function add_title_lede( string $html, array $block ): string {
 	}
 	$checkin = find_checkin_block( $post );
 	$attrs   = (array) ( $checkin['attrs'] ?? array() );
-	$place   = safe_place( $attrs );
+	$place   = safe_place( $attrs, $post->ID );
 
 	$lede  = '<p class="cr-journal__lede">';
 	$lede .= '<time class="cr-journal__lede-date" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time>';
@@ -279,7 +286,7 @@ function journal_page( string $html, array $block ): string {
 
 	$ts    = ! empty( $attrs['checkinAt'] ) ? (int) strtotime( (string) $attrs['checkinAt'] ) : 0;
 	$ts    = $ts > 0 ? $ts : (int) get_post_time( 'U', true, $post );
-	$place = safe_place( $attrs );
+	$place = safe_place( $attrs, $post->ID );
 
 	$after .= '<footer class="cr-journal__meta">';
 	$after .= '<p class="cr-journal__meta-item cr-journal__meta-item--time"><span class="cr-journal__meta-icon" aria-hidden="true"></span><span class="cr-journal__meta-text"><time datetime="' . esc_attr( (string) wp_date( 'c', $ts ) ) . '">' . esc_html( (string) wp_date( get_option( 'date_format' ), $ts ) ) . '<br>' . esc_html( (string) wp_date( get_option( 'time_format' ) . ' (T)', $ts ) ) . '</time></span></p>';

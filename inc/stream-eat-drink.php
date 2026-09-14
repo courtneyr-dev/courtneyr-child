@@ -142,11 +142,14 @@ function placemat_card( string $html, array $block, $instance ): string {
 		$html = (string) preg_replace( '/<span class="p-location h-card"><span class="p-name">' . preg_quote( esc_html( $restaurant ), '/' ) . '<\/span><\/span>\s*(?:&mdash;\s*)?/', '', $html, 1 );
 	}
 
-	// 3. A map link instead of a map, when coordinates exist. A card with no
-	//    location borrows Simple Location's public place: its address as the
-	//    WHERE line (after the sub line) and its point for the link.
-	$lat = (float) ( $a['geoLatitude'] ?? 0 );
-	$lon = (float) ( $a['geoLongitude'] ?? 0 );
+	// 3. A map link instead of a map, when coordinates exist (gated by
+	//    pkiw_get_visible_location_fields()). A card with no location borrows
+	//    Simple Location's public place: its address as the WHERE line.
+	$visible = function_exists( 'pkiw_get_visible_location_fields' )
+		? pkiw_get_visible_location_fields( $post->ID )
+		: array();
+	$lat     = ! empty( $visible['coordinates'] ) ? (float) ( $a['geoLatitude'] ?? 0 ) : 0.0;
+	$lon     = ! empty( $visible['coordinates'] ) ? (float) ( $a['geoLongitude'] ?? 0 ) : 0.0;
 	if ( ! $has_where ) {
 		$sl = \Courtneyr\Child\SinglePlacemat\sloc_place( $post );
 		$c_open = '<div class="pk-caption">';
@@ -162,7 +165,7 @@ function placemat_card( string $html, array $block, $instance ): string {
 		}
 	}
 	$map = '';
-	if ( 0.0 !== $lat || 0.0 !== $lon ) {
+	if ( ! empty( $visible['coordinates'] ) && ( 0.0 !== $lat || 0.0 !== $lon ) ) {
 		$map = '<a class="cr-mat__map" href="' . esc_url( sprintf( 'https://www.openstreetmap.org/?mlat=%F&mlon=%F#map=16/%F/%F', $lat, $lon, $lat, $lon ) ) . '" target="_blank" rel="noopener noreferrer">'
 			. '<svg class="cr-mat__pin" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 1.5a4.5 4.5 0 0 0-4.5 4.5c0 3.4 4.5 8.5 4.5 8.5s4.5-5.1 4.5-8.5A4.5 4.5 0 0 0 8 1.5zm0 6.3a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6z" fill="currentColor"/></svg>'
 			. esc_html__( 'View on map', 'courtneyr-child' ) . ' <span aria-hidden="true">↗</span></a>';

@@ -89,8 +89,11 @@ function gallery_image_ids( \WP_Post $post ): array {
  *
  * Frame count is the real number of images in the post, date is the
  * publication date, category is the post's first category name, and place
- * is the Simple Location address only when that plugin marked the post's
- * location public. Nothing else is inferred; an absent fact is omitted.
+ * is the Simple Location address, gated by Post Kinds for IndieWeb's
+ * `pkiw_get_visible_location_fields()` (its `street` tier) rather than
+ * Simple Location's own `geo_public` — a gallery post's Post Kinds privacy,
+ * where set, is the stricter and authoritative one. Post Kinds absent means
+ * no place. Nothing else is inferred; an absent fact is omitted.
  *
  * @param \WP_Post $post  Post being rendered.
  * @param int      $total Number of images in the gallery.
@@ -101,8 +104,11 @@ function stamp_facts( \WP_Post $post, int $total ): array {
 	$category = ( ! empty( $cats ) && 'uncategorized' !== $cats[0]->slug ) ? (string) $cats[0]->name : '';
 
 	$place = '';
-	if ( '1' === (string) get_post_meta( $post->ID, 'geo_public', true ) ) {
-		$place = trim( (string) get_post_meta( $post->ID, 'geo_address', true ) );
+	if ( function_exists( 'pkiw_get_visible_location_fields' ) ) {
+		$visible = pkiw_get_visible_location_fields( $post->ID );
+		if ( ! empty( $visible['street'] ) ) {
+			$place = trim( (string) get_post_meta( $post->ID, 'geo_address', true ) );
+		}
 	}
 
 	return array(
