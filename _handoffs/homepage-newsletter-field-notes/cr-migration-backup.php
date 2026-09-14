@@ -134,6 +134,30 @@ if ( ! function_exists( 'cr_migration_backup_dir' ) ) {
 	}
 
 	/**
+	 * Parse a manifest object identity ("post:12", "wp_template:37240",
+	 * "wp_template_part:10861") into its type and id. Plain-text match on the
+	 * manifest string; anything else is not a restorable object.
+	 *
+	 * @param string $identity Manifest object.
+	 * @return array{type: string, id: int, post_types: string[]}|null
+	 */
+	function cr_migration_parse_object( string $identity ): ?array {
+		if ( ! preg_match( '/\A(post|wp_template|wp_template_part):([1-9][0-9]*)\z/', $identity, $m ) ) {
+			return null;
+		}
+		$post_types = array(
+			'post'             => array( 'page', 'post' ),
+			'wp_template'      => array( 'wp_template' ),
+			'wp_template_part' => array( 'wp_template_part' ),
+		);
+		return array(
+			'type'       => $m[1],
+			'id'         => (int) $m[2],
+			'post_types' => $post_types[ $m[1] ],
+		);
+	}
+
+	/**
 	 * Line diff summary for previews: changed line count and the first changed lines.
 	 *
 	 * @param string $before Before.
