@@ -10,15 +10,19 @@
  * /stream) and the generic stream card — emit one
  * `<span class="pk-mood__emoji">`. This module swaps that span for the pin.
  * A `moodKey` (or, with none, saved text matching one of the plugin's known
- * spellings) resolves the catalog entry by that mood's identity rather than
- * by literal text, and the pin's word — accessible name, visible word, and
- * printed face word — becomes `Mood_Vocabulary::display_label()` so it
- * matches the plugin's `p-name`. A catalog mood (assets/data/moods.json:
- * 194 moods, each with a family, a motif from inc/mood-motifs.php, a word
- * layout, a face, and a deterministic two-or-three-ink palette) prints as
- * screen-printed art: the motif in two plates, a halftone field, the word
- * set into the composition. Anything off the catalog and off the plugin's
- * vocabulary prints the saved word, as authored, and, when there is one,
+ * spellings) picks the catalog entry by that mood's identity rather than by
+ * literal text, for its *visuals* only. The pin's word — accessible name,
+ * visible word, and printed face word — becomes
+ * `Mood_Vocabulary::display_label()` only when the block has a *stored*
+ * `moodKey`, matching the plugin's own `p-name` exactly (it never infers a
+ * key from text either): #207 keeps typed text separate from generated
+ * labels, so a key-less mood, even one whose text matches the plugin's
+ * vocabulary, renders exactly as saved. A catalog mood
+ * (assets/data/moods.json: 194 moods, each with a family, a motif from
+ * inc/mood-motifs.php, a word layout, a face, and a deterministic
+ * two-or-three-ink palette) prints as screen-printed art: the motif in two
+ * plates, a halftone field, the word set into the composition. Anything off
+ * the catalog prints the saved word, as authored, and, when there is one,
  * the saved emoji as a text glyph. Storage is untouched: the block keeps
  * its attributes and their meaning. cr-mood-pin.css paints the shell (rim,
  * dome, wear, contact shadow).
@@ -202,14 +206,21 @@ function catalog_entry_for_vocabulary_key( string $mood_key ): ?array {
 /**
  * What to print for a saved mood + emoji.
  *
- * Identity first: a known Post Kinds mood key (or, with none, saved text
- * that matches a Post Kinds mood's known spellings) picks the catalog entry
- * by that mood's US/UK/current variants and prints
- * `Mood_Vocabulary::display_label()` as both the accessible name and the
- * printed face word, so they match the plugin's `p-name`. A custom mood
- * (no catalog entry, no Post Kinds match) keeps its printed face word as
- * today (lowercase) but its accessible name is the authored text, trimmed
- * and not lowercased.
+ * The label only ever resolves through a *stored* mood key — #207 keeps
+ * typed text separate from generated labels, and the plugin's own
+ * `p-name` resolves the same way (`Mood_Vocabulary::display_label()`
+ * called with only the block's actual `moodKey`). A block with no stored
+ * key renders its saved text exactly as authored, even when that text
+ * happens to match one of the plugin's known spellings.
+ *
+ * Catalog *visuals* (family, motif, layout, palette) are looked up more
+ * generously: a known Post Kinds mood key (stored, or — with none —
+ * inferred from saved text that matches a Post Kinds mood's known
+ * spellings) picks the catalog entry by that mood's US/UK/current
+ * variants. That inferred key never feeds the label, only the entry
+ * lookup. A custom mood (no catalog entry, no Post Kinds match) keeps
+ * its printed face word as today (lowercase) and its accessible name is
+ * the authored text, trimmed and not lowercased.
  *
  * @param string $mood     Saved mood text.
  * @param string $emoji    Saved emoji.
@@ -217,18 +228,25 @@ function catalog_entry_for_vocabulary_key( string $mood_key ): ?array {
  * @return array{label: string, name: string, family: string, motif: string, layout: string, font: string, palette: array<int, string>, rim: array<int, string>, glyph: string, pattern: string, custom: bool}
  */
 function resolve( string $mood, string $emoji, string $mood_key = '' ): array {
-	$authored = authored_label( $mood );
-	$label    = mb_strtolower( $authored );
-	$emoji    = trim( wp_strip_all_tags( $emoji ) );
-	$mood_key = sanitize_key( $mood_key );
+	$authored   = authored_label( $mood );
+	$label      = mb_strtolower( $authored );
+	$emoji      = trim( wp_strip_all_tags( $emoji ) );
+	$stored_key = sanitize_key( $mood_key );
 
+	// Catalog-entry lookup only: the stored key when valid, else — with
+	// none — text that matches one of Post Kinds' known spellings.
 	$vocab_key = '';
-	if ( '' !== $mood_key && null !== vocabulary_mood( $mood_key ) ) {
-		$vocab_key = $mood_key;
-	} elseif ( '' === $mood_key ) {
+	if ( '' !== $stored_key && null !== vocabulary_mood( $stored_key ) ) {
+		$vocab_key = $stored_key;
+	} elseif ( '' === $stored_key ) {
 		$vocab_key = vocabulary_key_for_label( $label );
 	}
-	$vocab_label = '' !== $vocab_key ? \PKIW\Mood_Vocabulary::display_label( $mood, $vocab_key ) : '';
+
+	// The label: only a *stored* key resolves it, matching the plugin's
+	// own p-name exactly (it never infers a key from text either).
+	$resolved_label = ( '' !== $stored_key && class_exists( '\PKIW\Mood_Vocabulary' ) )
+		? \PKIW\Mood_Vocabulary::display_label( $mood, $stored_key )
+		: '';
 
 	$entry = '' !== $vocab_key ? catalog_entry_for_vocabulary_key( $vocab_key ) : null;
 	if ( null === $entry ) {
@@ -237,8 +255,14 @@ function resolve( string $mood, string $emoji, string $mood_key = '' ): array {
 
 	$seed = crc32( $label . '|' . $emoji );
 	if ( null !== $entry ) {
-		$v    = (array) ( $entry['visual'] ?? array() );
-		$name = '' !== $vocab_label ? $vocab_label : (string) $entry['label'];
+		$v = (array) ( $entry['visual'] ?? array() );
+		if ( '' !== $resolved_label ) {
+			$name = $resolved_label; // A stored key: the plugin's resolved label.
+		} elseif ( '' !== $vocab_key ) {
+			$name = $authored; // A key-less Post Kinds mood: renders exactly as saved.
+		} else {
+			$name = (string) $entry['label']; // A catalog-only mood: the catalog's own case, as today.
+		}
 		return array(
 			'label'   => $name,
 			'name'    => $name,
@@ -256,7 +280,7 @@ function resolve( string $mood, string $emoji, string $mood_key = '' ): array {
 	$with_glyph = array( 'icon-word', 'crooked', 'icon-arc', 'arc-top' );
 	return array(
 		'label'   => $label,
-		'name'    => '' !== $vocab_label ? $vocab_label : $authored,
+		'name'    => '' !== $resolved_label ? $resolved_label : $authored,
 		'family'  => '',
 		'motif'   => '',
 		'layout'  => '' !== $emoji ? $with_glyph[ ( $seed >> 2 ) % 4 ] : ( false !== strpos( $label, ' ' ) ? 'stacked' : 'word-big' ),
