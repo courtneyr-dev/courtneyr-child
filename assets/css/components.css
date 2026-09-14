@@ -57,6 +57,13 @@ th a:not(.wp-element-button) {
   margin: 0 0 var(--cr-space-md);
 }
 
+/* R-31: balanced line breaks on display headings (Rock Salt display, hero,
+   single, page, archive and search titles). :where() keeps specificity at
+   zero, so a component rule that sets text-wrap still wins. */
+:where(.cr-display, .is-style-cr-display, .cr-hero__title, .cr-hero__display, .single-post__title, .cr-page__title, .cr-archive__title) {
+  text-wrap: balance;
+}
+
 
 /* ============ Eyebrow ============
    Block, not inline-block — inline-block let it sit on the same line as
