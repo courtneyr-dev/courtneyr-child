@@ -141,10 +141,11 @@ function send_frontend_headers( \WP $wp ): void {
 	send_baseline_headers();
 
 	// R-29: deny powerful features no front-end page uses. Site code calls only
-	// navigator.clipboard (pull quotes) and navigator.share (Outpost), which
-	// stay available; geolocation keeps same-origin for Outpost and future
-	// check-in capture (the Post Kinds check-in picker runs in wp-admin, which
-	// these front-end headers do not reach). Embed iframes keep their default
+	// navigator.clipboard (pull quotes) and navigator.share, which stay
+	// available; geolocation is limited to the site's own origin (the Post Kinds
+	// check-in picker runs in wp-admin, which these front-end headers do not
+	// reach). Outpost's /post/ shell sends its own Permissions-Policy, which
+	// replaces this one there. Embed iframes keep their default
 	// autoplay/fullscreen/picture-in-picture/encrypted-media allowances.
 	header( 'Permissions-Policy: accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=(), browsing-topics=()' );
 
