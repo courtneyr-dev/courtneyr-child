@@ -161,20 +161,19 @@ function enqueue_baseline(): void {
 		   (body.home), archives (body.archive), search, 404, etc. all
 		   fall back to the theme.json 720/1100 defaults — restoring the
 		   image-202 layout. Inline so Perfmatters Used CSS does not
-		   prune the body.single scope. */
+		   prune the body.single scope.
+
+		   R-24: the width reaches the article through block layout. The
+		   Single Post group is a constrained layout sized by the content-size
+		   property below, and the Post Content block (templates/single.html)
+		   sets contentSize 100% so its children fill that column. The two
+		   max-width !important rules that used to force it are gone. */
 		@media (min-width: 1024px) {
 			body.single {
 				--wp--style--global--content-size: 80vw;
 				--wp--style--global--wide-size: 86vw;
 				--cr-measure: 80vw;
 				--cr-measure-wide: 86vw;
-			}
-			body.single .wp-block-post-content {
-				max-width: 80vw !important;
-				margin-inline: auto !important;
-			}
-			body.single .wp-block-post-content > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
-				max-width: 100% !important;
 			}
 			body.single .wp-block-post-content pre,
 			body.single .wp-block-post-content .wp-block-code,
@@ -473,9 +472,25 @@ function revalidate_page_html(): void {
 	if ( is_admin() || is_feed() || is_robots() ) {
 		return;
 	}
-	if ( is_user_logged_in() || ( is_singular() && post_password_required() ) ) {
-		// R-09: a password-protected post must never be publicly cacheable —
-		// the form and, after the cookie, the content are per-visitor.
+
+	$post_password_set = false;
+	if ( is_singular() ) {
+		$post              = get_post();
+		$post_password_set = $post && '' !== (string) $post->post_password;
+	}
+
+	if ( $post_password_set ) {
+		// R-09: a password-protected post must never be shared-cacheable. Gate on
+		// the post HAVING a password, not post_password_required() — that helper
+		// returns false once the visitor's wp-postpass_ cookie is valid, but the
+		// response still varies by that cookie (form vs. content), so it's still
+		// a per-visitor response. The host replaces Cache-Control on HTML unless
+		// the value contains "private" (/wp-login.php keeps its "...private"
+		// suffix; this branch previously didn't, and reached browsers as
+		// "public, max-age=2678400" — staging evidence 2026-09-14, FAIL 3), so
+		// "private" here is load-bearing, not decorative.
+		header( 'Cache-Control: private, no-cache, no-store, must-revalidate, max-age=0', true );
+	} elseif ( is_user_logged_in() ) {
 		header( 'Cache-Control: no-cache, must-revalidate, max-age=0', true );
 	} else {
 		header( 'Cache-Control: public, max-age=600, must-revalidate', true );
@@ -484,11 +499,17 @@ function revalidate_page_html(): void {
 add_action( 'send_headers', __NAMESPACE__ . '\\revalidate_page_html', 99 );
 
 /**
- * Preload the above-the-fold self-hosted fonts. Paired with font-display:optional
- * (theme.json), this lets the real font arrive before first paint on normal
- * connections — so users still see the brand type — while `optional` guarantees
- * no font-swap layout shift under lab throttling (the mobile CLS culprit). Fonts
- * are CORS-fetched, so the preload needs crossorigin even though same-origin.
+ * Preload the self-hosted theme.json fonts on every theme-rendered HTML route:
+ * pages, singles, archives, search and 404. This is the only font preload
+ * owner. site-performance-security 1.7.2 dropped its singular/home copy, so
+ * each file gets one link. wp_head doesn't run for admin, login, REST, AJAX,
+ * feeds, sitemaps, embeds or Web Stories documents, so those get none.
+ *
+ * theme.json declares font-display:optional. Hosted output currently serves
+ * Barlow and Roboto Slab as swap and Rock Salt as optional; the fixture without
+ * Perfmatters keeps optional. Either way the preload lets the file arrive
+ * before first paint. Fonts are CORS-fetched, so the preload needs crossorigin
+ * even though same-origin.
  */
 function preload_critical_fonts(): void {
 	$fonts = array(
@@ -559,46 +580,72 @@ function enqueue_theme_toggle(): void {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_theme_toggle' );
 
 /**
- * Enqueue the icon-injector script that converts <use href> references
- * into inline SVGs from the post-type icon sprite. Required for the
- * cr-icon-avatar pattern to render its icon glyphs.
- *
- * Only enqueued when the icon sprite is present on disk.
+ * Print the post-type icon sprite once, server-side, as the first child
+ * of <body> (R-26). icons-inject.js used to insert the same markup there
+ * after DOMContentLoaded; printing it keeps that DOM position and makes
+ * `<use href="#post-icon-*">` resolve without JavaScript. wp_footer is the
+ * fallback for a template that never calls wp_body_open.
  */
-function enqueue_icons_inject(): void {
+function print_icon_sprite(): void {
+	static $printed = false;
+	if ( $printed ) {
+		return;
+	}
 	$path = COURTNEYR_CHILD_DIR . '/assets/svg/icons.svg';
 	if ( ! is_readable( $path ) ) {
 		return;
 	}
-	wp_enqueue_script(
-		'courtneyr-icons-inject',
-		COURTNEYR_CHILD_URI . '/assets/js/icons-inject.js',
-		array(),
-		COURTNEYR_CHILD_VERSION,
-		array(
-			'in_footer' => true,
-			'strategy'  => 'defer',
-		)
-	);
-	// Pass the sprite URL as a JS global so icons-inject knows where to fetch.
-	wp_add_inline_script(
-		'courtneyr-icons-inject',
-		'window.COURTNEYR_ICONS_SPRITE_URL = ' . wp_json_encode(
-			COURTNEYR_CHILD_URI . '/assets/svg/icons.svg?ver=' . COURTNEYR_CHILD_VERSION
-		) . ';',
-		'before'
-	);
+	$svg   = (string) file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	$start = strpos( $svg, '<svg' );
+	if ( false === $start ) {
+		return;
+	}
+	$printed = true;
+	echo substr( $svg, $start ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the theme's own static sprite file.
 }
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_icons_inject' );
+add_action( 'wp_body_open', __NAMESPACE__ . '\\print_icon_sprite', 0 );
+add_action( 'wp_footer', __NAMESPACE__ . '\\print_icon_sprite', 0 );
 
 /**
- * Small site-UX a11y polish module (v0.5.49): header search disclosure
- * (Escape + click-outside to close) and Complianz close-button Space-key
- * activation. See assets/js/site-ux.js for full rationale.
+ * Point sprite references at the printed sprite, once, on the finished
+ * HTML document. Mirrors the rewrite icons-inject.js ran after
+ * DOMContentLoaded: a `<use>` whose href contains `icons.svg#` becomes the
+ * same-document fragment. Running on the whole document rather than per
+ * block keeps every render_block filter seeing the file URLs it matches
+ * on (transform_stream_item_avatar() and transform_related_post_avatar()
+ * key off them). Documents without the printed sprite (embeds) are left
+ * alone, and REST, admin and feed responses never reach this filter.
  *
- * Footer-deferred — none of this is render-blocking and all behaviors
- * degrade gracefully (Escape/click-outside missing means user re-clicks
- * the toggle; Space on Complianz close still works via Enter fallback).
+ * @param string $html Buffered template output.
+ * @return string Output with same-document sprite references.
+ */
+function localize_icon_sprite_refs( string $html ): string {
+	if ( ! str_contains( $html, 'icons.svg#' ) || ! str_contains( $html, '<symbol id="post-icon-blog"' ) ) {
+		return $html;
+	}
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	while ( $tags->next_tag( 'use' ) ) {
+		foreach ( array( 'href', 'xlink:href' ) as $attribute ) {
+			$value = $tags->get_attribute( $attribute );
+			if ( ! is_string( $value ) || ! str_contains( $value, 'icons.svg#' ) ) {
+				continue;
+			}
+			$tags->set_attribute( 'href', substr( $value, (int) strpos( $value, '#' ) ) );
+			if ( 'xlink:href' === $attribute ) {
+				$tags->remove_attribute( 'xlink:href' );
+			}
+		}
+	}
+	return $tags->get_updated_html();
+}
+add_filter( 'wp_template_enhancement_output_buffer', __NAMESPACE__ . '\\localize_icon_sprite_refs' );
+
+/**
+ * Small site-UX a11y polish module (v0.5.49): Complianz close-button
+ * Space-key activation. See assets/js/site-ux.js for full rationale.
+ *
+ * Footer-deferred — not render-blocking, and it degrades gracefully
+ * (Space on Complianz close still works via the Enter fallback).
  */
 function enqueue_site_ux(): void {
 	wp_enqueue_script(

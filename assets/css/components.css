@@ -57,6 +57,13 @@ th a:not(.wp-element-button) {
   margin: 0 0 var(--cr-space-md);
 }
 
+/* R-31: balanced line breaks on display headings (Rock Salt display, hero,
+   single, page, archive and search titles). :where() keeps specificity at
+   zero, so a component rule that sets text-wrap still wins. */
+:where(.cr-display, .is-style-cr-display, .cr-hero__title, .cr-hero__display, .single-post__title, .cr-page__title, .cr-archive__title) {
+  text-wrap: balance;
+}
+
 
 /* ============ Eyebrow ============
    Block, not inline-block — inline-block let it sit on the same line as
@@ -1132,6 +1139,19 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 	}
 }
 
+/* R-13: the appearance toggle renders from a template part
+   (parts/appearance-toggle.html); its wrapper stays out of the row's flex layout. */
+.site-header__appearance {
+	display: contents;
+}
+
+/* Paragraph blocks that read as one run of text (the footer copyright line,
+   the listen rating): each block stays editable, the text flows inline. */
+.cr-inline-run > p {
+	display: inline;
+	margin: 0;
+}
+
 /* v0.5.40: more breathing room in the nav now that the inline search
    form is gone. Bump the gap between top-level controls + nav items
    so the desktop bar reads as relaxed instead of cramped (image #125). */
@@ -1710,43 +1730,6 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
 }
 
 
-/* ============================================================
-   Site wordmark — Rock Salt "courtneyr.dev" replacing wp:site-title.
-   Hand-drawn display typeface, single line, links to home.
-   ============================================================ */
-
-.cr-wordmark {
-	font-family: var(--cr-font-display, "Rock Salt", "Bradley Hand", cursive);
-	font-size: clamp(1.25rem, 1rem + 0.7vw, 1.65rem);
-	/* v0.5.43 — bumped weight from 400 to 700. Rock Salt is naturally
-	   heavy at 400 (it's a hand-lettered display face), but the
-	   variable-axis 700 picks up extra ink density that reads
-	   stronger as a brand mark in the nav. */
-	font-weight: 700;
-	line-height: 1;
-	color: var(--cr-ink, #241c4a);
-	/* v0.5.10: !important needed because Ollie's parent anchor rule
-	   wins on cascade order otherwise — the wordmark rendered with
-	   the marker-orange underline of regular links. */
-	text-decoration: none !important;
-	letter-spacing: -0.01em;
-	display: inline-block;
-	padding: 0.1em 0.05em 0.2em; /* room for Rock Salt's irregular baseline */
-	transition: color 0.15s ease, transform 0.15s ease;
-}
-
-.cr-wordmark:hover,
-.cr-wordmark:focus-visible {
-	color: var(--cr-marker, #ffb703);
-	transform: rotate(-0.5deg);
-	text-decoration: none !important;
-}
-
-.cr-wordmark:focus-visible {
-	outline: 3px solid var(--cr-focus-ring, var(--cr-marker, #ffb703));
-	outline-offset: 4px;
-	border-radius: 2px;
-}
 
 /* ============================================================
    Footer on russian-violet — light text, light social icons,
@@ -1928,12 +1911,6 @@ figure.wp-block-post-featured-image.single-post__featured {
 .site-header__nav .wp-block-navigation-item__content {
 	font-size: 1.125rem;
 	padding: 0.4rem 0.4rem;
-}
-
-/* Wordmark — bumped up 20% so the brand reads stronger in the
-   redesigned bare header. */
-.cr-wordmark {
-	font-size: clamp(1.5rem, 1.2rem + 0.8vw, 2rem);
 }
 
 /* Submenu container — keep the elevated card look but no shadow.
@@ -6547,6 +6524,80 @@ input.wp-block-search__input:focus,
 	}
 }
 
+/* R-13: the header search is the core Search block (no button, Enter submits)
+   with the cr-header-search style. The form keeps the site-header__search box
+   (the rules near the top of the header section); the inside wrapper carries the
+   leading glyph and the borderless field. These rules sit after the generic
+   .wp-block-search__input rules above, which set background, colour, border,
+   padding, size, placeholder and focus outline with !important for in-page
+   search fields; the header field repeats !important on those properties only,
+   and equal specificity plus later order makes it win in light and dark modes.
+   Padding, size and width repeat what the old header field actually rendered
+   with: the input:not([type="submit"]) form rule gave it 0.5em 1em and the
+   small font-size preset, the tokens.css form rule gave it width 100%, so the
+   box keeps its 44.8px height. */
+.wp-block-search.is-style-cr-header-search .wp-block-search__inside-wrapper {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0;
+	border: 0;
+	background: none;
+}
+
+.wp-block-search.is-style-cr-header-search .wp-block-search__inside-wrapper::before {
+	content: "";
+	flex: none;
+	inline-size: 18px;
+	block-size: 18px;
+	background-color: var(--cr-ink-muted, #647baf);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13.5 6C10.5 6 8 8.5 8 11.5c0 1.1.3 2.1.9 3l-3.4 3 1 1.1 3.4-3c1 .9 2.2 1.4 3.6 1.4 3 0 5.5-2.5 5.5-5.5C19 8.5 16.5 6 13.5 6zm0 9.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z'/%3E%3C/svg%3E") center / contain no-repeat;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13.5 6C10.5 6 8 8.5 8 11.5c0 1.1.3 2.1.9 3l-3.4 3 1 1.1 3.4-3c1 .9 2.2 1.4 3.6 1.4 3 0 5.5-2.5 5.5-5.5C19 8.5 16.5 6 13.5 6zm0 9.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z'/%3E%3C/svg%3E") center / contain no-repeat;
+	pointer-events: none;
+}
+
+.wp-block-search.is-style-cr-header-search:focus-within .wp-block-search__inside-wrapper::before {
+	background-color: var(--cr-ink, #241c4a);
+}
+
+.wp-block-search.is-style-cr-header-search .wp-block-search__input {
+	flex: 1 1 auto;
+	min-width: 0;
+	width: 100%;
+	margin: 0;
+	padding: 0.5em 1em !important;
+	border: 0 !important;
+	border-radius: 0;
+	background: transparent !important;
+	color: var(--cr-ink, #241c4a) !important;
+	font-family: var(--cr-font-body);
+	font-size: var(--wp--preset--font-size--small) !important;
+	line-height: 1.4;
+	box-shadow: none;
+	transition: width 200ms var(--cr-ease-out, ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.wp-block-search.is-style-cr-header-search .wp-block-search__input {
+		transition: none;
+	}
+}
+
+.wp-block-search.is-style-cr-header-search .wp-block-search__input::placeholder {
+	color: var(--cr-ink-muted, #647baf) !important;
+	opacity: 0.85 !important;
+}
+
+.wp-block-search.is-style-cr-header-search .wp-block-search__input:focus,
+.wp-block-search.is-style-cr-header-search .wp-block-search__input:focus-visible {
+	outline: none !important;
+}
+
+.wp-block-search.is-style-cr-header-search:focus-within .wp-block-search__input {
+	width: clamp(9rem, 16vw, 14rem);
+}
+
 
 /* ============================================================
    v0.5.17 — 404 page (cr-404).
@@ -6858,9 +6909,14 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]):hover {
 
 /* v0.5.24: image fills the available flex space (the column-height
    polaroid minus the caption strip). flex:1 grows it; min-height:0
-   lets it shrink correctly inside the flex parent. Drop the
-   aspect-ratio constraint — height comes from the flex container,
-   not the image's intrinsic ratio. object-fit:cover crops to fill. */
+   lets it shrink correctly inside the flex parent. object-fit:cover
+   crops to fill.
+   0.7.46: keep a 1 / 1 ratio instead of unsetting it. On stacked
+   layouts (up to 781px) the polaroid has no column height to fill, so
+   with no ratio the img stayed 0px tall until the AVIF decoded and a
+   late-arriving hero shifted the page (CLS 0.185-0.304, theme #6).
+   Where the column does set a height, width and height are both
+   definite and the ratio is ignored, so desktop layout is unchanged. */
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) > img.wp-block-cover__image-background {
 	position: relative !important;
 	top: auto !important;
@@ -6872,7 +6928,7 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) > img.wp-block-cover_
 	height: 100% !important;
 	min-height: 0 !important;
 	flex: 1 1 auto !important;
-	aspect-ratio: unset !important;
+	aspect-ratio: 1 / 1 !important;
 	display: block !important;
 	border-radius: 6px !important;
 	object-fit: cover !important;
@@ -8179,3 +8235,69 @@ html { scroll-padding-top: calc(4rem + var(--wp--preset--spacing--small, 1rem));
 	min-height: 24px;
 	min-width: 24px;
 }
+
+/* ============================================================
+   Site wordmark — the Site Title block with the cr-wordmark style
+   (parts/header.html). The all-paths asset (assets/brand/wordmark.svg)
+   paints the mark through a mask, so it needs no web font and takes the
+   link colour. The site name stays in the link for assistive tech, and
+   inc/site-title-wordmark.php labels the link. The box keeps the old
+   live-text wordmark's box model (line-height 1 plus 0.1em/0.2em padding,
+   8.6em wide), so the header row keeps its exact height and nothing shifts.
+   ============================================================ */
+/* stylelint-disable no-descending-specificity -- these rules only match the Site Title link with the cr-wordmark style; the earlier body.home rules the linter compares them with match latest-posts and home-stream title links. */
+.wp-block-site-title.is-style-cr-wordmark {
+	margin: 0;
+	line-height: 1;
+}
+
+.wp-block-site-title.is-style-cr-wordmark a:any-link {
+	position: relative;
+	display: block;
+	inline-size: 8.6em;
+	padding: 0.1em 0.05em 0.2em;
+	overflow: hidden;
+	font-size: clamp(1.5rem, 1.2rem + 0.8vw, 2rem);
+	line-height: 1;
+	white-space: nowrap;
+	text-indent: 110%;
+	color: var(--cr-ink, #241c4a);
+	text-decoration: none;
+	transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.wp-block-site-title.is-style-cr-wordmark a:any-link::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-color: currentcolor;
+	-webkit-mask: url(../brand/wordmark.svg) left center / contain no-repeat;
+	mask: url(../brand/wordmark.svg) left center / contain no-repeat;
+}
+
+/* Forced colours drop the masked background; show the site name text instead. */
+@media (forced-colors: active) {
+
+	.wp-block-site-title.is-style-cr-wordmark a:any-link {
+		inline-size: auto;
+		block-size: auto;
+		text-indent: 0;
+	}
+
+	.wp-block-site-title.is-style-cr-wordmark a:any-link::before {
+		display: none;
+	}
+}
+
+.wp-block-site-title.is-style-cr-wordmark a:any-link:hover,
+.wp-block-site-title.is-style-cr-wordmark a:any-link:focus-visible {
+	color: var(--cr-marker, #ffb703);
+	transform: rotate(-0.5deg);
+}
+
+.wp-block-site-title.is-style-cr-wordmark a:any-link:focus-visible {
+	outline: 3px solid var(--cr-focus-ring, var(--cr-marker, #ffb703));
+	outline-offset: 4px;
+	border-radius: 2px;
+}
+/* stylelint-enable no-descending-specificity */

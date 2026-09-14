@@ -15,9 +15,8 @@
  *   - courtneyr/pull-quote (v0.5.18) — copy-to-clipboard button
  *
  * Pre-paint script for theme:
- *   The inline pre_paint_theme() below sets data-theme on <html>
- *   before any CSS loads. This stays inline because it must execute
- *   before first paint.
+ *   inc/enqueue.php print_no_flash_theme_script() is the single inline
+ *   initializer that sets data-theme on <html> before any CSS loads.
  *
  * @package CourtneyrChild
  */
@@ -29,34 +28,6 @@ namespace Courtneyr\Child\Interactivity;
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-/**
- * Inline pre-paint script. Sets data-theme on <html> before CSS loads.
- *
- * Output position: <head>, before any stylesheet link.
- * Storage key: 'courtneyr-theme' (same key the kit uses, so the kit and
- * the live site share the user's preference if they happen to test in
- * both).
- */
-function pre_paint_theme(): void {
-	?>
-<script id="courtneyr-pre-paint">
-(function () {
-	try {
-		var stored = localStorage.getItem('courtneyr-theme');
-		if (stored === 'dark' || stored === 'light') {
-			document.documentElement.setAttribute('data-theme', stored);
-			return;
-		}
-		// No explicit choice — fall through to OS pref via @media (prefers-color-scheme).
-	} catch (e) {
-		// localStorage may be blocked. Fall through silently.
-	}
-})();
-</script>
-	<?php
-}
-add_action( 'wp_head', __NAMESPACE__ . '\\pre_paint_theme', 1 );
 
 /*
 ============================================================
@@ -190,14 +161,21 @@ function register_stream_filter_view(): void {
 add_action( 'init', __NAMESPACE__ . '\\register_stream_filter_view' );
 
 /**
- * Enqueue the stream-filter IA module on any page that might render
- * the cr-stream-loop pattern. Same always-enqueue rationale as the
- * callout module above.
+ * Enqueue the stream-filter IA module only when a rendered block carries
+ * its `data-wp-interactive="courtneyr/stream-filter"` wrapper (the
+ * cr-stream-loop pattern). Block themes render the template before
+ * wp_head, so the module still prints with the page's other modules.
+ *
+ * @param string $block_content Rendered block HTML.
+ * @return string Unchanged block HTML.
  */
-function maybe_enqueue_stream_filter(): void {
-	wp_enqueue_script_module( 'courtneyr/stream-filter' );
+function maybe_enqueue_stream_filter( string $block_content ): string {
+	if ( str_contains( $block_content, 'courtneyr/stream-filter' ) ) {
+		wp_enqueue_script_module( 'courtneyr/stream-filter' );
+	}
+	return $block_content;
 }
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\maybe_enqueue_stream_filter' );
+add_filter( 'render_block', __NAMESPACE__ . '\\maybe_enqueue_stream_filter' );
 
 
 /*

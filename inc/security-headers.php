@@ -140,7 +140,14 @@ function send_baseline_headers(): void {
 function send_frontend_headers( \WP $wp ): void {
 	send_baseline_headers();
 
-	header( 'Permissions-Policy: interest-cohort=(), browsing-topics=()' );
+	// R-29: deny powerful features no front-end page uses. Site code calls only
+	// navigator.clipboard (pull quotes) and navigator.share, which stay
+	// available; geolocation is limited to the site's own origin (the Post Kinds
+	// check-in picker runs in wp-admin, which these front-end headers do not
+	// reach). Outpost's /post/ shell sends its own Permissions-Policy, which
+	// replaces this one there. Embed iframes keep their default
+	// autoplay/fullscreen/picture-in-picture/encrypted-media allowances.
+	header( 'Permissions-Policy: accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=(), browsing-topics=()' );
 
 	// The Sucuri edge in front of courtneyr.dev injects
 	// Referrer-Policy: strict-origin-when-cross-origin on every response,
@@ -189,6 +196,12 @@ function send_frontend_headers( \WP $wp ): void {
 	// browser ignores it and Chrome logs a console error on every page
 	// load, so it stays out of the trial policy.
 	$csp_report_only = array_merge( $csp, CSP_REPORT_ONLY_OVERRIDES );
+	// The trial script-src replaces the enforced one wholesale, so the AMP
+	// runtime source added for story singles above has to be re-added here or
+	// every story view logs report-only violations for its own runtime.
+	if ( is_singular( 'web-story' ) ) {
+		$csp_report_only['script-src'] .= ' https://cdn.ampproject.org';
+	}
 	unset( $csp_report_only['upgrade-insecure-requests'] );
 	header( 'Content-Security-Policy-Report-Only: ' . build_policy( $csp_report_only ) );
 }

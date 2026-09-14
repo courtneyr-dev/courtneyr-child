@@ -46,7 +46,7 @@ Baseline first, then change, then compare: frontend at 1440 and 375, dark (`loca
 
 - `theme.json` `templateParts` merges with Ollie's by array index; a child that declares any part must re-declare `header`, `footer`, `sidebar` in Ollie's order first.
 - The theme's full-bleed rules key off `.alignfull` on the Group (`width: 100vw; margin-left: calc(50% - 50vw)`); wrap such a group in a plain `wp:template-part` (no `align`) and leave the group unchanged.
-- `templates/_archive` and `parts/_archive` are live registrations until they leave those folders.
+- Archived templates and parts live in `_archive/templates` and `_archive/parts`. Core registers every `.html` file under `templates/` and `parts/` recursively, so never move them back.
 
 ## Conventions
 

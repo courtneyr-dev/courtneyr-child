@@ -16,13 +16,36 @@
 
 if ( ! function_exists( 'cr_migration_backup_dir' ) ) {
 	/**
-	 * Backup directory (overridable for tests via CR_MIGRATION_BACKUP_DIR).
+	 * Backup directory, outside the web root.
+	 *
+	 * Defaults to a folder beside the WordPress root (on GoDaddy Managed WordPress,
+	 * the account home above html/). CR_MIGRATION_BACKUP_DIR overrides it for tests
+	 * and fixtures. Backups hold previous content and option values, so a folder
+	 * inside ABSPATH or WP_CONTENT_DIR is refused: the web server would serve a
+	 * backup to anyone who guesses its timestamped name.
 	 *
 	 * @return string
 	 */
 	function cr_migration_backup_dir(): string {
 		$env = getenv( 'CR_MIGRATION_BACKUP_DIR' );
-		return is_string( $env ) && '' !== $env ? $env : WP_CONTENT_DIR . '/cr-homepage-migration';
+		$dir = is_string( $env ) && '' !== $env ? $env : dirname( untrailingslashit( ABSPATH ) ) . '/cr-homepage-migration';
+		$dir = untrailingslashit( wp_normalize_path( $dir ) );
+
+		// Resolve the nearest existing ancestor so symlinks and not-yet-created folders compare correctly.
+		$probe = $dir;
+		while ( ! file_exists( $probe ) && dirname( $probe ) !== $probe ) {
+			$probe = dirname( $probe );
+		}
+		$resolved = realpath( $probe );
+		$resolved = trailingslashit( wp_normalize_path( false !== $resolved ? $resolved : $probe ) );
+		foreach ( array( ABSPATH, WP_CONTENT_DIR ) as $web_dir ) {
+			$web = realpath( $web_dir );
+			$web = trailingslashit( wp_normalize_path( false !== $web ? $web : $web_dir ) );
+			if ( str_starts_with( $resolved, $web ) ) {
+				WP_CLI::error( sprintf( 'Backup directory %s is inside the web root (%s); set CR_MIGRATION_BACKUP_DIR to a folder outside it. Nothing was changed.', $dir, $web ) );
+			}
+		}
+		return $dir;
 	}
 
 	/**
@@ -93,6 +116,68 @@ if ( ! function_exists( 'cr_migration_backup_dir' ) ) {
 		if ( ! $check instanceof WP_Post || $check->post_content !== $content ) {
 			WP_CLI::error( sprintf( 'Post %d did not store the expected content.', $post_id ) );
 		}
+	}
+
+	/**
+	 * Read a backup for restore only after proving it is the manifest-recorded
+	 * backup of $object on this site: the file has a manifest line, its sha256
+	 * matches that line, the line's home is this site and its object is exactly
+	 * $object. Any mismatch stops with nothing changed.
+	 *
+	 * @param string $file   Backup file path.
+	 * @param string $object Expected manifest object (e.g. "wp_navigation:9960").
+	 * @return string Backup contents.
+	 */
+	function cr_migration_read_verified_backup( string $file, string $object ): string {
+		if ( '' === $file || ! is_readable( $file ) ) {
+			WP_CLI::error( 'restore needs a readable backup file path.' );
+		}
+		$contents = (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$manifest = dirname( $file ) . '/manifest.jsonl';
+		$entry    = null;
+		foreach ( is_readable( $manifest ) ? (array) file( $manifest, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES ) : array() as $line ) {
+			$row = json_decode( (string) $line, true );
+			if ( is_array( $row ) && ( $row['file'] ?? '' ) === basename( $file ) ) {
+				$entry = $row;
+			}
+		}
+		if ( ! $entry ) {
+			WP_CLI::error( sprintf( '%s has no line in %s; refusing to guess its target.', basename( $file ), $manifest ) );
+		}
+		if ( ! hash_equals( (string) ( $entry['sha256'] ?? '' ), hash( 'sha256', $contents ) ) ) {
+			WP_CLI::error( sprintf( '%s does not match its manifest sha256; refusing to restore.', basename( $file ) ) );
+		}
+		if ( untrailingslashit( (string) ( $entry['home'] ?? '' ) ) !== untrailingslashit( home_url( '/' ) ) ) {
+			WP_CLI::error( sprintf( 'Backup was taken on %s, not %s; refusing to restore.', $entry['home'] ?? '?', home_url( '/' ) ) );
+		}
+		if ( (string) ( $entry['object'] ?? '' ) !== $object ) {
+			WP_CLI::error( sprintf( '%s was recorded for %s, not %s; refusing to restore.', basename( $file ), $entry['object'] ?? '?', $object ) );
+		}
+		return $contents;
+	}
+
+	/**
+	 * Parse a manifest object identity ("post:12", "wp_template:37240",
+	 * "wp_template_part:10861") into its type and id. Plain-text match on the
+	 * manifest string; anything else is not a restorable object.
+	 *
+	 * @param string $identity Manifest object.
+	 * @return array{type: string, id: int, post_types: string[]}|null
+	 */
+	function cr_migration_parse_object( string $identity ): ?array {
+		if ( ! preg_match( '/\A(post|wp_template|wp_template_part):([1-9][0-9]*)\z/', $identity, $m ) ) {
+			return null;
+		}
+		$post_types = array(
+			'post'             => array( 'page', 'post' ),
+			'wp_template'      => array( 'wp_template' ),
+			'wp_template_part' => array( 'wp_template_part' ),
+		);
+		return array(
+			'type'       => $m[1],
+			'id'         => (int) $m[2],
+			'post_types' => $post_types[ $m[1] ],
+		);
 	}
 
 	/**
