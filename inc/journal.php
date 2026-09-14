@@ -247,12 +247,45 @@ const THEME_META_MAP = array(
 );
 
 /**
+ * Card block attributes that carry location data, mapped to the
+ * corresponding key in the array returned by
+ * `pkiw_get_visible_location_fields()`. Attributes not listed here are
+ * not location data and are always eligible to fill from meta.
+ *
+ * `name` is the dish (eat) or beverage (drink), not the venue, so it
+ * isn't listed. `restaurant` is the eat card's deprecated venue-name
+ * field and is gated with `locationName`. `brand` is the drink's
+ * producer, not where it was drunk.
+ */
+const LOCATION_ATTR_VISIBILITY_MAP = array(
+	'restaurant'       => 'name',
+	'locationName'     => 'name',
+	'locationAddress'  => 'street',
+	'locationLocality' => 'locality',
+	'locationRegion'   => 'region',
+	'locationCountry'  => 'country',
+	'geoLatitude'      => 'coordinates',
+	'geoLongitude'     => 'coordinates',
+	'restaurantUrl'    => 'url',
+	'venueUrl'         => 'url',
+);
+
+/**
  * A card block's attributes with the plugin's post-meta fallback.
  *
  * The plugin mirrors card attributes into `_pkiw_*` meta (Card_Meta_Sync)
  * and fills empty attributes from that meta when it renders, so a post
  * whose block stores only some fields still shows the rest. Read them
  * the same way. Numeric attributes come back as integers.
+ *
+ * Location-related attributes (name/address/locality/region/country/
+ * coordinates/url — see LOCATION_ATTR_VISIBILITY_MAP) are only filled
+ * from meta when the Post Kinds for IndieWeb plugin's
+ * `pkiw_get_visible_location_fields()` says the viewer may see that
+ * field for this post. If the plugin function isn't present (inactive
+ * or an older version that doesn't expose it), no location-related
+ * attribute is filled — this theme never re-derives `_pkiw_geo_privacy`
+ * itself, it only defers to the plugin's own gate.
  *
  * @param \WP_Post             $post       Post.
  * @param string               $block_name e.g. 'post-kinds-indieweb/read-card'.
@@ -267,10 +300,20 @@ function card_attrs( \WP_Post $post, string $block_name, array $attrs ): array {
 	if ( empty( $map ) ) {
 		$map = (array) ( THEME_META_MAP[ $block_name ] ?? array() );
 	}
+
+	$visible_location = array();
+	if ( function_exists( 'pkiw_get_visible_location_fields' ) ) {
+		$visible_location = pkiw_get_visible_location_fields( $post->ID );
+	}
+
 	$numeric = array( 'pageCount', 'currentPage', 'rating', 'seasonNumber', 'episodeNumber', 'releaseYear' );
 	$floats  = array( 'geoLatitude', 'geoLongitude' );
 	foreach ( $map as $attr => $suffix ) {
 		if ( isset( $attrs[ $attr ] ) && '' !== $attrs[ $attr ] && 0 !== $attrs[ $attr ] && 0.0 !== $attrs[ $attr ] ) {
+			continue;
+		}
+		$location_field = LOCATION_ATTR_VISIBILITY_MAP[ $attr ] ?? null;
+		if ( null !== $location_field && empty( $visible_location[ $location_field ] ) ) {
 			continue;
 		}
 		$value = get_post_meta( $post->ID, '_pkiw_' . $suffix, true );
