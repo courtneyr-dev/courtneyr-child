@@ -6858,9 +6858,14 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]):hover {
 
 /* v0.5.24: image fills the available flex space (the column-height
    polaroid minus the caption strip). flex:1 grows it; min-height:0
-   lets it shrink correctly inside the flex parent. Drop the
-   aspect-ratio constraint — height comes from the flex container,
-   not the image's intrinsic ratio. object-fit:cover crops to fill. */
+   lets it shrink correctly inside the flex parent. object-fit:cover
+   crops to fill.
+   0.7.46: keep a 1 / 1 ratio instead of unsetting it. On stacked
+   layouts (up to 781px) the polaroid has no column height to fill, so
+   with no ratio the img stayed 0px tall until the AVIF decoded and a
+   late-arriving hero shifted the page (CLS 0.185-0.304, theme #6).
+   Where the column does set a height, width and height are both
+   definite and the ratio is ignored, so desktop layout is unchanged. */
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) > img.wp-block-cover__image-background {
 	position: relative !important;
 	top: auto !important;
@@ -6872,7 +6877,7 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) > img.wp-block-cover_
 	height: 100% !important;
 	min-height: 0 !important;
 	flex: 1 1 auto !important;
-	aspect-ratio: unset !important;
+	aspect-ratio: 1 / 1 !important;
 	display: block !important;
 	border-radius: 6px !important;
 	object-fit: cover !important;
