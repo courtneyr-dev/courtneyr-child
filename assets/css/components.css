@@ -8244,6 +8244,16 @@ html { scroll-padding-top: calc(4rem + var(--wp--preset--spacing--small, 1rem));
    inc/site-title-wordmark.php labels the link. The box keeps the old
    live-text wordmark's box model (line-height 1 plus 0.1em/0.2em padding,
    8.6em wide), so the header row keeps its exact height and nothing shifts.
+
+   0.7.46.1: the site name text is pushed off-canvas by text-indent (never
+   painted — the wordmark image is the only visible mark), so it isn't
+   "displayed text" for WCAG 1.4.12's purposes; the SC governs perceivable
+   text. But its box still inherits a visitor's text-spacing overrides
+   (line-height/letter-spacing/word-spacing), which grows the already-
+   off-canvas run and trips automated text-spacing checks with a false
+   clip on this link on every route. Pin the metrics that only affect
+   this invisible run back to the design's own values so growth stops —
+   this doesn't fight anything the visitor can see or read.
    ============================================================ */
 /* stylelint-disable no-descending-specificity -- these rules only match the Site Title link with the cr-wordmark style; the earlier body.home rules the linter compares them with match latest-posts and home-stream title links. */
 .wp-block-site-title.is-style-cr-wordmark {
@@ -8258,8 +8268,10 @@ html { scroll-padding-top: calc(4rem + var(--wp--preset--spacing--small, 1rem));
 	padding: 0.1em 0.05em 0.2em;
 	overflow: hidden;
 	font-size: clamp(1.5rem, 1.2rem + 0.8vw, 2rem);
-	line-height: 1;
+	line-height: 1 !important;
 	white-space: nowrap;
+	letter-spacing: normal !important;
+	word-spacing: normal !important;
 	text-indent: 110%;
 	color: var(--cr-ink, #241c4a);
 	text-decoration: none;
