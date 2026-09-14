@@ -2513,16 +2513,16 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 	color: var(--cr-printer-ivory) !important;
 }
 
-:root[data-theme="dark"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-:root[data-theme="dark"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-:root[data-theme="dark"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-:root[data-theme="dark"] .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *) {
+:root[data-theme="dark"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *):not(.cr-note-artifact *),
+:root[data-theme="dark"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *):not(.cr-note-artifact *),
+:root[data-theme="dark"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *):not(.cr-note-artifact *),
+:root[data-theme="dark"] .has-secondary-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *):not(.cr-note-artifact *) {
 	color: var(--cr-printer-ivory) !important;
 }
 
-:root[data-theme="dark"] .has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
-:root[data-theme="dark"] .has-tertiary-background-color  a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *),
-:root[data-theme="dark"] .has-base-background-color      a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *) {
+:root[data-theme="dark"] .has-main-accent-background-color a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *):not(.cr-note-artifact *),
+:root[data-theme="dark"] .has-tertiary-background-color  a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *):not(.cr-note-artifact *),
+:root[data-theme="dark"] .has-base-background-color      a:not(.wp-element-button):not(.cr-cta):not(.cr-reasons *):not(.cr-fieldnotes *):not(.cr-note-artifact *) {
 	color: var(--cr-sky-blue, #8ecae6) !important;
 }
 
@@ -2538,12 +2538,12 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 		background-color: var(--cr-surface-soft) !important;
 		color: var(--cr-printer-ivory) !important;
 	}
-	:root:not([data-theme]) .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-	:root:not([data-theme]) .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-	:root:not([data-theme]) .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-	:root[data-theme="system"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-	:root[data-theme="system"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *),
-	:root[data-theme="system"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *) {
+	:root:not([data-theme]) .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *):not(.cr-note-artifact *),
+	:root:not([data-theme]) .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *):not(.cr-note-artifact *),
+	:root:not([data-theme]) .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *):not(.cr-note-artifact *),
+	:root[data-theme="system"] .has-main-accent-background-color *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *):not(.cr-note-artifact *),
+	:root[data-theme="system"] .has-tertiary-background-color  *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *):not(.cr-note-artifact *),
+	:root[data-theme="system"] .has-base-background-color      *:not(.wp-element-button):not(.cr-cta):not(input):not(button):not(.cr-icon-avatar):not(.cr-reasons *):not(.cr-fieldnotes *):not(.cr-note-artifact *) {
 		color: var(--cr-printer-ivory) !important;
 	}
 }
