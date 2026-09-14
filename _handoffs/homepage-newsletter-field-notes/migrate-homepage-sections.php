@@ -220,7 +220,9 @@ if ( 'upgrade-templates' === $cr_mode ) {
 		array(
 			'post_type'      => 'wp_template',
 			'post_status'    => 'publish',
-			'name'           => 'single',
+			// post_name__in, not name: a name query is singular and WP_Query skips tax_query for it,
+			// which let another theme's newer single override win.
+			'post_name__in'  => array( 'single' ),
 			'posts_per_page' => 1,
 			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				array(
