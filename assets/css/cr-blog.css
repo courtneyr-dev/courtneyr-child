@@ -236,17 +236,27 @@
 	box-shadow: var(--cr-shadow-hard-2);
 }
 .cr-blog .post-grid > li:first-child .card:hover { transform: translate(-3px, -3px); }
+
+/* 0.7.46.1 (CLS): reserve the lead image's box on this wrapper, not on the
+   <img>/<figure> the post-featured-image block renders. The wrapper's own
+   width is already settled by the grid (no dependency on the image's own
+   intrinsic size or on whichever optimization-plugin pass touches the
+   <img>/<picture> last), so aspect-ratio here reserves the same footprint
+   from first paint regardless of image load timing. */
 .cr-blog .post-grid > li:first-child .card__media {
 	border-right: 0;
 	border-bottom: var(--cr-border-thick);
 	background: none;
+	aspect-ratio: 16 / 9;
 }
 /* Show the whole image — override the post-featured-image 16/9 crop (the block
-   sets aspect-ratio + object-fit:cover inline, so !important is needed). */
+   sets aspect-ratio + object-fit:cover inline, so !important is needed). The
+   box itself no longer comes from this height; it just fills the wrapper's
+   now-reserved aspect-ratio box without cropping. */
 .cr-blog .post-grid > li:first-child .card__media img,
 .cr-blog .post-grid > li:first-child .card__media figure {
 	aspect-ratio: auto !important;
-	height: auto !important;
+	height: 100% !important;
 	min-height: 0;
 	object-fit: contain;
 }

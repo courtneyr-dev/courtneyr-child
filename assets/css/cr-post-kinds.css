@@ -185,6 +185,21 @@ body .pk-card {
 .cr-stream-page .pk-card::before { content: none; }
 .cr-stream-page .pk-card .pk-body { display: flex; flex-direction: column; min-width: 0; }
 
+/* 0.7.46.1: .pk-caption is a flex column in several kind skins (VHS,
+   cassette, mat, …) and its title/sub text carries white-space: nowrap
+   + text-overflow: ellipsis so long titles truncate visually. Without
+   min-width: 0, a flex item's automatic minimum size defaults to its
+   content's full (unwrapped) width, so the title/sub boxes refuse to
+   shrink to the caption's own box — the truncation still LOOKS right at
+   default spacing (the ancestor's overflow: hidden still crops it
+   visually), but the boxes silently overhang their column underneath,
+   and a visitor's larger letter/word-spacing widens that overhang
+   further, tripping automated text-spacing clipping checks. Let every
+   caption child shrink to fit, same fix already used for
+   .pk-body > * / .cr-sticky .pk-body a few kind skins down. */
+.cr-stream-page .pk-caption,
+.cr-stream-page .pk-caption > * { min-width: 0; }
+
 /* ---- Cover-hero kinds: the box shell ---- */
 .cr-stream-page .pk-card.k-watch,
 .cr-stream-page .pk-card.k-listen,
