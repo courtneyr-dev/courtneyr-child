@@ -1931,6 +1931,18 @@ figure.wp-block-post-featured-image.single-post__featured {
 	padding: 0.4rem 0.4rem;
 }
 
+/* WCAG 2.2 SC 2.5.8: the submenu toggles measured 12×12 at 1280 (2026-09-22). */
+.site-header__nav .wp-block-navigation-submenu__toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-inline-size: 24px;
+	min-block-size: 24px;
+	padding: 0;
+}
+
+.site-header__nav .wp-block-navigation-submenu__toggle .wp-block-navigation__submenu-icon svg { width: 12px; height: 12px; }
+
 /* Submenu container — keep the elevated card look but no shadow.
    Border + background-elevated still distinguishes it from page bg. */
 .site-header__nav .wp-block-navigation__submenu-container {
