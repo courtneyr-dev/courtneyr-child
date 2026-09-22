@@ -6949,6 +6949,16 @@ body.home .wp-block-columns:has(.wp-block-cover img[src*="courtney-pirate"]) > .
 	flex-direction: column !important;
 }
 
+/* Phones: the pitch and the subscribe form come first; the polaroid follows.
+   At 375×812 the form sat 1.26 screens down (2026-09-22). Core stacks columns
+   in DOM order below 782px; flex order swaps them without touching content. */
+@media (max-width: 781px) {
+
+	body.home .wp-block-columns:has(.wp-block-cover img[src*="courtney-pirate"]) > .wp-block-column:has(.wp-block-cover img[src*="courtney-pirate"]) {
+		order: 2;
+	}
+}
+
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) {
 	background: #ffffff !important;
 	display: flex !important;
