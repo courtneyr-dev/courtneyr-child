@@ -651,6 +651,14 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 .cr-term-chip--5 { border-left-color: var(--cr-type-quote); transform: rotate(-1.8deg); }
 .cr-term-chip--6 { border-left-color: var(--cr-type-reply); transform: rotate(2.2deg); }
 
+/* Dark: tape chips keep tape (light) paper so the tape ink stays readable. */
+:root[data-theme="dark"] .cr-term-chip { background: var(--cr-tape, #f3e5b8); color: var(--cr-tape-ink, #241c4a); }
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-term-chip { background: var(--cr-tape, #f3e5b8); color: var(--cr-tape-ink, #241c4a); }
+}
+
 
 /* ============ Hero layout ============
    v1.x __title and __lead preserved. v2.0 __inner and __display added.
@@ -938,6 +946,16 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
   z-index: 10000;
 }
 .cr-skip-link:focus { left: var(--cr-space-md); top: var(--cr-space-md); }
+
+/* Dark: core's skip link measured 2.79:1 when focused. */
+:root[data-theme="dark"] .skip-link.screen-reader-text:focus,
+:root[data-theme="dark"] .cr-skip-link:focus { background: var(--cr-surface-elevated); color: var(--cr-ink); outline: 3px solid var(--cr-focus-ring); }
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .skip-link.screen-reader-text:focus,
+	:root:not([data-theme="light"]) .cr-skip-link:focus { background: var(--cr-surface-elevated); color: var(--cr-ink); outline: 3px solid var(--cr-focus-ring); }
+}
 
 
 /* ============ Rotation utilities ============
