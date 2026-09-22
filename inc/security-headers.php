@@ -7,7 +7,7 @@
  * v1.7.0 in favor of this file, so exactly one layer emits the CSP.
  *
  * Response-path reality (verified July 2026): requests flow
- * Cloudflare -> Sucuri (courtneyr.dev edge) -> GoDaddy MWP gateway -> PHP.
+ * Pantheon Global CDN (Cloudflare-based) -> nginx -> PHP; no WAF layer since 2026-09.
  * PHP-emitted headers survive that chain (confirmed via archived live
  * responses), but responses answered before PHP — nginx-level 404s for
  * missing static files such as /404javascript.js — can only be covered by
@@ -149,14 +149,13 @@ function send_frontend_headers( \WP $wp ): void {
 	// autoplay/fullscreen/picture-in-picture/encrypted-media allowances.
 	header( 'Permissions-Policy: accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=(), browsing-topics=()' );
 
-	// The Sucuri edge in front of courtneyr.dev injects
-	// Referrer-Policy: strict-origin-when-cross-origin on every response,
-	// and a server-side plugin emits the identical value at origin, so
-	// clients were seeing the header twice. Drop the origin copy here
-	// (runs last at priority 999); the edge copy remains the single
-	// authoritative one. If the site ever moves off Sucuri, replace this
-	// removal with an explicit header() call.
-	header_remove( 'Referrer-Policy' );
+	// Referrer-Policy used to be injected by the Sucuri edge in front of
+	// courtneyr.dev, and this callback only removed the duplicate origin copy.
+	// The site now runs on Pantheon with no WAF in front (audit 2026-09-22:
+	// the header was absent on every response), so the theme is the single
+	// source. header() with replace = true keeps it single-valued even if a
+	// plugin emits its own earlier.
+	header( 'Referrer-Policy: strict-origin-when-cross-origin' );
 
 	$csp = CSP_ENFORCED;
 
