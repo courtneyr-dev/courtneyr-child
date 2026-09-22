@@ -7,12 +7,13 @@
 		"node": ">=20.19"
 	},
 	"scripts": {
-		"lint": "npm run lint:php && npm run lint:css && npm run lint:theme-json",
+		"lint": "npm run lint:php && npm run lint:css && npm run lint:theme-json && npm run lint:dark-tokens",
 		"lint:php": "node tests/lint/baseline.mjs phpcs",
 		"lint:php:baseline": "node tests/lint/baseline.mjs phpcs --update",
 		"lint:css": "node tests/lint/baseline.mjs stylelint",
 		"lint:css:baseline": "node tests/lint/baseline.mjs stylelint --update",
 		"lint:theme-json": "node tests/lint/theme-json-schema.mjs",
+		"lint:dark-tokens": "node tests/lint/dark-tokens-parity.mjs",
 		"evidence": "node tests/evidence/evidence.mjs",
 		"captures": "playwright test --config tests/playwright/playwright.config.mjs"
 	},
