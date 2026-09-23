@@ -33,7 +33,7 @@ function label_wordmark_link( string $block_content, array $block ): string {
 	}
 	$tags = new \WP_HTML_Tag_Processor( $block_content );
 	if ( $tags->next_tag( 'a' ) ) {
-		$tags->set_attribute( 'aria-label', __( 'CourtneyR.dev — home', 'courtneyr-child' ) );
+		$tags->set_attribute( 'aria-label', __( 'Courtney Robertson — CourtneyR.dev home', 'courtneyr-child' ) );
 	}
 	return $tags->get_updated_html();
 }
