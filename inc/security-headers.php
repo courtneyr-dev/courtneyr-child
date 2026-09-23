@@ -131,13 +131,12 @@ function send_baseline_headers(): void {
  * plugin that emits the same header earlier, keeping each header
  * single-valued instead of duplicated.
  *
- * Note: the main query has not run yet inside send_headers, so template
- * conditionals like is_embed() are not usable here; embed requests are
- * detected from the parsed query vars on the passed WP instance.
- *
- * @param \WP $wp Current WordPress environment instance (by reference).
+ * Note: conditional tags such as is_embed() are valid here. Core's
+ * WP::main() runs query_posts() before it calls send_headers()
+ * (wp-includes/class-wp.php:819-830 on 7.1.2), so the main query is
+ * already parsed by the time this callback fires.
  */
-function send_frontend_headers( \WP $wp ): void {
+function send_frontend_headers(): void {
 	send_baseline_headers();
 
 	// R-29: deny powerful features no front-end page uses. Site code calls only
@@ -177,7 +176,7 @@ function send_frontend_headers( \WP $wp ): void {
 	// /embed/ responses exist to be iframed by other sites: no framing
 	// restriction there. Everywhere else, CSP and X-Frame-Options stay
 	// semantically aligned ('self' <=> SAMEORIGIN).
-	if ( ! empty( $wp->query_vars['embed'] ) ) {
+	if ( is_embed() ) {
 		unset( $csp['frame-ancestors'] );
 		// A server-side plugin outside this repo also emits
 		// X-Frame-Options: SAMEORIGIN; strip it here (this callback runs
