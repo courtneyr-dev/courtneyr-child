@@ -31,3 +31,6 @@ assets/fonts/.staging/
 
 # Test tooling output (see docs/testing.md)
 tests/output/
+
+# Playwright MCP browser session artifacts
+.playwright-mcp/

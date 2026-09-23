@@ -572,6 +572,20 @@
 	}
 }
 
+/* Dark: the story titles inherited light-mode ink (1.04–1.51:1 measured 2026-09-22). */
+:root[data-theme="dark"] .cr-fieldnotes .cr-home-story__title,
+:root[data-theme="dark"] .cr-fieldnotes .cr-home-story__title a {
+	color: var(--cr-ink);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-fieldnotes .cr-home-story__title,
+	:root:not([data-theme="light"]) .cr-fieldnotes .cr-home-story__title a {
+		color: var(--cr-ink);
+	}
+}
+
 /* ---- Panels wiggle like the hero polaroid ----
    Same recipe as `body.home .wp-block-cover:has(img[src*="courtney-pirate"])`
    in components.css: a resting tilt, hover / focus-within straightens it and
@@ -630,6 +644,20 @@
 .editor-styles-wrapper .cr-post-glyph-editor { display: contents; }
 .editor-styles-wrapper .pkiw-stream-card-editor { display: contents; }
 .editor-styles-wrapper .pkiw-stream-card-editor__placeholder { font-family: var(--cr-font-mono, monospace); font-size: 0.75rem; opacity: 0.7; }
+
+/* Dark: the stream card chips inherited light-mode ink (1.04–1.51:1 measured 2026-09-22). */
+:root[data-theme="dark"] .cr-fieldnotes .pk-card .pk-title,
+:root[data-theme="dark"] .cr-fieldnotes .pk-card .pk-title a {
+	color: var(--cr-ink);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-fieldnotes .pk-card .pk-title,
+	:root:not([data-theme="light"]) .cr-fieldnotes .pk-card .pk-title a {
+		color: var(--cr-ink);
+	}
+}
 
 /* ------------------------------------------------------------------
    Refinement accepted 2026-09-13 (issue 13): tighter rhythm and the small

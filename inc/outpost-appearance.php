@@ -11,6 +11,10 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\OutpostAppearance;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 const HANDLE = 'courtneyr-outpost-appearance';
 
 /**

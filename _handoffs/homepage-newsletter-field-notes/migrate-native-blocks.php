@@ -52,6 +52,10 @@
  * @package CourtneyrChild
  */
 
+if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
+	exit;
+}
+
 if ( ! function_exists( 'cr_nb_block' ) ) {
 	/**
 	 * A parsed block with no inner content (dynamic blocks serialize self-closing).

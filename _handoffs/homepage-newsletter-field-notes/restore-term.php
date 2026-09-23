@@ -12,6 +12,10 @@
  * @package CourtneyrChild
  */
 
+if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
+	exit;
+}
+
 $cr_taxonomy = (string) ( $args[0] ?? '' );
 $cr_term_id  = (int) ( $args[1] ?? 0 );
 $cr_slug     = (string) ( $args[2] ?? '' );

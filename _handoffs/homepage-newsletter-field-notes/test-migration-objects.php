@@ -12,6 +12,10 @@
  * @package CourtneyrChild
  */
 
+if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
+	exit;
+}
+
 $cr_cases = array(
 	// Accepted identities.
 	array(

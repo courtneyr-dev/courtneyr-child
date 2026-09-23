@@ -9,6 +9,10 @@
  * @package CourtneyrChild
  */
 
+if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
+	exit;
+}
+
 require_once __DIR__ . '/cr-migration-backup.php';
 
 $cr_mode = (string) ( $args[0] ?? 'preview' );

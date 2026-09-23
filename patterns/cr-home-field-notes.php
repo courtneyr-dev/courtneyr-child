@@ -33,8 +33,8 @@ declare( strict_types = 1 );
 
 		<!-- wp:group {"className":"cr-fieldnotes__lane-head","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"center"}} -->
 		<div class="wp-block-group cr-fieldnotes__lane-head">
-			<!-- wp:heading {"level":3,"className":"cr-fieldnotes__lane-title cr-fieldnotes__lane-title--blog","fontFamily":"accent"} -->
-			<h3 class="wp-block-heading cr-fieldnotes__lane-title cr-fieldnotes__lane-title--blog has-accent-font-family"><?php esc_html_e( 'Blog', 'courtneyr-child' ); ?></h3>
+			<!-- wp:heading {"level":2,"className":"cr-fieldnotes__lane-title cr-fieldnotes__lane-title--blog","fontFamily":"accent"} -->
+			<h2 class="wp-block-heading cr-fieldnotes__lane-title cr-fieldnotes__lane-title--blog has-accent-font-family"><?php esc_html_e( 'Blog', 'courtneyr-child' ); ?></h2>
 			<!-- /wp:heading -->
 		</div>
 		<!-- /wp:group -->
@@ -57,7 +57,7 @@ declare( strict_types = 1 );
 						<div class="wp-block-group cr-home-story__title-row">
 							<!-- wp:courtneyr/post-glyph /-->
 
-							<!-- wp:post-title {"level":4,"isLink":true,"className":"cr-home-story__title p-name cr-u-url","fontFamily":"accent"} /-->
+							<!-- wp:post-title {"level":3,"isLink":true,"className":"cr-home-story__title p-name cr-u-url","fontFamily":"accent"} /-->
 						</div>
 						<!-- /wp:group -->
 
@@ -87,7 +87,7 @@ declare( strict_types = 1 );
 						<div class="wp-block-group cr-home-story__title-row">
 							<!-- wp:courtneyr/post-glyph /-->
 
-							<!-- wp:post-title {"level":4,"isLink":true,"className":"cr-home-story__title p-name cr-u-url","fontFamily":"accent"} /-->
+							<!-- wp:post-title {"level":3,"isLink":true,"className":"cr-home-story__title p-name cr-u-url","fontFamily":"accent"} /-->
 						</div>
 						<!-- /wp:group -->
 
@@ -119,8 +119,8 @@ declare( strict_types = 1 );
 
 		<!-- wp:group {"className":"cr-fieldnotes__lane-head","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"center"}} -->
 		<div class="wp-block-group cr-fieldnotes__lane-head">
-			<!-- wp:heading {"level":3,"className":"cr-fieldnotes__lane-title cr-fieldnotes__lane-title--stream","fontFamily":"accent"} -->
-			<h3 class="wp-block-heading cr-fieldnotes__lane-title cr-fieldnotes__lane-title--stream has-accent-font-family"><?php esc_html_e( 'Stream', 'courtneyr-child' ); ?></h3>
+			<!-- wp:heading {"level":2,"className":"cr-fieldnotes__lane-title cr-fieldnotes__lane-title--stream","fontFamily":"accent"} -->
+			<h2 class="wp-block-heading cr-fieldnotes__lane-title cr-fieldnotes__lane-title--stream has-accent-font-family"><?php esc_html_e( 'Stream', 'courtneyr-child' ); ?></h2>
 			<!-- /wp:heading -->
 		</div>
 		<!-- /wp:group -->

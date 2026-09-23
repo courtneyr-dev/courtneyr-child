@@ -14,6 +14,10 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Archives;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /** Kinds without a sprite of their own borrow the nearest format glyph/colour. */
 const KIND_TYPE_ALIASES = array(
 	'article'  => 'blog',

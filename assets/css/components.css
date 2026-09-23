@@ -651,6 +651,14 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 .cr-term-chip--5 { border-left-color: var(--cr-type-quote); transform: rotate(-1.8deg); }
 .cr-term-chip--6 { border-left-color: var(--cr-type-reply); transform: rotate(2.2deg); }
 
+/* Dark: tape chips keep tape (light) paper so the tape ink stays readable. */
+:root[data-theme="dark"] .cr-term-chip { background: var(--cr-tape, #f3e5b8); color: var(--cr-tape-ink, #241c4a); }
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-term-chip { background: var(--cr-tape, #f3e5b8); color: var(--cr-tape-ink, #241c4a); }
+}
+
 
 /* ============ Hero layout ============
    v1.x __title and __lead preserved. v2.0 __inner and __display added.
@@ -938,6 +946,16 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
   z-index: 10000;
 }
 .cr-skip-link:focus { left: var(--cr-space-md); top: var(--cr-space-md); }
+
+/* Dark: core's skip link measured 2.79:1 when focused. */
+:root[data-theme="dark"] .skip-link.screen-reader-text:focus,
+:root[data-theme="dark"] .cr-skip-link:focus { background: var(--cr-surface-elevated); color: var(--cr-ink); outline: 3px solid var(--cr-focus-ring); }
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .skip-link.screen-reader-text:focus,
+	:root:not([data-theme="light"]) .cr-skip-link:focus { background: var(--cr-surface-elevated); color: var(--cr-ink); outline: 3px solid var(--cr-focus-ring); }
+}
 
 
 /* ============ Rotation utilities ============
@@ -1912,6 +1930,18 @@ figure.wp-block-post-featured-image.single-post__featured {
 	font-size: 1.125rem;
 	padding: 0.4rem 0.4rem;
 }
+
+/* WCAG 2.2 SC 2.5.8: the submenu toggles measured 12×12 at 1280 (2026-09-22). */
+.site-header__nav .wp-block-navigation-submenu__toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-inline-size: 24px;
+	min-block-size: 24px;
+	padding: 0;
+}
+
+.site-header__nav .wp-block-navigation-submenu__toggle .wp-block-navigation__submenu-icon svg { width: 12px; height: 12px; }
 
 /* Submenu container — keep the elevated card look but no shadow.
    Border + background-elevated still distinguishes it from page bg. */
@@ -6929,6 +6959,16 @@ body.home .wp-block-columns:has(.wp-block-cover img[src*="courtney-pirate"]) {
 body.home .wp-block-columns:has(.wp-block-cover img[src*="courtney-pirate"]) > .wp-block-column:has(.wp-block-cover img[src*="courtney-pirate"]) {
 	display: flex !important;
 	flex-direction: column !important;
+}
+
+/* Phones: the pitch and the subscribe form come first; the polaroid follows.
+   At 375×812 the form sat 1.26 screens down (2026-09-22). Core stacks columns
+   in DOM order below 782px; flex order swaps them without touching content. */
+@media (max-width: 781px) {
+
+	body.home .wp-block-columns:has(.wp-block-cover img[src*="courtney-pirate"]) > .wp-block-column:has(.wp-block-cover img[src*="courtney-pirate"]) {
+		order: 2;
+	}
 }
 
 body.home .wp-block-cover:has(img[src*="courtney-pirate"]) {

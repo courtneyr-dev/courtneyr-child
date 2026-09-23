@@ -343,6 +343,30 @@
 	outline-offset: 2px;
 }
 
+/* Dark: the postcard stays white paper, so its fields need paper ink, not page ink (1.05:1 measured 2026-09-22). */
+:root[data-theme="dark"] .cr-contact .cr-contact__postcard .wsf-field-wrapper input[type="text"],
+:root[data-theme="dark"] .cr-contact .cr-contact__postcard .wsf-field-wrapper input[type="email"],
+:root[data-theme="dark"] .cr-contact .cr-contact__postcard .wsf-field-wrapper textarea {
+	background: #fff;
+	color: var(--cr-russian-violet, #241c4a);
+	border-color: var(--cr-russian-violet, #241c4a);
+}
+
+:root[data-theme="dark"] .cr-contact .cr-contact__postcard .wsf-label { color: var(--cr-russian-violet, #241c4a); }
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-contact .cr-contact__postcard .wsf-field-wrapper input[type="text"],
+	:root:not([data-theme="light"]) .cr-contact .cr-contact__postcard .wsf-field-wrapper input[type="email"],
+	:root:not([data-theme="light"]) .cr-contact .cr-contact__postcard .wsf-field-wrapper textarea {
+		background: #fff;
+		color: var(--cr-russian-violet, #241c4a);
+		border-color: var(--cr-russian-violet, #241c4a);
+	}
+
+	:root:not([data-theme="light"]) .cr-contact .cr-contact__postcard .wsf-label { color: var(--cr-russian-violet, #241c4a); }
+}
+
 /* Submit button → stamped "Send it" CTA (the submit field renders an
    input[type=submit].wsf-button inside its wrapper) */
 .cr-contact .cr-contact__postcard .wsf-field-wrapper input[type="submit"],
@@ -603,7 +627,10 @@
 	font-size: var(--cr-text-sm);
 	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
+
+/* 0.7.48: the flip script was removed in 8362d77; the back-face control cannot work. Hidden until the page content drops it (Lane F). */
 .cr-contact .cr-front__back {
+	display: none;
 	flex-shrink: 0;
 	font-family: var(--cr-font-mono);
 	font-weight: var(--cr-weight-bold);

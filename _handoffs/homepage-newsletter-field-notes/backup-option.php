@@ -8,6 +8,10 @@
  * @package CourtneyrChild
  */
 
+if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
+	exit;
+}
+
 require_once __DIR__ . '/cr-migration-backup.php';
 
 $cr_name = (string) ( $args[0] ?? '' );
