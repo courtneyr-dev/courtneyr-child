@@ -2709,7 +2709,9 @@ body .pk-card {
 .cr-stream-page .pk-card.k-question,
 .cr-stream-page .pk-card.k-craft,
 .cr-stream-page .pk-card.k-eat,
-.cr-stream-page .pk-card.k-photo {
+.cr-stream-page .pk-card.k-photo,
+.cr-stream-page .pk-card.k-jam,
+.cr-stream-page .pk-card.k-audio {
 	--cr-ink: #241c4a;
 	--cr-ink-muted: #126782;
 	--cr-ink-soft: #3d2f6e;

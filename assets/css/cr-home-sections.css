@@ -645,7 +645,9 @@
 .editor-styles-wrapper .pkiw-stream-card-editor { display: contents; }
 .editor-styles-wrapper .pkiw-stream-card-editor__placeholder { font-family: var(--cr-font-mono, monospace); font-size: 0.75rem; opacity: 0.7; }
 
-/* Dark: the stream card chips inherited light-mode ink (1.04–1.51:1 measured 2026-09-22). */
+/* Dark: the stream card titles inherited light-mode ink (1.04–1.51:1 measured 2026-09-22).
+   k-jam and k-audio are pinned back to their own light-paper ink in
+   cr-post-kinds.css instead of following --cr-ink here (0.7.48 review). */
 :root[data-theme="dark"] .cr-fieldnotes .pk-card .pk-title,
 :root[data-theme="dark"] .cr-fieldnotes .pk-card .pk-title a {
 	color: var(--cr-ink);

@@ -651,7 +651,9 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 .cr-term-chip--5 { border-left-color: var(--cr-type-quote); transform: rotate(-1.8deg); }
 .cr-term-chip--6 { border-left-color: var(--cr-type-reply); transform: rotate(2.2deg); }
 
-/* Dark: tape chips keep tape (light) paper so the tape ink stays readable. */
+/* Dark: tape chips follow var(--cr-tape)/--cr-tape-ink, which flip to dark
+   tape (#4a3f1c) with selective-yellow ink (#ffb703) in dark mode — the tape
+   itself does not stay light paper here. */
 :root[data-theme="dark"] .cr-term-chip { background: var(--cr-tape, #f3e5b8); color: var(--cr-tape-ink, #241c4a); }
 
 @media (prefers-color-scheme: dark) {
