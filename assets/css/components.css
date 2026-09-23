@@ -3892,7 +3892,7 @@ body.home main.homepage p:not(.has-text-align-center) {
    class can still emit sparkle pseudo-elements.
    v0.7.44: the newsletter reasons / Field Notes sections are excluded too;
    their lane titles carry the nav's 📰 / 🌊 as ::before content. */
-body.home main.homepage > .wp-block-post-content h2.wp-block-heading:not(.cr-flank)::before,
+body.home main.homepage > .wp-block-post-content h2.wp-block-heading:not(.cr-flank):not(.cr-fieldnotes__lane-title)::before,
 body.home main.homepage > .wp-block-post-content h1.wp-block-heading:not(.cr-flank)::before,
 body.home main.homepage > .wp-block-post-content h3.wp-block-heading:not(.cr-flank):not(.cr-fieldnotes__lane-title)::before,
 body.home main.homepage > .alignfull:not(.wp-block-latest-posts)::after,
