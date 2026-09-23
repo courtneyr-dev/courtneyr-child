@@ -44,6 +44,15 @@ function add_map_alt( string $content ): string {
 		: "Map showing this post's location";
 	$alt = esc_attr( $label );
 
+	// Simple Location wraps the map in <a target="_blank" href=""> when the
+	// provider has no link target; an empty-href link is a link to nowhere
+	// with an image for a name. Drop the wrapper, keep the image.
+	$content = (string) preg_replace(
+		'#<a\b[^>]*\bhref=""[^>]*>(\s*<img\b[^>]*\bsloc-map\b[^>]*>\s*)</a>#i',
+		'$1',
+		$content
+	);
+
 	return (string) preg_replace_callback(
 		'/<img\b[^>]*>/i',
 		static function ( array $m ) use ( $alt ): string {

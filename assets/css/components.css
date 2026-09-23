@@ -1732,6 +1732,13 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
 .editor-styles-wrapper ul.wp-block-list {
 	list-style: none;
 }
+
+/* Syndication Links sets ul.relsyn li to 0.8em; inside small meta text that
+   computes under 10px (WCAG 1.4.4 as the checker applies it). Floor it. */
+ul.relsyn li {
+	font-size: max(0.8em, 0.75rem);
+}
+
 .editor-styles-wrapper ul.wp-block-list > li {
 	position: relative;
 	padding-left: var(--cr-space-lg, 1.5rem);

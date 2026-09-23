@@ -35,6 +35,11 @@ function label_wordmark_link( string $block_content, array $block ): string {
 	if ( $tags->next_tag( 'a' ) ) {
 		$tags->set_attribute( 'aria-label', __( 'Courtney Robertson — CourtneyR.dev home', 'courtneyr-child' ) );
 	}
-	return $tags->get_updated_html();
+	$html = $tags->get_updated_html();
+	// Level 0 renders the block as <p>. A 1.5rem paragraph of two words trips
+	// "possible heading" checks; the wordmark is a home link, so a <div> is the
+	// honest wrapper. Only the outer tag changes.
+	$html = (string) preg_replace( '/^(\s*)<p\b/', '$1<div', $html, 1 );
+	return (string) preg_replace( '/<\/p>(\s*)$/', '</div>$1', $html, 1 );
 }
 add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\\label_wordmark_link', 10, 2 );
