@@ -14,6 +14,10 @@
 
 declare( strict_types = 1 );
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $cr_post_id = (int) ( $block->context['postId'] ?? get_the_ID() );
 if ( ! $cr_post_id ) {
 	return;

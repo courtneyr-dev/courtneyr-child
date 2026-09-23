@@ -19,6 +19,10 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Microformats;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Add a class to the first tag of a kind inside the rendered block.
  */

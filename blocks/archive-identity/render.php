@@ -9,6 +9,10 @@
 
 declare( strict_types = 1 );
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $cr_identity = \Courtneyr\Child\Archives\resolve_identity();
 printf(
 	'<div class="cr-archive-identity cr-archive-identity--%1$s" style="--cr-archive-accent: %2$s;"><span class="cr-archive-identity__glyph media-glyph cr-icon-avatar cr-icon-avatar--%3$s" aria-hidden="true">%4$s</span><p class="cr-archive-identity__kicker is-style-cr-tape-label">%5$s</p></div>',
