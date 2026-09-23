@@ -536,7 +536,9 @@ add_action( 'wp_head', __NAMESPACE__ . '\\preload_critical_fonts', 1 );
  * aria-label "Read more about TCF purposes on Cookie Database" — the accessible
  * name doesn't contain the visible text, which fails voice-control activation
  * and misleads screen-reader users. Where the aria-label doesn't contain the
- * visible text, drop it so the visible text becomes the accessible name. The
+ * visible text, drop it so the visible text becomes the accessible name. Links
+ * that open a new tab get "(opens in a new tab)" appended to their name (WCAG
+ * 3.2.5, G201), which the checker's new-window rule looks for. The
  * banner is plugin-rendered (and re-renders on interaction), so a small script
  * that re-runs on Complianz's status event is the cleanest seam.
  */
@@ -545,10 +547,14 @@ function fix_consent_link_labels(): void {
 <script id="cr-consent-a11y">
 (function(){
 	function fix(){
-		document.querySelectorAll('a.cmplz-link[aria-label], a[class*="cmplz-read-more"][aria-label]').forEach(function(a){
-			var vis=(a.textContent||'').trim().toLowerCase();
+		document.querySelectorAll('a.cmplz-link, a[class*="cmplz-read-more"]').forEach(function(a){
+			var visText=(a.textContent||'').trim();
+			var vis=visText.toLowerCase();
 			var lab=(a.getAttribute('aria-label')||'').trim().toLowerCase();
-			if(vis && lab && lab.indexOf(vis)===-1){ a.removeAttribute('aria-label'); }
+			var blank=a.getAttribute('target')==='_blank';
+			if(vis && lab && lab.indexOf(vis)===-1){ a.removeAttribute('aria-label'); lab=''; }
+			// WCAG 3.2.5 / G201: a link that opens a new tab says so in its name.
+			if(vis && blank && !/new (tab|window)|opens in/i.test(lab||vis)){ a.setAttribute('aria-label', visText+' (opens in a new tab)'); }
 		});
 	}
 	if(document.readyState!=='loading'){fix();}else{document.addEventListener('DOMContentLoaded',fix);}

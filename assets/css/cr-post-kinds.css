@@ -87,8 +87,15 @@ body .pk-card {
 /* the kind label reads in the display face + tape ink, matching the design */
 .pk-card .pk-kindlabel {
 	font-family: var(--pk-font-meta);
+	font-size: max(0.75rem, var(--cr-text-floor, 0.75rem));
 	color: var(--pk-muted);
 	letter-spacing: 0.08em;
+}
+
+/* Text-size floor for card metadata everywhere a card renders (kind archives,
+   home lanes, singles), not only on /stream/: nothing computes under 12px. */
+.pk-card .pk-meta {
+	font-size: max(0.75rem, var(--cr-text-floor, 0.75rem));
 }
 
 /* ---- per-kind accents: light hue + brightened dark hue in one place ----
