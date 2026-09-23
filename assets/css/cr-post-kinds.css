@@ -271,9 +271,17 @@ body .pk-card {
 }
 .cr-stream-page .pk-card .pk-meta { padding: 0.4rem 0.65rem 0.7rem; }
 .cr-stream-page .pk-card .pk-excerpt { padding: 0.3rem 0.65rem 0; }
-.cr-stream-page .pk-card .pk-link {
+
+/* v0.7.48 follow-up: /stream/ still measured 12px (0.75rem) at 375 wide —
+   the plugin's own pk-card.css .pk-link rule (0.75rem, 1.8.2) loads after
+   this stylesheet. Both stream surfaces (patterns/cr-archive-stream-loop.php
+   and the Stream lane in patterns/cr-home-field-notes.php) wrap their cards
+   in .cr-stream-page; .cr-fieldnotes is the outer Field Notes section on
+   home, listed here too so the rule wins regardless of load order. */
+.cr-stream-page .pk-card .pk-link,
+.cr-fieldnotes .pk-card .pk-link {
 	font-family: var(--cr-font-accent, serif);
-	font-size: max(0.875rem, var(--cr-text-floor, 0.75rem));
+	font-size: max(0.875rem, var(--cr-text-floor, 0.75rem)) !important;
 	font-weight: 700;
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
