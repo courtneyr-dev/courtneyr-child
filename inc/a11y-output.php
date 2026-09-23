@@ -24,12 +24,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  * them, so alt="<name>" repeats the name and, for repeat commenters, fails
  * the duplicate-alt check. Linked avatars keep their alt (it names the link).
  *
- * @param string $content Rendered block.
- * @param array  $block   Parsed block, with comment context when in a comment.
+ * Context (the comment id) travels on the WP_Block instance, not on the
+ * parsed block array.
+ *
+ * @param string    $content  Rendered block.
+ * @param array     $block    Parsed block.
+ * @param \WP_Block $instance Block instance carrying context.
  * @return string
  */
-function decorative_comment_avatar( string $content, array $block ): string {
-	if ( empty( $block['context']['commentId'] ) || ! empty( $block['attrs']['isLink'] ) ) {
+function decorative_comment_avatar( string $content, array $block, \WP_Block $instance ): string {
+	if ( empty( $instance->context['commentId'] ) || ! empty( $block['attrs']['isLink'] ) ) {
 		return $content;
 	}
 	$tags = new \WP_HTML_Tag_Processor( $content );
@@ -40,7 +44,7 @@ function decorative_comment_avatar( string $content, array $block ): string {
 	}
 	return $tags->get_updated_html();
 }
-add_filter( 'render_block_core/avatar', __NAMESPACE__ . '\\decorative_comment_avatar', 10, 2 );
+add_filter( 'render_block_core/avatar', __NAMESPACE__ . '\\decorative_comment_avatar', 10, 3 );
 
 /**
  * Links in comment text whose visible text is the bare URL (make_clickable,
