@@ -82,6 +82,9 @@
   --cr-cerulean-light:      #3a8090;
   --cr-sage:                #658057;
   --cr-mauve:               #9d4e6c;
+
+  /* Accessibility Checker floor: no theme text renders below 12px. */
+  --cr-text-floor: 0.75rem;
 }
 
 
