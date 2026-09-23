@@ -6965,11 +6965,16 @@ body.home .wp-block-columns:has(.wp-block-cover img[src*="courtney-pirate"]) > .
 
 /* Phones: the pitch and the subscribe form come first; the polaroid follows.
    At 375×812 the form sat 1.26 screens down (2026-09-22). Core stacks columns
-   in DOM order below 782px; flex order swaps them without touching content. */
+   in DOM order below 782px; flex order swaps them without touching content.
+   v0.7.48 follow-up: order: 2 still lost to the sibling pitch/form column,
+   which already carries order: 999 from a pre-existing mobile rule (not in
+   this stylesheet — the DOM check at 375×812 on 2026-09-22 measured the
+   polaroid column at order 2/top 136 rendering before the sibling at
+   order 999/top 632). 1000 clears any order value the sibling can carry. */
 @media (max-width: 781px) {
 
 	body.home .wp-block-columns:has(.wp-block-cover img[src*="courtney-pirate"]) > .wp-block-column:has(.wp-block-cover img[src*="courtney-pirate"]) {
-		order: 2;
+		order: 1000;
 	}
 }
 
