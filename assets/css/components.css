@@ -7688,6 +7688,13 @@ form.tnp input:autofill,
 	outline-offset: 2px !important;
 }
 
+/* F3 (WCAG 2.5.8 target size): Complianz renders the banner close control at
+   ~20×20 px; give it the 24×24 minimum without changing its glyph. */
+.cmplz-cookiebanner .cmplz-close {
+	min-inline-size: 24px;
+	min-block-size: 24px;
+}
+
 /* v0.5.58 — visually hide post title on title-less formats.
 
    PFBT_Format_Classes adds .pfbt-format-titleless to body + post on

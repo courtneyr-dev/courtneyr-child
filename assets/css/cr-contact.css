@@ -692,3 +692,11 @@
 	color: inherit !important;
 	padding: 0;
 }
+
+/* F4: privacy sentence above the WS Form inside the postcard (content edit
+   adds the paragraph; this keeps it quieter than body copy). */
+.cr-contact__privacy {
+	margin: 0 0 0.75rem;
+	font-size: 0.9rem;
+	line-height: 1.4;
+}
