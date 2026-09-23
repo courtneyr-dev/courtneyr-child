@@ -50,13 +50,14 @@ const HSTS_VALUE = 'max-age=31536000; includeSubDomains';
  *
  * Host lists come from the policy that ran in production for months (via the
  * site-performance-security plugin) plus a live resource inventory of the
- * rendered site, so every source here is known-needed:
- * - img1.wsimg.com / csp.secureserver.net: GoDaddy MWP-injected tccl
- *   analytics (script + beacon).
+ * rendered site, so every source here is known-needed. The GoDaddy-era
+ * tccl analytics hosts (img1.wsimg.com, csp.secureserver.net) and the
+ * Google Fonts hosts (fonts.googleapis.com, fonts.gstatic.com) are gone:
+ * the site left GoDaddy for Pantheon and the theme's five fonts are all
+ * self-hosted, so no asset in the theme still references them (verified
+ * by grep 2026-09-22).
  * - google-analytics / googletagmanager: site analytics.
  * - youtube / vimeo / calendly / spotify: embeds.
- * - fonts.googleapis.com / fonts.gstatic.com: font fallback (primary fonts
- *   are self-hosted).
  * - img-src https:: IndieWeb post kinds render arbitrary external images
  *   (bookmarks, reposts, avatars); enumerating hosts is not maintainable.
  * - frame-ancestors 'self' pairs with X-Frame-Options: SAMEORIGIN below;
@@ -68,11 +69,11 @@ const HSTS_VALUE = 'max-age=31536000; includeSubDomains';
  */
 const CSP_ENFORCED = array(
 	'default-src'               => "'self'",
-	'script-src'                => "'self' 'unsafe-inline' 'unsafe-eval' img1.wsimg.com www.google-analytics.com www.googletagmanager.com csp.secureserver.net www.youtube.com www.youtube-nocookie.com s.ytimg.com",
-	'style-src'                 => "'self' 'unsafe-inline' fonts.googleapis.com",
+	'script-src'                => "'self' 'unsafe-inline' 'unsafe-eval' www.google-analytics.com www.googletagmanager.com www.youtube.com www.youtube-nocookie.com s.ytimg.com",
+	'style-src'                 => "'self' 'unsafe-inline'",
 	'img-src'                   => "'self' data: blob: https:",
-	'font-src'                  => "'self' data: fonts.gstatic.com",
-	'connect-src'               => "'self' www.google-analytics.com analytics.google.com region1.google-analytics.com csp.secureserver.net",
+	'font-src'                  => "'self' data:",
+	'connect-src'               => "'self' www.google-analytics.com analytics.google.com region1.google-analytics.com",
 	'frame-src'                 => "'self' www.youtube.com youtube.com www.youtube-nocookie.com player.vimeo.com calendly.com open.spotify.com www.openstreetmap.org read.amazon.com",
 	'media-src'                 => "'self' www.youtube.com",
 	'object-src'                => "'none'",
@@ -92,7 +93,7 @@ const CSP_ENFORCED = array(
  * fold these values into CSP_ENFORCED and delete this constant.
  */
 const CSP_REPORT_ONLY_OVERRIDES = array(
-	'script-src' => "'self' img1.wsimg.com www.google-analytics.com www.googletagmanager.com csp.secureserver.net www.youtube.com www.youtube-nocookie.com s.ytimg.com",
+	'script-src' => "'self' www.google-analytics.com www.googletagmanager.com www.youtube.com www.youtube-nocookie.com s.ytimg.com",
 	'worker-src' => "'self'",
 );
 
@@ -201,7 +202,9 @@ function send_frontend_headers(): void {
 		$csp_report_only['script-src'] .= ' https://cdn.ampproject.org';
 	}
 	unset( $csp_report_only['upgrade-insecure-requests'] );
-	header( 'Content-Security-Policy-Report-Only: ' . build_policy( $csp_report_only ) );
+	// report-to routes violation reports to the mu-plugin's Reporting-Endpoints
+	// group named "default", the only way to collect this evidence off-browser.
+	header( 'Content-Security-Policy-Report-Only: ' . build_policy( $csp_report_only ) . '; report-to default' );
 }
 
 /**
