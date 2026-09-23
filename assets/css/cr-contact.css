@@ -359,6 +359,7 @@
 	:root[data-theme="dark"] .cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(2) input,
 	:root[data-theme="dark"] .cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(3) input {
 		background: #fff !important;
+		border-bottom-color: var(--cr-russian-violet, #241c4a) !important;
 	}
 }
 
@@ -378,6 +379,7 @@
 	:root:not([data-theme="light"]) .cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(2) input,
 	:root:not([data-theme="light"]) .cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(3) input {
 		background: #fff !important;
+		border-bottom-color: var(--cr-russian-violet, #241c4a) !important;
 	}
 }
 
