@@ -351,6 +351,17 @@
 	border-color: var(--cr-russian-violet, #241c4a);
 }
 
+/* Dark + desktop: the ≥48rem ruled-line rule below strips name/email back to
+   `background: transparent !important`, which let the dark postcard show
+   through navy text (1.04:1 measured 2026-09-22). Keep the paper white here too. */
+@media (min-width: 48rem) {
+
+	:root[data-theme="dark"] .cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(2) input,
+	:root[data-theme="dark"] .cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(3) input {
+		background: #fff !important;
+	}
+}
+
 @media (prefers-color-scheme: dark) {
 
 	:root:not([data-theme="light"]) .cr-contact .cr-contact__postcard .wsf-field-wrapper input[type="text"],
@@ -359,6 +370,14 @@
 		background: #fff;
 		color: var(--cr-russian-violet, #241c4a);
 		border-color: var(--cr-russian-violet, #241c4a);
+	}
+}
+
+@media (min-width: 48rem) and (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(2) input,
+	:root:not([data-theme="light"]) .cr-contact .cr-contact__postcard .wsf-fields > .wsf-field-wrapper:nth-child(3) input {
+		background: #fff !important;
 	}
 }
 
