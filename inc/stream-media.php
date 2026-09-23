@@ -156,7 +156,7 @@ function sources_row( array $links, string $kind ): string {
 	}
 	$label = 'watch' === $kind ? __( 'Watch / find it', 'courtneyr-child' ) : __( 'Listen / find it', 'courtneyr-child' );
 	$aria  = 'watch' === $kind ? __( 'Watch or find it', 'courtneyr-child' ) : __( 'Listen or find it', 'courtneyr-child' );
-	$row   = '<nav class="pk-sources pk-sources--' . esc_attr( $kind ) . ' pk-sources--stream" aria-label="' . esc_attr( $aria ) . '">';
+	$row   = '<div class="pk-sources pk-sources--' . esc_attr( $kind ) . ' pk-sources--stream" role="group" aria-label="' . esc_attr( $aria ) . '">';
 	$row  .= '<p class="pk-sources__label">' . esc_html( $label ) . '</p><ul class="pk-sources__list">';
 	foreach ( $links as $link ) {
 		$row .= '<li><a class="pk-sources__link pk-sources__link--' . esc_attr( $link[2] ) . '" href="' . esc_url( $link[0] ) . '" target="_blank" rel="noopener noreferrer">'
@@ -164,7 +164,7 @@ function sources_row( array $links, string $kind ): string {
 			. '<span class="pk-sr-only"> ' . esc_html__( '(opens in a new tab)', 'courtneyr-child' ) . '</span>'
 			. '<span class="pk-sources__arrow" aria-hidden="true">↗</span></a></li>';
 	}
-	return $row . '</ul></nav>';
+	return $row . '</ul></div>';
 }
 
 /**
