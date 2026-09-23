@@ -1,6 +1,7 @@
 # PHPCS (WordPress Coding Standards) and stylelint against their checked-in
-# baselines, plus the theme.json schema check. The evidence and Playwright
-# capture scripts need a running site, so they stay local (docs/testing.md).
+# baselines, the theme.json schema check, and the dark/light token parity
+# check. The evidence and Playwright capture scripts need a running site, so
+# they stay local (docs/testing.md).
 
 name: Lint
 
@@ -44,3 +45,7 @@ jobs:
       - name: theme.json and styles/*.json against the pinned schema
         if: ${{ !cancelled() }}
         run: npm run lint:theme-json
+
+      - name: dark/light token parity in tokens.css
+        if: ${{ !cancelled() }}
+        run: npm run lint:dark-tokens
