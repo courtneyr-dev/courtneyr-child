@@ -243,7 +243,7 @@ body .pk-card {
 .cr-stream-page .pk-card .pk-title a { color: inherit; }
 .cr-stream-page .pk-card .pk-sub {
 	padding: 0.15rem 0.65rem 0;
-	font-size: max(0.75rem, var(--cr-text-floor, 0.75rem));
+	font-size: 0.8rem;
 }
 .cr-stream-page .k-watch .pk-sub,
 .cr-stream-page .k-listen .pk-sub,
@@ -1253,7 +1253,7 @@ body .pk-card {
 .cr-stream-page .k-reply .p-author {
 	display: block;
 	font-family: var(--cr-font-accent, serif);
-	font-size: 0.72rem;
+	font-size: max(0.72rem, var(--cr-text-floor, 0.75rem));
 	font-weight: 700;
 	letter-spacing: 0.12em;
 	text-transform: uppercase;
@@ -1724,7 +1724,7 @@ body .pk-card {
 	width: auto;
 	height: auto;
 	padding: 0;
-	font-size: 0.58rem;
+	font-size: max(0.58rem, var(--cr-text-floor, 0.75rem));
 	letter-spacing: 0.14em;
 	color: var(--cr-ink-muted, #126782);
 }
@@ -1806,7 +1806,7 @@ body .pk-card {
 	width: auto;
 	height: auto;
 	padding: 0;
-	font-size: 0.58rem;
+	font-size: max(0.58rem, var(--cr-text-floor, 0.75rem));
 	letter-spacing: 0.14em;
 	color: var(--cr-ink-muted, #126782);
 }
@@ -1830,7 +1830,7 @@ body .pk-card {
 	border-radius: 0;
 }
 .cr-stream-page .k-video .pk-title { padding: 0; font-size: 1rem; color: var(--cr-ink, #241c4a); }
-.cr-stream-page .k-video .pk-kindlabel { position: static; display: block; margin: 0 0 0.3rem; background: none; border: 0; box-shadow: none; transform: none; width: auto; height: auto; padding: 0; font-size: 0.58rem; letter-spacing: 0.14em; color: var(--cr-ink-muted, #126782); }
+.cr-stream-page .k-video .pk-kindlabel { position: static; display: block; margin: 0 0 0.3rem; background: none; border: 0; box-shadow: none; transform: none; width: auto; height: auto; padding: 0; font-size: max(0.58rem, var(--cr-text-floor, 0.75rem)); letter-spacing: 0.14em; color: var(--cr-ink-muted, #126782); }
 
 /* 6. Photo polaroid: one caption voice (excerpt), not title + excerpt.
    Only drop the title when the polaroid actually holds a picture. A photo
@@ -3144,7 +3144,7 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 .cr-stream-page .pk-card.k-mood .pk-meta .dt-published {
 	display: block;
 	font-family: var(--cr-font-accent, "Roboto Slab", serif);
-	font-size: 0.68rem;
+	font-size: max(0.68rem, var(--cr-text-floor, 0.75rem));
 	font-weight: 700;
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
@@ -4897,7 +4897,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	background: #f6f3ea;
 	box-shadow: 2px 2px 0 #b89d55;
 	font-family: var(--cr-font-mono, monospace);
-	font-size: max(0.58rem, var(--cr-text-floor, 0.7rem));
+	font-size: 0.875rem;
 	font-weight: 700;
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
@@ -4982,7 +4982,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 }
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-kindlabel { margin-left: 3cqw; color: #8e8a98; }
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-caption { margin: 0.6cqw 4.5cqw 0.8cqw; }
-.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-title { text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.74rem; }
+.cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-title { text-transform: uppercase; letter-spacing: 0.04em; font-size: max(0.74rem, var(--cr-text-floor, 0.75rem)); }
 /* The window: the real player, or the poster, in the recess. */
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-embed,
 .cr-stream-page li.kind-watch .pk-card.pk-card--stream.cr-vhs--stream .pk-media {
@@ -5108,7 +5108,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-title {
 	font-family: var(--cr-font-display, cursive);
 	font-weight: 400;
-	font-size: 0.7rem;
+	font-size: max(0.7rem, var(--cr-text-floor, 0.75rem));
 	line-height: 1.4;
 }
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-sub { text-transform: uppercase; letter-spacing: 0.08em; font-size: max(0.55rem, var(--cr-text-floor, 0.7rem)); }
