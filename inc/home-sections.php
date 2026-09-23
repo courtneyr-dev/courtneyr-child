@@ -148,7 +148,17 @@ function apply_surface( array $query, string $surface ): array {
  */
 function filter_query_loop( array $query, \WP_Block $block ): array {
 	$surface = (string) ( $block->context['query']['pkiwSurface'] ?? '' );
-	return '' === $surface ? $query : apply_surface( $query, $surface );
+	if ( '' === $surface ) {
+		return $query;
+	}
+	$query = apply_surface( $query, $surface );
+	if ( is_singular() ) {
+		$current = (int) get_queried_object_id();
+		if ( $current > 0 ) {
+			$query['post__not_in'] = array_values( array_unique( array_merge( (array) ( $query['post__not_in'] ?? array() ), array( $current ) ) ) );
+		}
+	}
+	return $query;
 }
 add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\\filter_query_loop', 10, 2 );
 
