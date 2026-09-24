@@ -6556,8 +6556,10 @@ header.is-position-sticky .site-header__inner {
 
 /* Filter visibility — same attribute selector pattern. When a non-
    empty filter is active, hide post-template li's that don't carry
-   the matching format-X class from post_class(). */
-.cr-stream-filter[data-active-format="blog"] .wp-block-post-template > li:not(.format-blog),
+   the matching format-X class from post_class(). A default/standard
+   post gets post_class "format-standard", not "format-blog", so the
+   "Blog" filter has to spare both. */
+.cr-stream-filter[data-active-format="blog"] .wp-block-post-template > li:not(:is(.format-blog, .format-standard)),
 .cr-stream-filter[data-active-format="quote"] .wp-block-post-template > li:not(.format-quote),
 .cr-stream-filter[data-active-format="link"] .wp-block-post-template > li:not(.format-link),
 .cr-stream-filter[data-active-format="gallery"] .wp-block-post-template > li:not(.format-gallery),
