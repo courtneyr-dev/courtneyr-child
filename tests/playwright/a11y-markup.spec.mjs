@@ -5,6 +5,7 @@
 import { test, expect } from '@playwright/test';
 
 const ABLEPLAYER_POST = process.env.CR_ABLEPLAYER_POST_PATH || '/?p=3010'; // Able Player YouTube shortcode
+const ABLEPLAYER_URL_POST = process.env.CR_ABLEPLAYER_URL_POST_PATH || '/?p=1053'; // youtube-id written as a full watch URL
 const COMMENTS_POST = process.env.CR_COMMENTS_POST_PATH || '/?p=38071'; // backfeed comments, incl. two with no avatar
 const QUOTE_POST = process.env.CR_QUOTE_POST_PATH || '/?p=38049'; // Syndication Links plugin output
 const BROWSE_PAGE = process.env.CR_BROWSE_ALL_PATH || '/stream/'; // cr-browse-all pattern (post_format list)
@@ -31,6 +32,19 @@ test( 'Able Player YouTube players carry the captions/transcript link', async ( 
 	expect( await links.count() ).toBeGreaterThanOrEqual( count );
 	for ( const text of await links.allTextContents() ) {
 		expect( text.toLowerCase() ).toContain( 'transcript' );
+	}
+} );
+
+test( 'Able Player shortcodes whose youtube-id is a full URL still get the transcript link', async ( { page } ) => {
+	await page.goto( ABLEPLAYER_URL_POST, { waitUntil: 'load' } );
+	const players = page.locator( '[data-youtube-id], iframe[id^="able_player_"][id$="_youtube"]' );
+	const count = await players.count();
+	expect( count, 'fixture post renders at least one Able Player YouTube player' ).toBeGreaterThan( 0 );
+	const links = page.locator( 'figure.cr-media--ableplayer figcaption.cr-media__transcript a' );
+	expect( await links.count() ).toBeGreaterThanOrEqual( count );
+	for ( const href of await links.evaluateAll( ( a ) => a.map( ( el ) => el.getAttribute( 'href' ) ) ) ) {
+		// An eleven-character id, never the pasted URL nested inside another URL.
+		expect( href ).toMatch( /^https:\/\/www\.youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}$/ );
 	}
 } );
 
