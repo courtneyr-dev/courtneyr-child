@@ -180,6 +180,13 @@
 	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 2px;
 }
+
+/* UA placeholder default (#757575) is 3.5-3.8:1 in dark mode; cerulean
+   on ivory is ~6:1 in light. */
+.cr-contact .cr-contact__postcard :is(input, textarea)::placeholder {
+	color: var(--cr-ink-muted);
+	opacity: 1;
+}
 /* The submit button → stamped "Send it" CTA. Scoped through .send-row so the
    selector (0,4,0) outranks Ollie's .wp-site-blocks button[type="submit"]
    reset (0,3,1), which otherwise forces a transparent bg + white (invisible) text. */
@@ -208,9 +215,15 @@
 	transform: translate(3px, 3px);
 	box-shadow: 2px 2px 0 var(--cr-ink);
 }
+
+/* The button's own hard shadow otherwise replaces the focus halo,
+   leaving only the 3px outline (1.75:1 on the white postcard in
+   light mode) — layer the halo alongside the hard shadow instead of
+   letting one override the other. */
 .cr-contact .cr-contact__postcard .send-row .send-btn:focus-visible {
 	outline: 3px solid var(--cr-focus-ring, currentColor);
 	outline-offset: 3px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo), var(--cr-shadow-hard-2);
 }
 /* custom form layout helpers (the [cr_contact_form] shortcode markup —
    labels/inputs/textarea/button are already styled by the element rules above) */

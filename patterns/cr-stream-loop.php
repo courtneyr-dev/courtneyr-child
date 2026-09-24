@@ -26,6 +26,7 @@ declare( strict_types = 1 );
 		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="gallery" aria-pressed="false">Gallery</button>
 		<button type="button" class="cr-stream-filter__chip" data-wp-on--click="actions.setFormat" data-format="video" aria-pressed="false">Video</button>
 	</div>
+	<p class="screen-reader-text" role="status" data-wp-text="state.resultsLabel"></p>
 <!-- /wp:html -->
 
 <!-- wp:query {"queryId":42,"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"align":"wide","className":"cr-stream"} -->
@@ -52,7 +53,7 @@ declare( strict_types = 1 );
 					<!-- wp:post-date {"format":"F j, Y","fontSize":"small"} /-->
 
 					<!-- wp:html -->
-					<span class="cr-format-chip" aria-hidden="true"></span>
+					<span class="cr-format-chip"></span>
 					<!-- /wp:html -->
 
 					<!-- wp:post-terms {"term":"category","className":"cr-stream-item__category","fontSize":"xs"} /-->

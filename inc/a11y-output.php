@@ -40,7 +40,6 @@ function decorative_comment_avatar( string $content, array $block, \WP_Block $in
 	if ( $tags->next_tag( 'img' ) ) {
 		$tags->set_attribute( 'alt', '' );
 		$tags->set_attribute( 'aria-hidden', 'true' );
-		$tags->set_attribute( 'role', 'presentation' );
 	}
 	return $tags->get_updated_html();
 }
@@ -106,16 +105,32 @@ add_filter( 'render_block', __NAMESPACE__ . '\\comment_hacks_small', 91, 2 );
  * placeholder left blank) renders as <p></p> and is announced as a blank
  * line. Drop it on the front end; the editor still shows the block.
  *
+ * A block-bindings paragraph (e.g. cr-listen-sources__value, bound to
+ * post-kinds/kind-meta) legitimately renders empty when the bound meta is
+ * unset, and CSS such as cr-post-kinds.css's
+ * .cr-listen-sources__rating:has(> .cr-listen-sources__value:empty) depends
+ * on that empty element staying in the DOM to hide its wrapper. Skip any
+ * paragraph carrying bindings metadata, or the cr-listen-sources__value
+ * class specifically, so that rule keeps working.
+ *
  * @param string $content Rendered block.
+ * @param array  $block   Parsed block, including attrs.
  * @return string
  */
-function drop_empty_paragraph( string $content ): string {
+function drop_empty_paragraph( string $content, array $block ): string {
 	if ( is_admin() ) {
+		return $content;
+	}
+	if ( ! empty( $block['attrs']['metadata']['bindings'] ) ) {
+		return $content;
+	}
+	$class_name = (string) ( $block['attrs']['className'] ?? '' );
+	if ( false !== strpos( $class_name, 'cr-listen-sources__value' ) ) {
 		return $content;
 	}
 	return preg_match( '#^\s*<p\b[^>]*>(?:\s|&nbsp;|\xC2\xA0)*</p>\s*$#u', $content ) ? '' : $content;
 }
-add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\drop_empty_paragraph' );
+add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\drop_empty_paragraph', 10, 2 );
 
 /**
  * A featured image whose alt repeats the post title, or whose attachment also
@@ -152,7 +167,6 @@ function decorative_duplicate_featured_image( string $content, array $block, \WP
 	if ( $tags->next_tag( 'img' ) ) {
 		$tags->set_attribute( 'alt', '' );
 		$tags->set_attribute( 'aria-hidden', 'true' );
-		$tags->set_attribute( 'role', 'presentation' );
 	}
 	return $tags->get_updated_html();
 }
@@ -258,3 +272,103 @@ function name_header_search_landmark( string $content, array $block ): string {
 	return $tags->get_updated_html();
 }
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\\name_header_search_landmark', 10, 2 );
+
+/**
+ * The comment platform badge (assets/css/components.css, "Comment platform
+ * badges") paints a small circular icon in the corner of a comment bubble,
+ * detecting the network purely via CSS :has()/[href*="..."] matching on the
+ * comment author link — Mastodon, WordPress, X, GitHub, Bluesky, or a
+ * generic IndieWeb globe. It has no text alternative, so a badged comment
+ * announces nothing about its source to assistive tech.
+ *
+ * Mirror the same URL-substring cascade here (checks applied in the same
+ * order the CSS rules are written, so a later match — e.g. Bluesky —
+ * overrides an earlier one exactly like the CSS "last rule wins" cascade)
+ * and append a visually-hidden "via {Network}" span. Purely additive: the
+ * visible badge is untouched.
+ *
+ * @param string    $content  Rendered block.
+ * @param array     $block    Parsed block.
+ * @param \WP_Block $instance Block instance, carries the commentId context.
+ * @return string
+ */
+function comment_network_label( string $content, array $block, \WP_Block $instance ): string {
+	unset( $block );
+	$comment_id = (int) ( $instance->context['commentId'] ?? 0 );
+	if ( 0 === $comment_id ) {
+		return $content;
+	}
+	$url = get_comment_author_url( $comment_id );
+	if ( '' === $url ) {
+		return $content;
+	}
+
+	$network = __( 'IndieWeb', 'courtneyr-child' );
+	if ( false !== strpos( $url, '/@' ) ) {
+		$network = __( 'Mastodon', 'courtneyr-child' );
+	}
+	if ( false !== strpos( $url, 'wordpress.org' ) || false !== strpos( $url, '.wordpress.com' ) ) {
+		$network = __( 'WordPress', 'courtneyr-child' );
+	}
+	if ( false !== strpos( $url, 'x.com/' ) || false !== strpos( $url, 'twitter.com/' ) ) {
+		$network = __( 'X', 'courtneyr-child' );
+	}
+	if ( false !== strpos( $url, 'github.com' ) ) {
+		$network = __( 'GitHub', 'courtneyr-child' );
+	}
+	if ( false !== strpos( $url, 'bsky.app' ) ) {
+		$network = __( 'Bluesky', 'courtneyr-child' );
+	}
+
+	$label = '<span class="screen-reader-text"> ' . sprintf(
+		/* translators: %s: social network or platform name, e.g. Mastodon. */
+		esc_html__( 'via %s', 'courtneyr-child' ),
+		esc_html( $network )
+	) . '</span>';
+
+	return $content . $label;
+}
+add_filter( 'render_block_core/comment-author-name', __NAMESPACE__ . '\\comment_network_label', 10, 3 );
+
+/**
+ * Saved copies of theme patterns keep the markup they were inserted with. The
+ * home page's newsletter-reasons section still carries the "01"–"04" number
+ * paragraphs (now painted by a CSS counter) and the "Every Saturday" edition
+ * line as a <p>; both read as headings to checkers. Handle them at render so
+ * the content needs no surgery: drop the number paragraphs, and render the
+ * edition line as a <div>.
+ *
+ * @param string $content Rendered block.
+ * @param array  $block   Parsed block.
+ * @return string
+ */
+function reasons_paragraphs( string $content, array $block ): string {
+	$classes = ' ' . (string) ( $block['attrs']['className'] ?? '' ) . ' ';
+	if ( false !== strpos( $classes, ' cr-reasons__number ' ) ) {
+		return '';
+	}
+	if ( false !== strpos( $classes, ' cr-reasons__edition ' ) ) {
+		$content = (string) preg_replace( '/^(\s*)<p\b/', '$1<div', $content, 1 );
+		return (string) preg_replace( '/<\/p>(\s*)$/', '</div>$1', $content, 1 );
+	}
+	return $content;
+}
+add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\reasons_paragraphs', 20, 2 );
+
+/**
+ * The Stream page paginates its Query Loop with ?query-1-page=N (a non-inheriting
+ * loop), so the conventional /stream/page/N/ URL renders page 1 under a page-N
+ * address. Send it to the address the block actually reads.
+ */
+function stream_page_redirect(): void {
+	if ( ! is_page( 'stream' ) ) {
+		return;
+	}
+	$paged = (int) get_query_var( 'page' );
+	if ( $paged < 2 ) {
+		return;
+	}
+	wp_safe_redirect( add_query_arg( 'query-1-page', $paged, get_permalink() ), 301 );
+	exit;
+}
+add_action( 'template_redirect', __NAMESPACE__ . '\\stream_page_redirect' );

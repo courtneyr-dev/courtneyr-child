@@ -165,7 +165,7 @@ function placemat_card( string $html, array $block, $instance ): string {
 	if ( 0.0 !== $lat || 0.0 !== $lon ) {
 		$map = '<a class="cr-mat__map" href="' . esc_url( sprintf( 'https://www.openstreetmap.org/?mlat=%F&mlon=%F#map=16/%F/%F', $lat, $lon, $lat, $lon ) ) . '" target="_blank" rel="noopener noreferrer">'
 			. '<svg class="cr-mat__pin" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 1.5a4.5 4.5 0 0 0-4.5 4.5c0 3.4 4.5 8.5 4.5 8.5s4.5-5.1 4.5-8.5A4.5 4.5 0 0 0 8 1.5zm0 6.3a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6z" fill="currentColor"/></svg>'
-			. esc_html__( 'View on map', 'courtneyr-child' ) . ' <span aria-hidden="true">↗</span></a>';
+			. esc_html__( 'View on map', 'courtneyr-child' ) . '<span class="pk-sr-only"> ' . esc_html__( '(opens in a new tab)', 'courtneyr-child' ) . '</span> <span aria-hidden="true">↗</span></a>';
 	}
 
 	// 4. The art corner: one doodle, one small generic stamp, one short line.

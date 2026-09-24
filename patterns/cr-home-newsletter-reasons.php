@@ -23,9 +23,9 @@ declare( strict_types = 1 );
 		<div class="wp-block-group cr-reasons__intro-title">
 			<!-- wp:group {"className":"cr-reasons__eyebrow","layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"center"}} -->
 			<div class="wp-block-group cr-reasons__eyebrow">
-				<!-- wp:paragraph {"className":"cr-reasons__edition"} -->
-				<p class="cr-reasons__edition"><?php esc_html_e( 'Every Saturday', 'courtneyr-child' ); ?></p>
-				<!-- /wp:paragraph -->
+				<!-- wp:html -->
+				<div class="cr-reasons__edition"><?php esc_html_e( 'Every Saturday', 'courtneyr-child' ); ?></div>
+				<!-- /wp:html -->
 
 				<!-- wp:paragraph {"className":"cr-reasons__kicker"} -->
 				<p class="cr-reasons__kicker"><?php esc_html_e( 'Free weekly newsletter', 'courtneyr-child' ); ?></p>
@@ -61,10 +61,6 @@ declare( strict_types = 1 );
 		<div class="wp-block-group cr-reasons__panel">
 			<!-- wp:group {"className":"cr-reasons__audience","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"stretch"}} -->
 			<div class="wp-block-group cr-reasons__audience">
-				<!-- wp:paragraph {"className":"cr-reasons__number"} -->
-				<p class="cr-reasons__number"><?php esc_html_e( '01', 'courtneyr-child' ); ?></p>
-				<!-- /wp:paragraph -->
-
 				<!-- wp:paragraph {"className":"cr-reasons__audience-name"} -->
 				<p class="cr-reasons__audience-name"><?php esc_html_e( 'Contributors', 'courtneyr-child' ); ?></p>
 				<!-- /wp:paragraph -->
@@ -97,10 +93,6 @@ declare( strict_types = 1 );
 		<div class="wp-block-group cr-reasons__panel">
 			<!-- wp:group {"className":"cr-reasons__audience","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"stretch"}} -->
 			<div class="wp-block-group cr-reasons__audience">
-				<!-- wp:paragraph {"className":"cr-reasons__number"} -->
-				<p class="cr-reasons__number"><?php esc_html_e( '02', 'courtneyr-child' ); ?></p>
-				<!-- /wp:paragraph -->
-
 				<!-- wp:paragraph {"className":"cr-reasons__audience-name"} -->
 				<p class="cr-reasons__audience-name"><?php esc_html_e( 'Educators', 'courtneyr-child' ); ?></p>
 				<!-- /wp:paragraph -->
@@ -133,10 +125,6 @@ declare( strict_types = 1 );
 		<div class="wp-block-group cr-reasons__panel">
 			<!-- wp:group {"className":"cr-reasons__audience","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"stretch"}} -->
 			<div class="wp-block-group cr-reasons__audience">
-				<!-- wp:paragraph {"className":"cr-reasons__number"} -->
-				<p class="cr-reasons__number"><?php esc_html_e( '03', 'courtneyr-child' ); ?></p>
-				<!-- /wp:paragraph -->
-
 				<!-- wp:paragraph {"className":"cr-reasons__audience-name"} -->
 				<p class="cr-reasons__audience-name"><?php esc_html_e( 'Leaders', 'courtneyr-child' ); ?></p>
 				<!-- /wp:paragraph -->
@@ -169,10 +157,6 @@ declare( strict_types = 1 );
 		<div class="wp-block-group cr-reasons__panel">
 			<!-- wp:group {"className":"cr-reasons__audience","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"stretch"}} -->
 			<div class="wp-block-group cr-reasons__audience">
-				<!-- wp:paragraph {"className":"cr-reasons__number"} -->
-				<p class="cr-reasons__number"><?php esc_html_e( '04', 'courtneyr-child' ); ?></p>
-				<!-- /wp:paragraph -->
-
 				<!-- wp:paragraph {"className":"cr-reasons__audience-name"} -->
 				<p class="cr-reasons__audience-name"><?php esc_html_e( 'Developers', 'courtneyr-child' ); ?></p>
 				<!-- /wp:paragraph -->

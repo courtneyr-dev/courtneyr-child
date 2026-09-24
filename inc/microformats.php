@@ -122,7 +122,7 @@ add_filter(
  */
 function entry_author_html( int $post_id ): string {
 	$a    = entry_author( $post_id );
-	$html = '<span class="p-author h-card cr-entry-author" hidden aria-hidden="true"><a class="u-url p-name" href="' . esc_url( $a['url'] ) . '" tabindex="-1">' . esc_html( $a['name'] ) . '</a>';
+	$html = '<span class="p-author h-card cr-entry-author" hidden><a class="u-url p-name" href="' . esc_url( $a['url'] ) . '" tabindex="-1">' . esc_html( $a['name'] ) . '</a>';
 	if ( '' !== $a['photo'] ) {
 		$html .= '<img class="u-photo" src="' . esc_url( $a['photo'] ) . '" alt="" loading="lazy" />';
 	}

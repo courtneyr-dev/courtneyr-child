@@ -9,14 +9,50 @@
  * — no per-item directives, no DOM mutation, just one attribute on
  * the wrapper that CSS reads.
  *
- * No store-level state needed: each filter instance has its own
- * context (so multiple stream loops on one page would each filter
- * independently).
+ * state.resultsLabel backs a visually-hidden status paragraph so AT
+ * users get an equivalent of the CSS-only visible/hidden filtering
+ * (the count of currently-shown items), each filter instance's own
+ * context still keeping multiple stream loops independent.
  */
 
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, getElement } from '@wordpress/interactivity';
+
+// A default/standard post's post_class carries "format-standard", not
+// "format-blog" — the same mapping components.css's filter-visibility
+// rule (~L6560) uses to spare both classes from the "Blog" chip.
+const FORMAT_CLASSES = {
+	blog: [ 'format-blog', 'format-standard' ],
+	quote: [ 'format-quote' ],
+	link: [ 'format-link' ],
+	gallery: [ 'format-gallery' ],
+	video: [ 'format-video' ],
+};
 
 store( 'courtneyr/stream-filter', {
+	state: {
+		// Visible-result count for the screen-reader-only status
+		// paragraph. The filter itself stays CSS-only (no per-item
+		// directives); this reads the same DOM the CSS hides from,
+		// counting the currently-visible items so AT users get an
+		// equivalent of what the CSS attribute-selector filter shows.
+		get resultsLabel() {
+			const { format } = getContext();
+			const { ref } = getElement();
+			const root = ref.closest( '.cr-stream-filter' );
+			if ( ! root ) {
+				return '';
+			}
+			const items   = root.querySelectorAll( '.wp-block-post-template > li' );
+			const classes = FORMAT_CLASSES[ format ] || null;
+			let count = 0;
+			items.forEach( ( li ) => {
+				if ( ! classes || classes.some( ( c ) => li.classList.contains( c ) ) ) {
+					count++;
+				}
+			} );
+			return count + ( 1 === count ? ' post shown' : ' posts shown' );
+		},
+	},
 	actions: {
 		setFormat( event ) {
 			const ctx = getContext();

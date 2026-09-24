@@ -238,14 +238,15 @@ function transform_pull_quote_block( string $block_content, array $block ): stri
 	// button. context.copied=false initially; toggles to true for
 	// 2s after a successful clipboard write.
 	// v0.5.32 — moved aria-live off the button (buttons aren't live
-	// regions; AT didn't announce the swap reliably). Now there's a
-	// dedicated visually-hidden status span next to the button that
-	// AT does watch — it picks up "Quote copied to clipboard" when
-	// state.copyStatus transitions from "" to non-empty after the
-	// click action flips context.copied.
-	$button = '<button type="button" class="cr-pull-quote__copy" data-wp-on--click="actions.copyQuote" data-wp-class--is-copied="context.copied" aria-label="Copy quote to clipboard">'
-		. '<span class="cr-pull-quote__copy-default" aria-hidden="true">Copy quote</span>'
-		. '<span class="cr-pull-quote__copy-confirm" aria-hidden="true">Copied</span>'
+	// regions; AT didn't announce the swap reliably). A dedicated
+	// visually-hidden status span next to the button announces
+	// "Quote copied to clipboard" when state.copyStatus transitions
+	// from "" to non-empty after the click action flips context.copied.
+	// The button's visible label is bound with data-wp-text
+	// (state.copyLabel) instead of two aria-hidden spans, so the
+	// button's accessible name always matches what's on screen.
+	$button = '<button type="button" class="cr-pull-quote__copy" data-wp-on--click="actions.copyQuote" data-wp-class--is-copied="context.copied">'
+		. '<span class="cr-pull-quote__copy-label" data-wp-text="state.copyLabel">Copy quote</span>'
 		. '</button>'
 		. '<span class="cr-pull-quote__status screen-reader-text" role="status" aria-live="polite" data-wp-text="state.copyStatus"></span>';
 

@@ -260,7 +260,7 @@ function passport_card( string $html, array $block, $instance ): string {
 		$label_end = strpos( $card, '</p>', (int) strpos( $card, 'pk-kindlabel' ) );
 		if ( false !== $label_end ) {
 			$label_end += 4;
-			$headline   = '<p class="cr-passport__title"><a href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( $title ) . '</a></p>';
+			$headline   = '<div class="cr-passport__title"><a href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( $title ) . '</a></div>';
 			$card       = substr( $card, 0, $label_end ) . $headline . substr( $card, $label_end );
 		}
 	}
