@@ -1749,13 +1749,6 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
 	font-size: 0.875rem;
 }
 
-/* ATmosphere facepile: the plugin overlaps 32px avatars by 10px, leaving 22px
-   of each link unobscured, under the 24px target minimum (WCAG 2.5.8). Overlap
-   by 6px instead so every avatar keeps a 26px clear target. */
-.wp-block-atmosphere-reactions .reaction-avatars li {
-	margin-right: -6px;
-}
-
 /* Syndication Links sets ul.relsyn li to 0.8em; inside small meta text that
    computes under 10px (WCAG 1.4.4 as the checker applies it). Floor it. */
 ul.relsyn li {
