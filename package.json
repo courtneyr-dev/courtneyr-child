@@ -15,7 +15,8 @@
 		"lint:theme-json": "node tests/lint/theme-json-schema.mjs",
 		"lint:dark-tokens": "node tests/lint/dark-tokens-parity.mjs",
 		"evidence": "node tests/evidence/evidence.mjs",
-		"captures": "playwright test --config tests/playwright/playwright.config.mjs"
+		"captures": "playwright test --config tests/playwright/playwright.config.mjs",
+		"test:a11y-markup": "CR_SPEC=a11y-markup.spec.mjs playwright test --config tests/playwright/playwright.config.mjs --project=1280-light"
 	},
 	"devDependencies": {
 		"@playwright/test": "1.62.1",

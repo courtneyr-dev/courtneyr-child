@@ -7,14 +7,14 @@ assertLocalTarget();
 
 export default defineConfig( {
 	testDir: '.',
-	testMatch: 'captures.spec.mjs',
+	testMatch: process.env.CR_SPEC || 'captures.spec.mjs',
 	outputDir: '../output/test-results',
 	reporter: [ [ 'list' ] ],
 	fullyParallel: true,
 	workers: 4,
 	retries: 0,
 	timeout: 120000,
-	use: { baseURL: BASE_URL, browserName: 'chromium', deviceScaleFactor: 1 },
+	use: { baseURL: BASE_URL, browserName: 'chromium', deviceScaleFactor: 1, ...( process.env.CR_USER_AGENT ? { userAgent: process.env.CR_USER_AGENT } : {} ) },
 	projects: [ 390, 1280 ].flatMap( ( width ) =>
 		[ 'light', 'dark' ].map( ( colorScheme ) => ( {
 			name: `${ width }-${ colorScheme }`,

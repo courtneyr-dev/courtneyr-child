@@ -38,6 +38,9 @@ function decorative_comment_avatar( string $content, array $block, \WP_Block $in
 	}
 	$tags = new \WP_HTML_Tag_Processor( $content );
 	if ( $tags->next_tag( 'img' ) ) {
+		if ( '' === trim( (string) $tags->get_attribute( 'src' ) ) ) {
+			return ''; // No avatar resolved for this commenter: an empty <img src=""> is a broken image, not a decoration.
+		}
 		$tags->set_attribute( 'alt', '' );
 		$tags->set_attribute( 'aria-hidden', 'true' );
 	}
@@ -161,6 +164,15 @@ function decorative_duplicate_featured_image( string $content, array $block, \WP
 		|| false !== strpos( $body, 'wp-image-' . $thumb_id . ' ' )
 		|| false !== strpos( $body, '"id":' . $thumb_id . ',' );
 	if ( ! $duplicate ) {
+		// Legacy posts (pre-block editor) embed the same file by URL with no
+		// wp-image-N class; match the filename, any size suffix, any format.
+		$file = pathinfo( wp_basename( (string) get_attached_file( $thumb_id ) ), PATHINFO_FILENAME );
+		$file = (string) preg_replace( '/-scaled$/', '', $file );
+		if ( '' !== $file && preg_match( '#src="[^"]*/' . preg_quote( $file, '#' ) . '(?:-\\d+x\\d+|-scaled)?\\.[a-z0-9]{3,4}"#i', $body ) ) {
+			$duplicate = true;
+		}
+	}
+	if ( ! $duplicate ) {
 		return $content;
 	}
 	$tags = new \WP_HTML_Tag_Processor( $content );
@@ -223,6 +235,7 @@ function trim_long_embed_alt( $html ) {
 	);
 }
 add_filter( 'embed_oembed_html', __NAMESPACE__ . '\\trim_long_embed_alt', 20 );
+add_filter( 'embed_maybe_make_link', __NAMESPACE__ . '\\trim_long_embed_alt', 100 ); // OpenGraph Fallback Embed cards return here (priority 99).
 
 /**
  * Able Player converts YouTube embed blocks into <video data-able-player>
@@ -234,7 +247,7 @@ add_filter( 'embed_oembed_html', __NAMESPACE__ . '\\trim_long_embed_alt', 20 );
  * @return string
  */
 function youtube_transcript_link( string $content ): string {
-	if ( false === strpos( $content, 'data-able-player' ) || false !== strpos( $content, '<track' ) || false !== stripos( $content, 'transcript' ) ) {
+	if ( false === strpos( $content, 'data-youtube-id' ) || false !== strpos( $content, '<track' ) || false !== stripos( $content, 'transcript' ) ) {
 		return $content;
 	}
 	if ( ! preg_match( '/data-youtube-id="([A-Za-z0-9_-]{6,})"/', $content, $m ) ) {
@@ -250,6 +263,23 @@ function youtube_transcript_link( string $content ): string {
 	return false === $pos ? $content . $link : substr( $content, 0, $pos ) . $link . substr( $content, $pos );
 }
 add_filter( 'render_block_core/embed', __NAMESPACE__ . '\\youtube_transcript_link', 200 );
+
+/**
+ * The same link for Able Player shortcodes: `[ableplayer youtube-id="…"]`
+ * renders outside any block, so the core/embed filter never sees it and the
+ * Checker reports the player as a video with no transcript.
+ *
+ * @param string $output Shortcode output.
+ * @param string $tag    Shortcode name.
+ * @return string
+ */
+function ableplayer_transcript_link( $output, $tag ) {
+	if ( 'ableplayer' !== $tag || ! is_string( $output ) ) {
+		return $output;
+	}
+	return youtube_transcript_link( $output );
+}
+add_filter( 'do_shortcode_tag', __NAMESPACE__ . '\\ableplayer_transcript_link', 20, 2 );
 
 /**
  * The header search block renders <form role="search"> with no name, and the
@@ -372,3 +402,25 @@ function stream_page_redirect(): void {
 	exit;
 }
 add_action( 'template_redirect', __NAMESPACE__ . '\\stream_page_redirect' );
+
+/**
+ * Post-format list items say what they are. The browse-all pattern renders
+ * the post_format taxonomy through core/categories, so a term named "Link"
+ * becomes a link whose whole text is "Link" (WCAG 2.4.4). Every item gets the
+ * same visually hidden suffix so the list reads consistently.
+ *
+ * @param string $content Rendered block.
+ * @param array  $block   Parsed block.
+ * @return string
+ */
+function post_format_list_link_names( string $content, array $block ): string {
+	if ( 'post_format' !== ( $block['attrs']['taxonomy'] ?? 'category' ) || false === strpos( $content, 'cat-item' ) ) {
+		return $content;
+	}
+	return (string) preg_replace(
+		'#(<li class="cat-item[^"]*"[^>]*>\\s*<a [^>]*>)([^<]+)(</a>)#',
+		'$1$2<span class="screen-reader-text"> ' . esc_html__( 'posts', 'courtneyr-child' ) . '</span>$3',
+		$content
+	);
+}
+add_filter( 'render_block_core/categories', __NAMESPACE__ . '\\post_format_list_link_names', 10, 2 );
