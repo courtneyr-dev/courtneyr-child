@@ -1,12 +1,4 @@
-//* The Newsletter plugin prints an admin-only notice as a fixed #eee box
-   (inline style) with a theme-colored link inside; in dark mode that link
-   fails contrast on the light box. The box never changes color, so the ink
-   is fixed too (#1f2a44 on #eee is 11:1). */
-p[style*="background-color: #eee"] > a {
-	color: #1f2a44;
-}
-
-* =============================================================================
+/* =============================================================================
    courtneyr.dev — components v2.0
    Reusable components layered on top of tokens.css element defaults.
 
@@ -40,6 +32,15 @@ p[style*="background-color: #eee"] > a {
      .cr-shape-frame, .cr-shape-frame--*, .cr-float-badge*, .cr-drift,
      .cr-hero__shape*, .cr-card--elevated, .cr-card--inverse
    ============================================================================= */
+
+/* The Newsletter plugin prints an admin-only notice as a fixed #eee box
+   (inline style) with a theme-colored link inside; in dark mode that link
+   fails contrast on the light box. The box never changes color, so the ink
+   is fixed too (#1f2a44 on #eee is 11:1). */
+p[style*="background-color: #eee"] > a {
+	color: #1f2a44;
+}
+
 
 
 /* ============ a11y: contrast in colored table-header cells (v0.5.116) ============
