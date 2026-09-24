@@ -267,6 +267,9 @@ function enqueue_baseline(): void {
 	 * copy sidesteps the pipeline and always wins. Without it the
 	 * "6 likes"/"6 reposts" buttons inherit the theme.json hard button
 	 * shadow, which reads far too heavy beside a row of avatars.
+	 *
+	 * Syndication Links (plugin) sizes its list items at 0.8em of a 12px block,
+	 * 9.6px, under the Checker's 10px text floor; the last rule floors them.
 	 */
 	wp_add_inline_style(
 		'courtneyr-components',
@@ -274,7 +277,8 @@ function enqueue_baseline(): void {
 		.wp-block-atmosphere-reactions .reaction-label:hover { color: var(--cr-prussian-blue, #023047) !important; text-decoration: underline; }
 		.wp-block-atmosphere-reactions .reaction-label:focus-visible { outline: 3px solid var(--cr-selective-yellow, #ffb703); outline-offset: 2px; box-shadow: none !important; }
 		.wp-block-atmosphere-reactions .reaction-avatar { border: 2px solid var(--cr-printer-ivory, #fbfaf5) !important; box-shadow: 0 1px 2px rgba(36, 28, 74, 0.25) !important; }
-		.wp-block-atmosphere-reactions ul.reaction-avatars > li { margin-right: -6px !important; }'
+		.wp-block-atmosphere-reactions ul.reaction-avatars > li { margin-right: -6px !important; }
+		.single-post__content .syndication-links .relsyn li { font-size: max(var(--cr-text-floor, 0.7rem), 0.75rem); }'
 	);
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_baseline' );
