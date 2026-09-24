@@ -331,3 +331,28 @@ function comment_network_label( string $content, array $block, \WP_Block $instan
 	return $content . $label;
 }
 add_filter( 'render_block_core/comment-author-name', __NAMESPACE__ . '\\comment_network_label', 10, 3 );
+
+/**
+ * Saved copies of theme patterns keep the markup they were inserted with. The
+ * home page's newsletter-reasons section still carries the "01"–"04" number
+ * paragraphs (now painted by a CSS counter) and the "Every Saturday" edition
+ * line as a <p>; both read as headings to checkers. Handle them at render so
+ * the content needs no surgery: drop the number paragraphs, and render the
+ * edition line as a <div>.
+ *
+ * @param string $content Rendered block.
+ * @param array  $block   Parsed block.
+ * @return string
+ */
+function reasons_paragraphs( string $content, array $block ): string {
+	$classes = ' ' . (string) ( $block['attrs']['className'] ?? '' ) . ' ';
+	if ( false !== strpos( $classes, ' cr-reasons__number ' ) ) {
+		return '';
+	}
+	if ( false !== strpos( $classes, ' cr-reasons__edition ' ) ) {
+		$content = (string) preg_replace( '/^(\s*)<p\b/', '$1<div', $content, 1 );
+		return (string) preg_replace( '/<\/p>(\s*)$/', '</div>$1', $content, 1 );
+	}
+	return $content;
+}
+add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\reasons_paragraphs', 20, 2 );
