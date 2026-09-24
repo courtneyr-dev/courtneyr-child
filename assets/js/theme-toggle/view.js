@@ -25,10 +25,28 @@
 		root.setAttribute( 'data-theme', value );
 		try { localStorage.setItem( STORAGE_KEY, value ); } catch ( e ) {}
 		syncSegments( value );
+		announceCycleStatus( value );
 	}
 
 	var ORDER  = [ 'light', 'dark', 'system' ];
 	var LABELS = { light: 'light', dark: 'dark', system: 'system' };
+
+	// Announced text for the mobile cycle button's visually-hidden status
+	// span. "Following system" reads more clearly than "system mode on"
+	// for a value that isn't really an on/off state.
+	var STATUS_TEXT = {
+		light:  'Light mode on',
+		dark:   'Dark mode on',
+		system: 'Following system',
+	};
+
+	function announceCycleStatus( value ) {
+		var statuses = document.querySelectorAll( '[data-theme-cycle-status]' );
+		var text     = STATUS_TEXT[ value ] || STATUS_TEXT.system;
+		for ( var i = 0; i < statuses.length; i++ ) {
+			statuses[ i ].textContent = text;
+		}
+	}
 
 	function syncSegments( value ) {
 		var segments = document.querySelectorAll( '[data-theme-set]' );
