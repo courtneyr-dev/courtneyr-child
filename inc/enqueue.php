@@ -278,7 +278,9 @@ function enqueue_baseline(): void {
 		.wp-block-atmosphere-reactions .reaction-label:focus-visible { outline: 3px solid var(--cr-selective-yellow, #ffb703); outline-offset: 2px; box-shadow: none !important; }
 		.wp-block-atmosphere-reactions .reaction-avatar { border: 2px solid var(--cr-printer-ivory, #fbfaf5) !important; box-shadow: 0 1px 2px rgba(36, 28, 74, 0.25) !important; }
 		.wp-block-atmosphere-reactions ul.reaction-avatars > li { margin-right: -6px !important; }
-		.single-post__content .syndication-links .relsyn li { font-size: max(var(--cr-text-floor, 0.7rem), 0.75rem); }'
+		.single-post__content .syndication-links .relsyn li { font-size: max(var(--cr-text-floor, 0.7rem), 0.75rem); }
+		.cr-media--ableplayer { margin: 1.5rem 0; }
+		.cr-media--ableplayer .cr-media__transcript { margin-top: 0.5rem; font-size: max(var(--cr-text-floor, 0.7rem), 0.8125rem); }'
 	);
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_baseline' );

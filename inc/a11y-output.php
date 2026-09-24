@@ -274,10 +274,21 @@ add_filter( 'render_block_core/embed', __NAMESPACE__ . '\\youtube_transcript_lin
  * @return string
  */
 function ableplayer_transcript_link( $output, $tag ) {
-	if ( 'ableplayer' !== $tag || ! is_string( $output ) ) {
+	if ( 'ableplayer' !== $tag || ! is_string( $output ) || false !== strpos( $output, '<track' ) || false !== stripos( $output, 'transcript' ) ) {
 		return $output;
 	}
-	return youtube_transcript_link( $output );
+	if ( ! preg_match( '/data-youtube-id="([A-Za-z0-9_-]{6,})"/', $output, $m ) ) {
+		return $output;
+	}
+	// A figure with the link as its caption: the Checker's transcript check reads a
+	// media element's figcaption before it caps the surrounding text at 350
+	// characters, so the link is found however long the paragraph before it runs.
+	return sprintf(
+		'<figure class="cr-media cr-media--ableplayer">%s<figcaption class="cr-media__transcript"><a href="%s">%s</a></figcaption></figure>',
+		$output,
+		esc_url( 'https://www.youtube.com/watch?v=' . $m[1] ),
+		esc_html__( 'Captions and transcript on YouTube', 'courtneyr-child' )
+	);
 }
 add_filter( 'do_shortcode_tag', __NAMESPACE__ . '\\ableplayer_transcript_link', 20, 2 );
 
