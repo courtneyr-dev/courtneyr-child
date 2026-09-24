@@ -40,7 +40,6 @@ function decorative_comment_avatar( string $content, array $block, \WP_Block $in
 	if ( $tags->next_tag( 'img' ) ) {
 		$tags->set_attribute( 'alt', '' );
 		$tags->set_attribute( 'aria-hidden', 'true' );
-		$tags->set_attribute( 'role', 'presentation' );
 	}
 	return $tags->get_updated_html();
 }
@@ -168,7 +167,6 @@ function decorative_duplicate_featured_image( string $content, array $block, \WP
 	if ( $tags->next_tag( 'img' ) ) {
 		$tags->set_attribute( 'alt', '' );
 		$tags->set_attribute( 'aria-hidden', 'true' );
-		$tags->set_attribute( 'role', 'presentation' );
 	}
 	return $tags->get_updated_html();
 }
