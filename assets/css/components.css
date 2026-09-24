@@ -1077,8 +1077,9 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
 	border-radius: 0;
 }
 .site-header__search:focus-within {
-	outline: 2px solid var(--cr-focus-ring, var(--cr-marker, #fb8500));
+	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 /* leading magnifying glass, inside the box */
 .site-header__search-icon {
@@ -1281,7 +1282,7 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
 		background: var(--cr-surface, #fff);
 		border: 2px solid var(--cr-ink, #241c4a);
 	}
-	.cr-mobile-search:focus-within { outline: 3px solid var(--cr-marker, #ffb703); outline-offset: 2px; }
+	.cr-mobile-search:focus-within { outline: 3px solid var(--cr-focus-ring); outline-offset: 2px; box-shadow: 0 0 0 7px var(--cr-focus-halo); }
 	.cr-mobile-search__icon { display: inline-flex; color: var(--cr-ink-muted, #555); flex: 0 0 auto; }
 	.cr-mobile-search__input {
 		flex: 1 1 auto;
@@ -1484,6 +1485,7 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
 .cr-theme-segment:focus-visible {
 	outline: 2px solid var(--cr-focus-ring, var(--cr-selective-yellow, #ffb703));
 	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo) !important;
 }
 
 /* Dark header — track deepens to prussian-blue, idle icons go sky-blue; the
@@ -2505,7 +2507,8 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 :root[data-theme="dark"] .has-main-accent-background-color,
 :root[data-theme="dark"] .has-tertiary-background-color,
 :root[data-theme="dark"] .has-base-background-color,
-:root[data-theme="dark"] .has-secondary-background-color {
+:root[data-theme="dark"] .has-secondary-background-color,
+:root[data-theme="dark"] .has-primary-accent-background-color {
 	background-color: var(--cr-surface-soft) !important;
 	color: var(--cr-ink, #fbfaf5);
 }
@@ -2516,10 +2519,12 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 	:root:not([data-theme]) .has-tertiary-background-color,
 	:root:not([data-theme]) .has-base-background-color,
 	:root:not([data-theme]) .has-secondary-background-color,
+	:root:not([data-theme]) .has-primary-accent-background-color,
 	:root[data-theme="system"] .has-main-accent-background-color,
 	:root[data-theme="system"] .has-tertiary-background-color,
 	:root[data-theme="system"] .has-base-background-color,
-	:root[data-theme="system"] .has-secondary-background-color {
+	:root[data-theme="system"] .has-secondary-background-color,
+	:root[data-theme="system"] .has-primary-accent-background-color {
 		background-color: var(--cr-surface-soft) !important;
 		color: var(--cr-ink, #fbfaf5);
 	}
@@ -4957,7 +4962,7 @@ body.single .single-post__tags a:hover { box-shadow: 3px 3px 0 rgba(36, 28, 74, 
    footer (rule above at L1574 area), so no notebook-specific override
    is needed. */
 .is-style-cr-card .is-style-cr-eyebrow {
-	font-size: 0.6rem;
+	font-size: max(0.75rem, var(--cr-text-floor, 0.75rem));
 	letter-spacing: 0.05em;
 	white-space: nowrap;
 	line-height: 1.2;
@@ -5746,6 +5751,9 @@ body.home .wp-block-post-template > li::after {
 	color: inherit !important;
 	text-decoration: none !important;
 	border-bottom: 0 !important;
+	display: inline-flex;
+	align-items: center;
+	min-block-size: 1.5rem;
 }
 
 .wp-block-post-terms.cr-chip a:hover {
@@ -6447,6 +6455,7 @@ header.is-position-sticky .site-header__inner {
 	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
+	min-block-size: 1.5rem;
 	gap: 0.4rem;
 	font-family: var(--cr-font-accent);
 	font-size: var(--cr-text-sm, 0.875rem);
@@ -6527,8 +6536,8 @@ header.is-position-sticky .site-header__inner {
 .cr-stream-filter__chip:hover,
 .cr-stream-filter__chip:focus-visible {
 	transform: rotate(0deg);
-	background: var(--cr-marker, var(--cr-ut-orange, #fb8500));
-	color: var(--cr-printer-ivory, #fbfaf5);
+	background: var(--cr-cta-bg);
+	color: var(--cr-cta-ink);
 }
 
 /* Active chip — driven by CSS attribute selectors on the wrapper,
@@ -6892,6 +6901,7 @@ input.wp-block-search__input:focus,
 .cr-pull-quote__copy {
 	display: inline-flex;
 	align-items: center;
+	min-block-size: 1.5rem;
 	gap: 0.4rem;
 	margin-top: var(--cr-space-sm, 0.5rem);
 	padding: var(--cr-space-3xs, 0.2rem) var(--cr-space-sm, 0.7em);
@@ -6909,9 +6919,9 @@ input.wp-block-search__input:focus,
 }
 .cr-pull-quote__copy:hover,
 .cr-pull-quote__copy:focus-visible {
-	background: var(--cr-marker, var(--cr-ut-orange, #fb8500));
-	border-color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
-	color: var(--cr-printer-ivory, #fbfaf5);
+	background: var(--cr-cta-bg);
+	border-color: var(--cr-cta-bg);
+	color: var(--cr-cta-ink);
 }
 
 /* Confirmation state — swap the visible label. The two spans live

@@ -37,8 +37,8 @@ declare( strict_types = 1 );
 	</blockquote>
 	<!-- /wp:quote -->
 
-	<!-- wp:paragraph {"className":"cr-cite-link","fontSize":"sm","style":{"color":{"text":"var:preset|color|cerulean"}}} -->
-	<p class="cr-cite-link has-sm-font-size has-cerulean-color has-text-color">
+	<!-- wp:paragraph {"className":"cr-cite-link","fontSize":"sm"} -->
+	<p class="cr-cite-link has-sm-font-size">
 		<a href="#">Read the original →</a>
 	</p>
 	<!-- /wp:paragraph -->
