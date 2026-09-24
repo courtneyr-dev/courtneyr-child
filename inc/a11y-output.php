@@ -179,7 +179,7 @@ function kind_label_is_not_a_paragraph( string $content, array $block ): string 
 add_filter( 'render_block', __NAMESPACE__ . '\\kind_label_is_not_a_paragraph', 200, 2 );
 
 /**
- * oEmbed fallbacks (Instagram in particular) ship an <img> whose alt is the
+ * Embed fallbacks (oEmbed, Instagram in particular) ship an <img> whose alt is the
  * entire caption, hundreds of characters long. Trim any embedded image alt
  * over 300 characters to its first sentence.
  *
@@ -231,3 +231,25 @@ function youtube_transcript_link( string $content ): string {
 	return false === $pos ? $content . $link : substr( $content, 0, $pos ) . $link . substr( $content, $pos );
 }
 add_filter( 'render_block_core/embed', __NAMESPACE__ . '\\youtube_transcript_link', 200 );
+
+/**
+ * The header search block renders <form role="search"> with no name, and the
+ * search and 404 templates add a second one, so the two landmarks collide.
+ * Name the header form after its (visually hidden) label.
+ *
+ * @param string $content Rendered block.
+ * @param array  $block   Parsed block.
+ * @return string
+ */
+function name_header_search_landmark( string $content, array $block ): string {
+	$classes = (string) ( $block['attrs']['className'] ?? '' );
+	if ( false === strpos( $classes, 'site-header__search' ) ) {
+		return $content;
+	}
+	$tags = new \WP_HTML_Tag_Processor( $content );
+	if ( $tags->next_tag( 'form' ) && null === $tags->get_attribute( 'aria-label' ) ) {
+		$tags->set_attribute( 'aria-label', (string) ( $block['attrs']['label'] ?? __( 'Search the site', 'courtneyr-child' ) ) );
+	}
+	return $tags->get_updated_html();
+}
+add_filter( 'render_block_core/search', __NAMESPACE__ . '\\name_header_search_landmark', 10, 2 );

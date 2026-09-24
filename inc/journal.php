@@ -165,7 +165,7 @@ function margin_lines( int $seed, string $flavour ): array {
  * @return string
  */
 function aside( string $text, int $position, string $variant = 'cr-hand--underline' ): string {
-	return '<aside class="cr-journal__margin cr-journal__margin--' . (int) $position . '"><p class="cr-hand ' . esc_attr( $variant ) . '">' . esc_html( $text ) . '</p></aside>';
+	return '<div class="cr-journal__margin cr-journal__margin--' . (int) $position . '"><p class="cr-hand ' . esc_attr( $variant ) . '">' . esc_html( $text ) . '</p></div>';
 }
 
 /**
