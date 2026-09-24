@@ -4408,6 +4408,13 @@ body.blog button[type="submit"]:hover {
 	font-family: var(--cr-font-accent);
 }
 
+/* WCAG 2.5.8: the comment-date link measured 87x16px — 8px short of
+   the 24px minimum target size. */
+.single-post__comment-item .wp-block-comment-date a.u-url {
+	display: inline-block;
+	padding-block: 0.25rem;
+}
+
 /* Comment content — the actual message. Make it the bubble's lead
    element with display: order. */
 .single-post__comment-item .wp-block-comment-content {

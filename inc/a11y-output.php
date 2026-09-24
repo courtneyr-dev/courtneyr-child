@@ -274,3 +274,60 @@ function name_header_search_landmark( string $content, array $block ): string {
 	return $tags->get_updated_html();
 }
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\\name_header_search_landmark', 10, 2 );
+
+/**
+ * The comment platform badge (assets/css/components.css, "Comment platform
+ * badges") paints a small circular icon in the corner of a comment bubble,
+ * detecting the network purely via CSS :has()/[href*="..."] matching on the
+ * comment author link — Mastodon, WordPress, X, GitHub, Bluesky, or a
+ * generic IndieWeb globe. It has no text alternative, so a badged comment
+ * announces nothing about its source to assistive tech.
+ *
+ * Mirror the same URL-substring cascade here (checks applied in the same
+ * order the CSS rules are written, so a later match — e.g. Bluesky —
+ * overrides an earlier one exactly like the CSS "last rule wins" cascade)
+ * and append a visually-hidden "via {Network}" span. Purely additive: the
+ * visible badge is untouched.
+ *
+ * @param string    $content  Rendered block.
+ * @param array     $block    Parsed block.
+ * @param \WP_Block $instance Block instance, carries the commentId context.
+ * @return string
+ */
+function comment_network_label( string $content, array $block, \WP_Block $instance ): string {
+	unset( $block );
+	$comment_id = (int) ( $instance->context['commentId'] ?? 0 );
+	if ( 0 === $comment_id ) {
+		return $content;
+	}
+	$url = get_comment_author_url( $comment_id );
+	if ( '' === $url ) {
+		return $content;
+	}
+
+	$network = __( 'IndieWeb', 'courtneyr-child' );
+	if ( false !== strpos( $url, '/@' ) ) {
+		$network = __( 'Mastodon', 'courtneyr-child' );
+	}
+	if ( false !== strpos( $url, 'wordpress.org' ) || false !== strpos( $url, '.wordpress.com' ) ) {
+		$network = __( 'WordPress', 'courtneyr-child' );
+	}
+	if ( false !== strpos( $url, 'x.com/' ) || false !== strpos( $url, 'twitter.com/' ) ) {
+		$network = __( 'X', 'courtneyr-child' );
+	}
+	if ( false !== strpos( $url, 'github.com' ) ) {
+		$network = __( 'GitHub', 'courtneyr-child' );
+	}
+	if ( false !== strpos( $url, 'bsky.app' ) ) {
+		$network = __( 'Bluesky', 'courtneyr-child' );
+	}
+
+	$label = '<span class="screen-reader-text"> ' . sprintf(
+		/* translators: %s: social network or platform name, e.g. Mastodon. */
+		esc_html__( 'via %s', 'courtneyr-child' ),
+		esc_html( $network )
+	) . '</span>';
+
+	return $content . $label;
+}
+add_filter( 'render_block_core/comment-author-name', __NAMESPACE__ . '\\comment_network_label', 10, 3 );
