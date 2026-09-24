@@ -63,7 +63,7 @@ function sticky_style( int $seed ): string {
  * @return string
  */
 function curl(): string {
-	return '<span class="cr-sticky__curl" aria-hidden="true"></span>';
+	return '<span class="cr-sticky__curl"></span>';
 }
 
 /**

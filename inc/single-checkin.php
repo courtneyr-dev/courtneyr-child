@@ -282,9 +282,9 @@ function journal_page( string $html, array $block ): string {
 	$place = safe_place( $attrs );
 
 	$after .= '<footer class="cr-journal__meta">';
-	$after .= '<p class="cr-journal__meta-item cr-journal__meta-item--time"><span class="cr-journal__meta-icon" aria-hidden="true"></span><span class="cr-journal__meta-text"><time datetime="' . esc_attr( (string) wp_date( 'c', $ts ) ) . '">' . esc_html( (string) wp_date( get_option( 'date_format' ), $ts ) ) . '<br>' . esc_html( (string) wp_date( get_option( 'time_format' ) . ' (T)', $ts ) ) . '</time></span></p>';
+	$after .= '<p class="cr-journal__meta-item cr-journal__meta-item--time"><span class="cr-journal__meta-icon"></span><span class="cr-journal__meta-text"><time datetime="' . esc_attr( (string) wp_date( 'c', $ts ) ) . '">' . esc_html( (string) wp_date( get_option( 'date_format' ), $ts ) ) . '<br>' . esc_html( (string) wp_date( get_option( 'time_format' ) . ' (T)', $ts ) ) . '</time></span></p>';
 	if ( '' !== $place ) {
-		$after .= '<p class="cr-journal__meta-item cr-journal__meta-item--place"><span class="cr-journal__meta-icon" aria-hidden="true"></span><span class="cr-journal__meta-text">' . implode( '<br>', array_map( 'esc_html', explode( ', ', $place ) ) ) . '</span></p>';
+		$after .= '<p class="cr-journal__meta-item cr-journal__meta-item--place"><span class="cr-journal__meta-icon"></span><span class="cr-journal__meta-text">' . implode( '<br>', array_map( 'esc_html', explode( ', ', $place ) ) ) . '</span></p>';
 	}
 	$after .= '</footer>';
 

@@ -116,3 +116,118 @@ function drop_empty_paragraph( string $content ): string {
 	return preg_match( '#^\s*<p\b[^>]*>(?:\s|&nbsp;|\xC2\xA0)*</p>\s*$#u', $content ) ? '' : $content;
 }
 add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\drop_empty_paragraph' );
+
+/**
+ * A featured image whose alt repeats the post title, or whose attachment also
+ * appears inside the content (the first content image reused as the thumbnail),
+ * carries nothing the page does not already say. Mark it decorative so the
+ * duplicate-alt check and screen readers both skip it; the content copy keeps
+ * its alt.
+ *
+ * @param string    $content  Rendered block.
+ * @param array     $block    Parsed block.
+ * @param \WP_Block $instance Block instance carrying postId context.
+ * @return string
+ */
+function decorative_duplicate_featured_image( string $content, array $block, \WP_Block $instance ): string {
+	$post_id = (int) ( $instance->context['postId'] ?? 0 );
+	if ( ! $post_id || ! empty( $block['attrs']['isLink'] ) ) {
+		return $content;
+	}
+	$thumb_id = (int) get_post_thumbnail_id( $post_id );
+	if ( ! $thumb_id ) {
+		return $content;
+	}
+	$alt       = trim( (string) get_post_meta( $thumb_id, '_wp_attachment_image_alt', true ) );
+	$title     = trim( wp_strip_all_tags( (string) get_the_title( $post_id ) ) );
+	$body      = (string) get_post_field( 'post_content', $post_id );
+	$duplicate = ( '' !== $alt && 0 === strcasecmp( $alt, $title ) )
+		|| false !== strpos( $body, 'wp-image-' . $thumb_id . '"' )
+		|| false !== strpos( $body, 'wp-image-' . $thumb_id . ' ' )
+		|| false !== strpos( $body, '"id":' . $thumb_id . ',' );
+	if ( ! $duplicate ) {
+		return $content;
+	}
+	$tags = new \WP_HTML_Tag_Processor( $content );
+	if ( $tags->next_tag( 'img' ) ) {
+		$tags->set_attribute( 'alt', '' );
+		$tags->set_attribute( 'aria-hidden', 'true' );
+		$tags->set_attribute( 'role', 'presentation' );
+	}
+	return $tags->get_updated_html();
+}
+add_filter( 'render_block_core/post-featured-image', __NAMESPACE__ . '\\decorative_duplicate_featured_image', 10, 3 );
+
+/**
+ * Post Kinds prints its kind label as <p class="pk-kindlabel">. It is a label,
+ * not prose, and on single pages the theme sets it large enough that checkers
+ * read a short, large <p> as a heading. Swap the tag; the class-based CSS
+ * (inline-block, explicit margin) renders identically. Runs after the theme's
+ * own label rewrites, which match the <p> literal.
+ *
+ * @param string $content Rendered block.
+ * @param array  $block   Parsed block.
+ * @return string
+ */
+function kind_label_is_not_a_paragraph( string $content, array $block ): string {
+	$name = (string) ( $block['blockName'] ?? '' );
+	if ( 0 !== strpos( $name, 'post-kinds-indieweb/' ) || false === strpos( $content, '<p class="pk-kindlabel"' ) ) {
+		return $content;
+	}
+	return (string) preg_replace( '#<p class="pk-kindlabel"([^>]*)>(.*?)</p>#s', '<span class="pk-kindlabel"$1>$2</span>', $content );
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\kind_label_is_not_a_paragraph', 200, 2 );
+
+/**
+ * oEmbed fallbacks (Instagram in particular) ship an <img> whose alt is the
+ * entire caption, hundreds of characters long. Trim any embedded image alt
+ * over 300 characters to its first sentence.
+ *
+ * @param string|false $html Embed markup.
+ * @return string|false
+ */
+function trim_long_embed_alt( $html ) {
+	if ( ! is_string( $html ) || false === strpos( $html, 'alt="' ) ) {
+		return $html;
+	}
+	return (string) preg_replace_callback(
+		'/alt="([^"]{301,})"/',
+		static function ( array $m ): string {
+			$text  = html_entity_decode( $m[1], ENT_QUOTES | ENT_HTML5 );
+			$first = preg_split( '/(?<=[.!?])\s+/', $text, 2 )[0] ?? $text;
+			if ( mb_strlen( $first ) > 200 ) {
+				$first = mb_substr( $first, 0, 197 ) . '…';
+			}
+			return 'alt="' . esc_attr( $first ) . '"';
+		},
+		$html
+	);
+}
+add_filter( 'embed_oembed_html', __NAMESPACE__ . '\\trim_long_embed_alt', 20 );
+
+/**
+ * Able Player converts YouTube embed blocks into <video data-able-player>
+ * players. Where the block carries no caption track, add a link to the video
+ * on YouTube, where its captions and the transcript panel live, right after
+ * the player so the two sit together for readers and for checkers.
+ *
+ * @param string $content Rendered block.
+ * @return string
+ */
+function youtube_transcript_link( string $content ): string {
+	if ( false === strpos( $content, 'data-able-player' ) || false !== strpos( $content, '<track' ) || false !== stripos( $content, 'transcript' ) ) {
+		return $content;
+	}
+	if ( ! preg_match( '/data-youtube-id="([A-Za-z0-9_-]{6,})"/', $content, $m ) ) {
+		return $content;
+	}
+	$link = sprintf(
+		'<p class="cr-media__transcript"><a href="%s">%s</a></p>',
+		esc_url( 'https://www.youtube.com/watch?v=' . $m[1] ),
+		esc_html__( 'Captions and transcript on YouTube', 'courtneyr-child' )
+	);
+	// Inside the figure when there is one, so it is the player's next sibling.
+	$pos = strripos( $content, '</figure>' );
+	return false === $pos ? $content . $link : substr( $content, 0, $pos ) . $link . substr( $content, $pos );
+}
+add_filter( 'render_block_core/embed', __NAMESPACE__ . '\\youtube_transcript_link', 200 );

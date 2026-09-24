@@ -1,4 +1,12 @@
-/* =============================================================================
+//* The Newsletter plugin prints an admin-only notice as a fixed #eee box
+   (inline style) with a theme-colored link inside; in dark mode that link
+   fails contrast on the light box. The box never changes color, so the ink
+   is fixed too (#1f2a44 on #eee is 11:1). */
+p[style*="background-color: #eee"] > a {
+	color: #1f2a44;
+}
+
+* =============================================================================
    courtneyr.dev — components v2.0
    Reusable components layered on top of tokens.css element defaults.
 
@@ -1731,6 +1739,13 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
    untouched; specificity (0,2,3) beats Snow Monkey's :where()-based (0,1,1). */
 .editor-styles-wrapper ul.wp-block-list {
 	list-style: none;
+}
+
+/* Link to the YouTube page (captions, transcript) under Able Player embeds
+   that carry no caption track of their own. */
+.cr-media__transcript {
+	margin: 0.5rem 0 0;
+	font-size: 0.875rem;
 }
 
 /* Syndication Links sets ul.relsyn li to 0.8em; inside small meta text that
