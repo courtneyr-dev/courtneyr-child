@@ -106,16 +106,32 @@ add_filter( 'render_block', __NAMESPACE__ . '\\comment_hacks_small', 91, 2 );
  * placeholder left blank) renders as <p></p> and is announced as a blank
  * line. Drop it on the front end; the editor still shows the block.
  *
+ * A block-bindings paragraph (e.g. cr-listen-sources__value, bound to
+ * post-kinds/kind-meta) legitimately renders empty when the bound meta is
+ * unset, and CSS such as cr-post-kinds.css's
+ * .cr-listen-sources__rating:has(> .cr-listen-sources__value:empty) depends
+ * on that empty element staying in the DOM to hide its wrapper. Skip any
+ * paragraph carrying bindings metadata, or the cr-listen-sources__value
+ * class specifically, so that rule keeps working.
+ *
  * @param string $content Rendered block.
+ * @param array  $block   Parsed block, including attrs.
  * @return string
  */
-function drop_empty_paragraph( string $content ): string {
+function drop_empty_paragraph( string $content, array $block ): string {
 	if ( is_admin() ) {
+		return $content;
+	}
+	if ( ! empty( $block['attrs']['metadata']['bindings'] ) ) {
+		return $content;
+	}
+	$class_name = (string) ( $block['attrs']['className'] ?? '' );
+	if ( false !== strpos( $class_name, 'cr-listen-sources__value' ) ) {
 		return $content;
 	}
 	return preg_match( '#^\s*<p\b[^>]*>(?:\s|&nbsp;|\xC2\xA0)*</p>\s*$#u', $content ) ? '' : $content;
 }
-add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\drop_empty_paragraph' );
+add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\drop_empty_paragraph', 10, 2 );
 
 /**
  * A featured image whose alt repeats the post title, or whose attachment also

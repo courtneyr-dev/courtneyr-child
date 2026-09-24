@@ -110,6 +110,7 @@
 .cr-reasons .cr-reasons__panels {
 	gap: 2.375rem 1.5rem;
 	margin: 0;
+	counter-reset: cr-reasons-panel;
 }
 .cr-reasons .cr-reasons__panel {
 	position: relative;
@@ -120,6 +121,7 @@
 	color: var(--cr-reasons-ink);
 	border: 2px solid var(--cr-reasons-ink);
 	box-shadow: var(--cr-shadow-hard-2, 6px 6px 0 var(--cr-reasons-ink));
+	counter-increment: cr-reasons-panel;
 }
 .cr-reasons .cr-reasons__audience {
 	display: inline-flex;
@@ -132,9 +134,16 @@
 	width: max-content;
 	max-width: calc(100% + 0.5625rem);
 }
-.cr-reasons .cr-reasons__number,
+.cr-reasons .cr-reasons__audience::before,
 .cr-reasons .cr-reasons__audience-name { margin: 0; }
-.cr-reasons .cr-reasons__number {
+
+/* Decorative panel number — a CSS counter, not text content. The four
+   panels are already ordered in the DOM and named by their heading;
+   the "01"-"04" badge is purely visual, so it no longer needs a <p>
+   that reads to assistive tech as an unlabeled number next to a
+   heading. */
+.cr-reasons .cr-reasons__audience::before {
+	content: counter(cr-reasons-panel, decimal-leading-zero);
 	font-family: var(--cr-font-accent);
 	font-weight: var(--cr-weight-extrabold, 800);
 	font-size: 1.6875rem;
