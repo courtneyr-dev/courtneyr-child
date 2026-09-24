@@ -23,7 +23,8 @@ test( 'footer h-card photo is a decorative image inside the named link', async (
 
 test( 'Able Player YouTube players carry the captions/transcript link', async ( { page } ) => {
 	await page.goto( ABLEPLAYER_POST, { waitUntil: 'load' } );
-	const players = page.locator( '[data-youtube-id]' );
+	// Able Player swaps its <video data-youtube-id> for an iframe at init; count either form.
+	const players = page.locator( '[data-youtube-id], iframe[id^="able_player_"][id$="_youtube"]' );
 	const count = await players.count();
 	expect( count, 'fixture post renders at least one Able Player YouTube player' ).toBeGreaterThan( 0 );
 	const links = page.locator( '.cr-media__transcript a[href*="youtube.com/watch?v="]' );
