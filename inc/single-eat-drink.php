@@ -154,7 +154,7 @@ function map_html( float $lat, float $lon, string $name ): string {
 		: __( 'Map of this location', 'courtneyr-child' );
 	return '<div class="pk-embed pk-embed--map">'
 		. '<iframe title="' . esc_attr( $title ) . '" width="100%" height="200" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="' . esc_url( $src ) . '" loading="lazy"></iframe>'
-		. '<a href="' . esc_url( $large ) . '" class="pk-map-link" target="_blank" rel="noopener noreferrer">' . esc_html__( 'View on OpenStreetMap', 'courtneyr-child' ) . ' <span class="pk-map-link__arrow" aria-hidden="true">↗</span></a>'
+		. '<a href="' . esc_url( $large ) . '" class="pk-map-link" target="_blank" rel="noopener noreferrer">' . esc_html__( 'View on OpenStreetMap', 'courtneyr-child' ) . '<span class="pk-sr-only"> ' . esc_html__( '(opens in a new tab)', 'courtneyr-child' ) . '</span> <span class="pk-map-link__arrow" aria-hidden="true">↗</span></a>'
 		. '</div>';
 }
 
