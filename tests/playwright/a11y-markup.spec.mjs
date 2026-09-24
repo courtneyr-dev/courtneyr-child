@@ -40,8 +40,15 @@ test( 'Able Player shortcodes whose youtube-id is a full URL still get the trans
 	const players = page.locator( '[data-youtube-id], iframe[id^="able_player_"][id$="_youtube"]' );
 	const count = await players.count();
 	expect( count, 'fixture post renders at least one Able Player YouTube player' ).toBeGreaterThan( 0 );
-	const links = page.locator( 'figure.cr-media--ableplayer figcaption.cr-media__transcript a' );
-	expect( await links.count() ).toBeGreaterThanOrEqual( count );
+	// Every player gets a figcaption that names the transcript: a YouTube link when the
+	// shortcode has no captions track, a sentence pointing at Able Player's Transcript
+	// control when it has one (these fixture posts do).
+	const captions = page.locator( 'figure.cr-media--ableplayer figcaption.cr-media__transcript' );
+	expect( await captions.count() ).toBeGreaterThanOrEqual( count );
+	for ( const text of await captions.allTextContents() ) {
+		expect( text.toLowerCase() ).toContain( 'transcript' );
+	}
+	const links = captions.locator( 'a' );
 	for ( const href of await links.evaluateAll( ( a ) => a.map( ( el ) => el.getAttribute( 'href' ) ) ) ) {
 		// An eleven-character id, never the pasted URL nested inside another URL.
 		expect( href ).toMatch( /^https:\/\/www\.youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}$/ );

@@ -285,30 +285,40 @@ function youtube_transcript_link( string $content ): string {
 add_filter( 'render_block_core/embed', __NAMESPACE__ . '\\youtube_transcript_link', 200 );
 
 /**
- * The same link for Able Player shortcodes: `[ableplayer youtube-id="…"]`
- * renders outside any block, so the core/embed filter never sees it and the
- * Checker reports the player as a video with no transcript.
+ * The same for Able Player shortcodes: `[ableplayer youtube-id="…"]` renders
+ * outside any block, so the core/embed filter never sees it and the Checker
+ * reports the player as a video with no transcript.
+ *
+ * With a captions track, Able Player itself offers an interactive transcript
+ * (its Transcript control), but that control is an icon button with an
+ * aria-label, which the Checker's transcript check, reading visible text
+ * only, cannot see. The caption tells every reader where the transcript is,
+ * and the check reads a figcaption before it caps the surrounding text.
+ * Without a track, the caption links to the captions and transcript on YouTube.
  *
  * @param string $output Shortcode output.
  * @param string $tag    Shortcode name.
  * @return string
  */
 function ableplayer_transcript_link( $output, $tag ) {
-	if ( 'ableplayer' !== $tag || ! is_string( $output ) || false !== strpos( $output, '<track' ) || false !== stripos( $output, 'transcript' ) ) {
+	if ( 'ableplayer' !== $tag || ! is_string( $output ) || false !== strpos( $output, 'cr-media__transcript' ) ) {
 		return $output;
 	}
 	$id = preg_match( '/data-youtube-id="([^"]+)"/', $output, $m ) ? youtube_id( $m[1] ) : '';
 	if ( '' === $id ) {
 		return $output;
 	}
-	// A figure with the link as its caption: the Checker's transcript check reads a
-	// media element's figcaption before it caps the surrounding text at 350
-	// characters, so the link is found however long the paragraph before it runs.
+	$caption = false !== stripos( $output, '<track' )
+		? esc_html__( 'Captions and an interactive transcript are in the player controls (Transcript button).', 'courtneyr-child' )
+		: sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( 'https://www.youtube.com/watch?v=' . $id ),
+			esc_html__( 'Captions and transcript on YouTube', 'courtneyr-child' )
+		);
 	return sprintf(
-		'<figure class="cr-media cr-media--ableplayer">%s<figcaption class="cr-media__transcript"><a href="%s">%s</a></figcaption></figure>',
+		'<figure class="cr-media cr-media--ableplayer">%s<figcaption class="cr-media__transcript">%s</figcaption></figure>',
 		$output,
-		esc_url( 'https://www.youtube.com/watch?v=' . $id ),
-		esc_html__( 'Captions and transcript on YouTube', 'courtneyr-child' )
+		$caption
 	);
 }
 add_filter( 'do_shortcode_tag', __NAMESPACE__ . '\\ableplayer_transcript_link', 20, 2 );
