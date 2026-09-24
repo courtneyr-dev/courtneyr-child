@@ -1,0 +1,68 @@
+// `npm run test:a11y-markup`: DOM assertions for the output-level accessibility fixes in
+// inc/a11y-output.php and patterns/cr-hcard.php. Read-only GETs; needs a running site
+// (CR_BASE_URL, CR_ALLOW_REMOTE=1 and CR_USER_AGENT for a Pantheon sandbox). Post paths
+// default to dev fixtures and can be pointed elsewhere with the CR_*_PATH variables.
+import { test, expect } from '@playwright/test';
+
+const ABLEPLAYER_POST = process.env.CR_ABLEPLAYER_POST_PATH || '/?p=3010'; // Able Player YouTube shortcode
+const COMMENTS_POST = process.env.CR_COMMENTS_POST_PATH || '/?p=38071'; // backfeed comments, incl. two with no avatar
+const QUOTE_POST = process.env.CR_QUOTE_POST_PATH || '/?p=38049'; // Syndication Links plugin output
+const BROWSE_PAGE = process.env.CR_BROWSE_ALL_PATH || '/stream/'; // cr-browse-all pattern (post_format list)
+
+test( 'footer h-card photo is a decorative image inside the named link', async ( { page } ) => {
+	await page.goto( '/', { waitUntil: 'load' } );
+	const link = page.locator( '.cr-hcard a.u-url' );
+	await expect( link ).toHaveCount( 1 );
+	const img = link.locator( 'img.cr-hcard__photo' );
+	await expect( img ).toHaveCount( 1 );
+	await expect( img ).toHaveAttribute( 'alt', '' );
+	expect( await img.getAttribute( 'aria-hidden' ) ).toBeNull();
+	expect( ( await link.textContent() )?.trim().length ).toBeGreaterThan( 2 );
+	expect( await page.locator( '.cr-hcard img[aria-hidden]' ).count() ).toBe( 0 );
+} );
+
+test( 'Able Player YouTube players carry the captions/transcript link', async ( { page } ) => {
+	await page.goto( ABLEPLAYER_POST, { waitUntil: 'load' } );
+	const players = page.locator( '[data-youtube-id]' );
+	const count = await players.count();
+	expect( count, 'fixture post renders at least one Able Player YouTube player' ).toBeGreaterThan( 0 );
+	const links = page.locator( '.cr-media__transcript a[href*="youtube.com/watch?v="]' );
+	expect( await links.count() ).toBeGreaterThanOrEqual( count );
+	for ( const text of await links.allTextContents() ) {
+		expect( text.toLowerCase() ).toContain( 'transcript' );
+	}
+} );
+
+test( 'comment avatars are decorative and never render with an empty src', async ( { page } ) => {
+	await page.goto( COMMENTS_POST, { waitUntil: 'load' } );
+	const avatars = page.locator( '.wp-block-avatar img' );
+	expect( await avatars.count() ).toBeGreaterThan( 0 );
+	for ( const img of await avatars.all() ) {
+		expect( ( await img.getAttribute( 'src' ) ) || ( await img.getAttribute( 'data-src' ) ) ).not.toBe( '' );
+		await expect( img ).toHaveAttribute( 'alt', '' );
+		await expect( img ).toHaveAttribute( 'aria-hidden', 'true' );
+	}
+	// A comment whose avatar resolves to nothing renders no <img> at all.
+	expect( await page.locator( '.wp-block-avatar img[src=""]' ).count() ).toBe( 0 );
+} );
+
+test( 'syndication links are not smaller than 11px', async ( { page } ) => {
+	await page.goto( QUOTE_POST, { waitUntil: 'load' } );
+	const links = page.locator( '.syndication-links .syn-link' );
+	expect( await links.count() ).toBeGreaterThan( 0 );
+	for ( const a of await links.all() ) {
+		const size = parseFloat( await a.evaluate( ( el ) => getComputedStyle( el ).fontSize ) );
+		expect( size ).toBeGreaterThanOrEqual( 11 );
+	}
+} );
+
+test( 'post-format list links name what they link to', async ( { page } ) => {
+	await page.goto( BROWSE_PAGE, { waitUntil: 'load' } );
+	const items = page.locator( '.cr-browse-all__list li.cat-item a[href*="/type/"]' );
+	expect( await items.count() ).toBeGreaterThan( 0 );
+	for ( const a of await items.all() ) {
+		const name = ( await a.textContent() )?.replace( /\s+/g, ' ' ).trim() || '';
+		expect( name.toLowerCase() ).toMatch( /\bposts$/ );
+		expect( name.toLowerCase() ).not.toBe( 'link' );
+	}
+} );
