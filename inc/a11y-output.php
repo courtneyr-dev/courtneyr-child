@@ -354,3 +354,21 @@ function reasons_paragraphs( string $content, array $block ): string {
 	return $content;
 }
 add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\reasons_paragraphs', 20, 2 );
+
+/**
+ * The Stream page paginates its Query Loop with ?query-1-page=N (a non-inheriting
+ * loop), so the conventional /stream/page/N/ URL renders page 1 under a page-N
+ * address. Send it to the address the block actually reads.
+ */
+function stream_page_redirect(): void {
+	if ( ! is_page( 'stream' ) ) {
+		return;
+	}
+	$paged = (int) get_query_var( 'page' );
+	if ( $paged < 2 ) {
+		return;
+	}
+	wp_safe_redirect( add_query_arg( 'query-1-page', $paged, get_permalink() ), 301 );
+	exit;
+}
+add_action( 'template_redirect', __NAMESPACE__ . '\\stream_page_redirect' );
