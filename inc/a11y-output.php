@@ -238,6 +238,25 @@ add_filter( 'embed_oembed_html', __NAMESPACE__ . '\\trim_long_embed_alt', 20 );
 add_filter( 'embed_maybe_make_link', __NAMESPACE__ . '\\trim_long_embed_alt', 100 ); // OpenGraph Fallback Embed cards return here (priority 99).
 
 /**
+ * The YouTube video id behind an Able Player `youtube-id` value. Authors write
+ * it as a bare id or paste any youtube.com / youtu.be URL, and the attribute
+ * reaches the filters entity-encoded.
+ *
+ * @param string $value Attribute value as it sits in the markup.
+ * @return string Eleven-character id, or '' when the value holds none.
+ */
+function youtube_id( string $value ): string {
+	$value = trim( html_entity_decode( $value, ENT_QUOTES | ENT_HTML5 ) );
+	if ( preg_match( '/^[A-Za-z0-9_-]{11}$/', $value ) ) {
+		return $value;
+	}
+	if ( preg_match( '#(?:[?&]v=|youtu\.be/|/embed/|/shorts/|/live/|/v/)([A-Za-z0-9_-]{11})(?![A-Za-z0-9_-])#', $value, $m ) ) {
+		return $m[1];
+	}
+	return '';
+}
+
+/**
  * Able Player converts YouTube embed blocks into <video data-able-player>
  * players. Where the block carries no caption track, add a link to the video
  * on YouTube, where its captions and the transcript panel live, right after
@@ -250,12 +269,13 @@ function youtube_transcript_link( string $content ): string {
 	if ( false === strpos( $content, 'data-youtube-id' ) || false !== strpos( $content, '<track' ) || false !== stripos( $content, 'transcript' ) ) {
 		return $content;
 	}
-	if ( ! preg_match( '/data-youtube-id="([A-Za-z0-9_-]{6,})"/', $content, $m ) ) {
+	$id = preg_match( '/data-youtube-id="([^"]+)"/', $content, $m ) ? youtube_id( $m[1] ) : '';
+	if ( '' === $id ) {
 		return $content;
 	}
 	$link = sprintf(
 		'<p class="cr-media__transcript"><a href="%s">%s</a></p>',
-		esc_url( 'https://www.youtube.com/watch?v=' . $m[1] ),
+		esc_url( 'https://www.youtube.com/watch?v=' . $id ),
 		esc_html__( 'Captions and transcript on YouTube', 'courtneyr-child' )
 	);
 	// Inside the figure when there is one, so it is the player's next sibling.
@@ -277,7 +297,8 @@ function ableplayer_transcript_link( $output, $tag ) {
 	if ( 'ableplayer' !== $tag || ! is_string( $output ) || false !== strpos( $output, '<track' ) || false !== stripos( $output, 'transcript' ) ) {
 		return $output;
 	}
-	if ( ! preg_match( '/data-youtube-id="([A-Za-z0-9_-]{6,})"/', $output, $m ) ) {
+	$id = preg_match( '/data-youtube-id="([^"]+)"/', $output, $m ) ? youtube_id( $m[1] ) : '';
+	if ( '' === $id ) {
 		return $output;
 	}
 	// A figure with the link as its caption: the Checker's transcript check reads a
@@ -286,11 +307,42 @@ function ableplayer_transcript_link( $output, $tag ) {
 	return sprintf(
 		'<figure class="cr-media cr-media--ableplayer">%s<figcaption class="cr-media__transcript"><a href="%s">%s</a></figcaption></figure>',
 		$output,
-		esc_url( 'https://www.youtube.com/watch?v=' . $m[1] ),
+		esc_url( 'https://www.youtube.com/watch?v=' . $id ),
 		esc_html__( 'Captions and transcript on YouTube', 'courtneyr-child' )
 	);
 }
 add_filter( 'do_shortcode_tag', __NAMESPACE__ . '\\ableplayer_transcript_link', 20, 2 );
+
+/**
+ * Backfed comments (Bridgy through the Webmention plugin) arrive with the
+ * author's fediverse display name verbatim, custom-emoji shortcodes included:
+ * `James Huff :prami_pride:`. The shortcode is noise wherever the name is read
+ * out, and on the ATmosphere reactions block it becomes the avatar's alt, where
+ * the Checker reads its underscore as a filename. Drop it before the comment
+ * is stored or updated.
+ *
+ * @param string $name Author name as submitted.
+ * @return string
+ */
+function author_name_without_emoji_shortcodes( string $name ): string {
+	$name = preg_replace( '/\s*:[A-Za-z0-9_]*[A-Za-z_][A-Za-z0-9_]*:\s*/', ' ', $name );
+	return trim( preg_replace( '/\s{2,}/', ' ', (string) $name ) );
+}
+
+/**
+ * Apply the strip to the comment author about to be inserted or updated.
+ *
+ * @param array $commentdata Comment data (preprocess_comment or wp_update_comment_data).
+ * @return array
+ */
+function strip_emoji_shortcodes_from_author( array $commentdata ): array {
+	if ( ! empty( $commentdata['comment_author'] ) && is_string( $commentdata['comment_author'] ) ) {
+		$commentdata['comment_author'] = author_name_without_emoji_shortcodes( $commentdata['comment_author'] );
+	}
+	return $commentdata;
+}
+add_filter( 'preprocess_comment', __NAMESPACE__ . '\strip_emoji_shortcodes_from_author' );
+add_filter( 'wp_update_comment_data', __NAMESPACE__ . '\strip_emoji_shortcodes_from_author' );
 
 /**
  * The header search block renders <form role="search"> with no name, and the
