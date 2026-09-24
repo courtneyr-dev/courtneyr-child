@@ -162,21 +162,26 @@ add_filter( 'render_block_core/post-featured-image', __NAMESPACE__ . '\\decorati
  * Post Kinds prints its kind label as <p class="pk-kindlabel">. It is a label,
  * not prose, and on single pages the theme sets it large enough that checkers
  * read a short, large <p> as a heading. Swap the tag; the class-based CSS
- * (inline-block, explicit margin) renders identically. Runs after the theme's
- * own label rewrites, which match the <p> literal.
+ * (inline-block, explicit margin) renders identically.
+ *
+ * The theme's own relabels (stream-checkin, single-checkin, single-watch,
+ * single-eat-drink, stream-media, aside-scrap) match the <p> literal, so this
+ * must run after all of them: on the OUTER blocks, via the block-specific
+ * hooks (which WordPress fires after the generic render_block filters) at a
+ * late priority. Inner card blocks are left alone.
  *
  * @param string $content Rendered block.
- * @param array  $block   Parsed block.
  * @return string
  */
-function kind_label_is_not_a_paragraph( string $content, array $block ): string {
-	$name = (string) ( $block['blockName'] ?? '' );
-	if ( 0 !== strpos( $name, 'post-kinds-indieweb/' ) || false === strpos( $content, '<p class="pk-kindlabel"' ) ) {
+function kind_label_is_not_a_paragraph( string $content ): string {
+	if ( false === strpos( $content, '<p class="pk-kindlabel"' ) ) {
 		return $content;
 	}
 	return (string) preg_replace( '#<p class="pk-kindlabel"([^>]*)>(.*?)</p>#s', '<span class="pk-kindlabel"$1>$2</span>', $content );
 }
-add_filter( 'render_block', __NAMESPACE__ . '\\kind_label_is_not_a_paragraph', 200, 2 );
+add_filter( 'render_block_core/post-content', __NAMESPACE__ . '\\kind_label_is_not_a_paragraph', 999 );
+add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\kind_label_is_not_a_paragraph', 999 );
+add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\kind_label_is_not_a_paragraph', 999 );
 
 /**
  * Embed fallbacks (oEmbed, Instagram in particular) ship an <img> whose alt is the
