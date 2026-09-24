@@ -207,14 +207,14 @@ function add_title_lede( string $html, array $block ): string {
 	$out    = '';
 
 	if ( '' !== $author ) {
-		$out .= '<p class="cr-journal__lede cr-read__author">' . esc_html( $author ) . '</p>';
+		$out .= '<div class="cr-journal__lede cr-read__author">' . esc_html( $author ) . '</div>';
 	}
 	if ( $rating > 0 ) {
 		$out .= '<p class="cr-journal__rating" role="img" aria-label="' . esc_attr( sprintf( /* translators: %d: rating */ __( 'Rated %d of 5', 'courtneyr-child' ), $rating ) ) . '">';
 		for ( $i = 1; $i <= 5; $i++ ) {
-			$out .= '<span class="cr-journal__star' . ( $i <= $rating ? '' : ' cr-journal__star--off' ) . '" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" focusable="false"><path d="M12 2l3 6.5 7 .6-5.3 4.6 1.6 6.8L12 17l-6.9 3.5 1.6-6.8L1.4 9.1l7-.6z"/></svg></span>';
+			$out .= '<span class="cr-journal__star' . ( $i <= $rating ? '' : ' cr-journal__star--off' ) . '"><svg viewBox="0 0 24 24" fill="currentColor" focusable="false"><path d="M12 2l3 6.5 7 .6-5.3 4.6 1.6 6.8L12 17l-6.9 3.5 1.6-6.8L1.4 9.1l7-.6z"/></svg></span>';
 		}
-		$out .= '<span class="cr-journal__rating-value" aria-hidden="true">' . esc_html( sprintf( '%d / 5', $rating ) ) . '</span></p>';
+		$out .= '<span class="cr-journal__rating-value">' . esc_html( sprintf( '%d / 5', $rating ) ) . '</span></p>';
 	}
 
 	list( $label ) = status_copy( $status );
@@ -410,7 +410,7 @@ function journal_page( string $html, array $block ): string {
 			$m_start = strpos( $html, 'class="pk-media' );
 			$m_end   = false !== $m_start ? strpos( $html, '</div>', $m_start ) : false;
 			if ( false !== $m_end ) {
-				$ribbon = '<span class="cr-book__ribbon cr-book__ribbon--' . esc_attr( $status ) . '" aria-hidden="true"></span>';
+				$ribbon = '<span class="cr-book__ribbon cr-book__ribbon--' . esc_attr( $status ) . '"></span>';
 				$html   = substr( $html, 0, $m_end ) . $ribbon . substr( $html, $m_end );
 			}
 		}

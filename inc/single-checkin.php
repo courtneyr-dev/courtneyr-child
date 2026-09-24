@@ -264,17 +264,17 @@ function journal_page( string $html, array $block ): string {
 	//    time and place row. Margin notes are asides in the page grid.
 	$copy   = margin_copy()[ pick( $s, 2, count( margin_copy() ) ) ];
 	$after  = '';
-	$after .= '<aside class="cr-journal__margin cr-journal__margin--1"><p class="cr-hand cr-hand--underline">' . esc_html( $copy[0] ) . '</p></aside>';
+	$after .= '<div class="cr-journal__margin cr-journal__margin--1"><p class="cr-hand cr-hand--underline">' . esc_html( $copy[0] ) . '</p></div>';
 
 	if ( '' !== $note_html ) {
 		$after .= '<section class="cr-journal__notes"><h2 class="cr-journal__notes-title">' . esc_html__( 'Notes from this check-in', 'courtneyr-child' ) . '</h2>' . $note_html . '</section>';
-		$after .= '<aside class="cr-journal__margin cr-journal__margin--2"><p class="cr-hand cr-hand--orange cr-hand--burst">' . esc_html( $copy[1] ) . '</p></aside>';
+		$after .= '<div class="cr-journal__margin cr-journal__margin--2"><p class="cr-hand cr-hand--orange cr-hand--burst">' . esc_html( $copy[1] ) . '</p></div>';
 	}
 
 	if ( '' !== $photo_html ) {
 		$caption = caption_copy()[ pick( $s, 5, count( caption_copy() ) ) ];
 		$after  .= '<figure class="cr-journal__photo">' . $photo_html . '<figcaption class="cr-hand cr-hand--caption">' . esc_html( $caption ) . ' <span class="cr-hand__heart" aria-hidden="true">♡</span></figcaption></figure>';
-		$after  .= '<aside class="cr-journal__margin cr-journal__margin--3"><p class="cr-hand cr-hand--underline">' . esc_html( $copy[ '' !== $note_html ? 2 : 1 ] ) . '</p></aside>';
+		$after  .= '<div class="cr-journal__margin cr-journal__margin--3"><p class="cr-hand cr-hand--underline">' . esc_html( $copy[ '' !== $note_html ? 2 : 1 ] ) . '</p></div>';
 	}
 
 	$ts    = ! empty( $attrs['checkinAt'] ) ? (int) strtotime( (string) $attrs['checkinAt'] ) : 0;
@@ -282,9 +282,9 @@ function journal_page( string $html, array $block ): string {
 	$place = safe_place( $attrs );
 
 	$after .= '<footer class="cr-journal__meta">';
-	$after .= '<p class="cr-journal__meta-item cr-journal__meta-item--time"><span class="cr-journal__meta-icon" aria-hidden="true"></span><span class="cr-journal__meta-text"><time datetime="' . esc_attr( (string) wp_date( 'c', $ts ) ) . '">' . esc_html( (string) wp_date( get_option( 'date_format' ), $ts ) ) . '<br>' . esc_html( (string) wp_date( get_option( 'time_format' ) . ' (T)', $ts ) ) . '</time></span></p>';
+	$after .= '<p class="cr-journal__meta-item cr-journal__meta-item--time"><span class="cr-journal__meta-icon"></span><span class="cr-journal__meta-text"><time datetime="' . esc_attr( (string) wp_date( 'c', $ts ) ) . '">' . esc_html( (string) wp_date( get_option( 'date_format' ), $ts ) ) . '<br>' . esc_html( (string) wp_date( get_option( 'time_format' ) . ' (T)', $ts ) ) . '</time></span></p>';
 	if ( '' !== $place ) {
-		$after .= '<p class="cr-journal__meta-item cr-journal__meta-item--place"><span class="cr-journal__meta-icon" aria-hidden="true"></span><span class="cr-journal__meta-text">' . implode( '<br>', array_map( 'esc_html', explode( ', ', $place ) ) ) . '</span></p>';
+		$after .= '<p class="cr-journal__meta-item cr-journal__meta-item--place"><span class="cr-journal__meta-icon"></span><span class="cr-journal__meta-text">' . implode( '<br>', array_map( 'esc_html', explode( ', ', $place ) ) ) . '</span></p>';
 	}
 	$after .= '</footer>';
 

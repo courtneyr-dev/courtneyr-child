@@ -165,7 +165,7 @@ function margin_lines( int $seed, string $flavour ): array {
  * @return string
  */
 function aside( string $text, int $position, string $variant = 'cr-hand--underline' ): string {
-	return '<aside class="cr-journal__margin cr-journal__margin--' . (int) $position . '"><p class="cr-hand ' . esc_attr( $variant ) . '">' . esc_html( $text ) . '</p></aside>';
+	return '<div class="cr-journal__margin cr-journal__margin--' . (int) $position . '"><p class="cr-hand ' . esc_attr( $variant ) . '">' . esc_html( $text ) . '</p></div>';
 }
 
 /**
@@ -188,7 +188,7 @@ function notes_section( string $title, string $html ): string {
  * @return string
  */
 function meta_item( string $kind, string $html, string $label = '' ): string {
-	$out  = '<p class="cr-journal__meta-item cr-journal__meta-item--' . esc_attr( $kind ) . '"><span class="cr-journal__meta-icon" aria-hidden="true"></span><span class="cr-journal__meta-text">' . $html;
+	$out  = '<p class="cr-journal__meta-item cr-journal__meta-item--' . esc_attr( $kind ) . '"><span class="cr-journal__meta-icon"></span><span class="cr-journal__meta-text">' . $html;
 	if ( '' !== $label ) {
 		$out .= '<span class="cr-journal__meta-label">' . esc_html( $label ) . '</span>';
 	}
