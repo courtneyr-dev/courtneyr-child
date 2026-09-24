@@ -52,7 +52,7 @@ declare( strict_types = 1 );
 					<!-- wp:post-date {"format":"F j, Y","fontSize":"small"} /-->
 
 					<!-- wp:html -->
-					<span class="cr-format-chip" aria-hidden="true"></span>
+					<span class="cr-format-chip"></span>
 					<!-- /wp:html -->
 
 					<!-- wp:post-terms {"term":"category","className":"cr-stream-item__category","fontSize":"xs"} /-->

@@ -6890,8 +6890,9 @@ input.wp-block-search__input:focus,
    v0.5.18 — Pull-quote copy-to-clipboard (IA module).
      The render filter wraps each cr-pull-quote in a
      .cr-pull-quote-wrap with IA wiring + appends a "Copy quote"
-     button. CSS swaps the button label between "Copy quote" and
-     "Copied" via the .is-copied class (driven by context.copied).
+     button. The label swaps between "Copy quote" and "Copied" via
+     data-wp-text (state.copyLabel); the .is-copied class (driven by
+     context.copied) only re-paints the button's colors here.
    ============================================================ */
 
 .cr-pull-quote-wrap {
@@ -6924,19 +6925,9 @@ input.wp-block-search__input:focus,
 	color: var(--cr-cta-ink);
 }
 
-/* Confirmation state — swap the visible label. The two spans live
-   in the button at all times; only one is rendered visually based
-   on the .is-copied class. The aria-live on the button announces
-   the change to screen readers. */
-.cr-pull-quote__copy-confirm {
-	display: none;
-}
-.cr-pull-quote__copy.is-copied .cr-pull-quote__copy-default {
-	display: none;
-}
-.cr-pull-quote__copy.is-copied .cr-pull-quote__copy-confirm {
-	display: inline;
-}
+/* Confirmation state — the label text itself swaps via data-wp-text
+   (state.copyLabel); the aria-live status span announces the change
+   to screen readers. */
 .cr-pull-quote__copy.is-copied {
 	background: var(--cr-cerulean, #126782);
 	border-color: var(--cr-cerulean, #126782);

@@ -24,6 +24,12 @@ store( 'courtneyr/pull-quote', {
 		get copyStatus() {
 			return getContext().copied ? 'Quote copied to clipboard' : '';
 		},
+		// The button's own visible label, bound with data-wp-text. Kept
+		// as one real text node instead of two aria-hidden spans so the
+		// button's accessible name always matches what's rendered.
+		get copyLabel() {
+			return getContext().copied ? 'Copied' : 'Copy quote';
+		},
 	},
 	actions: {
 		// v0.5.39 — WP 7.0 changed `data-wp-on--click` to fire actions
