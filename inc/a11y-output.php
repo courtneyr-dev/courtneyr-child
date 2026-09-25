@@ -418,6 +418,25 @@ add_filter( 'the_content', __NAMESPACE__ . '\drop_empty_paragraphs_in_output', 9
 add_filter( 'comment_text', __NAMESPACE__ . '\drop_empty_paragraphs_in_output', 999 );
 
 /**
+ * ATmosphere's reactions block (Automattic, third-party) opens every avatar and
+ * name link in a new tab with no announcement. Site policy since 2026-09-25 is
+ * same-tab links unless the link says otherwise (content links were converted
+ * the same day), so the block's anchors lose target="_blank"; the rel that only
+ * served the new tab goes with it.
+ *
+ * @param string $content Rendered block.
+ * @return string
+ */
+function reactions_open_in_same_tab( string $content ): string {
+	if ( false === strpos( $content, 'target="_blank"' ) ) {
+		return $content;
+	}
+	$content = (string) preg_replace( '/\s+target="_blank"/', '', $content );
+	return (string) preg_replace( '/\s+rel="(?:\s*(?:noopener|noreferrer)\s*)+"/', '', $content );
+}
+add_filter( 'render_block_atmosphere/reactions', __NAMESPACE__ . '\reactions_open_in_same_tab', 10 );
+
+/**
  * The header search block renders <form role="search"> with no name, and the
  * search and 404 templates add a second one, so the two landmarks collide.
  * Name the header form after its (visually hidden) label.
