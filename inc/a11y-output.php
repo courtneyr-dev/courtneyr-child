@@ -405,6 +405,13 @@ function drop_empty_paragraphs_in_output( $html ) {
 	if ( ! is_string( $html ) || false === strpos( $html, '<p' ) ) {
 		return $html;
 	}
+	// wpautop wraps a block-level element (the Able Player figure, an embed) in a paragraph;
+	// the browser closes that paragraph when the block starts and turns the leftover `</p>`
+	// into an empty one. Backfed comments arrive with a doubled `</p></p>`. Remove the orphans
+	// first, then any paragraph whose only content is whitespace.
+	$html = (string) preg_replace( '#</(figure|div|ul|ol|blockquote|table|pre|h[1-6])>\s*</p>#i', '</$1>', $html );
+	$html = (string) preg_replace( '#<p(?:\s[^>]*)?>\s*(?=<(?:figure|div|ul|ol|blockquote|table|pre|h[1-6])\b)#i', '', $html );
+	$html = (string) preg_replace( '#</p>(\s*</p>)+#i', '</p>', $html );
 	return (string) preg_replace( '#<p(?:\s[^>]*)?>(?:\s|&nbsp;|\x{00a0})*</p>#u', '', $html );
 }
 add_filter( 'the_content', __NAMESPACE__ . '\drop_empty_paragraphs_in_output', 999 );
