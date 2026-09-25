@@ -355,6 +355,26 @@ add_filter( 'preprocess_comment', __NAMESPACE__ . '\strip_emoji_shortcodes_from_
 add_filter( 'wp_update_comment_data', __NAMESPACE__ . '\strip_emoji_shortcodes_from_author' );
 
 /**
+ * The Newsletter plugin's `[newsletter_form]` shortcode carries its field
+ * shortcodes as multi-line inner content. wpautop runs before do_shortcode and
+ * wraps those lines, so the rendered form holds an orphan `</p>` after the
+ * hidden language input and an unclosed `<p>` before the submit button; the
+ * browser turns both into empty paragraphs (Checker: empty_paragraph_tag).
+ * The form is built from divs and never needs paragraph tags, so drop them.
+ *
+ * @param string $output Shortcode output.
+ * @param string $tag    Shortcode name.
+ * @return string
+ */
+function newsletter_form_without_autop( $output, $tag ) {
+	if ( 'newsletter_form' !== $tag || ! is_string( $output ) || false === strpos( $output, 'tnp-subscription' ) ) {
+		return $output;
+	}
+	return (string) preg_replace( '#\s*</?p>\s*#', ' ', $output );
+}
+add_filter( 'do_shortcode_tag', __NAMESPACE__ . '\newsletter_form_without_autop', 20, 2 );
+
+/**
  * The header search block renders <form role="search"> with no name, and the
  * search and 404 templates add a second one, so the two landmarks collide.
  * Name the header form after its (visually hidden) label.
