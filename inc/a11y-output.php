@@ -392,6 +392,25 @@ function drop_empty_post_excerpt( string $content ): string {
 add_filter( 'render_block_core/post-excerpt', __NAMESPACE__ . '\drop_empty_post_excerpt', 10 );
 
 /**
+ * Empty paragraphs that appear only at render time: wpautop leaves `<p></p>`
+ * around the Able Player shortcode in classic-era posts, and backfed comments
+ * end in one when the source text closed with a blank line. Nothing is lost by
+ * removing an element with no content, and the Checker reports each one.
+ * Excerpt-block emptiness is handled by drop_empty_post_excerpt().
+ *
+ * @param string $html Rendered content or comment text.
+ * @return string
+ */
+function drop_empty_paragraphs_in_output( $html ) {
+	if ( ! is_string( $html ) || false === strpos( $html, '<p' ) ) {
+		return $html;
+	}
+	return (string) preg_replace( '#<p(?:\s[^>]*)?>(?:\s|&nbsp;|\x{00a0})*</p>#u', '', $html );
+}
+add_filter( 'the_content', __NAMESPACE__ . '\drop_empty_paragraphs_in_output', 999 );
+add_filter( 'comment_text', __NAMESPACE__ . '\drop_empty_paragraphs_in_output', 999 );
+
+/**
  * The header search block renders <form role="search"> with no name, and the
  * search and 404 templates add a second one, so the two landmarks collide.
  * Name the header form after its (visually hidden) label.
