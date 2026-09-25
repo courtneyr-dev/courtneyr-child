@@ -427,14 +427,17 @@ add_filter( 'comment_text', __NAMESPACE__ . '\drop_empty_paragraphs_in_output', 
  * @param string $content Rendered block.
  * @return string
  */
-function reactions_open_in_same_tab( string $content ): string {
-	if ( false === strpos( $content, 'target="_blank"' ) ) {
+function reactions_open_in_same_tab( $content ) {
+	if ( ! is_string( $content ) || false === strpos( $content, 'target="_blank"' ) ) {
 		return $content;
 	}
 	$content = (string) preg_replace( '/\s+target="_blank"/', '', $content );
 	return (string) preg_replace( '/\s+rel="(?:\s*(?:noopener|noreferrer)\s*)+"/', '', $content );
 }
 add_filter( 'render_block_atmosphere/reactions', __NAMESPACE__ . '\reactions_open_in_same_tab', 10 );
+// OpenGraph Fallback Embed cards (pento) link their title with target="_blank" too; same policy.
+add_filter( 'embed_maybe_make_link', __NAMESPACE__ . '\reactions_open_in_same_tab', 101 );
+add_filter( 'embed_oembed_html', __NAMESPACE__ . '\reactions_open_in_same_tab', 21 );
 
 /**
  * The header search block renders <form role="search"> with no name, and the
