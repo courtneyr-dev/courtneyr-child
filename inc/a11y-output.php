@@ -375,6 +375,23 @@ function newsletter_form_without_autop( $output, $tag ) {
 add_filter( 'do_shortcode_tag', __NAMESPACE__ . '\newsletter_form_without_autop', 20, 2 );
 
 /**
+ * The archive and Stream loops print a core Post Excerpt block for every
+ * post. A note, photo or check-in without excerpt text still renders
+ * `<p class="wp-block-post-excerpt__excerpt"> </p>`, which the Checker
+ * reports as an empty paragraph. Drop the block when there is nothing to say.
+ *
+ * @param string $content Rendered block.
+ * @return string
+ */
+function drop_empty_post_excerpt( string $content ): string {
+	if ( '' === trim( wp_strip_all_tags( $content ) ) ) {
+		return '';
+	}
+	return $content;
+}
+add_filter( 'render_block_core/post-excerpt', __NAMESPACE__ . '\drop_empty_post_excerpt', 10 );
+
+/**
  * The header search block renders <form role="search"> with no name, and the
  * search and 404 templates add a second one, so the two landmarks collide.
  * Name the header form after its (visually hidden) label.
