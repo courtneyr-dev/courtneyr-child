@@ -49,7 +49,10 @@ p[style*="background-color: #eee"] > a {
    comparison table), and the global heading/link color (dark) overrode the
    cell's white — producing dark-on-cerulean (~2.8:1, fails WCAG AA). Make
    headings/links inside header cells inherit the cell's (light) color. Scoped to
-   <th> only, so normal data-cell links keep their link color. */
+   <th> only, so normal data-cell links keep their link color. Inside post content the
+   band rules (`.has-tertiary-background-color h3`, the `:where(...) a` band link) outrank
+   this; the table th rule in section (4) resolves the tokens they read to the cell's
+   own colour instead. */
 th h1, th h2, th h3, th h4, th h5, th h6,
 th a:not(.wp-element-button) {
   color: inherit;
@@ -1744,10 +1747,16 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
 	list-style: none;
 }
 
-/* Link to the YouTube page (captions, transcript) under Able Player embeds
-   that carry no caption track of their own. */
-.cr-media__transcript {
+/* Caption under Able Player embeds: the captions/transcript pointer, or the link to
+   the YouTube page when the player has no caption track. Ollie's
+   `div[class*="wp-block-"] figcaption` (0,1,2) sets figcaptions to the secondary
+   preset, 3.84:1 on the tertiary band at 13px (posts 744/751/775, 2026-09-25);
+   the qualified selector outranks it and uses the muted ink token, which the
+   token sheet pairs with every surface in both colour modes (5.1:1 on tertiary). */
+.cr-media__transcript,
+figure.cr-media figcaption.cr-media__transcript {
 	margin: 0.5rem 0 0;
+	color: var(--cr-ink-muted);
 	font-size: 0.875rem;
 }
 
@@ -2605,6 +2614,17 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 	   ink instead of the dark default — fixes WCAG contrast without a specificity
 	   war. The `th h1..h6, th a` rule above covers the no-DesignSetGo case. */
 	--dsgo-text-color: var(--cr-callout-ink);
+
+	/* The content-band rules colour nested headings and links through these tokens
+	   (`.has-tertiary-background-color h3 { color: var(--cr-ink) }`, the band link
+	   `var(--cr-band-link, ...)`, `a { color: var(--cr-link) }`), and at 0,1,1 they
+	   outrank `th h3` above. `currentColor` set on the color property means inherit,
+	   so every one of them resolves to the cell's own ink: light on cerulean here,
+	   ivory on prussian blue in dark mode. Post 551's comparison table measured
+	   2.45:1 before this (2026-09-25). */
+	--cr-ink: currentcolor;
+	--cr-band-link: currentcolor;
+	--cr-link: currentcolor;
 	font-family: var(--cr-font-accent, serif);
 	font-weight: 700;
 	text-align: left;

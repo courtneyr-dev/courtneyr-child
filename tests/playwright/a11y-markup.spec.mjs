@@ -9,6 +9,8 @@ const ABLEPLAYER_URL_POST = process.env.CR_ABLEPLAYER_URL_POST_PATH || '/?p=1053
 const COMMENTS_POST = process.env.CR_COMMENTS_POST_PATH || '/?p=38071'; // backfeed comments, incl. two with no avatar
 const QUOTE_POST = process.env.CR_QUOTE_POST_PATH || '/?p=38049'; // Syndication Links plugin output
 const BROWSE_PAGE = process.env.CR_BROWSE_ALL_PATH || '/stream/'; // cr-browse-all pattern (post_format list)
+const TABLE_POST = process.env.CR_TABLE_POST_PATH || '/?p=551'; // legacy comparison table with headings and links in <th>
+const TERM_ARCHIVE = process.env.CR_TERM_ARCHIVE_PATH || '/type/aside/'; // term archive with a description
 
 test( 'footer h-card photo is a decorative image inside the named link', async ( { page } ) => {
 	await page.goto( '/', { waitUntil: 'load' } );
@@ -86,5 +88,29 @@ test( 'post-format list links name what they link to', async ( { page } ) => {
 		const name = ( await a.textContent() )?.replace( /\s+/g, ' ' ).trim() || '';
 		expect( name.toLowerCase() ).toMatch( /\bposts$/ );
 		expect( name.toLowerCase() ).not.toBe( 'link' );
+	}
+} );
+
+test( 'headings and links inside table header cells take the cell colour', async ( { page } ) => {
+	await page.goto( TABLE_POST, { waitUntil: 'load' } );
+	const cells = page.locator( '.wp-block-post-content th, .entry-content th' );
+	expect( await cells.count() ).toBeGreaterThan( 0 );
+	for ( const th of await cells.all() ) {
+		const thColor = await th.evaluate( ( el ) => getComputedStyle( el ).color );
+		for ( const inner of await th.locator( 'h1, h2, h3, h4, h5, h6, a' ).all() ) {
+			expect( await inner.evaluate( ( el ) => getComputedStyle( el ).color ) ).toBe( thColor );
+		}
+	}
+} );
+
+test( 'term archive description stays below heading size', async ( { page } ) => {
+	// Accessibility Checker's possible_heading flags a <p> of 50 characters or fewer at 20px or more.
+	await page.goto( TERM_ARCHIVE, { waitUntil: 'load' } );
+	const lede = page.locator( '.cr-archive__description p' );
+	expect( await lede.count() ).toBeGreaterThan( 0 );
+	for ( const p of await lede.all() ) {
+		const size = parseFloat( await p.evaluate( ( el ) => getComputedStyle( el ).fontSize ) );
+		expect( size ).toBeLessThan( 20 );
+		expect( size ).toBeGreaterThanOrEqual( 16 );
 	}
 } );
