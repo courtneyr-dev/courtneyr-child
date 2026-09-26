@@ -11,6 +11,7 @@ const QUOTE_POST = process.env.CR_QUOTE_POST_PATH || '/?p=38049'; // Syndication
 const BROWSE_PAGE = process.env.CR_BROWSE_ALL_PATH || '/stream/'; // cr-browse-all pattern (post_format list)
 const TABLE_POST = process.env.CR_TABLE_POST_PATH || '/?p=551'; // legacy comparison table with headings and links in <th>
 const TERM_ARCHIVE = process.env.CR_TERM_ARCHIVE_PATH || '/type/aside/'; // term archive with a description
+const AUTOEMBED_CAPTIONED_POST = process.env.CR_AUTOEMBED_CAPTIONED_POST_PATH || '/?p=3010'; // bare YouTube URL whose video has a registered VTT (_cr_youtube_id)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
 const DARK_FIXTURES = [
 	[ process.env.CR_RESUME_PAGE_PATH || '/?page_id=37840', 'code', 'beta-rc' ], // inline code inside page content
@@ -148,4 +149,13 @@ test( 'dark mode keeps AA contrast on inline code, the success alert and highlig
 		expect( result.theme ).toBe( 'dark' );
 		expect( result.ratio, `${ selector } on ${ path }` ).toBeGreaterThanOrEqual( 4.5 );
 	}
+} );
+
+test( 'a YouTube autoembed picks up the site caption file registered for its video', async ( { page } ) => {
+	await page.goto( AUTOEMBED_CAPTIONED_POST, { waitUntil: 'load' } );
+	const player = page.locator( 'figure.cr-media--ableplayer video[data-youtube-id]' ).first();
+	await expect( player ).toHaveCount( 1 );
+	const track = player.locator( 'track[kind="captions"]' );
+	await expect( track ).toHaveCount( 1 );
+	expect( await track.getAttribute( 'src' ) ).toMatch( /\.vtt$/ );
 } );
