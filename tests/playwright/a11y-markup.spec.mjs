@@ -11,6 +11,13 @@ const QUOTE_POST = process.env.CR_QUOTE_POST_PATH || '/?p=38049'; // Syndication
 const BROWSE_PAGE = process.env.CR_BROWSE_ALL_PATH || '/stream/'; // cr-browse-all pattern (post_format list)
 const TABLE_POST = process.env.CR_TABLE_POST_PATH || '/?p=551'; // legacy comparison table with headings and links in <th>
 const TERM_ARCHIVE = process.env.CR_TERM_ARCHIVE_PATH || '/type/aside/'; // term archive with a description
+// Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
+const DARK_FIXTURES = [
+	[ process.env.CR_RESUME_PAGE_PATH || '/?page_id=37840', 'code', 'beta-rc' ], // inline code inside page content
+	[ process.env.CR_ALERT_POST_PATH || '/?p=37492', 'p.is-style-sme-alert-success', 'Disclosure' ], // SME success alert
+	[ process.env.CR_MARK_POST_PATH || '/?p=50', 'mark', 'love the Lord' ], // highlighted verse
+	[ process.env.CR_MARK_POST2_PATH || '/?p=751', 'mark', 'FREE' ], // highlighted word
+];
 
 test( 'footer h-card photo is a decorative image inside the named link', async ( { page } ) => {
 	await page.goto( '/', { waitUntil: 'load' } );
@@ -116,5 +123,28 @@ test( 'term archive description stays below heading size', async ( { page } ) =>
 		const size = parseFloat( await p.evaluate( ( el ) => getComputedStyle( el ).fontSize ) );
 		expect( size ).toBeLessThan( 20 );
 		expect( size ).toBeGreaterThanOrEqual( 16 );
+	}
+} );
+
+test( 'dark mode keeps AA contrast on inline code, the success alert and highlights', async ( { page } ) => {
+	// The theme toggle reads localStorage before paint; force Dark regardless of the project's colour scheme.
+	await page.addInitScript( () => { try { localStorage.setItem( 'courtneyr-theme', 'dark' ); } catch ( e ) {} } );
+	for ( const [ path, selector, text ] of DARK_FIXTURES ) {
+		await page.goto( path, { waitUntil: 'load' } );
+		await page.evaluate( () => Promise.all( document.getAnimations().map( ( a ) => a.finished ) ) );
+		const result = await page.evaluate( ( [ sel, needle ] ) => {
+			const el = [ ...document.querySelectorAll( sel ) ].find( ( e ) => e.textContent.includes( needle ) );
+			if ( ! el ) { return { missing: true }; }
+			const channels = ( c ) => c.match( /\d+(\.\d+)?/g ).slice( 0, 3 ).map( Number );
+			const lum = ( c ) => { const [ r, g, b ] = channels( c ).map( ( v ) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow( ( v + 0.055 ) / 1.055, 2.4 ); } ); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+			let node = el, bg = null;
+			while ( node && node !== document.documentElement ) { const c = getComputedStyle( node ).backgroundColor; if ( c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent' ) { bg = c; break; } node = node.parentElement; }
+			if ( ! bg ) { return { missing: false, noBackground: true }; }
+			const l1 = lum( getComputedStyle( el ).color ), l2 = lum( bg );
+			return { theme: document.documentElement.getAttribute( 'data-theme' ), ratio: ( Math.max( l1, l2 ) + 0.05 ) / ( Math.min( l1, l2 ) + 0.05 ) };
+		}, [ selector, text ] );
+		expect( result.missing, `${ selector } on ${ path }` ).toBe( false );
+		expect( result.theme ).toBe( 'dark' );
+		expect( result.ratio, `${ selector } on ${ path }` ).toBeGreaterThanOrEqual( 4.5 );
 	}
 } );
