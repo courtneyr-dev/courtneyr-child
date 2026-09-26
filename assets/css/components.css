@@ -2136,11 +2136,15 @@ section.alignfull,
    leaving us with russian-violet text on a russian-violet-tinted bg
    (or worse, the parent theme's peach `<code>` default), which fails
    readability. Force the design-system dark code tokens in all three
-   dark-mode paths (explicit, system-via-not, and prefers media). */
+   dark-mode paths (explicit, system-via-not, and prefers media).
+   `.entry-content code` covers page templates (.cr-page__content) too: the
+   Resume page's inline <code> measured periwinkle on Ollie's tertiary
+   background at 1.55:1 in dark mode (2026-09-25). */
 :root[data-theme="dark"] .has-tertiary-background-color code,
 :root[data-theme="dark"] .has-main-accent-background-color code,
 :root[data-theme="dark"] .related-posts code,
-:root[data-theme="dark"] .single-post__comments-wrapper code {
+:root[data-theme="dark"] .single-post__comments-wrapper code,
+:root[data-theme="dark"] .entry-content code {
 	color: var(--cr-code-ink, var(--cr-periwinkle, #d4cfeb)) !important;
 	background: var(--cr-code-bg, #2a2520) !important;
 }
@@ -2152,7 +2156,9 @@ section.alignfull,
 	:root[data-theme="system"] .has-tertiary-background-color code,
 	:root[data-theme="system"] .has-main-accent-background-color code,
 	:root[data-theme="system"] .related-posts code,
-	:root[data-theme="system"] .single-post__comments-wrapper code {
+	:root[data-theme="system"] .single-post__comments-wrapper code,
+	:root:not([data-theme]) .entry-content code,
+	:root[data-theme="system"] .entry-content code {
 		color: var(--cr-code-ink, var(--cr-periwinkle, #d4cfeb)) !important;
 		background: var(--cr-code-bg, #2a2520) !important;
 	}
@@ -8113,6 +8119,10 @@ body.single-format-video main.single-post   { background-color: var(--cr-type-vi
    (D) Able Player transcript ships a fixed white bg → flip to a dark surface + light text. */
 :root[data-theme="dark"] .is-style-sme-alert-success {
 	background: color-mix(in srgb, #5fa052 20%, var(--cr-night-elevated, #251f1c)) !important;
+
+	/* The alert keeps its light-mode --sme-alert--color (dark green) through the
+	   broad ivory rule, 1.56:1 on the dark-green bg (post 37492, 2026-09-25). */
+	color: var(--cr-printer-ivory, #fbfaf5) !important;
 }
 :root[data-theme="dark"] .wp-block-post-content mark,
 :root[data-theme="dark"] .entry-content mark {
@@ -8140,6 +8150,7 @@ body.single-format-video main.single-post   { background-color: var(--cr-type-vi
 	:root:not([data-theme]) .is-style-sme-alert-success,
 	:root[data-theme="system"] .is-style-sme-alert-success {
 		background: color-mix(in srgb, #5fa052 20%, var(--cr-night-elevated, #251f1c)) !important;
+		color: var(--cr-printer-ivory, #fbfaf5) !important;
 	}
 	:root:not([data-theme]) .wp-block-post-content mark,
 	:root[data-theme="system"] .wp-block-post-content mark,
