@@ -93,6 +93,10 @@ test( 'post-format list links name what they link to', async ( { page } ) => {
 
 test( 'headings and links inside table header cells take the cell colour', async ( { page } ) => {
 	await page.goto( TABLE_POST, { waitUntil: 'load' } );
+	// Links transition their colour when the component sheet applies after the token sheet;
+	// read the settled values, not a frame from the 200 ms transition.
+	await page.evaluate( () => Promise.all( document.getAnimations().map( ( a ) => a.finished ) ) );
+	await page.waitForTimeout( 400 );
 	const cells = page.locator( '.wp-block-post-content th, .entry-content th' );
 	expect( await cells.count() ).toBeGreaterThan( 0 );
 	for ( const th of await cells.all() ) {
