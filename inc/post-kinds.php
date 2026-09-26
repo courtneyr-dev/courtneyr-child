@@ -15,6 +15,12 @@
  * Everything falls back to the default embed whenever Able Player is inactive
  * or the URL isn't YouTube, so nothing breaks without Able Player.
  *
+ * Caption files: a WebVTT attachment whose `_cr_youtube_id` meta holds the
+ * video's 11-character ID is attached to every player for that video (embed
+ * blocks, bare-URL autoembeds and cards without their own file), so captions and
+ * the interactive transcript come from the site's own track rather than
+ * YouTube's auto-generated one.
+ *
  * @package CourtneyrChild
  */
 
@@ -45,6 +51,44 @@ function ableplayer_youtube( string $youtube_id, string $captions = '' ): string
 			$captions_attr
 		)
 	);
+}
+
+/**
+ * Find the site's WebVTT caption file for a YouTube video.
+ *
+ * Looks up a `text/vtt` attachment whose `_cr_youtube_id` meta equals the video
+ * ID. Set the meta when importing a caption file (see the remediation tools'
+ * import-captions.sh). Memoised per request; one query per distinct video.
+ *
+ * @param string $youtube_id 11-character YouTube video ID.
+ * @return string Attachment ID as a string, or '' when no file is registered.
+ */
+function captions_for_youtube_id( string $youtube_id ): string {
+	static $cache = array();
+
+	if ( '' === $youtube_id ) {
+		return '';
+	}
+	if ( isset( $cache[ $youtube_id ] ) ) {
+		return $cache[ $youtube_id ];
+	}
+
+	$ids = get_posts(
+		array(
+			'post_type'      => 'attachment',
+			'post_status'    => 'inherit',
+			'post_mime_type' => 'text/vtt',
+			'posts_per_page' => 1,
+			'fields'         => 'ids',
+			'meta_key'       => '_cr_youtube_id', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value'     => $youtube_id, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			'no_found_rows'  => true,
+		)
+	);
+
+	$cache[ $youtube_id ] = empty( $ids ) ? '' : (string) $ids[0];
+
+	return $cache[ $youtube_id ];
 }
 
 /**
@@ -102,7 +146,7 @@ function card_embed( $pre, $url, $kind, $context = array() ) {
 
 	$captions = ( isset( $context['captions'] ) && is_string( $context['captions'] ) )
 		? $context['captions']
-		: '';
+		: captions_for_youtube_id( $youtube_id );
 
 	return ableplayer_youtube( $youtube_id, $captions );
 }
@@ -111,8 +155,9 @@ add_filter( 'pkiw_card_embed_html', __NAMESPACE__ . '\\card_embed', 10, 4 );
 /**
  * Render core Embed blocks (wp:embed) that point at YouTube through Able Player.
  *
- * Core embeds carry no caption file, so this gives the accessible player plus
- * YouTube's own captions. For a local VTT transcript, use the watch card.
+ * Core embeds carry no caption file of their own; the site's registered WebVTT
+ * for the video (captions_for_youtube_id) is attached when one exists, otherwise
+ * the player falls back to YouTube's own captions.
  *
  * @param string $content The block's rendered HTML.
  * @param array  $block   The parsed block (blockName, attrs, …).
@@ -139,7 +184,7 @@ function embed_block( $content, $block ) {
 		return $content;
 	}
 
-	return ableplayer_youtube( $youtube_id );
+	return ableplayer_youtube( $youtube_id, captions_for_youtube_id( $youtube_id ) );
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\embed_block', 10, 2 );
 
@@ -169,7 +214,7 @@ function oembed_html( $html, $url ) {
 		return $html;
 	}
 
-	return ableplayer_youtube( $youtube_id );
+	return ableplayer_youtube( $youtube_id, captions_for_youtube_id( $youtube_id ) );
 }
 add_filter( 'embed_oembed_html', __NAMESPACE__ . '\\oembed_html', 10, 2 );
 
