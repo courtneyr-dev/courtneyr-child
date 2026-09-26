@@ -38,10 +38,15 @@ test( 'Able Player YouTube players carry the captions/transcript link', async ( 
 	const players = page.locator( '[data-youtube-id], iframe[id^="able_player_"][id$="_youtube"]' );
 	const count = await players.count();
 	expect( count, 'fixture post renders at least one Able Player YouTube player' ).toBeGreaterThan( 0 );
-	const links = page.locator( '.cr-media__transcript a[href*="youtube.com/watch?v="]' );
-	expect( await links.count() ).toBeGreaterThanOrEqual( count );
-	for ( const text of await links.allTextContents() ) {
-		expect( text.toLowerCase() ).toContain( 'transcript' );
+	// Each player gets a figcaption: the in-player captions/transcript note when the video has a
+	// caption file (shortcode attribute or a registered _cr_youtube_id VTT), else the YouTube link.
+	const captions = page.locator( 'figure.cr-media--ableplayer figcaption.cr-media__transcript' );
+	expect( await captions.count() ).toBeGreaterThanOrEqual( count );
+	for ( const caption of await captions.all() ) {
+		expect( ( await caption.textContent() )?.toLowerCase() ).toContain( 'transcript' );
+		for ( const href of await caption.locator( 'a' ).evaluateAll( ( as ) => as.map( ( a ) => a.href ) ) ) {
+			expect( href ).toMatch( /^https:\/\/www\.youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}$/ );
+		}
 	}
 } );
 
@@ -152,10 +157,14 @@ test( 'dark mode keeps AA contrast on inline code, the success alert and highlig
 } );
 
 test( 'a YouTube autoembed picks up the site caption file registered for its video', async ( { page } ) => {
+	// Able Player replaces the <video> (and its <track>) with a YouTube iframe at init, so read the
+	// server markup rather than the live DOM.
+	const html = await ( await page.request.get( AUTOEMBED_CAPTIONED_POST ) ).text();
+	const figure = html.match( /<figure class="cr-media cr-media--ableplayer">[\s\S]*?<\/figure>/ );
+	expect( figure, 'fixture post renders an Able Player figure' ).not.toBeNull();
+	const track = figure[ 0 ].match( /<track\b[^>]*\bkind="captions"[^>]*\bsrc="([^"]+)"/ ) || figure[ 0 ].match( /<track\b[^>]*\bsrc="([^"]+)"[^>]*\bkind="captions"/ );
+	expect( track, 'the player carries a captions track' ).not.toBeNull();
+	expect( track[ 1 ] ).toMatch( /\.vtt$/ );
 	await page.goto( AUTOEMBED_CAPTIONED_POST, { waitUntil: 'load' } );
-	const player = page.locator( 'figure.cr-media--ableplayer video[data-youtube-id]' ).first();
-	await expect( player ).toHaveCount( 1 );
-	const track = player.locator( 'track[kind="captions"]' );
-	await expect( track ).toHaveCount( 1 );
-	expect( await track.getAttribute( 'src' ) ).toMatch( /\.vtt$/ );
+	await expect( page.locator( 'figure.cr-media--ableplayer figcaption.cr-media__transcript' ).first() ).toContainText( /transcript/i );
 } );
