@@ -143,7 +143,8 @@ test( 'dark mode keeps AA contrast on inline code, the success alert and highlig
 			const l1 = lum( getComputedStyle( el ).color ), l2 = lum( bg );
 			return { theme: document.documentElement.getAttribute( 'data-theme' ), ratio: ( Math.max( l1, l2 ) + 0.05 ) / ( Math.min( l1, l2 ) + 0.05 ) };
 		}, [ selector, text ] );
-		expect( result.missing, `${ selector } on ${ path }` ).toBe( false );
+		expect( result.missing, `${ selector } on ${ path }` ).toBeFalsy();
+		expect( result.noBackground, `${ selector } on ${ path }` ).toBeFalsy();
 		expect( result.theme ).toBe( 'dark' );
 		expect( result.ratio, `${ selector } on ${ path }` ).toBeGreaterThanOrEqual( 4.5 );
 	}
