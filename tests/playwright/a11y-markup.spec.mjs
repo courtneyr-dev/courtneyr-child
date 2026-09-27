@@ -11,7 +11,7 @@ const QUOTE_POST = process.env.CR_QUOTE_POST_PATH || '/?p=38049'; // Syndication
 const BROWSE_PAGE = process.env.CR_BROWSE_ALL_PATH || '/stream/'; // cr-browse-all pattern (post_format list)
 const TABLE_POST = process.env.CR_TABLE_POST_PATH || '/?p=551'; // legacy comparison table with headings and links in <th>
 const TERM_ARCHIVE = process.env.CR_TERM_ARCHIVE_PATH || '/type/aside/'; // term archive with a description
-const CUTOUT_ARCHIVES = ( process.env.CR_CUTOUT_ARCHIVE_PATHS || '/kind/mood/,/type/aside/,/?s=wordpress' ).split( ',' ); // cut-paper archive titles
+const CUTOUT_ARCHIVES = ( process.env.CR_CUTOUT_ARCHIVE_PATHS || '/kind/mood/,/type/aside/,/?s=wordpress,/stream/' ).split( ',' ); // cut-paper archive titles
 const AUTOEMBED_CAPTIONED_POST = process.env.CR_AUTOEMBED_CAPTIONED_POST_PATH || '/?p=3010'; // bare YouTube URL whose video has a registered VTT (_cr_youtube_id)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
 const DARK_FIXTURES = [
@@ -187,6 +187,11 @@ test( 'archive titles are one h1 named by the exact title, with aria-hidden per-
 		expect( glyphs, path ).toEqual( graphemes );
 		expect( await h1.locator( 'a, button, input, [tabindex]' ).count(), path ).toBe( 0 );
 	}
+	// The front page has exactly one: the Field notes heading, still an h2 named by its text.
 	await page.goto( '/', { waitUntil: 'load' } );
-	expect( await page.locator( '.cr-cutout' ).count(), 'front page has no cut-paper title' ).toBe( 0 );
+	const cut = page.locator( '.cr-cutout' );
+	await expect( cut ).toHaveCount( 1 );
+	await expect( cut ).toHaveClass( /cr-fieldnotes__title/ );
+	expect( await cut.evaluate( ( el ) => el.tagName ) ).toBe( 'H2' );
+	await expect( cut ).toHaveAccessibleName( ( await cut.locator( '.cr-cutout__text' ).textContent() )?.trim() );
 } );

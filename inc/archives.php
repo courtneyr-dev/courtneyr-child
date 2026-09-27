@@ -285,20 +285,29 @@ function cutout_heading( string $html ): string {
 /**
  * Archive titles print as cut-paper titles: the query-title block that the
  * archive-family templates mark `cr-archive__title` (categories, tags, dates,
- * formats, kinds, Stories, search) and the posts page's `cr-blog__title`
- * masthead. Front end only; the front page never matches.
+ * formats, kinds, Stories, search), the posts page's `cr-blog__title`
+ * masthead, the Stream page's `cr-stream__title` masthead and the front
+ * page's `cr-fieldnotes__title` heading. The last two live in page content or
+ * a pattern and are matched by class, so content stays untouched. Nothing
+ * else on the front page matches. Front end only.
  *
  * @param string $content Rendered block.
  * @param array  $block   Parsed block.
  */
 function cutout_archive_title( string $content, array $block ): string {
-	if ( is_admin() || wp_is_serving_rest_request() || is_front_page() ) {
+	if ( is_admin() || wp_is_serving_rest_request() ) {
 		return $content;
 	}
-	$classes          = explode( ' ', (string) ( $block['attrs']['className'] ?? '' ) );
-	$is_archive_title = 'core/query-title' === $block['blockName'] && in_array( 'cr-archive__title', $classes, true );
-	$is_blog_title    = 'core/heading' === $block['blockName'] && in_array( 'cr-blog__title', $classes, true ) && is_home();
-	if ( ! $is_archive_title && ! $is_blog_title ) {
+	$classes    = explode( ' ', (string) ( $block['attrs']['className'] ?? '' ) );
+	$is_heading = 'core/heading' === $block['blockName'];
+	if ( is_front_page() ) {
+		$match = $is_heading && in_array( 'cr-fieldnotes__title', $classes, true );
+	} else {
+		$match = ( 'core/query-title' === $block['blockName'] && in_array( 'cr-archive__title', $classes, true ) )
+			|| ( $is_heading && in_array( 'cr-blog__title', $classes, true ) && is_home() )
+			|| ( $is_heading && in_array( 'cr-stream__title', $classes, true ) && is_page( 'stream' ) );
+	}
+	if ( ! $match ) {
 		return $content;
 	}
 	return cutout_heading( $content );
@@ -332,6 +341,23 @@ function enqueue_styles(): void {
 	);
 }
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_styles' );
+
+/**
+ * Cut-paper title stylesheet: everywhere cutout_archive_title() can match
+ * (archives, search, posts page, Stream page, front page) and the editor.
+ */
+function enqueue_cutout_styles(): void {
+	if ( ! is_admin() && ! is_archive() && ! is_search() && ! is_home() && ! is_front_page() && ! is_page( 'stream' ) ) {
+		return;
+	}
+	wp_enqueue_style(
+		'courtneyr-cutout',
+		COURTNEYR_CHILD_URI . '/assets/css/cr-cutout.css',
+		array(),
+		COURTNEYR_CHILD_VERSION
+	);
+}
+add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_cutout_styles' );
 
 /**
  * The Stories archive is theme-rendered (poster grid, playback on the story
