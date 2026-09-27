@@ -149,6 +149,163 @@ function resolve_identity(): array {
 	);
 }
 
+/** Tile papers in cr-archives.css; strides are coprime so neighbours never repeat. */
+const CUTOUT_PAPERS = 11;
+const CUTOUT_VOICES = 4;
+const CUTOUT_TILTS  = 4;
+const CUTOUT_EDGES  = 5;
+
+/**
+ * Split plain text into grapheme clusters (not bytes, not code points).
+ *
+ * @param string $text Plain text.
+ * @return string[]
+ */
+function graphemes( string $text ): array {
+	if ( function_exists( 'grapheme_str_split' ) ) {
+		$parts = grapheme_str_split( $text );
+		if ( is_array( $parts ) ) {
+			return $parts;
+		}
+	}
+	// Plain text, not HTML: \X is PCRE's extended grapheme cluster.
+	return preg_match_all( '/\X/u', $text, $m ) ? $m[0] : array();
+}
+
+/**
+ * The visual per-letter title: one torn-paper tile per grapheme, words kept
+ * together so lines break only at spaces. Style indexes come from the title's
+ * crc32 and the tile position, so the same title always prints the same way.
+ * Decorative: the caller pairs it with the unchanged title as text.
+ *
+ * @param string $title Exact title text.
+ * @return array{html:string,longest:int}
+ */
+function cutout_tiles( string $title ): array {
+	$seed    = crc32( $title );
+	$words   = array();
+	$word    = '';
+	$letters = 0;
+	$longest = 0;
+	$i       = 0;
+	foreach ( graphemes( $title ) as $g ) {
+		if ( preg_match( '/^[\s\x{00A0}]+$/u', $g ) ) {
+			if ( '' !== $word ) {
+				$words[] = $word;
+				$longest = max( $longest, $letters );
+			}
+			$word    = '';
+			$letters = 0;
+			continue;
+		}
+		$voice = ( ( $seed >> 4 ) + $i * 3 ) % CUTOUT_VOICES;
+		// Rock Salt draws i, j, l and thin marks as slivers; those take the slab voice.
+		if ( 0 === $voice && preg_match( '/^[ijlI1|!.,:;\'’‘`]$/u', $g ) ) {
+			$voice = 1;
+		}
+		$classes = sprintf(
+			'cr-cutout__tile is-p%d is-v%d is-r%d is-e%d',
+			( $seed + $i * 5 ) % CUTOUT_PAPERS,
+			$voice,
+			( ( $seed >> 8 ) + $i + intdiv( $i, 3 ) ) % CUTOUT_TILTS,
+			( ( $seed >> 12 ) + $i * 2 ) % CUTOUT_EDGES
+		);
+		if ( preg_match( '/^[\p{P}\p{S}]/u', $g ) ) {
+			$classes .= ' is-punct';
+		}
+		$word .= '<span class="' . esc_attr( $classes ) . '"><span class="cr-cutout__paper"></span>' . esc_html( $g ) . '</span>';
+		++$letters;
+		++$i;
+	}
+	if ( '' !== $word ) {
+		$words[] = $word;
+		$longest = max( $longest, $letters );
+	}
+	$html = implode(
+		'<span class="cr-cutout__gap"> </span>',
+		array_map( static fn( $w ) => '<span class="cr-cutout__word">' . $w . '</span>', $words )
+	);
+	return array(
+		'html'    => $html,
+		'longest' => max( 1, $longest ),
+	);
+}
+
+/**
+ * Rebuild a rendered heading as a cut-paper title. The heading keeps its tag
+ * and every attribute; its text becomes one screen-reader-only copy of the
+ * exact title plus an aria-hidden tile layer. Anything that is not a heading
+ * with text comes back unchanged.
+ *
+ * @param string $html Rendered heading markup.
+ */
+function cutout_heading( string $html ): string {
+	if ( ! class_exists( '\WP_HTML_Processor' ) ) {
+		return $html;
+	}
+	$p = \WP_HTML_Processor::create_fragment( $html );
+	if ( ! $p || ! $p->next_tag() || ! in_array( $p->get_tag(), array( 'H1', 'H2' ), true ) ) {
+		return $html;
+	}
+	$tag   = strtolower( (string) $p->get_tag() );
+	$attrs = array();
+	foreach ( (array) $p->get_attribute_names_with_prefix( '' ) as $name ) {
+		$attrs[ $name ] = $p->get_attribute( $name );
+	}
+	$text = '';
+	while ( $p->next_token() ) {
+		if ( '#tag' === $p->get_token_type() && strtolower( (string) $p->get_tag() ) === $tag && $p->is_tag_closer() ) {
+			break;
+		}
+		if ( '#text' === $p->get_token_type() ) {
+			$text .= $p->get_modifiable_text();
+		}
+	}
+	$title = trim( $text );
+	if ( '' === $title || null !== $p->get_last_error() ) {
+		return $html;
+	}
+	$tiles = cutout_tiles( $title );
+
+	$attrs['class'] = trim( ( is_string( $attrs['class'] ?? null ) ? $attrs['class'] : '' ) . ' cr-cutout' );
+	$attrs['style'] = ( is_string( $attrs['style'] ?? null ) && '' !== trim( $attrs['style'] ) ? rtrim( trim( $attrs['style'] ), ';' ) . ';' : '' ) . '--cr-cutout-longest:' . $tiles['longest'];
+	$open           = '';
+	foreach ( $attrs as $name => $value ) {
+		$open .= true === $value ? ' ' . esc_attr( $name ) : sprintf( ' %s="%s"', esc_attr( $name ), esc_attr( (string) $value ) );
+	}
+	return sprintf(
+		'<%1$s%2$s><span class="cr-cutout__text">%3$s</span><span class="cr-cutout__tiles" aria-hidden="true">%4$s</span></%1$s>',
+		$tag,
+		$open,
+		esc_html( $title ),
+		$tiles['html'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_html'd graphemes and fixed class names.
+	);
+}
+
+/**
+ * Archive titles print as cut-paper titles: the query-title block that the
+ * archive-family templates mark `cr-archive__title` (categories, tags, dates,
+ * formats, kinds, Stories, search) and the posts page's `cr-blog__title`
+ * masthead. Front end only; the front page never matches.
+ *
+ * @param string $content Rendered block.
+ * @param array  $block   Parsed block.
+ */
+function cutout_archive_title( string $content, array $block ): string {
+	if ( is_admin() || wp_is_serving_rest_request() || is_front_page() ) {
+		return $content;
+	}
+	$classes          = explode( ' ', (string) ( $block['attrs']['className'] ?? '' ) );
+	$is_archive_title = 'core/query-title' === $block['blockName'] && in_array( 'cr-archive__title', $classes, true );
+	$is_blog_title    = 'core/heading' === $block['blockName'] && in_array( 'cr-blog__title', $classes, true ) && is_home();
+	if ( ! $is_archive_title && ! $is_blog_title ) {
+		return $content;
+	}
+	return cutout_heading( $content );
+}
+add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\\cutout_archive_title', 10, 2 );
+add_filter( 'render_block_core/heading', __NAMESPACE__ . '\\cutout_archive_title', 10, 2 );
+
 /**
  * Register the identity block.
  */
@@ -158,11 +315,13 @@ function register_blocks(): void {
 add_action( 'init', __NAMESPACE__ . '\\register_blocks' );
 
 /**
- * Archive-family stylesheet: front end on archives, search and the Stream
- * page; always in the editor canvas (enqueue_block_assets runs there).
+ * Archive-family stylesheet: front end on archives, search, the posts page
+ * (never when it is also the front page) and the Stream page; always in the
+ * editor canvas (enqueue_block_assets runs there).
  */
 function enqueue_styles(): void {
-	if ( ! is_admin() && ! is_archive() && ! is_search() && ! is_page( 'stream' ) ) {
+	$posts_page = is_home() && ! is_front_page();
+	if ( ! is_admin() && ! is_archive() && ! is_search() && ! $posts_page && ! is_page( 'stream' ) ) {
 		return;
 	}
 	wp_enqueue_style(

@@ -11,6 +11,7 @@ const QUOTE_POST = process.env.CR_QUOTE_POST_PATH || '/?p=38049'; // Syndication
 const BROWSE_PAGE = process.env.CR_BROWSE_ALL_PATH || '/stream/'; // cr-browse-all pattern (post_format list)
 const TABLE_POST = process.env.CR_TABLE_POST_PATH || '/?p=551'; // legacy comparison table with headings and links in <th>
 const TERM_ARCHIVE = process.env.CR_TERM_ARCHIVE_PATH || '/type/aside/'; // term archive with a description
+const CUTOUT_ARCHIVES = ( process.env.CR_CUTOUT_ARCHIVE_PATHS || '/kind/mood/,/type/aside/,/?s=wordpress' ).split( ',' ); // cut-paper archive titles
 const AUTOEMBED_CAPTIONED_POST = process.env.CR_AUTOEMBED_CAPTIONED_POST_PATH || '/?p=3010'; // bare YouTube URL whose video has a registered VTT (_cr_youtube_id)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
 const DARK_FIXTURES = [
@@ -167,4 +168,25 @@ test( 'a YouTube autoembed picks up the site caption file registered for its vid
 	expect( track[ 1 ] ).toMatch( /\.vtt$/ );
 	await page.goto( AUTOEMBED_CAPTIONED_POST, { waitUntil: 'load' } );
 	await expect( page.locator( 'figure.cr-media--ableplayer figcaption.cr-media__transcript' ).first() ).toContainText( /transcript/i );
+} );
+
+test( 'archive titles are one h1 named by the exact title, with aria-hidden per-letter tiles', async ( { page } ) => {
+	for ( const path of CUTOUT_ARCHIVES ) {
+		await page.goto( path, { waitUntil: 'load' } );
+		const h1 = page.locator( 'h1' );
+		await expect( h1, path ).toHaveCount( 1 );
+		await expect( h1, path ).toHaveClass( /cr-cutout/ );
+		const title = ( await h1.locator( '.cr-cutout__text' ).textContent() )?.trim();
+		expect( title?.length, path ).toBeGreaterThan( 0 );
+		// The accessible name is the title alone: no tile letters, no flank sparkles.
+		await expect( h1, path ).toHaveAccessibleName( title );
+		await expect( h1.locator( '.cr-cutout__tiles' ), path ).toHaveAttribute( 'aria-hidden', 'true' );
+		// One tile per non-space grapheme, in order.
+		const glyphs = await h1.locator( '.cr-cutout__tile' ).allTextContents();
+		const graphemes = [ ...new Intl.Segmenter().segment( title.replace( /\s+/g, '' ) ) ].map( ( g ) => g.segment );
+		expect( glyphs, path ).toEqual( graphemes );
+		expect( await h1.locator( 'a, button, input, [tabindex]' ).count(), path ).toBe( 0 );
+	}
+	await page.goto( '/', { waitUntil: 'load' } );
+	expect( await page.locator( '.cr-cutout' ).count(), 'front page has no cut-paper title' ).toBe( 0 );
 } );
