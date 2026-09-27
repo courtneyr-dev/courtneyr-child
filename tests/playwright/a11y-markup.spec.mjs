@@ -195,3 +195,19 @@ test( 'archive titles are one h1 named by the exact title, with aria-hidden per-
 	expect( await cut.evaluate( ( el ) => el.tagName ) ).toBe( 'H2' );
 	await expect( cut ).toHaveAccessibleName( ( await cut.locator( '.cr-cutout__text' ).textContent() )?.trim() );
 } );
+
+test( 'homepage lane titles lead with the same emoji as their nav links', async ( { page } ) => {
+	await page.goto( '/', { waitUntil: 'load' } );
+	const firstGrapheme = ( s ) => [ ...new Intl.Segmenter().segment( s.trim() ) ][ 0 ]?.segment;
+	for ( const [ lane, path, word ] of [ [ 'blog', '/blog/', 'Blog' ], [ 'stream', '/stream/', 'Stream' ] ] ) {
+		const navLabel = await page.locator( `header a[href$="${ path }"]` ).first().textContent( { timeout: 5000 } );
+		const navEmoji = firstGrapheme( navLabel );
+		const title = page.locator( `.cr-fieldnotes__lane-title--${ lane }` );
+		const glyph = title.locator( '.cr-fieldnotes__lane-glyph' );
+		await expect( glyph, lane ).toHaveCount( 1 );
+		await expect( glyph, lane ).toBeVisible();
+		await expect( glyph, lane ).toHaveAttribute( 'aria-hidden', 'true' );
+		expect( ( await glyph.textContent() )?.trim(), `${ lane } glyph matches nav "${ navLabel }"` ).toBe( navEmoji );
+		await expect( title, lane ).toHaveAccessibleName( word );
+	}
+} );

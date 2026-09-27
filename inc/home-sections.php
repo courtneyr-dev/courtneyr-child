@@ -333,3 +333,74 @@ function restrict_block_locking( array $settings ): array {
 	return $settings;
 }
 add_filter( 'block_editor_settings_all', __NAMESPACE__ . '\\restrict_block_locking' );
+
+/**
+ * The Field notes lane titles lead with the same emoji as their nav links
+ * (📰 Blog, 🌊 Stream). Printed in the markup, not as CSS ::before content:
+ * Perfmatters' used-CSS cache kept serving an old rule that hides every
+ * homepage heading's ::before, and each stale cache dropped the emoji again.
+ * The lane headings live in the front page's content, so they are matched by
+ * class and the content stays untouched. tests/playwright/a11y-markup.spec.mjs
+ * fails when a lane glyph and its nav label's emoji differ.
+ */
+const LANE_GLYPHS = array(
+	'cr-fieldnotes__lane-title--blog'   => '📰',
+	'cr-fieldnotes__lane-title--stream' => '🌊',
+);
+
+/**
+ * Prepend the lane's nav emoji, aria-hidden so the heading's name stays the
+ * lane word. Anything but a heading holding plain text comes back unchanged.
+ *
+ * @param string $content Rendered block.
+ * @param array  $block   Parsed block.
+ */
+function lane_title_glyph( string $content, array $block ): string {
+	if ( is_admin() || wp_is_serving_rest_request() || ! is_front_page() ) {
+		return $content;
+	}
+	$classes = explode( ' ', (string) ( $block['attrs']['className'] ?? '' ) );
+	$glyph   = '';
+	foreach ( LANE_GLYPHS as $class => $emoji ) {
+		if ( in_array( $class, $classes, true ) ) {
+			$glyph = $emoji;
+		}
+	}
+	if ( '' === $glyph || ! class_exists( '\WP_HTML_Processor' ) ) {
+		return $content;
+	}
+	$p = \WP_HTML_Processor::create_fragment( $content );
+	if ( ! $p || ! $p->next_tag() || ! in_array( $p->get_tag(), array( 'H1', 'H2', 'H3' ), true ) ) {
+		return $content;
+	}
+	$tag   = strtolower( (string) $p->get_tag() );
+	$attrs = array();
+	foreach ( (array) $p->get_attribute_names_with_prefix( '' ) as $name ) {
+		$attrs[ $name ] = $p->get_attribute( $name );
+	}
+	$text = '';
+	while ( $p->next_token() ) {
+		if ( '#tag' === $p->get_token_type() && strtolower( (string) $p->get_tag() ) === $tag && $p->is_tag_closer() ) {
+			break;
+		}
+		if ( '#text' !== $p->get_token_type() ) {
+			return $content;
+		}
+		$text .= $p->get_modifiable_text();
+	}
+	if ( '' === trim( $text ) || null !== $p->get_last_error() ) {
+		return $content;
+	}
+	$open = '';
+	foreach ( $attrs as $name => $value ) {
+		$open .= true === $value ? ' ' . esc_attr( $name ) : sprintf( ' %s="%s"', esc_attr( $name ), esc_attr( (string) $value ) );
+	}
+	return sprintf(
+		'<%1$s%2$s><span class="cr-fieldnotes__lane-glyph" aria-hidden="true">%3$s</span>%4$s</%1$s>',
+		$tag,
+		$open,
+		esc_html( $glyph ),
+		esc_html( trim( $text ) )
+	);
+}
+add_filter( 'render_block_core/heading', __NAMESPACE__ . '\\lane_title_glyph', 10, 2 );
