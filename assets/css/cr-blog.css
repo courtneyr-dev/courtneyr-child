@@ -278,48 +278,8 @@ body.blog:not(.paged) .cr-blog .post-grid > li:first-child .card::after {
 	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
 }
 
-/* =============================================================================
-   Pagination — style core query-pagination to the design's .pager look
-   ============================================================================= */
-.cr-blog .wp-block-query-pagination {
-	max-width: 72rem;
-	margin: var(--cr-space-3xl) auto var(--cr-space-2xl);
-	display: flex;
-	gap: var(--cr-space-sm);
-	align-items: center;
-	justify-content: center;
-	flex-wrap: wrap;
-}
-.cr-blog .wp-block-query-pagination .wp-block-query-pagination-numbers { display: flex; gap: var(--cr-space-sm); flex-wrap: wrap; }
-.cr-blog .wp-block-query-pagination a,
-.cr-blog .wp-block-query-pagination .page-numbers {
-	font-family: var(--cr-font-accent);
-	font-weight: var(--cr-weight-extrabold, 800);
-	font-size: var(--cr-text-md);
-	min-width: 2.75rem;
-	text-align: center;
-	border: var(--cr-border-thick);
-	padding: var(--cr-space-xs) var(--cr-space-md);
-	text-decoration: none;
-	color: var(--cr-ink);
-	background: var(--cr-surface-elevated);
-	box-shadow: 3px 3px 0 var(--cr-ink);
-	transition: transform 80ms var(--cr-ease-out, ease), box-shadow 80ms var(--cr-ease-out, ease);
-}
-.cr-blog .wp-block-query-pagination a:hover {
-	transform: translate(-1px, -1px);
-	box-shadow: 4px 4px 0 var(--cr-ink);
-}
-.cr-blog .wp-block-query-pagination .page-numbers.current {
-	background: var(--cr-marker);
-	color: var(--cr-cta-ink);
-}
-.cr-blog .wp-block-query-pagination .page-numbers.dots {
-	border: 0;
-	box-shadow: none;
-	background: transparent;
-	min-width: 0;
-}
+/* Pagination: assets/css/cr-nav.css (shared with every archive and the single
+   post's Previous/Next). */
 
 /* =============================================================================
    Find me elsewhere

@@ -1,0 +1,172 @@
+/* ============================================================
+   Shared navigation chips — archive pagination and single-post
+   Previous/Next (PKIW #233, v0.7.70).
+
+   One look for both controls: an outlined paper chip with a thick
+   ink border, the elevated surface, a 3px hard offset shadow, and
+   Roboto Slab. Hover and keyboard focus lift the chip 1px and deepen
+   the shadow; focus adds the site's two-tone ring. The current page
+   fills with ink (Russian violet in light, printer ivory in dark)
+   and takes the inverse ink as text.
+
+   Loaded by inc/nav.php through wp_enqueue_block_style() for
+   core/query-pagination and core/post-navigation-link, so it ships
+   only where one of those blocks renders, in the editor as well.
+   Every archive that paginates (blog, categories, search, /kind/*,
+   post formats, web stories) uses core Query Pagination and gets the
+   same chips from this file; /stream renders no pagination.
+   ============================================================ */
+
+/* Pager row: previous, numbers, next. The block's own layout support
+   (justifyContent: center in each pattern) centers the row. */
+.wp-block-query-pagination {
+	gap: var(--cr-space-sm);
+	flex-wrap: wrap;
+	margin-block-start: var(--cr-space-2xl);
+}
+
+.wp-block-query-pagination .wp-block-query-pagination-numbers {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--cr-space-sm);
+}
+
+/* Single post: Previous on the left, Next on the right. Core prints an
+   empty wrapper when there's no adjacent post, so a lone link keeps
+   its side. */
+.cr-post-nav {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--cr-space-md);
+	align-items: start;
+	margin-block: var(--cr-space-xl);
+}
+
+/* The Group's flow layout adds a block-start margin to the second child,
+   which would drop Next below Previous. */
+.cr-post-nav > .wp-block-post-navigation-link {
+	margin-block: 0;
+}
+
+.cr-post-nav .post-navigation-link-previous {
+	grid-column: 1;
+	justify-self: start;
+}
+
+.cr-post-nav .post-navigation-link-next {
+	grid-column: 2;
+	justify-self: end;
+}
+
+/* No adjacent post on either side: no empty landmark. */
+.cr-post-nav:not(:has(a)) {
+	display: none;
+}
+
+/* The chip. */
+.wp-block-query-pagination :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .page-numbers:not(.dots)),
+.cr-post-nav .wp-block-post-navigation-link a {
+	--dsgo-text-color: var(--cr-ink);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--cr-space-2xs);
+	min-width: 2.75rem;
+	min-height: 2.75rem;
+	margin: 0;
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	border: var(--cr-border-thick);
+	border-radius: 0;
+	background: var(--cr-surface-elevated);
+	box-shadow: var(--cr-shadow-hard-sm);
+	color: var(--cr-ink);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-extrabold);
+	line-height: 1.2;
+	text-align: center;
+	text-decoration: none;
+}
+
+/* The current page: filled with ink. */
+.wp-block-query-pagination .page-numbers.current {
+	--dsgo-text-color: var(--cr-ink-inverse);
+	background: var(--cr-ink);
+	border-color: var(--cr-ink);
+	color: var(--cr-ink-inverse);
+}
+
+/* The ellipsis between number ranges is text, not a chip. */
+.wp-block-query-pagination .page-numbers.dots {
+	padding-inline: var(--cr-space-2xs);
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+	color: var(--cr-ink);
+}
+
+/* Core's pager arrow sits inside the link; the post-nav arrow is drawn
+   here so it stays inside the chip (core prints that one outside the
+   link). The empty alt text keeps it out of the link's name. */
+.cr-post-nav .post-navigation-link-previous a::before {
+	content: "←";
+	content: "←" / "";
+}
+
+.cr-post-nav .post-navigation-link-next a::after {
+	content: "→";
+	content: "→" / "";
+}
+
+/* Hover and focus: lift 1px, deepen the shadow. The a.* selectors
+   outrank the chip rule above (0,3,1 over 0,3,0). */
+.wp-block-query-pagination :is(a.wp-block-query-pagination-previous, a.wp-block-query-pagination-next, a.page-numbers):is(:hover, :focus-visible),
+.cr-post-nav .wp-block-post-navigation-link a:is(:hover, :focus-visible) {
+	transform: translate(-1px, -1px);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-ink);
+}
+
+/* One focus treatment for both controls: the site's selective-yellow
+   ring with the ink halo (tokens.css a:focus-visible). */
+.wp-block-query-pagination :is(a.wp-block-query-pagination-previous, a.wp-block-query-pagination-next, a.page-numbers):focus-visible,
+.cr-post-nav .wp-block-post-navigation-link a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.wp-block-query-pagination a,
+	.cr-post-nav .wp-block-post-navigation-link a {
+		transition: transform var(--cr-motion-fast) var(--cr-ease-out), box-shadow var(--cr-motion-fast) var(--cr-ease-out);
+	}
+}
+
+@media (forced-colors: active) {
+
+	.wp-block-query-pagination :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, a.page-numbers),
+	.cr-post-nav .wp-block-post-navigation-link a {
+		border-color: LinkText;
+		box-shadow: none;
+	}
+
+	.wp-block-query-pagination :is(a.wp-block-query-pagination-previous, a.wp-block-query-pagination-next, a.page-numbers):is(:hover, :focus-visible),
+	.cr-post-nav .wp-block-post-navigation-link a:is(:hover, :focus-visible) {
+		box-shadow: none;
+	}
+
+	.wp-block-query-pagination .page-numbers.current {
+		forced-color-adjust: none;
+		background: Highlight;
+		border-color: Highlight;
+		box-shadow: none;
+		color: HighlightText;
+	}
+
+	.wp-block-query-pagination .page-numbers.dots {
+		color: CanvasText;
+	}
+}

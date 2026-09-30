@@ -281,6 +281,7 @@
    ============================================================================= */
 :root {
   /* Zine — hard offset shadows, slight rotation */
+  --cr-shadow-hard-sm: 3px 3px 0 var(--cr-ink);   /* pager and post-nav chips (cr-nav.css) */
   --cr-shadow-hard:   4px 4px 0 var(--cr-ink);
   --cr-shadow-hard-2: 6px 6px 0 var(--cr-ink);
   --cr-shadow-marker: 0 -0.4em 0 inset var(--cr-marker);
@@ -439,6 +440,7 @@
     --cr-code-bg:  #2a2520;
     --cr-code-ink: var(--cr-periwinkle);
 
+    --cr-shadow-hard-sm: 3px 3px 0 var(--cr-selective-yellow);
     --cr-shadow-hard:   4px 4px 0 var(--cr-selective-yellow);
     --cr-shadow-hard-2: 6px 6px 0 var(--cr-selective-yellow);
 
@@ -530,6 +532,7 @@
     --cr-code-bg:  #2a2520;
     --cr-code-ink: var(--cr-periwinkle);
 
+    --cr-shadow-hard-sm: 3px 3px 0 var(--cr-selective-yellow);
     --cr-shadow-hard:   4px 4px 0 var(--cr-selective-yellow);
     --cr-shadow-hard-2: 6px 6px 0 var(--cr-selective-yellow);
 

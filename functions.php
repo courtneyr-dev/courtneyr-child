@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.69' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.70' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -44,6 +44,7 @@ require_once __DIR__ . '/inc/stream-gallery.php';
 require_once __DIR__ . '/inc/stream-checkin.php';
 require_once __DIR__ . '/inc/single-checkin.php';
 require_once __DIR__ . '/inc/kind-parts.php';
+require_once __DIR__ . '/inc/nav.php';
 require_once __DIR__ . '/inc/block-bindings.php';
 require_once __DIR__ . '/inc/site-title-wordmark.php';
 require_once __DIR__ . '/inc/single-watch.php';

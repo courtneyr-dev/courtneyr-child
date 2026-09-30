@@ -12,6 +12,8 @@ const BROWSE_PAGE = process.env.CR_BROWSE_ALL_PATH || '/stream/'; // cr-browse-a
 const TABLE_POST = process.env.CR_TABLE_POST_PATH || '/?p=551'; // legacy comparison table with headings and links in <th>
 const TERM_ARCHIVE = process.env.CR_TERM_ARCHIVE_PATH || '/type/aside/'; // term archive with a description
 const CUTOUT_ARCHIVES = ( process.env.CR_CUTOUT_ARCHIVE_PATHS || '/kind/mood/,/type/aside/,/?s=wordpress,/stream/' ).split( ',' ); // cut-paper archive titles
+const PAGED_KIND_ARCHIVE = process.env.CR_PAGED_KIND_ARCHIVE_PATH || '/kind/note/page/2/'; // a /kind/* archive with at least three pages
+const POST_NAV_POST = process.env.CR_POST_NAV_POST_PATH || '/?p=38071'; // a Blog post with a titled post on each side
 const AUTOEMBED_CAPTIONED_POST = process.env.CR_AUTOEMBED_CAPTIONED_POST_PATH || '/?p=3010'; // bare YouTube URL whose video has a registered VTT (_cr_youtube_id)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
 const DARK_FIXTURES = [
@@ -210,4 +212,66 @@ test( 'homepage lane titles lead with the same emoji as their nav links', async 
 		expect( ( await glyph.textContent() )?.trim(), `${ lane } glyph matches nav "${ navLabel }"` ).toBe( navEmoji );
 		await expect( title, lane ).toHaveAccessibleName( word );
 	}
+} );
+
+test( 'kind archive pagination is the shared centered pager with the current page filled', async ( { page } ) => {
+	await page.goto( PAGED_KIND_ARCHIVE, { waitUntil: 'load' } );
+	const pager = page.locator( 'nav.wp-block-query-pagination' );
+	await expect( pager ).toHaveCount( 1 );
+	await expect( pager ).not.toHaveClass( /cr-stream__pagination/ );
+	expect( await page.locator( '#courtneyr-nav-css, #courtneyr-nav-inline-css' ).count(), 'cr-nav.css is loaded' ).toBeGreaterThan( 0 );
+	const layout = await pager.evaluate( ( nav ) => {
+		const box = nav.getBoundingClientRect();
+		const kids = [ ...nav.children ].map( ( el ) => el.getBoundingClientRect() );
+		return {
+			justify: getComputedStyle( nav ).justifyContent,
+			left: Math.min( ...kids.map( ( k ) => k.left ) ) - box.left,
+			right: box.right - Math.max( ...kids.map( ( k ) => k.right ) ),
+		};
+	} );
+	expect( layout.justify ).toBe( 'center' );
+	expect( Math.abs( layout.left - layout.right ), 'row is centered' ).toBeLessThanOrEqual( 2 );
+	const current = pager.locator( '.page-numbers.current' );
+	await expect( current ).toHaveCount( 1 );
+	await expect( current ).toHaveAttribute( 'aria-current', 'page' );
+	const colors = await current.evaluate( ( el ) => {
+		const probe = ( value ) => { const d = document.createElement( 'span' ); d.style.color = value; document.body.append( d ); const c = getComputedStyle( d ).color; d.remove(); return c; };
+		const cs = getComputedStyle( el );
+		return { bg: cs.backgroundColor, color: cs.color, ink: probe( 'var(--cr-ink)' ), inverse: probe( 'var(--cr-ink-inverse)' ) };
+	} );
+	expect( colors.bg ).toBe( colors.ink );
+	expect( colors.color ).toBe( colors.inverse );
+	for ( const chip of await pager.locator( 'a' ).all() ) {
+		const style = await chip.evaluate( ( el ) => ( { border: parseFloat( getComputedStyle( el ).borderTopWidth ), shadow: getComputedStyle( el ).boxShadow } ) );
+		expect( style.border ).toBeGreaterThanOrEqual( 2 );
+		expect( style.shadow ).not.toBe( 'none' );
+	}
+} );
+
+test( 'single posts have a Post navigation landmark whose links name the adjacent post', async ( { page } ) => {
+	await page.goto( POST_NAV_POST, { waitUntil: 'load' } );
+	const nav = page.getByRole( 'navigation', { name: 'Post navigation', exact: true } );
+	await expect( nav ).toHaveCount( 1 );
+	const links = nav.getByRole( 'link' );
+	expect( await links.count() ).toBeGreaterThan( 0 );
+	for ( const link of await links.all() ) {
+		const visible = ( await link.locator( '.post-navigation-link__label' ).textContent() )?.trim();
+		expect( [ 'Previous', 'Next' ] ).toContain( visible );
+		const title = ( await link.locator( '.post-navigation-link__title' ).textContent() )?.trim() || '';
+		expect( title.length ).toBeGreaterThan( 0 );
+		expect( title ).not.toMatch( /^(Previous|Next) Post$/ );
+		// Label in name: the accessible name starts with the visible text and carries the title.
+		await expect( link ).toHaveAccessibleName( `${ visible } ${ title }` );
+		await expect( link.locator( '.post-navigation-link__title' ) ).toHaveClass( /screen-reader-text/ );
+		// The title belongs to the page the link opens.
+		const html = await ( await page.request.get( await link.getAttribute( 'href' ) ) ).text();
+		const destination = html.match( /<title>([^<]*)<\/title>/ )?.[ 1 ] || '';
+		const decode = ( s ) => s.replace( /&#8217;/g, '’' ).replace( /&#8211;/g, '–' ).replace( /&#8220;|&#8221;/g, '"' ).replace( /&amp;/g, '&' );
+		expect( decode( destination ) ).toContain( title );
+	}
+} );
+
+test( 'the Stream page has no pagination and no post navigation', async ( { page } ) => {
+	await page.goto( '/stream/', { waitUntil: 'load' } );
+	expect( await page.locator( '.wp-block-query-pagination, .page-numbers, .cr-post-nav' ).count() ).toBe( 0 );
 } );

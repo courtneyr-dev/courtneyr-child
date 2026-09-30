@@ -82,10 +82,10 @@ declare( strict_types = 1 );
 		<!-- /wp:paragraph -->
 	<!-- /wp:query-no-results -->
 
-	<!-- wp:query-pagination {"paginationArrow":"arrow","className":"cr-stream__pagination","layout":{"type":"flex","justifyContent":"space-between"}} -->
-		<!-- wp:query-pagination-previous /-->
+	<!-- wp:query-pagination {"paginationArrow":"arrow","layout":{"type":"flex","justifyContent":"center"}} -->
+		<!-- wp:query-pagination-previous <?php echo wp_json_encode( array( 'label' => __( 'Previous', 'courtneyr-child' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- block attribute JSON. ?> /-->
 		<!-- wp:query-pagination-numbers /-->
-		<!-- wp:query-pagination-next /-->
+		<!-- wp:query-pagination-next <?php echo wp_json_encode( array( 'label' => __( 'Next', 'courtneyr-child' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- block attribute JSON. ?> /-->
 	<!-- /wp:query-pagination -->
 
 </div>

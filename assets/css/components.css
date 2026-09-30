@@ -4946,30 +4946,7 @@ body.single .single-post__tags a:hover { box-shadow: 3px 3px 0 rgba(36, 28, 74, 
 .cr-archive .cr-stream-item__tags a:nth-of-type(6n+5), body.single .single-post__tags a:nth-of-type(6n+5) { background: var(--cr-glaucous-dark, #3d527d) !important;  color: var(--cr-printer-ivory, #fbfaf5) !important;   --dsgo-text-color: var(--cr-printer-ivory, #fbfaf5);   transform: rotate(-1.8deg); }
 .cr-archive .cr-stream-item__tags a:nth-of-type(6n),   body.single .single-post__tags a:nth-of-type(6n)   { background: var(--cr-blue-green, #219ebc) !important;     color: var(--cr-russian-violet, #241c4a) !important;  --dsgo-text-color: var(--cr-russian-violet, #241c4a); transform: rotate(2.2deg); }
 
-/* (5) Pagination — hard-edge buttons matching the design system. */
-.cr-archive .cr-stream__pagination {
-	margin-top: var(--cr-space-2xl, 3rem);
-	padding-top: var(--cr-space-lg, 1.5rem);
-	border-top: 1px dashed var(--cr-rule, rgba(36, 28, 74, 0.15));
-}
-.cr-archive .wp-block-query-pagination-numbers .page-numbers {
-	font-family: var(--cr-font-accent);
-	font-weight: var(--cr-weight-bold, 700);
-	padding: 0.35em 0.75em;
-	border: 2px solid var(--cr-russian-violet, #241c4a);
-	color: var(--cr-ink, #241c4a);
-	text-decoration: none;
-	margin-inline: 0.15em;
-	transition: background-color 0.15s ease, color 0.15s ease;
-}
-.cr-archive .wp-block-query-pagination-numbers .page-numbers.current {
-	background-color: var(--cr-russian-violet, #241c4a);
-	color: var(--cr-printer-ivory, #fbfaf5);
-}
-.cr-archive .wp-block-query-pagination-numbers .page-numbers:hover {
-	background-color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
-	color: var(--cr-russian-violet, #241c4a);
-}
+/* (5) Pagination moved to assets/css/cr-nav.css (0.7.70). */
 
 /* (6) Mobile — collapse the 3rem avatar column to inline above body. */
 @media (max-width: 600px) {
@@ -5536,57 +5513,7 @@ body.home .homepage__content > .alignfull:has(#h-recent-posts) + .alignfull {
 	padding-top: 0 !important;
 }
 
-/* (3) Pagination — query loop pagination numbers + prev/next.
-   Default WP renders them as plain text in palette colors that fail
-   in dark mode. Lock to a zine-style outlined chip that flips cleanly. */
-.wp-block-query-pagination .page-numbers,
-.wp-block-query-pagination-numbers .page-numbers,
-.wp-block-query-pagination .wp-block-query-pagination-previous,
-.wp-block-query-pagination .wp-block-query-pagination-next {
-	display: inline-block;
-	color: var(--cr-ink, var(--cr-russian-violet, #241c4a));
-	background: var(--cr-surface-elevated, var(--cr-printer-ivory, #fbfaf5));
-	border: 2px solid var(--cr-ink, var(--cr-russian-violet, #241c4a));
-	padding: var(--cr-space-2xs, 0.25rem) var(--cr-space-sm, 0.75rem);
-	margin: 0 var(--cr-space-2xs, 0.25rem);
-	text-decoration: none;
-	font-family: var(--cr-font-accent);
-	font-weight: var(--cr-weight-bold);
-	font-size: var(--cr-text-sm);
-	line-height: 1.2;
-	min-width: 2rem;
-	text-align: center;
-}
-
-.wp-block-query-pagination .page-numbers.current,
-.wp-block-query-pagination-numbers .page-numbers.current {
-	/* v0.3.6: use palette tokens (don't flip in dark mode) so the
-	   current page is always dark bg + ivory text. Previously used
-	   --cr-ink which flips to ivory in dark, giving white-on-white. */
-	background: var(--cr-russian-violet, #241c4a) !important;
-	color: var(--cr-printer-ivory, #fbfaf5) !important;
-	border-color: var(--cr-russian-violet, #241c4a) !important;
-}
-
-.wp-block-query-pagination .page-numbers:hover,
-.wp-block-query-pagination .wp-block-query-pagination-previous:hover,
-.wp-block-query-pagination .wp-block-query-pagination-next:hover {
-	background: var(--cr-russian-violet, #241c4a) !important;
-	color: var(--cr-sky-blue, #8ecae6) !important;
-	/* The dsgo plugin forces link color via `a { color: var(--dsgo-text-color)
-	   !important }` (the archive is a has-*-background-color group), which kept the
-	   text dark on this navy hover bg = unreadable. Set the var so dsgo resolves to
-	   sky-blue too. */
-	--dsgo-text-color: var(--cr-sky-blue, #8ecae6);
-}
-
-/* Dots between number ranges shouldn't get the chip treatment */
-.wp-block-query-pagination .page-numbers.dots {
-	background: transparent;
-	border: 0;
-	color: var(--cr-ink-muted);
-	padding: 0 var(--cr-space-xs);
-}
+/* (3) Pagination moved to assets/css/cr-nav.css (0.7.70). */
 
 /* (4) ✦ glyph on Query Loop Recent Posts items.
    The v0.2.6.7 rule targeted .wp-block-latest-posts but the home now
