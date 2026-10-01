@@ -67,6 +67,7 @@
 	inset-inline-end: -100vw;
 	width: auto;
 	max-width: none; /* .cr-archive's post divider caps ::after at 60% */
+	transform: none; /* and tilts it -0.5deg */
 	height: var(--pkiw-shelf-board-size);
 	margin: 0;
 	background: var(--pkiw-shelf-board-color);
