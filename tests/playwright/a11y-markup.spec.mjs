@@ -271,7 +271,12 @@ test( 'single posts have a Post navigation landmark whose links name the adjacen
 	}
 } );
 
-test( 'the Stream page has no pagination and no post navigation', async ( { page } ) => {
+// /stream keeps the pager saved in its own page content (it had one before
+// 0.7.70); what it must never gain is single-post navigation or an archive
+// shelf/menu layout, and its cards stay in the loose multi-column collage.
+test( 'the Stream page gains no post navigation or archive layout', async ( { page } ) => {
 	await page.goto( '/stream/', { waitUntil: 'load' } );
-	expect( await page.locator( '.wp-block-query-pagination, .page-numbers, .cr-post-nav' ).count() ).toBe( 0 );
+	expect( await page.locator( '.cr-post-nav, .is-style-pkiw-shelf, .is-style-pkiw-menu, .pkiw-kind-archive' ).count() ).toBe( 0 );
+	const columns = await page.locator( 'body.cr-stream-page .wp-block-post-template' ).first().evaluate( ( el ) => getComputedStyle( el ).columnWidth );
+	expect( columns ).not.toBe( 'auto' );
 } );
