@@ -1,0 +1,181 @@
+/* ============================================================
+   Media shelf — kind archives as a store shelf (PKIW #226 listen).
+
+   Structure is Post Kinds': templates/taxonomy-kind-listen.html renders
+   the archive query through the plugin's `is-style-pkiw-shelf` post
+   template (styles/kind-layouts.css): a grid, one item per post, and a
+   board under each item that runs to the row's end, so a short last
+   row shows empty shelf, never placeholder posts. This file only paints:
+   blue-green boards, Prussian-blue uprights, the cassettes standing
+   upright (no collage tilt), the whole case as one link, and the
+   decorative boombox behind the archive header.
+
+   The cassettes themselves are the Stream's (inc/stream-media.php adds
+   `cr-media--shelf` on this archive; cr-post-kinds.css paints them).
+   The shelf uses the palette tokens (not the semantic ones), so it keeps
+   its colour in dark mode like the other physical objects (LAYERING.md);
+   shadows and focus use the semantic tokens, so the hard shadow turns
+   selective yellow in dark mode.
+   ============================================================ */
+
+/* ---- The shelf frame ---- */
+.cr-media-shelf .wp-block-post-template.cr-media-shelf__list {
+	--pkiw-shelf-item-min: 15rem;
+	--pkiw-shelf-gap-row: 2.25rem;
+	--pkiw-shelf-gap-column: 1.5rem;
+	--pkiw-shelf-board-size: 0.85rem;
+	--pkiw-shelf-board-color: var(--cr-blue-green);
+	--pkiw-shelf-board-opacity: 1;
+	--pkiw-focus-indicator: var(--cr-focus-ring);
+	columns: auto;
+	column-gap: normal;
+	align-items: stretch;
+	max-width: 72rem;
+	margin-inline: auto;
+	padding: 1.75rem calc(var(--pkiw-shelf-gap-column) / 2) 0;
+	border: 0 solid var(--cr-prussian-blue);
+	border-inline-width: 0.9rem;
+	border-block-end-width: 0.9rem;
+	background: linear-gradient(var(--cr-blue-green), var(--cr-blue-green)) top / 100% 0.85rem no-repeat;
+	box-shadow: var(--cr-shadow-hard);
+}
+
+/* Cases stand upright on the boards: undo the Stream collage's spacing
+   and tilts for this list only. */
+.cr-media-shelf .wp-block-post-template.cr-media-shelf__list > li {
+	break-inside: auto;
+	align-self: stretch;
+	margin: 0;
+	padding: 0 0 calc(var(--pkiw-shelf-board-size) + 0.75rem);
+}
+
+.cr-media-shelf .cr-media-shelf__list > li:is(.kind-listen, .kind-watch) .pk-card.pk-card--stream.cr-media--shelf,
+.cr-media-shelf .cr-media-shelf__list > li:is(.kind-listen, .kind-watch) .pk-card.pk-card--stream.cr-media--shelf .pk-body {
+	transform: none;
+}
+
+/* The board. Post Kinds draws it (kind-layouts.css); the Stream's
+   cover-box "shelf shadow" (cr-post-kinds.css, li.kind-*::after) outranks
+   that rule here, so the board is restated at higher specificity. Its top
+   edge catches the light; its front face stays flat. */
+.cr-media-shelf .wp-block-post-template.cr-media-shelf__list > li[class*="kind-"]::after {
+	content: "";
+	position: absolute;
+	display: block;
+	inset-block-end: 0;
+	inset-inline-start: calc(var(--pkiw-shelf-gap-column) / -2);
+	inset-inline-end: -100vw;
+	width: auto;
+	max-width: none; /* .cr-archive's post divider caps ::after at 60% */
+	height: var(--pkiw-shelf-board-size);
+	margin: 0;
+	background: var(--pkiw-shelf-board-color);
+	opacity: 1;
+	pointer-events: none;
+	box-shadow: inset 0 3px 0 var(--cr-sky-blue), 0 4px 0 var(--cr-cerulean);
+}
+
+/* No player on the shelf (it plays on the single), so the cassette's
+   player tray shrinks to a sliver and the case keeps a cassette's
+   proportions instead of the Stream's taller deck. */
+.cr-media-shelf .cr-media-shelf__list > li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream.cr-media--shelf .pk-body {
+	grid-template-rows: 13cqw 18cqw 4cqw max(6cqw, 1.2rem) auto auto auto auto;
+}
+
+/* ---- One link per case ----
+   The title link's hit area covers the cassette body (the nearest
+   positioned box); the accessible name stays the track title. The
+   "Listen / find it" row sits above it and keeps its own links. */
+.cr-media-shelf .cr-media-shelf__list > li:is(.kind-listen, .kind-watch) .pk-card.pk-card--stream.cr-media--shelf .pk-body > .pk-caption {
+	position: static;
+}
+
+.cr-media-shelf .cr-media-shelf__list > li:is(.kind-listen, .kind-watch) .pk-card.pk-card--stream.cr-media--shelf .pk-title a::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+}
+
+.cr-media-shelf .cr-media-shelf__list > li:is(.kind-listen, .kind-watch) .pk-card.pk-card--stream.cr-media--shelf .pk-body > .pk-sources {
+	z-index: 3;
+}
+
+/* Focus: the site's two-tone ring around the whole case (the mockup's
+   selective-yellow outline), drawn on the item so it isn't clipped. */
+.cr-media-shelf .wp-block-post-template.cr-media-shelf__list > li:has(.pk-title a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-media-shelf .cr-media-shelf__list > li:is(.kind-listen, .kind-watch) .pk-card.pk-card--stream.cr-media--shelf .pk-title a:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+/* ---- Empty archive: bare boards, no content ---- */
+.cr-media-shelf .wp-block-query:not(:has(.wp-block-post-template))::before {
+	content: "";
+	display: block;
+	max-width: 72rem;
+	height: 9rem;
+	margin: 0 auto 1.5rem;
+	border: 0 solid var(--cr-prussian-blue);
+	border-inline-width: 0.9rem;
+	border-block-end-width: 0.9rem;
+	background:
+		linear-gradient(var(--cr-blue-green), var(--cr-blue-green)) top / 100% 0.85rem no-repeat,
+		linear-gradient(var(--cr-blue-green), var(--cr-blue-green)) bottom / 100% 0.85rem no-repeat;
+	box-shadow: var(--cr-shadow-hard);
+}
+
+/* ---- Decorative boombox above the shelf (listen) ----
+   A CSS background on a pseudo-element: no DOM, never focused or read. */
+.cr-archive--listen .cr-archive__header::after {
+	content: "";
+	display: block;
+	width: min(26rem, 78%);
+	aspect-ratio: 480 / 270;
+	margin: 1.25rem auto 0;
+	background: url(../img/cr-boombox.svg) center / contain no-repeat;
+}
+
+/* ---- Small screens: one case per row, a narrower frame ---- */
+@media (max-width: 40rem) {
+
+	.cr-media-shelf .wp-block-post-template.cr-media-shelf__list {
+		--pkiw-shelf-item-min: 13rem;
+		border-inline-width: 0.5rem;
+	}
+
+	.cr-archive--listen .cr-archive__header::after {
+		width: min(16rem, 70%);
+	}
+}
+
+/* ---- Forced colours: the frame and boards as system lines ---- */
+@media (forced-colors: active) {
+
+	.cr-media-shelf .wp-block-post-template.cr-media-shelf__list,
+	.cr-media-shelf .wp-block-query:not(:has(.wp-block-post-template))::before {
+		border-color: CanvasText;
+		background: none;
+		box-shadow: none;
+	}
+
+	.cr-media-shelf .wp-block-post-template.cr-media-shelf__list > li[class*="kind-"]::after {
+		background: CanvasText;
+		box-shadow: none;
+		forced-color-adjust: none;
+	}
+
+	.cr-media-shelf .wp-block-post-template.cr-media-shelf__list > li:has(.pk-title a:focus-visible) {
+		outline-color: Highlight;
+		box-shadow: none;
+	}
+
+	.cr-archive--listen .cr-archive__header::after {
+		display: none;
+	}
+}

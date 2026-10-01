@@ -238,7 +238,8 @@ function cut_div( string $html, string $open ): string {
  * @return string
  */
 function media_card( string $html, array $block, $instance ): string {
-	if ( ! \Courtneyr\Child\HomeSections\is_stream_surface() ) {
+	$shelf = \Courtneyr\Child\MediaShelf\shelf_kind();
+	if ( '' === $shelf && ! \Courtneyr\Child\HomeSections\is_stream_surface() ) {
 		return $html;
 	}
 	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
@@ -252,6 +253,18 @@ function media_card( string $html, array $block, $instance ): string {
 	$kind = has_term( 'watch', 'kind', $post ) ? 'watch' : ( has_term( 'listen', 'kind', $post ) ? 'listen' : '' );
 	if ( '' === $kind || false === strpos( $html, 'pk-card k-' . $kind ) ) {
 		return $html;
+	}
+
+	// On a shelf archive (inc/media-shelf.php) each case is one link to its
+	// single, so the provider player stays on the single: no iframe per case.
+	if ( '' !== $shelf ) {
+		$html = cut_div( $html, '<div class="pk-embed pk-embed--audio">' );
+	}
+
+	// A listen card with a stored cover and no provider player prints the
+	// cover as a photo embed; on the cassette that is the label art.
+	if ( 'listen' === $kind && false === strpos( $html, '<div class="pk-media' ) ) {
+		$html = str_replace( '<div class="pk-embed pk-embed--photo">', '<div class="pk-media pk-media--stream">', $html );
 	}
 
 	$card  = find_block( $post, 'post-kinds-indieweb/' . $kind . '-card' );
@@ -321,10 +334,19 @@ function media_card( string $html, array $block, $instance ): string {
 
 	// 3. The kind label is the object's printed marking; the mechanics
 	//    follow it in the DOM so they paint under everything else.
+	// Post Kinds prints the label as a <span> since 1.8.6 (a <p> before).
 	$label = '<p class="pk-kindlabel">';
-	$lpos  = strpos( $html, $label );
+	$lpos  = false;
+	$ltag  = '';
+	foreach ( array( 'span', 'p' ) as $tag ) {
+		$lpos = strpos( $html, '<' . $tag . ' class="pk-kindlabel">' );
+		if ( false !== $lpos ) {
+			$ltag = $tag;
+			break;
+		}
+	}
 	if ( false !== $lpos ) {
-		$lend = strpos( $html, '</p>', $lpos );
+		$lend = strpos( $html, '</' . $ltag . '>', $lpos );
 		if ( false !== $lend ) {
 			$text = 'watch' === $kind ? __( 'Watch · VHS', 'courtneyr-child' ) : __( 'Listen · Cassette', 'courtneyr-child' );
 			// A VHS draws the same reels, transport and handwritten label as
@@ -333,7 +355,7 @@ function media_card( string $html, array $block, $instance ): string {
 			$mech = 'watch' === $kind
 				? vhs_mechanics( heavy_left( $post ) ) . vhs_label( $playable ? film_facts( $attrs ) : array() )
 				: mech_svg( seed( (string) $post->ID, (string) ( $attrs['listenUrl'] ?? '' ) ) );
-			$html = substr( $html, 0, $lpos ) . $label . esc_html( $text ) . '</p>' . $mech . substr( $html, $lend + 4 );
+			$html = substr( $html, 0, $lpos ) . $label . esc_html( $text ) . '</p>' . $mech . substr( $html, $lend + strlen( '</' . $ltag . '>' ) );
 		}
 	}
 
@@ -365,6 +387,9 @@ function media_card( string $html, array $block, $instance ): string {
 		$tags->add_class( 'pk-card--stream' );
 		$tags->add_class( 'watch' === $kind ? 'cr-vhs' : 'cr-cassette' );
 		$tags->add_class( 'watch' === $kind ? 'cr-vhs--stream' : 'cr-cassette--stream' );
+		if ( '' !== $shelf ) {
+			$tags->add_class( 'cr-media--shelf' );
+		}
 		if ( $playable ) {
 			$tags->add_class( 'has-video-player' );
 		}
