@@ -14,6 +14,7 @@ const TERM_ARCHIVE = process.env.CR_TERM_ARCHIVE_PATH || '/type/aside/'; // term
 const CUTOUT_ARCHIVES = ( process.env.CR_CUTOUT_ARCHIVE_PATHS || '/kind/mood/,/type/aside/,/?s=wordpress,/stream/' ).split( ',' ); // cut-paper archive titles
 const PAGED_KIND_ARCHIVE = process.env.CR_PAGED_KIND_ARCHIVE_PATH || '/kind/note/page/2/'; // a /kind/* archive with at least three pages
 const POST_NAV_POST = process.env.CR_POST_NAV_POST_PATH || '/?p=38071'; // a Blog post with a titled post on each side
+const LISTEN_ARCHIVE = process.env.CR_LISTEN_ARCHIVE_PATH || '/kind/listen/'; // listen archive with at least one listen post (PKIW #226)
 const AUTOEMBED_CAPTIONED_POST = process.env.CR_AUTOEMBED_CAPTIONED_POST_PATH || '/?p=3010'; // bare YouTube URL whose video has a registered VTT (_cr_youtube_id)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
 const DARK_FIXTURES = [
@@ -279,4 +280,47 @@ test( 'the Stream page gains no post navigation or archive layout', async ( { pa
 	expect( await page.locator( '.cr-post-nav, .is-style-pkiw-shelf, .is-style-pkiw-menu, .pkiw-kind-archive' ).count() ).toBe( 0 );
 	const columns = await page.locator( 'body.cr-stream-page .wp-block-post-template' ).first().evaluate( ( el ) => getComputedStyle( el ).columnWidth );
 	expect( columns ).not.toBe( 'auto' );
+} );
+
+// PKIW #226: the listen archive stands the Stream's cassettes upright on Post
+// Kinds shelf rows. One title link per case, no players, a board under every
+// row that reaches past the case (empty shelf is CSS, not placeholder posts),
+// and the boombox is a CSS background, not content.
+test( 'the listen archive is a shelf of cassette cases, one title link each, no players', async ( { page } ) => {
+	await page.goto( LISTEN_ARCHIVE, { waitUntil: 'load' } );
+	const list = page.locator( 'ul.cr-media-shelf__list.is-style-pkiw-shelf' );
+	await expect( list ).toHaveCount( 1 );
+	const cases = list.locator( ':scope > li' );
+	expect( await cases.count() ).toBeGreaterThan( 0 );
+	expect( await list.locator( 'iframe' ).count(), 'no provider player on the shelf' ).toBe( 0 );
+	for ( const item of await cases.all() ) {
+		const card = item.locator( 'article.pk-card.cr-cassette--stream.cr-media--shelf' );
+		await expect( card ).toHaveCount( 1 );
+		await expect( card.locator( '.pk-kindlabel' ) ).toHaveText( 'Listen · Cassette' );
+		await expect( card.locator( '.cr-media__mech' ) ).toHaveCount( 1 );
+		await expect( card.locator( '.pk-title a' ) ).toHaveCount( 1 );
+		const shape = await item.evaluate( ( li ) => {
+			const board = getComputedStyle( li, '::after' );
+			return {
+				board: board.content,
+				boardWidth: parseFloat( board.width ),
+				itemWidth: li.getBoundingClientRect().width,
+				tilt: getComputedStyle( li.querySelector( '.pk-body' ) ).transform,
+			};
+		} );
+		expect( shape.board ).toBe( '""' );
+		expect( shape.boardWidth, 'the board runs past the case to the row end' ).toBeGreaterThan( shape.itemWidth );
+		expect( shape.tilt, 'cases stand upright' ).toBe( 'none' );
+	}
+	// The whole case is the title link's hit area.
+	const first = cases.first();
+	const hit = await first.evaluate( ( li ) => {
+		const box = li.querySelector( '.pk-body' ).getBoundingClientRect();
+		const el = document.elementFromPoint( box.left + box.width / 2, box.top + box.height * 0.3 );
+		return el?.closest( 'a' ) === li.querySelector( '.pk-title a' );
+	} );
+	expect( hit ).toBe( true );
+	expect( await page.locator( '.cr-archive--listen .cr-archive__header img, .cr-archive--listen .cr-archive__header svg[aria-label]' ).count(), 'the boombox adds no content' ).toBe( 0 );
+	const boombox = await page.locator( '.cr-archive--listen .cr-archive__header' ).evaluate( ( el ) => getComputedStyle( el, '::after' ).backgroundImage );
+	expect( boombox ).toContain( 'cr-boombox.svg' );
 } );
