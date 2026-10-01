@@ -827,6 +827,31 @@ add_filter( 'perfmatters_minify_css_exclusions', __NAMESPACE__ . '\\perfmatters_
 add_filter( 'perfmatters_minify_js_exclusions', __NAMESPACE__ . '\\perfmatters_exclusions' );
 
 /**
+ * Keep the shelf and pager stylesheets whole under Perfmatters' Remove
+ * Unused CSS.
+ *
+ * Perfmatters builds one used-CSS file per URL type (CSS.php,
+ * `{url_type}.used.css`), from whichever page of that type renders first.
+ * Every /kind/* archive shares one file, so a copy built from a note
+ * archive drops the listen archive's shelf rules, and one built from an
+ * archive with a single page drops the pager chips (seen as a risk on
+ * 2026-10-01 when the kind file was built from /kind/listen/). The site
+ * option already excludes cr-post-kinds.css, cr-archives.css and
+ * cr-home-sections.css for the same reason; these two join them in code.
+ *
+ * @param array<int, string> $exclusions URL fragments Remove Unused CSS skips.
+ * @return array<int, string>
+ */
+function perfmatters_rucss_exclusions( $exclusions ): array {
+	$exclusions = is_array( $exclusions ) ? $exclusions : array();
+	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css' ) as $file ) {
+		$exclusions[] = $file;
+	}
+	return array_values( array_unique( $exclusions ) );
+}
+add_filter( 'perfmatters_rucss_excluded_stylesheets', __NAMESPACE__ . '\\perfmatters_rucss_exclusions' );
+
+/**
  * Keep consent-gated and Able Player embeds out of Perfmatters' lazy load.
  *
  * Complianz renders a gated iframe with `src="about:blank"` and the real
