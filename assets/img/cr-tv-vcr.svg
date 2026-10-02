@@ -1,24 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" width="480" height="300"><!-- Decorative TV on a VCR for the watch archive (PKIW #227). Palette only; painted as a CSS background, never content. -->
-<rect x="112" y="18" width="268" height="196" rx="18" fill="#023047"/>
-<rect x="100" y="8" width="268" height="196" rx="18" fill="#241c4a" stroke="#bcb5e3" stroke-width="3"/>
-<rect x="120" y="26" width="196" height="160" rx="14" fill="#023047"/>
-<g>
-<rect x="132" y="38" width="29" height="136" fill="#bcb5e3"/>
-<rect x="161" y="38" width="29" height="136" fill="#8ecae6"/>
-<rect x="190" y="38" width="29" height="136" fill="#647baf"/>
-<rect x="219" y="38" width="29" height="136" fill="#219ebc"/>
-<rect x="248" y="38" width="29" height="136" fill="#ffb703"/>
-<rect x="277" y="38" width="27" height="136" fill="#bcb5e3"/>
-</g>
-<rect x="132" y="38" width="172" height="136" rx="8" fill="none" stroke="#241c4a" stroke-width="6"/>
-<circle cx="342" cy="56" r="12" fill="#647baf" stroke="#bcb5e3" stroke-width="3"/>
-<circle cx="342" cy="94" r="12" fill="#647baf" stroke="#bcb5e3" stroke-width="3"/>
-<g fill="#126782"><rect x="330" y="124" width="24" height="5" rx="2"/><rect x="330" y="134" width="24" height="5" rx="2"/><rect x="330" y="144" width="24" height="5" rx="2"/><rect x="330" y="154" width="24" height="5" rx="2"/></g>
-<rect x="80" y="222" width="320" height="66" rx="8" fill="#023047"/>
-<rect x="70" y="214" width="320" height="66" rx="8" fill="#241c4a" stroke="#bcb5e3" stroke-width="3"/>
-<rect x="92" y="232" width="150" height="16" rx="3" fill="#023047" stroke="#647baf" stroke-width="2"/>
-<rect x="276" y="230" width="90" height="22" rx="4" fill="#023047"/>
-<g fill="#fb8500"><rect x="286" y="236" width="6" height="10"/><rect x="296" y="236" width="6" height="10"/><rect x="310" y="236" width="6" height="10"/><rect x="320" y="236" width="6" height="10"/></g>
-<g fill="#647baf"><rect x="92" y="258" width="22" height="10" rx="2"/><rect x="120" y="258" width="22" height="10" rx="2"/><rect x="148" y="258" width="22" height="10" rx="2" fill="#ffb703"/><rect x="176" y="258" width="22" height="10" rx="2"/><rect x="204" y="258" width="22" height="10" rx="2"/></g>
-<circle cx="360" cy="265" r="5" fill="#219ebc"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 300" width="1400" height="300"><!-- Decorative still life for the watch archive's top shelf (PKIW #227): tape stacks, a CRT on a VCR, popcorn and a remote, all standing on the board below. Palette only; painted as a CSS background, never content. Everything is bottom-aligned at y=300. -->
+<!-- left tape stack -->
+<g><rect x="258" y="248" width="230" height="44" rx="4" fill="#241c4a"/><rect x="250" y="240" width="230" height="44" rx="4" fill="#647baf" stroke="#241c4a" stroke-width="4"/><rect x="262" y="252" width="110" height="20" rx="2" fill="#fbfaf5"/><rect x="380" y="252" width="88" height="20" rx="2" fill="#ffb703"/>
+<rect x="276" y="200" width="230" height="44" rx="4" fill="#241c4a"/><rect x="268" y="192" width="230" height="44" rx="4" fill="#219ebc" stroke="#241c4a" stroke-width="4"/><rect x="280" y="204" width="130" height="20" rx="2" fill="#fbfaf5"/><rect x="418" y="204" width="66" height="20" rx="2" fill="#fb8500"/>
+<rect x="262" y="152" width="230" height="44" rx="4" fill="#241c4a"/><rect x="254" y="144" width="230" height="44" rx="4" fill="#bcb5e3" stroke="#241c4a" stroke-width="4"/><rect x="266" y="156" width="96" height="20" rx="2" fill="#fbfaf5"/><rect x="370" y="156" width="100" height="20" rx="2" fill="#241c4a"/></g>
+<!-- TV -->
+<g transform="translate(540 0)"><rect x="12" y="20" width="300" height="212" rx="18" fill="#023047"/><rect x="0" y="8" width="300" height="212" rx="18" fill="#241c4a" stroke="#bcb5e3" stroke-width="3"/><rect x="22" y="28" width="212" height="172" rx="14" fill="#023047"/>
+<rect x="36" y="42" width="31" height="144" fill="#bcb5e3"/><rect x="67" y="42" width="31" height="144" fill="#8ecae6"/><rect x="98" y="42" width="31" height="144" fill="#647baf"/><rect x="129" y="42" width="31" height="144" fill="#219ebc"/><rect x="160" y="42" width="31" height="144" fill="#ffb703"/><rect x="191" y="42" width="29" height="144" fill="#bcb5e3"/>
+<rect x="36" y="42" width="184" height="144" rx="8" fill="none" stroke="#241c4a" stroke-width="6"/><circle cx="266" cy="60" r="12" fill="#647baf" stroke="#bcb5e3" stroke-width="3"/><circle cx="266" cy="98" r="12" fill="#647baf" stroke="#bcb5e3" stroke-width="3"/>
+<g fill="#126782"><rect x="254" y="130" width="24" height="5" rx="2"/><rect x="254" y="140" width="24" height="5" rx="2"/><rect x="254" y="150" width="24" height="5" rx="2"/><rect x="254" y="160" width="24" height="5" rx="2"/></g>
+<!-- VCR -->
+<rect x="-30" y="232" width="360" height="66" rx="8" fill="#023047"/><rect x="-40" y="224" width="360" height="66" rx="8" fill="#241c4a" stroke="#bcb5e3" stroke-width="3"/><rect x="-16" y="242" width="150" height="16" rx="3" fill="#023047" stroke="#647baf" stroke-width="2"/><rect x="190" y="240" width="90" height="22" rx="4" fill="#023047"/>
+<g fill="#fb8500"><rect x="200" y="246" width="6" height="10"/><rect x="210" y="246" width="6" height="10"/><rect x="224" y="246" width="6" height="10"/><rect x="234" y="246" width="6" height="10"/></g>
+<g fill="#647baf"><rect x="-16" y="268" width="22" height="10" rx="2"/><rect x="12" y="268" width="22" height="10" rx="2"/><rect x="40" y="268" width="22" height="10" rx="2" fill="#ffb703"/><rect x="68" y="268" width="22" height="10" rx="2"/><rect x="96" y="268" width="22" height="10" rx="2"/></g><circle cx="276" cy="275" r="5" fill="#219ebc"/></g>
+<!-- popcorn -->
+<g transform="translate(900 0)"><path d="M14 190 h120 l-14 104 h-92 z" fill="#fbfaf5" stroke="#241c4a" stroke-width="4"/><path d="M30 190 l10 104 M60 190 l4 104 M90 190 l-4 104 M120 190 l-10 104" stroke="#fb8500" stroke-width="12" stroke-linecap="round"/><g fill="#ffb703" stroke="#241c4a" stroke-width="3"><circle cx="34" cy="176" r="16"/><circle cx="66" cy="160" r="18"/><circle cx="98" cy="168" r="16"/><circle cx="118" cy="188" r="12"/><circle cx="50" cy="150" r="12"/></g></g>
+<!-- right tape stack -->
+<g><rect x="1066" y="248" width="230" height="44" rx="4" fill="#241c4a"/><rect x="1058" y="240" width="230" height="44" rx="4" fill="#219ebc" stroke="#241c4a" stroke-width="4"/><rect x="1070" y="252" width="120" height="20" rx="2" fill="#fbfaf5"/><rect x="1198" y="252" width="78" height="20" rx="2" fill="#fb8500"/>
+<rect x="1080" y="200" width="230" height="44" rx="4" fill="#241c4a"/><rect x="1072" y="192" width="230" height="44" rx="4" fill="#bcb5e3" stroke="#241c4a" stroke-width="4"/><rect x="1084" y="204" width="100" height="20" rx="2" fill="#fbfaf5"/><rect x="1192" y="204" width="96" height="20" rx="2" fill="#241c4a"/></g>
+<!-- remote -->
+<g transform="translate(1320 0)"><rect x="8" y="150" width="50" height="150" rx="8" fill="#241c4a"/><rect x="0" y="142" width="50" height="150" rx="8" fill="#023047" stroke="#bcb5e3" stroke-width="3"/><g fill="#8ecae6"><circle cx="14" cy="166" r="5"/><circle cx="36" cy="166" r="5"/><circle cx="14" cy="186" r="5"/><circle cx="36" cy="186" r="5"/><circle cx="14" cy="206" r="5"/><circle cx="36" cy="206" r="5"/><circle cx="14" cy="226" r="5"/><circle cx="36" cy="226" r="5"/></g><rect x="12" y="250" width="26" height="26" rx="13" fill="#fb8500"/></g>
 </svg>
