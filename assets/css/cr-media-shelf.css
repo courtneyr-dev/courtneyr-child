@@ -536,14 +536,12 @@
 	content: none;
 }
 
-/* ---- Small screens: labels above their rows, a narrower unit ---- */
-@media (max-width: 40rem) {
+/* ---- Under 60rem the label column would leave room for one case per
+   plank, so labels go above their rows instead ---- */
+@media (max-width: 60rem) {
 
 	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf {
-		--vhs-post: 0.9rem;
-		--vhs-post-edge: 0.25rem;
 		--vhs-label-col: 0.9rem;
-		--vhs-still-life: 7rem;
 		display: block;
 	}
 
@@ -554,6 +552,16 @@
 
 	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .wp-block-post-template.cr-media-shelf__list {
 		padding-block-start: 0.5rem;
+	}
+}
+
+/* ---- Small screens: narrower posts, a shorter still life ---- */
+@media (max-width: 40rem) {
+
+	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf {
+		--vhs-post: 0.9rem;
+		--vhs-post-edge: 0.25rem;
+		--vhs-still-life: 7rem;
 	}
 
 	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--spine::after {
