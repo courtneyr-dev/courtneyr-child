@@ -15,6 +15,7 @@ const CUTOUT_ARCHIVES = ( process.env.CR_CUTOUT_ARCHIVE_PATHS || '/kind/mood/,/t
 const PAGED_KIND_ARCHIVE = process.env.CR_PAGED_KIND_ARCHIVE_PATH || '/kind/note/page/2/'; // a /kind/* archive with at least three pages
 const POST_NAV_POST = process.env.CR_POST_NAV_POST_PATH || '/?p=38071'; // a Blog post with a titled post on each side
 const LISTEN_ARCHIVE = process.env.CR_LISTEN_ARCHIVE_PATH || '/kind/listen/'; // listen archive with at least one listen post (PKIW #226)
+const WATCH_ARCHIVE = process.env.CR_WATCH_ARCHIVE_PATH || '/kind/watch/'; // watch archive page 1 (PKIW #227)
 const AUTOEMBED_CAPTIONED_POST = process.env.CR_AUTOEMBED_CAPTIONED_POST_PATH || '/?p=3010'; // bare YouTube URL whose video has a registered VTT (_cr_youtube_id)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
 const DARK_FIXTURES = [
@@ -323,4 +324,37 @@ test( 'the listen archive is a shelf of cassette cases, one title link each, no 
 	expect( await page.locator( '.cr-archive--listen .cr-archive__header img, .cr-archive--listen .cr-archive__header svg[aria-label]' ).count(), 'the boombox adds no content' ).toBe( 0 );
 	const boombox = await page.locator( '.cr-archive--listen .cr-archive__header' ).evaluate( ( el ) => getComputedStyle( el, '::after' ).backgroundImage );
 	expect( boombox ).toContain( 'cr-boombox.svg' );
+} );
+
+// PKIW #227: the watch archive's page 1 is a "New releases" shelf of up to
+// three face-out clamshells and an "All watches" shelf of spines, each a
+// real h2 over card titles at h3. Later pages are all spines. A spine is
+// one link (its title); no players anywhere on the shelf.
+test( 'the watch archive is labelled VHS shelves, face-out new releases then titled spines', async ( { page } ) => {
+	await page.goto( WATCH_ARCHIVE, { waitUntil: 'load' } );
+	const shelf = page.locator( '.cr-archive--watch .cr-vhs-shelf' );
+	await expect( shelf ).toHaveCount( 1 );
+	expect( await shelf.locator( 'iframe' ).count(), 'no provider player on the shelf' ).toBe( 0 );
+	const labels = shelf.locator( 'h2.cr-vhs-shelf__label' );
+	const texts = await labels.allTextContents();
+	expect( texts[ 0 ] ).toBe( 'New releases' );
+	const face = shelf.locator( 'ul.cr-vhs-shelf__list--face[aria-labelledby="cr-vhs-new"] > li' );
+	const faceCount = await face.count();
+	expect( faceCount ).toBeGreaterThan( 0 );
+	expect( faceCount ).toBeLessThanOrEqual( 3 );
+	for ( const item of await face.all() ) {
+		await expect( item.locator( 'h3.pk-title a' ) ).toHaveCount( 1 );
+	}
+	const spines = shelf.locator( 'ul.cr-vhs-shelf__list--spine[aria-labelledby="cr-vhs-all"] > li' );
+	if ( await spines.count() ) {
+		expect( texts[ 1 ] ).toBe( 'All watches' );
+		for ( const item of await spines.all() ) {
+			const visibleLinks = await item.evaluate( ( li ) => [ ...li.querySelectorAll( 'a' ) ].filter( ( a ) => a.getClientRects().length > 0 ).length );
+			expect( visibleLinks, 'a spine is one link' ).toBe( 1 );
+			const mode = await item.locator( '.pk-caption' ).evaluate( ( el ) => getComputedStyle( el ).writingMode );
+			expect( mode ).toBe( 'vertical-rl' );
+		}
+	}
+	const decor = await page.locator( '.cr-archive--watch .cr-archive__header' ).evaluate( ( el ) => getComputedStyle( el, '::after' ).backgroundImage );
+	expect( decor ).toContain( 'cr-tv-vcr.svg' );
 } );

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" width="480" height="300"><!-- Decorative TV on a VCR for the watch archive (PKIW #227). Palette only; painted as a CSS background, never content. -->
+<rect x="112" y="18" width="268" height="196" rx="18" fill="#023047"/>
+<rect x="100" y="8" width="268" height="196" rx="18" fill="#241c4a" stroke="#bcb5e3" stroke-width="3"/>
+<rect x="120" y="26" width="196" height="160" rx="14" fill="#023047"/>
+<g>
+<rect x="132" y="38" width="29" height="136" fill="#bcb5e3"/>
+<rect x="161" y="38" width="29" height="136" fill="#8ecae6"/>
+<rect x="190" y="38" width="29" height="136" fill="#647baf"/>
+<rect x="219" y="38" width="29" height="136" fill="#219ebc"/>
+<rect x="248" y="38" width="29" height="136" fill="#ffb703"/>
+<rect x="277" y="38" width="27" height="136" fill="#bcb5e3"/>
+</g>
+<rect x="132" y="38" width="172" height="136" rx="8" fill="none" stroke="#241c4a" stroke-width="6"/>
+<circle cx="342" cy="56" r="12" fill="#647baf" stroke="#bcb5e3" stroke-width="3"/>
+<circle cx="342" cy="94" r="12" fill="#647baf" stroke="#bcb5e3" stroke-width="3"/>
+<g fill="#126782"><rect x="330" y="124" width="24" height="5" rx="2"/><rect x="330" y="134" width="24" height="5" rx="2"/><rect x="330" y="144" width="24" height="5" rx="2"/><rect x="330" y="154" width="24" height="5" rx="2"/></g>
+<rect x="80" y="222" width="320" height="66" rx="8" fill="#023047"/>
+<rect x="70" y="214" width="320" height="66" rx="8" fill="#241c4a" stroke="#bcb5e3" stroke-width="3"/>
+<rect x="92" y="232" width="150" height="16" rx="3" fill="#023047" stroke="#647baf" stroke-width="2"/>
+<rect x="276" y="230" width="90" height="22" rx="4" fill="#023047"/>
+<g fill="#fb8500"><rect x="286" y="236" width="6" height="10"/><rect x="296" y="236" width="6" height="10"/><rect x="310" y="236" width="6" height="10"/><rect x="320" y="236" width="6" height="10"/></g>
+<g fill="#647baf"><rect x="92" y="258" width="22" height="10" rx="2"/><rect x="120" y="258" width="22" height="10" rx="2"/><rect x="148" y="258" width="22" height="10" rx="2" fill="#ffb703"/><rect x="176" y="258" width="22" height="10" rx="2"/><rect x="204" y="258" width="22" height="10" rx="2"/></g>
+<circle cx="360" cy="265" r="5" fill="#219ebc"/>
+</svg>
