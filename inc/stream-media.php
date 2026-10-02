@@ -233,7 +233,7 @@ function cut_div( string $html, string $open ): string {
  * Dress a watch or listen stream card as its object.
  *
  * @param string    $html     Rendered stream card.
- * @param array     $block    Parsed stream-card block (unused).
+ * @param array     $block    Parsed stream-card block; its headingLevel sets an added title's level.
  * @param \WP_Block $instance Block instance with the Query Loop's postId.
  * @return string
  */
@@ -313,12 +313,15 @@ function media_card( string $html, array $block, $instance ): string {
 		}
 	}
 
-	// 1. A card without a title gets the post's, linked, in the caption.
+	// 1. A card without a title gets the post's, linked, in the caption, at
+	// the level the stream-card block asked for: the plugin re-levels its
+	// own titles before this filter runs, so a title added here must match.
 	if ( false === strpos( $html, 'pk-title' ) ) {
 		$cap = strpos( $html, '<div class="pk-caption">' );
 		if ( false !== $cap ) {
 			$cap  += 24;
-			$title = '<h2 class="pk-title p-name"><a href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( get_the_title( $post ) ) . '</a></h2>';
+			$level = max( 2, min( 4, (int) ( $block['attrs']['headingLevel'] ?? 2 ) ) );
+			$title = '<h' . $level . ' class="pk-title p-name"><a href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( get_the_title( $post ) ) . '</a></h' . $level . '>';
 			$html  = substr( $html, 0, $cap ) . $title . substr( $html, $cap );
 		}
 	}
