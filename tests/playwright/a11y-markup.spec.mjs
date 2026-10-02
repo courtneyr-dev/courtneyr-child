@@ -356,6 +356,7 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 			expect( mode ).toBe( 'vertical-rl' );
 		}
 	}
-	const decor = await page.locator( '.cr-archive--watch .cr-archive__header' ).evaluate( ( el ) => getComputedStyle( el, '::after' ).backgroundImage );
-	expect( decor ).toContain( 'cr-tv-vcr.svg' );
+	const decor = await page.locator( '.cr-archive--watch .cr-vhs-shelf' ).evaluate( ( el ) => getComputedStyle( el, '::before' ).backgroundImage );
+	expect( decor, 'the TV still life is a CSS background on the unit, not content' ).toContain( 'cr-tv-vcr.svg' );
+	expect( await page.locator( '.cr-archive--watch .cr-vhs-shelf img, .cr-archive--watch .cr-vhs-shelf svg' ).evaluateAll( ( els ) => els.filter( ( e ) => ! e.closest( '.pk-card' ) ).length ), 'no decoration enters the DOM' ).toBe( 0 );
 } );

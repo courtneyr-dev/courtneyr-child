@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 76" width="200" height="76"><!-- Decorative VHS rewinder for the watch archive's bottom shelf (PKIW #227). Palette only; a CSS background, never content. Bottom-aligned at y=76. -->
+<path d="M14 36 L178 22 L190 72 L8 72 Z" fill="#023047"/>
+<path d="M6 30 L170 16 L182 66 L0 66 Z" fill="#241c4a" stroke="#bcb5e3" stroke-width="3"/>
+<rect x="40" y="18" width="80" height="8" rx="2" fill="#fb8500"/>
+<rect x="36" y="36" width="104" height="22" rx="3" fill="#fbfaf5" stroke="#241c4a" stroke-width="2"/>
+<text x="88" y="52" text-anchor="middle" font-family="Barlow, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1" fill="#241c4a">REWIND</text>
+<circle cx="164" cy="30" r="7" fill="#ffb703" stroke="#241c4a" stroke-width="2"/>
+</svg>
