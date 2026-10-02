@@ -338,6 +338,7 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 	const labels = shelf.locator( 'h2.cr-vhs-shelf__label' );
 	const texts = await labels.allTextContents();
 	expect( texts[ 0 ] ).toBe( 'New releases' );
+	expect( await shelf.locator( '.pk-title:not(h3)' ).count(), 'every card title, face-out or spine, is an h3 under its shelf label' ).toBe( 0 );
 	const face = shelf.locator( 'ul.cr-vhs-shelf__list--face[aria-labelledby="cr-vhs-new"] > li' );
 	const faceCount = await face.count();
 	expect( faceCount ).toBeGreaterThan( 0 );
