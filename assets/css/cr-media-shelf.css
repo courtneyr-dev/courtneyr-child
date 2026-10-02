@@ -28,7 +28,7 @@
 	--pkiw-shelf-board-opacity: 1;
 	--pkiw-focus-indicator: var(--cr-focus-ring);
 	columns: auto;
-	column-gap: normal;
+	column-gap: var(--pkiw-shelf-gap-column);
 	align-items: stretch;
 	max-width: 72rem;
 	margin-inline: auto;
@@ -180,3 +180,240 @@
 		display: none;
 	}
 }
+
+/* ============================================================
+   Watch: VHS rental shelf (PKIW #227).
+
+   inc/media-shelf.php splits page 1 into a face-out "New releases"
+   shelf and a spine-out "All watches" shelf, each a list led by a real
+   h2; later pages are all spine-out. One frame holds both shelves.
+   The cards are the Stream's VHS (inc/stream-media.php); here they are
+   repainted as rental clamshells: the stored poster (or a typographic
+   sleeve when there is none) face-out, a titled spine otherwise.
+   ============================================================ */
+
+/* stylelint-disable no-descending-specificity -- the watch section's selectors
+   match different lists (listen vs watch, face vs spine) than the rules it
+   follows, so their order is by section, not by specificity. */
+
+/* One frame around both shelves; each list keeps only its top board. */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf {
+	max-width: 72rem;
+	margin-inline: auto;
+	padding: 1.25rem 0.75rem 0;
+	border: 0 solid var(--cr-prussian-blue);
+	border-inline-width: 0.9rem;
+	border-block-end-width: 0.9rem;
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .wp-block-post-template.cr-media-shelf__list {
+	border: 0;
+	box-shadow: none;
+	margin-block-end: 1.5rem;
+}
+
+/* Shelf labels: paper tags, upright text, a slight lean on the tag. */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__label {
+	display: inline-block;
+	margin: 0 0 0.75rem;
+	padding: 0.3rem 0.8rem;
+	border: 2px solid var(--cr-ink);
+	background: var(--cr-light-orange);
+	color: var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard-sm);
+	font-family: var(--cr-font-accent);
+	font-size: 1rem;
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	line-height: 1.2;
+	text-transform: uppercase;
+	transform: rotate(var(--cr-rotate-1));
+}
+
+/* ---- Face-out: a clamshell showing the stored poster ---- */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--face {
+	--pkiw-shelf-item-min: 11rem;
+	--pkiw-shelf-gap-column: 2rem;
+	grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 14rem));
+	justify-content: start;
+}
+
+/* The text under a clamshell sits on the page, not on a VHS label, so it
+   takes the page's ink (which flips in dark mode). */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:has(.pk-media) .pk-title {
+	color: var(--cr-ink);
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:has(.pk-media) .pk-caption .pk-sub {
+	color: var(--cr-ink-muted);
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+/* The tape-face parts belong to the Stream view, not the clamshell. */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list > li .pk-card.cr-vhs--stream.cr-media--shelf :is(.cr-vhs__reel, .cr-vhs__tape, .cr-vhs__label, .cr-media__mech),
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body::before {
+	display: none;
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-media {
+	order: -1;
+	display: block;
+	aspect-ratio: 2 / 3;
+	padding: 0.45rem 0.45rem 0.45rem 0.9rem;
+	border-radius: 4px;
+	background: var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	border-radius: 2px;
+}
+
+/* No stored poster: a typographic sleeve in the clamshell, still one
+   real post. The title shows on the sleeve as text (the caption, moved
+   up by order), never as generated art. */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:not(:has(.pk-media)) .pk-caption {
+	order: -1;
+	aspect-ratio: 2 / 3;
+	justify-content: flex-end;
+	padding: 1rem 0.75rem 1rem 1.2rem;
+	border: 0.45rem solid var(--cr-russian-violet);
+	border-inline-start-width: 0.9rem;
+	border-radius: 4px;
+	background: var(--cr-cerulean); /* ivory title on cerulean: 6.3:1 */
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:not(:has(.pk-media)) .pk-title {
+	white-space: normal;
+	color: var(--cr-printer-ivory);
+	font-size: 1.15rem;
+	line-height: 1.15;
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:not(:has(.pk-media)) .pk-sub {
+	color: var(--cr-light-orange);
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-title {
+	white-space: normal;
+}
+
+/* ---- Spine-out: a narrow upright case, title set vertically ---- */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--spine {
+	--pkiw-shelf-item-min: 3.75rem;
+	--pkiw-shelf-gap-column: 0.6rem;
+	grid-template-columns: repeat(auto-fill, minmax(3.75rem, 3.75rem));
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--spine > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	height: 15rem;
+	padding: 0.6rem 0.35rem;
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: 3px;
+	background:
+		linear-gradient(var(--cr-printer-ivory), var(--cr-printer-ivory)) center 2.2rem / 70% calc(100% - 4.4rem) no-repeat,
+		var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard-sm);
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--spine > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-caption {
+	display: block;
+	flex: 1 0 auto;
+	box-sizing: border-box;
+	height: 100%;
+	padding-top: 1.75rem; /* physical: keeps the title inside the cream label */
+	padding-bottom: 1.75rem;
+	margin-inline: auto;
+	writing-mode: vertical-rl;
+	transform: rotate(180deg);
+	overflow: hidden;
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--spine > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-title {
+	color: var(--cr-russian-violet);
+	font-size: 0.8rem;
+	display: block;
+	max-height: 100%;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+/* The spine is a label only: the kind marking, poster and sources stay
+   on the single. Date and rating stay in the markup for screen readers
+   (the spine is too narrow to print them legibly). */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--spine > li .pk-card.cr-vhs--stream.cr-media--shelf :is(.pk-kindlabel, .pk-sources, .pk-meta) {
+	display: none;
+}
+
+/* cr-post-kinds.css forces the VHS poster slot to display:flex
+   !important (the single and Stream share that rule), so the spine
+   has to answer in kind to keep the poster off it. */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--spine > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-media {
+	display: none !important;
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--spine > li .pk-card.cr-vhs--stream.cr-media--shelf :is(.pk-stars, .pk-rating-value, .pk-stream-date, .pk-caption .pk-sub) {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+/* ---- Decorative TV and VCR above the shelf (watch) ---- */
+.cr-archive--watch .cr-archive__header::after {
+	content: "";
+	display: block;
+	width: min(22rem, 70%);
+	aspect-ratio: 480 / 300;
+	margin: 1.25rem auto 0;
+	background: url(../img/cr-tv-vcr.svg) center / contain no-repeat;
+}
+
+@media (max-width: 40rem) {
+
+	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf {
+		border-inline-width: 0.5rem;
+		padding-inline: 0.4rem;
+	}
+
+	.cr-archive--watch .cr-archive__header::after {
+		width: min(14rem, 66%);
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf {
+		border-color: CanvasText;
+		box-shadow: none;
+	}
+
+	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__label,
+	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf__list--spine > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body {
+		border-color: CanvasText;
+		box-shadow: none;
+		background: Canvas;
+	}
+
+	.cr-archive--watch .cr-archive__header::after {
+		display: none;
+	}
+}
+
+/* stylelint-enable no-descending-specificity */
