@@ -276,14 +276,17 @@ function plain( string $html ): string {
  * A comic posted through Micropub stores the card, then the picture, then
  * the note again as a paragraph. On the single the bag shows the cover and
  * the notes card shows the note, so the copies would print each twice.
- * Only exact repeats go; any other picture or paragraph stays. The stored
- * post content is not touched.
+ * Only exact repeats go; any other picture or paragraph stays. A group the
+ * repeats leave empty goes with them (Micropub wraps the note in an
+ * e-content group, and an empty e-content would read as the entry's text).
+ * The stored post content is not touched.
  *
  * @param string               $html Rendered content around the card.
  * @param array<string, mixed> $a    Attributes.
  * @return string
  */
 function drop_repeats( string $html, array $a ): string {
+	$given = $html;
 	$cover = trim( (string) ( $a['coverImage'] ?? '' ) );
 	if ( '' !== $cover ) {
 		$html = (string) preg_replace_callback(
@@ -307,6 +310,11 @@ function drop_repeats( string $html, array $a ): string {
 			static fn( array $m ): string => plain( $m[1] ) === $note ? '' : $m[0],
 			$html
 		);
+	}
+	if ( $html !== $given ) {
+		do {
+			$html = (string) preg_replace( '#<div\b[^>]*\bclass="[^"]*(?<![\w-])wp-block-group(?![\w-])[^"]*"[^>]*>\s*</div>#', '', $html, -1, $emptied );
+		} while ( $emptied > 0 );
 	}
 	return $html;
 }

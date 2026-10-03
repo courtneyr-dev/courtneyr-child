@@ -436,10 +436,11 @@ test( 'a comic single is a bagged comic beside its header, notes and reading rec
 	await expect( bag.locator( '.pk-kindlabel' ) ).toHaveText( 'Comic' );
 	// The cover is the page's largest image and sits at the top, so it loads
 	// eagerly with a real src: lazy-load plugins skip fetchpriority="high",
-	// and the cover still shows with scripting off.
+	// and the cover still shows with scripting off. An optimizer may drop the
+	// redundant loading="eager"; what matters is that it is never lazy.
 	const cover = bag.locator( '.pk-media img' );
 	await expect( cover ).toHaveAttribute( 'fetchpriority', 'high' );
-	await expect( cover ).toHaveAttribute( 'loading', 'eager' );
+	expect( await cover.getAttribute( 'loading' ) ).not.toBe( 'lazy' );
 	expect( await cover.getAttribute( 'src' ) ).toMatch( /^https?:/ );
 	const chip = page.locator( '.single-post__header .cr-comic__status-chip' );
 	await expect( chip ).toHaveText( 'Currently reading' );
@@ -479,6 +480,14 @@ test( 'a comic single is a bagged comic beside its header, notes and reading rec
 	} );
 	expect( repeats.covers, 'the cover is shown once' ).toBe( 1 );
 	expect( repeats.notes, 'the note is shown once' ).toBe( 1 );
+	// Skipping the repeats leaves nothing behind: no empty body wrapper, and
+	// no empty e-content for a microformats parser to read as the entry's text.
+	const husks = await page.evaluate( () => {
+		const empty = ( el ) => el.textContent.trim() === '' && ! el.querySelector( 'img, picture, video, audio, iframe, svg, object' );
+		const content = document.querySelector( '.single-post__content' );
+		return [ ...content.querySelectorAll( '.cr-journal__more, .e-content' ) ].filter( empty ).map( ( el ) => el.className );
+	} );
+	expect( husks, 'no empty wrapper is left where the repeats were' ).toEqual( [] );
 	// The "Read / find it" link's focus ring holds 3:1 against the page: it has the halo.
 	const sourceFocus = await page.evaluate( () => {
 		const a = document.querySelector( '.cr-journal--comic .pk-sources__link' );
