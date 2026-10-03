@@ -325,6 +325,7 @@ const POST_KINDS_CARD_BLOCKS = array(
 	'post-kinds-indieweb/jam-card',
 	'post-kinds-indieweb/watch-card',
 	'post-kinds-indieweb/read-card',
+	'post-kinds-indieweb/comic-card',
 	'post-kinds-indieweb/play-card',
 	'post-kinds-indieweb/checkin-card',
 	'post-kinds-indieweb/eat-card',
@@ -837,14 +838,14 @@ add_filter( 'perfmatters_minify_js_exclusions', __NAMESPACE__ . '\\perfmatters_e
  * archive with a single page drops the pager chips (seen as a risk on
  * 2026-10-01 when the kind file was built from /kind/listen/). The site
  * option already excludes cr-post-kinds.css, cr-archives.css and
- * cr-home-sections.css for the same reason; these two join them in code.
+ * cr-home-sections.css for the same reason; these join them in code.
  *
  * @param array<int, string> $exclusions URL fragments Remove Unused CSS skips.
  * @return array<int, string>
  */
 function perfmatters_rucss_exclusions( $exclusions ): array {
 	$exclusions = is_array( $exclusions ) ? $exclusions : array();
-	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css' ) as $file ) {
+	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css' ) as $file ) {
 		$exclusions[] = $file;
 	}
 	return array_values( array_unique( $exclusions ) );
