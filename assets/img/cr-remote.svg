@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 160" width="66" height="160"><!-- Decorative remote for the watch archive's top shelf (PKIW #227). Palette only; a CSS background, never content. Its foot is at y=160. -->
+<rect x="14" y="10" width="50" height="150" rx="8" fill="#241c4a"/><rect x="4" y="2" width="50" height="150" rx="8" fill="#023047" stroke="#bcb5e3" stroke-width="3"/>
+<g fill="#8ecae6"><circle cx="18" cy="26" r="5"/><circle cx="40" cy="26" r="5"/><circle cx="18" cy="46" r="5"/><circle cx="40" cy="46" r="5"/><circle cx="18" cy="66" r="5"/><circle cx="40" cy="66" r="5"/><circle cx="18" cy="86" r="5"/><circle cx="40" cy="86" r="5"/></g>
+<rect x="16" y="110" width="26" height="26" rx="13" fill="#fb8500"/>
+</svg>

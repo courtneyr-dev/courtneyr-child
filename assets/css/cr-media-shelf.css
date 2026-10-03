@@ -209,7 +209,7 @@
 	--vhs-post: 1.4rem;
 	--vhs-post-edge: 0.35rem;
 	--vhs-label-col: 12.5rem;
-	--vhs-still-life: 12rem;
+	--vhs-still-life: 18rem;
 	--vhs-case-ratio: 2 / 3; /* a VHS rental clamshell stands taller than it is wide; the mockup's measure 0.89 but read as boxes */
 	--vhs-case-h: 150cqw; /* the case's height in its card's inline size, for the tag box below the plank */
 	--vhs-plank-paint: linear-gradient(var(--cr-sky-blue) 0 28%, var(--cr-blue-green) 28% 82%, var(--cr-cerulean) 82%);
@@ -229,16 +229,24 @@
 	box-shadow: var(--cr-shadow-hard);
 }
 
-/* The still life (assets/img/cr-tv-vcr.svg) is drawn bottom-aligned, so
-   its feet meet the top plank. Centred and height-scaled: on a narrow
-   screen the tape stacks at its ends clip away and the TV stays. */
+/* The still life on the top plank: separate assets (assets/img/cr-tv-vcr,
+   cr-popcorn, cr-vhs-stack, cr-remote), each a background layer with its
+   own size and position, every one drawn with its foot on the image's
+   bottom edge so it stands on the plank. The TV on its VCR is the focal
+   object (full height), the popcorn beside it, the stacks and remote
+   quieter; narrower screens drop the remote, then the stacks. */
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf::before {
 	content: "";
 	position: absolute;
 	inset-inline: 0;
 	inset-block-end: 100%;
 	height: var(--vhs-still-life);
-	background: url(../img/cr-tv-vcr.svg) center bottom / auto 100% no-repeat;
+	background:
+		url(../img/cr-popcorn.svg) calc(50% + 15rem) bottom / auto 58% no-repeat,
+		url(../img/cr-tv-vcr.svg) center bottom / auto 100% no-repeat,
+		url(../img/cr-vhs-stack.svg) 4% bottom / auto 34% no-repeat,
+		url(../img/cr-remote.svg) 86% bottom / auto 34% no-repeat,
+		url(../img/cr-vhs-stack.svg) 100% bottom / auto 26% no-repeat;
 	pointer-events: none;
 }
 
@@ -312,9 +320,19 @@
 }
 
 /* The plugin's board under each item goes: the plank is drawn at the
-   case's foot instead (below), with the shelf tag under it. */
+   case's foot instead (below), with the shelf tag under it. The grid
+   stretches every item in the row to the tallest; the card fills its
+   item, so every tag in the row ends on one line. */
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li {
+	display: flex; /* the collage rules make the item a block; the card needs a flex parent to grow */
+	flex-direction: column;
 	padding: 0;
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li > .pk-card {
+	flex: 1 0 auto;
+	display: flex;
+	flex-direction: column;
 }
 
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li[class*="kind-"]::after {
@@ -322,6 +340,7 @@
 }
 
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body {
+	flex: 1 0 auto;
 	display: flex;
 	flex-direction: column;
 	gap: 0;
@@ -346,7 +365,7 @@
 	display: block;
 	box-sizing: border-box;
 	aspect-ratio: var(--vhs-case-ratio);
-	margin: 0 0 calc(var(--vhs-plank) + 0.6rem) !important;
+	margin: 0 0 var(--vhs-plank) !important;
 	padding: 0.65rem 0.65rem 0.65rem 2.3rem;
 	transform: none;
 	border-radius: 3px;
@@ -368,6 +387,7 @@
 	border: 0;
 	border-radius: 2px;
 	object-fit: cover;
+	background-color: var(--cr-cerulean); /* outranks the Dominant Color Images plugin's per-image colour: until the cover paints, the recess reads as the sleeve */
 	box-shadow: 0 0 0 2px var(--cr-glaucous); /* the clear sleeve's edge around the art */
 }
 
@@ -398,25 +418,42 @@
 	pointer-events: none;
 }
 
-/* The shelf tag: a paper tag the width of its case, hung under the
-   plank, carrying the Stream's title, year, rating, services and date.
-   Paper and ink are palette colours (a physical object, the same in dark
-   mode); the tag box is the body's ::after, placed from the case's
-   height so it starts where the text does. */
+/* The shelf tag: a paper tag the width of its case, tucked under the
+   plank (its top sits in the plank's shadow) and taped to it, carrying
+   the Stream's title, year, rating, services and date in that order with
+   the date at the foot. Paper and ink are palette colours (a physical
+   object, the same in dark mode). The tag box is the body's ::after,
+   placed from the case's height and running to the item's foot, so every
+   tag in a row shares one bottom edge; a sparse tag shows empty paper. */
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body::after {
 	content: "";
 	position: absolute;
 	z-index: 0;
-	inset: calc(var(--vhs-case-h) + var(--vhs-plank) + 0.6rem) 0 0;
-	border: 2px solid var(--cr-russian-violet);
-	border-radius: 2px;
+	inset: calc(var(--vhs-case-h) + var(--vhs-plank)) 0 0;
+	border-block-end: 2px solid var(--cr-russian-violet);
 	background: var(--cr-printer-ivory);
-	box-shadow: var(--cr-shadow-hard-sm);
+	box-shadow: 0 3px 0 var(--cr-russian-violet);
+	pointer-events: none;
+}
+
+/* The tape tab that holds the tag to the plank. */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body::before {
+	content: "";
+	display: block;
+	position: absolute;
+	z-index: 2;
+	inset-block-start: calc(var(--vhs-case-h) + var(--vhs-plank) - 0.4rem);
+	inset-inline-start: 50%;
+	width: 2.6rem;
+	height: 1rem;
+	background: var(--cr-light-orange);
+	opacity: 0.92;
+	transform: translateX(-50%) rotate(var(--cr-rotate-1));
 	pointer-events: none;
 }
 
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:has(.pk-media) .pk-caption {
-	padding: 0.6rem 0.7rem 0;
+	padding: 0.95rem 0.7rem 0; /* clear of the plank's shadow and the tab */
 	overflow: visible;
 }
 
@@ -436,8 +473,13 @@
 	padding: 0.4rem 0.7rem 0;
 }
 
+/* The watched date sits at the tag's foot whatever the tag above it holds. */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body > .pk-stream-date {
+	margin-block-start: auto;
+}
+
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:not(:has(.pk-media)) > .pk-sources {
-	padding-block-start: 0.6rem;
+	padding-block-start: 0.95rem;
 }
 
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body > .pk-stars {
@@ -457,7 +499,7 @@
 	box-sizing: border-box;
 	aspect-ratio: var(--vhs-case-ratio);
 	justify-content: flex-end;
-	margin: 0 0 calc(var(--vhs-plank) + 0.6rem);
+	margin: 0 0 var(--vhs-plank);
 	padding: 1rem 0.75rem 1rem 1.2rem;
 	border: 0.65rem solid var(--cr-russian-violet);
 	border-inline-start-width: 2.3rem;
@@ -598,13 +640,35 @@
 	}
 }
 
-/* ---- Small screens: narrower posts, a shorter still life ---- */
+/* ---- Under 64rem the remote and the far stack go, so the TV and
+   popcorn keep their size ---- */
+@media (max-width: 64rem) {
+
+	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf {
+		--vhs-still-life: 15rem;
+	}
+
+	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf::before {
+		background:
+			url(../img/cr-popcorn.svg) calc(50% + 12.5rem) bottom / auto 58% no-repeat,
+			url(../img/cr-tv-vcr.svg) center bottom / auto 100% no-repeat,
+			url(../img/cr-vhs-stack.svg) 4% bottom / auto 34% no-repeat;
+	}
+}
+
+/* ---- Small screens: narrower posts; the TV and popcorn only ---- */
 @media (max-width: 40rem) {
 
 	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf {
 		--vhs-post: 0.9rem;
 		--vhs-post-edge: 0.25rem;
-		--vhs-still-life: 7rem;
+		--vhs-still-life: 11rem;
+	}
+
+	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf::before {
+		background:
+			url(../img/cr-popcorn.svg) right 2% bottom / auto 58% no-repeat,
+			url(../img/cr-tv-vcr.svg) 42% bottom / auto 100% no-repeat;
 	}
 
 	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--spine::after {
