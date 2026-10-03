@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 270" width="230" height="270"><!-- Decorative cut-paper popcorn bucket for the watch archive's top shelf (PKIW #227). Palette only; a CSS background, never content. The bucket's foot is at y=270. -->
+<g transform="rotate(-2.5 115 190)">
+<!-- shadow -->
+<path d="M50 118 L192 114 L178 266 L66 268 Z" fill="#241c4a"/>
+<!-- bucket, striped under a clip -->
+<clipPath id="b"><path d="M42 110 Q40 106 46 106 L184 102 Q190 102 189 108 L172 258 Q171 262 166 262 L62 264 Q56 264 56 258 Z"/></clipPath>
+<g clip-path="url(#b)"><rect x="40" y="100" width="150" height="170" fill="#fbfaf5"/><g fill="#fb8500"><rect x="58" y="100" width="18" height="170"/><rect x="94" y="100" width="18" height="170"/><rect x="130" y="100" width="18" height="170"/><rect x="166" y="100" width="18" height="170"/></g></g>
+<path d="M42 110 Q40 106 46 106 L184 102 Q190 102 189 108 L172 258 Q171 262 166 262 L62 264 Q56 264 56 258 Z" fill="none" stroke="#241c4a" stroke-width="4" stroke-linejoin="round"/>
+<!-- rim -->
+<path d="M38 104 Q115 92 194 98 L192 112 Q115 106 40 116 Z" fill="#fbfaf5" stroke="#241c4a" stroke-width="4" stroke-linejoin="round"/>
+<!-- kernels: back row -->
+<g stroke="#241c4a" stroke-width="2.5" stroke-linejoin="round">
+<path d="M70 70 q-14 -4 -10 -16 q4 -12 16 -8 q8 -14 20 -6 q12 -6 14 8 q12 4 4 16 q-2 12 -14 10 q-8 10 -18 2 q-12 4 -12 -6 Z" fill="#ffb703"/>
+<path d="M128 46 q-12 -6 -6 -16 q6 -10 16 -4 q10 -12 20 -2 q10 -2 8 10 q10 8 0 16 q-4 10 -14 6 q-10 8 -18 0 q-10 2 -6 -10 Z" fill="#ffb703"/>
+<path d="M176 74 q-12 -4 -8 -14 q6 -10 16 -6 q8 -10 18 -2 q10 0 8 12 q6 8 -4 14 q-4 8 -14 4 q-10 6 -16 -2 q-10 0 -8 -6 Z" fill="#ffb703"/>
+<!-- front row, overflowing the rim -->
+<path d="M46 102 q-14 -6 -8 -18 q6 -12 18 -6 q10 -12 20 -2 q12 -4 12 10 q10 8 0 16 q-4 10 -16 6 q-10 8 -18 0 q-12 2 -8 -6 Z" fill="#ffb703"/>
+<path d="M96 90 q-12 -8 -4 -18 q8 -10 18 -4 q10 -12 22 -2 q12 0 8 12 q8 10 -2 16 q-6 10 -16 6 q-10 8 -20 0 q-10 0 -6 -10 Z" fill="#ffb703"/>
+<path d="M150 96 q-12 -6 -6 -16 q6 -12 18 -6 q10 -12 20 0 q10 -2 8 12 q8 8 -2 14 q-4 10 -14 6 q-10 8 -18 0 q-10 2 -6 -10 Z" fill="#ffb703"/>
+<path d="M190 112 q-10 -6 -4 -14 q6 -10 16 -4 q10 -8 16 2 q8 2 4 12 q4 10 -6 12 q-6 6 -14 2 q-10 4 -12 -4 Z" fill="#ffb703"/>
+<!-- one spilled on the shelf -->
+<path d="M14 254 q-8 -6 -2 -12 q6 -8 14 -2 q8 -6 14 2 q6 2 2 10 q2 8 -6 10 q-6 4 -12 0 q-8 2 -10 -8 Z" fill="#ffb703"/>
+</g>
+<!-- highlights -->
+<g fill="#fee2c3"><ellipse cx="78" cy="58" rx="7" ry="4" transform="rotate(-25 78 58)"/><ellipse cx="138" cy="34" rx="7" ry="4" transform="rotate(-25 138 34)"/><ellipse cx="186" cy="62" rx="6" ry="4" transform="rotate(-25 186 62)"/><ellipse cx="56" cy="88" rx="7" ry="4" transform="rotate(-25 56 88)"/><ellipse cx="108" cy="76" rx="8" ry="4" transform="rotate(-25 108 76)"/><ellipse cx="160" cy="82" rx="7" ry="4" transform="rotate(-25 160 82)"/><ellipse cx="200" cy="104" rx="5" ry="3" transform="rotate(-25 200 104)"/><ellipse cx="22" cy="246" rx="5" ry="3" transform="rotate(-25 22 246)"/></g>
+<g fill="#fbfaf5"><circle cx="86" cy="52" r="2.5"/><circle cx="146" cy="28" r="2.5"/><circle cx="64" cy="82" r="2.5"/><circle cx="118" cy="70" r="2.5"/><circle cx="170" cy="76" r="2.5"/></g>
+</g>
+</svg>
