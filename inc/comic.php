@@ -343,6 +343,19 @@ function split_at_container_end( string $html ): array {
 }
 
 /**
+ * Would this markup put anything on the page? Text or media counts;
+ * comments, whitespace and elements carrying the hidden attribute (the
+ * plugin's entry properties) do not.
+ *
+ * @param string $html Markup.
+ * @return bool
+ */
+function shows_something( string $html ): bool {
+	$html = (string) preg_replace( array( '/<!--.*?-->/s', '#<(\w+)\b[^>]*\shidden(?:=""|(?=[\s>/]))[^>]*>.*?</\1>#s' ), '', $html );
+	return '' !== plain( $html ) || 1 === preg_match( '/<(?:img|picture|video|audio|iframe|svg|object|embed|canvas|hr|table|form)\b/i', $html );
+}
+
+/**
  * Put markup just before the card's meta row, the last thing in its body.
  *
  * @param string $html   Card.
@@ -706,7 +719,7 @@ function comic_page( string $html, array $block ): string {
 	// Whatever the author wrote after the card follows the record and the
 	// link in the same column, in the order it was written.
 	list( $more, $tail ) = split_at_container_end( $rest );
-	if ( '' !== trim( (string) preg_replace( '/<!--.*?-->/s', '', $more ) ) ) {
+	if ( shows_something( $more ) ) {
 		$after .= '<div class="cr-journal__more is-layout-flow">' . $more . '</div>';
 		$rest   = $tail;
 	}

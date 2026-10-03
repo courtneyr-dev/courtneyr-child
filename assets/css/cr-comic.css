@@ -781,7 +781,7 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 			var(--comic-gap)
 			[details-start] minmax(0, calc(var(--wp--style--global--wide-size) - var(--comic-bag) - var(--comic-gap))) [details-end]
 			minmax(0, 1fr);
-		grid-template-rows: auto auto auto auto minmax(0, 1fr);
+		grid-template-rows: repeat(6, auto) minmax(0, 1fr);
 	}
 
 	body.cr-comic-single .single-post__content > *,
@@ -805,7 +805,7 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 
 	body.cr-comic-single .single-post__content .cr-journal--comic > .pk-card.cr-comic--single {
 		grid-column: bag;
-		grid-row: 1 / span 5;
+		grid-row: 1 / -1;
 		align-self: start;
 		width: 100%;
 		margin: 0.5rem 0 0;
@@ -832,6 +832,14 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 	body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 		grid-column: details;
 		grid-row: 5;
+	}
+
+	/* "Also on" follows the record in its column. */
+	body.cr-comic-single .single-post__content > .syndication-links,
+	body.cr-comic-single .single-post__content div:has(.cr-journal--comic) > .syndication-links {
+		grid-column: details;
+		grid-row: 6;
+		margin-top: 2rem;
 	}
 }
 
