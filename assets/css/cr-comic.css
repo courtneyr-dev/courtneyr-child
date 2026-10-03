@@ -1,0 +1,1147 @@
+/* ============================================================
+   Comics you read (PKIW #228): the bagged comic on three surfaces.
+
+   inc/comic.php decides what each surface holds; this file paints it.
+     Archive  .cr-comic-rack: a comic-shop rack. The Query Loop's list is
+              the rack; tiers, uprights and the wire rail are backgrounds,
+              so empty rack space adds no DOM and no placeholder items.
+     Stream   .cr-comic--stream: one bagged issue in the collage.
+     Single   body.cr-comic-single: the bag left of the post header, the
+              notes card and the reading record.
+
+   The bag, board and rack use the palette tokens (not the semantic
+   ones), so they keep their colour in dark mode like the other physical
+   objects; page text, focus and hard shadows use the semantic tokens.
+   Text stays upright: only the tape and the sticker's underline tilt.
+   ============================================================ */
+
+/* ---- The bag: a backing board in a clear sleeve ---- */
+.pk-card.cr-comic .pk-media {
+	position: relative;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0.5rem;
+	background: var(--cr-periwinkle);
+	border: 1.5px solid var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard);
+	transform: none;
+}
+
+.pk-card.cr-comic .pk-media img {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 2 / 3;
+	object-fit: cover;
+	border: 1px solid var(--cr-russian-violet);
+	border-radius: 0;
+	background-color: var(--cr-printer-ivory);
+}
+
+/* The sleeve: its edge sits just outside the board, with one hard glint. */
+.pk-card.cr-comic .pk-media::after {
+	content: "";
+	position: absolute;
+	inset: -0.3rem;
+	border: 1px solid color-mix(in srgb, var(--cr-russian-violet) 45%, transparent);
+	background: linear-gradient(112deg, transparent 0 64%, color-mix(in srgb, var(--cr-white) 26%, transparent) 64% 68%, transparent 68%);
+	pointer-events: none;
+}
+
+/* The tape that closes the sleeve's flap. */
+.pk-card.cr-comic .pk-media::before {
+	content: "";
+	position: absolute;
+	z-index: 1;
+	inset-block-start: -0.75rem;
+	inset-inline-end: 1.1rem;
+	width: 3.4rem;
+	height: 1.15rem;
+	border: 1px solid color-mix(in srgb, var(--cr-russian-violet) 25%, transparent);
+	background: var(--cr-tape);
+	transform: rotate(var(--cr-rotate-neg2));
+	pointer-events: none;
+}
+
+/* No stored artwork: a typographic cover from the card's own title. */
+.pk-card.cr-comic .pk-media.cr-comic__cover--type {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 0.5rem;
+	aspect-ratio: 2 / 3;
+	padding: clamp(0.85rem, 3.5vw, 1.4rem) clamp(0.8rem, 3vw, 1.2rem);
+	background: var(--cr-cerulean);
+	box-shadow: inset 0 0 0 0.5rem var(--cr-periwinkle), var(--cr-shadow-hard);
+	color: var(--cr-printer-ivory);
+	overflow: hidden;
+}
+
+.pk-card.cr-comic .cr-comic__type-title {
+	font-family: var(--cr-font-accent);
+	font-size: clamp(1rem, 4.2vw, 1.15rem);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+}
+
+.pk-card.cr-comic .cr-comic__type-creators {
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	line-height: var(--cr-leading-snug);
+}
+
+/* Stored artwork that failed to load (assets/js/site-ux.js marks the
+   card): the board becomes the typographic cover. */
+.pk-card.cr-comic.cr-comic--no-art .pk-media {
+	aspect-ratio: 2 / 3;
+	background: var(--cr-cerulean);
+	box-shadow: inset 0 0 0 0.5rem var(--cr-periwinkle), var(--cr-shadow-hard);
+}
+
+/* ============================================================
+   Archive: the rack
+   ============================================================ */
+.cr-comic-rack {
+	max-width: 72rem;
+	margin-inline: auto;
+}
+
+.cr-comic-rack .wp-block-post-template.cr-comic-rack__list {
+	--rack-cols: 4;
+	--rack-lip: 2.75rem;
+	--rack-comic: clamp(8rem, 15vw, 11rem);
+	--rack-tier: calc(var(--rack-comic) * 1.5 + 6.5rem);
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(var(--rack-cols), minmax(0, 1fr));
+	grid-auto-rows: var(--rack-tier);
+	gap: 0;
+	min-height: calc(var(--rack-tier) * 3);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	columns: auto;
+	border: 2px solid var(--cr-russian-violet);
+	background:
+		/* Each tier's front lip. */
+		repeating-linear-gradient(180deg, transparent 0 calc(var(--rack-tier) - var(--rack-lip)), var(--cr-russian-violet) calc(var(--rack-tier) - var(--rack-lip)) calc(var(--rack-tier) - var(--rack-lip) + 2px), var(--cr-glaucous) calc(var(--rack-tier) - var(--rack-lip) + 2px) calc(var(--rack-tier) - 2px), var(--cr-russian-violet) calc(var(--rack-tier) - 2px) var(--rack-tier)),
+		/* The slotted uprights between bays. */
+		linear-gradient(90deg, var(--cr-glaucous-dark) 0 0.4rem, transparent 0.4rem) 0 0 / calc(100% / var(--rack-cols)) 100%,
+		var(--cr-prussian-blue);
+	box-shadow: var(--cr-shadow-hard-2);
+}
+
+/* The wire rail that keeps issues from tipping forward. */
+.cr-comic-rack .wp-block-post-template.cr-comic-rack__list::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: repeating-linear-gradient(180deg, transparent 0 calc(var(--rack-tier) - var(--rack-lip) - 2.4rem), var(--cr-light-gray) calc(var(--rack-tier) - var(--rack-lip) - 2.4rem) calc(var(--rack-tier) - var(--rack-lip) - 2.4rem + 2px), transparent calc(var(--rack-tier) - var(--rack-lip) - 2.4rem + 2px) var(--rack-tier));
+	pointer-events: none;
+}
+
+.cr-comic-rack .wp-block-post-template.cr-comic-rack__list > li {
+	position: relative;
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+	box-sizing: border-box;
+	min-width: 0;
+	margin: 0;
+	padding: 0 0.75rem var(--rack-lip);
+	break-inside: auto;
+}
+
+/* The card is the bag and nothing else. */
+.cr-comic-rack .cr-comic-rack__list > li .pk-card {
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	width: min(var(--rack-comic), 100%);
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	transform: none;
+	overflow: visible;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card::before,
+.cr-comic-rack .cr-comic-rack__list > li .pk-card::after {
+	content: none;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-body {
+	display: block;
+	margin: 0;
+	padding: 0;
+	transform: none;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-caption,
+.cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-title {
+	margin: 0;
+	padding: 0;
+	font-size: var(--cr-text-base);
+	line-height: 1;
+}
+
+/* A strip its author drew: its picture, unbagged, with its title on a
+   shelf tag. The title link covers the picture. */
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-body {
+	display: flex;
+	flex-direction: column;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-media {
+	order: -1;
+	margin: 0;
+	padding: 0.35rem;
+	border: 1.5px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+	transform: none;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-media img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 2 / 3;
+	border-radius: 0;
+	object-fit: cover;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-caption {
+	margin: 0.45rem 0 -2.25rem;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-title {
+	padding: 0.2rem 0.45rem;
+	border: 1px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-semibold);
+	line-height: var(--cr-leading-snug);
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-title a {
+	color: var(--cr-russian-violet);
+	text-decoration: none;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-title a::after {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset: 0;
+}
+
+/* The title's link is the whole bag. Its text is the accessible name; the
+   cover (or the typographic cover) is what a sighted reader sees. */
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-title a {
+	position: absolute;
+	z-index: 2;
+	inset: 0;
+	overflow: hidden;
+	color: transparent;
+	white-space: nowrap;
+	text-indent: 200%;
+}
+
+/* No artwork arrived: the link's own text is the cover's title. */
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack.cr-comic--no-art .pk-title a {
+	display: flex;
+	align-items: center;
+	box-sizing: border-box;
+	padding: clamp(0.85rem, 3.5vw, 1.4rem) clamp(0.8rem, 3vw, 1.2rem);
+	color: var(--cr-printer-ivory);
+	font-family: var(--cr-font-accent);
+	font-size: clamp(1rem, 4.2vw, 1.15rem);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+	white-space: normal;
+	text-decoration: none;
+	text-indent: 0;
+	overflow-wrap: anywhere;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-title a::before,
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-title a::after {
+	content: none;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-title a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 5px;
+	box-shadow: 0 0 0 8px var(--cr-focus-halo);
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-title a:focus-visible {
+	outline: none;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-title a:focus-visible::after {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 5px;
+	box-shadow: 0 0 0 8px var(--cr-focus-halo);
+}
+
+/* Status sticker: upright text on a round label, top corner of the bag. */
+.cr-comic-rack .cr-comic__sticker {
+	position: absolute;
+	z-index: 1;
+	inset-block-start: -0.9rem;
+	inset-inline-end: -0.9rem;
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	width: 4.9rem;
+	height: 4.9rem;
+	margin: 0;
+	padding: 0.4rem;
+	border: 1.5px solid var(--cr-russian-violet);
+	border-radius: var(--cr-radius-full);
+	background: var(--cr-selective-yellow);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: max(0.75rem, var(--cr-text-floor));
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+	text-align: center;
+	pointer-events: none;
+}
+
+.cr-comic-rack .cr-comic__sticker--to-read {
+	background: var(--cr-light-orange);
+}
+
+.cr-comic-rack .cr-comic__sticker--abandoned {
+	background: var(--cr-light-gray);
+}
+
+/* Series and issue: a shelf tag on the lip under the bag. */
+.cr-comic-rack .cr-comic__label {
+	position: absolute;
+	inset-block-start: calc(100% + 0.45rem);
+	inset-inline: 0;
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 0.35rem;
+	justify-content: center;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0.2rem 0.45rem;
+	border: 1px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-semibold);
+	line-height: var(--cr-leading-snug);
+	white-space: nowrap;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.cr-comic-rack .cr-comic__label .pk-comic-series {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.cr-comic-rack .cr-comic__label :is(.pk-comic-volume, .pk-comic-number) {
+	flex: none;
+}
+
+@media (max-width: 64rem) {
+
+	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list {
+		--rack-cols: 3;
+		--rack-comic: clamp(7.5rem, 22vw, 10rem);
+	}
+}
+
+@media (max-width: 40rem) {
+
+	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list {
+		--rack-cols: 2;
+		--rack-comic: clamp(6.5rem, 34vw, 9rem);
+	}
+
+	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list > li {
+		padding-inline: 0.6rem;
+	}
+
+	.cr-comic-rack .cr-comic__sticker {
+		inset-inline-end: -0.5rem;
+		width: 4.4rem;
+		height: 4.4rem;
+	}
+}
+
+/* ============================================================
+   Single: the bag beside its details
+   ============================================================ */
+body.cr-comic-single .single-post__featured,
+body.cr-comic-single .single-post__lede-meta .single-post__date,
+body.cr-comic-single .single-post__meta {
+	display: none;
+}
+
+/* Under the H1: creators, stars, status. */
+body.cr-comic-single .cr-comic__creators {
+	margin: 0.35rem 0 0;
+	color: var(--cr-ink);
+	font-family: var(--cr-font-accent);
+	font-size: 1.35rem;
+	font-weight: var(--cr-weight-regular);
+}
+
+body.cr-comic-single .cr-comic__creators::after {
+	content: "";
+	display: block;
+	width: 6rem;
+	height: 0.3rem;
+	margin-top: 0.4rem;
+	border-radius: 1px;
+	background: var(--cr-cerulean);
+	transform: rotate(var(--cr-rotate-1));
+}
+
+body.cr-comic-single .cr-journal__rating {
+	display: flex;
+	align-items: center;
+	gap: 0.15rem;
+	margin: 0.45rem 0 0;
+	color: var(--cr-selective-yellow);
+}
+
+body.cr-comic-single .cr-journal__star {
+	display: inline-flex;
+	width: 1.35rem;
+	height: 1.35rem;
+}
+
+body.cr-comic-single .cr-journal__star svg {
+	width: 100%;
+	height: 100%;
+	stroke: var(--cr-russian-violet);
+	stroke-width: 1;
+}
+
+body.cr-comic-single .cr-journal__star--off {
+	color: transparent;
+}
+
+body.cr-comic-single .cr-journal__rating-value {
+	margin-left: 0.5rem;
+	color: var(--cr-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	letter-spacing: var(--cr-tracking-eyebrow);
+}
+
+body.cr-comic-single .cr-comic__status {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem 0.8rem;
+	margin: 0.6rem 0 0;
+	color: var(--cr-ink-muted);
+	font-family: var(--cr-font-mono);
+	font-size: max(0.75rem, var(--cr-text-floor));
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+}
+
+body.cr-comic-single .cr-comic__status-chip {
+	display: inline-block;
+	padding: 0.28rem 0.7rem;
+	border-radius: 2px;
+	background: var(--cr-sky-blue);
+	color: var(--cr-prussian-blue);
+	font-weight: var(--cr-weight-bold);
+}
+
+body.cr-comic-single .cr-comic__status--reading .cr-comic__status-chip {
+	background: var(--cr-selective-yellow);
+	color: var(--cr-russian-violet);
+}
+
+body.cr-comic-single .cr-comic__status--abandoned .cr-comic__status-chip {
+	background: var(--cr-light-gray);
+	color: var(--cr-russian-violet);
+}
+
+body.cr-comic-single .cr-comic__status--to-read .cr-comic__status-chip {
+	background: var(--cr-light-orange);
+	color: var(--cr-russian-violet);
+}
+
+/* The bag. Title, creators, stars and dates stay in the card for
+   microformats; the header and the record show them. */
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single {
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	width: min(100% - 1.5rem, 18rem);
+	margin: 1.5rem auto 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	overflow: visible;
+}
+
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single::before,
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single::after {
+	content: none;
+}
+
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-body {
+	position: relative;
+	display: block;
+	margin: 0;
+	padding: 0;
+}
+
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single :is(.pk-badge, .pk-caption, .pk-stars, .pk-meta) {
+	display: none;
+}
+
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-media {
+	padding: 0.85rem;
+	box-shadow: var(--cr-shadow-hard-2);
+}
+
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single .cr-comic__type-title {
+	font-size: var(--cr-text-2xl);
+}
+
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single .cr-comic__type-creators {
+	font-size: var(--cr-text-md);
+}
+
+/* The stand the bag leans in. */
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-body::after {
+	content: "";
+	display: block;
+	height: 0.9rem;
+	margin: 0.35rem -0.9rem 0;
+	border: 1.5px solid var(--cr-russian-violet);
+	border-radius: var(--cr-radius-xs);
+	background: var(--cr-light-gray);
+}
+
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-kindlabel {
+	position: absolute;
+	z-index: 3;
+	inset: 0.4rem 0.4rem auto auto;
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	width: 5.4rem;
+	height: 5.4rem;
+	margin: 0;
+	padding: 0;
+	border: 1.5px solid var(--cr-russian-violet);
+	border-radius: var(--cr-radius-full);
+	background: var(--cr-selective-yellow);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-base);
+	font-weight: var(--cr-weight-extrabold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: 1;
+	text-transform: uppercase;
+	transform: none;
+}
+
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-kindlabel::after {
+	content: "";
+	position: absolute;
+	inset: auto 1.1rem 1.3rem;
+	height: 2px;
+	background: var(--cr-russian-violet);
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+body.cr-comic-single .cr-journal--comic {
+	display: flex;
+	flex-direction: column;
+	gap: 1.75rem;
+}
+
+/* ---- Notes: a torn notebook sheet (the Read single's) ---- */
+body.cr-comic-single .cr-journal__notes {
+	position: relative;
+	margin: 0;
+	padding: 1.4rem 1.6rem 1.6rem 2.9rem;
+	border: 1.5px solid var(--cr-ink);
+	background-color: var(--cr-printer-ivory);
+	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.7rem - 1px), color-mix(in srgb, var(--cr-russian-violet) 13%, transparent) calc(1.7rem - 1px) 1.7rem);
+	background-position: 0 1.25rem;
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+}
+
+body.cr-comic-single .cr-journal__notes::before {
+	content: "";
+	position: absolute;
+	inset-block: 1rem;
+	inset-inline-start: 0.85rem;
+	width: 0.9rem;
+	background: radial-gradient(circle 0.3rem at 50% 50%, var(--cr-russian-violet) 0 55%, transparent 60%) 0 0 / 0.9rem 1.7rem repeat-y;
+	opacity: 0.85;
+	pointer-events: none;
+}
+
+body.cr-comic-single .cr-journal__notes-title {
+	display: block;
+	margin: 0 0 0.9rem;
+	padding: 0 0 0.3rem;
+	border-bottom: 2px solid var(--cr-russian-violet);
+	background: none;
+	box-shadow: none;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-display);
+	font-size: 1.3rem;
+	font-weight: var(--cr-weight-regular);
+	line-height: 1.5;
+	letter-spacing: normal;
+	text-transform: none;
+}
+
+body.cr-comic-single .cr-journal__notes .pk-note {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: 0.92rem;
+	line-height: 1.848;
+}
+
+body.cr-comic-single .cr-journal__notes .pk-note p {
+	margin: 0 0 1.7rem;
+}
+
+body.cr-comic-single .cr-journal__notes .pk-note p:last-child {
+	margin-bottom: 0;
+}
+
+/* ---- Reading record: a library card (the Read single's) ---- */
+body.cr-comic-single .cr-record {
+	position: relative;
+	margin: 0;
+	padding: 1.1rem 1.4rem 1.6rem;
+	border: 1.5px solid var(--cr-ink);
+	background-color: var(--cr-printer-ivory);
+	background-image: repeating-linear-gradient(180deg, transparent 0 1.9rem, color-mix(in srgb, var(--cr-russian-violet) 8%, transparent) 1.9rem calc(1.9rem + 1px));
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+}
+
+body.cr-comic-single .cr-record::before {
+	content: "";
+	position: absolute;
+	inset: 0.45rem;
+	border: 1px solid color-mix(in srgb, var(--cr-russian-violet) 40%, transparent);
+	pointer-events: none;
+}
+
+body.cr-comic-single .cr-record-eyebrow {
+	margin: 0;
+	color: var(--cr-cerulean);
+	font-size: max(0.75rem, var(--cr-text-floor));
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+}
+
+body.cr-comic-single .cr-record-title {
+	margin: 0.15rem 0 0.9rem;
+	padding-bottom: 0.45rem;
+	border-bottom: 2px solid var(--cr-russian-violet);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: max(0.82rem, var(--cr-text-floor));
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-widest);
+	text-transform: uppercase;
+}
+
+body.cr-comic-single .cr-record-rows {
+	display: grid;
+	gap: 0;
+	margin: 0;
+	padding: 0;
+}
+
+body.cr-comic-single .cr-record-row {
+	display: grid;
+	grid-template-columns: 7.5rem minmax(0, 1fr);
+	gap: 0.6rem;
+	align-items: baseline;
+	padding: 0.42rem 0;
+	border-bottom: 1px dotted color-mix(in srgb, var(--cr-russian-violet) 45%, transparent);
+}
+
+body.cr-comic-single .cr-record-row dt {
+	margin: 0;
+	color: var(--cr-russian-violet-soft);
+	font-size: max(0.75rem, var(--cr-text-floor));
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+}
+
+body.cr-comic-single .cr-record-row dd {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-size: 0.86rem;
+	overflow-wrap: anywhere;
+}
+
+body.cr-comic-single .cr-record-stamp {
+	position: absolute;
+	right: 0.9rem;
+	bottom: -1.2rem;
+	width: 7rem;
+	mix-blend-mode: multiply;
+	pointer-events: none;
+}
+
+body.cr-comic-single .cr-record-stamp .cr-stamp {
+	width: 100%;
+	height: auto;
+}
+
+body.cr-comic-single .cr-record:has(.cr-record-stamp) .cr-record-rows {
+	padding-right: 5.5rem;
+}
+
+/* ---- Read / find it ---- */
+body.cr-comic-single .cr-journal--comic > .pk-sources {
+	margin: 0;
+}
+
+body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__label {
+	margin: 0 0 0.5rem;
+	color: var(--cr-ink-muted);
+	font-family: var(--cr-font-mono);
+	font-size: max(0.75rem, var(--cr-text-floor));
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-widest);
+	text-transform: uppercase;
+}
+
+body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.55rem 0.65rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__list li {
+	margin: 0;
+	padding: 0;
+}
+
+body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__list li::before,
+body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__list li::marker {
+	content: none;
+}
+
+body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__link {
+	display: inline-flex;
+	gap: 0.4rem;
+	align-items: center;
+	padding: 0.3rem 0.75rem;
+	border: 1.5px solid var(--cr-russian-violet);
+	background: var(--cr-light-orange);
+	box-shadow: var(--cr-shadow-hard-sm);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-decoration: none;
+	text-transform: uppercase;
+}
+
+body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__link:hover {
+	background: var(--cr-selective-yellow);
+}
+
+body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__link:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 3px;
+}
+
+/* Wide screens: the bag stands left of the header, notes and record.
+   The header and the post content are siblings in <main>, so the content's
+   wrappers step aside (display: contents) and the bag, notes and record
+   join the header as items of one grid. The gap leaves room for the H1's
+   own flank marks (format avatar, starburst), which hang to its left. */
+@media (min-width: 64rem) {
+
+	body.cr-comic-single main.single-post {
+		--comic-bag: 22rem;
+		--comic-gap: 8rem;
+		display: grid;
+		grid-template-columns:
+			minmax(0, 1fr)
+			[bag-start] minmax(0, var(--comic-bag)) [bag-end]
+			var(--comic-gap)
+			[details-start] minmax(0, calc(var(--wp--style--global--wide-size) - var(--comic-bag) - var(--comic-gap))) [details-end]
+			minmax(0, 1fr);
+		grid-template-rows: auto auto auto auto minmax(0, 1fr);
+	}
+
+	body.cr-comic-single .single-post__content > *,
+	body.cr-comic-single main.single-post > *,
+	body.cr-comic-single .single-post__content div:has(.cr-journal--comic) > * {
+		grid-column: 1 / -1;
+	}
+
+	body.cr-comic-single .single-post__content,
+	body.cr-comic-single .single-post__content div:has(.cr-journal--comic),
+	body.cr-comic-single .cr-journal--comic {
+		display: contents;
+	}
+
+	body.cr-comic-single main.single-post > .single-post__header {
+		grid-column: details;
+		grid-row: 1;
+		width: 100%;
+		max-width: none;
+	}
+
+	body.cr-comic-single .single-post__content .cr-journal--comic > .pk-card.cr-comic--single {
+		grid-column: bag;
+		grid-row: 1 / span 5;
+		align-self: start;
+		width: 100%;
+		margin: 0.5rem 0 0;
+	}
+
+	body.cr-comic-single .cr-journal--comic > .cr-journal__notes {
+		grid-column: details;
+		grid-row: 2;
+		margin-top: 2rem;
+	}
+
+	body.cr-comic-single .cr-journal--comic > .cr-record {
+		grid-column: details;
+		grid-row: 3;
+		margin-top: 2rem;
+	}
+
+	body.cr-comic-single .cr-journal--comic > .pk-sources {
+		grid-column: details;
+		grid-row: 4;
+		margin-top: 2.25rem;
+	}
+}
+
+@media (max-width: 40rem) {
+
+	body.cr-comic-single .cr-journal__notes {
+		padding-left: 2.4rem;
+	}
+
+	body.cr-comic-single .cr-record-row {
+		grid-template-columns: 6rem minmax(0, 1fr);
+	}
+
+	body.cr-comic-single .cr-record:has(.cr-record-stamp) .cr-record-rows {
+		padding-right: 0;
+		padding-bottom: 3.6rem;
+	}
+
+	body.cr-comic-single .cr-record-stamp {
+		width: 5.5rem;
+		bottom: -0.9rem;
+	}
+}
+
+/* ============================================================
+   Stream: one bagged issue in the collage
+   ============================================================ */
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream {
+	display: block;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	overflow: visible;
+	aspect-ratio: auto;
+	color: var(--cr-russian-violet);
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream::before,
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream::after {
+	content: none;
+	display: none;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-badge {
+	display: none;
+}
+
+/* The board carries the cover and, under it, the issue's paper slip. */
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-body {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	width: auto;
+	padding: 0.55rem;
+	border: 1.5px solid var(--cr-russian-violet);
+	border-radius: 0;
+	background: var(--cr-periwinkle);
+	box-shadow: var(--cr-shadow-hard);
+	overflow: visible;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-media {
+	order: -1;
+	padding: 0;
+	border: 0;
+	box-shadow: none;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-media::after {
+	inset: 0;
+	border: 0;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-media::before {
+	inset-block-start: -1.15rem;
+}
+
+/* The caption steps aside so its lines and the stars order as one slip:
+   title, issue, creators, rating, status, note. */
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-caption {
+	display: contents;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream :is(.pk-title, .pk-sub, .pk-stars, .pk-note) {
+	margin: 0;
+	padding: 0.2rem 0.85rem;
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-title {
+	order: 1;
+	padding-block-start: 0.75rem;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+	letter-spacing: var(--cr-tracking-tight);
+	overflow-wrap: anywhere;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-sub {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.15rem 0.5rem;
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-base);
+	line-height: var(--cr-leading-snug);
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-sub.pk-comic-issue {
+	order: 2;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-sub:has(.p-author) {
+	order: 3;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-sub:has(.pk-comic-status) {
+	order: 5;
+	padding-block-end: 0.7rem;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-comic-status {
+	display: inline-block;
+	padding: 0.1rem 0.7rem;
+	border-radius: var(--cr-radius-full);
+	background: var(--cr-periwinkle);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-semibold);
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-stars {
+	order: 4;
+	display: flex;
+	align-items: center;
+	gap: 0.1rem;
+	color: var(--cr-selective-yellow);
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-stars svg {
+	width: 1.1rem;
+	height: 1.1rem;
+	stroke: var(--cr-russian-violet);
+	stroke-width: 1;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-stars svg.off {
+	color: transparent;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-rating-value {
+	margin-inline-start: 0.45rem;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-semibold);
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-note {
+	order: 6;
+	margin-block-start: -0.4rem;
+	padding-block-end: 0.85rem;
+	border: 0;
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	line-height: var(--cr-leading-normal);
+}
+
+/* A link inside the note stays its own target above the bag's link. */
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-note a {
+	position: relative;
+	z-index: 3;
+}
+
+/* The title link covers the whole bag: cover and slip. */
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-title a {
+	color: var(--cr-russian-violet);
+	text-decoration: none;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-title a::after {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset: 0;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-title a:focus-visible {
+	outline: none;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-title a:focus-visible::after {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+/* Kind label: a round sticker on the bag's top corner. */
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-kindlabel {
+	position: absolute;
+	z-index: 3;
+	inset: 0.1rem 0.1rem auto auto;
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	width: 4.6rem;
+	height: 4.6rem;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	border: 1.5px solid var(--cr-russian-violet);
+	border-radius: var(--cr-radius-full);
+	background: var(--cr-selective-yellow);
+	box-shadow: none;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-extrabold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: 1;
+	text-transform: uppercase;
+	transform: none;
+	pointer-events: none;
+}
+
+.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-kindlabel::after {
+	content: "";
+	position: absolute;
+	inset: auto 1rem 1.15rem;
+	height: 2px;
+	background: var(--cr-russian-violet);
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+/* ============================================================
+   Forced colours: the objects become outlines; text stays text.
+   ============================================================ */
+@media (forced-colors: active) {
+
+	.pk-card.cr-comic .pk-media,
+	.cr-comic-rack .cr-comic__sticker,
+	.cr-comic-rack .cr-comic__label,
+	body.cr-comic-single .cr-journal__notes,
+	body.cr-comic-single .cr-record,
+	body.cr-comic-single .cr-comic__status-chip,
+	body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-kindlabel,
+	.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-body,
+	.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-kindlabel {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+		box-shadow: none;
+		forced-color-adjust: none;
+	}
+
+	.pk-card.cr-comic .pk-media::before,
+	.pk-card.cr-comic .pk-media::after {
+		content: none;
+	}
+
+	.pk-card.cr-comic .pk-media.cr-comic__cover--type,
+	.pk-card.cr-comic .cr-comic__type-title,
+	.pk-card.cr-comic .cr-comic__type-creators {
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list {
+		border-color: CanvasText;
+		background:
+			repeating-linear-gradient(180deg, transparent 0 calc(var(--rack-tier) - 3px), CanvasText calc(var(--rack-tier) - 3px) var(--rack-tier)),
+			Canvas;
+		box-shadow: none;
+		forced-color-adjust: none;
+	}
+
+	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list::after {
+		content: none;
+	}
+
+	.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-title a:focus-visible,
+	.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-title a:focus-visible::after {
+		outline-color: Highlight;
+		box-shadow: none;
+	}
+}

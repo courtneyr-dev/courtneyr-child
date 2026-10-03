@@ -16,6 +16,8 @@ const PAGED_KIND_ARCHIVE = process.env.CR_PAGED_KIND_ARCHIVE_PATH || '/kind/note
 const POST_NAV_POST = process.env.CR_POST_NAV_POST_PATH || '/?p=38071'; // a Blog post with a titled post on each side
 const LISTEN_ARCHIVE = process.env.CR_LISTEN_ARCHIVE_PATH || '/kind/listen/'; // listen archive with at least one listen post (PKIW #226)
 const WATCH_ARCHIVE = process.env.CR_WATCH_ARCHIVE_PATH || '/kind/watch/'; // watch archive page 1 (PKIW #227)
+const COMICS_ARCHIVE = process.env.CR_COMICS_ARCHIVE_PATH || '/kind/comics/'; // comics archive with at least one comic read (PKIW #228)
+const COMIC_SINGLE = process.env.CR_COMIC_SINGLE_PATH || '/2026/09/06/anzuelo/'; // a comic read (comic-card) still being read, with a cover and a stored start date
 const AUTOEMBED_CAPTIONED_POST = process.env.CR_AUTOEMBED_CAPTIONED_POST_PATH || '/?p=3010'; // bare YouTube URL whose video has a registered VTT (_cr_youtube_id)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
 const DARK_FIXTURES = [
@@ -360,3 +362,117 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 	expect( decor, 'the TV still life is a CSS background on the unit, not content' ).toContain( 'cr-tv-vcr.svg' );
 	expect( await page.locator( '.cr-archive--watch .cr-vhs-shelf img, .cr-archive--watch .cr-vhs-shelf svg' ).evaluateAll( ( els ) => els.filter( ( e ) => ! e.closest( '.pk-card' ) ).length ), 'no decoration enters the DOM' ).toBe( 0 );
 } );
+
+// PKIW #228: the comics archive is a comic-shop rack filled by the archive
+// query. Each comic read is its bagged cover and one link (the h2 title,
+// stretched over the bag; the rack has no section labels, so titles sit
+// directly under the h1); rating, dates, creators and notes stay on the
+// single. Empty rack space is CSS, never placeholder items.
+test( 'the comics archive is a rack of bagged comics, one title link each, no metadata under the covers', async ( { page } ) => {
+	await page.goto( COMICS_ARCHIVE, { waitUntil: 'load' } );
+	await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
+	const list = page.locator( '.cr-archive--comics ul.cr-comic-rack__list' );
+	await expect( list ).toHaveCount( 1 );
+	const items = list.locator( ':scope > li' );
+	const count = await items.count();
+	expect( count ).toBeGreaterThan( 0 );
+	expect( await list.locator( 'article.pk-card' ).count(), 'one card per query item, no filler' ).toBe( count );
+	expect( await list.locator( '.pk-title:not(h2)' ).count(), 'every rack title is an h2 under the archive h1' ).toBe( 0 );
+	const bagged = list.locator( 'article.pk-card.cr-comic--rack' );
+	expect( await bagged.count(), 'the fixture archive holds at least one comic read' ).toBeGreaterThan( 0 );
+	for ( const card of await bagged.all() ) {
+		const link = card.locator( 'h2.pk-title a' );
+		await expect( link ).toHaveCount( 1 );
+		expect( ( await link.textContent() )?.trim().length ).toBeGreaterThan( 0 );
+		expect( await card.locator( 'a' ).count(), 'a racked comic is one link' ).toBe( 1 );
+		expect( await card.locator( '.pk-stars, .p-rating, .pk-note, .pk-meta, .pk-kindlabel, .pk-stream-date, .pk-sources, .p-author, .pk-comic-status, .pk-comic-publisher, time' ).count(), 'no rating, date, creator, note or status paragraph on the rack' ).toBe( 0 );
+		// The bag is the link's hit area, and the link is not wrapped around the cover.
+		const hit = await card.evaluate( ( el ) => {
+			// Instant: the site scrolls smoothly, and a smooth scroll has not moved yet.
+			el.scrollIntoView( { block: 'center', behavior: 'instant' } );
+			const bag = el.querySelector( '.pk-media' ).getBoundingClientRect();
+			const at = document.elementFromPoint( bag.left + bag.width / 2, bag.top + bag.height / 2 );
+			return { link: at?.closest( 'a' ) === el.querySelector( '.pk-title a' ), imgInLink: !! el.querySelector( 'a img' ) };
+		} );
+		expect( hit.link, 'the bag is the title link' ).toBe( true );
+		expect( hit.imgInLink ).toBe( false );
+		for ( const sticker of await card.locator( '.cr-comic__sticker' ).allTextContents() ) {
+			expect( [ 'Currently reading', 'To read', 'Set aside' ] ).toContain( sticker.trim() );
+		}
+	}
+	// A strip its author drew is on the rack as its picture and one title link.
+	for ( const strip of await list.locator( 'article.pk-card.cr-comic-strip' ).all() ) {
+		// The entry's hidden author h-card link is not rendered; count what is.
+		const rendered = await strip.evaluate( ( el ) => [ ...el.querySelectorAll( 'a' ) ].filter( ( a ) => a.getClientRects().length > 0 ).length );
+		expect( rendered, 'an authored strip is one link' ).toBe( 1 );
+		expect( await strip.locator( '.u-read-of, .h-cite' ).count(), 'and claims no read-of' ).toBe( 0 );
+	}
+	// Three tiers of rack stand even when one comic is all there is.
+	const rack = await list.evaluate( ( ul ) => ( { min: parseFloat( getComputedStyle( ul ).minHeight ), tier: parseFloat( getComputedStyle( ul ).gridAutoRows ), tilt: getComputedStyle( ul.querySelector( '.pk-title' ) ).transform } ) );
+	expect( rack.tier ).toBeGreaterThan( 0 );
+	expect( rack.min ).toBeGreaterThanOrEqual( rack.tier * 3 );
+	expect( rack.tilt ).toBe( 'none' );
+	expect( await page.locator( '.cr-archive--comics .cr-comic-rack img, .cr-archive--comics .cr-comic-rack svg' ).evaluateAll( ( els ) => els.filter( ( e ) => ! e.closest( '.pk-card' ) ).length ), 'no decoration enters the DOM' ).toBe( 0 );
+} );
+
+// PKIW #228: a comic read's single keeps the bagged comic left of the post
+// header, notes card and reading record on wide screens. A comic still being
+// read is labelled by its start, never as read or finished.
+test( 'a comic single is a bagged comic beside its header, notes and reading record, with truthful date labels', async ( { page } ) => {
+	await page.goto( COMIC_SINGLE, { waitUntil: 'load' } );
+	await expect( page.locator( 'body.cr-comic-single' ) ).toHaveCount( 1 );
+	await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
+	const bag = page.locator( '.single-post__content article.pk-card.k-comics.cr-comic--single' );
+	await expect( bag ).toHaveCount( 1 );
+	await expect( bag.locator( '.pk-kindlabel' ) ).toHaveText( 'Comic' );
+	const chip = page.locator( '.single-post__header .cr-comic__status-chip' );
+	await expect( chip ).toHaveText( 'Currently reading' );
+	const when = page.locator( '.single-post__header .cr-comic__status-when' );
+	await expect( when ).toHaveCount( 1 );
+	expect( ( await when.textContent() )?.trim() ).toMatch( /^since / );
+	const terms = await page.locator( '.cr-record .cr-record-row dt' ).allTextContents();
+	expect( terms ).toContain( 'Started' );
+	for ( const term of terms ) {
+		expect( [ 'Started', 'Finished', 'Set aside', 'Series', 'Volume', 'Issue', 'Publisher' ] ).toContain( term );
+	}
+	expect( terms, 'a comic still being read has no end date' ).not.toContain( 'Finished' );
+	// The record's start is the stored calendar day, the same one the header shows.
+	const started = await page.locator( '.cr-record .cr-record-row:has(dt:text-is("Started")) time' ).getAttribute( 'datetime' );
+	expect( started ).toMatch( /^\d{4}-\d{2}-\d{2}$/ );
+	expect( await when.locator( 'time' ).getAttribute( 'datetime' ) ).toBe( started );
+	await expect( page.locator( 'nav.cr-post-nav' ) ).toHaveCount( 1 );
+	const spread = await page.evaluate( () => {
+		const b = document.querySelector( 'article.cr-comic--single' ).getBoundingClientRect();
+		const h = document.querySelector( 'h1' ).getBoundingClientRect();
+		const n = document.querySelector( '.cr-journal__notes, .cr-record' ).getBoundingClientRect();
+		return { bagRight: b.right, bagTop: b.top, h1Left: h.left, h1Top: h.top, notesLeft: n.left };
+	} );
+	expect( spread.bagRight, 'the bag stands left of the header' ).toBeLessThanOrEqual( spread.h1Left );
+	expect( spread.bagRight ).toBeLessThanOrEqual( spread.notesLeft );
+	expect( spread.bagTop, 'the bag starts level with the header, not below it' ).toBeLessThan( spread.h1Top + 40 );
+} );
+
+// PKIW #228: on the Stream a comic read is one bagged card in the collage:
+// cover, kind label, title link over the whole card, creators, rating,
+// status and note. No post date, publisher or end date.
+test( 'the Stream shows a comic read as one bagged card whose title link covers it', async ( { page } ) => {
+	await page.goto( '/stream/', { waitUntil: 'load' } );
+	test.skip( ( await page.locator( 'body.cr-stream-page li.kind-comics' ).count() ) === 0, 'no comics post on the first Stream page' );
+	const cards = page.locator( 'body.cr-stream-page article.pk-card.k-comics.cr-comic--stream' );
+	expect( await cards.count(), 'the first Stream page holds at least one comic read' ).toBeGreaterThan( 0 );
+	for ( const card of await cards.all() ) {
+		await expect( card.locator( '.pk-kindlabel' ) ).toHaveText( 'Comic' );
+		await expect( card.locator( '.pk-title a' ) ).toHaveCount( 1 );
+		expect( await card.locator( '.pk-stream-date, .pk-comic-publisher, .pk-meta time' ).count() ).toBe( 0 );
+		const hit = await card.evaluate( ( el ) => {
+			el.scrollIntoView( { block: 'center', behavior: 'instant' } );
+			const box = el.querySelector( '.pk-media' ).getBoundingClientRect();
+			const at = document.elementFromPoint( box.left + box.width / 2, box.top + box.height / 2 );
+			return at?.closest( 'a' ) === el.querySelector( '.pk-title a' );
+		} );
+		expect( hit, 'the cover is part of the title link' ).toBe( true );
+	}
+	const columns = await page.locator( 'body.cr-stream-page .wp-block-post-template' ).first().evaluate( ( el ) => getComputedStyle( el ).columnWidth );
+	expect( columns, 'the Stream stays a multi-column collage' ).not.toBe( 'auto' );
+} );
+

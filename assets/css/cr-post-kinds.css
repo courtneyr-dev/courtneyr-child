@@ -3610,38 +3610,38 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
    One SVG per stamp, ink from --cr-stamp-ink, fixed width per shape so a
    footer's height never depends on the variant. Tilts are the only
    transform; both the passport and the booth consume these rules. */
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp-mark { display: block; line-height: 0; mix-blend-mode: multiply; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp-mark--tilt-0 { transform: rotate(-3deg); }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp-mark--tilt-1 { transform: rotate(-1deg); }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp-mark--tilt-2 { transform: rotate(1.5deg); }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp-mark--tilt-3 { transform: rotate(3.5deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp-mark { display: block; line-height: 0; mix-blend-mode: multiply; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp-mark--tilt-0 { transform: rotate(-3deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp-mark--tilt-1 { transform: rotate(-1deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp-mark--tilt-2 { transform: rotate(1.5deg); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp-mark--tilt-3 { transform: rotate(3.5deg); }
 /* Stamps sit close, the second tucked against the first like real
    overprints; they only ever overlap each other, never content. */
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp-mark + .cr-stamp-mark { margin-left: -0.9rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp { display: block; height: auto; opacity: 0.9; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp--rect { width: 8.4rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp--seal,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp--octagon { width: 5.8rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp--postmark { width: 10rem; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp rect,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp circle,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp > path,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp .cr-stamp__waves { fill: none; stroke: var(--cr-stamp-ink, #241c4a); stroke-linecap: round; stroke-linejoin: round; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp text,
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp .cr-stamp__glyph { fill: var(--cr-stamp-ink, #241c4a); }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp text {
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp-mark + .cr-stamp-mark { margin-left: -0.9rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp { display: block; height: auto; opacity: 0.9; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp--rect { width: 8.4rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp--seal,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp--octagon { width: 5.8rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp--postmark { width: 10rem; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp rect,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp circle,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp > path,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp .cr-stamp__waves { fill: none; stroke: var(--cr-stamp-ink, #241c4a); stroke-linecap: round; stroke-linejoin: round; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp text,
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp .cr-stamp__glyph { fill: var(--cr-stamp-ink, #241c4a); }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp text {
 	font-family: var(--cr-font-mono, monospace);
 	text-anchor: middle;
 	text-transform: uppercase;
 	font-weight: 700;
 }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__big { font-size: 21px; letter-spacing: 2px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__big--seal { font-size: 12.5px; letter-spacing: 1.4px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__mid { font-size: 11.5px; letter-spacing: 1.2px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__mid--seal { font-size: 10px; letter-spacing: 1px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__small { font-size: 9px; letter-spacing: 1px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__tiny { font-size: 8px; letter-spacing: 1px; }
-:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink) .cr-stamp__ring { font-size: 9.5px; letter-spacing: 2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp__big { font-size: 21px; letter-spacing: 2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp__big--seal { font-size: 12.5px; letter-spacing: 1.4px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp__mid { font-size: 11.5px; letter-spacing: 1.2px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp__mid--seal { font-size: 10px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp__small { font-size: 9px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp__tiny { font-size: 8px; letter-spacing: 1px; }
+:is(.cr-stream-page, body.single-post.kind-checkin, body.single-post.kind-read, body.single-post.kind-watch, body.single-post.kind-eat, body.single-post.kind-drink, body.cr-comic-single) .cr-stamp__ring { font-size: 9.5px; letter-spacing: 2px; }
 .cr-stream-page .cr-passport .cr-passport__entry {
 	flex: 1 1 100%;
 	margin: 0.1rem 0 0;
