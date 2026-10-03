@@ -273,14 +273,14 @@
 	z-index: 2;
 	justify-self: start;
 	align-self: start;
-	margin: 1.4rem 0 0 0.75rem;
-	padding: 0.35rem 0.9rem;
+	margin: 1.4rem 0 0 0.25rem; /* clear of the first case and its focus halo, which starts 14px outside it */
+	padding: 0.3rem 0.6rem;
 	border: 0;
 	background: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
 	box-shadow: var(--cr-shadow-hard-sm);
 	font-family: var(--cr-font-accent);
-	font-size: 1.05rem;
+	font-size: 0.92rem;
 	font-weight: 800;
 	letter-spacing: 0.06em;
 	line-height: 1.2;
