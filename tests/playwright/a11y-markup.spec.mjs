@@ -425,6 +425,13 @@ test( 'a comic single is a bagged comic beside its header, notes and reading rec
 	const bag = page.locator( '.single-post__content article.pk-card.k-comics.cr-comic--single' );
 	await expect( bag ).toHaveCount( 1 );
 	await expect( bag.locator( '.pk-kindlabel' ) ).toHaveText( 'Comic' );
+	// The cover is the page's largest image and sits at the top, so it loads
+	// eagerly with a real src: lazy-load plugins skip fetchpriority="high",
+	// and the cover still shows with scripting off.
+	const cover = bag.locator( '.pk-media img' );
+	await expect( cover ).toHaveAttribute( 'fetchpriority', 'high' );
+	await expect( cover ).toHaveAttribute( 'loading', 'eager' );
+	expect( await cover.getAttribute( 'src' ) ).toMatch( /^https?:/ );
 	const chip = page.locator( '.single-post__header .cr-comic__status-chip' );
 	await expect( chip ).toHaveText( 'Currently reading' );
 	const when = page.locator( '.single-post__header .cr-comic__status-when' );
