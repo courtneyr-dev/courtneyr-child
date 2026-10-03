@@ -416,10 +416,16 @@ test( 'the comics archive is a rack of bagged comics, one title link each, no me
 		expect( rendered, 'an authored strip is one link' ).toBe( 1 );
 		expect( await strip.locator( '.u-read-of, .h-cite' ).count(), 'and claims no read-of' ).toBe( 0 );
 	}
-	// Three tiers of rack stand even when one comic is all there is.
-	const rack = await list.evaluate( ( ul ) => ( { min: parseFloat( getComputedStyle( ul ).minHeight ), tier: parseFloat( getComputedStyle( ul ).gridAutoRows ), tilt: getComputedStyle( ul.querySelector( '.pk-title' ) ).transform } ) );
+	// The rack is as tall as its comics need: one tier per row of the grid.
+	// A sparse page keeps the unused bays of its last row and holds no tier
+	// for posts that don't exist yet.
+	const rack = await list.evaluate( ( ul ) => {
+		const cs = getComputedStyle( ul );
+		return { tier: parseFloat( cs.gridAutoRows ), cols: cs.gridTemplateColumns.split( ' ' ).length, height: ul.clientHeight, tilt: getComputedStyle( ul.querySelector( '.pk-title' ) ).transform };
+	} );
 	expect( rack.tier ).toBeGreaterThan( 0 );
-	expect( rack.min ).toBeGreaterThanOrEqual( rack.tier * 3 );
+	expect( rack.cols, 'a row has more than one bay' ).toBeGreaterThan( 1 );
+	expect( Math.abs( rack.height - Math.ceil( count / rack.cols ) * rack.tier ), `${ count } comics at ${ rack.cols } across stand on ${ Math.ceil( count / rack.cols ) } tier(s)` ).toBeLessThanOrEqual( 1 );
 	expect( rack.tilt ).toBe( 'none' );
 	expect( await page.locator( '.cr-archive--comics .cr-comic-rack img, .cr-archive--comics .cr-comic-rack svg' ).evaluateAll( ( els ) => els.filter( ( e ) => ! e.closest( '.pk-card' ) ).length ), 'no decoration enters the DOM' ).toBe( 0 );
 } );
