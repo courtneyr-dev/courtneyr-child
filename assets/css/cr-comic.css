@@ -119,7 +119,6 @@
 	grid-template-columns: repeat(var(--rack-cols), minmax(0, 1fr));
 	grid-auto-rows: var(--rack-tier);
 	gap: 0;
-	min-height: calc(var(--rack-tier) * 3);
 	margin: 0;
 	padding: 0;
 	list-style: none;
