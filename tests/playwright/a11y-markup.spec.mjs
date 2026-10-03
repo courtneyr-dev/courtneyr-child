@@ -504,6 +504,19 @@ test( 'a comic single is a bagged comic beside its header, notes and reading rec
 		const n = document.querySelector( '.cr-journal__notes, .cr-record' ).getBoundingClientRect();
 		return { bagRight: b.right, bagTop: b.top, h1Left: h.left, h1Top: h.top, notesLeft: n.left };
 	} );
+	// "Also on" (syndication links) follows the record in its column; it is
+	// not a stray line at the page edge under the bag.
+	const alsoOn = await page.evaluate( () => {
+		const s = document.querySelector( '.single-post__content .syndication-links' );
+		if ( ! s || s.getClientRects().length === 0 ) return null;
+		const r = document.querySelector( '.cr-record' ).getBoundingClientRect();
+		const b = s.getBoundingClientRect();
+		return { left: b.left, top: b.top, recordLeft: r.left, recordBottom: r.bottom };
+	} );
+	if ( alsoOn !== null ) {
+		expect( Math.abs( alsoOn.left - alsoOn.recordLeft ), 'syndication links start where the record starts' ).toBeLessThanOrEqual( 1 );
+		expect( alsoOn.top ).toBeGreaterThan( alsoOn.recordBottom );
+	}
 	expect( spread.bagRight, 'the bag stands left of the header' ).toBeLessThanOrEqual( spread.h1Left );
 	expect( spread.bagRight ).toBeLessThanOrEqual( spread.notesLeft );
 	expect( spread.bagTop, 'the bag starts level with the header, not below it' ).toBeLessThan( spread.h1Top + 40 );
