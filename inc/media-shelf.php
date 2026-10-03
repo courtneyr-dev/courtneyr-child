@@ -117,7 +117,7 @@ function split_vhs_shelf( string $html, array $block ): string {
 	}
 
 	$paged   = max( 1, (int) get_query_var( 'paged' ) );
-	$face    = 1 === $paged ? array_slice( $parts, 0, NEW_RELEASES ) : array();
+	$face    = 1 === $paged ? array_map( __NAMESPACE__ . '\\case_only', array_slice( $parts, 0, NEW_RELEASES ) ) : array();
 	$spine   = 1 === $paged ? array_slice( $parts, NEW_RELEASES ) : $parts;
 	$heading = static fn( string $id, string $text ): string => '<h2 class="cr-vhs-shelf__label" id="' . esc_attr( $id ) . '">' . esc_html( $text ) . '</h2>';
 	$list    = static function ( string $modifier, string $labelled_by, array $lis ) use ( $list_open ): string {
@@ -138,3 +138,79 @@ function split_vhs_shelf( string $html, array $block ): string {
 	return '<div class="cr-vhs-shelf">' . $out . '</div>';
 }
 add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\split_vhs_shelf', 10, 2 );
+
+/**
+ * Cut every element of one tag that carries a class from a fragment.
+ *
+ * Counts nesting of the same tag so an element's own children of that
+ * tag don't end it early. Used on the Stream card's metadata, whose
+ * elements nest at most one level of their own tag.
+ *
+ * @param string $html       Fragment.
+ * @param string $tag        Tag name.
+ * @param string $class_name One class the element carries.
+ * @return string
+ */
+function cut_elements( string $html, string $tag, string $class_name ): string {
+	$open = '/<' . $tag . '\\b[^>]*\\bclass="[^"]*(?<![\\w-])' . preg_quote( $class_name, '/' ) . '(?![\\w-])[^"]*"[^>]*>/';
+	while ( preg_match( $open, $html, $m, PREG_OFFSET_CAPTURE ) ) {
+		$start = (int) $m[0][1];
+		$pos   = $start + strlen( $m[0][0] );
+		$depth = 1;
+		while ( $depth > 0 && preg_match( '/<(\\/?)' . $tag . '\\b[^>]*>/', $html, $t, PREG_OFFSET_CAPTURE, $pos ) ) {
+			$pos    = (int) $t[0][1] + strlen( $t[0][0] );
+			$depth += '/' === $t[1][0] ? -1 : 1;
+		}
+		if ( $depth > 0 ) {
+			return $html; // No closing tag: leave the fragment alone rather than cut blind.
+		}
+		$html = substr( $html, 0, $start ) . substr( $html, $pos );
+	}
+	return $html;
+}
+
+/**
+ * Reduce a face-out watch item to its case (PKIW #227, approved 2026-10-03).
+ *
+ * The archive is for browsing cases; the year, rating, "Watch / find it"
+ * links, date and meta links stay on the single post. What remains in the
+ * item is the clamshell (cover or title sleeve) and its h3 title link,
+ * which the stylesheet turns into the whole case's link. With a cover,
+ * the title is the link's one accessible name and the cover's alt is
+ * emptied so it isn't announced a second time; without one, the title
+ * shows on the sleeve. `.pk-entry-props` outside the card keeps the
+ * entry's dt-published for microformats.
+ *
+ * @param string $item One rendered <li>.
+ * @return string
+ */
+function case_only( string $item ): string {
+	foreach ( array( array( 'p', 'pk-sub' ), array( 'div', 'pk-stars' ), array( 'data', 'p-rating' ), array( 'div', 'pk-sources' ), array( 'div', 'pk-meta' ), array( 'span', 'pk-kindlabel' ) ) as $cut ) {
+		$item = cut_elements( $item, $cut[0], $cut[1] );
+	}
+	$card  = array(
+		'tag_name'   => 'article',
+		'class_name' => 'pk-card',
+	);
+	$cover = array(
+		'tag_name'   => 'div',
+		'class_name' => 'pk-media',
+	);
+	$tags  = new \WP_HTML_Tag_Processor( $item );
+	if ( ! $tags->next_tag( $card ) ) {
+		return $item;
+	}
+	$tags->add_class( 'cr-vhs--case' );
+	$has_cover = $tags->next_tag( $cover );
+	if ( $has_cover && $tags->next_tag( 'img' ) ) {
+		$tags->set_attribute( 'alt', '' );
+	}
+	$item = $tags->get_updated_html();
+	if ( $has_cover ) {
+		$tags = new \WP_HTML_Tag_Processor( $item );
+		$tags->next_tag( $card );
+		$tags->add_class( 'has-cover' );
+		$item = $tags->get_updated_html();
+	}
+	return $item;
+}
