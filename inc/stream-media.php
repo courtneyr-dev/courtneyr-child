@@ -300,7 +300,15 @@ function media_card( string $html, array $block, $instance ): string {
 		// (in place of the plugin's poster art), as the generic stream card
 		// did; a post without one keeps whatever the plugin rendered.
 		if ( has_post_thumbnail( $post ) ) {
-			$thumb = '<div class="pk-media pk-media--stream">' . get_the_post_thumbnail( $post, 'medium_large', array( 'class' => 'u-photo', 'loading' => 'lazy' ) ) . '</div>';
+			// The watch shelf's face-out covers (page 1, first NEW_RELEASES
+			// posts) load eagerly: they sit at the top of the archive, and
+			// Perfmatters' lazy load skips an image whose fetchpriority is
+			// high, so its fade-in can't hold the recess empty (PKIW #227).
+			$attrs = array( 'class' => 'u-photo', 'loading' => 'lazy' );
+			if ( 'watch' === $shelf && ! is_paged() && in_the_loop() && $GLOBALS['wp_query']->current_post < \Courtneyr\Child\MediaShelf\NEW_RELEASES ) {
+				$attrs = array( 'class' => 'u-photo', 'loading' => 'eager', 'fetchpriority' => 'high' );
+			}
+			$thumb = '<div class="pk-media pk-media--stream">' . get_the_post_thumbnail( $post, 'medium_large', $attrs ) . '</div>';
 			$m_pos = strpos( $html, '<div class="pk-media' );
 			if ( false !== $m_pos ) {
 				$m_open = substr( $html, $m_pos, strpos( $html, '>', $m_pos ) - $m_pos + 1 );
