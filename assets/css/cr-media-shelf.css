@@ -429,8 +429,10 @@
 }
 
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:has(.pk-media) .pk-caption {
+	align-items: start;
 	gap: 0.1rem;
 	padding: 0;
+	text-align: start;
 	overflow: visible;
 }
 
