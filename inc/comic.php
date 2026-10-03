@@ -573,6 +573,22 @@ function comic_page( string $html, array $block ): string {
 	}
 	$card = card_classes( $card, array_merge( array( 'cr-comic', 'cr-comic--single', 'cr-comic--' . $a['readStatus'] ), $has_cover ? array( 'has-cover' ) : array() ) );
 
+	// The cover stands at the top of the page and is its largest image.
+	// Eager with fetchpriority high: the browser fetches it first, and
+	// Perfmatters' lazy load (which skips fetchpriority="high") leaves its
+	// real src in place, so it also shows with scripting off.
+	$tags = new \WP_HTML_Tag_Processor( $card );
+	if ( $has_cover && $tags->next_tag(
+		array(
+			'tag_name'   => 'img',
+			'class_name' => 'u-photo',
+		)
+	) ) {
+		$tags->set_attribute( 'loading', 'eager' );
+		$tags->set_attribute( 'fetchpriority', 'high' );
+		$card = $tags->get_updated_html();
+	}
+
 	$after = '';
 	if ( '' !== $note ) {
 		$after .= notes_section( __( 'Notes from this read', 'courtneyr-child' ), $note );
