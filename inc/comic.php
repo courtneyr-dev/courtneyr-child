@@ -391,6 +391,39 @@ function card_classes( string $html, array $classes ): string {
 }
 
 /**
+ * Name the rack's title link by its own text and the shelf tag beside it.
+ *
+ * Volume and issue print next to the link, not in it. Named by its text
+ * alone, two issues of one series are the same link to a screen reader, so
+ * the link is labelled by both. The tag stays where it is: the heading's
+ * p-name and the one-line layout don't change. Only a link that comes
+ * before the tag is named, because the tag follows the heading.
+ *
+ * @param string $html Card with the tag after its title.
+ * @return string
+ */
+function name_link_by_tag( string $html ): string {
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	if ( ! $tags->next_tag( array( 'class_name' => 'pk-title' ) ) || ! $tags->next_tag( 'a' ) ) {
+		return $html;
+	}
+	$title = wp_unique_id( 'cr-comic-title-' );
+	$label = wp_unique_id( 'cr-comic-label-' );
+	$tags->set_attribute( 'id', $title );
+	$tags->set_attribute( 'aria-labelledby', $title . ' ' . $label );
+	if ( ! $tags->next_tag(
+		array(
+			'tag_name'   => 'p',
+			'class_name' => 'cr-comic__label',
+		)
+	) ) {
+		return $html;
+	}
+	$tags->set_attribute( 'id', $label );
+	return $tags->get_updated_html();
+}
+
+/**
  * Dress a comic read's stream card for the rack or the Stream.
  *
  * @param string    $html     Rendered stream card.
@@ -488,6 +521,7 @@ function bag_card( string $html, array $block, $instance ): string {
 			if ( false !== strpos( $issue, '<span' ) ) {
 				$label = str_replace( 'class="pk-sub pk-comic-issue"', 'class="cr-comic__label"', $issue );
 				$html  = (string) preg_replace( '#</h[2-4]>#', '$0' . $label, $html, 1 );
+				$html  = name_link_by_tag( $html );
 			}
 		}
 		$extra = $has_cover ? '' : type_cover( $a, $post, false );
