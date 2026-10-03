@@ -381,10 +381,21 @@ test( 'the comics archive is a rack of bagged comics, one title link each, no me
 	expect( await list.locator( '.pk-title:not(h2)' ).count(), 'every rack title is an h2 under the archive h1' ).toBe( 0 );
 	const bagged = list.locator( 'article.pk-card.cr-comic--rack' );
 	expect( await bagged.count(), 'the fixture archive holds at least one comic read' ).toBeGreaterThan( 0 );
+	const issuesByName = new Map();
 	for ( const card of await bagged.all() ) {
 		const link = card.locator( 'h2.pk-title a' );
 		await expect( link ).toHaveCount( 1 );
 		expect( ( await link.textContent() )?.trim().length ).toBeGreaterThan( 0 );
+		// Tabbing the rack or listing its links, a link's name alone tells one
+		// issue of a series from the next. Volume and issue print beside the
+		// link, so the link is named as the tag reads; a series the tag leaves
+		// out (it equals the title) is not said twice.
+		const tag = ( await card.locator( '.cr-comic__label span' ).allTextContents() ).map( ( t ) => t.trim() );
+		await expect( link ).toHaveAccessibleName( [ ( await link.textContent() ).trim(), ...tag ].join( ' ' ) );
+		// The aria snapshot's first line is the link's role and computed name.
+		const name = ( await link.ariaSnapshot() ).split( '\n' )[ 0 ];
+		const issue = ( await card.locator( '.pk-comic-volume, .pk-comic-number' ).allTextContents() ).map( ( t ) => t.trim() ).join( ' ' );
+		issuesByName.set( name, ( issuesByName.get( name ) ?? new Set() ).add( issue ) );
 		// Cover art need not carry the title, so the title is readable on the shelf tag.
 		const shown = await link.evaluate( ( a ) => {
 			const cs = getComputedStyle( a );
@@ -408,6 +419,9 @@ test( 'the comics archive is a rack of bagged comics, one title link each, no me
 		for ( const sticker of await card.locator( '.cr-comic__sticker' ).allTextContents() ) {
 			expect( [ 'Currently reading', 'To read', 'Set aside' ] ).toContain( sticker.trim() );
 		}
+	}
+	for ( const [ name, issues ] of issuesByName ) {
+		expect( [ ...issues ], `rack links that read ${ name } are one volume and issue` ).toHaveLength( 1 );
 	}
 	// A strip its author drew is on the rack as its picture and one title link.
 	for ( const strip of await list.locator( 'article.pk-card.cr-comic-strip' ).all() ) {
