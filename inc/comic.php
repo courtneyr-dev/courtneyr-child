@@ -7,15 +7,16 @@
  * issue, publisher, cover and its alt, link, status, rating, dates, note)
  * and its microformats. This file decides what each surface shows:
  *
- *   Archive  the bagged cover and its h2 title link, a status sticker and,
- *            when stored, the series and issue label. Creators, rating,
- *            dates, publisher and the note are cut from the markup and stay
- *            on the single.
+ *   Archive  the bagged cover, its h2 title link on a shelf tag (with series,
+ *            volume and issue when stored) and a status sticker. Creators,
+ *            rating, dates, publisher and the note are cut from the markup
+ *            and stay on the single.
  *   Stream   the bagged cover, kind label, title link, creators, rating,
  *            status and note. No dates.
  *   Single   the bag, with creators, rating and status under the H1, the
  *            note as "Notes from this read" and a library-card reading
- *            record.
+ *            record. Body blocks that repeat the card's cover or note are
+ *            not printed a second time.
  *
  * A comics post with no comic-card (a strip its author drew) keeps the
  * plugin's generic card and the default single; on the rack that card is
@@ -248,6 +249,100 @@ function type_cover( array $a, \WP_Post $post, bool $with_creators ): string {
 }
 
 /**
+ * Does a card hold a cover box? Tested on the class, not on the exact
+ * attribute string, so a class another filter adds does not hide it.
+ *
+ * @param string $html Card.
+ * @return bool
+ */
+function has_cover( string $html ): bool {
+	return 1 === preg_match( '/<div\b[^>]*\bclass="[^"]*(?<![\w-])pk-media(?![\w-])/', $html );
+}
+
+/**
+ * Text as a reader sees it: no tags, entities decoded, whitespace folded.
+ *
+ * @param string $html Markup or text.
+ * @return string
+ */
+function plain( string $html ): string {
+	return trim( (string) preg_replace( '/\s+/u', ' ', html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+}
+
+/**
+ * Drop body blocks that repeat the card: an image block showing the
+ * card's own cover, and a paragraph whose text is the card's own note.
+ *
+ * A comic posted through Micropub stores the card, then the picture, then
+ * the note again as a paragraph. On the single the bag shows the cover and
+ * the notes card shows the note, so the copies would print each twice.
+ * Only exact repeats go; any other picture or paragraph stays. A group the
+ * repeats leave empty goes with them (Micropub wraps the note in an
+ * e-content group, and an empty e-content would read as the entry's text).
+ * The stored post content is not touched.
+ *
+ * @param string               $html Rendered content around the card.
+ * @param array<string, mixed> $a    Attributes.
+ * @return string
+ */
+function drop_repeats( string $html, array $a ): string {
+	$given = $html;
+	$cover = trim( (string) ( $a['coverImage'] ?? '' ) );
+	if ( '' !== $cover ) {
+		$html = (string) preg_replace_callback(
+			'#<figure\b[^>]*\bclass="[^"]*(?<![\w-])wp-block-image(?![\w-])[^"]*"[^>]*>.*?</figure>#s',
+			static function ( array $m ) use ( $cover ): string {
+				$tags = new \WP_HTML_Tag_Processor( $m[0] );
+				while ( $tags->next_tag( 'img' ) ) {
+					if ( in_array( $cover, array( $tags->get_attribute( 'src' ), $tags->get_attribute( 'data-src' ) ), true ) ) {
+						return '';
+					}
+				}
+				return $m[0];
+			},
+			$html
+		);
+	}
+	$note = plain( (string) ( $a['review'] ?? '' ) );
+	if ( '' !== $note ) {
+		$html = (string) preg_replace_callback(
+			'#<p\b[^>]*>(.*?)</p>#s',
+			static fn( array $m ): string => plain( $m[1] ) === $note ? '' : $m[0],
+			$html
+		);
+	}
+	if ( $html !== $given ) {
+		do {
+			$html = (string) preg_replace( '#<div\b[^>]*\bclass="[^"]*(?<![\w-])wp-block-group(?![\w-])[^"]*"[^>]*>\s*</div>#', '', $html, -1, $emptied );
+		} while ( $emptied > 0 );
+	}
+	return $html;
+}
+
+/**
+ * Split markup at the first closing div it does not itself open: the end
+ * of the container the card sits in.
+ *
+ * @param string $html Markup that follows the card.
+ * @return array{0: string, 1: string} What is left inside the container, then the rest.
+ */
+function split_at_container_end( string $html ): array {
+	$depth = 0;
+	if ( preg_match_all( '#<(/?)div\b[^>]*>#i', $html, $tags, PREG_OFFSET_CAPTURE | PREG_SET_ORDER ) ) {
+		foreach ( $tags as $tag ) {
+			if ( '' === $tag[1][0] ) {
+				++$depth;
+			} elseif ( 0 === $depth ) {
+				return array( substr( $html, 0, (int) $tag[0][1] ), substr( $html, (int) $tag[0][1] ) );
+			} else {
+				--$depth;
+			}
+		}
+	}
+	return array( '', $html );
+}
+
+/**
  * Put markup just before the card's meta row, the last thing in its body.
  *
  * @param string $html   Card.
@@ -332,7 +427,7 @@ function bag_card( string $html, array $block, $instance ): string {
 
 	$a         = comic_attrs( $post, $comic );
 	$status    = (string) $a['readStatus'];
-	$has_cover = false !== strpos( $html, 'class="pk-media"' );
+	$has_cover = has_cover( $html );
 	$classes   = array( 'cr-comic', $rack ? 'cr-comic--rack' : 'cr-comic--stream', 'cr-comic--' . $status );
 	if ( $has_cover ) {
 		$classes[] = 'has-cover';
@@ -364,19 +459,28 @@ function bag_card( string $html, array $block, $instance ): string {
 	take_element( $html, 'p', 'pk-stream-date' );
 
 	if ( $rack ) {
-		// The rack is for browsing covers: one bag, one link. The series
-		// and issue label is kept because it tells one issue from another.
+		// The rack is for browsing covers: one bag, one link. The title
+		// stays readable on the shelf tag under the bag, because cover art
+		// does not always carry it. Series, volume and issue join it there
+		// when stored, because they tell one issue from another.
 		$issue = take_element( $html, 'p', 'pk-comic-issue' );
 		foreach ( array( array( 'p', 'pk-sub' ), array( 'div', 'pk-stars' ), array( 'data', 'p-rating' ), array( 'div', 'pk-note' ), array( 'span', 'pk-kindlabel' ), array( 'div', 'pk-badge' ) ) as $cut ) {
 			$html = cut_elements( $html, $cut[0], $cut[1] );
+		}
+		if ( '' !== $issue ) {
+			// A series named like the title would read "Saga Saga".
+			if ( 0 === strcasecmp( plain( (string) ( $a['series'] ?? '' ) ), plain( (string) ( $a['title'] ?? '' ) ) ) ) {
+				$issue = cut_elements( $issue, 'span', 'pk-comic-series' );
+			}
+			if ( false !== strpos( $issue, '<span' ) ) {
+				$label = str_replace( 'class="pk-sub pk-comic-issue"', 'class="cr-comic__label"', $issue );
+				$html  = (string) preg_replace( '#</h[2-4]>#', '$0' . $label, $html, 1 );
+			}
 		}
 		$extra = $has_cover ? '' : type_cover( $a, $post, false );
 		if ( 'finished' !== $status ) {
 			list( $label ) = status_copy( $status );
 			$extra        .= '<p class="cr-comic__sticker cr-comic__sticker--' . esc_attr( $status ) . '">' . esc_html( $label ) . '</p>';
-		}
-		if ( '' !== $issue ) {
-			$extra .= str_replace( 'class="pk-sub pk-comic-issue"', 'class="cr-comic__label"', $issue );
 		}
 		$html = before_meta( $html, $extra );
 		$html = cut_elements( $html, 'div', 'pk-meta' );
@@ -553,21 +657,25 @@ function comic_page( string $html, array $block ): string {
 	}
 	$post  = \get_post();
 	$comic = comic_read( $post );
-	$open  = strpos( $html, '<article' );
-	$close = strpos( $html, '</article>' );
-	if ( null === $comic || false === strpos( $html, 'pk-card k-comics' ) || false === $open || false === $close || $open > $close ) {
+	// The comic card's own article: another card may come before it.
+	if ( null === $comic || ! preg_match( '/<article\b[^>]*\bclass="[^"]*(?<![\w-])k-comics(?![\w-])[^"]*"[^>]*>/', $html, $m, PREG_OFFSET_CAPTURE ) ) {
+		return $html;
+	}
+	$open  = (int) $m[0][1];
+	$close = strpos( $html, '</article>', $open );
+	if ( false === $close ) {
 		return $html;
 	}
 	$close += 10;
-	$before = substr( $html, 0, $open );
-	$card   = substr( $html, $open, $close - $open );
-	$rest   = substr( $html, $close );
 	$a      = comic_attrs( $post, $comic );
+	$before = drop_repeats( substr( $html, 0, $open ), $a );
+	$card   = substr( $html, $open, $close - $open );
+	$rest   = drop_repeats( substr( $html, $close ), $a );
 
 	// The note leaves the bag for the notes card.
 	$note = take_element( $card, 'div', 'pk-note' );
 
-	$has_cover = false !== strpos( $card, 'class="pk-media"' );
+	$has_cover = has_cover( $card );
 	if ( ! $has_cover ) {
 		$card = before_meta( $card, type_cover( $a, $post, true ) );
 	}
@@ -594,6 +702,14 @@ function comic_page( string $html, array $block ): string {
 		$after .= notes_section( __( 'Notes from this read', 'courtneyr-child' ), $note );
 	}
 	$after .= reading_record( $a, $post ) . sources_row( $a );
+
+	// Whatever the author wrote after the card follows the record and the
+	// link in the same column, in the order it was written.
+	list( $more, $tail ) = split_at_container_end( $rest );
+	if ( '' !== trim( (string) preg_replace( '/<!--.*?-->/s', '', $more ) ) ) {
+		$after .= '<div class="cr-journal__more is-layout-flow">' . $more . '</div>';
+		$rest   = $tail;
+	}
 
 	return $before . '<div class="cr-journal cr-journal--comic">' . $card . $after . '</div>' . $rest;
 }

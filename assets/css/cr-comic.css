@@ -111,6 +111,7 @@
 .cr-comic-rack .wp-block-post-template.cr-comic-rack__list {
 	--rack-cols: 4;
 	--rack-lip: 2.75rem;
+	--rack-tag-drop: 2.25rem;
 	--rack-comic: clamp(8rem, 15vw, 11rem);
 	--rack-tier: calc(var(--rack-comic) * 1.5 + 6.5rem);
 	position: relative;
@@ -154,7 +155,7 @@
 	break-inside: auto;
 }
 
-/* The card is the bag and nothing else. */
+/* The card is the bag and, under it, the shelf tag. */
 .cr-comic-rack .cr-comic-rack__list > li .pk-card {
 	position: relative;
 	display: block;
@@ -176,29 +177,19 @@
 }
 
 .cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-body {
-	display: block;
+	display: flex;
+	flex-direction: column;
 	margin: 0;
 	padding: 0;
 	transform: none;
 }
 
-.cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-caption,
-.cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-title {
-	margin: 0;
-	padding: 0;
-	font-size: var(--cr-text-base);
-	line-height: 1;
-}
-
-/* A strip its author drew: its picture, unbagged, with its title on a
-   shelf tag. The title link covers the picture. */
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-body {
-	display: flex;
-	flex-direction: column;
-}
-
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-media {
+.cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-media {
 	order: -1;
+}
+
+/* A strip its author drew: its picture, unbagged. */
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-media {
 	margin: 0;
 	padding: 0.35rem;
 	border: 1.5px solid var(--cr-russian-violet);
@@ -216,81 +207,89 @@
 	object-fit: cover;
 }
 
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-caption {
-	margin: 0.45rem 0 -2.25rem;
-}
-
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-title {
+/* The shelf tag on the lip under the bag: the title, then series, volume
+   and issue when stored. Cover art does not always carry its title, so the
+   tag is where a sighted reader finds it. One line: the tiers are a fixed
+   height, and the full title is on the single. */
+.cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-caption {
+	display: flex;
+	gap: 0.35rem;
+	align-items: baseline;
+	justify-content: center;
+	box-sizing: border-box;
+	margin: 0.45rem 0 calc(var(--rack-tag-drop) * -1);
 	padding: 0.2rem 0.45rem;
 	border: 1px solid var(--cr-russian-violet);
 	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-body);
 	font-size: var(--cr-text-sm);
 	font-weight: var(--cr-weight-semibold);
 	line-height: var(--cr-leading-snug);
-	text-align: center;
 	white-space: nowrap;
+	transform: none;
+	overflow: hidden;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-title {
+	flex: 0 1 auto;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	color: inherit;
+	font: inherit;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
 
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-title a {
+.cr-comic-rack .cr-comic__label {
+	display: flex;
+	flex: none;
+	gap: 0.35rem;
+	max-width: 60%;
+	margin: 0;
+	color: inherit;
+	font: inherit;
+	font-weight: var(--cr-weight-regular);
+	overflow: hidden;
+}
+
+.cr-comic-rack .cr-comic__label .pk-comic-series {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.cr-comic-rack .cr-comic__label :is(.pk-comic-volume, .pk-comic-number) {
+	flex: none;
+}
+
+/* The title's link is the whole bag and its tag. */
+.cr-comic-rack .cr-comic-rack__list > li .pk-card:is(.cr-comic--rack, .cr-comic-strip) .pk-title a {
 	color: var(--cr-russian-violet);
 	text-decoration: none;
 }
 
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-title a::after {
-	content: "";
-	position: absolute;
-	z-index: 2;
-	inset: 0;
+.cr-comic-rack .cr-comic-rack__list > li .pk-card:is(.cr-comic--rack, .cr-comic-strip) .pk-title a:hover {
+	text-decoration: underline;
 }
 
-/* The title's link is the whole bag. Its text is the accessible name; the
-   cover (or the typographic cover) is what a sighted reader sees. */
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-title a {
-	position: absolute;
-	z-index: 2;
-	inset: 0;
-	overflow: hidden;
-	color: transparent;
-	white-space: nowrap;
-	text-indent: 200%;
-}
-
-/* No artwork arrived: the link's own text is the cover's title. */
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack.cr-comic--no-art .pk-title a {
-	display: flex;
-	align-items: center;
-	box-sizing: border-box;
-	padding: clamp(0.85rem, 3.5vw, 1.4rem) clamp(0.8rem, 3vw, 1.2rem);
-	color: var(--cr-printer-ivory);
-	font-family: var(--cr-font-accent);
-	font-size: clamp(1rem, 4.2vw, 1.15rem);
-	font-weight: var(--cr-weight-bold);
-	line-height: var(--cr-leading-tight);
-	white-space: normal;
-	text-decoration: none;
-	text-indent: 0;
-	overflow-wrap: anywhere;
-}
-
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-title a::before,
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-title a::after {
+.cr-comic-rack .cr-comic-rack__list > li .pk-card:is(.cr-comic--rack, .cr-comic-strip) .pk-title a::before {
 	content: none;
 }
 
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-title a:focus-visible {
-	outline: 3px solid var(--cr-focus-ring);
-	outline-offset: 5px;
-	box-shadow: 0 0 0 8px var(--cr-focus-halo);
+.cr-comic-rack .cr-comic-rack__list > li .pk-card:is(.cr-comic--rack, .cr-comic-strip) .pk-title a::after {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset: 0 0 calc(var(--rack-tag-drop) * -1);
 }
 
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-title a:focus-visible {
+.cr-comic-rack .cr-comic-rack__list > li .pk-card:is(.cr-comic--rack, .cr-comic-strip) .pk-title a:focus-visible {
 	outline: none;
 }
 
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic-strip .pk-title a:focus-visible::after {
+.cr-comic-rack .cr-comic-rack__list > li .pk-card:is(.cr-comic--rack, .cr-comic-strip) .pk-title a:focus-visible::after {
 	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 5px;
 	box-shadow: 0 0 0 8px var(--cr-focus-halo);
@@ -327,39 +326,6 @@
 
 .cr-comic-rack .cr-comic__sticker--abandoned {
 	background: var(--cr-light-gray);
-}
-
-/* Series and issue: a shelf tag on the lip under the bag. */
-.cr-comic-rack .cr-comic__label {
-	position: absolute;
-	inset-block-start: calc(100% + 0.45rem);
-	inset-inline: 0;
-	display: flex;
-	flex-wrap: nowrap;
-	gap: 0.35rem;
-	justify-content: center;
-	box-sizing: border-box;
-	margin: 0;
-	padding: 0.2rem 0.45rem;
-	border: 1px solid var(--cr-russian-violet);
-	background: var(--cr-printer-ivory);
-	color: var(--cr-russian-violet);
-	font-family: var(--cr-font-body);
-	font-size: var(--cr-text-sm);
-	font-weight: var(--cr-weight-semibold);
-	line-height: var(--cr-leading-snug);
-	white-space: nowrap;
-	overflow: hidden;
-	pointer-events: none;
-}
-
-.cr-comic-rack .cr-comic__label .pk-comic-series {
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-.cr-comic-rack .cr-comic__label :is(.pk-comic-volume, .pk-comic-number) {
-	flex: none;
 }
 
 @media (max-width: 64rem) {
@@ -790,6 +756,12 @@ body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__link:hover {
 body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__link:focus-visible {
 	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 3px;
+	box-shadow: 0 0 0 8px var(--cr-focus-halo);
+}
+
+/* ---- Body text after the card ---- */
+body.cr-comic-single .cr-journal--comic > .cr-journal__more {
+	margin-top: 2.25rem;
 }
 
 /* Wide screens: the bag stands left of the header, notes and record.
@@ -855,6 +827,11 @@ body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__link:focus-vi
 		grid-column: details;
 		grid-row: 4;
 		margin-top: 2.25rem;
+	}
+
+	body.cr-comic-single .cr-journal--comic > .cr-journal__more {
+		grid-column: details;
+		grid-row: 5;
 	}
 }
 
@@ -1100,7 +1077,7 @@ body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__link:focus-vi
 
 	.pk-card.cr-comic .pk-media,
 	.cr-comic-rack .cr-comic__sticker,
-	.cr-comic-rack .cr-comic__label,
+	.cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-caption,
 	body.cr-comic-single .cr-journal__notes,
 	body.cr-comic-single .cr-record,
 	body.cr-comic-single .cr-comic__status-chip,
@@ -1139,7 +1116,12 @@ body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__link:focus-vi
 		content: none;
 	}
 
-	.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-title a:focus-visible,
+	.cr-comic-rack .cr-comic-rack__list > li .pk-card:is(.cr-comic--rack, .cr-comic-strip) .pk-title a {
+		color: LinkText;
+	}
+
+	.cr-comic-rack .cr-comic-rack__list > li .pk-card:is(.cr-comic--rack, .cr-comic-strip) .pk-title a:focus-visible::after,
+	body.cr-comic-single .cr-journal--comic > .pk-sources .pk-sources__link:focus-visible,
 	.cr-stream-page li.kind-comics .pk-card.pk-card--stream.cr-comic--stream .pk-title a:focus-visible::after {
 		outline-color: Highlight;
 		box-shadow: none;

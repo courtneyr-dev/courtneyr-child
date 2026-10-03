@@ -18,6 +18,7 @@ const LISTEN_ARCHIVE = process.env.CR_LISTEN_ARCHIVE_PATH || '/kind/listen/'; //
 const WATCH_ARCHIVE = process.env.CR_WATCH_ARCHIVE_PATH || '/kind/watch/'; // watch archive page 1 (PKIW #227)
 const COMICS_ARCHIVE = process.env.CR_COMICS_ARCHIVE_PATH || '/kind/comics/'; // comics archive with at least one comic read (PKIW #228)
 const COMIC_SINGLE = process.env.CR_COMIC_SINGLE_PATH || '/2026/09/06/anzuelo/'; // a comic read (comic-card) still being read, with a cover and a stored start date
+const COMIC_TRAILING = process.env.CR_COMIC_TRAILING_PATH || ''; // a comic read with body text after the card (no such post on dev: set it to run the test)
 const AUTOEMBED_CAPTIONED_POST = process.env.CR_AUTOEMBED_CAPTIONED_POST_PATH || '/?p=3010'; // bare YouTube URL whose video has a registered VTT (_cr_youtube_id)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
 const DARK_FIXTURES = [
@@ -384,6 +385,14 @@ test( 'the comics archive is a rack of bagged comics, one title link each, no me
 		const link = card.locator( 'h2.pk-title a' );
 		await expect( link ).toHaveCount( 1 );
 		expect( ( await link.textContent() )?.trim().length ).toBeGreaterThan( 0 );
+		// Cover art need not carry the title, so the title is readable on the shelf tag.
+		const shown = await link.evaluate( ( a ) => {
+			const cs = getComputedStyle( a );
+			const box = a.getBoundingClientRect();
+			return { visible: cs.color !== 'rgba(0, 0, 0, 0)' && cs.textIndent === '0px' && box.width > 8 && box.height > 8, upright: getComputedStyle( a.closest( '.pk-caption' ) ).transform };
+		} );
+		expect( shown.visible, 'the title text is visible' ).toBe( true );
+		expect( shown.upright ).toBe( 'none' );
 		expect( await card.locator( 'a' ).count(), 'a racked comic is one link' ).toBe( 1 );
 		expect( await card.locator( '.pk-stars, .p-rating, .pk-note, .pk-meta, .pk-kindlabel, .pk-stream-date, .pk-sources, .p-author, .pk-comic-status, .pk-comic-publisher, time' ).count(), 'no rating, date, creator, note or status paragraph on the rack' ).toBe( 0 );
 		// The bag is the link's hit area, and the link is not wrapped around the cover.
@@ -427,10 +436,11 @@ test( 'a comic single is a bagged comic beside its header, notes and reading rec
 	await expect( bag.locator( '.pk-kindlabel' ) ).toHaveText( 'Comic' );
 	// The cover is the page's largest image and sits at the top, so it loads
 	// eagerly with a real src: lazy-load plugins skip fetchpriority="high",
-	// and the cover still shows with scripting off.
+	// and the cover still shows with scripting off. An optimizer may drop the
+	// redundant loading="eager"; what matters is that it is never lazy.
 	const cover = bag.locator( '.pk-media img' );
 	await expect( cover ).toHaveAttribute( 'fetchpriority', 'high' );
-	await expect( cover ).toHaveAttribute( 'loading', 'eager' );
+	expect( await cover.getAttribute( 'loading' ) ).not.toBe( 'lazy' );
 	expect( await cover.getAttribute( 'src' ) ).toMatch( /^https?:/ );
 	const chip = page.locator( '.single-post__header .cr-comic__status-chip' );
 	await expect( chip ).toHaveText( 'Currently reading' );
@@ -447,7 +457,47 @@ test( 'a comic single is a bagged comic beside its header, notes and reading rec
 	const started = await page.locator( '.cr-record .cr-record-row:has(dt:text-is("Started")) time' ).getAttribute( 'datetime' );
 	expect( started ).toMatch( /^\d{4}-\d{2}-\d{2}$/ );
 	expect( await when.locator( 'time' ).getAttribute( 'datetime' ) ).toBe( started );
-	await expect( page.locator( 'nav.cr-post-nav' ) ).toHaveCount( 1 );
+	// Previous/Next name real posts. A kind with a single post on its surface
+	// falls back to the Stream's own order, so the landmark is never empty.
+	const nav = page.locator( 'nav.cr-post-nav' );
+	await expect( nav ).toHaveCount( 1 );
+	const navLinks = await nav.locator( 'a' ).allTextContents();
+	expect( navLinks.length, 'Post navigation holds at least one link' ).toBeGreaterThan( 0 );
+	for ( const text of navLinks ) {
+		expect( text.trim().length ).toBeGreaterThan( 0 );
+	}
+	// A body that repeats the card's own cover and note (the Micropub shape)
+	// shows each once: in the bag and on the notes card.
+	const repeats = await page.evaluate( () => {
+		const content = document.querySelector( '.single-post__content' );
+		const cover = content.querySelector( '.cr-comic--single .pk-media img' );
+		const src = ( img ) => ( img.getAttribute( 'data-src' ) || img.currentSrc || img.src ).split( '?' )[ 0 ];
+		const note = content.querySelector( '.cr-journal__notes .pk-note' )?.textContent.trim().replace( /\s+/g, ' ' ) || '';
+		return {
+			covers: [ ...content.querySelectorAll( 'img' ) ].filter( ( img ) => src( img ) === src( cover ) ).length,
+			notes: note ? [ ...content.querySelectorAll( 'p, .pk-note' ) ].filter( ( el ) => el.textContent.trim().replace( /\s+/g, ' ' ) === note ).length : 1,
+		};
+	} );
+	expect( repeats.covers, 'the cover is shown once' ).toBe( 1 );
+	expect( repeats.notes, 'the note is shown once' ).toBe( 1 );
+	// Skipping the repeats leaves nothing behind: no empty body wrapper, and
+	// no empty e-content for a microformats parser to read as the entry's text.
+	const husks = await page.evaluate( () => {
+		const empty = ( el ) => el.textContent.trim() === '' && ! el.querySelector( 'img, picture, video, audio, iframe, svg, object' );
+		const content = document.querySelector( '.single-post__content' );
+		return [ ...content.querySelectorAll( '.cr-journal__more, .e-content' ) ].filter( empty ).map( ( el ) => el.className );
+	} );
+	expect( husks, 'no empty wrapper is left where the repeats were' ).toEqual( [] );
+	// The "Read / find it" link's focus ring holds 3:1 against the page: it has the halo.
+	const sourceFocus = await page.evaluate( () => {
+		const a = document.querySelector( '.cr-journal--comic .pk-sources__link' );
+		if ( ! a ) return null;
+		a.focus();
+		return getComputedStyle( a ).boxShadow;
+	} );
+	if ( sourceFocus !== null ) {
+		expect( sourceFocus ).toMatch( /0px 0px 0px 8px/ );
+	}
 	const spread = await page.evaluate( () => {
 		const b = document.querySelector( 'article.cr-comic--single' ).getBoundingClientRect();
 		const h = document.querySelector( 'h1' ).getBoundingClientRect();
@@ -457,6 +507,30 @@ test( 'a comic single is a bagged comic beside its header, notes and reading rec
 	expect( spread.bagRight, 'the bag stands left of the header' ).toBeLessThanOrEqual( spread.h1Left );
 	expect( spread.bagRight ).toBeLessThanOrEqual( spread.notesLeft );
 	expect( spread.bagTop, 'the bag starts level with the header, not below it' ).toBeLessThan( spread.h1Top + 40 );
+} );
+
+// PKIW #228: body text an author writes after the card keeps its place in
+// the reading order: under the record and the link, in their column, not
+// as a full-width strip under the bag.
+test( 'body text after a comic card reads in the details column, under the reading record', async ( { page } ) => {
+	test.skip( ! COMIC_TRAILING, 'CR_COMIC_TRAILING_PATH is not set' );
+	await page.goto( COMIC_TRAILING, { waitUntil: 'load' } );
+	const more = page.locator( '.cr-journal--comic > .cr-journal__more' );
+	await expect( more ).toHaveCount( 1 );
+	const box = await page.evaluate( () => {
+		const r = ( sel ) => document.querySelector( sel ).getBoundingClientRect();
+		const m = r( '.cr-journal--comic > .cr-journal__more' );
+		const d = r( '.cr-record' );
+		const b = r( 'article.cr-comic--single' );
+		return { left: m.left, right: m.right, top: m.top, recordLeft: d.left, recordRight: d.right, recordBottom: d.bottom, bagRight: b.right };
+	} );
+	expect( box.top, 'after the reading record' ).toBeGreaterThan( box.recordBottom );
+	expect( Math.abs( box.left - box.recordLeft ), 'starts where the record starts' ).toBeLessThanOrEqual( 1 );
+	expect( box.right ).toBeLessThanOrEqual( box.recordRight + 1 );
+	// Side by side from 64rem up; stacked below it.
+	if ( page.viewportSize().width >= 1024 ) {
+		expect( box.left, 'clear of the bag' ).toBeGreaterThanOrEqual( box.bagRight );
+	}
 } );
 
 // PKIW #228: on the Stream a comic read is one bagged card in the collage:
