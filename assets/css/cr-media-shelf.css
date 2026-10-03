@@ -233,8 +233,9 @@
    cr-popcorn, cr-vhs-stack, cr-remote), each a background layer with its
    own size and position, every one drawn with its foot on the image's
    bottom edge so it stands on the plank. The TV on its VCR is the focal
-   object (full height), the popcorn beside it, the stacks and remote
-   quieter; narrower screens drop the remote, then the stacks. */
+   object (full height), the popcorn beside it, the houseplant, stacks
+   and remote quieter; narrower screens drop the remote and far stack,
+   then the plant and near stack. */
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf::before {
 	content: "";
 	position: absolute;
@@ -244,7 +245,8 @@
 	background:
 		url(../img/cr-popcorn.svg) calc(50% + 15rem) bottom / auto 58% no-repeat,
 		url(../img/cr-tv-vcr.svg) center bottom / auto 100% no-repeat,
-		url(../img/cr-vhs-stack.svg) 4% bottom / auto 34% no-repeat,
+		url(../img/cr-houseplant.svg) 0 bottom / auto 50% no-repeat,
+		url(../img/cr-vhs-stack.svg) 15% bottom / auto 32% no-repeat,
 		url(../img/cr-remote.svg) 86% bottom / auto 34% no-repeat,
 		url(../img/cr-vhs-stack.svg) 100% bottom / auto 26% no-repeat;
 	pointer-events: none;
@@ -320,19 +322,9 @@
 }
 
 /* The plugin's board under each item goes: the plank is drawn at the
-   case's foot instead (below), with the shelf tag under it. The grid
-   stretches every item in the row to the tallest; the card fills its
-   item, so every tag in the row ends on one line. */
+   case's foot instead (below), with the shelf label under it. */
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li {
-	display: flex; /* the collage rules make the item a block; the card needs a flex parent to grow */
-	flex-direction: column;
 	padding: 0;
-}
-
-.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li > .pk-card {
-	flex: 1 0 auto;
-	display: flex;
-	flex-direction: column;
 }
 
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li[class*="kind-"]::after {
@@ -340,11 +332,9 @@
 }
 
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body {
-	flex: 1 0 auto;
 	display: flex;
 	flex-direction: column;
-	gap: 0;
-	padding-block-end: 0.6rem; /* inside the shelf tag */
+	gap: 0.3rem;
 }
 
 /* The tape-face parts belong to the Stream view, not the clamshell. */
@@ -365,7 +355,7 @@
 	display: block;
 	box-sizing: border-box;
 	aspect-ratio: var(--vhs-case-ratio);
-	margin: 0 0 var(--vhs-plank) !important;
+	margin: 0 0 calc(var(--vhs-plank) + 0.8rem) !important;
 	padding: 0.65rem 0.65rem 0.65rem 2.3rem;
 	transform: none;
 	border-radius: 3px;
@@ -418,34 +408,20 @@
 	pointer-events: none;
 }
 
-/* The shelf tag: a paper tag the width of its case, tucked under the
-   plank (its top sits in the plank's shadow) and taped to it, carrying
-   the Stream's title, year, rating, services and date in that order with
-   the date at the foot. Paper and ink are palette colours (a physical
-   object, the same in dark mode). The tag box is the body's ::after,
-   placed from the case's height and running to the item's foot, so every
-   tag in a row shares one bottom edge; a sparse tag shows empty paper. */
-.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body::after {
-	content: "";
-	position: absolute;
-	z-index: 0;
-	inset: calc(var(--vhs-case-h) + var(--vhs-plank)) 0 0;
-	border-block-end: 2px solid var(--cr-russian-violet);
-	background: var(--cr-printer-ivory);
-	box-shadow: 0 3px 0 var(--cr-russian-violet);
-	pointer-events: none;
-}
-
-/* The tape tab that holds the tag to the plank. */
+/* The shelf label: the Stream's title, year, rating, services and date
+   as compact text under the plank, left-aligned to its case, at its own
+   content height (a post without a rating or services takes less room,
+   never a blank panel). A tape mark on the plank's lower edge ties the
+   label to its case. Ink is a palette colour, like the physical parts. */
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body::before {
 	content: "";
 	display: block;
 	position: absolute;
 	z-index: 2;
-	inset-block-start: calc(var(--vhs-case-h) + var(--vhs-plank) - 0.4rem);
+	inset-block-start: calc(var(--vhs-case-h) + var(--vhs-plank) - 0.35rem);
 	inset-inline-start: 50%;
-	width: 2.6rem;
-	height: 1rem;
+	width: 2.2rem;
+	height: 0.85rem;
 	background: var(--cr-light-orange);
 	opacity: 0.92;
 	transform: translateX(-50%) rotate(var(--cr-rotate-1));
@@ -453,40 +429,75 @@
 }
 
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:has(.pk-media) .pk-caption {
-	padding: 0.95rem 0.7rem 0; /* clear of the plank's shadow and the tab */
+	gap: 0.1rem;
+	padding: 0;
 	overflow: visible;
 }
 
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:has(.pk-media) .pk-title {
 	color: var(--cr-russian-violet);
 	white-space: normal;
-	font-size: 0.85rem;
+	font-family: var(--cr-font-accent);
+	font-size: 0.95rem;
+	letter-spacing: 0.02em;
 	line-height: 1.2;
 }
 
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:has(.pk-media) .pk-caption .pk-sub {
 	color: var(--cr-cerulean);
+	font-family: var(--cr-font-body);
+	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0;
 }
 
-.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body > :is(.pk-sources, .pk-stream-date, .pk-meta) {
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body > :is(.pk-stars, .pk-sources, .pk-stream-date, .pk-meta) {
 	margin: 0;
-	padding: 0.4rem 0.7rem 0;
+	padding: 0;
 }
 
-/* The watched date sits at the tag's foot whatever the tag above it holds. */
-.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body > .pk-stream-date {
-	margin-block-start: auto;
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-stars svg {
+	width: 0.8rem;
+	height: 0.8rem;
 }
 
-.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:not(:has(.pk-media)) > .pk-sources {
-	padding-block-start: 0.95rem;
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-sources__label {
+	margin: 0 0 0.2rem;
+	font-family: var(--cr-font-body);
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	color: var(--cr-cerulean);
 }
 
-.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body > .pk-stars {
-	padding: 0.3rem 0.7rem 0;
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-sources__list {
+	gap: 0.3rem;
 }
 
-.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body :is(.pk-stream-date time, .pk-meta, .pk-sources__label, .pk-rating-value) {
+/* Source chips: the stored service names, each its own link, small
+   enough to wrap inside the case's width. */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-sources__link {
+	gap: 0.2rem;
+	min-height: 1.6rem;
+	padding: 0.1rem 0.4rem;
+	border: 2px solid var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard-sm);
+	font-family: var(--cr-font-body);
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	color: var(--cr-russian-violet);
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-stream-date time {
+	font-family: var(--cr-font-body);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	color: var(--cr-russian-violet);
+}
+
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body :is(.pk-meta, .pk-rating-value) {
 	color: var(--cr-russian-violet);
 }
 
@@ -499,7 +510,7 @@
 	box-sizing: border-box;
 	aspect-ratio: var(--vhs-case-ratio);
 	justify-content: flex-end;
-	margin: 0 0 var(--vhs-plank);
+	margin: 0 0 calc(var(--vhs-plank) + 0.8rem);
 	padding: 1rem 0.75rem 1rem 1.2rem;
 	border: 0.65rem solid var(--cr-russian-violet);
 	border-inline-start-width: 2.3rem;
@@ -640,8 +651,8 @@
 	}
 }
 
-/* ---- Under 64rem the remote and the far stack go, so the TV and
-   popcorn keep their size ---- */
+/* ---- Under 64rem the remote and the far stack go, so the TV, popcorn
+   and plant keep their size ---- */
 @media (max-width: 64rem) {
 
 	.cr-archive--watch .cr-media-shelf .cr-vhs-shelf {
@@ -652,7 +663,8 @@
 		background:
 			url(../img/cr-popcorn.svg) calc(50% + 12.5rem) bottom / auto 58% no-repeat,
 			url(../img/cr-tv-vcr.svg) center bottom / auto 100% no-repeat,
-			url(../img/cr-vhs-stack.svg) 4% bottom / auto 34% no-repeat;
+			url(../img/cr-houseplant.svg) 0 bottom / auto 48% no-repeat,
+			url(../img/cr-vhs-stack.svg) 17% bottom / auto 30% no-repeat;
 	}
 }
 
