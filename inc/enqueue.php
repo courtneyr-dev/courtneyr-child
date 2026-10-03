@@ -873,3 +873,21 @@ function perfmatters_lazyload_exclusions( $exclusions ): array {
 }
 add_filter( 'perfmatters_lazyload_exclusions', __NAMESPACE__ . '\\perfmatters_lazyload_exclusions' );
 add_filter( 'perfmatters_lazyload_iframe_exclusions', __NAMESPACE__ . '\\perfmatters_lazyload_exclusions' );
+
+/**
+ * Keep the watch archive's face-out covers out of Perfmatters' lazy load.
+ *
+ * The three New releases cases sit at the top of /kind/watch/, and the
+ * lazy load's fade-in left their covers at opacity 0 until the scroll
+ * observer fired, so captures (and slow paints) showed the recess alone.
+ * Perfmatters marks every image inside these parents `no-lazy`.
+ *
+ * @param array<int, string> $selectors CSS selectors whose images stay eager.
+ * @return array<int, string>
+ */
+function perfmatters_lazyload_parent_exclusions( $selectors ): array {
+	$selectors   = is_array( $selectors ) ? $selectors : array();
+	$selectors[] = '.cr-vhs-shelf__list--face';
+	return array_values( array_unique( $selectors ) );
+}
+add_filter( 'perfmatters_lazyload_parent_exclusions', __NAMESPACE__ . '\\perfmatters_lazyload_parent_exclusions' );
