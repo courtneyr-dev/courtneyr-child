@@ -91,10 +91,29 @@ function scope_to_kind( array $parsed_block ): array {
 	if ( ! $post instanceof \WP_Post || 'post' !== $post->post_type ) {
 		return $parsed_block;
 	}
-	if ( HomeSections\SURFACE_STREAM === surface_of( $post->ID ) && has_term( '', 'kind', $post ) ) {
+	if ( HomeSections\SURFACE_STREAM === surface_of( $post->ID ) && has_term( '', 'kind', $post ) && has_kind_neighbour( $post ) ) {
 		$parsed_block['attrs']['taxonomy'] = 'kind';
 	}
 	return $parsed_block;
+}
+
+/**
+ * Does the post's kind hold another post on the same surface?
+ *
+ * A kind's only post has no Previous or Next inside the kind, and scoping
+ * it there would print an empty Post navigation landmark. Such a post
+ * keeps the surface's own order instead (the next and previous Stream
+ * posts of any kind).
+ *
+ * @param \WP_Post $post Current post.
+ * @return bool
+ */
+function has_kind_neighbour( \WP_Post $post ): bool {
+	static $seen = array();
+	if ( ! isset( $seen[ $post->ID ] ) ) {
+		$seen[ $post->ID ] = (bool) get_adjacent_post( true, '', true, 'kind' ) || (bool) get_adjacent_post( true, '', false, 'kind' );
+	}
+	return $seen[ $post->ID ];
 }
 add_filter( 'render_block_data', __NAMESPACE__ . '\\scope_to_kind' );
 
