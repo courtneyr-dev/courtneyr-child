@@ -19,6 +19,8 @@ const WATCH_ARCHIVE = process.env.CR_WATCH_ARCHIVE_PATH || '/kind/watch/'; // wa
 const COMICS_ARCHIVE = process.env.CR_COMICS_ARCHIVE_PATH || '/kind/comics/'; // comics archive with at least one comic read (PKIW #228)
 const COMIC_SINGLE = process.env.CR_COMIC_SINGLE_PATH || '/2026/09/06/anzuelo/'; // a comic read (comic-card) still being read, with a cover and a stored start date
 const RECIPE_ARCHIVE = process.env.CR_RECIPE_ARCHIVE_PATH || '/kind/recipe/'; // recipe archive (PKIW #229); its tests skip on a site with no recipe posts
+const RECIPE_SINGLE = process.env.CR_RECIPE_SINGLE_PATH || '/2026/08/14/tomato-basil-soup/'; // a recipe post with a WP Recipe Maker recipe and a featured image (local fixture)
+const RECIPE_PLAIN_SINGLE = process.env.CR_RECIPE_PLAIN_SINGLE_PATH || '/2026/08/01/campfire-chili/'; // a recipe post with no recipe card (local fixture)
 const COMIC_TRAILING = process.env.CR_COMIC_TRAILING_PATH || ''; // a comic read with body text after the card (no such post on dev: set it to run the test)
 const AUTOEMBED_CAPTIONED_POST = process.env.CR_AUTOEMBED_CAPTIONED_POST_PATH || '/?p=3010'; // bare YouTube URL whose video has a registered VTT (_cr_youtube_id)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
@@ -791,5 +793,77 @@ test( 'the recipe archive is a binder of four recipe cards, one title link each,
 	for ( const href of pager ) {
 		expect( new URL( href ).searchParams.get( 'orderby' ), 'pager links keep the title order' ).toBe( 'title' );
 	}
+} );
+
+// PKIW #229: a recipe single is one binder page. The post title is the page
+// heading and the featured image is the picture; the recipe plugin's card
+// sits inside the page without repeating either. The plugin's own print
+// link, section links and structured data stay as it renders them.
+test( 'a recipe single is one binder page: title and picture once, the recipe plugin\'s card inside it, print and section links intact', async ( { page } ) => {
+	const response = await page.goto( RECIPE_SINGLE, { waitUntil: 'load' } );
+	test.skip( response.status() === 404, 'no recipe fixture on this site' );
+	await expect( page.locator( 'body.cr-recipe-single' ) ).toHaveCount( 1 );
+	const h1 = page.locator( 'main h1' );
+	await expect( h1 ).toHaveCount( 1 );
+	const title = ( await h1.textContent() ).trim();
+	const recipe = page.locator( 'main .wprm-recipe.wprm-recipe-template-cr-binder' );
+	await expect( recipe ).toHaveCount( 1 );
+
+	// The name and the picture each show once: the post's own.
+	expect( await recipe.locator( '.wprm-recipe-name, .wprm-recipe-image' ).count(), 'the recipe card repeats neither the name nor the picture' ).toBe( 0 );
+	await expect( page.locator( 'main figure.single-post__featured img' ) ).toHaveCount( 1 );
+	const named = await page.locator( 'main .single-post__header :is(h1, h2, h3, h4), main .single-post__content :is(h1, h2, h3, h4)' ).evaluateAll( ( hs, t ) => hs.filter( ( h ) => h.textContent.trim() === t ).length, title );
+	expect( named, 'one heading carries the recipe name' ).toBe( 1 );
+
+	// The recipe's sections are h2 under the page's h1.
+	const sections = await recipe.locator( 'h2, h3, h4' ).evaluateAll( ( hs ) => hs.filter( ( h ) => h.getClientRects().length > 0 ).map( ( h ) => h.tagName + ' ' + h.textContent.trim() ) );
+	expect( sections ).toEqual( expect.arrayContaining( [ 'H2 Ingredients', 'H2 Equipment', 'H2 Instructions' ] ) );
+
+	// Summary and the plugin's print link sit under the title.
+	await expect( page.locator( 'main .single-post__header .cr-recipe__summary' ) ).toHaveText( /\S/ );
+	const print = page.locator( 'main .single-post__header a.wprm-recipe-print' );
+	await expect( print ).toHaveCount( 1 );
+	expect( await print.getAttribute( 'href' ) ).toContain( '/wprm_print/' );
+	expect( await recipe.locator( 'a.wprm-recipe-print' ).count(), 'and the card does not print a second one' ).toBe( 0 );
+
+	// Times, servings and course are text.
+	const facts = ( await recipe.locator( '.cr-binder-recipe__facts' ).textContent() ).replace( /\s+/g, ' ' );
+	for ( const label of [ 'Prep Time', 'Cook Time', 'Total Time', 'Servings', 'Course' ] ) {
+		expect( facts ).toContain( label );
+	}
+
+	// Section links go to sections that exist.
+	const jumps = await recipe.locator( 'a.wprm-recipe-jump-to-section' ).evaluateAll( ( as ) => as.map( ( a ) => a.getAttribute( 'href' ) ) );
+	expect( jumps.length ).toBeGreaterThanOrEqual( 3 );
+	for ( const href of jumps ) {
+		expect( href.startsWith( '#' ), `${ href } is an in-page link` ).toBe( true );
+		expect( await page.locator( `[id="${ href.slice( 1 ) }"]` ).count(), `${ href } has a target` ).toBe( 1 );
+	}
+
+	// The plugin's structured data is still there, once.
+	expect( await page.locator( 'script[type="application/ld+json"]' ).evaluateAll( ( ss ) => ss.filter( ( s ) => s.textContent.includes( '"Recipe"' ) ).length ) ).toBe( 1 );
+
+	const box = await page.evaluate( () => {
+		const f = document.querySelector( 'main figure.single-post__featured' ).getBoundingClientRect();
+		const h = document.querySelector( 'main h1' ).getBoundingClientRect();
+		return { figureRight: f.right, figureTop: f.top, h1Left: h.left, h1Bottom: h.bottom, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+	} );
+	if ( page.viewportSize().width >= 1024 ) {
+		expect( box.figureRight, 'the picture stands left of the title' ).toBeLessThanOrEqual( box.h1Left );
+	} else {
+		expect( box.figureTop, 'on a phone the picture follows the title' ).toBeGreaterThanOrEqual( box.h1Bottom - 1 );
+	}
+	expect( box.overflow ).toBe( 0 );
+	await expect( page.locator( 'main nav.cr-post-nav' ) ).toHaveCount( 1 );
+} );
+
+test( 'a recipe post with no recipe card keeps the default single', async ( { page } ) => {
+	const response = await page.goto( RECIPE_PLAIN_SINGLE, { waitUntil: 'load' } );
+	test.skip( response.status() === 404, 'no recipe fixture on this site' );
+	await expect( page.locator( 'body.cr-recipe-single' ) ).toHaveCount( 0 );
+	await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
+	await expect( page.locator( 'main .wprm-recipe' ) ).toHaveCount( 0 );
+	expect( await page.locator( 'main .single-post__content li' ).count(), 'its own lists render' ).toBeGreaterThan( 0 );
+	expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBe( 0 );
 } );
 

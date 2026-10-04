@@ -44,6 +44,36 @@ function is_binder(): bool {
 }
 
 /**
+ * The WP Recipe Maker template this theme ships: wprm-templates/recipe/cr-binder/.
+ */
+const TEMPLATE = 'cr-binder';
+
+/**
+ * The recipe a post embeds, as Post Kinds reads it from the recipe plugin.
+ *
+ * @param int $post_id Post ID.
+ * @return array<string, mixed>|null Recipe values, or null with no recipe plugin or no recipe card.
+ */
+function post_recipe( int $post_id ): ?array {
+	if ( ! class_exists( '\\PKIW\\Integrations\\WP_Recipe_Maker' ) || ! method_exists( '\\PKIW\\Integrations\\WP_Recipe_Maker', 'get_post_recipe' ) ) {
+		return null;
+	}
+
+	return \PKIW\Integrations\WP_Recipe_Maker::get_post_recipe( $post_id );
+}
+
+/**
+ * Is this the single view of a recipe post that holds a recipe card?
+ *
+ * A recipe post with no card keeps the default single.
+ *
+ * @return bool
+ */
+function is_recipe_single(): bool {
+	return \is_singular( 'post' ) && \has_term( 'recipe', 'kind', \get_queried_object_id() ) && null !== post_recipe( (int) \get_queried_object_id() );
+}
+
+/**
  * Fill the binder: the recipe archive pages by BINDER_SIZE.
  *
  * Runs after the theme's card-grid rule (5 per archive page), which would
@@ -65,7 +95,7 @@ add_action( 'pre_get_posts', __NAMESPACE__ . '\\binder_page_size', 11 );
  * @return void
  */
 function enqueue_styles(): void {
-	if ( ! is_admin() && ! is_binder() ) {
+	if ( ! is_admin() && ! is_binder() && ! is_recipe_single() ) {
 		return;
 	}
 	wp_enqueue_style(
@@ -204,3 +234,88 @@ function add_tabs( string $html, array $block ): string {
 	);
 }
 add_filter( 'render_block_core/query', __NAMESPACE__ . '\\add_tabs', 10, 2 );
+
+/**
+ * Mark the single view of a recipe for the stylesheet.
+ *
+ * @param string[] $classes Body classes.
+ * @return string[]
+ */
+function body_class( array $classes ): array {
+	if ( is_recipe_single() ) {
+		$classes[] = 'cr-recipe-single';
+	}
+	return $classes;
+}
+add_filter( 'body_class', __NAMESPACE__ . '\\body_class' );
+
+/**
+ * Use the theme's binder template for recipes, unless the site chose one.
+ *
+ * WP Recipe Maker finds the template in this theme's wprm-templates/
+ * folder; this only makes it the default. A template, print template or
+ * stylesheet placement the site set in the plugin's settings is kept.
+ *
+ *  - Printing stays on one of the plugin's own templates: the print page
+ *    is the plugin's page, outside this theme and its tokens.
+ *  - Template styles print with the recipe, not in the head of every page.
+ *
+ * @param mixed $settings Stored WP Recipe Maker settings.
+ * @return mixed
+ */
+function recipe_plugin_settings( $settings ) {
+	if ( ! is_array( $settings ) ) {
+		return $settings;
+	}
+
+	$defaults = array(
+		'default_recipe_template_modern' => TEMPLATE,
+		'default_print_template_modern'  => 'meadow',
+		'recipe_templates_in_footer'     => true,
+		'snippet_templates_in_footer'    => true,
+	);
+	foreach ( $defaults as $key => $value ) {
+		if ( ! array_key_exists( $key, $settings ) ) {
+			$settings[ $key ] = $value;
+		}
+	}
+
+	return $settings;
+}
+add_filter( 'wprm_settings', __NAMESPACE__ . '\\recipe_plugin_settings' );
+
+/**
+ * The recipe's summary and the plugin's print link, under the H1.
+ *
+ * The post title is the page heading, so the template leaves the recipe
+ * name out. The summary and the print link sit with the title, beside
+ * the picture. The print link is the plugin's own shortcode: it builds
+ * the URL and decides who may print.
+ *
+ * @param string               $html  Rendered block.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function add_title_lede( string $html, array $block ): string {
+	if ( 'core/post-title' !== ( $block['blockName'] ?? '' ) || ! is_recipe_single() || get_the_ID() !== get_queried_object_id() ) {
+		return $html;
+	}
+	$recipe = post_recipe( (int) get_the_ID() );
+	if ( null === $recipe ) {
+		return $html;
+	}
+
+	$out     = '';
+	$summary = trim( (string) ( $recipe['summary'] ?? '' ) );
+	if ( '' !== $summary ) {
+		$out .= '<p class="cr-recipe__summary">' . esc_html( $summary ) . '</p>';
+	}
+
+	$print = trim( do_shortcode( '[wprm-recipe-print id="' . (int) $recipe['id'] . '" style="button" icon="printer" text_color="var(--cr-russian-violet)" icon_color="var(--cr-russian-violet)" button_color="var(--cr-ut-orange)" border_color="var(--cr-russian-violet)" border_radius="6px" horizontal_padding="18px" vertical_padding="10px" text_style="bold"]' ) );
+	if ( '' !== $print ) {
+		$out .= '<p class="cr-recipe__actions">' . $print . '</p>';
+	}
+
+	return $html . $out;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\add_title_lede', 20, 2 );
