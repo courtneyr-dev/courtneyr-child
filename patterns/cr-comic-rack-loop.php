@@ -19,7 +19,7 @@ declare( strict_types = 1 );
 	<!-- wp:query {"queryId":97,"query":{"perPage":12,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"className":"cr-archive-stream__query"} -->
 	<div class="wp-block-query cr-archive-stream__query">
 		<!-- wp:post-template {"className":"cr-archive-stream__list cr-comic-rack__list"} -->
-			<!-- wp:post-kinds-indieweb/stream-card {"headingLevel":2} /-->
+			<!-- wp:post-kinds-indieweb/stream-card {"headingLevel":2,"className":"is-style-cr-rack-comic"} /-->
 		<!-- /wp:post-template -->
 
 		<!-- wp:query-no-results -->

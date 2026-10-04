@@ -26,6 +26,32 @@ function shelf_kinds(): array {
 }
 
 /**
+ * Block style the shelf patterns give their stream card.
+ *
+ * The style travels with the block, so the Site Editor dresses the case
+ * the way the archive does (see stream-media.php).
+ */
+const SHELF_CARD_STYLE = 'is-style-cr-shelf-case';
+
+/**
+ * Name the card style, so the editor lists it for the stream card.
+ *
+ * @return void
+ */
+function register_card_style(): void {
+	if ( function_exists( 'register_block_style' ) ) {
+		register_block_style(
+			'post-kinds-indieweb/stream-card',
+			array(
+				'name'  => 'cr-shelf-case',
+				'label' => __( 'Shelf case', 'courtneyr-child' ),
+			)
+		);
+	}
+}
+add_action( 'init', __NAMESPACE__ . '\\register_card_style' );
+
+/**
  * The kind of the current shelf archive, or '' when the request isn't one.
  *
  * @return string

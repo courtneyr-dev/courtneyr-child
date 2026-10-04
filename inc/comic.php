@@ -76,6 +76,45 @@ function rack_page_size( $query ): void {
 add_action( 'pre_get_posts', __NAMESPACE__ . '\\rack_page_size', 11 );
 
 /**
+ * Block style the rack's pattern gives its stream card.
+ *
+ * The editor asks the server for each card on its own, with no archive
+ * query behind the request. The style travels with the block, so the card
+ * is bagged for the rack in the Site Editor as it is on the archive.
+ */
+const RACK_CARD_STYLE = 'is-style-cr-rack-comic';
+
+/**
+ * Name the card style, so the editor lists it for the stream card.
+ *
+ * @return void
+ */
+function register_card_style(): void {
+	if ( function_exists( 'register_block_style' ) ) {
+		register_block_style(
+			'post-kinds-indieweb/stream-card',
+			array(
+				'name'  => 'cr-rack-comic',
+				'label' => __( 'Racked comic', 'courtneyr-child' ),
+			)
+		);
+	}
+}
+add_action( 'init', __NAMESPACE__ . '\\register_card_style' );
+
+/**
+ * The Site Editor previews the comics archive RACK_SIZE comics to a page.
+ *
+ * @param int    $per_page Posts per page. Zero keeps the editor's own size.
+ * @param string $kind     Kind slug.
+ * @return int
+ */
+function preview_page_size( $per_page, $kind ): int {
+	return 'comics' === $kind ? RACK_SIZE : (int) $per_page;
+}
+add_filter( 'pkiw_kind_archive_preview_per_page', __NAMESPACE__ . '\\preview_page_size', 10, 2 );
+
+/**
  * The comic-card block in a post's content.
  *
  * @param \WP_Post $post Post.
@@ -432,7 +471,7 @@ function name_link_by_tag( string $html ): string {
  * @return string
  */
 function bag_card( string $html, array $block, $instance ): string {
-	$rack = is_rack();
+	$rack = is_rack() || false !== strpos( (string) ( $block['attrs']['className'] ?? '' ), RACK_CARD_STYLE );
 	if ( ! $rack && ! is_stream_surface() ) {
 		return $html;
 	}

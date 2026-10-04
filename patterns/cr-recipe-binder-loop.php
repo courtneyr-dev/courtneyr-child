@@ -18,8 +18,12 @@ declare( strict_types = 1 );
 <div class="wp-block-group alignwide cr-archive-stream cr-recipe-binder">
 	<!-- wp:query {"queryId":229,"query":{"perPage":4,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"className":"cr-archive-stream__query cr-recipe-binder__query"} -->
 	<div class="wp-block-query cr-archive-stream__query cr-recipe-binder__query">
+		<?php if ( WP_Block_Type_Registry::get_instance()->is_registered( 'post-kinds-indieweb/recipe-courses' ) ) : ?>
+		<!-- wp:post-kinds-indieweb/recipe-courses {"className":"cr-recipe-tabs"} /-->
+		<?php endif; ?>
+
 		<!-- wp:post-template {"className":"cr-archive-stream__list cr-recipe-binder__list"} -->
-			<!-- wp:post-kinds-indieweb/stream-card {"headingLevel":2} /-->
+			<!-- wp:post-kinds-indieweb/stream-card {"headingLevel":2,"className":"is-style-cr-binder-card"} /-->
 		<!-- /wp:post-template -->
 
 		<!-- wp:query-no-results -->

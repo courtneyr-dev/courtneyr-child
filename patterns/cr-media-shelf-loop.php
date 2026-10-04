@@ -19,7 +19,7 @@ declare( strict_types = 1 );
 	<!-- wp:query {"queryId":95,"query":{"perPage":12,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"className":"cr-archive-stream__query"} -->
 	<div class="wp-block-query cr-archive-stream__query">
 		<!-- wp:post-template {"className":"cr-archive-stream__list is-style-pkiw-shelf cr-media-shelf__list"} -->
-			<!-- wp:post-kinds-indieweb/stream-card /-->
+			<!-- wp:post-kinds-indieweb/stream-card {"className":"is-style-cr-shelf-case"} /-->
 		<!-- /wp:post-template -->
 
 		<!-- wp:query-no-results -->
