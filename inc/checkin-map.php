@@ -35,8 +35,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * The slip for a place the plugin's card printed.
  *
- * @param array{name:string,url:string,street:string,locality:string,region:string,country:string,lat:?float,lon:?float} $place       The printed place; lat and lon are null when no coordinates printed.
- * @param bool                                                                                                             $named_above Whether the card above already shows the place's name as a fact.
+ * @param array<string, mixed> $place       The printed place: name, url, street, locality, region, country, and lat and lon, which are null when no coordinates printed.
+ * @param bool                 $named_above Whether the card above already shows the place's name as a fact.
  * @return string Empty when the slip would show nothing the card above doesn't.
  */
 function slip( array $place, bool $named_above ): string {
@@ -93,14 +93,10 @@ function slip( array $place, bool $named_above ): string {
 		$span  = 0.01;
 		$src   = sprintf( 'https://www.openstreetmap.org/export/embed.html?bbox=%F,%F,%F,%F&layer=mapnik&marker=%F,%F', $lon - $span, $lat - $span, $lon + $span, $lat + $span, $lat, $lon );
 		$large = sprintf( 'https://www.openstreetmap.org/?mlat=%F&mlon=%F#map=16/%F/%F', $lat, $lon, $lat, $lon );
-		$title = '' !== $name
-			/* translators: %s: place name. */
-			? sprintf( __( 'Map showing %s.', 'courtneyr-child' ), $name )
-			: __( 'Map showing this location.', 'courtneyr-child' );
-		$link  = '' !== $name
-			/* translators: %s: place name. */
-			? sprintf( __( 'View %s on OpenStreetMap', 'courtneyr-child' ), $name )
-			: __( 'View this location on OpenStreetMap', 'courtneyr-child' );
+		/* translators: %s: place name. */
+		$title = '' !== $name ? sprintf( __( 'Map showing %s.', 'courtneyr-child' ), $name ) : __( 'Map showing this location.', 'courtneyr-child' );
+		/* translators: %s: place name. */
+		$link = '' !== $name ? sprintf( __( 'View %s on OpenStreetMap', 'courtneyr-child' ), $name ) : __( 'View this location on OpenStreetMap', 'courtneyr-child' );
 
 		$map      = '<div class="cr-map-slip__map"><iframe class="cr-map-slip__frame" title="' . esc_attr( $title ) . '" src="' . esc_url( $src ) . '" width="640" height="360" loading="lazy"></iframe></div>';
 		$caption .= '<p class="cr-map-slip__more"><a class="cr-map-slip__link" href="' . esc_url( $large ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $link ) . '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'courtneyr-child' ) . '</span></a></p>';

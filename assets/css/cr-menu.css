@@ -85,6 +85,21 @@
 	object-fit: cover;
 }
 
+/* A special with no photo keeps its place: a blank plate of coloured
+   paper, drawn here and never announced. */
+.cr-menu .pkiw-menu-specials__item--no-photo::before {
+	content: "";
+	display: block;
+	width: 100%;
+	aspect-ratio: 3 / 2;
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-light-orange);
+}
+
+.cr-menu--drink .pkiw-menu-specials__item--no-photo::before {
+	background: var(--cr-periwinkle);
+}
+
 .cr-menu .pkiw-menu-specials__body {
 	min-width: 0;
 }

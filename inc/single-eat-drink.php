@@ -86,7 +86,7 @@ function parts( string $article, string $kind ): array {
 		$node  = $found ? $found->item( 0 ) : null;
 		return $node instanceof \DOMElement ? $node : null;
 	};
-	$text  = static fn( ?\DOMElement $node ): string => $node ? trim( (string) preg_replace( '/\s+/u', ' ', $node->textContent ) ) : '';
+	$text  = static fn( ?\DOMElement $node ): string => $node ? trim( (string) preg_replace( '/\s+/u', ' ', $node->textContent ) ) : ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOM property.
 
 	// The line under the title: restaurant and cuisine, or drink type and brand.
 	$sub   = $one( '//p[' . $has( 'pk-sub' ) . ' and not(' . $has( 'p-location' ) . ') and not(' . $has( 'pk-stream-date' ) . ')]' );
@@ -102,7 +102,7 @@ function parts( string $article, string $kind ): array {
 		$point = $geo ? array_map( 'trim', explode( ',', (string) $geo->getAttribute( 'value' ) ) ) : array();
 		$place = array(
 			'name'     => $text( $named ),
-			'url'      => $named && 'a' === strtolower( $named->nodeName ) ? (string) $named->getAttribute( 'href' ) : '',
+			'url'      => $named && 'a' === strtolower( $named->nodeName ) ? (string) $named->getAttribute( 'href' ) : '', // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOM property.
 			'street'   => $text( $one( './/*[' . $has( 'p-street-address' ) . ']', $where ) ),
 			'locality' => $text( $one( './/*[' . $has( 'p-locality' ) . ']', $where ) ),
 			'region'   => $text( $one( './/*[' . $has( 'p-region' ) . ']', $where ) ),
@@ -142,10 +142,10 @@ function parts( string $article, string $kind ): array {
  *
  * @param \WP_Post                   $post  Post.
  * @param array<string, string>|null $photo The card's photo, when it printed one.
- * @param string                     $class Class for the figure.
+ * @param string                     $css   Class for the figure.
  * @return string
  */
-function photo( \WP_Post $post, ?array $photo, string $class ): string {
+function photo( \WP_Post $post, ?array $photo, string $css ): string {
 	if ( $photo && '' !== $photo['src'] ) {
 		$img = '<img class="u-photo" src="' . esc_url( $photo['src'] ) . '" alt="' . esc_attr( $photo['alt'] ) . '" loading="lazy" decoding="async" />';
 	} elseif ( \has_post_thumbnail( $post ) ) {
@@ -153,7 +153,7 @@ function photo( \WP_Post $post, ?array $photo, string $class ): string {
 	} else {
 		return '';
 	}
-	return '<figure class="' . esc_attr( $class ) . '">' . $img . '</figure>';
+	return '<figure class="' . esc_attr( $css ) . '">' . $img . '</figure>';
 }
 
 /**
