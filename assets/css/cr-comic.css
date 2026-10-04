@@ -115,12 +115,16 @@
 	--rack-comic: clamp(8rem, 19vw, 14.5rem);
 	--rack-tier: calc(var(--rack-comic) * 1.5 + 7.5rem);
 	--sleeve-edge: 1px;
-	--sleeve-gap: calc(var(--rack-comic) * 0.025);
+	--sleeve-gap: calc(var(--rack-comic) * 0.03);
+	--sleeve-foot: calc(var(--rack-comic) * 0.012);
 	--sleeve-flap: calc(var(--rack-comic) * 0.11);
-	--sleeve-line: color-mix(in srgb, var(--cr-light-gray) 55%, transparent);
-	--sleeve-film: color-mix(in srgb, var(--cr-light-gray) 20%, transparent);
-	--sleeve-shine: color-mix(in srgb, var(--cr-light-gray) 34%, transparent);
-	--sleeve-haze: color-mix(in srgb, var(--cr-light-gray) 12%, transparent);
+	--sleeve-line: color-mix(in srgb, var(--cr-light-gray) 88%, transparent);
+	--sleeve-film: color-mix(in srgb, var(--cr-light-gray) 72%, transparent);
+	--sleeve-double: color-mix(in srgb, var(--cr-light-gray) 55%, transparent);
+	--sleeve-shine: color-mix(in srgb, var(--cr-light-gray) 40%, transparent);
+	--sleeve-haze: color-mix(in srgb, var(--cr-light-gray) 16%, transparent);
+	--sleeve-veil: color-mix(in srgb, var(--cr-light-gray) 7%, transparent);
+	--sleeve-lilac: color-mix(in srgb, var(--cr-periwinkle) 24%, transparent);
 	--sleeve-fold: color-mix(in srgb, var(--cr-periwinkle) 34%, transparent);
 	--sleeve-tint: color-mix(in srgb, var(--cr-sky-blue) 18%, transparent);
 	--sleeve-clear: color-mix(in srgb, var(--cr-light-gray) 0%, transparent);
@@ -204,14 +208,16 @@
    corners, and a slight tilt so it doesn't sit square. ::before is the
    flap, folded over the top of the bag. ::after lies over the cover: one
    broad reflection that fades at both edges and a few creases at the top
-   and corners. Neither adds content. The plastic is Light Gray, Periwinkle
-   and Sky Blue at low opacity in light and dark mode alike, and one hard
-   shadow lifts the bag off the rack. The shelf tag under it stays upright. */
+   and corners. Neither adds content. The plastic is Light Gray under a
+   Periwinkle tint, dense enough at the rim and flap to stay pale against the
+   dark rack and thin over the cover, in light and dark mode alike. The comic
+   rests at the foot of the bag, and one hard shadow lifts the bag off the
+   rack. The shelf tag under it stays upright. */
 .cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media {
-	padding: var(--sleeve-flap) var(--sleeve-gap) var(--sleeve-gap);
+	padding: var(--sleeve-flap) var(--sleeve-gap) var(--sleeve-foot);
 	border: var(--sleeve-edge) solid var(--sleeve-line);
 	border-radius: var(--cr-radius-sm);
-	background: var(--sleeve-film);
+	background: linear-gradient(var(--sleeve-lilac), var(--sleeve-lilac)) var(--sleeve-film);
 	box-shadow: var(--cr-shadow-hard-sm);
 	transform: rotate(var(--cr-rotate-1));
 }
@@ -230,7 +236,7 @@
 		linear-gradient(172deg, var(--sleeve-clear) 38%, var(--sleeve-shine) 46%, var(--sleeve-clear) 58%),
 		linear-gradient(186deg, var(--sleeve-clear) 55%, var(--sleeve-fold) 66%, var(--sleeve-clear) 80%),
 		/* The doubled plastic of the flap, thicker toward the fold. */
-		linear-gradient(180deg, var(--sleeve-haze), var(--sleeve-shine));
+		linear-gradient(180deg, var(--sleeve-haze), var(--sleeve-double));
 	transform: none;
 }
 
@@ -241,6 +247,8 @@
 	border: 0;
 	border-radius: var(--cr-radius-sm);
 	background:
+		/* The plastic itself, a thin veil over the whole cover. */
+		linear-gradient(var(--sleeve-veil), var(--sleeve-veil)),
 		/* A crease at the upper left corner and one at the lower right. */
 		linear-gradient(140deg, var(--sleeve-shine) 0, var(--sleeve-clear) 9%) 0 0 / 46% 22% no-repeat,
 		linear-gradient(320deg, var(--sleeve-fold) 0, var(--sleeve-clear) 8%) 100% 100% / 40% 16% no-repeat,
@@ -250,13 +258,18 @@
 		linear-gradient(112deg, var(--sleeve-clear) 10%, var(--sleeve-haze) 20%, var(--sleeve-shine) 29%, var(--sleeve-haze) 38%, var(--sleeve-clear) 50%);
 }
 
+/* Inside the bag the cover has no inked outline, only the page's own edge. */
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media img {
+	border-color: var(--sleeve-fold);
+}
+
 /* No artwork: the typographic cover is painted inside the sleeve, the
    same distance from its edge as a picture would be. */
 .cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media.cr-comic__cover--type,
 .cr-comic-rack .cr-comic-rack__list > li .cr-comic--rack.cr-comic--no-art .pk-media {
-	padding: calc(var(--sleeve-flap) + 0.85rem) calc(var(--sleeve-gap) + 0.8rem) calc(var(--sleeve-gap) + 0.85rem);
+	padding: calc(var(--sleeve-flap) + 0.85rem) calc(var(--sleeve-gap) + 0.8rem) calc(var(--sleeve-foot) + 0.85rem);
 	background:
-		linear-gradient(var(--cr-cerulean), var(--cr-cerulean)) var(--sleeve-gap) var(--sleeve-flap) / calc(100% - var(--sleeve-gap) * 2) calc(100% - var(--sleeve-flap) - var(--sleeve-gap)) no-repeat,
+		linear-gradient(var(--cr-cerulean), var(--cr-cerulean)) var(--sleeve-gap) var(--sleeve-flap) / calc(100% - var(--sleeve-gap) * 2) calc(100% - var(--sleeve-flap) - var(--sleeve-foot)) no-repeat,
 		var(--sleeve-film);
 }
 
