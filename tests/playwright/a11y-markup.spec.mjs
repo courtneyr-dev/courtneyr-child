@@ -450,126 +450,191 @@ test( 'the comics archive is a rack of bagged comics, one title link each, no me
 	expect( await page.locator( '.cr-archive--comics .cr-comic-rack img, .cr-archive--comics .cr-comic-rack svg' ).evaluateAll( ( els ) => els.filter( ( e ) => ! e.closest( '.pk-card' ) ).length ), 'no decoration enters the DOM' ).toBe( 0 );
 } );
 
-// PKIW #228: on the rack a comic stands in a clear sleeve, as in the approved
-// mockup. The rack shows through the plastic around the cover. The sleeve is
-// a thin edge, a seam across the top flap and one small glare, drawn with
-// pseudo-elements so it adds no content. The status sticker sits on the
-// plastic, inside the sleeve's edge, and nothing is taped on.
-test( 'a racked comic stands in a clear sleeve: thin edge, top seam, one glare, status sticker on the plastic', async ( { page } ) => {
+// PKIW #228, the polybag: on the rack a comic stands in a loose clear bag.
+// The bag is about a fifth of the rack on a wide screen, its plastic is pale
+// (Light Gray, Periwinkle, Sky Blue at low opacity), the cover nearly fills
+// it, a taller flap folds over the top, the corners are soft, and it tilts by
+// one rotation token while the shelf tag stays upright. One broad reflection
+// fades at both edges; one hard shadow lifts the bag off the rack. The status
+// sticker is on the plastic: small, tilted, hand-lettered on two lines, with
+// plastic showing above and beside it. Nothing here adds content.
+test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft reflection, small tilted hand-lettered sticker', async ( { page } ) => {
 	await page.goto( COMICS_ARCHIVE, { waitUntil: 'load' } );
+	await page.evaluate( () => document.fonts.ready );
 	const bagged = page.locator( '.cr-archive--comics ul.cr-comic-rack__list article.pk-card.cr-comic--rack' );
 	expect( await bagged.count(), 'the fixture archive holds at least one comic read' ).toBeGreaterThan( 0 );
-	// Read in the page: boxes, the sleeve's paint, and the focus box of the title link.
+	// Read in the page. Boxes are layout boxes (offset*), so the bag's tilt doesn't blur the geometry.
 	const measure = ( el ) => {
-		const box = ( n ) => {
-			const r = n.getBoundingClientRect();
-			return { top: r.top, right: r.right, bottom: r.bottom, left: r.left, width: r.width, height: r.height };
-		};
 		const alpha = ( c ) => ( c.includes( '/' ) ? parseFloat( c.split( '/' )[ 1 ] ) : c.startsWith( 'rgba' ) ? parseFloat( c.split( ',' )[ 3 ] ) : 1 );
 		const rgb = ( c ) => c.match( /[\d.]+/g ).slice( 0, 3 ).map( ( n ) => Math.round( c.startsWith( 'color(' ) ? n * 255 : n ) ).join( ' ' );
 		const blurs = ( n ) => [ ...getComputedStyle( n ).boxShadow.matchAll( /-?[\d.]+px -?[\d.]+px (-?[\d.]+)px/g ) ].map( ( m ) => parseFloat( m[ 1 ] ) );
-		const token = ( name ) => {
-			const probe = document.body.appendChild( document.createElement( 'i' ) );
-			probe.style.color = `var(${ name })`;
-			const value = rgb( getComputedStyle( probe ).color );
-			probe.remove();
-			return value;
+		const probe = ( property, value ) => {
+			const i = document.body.appendChild( document.createElement( 'i' ) );
+			i.style[ property ] = value;
+			const out = getComputedStyle( i )[ property ];
+			i.remove();
+			return out;
+		};
+		const colours = ( gradient ) => gradient.match( /(?:color|rgba?)\([^()]*\)/g ) || [];
+		const angle = ( transform ) => {
+			const m = transform.match( /matrix\(([^)]+)\)/ );
+			if ( ! m ) {
+				return 0;
+			}
+			const [ a, b ] = m[ 1 ].split( ',' ).map( parseFloat );
+			return Math.round( Math.atan2( b, a ) * ( 180 / Math.PI ) * 10 ) / 10;
 		};
 		const media = el.querySelector( '.pk-media' );
 		const cover = media.querySelector( 'img' );
 		const sticker = el.querySelector( '.cr-comic__sticker' );
+		const tag = el.querySelector( '.pk-caption' );
+		const list = el.closest( 'ul' );
+		const slot = el.closest( 'li' );
 		const cs = getComputedStyle( media );
-		const seam = getComputedStyle( media, '::before' );
-		const glare = getComputedStyle( media, '::after' );
+		const flap = getComputedStyle( media, '::before' );
+		const shine = getComputedStyle( media, '::after' );
 		const a = el.querySelector( '.pk-title a' );
 		const ring = getComputedStyle( a, '::after' );
-		let held = a.parentElement;
-		while ( getComputedStyle( held ).position === 'static' ) {
-			held = held.parentElement;
-		}
-		const origin = held.getBoundingClientRect();
-		const stops = ( glare.backgroundImage.match( /(?:color|rgba?)\([^()]*\)/g ) || [] ).filter( ( c ) => alpha( c ) > 0 );
-		const marks = [ ...glare.backgroundImage.matchAll( /((?:color|rgba?)\([^()]*\)) ([\d.]+)%/g ) ].filter( ( m ) => alpha( m[ 1 ] ) > 0 ).map( ( m ) => parseFloat( m[ 2 ] ) );
+		const bounds = ( n ) => {
+			const r = n.getBoundingClientRect();
+			return { top: r.top, right: r.right, bottom: r.bottom, left: r.left };
+		};
+		const layers = shine.backgroundImage.split( /,\s*(?=linear-gradient)/ );
+		const broad = colours( layers[ layers.length - 1 ] || '' ).map( alpha );
+		const lines = ( n ) => {
+			const range = document.createRange();
+			range.selectNodeContents( n );
+			return new Set( [ ...range.getClientRects() ].map( ( r ) => Math.round( r.top ) ) ).size;
+		};
 		return {
-			sleeve: box( media ),
-			slot: box( el.closest( 'li' ) ),
-			cover: cover ? box( cover ) : null,
-			sticker: sticker ? box( sticker ) : null,
-			film: alpha( cs.backgroundColor ),
+			rack: list.clientWidth,
+			sleeve: { width: media.offsetWidth, height: media.offsetHeight, bounds: bounds( media ) },
+			slot: bounds( slot ),
+			cover: cover ? { width: cover.offsetWidth, left: cover.offsetLeft, top: cover.offsetTop, bottom: media.clientHeight - cover.offsetTop - cover.offsetHeight } : null,
+			film: { alpha: alpha( cs.backgroundColor ), rgb: rgb( cs.backgroundColor ) },
 			edge: { style: cs.borderTopStyle, width: parseFloat( cs.borderTopWidth ), rgb: rgb( cs.borderTopColor ) },
-			seam: { content: seam.content, top: parseFloat( seam.top ), width: parseFloat( seam.width ), height: parseFloat( seam.height ), line: parseFloat( seam.borderBottomWidth ), transform: seam.transform, gradient: seam.backgroundImage },
-			glare: { content: glare.content, area: parseFloat( glare.width ) * parseFloat( glare.height ), gradient: glare.backgroundImage, alphas: stops.map( alpha ), rgbs: stops.map( rgb ), band: marks.length ? Math.max( ...marks ) - Math.min( ...marks ) : 0 },
+			radius: parseFloat( cs.borderTopLeftRadius ),
+			tilt: angle( cs.transform ),
+			tilts: [ '--cr-rotate-1', '--cr-rotate-2', '--cr-rotate-neg', '--cr-rotate-neg2' ].map( ( name ) => parseFloat( getComputedStyle( document.documentElement ).getPropertyValue( name ) ) ),
+			tag: tag ? getComputedStyle( tag ).transform : null,
+			shadow: { value: cs.boxShadow, token: probe( 'boxShadow', 'var(--cr-shadow-hard-sm)' ) },
+			flap: { content: flap.content, height: parseFloat( flap.height ), gradient: flap.backgroundImage },
+			shine: { content: shine.content, gradients: layers.length, alphas: colours( shine.backgroundImage ).map( alpha ), rgbs: [ ...colours( shine.backgroundImage ), ...colours( flap.backgroundImage ) ].filter( ( c ) => alpha( c ) > 0 ).map( rgb ), broad },
+			plastic: [ '--cr-light-gray', '--cr-periwinkle', '--cr-sky-blue' ].map( ( name ) => rgb( probe( 'color', `var(${ name })` ) ) ),
 			blurs: [ media, cover, sticker ].filter( Boolean ).flatMap( blurs ),
 			art: cover ? [ getComputedStyle( cover ).opacity, getComputedStyle( cover ).filter ] : null,
-			ring: { style: ring.outlineStyle, top: origin.top + parseFloat( ring.top ), left: origin.left + parseFloat( ring.left ), width: parseFloat( ring.width ), height: parseFloat( ring.height ) },
-			clips: [ el, el.closest( 'li' ), el.closest( 'ul' ) ].map( ( n ) => getComputedStyle( n ).overflow ),
-			dark: matchMedia( '(prefers-color-scheme: dark)' ).matches,
-			plastic: [ token( '--cr-sky-blue' ), token( '--cr-periwinkle' ) ],
+			sticker: sticker ? {
+				width: sticker.offsetWidth,
+				bounds: bounds( sticker ),
+				font: getComputedStyle( sticker ).fontFamily,
+				tilt: angle( getComputedStyle( sticker ).transform ),
+				fill: rgb( getComputedStyle( sticker ).backgroundColor ),
+				ink: rgb( getComputedStyle( sticker ).color ),
+				border: rgb( getComputedStyle( sticker ).borderTopColor ),
+				lines: lines( sticker ),
+				text: sticker.textContent.trim(),
+			} : null,
+			paint: { yellow: rgb( probe( 'color', 'var(--cr-selective-yellow)' ) ), violet: rgb( probe( 'color', 'var(--cr-russian-violet)' ) ) },
+			ring: { style: ring.outlineStyle, offset: parseFloat( ring.outlineOffset ), box: ( () => {
+				let held = a.parentElement;
+				while ( getComputedStyle( held ).position === 'static' ) {
+					held = held.parentElement;
+				}
+				const o = held.getBoundingClientRect();
+				return { top: o.top + parseFloat( ring.top ), left: o.left + parseFloat( ring.left ), right: o.left + parseFloat( ring.left ) + parseFloat( ring.width ), bottom: o.top + parseFloat( ring.top ) + parseFloat( ring.height ) };
+			} )() },
+			clips: [ el, slot, list ].map( ( n ) => getComputedStyle( n ).overflow ),
 		};
 	};
+	const wide = page.viewportSize().width >= 1280;
 	for ( const card of await bagged.all() ) {
 		await card.locator( '.pk-title a' ).focus();
 		const o = await card.evaluate( measure );
-		// A clear sleeve, not an opaque card: the rack shows through around the cover.
-		expect( o.film, 'the sleeve is see-through' ).toBeLessThan( 0.3 );
-		expect( o.film, 'the film is light enough to read as plastic' ).toBeGreaterThanOrEqual( 0.2 );
+		// Scale: about a fifth of the rack on a wide screen.
+		if ( wide ) {
+			expect( o.sleeve.width / o.rack, 'the bag is about 21% of the rack' ).toBeGreaterThanOrEqual( 0.19 );
+			expect( o.sleeve.width / o.rack ).toBeLessThanOrEqual( 0.23 );
+		}
+		// Pale clear plastic: the rack shows through, lightly washed.
+		expect( o.film.alpha, 'the plastic is see-through' ).toBeLessThanOrEqual( 0.3 );
+		expect( o.film.alpha, 'the plastic washes the rack' ).toBeGreaterThanOrEqual( 0.1 );
+		expect( o.plastic, 'the film is Light Gray, Periwinkle or Sky Blue' ).toContain( o.film.rgb );
+		expect( o.plastic, 'the edge is Light Gray, Periwinkle or Sky Blue' ).toContain( o.edge.rgb );
+		expect( o.shine.rgbs.every( ( c ) => o.plastic.includes( c ) ), 'every highlight is Light Gray, Periwinkle or Sky Blue' ).toBe( true );
 		expect( o.edge.style ).toBe( 'solid' );
-		expect( o.edge.width, 'the outer edge is thin' ).toBeGreaterThanOrEqual( 1 );
-		expect( o.edge.width ).toBeLessThanOrEqual( 2 );
-		expect( o.sleeve.left, 'the sleeve stays inside its rack slot' ).toBeGreaterThanOrEqual( o.slot.left );
-		expect( o.sleeve.right ).toBeLessThanOrEqual( o.slot.right );
-		expect( o.sleeve.top ).toBeGreaterThanOrEqual( o.slot.top );
-		expect( o.sleeve.bottom ).toBeLessThanOrEqual( o.slot.bottom );
+		expect( o.edge.width, 'a thin edge, not a frame' ).toBeLessThanOrEqual( 1.5 );
+		expect( o.radius, 'soft corners' ).toBeGreaterThan( 0 );
+		// A slight tilt from one rotation token; the shelf tag stays upright.
+		expect( o.tilt, 'the bag is tilted' ).not.toBe( 0 );
+		expect( o.tilts, 'by a rotation token' ).toContain( o.tilt );
+		expect( o.tag, 'the shelf tag is upright' ).toBe( 'none' );
+		// One hard shadow from the token; nothing blurred.
+		expect( o.shadow.value, 'a hard shadow token lifts the bag off the rack' ).toBe( o.shadow.token );
+		expect( o.blurs.every( ( blur ) => blur === 0 ), 'no blurred shadow' ).toBe( true );
+		// The bag stays inside its rack slot, tilt included.
+		expect( o.sleeve.bounds.left, 'the bag stays inside its rack slot' ).toBeGreaterThanOrEqual( o.slot.left );
+		expect( o.sleeve.bounds.right ).toBeLessThanOrEqual( o.slot.right );
+		expect( o.sleeve.bounds.top ).toBeGreaterThanOrEqual( o.slot.top );
+		expect( o.sleeve.bounds.bottom ).toBeLessThanOrEqual( o.slot.bottom );
 		if ( o.cover ) {
-			const gap = { top: o.cover.top - o.sleeve.top, right: o.sleeve.right - o.cover.right, bottom: o.sleeve.bottom - o.cover.bottom, left: o.cover.left - o.sleeve.left };
-			expect( Math.min( gap.right, gap.bottom, gap.left ), 'the sleeve extends past the cover on every side' ).toBeGreaterThan( 0 );
-			expect( gap.top, 'the top flap is taller than the side margin' ).toBeGreaterThan( gap.left );
-			// The seam crosses the flap, above the cover.
-			expect( o.seam.top + o.seam.height + o.seam.line, 'the seam is in the flap' ).toBeLessThanOrEqual( gap.top );
+			const rim = { left: o.cover.left, right: o.sleeve.width - 2 * o.edge.width - o.cover.left - o.cover.width, bottom: o.cover.bottom, top: o.cover.top };
+			expect( Math.min( rim.left, rim.right, rim.bottom ), 'plastic shows on every side of the cover' ).toBeGreaterThan( 0 );
+			expect( Math.max( rim.left, rim.right, rim.bottom ) / o.sleeve.width, 'the rim is narrow: the cover nearly fills the bag' ).toBeLessThanOrEqual( 0.05 );
+			expect( rim.top / o.sleeve.width, 'a tall flap over the top' ).toBeGreaterThanOrEqual( 0.08 );
+			expect( rim.top, 'the flap is at least three times the rim' ).toBeGreaterThanOrEqual( 3 * rim.left );
+			expect( o.flap.height, 'the flap is the plastic above the cover' ).toBeGreaterThanOrEqual( rim.top - 1 );
 			expect( o.art, 'the cover art is not dimmed or filtered' ).toEqual( [ '1', 'none' ] );
 		}
-		// The seam is a level line the width of the sleeve; nothing is taped on.
-		expect( o.seam.content, 'the seam is a pseudo-element with no text' ).toBe( '""' );
-		expect( o.seam.transform, 'no tilted tape' ).toBe( 'none' );
-		expect( o.seam.line ).toBeGreaterThan( 0 );
-		expect( o.seam.width, 'the seam spans the sleeve' ).toBeGreaterThan( o.sleeve.width - 2 * o.edge.width - 1 );
-		// One restrained glare: the only gradient, on a box under a quarter of the sleeve.
-		expect( o.glare.content ).toBe( '""' );
-		expect( o.glare.gradient ).toContain( 'gradient' );
-		expect( o.seam.gradient, 'the glare is the only highlight' ).toBe( 'none' );
-		expect( o.glare.area, 'the glare covers under a quarter of the sleeve' ).toBeLessThan( ( o.sleeve.width * o.sleeve.height ) / 4 );
-		expect( Math.max( ...o.glare.alphas ), 'the glare is translucent' ).toBeLessThanOrEqual( 0.5 );
-		expect( o.glare.band, 'the glare streak is at least an eighth of its gradient line' ).toBeGreaterThanOrEqual( 12.5 );
-		expect( o.blurs.every( ( blur ) => blur === 0 ), 'no blurred shadow' ).toBe( true );
-		// In dark mode the edge and the highlight are Sky Blue or Periwinkle.
-		if ( o.dark ) {
-			expect( o.plastic ).toContain( o.edge.rgb );
-			expect( o.glare.rgbs.every( ( c ) => o.plastic.includes( c ) ), 'the glare is Sky Blue or Periwinkle' ).toBe( true );
-		}
-		// The sticker is on the plastic: upper right, inside the sleeve's edge.
+		// The flap and the reflections are pseudo-elements with no text.
+		expect( o.flap.content ).toBe( '""' );
+		expect( o.flap.gradient, 'the flap is folded plastic, not a ruled line' ).toContain( 'gradient' );
+		expect( o.shine.content ).toBe( '""' );
+		expect( o.shine.gradients, 'a reflection and a few creases' ).toBeGreaterThanOrEqual( 2 );
+		expect( o.shine.gradients ).toBeLessThanOrEqual( 5 );
+		expect( Math.max( ...o.shine.alphas ), 'the reflections are translucent' ).toBeLessThanOrEqual( 0.4 );
+		expect( o.shine.broad[ 0 ], 'the broad reflection fades in' ).toBe( 0 );
+		expect( o.shine.broad[ o.shine.broad.length - 1 ], 'and fades out' ).toBe( 0 );
+		expect( o.shine.broad.length, 'through soft steps, not one hard band' ).toBeGreaterThanOrEqual( 5 );
+		// The sticker is on the plastic: small, tilted, hand-lettered, with plastic above and beside it.
 		if ( o.sticker ) {
-			expect( o.sticker.top, 'the sticker is inside the sleeve' ).toBeGreaterThanOrEqual( o.sleeve.top );
-			expect( o.sticker.right ).toBeLessThanOrEqual( o.sleeve.right );
-			expect( o.sticker.left ).toBeGreaterThanOrEqual( o.sleeve.left );
-			expect( o.sticker.bottom ).toBeLessThanOrEqual( o.sleeve.bottom );
-			expect( o.sticker.left + o.sticker.width / 2, 'on the right half' ).toBeGreaterThan( o.sleeve.left + o.sleeve.width / 2 );
-			expect( o.sticker.top + o.sticker.height / 2, 'on the upper half' ).toBeLessThan( o.sleeve.top + o.sleeve.height / 2 );
+			if ( wide ) {
+				expect( o.sticker.width / o.sleeve.width, 'the sticker is 28 to 30% of the bag' ).toBeGreaterThanOrEqual( 0.275 );
+				expect( o.sticker.width / o.sleeve.width ).toBeLessThanOrEqual( 0.305 );
+			}
+			expect( o.sticker.font, 'hand-lettered' ).toMatch( /^"?Rock Salt/ );
+			expect( o.sticker.tilt, 'the sticker is tilted' ).not.toBe( 0 );
+			expect( o.tilts, 'by a rotation token' ).toContain( o.sticker.tilt );
+			expect( [ o.sticker.fill, o.sticker.ink, o.sticker.border ], 'yellow, or its status colour, with violet ink and border' ).toEqual( [ o.sticker.fill, o.paint.violet, o.paint.violet ] );
+			if ( 'Currently reading' === o.sticker.text ) {
+				expect( o.sticker.fill ).toBe( o.paint.yellow );
+				expect( o.sticker.lines, '"Currently reading" sits on two lines' ).toBe( 2 );
+			}
+			expect( o.sticker.bounds.top - o.sleeve.bounds.top, 'plastic shows above the sticker' ).toBeGreaterThan( 2 );
+			expect( o.sleeve.bounds.right - o.sticker.bounds.right, 'and beside it' ).toBeGreaterThan( 2 );
+			expect( o.sticker.bounds.left, 'the sticker is inside the bag' ).toBeGreaterThanOrEqual( o.sleeve.bounds.left );
+			expect( o.sticker.bounds.bottom ).toBeLessThanOrEqual( o.sleeve.bounds.bottom );
+			expect( ( o.sticker.bounds.left + o.sticker.bounds.right ) / 2, 'on the right half' ).toBeGreaterThan( ( o.sleeve.bounds.left + o.sleeve.bounds.right ) / 2 );
+			expect( ( o.sticker.bounds.top + o.sticker.bounds.bottom ) / 2, 'on the upper half' ).toBeLessThan( ( o.sleeve.bounds.top + o.sleeve.bounds.bottom ) / 2 );
 		}
-		// Cover, sleeve and sticker focus as one object: the focus box holds all
-		// three, and no ancestor up to the rack clips its outline.
+		// Cover, bag and sticker focus as one object: the focus outline, drawn
+		// its offset outside the link's box, holds all three, and no ancestor
+		// up to the rack clips it.
 		expect( o.ring.style ).toBe( 'solid' );
-		for ( const part of [ o.sleeve, o.sticker ].filter( Boolean ) ) {
-			expect( part.top ).toBeGreaterThanOrEqual( o.ring.top );
-			expect( part.left ).toBeGreaterThanOrEqual( o.ring.left );
-			expect( part.right ).toBeLessThanOrEqual( o.ring.left + o.ring.width );
-			expect( part.bottom ).toBeLessThanOrEqual( o.ring.top + o.ring.height );
+		for ( const part of [ o.sleeve.bounds, o.sticker?.bounds ].filter( Boolean ) ) {
+			expect( part.top ).toBeGreaterThanOrEqual( o.ring.box.top - o.ring.offset );
+			expect( part.left ).toBeGreaterThanOrEqual( o.ring.box.left - o.ring.offset );
+			expect( part.right ).toBeLessThanOrEqual( o.ring.box.right + o.ring.offset );
+			expect( part.bottom ).toBeLessThanOrEqual( o.ring.box.bottom + o.ring.offset );
 		}
 		expect( o.clips, 'nothing clips the focus outline' ).toEqual( [ 'visible', 'visible', 'visible' ] );
 	}
-	// Forced colours: the glare goes, the sleeve keeps a clear outer boundary.
+	// Forced colours: the film, the flap, the reflections and the shadow go; the bag keeps a clear outline.
 	await page.emulateMedia( { forcedColors: 'active' } );
 	const forced = await bagged.first().evaluate( measure );
-	expect( forced.glare.content, 'no glare in forced colours' ).toBe( 'none' );
+	expect( forced.flap.content, 'no flap paint in forced colours' ).toBe( 'none' );
+	expect( forced.shine.content, 'no reflections in forced colours' ).toBe( 'none' );
+	expect( forced.film.alpha, 'no translucent film in forced colours' ).toBe( 1 );
+	expect( forced.shadow.value, 'no shadow in forced colours' ).toBe( 'none' );
 	expect( forced.edge.style ).toBe( 'solid' );
 	expect( forced.edge.width ).toBeGreaterThanOrEqual( 1 );
 } );
