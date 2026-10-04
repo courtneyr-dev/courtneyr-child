@@ -112,14 +112,18 @@
 	--rack-cols: 4;
 	--rack-lip: 2.75rem;
 	--rack-tag-drop: 2.25rem;
-	--rack-comic: clamp(8rem, 15vw, 11rem);
-	--rack-tier: calc(var(--rack-comic) * 1.5 + 6.5rem);
-	--sleeve-edge: 1.5px;
-	--sleeve-gap: calc(var(--rack-comic) * 0.04);
-	--sleeve-flap: calc(var(--sleeve-gap) * 2 + var(--sleeve-edge));
-	--sleeve-line: color-mix(in srgb, var(--cr-sky-blue) 80%, transparent);
-	--sleeve-film: color-mix(in srgb, var(--cr-sky-blue) 24%, transparent);
-	--sleeve-glare: color-mix(in srgb, var(--cr-sky-blue) 38%, transparent);
+	--rack-comic: clamp(8rem, 19vw, 14.5rem);
+	--rack-tier: calc(var(--rack-comic) * 1.5 + 7.5rem);
+	--sleeve-edge: 1px;
+	--sleeve-gap: calc(var(--rack-comic) * 0.025);
+	--sleeve-flap: calc(var(--rack-comic) * 0.11);
+	--sleeve-line: color-mix(in srgb, var(--cr-light-gray) 55%, transparent);
+	--sleeve-film: color-mix(in srgb, var(--cr-light-gray) 20%, transparent);
+	--sleeve-shine: color-mix(in srgb, var(--cr-light-gray) 34%, transparent);
+	--sleeve-haze: color-mix(in srgb, var(--cr-light-gray) 12%, transparent);
+	--sleeve-fold: color-mix(in srgb, var(--cr-periwinkle) 34%, transparent);
+	--sleeve-tint: color-mix(in srgb, var(--cr-sky-blue) 18%, transparent);
+	--sleeve-clear: color-mix(in srgb, var(--cr-light-gray) 0%, transparent);
 	position: relative;
 	display: grid;
 	grid-template-columns: repeat(var(--rack-cols), minmax(0, 1fr));
@@ -193,18 +197,23 @@
 	order: -1;
 }
 
-/* The clear sleeve. On the rack a comic stands in a polybag, not on the
-   board the Stream and the single use: the rack shows through the plastic
-   around the cover. The media box is the sleeve. Its border is the bag's
-   outer edge and its padding is the plastic past the cover, with a taller
-   flap on top. ::before is the seam across the flap and ::after is the one
-   glare, so the sleeve adds no content. The rack keeps its colour in dark
-   mode, so one Sky Blue edge and highlight show in both. */
+/* The polybag. On the rack a comic stands in a loose clear bag, not on the
+   board the Stream and the single use. The media box is the bag: pale
+   plastic that washes the rack lightly where it reaches past the cover, a
+   narrow rim at the sides and foot, a taller folded flap on top, soft
+   corners, and a slight tilt so it doesn't sit square. ::before is the
+   flap, folded over the top of the bag. ::after lies over the cover: one
+   broad reflection that fades at both edges and a few creases at the top
+   and corners. Neither adds content. The plastic is Light Gray, Periwinkle
+   and Sky Blue at low opacity in light and dark mode alike, and one hard
+   shadow lifts the bag off the rack. The shelf tag under it stays upright. */
 .cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media {
 	padding: var(--sleeve-flap) var(--sleeve-gap) var(--sleeve-gap);
 	border: var(--sleeve-edge) solid var(--sleeve-line);
+	border-radius: var(--cr-radius-sm);
 	background: var(--sleeve-film);
-	box-shadow: none;
+	box-shadow: var(--cr-shadow-hard-sm);
+	transform: rotate(var(--cr-rotate-1));
 }
 
 .cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media::before {
@@ -212,19 +221,33 @@
 	inset-block: 0 auto;
 	inset-inline: 0;
 	width: auto;
-	height: calc(var(--sleeve-flap) / 2);
+	height: var(--sleeve-flap);
 	border: 0;
 	border-block-end: 1px solid var(--sleeve-line);
-	background: var(--sleeve-film);
+	border-radius: var(--cr-radius-sm) var(--cr-radius-sm) 0 0;
+	background:
+		/* Two creases across the fold. */
+		linear-gradient(172deg, var(--sleeve-clear) 38%, var(--sleeve-shine) 46%, var(--sleeve-clear) 58%),
+		linear-gradient(186deg, var(--sleeve-clear) 55%, var(--sleeve-fold) 66%, var(--sleeve-clear) 80%),
+		/* The doubled plastic of the flap, thicker toward the fold. */
+		linear-gradient(180deg, var(--sleeve-haze), var(--sleeve-shine));
 	transform: none;
 }
 
 .cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media::after {
-	inset: 0 auto auto 0;
-	width: 52%;
-	aspect-ratio: 1;
+	inset: 0;
+	width: auto;
+	aspect-ratio: auto;
 	border: 0;
-	background: linear-gradient(135deg, transparent 0 12%, var(--sleeve-glare) 12% 30%, transparent 30%);
+	border-radius: var(--cr-radius-sm);
+	background:
+		/* A crease at the upper left corner and one at the lower right. */
+		linear-gradient(140deg, var(--sleeve-shine) 0, var(--sleeve-clear) 9%) 0 0 / 46% 22% no-repeat,
+		linear-gradient(320deg, var(--sleeve-fold) 0, var(--sleeve-clear) 8%) 100% 100% / 40% 16% no-repeat,
+		/* A cool edge down the left side, where the bag curls. */
+		linear-gradient(90deg, var(--sleeve-tint), var(--sleeve-clear) 7%),
+		/* The broad reflection, fading at both edges. */
+		linear-gradient(112deg, var(--sleeve-clear) 10%, var(--sleeve-haze) 20%, var(--sleeve-shine) 29%, var(--sleeve-haze) 38%, var(--sleeve-clear) 50%);
 }
 
 /* No artwork: the typographic cover is painted inside the sleeve, the
@@ -344,30 +367,35 @@
 	box-shadow: 0 0 0 8px var(--cr-focus-halo);
 }
 
-/* Status sticker: upright text on a round label, stuck to the plastic in
-   the sleeve's upper right, inside its edge. */
+/* Status sticker: a round label stuck on the outside of the plastic, in the
+   bag's upper right with plastic showing all round it, tilted, and
+   hand-lettered on two lines. Its width is 29% of the bag's and never
+   under 4rem, the smallest circle the lettering fits. */
 .cr-comic-rack .cr-comic__sticker {
 	position: absolute;
 	z-index: 1;
-	inset-block-start: 0.3rem;
-	inset-inline-end: 0.3rem;
+	inset-block-start: calc(var(--rack-comic) * 0.05);
+	inset-inline-end: calc(var(--rack-comic) * 0.045);
 	display: grid;
 	place-items: center;
 	box-sizing: border-box;
-	width: 3.75rem;
-	height: 3.75rem;
+	width: max(4rem, calc(var(--rack-comic) * 0.29));
+	aspect-ratio: 1;
+	height: auto;
 	margin: 0;
-	padding: 0.25rem;
+	padding: 0.2rem;
 	border: 1.5px solid var(--cr-russian-violet);
 	border-radius: var(--cr-radius-full);
 	background: var(--cr-selective-yellow);
 	color: var(--cr-russian-violet);
-	font-family: var(--cr-font-body);
-	font-size: max(0.75rem, var(--cr-text-floor));
-	font-weight: var(--cr-weight-bold);
-	line-height: var(--cr-leading-tight);
+	font-family: var(--cr-font-display);
+	font-size: 0.5625rem;
+	font-weight: var(--cr-weight-regular);
+	line-height: 1.35;
 	text-align: center;
+	text-wrap: balance;
 	pointer-events: none;
+	transform: rotate(var(--cr-rotate-neg));
 }
 
 .cr-comic-rack .cr-comic__sticker--to-read {
@@ -395,11 +423,6 @@
 
 	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list > li {
 		padding-inline: 0.6rem;
-	}
-
-	.cr-comic-rack .cr-comic__sticker {
-		inset-block-start: 0.2rem;
-		inset-inline-end: 0.2rem;
 	}
 }
 
@@ -1160,12 +1183,13 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 		color: CanvasText;
 	}
 
-	/* The rack's sleeve loses its seam and glare and keeps its outline. */
+	/* The rack's bag loses its film, flap, reflections and shadow and keeps its outline. */
 	.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media,
 	.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media.cr-comic__cover--type,
 	.cr-comic-rack .cr-comic-rack__list > li .cr-comic--rack.cr-comic--no-art .pk-media {
 		border: 2px solid CanvasText;
 		background: Canvas;
+		box-shadow: none;
 	}
 
 	.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media::before,
