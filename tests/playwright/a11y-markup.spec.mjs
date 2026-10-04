@@ -483,6 +483,7 @@ test( 'a racked comic stands in a clear sleeve: thin edge, top seam, one glare, 
 		}
 		const origin = held.getBoundingClientRect();
 		const stops = ( glare.backgroundImage.match( /(?:color|rgba?)\([^()]*\)/g ) || [] ).filter( ( c ) => alpha( c ) > 0 );
+		const marks = [ ...glare.backgroundImage.matchAll( /((?:color|rgba?)\([^()]*\)) ([\d.]+)%/g ) ].filter( ( m ) => alpha( m[ 1 ] ) > 0 ).map( ( m ) => parseFloat( m[ 2 ] ) );
 		return {
 			sleeve: box( media ),
 			slot: box( el.closest( 'li' ) ),
@@ -491,7 +492,7 @@ test( 'a racked comic stands in a clear sleeve: thin edge, top seam, one glare, 
 			film: alpha( cs.backgroundColor ),
 			edge: { style: cs.borderTopStyle, width: parseFloat( cs.borderTopWidth ), rgb: rgb( cs.borderTopColor ) },
 			seam: { content: seam.content, top: parseFloat( seam.top ), width: parseFloat( seam.width ), height: parseFloat( seam.height ), line: parseFloat( seam.borderBottomWidth ), transform: seam.transform, gradient: seam.backgroundImage },
-			glare: { content: glare.content, area: parseFloat( glare.width ) * parseFloat( glare.height ), gradient: glare.backgroundImage, alphas: stops.map( alpha ), rgbs: stops.map( rgb ) },
+			glare: { content: glare.content, area: parseFloat( glare.width ) * parseFloat( glare.height ), gradient: glare.backgroundImage, alphas: stops.map( alpha ), rgbs: stops.map( rgb ), band: marks.length ? Math.max( ...marks ) - Math.min( ...marks ) : 0 },
 			blurs: [ media, cover, sticker ].filter( Boolean ).flatMap( blurs ),
 			art: cover ? [ getComputedStyle( cover ).opacity, getComputedStyle( cover ).filter ] : null,
 			ring: { style: ring.outlineStyle, top: origin.top + parseFloat( ring.top ), left: origin.left + parseFloat( ring.left ), width: parseFloat( ring.width ), height: parseFloat( ring.height ) },
@@ -505,6 +506,7 @@ test( 'a racked comic stands in a clear sleeve: thin edge, top seam, one glare, 
 		const o = await card.evaluate( measure );
 		// A clear sleeve, not an opaque card: the rack shows through around the cover.
 		expect( o.film, 'the sleeve is see-through' ).toBeLessThan( 0.3 );
+		expect( o.film, 'the film is light enough to read as plastic' ).toBeGreaterThanOrEqual( 0.2 );
 		expect( o.edge.style ).toBe( 'solid' );
 		expect( o.edge.width, 'the outer edge is thin' ).toBeGreaterThanOrEqual( 1 );
 		expect( o.edge.width ).toBeLessThanOrEqual( 2 );
@@ -531,6 +533,7 @@ test( 'a racked comic stands in a clear sleeve: thin edge, top seam, one glare, 
 		expect( o.seam.gradient, 'the glare is the only highlight' ).toBe( 'none' );
 		expect( o.glare.area, 'the glare covers under a quarter of the sleeve' ).toBeLessThan( ( o.sleeve.width * o.sleeve.height ) / 4 );
 		expect( Math.max( ...o.glare.alphas ), 'the glare is translucent' ).toBeLessThanOrEqual( 0.5 );
+		expect( o.glare.band, 'the glare streak is at least an eighth of its gradient line' ).toBeGreaterThanOrEqual( 12.5 );
 		expect( o.blurs.every( ( blur ) => blur === 0 ), 'no blurred shadow' ).toBe( true );
 		// In dark mode the edge and the highlight are Sky Blue or Periwinkle.
 		if ( o.dark ) {

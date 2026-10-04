@@ -118,8 +118,8 @@
 	--sleeve-gap: calc(var(--rack-comic) * 0.04);
 	--sleeve-flap: calc(var(--sleeve-gap) * 2 + var(--sleeve-edge));
 	--sleeve-line: color-mix(in srgb, var(--cr-sky-blue) 80%, transparent);
-	--sleeve-film: color-mix(in srgb, var(--cr-sky-blue) 14%, transparent);
-	--sleeve-glare: color-mix(in srgb, var(--cr-sky-blue) 45%, transparent);
+	--sleeve-film: color-mix(in srgb, var(--cr-sky-blue) 24%, transparent);
+	--sleeve-glare: color-mix(in srgb, var(--cr-sky-blue) 38%, transparent);
 	position: relative;
 	display: grid;
 	grid-template-columns: repeat(var(--rack-cols), minmax(0, 1fr));
@@ -221,10 +221,10 @@
 
 .cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media::after {
 	inset: 0 auto auto 0;
-	width: 46%;
+	width: 52%;
 	aspect-ratio: 1;
 	border: 0;
-	background: linear-gradient(135deg, transparent 0 24%, var(--sleeve-glare) 24% 31%, transparent 31%);
+	background: linear-gradient(135deg, transparent 0 12%, var(--sleeve-glare) 12% 30%, transparent 30%);
 }
 
 /* No artwork: the typographic cover is painted inside the sleeve, the
