@@ -13,9 +13,10 @@
  * 1. The order: an eat post is one ticket on a clipboard (photo, label,
  *    title, then Restaurant, Cuisine, Ate and Rated, then Notes); a drink
  *    post is a taped photo beside a coaster (label, title, Type, Brand,
- *    Drank, Rated, Notes).
+ *    Date, Rated, Notes).
  * 2. The check-in map slip (inc/checkin-map.php), under the order and on
- *    the same placemat, when the plugin printed a place.
+ *    the same placemat, when the post has coordinates the visitor may see.
+ *    With none there is no map region at all.
  *
  * The post title is the page's one h1 and sits inside the order. The card's
  * own name carries the food's p-name there when it equals the title; when it
@@ -23,9 +24,11 @@
  * featured image don't print on these pages, so nothing shows twice. Post
  * navigation stays where the template puts it, outside the placemat.
  *
- * Nothing here reads location meta or block attributes. Every place, every
- * coordinate and every photo comes from what the plugin rendered, so the
- * plugin's privacy rule is the only one. p-ate / p-drank, h-food, the
+ * The place comes from the check-in data the plugin's card printed. A post
+ * the card gives no coordinates takes its point from Simple Location, and
+ * only when the plugin's own privacy rule shows coordinates for that post.
+ * Nothing here reads a card's block attributes, so the plugin's privacy
+ * rule is the only one. p-ate / p-drank, h-food, the
  * location h-card, p-rating, u-photo, p-content and dt-published stay
  * inside the article. Each module prints only when its data exists.
  * assets/css/cr-eat-drink.css draws it under body.cr-order-single.
@@ -157,6 +160,55 @@ function photo( \WP_Post $post, ?array $photo, string $css ): string {
 }
 
 /**
+ * The place for the map slip, with coordinates only when they are usable
+ * and the visitor may see them.
+ *
+ * The check-in data the plugin's card printed comes first: the plugin has
+ * already applied the post's privacy setting to it. When the card printed no
+ * coordinates, the post's Simple Location point stands in, and only if the
+ * plugin's privacy rule shows coordinates and a map for this post. A point
+ * at 0, 0 is no point.
+ *
+ * @param \WP_Post                  $post    Post.
+ * @param array<string, mixed>|null $printed The place the card printed, if any.
+ * @return array<string, mixed>|null
+ */
+function place( \WP_Post $post, ?array $printed ): ?array {
+	if ( is_array( $printed ) && null !== $printed['lat'] && null !== $printed['lon'] ) {
+		if ( 0.0 !== (float) $printed['lat'] || 0.0 !== (float) $printed['lon'] ) {
+			return $printed;
+		}
+		$printed['lat'] = null;
+		$printed['lon'] = null;
+	}
+
+	$visible = function_exists( 'pkiw_get_visible_location_fields' ) ? pkiw_get_visible_location_fields( $post->ID ) : array();
+	if ( empty( $visible['coordinates'] ) || empty( $visible['map'] ) ) {
+		return $printed;
+	}
+	$lat = get_post_meta( $post->ID, 'geo_latitude', true );
+	$lon = get_post_meta( $post->ID, 'geo_longitude', true );
+	if ( ! is_numeric( $lat ) || ! is_numeric( $lon ) || ( 0.0 === (float) $lat && 0.0 === (float) $lon ) ) {
+		return $printed;
+	}
+
+	$place = $printed ?? array(
+		'name'     => '',
+		'url'      => '',
+		'street'   => '',
+		'locality' => '',
+		'region'   => '',
+		'country'  => '',
+	);
+	$place['lat'] = (float) $lat;
+	$place['lon'] = (float) $lon;
+	if ( null === $printed && ! empty( $visible['street'] ) ) {
+		$place['label'] = trim( (string) get_post_meta( $post->ID, 'geo_address', true ) );
+	}
+	return $place;
+}
+
+/**
  * One labelled fact for the order's facts list.
  *
  * @param string $label Label.
@@ -206,7 +258,7 @@ function order( \WP_Post $post, string $kind, array $parts ): string {
 	$facts .= $is_eat
 		? fact( __( 'Restaurant', 'courtneyr-child' ), $parts['maker_html'] ) . fact( __( 'Cuisine', 'courtneyr-child' ), esc_html( $parts['sort'] ) )
 		: fact( __( 'Type', 'courtneyr-child' ), esc_html( $parts['sort'] ) ) . fact( __( 'Brand', 'courtneyr-child' ), $parts['maker_html'] );
-	$facts .= fact( $is_eat ? __( 'Ate', 'courtneyr-child' ) : __( 'Drank', 'courtneyr-child' ), $when );
+	$facts .= fact( $is_eat ? __( 'Ate', 'courtneyr-child' ) : __( 'Date', 'courtneyr-child' ), $when );
 	$facts .= fact( __( 'Rated', 'courtneyr-child' ), $rated );
 
 	$notes = '' !== $parts['note']
@@ -218,8 +270,9 @@ function order( \WP_Post $post, string $kind, array $parts ): string {
 	$order = '<div class="cr-order cr-order--' . ( $is_eat ? 'ticket' : 'coaster' ) . ( '' !== $photo ? ' cr-order--has-photo' : '' ) . '">' . $photo . $sheet . '</div>';
 
 	// The slip names the place only when the order above doesn't already (a restaurant, or a brand poured at its own bar).
-	$named_above = is_array( $parts['place'] ) && '' !== $parts['maker'] && 0 === strcasecmp( $parts['maker'], $parts['place']['name'] );
-	$map         = is_array( $parts['place'] ) ? slip( $parts['place'], $named_above ) : '';
+	$place       = place( $post, $parts['place'] );
+	$named_above = is_array( $place ) && '' !== $parts['maker'] && 0 === strcasecmp( $parts['maker'], (string) $place['name'] );
+	$map         = is_array( $place ) ? slip( $place, $named_above ) : '';
 
 	return $order . $map . $parts['marker'];
 }
