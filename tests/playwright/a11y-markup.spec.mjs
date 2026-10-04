@@ -18,6 +18,10 @@ const LISTEN_ARCHIVE = process.env.CR_LISTEN_ARCHIVE_PATH || '/kind/listen/'; //
 const WATCH_ARCHIVE = process.env.CR_WATCH_ARCHIVE_PATH || '/kind/watch/'; // watch archive page 1 (PKIW #227)
 const COMICS_ARCHIVE = process.env.CR_COMICS_ARCHIVE_PATH || '/kind/comics/'; // comics archive with at least one comic read (PKIW #228)
 const COMIC_SINGLE = process.env.CR_COMIC_SINGLE_PATH || '/2026/09/06/anzuelo/'; // a comic read (comic-card) still being read, with a cover and a stored start date
+const RECIPE_ARCHIVE = process.env.CR_RECIPE_ARCHIVE_PATH || '/kind/recipe/'; // recipe archive (PKIW #229); its tests skip on a site with no recipe posts
+const RECIPE_SINGLE = process.env.CR_RECIPE_SINGLE_PATH || '/2026/08/14/tomato-basil-soup/'; // a recipe post with a WP Recipe Maker recipe and a featured image (local fixture)
+const RECIPE_PLAIN_SINGLE = process.env.CR_RECIPE_PLAIN_SINGLE_PATH || '/2026/08/01/campfire-chili/'; // a recipe post with no recipe card (local fixture)
+const RECIPE_STREAM = process.env.CR_RECIPE_STREAM_PATH || '/stream/'; // a Stream page that shows a recipe post (local fixture); the test skips when it shows none
 const COMIC_TRAILING = process.env.CR_COMIC_TRAILING_PATH || ''; // a comic read with body text after the card (no such post on dev: set it to run the test)
 const AUTOEMBED_CAPTIONED_POST = process.env.CR_AUTOEMBED_CAPTIONED_POST_PATH || '/?p=3010'; // bare YouTube URL whose video has a registered VTT (_cr_youtube_id)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
@@ -712,5 +716,185 @@ test( 'the Stream shows a comic read as one bagged card whose title link covers 
 	}
 	const columns = await page.locator( 'body.cr-stream-page .wp-block-post-template' ).first().evaluate( ( el ) => getComputedStyle( el ).columnWidth );
 	expect( columns, 'the Stream stays a multi-column collage' ).not.toBe( 'auto' );
+} );
+
+// PKIW #229: the recipe archive is a ring binder of recipe cards, four to an
+// archive page. A card is its picture, its h2 title link and the course and
+// time the recipe plugin holds; the badge, kind label, date, excerpt and
+// "Read more" stay off the archive. The course tabs and the A-Z tab are
+// links that filter or reorder the same archive, and the pager keeps that
+// state because it lives in the URL.
+test( 'the recipe archive is a binder of four recipe cards, one title link each, with course tabs that filter it', async ( { page } ) => {
+	await page.goto( RECIPE_ARCHIVE, { waitUntil: 'load' } );
+	test.skip( ( await page.locator( 'main li.wp-block-post' ).count() ) === 0, 'no recipe posts on this site' );
+	await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
+	const list = page.locator( '.cr-archive--recipes ul.cr-recipe-binder__list' );
+	await expect( list ).toHaveCount( 1 );
+	const count = await list.locator( ':scope > li' ).count();
+	expect( count, 'four recipes to an archive page' ).toBeGreaterThan( 0 );
+	expect( count, 'four recipes to an archive page' ).toBeLessThanOrEqual( 4 );
+	const cards = list.locator( 'article.pk-card.cr-recipe-card' );
+	expect( await cards.count(), 'one card per query item, no filler' ).toBe( count );
+	for ( const card of await cards.all() ) {
+		const rendered = await card.evaluate( ( el ) => [ ...el.querySelectorAll( 'a' ) ].filter( ( a ) => a.getClientRects().length > 0 ).length );
+		expect( rendered, 'a recipe card is one link' ).toBe( 1 );
+		expect( await card.locator( '.pk-title:not(h2)' ).count(), 'every card title is an h2 under the archive h1' ).toBe( 0 );
+		expect( await card.locator( '.pk-badge, .pk-kindlabel, .pk-stream-date, .pk-excerpt, .pk-meta' ).count(), 'no badge, kind label, date, excerpt or Read more on the archive' ).toBe( 0 );
+		const covered = await card.evaluate( ( el ) => {
+			el.scrollIntoView( { block: 'center', behavior: 'instant' } );
+			const r = el.getBoundingClientRect();
+			const a = el.querySelector( '.pk-title a' );
+			const hit = document.elementFromPoint( r.left + r.width / 2, r.top + r.height - 12 );
+			return hit === a || a.contains( hit );
+		} );
+		expect( covered, 'the title link covers the whole card' ).toBe( true );
+	}
+	// A card with no picture is text, not a broken image.
+	expect( await list.locator( 'img' ).evaluateAll( ( imgs ) => imgs.filter( ( i ) => i.complete && i.naturalWidth === 0 ).length ) ).toBe( 0 );
+
+	const shape = await list.evaluate( ( ul ) => ( { cols: getComputedStyle( ul ).gridTemplateColumns.split( ' ' ).length, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth } ) );
+	expect( shape.cols, 'two binder pages side by side on a wide screen, one on a phone' ).toBe( page.viewportSize().width >= 1024 ? 2 : 1 );
+	expect( shape.overflow ).toBe( 0 );
+
+	// Tabs: every tab is a link to the same archive; one is current.
+	const tabs = page.locator( '.cr-archive--recipes nav.cr-recipe-tabs' );
+	await expect( tabs ).toHaveCount( 1 );
+	expect( ( await tabs.getAttribute( 'aria-label' ) || '' ).trim() ).not.toBe( '' );
+	await expect( tabs.locator( 'a[aria-current]' ) ).toHaveCount( 1 );
+	const archivePath = new URL( page.url() ).pathname;
+	for ( const href of await tabs.locator( 'a' ).evaluateAll( ( as ) => as.map( ( a ) => a.href ) ) ) {
+		expect( new URL( href ).pathname, 'a tab stays on the recipe archive' ).toBe( archivePath );
+	}
+
+	// A course tab filters the archive, and the pager keeps the filter.
+	const courseTab = tabs.locator( 'a[href*="pkiw_recipe_course="]' ).first();
+	const course = ( await courseTab.textContent() ).trim();
+	await courseTab.click();
+	await page.waitForLoadState( 'load' );
+	expect( new URL( page.url() ).searchParams.get( 'pkiw_recipe_course' ) ).toBeTruthy();
+	await expect( page.locator( '.cr-archive--recipes nav.cr-recipe-tabs a[aria-current]' ) ).toHaveText( course );
+	const filtered = page.locator( '.cr-archive--recipes ul.cr-recipe-binder__list article.cr-recipe-card' );
+	expect( await filtered.count() ).toBeGreaterThan( 0 );
+	for ( const text of await filtered.locator( '.pk-recipe-course' ).allTextContents() ) {
+		expect( text.split( ',' ).map( ( t ) => t.trim() ), `every card on the ${ course } tab is filed under it` ).toContain( course );
+	}
+	expect( await filtered.locator( '.pk-recipe-course' ).count(), 'and every card names its course' ).toBe( await filtered.count() );
+	const param = new URL( page.url() ).searchParams.get( 'pkiw_recipe_course' );
+	for ( const href of await page.locator( '.cr-archive--recipes .wp-block-query-pagination a' ).evaluateAll( ( as ) => as.map( ( a ) => a.href ) ) ) {
+		expect( new URL( href ).searchParams.get( 'pkiw_recipe_course' ), 'pager links keep the course' ).toBe( param );
+	}
+
+	// The A-Z tab is the same archive in title order, and the pager keeps the order.
+	await page.locator( '.cr-archive--recipes nav.cr-recipe-tabs a[href*="orderby=title"]' ).click();
+	await page.waitForLoadState( 'load' );
+	const titles = await page.locator( '.cr-archive--recipes ul.cr-recipe-binder__list .pk-title a' ).allTextContents();
+	expect( titles.map( ( t ) => t.trim() ) ).toEqual( [ ...titles ].map( ( t ) => t.trim() ).sort( ( a, b ) => a.localeCompare( b, 'en', { sensitivity: 'base' } ) ) );
+	const pager = await page.locator( '.cr-archive--recipes .wp-block-query-pagination a' ).evaluateAll( ( as ) => as.map( ( a ) => a.href ) );
+	expect( pager.length, 'the fixture archive runs past one page of four' ).toBeGreaterThan( 0 );
+	for ( const href of pager ) {
+		expect( new URL( href ).searchParams.get( 'orderby' ), 'pager links keep the title order' ).toBe( 'title' );
+	}
+} );
+
+// PKIW #229: a recipe single is one binder page. The post title is the page
+// heading and the featured image is the picture; the recipe plugin's card
+// sits inside the page without repeating either. The plugin's own print
+// link, section links and structured data stay as it renders them.
+test( 'a recipe single is one binder page: title and picture once, the recipe plugin\'s card inside it, print and section links intact', async ( { page } ) => {
+	const response = await page.goto( RECIPE_SINGLE, { waitUntil: 'load' } );
+	test.skip( response.status() === 404, 'no recipe fixture on this site' );
+	await expect( page.locator( 'body.cr-recipe-single' ) ).toHaveCount( 1 );
+	const h1 = page.locator( 'main h1' );
+	await expect( h1 ).toHaveCount( 1 );
+	const title = ( await h1.textContent() ).trim();
+	const recipe = page.locator( 'main .wprm-recipe.wprm-recipe-template-cr-binder' );
+	await expect( recipe ).toHaveCount( 1 );
+
+	// The name and the picture each show once: the post's own.
+	expect( await recipe.locator( '.wprm-recipe-name, .wprm-recipe-image' ).count(), 'the recipe card repeats neither the name nor the picture' ).toBe( 0 );
+	await expect( page.locator( 'main figure.single-post__featured img' ) ).toHaveCount( 1 );
+	const named = await page.locator( 'main .single-post__header :is(h1, h2, h3, h4), main .single-post__content :is(h1, h2, h3, h4)' ).evaluateAll( ( hs, t ) => hs.filter( ( h ) => h.textContent.trim() === t ).length, title );
+	expect( named, 'one heading carries the recipe name' ).toBe( 1 );
+
+	// The recipe's sections are h2 under the page's h1.
+	const sections = await recipe.locator( 'h2, h3, h4' ).evaluateAll( ( hs ) => hs.filter( ( h ) => h.getClientRects().length > 0 ).map( ( h ) => h.tagName + ' ' + h.textContent.trim() ) );
+	expect( sections ).toEqual( expect.arrayContaining( [ 'H2 Ingredients', 'H2 Equipment', 'H2 Instructions' ] ) );
+
+	// Summary and the plugin's print link sit under the title.
+	await expect( page.locator( 'main .single-post__header .cr-recipe__summary' ) ).toHaveText( /\S/ );
+	const print = page.locator( 'main .single-post__header a.wprm-recipe-print' );
+	await expect( print ).toHaveCount( 1 );
+	expect( await print.getAttribute( 'href' ) ).toContain( '/wprm_print/' );
+	expect( await recipe.locator( 'a.wprm-recipe-print' ).count(), 'and the card does not print a second one' ).toBe( 0 );
+
+	// Times, servings and course are text.
+	const facts = ( await recipe.locator( '.cr-binder-recipe__facts' ).textContent() ).replace( /\s+/g, ' ' );
+	for ( const label of [ 'Prep Time', 'Cook Time', 'Total Time', 'Servings', 'Course' ] ) {
+		expect( facts ).toContain( label );
+	}
+
+	// Section links go to sections that exist.
+	const jumps = await recipe.locator( 'a.wprm-recipe-jump-to-section' ).evaluateAll( ( as ) => as.map( ( a ) => a.getAttribute( 'href' ) ) );
+	expect( jumps.length ).toBeGreaterThanOrEqual( 3 );
+	for ( const href of jumps ) {
+		expect( href.startsWith( '#' ), `${ href } is an in-page link` ).toBe( true );
+		expect( await page.locator( `[id="${ href.slice( 1 ) }"]` ).count(), `${ href } has a target` ).toBe( 1 );
+	}
+
+	// The plugin's structured data is still there, once.
+	expect( await page.locator( 'script[type="application/ld+json"]' ).evaluateAll( ( ss ) => ss.filter( ( s ) => s.textContent.includes( '"Recipe"' ) ).length ) ).toBe( 1 );
+
+	const box = await page.evaluate( () => {
+		const f = document.querySelector( 'main figure.single-post__featured' ).getBoundingClientRect();
+		const h = document.querySelector( 'main h1' ).getBoundingClientRect();
+		return { figureRight: f.right, figureTop: f.top, h1Left: h.left, h1Bottom: h.bottom, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+	} );
+	if ( page.viewportSize().width >= 1024 ) {
+		expect( box.figureRight, 'the picture stands left of the title' ).toBeLessThanOrEqual( box.h1Left );
+	} else {
+		expect( box.figureTop, 'on a phone the picture follows the title' ).toBeGreaterThanOrEqual( box.h1Bottom - 1 );
+	}
+	expect( box.overflow ).toBe( 0 );
+	await expect( page.locator( 'main nav.cr-post-nav' ) ).toHaveCount( 1 );
+} );
+
+test( 'a recipe post with no recipe card keeps the default single', async ( { page } ) => {
+	const response = await page.goto( RECIPE_PLAIN_SINGLE, { waitUntil: 'load' } );
+	test.skip( response.status() === 404, 'no recipe fixture on this site' );
+	await expect( page.locator( 'body.cr-recipe-single' ) ).toHaveCount( 0 );
+	await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
+	await expect( page.locator( 'main .wprm-recipe' ) ).toHaveCount( 0 );
+	expect( await page.locator( 'main .single-post__content li' ).count(), 'its own lists render' ).toBeGreaterThan( 0 );
+	expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBe( 0 );
+} );
+
+// PKIW #229: on the Stream a recipe is a 3x5 card: the picture, the kind
+// label, the title link, and the course and time the recipe holds. The
+// date and the excerpt stay off the card. The Stream itself is unchanged.
+test( 'the Stream shows a recipe as a 3x5 card: picture, label, title link, course and time', async ( { page } ) => {
+	await page.goto( RECIPE_STREAM, { waitUntil: 'load' } );
+	const items = page.locator( 'main li.kind-recipe' );
+	test.skip( ( await items.count() ) === 0, 'no recipe on this Stream' );
+	const cards = items.locator( 'article.pk-card.cr-recipe-stream' );
+	expect( await cards.count(), 'every recipe on the Stream is a recipe card' ).toBe( await items.count() );
+	for ( const card of await cards.all() ) {
+		expect( await card.locator( '.pk-stream-date, .pk-excerpt, .pk-badge' ).count(), 'no date, excerpt or badge on the card' ).toBe( 0 );
+		await expect( card.locator( '.pk-kindlabel' ) ).toHaveText( /\S/ );
+		await expect( card.locator( 'h2.pk-title a' ) ).toHaveCount( 1 );
+		expect( await card.evaluate( ( el ) => getComputedStyle( el.querySelector( '.pk-title' ) ).transform ), 'the title is upright' ).toBe( 'none' );
+	}
+	// A recipe with a picture and stored facts: picture beside the text, course and time as text.
+	const full = cards.filter( { has: page.locator( '.pk-recipe-facts' ) } ).filter( { has: page.locator( '.pk-media img' ) } ).first();
+	await expect( full ).toHaveCount( 1 );
+	await expect( full.locator( '.pk-recipe-course' ) ).toHaveText( /\S/ );
+	await expect( full.locator( '.pk-recipe-time' ) ).toHaveText( /\d/ );
+	const beside = await full.evaluate( ( el ) => {
+		el.scrollIntoView( { block: 'center', behavior: 'instant' } );
+		const img = el.querySelector( '.pk-media img' ).getBoundingClientRect();
+		const title = el.querySelector( '.pk-title' ).getBoundingClientRect();
+		return { imgRight: img.right, titleLeft: title.left, width: el.getBoundingClientRect().width };
+	} );
+	expect( beside.imgRight, 'the picture stands left of the title' ).toBeLessThanOrEqual( beside.titleLeft );
+	expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBe( 0 );
 } );
 
