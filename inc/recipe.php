@@ -1,6 +1,7 @@
 <?php
 /**
- * Recipes (PKIW #229): a ring-binder archive of recipe cards.
+ * Recipes (PKIW #229): a ring-binder archive, a binder-page single and a
+ * 3x5 card on the Stream.
  *
  * WP Recipe Maker owns the recipe and its card when it runs; Post Kinds
  * reads the picture, course and time from it as a page renders and falls
@@ -13,6 +14,13 @@
  *            are cut from the markup and stay off the archive. Course tabs
  *            and the A-Z tab are links to the same archive, filtered or
  *            reordered by ordinary query vars, so the pager keeps them.
+ *   Single   one sheet of binder paper behind the post header, the
+ *            featured image and the content. The recipe plugin's card is
+ *            the theme's cr-binder template, without the name or picture
+ *            the page already shows. A recipe post with no recipe card
+ *            keeps the default single.
+ *   Stream   a 3x5 card: picture, kind label, h2 title link, course and
+ *            time, "Read more". No date, no excerpt.
  *
  * assets/css/cr-recipe.css paints it.
  *
@@ -23,6 +31,7 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Recipe;
 
+use function Courtneyr\Child\HomeSections\is_stream_surface;
 use function Courtneyr\Child\MediaShelf\cut_elements;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -95,7 +104,7 @@ add_action( 'pre_get_posts', __NAMESPACE__ . '\\binder_page_size', 11 );
  * @return void
  */
 function enqueue_styles(): void {
-	if ( ! is_admin() && ! is_binder() && ! is_recipe_single() ) {
+	if ( ! is_admin() && ! is_binder() && ! is_recipe_single() && ! is_stream_surface() ) {
 		return;
 	}
 	wp_enqueue_style(
@@ -150,6 +159,38 @@ function binder_card( string $html, array $block, $instance ): string { // phpcs
 	return $html;
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\binder_card', 10, 3 );
+
+/**
+ * A recipe on the Stream: a 3x5 card.
+ *
+ * What stays is the picture, the kind label, the h2 title link, the course
+ * and time line and the "Read more" link. The date and the excerpt are cut:
+ * the card is for scanning, and both are on the single.
+ *
+ * @param string               $html     Rendered stream card.
+ * @param array<string, mixed> $block    Parsed block.
+ * @param \WP_Block|null       $instance Block instance.
+ * @return string
+ */
+function stream_card( string $html, array $block, $instance ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- filter signature.
+	if ( is_binder() || ! is_stream_surface() || 1 !== preg_match( '/<article\b[^>]*\bclass="[^"]*(?<![\w-])k-recipe(?![\w-])/', $html ) ) {
+		return $html;
+	}
+
+	$cuts = array(
+		array( 'div', 'pk-badge' ),
+		array( 'p', 'pk-stream-date' ),
+		array( 'p', 'pk-excerpt' ),
+	);
+	foreach ( $cuts as $cut ) {
+		$html = cut_elements( $html, $cut[0], $cut[1] );
+	}
+
+	$classes = 'cr-recipe-stream ' . ( false !== strpos( $html, 'pk-media' ) ? 'has-picture' : 'cr-recipe-stream--no-picture' );
+
+	return (string) preg_replace( '/(<article\b[^>]*\bclass=")/', '$1' . $classes . ' ', $html, 1 );
+}
+add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\stream_card', 10, 3 );
 
 /**
  * The binder's tabs: every recipe, each course in use, and the A-Z index.

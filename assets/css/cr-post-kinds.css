@@ -472,11 +472,6 @@ body .pk-card {
 	border-width: 0 1.4rem 1.4rem 0;
 	border-color: transparent var(--cr-sky-blue, #8ecae6) transparent transparent;
 }
-/* recipe: ruled index card, coral top rule */
-.cr-stream-page .pk-card.k-recipe {
-	border-top: 4px double #d9604f;
-	background-image: repeating-linear-gradient(180deg, transparent 0, transparent calc(1.6em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) calc(1.6em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) 1.6em);
-}
 
 /* drink: coaster */
 .cr-stream-page .pk-card.k-drink {

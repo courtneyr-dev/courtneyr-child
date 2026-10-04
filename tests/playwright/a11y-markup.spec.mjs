@@ -21,6 +21,7 @@ const COMIC_SINGLE = process.env.CR_COMIC_SINGLE_PATH || '/2026/09/06/anzuelo/';
 const RECIPE_ARCHIVE = process.env.CR_RECIPE_ARCHIVE_PATH || '/kind/recipe/'; // recipe archive (PKIW #229); its tests skip on a site with no recipe posts
 const RECIPE_SINGLE = process.env.CR_RECIPE_SINGLE_PATH || '/2026/08/14/tomato-basil-soup/'; // a recipe post with a WP Recipe Maker recipe and a featured image (local fixture)
 const RECIPE_PLAIN_SINGLE = process.env.CR_RECIPE_PLAIN_SINGLE_PATH || '/2026/08/01/campfire-chili/'; // a recipe post with no recipe card (local fixture)
+const RECIPE_STREAM = process.env.CR_RECIPE_STREAM_PATH || '/stream/'; // a Stream page that shows a recipe post (local fixture); the test skips when it shows none
 const COMIC_TRAILING = process.env.CR_COMIC_TRAILING_PATH || ''; // a comic read with body text after the card (no such post on dev: set it to run the test)
 const AUTOEMBED_CAPTIONED_POST = process.env.CR_AUTOEMBED_CAPTIONED_POST_PATH || '/?p=3010'; // bare YouTube URL whose video has a registered VTT (_cr_youtube_id)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
@@ -864,6 +865,36 @@ test( 'a recipe post with no recipe card keeps the default single', async ( { pa
 	await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
 	await expect( page.locator( 'main .wprm-recipe' ) ).toHaveCount( 0 );
 	expect( await page.locator( 'main .single-post__content li' ).count(), 'its own lists render' ).toBeGreaterThan( 0 );
+	expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBe( 0 );
+} );
+
+// PKIW #229: on the Stream a recipe is a 3x5 card: the picture, the kind
+// label, the title link, and the course and time the recipe holds. The
+// date and the excerpt stay off the card. The Stream itself is unchanged.
+test( 'the Stream shows a recipe as a 3x5 card: picture, label, title link, course and time', async ( { page } ) => {
+	await page.goto( RECIPE_STREAM, { waitUntil: 'load' } );
+	const items = page.locator( 'main li.kind-recipe' );
+	test.skip( ( await items.count() ) === 0, 'no recipe on this Stream' );
+	const cards = items.locator( 'article.pk-card.cr-recipe-stream' );
+	expect( await cards.count(), 'every recipe on the Stream is a recipe card' ).toBe( await items.count() );
+	for ( const card of await cards.all() ) {
+		expect( await card.locator( '.pk-stream-date, .pk-excerpt, .pk-badge' ).count(), 'no date, excerpt or badge on the card' ).toBe( 0 );
+		await expect( card.locator( '.pk-kindlabel' ) ).toHaveText( /\S/ );
+		await expect( card.locator( 'h2.pk-title a' ) ).toHaveCount( 1 );
+		expect( await card.evaluate( ( el ) => getComputedStyle( el.querySelector( '.pk-title' ) ).transform ), 'the title is upright' ).toBe( 'none' );
+	}
+	// A recipe with a picture and stored facts: picture beside the text, course and time as text.
+	const full = cards.filter( { has: page.locator( '.pk-recipe-facts' ) } ).filter( { has: page.locator( '.pk-media img' ) } ).first();
+	await expect( full ).toHaveCount( 1 );
+	await expect( full.locator( '.pk-recipe-course' ) ).toHaveText( /\S/ );
+	await expect( full.locator( '.pk-recipe-time' ) ).toHaveText( /\d/ );
+	const beside = await full.evaluate( ( el ) => {
+		el.scrollIntoView( { block: 'center', behavior: 'instant' } );
+		const img = el.querySelector( '.pk-media img' ).getBoundingClientRect();
+		const title = el.querySelector( '.pk-title' ).getBoundingClientRect();
+		return { imgRight: img.right, titleLeft: title.left, width: el.getBoundingClientRect().width };
+	} );
+	expect( beside.imgRight, 'the picture stands left of the title' ).toBeLessThanOrEqual( beside.titleLeft );
 	expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBe( 0 );
 } );
 
