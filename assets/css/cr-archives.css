@@ -26,6 +26,73 @@
 .cr-archive-identity--stream .cr-archive-identity__kicker { --cr-tape-bg: var(--cr-archive-accent); }
 .cr-archive-identity-editor { display: block; }
 
+/* A kind archive (0.7.92): no kicker. The badge alone hangs on the upper-left
+   corner of the title's first letter, and its holder takes no row of its own,
+   so nothing stands between the header's top and the title. The circle and
+   the glyph take their own tokens: violet with a light glyph, and in dark
+   mode yellow with a violet glyph and edge. The glyph is decorative; the h1
+   names the archive. */
+
+.cr-archive-identity--kind {
+	position: relative;
+	z-index: 1;
+	display: block;
+	block-size: 0;
+	margin: 0;
+}
+
+.cr-archive__header > .cr-archive-identity--kind + *,
+.cr-archive__header > .cr-archive-identity-editor:has(.cr-archive-identity--kind) + * {
+	margin-block-start: 0;
+}
+
+.cr-archive-identity-editor:has(.cr-archive-identity--kind) {
+	block-size: 0;
+	margin: 0;
+}
+
+/* Room above the title for the part of the badge that stands proud of it. */
+
+.cr-archive__header:has(.cr-archive-identity--kind) {
+	padding-block-start: 1.5rem;
+}
+
+.cr-archive-identity--kind .cr-archive-identity__glyph {
+	position: absolute;
+	inset-block-start: -1.4rem;
+	inset-inline-start: -0.4rem;
+	background: var(--cr-archive-badge);
+	color: var(--cr-archive-badge-ink);
+	box-shadow: 0 0 0 2px var(--cr-archive-badge-edge), 3px 3px 0 var(--cr-archive-accent, var(--cr-cerulean));
+}
+
+.cr-archive-identity--kind .cr-archive-identity__glyph svg {
+	color: var(--cr-archive-badge-ink);
+}
+
+@media (min-width: 48rem) {
+
+	.cr-archive-identity--kind .cr-archive-identity__glyph {
+		inset-inline-start: -1.1rem;
+	}
+}
+
+/* Forced colours: the system's own pair, and a border in place of the shadow ring. */
+
+@media (forced-colors: active) {
+
+	.cr-archive-identity--kind .cr-archive-identity__glyph {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+		box-shadow: none;
+	}
+
+	.cr-archive-identity--kind .cr-archive-identity__glyph svg {
+		color: CanvasText;
+	}
+}
+
 /* The h1 keeps its ✺ flank; the accent tints the short marker bar below it. */
 .cr-archive__header hr.is-style-cr-marker-bar-short { background-color: var(--cr-archive-accent, var(--cr-ut-orange)); }
 

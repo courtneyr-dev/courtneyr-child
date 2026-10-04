@@ -21,6 +21,7 @@ const COMIC_SINGLE = process.env.CR_COMIC_SINGLE_PATH || '/2026/09/06/anzuelo/';
 const RECIPE_ARCHIVE = process.env.CR_RECIPE_ARCHIVE_PATH || '/kind/recipe/'; // recipe archive (PKIW #229); its tests skip on a site with no recipe posts
 const EAT_ARCHIVE = process.env.CR_EAT_ARCHIVE_PATH || '/kind/eat/'; // eat archive (PKIW #230); its test skips on a site with fewer than three eat posts
 const DRINK_ARCHIVE = process.env.CR_DRINK_ARCHIVE_PATH || '/kind/drink/'; // drink archive (PKIW #230); its test skips on a site with fewer than three drink posts
+const KIND_ARCHIVE_HEADERS = ( process.env.CR_KIND_ARCHIVE_HEADER_PATHS || '/kind/comics/,/kind/watch/,/kind/listen/,/kind/recipe/,/kind/eat/,/kind/drink/,/kind/note/' ).split( ',' ); // every dressed kind archive and one on the generic template; a path with no posts is skipped
 const EAT_SINGLE = process.env.CR_EAT_SINGLE_PATH || '/2026/09/25/mushroom-tacos/'; // an eat post with the eat card, a photo and public coordinates (local fixture)
 const DRINK_SINGLE = process.env.CR_DRINK_SINGLE_PATH || '/2026/09/24/honey-lavender-latte/'; // a drink post with the drink card, a photo and public coordinates (local fixture)
 const ORDER_HIDDEN = ( process.env.CR_ORDER_HIDDEN_PATHS || '/2026/08/05/salmon-sashimi/,/2026/08/07/spicy-margarita/' ).split( ',' ); // eat and drink posts whose location privacy is private (local fixtures)
@@ -1374,3 +1375,122 @@ test( 'the Stream shows an eat or drink post as one compact card with one link a
 	expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBe( 0 );
 } );
 
+// The shared kind-archive header: no "Stream · Kind" tape. The round badge is
+// decorative (the h1 names the archive), sits on the upper-left corner of the
+// title's first letter, and takes its circle and its glyph from two tokens,
+// so the glyph can't take the circle's colour. Stream cards keep their labels.
+for ( const path of KIND_ARCHIVE_HEADERS ) {
+	test( `the kind archive header has no tape, and its badge is decorative and legible (${ path })`, async ( { page } ) => {
+		const response = await page.goto( path, { waitUntil: 'load' } );
+		test.skip( 200 !== response.status() || ( await page.locator( '.cr-archive__header' ).count() ) === 0, `no kind archive at ${ path }` );
+		await page.evaluate( () => document.fonts.ready );
+		const header = page.locator( 'main .cr-archive__header' );
+		await expect( header ).toHaveCount( 1 );
+
+		// 1. The tape is gone from the DOM, not hidden.
+		expect( ( await header.textContent() ).includes( 'Stream · Kind' ), '"Stream · Kind" is not in the header' ).toBe( false );
+		expect( ( await page.content() ).includes( 'Stream · Kind' ), '"Stream · Kind" is not in the page' ).toBe( false );
+		await expect( header.locator( '.cr-archive-identity__kicker, .is-style-cr-tape-label' ) ).toHaveCount( 0 );
+
+		// 4. One h1, named for the archive, and no other heading in the header.
+		await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
+		await expect( header.locator( 'h1, h2, h3, h4, h5, h6' ) ).toHaveCount( 1 );
+		await expect( header.getByRole( 'heading', { level: 1 } ) ).toHaveAccessibleName( /^(?!.*Stream · Kind)\S.*$/ );
+
+		const o = await header.evaluate( ( el ) => {
+			const holder = el.querySelector( '.cr-archive-identity' );
+			const glyph = holder.querySelector( '.cr-archive-identity__glyph' );
+			const svg = glyph.querySelector( 'svg' );
+			const title = el.querySelector( 'h1' );
+			const tile = title.querySelector( '.cr-cutout__tile' ) || title;
+			const box = ( node ) => node.getBoundingClientRect();
+			const cs = getComputedStyle( glyph );
+			const pad = parseFloat( getComputedStyle( el ).paddingTop );
+			const probe = ( value ) => {
+				const i = document.body.appendChild( document.createElement( 'i' ) );
+				i.style.color = value;
+				const out = getComputedStyle( i ).color;
+				i.remove();
+				return out;
+			};
+			return {
+				kind: holder.classList.contains( 'cr-archive-identity--kind' ),
+				children: holder.children.length,
+				holderHeight: box( holder ).height,
+				bandAboveTitle: box( title ).top - box( el ).top,
+				pad,
+				glyph: { top: box( glyph ).top, left: box( glyph ).left, right: box( glyph ).right, bottom: box( glyph ).bottom, width: box( glyph ).width },
+				tile: { top: box( tile ).top, left: box( tile ).left },
+				hidden: glyph.getAttribute( 'aria-hidden' ),
+				named: [ glyph.getAttribute( 'aria-label' ), glyph.getAttribute( 'title' ), glyph.getAttribute( 'role' ), svg ? svg.querySelector( 'title' ) : null ].filter( Boolean ).length,
+				linked: null !== glyph.closest( 'a' ) || glyph.querySelectorAll( 'a' ).length > 0,
+				stops: [ glyph, ...glyph.querySelectorAll( '*' ) ].filter( ( n ) => n.tabIndex >= 0 ).length,
+				circle: cs.backgroundColor,
+				ink: svg ? getComputedStyle( svg ).color : cs.color,
+				radius: cs.borderTopLeftRadius,
+				tokens: { badge: probe( 'var(--cr-archive-badge)' ), ink: probe( 'var(--cr-archive-badge-ink)' ), violet: probe( 'var(--cr-russian-violet)' ), yellow: probe( 'var(--cr-selective-yellow)' ), gray: probe( 'var(--cr-light-gray)' ) },
+				dark: 'dark' === document.documentElement.dataset.theme || ( 'light' !== document.documentElement.dataset.theme && matchMedia( '(prefers-color-scheme: dark)' ).matches ),
+				overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+			};
+		} );
+		expect( o.kind, 'the shared kind-archive identity' ).toBe( true );
+
+		// 2. No empty wrapper and no reserved row: the holder has only the badge and no height,
+		//    and the band above the title is the room the badge's overhang stands in.
+		expect( o.children, 'the holder holds the badge and nothing else' ).toBe( 1 );
+		expect( o.holderHeight, 'the holder takes no row' ).toBe( 0 );
+		expect( o.bandAboveTitle, 'nothing but the badge above the title' ).toBeLessThanOrEqual( o.glyph.width );
+		expect( o.glyph.bottom, 'the badge reaches the title' ).toBeGreaterThan( o.tile.top );
+
+		// The badge anchors the title's upper-left corner.
+		expect( o.glyph.top, 'the badge starts above the first letter' ).toBeLessThan( o.tile.top );
+		expect( o.glyph.left, 'and at its left' ).toBeLessThanOrEqual( o.tile.left );
+		expect( o.glyph.left, 'inside the viewport' ).toBeGreaterThanOrEqual( 0 );
+		expect( o.radius ).toBe( '50%' );
+
+		// Decorative: hidden from assistive technology, unnamed, no link, no keyboard stop.
+		expect( o.hidden ).toBe( 'true' );
+		expect( o.named, 'no accessible name' ).toBe( 0 );
+		expect( o.linked, 'not a link' ).toBe( false );
+		expect( o.stops, 'no keyboard stop' ).toBe( 0 );
+
+		// 3. Circle and glyph take their own tokens and never the same colour.
+		expect( o.circle, 'the circle is the badge token' ).toBe( o.tokens.badge );
+		expect( o.ink, 'the glyph is the badge ink token' ).toBe( o.tokens.ink );
+		expect( o.circle, 'the glyph differs from its circle' ).not.toBe( o.ink );
+		expect( [ o.circle, o.ink ], o.dark ? 'dark: yellow circle, violet glyph' : 'light: violet circle, light gray glyph' ).toEqual( o.dark ? [ o.tokens.yellow, o.tokens.violet ] : [ o.tokens.violet, o.tokens.gray ] );
+		expect( o.overflow ).toBe( 0 );
+
+		// Forced colours: the system pair and a real border.
+		await page.emulateMedia( { forcedColors: 'active' } );
+		const forced = await header.locator( '.cr-archive-identity__glyph' ).evaluate( ( el ) => {
+			const cs = getComputedStyle( el );
+			return { style: cs.borderTopStyle, width: parseFloat( cs.borderTopWidth ), same: cs.backgroundColor === cs.color };
+		} );
+		expect( forced.style, 'a visible border in forced colours' ).toBe( 'solid' );
+		expect( forced.width ).toBeGreaterThanOrEqual( 2 );
+		expect( forced.same, 'Canvas and CanvasText differ' ).toBe( false );
+		await page.emulateMedia( { forcedColors: 'none' } );
+
+		// 5. No horizontal overflow at 320px.
+		await page.setViewportSize( { width: 320, height: 800 } );
+		await page.waitForTimeout( 150 );
+		const narrow = await page.evaluate( () => ( { overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, left: document.querySelector( '.cr-archive-identity__glyph' ).getBoundingClientRect().left } ) );
+		expect( narrow.overflow, 'no horizontal overflow at 320px' ).toBe( 0 );
+		expect( narrow.left, 'the badge stays on screen at 320px' ).toBeGreaterThanOrEqual( 0 );
+	} );
+}
+
+// 6. The correction is the kind archive's alone: Stream cards keep their kind
+// labels, and an archive of another family keeps its kicker.
+test( 'Stream cards keep their kind labels and a format archive keeps its kicker', async ( { page } ) => {
+	await page.goto( '/stream/', { waitUntil: 'load' } );
+	await expect( page.locator( '.cr-archive-identity--kind' ) ).toHaveCount( 0 );
+	expect( await page.locator( 'body.cr-stream-page .pk-kindlabel, body.cr-stream-page .cr-chit__kind' ).count(), 'Stream cards name their kind' ).toBeGreaterThan( 0 );
+	await page.goto( TERM_ARCHIVE, { waitUntil: 'load' } );
+	const kicker = page.locator( 'main .cr-archive__header .cr-archive-identity__kicker' );
+	test.skip( ( await page.locator( 'main .cr-archive__header' ).count() ) === 0, `no archive header at ${ TERM_ARCHIVE }` );
+	await expect( kicker ).toHaveCount( 1 );
+	await expect( kicker ).toHaveText( /·/ );
+	await expect( page.locator( '.cr-archive-identity--kind' ) ).toHaveCount( 0 );
+} );
