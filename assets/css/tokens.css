@@ -178,6 +178,12 @@
      halo outside the ring gives every edge a 3:1 boundary in both schemes
      (--cr-ink flips with the scheme). */
   --cr-focus-halo: var(--cr-ink);
+
+  /* 0.7.92: the round badge on a kind archive's title. The circle and its
+     glyph are named apart so the glyph can never take the circle's colour. */
+  --cr-archive-badge:      var(--cr-russian-violet);
+  --cr-archive-badge-ink:  var(--cr-light-gray);
+  --cr-archive-badge-edge: var(--cr-russian-violet);
   /* 0.7.46 (R-40): links inside a homepage / accent band. Light: ink (cerulean
      fails on the blue band); dark: the regular link tokens. */
   --cr-band-link: var(--cr-ink);
@@ -432,6 +438,9 @@
     --cr-accent:        var(--cr-sky-blue);
     --cr-accent-shape:  var(--cr-cerulean);
     --cr-accent-soft:   var(--cr-prussian-blue);
+    --cr-archive-badge:      var(--cr-selective-yellow);
+    --cr-archive-badge-ink:  var(--cr-russian-violet);
+    --cr-archive-badge-edge: var(--cr-russian-violet);
 
     /* v0.5.31 — eyebrow-ink dark mode: selective-yellow on
        photocopier-blk = 12.7:1 AAA; preserves the "marker" energy. */
@@ -524,6 +533,9 @@
     --cr-accent:        var(--cr-sky-blue);
     --cr-accent-shape:  var(--cr-cerulean);
     --cr-accent-soft:   var(--cr-prussian-blue);
+    --cr-archive-badge:      var(--cr-selective-yellow);
+    --cr-archive-badge-ink:  var(--cr-russian-violet);
+    --cr-archive-badge-edge: var(--cr-russian-violet);
 
     /* v0.5.31 — eyebrow-ink dark mode: selective-yellow on
        photocopier-blk = 12.7:1 AAA; preserves the "marker" energy. */

@@ -71,7 +71,10 @@ function sprite_glyph( string $type ): string {
 /**
  * Resolve the identity of the archive being rendered (or previewed).
  *
- * @return array{family:string,kicker:string,type:string,glyph:string,accent:string}
+ * A kind archive has no kicker: its h1 names it, and its round badge sits on
+ * the title's upper-left corner.
+ *
+ * @return array{family:string,kicker:string,type:string,glyph:string,accent:string,kind:bool}
  */
 function resolve_identity(): array {
 	$sprites = sprite_types();
@@ -80,11 +83,13 @@ function resolve_identity(): array {
 	$kicker  = __( 'Field notes', 'courtneyr-child' );
 	$type    = 'blog';
 	$glyph   = '';
+	$kind    = false;
 
 	if ( $object instanceof \WP_Term ) {
 		if ( 'kind' === $object->taxonomy ) {
 			$family = 'stream';
-			$kicker = __( 'Stream · Kind', 'courtneyr-child' );
+			$kicker = '';
+			$kind   = true;
 			$slug   = $object->slug;
 			$type   = KIND_TYPE_ALIASES[ $slug ] ?? ( in_array( $slug, $sprites, true ) ? $slug : 'blog' );
 			if ( function_exists( '\PKIW\get_kind_icon_svg' ) ) {
@@ -122,7 +127,8 @@ function resolve_identity(): array {
 		$template = sanitize_key( wp_unslash( (string) $_GET['cr_template'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( str_starts_with( $template, 'taxonomy-kind' ) ) {
 			$family = 'stream';
-			$kicker = __( 'Stream · Kind', 'courtneyr-child' );
+			$kicker = '';
+			$kind   = true;
 			$type   = 'status';
 		} elseif ( str_starts_with( $template, 'taxonomy-post_format' ) ) {
 			$family = 'stream';
@@ -146,6 +152,7 @@ function resolve_identity(): array {
 		'type'   => $type,
 		'glyph'  => $glyph,
 		'accent' => sprintf( 'var(--cr-type-%s, var(--cr-cerulean))', $type ),
+		'kind'   => $kind,
 	);
 }
 
