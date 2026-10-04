@@ -898,3 +898,31 @@ test( 'the Stream shows a recipe as a 3x5 card: picture, label, title link, cour
 	expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBe( 0 );
 } );
 
+// Paper has no use for site navigation. In print the header, the footer, the
+// Browse all lists, the pager, Previous/Next and the skip link are left out
+// on every template; the page's own heading and content stay. On screen they
+// are all still there.
+for ( const [ label, path ] of [ [ 'a kind archive', LISTEN_ARCHIVE ], [ 'a single post', COMIC_SINGLE ] ] ) {
+	test( `print leaves the site chrome out of ${ label } and keeps its content`, async ( { page } ) => {
+		await page.goto( path, { waitUntil: 'load' } );
+		const chrome = [ 'header.wp-block-template-part', 'footer.wp-block-template-part', '.cr-browse-all', 'nav.wp-block-query-pagination', '.cr-post-nav', '.skip-link' ];
+		const displayed = () => page.evaluate( ( selectors ) => Object.fromEntries( selectors.map( ( selector ) => {
+			const el = document.querySelector( selector );
+			return [ selector, el ? getComputedStyle( el ).display : 'absent' ];
+		} ) ), chrome );
+
+		const onScreen = await displayed();
+		expect( onScreen[ 'header.wp-block-template-part' ], 'the header shows on screen' ).not.toBe( 'none' );
+		expect( onScreen[ 'footer.wp-block-template-part' ], 'the footer shows on screen' ).not.toBe( 'none' );
+
+		await page.emulateMedia( { media: 'print' } );
+		const inPrint = await displayed();
+		const present = Object.entries( inPrint ).filter( ( [ , display ] ) => 'absent' !== display );
+		expect( present.length, 'the page has chrome to leave out' ).toBeGreaterThanOrEqual( 3 );
+		for ( const [ selector, display ] of present ) {
+			expect( display, `${ selector } is left out of print` ).toBe( 'none' );
+		}
+		await expect( page.locator( 'main h1' ).first() ).toBeVisible();
+		expect( await page.locator( 'main' ).evaluate( ( el ) => getComputedStyle( el ).display ) ).not.toBe( 'none' );
+	} );
+}
