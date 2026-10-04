@@ -160,6 +160,11 @@ function add_aria_current_to_navigation_link( $block_content, $block ) {
 add_filter( 'render_block', __NAMESPACE__ . '\\add_aria_current_to_navigation_link', 10, 2 );
 
 /**
+ * Posts per page on the card grid: a featured card and two full rows.
+ */
+const CARD_GRID_POSTS = 5;
+
+/**
  * Fill the zine card grid so it never ends on a lone card.
  *
  * The card grid (patterns/cr-blog-grid.php) renders a full-width featured lead
@@ -178,7 +183,19 @@ function fill_card_grid_post_count( $query ): void {
 		return;
 	}
 	if ( $query->is_home() || $query->is_archive() || $query->is_search() ) {
-		$query->set( 'posts_per_page', 5 );
+		$query->set( 'posts_per_page', CARD_GRID_POSTS );
 	}
 }
 add_action( 'pre_get_posts', __NAMESPACE__ . '\\fill_card_grid_post_count' );
+
+/**
+ * The Site Editor previews a kind archive with the same page size.
+ *
+ * Runs before the per-kind sizes (the recipe binder, the comic rack).
+ *
+ * @return int
+ */
+function preview_card_grid_post_count(): int {
+	return CARD_GRID_POSTS;
+}
+add_filter( 'pkiw_kind_archive_preview_per_page', __NAMESPACE__ . '\\preview_card_grid_post_count', 5 );

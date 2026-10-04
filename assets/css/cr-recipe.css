@@ -243,7 +243,7 @@
 	margin: 0;
 }
 
-.cr-recipe-binder .cr-recipe-tabs__list {
+.cr-recipe-binder .pk-recipe-courses__list {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.4rem;
@@ -252,29 +252,29 @@
 	list-style: none;
 }
 
-.cr-recipe-binder .cr-recipe-tabs__item {
+.cr-recipe-binder .pk-recipe-courses__item {
 	--tab: var(--cr-light-orange);
 	margin: 0;
 	padding: 0;
 }
 
-.cr-recipe-binder .cr-recipe-tabs__item:nth-child(5n + 2) {
+.cr-recipe-binder .pk-recipe-courses__item:nth-child(5n + 2) {
 	--tab: var(--cr-selective-yellow);
 }
 
-.cr-recipe-binder .cr-recipe-tabs__item:nth-child(5n + 3) {
+.cr-recipe-binder .pk-recipe-courses__item:nth-child(5n + 3) {
 	--tab: var(--cr-periwinkle);
 }
 
-.cr-recipe-binder .cr-recipe-tabs__item:nth-child(5n + 4) {
+.cr-recipe-binder .pk-recipe-courses__item:nth-child(5n + 4) {
 	--tab: var(--cr-sky-blue);
 }
 
-.cr-recipe-binder .cr-recipe-tabs__item:nth-child(5n + 5) {
+.cr-recipe-binder .pk-recipe-courses__item:nth-child(5n + 5) {
 	--tab: var(--cr-light-gray);
 }
 
-.cr-recipe-binder .cr-recipe-tabs__tab {
+.cr-recipe-binder .pk-recipe-courses__link {
 	display: flex;
 	align-items: center;
 	box-sizing: border-box;
@@ -294,18 +294,18 @@
 	text-transform: uppercase;
 }
 
-.cr-recipe-binder .cr-recipe-tabs__tab:hover {
+.cr-recipe-binder .pk-recipe-courses__link:hover {
 	text-decoration: underline;
 	text-decoration-thickness: 2px;
 	text-underline-offset: 0.15em;
 }
 
-.cr-recipe-binder .cr-recipe-tabs__tab[aria-current] {
+.cr-recipe-binder .pk-recipe-courses__link[aria-current] {
 	background: var(--cr-russian-violet);
 	color: var(--cr-printer-ivory);
 }
 
-.cr-recipe-binder .cr-recipe-tabs__tab:focus-visible {
+.cr-recipe-binder .pk-recipe-courses__link:focus-visible {
 	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 2px;
 	box-shadow: 0 0 0 7px var(--cr-focus-halo);
@@ -376,7 +376,7 @@
 		margin: 1.75rem 0 0 -2px;
 	}
 
-	.cr-recipe-binder .cr-recipe-tabs__list {
+	.cr-recipe-binder .pk-recipe-courses__list {
 		flex-direction: column;
 		flex-wrap: nowrap;
 		gap: 0;
@@ -384,11 +384,11 @@
 	}
 
 	/* The tabs share their edges, so the binder's shadow doesn't show between them. */
-	.cr-recipe-binder .cr-recipe-tabs__item + .cr-recipe-tabs__item {
+	.cr-recipe-binder .pk-recipe-courses__item + .pk-recipe-courses__item {
 		margin-top: -2px;
 	}
 
-	.cr-recipe-binder .cr-recipe-tabs__tab {
+	.cr-recipe-binder .pk-recipe-courses__link {
 		max-width: 9.5rem;
 		border: 2px solid var(--cr-russian-violet);
 		border-left: 0;
@@ -1027,7 +1027,7 @@ body.cr-recipe-single .cr-binder-recipe__more:not(:has(.wprm-recipe-header)) {
 
 	.cr-recipe-binder .wp-block-post-template.cr-recipe-binder__list,
 	.cr-recipe-binder .cr-recipe-binder__list > li .pk-card.cr-recipe-card,
-	.cr-recipe-binder .cr-recipe-tabs__tab {
+	.cr-recipe-binder .pk-recipe-courses__link {
 		border-color: CanvasText;
 		background: Canvas;
 		box-shadow: none;
@@ -1052,7 +1052,7 @@ body.cr-recipe-single .cr-binder-recipe__more:not(:has(.wprm-recipe-header)) {
 		color: CanvasText;
 	}
 
-	.cr-recipe-binder .cr-recipe-tabs__tab[aria-current] {
+	.cr-recipe-binder .pk-recipe-courses__link[aria-current] {
 		border-color: Highlight;
 		background: Highlight;
 		color: HighlightText;
@@ -1060,7 +1060,7 @@ body.cr-recipe-single .cr-binder-recipe__more:not(:has(.wprm-recipe-header)) {
 	}
 
 	.cr-recipe-binder .cr-recipe-binder__list > li .pk-card.cr-recipe-card .pk-title a:focus-visible::after,
-	.cr-recipe-binder .cr-recipe-tabs__tab:focus-visible {
+	.cr-recipe-binder .pk-recipe-courses__link:focus-visible {
 		outline-color: Highlight;
 		box-shadow: none;
 	}

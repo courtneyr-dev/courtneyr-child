@@ -239,7 +239,11 @@ function cut_div( string $html, string $open ): string {
  */
 function media_card( string $html, array $block, $instance ): string {
 	$shelf = \Courtneyr\Child\MediaShelf\shelf_kind();
-	if ( '' === $shelf && ! \Courtneyr\Child\HomeSections\is_stream_surface() ) {
+	// The Site Editor asks for each card on its own, with no archive query
+	// behind the request. The shelf patterns give their card a block style,
+	// so the case is dressed in the canvas as it is on the archive.
+	$shelf_card = false !== strpos( (string) ( $block['attrs']['className'] ?? '' ), \Courtneyr\Child\MediaShelf\SHELF_CARD_STYLE );
+	if ( '' === $shelf && ! $shelf_card && ! \Courtneyr\Child\HomeSections\is_stream_surface() ) {
 		return $html;
 	}
 	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
@@ -253,6 +257,9 @@ function media_card( string $html, array $block, $instance ): string {
 	$kind = has_term( 'watch', 'kind', $post ) ? 'watch' : ( has_term( 'listen', 'kind', $post ) ? 'listen' : '' );
 	if ( '' === $kind || false === strpos( $html, 'pk-card k-' . $kind ) ) {
 		return $html;
+	}
+	if ( '' === $shelf && $shelf_card ) {
+		$shelf = $kind;
 	}
 
 	// On a shelf archive (inc/media-shelf.php) each case is one link to its

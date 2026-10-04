@@ -53,6 +53,55 @@ function is_binder(): bool {
 }
 
 /**
+ * Block style the binder's pattern gives its stream card.
+ *
+ * The editor asks the server for each card on its own, with no archive
+ * query behind the request. The style travels with the block, so the card
+ * is cut the same way in the Site Editor as on the archive.
+ */
+const BINDER_CARD_STYLE = 'is-style-cr-binder-card';
+
+/**
+ * Is this stream card one of the binder's?
+ *
+ * @param array<string, mixed> $block Parsed stream-card block.
+ * @return bool
+ */
+function is_binder_card( array $block ): bool {
+	return is_binder() || false !== strpos( (string) ( $block['attrs']['className'] ?? '' ), BINDER_CARD_STYLE );
+}
+
+/**
+ * Name the card style, so the editor lists it for the stream card.
+ *
+ * @return void
+ */
+function register_card_style(): void {
+	if ( function_exists( 'register_block_style' ) ) {
+		register_block_style(
+			'post-kinds-indieweb/stream-card',
+			array(
+				'name'  => 'cr-binder-card',
+				'label' => __( 'Recipe binder card', 'courtneyr-child' ),
+			)
+		);
+	}
+}
+add_action( 'init', __NAMESPACE__ . '\\register_card_style' );
+
+/**
+ * The Site Editor previews the recipe archive BINDER_SIZE recipes to a page.
+ *
+ * @param int    $per_page Posts per page. Zero keeps the editor's own size.
+ * @param string $kind     Kind slug.
+ * @return int
+ */
+function preview_page_size( $per_page, $kind ): int {
+	return 'recipe' === $kind ? BINDER_SIZE : (int) $per_page;
+}
+add_filter( 'pkiw_kind_archive_preview_per_page', __NAMESPACE__ . '\\preview_page_size', 10, 2 );
+
+/**
  * The WP Recipe Maker template this theme ships: wprm-templates/recipe/cr-binder/.
  */
 const TEMPLATE = 'cr-binder';
@@ -131,7 +180,7 @@ add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_styles' );
 function binder_card( string $html, array $block, $instance ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- filter signature.
 	static $printed = 0;
 
-	if ( ! is_binder() || false === strpos( $html, 'pk-card' ) ) {
+	if ( ! is_binder_card( $block ) || false === strpos( $html, 'pk-card' ) ) {
 		return $html;
 	}
 
@@ -173,7 +222,7 @@ add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\b
  * @return string
  */
 function stream_card( string $html, array $block, $instance ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- filter signature.
-	if ( is_binder() || ! is_stream_surface() || 1 !== preg_match( '/<article\b[^>]*\bclass="[^"]*(?<![\w-])k-recipe(?![\w-])/', $html ) ) {
+	if ( is_binder_card( $block ) || ! is_stream_surface() || 1 !== preg_match( '/<article\b[^>]*\bclass="[^"]*(?<![\w-])k-recipe(?![\w-])/', $html ) ) {
 		return $html;
 	}
 
@@ -191,90 +240,6 @@ function stream_card( string $html, array $block, $instance ): string { // phpcs
 	return (string) preg_replace( '/(<article\b[^>]*\bclass=")/', '$1' . $classes . ' ', $html, 1 );
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\stream_card', 10, 3 );
-
-/**
- * The binder's tabs: every recipe, each course in use, and the A-Z index.
- *
- * Each tab is a link to the recipe archive. A course tab carries the
- * plugin's course query var and the A-Z tab carries WordPress's own
- * `orderby=title`, so the view a tab opens is an ordinary archive URL.
- *
- * @return string Navigation markup, or '' when the plugin can't list courses.
- */
-function tabs(): string {
-	$term = get_queried_object();
-	if ( ! $term instanceof \WP_Term || ! function_exists( '\\PKIW\\recipe_archive_courses' ) ) {
-		return '';
-	}
-	$base = get_term_link( $term );
-	if ( is_wp_error( $base ) ) {
-		return '';
-	}
-
-	$course   = sanitize_title( (string) get_query_var( 'pkiw_recipe_course' ) );
-	$orderby  = get_query_var( 'orderby' );
-	$by_title = '' === $course && ( 'title' === $orderby || ( is_array( $orderby ) && isset( $orderby['title'] ) ) );
-
-	$items = array(
-		array(
-			'label'   => __( 'All', 'courtneyr-child' ),
-			'url'     => $base,
-			'current' => '' === $course && ! $by_title,
-		),
-	);
-	foreach ( \PKIW\recipe_archive_courses() as $entry ) {
-		$items[] = array(
-			'label'   => $entry['name'],
-			'url'     => $entry['url'],
-			'current' => $entry['current'],
-		);
-	}
-	$items[] = array(
-		'label'   => __( 'A–Z index', 'courtneyr-child' ),
-		'url'     => add_query_arg(
-			array(
-				'orderby' => 'title',
-				'order'   => 'asc',
-			),
-			$base
-		),
-		'current' => $by_title,
-	);
-
-	$out = '<nav class="cr-recipe-tabs" aria-label="' . esc_attr__( 'Recipe courses', 'courtneyr-child' ) . '"><ul class="cr-recipe-tabs__list">';
-	foreach ( $items as $item ) {
-		$out .= '<li class="cr-recipe-tabs__item"><a class="cr-recipe-tabs__tab" href="' . esc_url( $item['url'] ) . '"'
-			. ( $item['current'] ? ' aria-current="page"' : '' ) . '>' . esc_html( $item['label'] ) . '</a></li>';
-	}
-
-	return $out . '</ul></nav>';
-}
-
-/**
- * Put the tabs inside the binder's Query block, ahead of the cards.
- *
- * The tabs depend on the request (which tab is current), so they are
- * rendered here and not written into the pattern.
- *
- * @param string               $html  Rendered Query block.
- * @param array<string, mixed> $block Parsed block.
- * @return string
- */
-function add_tabs( string $html, array $block ): string {
-	if ( ! is_binder() || false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'cr-recipe-binder__query' ) ) {
-		return $html;
-	}
-
-	$tabs = tabs();
-
-	return (string) preg_replace_callback(
-		'/^\s*<div\b[^>]*>/',
-		static fn( array $open ): string => $open[0] . $tabs,
-		$html,
-		1
-	);
-}
-add_filter( 'render_block_core/query', __NAMESPACE__ . '\\add_tabs', 10, 2 );
 
 /**
  * Mark the single view of a recipe for the stylesheet.

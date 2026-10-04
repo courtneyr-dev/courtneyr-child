@@ -129,3 +129,12 @@
 	.cr-stories .cr-stories__card { transition: transform 0.15s ease; }
 	.cr-stories .cr-stories__card:hover { transform: rotate(0deg) translateY(-2px); }
 }
+
+/* Site Editor. The editor nests each stream card in the block's own
+   wrappers. The outer one is already display: contents; this does the same
+   for the server-render wrapper inside it, so the card is the list item's
+   layout child in the canvas as it is on the front end. The class only
+   exists in the editor. */
+.cr-archive-stream__list > li > .block-editor-block-list__block > div {
+	display: contents;
+}
