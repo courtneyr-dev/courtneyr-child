@@ -19,6 +19,8 @@ const WATCH_ARCHIVE = process.env.CR_WATCH_ARCHIVE_PATH || '/kind/watch/'; // wa
 const COMICS_ARCHIVE = process.env.CR_COMICS_ARCHIVE_PATH || '/kind/comics/'; // comics archive with at least one comic read (PKIW #228)
 const COMIC_SINGLE = process.env.CR_COMIC_SINGLE_PATH || '/2026/09/06/anzuelo/'; // a comic read (comic-card) still being read, with a cover and a stored start date
 const RECIPE_ARCHIVE = process.env.CR_RECIPE_ARCHIVE_PATH || '/kind/recipe/'; // recipe archive (PKIW #229); its tests skip on a site with no recipe posts
+const EAT_ARCHIVE = process.env.CR_EAT_ARCHIVE_PATH || '/kind/eat/'; // eat archive (PKIW #230); its test skips on a site with fewer than three eat posts
+const DRINK_ARCHIVE = process.env.CR_DRINK_ARCHIVE_PATH || '/kind/drink/'; // drink archive (PKIW #230); its test skips on a site with fewer than three drink posts
 const RECIPE_SINGLE = process.env.CR_RECIPE_SINGLE_PATH || '/2026/08/14/tomato-basil-soup/'; // a recipe post with a WP Recipe Maker recipe and a featured image (local fixture)
 const RECIPE_PLAIN_SINGLE = process.env.CR_RECIPE_PLAIN_SINGLE_PATH || '/2026/08/01/campfire-chili/'; // a recipe post with no recipe card (local fixture)
 const RECIPE_STREAM = process.env.CR_RECIPE_STREAM_PATH || '/stream/'; // a Stream page that shows a recipe post (local fixture); the test skips when it shows none
@@ -924,5 +926,78 @@ for ( const [ label, path ] of [ [ 'a kind archive', LISTEN_ARCHIVE ], [ 'a sing
 		}
 		await expect( page.locator( 'main h1' ).first() ).toBeVisible();
 		expect( await page.locator( 'main' ).evaluate( ( el ) => getComputedStyle( el ).display ) ).not.toBe( 'none' );
+	} );
+}
+
+// PKIW #230: the eat and drink archives are menus. Recent Specials sits above
+// the menu on the first page; the menu is the Query Loop's own list, each
+// post one line (name link, a leader hidden from assistive technology, the
+// rating as text) under a section heading printed once per page. The paper,
+// the columns and the frame are CSS. No street, coordinates or venue link
+// prints anywhere on the page.
+for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3 ], [ 'drink', DRINK_ARCHIVE, 8, 2 ] ] ) {
+	test( `the ${ kind } archive is a menu: Recent Specials, then lines under section headings`, async ( { page } ) => {
+		await page.goto( path, { waitUntil: 'load' } );
+		test.skip( ( await page.locator( 'main li.wp-block-post' ).count() ) < 3, `fewer than three ${ kind } posts on this site` );
+		await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
+		const menu = page.locator( `.cr-archive--${ kind } ul.cr-menu__list` );
+		await expect( menu ).toHaveCount( 1 );
+		const lines = menu.locator( ':scope > li' );
+		const count = await lines.count();
+		expect( count ).toBeGreaterThan( 0 );
+		expect( count, `${ perPage } lines to a page` ).toBeLessThanOrEqual( perPage );
+		for ( const line of await lines.all() ) {
+			await expect( line.locator( 'a.pkiw-menu-entry__name' ) ).toHaveCount( 1 );
+			expect( await line.locator( 'a' ).count(), 'a menu line is one link' ).toBe( 1 );
+			expect( await line.locator( '.pkiw-menu-entry__leader' ).getAttribute( 'aria-hidden' ) ).toBe( 'true' );
+			const rating = line.locator( '.pkiw-menu-entry__rating' );
+			if ( await rating.count() ) {
+				expect( ( await rating.textContent() ).trim() ).toMatch( /^Rated [1-5] of 5$/ );
+			}
+		}
+		const sections = ( await menu.locator( 'h2.pkiw-menu-entry__section' ).allTextContents() ).map( ( text ) => text.trim() );
+		expect( sections.length, 'the menu has section headings' ).toBeGreaterThan( 0 );
+		expect( new Set( sections ).size, 'a section is headed once on a page' ).toBe( sections.length );
+		await expect( lines.first().locator( 'h2.pkiw-menu-entry__section' ) ).toHaveCount( 1 );
+
+		const specials = page.locator( `.cr-archive--${ kind } section.pkiw-menu-specials` );
+		await expect( specials ).toHaveCount( 1 );
+		await expect( page.locator( `[id="${ await specials.getAttribute( 'aria-labelledby' ) }"]` ) ).toHaveText( 'Recent Specials' );
+		const specialCount = await specials.locator( 'ul > li' ).count();
+		expect( specialCount ).toBeGreaterThan( 0 );
+		expect( specialCount, 'two specials at most' ).toBeLessThanOrEqual( 2 );
+		expect( await specials.locator( 'ul > li h3 a' ).count(), 'each special is named by a linked heading' ).toBe( specialCount );
+
+		const shape = await page.evaluate( ( k ) => {
+			const list = document.querySelector( `.cr-archive--${ k } ul.cr-menu__list` );
+			const box = document.querySelector( `.cr-archive--${ k } section.pkiw-menu-specials` );
+			const cs = getComputedStyle( list );
+			return {
+				columns: cs.columnCount,
+				paper: cs.backgroundColor,
+				frame: parseFloat( getComputedStyle( box ).borderTopWidth ),
+				specialsFirst: box.getBoundingClientRect().top < list.getBoundingClientRect().top,
+				overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+				located: document.querySelectorAll( 'main .p-street-address, main .p-latitude, main .p-longitude, main .h-geo, main .pkiw-menu-entry a[href*="openstreetmap"]' ).length,
+			};
+		}, kind );
+		expect( shape.specialsFirst, 'Recent Specials sits above the menu' ).toBe( true );
+		expect( shape.columns, 'the menu flows in columns on a wide screen and one on a phone' ).toBe( page.viewportSize().width >= 1024 ? String( wideColumns ) : '1' );
+		expect( shape.paper, 'the menu is on paper' ).not.toBe( 'rgba(0, 0, 0, 0)' );
+		expect( shape.frame, 'Recent Specials is framed' ).toBeGreaterThanOrEqual( 2 );
+		expect( shape.overflow ).toBe( 0 );
+		expect( shape.located, 'no street, coordinates or map link on the menu' ).toBe( 0 );
+
+		// The site's shared pager, and no specials past the first page.
+		const next = page.locator( `.cr-archive--${ kind } nav.wp-block-query-pagination a.wp-block-query-pagination-next` );
+		if ( await next.count() ) {
+			await expect( page.locator( `.cr-archive--${ kind } nav.wp-block-query-pagination` ) ).not.toHaveClass( /cr-stream__pagination/ );
+			await next.click();
+			await page.waitForLoadState( 'load' );
+			await expect( page.locator( `.cr-archive--${ kind } section.pkiw-menu-specials` ) ).toHaveCount( 0 );
+			const second = page.locator( `.cr-archive--${ kind } ul.cr-menu__list > li` );
+			expect( await second.count() ).toBeGreaterThan( 0 );
+			await expect( second.first().locator( 'h2.pkiw-menu-entry__section' ) ).toHaveCount( 1 );
+		}
 	} );
 }
