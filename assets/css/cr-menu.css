@@ -85,19 +85,30 @@
 	object-fit: cover;
 }
 
-/* A special with no photo keeps its place: a blank plate of coloured
-   paper, drawn here and never announced. */
+/* A special with no featured image gets the plate illustration: a plate on a
+   cloth, drawn here from three flat colours, with nothing to announce. A
+   special with a featured image shows that image and never this. */
 .cr-menu .pkiw-menu-specials__item--no-photo::before {
+	--plate-cloth: var(--cr-cerulean);
+	--plate-rim: var(--cr-light-orange);
+	--plate-well: var(--cr-sky-blue);
 	content: "";
 	display: block;
 	width: 100%;
 	aspect-ratio: 3 / 2;
 	border: 2px solid var(--cr-russian-violet);
-	background: var(--cr-light-orange);
+	background: radial-gradient(circle closest-side, var(--plate-well) 0 54%, var(--plate-rim) 54% 82%, var(--plate-cloth) 82%);
 }
 
 .cr-menu--drink .pkiw-menu-specials__item--no-photo::before {
-	background: var(--cr-periwinkle);
+	--plate-cloth: var(--cr-glaucous);
+	--plate-rim: var(--cr-printer-ivory);
+	--plate-well: var(--cr-periwinkle);
+}
+
+/* The two specials don't share a cloth. */
+.cr-menu .pkiw-menu-specials__item--no-photo:nth-child(even)::before {
+	--plate-cloth: var(--cr-prussian-blue);
 }
 
 .cr-menu .pkiw-menu-specials__body {
@@ -152,8 +163,9 @@
 	overflow: clip;
 	list-style: none;
 
-	/* A hairline of ink, then the hard shadow, both following the torn edge. */
-	filter: drop-shadow(1px 1px 0 var(--cr-ink)) drop-shadow(-1px -1px 0 var(--cr-ink)) drop-shadow(var(--cr-shadow-hard-2));
+	/* A 2px line of ink on every side, then the hard shadow, all following the
+	   torn edge, so the sheet reads as one piece of paper on a page its own colour. */
+	filter: drop-shadow(2px 0 0 var(--cr-ink)) drop-shadow(-2px 0 0 var(--cr-ink)) drop-shadow(0 2px 0 var(--cr-ink)) drop-shadow(0 -2px 0 var(--cr-ink)) drop-shadow(var(--cr-shadow-hard-2));
 }
 
 .cr-menu--drink .wp-block-post-template.cr-menu__list {
@@ -166,20 +178,22 @@
 	position: absolute;
 	z-index: -1;
 	inset: 0;
-	background: var(--menu-paper);
+	background: var(--menu-rules, none), var(--menu-paper);
 	clip-path: var(--menu-tear);
 }
 
 /* A panel. Its top and left seams are dashed fold lines; the sheet clips
-   the ones on its own outer edge, so only the joins between panels show. */
+   the ones on its own outer edge, so only the joins between panels show.
+   A section is never broken across columns. */
 .cr-menu .cr-menu__list > .pkiw-menu-section,
 .cr-menu .cr-menu__list > li {
 	min-width: 0;
-	margin: -1px 0 0 -1px;
+	margin: var(--menu-panel-margin, -1px 0 0 -1px);
 	padding: 0;
-	border-block-start: 1px dashed var(--menu-seam);
-	border-inline-start: 1px dashed var(--menu-seam);
-	background: linear-gradient(90deg, var(--menu-crease), transparent 1.25rem);
+	border-block-start: var(--menu-panel-fold, 1px dashed var(--menu-seam));
+	border-inline-start: var(--menu-panel-edge, 1px dashed var(--menu-seam));
+	background: var(--menu-panel-crease, linear-gradient(90deg, var(--menu-crease), transparent 1.25rem));
+	break-inside: avoid;
 }
 
 /* The room inside a panel belongs to the section, which both contexts share. */
@@ -329,15 +343,54 @@
 		border-left: 1px solid var(--cr-cerulean);
 	}
 
-	/* Panels sit side by side on the one sheet. */
+	/* Two columns on the one sheet. Eat and drink share this: the plugin tells
+	   each section how many sections the page holds (data-pkiw-sections).
+	   More sections than columns pack whole down the columns, so no row is
+	   left half empty. The fold between columns is drawn on the sheet, the
+	   sheet's full height. */
 	.cr-menu .wp-block-post-template.cr-menu__list {
+		--menu-fold: repeating-linear-gradient(180deg, var(--menu-seam) 0 4px, transparent 4px 8px);
+		--menu-panel-margin: 0;
+		--menu-panel-fold: 0;
+		--menu-panel-edge: 0;
+		--menu-panel-crease: none;
+		--menu-rules: var(--menu-fold) 50% 0 / 1px 100% no-repeat;
+		display: block;
+		column-count: 2;
+		column-gap: 0;
+	}
+
+	/* As many sections as columns, or fewer: each is one equal panel, side by
+	   side, headings on one line, and the sheet is as tall as the tallest. */
+	.cr-menu .wp-block-post-template.cr-menu__list:has(.pkiw-menu-section[data-pkiw-sections="1"]),
+	.cr-menu .wp-block-post-template.cr-menu__list:has(.pkiw-menu-section[data-pkiw-sections="2"]) {
+		--menu-panel-margin: -1px 0 0 -1px;
+		--menu-panel-edge: 1px dashed var(--menu-seam);
+		--menu-panel-crease: linear-gradient(90deg, var(--menu-crease), transparent 1.25rem);
+		--menu-rules: none;
+		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.cr-menu .wp-block-post-template.cr-menu__list:has(.pkiw-menu-section[data-pkiw-sections="1"]) {
+		grid-template-columns: minmax(0, 1fr);
 	}
 }
 
 @media (min-width: 64rem) {
 
-	.cr-menu--eat .wp-block-post-template.cr-menu__list {
+	/* Three columns, by the same rule. */
+	.cr-menu .wp-block-post-template.cr-menu__list {
+		--menu-rules: var(--menu-fold) 33.333% 0 / 1px 100% no-repeat, var(--menu-fold) 66.667% 0 / 1px 100% no-repeat;
+		column-count: 3;
+	}
+
+	.cr-menu .wp-block-post-template.cr-menu__list:has(.pkiw-menu-section[data-pkiw-sections="3"]) {
+		--menu-panel-margin: -1px 0 0 -1px;
+		--menu-panel-edge: 1px dashed var(--menu-seam);
+		--menu-panel-crease: linear-gradient(90deg, var(--menu-crease), transparent 1.25rem);
+		--menu-rules: none;
+		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 }

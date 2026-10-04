@@ -320,10 +320,6 @@ body.cr-order-single .single-post__content .cr-placemat--drink {
 	border-block-start: 1px dashed var(--cr-glaucous);
 }
 
-.cr-placemat .cr-map-slip--text .cr-map-slip__caption {
-	border-block-start: 0;
-}
-
 .cr-placemat .cr-map-slip__place {
 	display: grid;
 	gap: 0.15rem;
