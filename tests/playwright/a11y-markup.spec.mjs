@@ -948,7 +948,10 @@ for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3
 		expect( count, `${ perPage } lines to a page` ).toBeLessThanOrEqual( perPage );
 		for ( const line of await lines.all() ) {
 			await expect( line.locator( 'a.pkiw-menu-entry__name' ) ).toHaveCount( 1 );
-			expect( await line.locator( 'a' ).count(), 'a menu line is one link' ).toBe( 1 );
+			// The plugin names the entry's author in a hidden h-card link; a visitor meets one link.
+			const rendered = await line.evaluate( ( el ) => [ ...el.querySelectorAll( 'a' ) ].filter( ( a ) => a.getClientRects().length > 0 ).length );
+			expect( rendered, 'a menu line is one link' ).toBe( 1 );
+			expect( await line.locator( 'a[hidden], [hidden] a' ).evaluateAll( ( as ) => as.filter( ( a ) => a.getClientRects().length > 0 ).length ), 'hidden links stay hidden' ).toBe( 0 );
 			expect( await line.locator( '.pkiw-menu-entry__leader' ).getAttribute( 'aria-hidden' ) ).toBe( 'true' );
 			const rating = line.locator( '.pkiw-menu-entry__rating' );
 			if ( await rating.count() ) {
