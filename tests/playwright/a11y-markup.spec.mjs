@@ -452,8 +452,9 @@ test( 'the comics archive is a rack of bagged comics, one title link each, no me
 
 // PKIW #228, the polybag: on the rack a comic stands in a loose clear bag.
 // The bag is about a fifth of the rack on a wide screen, its plastic is pale
-// (Light Gray, Periwinkle, Sky Blue at low opacity), the cover nearly fills
-// it, a taller flap folds over the top, the corners are soft, and it tilts by
+// against the dark rack (Light Gray, Periwinkle and Sky Blue, each short of
+// opaque), the cover nearly fills it and rests at its foot, a taller flap
+// folds over the top, the corners are soft, and it tilts by
 // one rotation token while the shelf tag stays upright. One broad reflection
 // fades at both edges; one hard shadow lifts the bag off the rack. The status
 // sticker is on the plastic: small, tilted, hand-lettered on two lines, with
@@ -511,7 +512,7 @@ test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft
 			sleeve: { width: media.offsetWidth, height: media.offsetHeight, bounds: bounds( media ) },
 			slot: bounds( slot ),
 			cover: cover ? { width: cover.offsetWidth, left: cover.offsetLeft, top: cover.offsetTop, bottom: media.clientHeight - cover.offsetTop - cover.offsetHeight } : null,
-			film: { alpha: alpha( cs.backgroundColor ), rgb: rgb( cs.backgroundColor ) },
+			film: { alpha: alpha( cs.backgroundColor ), rgb: rgb( cs.backgroundColor ), rack: rgb( getComputedStyle( list ).backgroundColor ) },
 			edge: { style: cs.borderTopStyle, width: parseFloat( cs.borderTopWidth ), rgb: rgb( cs.borderTopColor ) },
 			radius: parseFloat( cs.borderTopLeftRadius ),
 			tilt: angle( cs.transform ),
@@ -547,6 +548,9 @@ test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft
 		};
 	};
 	const wide = page.viewportSize().width >= 1280;
+	// Relative luminance of an "r g b" string, and one colour laid over another at an alpha.
+	const luminance = ( c ) => c.split( ' ' ).map( ( n ) => n / 255 ).map( ( n ) => ( n <= 0.03928 ? n / 12.92 : ( ( n + 0.055 ) / 1.055 ) ** 2.4 ) ).reduce( ( sum, n, i ) => sum + n * [ 0.2126, 0.7152, 0.0722 ][ i ], 0 );
+	const over = ( top, a, under ) => top.split( ' ' ).map( ( n, i ) => Math.round( n * a + under.split( ' ' )[ i ] * ( 1 - a ) ) ).join( ' ' );
 	for ( const card of await bagged.all() ) {
 		await card.locator( '.pk-title a' ).focus();
 		const o = await card.evaluate( measure );
@@ -555,9 +559,10 @@ test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft
 			expect( o.sleeve.width / o.rack, 'the bag is about 21% of the rack' ).toBeGreaterThanOrEqual( 0.19 );
 			expect( o.sleeve.width / o.rack ).toBeLessThanOrEqual( 0.23 );
 		}
-		// Pale clear plastic: the rack shows through, lightly washed.
-		expect( o.film.alpha, 'the plastic is see-through' ).toBeLessThanOrEqual( 0.3 );
-		expect( o.film.alpha, 'the plastic washes the rack' ).toBeGreaterThanOrEqual( 0.1 );
+		// Pale plastic: short of opaque, and light where it lies over the dark rack.
+		expect( o.film.alpha, 'the plastic is not opaque' ).toBeLessThan( 1 );
+		expect( luminance( o.film.rack ), 'the rack behind the bag is dark' ).toBeLessThan( 0.1 );
+		expect( luminance( over( o.film.rgb, o.film.alpha, o.film.rack ) ), 'the plastic reads pale over the rack, not as dark glass' ).toBeGreaterThanOrEqual( 0.35 );
 		expect( o.plastic, 'the film is Light Gray, Periwinkle or Sky Blue' ).toContain( o.film.rgb );
 		expect( o.plastic, 'the edge is Light Gray, Periwinkle or Sky Blue' ).toContain( o.edge.rgb );
 		expect( o.shine.rgbs.every( ( c ) => o.plastic.includes( c ) ), 'every highlight is Light Gray, Periwinkle or Sky Blue' ).toBe( true );
@@ -583,6 +588,7 @@ test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft
 			expect( rim.top / o.sleeve.width, 'a tall flap over the top' ).toBeGreaterThanOrEqual( 0.08 );
 			expect( rim.top, 'the flap is at least three times the rim' ).toBeGreaterThanOrEqual( 3 * rim.left );
 			expect( o.flap.height, 'the flap is the plastic above the cover' ).toBeGreaterThanOrEqual( rim.top - 1 );
+			expect( rim.bottom, 'the comic rests at the foot of the bag' ).toBeLessThan( rim.left );
 			expect( o.art, 'the cover art is not dimmed or filtered' ).toEqual( [ '1', 'none' ] );
 		}
 		// The flap and the reflections are pseudo-elements with no text.
