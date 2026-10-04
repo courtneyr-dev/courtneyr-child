@@ -1,0 +1,22 @@
+/* ============================================================
+   Print
+
+   Paper has no use for site navigation. The header, the footer,
+   the Browse all lists, the pager, Previous/Next and the skip
+   link are left out of every printed page; the page's own heading
+   and content print. A surface with more to say about paper keeps
+   those rules in its own file (cr-recipe.css).
+
+   Loaded with media="print", so it doesn't block rendering on
+   screen. The declarations are !important because core's layout
+   classes and cr-nav.css set display on the same elements with
+   equal or higher specificity.
+   ============================================================ */
+header.wp-block-template-part,
+footer.wp-block-template-part,
+.cr-browse-all,
+.wp-block-query-pagination,
+.cr-post-nav,
+.skip-link {
+	display: none !important;
+}

@@ -74,6 +74,15 @@ function enqueue_baseline(): void {
 		COURTNEYR_CHILD_VERSION
 	);
 
+	// Site chrome stays off paper. media="print" keeps the sheet from blocking rendering on screen.
+	wp_enqueue_style(
+		'courtneyr-print',
+		COURTNEYR_CHILD_URI . '/assets/css/cr-print.css',
+		array(),
+		COURTNEYR_CHILD_VERSION,
+		'print'
+	);
+
 	// 404 comic layer — only loaded on the Not Found template.
 	if ( is_404() ) {
 		wp_enqueue_style(
@@ -839,13 +848,15 @@ add_filter( 'perfmatters_minify_js_exclusions', __NAMESPACE__ . '\\perfmatters_e
  * 2026-10-01 when the kind file was built from /kind/listen/). The site
  * option already excludes cr-post-kinds.css, cr-archives.css and
  * cr-home-sections.css for the same reason; these join them in code.
+ * cr-print.css joins them as a precaution: none of its rules match on
+ * screen. That one isn't verified against Perfmatters.
  *
  * @param array<int, string> $exclusions URL fragments Remove Unused CSS skips.
  * @return array<int, string>
  */
 function perfmatters_rucss_exclusions( $exclusions ): array {
 	$exclusions = is_array( $exclusions ) ? $exclusions : array();
-	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css' ) as $file ) {
+	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css' ) as $file ) {
 		$exclusions[] = $file;
 	}
 	return array_values( array_unique( $exclusions ) );
