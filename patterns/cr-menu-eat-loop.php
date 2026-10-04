@@ -4,7 +4,7 @@
  * Slug: courtneyr-child/cr-menu-eat-loop
  * Categories: cr-zine, cr-loops
  * Viewport Width: 1200
- * Description: Query Loop for the eat archive — the plugin's Recent Specials block, then the archive query as menu lines under section headings; inc/menu.php sets the page size and cr-menu.css draws the paper.
+ * Description: Query Loop for the eat archive — the plugin's Recent Specials block, then the archive query as menu lines in one section per cuisine; the menu entry sets 6 lines a page and cr-menu.css draws the paper.
  * Keywords: menu, eat, archive, kind, query
  * Block Types: core/query
  * Inserter: false
@@ -23,7 +23,7 @@ declare( strict_types = 1 );
 	<!-- wp:query {"queryId":230,"query":{"perPage":6,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"className":"cr-archive-stream__query cr-menu__query"} -->
 	<div class="wp-block-query cr-archive-stream__query cr-menu__query">
 		<!-- wp:post-template {"className":"cr-archive-stream__list is-style-pkiw-menu cr-menu__list"} -->
-			<!-- wp:post-kinds-indieweb/menu-entry /-->
+			<!-- wp:post-kinds-indieweb/menu-entry {"linesPerPage":6} /-->
 		<!-- /wp:post-template -->
 
 		<!-- wp:query-no-results -->

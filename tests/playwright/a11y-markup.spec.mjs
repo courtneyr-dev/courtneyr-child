@@ -1001,24 +1001,26 @@ for ( const [ label, path ] of [ [ 'a kind archive', LISTEN_ARCHIVE ], [ 'a sing
 }
 
 // PKIW #230: the eat and drink archives are menus. Recent Specials sits above
-// the menu on the first page; the menu is the Query Loop's own list, each
-// post one line (name link, a leader hidden from assistive technology, the
-// rating as text) under a section heading printed once per page. The paper,
-// the columns and the frame are CSS. No street, coordinates or venue link
+// the menu on the first page. The menu is the Query Loop's own posts, held in
+// one section per cuisine or drink type: a heading, then that group's lines
+// (name link in a heading, a leader hidden from assistive technology, the
+// rating as text). A line never leaves its section, so no group runs into
+// another column without its heading. The torn paper, the panels, the seams
+// and the marks in the margins are CSS. No street, coordinates or venue link
 // prints anywhere on the page.
 for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3 ], [ 'drink', DRINK_ARCHIVE, 8, 2 ] ] ) {
-	test( `the ${ kind } archive is a menu: Recent Specials, then lines under section headings`, async ( { page } ) => {
+	test( `the ${ kind } archive is a menu: Recent Specials, then a section of lines per group`, async ( { page } ) => {
 		await page.goto( path, { waitUntil: 'load' } );
 		test.skip( ( await page.locator( 'main li.wp-block-post' ).count() ) < 3, `fewer than three ${ kind } posts on this site` );
 		await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
-		const menu = page.locator( `.cr-archive--${ kind } ul.cr-menu__list` );
+		const menu = page.locator( `.cr-archive--${ kind } .cr-menu__list` );
 		await expect( menu ).toHaveCount( 1 );
-		const lines = menu.locator( ':scope > li' );
+		const lines = menu.locator( 'li.wp-block-post' );
 		const count = await lines.count();
 		expect( count ).toBeGreaterThan( 0 );
 		expect( count, `${ perPage } lines to a page` ).toBeLessThanOrEqual( perPage );
 		for ( const line of await lines.all() ) {
-			await expect( line.locator( 'a.pkiw-menu-entry__name' ) ).toHaveCount( 1 );
+			await expect( line.locator( 'h3.pkiw-menu-entry__title > a.pkiw-menu-entry__name' ), 'a line is named by a linked h3' ).toHaveCount( 1 );
 			// The plugin names the entry's author in a hidden h-card link; a visitor meets one link.
 			const rendered = await line.evaluate( ( el ) => [ ...el.querySelectorAll( 'a' ) ].filter( ( a ) => a.getClientRects().length > 0 ).length );
 			expect( rendered, 'a menu line is one link' ).toBe( 1 );
@@ -1029,10 +1031,52 @@ for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3
 				expect( ( await rating.textContent() ).trim() ).toMatch( /^Rated [1-5] of 5$/ );
 			}
 		}
-		const sections = ( await menu.locator( 'h2.pkiw-menu-entry__section' ).allTextContents() ).map( ( text ) => text.trim() );
-		expect( sections.length, 'the menu has section headings' ).toBeGreaterThan( 0 );
-		expect( new Set( sections ).size, 'a section is headed once on a page' ).toBe( sections.length );
-		await expect( lines.first().locator( 'h2.pkiw-menu-entry__section' ) ).toHaveCount( 1 );
+
+		// Real section containers: every line sits in exactly one, under that section's heading,
+		// and its box stays inside the section's box at every width.
+		const sections = await menu.locator( ':scope > section.pkiw-menu-section' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => {
+			const box = node.getBoundingClientRect();
+			const heading = node.querySelector( ':scope > h2.pkiw-menu-section__heading' );
+			const items = [ ...node.querySelectorAll( ':scope > ul.pkiw-menu-section__items > li.wp-block-post' ) ];
+			return {
+				heading: heading ? heading.textContent.trim() : '',
+				headingFirst: heading === node.firstElementChild,
+				lines: items.length,
+				inside: items.every( ( li ) => {
+					const r = li.getBoundingClientRect();
+					return r.left >= box.left - 1 && r.right <= box.right + 1 && r.top >= heading.getBoundingClientRect().bottom - 1 && r.bottom <= box.bottom + 1;
+				} ),
+				left: Math.round( box.left ),
+			};
+		} ) );
+		expect( sections.length, 'the menu has sections' ).toBeGreaterThan( 0 );
+		expect( await menu.locator( ':scope > *' ).count(), 'the menu holds sections and nothing else' ).toBe( sections.length );
+		expect( sections.reduce( ( sum, section ) => sum + section.lines, 0 ), 'every line is in a section' ).toBe( count );
+		for ( const section of sections ) {
+			expect( section.heading, 'a section is headed' ).not.toBe( '' );
+			expect( section.headingFirst, `${ section.heading }: the heading opens the section` ).toBe( true );
+			expect( section.lines, `${ section.heading }: a section holds at least one line` ).toBeGreaterThan( 0 );
+			expect( section.inside, `${ section.heading }: its lines stay under its heading, in its own panel` ).toBe( true );
+			expect( section.heading, 'no invented slogan stands in for a group' ).not.toMatch( /good food|sample content/i );
+		}
+		expect( new Set( sections.map( ( section ) => section.heading ) ).size, 'a section is headed once on a page' ).toBe( sections.length );
+
+		// Outline: the archive title, then Recent Specials and each section at h2, their items at h3.
+		const outline = await page.evaluate( () => [ ...document.querySelectorAll( 'h1, .cr-menu h2, .cr-menu h3, .cr-menu h4, .cr-menu h5, .cr-menu h6' ) ].map( ( node ) => ( {
+			tag: node.tagName,
+			text: node.textContent.trim(),
+			item: node.matches( '.pkiw-menu-entry__title, .pkiw-menu-specials__name' ),
+			group: node.matches( '.pkiw-menu-section__heading, .pkiw-menu-specials__heading' ),
+		} ) ) );
+		expect( outline[ 0 ].tag, 'the archive title leads the outline' ).toBe( 'H1' );
+		expect( outline.filter( ( heading ) => 'H1' === heading.tag ).length ).toBe( 1 );
+		const inMenu = outline.slice( 1 );
+		expect( inMenu.length ).toBeGreaterThan( 0 );
+		expect( inMenu[ 0 ].tag, 'the menu opens with an h2' ).toBe( 'H2' );
+		for ( const heading of inMenu ) {
+			expect( heading.group || heading.item, `"${ heading.text }" is a group or an item heading` ).toBe( true );
+			expect( heading.tag, `"${ heading.text }": groups are h2 and items h3` ).toBe( heading.group ? 'H2' : 'H3' );
+		}
 
 		const specials = page.locator( `.cr-archive--${ kind } section.pkiw-menu-specials` );
 		await expect( specials ).toHaveCount( 1 );
@@ -1043,12 +1087,17 @@ for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3
 		expect( await specials.locator( 'ul > li h3 a' ).count(), 'each special is named by a linked heading' ).toBe( specialCount );
 
 		const shape = await page.evaluate( ( k ) => {
-			const list = document.querySelector( `.cr-archive--${ k } ul.cr-menu__list` );
+			const list = document.querySelector( `.cr-archive--${ k } .cr-menu__list` );
 			const box = document.querySelector( `.cr-archive--${ k } section.pkiw-menu-specials` );
+			const wrap = document.querySelector( `.cr-archive--${ k } .cr-menu` );
 			const cs = getComputedStyle( list );
+			const sheet = getComputedStyle( list, '::before' );
 			return {
-				columns: cs.columnCount,
-				paper: cs.backgroundColor,
+				columns: cs.gridTemplateColumns.split( ' ' ).length,
+				paper: sheet.backgroundColor,
+				torn: sheet.clipPath,
+				marks: [ '::before', '::after' ].map( ( pseudo ) => getComputedStyle( wrap, pseudo ).content ),
+				decorated: wrap.querySelectorAll( 'svg, img:not(.pkiw-menu-specials__photo)' ).length,
 				frame: parseFloat( getComputedStyle( box ).borderTopWidth ),
 				specialsFirst: box.getBoundingClientRect().top < list.getBoundingClientRect().top,
 				overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -1056,8 +1105,13 @@ for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3
 			};
 		}, kind );
 		expect( shape.specialsFirst, 'Recent Specials sits above the menu' ).toBe( true );
-		expect( shape.columns, 'the menu flows in columns on a wide screen and one on a phone' ).toBe( page.viewportSize().width >= 1024 ? String( wideColumns ) : '1' );
+		expect( shape.columns, 'the panels sit side by side on a wide screen and stack on a phone' ).toBe( page.viewportSize().width >= 1024 ? wideColumns : 1 );
+		expect( new Set( sections.map( ( section ) => section.left ) ).size, 'as many panel columns as the grid has, or fewer sections' ).toBe( Math.min( shape.columns, sections.length ) );
 		expect( shape.paper, 'the menu is on paper' ).not.toBe( 'rgba(0, 0, 0, 0)' );
+		expect( shape.torn, 'the sheet is torn, not ruled' ).toContain( 'polygon' );
+		// Marks in the margins are empty pseudo-elements: nothing for assistive technology, nothing in the DOM.
+		expect( shape.marks.every( ( content ) => 'none' === content || '""' === content ), 'margin marks carry no content' ).toBe( true );
+		expect( shape.decorated, 'no decorative image or SVG element in the menu' ).toBe( 0 );
 		expect( shape.frame, 'Recent Specials is framed' ).toBeGreaterThanOrEqual( 2 );
 		expect( shape.overflow ).toBe( 0 );
 		expect( shape.located, 'no street, coordinates or map link on the menu' ).toBe( 0 );
@@ -1069,9 +1123,9 @@ for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3
 			await next.click();
 			await page.waitForLoadState( 'load' );
 			await expect( page.locator( `.cr-archive--${ kind } section.pkiw-menu-specials` ) ).toHaveCount( 0 );
-			const second = page.locator( `.cr-archive--${ kind } ul.cr-menu__list > li` );
+			const second = page.locator( `.cr-archive--${ kind } .cr-menu__list > section.pkiw-menu-section` );
 			expect( await second.count() ).toBeGreaterThan( 0 );
-			await expect( second.first().locator( 'h2.pkiw-menu-entry__section' ) ).toHaveCount( 1 );
+			await expect( second.first().locator( ':scope > h2.pkiw-menu-section__heading' ), 'page two opens with a headed section' ).toHaveCount( 1 );
 		}
 	} );
 }

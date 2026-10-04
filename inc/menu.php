@@ -3,14 +3,15 @@
  * Eat and drink archives: menus (PKIW issue 230).
  *
  * The plugin owns the data and the markup: its Recent Specials block lists
- * the newest posts, its menu entry prints each post as a menu line with a
- * section heading when the cuisine or drink type changes, and it orders
+ * the newest posts, its menu entry prints each post as a menu line, the
+ * Post Template holds each cuisine or drink type in a section, and it orders
  * the archive query by that group so pagination stays native. It groups
  * the query because templates/taxonomy-kind-eat.html and -drink.html place
  * the menu entry, through patterns/cr-menu-eat-loop.php and -drink-loop.php.
  *
- * This file sets how many lines a page holds and loads the paper,
- * assets/css/cr-menu.css.
+ * The menu entry in each pattern says how many lines a page holds (six for
+ * eat, eight for drink), so that number is edited in the Site Editor. This
+ * file loads the paper, assets/css/cr-menu.css.
  *
  * @package CourtneyrChild
  */
@@ -24,58 +25,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Lines on a menu page, by kind: what the approved menus show.
+ * The kinds whose archive is a menu.
  */
-const LINES = array(
-	'eat'   => 6,
-	'drink' => 8,
-);
+const KINDS = array( 'eat', 'drink' );
 
 /**
- * The kind of the menu archive being shown, or '' when the request isn't one.
- *
- * @return string
+ * The menu kind whose archive is being served, or ''.
  */
 function menu_kind(): string {
-	foreach ( array_keys( LINES ) as $kind ) {
+	foreach ( KINDS as $kind ) {
 		if ( \is_tax( 'kind', $kind ) ) {
 			return $kind;
 		}
 	}
 	return '';
 }
-
-/**
- * Fill the menu page: the eat and drink archives page by LINES.
- *
- * Runs after the theme's card-grid rule (5 per archive page).
- *
- * @param \WP_Query $query The query about to run.
- * @return void
- */
-function menu_page_size( $query ): void {
-	if ( is_admin() || ! $query->is_main_query() ) {
-		return;
-	}
-	foreach ( LINES as $kind => $lines ) {
-		if ( $query->is_tax( 'kind', $kind ) ) {
-			$query->set( 'posts_per_page', $lines );
-		}
-	}
-}
-add_action( 'pre_get_posts', __NAMESPACE__ . '\\menu_page_size', 11 );
-
-/**
- * The Site Editor previews each menu with the same number of lines.
- *
- * @param int    $per_page Posts per page. Zero keeps the editor's own size.
- * @param string $kind     Kind slug.
- * @return int
- */
-function preview_page_size( $per_page, $kind ): int {
-	return LINES[ $kind ] ?? (int) $per_page;
-}
-add_filter( 'pkiw_kind_archive_preview_per_page', __NAMESPACE__ . '\\preview_page_size', 10, 2 );
 
 /**
  * Load the menu paper on the two archives (and in the editor, where the
