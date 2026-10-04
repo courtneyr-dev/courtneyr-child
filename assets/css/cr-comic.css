@@ -114,6 +114,12 @@
 	--rack-tag-drop: 2.25rem;
 	--rack-comic: clamp(8rem, 15vw, 11rem);
 	--rack-tier: calc(var(--rack-comic) * 1.5 + 6.5rem);
+	--sleeve-edge: 1.5px;
+	--sleeve-gap: calc(var(--rack-comic) * 0.04);
+	--sleeve-flap: calc(var(--sleeve-gap) * 2 + var(--sleeve-edge));
+	--sleeve-line: color-mix(in srgb, var(--cr-sky-blue) 80%, transparent);
+	--sleeve-film: color-mix(in srgb, var(--cr-sky-blue) 14%, transparent);
+	--sleeve-glare: color-mix(in srgb, var(--cr-sky-blue) 45%, transparent);
 	position: relative;
 	display: grid;
 	grid-template-columns: repeat(var(--rack-cols), minmax(0, 1fr));
@@ -185,6 +191,50 @@
 
 .cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-media {
 	order: -1;
+}
+
+/* The clear sleeve. On the rack a comic stands in a polybag, not on the
+   board the Stream and the single use: the rack shows through the plastic
+   around the cover. The media box is the sleeve. Its border is the bag's
+   outer edge and its padding is the plastic past the cover, with a taller
+   flap on top. ::before is the seam across the flap and ::after is the one
+   glare, so the sleeve adds no content. The rack keeps its colour in dark
+   mode, so one Sky Blue edge and highlight show in both. */
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media {
+	padding: var(--sleeve-flap) var(--sleeve-gap) var(--sleeve-gap);
+	border: var(--sleeve-edge) solid var(--sleeve-line);
+	background: var(--sleeve-film);
+	box-shadow: none;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media::before {
+	z-index: auto;
+	inset-block: 0 auto;
+	inset-inline: 0;
+	width: auto;
+	height: calc(var(--sleeve-flap) / 2);
+	border: 0;
+	border-block-end: 1px solid var(--sleeve-line);
+	background: var(--sleeve-film);
+	transform: none;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media::after {
+	inset: 0 auto auto 0;
+	width: 46%;
+	aspect-ratio: 1;
+	border: 0;
+	background: linear-gradient(135deg, transparent 0 24%, var(--sleeve-glare) 24% 31%, transparent 31%);
+}
+
+/* No artwork: the typographic cover is painted inside the sleeve, the
+   same distance from its edge as a picture would be. */
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media.cr-comic__cover--type,
+.cr-comic-rack .cr-comic-rack__list > li .cr-comic--rack.cr-comic--no-art .pk-media {
+	padding: calc(var(--sleeve-flap) + 0.85rem) calc(var(--sleeve-gap) + 0.8rem) calc(var(--sleeve-gap) + 0.85rem);
+	background:
+		linear-gradient(var(--cr-cerulean), var(--cr-cerulean)) var(--sleeve-gap) var(--sleeve-flap) / calc(100% - var(--sleeve-gap) * 2) calc(100% - var(--sleeve-flap) - var(--sleeve-gap)) no-repeat,
+		var(--sleeve-film);
 }
 
 /* A strip its author drew: its picture, unbagged. */
@@ -294,19 +344,20 @@
 	box-shadow: 0 0 0 8px var(--cr-focus-halo);
 }
 
-/* Status sticker: upright text on a round label, top corner of the bag. */
+/* Status sticker: upright text on a round label, stuck to the plastic in
+   the sleeve's upper right, inside its edge. */
 .cr-comic-rack .cr-comic__sticker {
 	position: absolute;
 	z-index: 1;
-	inset-block-start: -0.9rem;
-	inset-inline-end: -0.9rem;
+	inset-block-start: 0.3rem;
+	inset-inline-end: 0.3rem;
 	display: grid;
 	place-items: center;
 	box-sizing: border-box;
-	width: 4.9rem;
-	height: 4.9rem;
+	width: 3.75rem;
+	height: 3.75rem;
 	margin: 0;
-	padding: 0.4rem;
+	padding: 0.25rem;
 	border: 1.5px solid var(--cr-russian-violet);
 	border-radius: var(--cr-radius-full);
 	background: var(--cr-selective-yellow);
@@ -347,9 +398,8 @@
 	}
 
 	.cr-comic-rack .cr-comic__sticker {
-		inset-inline-end: -0.5rem;
-		width: 4.4rem;
-		height: 4.4rem;
+		inset-block-start: 0.2rem;
+		inset-inline-end: 0.2rem;
 	}
 }
 
@@ -1108,6 +1158,19 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 	.pk-card.cr-comic .cr-comic__type-creators {
 		background: Canvas;
 		color: CanvasText;
+	}
+
+	/* The rack's sleeve loses its seam and glare and keeps its outline. */
+	.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media,
+	.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media.cr-comic__cover--type,
+	.cr-comic-rack .cr-comic-rack__list > li .cr-comic--rack.cr-comic--no-art .pk-media {
+		border: 2px solid CanvasText;
+		background: Canvas;
+	}
+
+	.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media::before,
+	.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media::after {
+		content: none;
 	}
 
 	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list {
