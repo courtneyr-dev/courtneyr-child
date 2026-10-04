@@ -53,6 +53,7 @@ require_once __DIR__ . '/inc/media-shelf.php';
 require_once __DIR__ . '/inc/stream-media.php';
 require_once __DIR__ . '/inc/stream-read.php';
 require_once __DIR__ . '/inc/comic.php';
+require_once __DIR__ . '/inc/recipe.php';
 require_once __DIR__ . '/inc/single-eat-drink.php';
 require_once __DIR__ . '/inc/stream-eat-drink.php';
 require_once __DIR__ . '/inc/quote-note.php';

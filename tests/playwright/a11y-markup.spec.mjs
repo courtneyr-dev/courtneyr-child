@@ -18,6 +18,7 @@ const LISTEN_ARCHIVE = process.env.CR_LISTEN_ARCHIVE_PATH || '/kind/listen/'; //
 const WATCH_ARCHIVE = process.env.CR_WATCH_ARCHIVE_PATH || '/kind/watch/'; // watch archive page 1 (PKIW #227)
 const COMICS_ARCHIVE = process.env.CR_COMICS_ARCHIVE_PATH || '/kind/comics/'; // comics archive with at least one comic read (PKIW #228)
 const COMIC_SINGLE = process.env.CR_COMIC_SINGLE_PATH || '/2026/09/06/anzuelo/'; // a comic read (comic-card) still being read, with a cover and a stored start date
+const RECIPE_ARCHIVE = process.env.CR_RECIPE_ARCHIVE_PATH || '/kind/recipe/'; // recipe archive (PKIW #229); its tests skip on a site with no recipe posts
 const COMIC_TRAILING = process.env.CR_COMIC_TRAILING_PATH || ''; // a comic read with body text after the card (no such post on dev: set it to run the test)
 const AUTOEMBED_CAPTIONED_POST = process.env.CR_AUTOEMBED_CAPTIONED_POST_PATH || '/?p=3010'; // bare YouTube URL whose video has a registered VTT (_cr_youtube_id)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
@@ -712,5 +713,83 @@ test( 'the Stream shows a comic read as one bagged card whose title link covers 
 	}
 	const columns = await page.locator( 'body.cr-stream-page .wp-block-post-template' ).first().evaluate( ( el ) => getComputedStyle( el ).columnWidth );
 	expect( columns, 'the Stream stays a multi-column collage' ).not.toBe( 'auto' );
+} );
+
+// PKIW #229: the recipe archive is a ring binder of recipe cards, four to an
+// archive page. A card is its picture, its h2 title link and the course and
+// time the recipe plugin holds; the badge, kind label, date, excerpt and
+// "Read more" stay off the archive. The course tabs and the A-Z tab are
+// links that filter or reorder the same archive, and the pager keeps that
+// state because it lives in the URL.
+test( 'the recipe archive is a binder of four recipe cards, one title link each, with course tabs that filter it', async ( { page } ) => {
+	await page.goto( RECIPE_ARCHIVE, { waitUntil: 'load' } );
+	test.skip( ( await page.locator( 'main li.wp-block-post' ).count() ) === 0, 'no recipe posts on this site' );
+	await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
+	const list = page.locator( '.cr-archive--recipes ul.cr-recipe-binder__list' );
+	await expect( list ).toHaveCount( 1 );
+	const count = await list.locator( ':scope > li' ).count();
+	expect( count, 'four recipes to an archive page' ).toBeGreaterThan( 0 );
+	expect( count, 'four recipes to an archive page' ).toBeLessThanOrEqual( 4 );
+	const cards = list.locator( 'article.pk-card.cr-recipe-card' );
+	expect( await cards.count(), 'one card per query item, no filler' ).toBe( count );
+	for ( const card of await cards.all() ) {
+		const rendered = await card.evaluate( ( el ) => [ ...el.querySelectorAll( 'a' ) ].filter( ( a ) => a.getClientRects().length > 0 ).length );
+		expect( rendered, 'a recipe card is one link' ).toBe( 1 );
+		expect( await card.locator( '.pk-title:not(h2)' ).count(), 'every card title is an h2 under the archive h1' ).toBe( 0 );
+		expect( await card.locator( '.pk-badge, .pk-kindlabel, .pk-stream-date, .pk-excerpt, .pk-meta' ).count(), 'no badge, kind label, date, excerpt or Read more on the archive' ).toBe( 0 );
+		const covered = await card.evaluate( ( el ) => {
+			el.scrollIntoView( { block: 'center', behavior: 'instant' } );
+			const r = el.getBoundingClientRect();
+			const a = el.querySelector( '.pk-title a' );
+			const hit = document.elementFromPoint( r.left + r.width / 2, r.top + r.height - 12 );
+			return hit === a || a.contains( hit );
+		} );
+		expect( covered, 'the title link covers the whole card' ).toBe( true );
+	}
+	// A card with no picture is text, not a broken image.
+	expect( await list.locator( 'img' ).evaluateAll( ( imgs ) => imgs.filter( ( i ) => i.complete && i.naturalWidth === 0 ).length ) ).toBe( 0 );
+
+	const shape = await list.evaluate( ( ul ) => ( { cols: getComputedStyle( ul ).gridTemplateColumns.split( ' ' ).length, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth } ) );
+	expect( shape.cols, 'two binder pages side by side on a wide screen, one on a phone' ).toBe( page.viewportSize().width >= 1024 ? 2 : 1 );
+	expect( shape.overflow ).toBe( 0 );
+
+	// Tabs: every tab is a link to the same archive; one is current.
+	const tabs = page.locator( '.cr-archive--recipes nav.cr-recipe-tabs' );
+	await expect( tabs ).toHaveCount( 1 );
+	expect( ( await tabs.getAttribute( 'aria-label' ) || '' ).trim() ).not.toBe( '' );
+	await expect( tabs.locator( 'a[aria-current]' ) ).toHaveCount( 1 );
+	const archivePath = new URL( page.url() ).pathname;
+	for ( const href of await tabs.locator( 'a' ).evaluateAll( ( as ) => as.map( ( a ) => a.href ) ) ) {
+		expect( new URL( href ).pathname, 'a tab stays on the recipe archive' ).toBe( archivePath );
+	}
+
+	// A course tab filters the archive, and the pager keeps the filter.
+	const courseTab = tabs.locator( 'a[href*="pkiw_recipe_course="]' ).first();
+	const course = ( await courseTab.textContent() ).trim();
+	await courseTab.click();
+	await page.waitForLoadState( 'load' );
+	expect( new URL( page.url() ).searchParams.get( 'pkiw_recipe_course' ) ).toBeTruthy();
+	await expect( page.locator( '.cr-archive--recipes nav.cr-recipe-tabs a[aria-current]' ) ).toHaveText( course );
+	const filtered = page.locator( '.cr-archive--recipes ul.cr-recipe-binder__list article.cr-recipe-card' );
+	expect( await filtered.count() ).toBeGreaterThan( 0 );
+	for ( const text of await filtered.locator( '.pk-recipe-course' ).allTextContents() ) {
+		expect( text.split( ',' ).map( ( t ) => t.trim() ), `every card on the ${ course } tab is filed under it` ).toContain( course );
+	}
+	expect( await filtered.locator( '.pk-recipe-course' ).count(), 'and every card names its course' ).toBe( await filtered.count() );
+	const param = new URL( page.url() ).searchParams.get( 'pkiw_recipe_course' );
+	for ( const href of await page.locator( '.cr-archive--recipes .wp-block-query-pagination a' ).evaluateAll( ( as ) => as.map( ( a ) => a.href ) ) ) {
+		expect( new URL( href ).searchParams.get( 'pkiw_recipe_course' ), 'pager links keep the course' ).toBe( param );
+	}
+
+	// The A-Z tab is the same archive in title order, and the pager keeps the order.
+	await page.locator( '.cr-archive--recipes nav.cr-recipe-tabs a[href*="orderby=title"]' ).click();
+	await page.waitForLoadState( 'load' );
+	const titles = await page.locator( '.cr-archive--recipes ul.cr-recipe-binder__list .pk-title a' ).allTextContents();
+	expect( titles.map( ( t ) => t.trim() ) ).toEqual( [ ...titles ].map( ( t ) => t.trim() ).sort( ( a, b ) => a.localeCompare( b, 'en', { sensitivity: 'base' } ) ) );
+	const pager = await page.locator( '.cr-archive--recipes .wp-block-query-pagination a' ).evaluateAll( ( as ) => as.map( ( a ) => a.href ) );
+	expect( pager.length, 'the fixture archive runs past one page of four' ).toBeGreaterThan( 0 );
+	for ( const href of pager ) {
+		expect( new URL( href ).searchParams.get( 'orderby' ), 'pager links keep the title order' ).toBe( 'title' );
+	}
 } );
 
