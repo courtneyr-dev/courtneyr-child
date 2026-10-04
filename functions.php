@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.87' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.88' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -54,6 +54,7 @@ require_once __DIR__ . '/inc/stream-media.php';
 require_once __DIR__ . '/inc/stream-read.php';
 require_once __DIR__ . '/inc/comic.php';
 require_once __DIR__ . '/inc/recipe.php';
+require_once __DIR__ . '/inc/menu.php';
 require_once __DIR__ . '/inc/single-eat-drink.php';
 require_once __DIR__ . '/inc/stream-eat-drink.php';
 require_once __DIR__ . '/inc/quote-note.php';

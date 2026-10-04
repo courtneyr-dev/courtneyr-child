@@ -1,0 +1,297 @@
+/* ============================================================
+   Eat and drink menus (PKIW #230)
+
+   The eat and drink archives are menus on paper. The plugin prints
+   the markup: its Recent Specials block, and each archive post as
+   a menu line with a section heading where the cuisine or drink
+   type changes. Everything drawn here is CSS on that markup;
+   nothing is added to the DOM.
+
+   The paper, its frame and the heading strips are objects, so they
+   take palette tokens and keep their colours in dark mode. Focus
+   and the hard shadow use the semantic tokens.
+   ============================================================ */
+
+.cr-menu {
+	max-width: 72rem;
+	margin-inline: auto;
+	color: var(--cr-russian-violet);
+}
+
+/* ============================================================
+   Recent Specials: a framed card taped above the menu
+   ============================================================ */
+.cr-menu .pkiw-menu-specials {
+	position: relative;
+	margin: 0 0 1.75rem;
+	padding: 1.5rem 1.25rem 1.25rem;
+	border: 3px solid var(--cr-cerulean);
+	background: var(--cr-printer-ivory);
+	box-shadow: inset 0 0 0 4px var(--cr-printer-ivory), inset 0 0 0 5px var(--cr-cerulean), var(--cr-shadow-hard);
+}
+
+/* One strip of tape holds the card. */
+.cr-menu .pkiw-menu-specials::before {
+	content: "";
+	position: absolute;
+	top: -0.75rem;
+	left: 50%;
+	width: 6rem;
+	height: 1.4rem;
+	margin-left: -3rem;
+	background: var(--cr-sky-blue);
+	opacity: 0.92;
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-menu .pkiw-menu-specials__heading {
+	margin: 0 0 1rem;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--wp--preset--font-size--large);
+	line-height: 1.1;
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.cr-menu .pkiw-menu-specials__list {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 1.25rem;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-menu .pkiw-menu-specials__item {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 0.9rem;
+	align-items: start;
+	min-width: 0;
+	margin: 0;
+}
+
+.cr-menu .pkiw-menu-specials__photo {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 2;
+	border: 2px solid var(--cr-russian-violet);
+	object-fit: cover;
+}
+
+.cr-menu .pkiw-menu-specials__body {
+	min-width: 0;
+}
+
+.cr-menu .pkiw-menu-specials__name {
+	margin: 0 0 0.35rem;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--wp--preset--font-size--medium);
+	line-height: 1.2;
+}
+
+.cr-menu .pkiw-menu-specials__notes,
+.cr-menu .pkiw-menu-specials__meta,
+.cr-menu .pkiw-menu-specials__rating {
+	margin: 0 0 0.35rem;
+	font-size: var(--wp--preset--font-size--small);
+	line-height: 1.45;
+}
+
+.cr-menu .pkiw-menu-specials__meta {
+	color: var(--cr-cerulean);
+}
+
+.cr-menu .pkiw-menu-specials__rating {
+	margin-bottom: 0;
+	font-weight: 700;
+}
+
+/* ============================================================
+   The menu: the Query Loop's list on a sheet of paper
+   ============================================================ */
+.cr-menu .wp-block-post-template.cr-menu__list {
+	display: block;
+	column-count: 1;
+	column-gap: 2.5rem;
+	column-rule: 2px dotted var(--cr-glaucous);
+	margin: 0;
+	padding: 1.5rem 1.25rem;
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-light-orange);
+	box-shadow: var(--cr-shadow-hard-2);
+	list-style: none;
+}
+
+.cr-menu--drink .wp-block-post-template.cr-menu__list {
+	background: var(--cr-printer-ivory);
+}
+
+.cr-menu .cr-menu__list > li {
+	margin: 0 0 1.1rem;
+	break-inside: avoid;
+}
+
+.cr-menu .cr-menu__list > li:last-child {
+	margin-bottom: 0;
+}
+
+/* A section heading is lettered on a strip of coloured paper. */
+.cr-menu .pkiw-menu-entry__section {
+	display: inline-block;
+	margin: 0.4rem 0 0.8rem;
+	padding: 0.2em 0.8em;
+	background: var(--cr-sky-blue);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--wp--preset--font-size--medium);
+	line-height: 1.2;
+	letter-spacing: var(--cr-tracking-wide);
+	text-transform: uppercase;
+	transform: rotate(var(--cr-rotate-1));
+}
+
+/* Strips take turns through the palette, counted among the lines that
+   start a section. */
+.cr-menu .cr-menu__list > li:nth-child(3n + 2 of :has(.pkiw-menu-entry__section)) .pkiw-menu-entry__section {
+	background: var(--cr-periwinkle);
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-menu .cr-menu__list > li:nth-child(3n + 3 of :has(.pkiw-menu-entry__section)) .pkiw-menu-entry__section {
+	background: var(--cr-selective-yellow);
+}
+
+.cr-menu .pkiw-menu-entry__line {
+	gap: 0.4em;
+}
+
+.cr-menu .pkiw-menu-entry__leader {
+	border-block-end-color: var(--cr-glaucous);
+}
+
+.cr-menu .pkiw-menu-entry__rating {
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 700;
+}
+
+.cr-menu .pkiw-menu-entry__meta {
+	gap: 0 0.5em;
+	color: var(--cr-cerulean);
+	font-size: var(--wp--preset--font-size--small);
+	opacity: 1;
+}
+
+/* A dot between the venue and the date, as on a printed menu. */
+.cr-menu .pkiw-menu-entry__meta > * + *::before,
+.cr-menu .pkiw-menu-specials__meta > * + *::before {
+	content: "\2022";
+	margin-right: 0.5em;
+	color: var(--cr-glaucous);
+}
+
+.cr-menu .pkiw-menu-entry__notes {
+	margin: 0.2em 0 0;
+	font-size: var(--wp--preset--font-size--small);
+	line-height: 1.45;
+}
+
+/* Names are the links. They read as ink until pointed at. */
+.cr-menu .pkiw-menu-entry__name,
+.cr-menu .pkiw-menu-specials__link {
+	background: none;
+	box-shadow: none;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.cr-menu .pkiw-menu-entry__name:hover,
+.cr-menu .pkiw-menu-specials__link:hover {
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.15em;
+}
+
+.cr-menu .pkiw-menu-entry__name:focus-visible,
+.cr-menu .pkiw-menu-specials__link:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+/* ============================================================
+   Wider screens: specials side by side, the menu in columns
+   ============================================================ */
+@media (min-width: 40rem) {
+
+	.cr-menu .pkiw-menu-specials__item {
+		grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+	}
+
+	.cr-menu .wp-block-post-template.cr-menu__list {
+		padding: 2rem;
+	}
+}
+
+@media (min-width: 48rem) {
+
+	.cr-menu .pkiw-menu-specials__list {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 2rem;
+	}
+
+	.cr-menu .pkiw-menu-specials__item + .pkiw-menu-specials__item {
+		padding-left: 2rem;
+		border-left: 1px solid var(--cr-cerulean);
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-menu .wp-block-post-template.cr-menu__list {
+		column-count: 2;
+	}
+
+	.cr-menu--eat .wp-block-post-template.cr-menu__list {
+		column-count: 3;
+	}
+}
+
+/* ============================================================
+   Forced colours and print
+   ============================================================ */
+@media (forced-colors: active) {
+
+	.cr-menu .pkiw-menu-specials,
+	.cr-menu .wp-block-post-template.cr-menu__list {
+		border-color: CanvasText;
+		box-shadow: none;
+	}
+
+	.cr-menu .pkiw-menu-specials::before {
+		content: none;
+	}
+
+	.cr-menu .pkiw-menu-entry__section {
+		border: 1px solid CanvasText;
+	}
+}
+
+@media print {
+
+	.cr-menu .pkiw-menu-specials,
+	.cr-menu .wp-block-post-template.cr-menu__list {
+		box-shadow: none;
+	}
+
+	.cr-menu .pkiw-menu-specials__item {
+		break-inside: avoid;
+	}
+}
