@@ -21,6 +21,11 @@ const COMIC_SINGLE = process.env.CR_COMIC_SINGLE_PATH || '/2026/09/06/anzuelo/';
 const RECIPE_ARCHIVE = process.env.CR_RECIPE_ARCHIVE_PATH || '/kind/recipe/'; // recipe archive (PKIW #229); its tests skip on a site with no recipe posts
 const EAT_ARCHIVE = process.env.CR_EAT_ARCHIVE_PATH || '/kind/eat/'; // eat archive (PKIW #230); its test skips on a site with fewer than three eat posts
 const DRINK_ARCHIVE = process.env.CR_DRINK_ARCHIVE_PATH || '/kind/drink/'; // drink archive (PKIW #230); its test skips on a site with fewer than three drink posts
+const EAT_SINGLE = process.env.CR_EAT_SINGLE_PATH || '/2026/09/25/mushroom-tacos/'; // an eat post with the eat card, a photo and public coordinates (local fixture)
+const DRINK_SINGLE = process.env.CR_DRINK_SINGLE_PATH || '/2026/09/24/honey-lavender-latte/'; // a drink post with the drink card, a photo and public coordinates (local fixture)
+const ORDER_HIDDEN = ( process.env.CR_ORDER_HIDDEN_PATHS || '/2026/08/05/salmon-sashimi/,/2026/08/07/spicy-margarita/' ).split( ',' ); // eat and drink posts whose location privacy is private (local fixtures)
+const ORDER_TEXT_ONLY = process.env.CR_ORDER_TEXT_ONLY_PATH || '/2026/09/06/seed-drink/'; // a drink post with a place name and town and no coordinates (local fixture)
+const ORDER_STREAM = process.env.CR_ORDER_STREAM_PATH || '/stream/'; // a Stream page that shows an eat or drink post (local fixture); the test skips when it shows none
 const RECIPE_SINGLE = process.env.CR_RECIPE_SINGLE_PATH || '/2026/08/14/tomato-basil-soup/'; // a recipe post with a WP Recipe Maker recipe and a featured image (local fixture)
 const RECIPE_PLAIN_SINGLE = process.env.CR_RECIPE_PLAIN_SINGLE_PATH || '/2026/08/01/campfire-chili/'; // a recipe post with no recipe card (local fixture)
 const RECIPE_STREAM = process.env.CR_RECIPE_STREAM_PATH || '/stream/'; // a Stream page that shows a recipe post (local fixture); the test skips when it shows none
@@ -1001,24 +1006,26 @@ for ( const [ label, path ] of [ [ 'a kind archive', LISTEN_ARCHIVE ], [ 'a sing
 }
 
 // PKIW #230: the eat and drink archives are menus. Recent Specials sits above
-// the menu on the first page; the menu is the Query Loop's own list, each
-// post one line (name link, a leader hidden from assistive technology, the
-// rating as text) under a section heading printed once per page. The paper,
-// the columns and the frame are CSS. No street, coordinates or venue link
+// the menu on the first page. The menu is the Query Loop's own posts, held in
+// one section per cuisine or drink type: a heading, then that group's lines
+// (name link in a heading, a leader hidden from assistive technology, the
+// rating as text). A line never leaves its section, so no group runs into
+// another column without its heading. The torn paper, the panels, the seams
+// and the marks in the margins are CSS. No street, coordinates or venue link
 // prints anywhere on the page.
 for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3 ], [ 'drink', DRINK_ARCHIVE, 8, 2 ] ] ) {
-	test( `the ${ kind } archive is a menu: Recent Specials, then lines under section headings`, async ( { page } ) => {
+	test( `the ${ kind } archive is a menu: Recent Specials, then a section of lines per group`, async ( { page } ) => {
 		await page.goto( path, { waitUntil: 'load' } );
 		test.skip( ( await page.locator( 'main li.wp-block-post' ).count() ) < 3, `fewer than three ${ kind } posts on this site` );
 		await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
-		const menu = page.locator( `.cr-archive--${ kind } ul.cr-menu__list` );
+		const menu = page.locator( `.cr-archive--${ kind } .cr-menu__list` );
 		await expect( menu ).toHaveCount( 1 );
-		const lines = menu.locator( ':scope > li' );
+		const lines = menu.locator( 'li.wp-block-post' );
 		const count = await lines.count();
 		expect( count ).toBeGreaterThan( 0 );
 		expect( count, `${ perPage } lines to a page` ).toBeLessThanOrEqual( perPage );
 		for ( const line of await lines.all() ) {
-			await expect( line.locator( 'a.pkiw-menu-entry__name' ) ).toHaveCount( 1 );
+			await expect( line.locator( 'h3.pkiw-menu-entry__title > a.pkiw-menu-entry__name' ), 'a line is named by a linked h3' ).toHaveCount( 1 );
 			// The plugin names the entry's author in a hidden h-card link; a visitor meets one link.
 			const rendered = await line.evaluate( ( el ) => [ ...el.querySelectorAll( 'a' ) ].filter( ( a ) => a.getClientRects().length > 0 ).length );
 			expect( rendered, 'a menu line is one link' ).toBe( 1 );
@@ -1029,10 +1036,52 @@ for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3
 				expect( ( await rating.textContent() ).trim() ).toMatch( /^Rated [1-5] of 5$/ );
 			}
 		}
-		const sections = ( await menu.locator( 'h2.pkiw-menu-entry__section' ).allTextContents() ).map( ( text ) => text.trim() );
-		expect( sections.length, 'the menu has section headings' ).toBeGreaterThan( 0 );
-		expect( new Set( sections ).size, 'a section is headed once on a page' ).toBe( sections.length );
-		await expect( lines.first().locator( 'h2.pkiw-menu-entry__section' ) ).toHaveCount( 1 );
+
+		// Real section containers: every line sits in exactly one, under that section's heading,
+		// and its box stays inside the section's box at every width.
+		const sections = await menu.locator( ':scope > section.pkiw-menu-section' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => {
+			const box = node.getBoundingClientRect();
+			const heading = node.querySelector( ':scope > h2.pkiw-menu-section__heading' );
+			const items = [ ...node.querySelectorAll( ':scope > ul.pkiw-menu-section__items > li.wp-block-post' ) ];
+			return {
+				heading: heading ? heading.textContent.trim() : '',
+				headingFirst: heading === node.firstElementChild,
+				lines: items.length,
+				inside: items.every( ( li ) => {
+					const r = li.getBoundingClientRect();
+					return r.left >= box.left - 1 && r.right <= box.right + 1 && r.top >= heading.getBoundingClientRect().bottom - 1 && r.bottom <= box.bottom + 1;
+				} ),
+				left: Math.round( box.left ),
+			};
+		} ) );
+		expect( sections.length, 'the menu has sections' ).toBeGreaterThan( 0 );
+		expect( await menu.locator( ':scope > *' ).count(), 'the menu holds sections and nothing else' ).toBe( sections.length );
+		expect( sections.reduce( ( sum, section ) => sum + section.lines, 0 ), 'every line is in a section' ).toBe( count );
+		for ( const section of sections ) {
+			expect( section.heading, 'a section is headed' ).not.toBe( '' );
+			expect( section.headingFirst, `${ section.heading }: the heading opens the section` ).toBe( true );
+			expect( section.lines, `${ section.heading }: a section holds at least one line` ).toBeGreaterThan( 0 );
+			expect( section.inside, `${ section.heading }: its lines stay under its heading, in its own panel` ).toBe( true );
+			expect( section.heading, 'no invented slogan stands in for a group' ).not.toMatch( /good food|sample content/i );
+		}
+		expect( new Set( sections.map( ( section ) => section.heading ) ).size, 'a section is headed once on a page' ).toBe( sections.length );
+
+		// Outline: the archive title, then Recent Specials and each section at h2, their items at h3.
+		const outline = await page.evaluate( () => [ ...document.querySelectorAll( 'h1, .cr-menu h2, .cr-menu h3, .cr-menu h4, .cr-menu h5, .cr-menu h6' ) ].map( ( node ) => ( {
+			tag: node.tagName,
+			text: node.textContent.trim(),
+			item: node.matches( '.pkiw-menu-entry__title, .pkiw-menu-specials__name' ),
+			group: node.matches( '.pkiw-menu-section__heading, .pkiw-menu-specials__heading' ),
+		} ) ) );
+		expect( outline[ 0 ].tag, 'the archive title leads the outline' ).toBe( 'H1' );
+		expect( outline.filter( ( heading ) => 'H1' === heading.tag ).length ).toBe( 1 );
+		const inMenu = outline.slice( 1 );
+		expect( inMenu.length ).toBeGreaterThan( 0 );
+		expect( inMenu[ 0 ].tag, 'the menu opens with an h2' ).toBe( 'H2' );
+		for ( const heading of inMenu ) {
+			expect( heading.group || heading.item, `"${ heading.text }" is a group or an item heading` ).toBe( true );
+			expect( heading.tag, `"${ heading.text }": groups are h2 and items h3` ).toBe( heading.group ? 'H2' : 'H3' );
+		}
 
 		const specials = page.locator( `.cr-archive--${ kind } section.pkiw-menu-specials` );
 		await expect( specials ).toHaveCount( 1 );
@@ -1043,12 +1092,17 @@ for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3
 		expect( await specials.locator( 'ul > li h3 a' ).count(), 'each special is named by a linked heading' ).toBe( specialCount );
 
 		const shape = await page.evaluate( ( k ) => {
-			const list = document.querySelector( `.cr-archive--${ k } ul.cr-menu__list` );
+			const list = document.querySelector( `.cr-archive--${ k } .cr-menu__list` );
 			const box = document.querySelector( `.cr-archive--${ k } section.pkiw-menu-specials` );
+			const wrap = document.querySelector( `.cr-archive--${ k } .cr-menu` );
 			const cs = getComputedStyle( list );
+			const sheet = getComputedStyle( list, '::before' );
 			return {
-				columns: cs.columnCount,
-				paper: cs.backgroundColor,
+				columns: cs.gridTemplateColumns.split( ' ' ).length,
+				paper: sheet.backgroundColor,
+				torn: sheet.clipPath,
+				marks: [ '::before', '::after' ].map( ( pseudo ) => getComputedStyle( wrap, pseudo ).content ),
+				decorated: wrap.querySelectorAll( 'svg, img:not(.pkiw-menu-specials__photo)' ).length,
 				frame: parseFloat( getComputedStyle( box ).borderTopWidth ),
 				specialsFirst: box.getBoundingClientRect().top < list.getBoundingClientRect().top,
 				overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -1056,8 +1110,13 @@ for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3
 			};
 		}, kind );
 		expect( shape.specialsFirst, 'Recent Specials sits above the menu' ).toBe( true );
-		expect( shape.columns, 'the menu flows in columns on a wide screen and one on a phone' ).toBe( page.viewportSize().width >= 1024 ? String( wideColumns ) : '1' );
+		expect( shape.columns, 'the panels sit side by side on a wide screen and stack on a phone' ).toBe( page.viewportSize().width >= 1024 ? wideColumns : 1 );
+		expect( new Set( sections.map( ( section ) => section.left ) ).size, 'as many panel columns as the grid has, or fewer sections' ).toBe( Math.min( shape.columns, sections.length ) );
 		expect( shape.paper, 'the menu is on paper' ).not.toBe( 'rgba(0, 0, 0, 0)' );
+		expect( shape.torn, 'the sheet is torn, not ruled' ).toContain( 'polygon' );
+		// Marks in the margins are empty pseudo-elements: nothing for assistive technology, nothing in the DOM.
+		expect( shape.marks.every( ( content ) => 'none' === content || '""' === content ), 'margin marks carry no content' ).toBe( true );
+		expect( shape.decorated, 'no decorative image or SVG element in the menu' ).toBe( 0 );
 		expect( shape.frame, 'Recent Specials is framed' ).toBeGreaterThanOrEqual( 2 );
 		expect( shape.overflow ).toBe( 0 );
 		expect( shape.located, 'no street, coordinates or map link on the menu' ).toBe( 0 );
@@ -1069,9 +1128,249 @@ for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3
 			await next.click();
 			await page.waitForLoadState( 'load' );
 			await expect( page.locator( `.cr-archive--${ kind } section.pkiw-menu-specials` ) ).toHaveCount( 0 );
-			const second = page.locator( `.cr-archive--${ kind } ul.cr-menu__list > li` );
+			const second = page.locator( `.cr-archive--${ kind } .cr-menu__list > section.pkiw-menu-section` );
 			expect( await second.count() ).toBeGreaterThan( 0 );
-			await expect( second.first().locator( 'h2.pkiw-menu-entry__section' ) ).toHaveCount( 1 );
+			await expect( second.first().locator( ':scope > h2.pkiw-menu-section__heading' ), 'page two opens with a headed section' ).toHaveCount( 1 );
 		}
 	} );
 }
+
+// PKIW #230: an eat single is an order ticket and a drink single is a taped
+// photo beside a coaster. Each sits on one placemat with the check-in map
+// slip under it. The post title is the page's one h1 and it is inside the
+// order; the template's post header and featured image don't print. The map
+// slip prints what the plugin's privacy rule let the card print.
+for ( const [ kind, path, labels ] of [ [ 'eat', EAT_SINGLE, [ 'Dish', 'Restaurant', 'Cuisine', 'Ate', 'Rated' ] ], [ 'drink', DRINK_SINGLE, [ 'Drink', 'Type', 'Brand', 'Drank', 'Rated' ] ] ] ) {
+	test( `the ${ kind } single is one placemat: the order, then the map slip, with the title inside the order`, async ( { page } ) => {
+		const osm = [];
+		page.on( 'request', ( request ) => {
+			if ( request.url().includes( 'openstreetmap.org' ) ) {
+				osm.push( request.url() );
+			}
+		} );
+		await page.goto( path, { waitUntil: 'load' } );
+		test.skip( ( await page.locator( `body.cr-order-single--${ kind }` ).count() ) === 0, `no ${ kind } post with its card at ${ path }` );
+
+		const mat = page.locator( `main article.cr-placemat.cr-placemat--${ kind }` );
+		await expect( mat ).toHaveCount( 1 );
+		await expect( mat ).toHaveClass( /h-food/ );
+		await expect( mat ).toHaveClass( 'eat' === kind ? /p-ate/ : /p-drank/ );
+
+		// One title, inside the order; no second copy of the header or the picture above it.
+		await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
+		await expect( mat.locator( '.cr-order h1.cr-order__title' ) ).toHaveCount( 1 );
+		await expect( page.locator( 'main .single-post__header, main .single-post__featured, main .wp-block-post-featured-image' ) ).toHaveCount( 0 );
+		await expect( mat.locator( `.cr-order.cr-order--${ 'eat' === kind ? 'ticket' : 'coaster' }` ) ).toHaveCount( 1 );
+		expect( await mat.locator( '.cr-order__photo img' ).count(), 'one picture at most' ).toBeLessThanOrEqual( 1 );
+
+		// Facts: labelled, in the approved order, each printed once.
+		const facts = await mat.locator( 'dl.cr-order__facts > .cr-order__fact' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => [ node.querySelector( 'dt' ).textContent.trim(), node.querySelector( 'dd' ).textContent.trim() ] ) );
+		const names = facts.map( ( [ label ] ) => label );
+		expect( names.length ).toBeGreaterThan( 0 );
+		expect( names, 'known facts in the approved order' ).toEqual( labels.filter( ( label ) => names.includes( label ) ) );
+		expect( names ).toContain( 'eat' === kind ? 'Ate' : 'Drank' );
+		for ( const [ label, value ] of facts ) {
+			expect( value, `${ label } has a value` ).not.toBe( '' );
+		}
+		const rated = facts.find( ( [ label ] ) => 'Rated' === label );
+		if ( rated ) {
+			expect( rated[ 1 ] ).toMatch( /^Rated [1-5] of 5$/ );
+		}
+		await expect( mat.locator( 'svg, [role="img"]' ), 'the rating is text, not a row of stars' ).toHaveCount( 0 );
+
+		// The map slip: inside the placemat, under the order.
+		const slip = mat.locator( ':scope > section.cr-map-slip' );
+		await expect( slip ).toHaveCount( 1 );
+		await expect( slip ).toHaveClass( /cr-map-slip--map/ );
+		const frame = slip.locator( 'iframe' );
+		await expect( frame ).toHaveCount( 1 );
+		expect( await frame.getAttribute( 'title' ) ).toMatch( /^Map showing .+\.$/ );
+		expect( await frame.getAttribute( 'loading' ) ).toBe( 'lazy' );
+		expect( Number( await frame.getAttribute( 'width' ) ) ).toBeGreaterThan( 0 );
+		expect( Number( await frame.getAttribute( 'height' ) ) ).toBeGreaterThan( 0 );
+		expect( await frame.getAttribute( 'src' ) ).toContain( 'https://www.openstreetmap.org/export/embed.html' );
+		expect( await frame.evaluate( ( el ) => null !== el.closest( 'a' ) ), 'the map is not inside a link' ).toBe( false );
+		const links = page.locator( 'main a[href*="openstreetmap.org"]' );
+		await expect( links, 'one OpenStreetMap link' ).toHaveCount( 1 );
+		expect( ( await links.textContent() ).trim() ).toMatch( /^View .+ on OpenStreetMap \(opens in a new tab\)$/ );
+		await expect( slip.locator( '.cr-map-slip__privacy' ) ).toHaveText( /privacy setting/ );
+		await expect( slip.locator( '.cr-map-slip__place.p-location.h-card' ) ).toHaveCount( 1 );
+		await expect( slip.locator( 'data.h-geo[hidden]' ) ).toHaveCount( 1 );
+
+		const shape = await mat.evaluate( ( el ) => {
+			const box = ( node ) => node.getBoundingClientRect();
+			const order = el.querySelector( '.cr-order' );
+			const slipEl = el.querySelector( '.cr-map-slip' );
+			const map = slipEl.querySelector( '.cr-map-slip__map' );
+			const caption = slipEl.querySelector( '.cr-map-slip__caption' );
+			const frameEl = slipEl.querySelector( 'iframe' );
+			const link = slipEl.querySelector( 'a' );
+			const nav = document.querySelector( 'nav.cr-post-nav' );
+			const visible = ( node ) => [ ...node.querySelectorAll( '*' ) ].filter( ( n ) => ! n.closest( '[hidden]' ) && n.children.length === 0 ).map( ( n ) => n.textContent.trim() ).filter( Boolean );
+			return {
+				slipUnderOrder: box( slipEl ).top >= box( order ).bottom - 1,
+				slipInside: box( slipEl ).left >= box( el ).left && box( slipEl ).right <= box( el ).right && box( slipEl ).bottom <= box( el ).bottom,
+				mapShare: box( map ).width / box( slipEl ).width,
+				captionBeside: box( caption ).left >= box( map ).right - 1,
+				captionUnder: box( caption ).top >= box( map ).bottom - 1,
+				frameRight: box( frameEl ).right,
+				frameLeft: box( frameEl ).left,
+				order: [ ...el.querySelectorAll( 'h1, h2, iframe, a' ) ].map( ( n ) => ( 'A' === n.tagName ? ( n.href.includes( 'openstreetmap' ) ? 'osm' : 'link' ) : n.tagName.toLowerCase() + ( 'IFRAME' === n.tagName ? '' : ':' + n.textContent.trim() ) ) ),
+				linkAfterCaption: Boolean( slipEl.querySelector( '.cr-map-slip__privacy' ).compareDocumentPosition( link ) & Node.DOCUMENT_POSITION_FOLLOWING ),
+				navInside: nav ? el.contains( nav ) : false,
+				navBelow: nav ? box( nav ).top >= box( el ).bottom : true,
+				overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+				words: visible( el ),
+			};
+		} );
+		expect( shape.slipUnderOrder, 'the slip sits under the order' ).toBe( true );
+		expect( shape.slipInside, 'on the same placemat' ).toBe( true );
+		const wide = page.viewportSize().width >= 768;
+		if ( wide ) {
+			expect( shape.mapShare, 'the map takes about 60 to 65% of the slip' ).toBeGreaterThanOrEqual( 0.58 );
+			expect( shape.mapShare ).toBeLessThanOrEqual( 0.66 );
+			expect( shape.captionBeside, 'the place is at the map\'s right' ).toBe( true );
+		} else {
+			expect( shape.captionUnder, 'the map stacks above its caption' ).toBe( true );
+		}
+		expect( shape.frameLeft, 'the map stays in the viewport' ).toBeGreaterThanOrEqual( 0 );
+		expect( shape.frameRight ).toBeLessThanOrEqual( page.viewportSize().width );
+		expect( shape.overflow ).toBe( 0 );
+		// Reading and tab order: the title, Notes, the map, Where, then the OpenStreetMap link last.
+		expect( shape.order[ 0 ] ).toBe( 'link' );
+		expect( shape.order[ 1 ] ).toMatch( /^h1:/ );
+		expect( shape.order.indexOf( 'iframe' ) ).toBeGreaterThan( shape.order.findIndex( ( item ) => item.startsWith( 'h1:' ) ) );
+		expect( shape.order.indexOf( 'h2:Where' ) ).toBeGreaterThan( shape.order.indexOf( 'iframe' ) );
+		expect( shape.order[ shape.order.length - 1 ], 'the OpenStreetMap link is the placemat\'s last stop' ).toBe( 'osm' );
+		expect( shape.linkAfterCaption, 'the link follows the caption' ).toBe( true );
+		expect( shape.order.filter( ( item ) => item.startsWith( 'h1:' ) ).length ).toBe( 1 );
+		expect( shape.navInside, 'post navigation is outside the placemat' ).toBe( false );
+		expect( shape.navBelow, 'and below it' ).toBe( true );
+		// Each fact once: no visible text repeats inside the placemat.
+		const repeated = shape.words.filter( ( word, index ) => word.length > 3 && shape.words.indexOf( word ) !== index );
+		expect( repeated, 'no fact prints twice' ).toEqual( [] );
+		expect( shape.words.join( ' ' ), 'no invented slogan' ).not.toMatch( /good food|good company|support local|sample content/i );
+
+		// Keyboard: the kind link and the OpenStreetMap link show a 3px outline that nothing clips.
+		for ( const selector of [ '.cr-order__kind-link', '.cr-map-slip__link' ] ) {
+			const target = mat.locator( selector );
+			await target.focus();
+			const ring = await target.evaluate( ( el ) => {
+				const cs = getComputedStyle( el );
+				let clipped = false;
+				for ( let up = el.parentElement; up && up !== document.body; up = up.parentElement ) {
+					if ( 'visible' !== getComputedStyle( up ).overflow && up.getBoundingClientRect().right < el.getBoundingClientRect().right + 6 ) {
+						clipped = true;
+					}
+				}
+				return { style: cs.outlineStyle, width: parseFloat( cs.outlineWidth ), clipped };
+			} );
+			expect( ring.style, `${ selector } shows a focus outline` ).toBe( 'solid' );
+			expect( ring.width ).toBeGreaterThanOrEqual( 3 );
+			expect( ring.clipped, `${ selector }'s outline isn't clipped` ).toBe( false );
+		}
+		expect( osm.length, 'a public location loads the map' ).toBeGreaterThan( 0 );
+	} );
+}
+
+// PKIW #230: a hidden location prints nothing about the place: no slip, no
+// link, no coordinates, no restaurant, and the browser never asks
+// OpenStreetMap for anything.
+for ( const path of ORDER_HIDDEN ) {
+	test( `a hidden location prints no map slip and makes no OpenStreetMap request (${ path })`, async ( { page } ) => {
+		const osm = [];
+		page.on( 'request', ( request ) => {
+			if ( request.url().includes( 'openstreetmap' ) ) {
+				osm.push( request.url() );
+			}
+		} );
+		await page.goto( path, { waitUntil: 'networkidle' } );
+		test.skip( ( await page.locator( 'body.cr-order-single' ).count() ) === 0, `no eat or drink post with its card at ${ path }` );
+		await page.mouse.wheel( 0, 4000 );
+		await page.waitForTimeout( 500 );
+
+		await expect( page.locator( 'main article.cr-placemat' ) ).toHaveCount( 1 );
+		await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
+		await expect( page.locator( '.cr-map-slip' ) ).toHaveCount( 0 );
+		await expect( page.locator( 'main iframe' ) ).toHaveCount( 0 );
+		await expect( page.locator( 'main a[href*="openstreetmap"]' ) ).toHaveCount( 0 );
+		await expect( page.locator( 'main .cr-placemat' ).locator( '.p-location, .h-geo, .p-latitude, .p-longitude, .p-street-address, .p-locality' ) ).toHaveCount( 0 );
+		expect( await page.locator( 'main .cr-placemat dt' ).allTextContents(), 'no restaurant fact' ).not.toContain( 'Restaurant' );
+		expect( ( await page.content() ).includes( 'openstreetmap' ), 'the page source never names OpenStreetMap' ).toBe( false );
+		expect( osm, 'no request to OpenStreetMap' ).toEqual( [] );
+	} );
+}
+
+// PKIW #230: a place the card may name, with no coordinates, gets a text
+// slip: "Where" and the place, no frame and no OpenStreetMap link.
+test( 'a public place with no coordinates gets a text slip with no map frame', async ( { page } ) => {
+	const osm = [];
+	page.on( 'request', ( request ) => {
+		if ( request.url().includes( 'openstreetmap' ) ) {
+			osm.push( request.url() );
+		}
+	} );
+	await page.goto( ORDER_TEXT_ONLY, { waitUntil: 'networkidle' } );
+	test.skip( ( await page.locator( 'body.cr-order-single' ).count() ) === 0, `no eat or drink post with its card at ${ ORDER_TEXT_ONLY }` );
+	const slip = page.locator( 'main article.cr-placemat > section.cr-map-slip' );
+	await expect( slip ).toHaveCount( 1 );
+	await expect( slip ).toHaveClass( /cr-map-slip--text/ );
+	await expect( slip.locator( 'iframe' ) ).toHaveCount( 0 );
+	await expect( slip.locator( 'a' ) ).toHaveCount( 0 );
+	await expect( slip.locator( 'h2' ) ).toHaveText( 'Where' );
+	expect( ( await slip.locator( '.cr-map-slip__place' ).textContent() ).trim().length ).toBeGreaterThan( 0 );
+	await expect( slip.locator( '.h-geo, .p-latitude' ) ).toHaveCount( 0 );
+	expect( osm ).toEqual( [] );
+	expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBe( 0 );
+} );
+
+// PKIW #230: on the Stream an eat or drink post is one compact card. Its
+// title link covers the card, so there is one keyboard stop and one link
+// name. No map link, address or coordinate prints, hidden or not.
+test( 'the Stream shows an eat or drink post as one compact card with one link and no map', async ( { page } ) => {
+	await page.goto( ORDER_STREAM, { waitUntil: 'load' } );
+	const cards = page.locator( 'body.cr-stream-page article.pk-card.cr-chit' );
+	test.skip( ( await cards.count() ) === 0, 'no eat or drink post on this Stream page' );
+	for ( const card of await cards.all() ) {
+		const o = await card.evaluate( ( el ) => {
+			const link = el.querySelector( 'a.cr-chit__link' );
+			const cover = getComputedStyle( link, '::after' );
+			const box = el.getBoundingClientRect();
+			return {
+				links: el.querySelectorAll( 'a' ).length,
+				stops: [ ...el.querySelectorAll( 'a, button, iframe, [tabindex]' ) ].filter( ( n ) => n.tabIndex >= 0 ).length,
+				name: link.textContent.trim(),
+				heading: link.parentElement.tagName,
+				covers: 'absolute' === cover.position && Math.abs( parseFloat( cover.width ) - el.clientWidth ) < 2 && Math.abs( parseFloat( cover.height ) - el.clientHeight ) < 2,
+				located: el.querySelectorAll( '.h-geo, .p-latitude, .p-longitude, .p-street-address, .p-locality, [href*="openstreetmap"], iframe' ).length,
+				source: el.outerHTML.includes( 'openstreetmap' ),
+				rating: el.querySelector( '.cr-chit__rating' )?.textContent.trim() ?? null,
+				stars: el.querySelectorAll( 'svg, [role="img"]' ).length,
+				date: el.querySelectorAll( 'time.dt-published' ).length,
+				food: el.matches( '.h-food.p-ate, .h-food.p-drank' ),
+				width: box.width,
+			};
+		} );
+		expect( o.links, 'one link' ).toBe( 1 );
+		expect( o.stops, 'one keyboard stop' ).toBe( 1 );
+		expect( o.name, 'the link is named by the dish or drink' ).not.toBe( '' );
+		expect( o.heading ).toBe( 'H2' );
+		expect( o.covers, 'the link\'s box is the whole card' ).toBe( true );
+		expect( o.located, 'no address, coordinate, map link or frame' ).toBe( 0 );
+		expect( o.source ).toBe( false );
+		if ( null !== o.rating ) {
+			expect( o.rating ).toMatch( /^Rated [1-5] of 5$/ );
+		}
+		expect( o.stars ).toBe( 0 );
+		expect( o.date ).toBe( 1 );
+		expect( o.food ).toBe( true );
+		await card.locator( 'a.cr-chit__link' ).focus();
+		const ring = await card.locator( 'a.cr-chit__link' ).evaluate( ( el ) => {
+			const cs = getComputedStyle( el, '::after' );
+			return [ cs.outlineStyle, parseFloat( cs.outlineWidth ) ];
+		} );
+		expect( ring, 'the site\'s 3px focus ring, around the whole card' ).toEqual( [ 'solid', 3 ] );
+	}
+	expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBe( 0 );
+} );
+

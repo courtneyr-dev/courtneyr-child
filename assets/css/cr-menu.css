@@ -2,10 +2,11 @@
    Eat and drink menus (PKIW #230)
 
    The eat and drink archives are menus on paper. The plugin prints
-   the markup: its Recent Specials block, and each archive post as
-   a menu line with a section heading where the cuisine or drink
-   type changes. Everything drawn here is CSS on that markup;
-   nothing is added to the DOM.
+   the markup: its Recent Specials block, then one section per
+   cuisine or drink type, each a heading and a list of menu lines.
+   Everything drawn here is CSS on that markup; nothing is added
+   to the DOM, and the marks in the margins are pseudo-elements
+   with no content, so assistive technology never meets them.
 
    The paper, its frame and the heading strips are objects, so they
    take palette tokens and keep their colours in dark mode. Focus
@@ -13,6 +14,7 @@
    ============================================================ */
 
 .cr-menu {
+	position: relative;
 	max-width: 72rem;
 	margin-inline: auto;
 	color: var(--cr-russian-violet);
@@ -83,6 +85,21 @@
 	object-fit: cover;
 }
 
+/* A special with no photo keeps its place: a blank plate of coloured
+   paper, drawn here and never announced. */
+.cr-menu .pkiw-menu-specials__item--no-photo::before {
+	content: "";
+	display: block;
+	width: 100%;
+	aspect-ratio: 3 / 2;
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-light-orange);
+}
+
+.cr-menu--drink .pkiw-menu-specials__item--no-photo::before {
+	background: var(--cr-periwinkle);
+}
+
 .cr-menu .pkiw-menu-specials__body {
 	min-width: 0;
 }
@@ -113,38 +130,73 @@
 }
 
 /* ============================================================
-   The menu: the Query Loop's list on a sheet of paper
+   The menu: one torn sheet, a panel per section
+
+   On the front end the list's children are the plugin's sections.
+   In the Site Editor they are the Post Template's list items, and
+   the item that opens a section holds it. Both are the panels.
    ============================================================ */
 .cr-menu .wp-block-post-template.cr-menu__list {
-	display: block;
-	column-count: 1;
-	column-gap: 2.5rem;
-	column-rule: 2px dotted var(--cr-glaucous);
+	--menu-paper: var(--cr-light-orange);
+	--menu-seam: color-mix(in srgb, var(--cr-glaucous) 60%, transparent);
+	--menu-crease: color-mix(in srgb, var(--cr-glaucous) 14%, transparent);
+	--menu-tear: polygon(0 0.3rem, 4% 0.05rem, 11% 0.4rem, 19% 0.1rem, 27% 0.45rem, 36% 0.15rem, 44% 0.35rem, 53% 0, 61% 0.4rem, 70% 0.1rem, 78% 0.45rem, 86% 0.05rem, 93% 0.35rem, 100% 0.1rem, 100% calc(100% - 0.35rem), 94% calc(100% - 0.05rem), 87% calc(100% - 0.4rem), 79% calc(100% - 0.1rem), 71% calc(100% - 0.45rem), 62% calc(100% - 0.05rem), 54% calc(100% - 0.35rem), 45% 100%, 37% calc(100% - 0.4rem), 28% calc(100% - 0.1rem), 20% calc(100% - 0.45rem), 12% calc(100% - 0.05rem), 5% calc(100% - 0.3rem), 0 calc(100% - 0.1rem));
+	position: relative;
+	isolation: isolate;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 0;
+	max-width: none;
 	margin: 0;
-	padding: 1.5rem 1.25rem;
-	border: 2px solid var(--cr-russian-violet);
-	background: var(--cr-light-orange);
-	box-shadow: var(--cr-shadow-hard-2);
+	padding: 0;
+	overflow: clip;
 	list-style: none;
+
+	/* A hairline of ink, then the hard shadow, both following the torn edge. */
+	filter: drop-shadow(1px 1px 0 var(--cr-ink)) drop-shadow(-1px -1px 0 var(--cr-ink)) drop-shadow(var(--cr-shadow-hard-2));
 }
 
 .cr-menu--drink .wp-block-post-template.cr-menu__list {
-	background: var(--cr-printer-ivory);
+	--menu-paper: var(--cr-printer-ivory);
 }
 
+/* The sheet, torn along its top and foot. */
+.cr-menu .wp-block-post-template.cr-menu__list::before {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	inset: 0;
+	background: var(--menu-paper);
+	clip-path: var(--menu-tear);
+}
+
+/* A panel. Its top and left seams are dashed fold lines; the sheet clips
+   the ones on its own outer edge, so only the joins between panels show. */
+.cr-menu .cr-menu__list > .pkiw-menu-section,
 .cr-menu .cr-menu__list > li {
-	margin: 0 0 1.1rem;
-	break-inside: avoid;
+	min-width: 0;
+	margin: -1px 0 0 -1px;
+	padding: 0;
+	border-block-start: 1px dashed var(--menu-seam);
+	border-inline-start: 1px dashed var(--menu-seam);
+	background: linear-gradient(90deg, var(--menu-crease), transparent 1.25rem);
 }
 
-.cr-menu .cr-menu__list > li:last-child {
-	margin-bottom: 0;
+/* The room inside a panel belongs to the section, which both contexts share. */
+.cr-menu .cr-menu__list .pkiw-menu-section {
+	padding: 1.9rem 1.25rem 1.6rem;
+}
+
+/* Site Editor: the lines a section already shows step aside. */
+.cr-menu .cr-menu__list > li:has(.pkiw-menu-entry--continued) {
+	display: none;
 }
 
 /* A section heading is lettered on a strip of coloured paper. */
 .cr-menu .pkiw-menu-entry__section {
-	display: inline-block;
-	margin: 0.4rem 0 0.8rem;
+	display: block;
+	width: fit-content;
+	margin: 0 0 1rem;
 	padding: 0.2em 0.8em;
 	background: var(--cr-sky-blue);
 	color: var(--cr-russian-violet);
@@ -156,15 +208,40 @@
 	transform: rotate(var(--cr-rotate-1));
 }
 
-/* Strips take turns through the palette, counted among the lines that
-   start a section. */
-.cr-menu .cr-menu__list > li:nth-child(3n + 2 of :has(.pkiw-menu-entry__section)) .pkiw-menu-entry__section {
+/* Strips take turns through the palette, counted among the panels. The
+   Site Editor keeps a hidden copy of its first item, which doesn't count. */
+.cr-menu .cr-menu__list > .pkiw-menu-section:nth-child(3n + 2) .pkiw-menu-entry__section {
 	background: var(--cr-periwinkle);
 	transform: rotate(var(--cr-rotate-2));
 }
 
-.cr-menu .cr-menu__list > li:nth-child(3n + 3 of :has(.pkiw-menu-entry__section)) .pkiw-menu-entry__section {
+.cr-menu .cr-menu__list > .pkiw-menu-section:nth-child(3n + 3) .pkiw-menu-entry__section {
 	background: var(--cr-selective-yellow);
+}
+
+.cr-menu .cr-menu__list > li:nth-child(3n + 2 of :has(.pkiw-menu-section):not([style*="none"])) .pkiw-menu-entry__section {
+	background: var(--cr-periwinkle);
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-menu .cr-menu__list > li:nth-child(3n + 3 of :has(.pkiw-menu-section):not([style*="none"])) .pkiw-menu-entry__section {
+	background: var(--cr-selective-yellow);
+}
+
+.cr-menu .pkiw-menu-section__items {
+	gap: 1.1rem;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* A line's name is a heading in the outline and menu lettering on the page. */
+.cr-menu .pkiw-menu-entry__title {
+	margin: 0;
+	font: inherit;
+	letter-spacing: normal;
+	text-transform: none;
 }
 
 .cr-menu .pkiw-menu-entry__line {
@@ -235,8 +312,8 @@
 		grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
 	}
 
-	.cr-menu .wp-block-post-template.cr-menu__list {
-		padding: 2rem;
+	.cr-menu .cr-menu__list .pkiw-menu-section {
+		padding: 2.1rem 1.75rem 1.9rem;
 	}
 }
 
@@ -251,16 +328,70 @@
 		padding-left: 2rem;
 		border-left: 1px solid var(--cr-cerulean);
 	}
+
+	/* Panels sit side by side on the one sheet. */
+	.cr-menu .wp-block-post-template.cr-menu__list {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
 }
 
 @media (min-width: 64rem) {
 
-	.cr-menu .wp-block-post-template.cr-menu__list {
-		column-count: 2;
+	.cr-menu--eat .wp-block-post-template.cr-menu__list {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+/* ============================================================
+   Marks in the outer margins: utensils for eat, a cup and a bottle
+   for drink. Each is an empty pseudo-element cut to a shape by a
+   mask and inked with the accent colour, so nothing reaches
+   assistive technology. They show only where the margin holds them.
+   ============================================================ */
+@media (min-width: 86rem) {
+
+	.cr-menu::before,
+	.cr-menu::after {
+		content: "";
+		position: absolute;
+		width: 3.25rem;
+		height: 6.5rem;
+		background: var(--cr-accent);
+		pointer-events: none;
+		-webkit-mask: var(--menu-mark) center / contain no-repeat;
+		mask: var(--menu-mark) center / contain no-repeat;
 	}
 
-	.cr-menu--eat .wp-block-post-template.cr-menu__list {
-		column-count: 3;
+	.cr-menu::before {
+		top: 1.5rem;
+		left: -5.25rem;
+		transform: rotate(var(--cr-rotate-neg));
+	}
+
+	.cr-menu::after {
+		right: -5.25rem;
+		bottom: 7rem;
+		transform: rotate(var(--cr-rotate-2));
+	}
+
+	/* A fork and a knife. */
+	.cr-menu--eat::before {
+		--menu-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 96' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 6v20a6 6 0 0 0 12 0V6M14 6v84M34 6c7 9 9 24 6 40h-6zM34 46v44'/%3E%3C/svg%3E");
+	}
+
+	/* A spoon. */
+	.cr-menu--eat::after {
+		--menu-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 96' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24 6c-8 0-12 9-12 17s5 14 12 14 12-6 12-14S32 6 24 6zM24 37v53'/%3E%3C/svg%3E");
+	}
+
+	/* A cup on its saucer, steaming. */
+	.cr-menu--drink::before {
+		--menu-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 96' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 44h28v12a14 14 0 0 1-28 0zM34 48h4a6 6 0 0 1 0 12h-5M4 78h34M14 34c-3-4 3-6 0-10M26 34c-3-4 3-6 0-10'/%3E%3C/svg%3E");
+	}
+
+	/* A bottle. */
+	.cr-menu--drink::after {
+		--menu-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 96' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6h8v20c0 6 6 8 6 16v44a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4V42c0-8 6-10 6-16zM14 54h20M14 72h20'/%3E%3C/svg%3E");
 	}
 }
 
@@ -269,14 +400,28 @@
    ============================================================ */
 @media (forced-colors: active) {
 
-	.cr-menu .pkiw-menu-specials,
-	.cr-menu .wp-block-post-template.cr-menu__list {
+	.cr-menu .pkiw-menu-specials {
 		border-color: CanvasText;
 		box-shadow: none;
 	}
 
-	.cr-menu .pkiw-menu-specials::before {
+	/* The sheet loses its paper, tear and shadow and keeps a plain outline. */
+	.cr-menu .wp-block-post-template.cr-menu__list {
+		border: 2px solid CanvasText;
+		filter: none;
+	}
+
+	.cr-menu .wp-block-post-template.cr-menu__list::before,
+	.cr-menu .pkiw-menu-specials::before,
+	.cr-menu::before,
+	.cr-menu::after {
 		content: none;
+	}
+
+	.cr-menu .cr-menu__list > .pkiw-menu-section,
+	.cr-menu .cr-menu__list > li {
+		border-color: CanvasText;
+		background: none;
 	}
 
 	.cr-menu .pkiw-menu-entry__section {
@@ -286,9 +431,22 @@
 
 @media print {
 
-	.cr-menu .pkiw-menu-specials,
-	.cr-menu .wp-block-post-template.cr-menu__list {
+	.cr-menu .pkiw-menu-specials {
 		box-shadow: none;
+	}
+
+	.cr-menu .wp-block-post-template.cr-menu__list {
+		filter: none;
+	}
+
+	.cr-menu::before,
+	.cr-menu::after {
+		content: none;
+	}
+
+	.cr-menu .cr-menu__list > .pkiw-menu-section,
+	.cr-menu .cr-menu__list > li {
+		break-inside: avoid;
 	}
 
 	.cr-menu .pkiw-menu-specials__item {

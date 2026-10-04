@@ -1,82 +1,46 @@
 <?php
 /**
- * /stream eat and drink cards: compact diner placemats.
+ * /stream eat and drink cards: a compact order ticket and a coaster
+ * (PKIW issue 230).
  *
- * A tighter cousin of the single placemat (inc/single-eat-drink.php).
- * The plugin's eat-card / drink-card is the card (a post whose body holds
+ * The plugin's eat-card / drink-card is the source (a post whose body holds
  * more than the card gets the plugin's generic stream card; the theme
- * renders the kind card itself then, with the plugin's own title link and
- * date helpers, as the read cards do). On top of it: the rating as a
- * number, a compact WHERE line (venue and town; the plugin's street and
- * country stay in the DOM for the h-card but do not print), a "View on
- * map" link to OpenStreetMap when coordinates exist instead of an
- * embedded map, the timestamp trimmed to its date, one doodle, one small
- * generic stamp and one short handwritten line in an art corner. The
- * full interactive map stays on the single. Nothing is invented and
- * every module renders only when its data exists.
+ * renders the kind card itself then, as the read cards do). This file reads
+ * what that card printed and sets out a small card: the kind, the dish or
+ * drink as the card's one link, the cuisine and restaurant (or the drink
+ * type and brand), the rating as text, the date, the note and a small photo.
+ *
+ * The whole card is one link to the single: the title link's box covers the
+ * card, so there is one keyboard stop and one link name. There is no map
+ * link, no address and no coordinate here, printed or hidden; those stay on
+ * the single, inside its map slip. The restaurant shows only when the
+ * plugin's privacy rule printed it.
+ *
+ * assets/css/cr-eat-drink.css draws both cards.
  *
  * @package CourtneyrChild
  */
 
 declare( strict_types = 1 );
 
-namespace Courtneyr\Child\StreamPlacemat;
+namespace Courtneyr\Child\StreamOrder;
 
-use function Courtneyr\Child\Journal\card_attrs;
-use function Courtneyr\Child\SinglePlacemat\doodles;
-use function Courtneyr\Child\Stamps\pick;
-use function Courtneyr\Child\Stamps\render;
-use function Courtneyr\Child\Stamps\seed;
+use function Courtneyr\Child\SingleOrder\parts;
 use function Courtneyr\Child\StreamMedia\find_block;
-use const Courtneyr\Child\Stamps\INKS;
-use const Courtneyr\Child\Stamps\TILTS;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Short generic handwriting for the art corner: nothing about the dish.
- *
- * @param string $kind 'eat' or 'drink'.
- * @return string[]
- */
-function hand_lines( string $kind ): array {
-	return 'eat' === $kind
-		? array( __( 'Good food, brighter days.', 'courtneyr-child' ), __( 'Worth the trip.', 'courtneyr-child' ), __( 'Eat well, wander often.', 'courtneyr-child' ) )
-		: array( __( 'Small sips, big stories.', 'courtneyr-child' ), __( 'Sip slowly.', 'courtneyr-child' ), __( 'Raise a glass.', 'courtneyr-child' ) );
-}
-
-/**
- * The stamp's big line: a generic diner phrase by kind and drink type.
- *
- * @param string $kind 'eat' or 'drink'.
- * @param string $type The drink card's drinkType.
- * @return string
- */
-function stamp_line( string $kind, string $type ): string {
-	if ( 'eat' === $kind ) {
-		return __( 'Good food', 'courtneyr-child' );
-	}
-	$lines = array(
-		'coffee'   => __( 'Good coffee', 'courtneyr-child' ),
-		'tea'      => __( 'Good tea', 'courtneyr-child' ),
-		'beer'     => __( 'Local brews', 'courtneyr-child' ),
-		'wine'     => __( 'Good wine', 'courtneyr-child' ),
-		'cocktail' => __( 'Cheers', 'courtneyr-child' ),
-	);
-	return $lines[ $type ] ?? __( 'Good drinks', 'courtneyr-child' );
-}
-
-/**
- * Dress an eat or drink stream card as a compact placemat.
+ * Set an eat or drink stream card out as a compact ticket or coaster.
  *
  * @param string    $html     Rendered stream card.
  * @param array     $block    Parsed stream-card block (unused).
  * @param \WP_Block $instance Block instance with the Query Loop's postId.
  * @return string
  */
-function placemat_card( string $html, array $block, $instance ): string {
+function card( string $html, array $block, $instance ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed
 	if ( ! \Courtneyr\Child\HomeSections\is_stream_surface() ) {
 		return $html;
 	}
@@ -88,155 +52,66 @@ function placemat_card( string $html, array $block, $instance ): string {
 		return $html;
 	}
 	$kind = has_term( 'eat', 'kind', $post ) ? 'eat' : ( has_term( 'drink', 'kind', $post ) ? 'drink' : '' );
-	if ( '' === $kind ) {
-		return $html;
-	}
-	$card = find_block( $post, 'post-kinds-indieweb/' . $kind . '-card' );
+	$card = '' !== $kind ? find_block( $post, 'post-kinds-indieweb/' . $kind . '-card' ) : null;
 	if ( null === $card ) {
 		return $html;
 	}
 
-	// The generic stream card (a post with more than the card in its
-	// body): render the kind card itself, with the plugin's title link and date.
-	if ( false === strpos( $html, 'pk-card k-' . $kind ) ) {
-		$rendered = render_block( $card );
-		if ( '' === $rendered || false === strpos( $rendered, 'pk-card k-' . $kind ) ) {
-			return $html;
-		}
-		if ( function_exists( '\\PKIW\\link_title_to_post' ) ) {
-			$rendered = \PKIW\link_title_to_post( $rendered, $post );
-		}
-		if ( false === strpos( $rendered, 'dt-published' ) && function_exists( '\\PKIW\\inject_post_date_into_card' ) ) {
-			$rendered = \PKIW\inject_post_date_into_card( $rendered, $post );
-		}
-		$html = $rendered;
+	// The kind card: the one the stream card holds, or the plugin's own render of it.
+	$source = $html;
+	if ( false === strpos( $source, 'pk-card k-' . $kind ) ) {
+		$source = (string) render_block( $card );
 	}
-
-	$a = card_attrs( $post, 'post-kinds-indieweb/' . $kind . '-card', (array) ( $card['attrs'] ?? array() ) );
-	// Meta the block lacked: the plugin renders the card again from the full set.
-	$html   = \Courtneyr\Child\SinglePlacemat\rerender_with_meta( $html, $post, $kind, $a );
-	if ( function_exists( '\\PKIW\\link_title_to_post' ) && false === strpos( $html, 'class="pk-title p-name"><a' ) ) {
-		$html = \PKIW\link_title_to_post( $html, $post );
+	$at    = strpos( $source, 'pk-card k-' . $kind );
+	$open  = false !== $at ? strrpos( substr( $source, 0, $at ), '<article' ) : false;
+	$close = false !== $open ? strpos( $source, '</article>', $open ) : false;
+	if ( false === $close ) {
+		return $html;
 	}
-	if ( false === strpos( $html, 'dt-published' ) && function_exists( '\\PKIW\\inject_post_date_into_card' ) ) {
-		$html = \PKIW\inject_post_date_into_card( $html, $post );
-	}
+	$parts  = parts( substr( $source, $open, $close + 10 - $open ), $kind );
 	$is_eat = 'eat' === $kind;
-	$name   = trim( (string) ( $a['name'] ?? '' ) );
-	$type   = (string) ( $a['drinkType'] ?? 'other' );
-	$s      = seed( (string) $post->ID, '' !== $name ? $name : $post->post_title );
+	$name   = '' !== $parts['name'] ? $parts['name'] : html_entity_decode( get_the_title( $post ), ENT_QUOTES );
+	$term   = get_term_by( 'slug', $kind, 'kind' );
 
-	// 1. The rating as a number.
-	if ( preg_match( '/<div class="pk-stars[^"]*" aria-label="[^"]*?(\d)[^"]*"/', $html, $m, PREG_OFFSET_CAPTURE ) ) {
-		$s_end = strpos( $html, '</div>', (int) $m[0][1] );
-		if ( false !== $s_end ) {
-			$html = substr( $html, 0, $s_end ) . '<span class="pk-rating-value">' . esc_html( sprintf( '%d / 5', (int) $m[1][0] ) ) . '</span>' . substr( $html, $s_end );
-		}
-	}
+	// Cuisine then restaurant, or type then brand: only what the card printed.
+	$sub = array_filter( array( esc_html( $parts['sort'] ), $parts['maker_html'] ) );
 
-	// 2. WHERE: the plugin's location block stays where it is (venue, town);
-	//    a restaurant that only repeats the venue leaves the sub line.
-	$has_where  = false !== strpos( $html, 'pk-sub p-location h-card' );
-	$restaurant = trim( (string) ( $a['restaurant'] ?? '' ) );
-	if ( $has_where && '' !== $restaurant && $restaurant === trim( (string) ( $a['locationName'] ?? '' ) ) ) {
-		$html = (string) preg_replace( '/<span class="p-location h-card"><span class="p-name">' . preg_quote( esc_html( $restaurant ), '/' ) . '<\/span><\/span>\s*(?:&mdash;\s*)?/', '', $html, 1 );
+	$stamp = '' !== $parts['when'] ? strtotime( $parts['when'] ) : false;
+	$iso   = false !== $stamp ? $parts['when'] : (string) get_post_time( 'c', true, $post );
+	$day   = false !== $stamp ? (string) wp_date( (string) get_option( 'date_format' ), $stamp ) : (string) get_the_date( '', $post );
+
+	// The small photo: the card's own, or else the featured image, with the alt text WordPress holds.
+	$photo = '';
+	if ( is_array( $parts['photo'] ) && '' !== $parts['photo']['src'] ) {
+		$photo = '<img class="u-photo" src="' . esc_url( $parts['photo']['src'] ) . '" alt="' . esc_attr( $parts['photo']['alt'] ) . '" loading="lazy" decoding="async" />';
+	} elseif ( has_post_thumbnail( $post ) ) {
+		$photo = get_the_post_thumbnail( $post, 'medium' );
 	}
 
-	// 3. A map link instead of a map, when coordinates exist. A card with no
-	//    location borrows Simple Location's public place: its address as the
-	//    WHERE line (after the sub line) and its point for the link.
-	$lat = (float) ( $a['geoLatitude'] ?? 0 );
-	$lon = (float) ( $a['geoLongitude'] ?? 0 );
-	if ( ! $has_where ) {
-		$sl = \Courtneyr\Child\SinglePlacemat\sloc_place( $post );
-		$c_open = '<div class="pk-caption">';
-		$c_pos  = strpos( $html, $c_open );
-		$c_end  = false !== $c_pos ? strpos( $html, '</div>', $c_pos ) : false;
-		if ( '' !== $sl['address'] && false !== $c_end ) {
-			$html      = substr( $html, 0, $c_end ) . '<p class="pk-sub p-location cr-mat__place">' . esc_html( $sl['address'] ) . '</p>' . substr( $html, $c_end );
-			$has_where = true;
-		}
-		if ( 0.0 === $lat && 0.0 === $lon ) {
-			$lat = $sl['lat'];
-			$lon = $sl['lon'];
-		}
+	$out  = '<article class="pk-card pk-card--stream k-' . $kind . ' p-' . ( $is_eat ? 'ate' : 'drank' ) . ' h-food cr-chit cr-chit--' . $kind . ( '' !== $photo ? ' cr-chit--has-photo' : '' ) . '">';
+	$out .= '<div class="cr-chit__body">';
+	$out .= '<p class="cr-chit__kind">' . esc_html( $term instanceof \WP_Term ? $term->name : ( $is_eat ? __( 'Eat', 'courtneyr-child' ) : __( 'Drink', 'courtneyr-child' ) ) ) . '</p>';
+	$out .= '<h2 class="cr-chit__title p-name"><a class="cr-chit__link u-url" href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( $name ) . '</a></h2>';
+	if ( $sub ) {
+		$out .= '<p class="cr-chit__sub">' . implode( '<span class="cr-chit__dot" aria-hidden="true"> · </span>', $sub ) . '</p>';
 	}
-	$map = '';
-	if ( 0.0 !== $lat || 0.0 !== $lon ) {
-		$map = '<a class="cr-mat__map" href="' . esc_url( sprintf( 'https://www.openstreetmap.org/?mlat=%F&mlon=%F#map=16/%F/%F', $lat, $lon, $lat, $lon ) ) . '" target="_blank" rel="noopener noreferrer">'
-			. '<svg class="cr-mat__pin" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 1.5a4.5 4.5 0 0 0-4.5 4.5c0 3.4 4.5 8.5 4.5 8.5s4.5-5.1 4.5-8.5A4.5 4.5 0 0 0 8 1.5zm0 6.3a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6z" fill="currentColor"/></svg>'
-			. esc_html__( 'View on map', 'courtneyr-child' ) . '<span class="pk-sr-only"> ' . esc_html__( '(opens in a new tab)', 'courtneyr-child' ) . '</span> <span aria-hidden="true">↗</span></a>';
+	if ( '' !== $parts['rated'] ) {
+		$out .= '<p class="cr-chit__rating">' . esc_html( $parts['rated'] ) . ( '' !== $parts['rating'] ? '<data class="p-rating" value="' . esc_attr( $parts['rating'] ) . '" hidden></data>' : '' ) . '</p>';
 	}
+	$out .= '<p class="cr-chit__date"><time class="dt-published" datetime="' . esc_attr( $iso ) . '">' . esc_html( $day ) . '</time></p>';
+	if ( '' !== $parts['note'] ) {
+		$out .= '<p class="cr-chit__note p-content">' . esc_html( $parts['note'] ) . '</p>';
+	}
+	$out .= '</div>';
+	if ( '' !== $photo ) {
+		$out .= '<figure class="cr-chit__photo">' . $photo . '</figure>';
+	}
+	$out .= $parts['marker'] . '</article>';
 
-	// 4. The art corner: one doodle, one small generic stamp, one short line.
-	$art  = '<div class="cr-mat__art" aria-hidden="true">';
-	$art .= doodles( $kind, $type );
-	$art .= '<div class="cr-mat__stamp">' . render(
-		array(
-			'shape'  => 'rect',
-			'big'    => stamp_line( $kind, $type ),
-			'mid'    => $is_eat ? __( 'Eaten well', 'courtneyr-child' ) : __( 'Sipped slowly', 'courtneyr-child' ),
-			'ink'    => INKS[ pick( $s, 3, count( INKS ) ) ],
-			'tilt'   => pick( $s, 6, TILTS ),
-			'family' => 'placemat-mini',
-		)
-	) . '</div>';
-	$lines = hand_lines( $kind );
-	$art  .= '<p class="cr-hand cr-mat__hand">' . esc_html( $lines[ pick( $s, 4, count( $lines ) ) ] ) . '</p>';
-	$art  .= '</div>';
-
-	// 5. One date, top right: the card's own ateAt / drankAt when it has one,
-	//    else the plugin's stream date (the post date), trimmed to the date;
-	//    the time of day stays on the single. The datetime attribute is kept.
-	$stream_date = '';
-	if ( preg_match( '/<p class="pk-sub pk-stream-date">(.*?)<\/p>/s', $html, $sd, PREG_OFFSET_CAPTURE ) ) {
-		$stream_date = $sd[1][0];
-		$html        = substr( $html, 0, (int) $sd[0][1] ) . substr( $html, (int) $sd[0][1] + strlen( $sd[0][0] ) );
+	// Swap the card in where the stream card held one; otherwise it is the card.
+	if ( $source === $html ) {
+		return substr( $html, 0, $open ) . $out . substr( $html, $close + 10 );
 	}
-	$m_open = '<div class="pk-meta">';
-	$m_pos  = strpos( $html, $m_open );
-	$m_end  = false !== $m_pos ? strpos( $html, '</div>', $m_pos ) : false;
-	if ( false !== $m_end ) {
-		$inner = substr( $html, $m_pos + strlen( $m_open ), $m_end - $m_pos - strlen( $m_open ) );
-		if ( false === strpos( $inner, '<time' ) && '' !== $stream_date ) {
-			$inner = $stream_date;
-		}
-		$inner = (string) preg_replace_callback(
-			'/(<time class="dt-published" datetime="([^"]*)">)([^<]*)(<\/time>)/',
-			static function ( array $mm ): string {
-				$ts = (int) strtotime( $mm[2] );
-				return $mm[1] . ( $ts > 0 ? esc_html( (string) wp_date( get_option( 'date_format' ), $ts ) ) : $mm[3] ) . $mm[4];
-			},
-			$inner,
-			1
-		);
-		$html = substr( $html, 0, $m_pos + strlen( $m_open ) ) . $inner . substr( $html, $m_end );
-	}
-
-	$meta = strpos( $html, '<div class="pk-meta">' );
-	if ( false !== $meta ) {
-		$html = substr( $html, 0, $meta ) . $map . $art . substr( $html, $meta );
-	}
-
-	$tags = new \WP_HTML_Tag_Processor( $html );
-	if ( $tags->next_tag( array( 'tag_name' => 'article', 'class_name' => 'pk-card' ) ) ) {
-		$tags->add_class( 'pk-card--stream' );
-		$tags->add_class( 'cr-mat' );
-		$tags->add_class( 'cr-mat--' . $kind );
-		if ( ! $is_eat ) {
-			$tags->add_class( 'cr-mat--' . sanitize_html_class( $type, 'other' ) );
-		}
-		if ( false !== strpos( $html, 'pk-embed--photo' ) ) {
-			$tags->add_class( 'cr-mat--has-photo' );
-		}
-		if ( $has_where ) {
-			$tags->add_class( 'cr-mat--has-where' );
-		}
-		if ( '' !== $map ) {
-			$tags->add_class( 'cr-mat--has-map' );
-		}
-		$html = $tags->get_updated_html();
-	}
-	return $html;
+	return $out;
 }
-add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\placemat_card', 10, 3 );
+add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\card', 10, 3 );

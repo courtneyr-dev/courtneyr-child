@@ -1,0 +1,625 @@
+/* ============================================================
+   Eat and drink: the order ticket, the coaster, the check-in map
+   slip and the compact Stream cards (PKIW #230)
+
+   Single   body.cr-order-single: one placemat holding the order
+            and, under it, the map slip. inc/single-eat-drink.php
+            sets the order out from what the plugin's card printed;
+            inc/checkin-map.php prints the slip.
+   Stream   .cr-chit: the same facts as one small card whose title
+            link covers it. inc/stream-eat-drink.php.
+
+   The placemat, the papers, the tape and the clipboard are objects,
+   so they take palette tokens and keep their colours in dark mode.
+   Focus and the hard shadows use the semantic tokens. Nothing here
+   adds content: every drawn part is a border, a background or an
+   empty pseudo-element.
+   ============================================================ */
+
+/* ============================================================
+   Single: the placemat
+   ============================================================ */
+body.cr-order-single .single-post__content {
+	width: 100%;
+	max-width: 68rem;
+	margin-inline: auto;
+}
+
+body.cr-order-single .single-post__content .cr-placemat {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 1.75rem;
+	max-width: none;
+	margin: 0;
+	padding: 1.25rem 1rem 1.5rem;
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-sky-blue);
+	box-shadow: var(--cr-shadow-hard-2);
+	color: var(--cr-russian-violet);
+}
+
+body.cr-order-single .single-post__content .cr-placemat--drink {
+	background: var(--cr-glaucous);
+}
+
+/* ============================================================
+   The order: shared parts
+   ============================================================ */
+.cr-placemat .cr-order {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 1.25rem;
+	min-width: 0;
+}
+
+.cr-placemat .cr-order__photo {
+	position: relative;
+	align-self: start;
+	margin: 0;
+	padding: 0.45rem;
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-white);
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-placemat .cr-order__photo img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
+}
+
+/* One strip of tape holds the photo. */
+.cr-placemat .cr-order__photo::before {
+	content: "";
+	position: absolute;
+	top: -0.7rem;
+	left: 1rem;
+	width: 5rem;
+	height: 1.3rem;
+	background: var(--cr-tape);
+	opacity: 0.92;
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-placemat .cr-order__sheet {
+	min-width: 0;
+}
+
+/* The kind, lettered on a strip of coloured paper. */
+.cr-placemat .cr-order__kind {
+	width: fit-content;
+	margin: 0 0 0.6rem;
+	padding: 0.15em 0.9em;
+	background: var(--cr-sky-blue);
+	font-family: var(--cr-font-accent);
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.3;
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-placemat--drink .cr-order__kind {
+	background: var(--cr-periwinkle);
+}
+
+.cr-placemat .cr-order__kind-link {
+	background: none;
+	box-shadow: none;
+	color: var(--cr-russian-violet);
+	text-decoration: none;
+}
+
+.cr-placemat .cr-order__kind-link:hover {
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.15em;
+}
+
+.cr-placemat .cr-order__kind-link:focus-visible {
+	outline: 3px solid var(--cr-russian-violet);
+	outline-offset: 3px;
+}
+
+/* The title, with one stroke of yellow marker under it. */
+.cr-placemat .cr-order__title {
+	margin: 0 0 1rem;
+	padding-bottom: 0.5rem;
+	background: linear-gradient(var(--cr-selective-yellow), var(--cr-selective-yellow)) 0 100% / min(9rem, 60%) 0.35rem no-repeat;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--wp--preset--font-size--xxl);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.1;
+	overflow-wrap: anywhere;
+}
+
+.cr-placemat .cr-order__facts {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+	gap: 0.9rem 2rem;
+	margin: 0;
+	padding: 0.9rem 0;
+	border-block: 1px solid var(--cr-glaucous);
+	overflow: clip;
+}
+
+/* A rule stands between facts. Each fact draws it at its own left, a gap
+   away, and the list clips the one that would stand before a row's first. */
+.cr-placemat .cr-order__fact {
+	min-width: 0;
+	margin-inline-start: -1rem;
+	padding-inline-start: 1rem;
+	border-inline-start: 1px solid var(--cr-glaucous);
+}
+
+.cr-placemat .cr-order__label {
+	margin: 0 0 0.15rem;
+	color: var(--cr-cerulean);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+}
+
+.cr-placemat .cr-order__value {
+	margin: 0;
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.25;
+	overflow-wrap: anywhere;
+}
+
+.cr-placemat .cr-order__notes {
+	margin-top: 1rem;
+}
+
+.cr-placemat .cr-order__notes-title,
+.cr-placemat .cr-map-slip__title {
+	width: fit-content;
+	margin: 0 0 0.5rem;
+	padding-bottom: 0.25rem;
+	background: linear-gradient(var(--cr-selective-yellow), var(--cr-selective-yellow)) 0 100% / 100% 0.25rem no-repeat;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--wp--preset--font-size--medium);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.2;
+}
+
+.cr-placemat .cr-order__note {
+	margin: 0;
+	line-height: 1.5;
+}
+
+/* ============================================================
+   Eat: one order ticket on a clipboard
+
+   The ticket is one sheet. Its paper is a pseudo-element cut along
+   the foot, so the hard shadow follows the torn edge. A second one
+   is the clipboard's bar and its clip.
+   ============================================================ */
+.cr-placemat .cr-order--ticket {
+	--ticket-tear: polygon(0 0, 100% 0, 100% calc(100% - 0.35rem), 94% calc(100% - 0.05rem), 87% calc(100% - 0.4rem), 79% calc(100% - 0.1rem), 71% calc(100% - 0.45rem), 62% calc(100% - 0.05rem), 54% calc(100% - 0.35rem), 45% 100%, 37% calc(100% - 0.4rem), 28% calc(100% - 0.1rem), 20% calc(100% - 0.45rem), 12% calc(100% - 0.05rem), 5% calc(100% - 0.3rem), 0 calc(100% - 0.1rem));
+	position: relative;
+	isolation: isolate;
+	padding: 2.6rem 1rem 1.75rem;
+	filter: drop-shadow(1px 1px 0 var(--cr-russian-violet)) drop-shadow(-1px -1px 0 var(--cr-russian-violet)) drop-shadow(var(--cr-shadow-hard));
+}
+
+.cr-placemat .cr-order--ticket::before {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	inset: 0;
+	background: var(--cr-printer-ivory);
+	clip-path: var(--ticket-tear);
+}
+
+.cr-placemat .cr-order--ticket::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	right: 0;
+	left: 0;
+	height: 1.5rem;
+	background:
+		linear-gradient(var(--cr-light-gray), var(--cr-light-gray)) center top / 4rem 100% no-repeat,
+		linear-gradient(var(--cr-prussian-blue), var(--cr-prussian-blue)) center top / 100% 60% no-repeat;
+}
+
+/* ============================================================
+   Drink: a taped photo beside a coaster
+   ============================================================ */
+.cr-placemat .cr-order--coaster .cr-order__photo {
+	padding: 0.6rem 0.6rem 1.6rem;
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-placemat .cr-order--coaster .cr-order__sheet {
+	padding: 1.5rem 1.25rem;
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: var(--cr-radius-xl);
+	background: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+/* A coaster reads its facts as rows: the label, then the value. */
+.cr-placemat .cr-order--coaster .cr-order__facts {
+	grid-template-columns: minmax(0, 1fr);
+	gap: 0.45rem;
+}
+
+.cr-placemat .cr-order--coaster .cr-order__fact {
+	display: grid;
+	grid-template-columns: 5.5rem minmax(0, 1fr);
+	gap: 0.75rem;
+	align-items: baseline;
+	margin-inline-start: 0;
+	padding-inline-start: 0;
+	border-inline-start: 0;
+}
+
+.cr-placemat .cr-order--coaster .cr-order__label {
+	margin: 0;
+}
+
+/* ============================================================
+   The check-in map slip: a folded slip under the order
+   ============================================================ */
+.cr-placemat .cr-map-slip {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 0;
+	min-width: 0;
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+/* One strip of tape holds the slip to the placemat. */
+.cr-placemat .cr-map-slip::before {
+	content: "";
+	position: absolute;
+	top: -0.7rem;
+	right: 2rem;
+	width: 5rem;
+	height: 1.3rem;
+	background: var(--cr-tape);
+	opacity: 0.92;
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-placemat .cr-map-slip__map {
+	min-width: 0;
+	padding: 0.75rem;
+}
+
+.cr-placemat .cr-map-slip__frame {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	height: auto;
+	aspect-ratio: 16 / 10;
+	border: 2px solid var(--cr-russian-violet);
+}
+
+/* Keyboard focus inside the map shows on its holder, clear of the frame. */
+.cr-placemat .cr-map-slip__map:focus-within .cr-map-slip__frame {
+	outline: 3px solid var(--cr-russian-violet);
+	outline-offset: 3px;
+}
+
+.cr-placemat .cr-map-slip__caption {
+	min-width: 0;
+	padding: 1rem 1.1rem 1.1rem;
+	border-block-start: 1px dashed var(--cr-glaucous);
+}
+
+.cr-placemat .cr-map-slip--text .cr-map-slip__caption {
+	border-block-start: 0;
+}
+
+.cr-placemat .cr-map-slip__place {
+	display: grid;
+	gap: 0.15rem;
+	margin: 0 0 0.6rem;
+	line-height: 1.35;
+}
+
+.cr-placemat .cr-map-slip__name {
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold);
+}
+
+.cr-placemat .cr-map-slip__privacy {
+	margin: 0 0 0.6rem;
+	color: var(--cr-prussian-blue);
+	font-size: var(--wp--preset--font-size--small);
+	line-height: 1.45;
+}
+
+.cr-placemat .cr-map-slip__more {
+	margin: 0;
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.cr-placemat .cr-map-slip__link {
+	background: none;
+	box-shadow: none;
+	color: var(--cr-russian-violet);
+	font-weight: var(--cr-weight-bold);
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.15em;
+}
+
+.cr-placemat .cr-map-slip__link:focus-visible {
+	outline: 3px solid var(--cr-russian-violet);
+	outline-offset: 3px;
+}
+
+/* ============================================================
+   Wider screens
+   ============================================================ */
+@media (min-width: 48rem) {
+
+	body.cr-order-single .single-post__content .cr-placemat {
+		gap: 2rem;
+		padding: 2rem;
+	}
+
+	.cr-placemat .cr-order__title {
+		font-size: var(--wp--preset--font-size--display);
+	}
+
+	/* The ticket: photo at its left, the order beside it. */
+	.cr-placemat .cr-order--ticket.cr-order--has-photo {
+		grid-template-columns: minmax(0, 38fr) minmax(0, 62fr);
+		gap: 2rem;
+		padding: 3rem 2rem 2.25rem;
+	}
+
+	.cr-placemat .cr-order--ticket {
+		padding: 3rem 2rem 2.25rem;
+	}
+
+	/* The coaster: the taped photo, then the coaster. */
+	.cr-placemat .cr-order--coaster.cr-order--has-photo {
+		grid-template-columns: minmax(0, 44fr) minmax(0, 56fr);
+		gap: 2.25rem;
+		align-items: center;
+	}
+
+	.cr-placemat .cr-order--coaster .cr-order__sheet {
+		padding: 2rem;
+	}
+
+	/* The slip: the map on the left, the place on the right, a fold between. */
+	.cr-placemat .cr-map-slip--map {
+		grid-template-columns: minmax(0, 62fr) minmax(0, 38fr);
+		align-items: center;
+	}
+
+	.cr-placemat .cr-map-slip--map .cr-map-slip__caption {
+		align-self: stretch;
+		padding: 1.5rem;
+		border-block-start: 0;
+		border-inline-start: 1px dashed var(--cr-glaucous);
+	}
+}
+
+/* ============================================================
+   Stream: the compact ticket and coaster
+   ============================================================ */
+.cr-stream-page .pk-card.pk-card--stream.cr-chit {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 0.75rem;
+	padding: 1.1rem 1rem 1rem;
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: 0;
+	background: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+}
+
+/* A ticket is perforated along its top; a coaster has round corners. */
+.cr-stream-page .pk-card.pk-card--stream.cr-chit--eat {
+	border-block-start: 2px dashed var(--cr-russian-violet);
+}
+
+.cr-stream-page .pk-card.pk-card--stream.cr-chit--drink {
+	border-radius: var(--cr-radius-lg);
+}
+
+.cr-stream-page .pk-card.pk-card--stream.cr-chit--has-photo {
+	grid-template-columns: minmax(0, 1fr) 5.5rem;
+}
+
+/* Nothing between the link and the card is positioned, so the link's box can be the card's. */
+.cr-stream-page .cr-chit .cr-chit__body {
+	position: static;
+	min-width: 0;
+}
+
+.cr-stream-page .cr-chit .cr-chit__kind {
+	margin: 0 0 0.25rem;
+	color: var(--cr-prussian-blue);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+}
+
+.cr-stream-page .cr-chit .cr-chit__title {
+	margin: 0 0 0.25rem;
+	font-family: var(--cr-font-accent);
+	font-size: var(--wp--preset--font-size--medium);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.2;
+	overflow-wrap: anywhere;
+}
+
+/* The title is the card's one link, and its box is the whole card. */
+.cr-stream-page .cr-chit .cr-chit__link {
+	background: none;
+	box-shadow: none;
+	color: var(--cr-russian-violet);
+	text-decoration: none;
+}
+
+.cr-stream-page .cr-chit .cr-chit__link::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-stream-page .cr-chit .cr-chit__link:hover {
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.15em;
+}
+
+.cr-stream-page .cr-chit .cr-chit__link:focus-visible {
+	outline: none;
+}
+
+.cr-stream-page .cr-chit .cr-chit__link:focus-visible::after {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-stream-page .cr-chit .cr-chit__sub,
+.cr-stream-page .cr-chit .cr-chit__rating,
+.cr-stream-page .cr-chit .cr-chit__date,
+.cr-stream-page .cr-chit .cr-chit__note {
+	margin: 0 0 0.3rem;
+	font-size: var(--wp--preset--font-size--small);
+	line-height: 1.4;
+}
+
+.cr-stream-page .cr-chit .cr-chit__sub {
+	color: var(--cr-prussian-blue);
+}
+
+.cr-stream-page .cr-chit .cr-chit__rating {
+	font-weight: var(--cr-weight-bold);
+}
+
+.cr-stream-page .cr-chit .cr-chit__date {
+	color: var(--cr-prussian-blue);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+}
+
+.cr-stream-page .cr-chit .cr-chit__note {
+	margin-bottom: 0;
+}
+
+.cr-stream-page .cr-chit .cr-chit__photo {
+	position: relative;
+	align-self: start;
+	margin: 0;
+	padding: 0.25rem;
+	border: 1.5px solid var(--cr-russian-violet);
+	background: var(--cr-white);
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-stream-page .cr-chit .cr-chit__photo img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 1;
+	object-fit: cover;
+}
+
+/* ============================================================
+   Forced colours and print
+   ============================================================ */
+@media (forced-colors: active) {
+
+	body.cr-order-single .single-post__content .cr-placemat,
+	.cr-placemat .cr-order__photo,
+	.cr-placemat .cr-order--coaster .cr-order__sheet,
+	.cr-placemat .cr-map-slip,
+	.cr-placemat .cr-map-slip__frame,
+	.cr-stream-page .pk-card.pk-card--stream.cr-chit,
+	.cr-stream-page .cr-chit .cr-chit__photo {
+		border-color: CanvasText;
+		box-shadow: none;
+	}
+
+	/* The ticket loses its paper, tear, shadow and clipboard and keeps a plain outline. */
+	.cr-placemat .cr-order--ticket {
+		border: 2px solid CanvasText;
+		filter: none;
+	}
+
+	.cr-placemat .cr-order--ticket::before,
+	.cr-placemat .cr-order--ticket::after,
+	.cr-placemat .cr-order__photo::before,
+	.cr-placemat .cr-map-slip::before {
+		content: none;
+	}
+
+	.cr-placemat .cr-order__kind {
+		border: 1px solid CanvasText;
+	}
+
+	.cr-placemat .cr-order__title,
+	.cr-placemat .cr-order__notes-title,
+	.cr-placemat .cr-map-slip__title {
+		background: none;
+		border-block-end: 2px solid CanvasText;
+	}
+
+	.cr-placemat .cr-order__kind-link:focus-visible,
+	.cr-placemat .cr-map-slip__link:focus-visible,
+	.cr-placemat .cr-map-slip__map:focus-within .cr-map-slip__frame,
+	.cr-stream-page .cr-chit .cr-chit__link:focus-visible::after {
+		outline-color: Highlight;
+		box-shadow: none;
+	}
+}
+
+@media print {
+
+	body.cr-order-single .single-post__content .cr-placemat,
+	.cr-placemat .cr-order__photo,
+	.cr-placemat .cr-order--coaster .cr-order__sheet,
+	.cr-placemat .cr-map-slip {
+		box-shadow: none;
+	}
+
+	.cr-placemat .cr-order--ticket {
+		filter: none;
+	}
+
+	/* A map frame prints as a blank box; the place and the link's address are text. */
+	.cr-placemat .cr-map-slip__map {
+		display: none;
+	}
+
+	.cr-placemat .cr-map-slip--map {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.cr-placemat .cr-map-slip--map .cr-map-slip__caption {
+		border: 0;
+	}
+
+	.cr-placemat .cr-order,
+	.cr-placemat .cr-map-slip {
+		break-inside: avoid;
+	}
+}
