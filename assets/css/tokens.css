@@ -642,8 +642,13 @@ a {
    else in the cascade moves. */
 a:hover:where(:not(.wp-element-button, .wp-block-button__link, .cr-cta)) { color: var(--cr-link-hover); }
 a:visited:where(:not(.wp-element-button, .wp-block-button__link, .cr-cta)) { color: var(--cr-link-visited); }
+
+/* The ring's width holds against an inline style. Accessibility Checker's
+   link-underline fix writes `outline-width: 2px` on a focused link, and an
+   inline style beats a stylesheet rule that isn't marked important. */
 a:focus-visible {
   outline: 3px solid var(--cr-focus-ring);
+  outline-width: 3px !important;
   outline-offset: 2px;
   border-radius: var(--cr-radius-xs);
   box-shadow: 0 0 0 7px var(--cr-focus-halo);

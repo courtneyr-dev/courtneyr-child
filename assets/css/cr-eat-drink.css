@@ -299,11 +299,15 @@ body.cr-order-single .single-post__content .cr-placemat--drink {
 	padding: 0.75rem;
 }
 
+/* 16:10 where the slip is wide. On a phone that ratio is too short: the embed's
+   zoom buttons and attribution covered half of a 136px map at 320px. At 14rem
+   they cover under a third. */
 .cr-placemat .cr-map-slip__frame {
 	display: block;
 	width: 100%;
 	max-width: 100%;
 	height: auto;
+	min-height: 14rem;
 	aspect-ratio: 16 / 10;
 	border: 2px solid var(--cr-russian-violet);
 }
