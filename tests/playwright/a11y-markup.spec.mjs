@@ -29,6 +29,10 @@ const ORDER_NO_COORDS = process.env.CR_ORDER_NO_COORDS_PATH || '/2026/09/06/seed
 const ORDER_SLOC = process.env.CR_ORDER_SLOC_PATH || '/2026/08/27/old-fashioned/'; // a drink post whose card has no location and whose Simple Location point is public (local fixture)
 const ORDER_STREAM = process.env.CR_ORDER_STREAM_PATH || '/stream/'; // a Stream page that shows an eat or drink post (local fixture); the test skips when it shows none
 const DRINK_UNSET = process.env.CR_DRINK_UNSET_PATH || '/2026/09/05/house-lemonade/'; // a drink post whose card has no drink type and whose `_pkiw_drink_type` is empty (local fixture)
+const CHECKIN_ARCHIVE = process.env.CR_CHECKIN_ARCHIVE_PATH || '/kind/checkin/'; // check-in archive (PKIW #224); its tests skip on a site with fewer than two mapped check-ins
+const CHECKIN_PUBLIC = process.env.CR_CHECKIN_PUBLIC_PATH || '/2026/09/12/evening-walk/'; // a public check-in with a street address and coordinates (local fixture, `_cr_seed_224`)
+const CHECKIN_GENERATED_PRIVATE = process.env.CR_CHECKIN_GENERATED_PRIVATE_PATH || '/2026/08/09/checked-in-at-hidden-venue/'; // a private check-in whose stored title is "Checked in at Hidden Venue" (local fixture)
+const CHECKIN_STREAM = process.env.CR_CHECKIN_STREAM_PATH || '/stream/'; // a Stream page that shows a public check-in; the test skips when it shows none
 const CHECKIN_STALE_PRIVATE = process.env.CR_CHECKIN_STALE_PRIVATE_PATH || '/2026/07/20/quiet-afternoon/'; // a check-in whose `_pkiw_geo_privacy` is private while its card's saved locationPrivacy attribute still says public (local fixture)
 const RECIPE_SINGLE = process.env.CR_RECIPE_SINGLE_PATH || '/2026/08/14/tomato-basil-soup/'; // a recipe post with a WP Recipe Maker recipe and a featured image (local fixture)
 const RECIPE_PLAIN_SINGLE = process.env.CR_RECIPE_PLAIN_SINGLE_PATH || '/2026/08/01/campfire-chili/'; // a recipe post with no recipe card (local fixture)
@@ -1816,3 +1820,172 @@ test( 'a check-in the plugin holds private prints no place from the theme, whate
 		expect( text, 'a stamp line names no place' ).toMatch( /^(ARRIVED|CHECKED IN|CHECK-IN|№ \d+|\d{2} [A-Z]{3} \d{4})$/ );
 	}
 } );
+
+// PKIW #224: the check-in archive is a map and a list on one placemat. The plugin's Check-ins
+// Feed prints both; the map holds only check-ins whose coordinates the visitor may see.
+test.describe( 'check-in archive (PKIW #224)', () => {
+	const open = async ( page ) => {
+		const response = await page.goto( CHECKIN_ARCHIVE, { waitUntil: 'load' } );
+		const mapped = await page.locator( '.pkiw-checkin-archive__entry.is-mapped' ).count();
+		test.skip( response.status() === 404 || mapped < 2, `fewer than two mapped check-ins at ${ CHECKIN_ARCHIVE }` );
+		await expect( page.locator( '.pkiw-checkin-archive__map .leaflet-control-zoom-in' ), 'the map script ran' ).toHaveCount( 1 );
+	};
+	const box = ( locator ) => locator.evaluateAll( ( els ) => els.map( ( el ) => { const r = el.getBoundingClientRect(); return [ Math.round( r.width ), Math.round( r.height ) ]; } ) );
+
+	test( 'one h1, a named map region, a count line, and visible attribution', async ( { page } ) => {
+		await open( page );
+		await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
+
+		const map = page.locator( '.pkiw-checkin-archive__map' );
+		await expect( map ).toHaveAttribute( 'role', 'region' );
+		await expect( map ).toHaveAttribute( 'aria-label', /\S/ );
+		const summary = page.locator( `#${ await map.getAttribute( 'aria-describedby' ) }` );
+		await expect( summary ).toHaveText( /^\d+ check-ins? · \d+ mapped$/ );
+		await expect( map.locator( '.leaflet-control-attribution' ) ).toBeVisible();
+		await expect( map.locator( '.leaflet-control-attribution' ) ).toContainText( 'OpenStreetMap' );
+
+		// A pin, coordinates and a number go together; an entry without a number carries no coordinates.
+		expect( await page.locator( '.pkiw-checkin-archive__entry:not(.is-mapped) .h-geo' ).count() ).toBe( 0 );
+		expect( await page.locator( '.pkiw-checkin-archive__entry:not(.is-mapped) .pkiw-checkin-archive__num' ).count() ).toBe( 0 );
+		expect( await page.locator( '.pkiw-checkin-archive__entry.is-mapped .h-geo' ).count() ).toBe( await page.locator( '.pkiw-checkin-archive__entry.is-mapped' ).count() );
+
+		// Every entry is a link, mapped or not.
+		const entries = page.locator( '.pkiw-checkin-archive__entry' );
+		expect( await entries.locator( '.pkiw-checkin-archive__title a[href]' ).count() ).toBe( await entries.count() );
+		for ( const text of await entries.locator( '.pkiw-checkin-archive__title a' ).allTextContents() ) {
+			expect( text.trim().length, 'each entry link has text' ).toBeGreaterThan( 0 );
+		}
+	} );
+
+	test( 'zoom buttons, pins and list numbers are at least 44 by 44 CSS pixels', async ( { page } ) => {
+		await open( page );
+		for ( const selector of [ '.pkiw-checkin-archive__map .leaflet-control-zoom a', '.pkiw-checkin-archive__map .pkiw-pin', 'button.pkiw-checkin-archive__num' ] ) {
+			const sizes = await box( page.locator( selector ) );
+			expect( sizes.length, selector ).toBeGreaterThan( 0 );
+			for ( const [ width, height ] of sizes ) {
+				expect( Math.min( width, height ), `${ selector } is ${ width }x${ height }` ).toBeGreaterThanOrEqual( 44 );
+			}
+		}
+	} );
+
+	test( 'keyboard: zoom comes before the pins, Enter on a pin goes to its entry, a list number moves the map', async ( { page } ) => {
+		await open( page );
+		const map = page.locator( '.pkiw-checkin-archive__map' );
+		const focused = () => page.evaluate( () => { const el = document.activeElement; return `${ el.tagName.toLowerCase() }.${ String( el.className ).split( ' ' ).filter( Boolean ).slice( 0, 2 ).join( '.' ) }`; } );
+
+		await map.focus();
+		await page.keyboard.press( 'Tab' );
+		expect( await focused() ).toContain( 'leaflet-control-zoom-in' );
+		await page.keyboard.press( 'Tab' );
+		expect( await focused() ).toContain( 'leaflet-control-zoom-out' );
+		await page.keyboard.press( 'Tab' ); // The attribution link.
+		await page.keyboard.press( 'Tab' );
+		expect( await focused(), 'the first pin follows the controls' ).toContain( 'pkiw-pin' );
+		expect( await page.evaluate( () => { const s = getComputedStyle( document.activeElement ); return s.outlineStyle !== 'none' && parseFloat( s.outlineWidth ) >= 2; } ), 'a focused pin shows a ring' ).toBe( true );
+
+		// A single pin (not a cluster) leads to its list entry.
+		const pin = map.locator( '.pkiw-pin:not(.pkiw-pin--cluster)' ).first();
+		await pin.focus();
+		await page.keyboard.press( 'Enter' );
+		expect( await page.evaluate( () => !! document.activeElement.closest( '.pkiw-checkin-archive__entry.is-active .pkiw-checkin-archive__title' ) ), 'focus is on the title link of the marked entry' ).toBe( true );
+
+		// A list number is a button that controls the map and keeps focus.
+		const number = page.locator( 'button.pkiw-checkin-archive__num' ).last();
+		await expect( number ).toHaveAttribute( 'aria-controls', await map.getAttribute( 'id' ) );
+		await expect( number ).toHaveAttribute( 'aria-label', /^Show .+ on map$/ );
+		await number.focus();
+		await page.keyboard.press( 'Enter' );
+		await expect( map.locator( '.pkiw-pin.is-active' ) ).toHaveCount( 1 );
+		expect( await page.evaluate( () => document.activeElement.classList.contains( 'pkiw-checkin-archive__num' ) ) ).toBe( true );
+
+		// Nothing traps: Tab from the last number leaves the placemat.
+		await page.keyboard.press( 'Tab' );
+		await page.keyboard.press( 'Tab' );
+		await page.keyboard.press( 'Tab' );
+		expect( await page.evaluate( () => !! document.activeElement.closest( '.pkiw-checkin-archive' ) ) ).toBe( false );
+	} );
+
+	test( 'the list is complete without JavaScript and the map stays hidden', async ( { browser } ) => {
+		const context = await browser.newContext( { javaScriptEnabled: false } );
+		const page = await context.newPage();
+		const response = await page.goto( CHECKIN_ARCHIVE, { waitUntil: 'load' } );
+		const entries = await page.locator( '.pkiw-checkin-archive__entry' ).count();
+		test.skip( response.status() === 404 || entries === 0, `no check-in archive at ${ CHECKIN_ARCHIVE }` );
+		expect( await page.locator( '.pkiw-checkin-archive__title a[href]' ).count() ).toBe( entries );
+		expect( await page.locator( '.pkiw-checkin-archive__map:visible' ).count() ).toBe( 0 );
+		await context.close();
+	} );
+
+	test( 'no sideways scroll at 320 pixels, and the kind badge clears the title on a phone', async ( { page } ) => {
+		await page.setViewportSize( { width: 320, height: 720 } );
+		await open( page );
+		expect( await page.evaluate( () => document.documentElement.scrollWidth ) ).toBeLessThanOrEqual( 320 );
+
+		await page.setViewportSize( { width: 375, height: 812 } );
+		const badge = await page.locator( '.cr-archive-identity--kind .cr-archive-identity__glyph' ).boundingBox();
+		const title = await page.locator( '.cr-archive__title' ).boundingBox();
+		expect( badge.x, 'the badge starts inside the 16px measure' ).toBeGreaterThanOrEqual( 16 );
+		expect( badge.y + badge.height, 'the badge ends above the title' ).toBeLessThanOrEqual( title.y + 1 );
+	} );
+
+	test( 'the pager, when the archive has one, is centered', async ( { page } ) => {
+		await open( page );
+		const pager = page.locator( '.cr-checkin-archive .wp-block-query-pagination' );
+		test.skip( ( await pager.count() ) === 0, 'one page of check-ins: no pager' );
+		expect( await pager.evaluate( ( el ) => getComputedStyle( el ).justifyContent ) ).toBe( 'center' );
+		await expect( pager ).toHaveAttribute( 'aria-label', /\S/ );
+	} );
+} );
+
+test( 'check-in single names its place once, on the card, with no comma opening a line (PKIW #224)', async ( { page } ) => {
+	const response = await page.goto( CHECKIN_PUBLIC, { waitUntil: 'load' } );
+	test.skip( response.status() === 404, `no public check-in fixture at ${ CHECKIN_PUBLIC }` );
+
+	await expect( page.locator( '.cr-journal__lede time' ) ).toHaveCount( 1 );
+	await expect( page.locator( '.cr-journal__lede-place' ) ).toHaveCount( 0 );
+	await expect( page.locator( '.cr-journal__meta-item--place' ) ).toHaveCount( 0 );
+
+	const card = page.locator( 'main article.k-checkin' );
+	await expect( card.locator( '.p-location .p-locality' ) ).toHaveCount( 1 );
+	const separator = card.locator( '.p-street-address + .pk-sub-sep' );
+	await expect( separator ).toHaveCount( 1 );
+	await expect( separator ).toBeHidden();
+} );
+
+test( 'a title generated from a hidden venue prints as "Check-in, date" in the h1 and the document title (PKIW #224)', async ( { page } ) => {
+	const response = await page.goto( CHECKIN_GENERATED_PRIVATE, { waitUntil: 'load' } );
+	test.skip( response.status() === 404, `no generated-title fixture at ${ CHECKIN_GENERATED_PRIVATE }` );
+
+	const heading = ( await page.locator( 'h1' ).first().textContent() ).trim();
+	expect( heading ).toMatch( /^Check-in, [A-Z][a-z]+ \d{1,2}, \d{4}$/ );
+	expect( await page.title() ).toContain( heading );
+	expect( await page.content(), 'the venue is nowhere in the page' ).not.toContain( 'Hidden Venue' );
+
+	const stamped = ( await page.locator( 'main .cr-passport__stamps svg text' ).allTextContents() ).map( ( text ) => text.trim() ).filter( Boolean );
+	expect( stamped.length ).toBeGreaterThan( 0 );
+	for ( const text of stamped ) {
+		expect( text, 'a stamp line names no place' ).toMatch( /^(ARRIVED|CHECKED IN|CHECK-IN|№ \d+|\d{2} [A-Z]{3} \d{4})$/ );
+	}
+	await expect( page.locator( 'main .cr-passport__stamps svg' ), 'one stamp, as a check-in with no location draws' ).toHaveCount( 1 );
+} );
+
+test( 'a public check-in on the Stream shows a still map thumbnail and one stamp (PKIW #224)', async ( { page } ) => {
+	await page.goto( CHECKIN_STREAM, { waitUntil: 'load' } );
+	const cards = page.locator( 'article.cr-passport:has(.cr-passport__thumb)' );
+	test.skip( ( await cards.count() ) === 0, `no public check-in on ${ CHECKIN_STREAM }` );
+
+	const card = cards.first();
+	await expect( card.locator( 'iframe' ) ).toHaveCount( 0 );
+	await expect( card.locator( '.cr-passport__thumb-map' ) ).toHaveAttribute( 'role', 'img' );
+	await expect( card.locator( '.cr-passport__thumb-map' ) ).toHaveAttribute( 'aria-label', /^Map showing / );
+	await expect( card.locator( '.cr-passport__thumb-tiles img' ) ).toHaveCount( 4 );
+	await expect( card.locator( '.cr-passport__thumb-credit' ) ).toContainText( 'OpenStreetMap' );
+	await expect( card.locator( '.cr-passport__thumb-credit' ) ).toBeVisible();
+	await expect( card.locator( '.cr-passport__stamps svg' ) ).toHaveCount( 1 );
+
+	// Every check-in card on the page keeps to one stamp, whatever its privacy.
+	for ( const count of await page.locator( 'article.cr-passport' ).evaluateAll( ( els ) => els.map( ( el ) => el.querySelectorAll( '.cr-passport__stamps svg' ).length ) ) ) {
+		expect( count ).toBe( 1 );
+	}
+} );
+

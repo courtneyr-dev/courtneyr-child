@@ -1,0 +1,192 @@
+/**
+ * Check-in archive placemat (PKIW issue 224).
+ *
+ * Paper and ink for the plugin's Check-ins Feed in archive mode. The plugin's
+ * own stylesheet sets the structure and the 44px targets; this file paints
+ * them with the theme's tokens. Leaflet draws the pins and controls with
+ * JavaScript, so Perfmatters' Remove Unused CSS must skip this file
+ * (inc/enqueue.php).
+ */
+
+.cr-checkin-archive .pkiw-checkin-archive {
+	grid-template-columns: minmax(0, 1fr);
+	gap: 0;
+	background: var(--cr-surface-elevated);
+	border: var(--cr-border-thick);
+	box-shadow: var(--cr-shadow-hard-2);
+	color: var(--cr-ink);
+}
+
+/* No pin on this page: the placemat narrows to the list. */
+.cr-checkin-archive .pkiw-checkin-archive:not(:has(.pkiw-checkin-archive__map)) {
+	max-width: 44rem;
+	margin-inline: auto;
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__map {
+	position: relative;
+	z-index: 0;
+	min-height: 19rem;
+	border: 0;
+	border-block-end: 2px dashed var(--cr-ink);
+	background: var(--cr-surface-soft);
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__map:focus-visible {
+	outline:3px solid var(--cr-focus-ring);
+	outline-offset:-5px;
+	box-shadow:inset 0 0 0 2px var(--cr-focus-halo);
+}
+
+/* Links first: the zoom buttons below are links too, and more specific. */
+.cr-checkin-archive .pkiw-checkin-archive__title a {
+	color:var(--cr-ink);
+	text-decoration:underline;
+	text-underline-offset:.15em;
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__map .leaflet-control-attribution a {
+	color:var(--cr-link);
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__map .leaflet-bar {
+	border:0;
+	border-radius:0;
+	box-shadow:var(--cr-shadow-hard-sm);
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__map .leaflet-bar a {
+	box-sizing: border-box;
+	width: 44px;
+	height: 44px;
+	border: var(--cr-border-thick);
+	border-radius: 0 !important;
+	background: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+	font: var(--cr-weight-bold) 1.375rem/1 var(--cr-font-body);
+	text-decoration: none;
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__map .leaflet-bar a + a {
+	border-block-start: 0;
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__map .leaflet-control-attribution {
+	padding:.2rem .5rem;
+	background:var(--cr-surface-elevated);
+	color:var(--cr-ink);
+	font:var(--cr-text-floor)/1.3 var(--cr-font-body);
+}
+
+.cr-checkin-archive .pkiw-pin,
+.cr-checkin-archive .pkiw-checkin-archive__num {
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: var(--cr-radius-full);
+	background: var(--cr-selective-yellow);
+	color: var(--cr-russian-violet);
+	font: var(--cr-weight-bold) var(--cr-text-base)/1 var(--cr-font-body);
+}
+
+.cr-checkin-archive .pkiw-pin {
+	display: grid !important;
+	box-shadow: var(--cr-shadow-hard-sm);
+}
+
+.cr-checkin-archive .pkiw-pin.is-active {
+	border-width: 4px;
+}
+
+.cr-checkin-archive .pkiw-pin--cluster {
+	border-style: double;
+	border-width: 6px;
+}
+
+.cr-checkin-archive .pkiw-pin__more {
+	border-color: var(--cr-russian-violet);
+	background: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+}
+
+.cr-checkin-archive .pkiw-pin:focus-visible,
+.cr-checkin-archive .pkiw-checkin-archive__num:focus-visible,
+.cr-checkin-archive .pkiw-checkin-archive__map .leaflet-bar a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__list {
+	padding: var(--cr-space-md);
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__list > * {
+	max-width: none;
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__summary {
+	margin:0 0 var(--cr-space-sm);
+	color:var(--cr-ink);
+	font:var(--cr-weight-semibold) var(--cr-text-sm)/var(--cr-leading-snug) var(--cr-font-body);
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__entry {
+	grid-template-columns: 44px minmax(0, 1fr);
+	column-gap: var(--cr-space-sm);
+	padding: var(--cr-space-sm) 0;
+	border-block-start: 1px dashed var(--cr-ink);
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__entry.is-active {
+	outline: 0;
+	background: var(--cr-surface-soft);
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__title {
+	margin:0;
+	font:var(--cr-weight-bold) var(--cr-text-md)/var(--cr-leading-snug) var(--cr-font-accent);
+}
+
+.cr-checkin-archive .pkiw-checkin-archive__place,
+.cr-checkin-archive .pkiw-checkin-archive__date {
+	margin:0;
+	color:var(--cr-ink);
+	font:var(--cr-text-sm)/var(--cr-leading-snug) var(--cr-font-body);
+}
+
+@media (min-width: 48.0625rem) {
+
+	.cr-checkin-archive .pkiw-checkin-archive:has(.pkiw-checkin-archive__map) {
+		grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+	}
+
+	.cr-checkin-archive .pkiw-checkin-archive__map {
+		min-height: 30rem;
+		border-block-end: 0;
+		border-inline-end: 2px dashed var(--cr-ink);
+	}
+
+	.cr-checkin-archive .pkiw-checkin-archive__list {
+		padding: var(--cr-space-lg);
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-checkin-archive .pkiw-checkin-archive,
+	.cr-checkin-archive .pkiw-checkin-archive__map .leaflet-bar a {
+		border-color: CanvasText;
+		box-shadow: none;
+	}
+
+	.cr-checkin-archive .pkiw-pin,
+	.cr-checkin-archive .pkiw-checkin-archive__num {
+		border-color: ButtonText;
+		background: ButtonFace;
+		color: ButtonText;
+		box-shadow: none;
+	}
+
+	.cr-checkin-archive .pkiw-checkin-archive__entry.is-active {
+		outline: 2px solid Highlight;
+	}
+}

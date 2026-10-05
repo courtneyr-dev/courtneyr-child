@@ -77,6 +77,21 @@
 	}
 }
 
+/* Phones: the badge sits above the first title tile and inside the 16px
+   measure. At -0.4rem it started 7px left of the measure and covered 13px
+   of the first tile (measured at 375px, PKIW issue 224). */
+@media (max-width: 47.9375rem) {
+
+	.cr-archive__header:has(.cr-archive-identity--kind) {
+		padding-block-start: 3.5rem;
+	}
+
+	.cr-archive-identity--kind .cr-archive-identity__glyph {
+		inset-block-start: -3.1rem;
+		inset-inline-start: 2px;
+	}
+}
+
 /* Forced colours: the system's own pair, and a border in place of the shadow ring. */
 
 @media (forced-colors: active) {

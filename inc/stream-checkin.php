@@ -115,6 +115,11 @@ function stamp_facts( array $attrs, \WP_Post $post ): array {
 
 	$place = implode( ', ', array_filter( array( $facts['locality'], $facts['region'] ) ) );
 
+	// A check-in whose place is hidden draws the stamp a check-in with no
+	// location draws: the venue and its ids stay out of the seed, so the
+	// stamp's shape, ink and tilt say nothing about a stored place.
+	$has_place = '' !== $place || '' !== $country;
+
 	$ts = 0;
 	if ( ! empty( $attrs['checkinAt'] ) ) {
 		$ts = (int) strtotime( (string) $attrs['checkinAt'] );
@@ -130,7 +135,7 @@ function stamp_facts( array $attrs, \WP_Post $post ): array {
 		'date'    => strtoupper( (string) wp_date( 'd M Y', $ts ) ),
 		'iso'     => (string) wp_date( 'c', $ts ),
 		'entry'   => sprintf( '№ %d', $post->ID ),
-		'seed'    => seed( (string) $post->ID, (string) ( $attrs['osmId'] ?? '' ), (string) ( $attrs['foursquareId'] ?? '' ), (string) ( $attrs['venueName'] ?? '' ) ),
+		'seed'    => $has_place ? seed( (string) $post->ID, (string) ( $attrs['osmId'] ?? '' ), (string) ( $attrs['foursquareId'] ?? '' ), (string) ( $attrs['venueName'] ?? '' ) ) : seed( (string) $post->ID ),
 	);
 }
 
@@ -207,9 +212,10 @@ function checkin_stamp( string $family, array $f, string $ink, int $tilt, string
  *
  * @param array<string, mixed> $attrs Block attributes.
  * @param \WP_Post             $post  Post being rendered.
+ * @param int                  $max   Most stamps to draw: 2 on the single, 1 on a Stream card.
  * @return string Footer markup.
  */
-function render_stamps( array $attrs, \WP_Post $post ): string {
+function render_stamps( array $attrs, \WP_Post $post, int $max = 2 ): string {
 	$f    = stamp_facts( $attrs, $post );
 	$seed = (int) $f['seed'];
 
@@ -218,7 +224,7 @@ function render_stamps( array $attrs, \WP_Post $post ): string {
 	$ink_a     = INKS[ pick( $seed, 3, 3 ) ];
 	$ink_b     = INKS[ ( pick( $seed, 3, 3 ) + 1 ) % 3 ];
 	$has_place = '' !== $f['place'] || '' !== $f['country'];
-	$second    = $has_place && 0 !== pick( $seed, 12, 3 );
+	$second    = $max > 1 && $has_place && 0 !== pick( $seed, 12, 3 );
 	$uid       = 'cr-seal-' . $post->ID;
 
 	// A second stamp always changes shape: a rectangle beside a round or
@@ -233,6 +239,74 @@ function render_stamps( array $attrs, \WP_Post $post ): string {
 		. esc_html( (string) $f['entry'] )
 		. '</p>';
 	$out .= '</footer>';
+
+	return $out;
+}
+
+/**
+ * A still map of one point: four map tiles behind a dot, with the tile
+ * provider's attribution. No script and no iframe.
+ *
+ * Call it only for coordinates the plugin already printed for this visitor.
+ *
+ * @param array<string, mixed> $attrs Check-in card attributes.
+ * @return string Empty without coordinates.
+ */
+function map_thumbnail( array $attrs ): string {
+	if ( ! isset( $attrs['latitude'], $attrs['longitude'] ) || ! is_numeric( $attrs['latitude'] ) || ! is_numeric( $attrs['longitude'] ) ) {
+		return '';
+	}
+
+	$lat  = max( -85.0, min( 85.0, (float) $attrs['latitude'] ) );
+	$lon  = (float) $attrs['longitude'];
+	$zoom = 15;
+	$n    = 2 ** $zoom;
+
+	// Slippy-map tile coordinates of the point, as fractions of a tile.
+	$x = ( $lon + 180 ) / 360 * $n;
+	$y = ( 1 - asinh( tan( deg2rad( $lat ) ) ) / M_PI ) / 2 * $n;
+
+	// The 2 by 2 block of tiles whose middle is nearest the point.
+	$x0 = (int) floor( $x - 0.5 );
+	$y0 = (int) floor( $y - 0.5 );
+
+	$tiles = class_exists( '\\PKIW\\Checkin_Map' )
+		? \PKIW\Checkin_Map::tile_layer()
+		: array(
+			'url'         => 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+			'attribution' => '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+		);
+
+	$venue = trim( (string) ( $attrs['venueName'] ?? '' ) );
+	$label = '' !== $venue
+		/* translators: %s: venue name */
+		? sprintf( __( 'Map showing %s', 'courtneyr-child' ), $venue )
+		: __( 'Map showing this check-in', 'courtneyr-child' );
+
+	$out  = '<div class="cr-passport__thumb">';
+	$out .= '<div class="cr-passport__thumb-map" role="img" aria-label="' . esc_attr( $label ) . '">';
+	$out .= sprintf(
+		'<div class="cr-passport__thumb-tiles" style="--cr-thumb-x:%dpx;--cr-thumb-y:%dpx">',
+		(int) round( ( $x - $x0 ) * 256 ),
+		(int) round( ( $y - $y0 ) * 256 )
+	);
+	foreach ( array( 0, 1 ) as $dy ) {
+		foreach ( array( 0, 1 ) as $dx ) {
+			$src  = str_replace( array( '{z}', '{x}', '{y}', '{s}' ), array( (string) $zoom, (string) ( ( $x0 + $dx + $n ) % $n ), (string) ( $y0 + $dy ), 'a' ), (string) $tiles['url'] );
+			$out .= '<img src="' . esc_url( $src ) . '" alt="" width="256" height="256" loading="lazy" decoding="async">';
+		}
+	}
+	$out .= '</div><span class="cr-passport__thumb-dot" aria-hidden="true"></span></div>';
+	$out .= '<p class="cr-passport__thumb-credit">' . wp_kses(
+		(string) $tiles['attribution'],
+		array(
+			'a' => array(
+				'href' => true,
+				'rel'  => true,
+			),
+		)
+	) . '</p>';
+	$out .= '</div>';
 
 	return $out;
 }
@@ -307,14 +381,31 @@ function passport_card( string $html, array $block, $instance ): string {
 	if ( false === $close ) {
 		return $html;
 	}
-	$card = substr( $card, 0, $close ) . render_stamps( (array) ( $checkin['attrs'] ?? array() ), $post ) . substr( $card, $close );
+	$card = substr( $card, 0, $close ) . render_stamps( (array) ( $checkin['attrs'] ?? array() ), $post, 1 ) . substr( $card, $close );
 
 	// 0.7.46 (R-43): the homepage preview and the editor's card preview keep the
 	// venue's map *link* but drop the map embed, so no map provider is contacted
 	// before the reader acts. /stream/ keeps its embed (that decision is separate).
 	$no_embed = is_front_page() || \Courtneyr\Child\HomeSections\is_stream_card_preview_request();
-	if ( $no_embed && false !== strpos( $card, '<iframe' ) ) {
+	$has_map  = false !== strpos( $card, '<iframe' );
+	if ( $no_embed && $has_map ) {
 		$card = (string) preg_replace( '#<iframe\b[^>]*>.*?</iframe>#is', '', $card );
+	}
+
+	// 0.7.97 (PKIW issue 224): on /stream/ the embed becomes a map thumbnail
+	// above the entry, so a public card stands about 1.5 times an approximate
+	// one, not twice. The plugin printed the embed, which is how this code
+	// knows the visitor may see the coordinates.
+	if ( ! $no_embed && $has_map ) {
+		$thumb = map_thumbnail( (array) ( $checkin['attrs'] ?? array() ) );
+		if ( '' !== $thumb ) {
+			$card      = (string) preg_replace( '#<div class="pk-embed pk-embed--map">.*?</div>#is', '', $card, 1 );
+			$label_end = strpos( $card, '</span>', (int) strpos( $card, 'pk-kindlabel' ) );
+			if ( false !== $label_end ) {
+				$label_end += 7;
+				$card       = substr( $card, 0, $label_end ) . $thumb . substr( $card, $label_end );
+			}
+		}
 	}
 
 	$tags = new \WP_HTML_Tag_Processor( $card );

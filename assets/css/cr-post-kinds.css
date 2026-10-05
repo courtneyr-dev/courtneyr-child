@@ -3354,6 +3354,91 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 .cr-stream-page .cr-passport .pk-map-link:focus-visible,
 .cr-stream-page .cr-passport .pk-embed--map:focus-within { outline: 3px solid #241c4a; outline-offset: 2px; }
 
+/* 0.7.97 (PKIW issue 224): on /stream/ a public check-in shows a still map
+   thumbnail under the eyebrow instead of the embed. Four tile images sit
+   behind a dot; the tile block is shifted so the check-in's point is at the
+   thumbnail's centre. The attribution stays visible under it. */
+.cr-stream-page .cr-passport .cr-passport__thumb {
+	order: -2;
+	margin: 0.35rem 0 0.6rem;
+}
+
+.cr-stream-page .cr-passport .cr-passport__thumb-map {
+	position: relative;
+	block-size: 6.5rem;
+	overflow: hidden;
+	border: 2px solid #241c4a;
+	background: #ffffff;
+}
+
+.cr-stream-page .cr-passport .cr-passport__thumb-tiles {
+	position: absolute;
+	inset-block-start: calc(50% - var(--cr-thumb-y, 256px));
+	inset-inline-start: calc(50% - var(--cr-thumb-x, 256px));
+	display: grid;
+	grid-template-columns: 256px 256px;
+	inline-size: 512px;
+	block-size: 512px;
+}
+
+.cr-stream-page .cr-passport .cr-passport__thumb-tiles img {
+	display: block;
+	inline-size: 256px;
+	block-size: 256px;
+	max-inline-size: none;
+	margin: 0;
+	border: 0;
+	border-radius: 0;
+}
+
+.cr-stream-page .cr-passport .cr-passport__thumb-dot {
+	position: absolute;
+	inset-block-start: calc(50% - 0.5rem);
+	inset-inline-start: calc(50% - 0.5rem);
+	box-sizing: border-box;
+	inline-size: 1rem;
+	block-size: 1rem;
+	border: 2px solid #241c4a;
+	border-radius: 50%;
+	background: #ffb703;
+}
+
+.cr-stream-page .cr-passport .cr-passport__thumb-credit {
+	margin: 0.2rem 0 0;
+	color: #241c4a;
+	font-family: var(--cr-font-body, sans-serif);
+	font-size: var(--cr-text-floor, 0.7rem);
+	line-height: 1.3;
+	text-align: end;
+}
+
+.cr-stream-page .cr-passport .cr-passport__thumb-credit a {
+	position: relative;
+	z-index: 2;
+	color: #126782;
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+
+@media (forced-colors: active) {
+
+	.cr-stream-page .cr-passport .cr-passport__thumb-map,
+	.cr-stream-page .cr-passport .cr-passport__thumb-dot {
+		border-color: CanvasText;
+	}
+
+	.cr-stream-page .cr-passport .cr-passport__thumb-dot {
+		background: Highlight;
+		forced-color-adjust: none;
+	}
+}
+
+/* The street sits on a line of its own on the passport, so the comma the
+   plugin prints after it would open the next line. */
+.cr-passport .p-street-address + .pk-sub-sep {
+	display: none;
+}
+
 /* Entry block: CHECK-IN eyebrow, post title, stamped date, venue and
    place with a pin, address in mono. */
 .cr-stream-page .pk-card.k-checkin.cr-passport .pk-kindlabel {
