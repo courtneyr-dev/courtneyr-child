@@ -28,6 +28,7 @@ const ORDER_HIDDEN = ( process.env.CR_ORDER_HIDDEN_PATHS || '/2026/08/05/salmon-
 const ORDER_NO_COORDS = process.env.CR_ORDER_NO_COORDS_PATH || '/2026/09/06/seed-drink/'; // a drink post with a place name and town and no coordinates (local fixture)
 const ORDER_SLOC = process.env.CR_ORDER_SLOC_PATH || '/2026/08/27/old-fashioned/'; // a drink post whose card has no location and whose Simple Location point is public (local fixture)
 const ORDER_STREAM = process.env.CR_ORDER_STREAM_PATH || '/stream/'; // a Stream page that shows an eat or drink post (local fixture); the test skips when it shows none
+const DRINK_UNSET = process.env.CR_DRINK_UNSET_PATH || '/2026/09/05/house-lemonade/'; // a drink post whose card has no drink type and whose `_pkiw_drink_type` is empty (local fixture)
 const RECIPE_SINGLE = process.env.CR_RECIPE_SINGLE_PATH || '/2026/08/14/tomato-basil-soup/'; // a recipe post with a WP Recipe Maker recipe and a featured image (local fixture)
 const RECIPE_PLAIN_SINGLE = process.env.CR_RECIPE_PLAIN_SINGLE_PATH || '/2026/08/01/campfire-chili/'; // a recipe post with no recipe card (local fixture)
 const RECIPE_STREAM = process.env.CR_RECIPE_STREAM_PATH || '/stream/'; // a Stream page that shows a recipe post (local fixture); the test skips when it shows none
@@ -1518,6 +1519,22 @@ for ( const [ kind, path, labels ] of [ [ 'eat', EAT_SINGLE, [ 'Dish', 'Restaura
 		expect( osm.length, 'a public location loads the map' ).toBeGreaterThan( 0 );
 	} );
 }
+
+// PKIW #230: a drink with no type claims none. The coaster prints no Type fact
+// and the word Coffee appears nowhere on it; the plugin files the post under a
+// "Drink" heading on the menu.
+test( 'a drink with no type prints no Type fact and is never called Coffee', async ( { page } ) => {
+	await page.goto( DRINK_UNSET, { waitUntil: 'load' } );
+	test.skip( ( await page.locator( 'body.cr-order-single--drink' ).count() ) === 0, `no drink post with its card at ${ DRINK_UNSET }` );
+	const mat = page.locator( 'main article.cr-placemat.cr-placemat--drink' );
+	await expect( mat ).toHaveCount( 1 );
+	const labels = await mat.locator( 'dl.cr-order__facts dt' ).allTextContents();
+	expect( labels.map( ( label ) => label.trim() ), 'no Type fact' ).not.toContain( 'Type' );
+	expect( labels.length, 'the other facts still print' ).toBeGreaterThan( 0 );
+	expect( await mat.innerText(), 'the coaster never says Coffee' ).not.toMatch( /coffee/i );
+	const words = await mat.evaluate( ( el ) => [ ...el.querySelectorAll( '*' ) ].filter( ( n ) => ! n.closest( '[hidden]' ) && n.children.length === 0 ).map( ( n ) => n.textContent.trim() ).filter( Boolean ) );
+	expect( words.filter( ( word, index ) => word.length > 3 && words.indexOf( word ) !== index ), 'no fact prints twice' ).toEqual( [] );
+} );
 
 // PKIW #230: a hidden location prints nothing about the place: no slip, no
 // link, no coordinates, no restaurant, and the browser never asks
