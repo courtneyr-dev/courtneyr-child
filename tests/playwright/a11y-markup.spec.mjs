@@ -1307,6 +1307,26 @@ for ( const [ kind, path ] of [ [ 'eat', EAT_ARCHIVE ], [ 'drink', DRINK_ARCHIVE
 			expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ), `no sideways scroll at ${ width }px` ).toBe( 0 );
 		}
 
+		// A site that serves modern image formats wraps the image in a <picture> with
+		// `display: contents` and a <source> before it (seen on Pantheon dev). Both of
+		// its children then become grid items. The special is still a row.
+		const wrapped = await page.locator( `.cr-archive--${ kind } .pkiw-menu-specials__item > img.pkiw-menu-specials__photo` ).evaluateAll( ( images ) => images.map( ( img ) => {
+			const picture = document.createElement( 'picture' );
+			picture.style.display = 'contents';
+			const source = document.createElement( 'source' );
+			source.type = 'image/x-not-served';
+			source.srcset = img.currentSrc;
+			img.before( picture );
+			picture.append( source, img );
+			return true;
+		} ).length );
+		if ( wrapped ) {
+			for ( const special of ( await measure() ).filter( ( item ) => item.image ) ) {
+				expect( special.image.height, `${ special.name }: wrapped in a picture element, still a small picture` ).toBeLessThanOrEqual( 96 );
+				expect( special.pictureColumn, `${ special.name }: wrapped in a picture element, the copy still sits beside it` ).toBeGreaterThanOrEqual( special.image.width );
+			}
+		}
+
 		for ( const width of [ 1280, 375 ] ) {
 			await page.setViewportSize( { width, height: 900 } );
 			await page.emulateMedia( { forcedColors: 'active' } );

@@ -79,10 +79,18 @@
 
 /* A special with a picture is a row: the picture, then its copy. On a phone
    the picture is a thumbnail, so two specials cost two short rows and not two
-   banners. A special printed without a picture is its copy alone. */
-.cr-menu .pkiw-menu-specials__item:has(> .pkiw-menu-specials__photo),
+   banners. A special printed without a picture is its copy alone. The image
+   may sit inside a <picture> a site adds for modern formats, so it is matched
+   anywhere in the item, not only as its child. */
+.cr-menu .pkiw-menu-specials__item:has(.pkiw-menu-specials__photo),
 .cr-menu .pkiw-menu-specials__item--no-photo {
 	grid-template-columns: 5rem minmax(0, 1fr);
+}
+
+/* A <picture> with `display: contents` hands its children to this grid. Its
+   <source> would take the picture's cell and push the image into the copy's. */
+.cr-menu .pkiw-menu-specials__item source {
+	display: none;
 }
 
 .cr-menu .pkiw-menu-specials__photo {
@@ -362,7 +370,7 @@
    ============================================================ */
 @media (min-width: 40rem) {
 
-	.cr-menu .pkiw-menu-specials__item:has(> .pkiw-menu-specials__photo),
+	.cr-menu .pkiw-menu-specials__item:has(.pkiw-menu-specials__photo),
 	.cr-menu .pkiw-menu-specials__item--no-photo {
 		grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
 	}
