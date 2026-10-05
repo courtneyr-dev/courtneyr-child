@@ -14,9 +14,10 @@
  *
  * The stamps are decoration. Every fact they show — place, date, entry
  * number — is also visible as text in the card, they are aria-hidden, and
- * they respect the block's locationPrivacy the same way the plugin does:
- * a private check-in stamps only the date and entry number. Nothing here
- * runs outside the stream page or touches a non-check-in card.
+ * they print no place the plugin hides: place_facts() asks the plugin's
+ * visibility result first, then the block's locationPrivacy. A private
+ * check-in stamps only the date and entry number. Nothing here runs outside
+ * the stream page or touches a non-check-in card.
  *
  * @package CourtneyrChild
  */
@@ -66,27 +67,53 @@ function find_checkin_block( \WP_Post $post ): ?array {
 }
 
 /**
+ * The place text this theme may print for a check-in.
+ *
+ * The plugin decides what a visitor may see from the post's
+ * `_pkiw_geo_privacy` meta. The block's saved locationPrivacy attribute can
+ * lag behind that meta after a privacy change made outside the block, so the
+ * stricter of the two wins: a field the plugin hides is never printed, and
+ * the attribute's own tier still applies on top. Public and approximate
+ * check-ins may show locality, region and country; the postal code is
+ * public-only; a private check-in shows no place at all.
+ *
+ * @param array<string, mixed> $attrs Block attributes.
+ * @param \WP_Post             $post  Post being rendered.
+ * @return array{locality: string, region: string, country: string, postal: string}
+ */
+function place_facts( array $attrs, \WP_Post $post ): array {
+	$visible = function_exists( 'pkiw_get_visible_location_fields' ) ? (array) pkiw_get_visible_location_fields( $post->ID ) : array();
+	$privacy = (string) ( $attrs['locationPrivacy'] ?? 'approximate' );
+	$private = 'private' === $privacy;
+
+	$fact = static function ( string $attr, string $field ) use ( $attrs, $visible, $private ): string {
+		return ( $private || empty( $visible[ $field ] ) ) ? '' : trim( (string) ( $attrs[ $attr ] ?? '' ) );
+	};
+
+	return array(
+		'locality' => $fact( 'locality', 'locality' ),
+		'region'   => $fact( 'region', 'region' ),
+		'country'  => $fact( 'country', 'country' ),
+		'postal'   => 'public' === $privacy ? $fact( 'postalCode', 'postal_code' ) : '',
+	);
+}
+
+/**
  * The facts a stamp is allowed to print for this check-in.
  *
- * Mirrors the plugin's privacy gates: public and approximate check-ins show
- * locality, region and country as text, so a stamp may repeat them; the
- * postal code is public-only; a private check-in shows no place at all.
- * Coordinates, street address and venue name never reach a stamp.
+ * The place comes from place_facts(). Coordinates, street address and venue
+ * name never reach a stamp.
  *
  * @param array<string, mixed> $attrs Block attributes.
  * @param \WP_Post             $post  Post being rendered.
  * @return array{place: string, country: string, postal: string, date: string, iso: string, entry: string, seed: int}
  */
 function stamp_facts( array $attrs, \WP_Post $post ): array {
-	$privacy = (string) ( $attrs['locationPrivacy'] ?? 'approximate' );
-	$private = 'private' === $privacy;
+	$facts   = place_facts( $attrs, $post );
+	$country = $facts['country'];
+	$postal  = $facts['postal'];
 
-	$locality = $private ? '' : trim( (string) ( $attrs['locality'] ?? '' ) );
-	$region   = $private ? '' : trim( (string) ( $attrs['region'] ?? '' ) );
-	$country  = $private ? '' : trim( (string) ( $attrs['country'] ?? '' ) );
-	$postal   = 'public' === $privacy ? trim( (string) ( $attrs['postalCode'] ?? '' ) ) : '';
-
-	$place = implode( ', ', array_filter( array( $locality, $region ) ) );
+	$place = implode( ', ', array_filter( array( $facts['locality'], $facts['region'] ) ) );
 
 	$ts = 0;
 	if ( ! empty( $attrs['checkinAt'] ) ) {

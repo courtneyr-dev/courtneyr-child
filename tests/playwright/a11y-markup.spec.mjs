@@ -29,6 +29,7 @@ const ORDER_NO_COORDS = process.env.CR_ORDER_NO_COORDS_PATH || '/2026/09/06/seed
 const ORDER_SLOC = process.env.CR_ORDER_SLOC_PATH || '/2026/08/27/old-fashioned/'; // a drink post whose card has no location and whose Simple Location point is public (local fixture)
 const ORDER_STREAM = process.env.CR_ORDER_STREAM_PATH || '/stream/'; // a Stream page that shows an eat or drink post (local fixture); the test skips when it shows none
 const DRINK_UNSET = process.env.CR_DRINK_UNSET_PATH || '/2026/09/05/house-lemonade/'; // a drink post whose card has no drink type and whose `_pkiw_drink_type` is empty (local fixture)
+const CHECKIN_STALE_PRIVATE = process.env.CR_CHECKIN_STALE_PRIVATE_PATH || '/2026/07/20/quiet-afternoon/'; // a check-in whose `_pkiw_geo_privacy` is private while its card's saved locationPrivacy attribute still says public (local fixture)
 const RECIPE_SINGLE = process.env.CR_RECIPE_SINGLE_PATH || '/2026/08/14/tomato-basil-soup/'; // a recipe post with a WP Recipe Maker recipe and a featured image (local fixture)
 const RECIPE_PLAIN_SINGLE = process.env.CR_RECIPE_PLAIN_SINGLE_PATH || '/2026/08/01/campfire-chili/'; // a recipe post with no recipe card (local fixture)
 const RECIPE_STREAM = process.env.CR_RECIPE_STREAM_PATH || '/stream/'; // a Stream page that shows a recipe post (local fixture); the test skips when it shows none
@@ -1791,4 +1792,27 @@ test( 'Stream cards keep their kind labels and a format archive keeps its kicker
 	await expect( kicker ).toHaveCount( 1 );
 	await expect( kicker ).toHaveText( /·/ );
 	await expect( page.locator( '.cr-archive-identity--kind' ) ).toHaveCount( 0 );
+} );
+
+// A check-in's privacy lives in the post's `_pkiw_geo_privacy` meta. The
+// card's saved locationPrivacy attribute can lag behind it after a privacy
+// change made outside the block. The plugin's card follows the meta, so the
+// theme's own place text does too: no town in the lede or the journal footer,
+// and stamps that carry only the word, the date and the entry number.
+test( 'a check-in the plugin holds private prints no place from the theme, whatever the card attribute says', async ( { page } ) => {
+	const response = await page.goto( CHECKIN_STALE_PRIVATE, { waitUntil: 'load' } );
+	test.skip( response.status() === 404, `no stale-private check-in fixture at ${ CHECKIN_STALE_PRIVATE }` );
+
+	await expect( page.locator( 'main article.k-checkin' ) ).toHaveCount( 1 );
+	await expect( page.locator( 'main article.k-checkin' ).locator( '.p-location, .h-geo, .p-street-address, .p-locality, .p-postal-code' ), 'the plugin card hides the place' ).toHaveCount( 0 );
+	await expect( page.locator( '.cr-journal__lede time' ) ).toHaveCount( 1 );
+	await expect( page.locator( '.cr-journal__lede-place' ) ).toHaveCount( 0 );
+	await expect( page.locator( '.cr-journal__meta-item--time' ) ).toHaveCount( 1 );
+	await expect( page.locator( '.cr-journal__meta-item--place' ) ).toHaveCount( 0 );
+
+	const stamped = ( await page.locator( 'main .cr-passport__stamps svg text' ).allTextContents() ).map( ( text ) => text.trim() ).filter( Boolean );
+	expect( stamped.length, 'the card keeps a stamp' ).toBeGreaterThan( 0 );
+	for ( const text of stamped ) {
+		expect( text, 'a stamp line names no place' ).toMatch( /^(ARRIVED|CHECKED IN|CHECK-IN|№ \d+|\d{2} [A-Z]{3} \d{4})$/ );
+	}
 } );
