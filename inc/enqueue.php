@@ -856,7 +856,7 @@ add_filter( 'perfmatters_minify_js_exclusions', __NAMESPACE__ . '\\perfmatters_e
  */
 function perfmatters_rucss_exclusions( $exclusions ): array {
 	$exclusions = is_array( $exclusions ) ? $exclusions : array();
-	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css' ) as $file ) {
+	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css', 'cr-checkin-archive.css', 'leaflet.css', 'MarkerCluster.css', 'checkins-feed/style.css' ) as $file ) {
 		$exclusions[] = $file;
 	}
 	return array_values( array_unique( $exclusions ) );

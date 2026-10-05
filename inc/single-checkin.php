@@ -34,7 +34,6 @@ namespace Courtneyr\Child\SingleCheckin;
 use function Courtneyr\Child\Stamps\pick;
 use function Courtneyr\Child\Stamps\seed;
 use function Courtneyr\Child\StreamCheckin\find_checkin_block;
-use function Courtneyr\Child\StreamCheckin\place_facts;
 use function Courtneyr\Child\StreamCheckin\render_stamps;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -96,19 +95,6 @@ function is_checkin_single(): bool {
 }
 
 /**
- * The place a page may print, by the plugin's visibility result and the
- * block's privacy setting (see place_facts()).
- *
- * @param array<string, mixed> $attrs Block attributes.
- * @param \WP_Post             $post  Post being rendered.
- * @return string "Locality, Region, Country" as far as privacy allows, or ''.
- */
-function safe_place( array $attrs, \WP_Post $post ): string {
-	$facts = place_facts( $attrs, $post );
-	return implode( ', ', array_filter( array( $facts['locality'], $facts['region'], $facts['country'] ) ) );
-}
-
-/**
  * Drop the featured image when the check-in block already shows that photo.
  *
  * The block's `photo` attribute holds an upload URL; the featured image is
@@ -149,7 +135,7 @@ function suppress_duplicate_featured_image( string $html, array $block ): string
 add_filter( 'render_block', __NAMESPACE__ . '\\suppress_duplicate_featured_image', 10, 2 );
 
 /**
- * Add the date-and-place lede under the H1.
+ * Add the date lede under the H1.
  *
  * @param string               $html  Rendered post-title block.
  * @param array<string, mixed> $block Parsed block.
@@ -166,15 +152,10 @@ function add_title_lede( string $html, array $block ): string {
 	if ( ! $post instanceof \WP_Post ) {
 		return $html;
 	}
-	$checkin = find_checkin_block( $post );
-	$attrs   = (array) ( $checkin['attrs'] ?? array() );
-	$place   = safe_place( $attrs, $post );
-
+	// The date only. The card is the one place a check-in names its place
+	// (PKIW issue 224), so the lede can't repeat or contradict it.
 	$lede  = '<p class="cr-journal__lede">';
 	$lede .= '<time class="cr-journal__lede-date" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time>';
-	if ( '' !== $place ) {
-		$lede .= '<span class="cr-journal__lede-sep" aria-hidden="true"> · </span><span class="cr-journal__lede-place">' . esc_html( $place ) . '</span>';
-	}
 	$lede .= '</p>';
 
 	return $html . $lede;
@@ -269,15 +250,11 @@ function journal_page( string $html, array $block ): string {
 		$after  .= '<div class="cr-journal__margin cr-journal__margin--3"><p class="cr-hand cr-hand--underline">' . esc_html( $copy[ '' !== $note_html ? 2 : 1 ] ) . '</p></div>';
 	}
 
-	$ts    = ! empty( $attrs['checkinAt'] ) ? (int) strtotime( (string) $attrs['checkinAt'] ) : 0;
-	$ts    = $ts > 0 ? $ts : (int) get_post_time( 'U', true, $post );
-	$place = safe_place( $attrs, $post );
+	$ts = ! empty( $attrs['checkinAt'] ) ? (int) strtotime( (string) $attrs['checkinAt'] ) : 0;
+	$ts = $ts > 0 ? $ts : (int) get_post_time( 'U', true, $post );
 
 	$after .= '<footer class="cr-journal__meta">';
 	$after .= '<p class="cr-journal__meta-item cr-journal__meta-item--time"><span class="cr-journal__meta-icon"></span><span class="cr-journal__meta-text"><time datetime="' . esc_attr( (string) wp_date( 'c', $ts ) ) . '">' . esc_html( (string) wp_date( get_option( 'date_format' ), $ts ) ) . '<br>' . esc_html( (string) wp_date( get_option( 'time_format' ) . ' (T)', $ts ) ) . '</time></span></p>';
-	if ( '' !== $place ) {
-		$after .= '<p class="cr-journal__meta-item cr-journal__meta-item--place"><span class="cr-journal__meta-icon"></span><span class="cr-journal__meta-text">' . implode( '<br>', array_map( 'esc_html', explode( ', ', $place ) ) ) . '</span></p>';
-	}
 	$after .= '</footer>';
 
 	// 5. The card and everything after it sit in the journal grid. Outpost
