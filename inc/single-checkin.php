@@ -34,6 +34,7 @@ namespace Courtneyr\Child\SingleCheckin;
 use function Courtneyr\Child\Stamps\pick;
 use function Courtneyr\Child\Stamps\seed;
 use function Courtneyr\Child\StreamCheckin\find_checkin_block;
+use function Courtneyr\Child\StreamCheckin\place_facts;
 use function Courtneyr\Child\StreamCheckin\render_stamps;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -95,25 +96,16 @@ function is_checkin_single(): bool {
 }
 
 /**
- * The place a page may print, by the block's privacy setting.
+ * The place a page may print, by the plugin's visibility result and the
+ * block's privacy setting (see place_facts()).
  *
  * @param array<string, mixed> $attrs Block attributes.
+ * @param \WP_Post             $post  Post being rendered.
  * @return string "Locality, Region, Country" as far as privacy allows, or ''.
  */
-function safe_place( array $attrs ): string {
-	if ( 'private' === ( $attrs['locationPrivacy'] ?? 'approximate' ) ) {
-		return '';
-	}
-	return implode(
-		', ',
-		array_filter(
-			array(
-				trim( (string) ( $attrs['locality'] ?? '' ) ),
-				trim( (string) ( $attrs['region'] ?? '' ) ),
-				trim( (string) ( $attrs['country'] ?? '' ) ),
-			)
-		)
-	);
+function safe_place( array $attrs, \WP_Post $post ): string {
+	$facts = place_facts( $attrs, $post );
+	return implode( ', ', array_filter( array( $facts['locality'], $facts['region'], $facts['country'] ) ) );
 }
 
 /**
@@ -176,7 +168,7 @@ function add_title_lede( string $html, array $block ): string {
 	}
 	$checkin = find_checkin_block( $post );
 	$attrs   = (array) ( $checkin['attrs'] ?? array() );
-	$place   = safe_place( $attrs );
+	$place   = safe_place( $attrs, $post );
 
 	$lede  = '<p class="cr-journal__lede">';
 	$lede .= '<time class="cr-journal__lede-date" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time>';
@@ -279,7 +271,7 @@ function journal_page( string $html, array $block ): string {
 
 	$ts    = ! empty( $attrs['checkinAt'] ) ? (int) strtotime( (string) $attrs['checkinAt'] ) : 0;
 	$ts    = $ts > 0 ? $ts : (int) get_post_time( 'U', true, $post );
-	$place = safe_place( $attrs );
+	$place = safe_place( $attrs, $post );
 
 	$after .= '<footer class="cr-journal__meta">';
 	$after .= '<p class="cr-journal__meta-item cr-journal__meta-item--time"><span class="cr-journal__meta-icon"></span><span class="cr-journal__meta-text"><time datetime="' . esc_attr( (string) wp_date( 'c', $ts ) ) . '">' . esc_html( (string) wp_date( get_option( 'date_format' ), $ts ) ) . '<br>' . esc_html( (string) wp_date( get_option( 'time_format' ) . ' (T)', $ts ) ) . '</time></span></p>';
