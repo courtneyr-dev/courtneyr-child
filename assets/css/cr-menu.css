@@ -68,6 +68,7 @@
 }
 
 .cr-menu .pkiw-menu-specials__item {
+	position: relative;
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
 	gap: 0.9rem;
@@ -76,11 +77,19 @@
 	margin: 0;
 }
 
+/* A special with a picture is a row: the picture, then its copy. On a phone
+   the picture is a thumbnail, so two specials cost two short rows and not two
+   banners. A special printed without a picture is its copy alone. */
+.cr-menu .pkiw-menu-specials__item:has(> .pkiw-menu-specials__photo),
+.cr-menu .pkiw-menu-specials__item--no-photo {
+	grid-template-columns: 5rem minmax(0, 1fr);
+}
+
 .cr-menu .pkiw-menu-specials__photo {
 	display: block;
 	width: 100%;
 	height: auto;
-	aspect-ratio: 3 / 2;
+	aspect-ratio: 1;
 	border: 2px solid var(--cr-russian-violet);
 	object-fit: cover;
 }
@@ -95,7 +104,7 @@
 	content: "";
 	display: block;
 	width: 100%;
-	aspect-ratio: 3 / 2;
+	aspect-ratio: 1;
 	border: 2px solid var(--cr-russian-violet);
 	background: radial-gradient(circle closest-side, var(--plate-well) 0 54%, var(--plate-rim) 54% 82%, var(--plate-cloth) 82%);
 }
@@ -178,21 +187,21 @@
 	position: absolute;
 	z-index: -1;
 	inset: 0;
-	background: var(--menu-rules, none), var(--menu-paper);
+	background: var(--menu-paper);
 	clip-path: var(--menu-tear);
 }
 
 /* A panel. Its top and left seams are dashed fold lines; the sheet clips
    the ones on its own outer edge, so only the joins between panels show.
-   A section is never broken across columns. */
+   A section is one grid item, so it is never broken across columns. */
 .cr-menu .cr-menu__list > .pkiw-menu-section,
 .cr-menu .cr-menu__list > li {
 	min-width: 0;
-	margin: var(--menu-panel-margin, -1px 0 0 -1px);
+	margin: -1px 0 0 -1px;
 	padding: 0;
-	border-block-start: var(--menu-panel-fold, 1px dashed var(--menu-seam));
-	border-inline-start: var(--menu-panel-edge, 1px dashed var(--menu-seam));
-	background: var(--menu-panel-crease, linear-gradient(90deg, var(--menu-crease), transparent 1.25rem));
+	border-block-start: 1px dashed var(--menu-seam);
+	border-inline-start: 1px dashed var(--menu-seam);
+	background: linear-gradient(90deg, var(--menu-crease), transparent 1.25rem);
 	break-inside: avoid;
 }
 
@@ -318,12 +327,49 @@
 }
 
 /* ============================================================
+   A phone: the rating under the name, the whole special a target
+   ============================================================ */
+@media (max-width: 47.999rem) {
+
+	/* In one column the rating drops under the name. A long name wraps as it
+	   needs to, and no stub of leader is left between it and the rating. */
+	.cr-menu .pkiw-menu-entry__line {
+		display: block;
+	}
+
+	.cr-menu .pkiw-menu-entry__leader {
+		display: none;
+	}
+
+	.cr-menu .pkiw-menu-entry__rating {
+		display: block;
+		margin-top: 0.15em;
+	}
+}
+
+@media (max-width: 39.999rem) {
+
+	/* The picture is where a thumb lands, so the whole row opens the post. */
+	.cr-menu .pkiw-menu-specials__link::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+	}
+}
+
+/* ============================================================
    Wider screens: specials side by side, the menu in columns
    ============================================================ */
 @media (min-width: 40rem) {
 
-	.cr-menu .pkiw-menu-specials__item {
+	.cr-menu .pkiw-menu-specials__item:has(> .pkiw-menu-specials__photo),
+	.cr-menu .pkiw-menu-specials__item--no-photo {
 		grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+	}
+
+	.cr-menu .pkiw-menu-specials__photo,
+	.cr-menu .pkiw-menu-specials__item--no-photo::before {
+		aspect-ratio: 3 / 2;
 	}
 
 	.cr-menu .cr-menu__list .pkiw-menu-section {
@@ -343,55 +389,48 @@
 		border-left: 1px solid var(--cr-cerulean);
 	}
 
-	/* Two columns on the one sheet. Eat and drink share this: the plugin tells
-	   each section how many sections the page holds (data-pkiw-sections).
-	   More sections than columns pack whole down the columns, so no row is
-	   left half empty. The fold between columns is drawn on the sheet, the
-	   sheet's full height. */
+	/* Two columns on the one sheet, read in rows: the sections run left to
+	   right, then down, in the order the plugin prints them. The eye, the
+	   keyboard and a screen reader meet them in the same order. Eat and drink
+	   share this, whatever the sections are called. */
 	.cr-menu .wp-block-post-template.cr-menu__list {
-		--menu-fold: repeating-linear-gradient(180deg, var(--menu-seam) 0 4px, transparent 4px 8px);
-		--menu-panel-margin: 0;
-		--menu-panel-fold: 0;
-		--menu-panel-edge: 0;
-		--menu-panel-crease: none;
-		--menu-rules: var(--menu-fold) 50% 0 / 1px 100% no-repeat;
-		display: block;
-		column-count: 2;
-		column-gap: 0;
-	}
-
-	/* As many sections as columns, or fewer: each is one equal panel, side by
-	   side, headings on one line, and the sheet is as tall as the tallest. */
-	.cr-menu .wp-block-post-template.cr-menu__list:has(.pkiw-menu-section[data-pkiw-sections="1"]),
-	.cr-menu .wp-block-post-template.cr-menu__list:has(.pkiw-menu-section[data-pkiw-sections="2"]) {
-		--menu-panel-margin: -1px 0 0 -1px;
-		--menu-panel-edge: 1px dashed var(--menu-seam);
-		--menu-panel-crease: linear-gradient(90deg, var(--menu-crease), transparent 1.25rem);
-		--menu-rules: none;
-		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
+}
 
-	.cr-menu .wp-block-post-template.cr-menu__list:has(.pkiw-menu-section[data-pkiw-sections="1"]) {
-		grid-template-columns: minmax(0, 1fr);
+@media (min-width: 48rem) and (max-width: 63.999rem) {
+
+	/* A last section with no partner takes the whole row. In the Site Editor
+	   the panels are the list items that open a section. */
+	.cr-menu .cr-menu__list > .pkiw-menu-section:nth-child(odd):last-child,
+	.cr-menu .cr-menu__list > li:nth-child(odd of :has(.pkiw-menu-section):not([style*="none"])):nth-last-child(1 of :has(.pkiw-menu-section):not([style*="none"])) {
+		grid-column: 1 / -1;
 	}
 }
 
 @media (min-width: 64rem) {
 
-	/* Three columns, by the same rule. */
+	/* Three columns, by the same rule. The sheet has six tracks and a section
+	   takes two, so a last row of one or two sections fills the row. */
 	.cr-menu .wp-block-post-template.cr-menu__list {
-		--menu-rules: var(--menu-fold) 33.333% 0 / 1px 100% no-repeat, var(--menu-fold) 66.667% 0 / 1px 100% no-repeat;
-		column-count: 3;
+		grid-template-columns: repeat(6, minmax(0, 1fr));
 	}
 
-	.cr-menu .wp-block-post-template.cr-menu__list:has(.pkiw-menu-section[data-pkiw-sections="3"]) {
-		--menu-panel-margin: -1px 0 0 -1px;
-		--menu-panel-edge: 1px dashed var(--menu-seam);
-		--menu-panel-crease: linear-gradient(90deg, var(--menu-crease), transparent 1.25rem);
-		--menu-rules: none;
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+	.cr-menu .cr-menu__list > .pkiw-menu-section,
+	.cr-menu .cr-menu__list > li {
+		grid-column: span 2;
+	}
+
+	.cr-menu .cr-menu__list > .pkiw-menu-section:nth-child(3n + 1):nth-last-child(2),
+	.cr-menu .cr-menu__list > .pkiw-menu-section:nth-child(3n + 2):last-child,
+	.cr-menu .cr-menu__list > li:nth-child(3n + 1 of :has(.pkiw-menu-section):not([style*="none"])):nth-last-child(2 of :has(.pkiw-menu-section):not([style*="none"])),
+	.cr-menu .cr-menu__list > li:nth-child(3n + 2 of :has(.pkiw-menu-section):not([style*="none"])):nth-last-child(1 of :has(.pkiw-menu-section):not([style*="none"])) {
+		grid-column: span 3;
+	}
+
+	.cr-menu .cr-menu__list > .pkiw-menu-section:nth-child(3n + 1):last-child,
+	.cr-menu .cr-menu__list > li:nth-child(3n + 1 of :has(.pkiw-menu-section):not([style*="none"])):nth-last-child(1 of :has(.pkiw-menu-section):not([style*="none"])) {
+		grid-column: 1 / -1;
 	}
 }
 
@@ -479,6 +518,17 @@
 
 	.cr-menu .pkiw-menu-entry__section {
 		border: 1px solid CanvasText;
+	}
+
+	/* The plate is flat colour, which a forced palette drops, so its frame
+	   would stand empty. It goes and the copy takes the row. A featured image
+	   is an image and keeps its pixels. */
+	.cr-menu .pkiw-menu-specials__item--no-photo {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.cr-menu .pkiw-menu-specials__item--no-photo::before {
+		content: none;
 	}
 }
 

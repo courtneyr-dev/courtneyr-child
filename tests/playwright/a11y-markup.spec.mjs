@@ -28,6 +28,7 @@ const ORDER_HIDDEN = ( process.env.CR_ORDER_HIDDEN_PATHS || '/2026/08/05/salmon-
 const ORDER_NO_COORDS = process.env.CR_ORDER_NO_COORDS_PATH || '/2026/09/06/seed-drink/'; // a drink post with a place name and town and no coordinates (local fixture)
 const ORDER_SLOC = process.env.CR_ORDER_SLOC_PATH || '/2026/08/27/old-fashioned/'; // a drink post whose card has no location and whose Simple Location point is public (local fixture)
 const ORDER_STREAM = process.env.CR_ORDER_STREAM_PATH || '/stream/'; // a Stream page that shows an eat or drink post (local fixture); the test skips when it shows none
+const DRINK_UNSET = process.env.CR_DRINK_UNSET_PATH || '/2026/09/05/house-lemonade/'; // a drink post whose card has no drink type and whose `_pkiw_drink_type` is empty (local fixture)
 const RECIPE_SINGLE = process.env.CR_RECIPE_SINGLE_PATH || '/2026/08/14/tomato-basil-soup/'; // a recipe post with a WP Recipe Maker recipe and a featured image (local fixture)
 const RECIPE_PLAIN_SINGLE = process.env.CR_RECIPE_PLAIN_SINGLE_PATH || '/2026/08/01/campfire-chili/'; // a recipe post with no recipe card (local fixture)
 const RECIPE_STREAM = process.env.CR_RECIPE_STREAM_PATH || '/stream/'; // a Stream page that shows a recipe post (local fixture); the test skips when it shows none
@@ -1139,7 +1140,9 @@ for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3
 			expect( section.boxes, `${ section.heading } is one box: never split between columns` ).toBe( 1 );
 		}
 		if ( wide ) {
-			expect( lefts.size, 'as many columns as sections, up to three' ).toBe( Math.min( wideColumns, sections.length ) );
+			expect( new Set( sections.filter( ( section ) => section.top === sections[ 0 ].top ).map( ( section ) => section.left ) ).size, 'as many columns as sections, up to three' ).toBe( Math.min( wideColumns, sections.length ) );
+			const rows = [ ...sections ].sort( ( a, b ) => ( Math.abs( a.top - b.top ) > 8 ? a.top - b.top : a.left - b.left ) );
+			expect( rows.map( ( section ) => section.heading ), 'the rows read in DOM order' ).toEqual( sections.map( ( section ) => section.heading ) );
 			if ( sections.length <= wideColumns ) {
 				expect( new Set( sections.map( ( section ) => section.labelTop ) ).size, 'every label on the same top edge' ).toBe( 1 );
 				expect( new Set( sections.map( ( section ) => section.top ) ).size, 'one row of panels' ).toBe( 1 );
@@ -1162,12 +1165,26 @@ for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3
 		expect( shape.overflow ).toBe( 0 );
 		expect( shape.located, 'no street, coordinates or map link on the menu' ).toBe( 0 );
 
-		// Tablet width: two columns, whole sections packed down them, none split.
+		// Tablet width: two columns read in rows, so the eye meets the sections in the order
+		// the keyboard and a screen reader do. A last section with no partner takes the row.
 		if ( wide ) {
 			await page.setViewportSize( { width: 800, height: 900 } );
 			await page.waitForTimeout( 150 );
-			const tablet = await menu.locator( ':scope > section.pkiw-menu-section' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => ( { left: Math.round( node.getBoundingClientRect().left ), boxes: node.getClientRects().length } ) ) );
-			expect( new Set( tablet.map( ( section ) => section.left ) ).size, 'two columns at tablet width' ).toBe( Math.min( 2, tablet.length ) );
+			const tablet = await menu.locator( ':scope > section.pkiw-menu-section' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => {
+				const box = node.getBoundingClientRect();
+				return { heading: node.querySelector( 'h2' ).textContent.trim(), left: Math.round( box.left ), top: Math.round( box.top ), width: Math.round( box.width ), boxes: node.getClientRects().length };
+			} ) );
+			const sheet = Math.round( ( await menu.boundingBox() ).width );
+			const rows = [ ...tablet ].sort( ( a, b ) => ( Math.abs( a.top - b.top ) > 8 ? a.top - b.top : a.left - b.left ) );
+			expect( rows.map( ( section ) => section.heading ), 'at tablet width the rows read in DOM order' ).toEqual( tablet.map( ( section ) => section.heading ) );
+			expect( new Set( tablet.slice( 0, 2 ).map( ( section ) => section.left ) ).size, 'two columns at tablet width' ).toBe( Math.min( 2, tablet.length ) );
+			if ( tablet.length > 1 ) {
+				expect( tablet[ 0 ].top, 'the first two sections share a row' ).toBe( tablet[ 1 ].top );
+				expect( Math.abs( tablet[ 0 ].width - tablet[ 1 ].width ), 'in equal columns' ).toBeLessThanOrEqual( 2 );
+			}
+			if ( 1 === tablet.length % 2 ) {
+				expect( sheet - tablet[ tablet.length - 1 ].width, 'an unmatched last section spans both columns' ).toBeLessThanOrEqual( 2 );
+			}
 			expect( tablet.every( ( section ) => 1 === section.boxes ), 'no section split between columns' ).toBe( true );
 			expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBe( 0 );
 			await page.setViewportSize( { width: 1280, height: 900 } );
@@ -1186,6 +1203,183 @@ for ( const [ kind, path, perPage, wideColumns ] of [ [ 'eat', EAT_ARCHIVE, 6, 3
 		}
 	} );
 }
+
+// PKIW #230: in one column a menu line is the name with its rating beneath,
+// so a long name wraps without leaving a stub of leader or squeezing the
+// rating. In two or three columns the dotted leader runs from name to rating.
+for ( const [ kind, path ] of [ [ 'eat', EAT_ARCHIVE ], [ 'drink', DRINK_ARCHIVE ] ] ) {
+	test( `a ${ kind } menu line puts its rating under the name on a phone and after a leader from tablet width`, async ( { page } ) => {
+		const measure = () => page.locator( `.cr-archive--${ kind } .cr-menu__list .pkiw-menu-entry` ).evaluateAll( ( entries ) => entries.filter( ( entry ) => entry.querySelector( '.pkiw-menu-entry__rating' ) ).map( ( entry ) => {
+			const name = entry.querySelector( '.pkiw-menu-entry__name' ).getBoundingClientRect();
+			const rating = entry.querySelector( '.pkiw-menu-entry__rating' );
+			const rated = rating.getBoundingClientRect();
+			return {
+				name: entry.querySelector( '.pkiw-menu-entry__name' ).textContent.trim(),
+				href: entry.querySelector( '.pkiw-menu-entry__name' ).getAttribute( 'href' ),
+				text: rating.textContent.trim(),
+				leader: entry.querySelector( '.pkiw-menu-entry__leader' ).getClientRects().length,
+				leaderWidth: Math.round( entry.querySelector( '.pkiw-menu-entry__leader' ).getBoundingClientRect().width ),
+				under: rated.top >= name.bottom - 1,
+				flush: Math.abs( rated.left - name.left ) <= 2,
+				after: rated.left >= name.right && rated.top < name.bottom,
+				inside: rated.right <= entry.getBoundingClientRect().right + 1,
+			};
+		} ) );
+		await page.setViewportSize( { width: 1280, height: 900 } );
+		await page.goto( path, { waitUntil: 'load' } );
+		test.skip( ( await page.locator( 'main li.wp-block-post' ).count() ) < 3, `fewer than three ${ kind } posts on this site` );
+		const desktop = await measure();
+		expect( desktop.length, 'the page has rated lines' ).toBeGreaterThan( 0 );
+		for ( const width of [ 1280, 800 ] ) {
+			await page.setViewportSize( { width, height: 900 } );
+			await page.waitForTimeout( 150 );
+			for ( const line of await measure() ) {
+				expect( line.leader, `${ line.name } at ${ width }px keeps its leader` ).toBe( 1 );
+				expect( line.after, `${ line.name } at ${ width }px: the rating follows the name on its line` ).toBe( true );
+			}
+		}
+		for ( const width of [ 375, 320 ] ) {
+			await page.setViewportSize( { width, height: 800 } );
+			await page.waitForTimeout( 150 );
+			const lines = await measure();
+			for ( const [ index, line ] of lines.entries() ) {
+				expect( line.leader, `${ line.name } at ${ width }px prints no leader` ).toBe( 0 );
+				expect( line.under, `${ line.name } at ${ width }px: the rating is on its own line under the name` ).toBe( true );
+				expect( line.flush, `${ line.name } at ${ width }px: the rating starts where the name does` ).toBe( true );
+				expect( line.inside, `${ line.name } at ${ width }px: the rating stays in the line` ).toBe( true );
+				expect( line.text, 'the rating reads the same at every width' ).toBe( desktop[ index ].text );
+				expect( line.href, 'the name links to the same post at every width' ).toBe( desktop[ index ].href );
+			}
+			expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ), `no sideways scroll at ${ width }px` ).toBe( 0 );
+		}
+	} );
+
+	// A phone gets each Recent Special as a row: a small picture, the copy beside it.
+	// The featured image when the post has one, the plate when it has none. The whole
+	// row is the link's target. In forced colours the plate is gone and leaves no frame.
+	test( `Recent Specials on the ${ kind } menu are compact rows on a phone and leave no empty frame in forced colours`, async ( { page } ) => {
+		const measure = () => page.locator( `.cr-archive--${ kind } .pkiw-menu-specials__item` ).evaluateAll( ( items ) => items.map( ( item ) => {
+			const box = item.getBoundingClientRect();
+			const body = item.querySelector( '.pkiw-menu-specials__body' ).getBoundingClientRect();
+			const img = item.querySelector( 'img' );
+			const plate = getComputedStyle( item, '::before' );
+			const link = item.querySelector( '.pkiw-menu-specials__link' );
+			const picture = img ? img.getBoundingClientRect() : null;
+			// Where the item's own content starts: past the rule and gap between two specials side by side.
+			const start = box.left + parseFloat( getComputedStyle( item ).paddingLeft ) + parseFloat( getComputedStyle( item ).borderLeftWidth );
+			// The point a thumb lands on: the middle of the picture column.
+			const tapped = document.elementFromPoint( start + Math.max( 2, ( body.left - start ) / 2 ), box.top + Math.min( box.height, 80 ) / 2 );
+			return {
+				name: link.textContent.trim(),
+				plain: item.classList.contains( 'pkiw-menu-specials__item--no-photo' ),
+				image: img ? { width: Math.round( picture.width ), height: Math.round( picture.height ), loaded: img.complete && img.naturalWidth > 0, alt: img.getAttribute( 'alt' ) } : null,
+				plate: 'none' === plate.content ? null : { width: parseFloat( plate.width ), height: parseFloat( plate.height ), border: parseFloat( plate.borderTopWidth ), drawn: plate.backgroundImage.includes( 'radial-gradient' ) },
+				pictureColumn: Math.round( body.left - start ),
+				bodyWidth: Math.round( body.width ),
+				height: Math.round( box.height ),
+				bodyHeight: Math.round( body.height ),
+				tapReachesLink: Boolean( tapped && ( tapped === link || link.contains( tapped ) ) ),
+				font: parseFloat( getComputedStyle( item.querySelector( '.pkiw-menu-specials__body' ) ).fontSize ),
+			};
+		} ) );
+		await page.goto( path, { waitUntil: 'load' } );
+		test.skip( ( await page.locator( 'main li.wp-block-post' ).count() ) < 3, `fewer than three ${ kind } posts on this site` );
+		for ( const width of [ 375, 320 ] ) {
+			await page.setViewportSize( { width, height: 800 } );
+			await page.waitForTimeout( 150 );
+			const specials = await measure();
+			expect( specials.length, 'both specials stay' ).toBeGreaterThan( 0 );
+			for ( const special of specials ) {
+				const picture = special.image || special.plate;
+				expect( picture, `${ special.name }: a featured image or the plate` ).not.toBeNull();
+				expect( Boolean( special.image ), `${ special.name }: a featured image wins over the plate` ).toBe( ! special.plain );
+				if ( special.image ) {
+					expect( special.image.loaded, `${ special.name }: its featured image loaded` ).toBe( true );
+					expect( special.plate, `${ special.name }: no plate beside a featured image` ).toBeNull();
+				}
+				expect( picture.height, `${ special.name } at ${ width }px: a small picture, not a banner` ).toBeLessThanOrEqual( 96 );
+				expect( special.pictureColumn, `${ special.name } at ${ width }px: the copy sits beside the picture` ).toBeGreaterThanOrEqual( Math.floor( picture.width ) );
+				expect( special.height, `${ special.name } at ${ width }px: the row is as tall as its copy or its picture` ).toBeLessThanOrEqual( Math.max( special.bodyHeight, Math.ceil( picture.height ) ) + 2 );
+				expect( special.bodyWidth, `${ special.name } at ${ width }px: the copy keeps a readable measure` ).toBeGreaterThanOrEqual( 140 );
+				expect( special.font, 'and a readable size' ).toBeGreaterThanOrEqual( 13 );
+				expect( special.tapReachesLink, `${ special.name } at ${ width }px: a tap on the picture opens the post` ).toBe( true );
+			}
+			expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ), `no sideways scroll at ${ width }px` ).toBe( 0 );
+		}
+
+		for ( const width of [ 1280, 375 ] ) {
+			await page.setViewportSize( { width, height: 900 } );
+			await page.emulateMedia( { forcedColors: 'active' } );
+			await page.waitForTimeout( 150 );
+			for ( const special of await measure() ) {
+				if ( special.plain ) {
+					expect( special.plate, `${ special.name } at ${ width }px in forced colours: the plate leaves no frame` ).toBeNull();
+					expect( special.pictureColumn, `${ special.name } at ${ width }px in forced colours: the copy takes the row` ).toBe( 0 );
+				} else {
+					expect( special.image.loaded, `${ special.name } at ${ width }px in forced colours: the featured image keeps its pixels` ).toBe( true );
+					expect( special.image.height ).toBeGreaterThan( 0 );
+				}
+			}
+			await page.emulateMedia( { forcedColors: 'none' } );
+		}
+	} );
+}
+
+// PKIW #230: the map on a phone is tall enough that the embed's zoom buttons and
+// its attribution leave most of the map showing. Measured at 320px: 14rem leaves
+// the controls under a third of the frame. A wide map keeps its 16:10 shape.
+test( 'the check-in map is at least 14rem tall on a phone and keeps its shape on a wide screen', async ( { page } ) => {
+	await page.setViewportSize( { width: 320, height: 800 } );
+	await page.goto( DRINK_SINGLE, { waitUntil: 'load' } );
+	test.skip( ( await page.locator( 'main .cr-map-slip iframe' ).count() ) === 0, `no drink post with a map at ${ DRINK_SINGLE }` );
+	const frame = page.locator( 'main .cr-map-slip iframe' );
+	const rem = await page.evaluate( () => parseFloat( getComputedStyle( document.documentElement ).fontSize ) );
+	for ( const width of [ 320, 375 ] ) {
+		await page.setViewportSize( { width, height: 800 } );
+		await page.waitForTimeout( 150 );
+		const box = await frame.boundingBox();
+		expect( box.height, `the map at ${ width }px` ).toBeGreaterThanOrEqual( 14 * rem - 1 );
+		expect( box.x + box.width, 'inside the viewport' ).toBeLessThanOrEqual( width );
+		expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBe( 0 );
+	}
+	await page.setViewportSize( { width: 1280, height: 900 } );
+	await page.waitForTimeout( 150 );
+	const wide = await frame.boundingBox();
+	expect( Math.abs( wide.width / wide.height - 1.6 ), 'a wide map is 16:10' ).toBeLessThan( 0.05 );
+} );
+
+// A link's focus ring is 3px. Accessibility Checker's link-underline fix writes
+// `outline-width: 2px` inline on focus (its frontendFixes bundle), and an inline
+// style beats a stylesheet rule. This copies that write and expects 3px to hold.
+test( 'a link keeps its 3px focus ring when a script writes a thinner outline inline', async ( { page } ) => {
+	await page.goto( DRINK_ARCHIVE, { waitUntil: 'load' } );
+	const links = [ '.cr-menu .pkiw-menu-entry__name', '.cr-menu .pkiw-menu-specials__link', 'main a' ];
+	let checked = 0;
+	for ( const selector of links ) {
+		const link = page.locator( selector ).first();
+		if ( 0 === await link.count() ) {
+			continue;
+		}
+		await link.evaluate( ( el ) => {
+			el.addEventListener( 'focusin', () => {
+				el.style.outlineWidth = '2px';
+				el.style.outlineOffset = '2px';
+			} );
+			const before = document.createElement( 'span' );
+			before.tabIndex = -1;
+			el.before( before );
+			before.focus();
+		} );
+		await page.keyboard.press( 'Tab' );
+		const ring = await link.evaluate( ( el ) => ( { focused: el === document.activeElement, inline: el.style.outlineWidth, width: getComputedStyle( el ).outlineWidth, style: getComputedStyle( el ).outlineStyle } ) );
+		expect( ring.focused, `${ selector } took focus from the keyboard` ).toBe( true );
+		expect( ring.inline, 'the script wrote its 2px' ).toBe( '2px' );
+		expect( ring.style, `${ selector } shows an outline` ).toBe( 'solid' );
+		expect( ring.width, `${ selector } keeps the theme's 3px` ).toBe( '3px' );
+		checked++;
+	}
+	expect( checked, 'at least one link was checked' ).toBeGreaterThan( 0 );
+} );
 
 // PKIW #230: an eat single is an order ticket and a drink single is a taped
 // photo beside a coaster. Each sits on one placemat with the check-in map
@@ -1325,6 +1519,22 @@ for ( const [ kind, path, labels ] of [ [ 'eat', EAT_SINGLE, [ 'Dish', 'Restaura
 		expect( osm.length, 'a public location loads the map' ).toBeGreaterThan( 0 );
 	} );
 }
+
+// PKIW #230: a drink with no type claims none. The coaster prints no Type fact
+// and the word Coffee appears nowhere on it; the plugin files the post under a
+// "Drink" heading on the menu.
+test( 'a drink with no type prints no Type fact and is never called Coffee', async ( { page } ) => {
+	await page.goto( DRINK_UNSET, { waitUntil: 'load' } );
+	test.skip( ( await page.locator( 'body.cr-order-single--drink' ).count() ) === 0, `no drink post with its card at ${ DRINK_UNSET }` );
+	const mat = page.locator( 'main article.cr-placemat.cr-placemat--drink' );
+	await expect( mat ).toHaveCount( 1 );
+	const labels = await mat.locator( 'dl.cr-order__facts dt' ).allTextContents();
+	expect( labels.map( ( label ) => label.trim() ), 'no Type fact' ).not.toContain( 'Type' );
+	expect( labels.length, 'the other facts still print' ).toBeGreaterThan( 0 );
+	expect( await mat.innerText(), 'the coaster never says Coffee' ).not.toMatch( /coffee/i );
+	const words = await mat.evaluate( ( el ) => [ ...el.querySelectorAll( '*' ) ].filter( ( n ) => ! n.closest( '[hidden]' ) && n.children.length === 0 ).map( ( n ) => n.textContent.trim() ).filter( Boolean ) );
+	expect( words.filter( ( word, index ) => word.length > 3 && words.indexOf( word ) !== index ), 'no fact prints twice' ).toEqual( [] );
+} );
 
 // PKIW #230: a hidden location prints nothing about the place: no slip, no
 // link, no coordinates, no restaurant, and the browser never asks
