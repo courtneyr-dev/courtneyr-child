@@ -663,11 +663,12 @@ test( 'a listen single shows its rating once, as text, and one Listen link (PKIW
 	// One visible link per destination, for every place the card and the
 	// listen part link to: visible links in main counted by href. A link kept
 	// for microformats and hidden (display: none, or clipped to a pixel the
-	// way screen-reader-text is) doesn't count; Playwright's `visible` filter
-	// would count the clipped one.
+	// way screen-reader-text is, or shrunk to nothing by font-size: 0) doesn't
+	// count; Playwright's `visible` filter would count the clipped one.
 	const destinations = await page.locator( 'main' ).evaluate( ( main ) => {
 		const shown = ( a ) => {
-			if ( 0 === a.getClientRects().length || 'visible' !== getComputedStyle( a ).visibility ) {
+			const size = a.getBoundingClientRect();
+			if ( 0 === a.getClientRects().length || size.width <= 2 || size.height <= 2 || 'visible' !== getComputedStyle( a ).visibility ) {
 				return false;
 			}
 			for ( let el = a; el && el !== main; el = el.parentElement ) {
