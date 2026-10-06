@@ -1738,7 +1738,9 @@ test( 'a link keeps its 3px focus ring when a script writes a thinner outline in
 test.describe( 'with the consent dialog open', () => {
 	test.use( { consentDialog: 'keep' } );
 
-	test( 'no focused link in main is entirely hidden under the consent dialog, or the page behind it is inert', async ( { page } ) => {
+	test( 'no focused link in main is entirely hidden under the consent dialog, or the page behind it is inert', async ( { page }, testInfo ) => {
+		// It sets its own window, so one project's run is the whole record.
+		test.skip( '390-light' !== testInfo.project.name, 'runs once, in the 390-light project' );
 		await page.setViewportSize( { width: 375, height: 800 } );
 		await page.goto( DRINK_ARCHIVE, { waitUntil: 'load' } );
 		const dialog = page.locator( '.cmplz-cookiebanner' ).filter( { visible: true } );
