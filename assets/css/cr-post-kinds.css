@@ -4383,11 +4383,16 @@ body.single-post:is(.kind-listen, .kind-watch) .single-post__content .pk-card:is
 body.single-post.kind-listen .single-post__content .pk-card.k-listen:has(.pk-sources) .pk-meta { font-size: 0; }
 
 /* PKIW #226: while the part shows the rating as text ("Rated 5 of 5") or
-   the Listen link, the card's stars and its meta-row link are second
-   copies. Hide them so each reads once, and close the paper label at the
-   caption. A single template without the kind part keeps the card's own. */
+   the Listen link, the card's stars, its meta-row link and that link's dot
+   are second copies. The card's title links to the same URL and repeats
+   the H1, so it goes too; the h2 keeps p-name and u-url in the DOM, and
+   the artist line stays on the label. Hide them so each reads once, and
+   close the paper label at the caption. A single template without the
+   kind part keeps the card's own. */
 body.single-post.kind-listen:has(.cr-listen-sources__value:not(:empty)) .single-post__content .pk-card.k-listen .pk-stars,
+body.single-post.kind-listen:has(.cr-listen-sources__link > a[href]) .single-post__content .pk-card.k-listen .pk-title:has(a[href]),
 body.single-post.kind-listen:has(.cr-listen-sources__link > a[href]) .single-post__content .pk-card.k-listen .pk-meta .pk-link,
+body.single-post.kind-listen:has(.cr-listen-sources__link > a[href]) .single-post__content .pk-card.k-listen .pk-meta .pk-dot,
 body.single-post.kind-listen:has(.cr-listen-sources__link > a[href]) .single-post__content .pk-card.k-listen .pk-meta:not(:has(time)) {
 	display: none;
 }
