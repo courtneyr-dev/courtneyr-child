@@ -662,7 +662,12 @@ test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft
 // header, notes card and reading record on wide screens. A comic still being
 // read is labelled by its start, never as read or finished.
 test( 'a comic single is a bagged comic beside its header, notes and reading record, with truthful date labels', async ( { page } ) => {
-	await page.goto( COMIC_SINGLE, { waitUntil: 'load' } );
+	const response = await page.goto( COMIC_SINGLE, { waitUntil: 'load' } );
+	// courtneyr-child#94: the default path is the dev fixture. Elsewhere it is
+	// missing (404) or a book read (test serves Anzuelo with a read-card), so
+	// there is no comic read to test. The plugin's own card decides that; the
+	// theme's classes are what the test checks.
+	test.skip( 404 === response.status() || 0 === await page.locator( '.wp-block-post-kinds-indieweb-comic-card' ).count(), `no comic read at ${ COMIC_SINGLE }: set CR_COMIC_SINGLE_PATH` );
 	await expect( page.locator( 'body.cr-comic-single' ) ).toHaveCount( 1 );
 	await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
 	const bag = page.locator( '.single-post__content article.pk-card.k-comics.cr-comic--single' );
@@ -736,7 +741,7 @@ test( 'a comic single is a bagged comic beside its header, notes and reading rec
 		const b = document.querySelector( 'article.cr-comic--single' ).getBoundingClientRect();
 		const h = document.querySelector( 'h1' ).getBoundingClientRect();
 		const n = document.querySelector( '.cr-journal__notes, .cr-record' ).getBoundingClientRect();
-		return { bagRight: b.right, bagTop: b.top, h1Left: h.left, h1Top: h.top, notesLeft: n.left };
+		return { bagRight: b.right, bagTop: b.top, bagBottom: b.bottom, h1Left: h.left, h1Top: h.top, h1Bottom: h.bottom, notesLeft: n.left, notesTop: n.top };
 	} );
 	// "Also on" (syndication links) follows the record in its column; it is
 	// not a stray line at the page edge under the bag.
@@ -751,9 +756,16 @@ test( 'a comic single is a bagged comic beside its header, notes and reading rec
 		expect( Math.abs( alsoOn.left - alsoOn.recordLeft ), 'syndication links start where the record starts' ).toBeLessThanOrEqual( 1 );
 		expect( alsoOn.top ).toBeGreaterThan( alsoOn.recordBottom );
 	}
-	expect( spread.bagRight, 'the bag stands left of the header' ).toBeLessThanOrEqual( spread.h1Left );
-	expect( spread.bagRight ).toBeLessThanOrEqual( spread.notesLeft );
-	expect( spread.bagTop, 'the bag starts level with the header, not below it' ).toBeLessThan( spread.h1Top + 40 );
+	// Side by side from 64rem (assets/css/cr-comic.css, `@media (min-width: 64rem)`).
+	// Below it the page stacks in source order: header, bag, then notes and record.
+	if ( page.viewportSize().width >= 1024 ) {
+		expect( spread.bagRight, 'the bag stands left of the header' ).toBeLessThanOrEqual( spread.h1Left );
+		expect( spread.bagRight ).toBeLessThanOrEqual( spread.notesLeft );
+		expect( spread.bagTop, 'the bag starts level with the header, not below it' ).toBeLessThan( spread.h1Top + 40 );
+	} else {
+		expect( spread.bagTop, 'stacked: the bag follows the header' ).toBeGreaterThanOrEqual( spread.h1Bottom );
+		expect( spread.notesTop, 'stacked: the notes and record follow the bag' ).toBeGreaterThanOrEqual( spread.bagBottom );
+	}
 } );
 
 // PKIW #228: body text an author writes after the card keeps its place in
