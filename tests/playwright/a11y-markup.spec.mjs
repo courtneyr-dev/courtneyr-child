@@ -59,7 +59,10 @@ const TABLE_POST = process.env.CR_TABLE_POST_PATH || '/?p=551'; // legacy compar
 const TERM_ARCHIVE = process.env.CR_TERM_ARCHIVE_PATH || '/type/aside/'; // term archive with a description
 const CUTOUT_ARCHIVES = ( process.env.CR_CUTOUT_ARCHIVE_PATHS || '/kind/mood/,/type/aside/,/?s=wordpress,/stream/' ).split( ',' ); // cut-paper archive titles
 const PAGED_KIND_ARCHIVE = process.env.CR_PAGED_KIND_ARCHIVE_PATH || '/kind/note/page/2/'; // a /kind/* archive with at least three pages
-const POST_NAV_POST = process.env.CR_POST_NAV_POST_PATH || '/?p=38071'; // a Blog post with a titled post on each side
+const POST_NAV_POST = process.env.CR_POST_NAV_POST_PATH || '/?p=8660'; // a post with a titled post on each side (dev and test 8660; 38071 lost its Next neighbour)
+const KIND_NAV_SINGLE = process.env.CR_KIND_NAV_SINGLE_PATH || '/2026/08/17/my-brilliant-career/'; // a Stream single whose kind has a post on each side; dev 37854, a watch
+const KIND_NEWEST_SINGLE = process.env.CR_KIND_NEWEST_SINGLE_PATH || '/2026/08/20/ted-lasso-season-4/'; // the newest Stream post of its kind, which has an older one; dev 37866, the newest watch
+const KIND_ONLY_SINGLE = process.env.CR_KIND_ONLY_SINGLE_PATH || '/2026/07/06/american-obituary/'; // the only Stream post of its kind; dev 37754, the one listen
 const LISTEN_ARCHIVE = process.env.CR_LISTEN_ARCHIVE_PATH || '/kind/listen/'; // listen archive with at least one listen post (PKIW #226)
 const WATCH_ARCHIVE = process.env.CR_WATCH_ARCHIVE_PATH || '/kind/watch/'; // watch archive page 1 (PKIW #227)
 const COMICS_ARCHIVE = process.env.CR_COMICS_ARCHIVE_PATH || '/kind/comics/'; // comics archive with at least one comic read (PKIW #228)
@@ -92,6 +95,23 @@ const DARK_FIXTURES = [
 	[ process.env.CR_MARK_POST_PATH || '/?p=50', 'mark', 'love the Lord' ], // highlighted verse
 	[ process.env.CR_MARK_POST2_PATH || '/?p=751', 'mark', 'FREE' ], // highlighted word
 ];
+
+// The single's Post navigation links, as { label: 'Previous' | 'Next', href }.
+async function postNavLinks( page ) {
+	const nav = page.getByRole( 'navigation', { name: 'Post navigation', exact: true } );
+	await expect( nav ).toHaveCount( 1 );
+	return nav.getByRole( 'link' ).evaluateAll( ( links ) => links.map( ( link ) => ( {
+		label: ( link.querySelector( '.post-navigation-link__label' )?.textContent || '' ).trim(),
+		href: link.href,
+	} ) ) );
+}
+
+// The kind-* body class of the page at href, read from a GET (no navigation).
+async function kindAt( page, href ) {
+	const html = await ( await page.request.get( href ) ).text();
+	const bodyClasses = html.match( /<body\b[^>]*\bclass=(['"])(.*?)\1/i )?.[ 2 ] || '';
+	return bodyClasses.split( /\s+/ ).find( ( className ) => /^kind-[a-z0-9-]+$/.test( className ) ) || '';
+}
 
 test( 'footer h-card photo is a decorative image inside the named link', async ( { page } ) => {
 	await page.goto( '/', { waitUntil: 'load' } );
@@ -324,8 +344,10 @@ test( 'single posts have a Post navigation landmark whose links name the adjacen
 	await expect( nav ).toHaveCount( 1 );
 	const links = nav.getByRole( 'link' );
 	expect( await links.count() ).toBeGreaterThan( 0 );
+	const visibleLabels = [];
 	for ( const link of await links.all() ) {
 		const visible = ( await link.locator( '.post-navigation-link__label' ).textContent() )?.trim();
+		visibleLabels.push( visible );
 		expect( [ 'Previous', 'Next' ] ).toContain( visible );
 		const title = ( await link.locator( '.post-navigation-link__title' ).textContent() )?.trim() || '';
 		expect( title.length ).toBeGreaterThan( 0 );
@@ -339,6 +361,43 @@ test( 'single posts have a Post navigation landmark whose links name the adjacen
 		const decode = ( s ) => s.replace( /&#8217;/g, '’' ).replace( /&#8211;/g, '–' ).replace( /&#8220;|&#8221;/g, '"' ).replace( /&amp;/g, '&' );
 		expect( decode( destination ) ).toContain( title );
 	}
+	expect( visibleLabels.sort(), 'repoint CR_POST_NAV_POST_PATH to a post with a neighbour on each side' ).toEqual( [ 'Next', 'Previous' ] );
+} );
+
+// PKIW #233: inc/nav.php keeps a Stream post's Previous and Next inside its
+// kind when the kind has another post on the same surface, and keeps the
+// Stream order when it doesn't. A post with a neighbour of its kind on each
+// side links to both.
+test( 'Previous and Next on a kind single stay inside its kind when the kind has a post on each side (PKIW #233)', async ( { page } ) => {
+	const response = await page.goto( KIND_NAV_SINGLE, { waitUntil: 'load' } );
+	const pageKind = await page.evaluate( () => [ ...document.body.classList ].find( ( className ) => /^kind-[a-z0-9-]+$/.test( className ) ) || '' );
+	test.skip( response.status() === 404 || ! pageKind, `no kind single fixture at ${ KIND_NAV_SINGLE }` );
+	const links = await postNavLinks( page );
+	expect( links.map( ( link ) => link.label ).sort(), 'repoint CR_KIND_NAV_SINGLE_PATH to a post with a neighbour on each side' ).toEqual( [ 'Next', 'Previous' ] );
+	for ( const link of links ) {
+		expect( await kindAt( page, link.href ), `${ link.label } destination stays inside ${ pageKind }` ).toBe( pageKind );
+	}
+} );
+
+// PKIW #233: the newest post of a kind has only its older kind neighbour.
+test( 'the newest post of a kind has a Previous inside its kind and no Next (PKIW #233)', async ( { page } ) => {
+	const response = await page.goto( KIND_NEWEST_SINGLE, { waitUntil: 'load' } );
+	const pageKind = await page.evaluate( () => [ ...document.body.classList ].find( ( className ) => /^kind-[a-z0-9-]+$/.test( className ) ) || '' );
+	test.skip( response.status() === 404 || ! pageKind, `no newest kind single fixture at ${ KIND_NEWEST_SINGLE }` );
+	const links = await postNavLinks( page );
+	expect( links.map( ( link ) => link.label ), 'a Next here belongs to another kind; if a newer post of this kind exists, repoint CR_KIND_NEWEST_SINGLE_PATH' ).toEqual( [ 'Previous' ] );
+	expect( await kindAt( page, links[ 0 ].href ), 'Previous destination stays inside the current kind' ).toBe( pageKind );
+} );
+
+// PKIW #233: a kind with one post falls back to the Stream order.
+test( 'the only post of its kind keeps the Stream order, so its Post navigation is never empty (PKIW #233)', async ( { page } ) => {
+	const response = await page.goto( KIND_ONLY_SINGLE, { waitUntil: 'load' } );
+	const pageKind = await page.evaluate( () => [ ...document.body.classList ].find( ( className ) => /^kind-[a-z0-9-]+$/.test( className ) ) || '' );
+	test.skip( response.status() === 404 || ! pageKind, `no only-of-kind single fixture at ${ KIND_ONLY_SINGLE }` );
+	const links = await postNavLinks( page );
+	const destinationKinds = await Promise.all( links.map( ( link ) => kindAt( page, link.href ) ) );
+	test.skip( destinationKinds.includes( pageKind ), `the path has a neighbour of its own kind here, so it is not the only one; set CR_KIND_ONLY_SINGLE_PATH` );
+	expect( links.length, 'an empty landmark means the nav was scoped to a kind with no neighbour' ).toBeGreaterThan( 0 );
 } );
 
 // /stream keeps the pager saved in its own page content (it had one before
