@@ -87,6 +87,7 @@ const TERM_ARCHIVE = process.env.CR_TERM_ARCHIVE_PATH || '/type/aside/'; // term
 const CUTOUT_ARCHIVES = ( process.env.CR_CUTOUT_ARCHIVE_PATHS || '/kind/mood/,/type/aside/,/?s=wordpress,/stream/' ).split( ',' ); // cut-paper archive titles
 const PAGED_KIND_ARCHIVE = process.env.CR_PAGED_KIND_ARCHIVE_PATH || '/kind/note/page/2/'; // a /kind/* archive with at least three pages
 const POST_NAV_POST = process.env.CR_POST_NAV_POST_PATH || '/?p=8660'; // a post with a titled post on each side (dev and test 8660; 38071 lost its Next neighbour)
+const STREAM = process.env.CR_STREAM_PATH || '/stream/'; // the Stream page whose query order a kind's only post follows (PKIW #233)
 const KIND_NAV_SINGLE = process.env.CR_KIND_NAV_SINGLE_PATH || '/2026/08/17/my-brilliant-career/'; // a Stream single whose kind has a post on each side; dev 37854, a watch
 const KIND_NEWEST_SINGLE = process.env.CR_KIND_NEWEST_SINGLE_PATH || '/2026/08/20/ted-lasso-season-4/'; // the newest Stream post of its kind, which has an older one; dev 37866, the newest watch
 const KIND_ONLY_SINGLE = process.env.CR_KIND_ONLY_SINGLE_PATH || '/2026/07/06/american-obituary/'; // the only Stream post of its kind; dev 37754, the one listen
@@ -136,11 +137,48 @@ async function postNavLinks( page ) {
 	} ) ) );
 }
 
-// The kind-* body class of the page at href, read from a GET (no navigation).
-async function kindAt( page, href ) {
+// The body classes of the page at href, read from a GET (no navigation).
+async function bodyClassesAt( page, href ) {
 	const html = await ( await page.request.get( href ) ).text();
-	const bodyClasses = html.match( /<body\b[^>]*\bclass=(['"])(.*?)\1/i )?.[ 2 ] || '';
-	return bodyClasses.split( /\s+/ ).find( ( className ) => /^kind-[a-z0-9-]+$/.test( className ) ) || '';
+	return ( html.match( /<body\b[^>]*\bclass=(['"])(.*?)\1/i )?.[ 2 ] || '' ).split( /\s+/ );
+}
+
+// The kind-* body class of the page at href.
+async function kindAt( page, href ) {
+	return ( await bodyClassesAt( page, href ) ).find( ( className ) => /^kind-[a-z0-9-]+$/.test( className ) ) || '';
+}
+
+// The post ID of the single at href, from its postid-* body class.
+async function postIdAt( page, href ) {
+	const postClass = ( await bodyClassesAt( page, href ) ).find( ( className ) => /^postid-\d+$/.test( className ) );
+	return postClass ? Number( postClass.slice( 'postid-'.length ) ) : null;
+}
+
+// The posts the Stream lists on either side of a post: { newer, older }
+// as post IDs (null at either end), read page by page from GETs of the
+// Stream query (newest first), the order core's adjacent-post query follows
+// on the Stream surface. Null when the post isn't on the first 30 pages.
+async function streamNeighbours( page, postId ) {
+	const ids = [];
+	let pageParam = '';
+	for ( let n = 1; n <= 30; n++ ) {
+		if ( n > 1 && ! pageParam ) {
+			break;
+		}
+		const html = await ( await page.request.get( 1 === n ? STREAM : `${ STREAM }${ STREAM.includes( '?' ) ? '&' : '?' }${ pageParam }=${ n }` ) ).text();
+		pageParam ||= html.match( /\b(query-\d+-page)=/ )?.[ 1 ] || '';
+		const pageIds = [ ...html.matchAll( /<li class="wp-block-post post-(\d+)\b/g ) ].map( ( match ) => Number( match[ 1 ] ) );
+		if ( 0 === pageIds.length ) {
+			break;
+		}
+		ids.push( ...pageIds );
+		const at = ids.indexOf( postId );
+		if ( -1 !== at && at + 1 < ids.length ) {
+			break;
+		}
+	}
+	const at = ids.indexOf( postId );
+	return -1 === at ? null : { newer: ids[ at - 1 ] ?? null, older: ids[ at + 1 ] ?? null };
 }
 
 test( 'footer h-card photo is a decorative image inside the named link', async ( { page } ) => {
@@ -419,7 +457,9 @@ test( 'the newest post of a kind has a Previous inside its kind and no Next (PKI
 	expect( await kindAt( page, links[ 0 ].href ), 'Previous destination stays inside the current kind' ).toBe( pageKind );
 } );
 
-// PKIW #233: a kind with one post falls back to the Stream order.
+// PKIW #233: a kind with one post falls back to the Stream order: Previous
+// opens the post the Stream lists just after it (older), Next the one just
+// before it (newer), whatever their kind.
 test( 'the only post of its kind keeps the Stream order, so its Post navigation is never empty (PKIW #233)', async ( { page } ) => {
 	const response = await page.goto( KIND_ONLY_SINGLE, { waitUntil: 'load' } );
 	const pageKind = await page.evaluate( () => [ ...document.body.classList ].find( ( className ) => /^kind-[a-z0-9-]+$/.test( className ) ) || '' );
@@ -428,6 +468,12 @@ test( 'the only post of its kind keeps the Stream order, so its Post navigation 
 	const destinationKinds = await Promise.all( links.map( ( link ) => kindAt( page, link.href ) ) );
 	test.skip( destinationKinds.includes( pageKind ), `the path has a neighbour of its own kind here, so it is not the only one; set CR_KIND_ONLY_SINGLE_PATH` );
 	expect( links.length, 'an empty landmark means the nav was scoped to a kind with no neighbour' ).toBeGreaterThan( 0 );
+	const postId = await page.evaluate( () => Number( [ ...document.body.classList ].find( ( className ) => /^postid-\d+$/.test( className ) )?.slice( 'postid-'.length ) ) );
+	const around = await streamNeighbours( page, postId );
+	expect( around, `post ${ postId } is on the first 30 pages of ${ STREAM }` ).not.toBeNull();
+	const expected = [ [ 'Previous', around.older ], [ 'Next', around.newer ] ].filter( ( [ , id ] ) => null !== id );
+	const actual = await Promise.all( links.map( async ( link ) => [ link.label, await postIdAt( page, link.href ) ] ) );
+	expect( actual.sort(), `Previous and Next are the posts ${ STREAM } lists after and before ${ postId }` ).toEqual( expected.sort() );
 } );
 
 // /stream keeps the pager saved in its own page content (it had one before
