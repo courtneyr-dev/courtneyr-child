@@ -154,23 +154,32 @@ async function postIdAt( page, href ) {
 	return postClass ? Number( postClass.slice( 'postid-'.length ) ) : null;
 }
 
-// The posts the Stream lists on either side of a post: { newer, older }
-// as post IDs (null at either end), read page by page from GETs of the
-// Stream query (newest first), the order core's adjacent-post query follows
-// on the Stream surface. Null when the post isn't on the first 30 pages.
-async function streamNeighbours( page, postId ) {
-	const ids = [];
+// A Stream page and the pages after it, read with GETs of `path` and its
+// ?query-N-page= pages, up to 30: each page's served HTML and the post IDs
+// it lists, newest first. Stops at the first page that lists no post.
+async function* streamPages( page, path ) {
 	let pageParam = '';
 	for ( let n = 1; n <= 30; n++ ) {
 		if ( n > 1 && ! pageParam ) {
-			break;
+			return;
 		}
-		const html = await ( await page.request.get( 1 === n ? STREAM : `${ STREAM }${ STREAM.includes( '?' ) ? '&' : '?' }${ pageParam }=${ n }` ) ).text();
+		const html = await ( await page.request.get( 1 === n ? path : `${ path }${ path.includes( '?' ) ? '&' : '?' }${ pageParam }=${ n }` ) ).text();
 		pageParam ||= html.match( /\b(query-\d+-page)=/ )?.[ 1 ] || '';
-		const pageIds = [ ...html.matchAll( /<li class="wp-block-post post-(\d+)\b/g ) ].map( ( match ) => Number( match[ 1 ] ) );
-		if ( 0 === pageIds.length ) {
-			break;
+		const ids = [ ...html.matchAll( /<li class="wp-block-post post-(\d+)\b/g ) ].map( ( match ) => Number( match[ 1 ] ) );
+		if ( 0 === ids.length ) {
+			return;
 		}
+		yield { html, ids };
+	}
+}
+
+// The posts the Stream lists on either side of a post: { newer, older }
+// as post IDs (null at either end), read page by page from the Stream query
+// (newest first), the order core's adjacent-post query follows on the
+// Stream surface. Null when the post isn't on the first 30 pages.
+async function streamNeighbours( page, postId ) {
+	const ids = [];
+	for await ( const { ids: pageIds } of streamPages( page, STREAM ) ) {
 		ids.push( ...pageIds );
 		const at = ids.indexOf( postId );
 		if ( -1 !== at && at + 1 < ids.length ) {
@@ -586,18 +595,39 @@ test( 'a watch single is a VHS tape: the flap reads "Watch · VHS" and the reels
 } );
 
 // PKIW #227: a missing episode never prints as episode zero, on the single
-// or on the Stream, whose VHS card prints the same film_facts() line when
-// the card has a player. The served HTML is scanned without its scripts and
-// styles, so a document title or an aria-label counts too, and "S01E00" as
-// well as "S1E0".
-test( 'a watch single and the Stream print no episode a watch does not store: no "S1E0" (PKIW #227)', async ( { page } ) => {
+// or on the Stream. The Stream's VHS card prints the same film_facts() line
+// only on a playable card with courtneyr_child_stream_watch_player on
+// (inc/stream-media.php:302, off by default), so the Stream half reads
+// CR_WATCH_STREAM_PATH page by page up to the page that lists this watch,
+// and logs a note when that card prints no facts: the run then checked no
+// film_facts() line on the Stream. The served HTML is scanned without its
+// scripts and styles, so a document title or an aria-label counts too, and
+// "S01E00" as well as "S1E0".
+test( 'a watch single and the Stream print no episode a watch does not store: no "S1E0" (PKIW #227)', async ( { page }, testInfo ) => {
 	const response = await page.goto( WATCH_SINGLE, { waitUntil: 'load' } );
 	const card = page.locator( 'article.pk-card.k-watch' );
 	test.skip( response.status() === 404 || 0 === await card.count(), `no watch card fixture at ${ WATCH_SINGLE }` );
 	const episodeZero = /\bS\d+E0+\b|\bEpisode 0+\b/g;
 	const served = ( html ) => html.replace( /<script\b[\s\S]*?<\/script>|<style\b[\s\S]*?<\/style>/gi, '' );
 	expect( served( await response.text() ).match( episodeZero ), `an episode 0 is invented on ${ WATCH_SINGLE }` ).toBeNull();
-	expect( served( await ( await page.request.get( WATCH_STREAM ) ).text() ).match( episodeZero ), `an episode 0 is invented on ${ WATCH_STREAM }` ).toBeNull();
+	const postId = await page.evaluate( () => Number( [ ...document.body.classList ].find( ( className ) => /^postid-\d+$/.test( className ) )?.slice( 'postid-'.length ) ) );
+	let streamCard = null;
+	let pageNumber = 0;
+	for await ( const { html, ids } of streamPages( page, WATCH_STREAM ) ) {
+		pageNumber++;
+		expect( served( html ).match( episodeZero ), `an episode 0 is invented on page ${ pageNumber } of ${ WATCH_STREAM }` ).toBeNull();
+		if ( ids.includes( postId ) ) {
+			streamCard = html.split( /(?=<li class="wp-block-post )/ ).find( ( item ) => Number( item.match( /^<li class="wp-block-post post-(\d+)\b/ )?.[ 1 ] ) === postId );
+			break;
+		}
+	}
+	if ( ! streamCard?.includes( 'cr-vhs__facts' ) ) {
+		const note = streamCard
+			? `post ${ postId }'s card on page ${ pageNumber } of ${ WATCH_STREAM } prints no film facts, so the Stream half checked no film_facts() line`
+			: `post ${ postId } isn't on the ${ pageNumber } pages of ${ WATCH_STREAM } read, so the Stream half checked no film_facts() line for it`;
+		testInfo.annotations.push( { type: 'coverage', description: note } );
+		console.log( note );
+	}
 } );
 
 // PKIW #227: the lede under the h1 and the footer's film line print
