@@ -2,7 +2,53 @@
 // inc/a11y-output.php and patterns/cr-hcard.php. Read-only GETs; needs a running site
 // (CR_BASE_URL, CR_ALLOW_REMOTE=1 and CR_USER_AGENT for a Pantheon sandbox). Post paths
 // default to dev fixtures and can be pointed elsewhere with the CR_*_PATH variables.
-import { test, expect } from '@playwright/test';
+import { test as base, expect } from '@playwright/test';
+
+// courtneyr-child#95: a site running Complianz opens its consent dialog
+// (.cmplz-cookiebanner, role="dialog", aria-modal="true") in every fresh
+// browser context. While it shows it traps Tab and covers part of the window,
+// so tests meet the dialog instead of the page. Setup closes it the way a
+// visitor does, through its own "Close dialog" control (.cmplz-close), whose
+// handler only records the banner as dismissed: no consent choice, so the site
+// loads the same scripts. No CSS hides it and nothing presses Accept. On a site
+// without the dialog (local wp-env) this does nothing. A test that needs the
+// dialog open sets `consentDialog: 'keep'`.
+async function closeConsentDialog( page ) {
+	if ( 0 === await page.locator( '.cmplz-cookiebanner' ).count() ) {
+		return;
+	}
+	// Closed earlier in this test's browser context: Complianz keeps it closed.
+	if ( ( await page.context().cookies() ).some( ( c ) => 'cmplz_banner-status' === c.name && 'dismissed' === c.value ) ) {
+		return;
+	}
+	const close = page.locator( '.cmplz-cookiebanner .cmplz-close' ).filter( { visible: true } ).first();
+	try {
+		// Complianz opens the dialog from its script after the load event.
+		await close.waitFor( { state: 'visible', timeout: 5000 } );
+	} catch {
+		return;
+	}
+	await close.click();
+	await expect( page.locator( '.cmplz-cookiebanner' ).filter( { visible: true } ) ).toHaveCount( 0 );
+}
+
+// Every page.goto() in this file closes the dialog once the page has loaded.
+// A locator handler would not do: it runs before actions and assertions, not
+// before page.evaluate() or page.keyboard, which these tests use.
+const test = base.extend( {
+	consentDialog: [ 'close', { option: true } ],
+	page: async ( { page, consentDialog }, use ) => {
+		if ( 'close' === consentDialog ) {
+			const goto = page.goto.bind( page );
+			page.goto = async ( url, options ) => {
+				const response = await goto( url, options );
+				await closeConsentDialog( page );
+				return response;
+			};
+		}
+		await use( page );
+	},
+} );
 
 const ABLEPLAYER_POST = process.env.CR_ABLEPLAYER_POST_PATH || '/?p=3010'; // Able Player YouTube shortcode
 const ABLEPLAYER_URL_POST = process.env.CR_ABLEPLAYER_URL_POST_PATH || '/?p=1053'; // youtube-id written as a full watch URL
@@ -1416,6 +1462,39 @@ test( 'a link keeps its 3px focus ring when a script writes a thinner outline in
 		checked++;
 	}
 	expect( checked, 'at least one link was checked' ).toBeGreaterThan( 0 );
+} );
+
+// courtneyr-child#95: the consent dialog belongs to the consent plugin, so this
+// test keeps it open to keep its effect on record. Complianz traps Tab inside
+// the dialog but leaves the page behind it focusable (no inert), so focus that
+// arrives another way (pointer, script, assistive technology) can sit under it.
+// Website Specification `focus-not-obscured` (recommended): a dialog either
+// makes the rest of the page inert or stays off focusable content. Expected to
+// fail until the plugin or its settings change; a pass means it changed.
+test.describe( 'with the consent dialog open', () => {
+	test.use( { consentDialog: 'keep' } );
+
+	test( 'no focused link in main is entirely hidden under the consent dialog, or the page behind it is inert', async ( { page } ) => {
+		await page.setViewportSize( { width: 375, height: 800 } );
+		await page.goto( DRINK_ARCHIVE, { waitUntil: 'load' } );
+		const dialog = page.locator( '.cmplz-cookiebanner' ).filter( { visible: true } );
+		await dialog.first().waitFor( { state: 'visible', timeout: 5000 } ).catch( () => {} );
+		test.skip( 0 === await dialog.count(), 'no consent dialog on this site' );
+		test.fail( true, 'Complianz leaves the page focusable under its dialog (courtneyr-child#95)' );
+		const state = await page.evaluate( () => {
+			const box = document.querySelector( '.cmplz-cookiebanner:not(.cmplz-hidden)' ).getBoundingClientRect();
+			const hidden = [];
+			for ( const a of document.querySelectorAll( 'main a[href]' ) ) {
+				a.focus();
+				const r = a.getBoundingClientRect();
+				if ( r.width > 0 && r.height > 0 && r.left >= box.left && r.right <= box.right && r.top >= box.top && r.bottom <= box.bottom ) {
+					hidden.push( a.textContent.trim() );
+				}
+			}
+			return { inert: null !== document.querySelector( 'main' ).closest( '[inert]' ), hidden };
+		} );
+		expect( state.inert || 0 === state.hidden.length, `focused links entirely under the dialog: ${ state.hidden.join( ', ' ) }` ).toBe( true );
+	} );
 } );
 
 // PKIW #230: an eat single is an order ticket and a drink single is a taped
