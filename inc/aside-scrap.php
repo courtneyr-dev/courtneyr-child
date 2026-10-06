@@ -145,7 +145,8 @@ function stream_card( string $html, array $block, $instance ): string {
 	}
 	$state = title_state( $post );
 	$label = esc_html__( 'Aside', 'courtneyr-child' );
-	$html  = (string) preg_replace( '/(<p class="pk-kindlabel">)[^<]*(<\/p>)/', '${1}' . $label . '${2}', $html, 1 );
+	// Post Kinds prints the label as a <span> since 1.8.6 (a <p> before).
+	$html = (string) preg_replace( '/<(span|p) class="pk-kindlabel">[^<]*<\/\1>/', '<p class="pk-kindlabel">' . $label . '</p>', $html, 1 );
 	if ( 'none' === $state ) {
 		$html = (string) preg_replace( '/(<h2 class="pk-title"><a href="[^"]*">)[^<]*(<\/a><\/h2>)/', '${1}' . $label . '${2}', $html, 1 );
 	}
