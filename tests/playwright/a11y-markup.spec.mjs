@@ -63,6 +63,8 @@ const POST_NAV_POST = process.env.CR_POST_NAV_POST_PATH || '/?p=8660'; // a post
 const KIND_NAV_SINGLE = process.env.CR_KIND_NAV_SINGLE_PATH || '/2026/08/17/my-brilliant-career/'; // a Stream single whose kind has a post on each side; dev 37854, a watch
 const KIND_NEWEST_SINGLE = process.env.CR_KIND_NEWEST_SINGLE_PATH || '/2026/08/20/ted-lasso-season-4/'; // the newest Stream post of its kind, which has an older one; dev 37866, the newest watch
 const KIND_ONLY_SINGLE = process.env.CR_KIND_ONLY_SINGLE_PATH || '/2026/07/06/american-obituary/'; // the only Stream post of its kind; dev 37754, the one listen
+const WATCH_SINGLE = process.env.CR_WATCH_SINGLE_PATH || '/2026/08/17/my-brilliant-career/'; // a watch post with the watch card that stores a season and no episode; dev 37854
+const LISTEN_SINGLE = process.env.CR_LISTEN_SINGLE_PATH || '/2026/07/06/american-obituary/'; // a listen post with the listen card, a rating and a listen URL; dev 37754
 const LISTEN_ARCHIVE = process.env.CR_LISTEN_ARCHIVE_PATH || '/kind/listen/'; // listen archive with at least one listen post (PKIW #226)
 const WATCH_ARCHIVE = process.env.CR_WATCH_ARCHIVE_PATH || '/kind/watch/'; // watch archive page 1 (PKIW #227)
 const COMICS_ARCHIVE = process.env.CR_COMICS_ARCHIVE_PATH || '/kind/comics/'; // comics archive with at least one comic read (PKIW #228)
@@ -486,6 +488,59 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 	const decor = await page.locator( '.cr-archive--watch .cr-vhs-shelf' ).evaluate( ( el ) => getComputedStyle( el, '::before' ).backgroundImage );
 	expect( decor, 'the TV still life is a CSS background on the unit, not content' ).toContain( 'cr-tv-vcr.svg' );
 	expect( await page.locator( '.cr-archive--watch .cr-vhs-shelf img, .cr-archive--watch .cr-vhs-shelf svg' ).evaluateAll( ( els ) => els.filter( ( e ) => ! e.closest( '.pk-card' ) ).length ), 'no decoration enters the DOM' ).toBe( 0 );
+} );
+
+// These tests record defects fixed by a separate theme PR and fail on a site without that fix.
+// PKIW #227: the watch single's flap reads "Watch · VHS" and its reels and
+// tape are drawn, as on the Stream's VHS card.
+test( 'a watch single is a VHS tape: the flap reads "Watch · VHS" and the reels and tape are drawn (PKIW #227)', async ( { page } ) => {
+	const response = await page.goto( WATCH_SINGLE, { waitUntil: 'load' } );
+	const card = page.locator( 'article.pk-card.k-watch' );
+	test.skip( response.status() === 404 || 0 === await card.count(), `no watch card fixture at ${ WATCH_SINGLE }` );
+	await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
+	await expect( page.locator( 'article.pk-card.k-watch.cr-vhs' ) ).toHaveCount( 1 );
+	await expect( page.locator( '.h-entry article.h-cite.u-watch-of' ) ).toHaveCount( 1 );
+	await expect( card.locator( '.pk-kindlabel' ) ).toHaveText( 'Watch · VHS' );
+	await expect( card.locator( '.cr-vhs__reel' ) ).toHaveCount( 2 );
+	await expect( card.locator( '.cr-vhs__tape' ) ).toHaveCount( 1 );
+	await expect( card.locator( '.cr-vhs__reel--l' ) ).toBeVisible();
+	await expect( card.locator( '.cr-vhs__tape' ) ).toBeVisible();
+	if ( ! await card.evaluate( ( element ) => element.classList.contains( 'cr-vhs--player' ) ) ) {
+		await expect( card.locator( '.cr-vhs__reel--r' ) ).toBeVisible();
+	}
+} );
+
+// PKIW #227: a missing episode never prints as episode zero.
+test( 'a watch single prints no episode it does not store: no "S1E0" (PKIW #227)', async ( { page } ) => {
+	const response = await page.goto( WATCH_SINGLE, { waitUntil: 'load' } );
+	const card = page.locator( 'article.pk-card.k-watch' );
+	test.skip( response.status() === 404 || 0 === await card.count(), `no watch card fixture at ${ WATCH_SINGLE }` );
+	const mainText = await page.locator( 'main' ).textContent() || '';
+	expect( mainText, 'an episode 0 is invented' ).not.toMatch( /\bS\d+E0\b/ );
+} );
+
+// PKIW #226: a listen single exposes one readable rating and one provider link.
+test( 'a listen single shows its rating once, as text, and one Listen link (PKIW #226)', async ( { page } ) => {
+	const response = await page.goto( LISTEN_SINGLE, { waitUntil: 'load' } );
+	const card = page.locator( 'article.pk-card.k-listen' );
+	test.skip( response.status() === 404 || 0 === await card.count(), `no listen card fixture at ${ LISTEN_SINGLE }` );
+	await expect( card ).toHaveClass( /\bh-cite\b/ );
+	await expect( card ).toHaveClass( /\bu-listen-of\b/ );
+	await expect( card.locator( '.p-rating' ) ).toHaveCount( 1 );
+	const ratings = page.locator( 'main .pk-stars, main .cr-listen-sources__rating' ).filter( { visible: true } );
+	await expect( ratings ).toHaveCount( 1 );
+	const ratingText = await ratings.first().getAttribute( 'aria-label' ) || await ratings.first().innerText();
+	expect( ratingText.replace( /\s+/g, ' ' ).trim() ).toMatch( /^Rated \d+ of 5$/ );
+	const listenUrl = await card.locator( 'a.u-url' ).first().getAttribute( 'href' );
+	expect( listenUrl ).toBeTruthy();
+	const visibleLinks = page.locator( 'main a' ).filter( { visible: true } );
+	let listenLinks = 0;
+	for ( const link of await visibleLinks.all() ) {
+		if ( await link.getAttribute( 'href' ) === listenUrl && /^\s*Listen\b/.test( await link.textContent() || '' ) ) {
+			listenLinks++;
+		}
+	}
+	expect( listenLinks ).toBe( 1 );
 } );
 
 // PKIW #228: the comics archive is a comic-shop rack filled by the archive
