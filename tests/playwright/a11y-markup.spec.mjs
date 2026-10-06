@@ -32,12 +32,39 @@ async function closeConsentDialog( page ) {
 	await expect( page.locator( '.cmplz-cookiebanner' ).filter( { visible: true } ) ).toHaveCount( 0 );
 }
 
+// Closing the dialog shows Complianz's "Manage consent" tab
+// (#cmplz-manage-consent .cmplz-manage-consent: position fixed, right 40px,
+// about 130 x 50 px at the bottom edge, z-index 9998). A hit test on a point
+// under it reads the tab, not the page. Every hit test in this file calls
+// window.crHitAt( x, y ) instead of document.elementFromPoint(): it scrolls
+// the page until the point clears the tab, and throws when the page can't
+// scroll that far. Without the tab it is elementFromPoint().
+function installHitAt() {
+	window.crHitAt = ( x, y ) => {
+		const tab = [ ...document.querySelectorAll( '#cmplz-manage-consent .cmplz-manage-consent' ) ]
+			.filter( ( el ) => 'hidden' !== getComputedStyle( el ).visibility )
+			.map( ( el ) => el.getBoundingClientRect() )
+			.find( ( r ) => r.width > 0 && r.height > 0 );
+		const under = ( py ) => Boolean( tab ) && x >= tab.left - 4 && x <= tab.right + 4 && py >= tab.top - 4 && py <= tab.bottom + 4;
+		if ( under( y ) ) {
+			const before = window.scrollY;
+			window.scrollBy( { top: y - tab.top + 5, behavior: 'instant' } );
+			y -= window.scrollY - before;
+			if ( under( y ) ) {
+				throw new Error( `the hit test at ${ Math.round( x ) },${ Math.round( y ) } sits under the Manage consent tab and the page can't scroll it clear` );
+			}
+		}
+		return document.elementFromPoint( x, y );
+	};
+}
+
 // Every page.goto() in this file closes the dialog once the page has loaded.
 // A locator handler would not do: it runs before actions and assertions, not
 // before page.evaluate() or page.keyboard, which these tests use.
 const test = base.extend( {
 	consentDialog: [ 'close', { option: true } ],
 	page: async ( { page, consentDialog }, use ) => {
+		await page.addInitScript( installHitAt );
 		if ( 'close' === consentDialog ) {
 			const goto = page.goto.bind( page );
 			page.goto = async ( url, options ) => {
@@ -446,7 +473,7 @@ test( 'the listen archive is a shelf of cassette cases, one title link each, no 
 	const first = cases.first();
 	const hit = await first.evaluate( ( li ) => {
 		const box = li.querySelector( '.pk-body' ).getBoundingClientRect();
-		const el = document.elementFromPoint( box.left + box.width / 2, box.top + box.height * 0.3 );
+		const el = window.crHitAt( box.left + box.width / 2, box.top + box.height * 0.3 );
 		return el?.closest( 'a' ) === li.querySelector( '.pk-title a' );
 	} );
 	expect( hit ).toBe( true );
@@ -590,7 +617,7 @@ test( 'the comics archive is a rack of bagged comics, one title link each, no me
 			// Instant: the site scrolls smoothly, and a smooth scroll has not moved yet.
 			el.scrollIntoView( { block: 'center', behavior: 'instant' } );
 			const bag = el.querySelector( '.pk-media' ).getBoundingClientRect();
-			const at = document.elementFromPoint( bag.left + bag.width / 2, bag.top + bag.height / 2 );
+			const at = window.crHitAt( bag.left + bag.width / 2, bag.top + bag.height / 2 );
 			return { link: at?.closest( 'a' ) === el.querySelector( '.pk-title a' ), imgInLink: !! el.querySelector( 'a img' ) };
 		} );
 		expect( hit.link, 'the bag is the title link' ).toBe( true );
@@ -967,7 +994,7 @@ test( 'the Stream shows a comic read as one bagged card whose title link covers 
 		const hit = await card.evaluate( ( el ) => {
 			el.scrollIntoView( { block: 'center', behavior: 'instant' } );
 			const box = el.querySelector( '.pk-media' ).getBoundingClientRect();
-			const at = document.elementFromPoint( box.left + box.width / 2, box.top + box.height / 2 );
+			const at = window.crHitAt( box.left + box.width / 2, box.top + box.height / 2 );
 			return at?.closest( 'a' ) === el.querySelector( '.pk-title a' );
 		} );
 		expect( hit, 'the cover is part of the title link' ).toBe( true );
@@ -1002,7 +1029,7 @@ test( 'the recipe archive is a binder of four recipe cards, one title link each,
 			el.scrollIntoView( { block: 'center', behavior: 'instant' } );
 			const r = el.getBoundingClientRect();
 			const a = el.querySelector( '.pk-title a' );
-			const hit = document.elementFromPoint( r.left + r.width / 2, r.top + r.height - 12 );
+			const hit = window.crHitAt( r.left + r.width / 2, r.top + r.height - 12 );
 			return hit === a || a.contains( hit );
 		} );
 		expect( covered, 'the title link covers the whole card' ).toBe( true );
@@ -1445,7 +1472,7 @@ for ( const [ kind, path ] of [ [ 'eat', EAT_ARCHIVE ], [ 'drink', DRINK_ARCHIVE
 			// Where the item's own content starts: past the rule and gap between two specials side by side.
 			const start = box.left + parseFloat( getComputedStyle( item ).paddingLeft ) + parseFloat( getComputedStyle( item ).borderLeftWidth );
 			// The point a thumb lands on: the middle of the picture column.
-			const tapped = document.elementFromPoint( start + Math.max( 2, ( body.left - start ) / 2 ), box.top + Math.min( box.height, 80 ) / 2 );
+			const tapped = window.crHitAt( start + Math.max( 2, ( body.left - start ) / 2 ), box.top + Math.min( box.height, 80 ) / 2 );
 			return {
 				name: link.textContent.trim(),
 				plain: item.classList.contains( 'pkiw-menu-specials__item--no-photo' ),
