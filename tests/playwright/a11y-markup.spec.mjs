@@ -612,16 +612,39 @@ test( 'a listen single shows its rating once, as text, and one Listen link (PKIW
 	await expect( ratings ).toHaveCount( 1 );
 	const ratingText = await ratings.first().getAttribute( 'aria-label' ) || await ratings.first().innerText();
 	expect( ratingText.replace( /\s+/g, ' ' ).trim() ).toMatch( /^Rated \d+ of 5$/ );
-	const listenUrl = await card.locator( 'a.u-url' ).first().getAttribute( 'href' );
+	const listenUrl = await card.locator( 'a.u-url' ).first().evaluate( ( a ) => a.href );
 	expect( listenUrl ).toBeTruthy();
-	const visibleLinks = page.locator( 'main a' ).filter( { visible: true } );
-	let listenLinks = 0;
-	for ( const link of await visibleLinks.all() ) {
-		if ( await link.getAttribute( 'href' ) === listenUrl && /^\s*Listen\b/.test( await link.textContent() || '' ) ) {
-			listenLinks++;
-		}
+	// One visible link per destination, for every place the card and the
+	// listen part link to: visible links in main counted by href. A link kept
+	// for microformats and hidden (display: none, or clipped to a pixel the
+	// way screen-reader-text is) doesn't count; Playwright's `visible` filter
+	// would count the clipped one.
+	const destinations = await page.locator( 'main' ).evaluate( ( main ) => {
+		const shown = ( a ) => {
+			if ( 0 === a.getClientRects().length || 'visible' !== getComputedStyle( a ).visibility ) {
+				return false;
+			}
+			for ( let el = a; el && el !== main; el = el.parentElement ) {
+				const style = getComputedStyle( el );
+				const box = el.getBoundingClientRect();
+				const clipped = ( 'auto' !== style.clip && '' !== style.clip ) || ( 'none' !== style.clipPath && '' !== style.clipPath );
+				if ( '0' === style.opacity || ( clipped && ( box.width <= 2 || box.height <= 2 ) ) || ( 'visible' !== style.overflow && ( box.width <= 2 || box.height <= 2 ) ) ) {
+					return false;
+				}
+			}
+			return true;
+		};
+		const hrefs = new Set( [ ...main.querySelectorAll( 'article.pk-card.k-listen a[href], .cr-listen-sources a[href]' ) ].map( ( a ) => a.href ) );
+		return [ ...hrefs ].map( ( href ) => ( {
+			href,
+			shown: [ ...main.querySelectorAll( 'a[href]' ) ].filter( ( a ) => a.href === href && shown( a ) ).map( ( a ) => a.textContent.replace( /\s+/g, ' ' ).trim() ),
+		} ) );
+	} );
+	expect( destinations.map( ( destination ) => destination.href ) ).toContain( listenUrl );
+	for ( const { href, shown } of destinations ) {
+		expect( shown.length, `visible links to ${ href }: ${ shown.join( ' | ' ) }` ).toBeLessThanOrEqual( 1 );
 	}
-	expect( listenLinks ).toBe( 1 );
+	expect( destinations.find( ( destination ) => destination.href === listenUrl ).shown.length, `the listen URL keeps one visible link` ).toBe( 1 );
 } );
 
 // PKIW #228: the comics archive is a comic-shop rack filled by the archive
