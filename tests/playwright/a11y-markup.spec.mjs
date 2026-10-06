@@ -91,6 +91,7 @@ const KIND_NAV_SINGLE = process.env.CR_KIND_NAV_SINGLE_PATH || '/2026/08/17/my-b
 const KIND_NEWEST_SINGLE = process.env.CR_KIND_NEWEST_SINGLE_PATH || '/2026/08/20/ted-lasso-season-4/'; // the newest Stream post of its kind, which has an older one; dev 37866, the newest watch
 const KIND_ONLY_SINGLE = process.env.CR_KIND_ONLY_SINGLE_PATH || '/2026/07/06/american-obituary/'; // the only Stream post of its kind; dev 37754, the one listen
 const WATCH_SINGLE = process.env.CR_WATCH_SINGLE_PATH || '/2026/08/17/my-brilliant-career/'; // a watch post with the watch card that stores a season and no episode; dev 37854
+const WATCH_STREAM = process.env.CR_WATCH_STREAM_PATH || '/stream/'; // a Stream page scanned for an invented episode 0 (its VHS card prints film_facts() when it has a player)
 const LISTEN_SINGLE = process.env.CR_LISTEN_SINGLE_PATH || '/2026/07/06/american-obituary/'; // a listen post with the listen card, a rating and a listen URL; dev 37754
 const LISTEN_ARCHIVE = process.env.CR_LISTEN_ARCHIVE_PATH || '/kind/listen/'; // listen archive with at least one listen post (PKIW #226)
 const WATCH_ARCHIVE = process.env.CR_WATCH_ARCHIVE_PATH || '/kind/watch/'; // watch archive page 1 (PKIW #227)
@@ -527,7 +528,8 @@ test( 'a watch single is a VHS tape: the flap reads "Watch · VHS" and the reels
 	await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
 	await expect( page.locator( 'article.pk-card.k-watch.cr-vhs' ) ).toHaveCount( 1 );
 	await expect( page.locator( '.h-entry article.h-cite.u-watch-of' ) ).toHaveCount( 1 );
-	await expect( card.locator( '.pk-kindlabel' ) ).toHaveText( 'Watch · VHS' );
+	await expect( card.locator( 'span.pk-kindlabel' ) ).toHaveCount( 1 );
+	await expect( card.locator( 'span.pk-kindlabel' ) ).toHaveText( 'Watch · VHS' );
 	await expect( card.locator( '.cr-vhs__reel' ) ).toHaveCount( 2 );
 	await expect( card.locator( '.cr-vhs__tape' ) ).toHaveCount( 1 );
 	await expect( card.locator( '.cr-vhs__reel--l' ) ).toBeVisible();
@@ -537,13 +539,65 @@ test( 'a watch single is a VHS tape: the flap reads "Watch · VHS" and the reels
 	}
 } );
 
-// PKIW #227: a missing episode never prints as episode zero.
-test( 'a watch single prints no episode it does not store: no "S1E0" (PKIW #227)', async ( { page } ) => {
+// PKIW #227: a missing episode never prints as episode zero, on the single
+// or on the Stream, whose VHS card prints the same film_facts() line when
+// the card has a player. The served HTML is scanned without its scripts and
+// styles, so a document title or an aria-label counts too, and "S01E00" as
+// well as "S1E0".
+test( 'a watch single and the Stream print no episode a watch does not store: no "S1E0" (PKIW #227)', async ( { page } ) => {
 	const response = await page.goto( WATCH_SINGLE, { waitUntil: 'load' } );
 	const card = page.locator( 'article.pk-card.k-watch' );
 	test.skip( response.status() === 404 || 0 === await card.count(), `no watch card fixture at ${ WATCH_SINGLE }` );
-	const mainText = await page.locator( 'main' ).textContent() || '';
-	expect( mainText, 'an episode 0 is invented' ).not.toMatch( /\bS\d+E0\b/ );
+	const episodeZero = /\bS\d+E0+\b|\bEpisode 0+\b/g;
+	const served = ( html ) => html.replace( /<script\b[\s\S]*?<\/script>|<style\b[\s\S]*?<\/style>/gi, '' );
+	expect( served( await response.text() ).match( episodeZero ), `an episode 0 is invented on ${ WATCH_SINGLE }` ).toBeNull();
+	expect( served( await ( await page.request.get( WATCH_STREAM ) ).text() ).match( episodeZero ), `an episode 0 is invented on ${ WATCH_STREAM }` ).toBeNull();
+} );
+
+// PKIW #227: the lede under the h1 and the footer's film line print
+// film_facts(); the tape label prints its own list from the same stored
+// facts. All three agree: the same season and episode (an S1E2 in the lede
+// reads "Season 1 · Episode 2" on the label), the same year, the same film or
+// series, the same director.
+test( 'a watch single\'s lede and footer facts match its tape label (PKIW #227)', async ( { page } ) => {
+	const response = await page.goto( WATCH_SINGLE, { waitUntil: 'load' } );
+	const card = page.locator( 'article.pk-card.k-watch' );
+	test.skip( response.status() === 404 || 0 === await card.count(), `no watch card fixture at ${ WATCH_SINGLE }` );
+	const facts = await page.evaluate( () => {
+		const text = ( value ) => ( value || '' ).replace( /\s+/g, ' ' ).trim();
+		// The film line is the title, a <br>, the facts, then its label.
+		let footer = '';
+		const film = document.querySelector( 'main .cr-journal__meta-item--film .cr-journal__meta-text' );
+		for ( let node = film?.querySelector( 'br' )?.nextSibling; node; node = node.nextSibling ) {
+			if ( node.nodeType === Node.ELEMENT_NODE && node.classList.contains( 'cr-journal__meta-label' ) ) {
+				break;
+			}
+			footer += node.textContent;
+		}
+		return {
+			lede: text( document.querySelector( 'main .cr-journal__lede-place' )?.textContent ),
+			footer: text( footer ),
+			label: [ ...document.querySelectorAll( 'main .cr-vhs__facts li' ) ].map( ( li ) => text( li.textContent ) ),
+		};
+	} );
+	expect( facts.label.length, 'the tape label lists the stored facts' ).toBeGreaterThan( 0 );
+	expect( facts.lede, 'the lede prints the film facts' ).not.toBe( '' );
+	expect( facts.footer, 'the footer\'s film line prints the lede\'s facts' ).toBe( facts.lede );
+	const seasonEpisode = ( text ) => {
+		const both = text.match( /\bS(\d+)E(\d+)\b/i );
+		const season = both ? both[ 1 ] : text.match( /\bSeason (\d+)\b/ )?.[ 1 ];
+		const episode = both ? both[ 2 ] : text.match( /\bEpisode (\d+)\b/ )?.[ 1 ];
+		return { season: undefined === season ? null : Number( season ), episode: undefined === episode ? null : Number( episode ) };
+	};
+	const ledeParts = facts.lede.split( ' · ' );
+	const labelSeason = facts.label.find( ( fact ) => /^Season \d+\b/.test( fact ) ) || '';
+	expect( seasonEpisode( facts.lede ), `lede "${ facts.lede }" and label "${ facts.label.join( ' · ' ) }" name one season and episode` ).toEqual( seasonEpisode( labelSeason ) );
+	expect( ledeParts.filter( ( part ) => /^\d{4}$/.test( part ) ), 'the same year' ).toEqual( facts.label.filter( ( fact ) => /^\d{4}$/.test( fact ) ) );
+	expect( ledeParts.includes( 'Film' ), 'both call it a film, or neither does' ).toBe( facts.label.includes( 'Film' ) );
+	const director = facts.label.find( ( fact ) => fact.startsWith( 'Directed by ' ) )?.slice( 'Directed by '.length );
+	if ( director ) {
+		expect( ledeParts, 'the lede names the label\'s director' ).toContain( director );
+	}
 } );
 
 // PKIW #226: a listen single exposes one readable rating and one provider link.
