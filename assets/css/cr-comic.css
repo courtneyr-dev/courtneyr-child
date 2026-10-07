@@ -633,27 +633,29 @@ body.cr-comic-single .cr-journal--comic {
 	gap: 1.75rem;
 }
 
-/* ---- Notes: a torn notebook sheet (the Read single's) ---- */
+/* ---- Notes: a ruled sheet torn along its top and foot ----
+   The menu's and the order ticket's tear: the paper is a pseudo-element
+   cut by clip-path, and drop-shadow filters draw the ink edge and the
+   hard shadow, so both follow the torn edge. */
 body.cr-comic-single .cr-journal__notes {
+	--notes-tear: polygon(0 0.3rem, 4% 0.05rem, 11% 0.4rem, 19% 0.1rem, 27% 0.45rem, 36% 0.15rem, 44% 0.35rem, 53% 0, 61% 0.4rem, 70% 0.1rem, 78% 0.45rem, 86% 0.05rem, 93% 0.35rem, 100% 0.1rem, 100% calc(100% - 0.35rem), 94% calc(100% - 0.05rem), 87% calc(100% - 0.4rem), 79% calc(100% - 0.1rem), 71% calc(100% - 0.45rem), 62% calc(100% - 0.05rem), 54% calc(100% - 0.35rem), 45% 100%, 37% calc(100% - 0.4rem), 28% calc(100% - 0.1rem), 20% calc(100% - 0.45rem), 12% calc(100% - 0.05rem), 5% calc(100% - 0.3rem), 0 calc(100% - 0.1rem));
 	position: relative;
+	isolation: isolate;
 	margin: 0;
 	padding: 1.4rem 1.6rem 1.6rem 2.9rem;
-	border: 1.5px solid var(--cr-ink);
-	background-color: var(--cr-printer-ivory);
-	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.7rem - 1px), color-mix(in srgb, var(--cr-russian-violet) 13%, transparent) calc(1.7rem - 1px) 1.7rem);
-	background-position: 0 1.25rem;
-	box-shadow: var(--cr-shadow-hard);
 	color: var(--cr-russian-violet);
+	filter: drop-shadow(1.5px 0 0 var(--cr-ink)) drop-shadow(-1.5px 0 0 var(--cr-ink)) drop-shadow(0 1.5px 0 var(--cr-ink)) drop-shadow(0 -1.5px 0 var(--cr-ink)) drop-shadow(var(--cr-shadow-hard));
 }
 
 body.cr-comic-single .cr-journal__notes::before {
 	content: "";
 	position: absolute;
-	inset-block: 1rem;
-	inset-inline-start: 0.85rem;
-	width: 0.9rem;
-	background: radial-gradient(circle 0.3rem at 50% 50%, var(--cr-russian-violet) 0 55%, transparent 60%) 0 0 / 0.9rem 1.7rem repeat-y;
-	opacity: 0.85;
+	z-index: -1;
+	inset: 0;
+	background-color: var(--cr-printer-ivory);
+	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.7rem - 1px), color-mix(in srgb, var(--cr-russian-violet) 13%, transparent) calc(1.7rem - 1px) 1.7rem);
+	background-position: 0 1.25rem;
+	clip-path: var(--notes-tear);
 	pointer-events: none;
 }
 
@@ -1193,8 +1195,13 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 	}
 
 	.pk-card.cr-comic .pk-media::before,
-	.pk-card.cr-comic .pk-media::after {
+	.pk-card.cr-comic .pk-media::after,
+	body.cr-comic-single .cr-journal__notes::before {
 		content: none;
+	}
+
+	body.cr-comic-single .cr-journal__notes {
+		filter: none;
 	}
 
 	.pk-card.cr-comic .pk-media.cr-comic__cover--type,
