@@ -236,7 +236,7 @@ function journal_page( string $html, array $block ): string {
 		$lclose = '</' . $ltag . '>';
 		$lend   = strpos( $html, $lclose, $lpos );
 		if ( false !== $lend ) {
-			$html = substr( $html, 0, $lpos ) . $label . esc_html__( 'Checked in at', 'courtneyr-child' ) . '</p>' . substr( $html, $lend + strlen( $lclose ) );
+			$html = substr( $html, 0, $lpos ) . $label . esc_html__( 'Check-in', 'courtneyr-child' ) . '</p>' . substr( $html, $lend + strlen( $lclose ) );
 		}
 		break;
 	}
