@@ -515,9 +515,12 @@ body.cr-recipe-single main.single-post > .single-post__header > * {
 	margin-inline: 0 !important;
 }
 
-/* Everything printed on the sheet takes the sheet's ink. */
+/* Everything printed on the sheet takes the sheet's ink, and so does a
+   focused link's halo: the site's halo is ivory in dark mode, the same as
+   the sheet, which keeps its colors. */
 body.cr-recipe-single main.single-post > .single-post__header,
 body.cr-recipe-single main.single-post > .single-post__content {
+	--cr-focus-halo: var(--page-ink);
 	box-sizing: border-box;
 	padding-inline: clamp(2.25rem, 5vw, 3rem) clamp(1rem, 3vw, 2rem);
 	color: var(--page-ink);
@@ -529,9 +532,23 @@ body.cr-recipe-single .single-post__content :is(p, li, h2, h3, span, div) {
 	color: var(--page-ink);
 }
 
-/* The kind tape is the header's sky-blue accent; dark mode keeps the dark tape and its yellow ink. */
+/* The kind tape is the header's sky-blue accent; dark mode keeps the dark
+   tape and its yellow ink. The tape switches on tokens.css's own dark-mode
+   selectors, the ones that switch its ink (--cr-tape-ink), so with no
+   JavaScript to set data-theme the OS scheme picks both. */
 body.cr-recipe-single .single-post__header .single-post__kind.cr-chip {
-	background: light-dark(var(--cr-sky-blue), var(--cr-tape));
+	background: var(--cr-sky-blue);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:is(:not([data-theme]), [data-theme="system"]) body.cr-recipe-single .single-post__header .single-post__kind.cr-chip {
+		background: var(--cr-tape);
+	}
+}
+
+:root[data-theme="dark"] body.cr-recipe-single .single-post__header .single-post__kind.cr-chip {
+	background: var(--cr-tape);
 }
 
 /* The title's flank marks would land on the picture beside it. The
@@ -613,7 +630,7 @@ body.cr-recipe-single .cr-recipe__actions .wprm-recipe-print:hover {
 body.cr-recipe-single .cr-recipe__actions .wprm-recipe-print:focus-visible {
 	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 2px;
-	box-shadow: 0 0 0 7px var(--cr-russian-violet);
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 
 /* The recipe plugin's card: no box of its own, it is print on the sheet. */
