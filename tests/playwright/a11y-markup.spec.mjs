@@ -2,7 +2,80 @@
 // inc/a11y-output.php and patterns/cr-hcard.php. Read-only GETs; needs a running site
 // (CR_BASE_URL, CR_ALLOW_REMOTE=1 and CR_USER_AGENT for a Pantheon sandbox). Post paths
 // default to dev fixtures and can be pointed elsewhere with the CR_*_PATH variables.
-import { test, expect } from '@playwright/test';
+import { test as base, expect } from '@playwright/test';
+
+// courtneyr-child#95: a site running Complianz opens its consent dialog
+// (.cmplz-cookiebanner, role="dialog", aria-modal="true") in every fresh
+// browser context. While it shows it traps Tab and covers part of the window,
+// so tests meet the dialog instead of the page. Setup closes it the way a
+// visitor does, through its own "Close dialog" control (.cmplz-close), whose
+// handler only records the banner as dismissed: no consent choice, so the site
+// loads the same scripts. No CSS hides it and nothing presses Accept. On a site
+// without the dialog (local wp-env) this does nothing. A test that needs the
+// dialog open sets `consentDialog: 'keep'`.
+async function closeConsentDialog( page ) {
+	if ( 0 === await page.locator( '.cmplz-cookiebanner' ).count() ) {
+		return;
+	}
+	// Closed earlier in this test's browser context: Complianz keeps it closed.
+	if ( ( await page.context().cookies() ).some( ( c ) => 'cmplz_banner-status' === c.name && 'dismissed' === c.value ) ) {
+		return;
+	}
+	const close = page.locator( '.cmplz-cookiebanner .cmplz-close' ).filter( { visible: true } ).first();
+	try {
+		// Complianz opens the dialog from its script after the load event.
+		await close.waitFor( { state: 'visible', timeout: 5000 } );
+	} catch {
+		return;
+	}
+	await close.click();
+	await expect( page.locator( '.cmplz-cookiebanner' ).filter( { visible: true } ) ).toHaveCount( 0 );
+}
+
+// Closing the dialog shows Complianz's "Manage consent" tab
+// (#cmplz-manage-consent .cmplz-manage-consent: position fixed, right 40px,
+// about 130 x 50 px at the bottom edge, z-index 9998). A hit test on a point
+// under it reads the tab, not the page. Every hit test in this file calls
+// window.crHitAt( x, y ) instead of document.elementFromPoint(): it scrolls
+// the page until the point clears the tab, and throws when the page can't
+// scroll that far. Without the tab it is elementFromPoint().
+function installHitAt() {
+	window.crHitAt = ( x, y ) => {
+		const tab = [ ...document.querySelectorAll( '#cmplz-manage-consent .cmplz-manage-consent' ) ]
+			.filter( ( el ) => 'hidden' !== getComputedStyle( el ).visibility )
+			.map( ( el ) => el.getBoundingClientRect() )
+			.find( ( r ) => r.width > 0 && r.height > 0 );
+		const under = ( py ) => Boolean( tab ) && x >= tab.left - 4 && x <= tab.right + 4 && py >= tab.top - 4 && py <= tab.bottom + 4;
+		if ( under( y ) ) {
+			const before = window.scrollY;
+			window.scrollBy( { top: y - tab.top + 5, behavior: 'instant' } );
+			y -= window.scrollY - before;
+			if ( under( y ) ) {
+				throw new Error( `the hit test at ${ Math.round( x ) },${ Math.round( y ) } sits under the Manage consent tab and the page can't scroll it clear` );
+			}
+		}
+		return document.elementFromPoint( x, y );
+	};
+}
+
+// Every page.goto() in this file closes the dialog once the page has loaded.
+// A locator handler would not do: it runs before actions and assertions, not
+// before page.evaluate() or page.keyboard, which these tests use.
+const test = base.extend( {
+	consentDialog: [ 'close', { option: true } ],
+	page: async ( { page, consentDialog }, use ) => {
+		await page.addInitScript( installHitAt );
+		if ( 'close' === consentDialog ) {
+			const goto = page.goto.bind( page );
+			page.goto = async ( url, options ) => {
+				const response = await goto( url, options );
+				await closeConsentDialog( page );
+				return response;
+			};
+		}
+		await use( page );
+	},
+} );
 
 const ABLEPLAYER_POST = process.env.CR_ABLEPLAYER_POST_PATH || '/?p=3010'; // Able Player YouTube shortcode
 const ABLEPLAYER_URL_POST = process.env.CR_ABLEPLAYER_URL_POST_PATH || '/?p=1053'; // youtube-id written as a full watch URL
@@ -13,7 +86,14 @@ const TABLE_POST = process.env.CR_TABLE_POST_PATH || '/?p=551'; // legacy compar
 const TERM_ARCHIVE = process.env.CR_TERM_ARCHIVE_PATH || '/type/aside/'; // term archive with a description
 const CUTOUT_ARCHIVES = ( process.env.CR_CUTOUT_ARCHIVE_PATHS || '/kind/mood/,/type/aside/,/?s=wordpress,/stream/' ).split( ',' ); // cut-paper archive titles
 const PAGED_KIND_ARCHIVE = process.env.CR_PAGED_KIND_ARCHIVE_PATH || '/kind/note/page/2/'; // a /kind/* archive with at least three pages
-const POST_NAV_POST = process.env.CR_POST_NAV_POST_PATH || '/?p=38071'; // a Blog post with a titled post on each side
+const POST_NAV_POST = process.env.CR_POST_NAV_POST_PATH || '/?p=8660'; // a post with a titled post on each side (dev and test 8660; 38071 lost its Next neighbour)
+const STREAM = process.env.CR_STREAM_PATH || '/stream/'; // the Stream page whose query order a kind's only post follows (PKIW #233)
+const KIND_NAV_SINGLE = process.env.CR_KIND_NAV_SINGLE_PATH || '/2026/08/17/my-brilliant-career/'; // a Stream single whose kind has a post on each side; dev 37854, a watch
+const KIND_NEWEST_SINGLE = process.env.CR_KIND_NEWEST_SINGLE_PATH || '/2026/08/20/ted-lasso-season-4/'; // the newest Stream post of its kind, which has an older one; dev 37866, the newest watch
+const KIND_ONLY_SINGLE = process.env.CR_KIND_ONLY_SINGLE_PATH || '/2026/07/06/american-obituary/'; // the only Stream post of its kind; dev 37754, the one listen
+const WATCH_SINGLE = process.env.CR_WATCH_SINGLE_PATH || '/2026/08/17/my-brilliant-career/'; // a watch post with the watch card that stores a season and no episode; dev 37854
+const WATCH_STREAM = process.env.CR_WATCH_STREAM_PATH || '/stream/'; // a Stream page scanned for an invented episode 0 (its VHS card prints film_facts() when it has a player)
+const LISTEN_SINGLE = process.env.CR_LISTEN_SINGLE_PATH || '/2026/07/06/american-obituary/'; // a listen post with the listen card, a rating and a listen URL; dev 37754
 const LISTEN_ARCHIVE = process.env.CR_LISTEN_ARCHIVE_PATH || '/kind/listen/'; // listen archive with at least one listen post (PKIW #226)
 const WATCH_ARCHIVE = process.env.CR_WATCH_ARCHIVE_PATH || '/kind/watch/'; // watch archive page 1 (PKIW #227)
 const COMICS_ARCHIVE = process.env.CR_COMICS_ARCHIVE_PATH || '/kind/comics/'; // comics archive with at least one comic read (PKIW #228)
@@ -46,6 +126,69 @@ const DARK_FIXTURES = [
 	[ process.env.CR_MARK_POST_PATH || '/?p=50', 'mark', 'love the Lord' ], // highlighted verse
 	[ process.env.CR_MARK_POST2_PATH || '/?p=751', 'mark', 'FREE' ], // highlighted word
 ];
+
+// The single's Post navigation links, as { label: 'Previous' | 'Next', href }.
+async function postNavLinks( page ) {
+	const nav = page.getByRole( 'navigation', { name: 'Post navigation', exact: true } );
+	await expect( nav ).toHaveCount( 1 );
+	return nav.getByRole( 'link' ).evaluateAll( ( links ) => links.map( ( link ) => ( {
+		label: ( link.querySelector( '.post-navigation-link__label' )?.textContent || '' ).trim(),
+		href: link.href,
+	} ) ) );
+}
+
+// The body classes of the page at href, read from a GET (no navigation).
+async function bodyClassesAt( page, href ) {
+	const html = await ( await page.request.get( href ) ).text();
+	return ( html.match( /<body\b[^>]*\bclass=(['"])(.*?)\1/i )?.[ 2 ] || '' ).split( /\s+/ );
+}
+
+// The kind-* body class of the page at href.
+async function kindAt( page, href ) {
+	return ( await bodyClassesAt( page, href ) ).find( ( className ) => /^kind-[a-z0-9-]+$/.test( className ) ) || '';
+}
+
+// The post ID of the single at href, from its postid-* body class.
+async function postIdAt( page, href ) {
+	const postClass = ( await bodyClassesAt( page, href ) ).find( ( className ) => /^postid-\d+$/.test( className ) );
+	return postClass ? Number( postClass.slice( 'postid-'.length ) ) : null;
+}
+
+// A Stream page and the pages after it, read with GETs of `path` and its
+// ?query-N-page= pages, up to 30: each page's served HTML and the post IDs
+// it lists, newest first. Stops at the first page that lists no post.
+async function* streamPages( page, path ) {
+	let pageParam = '';
+	for ( let n = 1; n <= 30; n++ ) {
+		if ( n > 1 && ! pageParam ) {
+			return;
+		}
+		const html = await ( await page.request.get( 1 === n ? path : `${ path }${ path.includes( '?' ) ? '&' : '?' }${ pageParam }=${ n }` ) ).text();
+		pageParam ||= html.match( /\b(query-\d+-page)=/ )?.[ 1 ] || '';
+		const ids = [ ...html.matchAll( /<li class="wp-block-post post-(\d+)\b/g ) ].map( ( match ) => Number( match[ 1 ] ) );
+		if ( 0 === ids.length ) {
+			return;
+		}
+		yield { html, ids };
+	}
+}
+
+// The posts the Stream lists on either side of a post: { newer, older }
+// as post IDs (null at either end), read page by page from the Stream query
+// (newest first), the order core's adjacent-post query follows on the
+// Stream surface. Null when the post isn't on the first 30 pages.
+async function streamNeighbours( page, postId ) {
+	const ids = [];
+	for await ( const { ids: pageIds } of streamPages( page, STREAM ) ) {
+		ids.push( ...pageIds );
+		const at = ids.indexOf( postId );
+		if ( -1 !== at && at + 1 < ids.length ) {
+			break;
+		}
+	}
+	const at = ids.indexOf( postId );
+	return -1 === at ? null : { newer: ids[ at - 1 ] ?? null, older: ids[ at + 1 ] ?? null };
+}
 
 test( 'footer h-card photo is a decorative image inside the named link', async ( { page } ) => {
 	await page.goto( '/', { waitUntil: 'load' } );
@@ -278,8 +421,10 @@ test( 'single posts have a Post navigation landmark whose links name the adjacen
 	await expect( nav ).toHaveCount( 1 );
 	const links = nav.getByRole( 'link' );
 	expect( await links.count() ).toBeGreaterThan( 0 );
+	const visibleLabels = [];
 	for ( const link of await links.all() ) {
 		const visible = ( await link.locator( '.post-navigation-link__label' ).textContent() )?.trim();
+		visibleLabels.push( visible );
 		expect( [ 'Previous', 'Next' ] ).toContain( visible );
 		const title = ( await link.locator( '.post-navigation-link__title' ).textContent() )?.trim() || '';
 		expect( title.length ).toBeGreaterThan( 0 );
@@ -293,6 +438,51 @@ test( 'single posts have a Post navigation landmark whose links name the adjacen
 		const decode = ( s ) => s.replace( /&#8217;/g, '’' ).replace( /&#8211;/g, '–' ).replace( /&#8220;|&#8221;/g, '"' ).replace( /&amp;/g, '&' );
 		expect( decode( destination ) ).toContain( title );
 	}
+	expect( visibleLabels.sort(), 'repoint CR_POST_NAV_POST_PATH to a post with a neighbour on each side' ).toEqual( [ 'Next', 'Previous' ] );
+} );
+
+// PKIW #233: inc/nav.php keeps a Stream post's Previous and Next inside its
+// kind when the kind has another post on the same surface, and keeps the
+// Stream order when it doesn't. A post with a neighbour of its kind on each
+// side links to both.
+test( 'Previous and Next on a kind single stay inside its kind when the kind has a post on each side (PKIW #233)', async ( { page } ) => {
+	const response = await page.goto( KIND_NAV_SINGLE, { waitUntil: 'load' } );
+	const pageKind = await page.evaluate( () => [ ...document.body.classList ].find( ( className ) => /^kind-[a-z0-9-]+$/.test( className ) ) || '' );
+	test.skip( response.status() === 404 || ! pageKind, `no kind single fixture at ${ KIND_NAV_SINGLE }` );
+	const links = await postNavLinks( page );
+	expect( links.map( ( link ) => link.label ).sort(), 'repoint CR_KIND_NAV_SINGLE_PATH to a post with a neighbour on each side' ).toEqual( [ 'Next', 'Previous' ] );
+	for ( const link of links ) {
+		expect( await kindAt( page, link.href ), `${ link.label } destination stays inside ${ pageKind }` ).toBe( pageKind );
+	}
+} );
+
+// PKIW #233: the newest post of a kind has only its older kind neighbour.
+test( 'the newest post of a kind has a Previous inside its kind and no Next (PKIW #233)', async ( { page } ) => {
+	const response = await page.goto( KIND_NEWEST_SINGLE, { waitUntil: 'load' } );
+	const pageKind = await page.evaluate( () => [ ...document.body.classList ].find( ( className ) => /^kind-[a-z0-9-]+$/.test( className ) ) || '' );
+	test.skip( response.status() === 404 || ! pageKind, `no newest kind single fixture at ${ KIND_NEWEST_SINGLE }` );
+	const links = await postNavLinks( page );
+	expect( links.map( ( link ) => link.label ), 'a Next here belongs to another kind; if a newer post of this kind exists, repoint CR_KIND_NEWEST_SINGLE_PATH' ).toEqual( [ 'Previous' ] );
+	expect( await kindAt( page, links[ 0 ].href ), 'Previous destination stays inside the current kind' ).toBe( pageKind );
+} );
+
+// PKIW #233: a kind with one post falls back to the Stream order: Previous
+// opens the post the Stream lists just after it (older), Next the one just
+// before it (newer), whatever their kind.
+test( 'the only post of its kind keeps the Stream order, so its Post navigation is never empty (PKIW #233)', async ( { page } ) => {
+	const response = await page.goto( KIND_ONLY_SINGLE, { waitUntil: 'load' } );
+	const pageKind = await page.evaluate( () => [ ...document.body.classList ].find( ( className ) => /^kind-[a-z0-9-]+$/.test( className ) ) || '' );
+	test.skip( response.status() === 404 || ! pageKind, `no only-of-kind single fixture at ${ KIND_ONLY_SINGLE }` );
+	const links = await postNavLinks( page );
+	const destinationKinds = await Promise.all( links.map( ( link ) => kindAt( page, link.href ) ) );
+	test.skip( destinationKinds.includes( pageKind ), `the path has a neighbour of its own kind here, so it is not the only one; set CR_KIND_ONLY_SINGLE_PATH` );
+	expect( links.length, 'an empty landmark means the nav was scoped to a kind with no neighbour' ).toBeGreaterThan( 0 );
+	const postId = await page.evaluate( () => Number( [ ...document.body.classList ].find( ( className ) => /^postid-\d+$/.test( className ) )?.slice( 'postid-'.length ) ) );
+	const around = await streamNeighbours( page, postId );
+	expect( around, `post ${ postId } is on the first 30 pages of ${ STREAM }` ).not.toBeNull();
+	const expected = [ [ 'Previous', around.older ], [ 'Next', around.newer ] ].filter( ( [ , id ] ) => null !== id );
+	const actual = await Promise.all( links.map( async ( link ) => [ link.label, await postIdAt( page, link.href ) ] ) );
+	expect( actual.sort(), `Previous and Next are the posts ${ STREAM } lists after and before ${ postId }` ).toEqual( expected.sort() );
 } );
 
 // /stream keeps the pager saved in its own page content (it had one before
@@ -339,7 +529,7 @@ test( 'the listen archive is a shelf of cassette cases, one title link each, no 
 	const first = cases.first();
 	const hit = await first.evaluate( ( li ) => {
 		const box = li.querySelector( '.pk-body' ).getBoundingClientRect();
-		const el = document.elementFromPoint( box.left + box.width / 2, box.top + box.height * 0.3 );
+		const el = window.crHitAt( box.left + box.width / 2, box.top + box.height * 0.3 );
 		return el?.closest( 'a' ) === li.querySelector( '.pk-title a' );
 	} );
 	expect( hit ).toBe( true );
@@ -381,6 +571,157 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 	const decor = await page.locator( '.cr-archive--watch .cr-vhs-shelf' ).evaluate( ( el ) => getComputedStyle( el, '::before' ).backgroundImage );
 	expect( decor, 'the TV still life is a CSS background on the unit, not content' ).toContain( 'cr-tv-vcr.svg' );
 	expect( await page.locator( '.cr-archive--watch .cr-vhs-shelf img, .cr-archive--watch .cr-vhs-shelf svg' ).evaluateAll( ( els ) => els.filter( ( e ) => ! e.closest( '.pk-card' ) ).length ), 'no decoration enters the DOM' ).toBe( 0 );
+} );
+
+// These tests record defects fixed by a separate theme PR and fail on a site without that fix.
+// PKIW #227: the watch single's flap reads "Watch · VHS" and its reels and
+// tape are drawn, as on the Stream's VHS card.
+test( 'a watch single is a VHS tape: the flap reads "Watch · VHS" and the reels and tape are drawn (PKIW #227)', async ( { page } ) => {
+	const response = await page.goto( WATCH_SINGLE, { waitUntil: 'load' } );
+	const card = page.locator( 'article.pk-card.k-watch' );
+	test.skip( response.status() === 404 || 0 === await card.count(), `no watch card fixture at ${ WATCH_SINGLE }` );
+	await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
+	await expect( page.locator( 'article.pk-card.k-watch.cr-vhs' ) ).toHaveCount( 1 );
+	await expect( page.locator( '.h-entry article.h-cite.u-watch-of' ) ).toHaveCount( 1 );
+	await expect( card.locator( 'span.pk-kindlabel' ) ).toHaveCount( 1 );
+	await expect( card.locator( 'span.pk-kindlabel' ) ).toHaveText( 'Watch · VHS' );
+	await expect( card.locator( '.cr-vhs__reel' ) ).toHaveCount( 2 );
+	await expect( card.locator( '.cr-vhs__tape' ) ).toHaveCount( 1 );
+	await expect( card.locator( '.cr-vhs__reel--l' ) ).toBeVisible();
+	await expect( card.locator( '.cr-vhs__tape' ) ).toBeVisible();
+	if ( ! await card.evaluate( ( element ) => element.classList.contains( 'cr-vhs--player' ) ) ) {
+		await expect( card.locator( '.cr-vhs__reel--r' ) ).toBeVisible();
+	}
+} );
+
+// PKIW #227: a missing episode never prints as episode zero, on the single
+// or on the Stream. The Stream's VHS card prints the same film_facts() line
+// only on a playable card with courtneyr_child_stream_watch_player on
+// (inc/stream-media.php:302, off by default), so the Stream half reads
+// CR_WATCH_STREAM_PATH page by page up to the page that lists this watch,
+// and logs a note when that card prints no facts: the run then checked no
+// film_facts() line on the Stream. The served HTML is scanned without its
+// scripts and styles, so a document title or an aria-label counts too, and
+// "S01E00" as well as "S1E0".
+test( 'a watch single and the Stream print no episode a watch does not store: no "S1E0" (PKIW #227)', async ( { page }, testInfo ) => {
+	const response = await page.goto( WATCH_SINGLE, { waitUntil: 'load' } );
+	const card = page.locator( 'article.pk-card.k-watch' );
+	test.skip( response.status() === 404 || 0 === await card.count(), `no watch card fixture at ${ WATCH_SINGLE }` );
+	const episodeZero = /\bS\d+E0+\b|\bEpisode 0+\b/g;
+	const served = ( html ) => html.replace( /<script\b[\s\S]*?<\/script>|<style\b[\s\S]*?<\/style>/gi, '' );
+	expect( served( await response.text() ).match( episodeZero ), `an episode 0 is invented on ${ WATCH_SINGLE }` ).toBeNull();
+	const postId = await page.evaluate( () => Number( [ ...document.body.classList ].find( ( className ) => /^postid-\d+$/.test( className ) )?.slice( 'postid-'.length ) ) );
+	let streamCard = null;
+	let pageNumber = 0;
+	for await ( const { html, ids } of streamPages( page, WATCH_STREAM ) ) {
+		pageNumber++;
+		expect( served( html ).match( episodeZero ), `an episode 0 is invented on page ${ pageNumber } of ${ WATCH_STREAM }` ).toBeNull();
+		if ( ids.includes( postId ) ) {
+			streamCard = html.split( /(?=<li class="wp-block-post )/ ).find( ( item ) => Number( item.match( /^<li class="wp-block-post post-(\d+)\b/ )?.[ 1 ] ) === postId );
+			break;
+		}
+	}
+	if ( ! streamCard?.includes( 'cr-vhs__facts' ) ) {
+		const note = streamCard
+			? `post ${ postId }'s card on page ${ pageNumber } of ${ WATCH_STREAM } prints no film facts, so the Stream half checked no film_facts() line`
+			: `post ${ postId } isn't on the ${ pageNumber } pages of ${ WATCH_STREAM } read, so the Stream half checked no film_facts() line for it`;
+		testInfo.annotations.push( { type: 'coverage', description: note } );
+		console.log( note );
+	}
+} );
+
+// PKIW #227: the lede under the h1 and the footer's film line print
+// film_facts(); the tape label prints its own list from the same stored
+// facts. All three agree: the same season and episode (an S1E2 in the lede
+// reads "Season 1 · Episode 2" on the label), the same year, the same film or
+// series, the same director.
+test( 'a watch single\'s lede and footer facts match its tape label (PKIW #227)', async ( { page } ) => {
+	const response = await page.goto( WATCH_SINGLE, { waitUntil: 'load' } );
+	const card = page.locator( 'article.pk-card.k-watch' );
+	test.skip( response.status() === 404 || 0 === await card.count(), `no watch card fixture at ${ WATCH_SINGLE }` );
+	const facts = await page.evaluate( () => {
+		const text = ( value ) => ( value || '' ).replace( /\s+/g, ' ' ).trim();
+		// The film line is the title, a <br>, the facts, then its label.
+		let footer = '';
+		const film = document.querySelector( 'main .cr-journal__meta-item--film .cr-journal__meta-text' );
+		for ( let node = film?.querySelector( 'br' )?.nextSibling; node; node = node.nextSibling ) {
+			if ( node.nodeType === Node.ELEMENT_NODE && node.classList.contains( 'cr-journal__meta-label' ) ) {
+				break;
+			}
+			footer += node.textContent;
+		}
+		return {
+			lede: text( document.querySelector( 'main .cr-journal__lede-place' )?.textContent ),
+			footer: text( footer ),
+			label: [ ...document.querySelectorAll( 'main .cr-vhs__facts li' ) ].map( ( li ) => text( li.textContent ) ),
+		};
+	} );
+	expect( facts.label.length, 'the tape label lists the stored facts' ).toBeGreaterThan( 0 );
+	expect( facts.lede, 'the lede prints the film facts' ).not.toBe( '' );
+	expect( facts.footer, 'the footer\'s film line prints the lede\'s facts' ).toBe( facts.lede );
+	const seasonEpisode = ( text ) => {
+		const both = text.match( /\bS(\d+)E(\d+)\b/i );
+		const season = both ? both[ 1 ] : text.match( /\bSeason (\d+)\b/ )?.[ 1 ];
+		const episode = both ? both[ 2 ] : text.match( /\bEpisode (\d+)\b/ )?.[ 1 ];
+		return { season: undefined === season ? null : Number( season ), episode: undefined === episode ? null : Number( episode ) };
+	};
+	const ledeParts = facts.lede.split( ' · ' );
+	const labelSeason = facts.label.find( ( fact ) => /^Season \d+\b/.test( fact ) ) || '';
+	expect( seasonEpisode( facts.lede ), `lede "${ facts.lede }" and label "${ facts.label.join( ' · ' ) }" name one season and episode` ).toEqual( seasonEpisode( labelSeason ) );
+	expect( ledeParts.filter( ( part ) => /^\d{4}$/.test( part ) ), 'the same year' ).toEqual( facts.label.filter( ( fact ) => /^\d{4}$/.test( fact ) ) );
+	expect( ledeParts.includes( 'Film' ), 'both call it a film, or neither does' ).toBe( facts.label.includes( 'Film' ) );
+	const director = facts.label.find( ( fact ) => fact.startsWith( 'Directed by ' ) )?.slice( 'Directed by '.length );
+	if ( director ) {
+		expect( ledeParts, 'the lede names the label\'s director' ).toContain( director );
+	}
+} );
+
+// PKIW #226: a listen single exposes one readable rating and one provider link.
+test( 'a listen single shows its rating once, as text, and one Listen link (PKIW #226)', async ( { page } ) => {
+	const response = await page.goto( LISTEN_SINGLE, { waitUntil: 'load' } );
+	const card = page.locator( 'article.pk-card.k-listen' );
+	test.skip( response.status() === 404 || 0 === await card.count(), `no listen card fixture at ${ LISTEN_SINGLE }` );
+	await expect( card ).toHaveClass( /\bh-cite\b/ );
+	await expect( card ).toHaveClass( /\bu-listen-of\b/ );
+	await expect( card.locator( '.p-rating' ) ).toHaveCount( 1 );
+	const ratings = page.locator( 'main .pk-stars, main .cr-listen-sources__rating' ).filter( { visible: true } );
+	await expect( ratings ).toHaveCount( 1 );
+	const ratingText = await ratings.first().getAttribute( 'aria-label' ) || await ratings.first().innerText();
+	expect( ratingText.replace( /\s+/g, ' ' ).trim() ).toMatch( /^Rated \d+ of 5$/ );
+	const listenUrl = await card.locator( 'a.u-url' ).first().evaluate( ( a ) => a.href );
+	expect( listenUrl ).toBeTruthy();
+	// One visible link per destination, for every place the card and the
+	// listen part link to: visible links in main counted by href. A link kept
+	// for microformats and hidden (display: none, or clipped to a pixel the
+	// way screen-reader-text is, or shrunk to nothing by font-size: 0) doesn't
+	// count; Playwright's `visible` filter would count the clipped one.
+	const destinations = await page.locator( 'main' ).evaluate( ( main ) => {
+		const shown = ( a ) => {
+			const size = a.getBoundingClientRect();
+			if ( 0 === a.getClientRects().length || size.width <= 2 || size.height <= 2 || 'visible' !== getComputedStyle( a ).visibility ) {
+				return false;
+			}
+			for ( let el = a; el && el !== main; el = el.parentElement ) {
+				const style = getComputedStyle( el );
+				const box = el.getBoundingClientRect();
+				const clipped = ( 'auto' !== style.clip && '' !== style.clip ) || ( 'none' !== style.clipPath && '' !== style.clipPath );
+				if ( '0' === style.opacity || ( clipped && ( box.width <= 2 || box.height <= 2 ) ) || ( 'visible' !== style.overflow && ( box.width <= 2 || box.height <= 2 ) ) ) {
+					return false;
+				}
+			}
+			return true;
+		};
+		const hrefs = new Set( [ ...main.querySelectorAll( 'article.pk-card.k-listen a[href], .cr-listen-sources a[href]' ) ].map( ( a ) => a.href ) );
+		return [ ...hrefs ].map( ( href ) => ( {
+			href,
+			shown: [ ...main.querySelectorAll( 'a[href]' ) ].filter( ( a ) => a.href === href && shown( a ) ).map( ( a ) => a.textContent.replace( /\s+/g, ' ' ).trim() ),
+		} ) );
+	} );
+	expect( destinations.map( ( destination ) => destination.href ) ).toContain( listenUrl );
+	for ( const { href, shown } of destinations ) {
+		expect( shown.length, `visible links to ${ href }: ${ shown.join( ' | ' ) }` ).toBeLessThanOrEqual( 1 );
+	}
+	expect( destinations.find( ( destination ) => destination.href === listenUrl ).shown.length, `the listen URL keeps one visible link` ).toBe( 1 );
 } );
 
 // PKIW #228: the comics archive is a comic-shop rack filled by the archive
@@ -430,7 +771,7 @@ test( 'the comics archive is a rack of bagged comics, one title link each, no me
 			// Instant: the site scrolls smoothly, and a smooth scroll has not moved yet.
 			el.scrollIntoView( { block: 'center', behavior: 'instant' } );
 			const bag = el.querySelector( '.pk-media' ).getBoundingClientRect();
-			const at = document.elementFromPoint( bag.left + bag.width / 2, bag.top + bag.height / 2 );
+			const at = window.crHitAt( bag.left + bag.width / 2, bag.top + bag.height / 2 );
 			return { link: at?.closest( 'a' ) === el.querySelector( '.pk-title a' ), imgInLink: !! el.querySelector( 'a img' ) };
 		} );
 		expect( hit.link, 'the bag is the title link' ).toBe( true );
@@ -662,7 +1003,12 @@ test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft
 // header, notes card and reading record on wide screens. A comic still being
 // read is labelled by its start, never as read or finished.
 test( 'a comic single is a bagged comic beside its header, notes and reading record, with truthful date labels', async ( { page } ) => {
-	await page.goto( COMIC_SINGLE, { waitUntil: 'load' } );
+	const response = await page.goto( COMIC_SINGLE, { waitUntil: 'load' } );
+	// courtneyr-child#94: the default path is the dev fixture. Elsewhere it is
+	// missing (404) or a book read (test serves Anzuelo with a read-card), so
+	// there is no comic read to test. The plugin's own card decides that; the
+	// theme's classes are what the test checks.
+	test.skip( 404 === response.status() || 0 === await page.locator( '.wp-block-post-kinds-indieweb-comic-card' ).count(), `no comic read at ${ COMIC_SINGLE }: set CR_COMIC_SINGLE_PATH` );
 	await expect( page.locator( 'body.cr-comic-single' ) ).toHaveCount( 1 );
 	await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
 	const bag = page.locator( '.single-post__content article.pk-card.k-comics.cr-comic--single' );
@@ -736,7 +1082,7 @@ test( 'a comic single is a bagged comic beside its header, notes and reading rec
 		const b = document.querySelector( 'article.cr-comic--single' ).getBoundingClientRect();
 		const h = document.querySelector( 'h1' ).getBoundingClientRect();
 		const n = document.querySelector( '.cr-journal__notes, .cr-record' ).getBoundingClientRect();
-		return { bagRight: b.right, bagTop: b.top, h1Left: h.left, h1Top: h.top, notesLeft: n.left };
+		return { bagRight: b.right, bagTop: b.top, bagBottom: b.bottom, h1Left: h.left, h1Top: h.top, h1Bottom: h.bottom, notesLeft: n.left, notesTop: n.top };
 	} );
 	// "Also on" (syndication links) follows the record in its column; it is
 	// not a stray line at the page edge under the bag.
@@ -751,9 +1097,16 @@ test( 'a comic single is a bagged comic beside its header, notes and reading rec
 		expect( Math.abs( alsoOn.left - alsoOn.recordLeft ), 'syndication links start where the record starts' ).toBeLessThanOrEqual( 1 );
 		expect( alsoOn.top ).toBeGreaterThan( alsoOn.recordBottom );
 	}
-	expect( spread.bagRight, 'the bag stands left of the header' ).toBeLessThanOrEqual( spread.h1Left );
-	expect( spread.bagRight ).toBeLessThanOrEqual( spread.notesLeft );
-	expect( spread.bagTop, 'the bag starts level with the header, not below it' ).toBeLessThan( spread.h1Top + 40 );
+	// Side by side from 64rem (assets/css/cr-comic.css, `@media (min-width: 64rem)`).
+	// Below it the page stacks in source order: header, bag, then notes and record.
+	if ( page.viewportSize().width >= 1024 ) {
+		expect( spread.bagRight, 'the bag stands left of the header' ).toBeLessThanOrEqual( spread.h1Left );
+		expect( spread.bagRight ).toBeLessThanOrEqual( spread.notesLeft );
+		expect( spread.bagTop, 'the bag starts level with the header, not below it' ).toBeLessThan( spread.h1Top + 40 );
+	} else {
+		expect( spread.bagTop, 'stacked: the bag follows the header' ).toBeGreaterThanOrEqual( spread.h1Bottom );
+		expect( spread.notesTop, 'stacked: the notes and record follow the bag' ).toBeGreaterThanOrEqual( spread.bagBottom );
+	}
 } );
 
 // PKIW #228: body text an author writes after the card keeps its place in
@@ -795,7 +1148,7 @@ test( 'the Stream shows a comic read as one bagged card whose title link covers 
 		const hit = await card.evaluate( ( el ) => {
 			el.scrollIntoView( { block: 'center', behavior: 'instant' } );
 			const box = el.querySelector( '.pk-media' ).getBoundingClientRect();
-			const at = document.elementFromPoint( box.left + box.width / 2, box.top + box.height / 2 );
+			const at = window.crHitAt( box.left + box.width / 2, box.top + box.height / 2 );
 			return at?.closest( 'a' ) === el.querySelector( '.pk-title a' );
 		} );
 		expect( hit, 'the cover is part of the title link' ).toBe( true );
@@ -830,7 +1183,7 @@ test( 'the recipe archive is a binder of four recipe cards, one title link each,
 			el.scrollIntoView( { block: 'center', behavior: 'instant' } );
 			const r = el.getBoundingClientRect();
 			const a = el.querySelector( '.pk-title a' );
-			const hit = document.elementFromPoint( r.left + r.width / 2, r.top + r.height - 12 );
+			const hit = window.crHitAt( r.left + r.width / 2, r.top + r.height - 12 );
 			return hit === a || a.contains( hit );
 		} );
 		expect( covered, 'the title link covers the whole card' ).toBe( true );
@@ -1273,7 +1626,7 @@ for ( const [ kind, path ] of [ [ 'eat', EAT_ARCHIVE ], [ 'drink', DRINK_ARCHIVE
 			// Where the item's own content starts: past the rule and gap between two specials side by side.
 			const start = box.left + parseFloat( getComputedStyle( item ).paddingLeft ) + parseFloat( getComputedStyle( item ).borderLeftWidth );
 			// The point a thumb lands on: the middle of the picture column.
-			const tapped = document.elementFromPoint( start + Math.max( 2, ( body.left - start ) / 2 ), box.top + Math.min( box.height, 80 ) / 2 );
+			const tapped = window.crHitAt( start + Math.max( 2, ( body.left - start ) / 2 ), box.top + Math.min( box.height, 80 ) / 2 );
 			return {
 				name: link.textContent.trim(),
 				plain: item.classList.contains( 'pkiw-menu-specials__item--no-photo' ),
@@ -1404,6 +1757,42 @@ test( 'a link keeps its 3px focus ring when a script writes a thinner outline in
 		checked++;
 	}
 	expect( checked, 'at least one link was checked' ).toBeGreaterThan( 0 );
+} );
+
+// courtneyr-child#95: the consent dialog belongs to the consent plugin, so this
+// test keeps it open to keep its effect on record. Complianz traps Tab inside
+// the dialog but leaves the page behind it focusable (no inert), so focus that
+// arrives another way (pointer, script, assistive technology) can sit under it.
+// Website Specification `focus-not-obscured` (recommended): a dialog either
+// makes the rest of the page inert or stays off focusable content. Expected to
+// fail until the plugin or its settings change; a pass means it changed.
+test.describe( 'with the consent dialog open', () => {
+	test.use( { consentDialog: 'keep' } );
+
+	test( 'no focused link in main is entirely hidden under the consent dialog, or the page behind it is inert', async ( { page }, testInfo ) => {
+		// It sets its own window, so one project's run is the whole record:
+		// 1280-light, the one project `npm run test:a11y-markup` runs.
+		test.skip( '1280-light' !== testInfo.project.name, 'runs once, in the 1280-light project' );
+		await page.setViewportSize( { width: 375, height: 800 } );
+		await page.goto( DRINK_ARCHIVE, { waitUntil: 'load' } );
+		const dialog = page.locator( '.cmplz-cookiebanner' ).filter( { visible: true } );
+		await dialog.first().waitFor( { state: 'visible', timeout: 5000 } ).catch( () => {} );
+		test.skip( 0 === await dialog.count(), 'no consent dialog on this site' );
+		test.fail( true, 'Complianz leaves the page focusable under its dialog (courtneyr-child#95)' );
+		const state = await page.evaluate( () => {
+			const box = document.querySelector( '.cmplz-cookiebanner:not(.cmplz-hidden)' ).getBoundingClientRect();
+			const hidden = [];
+			for ( const a of document.querySelectorAll( 'main a[href]' ) ) {
+				a.focus();
+				const r = a.getBoundingClientRect();
+				if ( r.width > 0 && r.height > 0 && r.left >= box.left && r.right <= box.right && r.top >= box.top && r.bottom <= box.bottom ) {
+					hidden.push( a.textContent.trim() );
+				}
+			}
+			return { inert: null !== document.querySelector( 'main' ).closest( '[inert]' ), hidden };
+		} );
+		expect( state.inert || 0 === state.hidden.length, `focused links entirely under the dialog: ${ state.hidden.join( ', ' ) }` ).toBe( true );
+	} );
 } );
 
 // PKIW #230: an eat single is an order ticket and a drink single is a taped
@@ -1986,6 +2375,35 @@ test( 'a public check-in on the Stream shows a still map thumbnail and one stamp
 	// Every check-in card on the page keeps to one stamp, whatever its privacy.
 	for ( const count of await page.locator( 'article.cr-passport' ).evaluateAll( ( els ) => els.map( ( el ) => el.querySelectorAll( '.cr-passport__stamps svg' ).length ) ) ) {
 		expect( count ).toBe( 1 );
+	}
+} );
+
+// PKIW #224: a Stream check-in's post title (.cr-passport__title) is its
+// headline, so in the DOM, which is what a screen reader reads, it comes
+// right after the kind label, before the map and the venue. A card whose
+// title is empty or the venue's name prints no .cr-passport__title and is
+// left out. Fails on dev at 0.7.97: inc/stream-checkin.php:361 inserts the
+// title after the first </p> past the label, and Post Kinds prints the
+// label as a <span>, so the title lands after the map and the venue h2.
+// The map thumbnail, when a card has one, sits between the label and the
+// title: the 0.7.97 CSS orders .cr-passport__thumb with the label (order -2)
+// and the title after it (order -1), so DOM, visual and focus order agree.
+test( 'every check-in card on the Stream puts its title right after the kind label and any map thumbnail (PKIW #224)', async ( { page } ) => {
+	await page.goto( CHECKIN_STREAM, { waitUntil: 'load' } );
+	const cards = await page.locator( 'article.cr-passport' ).evaluateAll( ( els ) => els.filter( ( el ) => el.querySelector( '.cr-passport__title' ) ).map( ( el ) => {
+		let next = el.querySelector( '.pk-kindlabel' )?.nextElementSibling;
+		if ( next?.classList.contains( 'cr-passport__thumb' ) ) {
+			next = next.nextElementSibling;
+		}
+		return {
+			title: el.querySelector( '.cr-passport__title' ).textContent.trim(),
+			next: next ? `${ next.tagName.toLowerCase() }.${ [ ...next.classList ].join( '.' ) }` : '(no kind label, or nothing after it)',
+			follows: Boolean( next?.classList.contains( 'cr-passport__title' ) ),
+		};
+	} ) );
+	test.skip( 0 === cards.length, `no check-in card with a post title on ${ CHECKIN_STREAM }` );
+	for ( const card of cards ) {
+		expect( card.follows, `${ card.title }: after the kind label comes ${ card.next }` ).toBe( true );
 	}
 } );
 
