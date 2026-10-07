@@ -167,7 +167,7 @@ function split_vhs_shelf( string $html, array $block ): string {
 
 	$paged   = max( 1, (int) get_query_var( 'paged' ) );
 	$parts   = load_order( $parts );
-	$face    = 1 === $paged ? array_map( __NAMESPACE__ . '\\case_only', array_slice( $parts, 0, NEW_RELEASES ) ) : array();
+	$face    = 1 === $paged ? lead_cover( array_map( __NAMESPACE__ . '\\case_only', array_slice( $parts, 0, NEW_RELEASES ) ) ) : array();
 	$spine   = array_map( __NAMESPACE__ . '\\spine_only', 1 === $paged ? array_slice( $parts, NEW_RELEASES ) : $parts );
 	$heading = static fn( string $id, string $text ): string => '<h2 class="cr-vhs-shelf__label" id="' . esc_attr( $id ) . '">' . esc_html( $text ) . '</h2>';
 	$list    = static function ( string $modifier, string $labelled_by, array $lis ) use ( $list_open ): string {
@@ -194,8 +194,9 @@ add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\split_vhs_shel
  *
  * On the live site lazy means Perfmatters' data-src swap (it drops
  * loading="lazy" for its own). case_only() then lifts page 1's face-out
- * covers, the first row, to eager at high priority, which Perfmatters
- * skips. Core keeps each attachment's srcset and sizes.
+ * covers, the first row, to eager and marks them skip-lazy, and
+ * lead_cover() gives the first of them high priority. Core keeps each
+ * attachment's srcset.
  *
  * @param string[] $items Rendered <li> items in query order.
  * @return string[]
@@ -328,16 +329,19 @@ function cut_elements( string $html, string $tag, string $class_name ): string {
  * What a watch case leaves on the single post (PKIW #227, Courtney's
  * 2026-10-03 ruling: no metadata on archive pages): the year and rewatch
  * line, the watched date (also a pk-sub), the stars and p-rating, the
- * "Watch / find it" links, the meta links and the kind label. Each is
- * [ tag, class ] for cut_elements().
+ * "Watch / find it" links, the review, the meta links, the kind label
+ * and the kind badge, as the comics rack cuts them (inc/comic.php). Each
+ * is [ tag, class ] for cut_elements().
  */
 const SINGLE_ONLY = array(
 	array( 'p', 'pk-sub' ),
 	array( 'div', 'pk-stars' ),
 	array( 'data', 'p-rating' ),
 	array( 'div', 'pk-sources' ),
+	array( 'div', 'pk-note' ),
 	array( 'div', 'pk-meta' ),
 	array( 'span', 'pk-kindlabel' ),
+	array( 'div', 'pk-badge' ),
 );
 
 /**
@@ -370,16 +374,28 @@ function spine_only( string $item ): string {
 }
 
 /**
+ * Width of a face-out cover: the case's 13rem column less the recess's
+ * 2.3rem spine band and 0.65rem inset in cr-media-shelf.css, 161px at
+ * most.
+ */
+const WATCH_COVER_SIZES = 'calc(13rem - 2.95rem)';
+
+/**
  * Reduce a face-out watch item to its case (PKIW #227, approved 2026-10-03).
  *
  * The archive is for browsing cases; SINGLE_ONLY stays on the single
  * post. What remains in the item is the clamshell (cover or title sleeve)
  * and its h3 title link, which the stylesheet turns into the whole case's
  * link. With a cover, the title is the link's one accessible name and the
- * cover's alt is emptied so it isn't announced a second time; the cover
- * is first-row imagery, so it loads eagerly at high priority. Without
- * one, the title shows on the sleeve. `.pk-entry-props` outside the card
- * keeps the entry's dt-published for microformats.
+ * cover's alt is emptied so it isn't announced a second time. The cover
+ * is first-row imagery, so it loads eagerly; skip-lazy keeps Perfmatters'
+ * swap off it (inc/journal.php), since Perfmatters lazy-loads an eager
+ * image that lacks fetchpriority=high. Its `sizes` names the cover's
+ * width without the `auto` core leads it with: `auto` is valid only on a
+ * lazy image, and browsers fall back to the next slot, wider than the
+ * cover.
+ * Without a cover, the title shows on the sleeve. `.pk-entry-props`
+ * outside the card keeps the entry's dt-published for microformats.
  *
  * @param string $item One rendered <li>.
  * @return string
@@ -403,7 +419,11 @@ function case_only( string $item ): string {
 	if ( $has_cover && $tags->next_tag( 'img' ) ) {
 		$tags->set_attribute( 'alt', '' );
 		$tags->set_attribute( 'loading', 'eager' );
-		$tags->set_attribute( 'fetchpriority', 'high' );
+		$tags->add_class( 'skip-lazy' );
+		$tags->set_attribute( 'data-skip-lazy', '1' );
+		if ( null !== $tags->get_attribute( 'srcset' ) ) {
+			$tags->set_attribute( 'sizes', WATCH_COVER_SIZES );
+		}
 	}
 	$item = $tags->get_updated_html();
 	if ( $has_cover ) {
@@ -413,4 +433,28 @@ function case_only( string $item ): string {
 		$item = $tags->get_updated_html();
 	}
 	return $item;
+}
+
+/**
+ * Give the first face-out cover high priority (PKIW #227, after #106).
+ *
+ * The other first-row covers stay eager without it: on a phone the
+ * face-out list is one column, so they sit below the first screen and
+ * would compete with the first cover for bandwidth.
+ *
+ * @param string[] $items Face-out items after case_only().
+ * @return string[]
+ */
+function lead_cover( array $items ): array {
+	foreach ( $items as $i => $item ) {
+		$tags = new \WP_HTML_Tag_Processor( $item );
+		while ( $tags->next_tag( 'img' ) ) {
+			if ( 'eager' === $tags->get_attribute( 'loading' ) ) {
+				$tags->set_attribute( 'fetchpriority', 'high' );
+				$items[ $i ] = $tags->get_updated_html();
+				return $items;
+			}
+		}
+	}
+	return $items;
 }
