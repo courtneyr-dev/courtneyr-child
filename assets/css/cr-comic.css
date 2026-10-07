@@ -650,7 +650,7 @@ body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-kindlab
 	font-family: var(--cr-font-display);
 	font-size: var(--cr-text-base);
 	font-weight: var(--cr-weight-regular);
-	letter-spacing: normal;
+	letter-spacing: var(--cr-tracking-normal);
 	line-height: 1;
 	text-transform: none;
 	transform: rotate(var(--cr-rotate-neg));
