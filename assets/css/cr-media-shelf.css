@@ -206,20 +206,26 @@
    match different lists (listen vs watch, face vs spine) than the rules it
    follows, so their order is by section, not by specificity. */
 
-/* ---- The unit: posts, top plank, the still life standing on it ---- */
+/* ---- The unit: posts, top plank, the still life standing on it ----
+   The unit runs across the archive's whole page area, inside the global
+   padding the main carries, as the mockup's shelf runs nearly edge to
+   edge; the header and Browse all keep the wide size. */
+.cr-archive--watch > .cr-media-shelf.alignwide {
+	max-width: none;
+}
+
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf {
 	--vhs-plank: 1.1rem;
 	--vhs-post: 1.4rem;
 	--vhs-post-edge: 0.35rem;
 	--vhs-label-col: 12.5rem;
 	--vhs-still-life: 18rem;
-	--vhs-case-ratio: 2 / 3; /* a VHS rental clamshell stands taller than it is wide; the mockup's measure 0.89 but read as boxes */
+	--vhs-case-ratio: 23 / 26.5; /* the approved mockup's broad rental clamshell */
 	--vhs-plank-paint: linear-gradient(var(--cr-sky-blue) 0 28%, var(--cr-blue-green) 28% 82%, var(--cr-cerulean) 82%);
 	position: relative;
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
-	max-width: 72rem;
-	margin: var(--vhs-still-life) auto 0;
+	margin: var(--vhs-still-life) 0 0;
 	padding: var(--vhs-plank) var(--vhs-post) 1rem;
 	border: 0;
 	background:
@@ -383,8 +389,9 @@
 	box-shadow: 0 0 0 2px var(--cr-glaucous); /* the clear sleeve's edge around the art */
 }
 
-/* The rental tag on the case's top corner. */
-.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-media::after {
+/* The rental tag on the case's top corner, cover or sleeve. */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-media::after,
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:not(:has(.pk-media)) .pk-caption::after {
 	content: "";
 	position: absolute;
 	inset-block-start: 1.15rem;
@@ -393,6 +400,13 @@
 	height: 1.35rem;
 	border-radius: 2px;
 	background: var(--cr-selective-yellow);
+}
+
+/* The sleeve's tag sits inside its 0.65rem frame, so the same spot is
+   0.65rem nearer its padding edge. */
+.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--face > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-body:not(:has(.pk-media)) .pk-caption::after {
+	inset-block-start: 0.5rem;
+	inset-inline-end: 0.5rem;
 }
 
 /* The middle plank, drawn at each case's foot and run both ways to the
@@ -465,7 +479,7 @@
 	aspect-ratio: var(--vhs-case-ratio);
 	justify-content: flex-end;
 	margin: 0 0 var(--vhs-plank);
-	padding: 1rem 0.75rem 1rem 1.2rem;
+	padding: 2.1rem 0.75rem 1rem 1.2rem; /* a long title stops below the rental tag */
 	border: 0.65rem solid var(--cr-russian-violet);
 	border-inline-start-width: 2.3rem;
 	border-radius: 3px;
@@ -546,14 +560,16 @@
 }
 
 /* A rewinder at the end of the bottom plank (assets/img/cr-rewinder.svg),
-   while the row has room for it. */
+   while the row has room for it: about one spine height wide, the shelf
+   object anchoring the board's end. */
 .cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--spine::after {
 	content: "";
 	position: absolute;
 	inset: auto 1rem var(--vhs-plank) auto; /* the collage's doodle field set inset: 0 and z-index: -1 */
 	z-index: 0;
-	width: 7.5rem;
-	height: 2.85rem;
+	width: 11.5rem;
+	height: auto;
+	aspect-ratio: 200 / 76;
 	background: url(../img/cr-rewinder.svg) right bottom / contain no-repeat;
 	opacity: 1;
 	pointer-events: none;
