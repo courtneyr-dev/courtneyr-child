@@ -140,21 +140,56 @@
 	columns: auto;
 	border: 2px solid var(--cr-russian-violet);
 	background:
-		/* Each tier's front lip. */
-		repeating-linear-gradient(180deg, transparent 0 calc(var(--rack-tier) - var(--rack-lip)), var(--cr-russian-violet) calc(var(--rack-tier) - var(--rack-lip)) calc(var(--rack-tier) - var(--rack-lip) + 2px), var(--cr-glaucous) calc(var(--rack-tier) - var(--rack-lip) + 2px) calc(var(--rack-tier) - 2px), var(--cr-russian-violet) calc(var(--rack-tier) - 2px) var(--rack-tier)),
-		/* The slotted uprights between bays. */
-		linear-gradient(90deg, var(--cr-glaucous-dark) 0 0.4rem, transparent 0.4rem) 0 0 / calc(100% / var(--rack-cols)) 100%,
+		/* Each tier's front lip, in layers: the ink edge, a lit top edge,
+		   the front face, its shaded underside, the ink foot. */
+		repeating-linear-gradient(180deg, transparent 0 calc(var(--rack-tier) - var(--rack-lip)), var(--cr-russian-violet) calc(var(--rack-tier) - var(--rack-lip)) calc(var(--rack-tier) - var(--rack-lip) + 2px), var(--cr-light-gray) calc(var(--rack-tier) - var(--rack-lip) + 2px) calc(var(--rack-tier) - var(--rack-lip) + 4px), var(--cr-glaucous) calc(var(--rack-tier) - var(--rack-lip) + 4px) calc(var(--rack-tier) - 6px), var(--cr-glaucous-dark) calc(var(--rack-tier) - 6px) calc(var(--rack-tier) - 2px), var(--cr-russian-violet) calc(var(--rack-tier) - 2px) var(--rack-tier)),
+		/* Slot cuts down every upright: the rack's back through the steel. */
+		conic-gradient(at 0.12rem 0.45rem, transparent 75%, var(--cr-prussian-blue) 0) 0.14rem 0 / calc(100% / var(--rack-cols)) 0.9rem,
+		repeating-linear-gradient(180deg, var(--cr-prussian-blue) 0 0.45rem, transparent 0.45rem 0.9rem) calc(100% - 0.14rem) 0 / 0.12rem 100% no-repeat,
+		/* The uprights: one at the left of each bay and one closing the
+		   right end, lit along one edge. */
+		linear-gradient(90deg, var(--cr-glaucous) 0 0.12rem, var(--cr-glaucous-dark) 0.12rem 0.4rem, transparent 0.4rem) 0 0 / calc(100% / var(--rack-cols)) 100%,
+		linear-gradient(90deg, var(--cr-glaucous) 0 0.12rem, var(--cr-glaucous-dark) 0.12rem) 100% 0 / 0.4rem 100% no-repeat,
 		var(--cr-prussian-blue);
 	box-shadow: var(--cr-shadow-hard-2);
 }
 
-/* The wire rail that keeps issues from tipping forward. */
+/* The wire rail that keeps issues from tipping forward, with a post at
+   each end of each bay where it bends down into the lip. */
 .cr-comic-rack .wp-block-post-template.cr-comic-rack__list::after {
+	--rail: calc(var(--rack-tier) - var(--rack-lip) - 2.4rem);
 	content: "";
 	position: absolute;
 	inset: 0;
-	background: repeating-linear-gradient(180deg, transparent 0 calc(var(--rack-tier) - var(--rack-lip) - 2.4rem), var(--cr-light-gray) calc(var(--rack-tier) - var(--rack-lip) - 2.4rem) calc(var(--rack-tier) - var(--rack-lip) - 2.4rem + 2px), transparent calc(var(--rack-tier) - var(--rack-lip) - 2.4rem + 2px) var(--rack-tier));
+	background:
+		conic-gradient(at 2px 2.4rem, transparent 75%, var(--cr-light-gray) 0) 0.85rem var(--rail) / calc(100% / var(--rack-cols)) var(--rack-tier),
+		conic-gradient(at 2px 2.4rem, transparent 75%, var(--cr-light-gray) 0) calc(-0.85rem - 2px) var(--rail) / calc(100% / var(--rack-cols)) var(--rack-tier),
+		repeating-linear-gradient(180deg, transparent 0 var(--rail), var(--cr-light-gray) var(--rail) calc(var(--rail) + 2px), transparent calc(var(--rail) + 2px) var(--rack-tier));
 	pointer-events: none;
+}
+
+/* The side brackets: a shallow end panel on each side of every tier,
+   widening toward its lip. They paint behind the rack and its shadow
+   (the rack's wrapper is the stacking context), and only where the page
+   has room for them beside the rack. */
+@media (min-width: 72rem) {
+
+	.cr-comic-rack {
+		isolation: isolate;
+	}
+
+	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list::before {
+		--rack-bracket: 1rem;
+		content: "";
+		position: absolute;
+		z-index: -1;
+		inset-block: 0;
+		inset-inline: calc(var(--rack-bracket) * -1);
+		background:
+			linear-gradient(to bottom right, transparent 50%, var(--cr-glaucous-dark) 50%) 0 0 / var(--rack-bracket) var(--rack-tier) repeat-y,
+			linear-gradient(to bottom left, transparent 50%, var(--cr-glaucous-dark) 50%) 100% 0 / var(--rack-bracket) var(--rack-tier) repeat-y;
+		pointer-events: none;
+	}
 }
 
 .cr-comic-rack .wp-block-post-template.cr-comic-rack__list > li {
@@ -1235,6 +1270,7 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 		forced-color-adjust: none;
 	}
 
+	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list::before,
 	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list::after {
 		content: none;
 	}
