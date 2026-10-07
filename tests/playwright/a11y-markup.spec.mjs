@@ -1150,14 +1150,17 @@ test( 'a comic single is a bagged comic beside its header, notes and reading rec
 	} );
 	expect( husks, 'no empty wrapper is left where the repeats were' ).toEqual( [] );
 	// The "Read / find it" link's focus ring holds 3:1 against the page: it has the halo.
-	const sourceFocus = await page.evaluate( () => {
-		const a = document.querySelector( '.cr-journal--comic .pk-sources__link' );
-		if ( ! a ) return null;
-		a.focus();
-		return getComputedStyle( a ).boxShadow;
-	} );
-	if ( sourceFocus !== null ) {
-		expect( sourceFocus ).toMatch( /0px 0px 0px 8px/ );
+	// Reach it with Tab: the halo is a :focus-visible rule (cr-comic.css), which
+	// element.focus() after setup's mouse click doesn't always match.
+	const source = page.locator( '.cr-journal--comic .pk-sources__link' ).first();
+	if ( await source.count() ) {
+		let presses = 0;
+		while ( presses < 100 && ! await source.evaluate( ( el ) => el === document.activeElement ) ) {
+			await page.keyboard.press( 'Tab' );
+			presses++;
+		}
+		expect( await source.evaluate( ( el ) => el === document.activeElement ), 'Tab reaches the "Read / find it" link' ).toBe( true );
+		expect( await source.evaluate( ( el ) => getComputedStyle( el ).boxShadow ) ).toMatch( /0px 0px 0px 8px/ );
 	}
 	const spread = await page.evaluate( () => {
 		const b = document.querySelector( 'article.cr-comic--single' ).getBoundingClientRect();
@@ -2146,8 +2149,16 @@ test( 'the Stream shows an eat or drink post as one compact card with one link a
 		expect( o.stars ).toBe( 0 );
 		expect( o.date ).toBe( 1 );
 		expect( o.food ).toBe( true );
-		await card.locator( 'a.cr-chit__link' ).focus();
-		const ring = await card.locator( 'a.cr-chit__link' ).evaluate( ( el ) => {
+		// Reach the link with Tab: the ring is a :focus-visible rule (cr-eat-drink.css),
+		// which element.focus() after setup's mouse click doesn't always match.
+		const link = card.locator( 'a.cr-chit__link' );
+		let presses = 0;
+		while ( presses < 100 && ! await link.evaluate( ( el ) => el === document.activeElement ) ) {
+			await page.keyboard.press( 'Tab' );
+			presses++;
+		}
+		expect( await link.evaluate( ( el ) => el === document.activeElement ), 'Tab reaches the card\'s link' ).toBe( true );
+		const ring = await link.evaluate( ( el ) => {
 			const cs = getComputedStyle( el, '::after' );
 			return [ cs.outlineStyle, parseFloat( cs.outlineWidth ) ];
 		} );
