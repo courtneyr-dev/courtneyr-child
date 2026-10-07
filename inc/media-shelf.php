@@ -120,7 +120,8 @@ const NEW_RELEASES = 3;
  * under "All watches". It stays one native Query Loop with core pagination;
  * this only closes the post template's <ul> after the third item and opens a
  * second one, each led by a real h2 (the cards' titles are h3), so the
- * shelves are headings in the outline, not painted labels.
+ * shelves are headings in the outline, not painted labels. Every case's
+ * link also names its watch date for screen readers (name_watch_date()).
  *
  * @param string $html  Rendered core/post-template.
  * @param array  $block Parsed block.
@@ -166,7 +167,7 @@ function split_vhs_shelf( string $html, array $block ): string {
 	}
 
 	$paged   = max( 1, (int) get_query_var( 'paged' ) );
-	$parts   = load_order( $parts );
+	$parts   = array_map( __NAMESPACE__ . '\\name_watch_date', load_order( $parts ) );
 	$face    = 1 === $paged ? lead_cover( array_map( __NAMESPACE__ . '\\case_only', array_slice( $parts, 0, NEW_RELEASES ) ) ) : array();
 	$spine   = array_map( __NAMESPACE__ . '\\spine_only', 1 === $paged ? array_slice( $parts, NEW_RELEASES ) : $parts );
 	$heading = static fn( string $id, string $text ): string => '<h2 class="cr-vhs-shelf__label" id="' . esc_attr( $id ) . '">' . esc_html( $text ) . '</h2>';
@@ -374,6 +375,59 @@ function spine_only( string $item ): string {
 }
 
 /**
+ * Name a watch case's link with its watch date for screen readers (PKIW
+ * issue 227, Courtney's 2026-10-07 decision).
+ *
+ * The shelf shows no dates, so a first watch and a rewatch of one title
+ * would share a link name. The title link gets the post's published date,
+ * from get_the_date() in the site's date format, as hidden text: "Dune,
+ * watched 4 May 2026". Nothing visible changes. Face-out cases get it too:
+ * SINGLE_ONLY cuts their date line as well. The h3 is the h-cite's p-name,
+ * so a hidden, empty `value-title` span opens it with the title: under the
+ * microformats value class pattern, parsers take the name from it (a direct
+ * child of the h3; php-mf2 doesn't look deeper) and the cited name stays
+ * the title alone. The post ID comes from the post template's `post-{ID}`
+ * class on the item.
+ *
+ * @param string $item One rendered <li>.
+ * @return string
+ */
+function name_watch_date( string $item ): string {
+	$tags = new \WP_HTML_Tag_Processor( $item );
+	if ( ! $tags->next_tag( 'li' ) ) {
+		return $item;
+	}
+	$post_id = 0;
+	foreach ( $tags->class_list() as $class_name ) {
+		if ( preg_match( '/^post-(\d+)$/', $class_name, $m ) ) {
+			$post_id = (int) $m[1];
+			break;
+		}
+	}
+	$date = 0 < $post_id ? get_the_date( '', $post_id ) : '';
+	if ( ! is_string( $date ) || '' === $date ) {
+		return $item;
+	}
+	if ( ! preg_match( '/(<h3\b[^>]*\bclass="[^"]*(?<![\w-])pk-title(?![\w-])[^"]*"[^>]*>)\s*<a\b[^>]*>/', $item, $open, PREG_OFFSET_CAPTURE ) ) {
+		return $item;
+	}
+	$heading = (int) $open[1][1] + strlen( $open[1][0] );
+	$start   = (int) $open[0][1] + strlen( $open[0][0] );
+	$end     = strpos( $item, '</a>', $start );
+	if ( false === $end ) {
+		return $item;
+	}
+	$title = wp_strip_all_tags( substr( $item, $start, $end - $start ) );
+	/* translators: %s: the date the watch was posted, in the site's date format. */
+	$hidden = sprintf( __( 'watched %s', 'courtneyr-child' ), $date );
+	return substr( $item, 0, $heading )
+		. '<span class="value-title" title="' . esc_attr( $title ) . '" hidden></span>'
+		. substr( $item, $heading, $end - $heading )
+		. '<span class="cr-sr-only">, ' . esc_html( $hidden ) . '</span>'
+		. substr( $item, $end );
+}
+
+/**
  * Width of a face-out cover: the case's 13rem column less the recess's
  * 2.3rem spine band and 0.65rem inset in cr-media-shelf.css, 161px at
  * most.
@@ -393,7 +447,10 @@ const WATCH_COVER_SIZES = 'calc(13rem - 2.95rem)';
  * image that lacks fetchpriority=high. Its `sizes` names the cover's
  * width without the `auto` core leads it with: `auto` is valid only on a
  * lazy image, and browsers fall back to the next slot, wider than the
- * cover.
+ * cover. Modern Image Formats in picture mode wraps the cover in a
+ * <picture> before this runs, and each <source> copies the lazy-time
+ * sizes, so every <source> in it gets the same value. Perfmatters leaves
+ * a <picture> that holds skip-lazy alone, sources included.
  * Without a cover, the title shows on the sleeve. `.pk-entry-props`
  * outside the card keeps the entry's dt-published for microformats.
  *
@@ -415,8 +472,23 @@ function case_only( string $item ): string {
 		return $item;
 	}
 	$tags->add_class( 'cr-vhs--case' );
-	$has_cover = $tags->next_tag( $cover );
-	if ( $has_cover && $tags->next_tag( 'img' ) ) {
+	$has_cover  = $tags->next_tag( $cover );
+	$in_picture = false;
+	while ( $has_cover && $tags->next_tag() ) {
+		$tag = $tags->get_tag();
+		if ( 'PICTURE' === $tag ) {
+			$in_picture = true;
+			continue;
+		}
+		if ( 'SOURCE' === $tag && $in_picture ) {
+			if ( null !== $tags->get_attribute( 'sizes' ) ) {
+				$tags->set_attribute( 'sizes', WATCH_COVER_SIZES );
+			}
+			continue;
+		}
+		if ( 'IMG' !== $tag ) {
+			continue;
+		}
 		$tags->set_attribute( 'alt', '' );
 		$tags->set_attribute( 'loading', 'eager' );
 		$tags->add_class( 'skip-lazy' );
@@ -424,6 +496,7 @@ function case_only( string $item ): string {
 		if ( null !== $tags->get_attribute( 'srcset' ) ) {
 			$tags->set_attribute( 'sizes', WATCH_COVER_SIZES );
 		}
+		break;
 	}
 	$item = $tags->get_updated_html();
 	if ( $has_cover ) {

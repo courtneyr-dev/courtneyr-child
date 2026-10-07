@@ -609,7 +609,9 @@ test( 'the listen shelf empties cover alt, loads the first row first and drops a
 // date as hidden text, "Dune, watched 4 May 2026" (Courtney, PKIW #227,
 // 2026-10-07), so a first watch and a rewatch of one title get different
 // names. The date is the entry's published date, so it names the year of
-// its dt-published, and the hidden part takes no space on screen.
+// its dt-published, and the hidden part takes no space on screen. The h3
+// is the h-cite's p-name, so its value class pattern keeps the cited name
+// the title alone.
 async function expectWatchDateNames( items, where ) {
 	for ( const item of await items.all() ) {
 		const link = item.locator( '.pk-title a' );
@@ -618,7 +620,20 @@ async function expectWatchDateNames( items, where ) {
 			const shown = a.cloneNode( true );
 			shown.querySelectorAll( '.cr-sr-only' ).forEach( ( n ) => n.remove() );
 			const hidden = [ ...a.querySelectorAll( '.cr-sr-only' ) ];
+			// The h-cite's name as a microformats parser reads the h3: its
+			// direct .value children, else its .value-title titles, else its text.
+			const pName = a.closest( '.p-name' );
+			const kids = pName ? [ ...pName.children ] : [];
+			const values = kids.filter( ( c ) => c.classList.contains( 'value' ) );
+			const titles = kids.filter( ( c ) => c.classList.contains( 'value-title' ) );
+			let cited = pName?.textContent ?? '';
+			if ( values.length ) {
+				cited = values.map( ( c ) => c.textContent ).join( '' );
+			} else if ( titles.length ) {
+				cited = titles.map( ( c ) => c.getAttribute( 'title' ) ?? '' ).join( '' );
+			}
 			return {
+				cited: cited.trim(),
 				title: shown.textContent.trim(),
 				hidden: hidden.map( ( n ) => n.textContent ),
 				onScreen: hidden.filter( ( n ) => n.getBoundingClientRect().width > 1 || 'inset(50%)' !== getComputedStyle( n ).clipPath ).length,
@@ -631,6 +646,7 @@ async function expectWatchDateNames( items, where ) {
 		expect( facts.hidden[ 0 ], `${ where } "${ facts.title }": the hidden text reads ", watched <date>"` ).toMatch( /^, watched \S/ );
 		expect( date, `${ where } "${ facts.title }": the date is the entry's published date` ).toContain( facts.published.slice( 0, 4 ) );
 		expect( facts.onScreen, `${ where } "${ facts.title }": the date is hidden from view` ).toBe( 0 );
+		expect( facts.cited, `${ where } "${ facts.title }": the h-cite's p-name stays the title alone` ).toBe( facts.title );
 		await expect( link, `${ where }: the link's accessible name is the title, then the watch date` ).toHaveAccessibleName( `${ facts.title }, watched ${ date }` );
 		await expect( item.getByRole( 'link', { name: `${ facts.title }, watched ${ date }`, exact: true } ) ).toHaveCount( 1 );
 	}
