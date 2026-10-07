@@ -155,6 +155,30 @@
 	pointer-events: none;
 }
 
+/* ---- Listen: a near-full-width shelf ----
+   The mockup's shelf spans about 94% of a 1536px view. Once the page is
+   wider than the 1100px wide column plus gutters, the shelf group leaves
+   that column and keeps the xl spacing step inside the page's own md
+   gutter on each side (48px from the viewport edge), topping out at 96rem
+   so very wide screens don't grow the cases past the mockup's. Narrower
+   pages keep the column's width. Off phones the wider list keeps the
+   approved four columns: each track is at least a quarter of the row. */
+.cr-archive--listen .cr-media-shelf.alignwide {
+	max-width: max(min(100%, var(--wp--style--global--wide-size)), min(100% - 2 * var(--wp--preset--spacing--xl), 96rem));
+}
+
+@media (min-width: 40.0625rem) {
+
+	.cr-archive--listen .cr-media-shelf .wp-block-post-template.cr-media-shelf__list {
+		--pkiw-shelf-item-min: max(15rem, (100% - 3 * var(--pkiw-shelf-gap-column)) / 4);
+	}
+}
+
+.cr-archive--listen .cr-media-shelf .wp-block-post-template.cr-media-shelf__list,
+.cr-archive--listen .cr-media-shelf .wp-block-query:not(:has(.wp-block-post-template))::before {
+	max-width: none;
+}
+
 @media (max-width: 64rem) {
 
 	.cr-archive--listen .cr-media-shelf::before {
