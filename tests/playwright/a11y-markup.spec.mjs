@@ -1428,10 +1428,19 @@ test( 'the Stream shows a recipe as a 3x5 card: picture, label, title link, cour
 	const cards = items.locator( 'article.pk-card.cr-recipe-stream' );
 	expect( await cards.count(), 'every recipe on the Stream is a recipe card' ).toBe( await items.count() );
 	for ( const card of await cards.all() ) {
-		expect( await card.locator( '.pk-stream-date, .pk-excerpt, .pk-badge' ).count(), 'no date, excerpt or badge on the card' ).toBe( 0 );
+		expect( await card.locator( '.pk-stream-date, .pk-excerpt, .pk-badge, .pk-meta' ).count(), 'no date, excerpt, badge or Read more on the card' ).toBe( 0 );
 		await expect( card.locator( '.pk-kindlabel' ) ).toHaveText( /\S/ );
 		await expect( card.locator( 'h2.pk-title a' ) ).toHaveCount( 1 );
+		expect( await card.evaluate( ( el ) => [ ...el.querySelectorAll( 'a' ) ].filter( ( a ) => a.getClientRects().length > 0 ).length ), 'a recipe card is one link' ).toBe( 1 );
 		expect( await card.evaluate( ( el ) => getComputedStyle( el.querySelector( '.pk-title' ) ).transform ), 'the title is upright' ).toBe( 'none' );
+		const covered = await card.evaluate( ( el ) => {
+			el.scrollIntoView( { block: 'center', behavior: 'instant' } );
+			const r = el.getBoundingClientRect();
+			const a = el.querySelector( '.pk-title a' );
+			const hit = window.crHitAt( r.right - 12, r.bottom - 12 );
+			return hit === a || a.contains( hit );
+		} );
+		expect( covered, 'the title link covers the whole card' ).toBe( true );
 	}
 	// A recipe with a picture and stored facts: picture beside the text, course and time as text.
 	const full = cards.filter( { has: page.locator( '.pk-recipe-facts' ) } ).filter( { has: page.locator( '.pk-media img' ) } ).first();

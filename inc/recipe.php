@@ -241,9 +241,10 @@ add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\b
 /**
  * A recipe on the Stream: a 3x5 card.
  *
- * What stays is the picture, the kind label, the h2 title link, the course
- * and time line and the "Read more" link. The date and the excerpt are cut:
- * the card is for scanning, and both are on the single.
+ * What stays is the picture, the kind label, the h2 title link and the
+ * course and time line. The date, the excerpt and "Read more" are cut: the
+ * card is for scanning, both texts are on the single, and the stylesheet
+ * stretches the title link over the card, so the card has one link.
  *
  * @param string               $html     Rendered stream card.
  * @param array<string, mixed> $block    Parsed block.
@@ -259,6 +260,7 @@ function stream_card( string $html, array $block, $instance ): string {
 		array( 'div', 'pk-badge' ),
 		array( 'p', 'pk-stream-date' ),
 		array( 'p', 'pk-excerpt' ),
+		array( 'div', 'pk-meta' ),
 	);
 	foreach ( $cuts as $cut ) {
 		$html = cut_elements( $html, $cut[0], $cut[1] );
