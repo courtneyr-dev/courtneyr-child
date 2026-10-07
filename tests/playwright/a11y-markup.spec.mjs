@@ -1913,9 +1913,17 @@ for ( const [ kind, path, labels ] of [ [ 'eat', EAT_SINGLE, [ 'Dish', 'Restaura
 		expect( shape.words.join( ' ' ), 'no invented slogan' ).not.toMatch( /good food|good company|support local|sample content/i );
 
 		// Keyboard: the kind link and the OpenStreetMap link show a 3px outline that nothing clips.
+		// Reach each one with Tab, as a keyboard user does. The ring is a :focus-visible rule
+		// (cr-eat-drink.css), and element.focus() right after setup closed the consent dialog
+		// with a mouse click doesn't match :focus-visible, so it would read no ring.
 		for ( const selector of [ '.cr-order__kind-link', '.cr-map-slip__link' ] ) {
 			const target = mat.locator( selector );
-			await target.focus();
+			let presses = 0;
+			while ( presses < 100 && ! await target.evaluate( ( el ) => el === document.activeElement ) ) {
+				await page.keyboard.press( 'Tab' );
+				presses++;
+			}
+			expect( await target.evaluate( ( el ) => el === document.activeElement ), `Tab reaches ${ selector }` ).toBe( true );
 			const ring = await target.evaluate( ( el ) => {
 				const cs = getComputedStyle( el );
 				let clipped = false;
@@ -2098,6 +2106,15 @@ for ( const path of KIND_ARCHIVE_HEADERS ) {
 			const box = ( node ) => node.getBoundingClientRect();
 			const cs = getComputedStyle( glyph );
 			const pad = parseFloat( getComputedStyle( el ).paddingTop );
+			// Anything with a box in the band between the header's top and the
+			// title's top, other than the badge and its zero-height holder.
+			const inBand = [ ...el.querySelectorAll( '*' ) ]
+				.filter( ( n ) => n !== holder && ! glyph.contains( n ) && ! title.contains( n ) )
+				.filter( ( n ) => {
+					const r = box( n );
+					return r.width > 0 && r.height > 0 && r.top < box( title ).top - 1 && r.bottom > box( el ).top + 1;
+				} )
+				.map( ( n ) => n.tagName.toLowerCase() + ( n.className && 'string' === typeof n.className ? '.' + n.className.trim().split( /\s+/ ).join( '.' ) : '' ) );
 			const probe = ( value ) => {
 				const i = document.body.appendChild( document.createElement( 'i' ) );
 				i.style.color = value;
@@ -2111,8 +2128,11 @@ for ( const path of KIND_ARCHIVE_HEADERS ) {
 				holderHeight: box( holder ).height,
 				bandAboveTitle: box( title ).top - box( el ).top,
 				pad,
+				inBand,
+				wide: matchMedia( '(min-width: 48rem)' ).matches,
 				glyph: { top: box( glyph ).top, left: box( glyph ).left, right: box( glyph ).right, bottom: box( glyph ).bottom, width: box( glyph ).width },
 				tile: { top: box( tile ).top, left: box( tile ).left },
+				titleBox: { top: box( title ).top, left: box( title ).left },
 				hidden: glyph.getAttribute( 'aria-hidden' ),
 				named: [ glyph.getAttribute( 'aria-label' ), glyph.getAttribute( 'title' ), glyph.getAttribute( 'role' ), svg ? svg.querySelector( 'title' ) : null ].filter( Boolean ).length,
 				linked: null !== glyph.closest( 'a' ) || glyph.querySelectorAll( 'a' ).length > 0,
@@ -2128,15 +2148,25 @@ for ( const path of KIND_ARCHIVE_HEADERS ) {
 		expect( o.kind, 'the shared kind-archive identity' ).toBe( true );
 
 		// 2. No empty wrapper and no reserved row: the holder has only the badge and no height,
-		//    and the band above the title is the room the badge's overhang stands in.
+		//    the band above the title is the header's own padding, and the badge is the only
+		//    thing in it. The padding differs by width (1.5rem wide, 3.5rem on a phone, where
+		//    the badge sits whole above the title: PKIW #224), so the test reads it, not a number.
 		expect( o.children, 'the holder holds the badge and nothing else' ).toBe( 1 );
 		expect( o.holderHeight, 'the holder takes no row' ).toBe( 0 );
-		expect( o.bandAboveTitle, 'nothing but the badge above the title' ).toBeLessThanOrEqual( o.glyph.width );
-		expect( o.glyph.bottom, 'the badge reaches the title' ).toBeGreaterThan( o.tile.top );
+		expect( o.bandAboveTitle, 'the band above the title is the header\'s padding, not a reserved row' ).toBeCloseTo( o.pad, 0 );
+		expect( o.inBand, 'nothing but the badge above the title' ).toEqual( [] );
 
-		// The badge anchors the title's upper-left corner.
+		// The badge anchors the title's upper-left corner: wide, it overlaps the first letter's
+		// corner; on a phone it starts inside the measure and ends above the title, as the
+		// check-in archive's "badge clears the title on a phone" test asks.
 		expect( o.glyph.top, 'the badge starts above the first letter' ).toBeLessThan( o.tile.top );
-		expect( o.glyph.left, 'and at its left' ).toBeLessThanOrEqual( o.tile.left );
+		if ( o.wide ) {
+			expect( o.glyph.bottom, 'the badge reaches the title' ).toBeGreaterThan( o.tile.top );
+			expect( o.glyph.left, 'and at its left' ).toBeLessThanOrEqual( o.tile.left );
+		} else {
+			expect( o.glyph.bottom, 'on a phone the badge ends above the title' ).toBeLessThanOrEqual( o.titleBox.top + 1 );
+			expect( o.glyph.left, 'and starts inside the measure' ).toBeGreaterThanOrEqual( o.titleBox.left );
+		}
 		expect( o.glyph.left, 'inside the viewport' ).toBeGreaterThanOrEqual( 0 );
 		expect( o.radius ).toBe( '50%' );
 
