@@ -90,18 +90,6 @@ function register_card_style(): void {
 add_action( 'init', __NAMESPACE__ . '\\register_card_style' );
 
 /**
- * The Site Editor previews the recipe archive BINDER_SIZE recipes to a page.
- *
- * @param int    $per_page Posts per page. Zero keeps the editor's own size.
- * @param string $kind     Kind slug.
- * @return int
- */
-function preview_page_size( $per_page, $kind ): int {
-	return 'recipe' === $kind ? BINDER_SIZE : (int) $per_page;
-}
-add_filter( 'pkiw_kind_archive_preview_per_page', __NAMESPACE__ . '\\preview_page_size', 10, 2 );
-
-/**
  * The WP Recipe Maker template this theme ships: wprm-templates/recipe/cr-binder/.
  */
 const TEMPLATE = 'cr-binder';
@@ -132,20 +120,21 @@ function is_recipe_single(): bool {
 }
 
 /**
- * Fill the binder: the recipe archive pages by BINDER_SIZE.
+ * Fill the binder: the recipe archive pages by BINDER_SIZE, and the Site
+ * Editor previews it at that size (inc/theme-supports.php applies both).
  *
- * Runs after the theme's card-grid rule (5 per archive page), which would
- * leave a fifth card with no place on the spread.
+ * The card-grid size of 5 would leave a fifth card with no place on the
+ * spread.
  *
- * @param \WP_Query $query The query about to run.
- * @return void
+ * @param array<string, int> $sizes Kind slug => posts per page.
+ * @return array<string, int>
  */
-function binder_page_size( $query ): void {
-	if ( ! is_admin() && $query->is_main_query() && $query->is_tax( 'kind', 'recipe' ) ) {
-		$query->set( 'posts_per_page', BINDER_SIZE );
-	}
+function page_size( $sizes ): array {
+	$sizes           = is_array( $sizes ) ? $sizes : array();
+	$sizes['recipe'] = BINDER_SIZE;
+	return $sizes;
 }
-add_action( 'pre_get_posts', __NAMESPACE__ . '\\binder_page_size', 11 );
+add_filter( 'courtneyr_child_kind_archive_page_sizes', __NAMESPACE__ . '\\page_size' );
 
 /**
  * Load the recipe paint where a recipe can appear.

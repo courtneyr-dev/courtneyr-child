@@ -60,20 +60,21 @@ const FIRST_ROW = 4;
 const RACK_SIZE = 12;
 
 /**
- * Fill the rack: the comics archive pages by RACK_SIZE.
+ * Fill the rack: the comics archive pages by RACK_SIZE, and the Site
+ * Editor previews it at that size (inc/theme-supports.php applies both).
  *
- * Runs after the theme's card-grid rule (5 per archive page), which would
- * leave seven of twelve rack spaces empty on every full page.
+ * The card-grid size of 5 would leave seven of twelve rack spaces empty on
+ * every full page.
  *
- * @param \WP_Query $query The query about to run.
- * @return void
+ * @param array<string, int> $sizes Kind slug => posts per page.
+ * @return array<string, int>
  */
-function rack_page_size( $query ): void {
-	if ( ! is_admin() && $query->is_main_query() && $query->is_tax( 'kind', 'comics' ) ) {
-		$query->set( 'posts_per_page', RACK_SIZE );
-	}
+function page_size( $sizes ): array {
+	$sizes           = is_array( $sizes ) ? $sizes : array();
+	$sizes['comics'] = RACK_SIZE;
+	return $sizes;
 }
-add_action( 'pre_get_posts', __NAMESPACE__ . '\\rack_page_size', 11 );
+add_filter( 'courtneyr_child_kind_archive_page_sizes', __NAMESPACE__ . '\\page_size' );
 
 /**
  * Block style the rack's pattern gives its stream card.
@@ -101,18 +102,6 @@ function register_card_style(): void {
 	}
 }
 add_action( 'init', __NAMESPACE__ . '\\register_card_style' );
-
-/**
- * The Site Editor previews the comics archive RACK_SIZE comics to a page.
- *
- * @param int    $per_page Posts per page. Zero keeps the editor's own size.
- * @param string $kind     Kind slug.
- * @return int
- */
-function preview_page_size( $per_page, $kind ): int {
-	return 'comics' === $kind ? RACK_SIZE : (int) $per_page;
-}
-add_filter( 'pkiw_kind_archive_preview_per_page', __NAMESPACE__ . '\\preview_page_size', 10, 2 );
 
 /**
  * The comic-card block in a post's content.
