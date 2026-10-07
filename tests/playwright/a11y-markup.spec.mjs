@@ -2494,14 +2494,18 @@ test( 'a public check-in on the Stream shows a still map thumbnail and one stamp
 // left out. Fails on dev at 0.7.97: inc/stream-checkin.php:361 inserts the
 // title after the first </p> past the label, and Post Kinds prints the
 // label as a <span>, so the title lands after the map and the venue h2.
-// The map thumbnail, when a card has one, sits between the label and the
-// title: the 0.7.97 CSS orders .cr-passport__thumb with the label (order -2)
-// and the title after it (order -1), so DOM, visual and focus order agree.
-test( 'every check-in card on the Stream puts its title right after the kind label and any map thumbnail (PKIW #224)', async ( { page } ) => {
+// The map thumbnail, when a card has one, and then the date strip sit
+// between the label and the title, as approved mockup 13 draws them (PKIW
+// #224 round 2; date before title since the 2026-10-07 fidelity review), so
+// DOM, visual and focus order agree.
+test( 'every check-in card on the Stream puts its title right after the kind label, any map thumbnail and the date (PKIW #224)', async ( { page } ) => {
 	await page.goto( CHECKIN_STREAM, { waitUntil: 'load' } );
 	const cards = await page.locator( 'article.cr-passport' ).evaluateAll( ( els ) => els.filter( ( el ) => el.querySelector( '.cr-passport__title' ) ).map( ( el ) => {
 		let next = el.querySelector( '.pk-kindlabel' )?.nextElementSibling;
 		if ( next?.classList.contains( 'cr-passport__thumb' ) ) {
+			next = next.nextElementSibling;
+		}
+		if ( next?.classList.contains( 'pk-meta' ) || next?.classList.contains( 'pk-stream-date' ) ) {
 			next = next.nextElementSibling;
 		}
 		return {

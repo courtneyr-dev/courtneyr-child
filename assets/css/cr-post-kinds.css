@@ -3310,11 +3310,14 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 	color: #241c4a;
 }
 .cr-stream-page .cr-passport .pk-body { display: flex; flex-direction: column; }
-/* Visual order: map, eyebrow, headline, date, venue block, photo, note.
-   DOM order is untouched; only the map moves ahead of the text. */
+/* Visual order follows the DOM: eyebrow, map thumbnail, date, headline,
+   venue block, photo, note (PKIW issue 224, mockup 13); passport_card()
+   moves the date ahead of the headline in the markup. A map embed, when one
+   stays, still moves ahead of the text. */
 .cr-stream-page .cr-passport .pk-kindlabel { order: -2; }
-.cr-stream-page .cr-passport .cr-passport__title { order: -1; }
-.cr-stream-page .cr-passport .pk-meta { order: 0; }
+.cr-stream-page .cr-passport .pk-meta,
+.cr-stream-page .cr-passport .pk-body > .pk-stream-date { order: -1; }
+.cr-stream-page .cr-passport .cr-passport__title { order: 0; }
 .cr-stream-page .cr-passport .pk-caption { order: 1; }
 .cr-stream-page .cr-passport .pk-embed--photo { order: 2; }
 .cr-stream-page .cr-passport .pk-note { order: 3; }
@@ -3559,8 +3562,9 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-revi
 }
 .cr-stream-page .cr-passport .pk-note p { margin: 0; }
 .cr-stream-page .cr-passport .pk-note .dashicons { display: none; }
-.cr-stream-page .cr-passport .pk-meta { padding: 0 0 0.45rem; }
-.cr-stream-page .cr-passport .pk-meta:empty { display: none; }
+.cr-stream-page .cr-passport .pk-meta,
+.cr-stream-page .cr-passport .pk-body > .pk-stream-date { margin: 0; padding: 0 0 0.45rem; }
+.cr-stream-page .cr-passport .pk-meta:not(:has(.dt-published)) { display: none; }
 .cr-stream-page .cr-passport .pk-badge { display: none; }
 
 /* Stamp footer: its own zone under a perforation, guilloché-light

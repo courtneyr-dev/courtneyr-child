@@ -99,6 +99,26 @@ function place_facts( array $attrs, \WP_Post $post ): array {
 }
 
 /**
+ * The check-in's moment, read the way the plugin's card reads it.
+ *
+ * The block editor's DateTimePicker saves checkinAt with no offset: a
+ * wall-clock time in the site timezone. strtotime() reads that as UTC, so on
+ * an America/New_York site the card printed 6:30 pm while the journal footer
+ * printed 2:30 pm, and a check-in at 2 am stamped the previous day.
+ * PKIW\card_datetime() is the card's own parser. The post date stands in when
+ * checkinAt is empty or isn't a date and time.
+ *
+ * @param array<string, mixed> $attrs Block attributes.
+ * @param \WP_Post             $post  Post being rendered.
+ * @return int Unix timestamp.
+ */
+function checkin_timestamp( array $attrs, \WP_Post $post ): int {
+	$raw  = trim( (string) ( $attrs['checkinAt'] ?? '' ) );
+	$date = ( '' !== $raw && function_exists( '\\PKIW\\card_datetime' ) ) ? \PKIW\card_datetime( $raw ) : null;
+	return $date instanceof \DateTimeImmutable ? $date->getTimestamp() : (int) get_post_time( 'U', true, $post );
+}
+
+/**
  * The facts a stamp is allowed to print for this check-in.
  *
  * The place comes from place_facts(). Coordinates, street address and venue
@@ -120,13 +140,7 @@ function stamp_facts( array $attrs, \WP_Post $post ): array {
 	// stamp's shape, ink and tilt say nothing about a stored place.
 	$has_place = '' !== $place || '' !== $country;
 
-	$ts = 0;
-	if ( ! empty( $attrs['checkinAt'] ) ) {
-		$ts = (int) strtotime( (string) $attrs['checkinAt'] );
-	}
-	if ( $ts <= 0 ) {
-		$ts = (int) get_post_time( 'U', true, $post );
-	}
+	$ts = checkin_timestamp( $attrs, $post );
 
 	return array(
 		'place'   => $place,
@@ -359,32 +373,35 @@ function passport_card( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
-	// The plugin's own stream helpers: title anchor → permalink, and the
-	// post date under the title when the card carries no date of its own.
+	// The plugin's own stream helper: title anchor → permalink.
 	if ( function_exists( '\\PKIW\\link_title_to_post' ) ) {
 		$card = \PKIW\link_title_to_post( $card, $post );
 	}
-	if ( false === strpos( $card, 'dt-published' ) && function_exists( '\\PKIW\\inject_post_date_into_card' ) ) {
-		$card = \PKIW\inject_post_date_into_card( $card, $post );
+
+	// The date strip leads the entry: after the eyebrow, ahead of the
+	// headline, in the markup as on screen (PKIW issue 224, mockup 13). It is
+	// the card's own .pk-meta when the card has a check-in time, and the post
+	// date when it has none.
+	$at = after_kind_label( $card );
+	if ( false !== $at ) {
+		$date_html = '';
+		if ( preg_match( '#<div class="pk-meta">\s*<time class="dt-published".*?</time>\s*</div>#s', $card, $m, PREG_OFFSET_CAPTURE, $at ) ) {
+			$date_html = $m[0][0];
+			$card      = substr( $card, 0, (int) $m[0][1] ) . substr( $card, (int) $m[0][1] + strlen( $date_html ) );
+		} elseif ( false === strpos( $card, 'dt-published' ) ) {
+			$date_html = '<p class="pk-sub pk-stream-date"><time class="dt-published" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time></p>';
+		}
+		$card = substr( $card, 0, $at ) . $date_html . substr( $card, $at );
+		$at  += strlen( $date_html );
 	}
 
-	// The post title is the entry's headline, directly under the eyebrow; the
-	// h2 stays the venue so the plugin's p-name / h-card structure is untouched.
+	// The post title is the entry's headline, under the date; the h2 stays
+	// the venue so the plugin's p-name / h-card structure is untouched.
 	$title = trim( get_the_title( $post ) );
 	$venue = trim( (string) ( $checkin['attrs']['venueName'] ?? '' ) );
-	$at    = after_kind_label( $card );
 	if ( false !== $at && '' !== $title && 0 !== strcasecmp( $title, $venue ) ) {
 		$headline = '<div class="cr-passport__title"><a href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( $title ) . '</a></div>';
 		$card     = substr( $card, 0, $at ) . $headline . substr( $card, $at );
-		$at      += strlen( $headline );
-	}
-
-	// A private check-in has no title for the plugin helper to hang a date
-	// on, so the date goes under the eyebrow (and the headline) instead, in
-	// the order the CSS shows them.
-	if ( false !== $at && false === strpos( $card, 'dt-published' ) ) {
-		$date_html = '<p class="pk-sub pk-stream-date"><time class="dt-published" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time></p>';
-		$card      = substr( $card, 0, $at ) . $date_html . substr( $card, $at );
 	}
 
 	$close = strrpos( $card, '</article>' );

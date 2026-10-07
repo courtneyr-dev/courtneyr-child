@@ -37,3 +37,25 @@ function enqueue_styles(): void {
 	);
 }
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_styles' );
+
+/**
+ * Keep the term name as the check-in archive's title when the URL narrows it.
+ *
+ * Core's get_the_archive_title() tests is_month() before is_tax(), so
+ * /kind/checkin/?monthnum=7 titled itself "July 2026" and the cut-paper tiles
+ * spelled the month. The month only filters the list; the page is still the
+ * Check-in archive. The template's query-title hides the prefix, so the term
+ * name is returned bare.
+ *
+ * @param string $title          Archive title.
+ * @param string $original_title Archive title without its prefix.
+ * @return string
+ */
+function term_archive_title( string $title, string $original_title = '' ): string {
+	if ( ! \is_tax( 'kind', 'checkin' ) ) {
+		return $title;
+	}
+	$name = (string) \single_term_title( '', false );
+	return ( '' === $name || $name === $original_title ) ? $title : $name;
+}
+add_filter( 'get_the_archive_title', __NAMESPACE__ . '\\term_archive_title', 10, 2 );
