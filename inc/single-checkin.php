@@ -33,6 +33,7 @@ namespace Courtneyr\Child\SingleCheckin;
 
 use function Courtneyr\Child\Stamps\pick;
 use function Courtneyr\Child\Stamps\seed;
+use function Courtneyr\Child\StreamCheckin\checkin_timestamp;
 use function Courtneyr\Child\StreamCheckin\find_checkin_block;
 use function Courtneyr\Child\StreamCheckin\render_stamps;
 
@@ -257,8 +258,7 @@ function journal_page( string $html, array $block ): string {
 		$after  .= '<div class="cr-journal__margin cr-journal__margin--3"><p class="cr-hand cr-hand--underline">' . esc_html( $copy[ '' !== $note_html ? 2 : 1 ] ) . '</p></div>';
 	}
 
-	$ts = ! empty( $attrs['checkinAt'] ) ? (int) strtotime( (string) $attrs['checkinAt'] ) : 0;
-	$ts = $ts > 0 ? $ts : (int) get_post_time( 'U', true, $post );
+	$ts = checkin_timestamp( $attrs, $post );
 
 	$after .= '<footer class="cr-journal__meta">';
 	$after .= '<p class="cr-journal__meta-item cr-journal__meta-item--time"><span class="cr-journal__meta-icon"></span><span class="cr-journal__meta-text"><time datetime="' . esc_attr( (string) wp_date( 'c', $ts ) ) . '">' . esc_html( (string) wp_date( get_option( 'date_format' ), $ts ) ) . '<br>' . esc_html( (string) wp_date( get_option( 'time_format' ) . ' (T)', $ts ) ) . '</time></span></p>';
