@@ -26,6 +26,29 @@ function shelf_kinds(): array {
 }
 
 /**
+ * Cases per shelf page: the 5 the card-grid rule served both shelves
+ * before they had a size of their own. The shelf patterns' Query perPage
+ * of 12 inherits the archive query, so it never set the page size.
+ */
+const SHELF_SIZE = 5;
+
+/**
+ * Page each shelf by SHELF_SIZE, and the Site Editor previews it at that
+ * size (inc/theme-supports.php applies both).
+ *
+ * @param array<string, int> $sizes Kind slug => posts per page.
+ * @return array<string, int>
+ */
+function page_size( $sizes ): array {
+	$sizes = is_array( $sizes ) ? $sizes : array();
+	foreach ( shelf_kinds() as $kind ) {
+		$sizes[ $kind ] = SHELF_SIZE;
+	}
+	return $sizes;
+}
+add_filter( 'courtneyr_child_kind_archive_page_sizes', __NAMESPACE__ . '\\page_size' );
+
+/**
  * Block style the shelf patterns give their stream card.
  *
  * The style travels with the block, so the Site Editor dresses the case
