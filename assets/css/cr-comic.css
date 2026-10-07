@@ -418,8 +418,10 @@
 
 /* Status sticker: a round label stuck on the outside of the plastic, in the
    bag's upper right with plastic showing all round it, tilted, and
-   hand-lettered on two lines. Its width is 29% of the bag's and never
-   under 4rem, the smallest circle the lettering fits. */
+   hand-lettered on two lines at the text floor. 5.75rem is the smallest
+   circle that holds "Currently reading" in Rock Salt at 12px with its ink
+   inside the border, forced colours' 2px border included: 40% of the
+   widest bag and most of a phone's. */
 .cr-comic-rack .cr-comic__sticker {
 	position: absolute;
 	z-index: 1;
@@ -428,7 +430,7 @@
 	display: grid;
 	place-items: center;
 	box-sizing: border-box;
-	width: max(4rem, calc(var(--rack-comic) * 0.29));
+	width: calc(var(--cr-space-4xl) - var(--cr-space-2xs));
 	aspect-ratio: 1;
 	height: auto;
 	margin: 0;
@@ -438,7 +440,7 @@
 	background: var(--cr-selective-yellow);
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-display);
-	font-size: 0.5625rem;
+	font-size: var(--cr-text-floor);
 	font-weight: var(--cr-weight-regular);
 	line-height: 1.35;
 	text-align: center;
