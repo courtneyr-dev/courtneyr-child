@@ -8321,12 +8321,26 @@ figure.wp-block-image.is-style-overlay-caption figcaption {
 
 /* R-17: keep focused and anchored targets clear of the sticky header
    (WCAG 2.4.11), and give standalone card links a 24px target (2.5.8).
+   --cr-sticky-header-clearance is the header's height plus a gap; the
+   check-in archive map (cr-checkin-archive.css) sticks at the same offset.
+   The header is one row, 65px, except from 1025px (where the compact
+   header ends) to 1261px, where the controls wrap under the brand and it
+   is 101 to 103px tall (measured on dev, 0.7.101). The band runs to 1279px
+   so a 17px classic scrollbar is covered too.
    The bottom padding clears Complianz's fixed Manage consent button
    (50px tall at bottom: 0, its own --cmplz-manage-consent-height), which
    covered focused links at 320 by 225 (PKIW 224). */
 html {
-	scroll-padding-top: calc(4rem + var(--wp--preset--spacing--small, 1rem));
-	scroll-padding-bottom: calc(var(--cmplz-manage-consent-height, 50px) + var(--wp--preset--spacing--small, 1rem));
+	--cr-sticky-header-clearance: calc(4rem + var(--wp--preset--spacing--md, 1rem));
+	scroll-padding-top: var(--cr-sticky-header-clearance);
+	scroll-padding-bottom: calc(var(--cmplz-manage-consent-height, 50px) + var(--wp--preset--spacing--md, 1rem));
+}
+
+@media (min-width: 1025px) and (max-width: 1279px) {
+
+	html {
+		--cr-sticky-header-clearance: calc(6.5rem + var(--wp--preset--spacing--md, 1rem));
+	}
 }
 .pk-card .pk-link,
 .pk-card .pk-map-link {

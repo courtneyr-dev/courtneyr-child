@@ -163,18 +163,24 @@
 	 * The map stays in view while the list scrolls. It sticks below the
 	 * sticky header (admin bar included) and is no taller than the space
 	 * under it, so Leaflet fits the pins inside the first screen instead of
-	 * the middle of a list-tall column. The grid still stretches it, so a
-	 * short list keeps a map no taller than the list.
+	 * the middle of a list-tall column. The grid stretches the map to the
+	 * row, so beside a list taller than 30rem it matches the list, up to
+	 * the space under the header; a shorter list sits beside a 30rem map
+	 * (min-height), as in 0.7.97.
 	 *
-	 * Literal offsets, not components.css tokens: components.css loads
-	 * after first paint, and Leaflet measures the map when its deferred
-	 * script runs. This file blocks rendering, so the height is final then.
+	 * --cr-sticky-header-clearance comes from components.css (R-17), which
+	 * also sets scroll-padding-top from it, and grows while the header wraps
+	 * to two rows. Leaflet measures the map when its deferred script runs;
+	 * Perfmatters inlines components.css's html rules in its Used CSS block
+	 * at the top of <head>, so the token is set by then. Without it, the
+	 * one-row fallback gives 0.7.101's geometry.
 	 */
 	.cr-checkin-archive .pkiw-checkin-archive__map {
+		--cr-checkin-map-cap: calc(100svh - var(--wp-admin--admin-bar--height, 0px) - var(--cr-sticky-header-clearance, 5rem) - var(--wp--preset--spacing--md, 1rem));
 		position: sticky;
-		top: calc(var(--wp-admin--admin-bar--height, 0px) + 4rem + var(--wp--preset--spacing--small, 1rem));
-		min-height: min(30rem, calc(100svh - var(--wp-admin--admin-bar--height, 0px) - 4rem - 2 * var(--wp--preset--spacing--small, 1rem)));
-		max-height: calc(100svh - var(--wp-admin--admin-bar--height, 0px) - 4rem - 2 * var(--wp--preset--spacing--small, 1rem));
+		top: calc(var(--wp-admin--admin-bar--height, 0px) + var(--cr-sticky-header-clearance, 5rem));
+		min-height: min(30rem, var(--cr-checkin-map-cap));
+		max-height: var(--cr-checkin-map-cap);
 		border-block-end: 0;
 		border-inline-end: 2px dashed var(--cr-ink);
 	}
