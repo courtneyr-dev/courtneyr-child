@@ -1342,6 +1342,20 @@ test( 'the recipe archive is a binder of four recipe cards, one title link each,
 	// A card with no picture is text, not a broken image.
 	expect( await list.locator( 'img' ).evaluateAll( ( imgs ) => imgs.filter( ( i ) => i.complete && i.naturalWidth === 0 ).length ) ).toBe( 0 );
 
+	// The list fills the left leaf first, so items 0 and 2 are the top card of
+	// each leaf. Their pictures load first on every page; the rest stay lazy.
+	const priority = async () => list.locator( ':scope > li' ).evaluateAll( ( lis ) => lis.map( ( li, i ) => {
+		const img = li.querySelector( 'img' );
+		return img ? { i, loading: img.getAttribute( 'loading' ), fetchpriority: img.getAttribute( 'fetchpriority' ) } : null;
+	} ).filter( Boolean ) );
+	const checkPriority = ( pictures ) => {
+		for ( const p of pictures ) {
+			const top = 0 === p.i % 4 || 2 === p.i % 4;
+			expect( [ p.loading, p.fetchpriority ], `card ${ p.i } is ${ top ? '' : 'not ' }a top card` ).toEqual( top ? [ 'eager', 'high' ] : [ 'lazy', null ] );
+		}
+	};
+	checkPriority( await priority() );
+
 	const shape = await list.evaluate( ( ul ) => ( { cols: getComputedStyle( ul ).gridTemplateColumns.split( ' ' ).length, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth } ) );
 	expect( shape.cols, 'two binder pages side by side on a wide screen, one on a phone' ).toBe( page.viewportSize().width >= 1024 ? 2 : 1 );
 	expect( shape.overflow ).toBe( 0 );
@@ -1356,23 +1370,38 @@ test( 'the recipe archive is a binder of four recipe cards, one title link each,
 		expect( new URL( href ).pathname, 'a tab stays on the recipe archive' ).toBe( archivePath );
 	}
 
-	// A course tab filters the archive, and the pager keeps the filter.
-	const courseTab = tabs.locator( 'a[href*="pkiw_recipe_course="]' ).first();
-	const course = ( await courseTab.textContent() ).trim();
-	await courseTab.click();
+	// Later pages promote their own top cards.
+	// Count first: getAttribute() on a missing link waits out the test's timeout.
+	const next = page.locator( '.cr-archive--recipes .wp-block-query-pagination a.wp-block-query-pagination-next' );
+	const nextPage = ( await next.count() ) ? await next.first().getAttribute( 'href' ) : null;
+	if ( nextPage ) {
+		await page.goto( nextPage, { waitUntil: 'load' } );
+		checkPriority( await priority() );
+		await page.goto( RECIPE_ARCHIVE, { waitUntil: 'load' } );
+	}
+
+	// A course tab filters the archive, and the pager keeps the filter. Each
+	// card names one course: the tab's, even for a recipe filed under two.
+	const courseTabs = await tabs.locator( 'a[href*="pkiw_recipe_course="]' ).evaluateAll( ( as ) => as.map( ( a ) => ( { href: a.href, name: a.textContent.trim() } ) ) );
+	expect( courseTabs.length ).toBeGreaterThan( 0 );
+	const course = courseTabs[ 0 ].name;
+	await tabs.locator( 'a[href*="pkiw_recipe_course="]' ).first().click();
 	await page.waitForLoadState( 'load' );
 	expect( new URL( page.url() ).searchParams.get( 'pkiw_recipe_course' ) ).toBeTruthy();
 	await expect( page.locator( '.cr-archive--recipes nav.cr-recipe-tabs a[aria-current]' ) ).toHaveText( course );
 	const filtered = page.locator( '.cr-archive--recipes ul.cr-recipe-binder__list article.cr-recipe-card' );
 	expect( await filtered.count() ).toBeGreaterThan( 0 );
-	for ( const text of await filtered.locator( '.pk-recipe-course' ).allTextContents() ) {
-		expect( text.split( ',' ).map( ( t ) => t.trim() ), `every card on the ${ course } tab is filed under it` ).toContain( course );
-	}
-	expect( await filtered.locator( '.pk-recipe-course' ).count(), 'and every card names its course' ).toBe( await filtered.count() );
 	const param = new URL( page.url() ).searchParams.get( 'pkiw_recipe_course' );
 	for ( const href of await page.locator( '.cr-archive--recipes .wp-block-query-pagination a' ).evaluateAll( ( as ) => as.map( ( a ) => a.href ) ) ) {
 		expect( new URL( href ).searchParams.get( 'pkiw_recipe_course' ), 'pager links keep the course' ).toBe( param );
 	}
+	for ( const tab of courseTabs ) {
+		await page.goto( tab.href, { waitUntil: 'load' } );
+		const cards = await filtered.count();
+		expect( cards, `the ${ tab.name } tab lists its recipes` ).toBeGreaterThan( 0 );
+		expect( await filtered.locator( '.pk-recipe-course' ).allTextContents(), `every card on the ${ tab.name } tab names that one course` ).toEqual( Array( cards ).fill( tab.name ) );
+	}
+	await page.goto( RECIPE_ARCHIVE, { waitUntil: 'load' } );
 
 	// The A-Z tab is the same archive in title order, and the pager keeps the order.
 	await page.locator( '.cr-archive--recipes nav.cr-recipe-tabs a[href*="orderby=title"]' ).click();
@@ -1448,6 +1477,110 @@ test( 'a recipe single is one binder page: title and picture once, the recipe pl
 	await expect( page.locator( 'main nav.cr-post-nav' ) ).toHaveCount( 1 );
 } );
 
+// PKIW #229: the recipe single's kind tape is sky blue with violet ink in light
+// mode and the dark tape with yellow ink in dark mode. The tape switches on the
+// same selectors as its ink (tokens.css), so the label holds 4.5:1 whatever
+// picks the mode: the OS scheme when there's no JavaScript to set data-theme,
+// or a choice the theme toggle stored. The sheet stays ivory in dark mode, so
+// a focused link printed on it takes the sheet's ink as its halo, 3:1 or more
+// against the sheet.
+test( 'the recipe single\'s kind tape and focus halos hold their contrast with and without JavaScript', async ( { browser, page } ) => {
+	const ratio = ( a, b ) => {
+		const lum = ( c ) => c.match( /\d+(\.\d+)?/g ).slice( 0, 3 ).map( ( v ) => v / 255 ).map( ( v ) => ( v <= 0.03928 ? v / 12.92 : ( ( v + 0.055 ) / 1.055 ) ** 2.4 ) ).reduce( ( sum, v, i ) => sum + v * [ 0.2126, 0.7152, 0.0722 ][ i ], 0 );
+		const [ hi, lo ] = [ lum( a ), lum( b ) ].sort( ( x, y ) => y - x );
+		return ( hi + 0.05 ) / ( lo + 0.05 );
+	};
+	const tape = ( p ) => p.locator( 'main .single-post__header .single-post__kind.cr-chip' ).evaluate( ( chip ) => {
+		const token = ( name ) => {
+			const probe = document.createElement( 'span' );
+			probe.style.color = `var(${ name })`;
+			chip.append( probe );
+			const value = getComputedStyle( probe ).color;
+			probe.remove();
+			return value;
+		};
+		const theme = document.documentElement.getAttribute( 'data-theme' );
+		const osDark = matchMedia( '(prefers-color-scheme: dark)' ).matches;
+		return {
+			theme,
+			osDark,
+			dark: 'dark' === theme || ( ( null === theme || 'system' === theme ) && osDark ),
+			background: getComputedStyle( chip ).backgroundColor,
+			ink: getComputedStyle( chip.querySelector( 'a' ) ).color,
+			sky: token( '--cr-sky-blue' ),
+			tape: token( '--cr-tape' ),
+			tapeInk: token( '--cr-tape-ink' ),
+		};
+	} );
+	const holds = ( t, mode ) => {
+		expect( t.background, `${ mode }: the tape is ${ t.dark ? 'the dark tape' : 'sky blue' }` ).toBe( t.dark ? t.tape : t.sky );
+		expect( t.ink, `${ mode }: the label takes the tape's ink` ).toBe( t.tapeInk );
+		expect( ratio( t.background, t.ink ), `${ mode }: ${ t.ink } on ${ t.background }` ).toBeGreaterThanOrEqual( 4.5 );
+	};
+
+	// No JavaScript: no data-theme, so the OS scheme decides.
+	const context = await browser.newContext( { javaScriptEnabled: false } );
+	const off = await context.newPage();
+	const response = await off.goto( RECIPE_SINGLE, { waitUntil: 'load' } );
+	if ( 404 === response.status() ) {
+		await context.close();
+		test.skip( true, 'no recipe fixture on this site' );
+	}
+	const plain = await tape( off );
+	expect( plain.theme, 'without JavaScript nothing sets data-theme' ).toBeNull();
+	holds( plain, `no JavaScript, OS ${ plain.osDark ? 'dark' : 'light' }` );
+
+	// Reach the kind label and the print link with Tab: their halos are
+	// :focus-visible rules. Without JavaScript there's no consent dialog.
+	const targets = { 'the kind label': 'main .single-post__header .single-post__kind a', 'the print link': 'main .single-post__header a.wprm-recipe-print' };
+	const halos = {};
+	for ( let presses = 0; presses < 120 && Object.keys( halos ).length < 2; presses++ ) {
+		await off.keyboard.press( 'Tab' );
+		const hit = await off.evaluate( ( selectors ) => {
+			const el = document.activeElement;
+			const label = el && Object.keys( selectors ).find( ( key ) => el.matches( selectors[ key ] ) );
+			if ( ! label ) {
+				return null;
+			}
+			document.getAnimations().filter( ( a ) => a instanceof CSSTransition ).forEach( ( a ) => a.finish() );
+			const token = ( name ) => {
+				const probe = document.createElement( 'span' );
+				probe.style.color = `var(${ name })`;
+				el.parentElement.append( probe );
+				const value = getComputedStyle( probe ).color;
+				probe.remove();
+				return value;
+			};
+			return { label, visible: el.matches( ':focus-visible' ), shadow: getComputedStyle( el ).boxShadow, halo: token( '--cr-focus-halo' ), paper: token( '--page-paper' ) };
+		}, targets );
+		if ( hit ) {
+			halos[ hit.label ] = hit;
+		}
+	}
+	for ( const label of Object.keys( targets ) ) {
+		const hit = halos[ label ];
+		expect( hit, `Tab reaches ${ label }` ).toBeTruthy();
+		expect( hit.visible, `${ label } shows its focus ring` ).toBe( true );
+		const halo = ( hit.shadow.match( /rgba?\([^)]*\)/ ) || [ '' ] )[ 0 ];
+		expect( halo, `${ label }'s halo is --cr-focus-halo` ).toBe( hit.halo );
+		expect( ratio( halo, hit.paper ), `${ label }'s halo ${ halo } against the sheet ${ hit.paper }` ).toBeGreaterThanOrEqual( 3 );
+	}
+	await context.close();
+
+	// JavaScript on, with the opposite of the OS scheme stored by the toggle.
+	const stored = plain.osDark ? 'light' : 'dark';
+	await page.addInitScript( ( value ) => {
+		try {
+			localStorage.setItem( 'courtneyr-theme', value );
+		} catch ( e ) {}
+	}, stored );
+	await page.goto( RECIPE_SINGLE, { waitUntil: 'load' } );
+	await page.evaluate( () => document.getAnimations().filter( ( a ) => a instanceof CSSTransition ).forEach( ( a ) => a.finish() ) );
+	const chosen = await tape( page );
+	expect( chosen.theme ).toBe( stored );
+	holds( chosen, `${ stored } chosen over OS ${ plain.osDark ? 'dark' : 'light' }` );
+} );
+
 test( 'a recipe post with no recipe card keeps the default single', async ( { page } ) => {
 	const response = await page.goto( RECIPE_PLAIN_SINGLE, { waitUntil: 'load' } );
 	test.skip( response.status() === 404, 'no recipe fixture on this site' );
@@ -1468,10 +1601,19 @@ test( 'the Stream shows a recipe as a 3x5 card: picture, label, title link, cour
 	const cards = items.locator( 'article.pk-card.cr-recipe-stream' );
 	expect( await cards.count(), 'every recipe on the Stream is a recipe card' ).toBe( await items.count() );
 	for ( const card of await cards.all() ) {
-		expect( await card.locator( '.pk-stream-date, .pk-excerpt, .pk-badge' ).count(), 'no date, excerpt or badge on the card' ).toBe( 0 );
+		expect( await card.locator( '.pk-stream-date, .pk-excerpt, .pk-badge, .pk-meta' ).count(), 'no date, excerpt, badge or Read more on the card' ).toBe( 0 );
 		await expect( card.locator( '.pk-kindlabel' ) ).toHaveText( /\S/ );
 		await expect( card.locator( 'h2.pk-title a' ) ).toHaveCount( 1 );
+		expect( await card.evaluate( ( el ) => [ ...el.querySelectorAll( 'a' ) ].filter( ( a ) => a.getClientRects().length > 0 ).length ), 'a recipe card is one link' ).toBe( 1 );
 		expect( await card.evaluate( ( el ) => getComputedStyle( el.querySelector( '.pk-title' ) ).transform ), 'the title is upright' ).toBe( 'none' );
+		const covered = await card.evaluate( ( el ) => {
+			el.scrollIntoView( { block: 'center', behavior: 'instant' } );
+			const r = el.getBoundingClientRect();
+			const a = el.querySelector( '.pk-title a' );
+			const hit = window.crHitAt( r.right - 12, r.bottom - 12 );
+			return hit === a || a.contains( hit );
+		} );
+		expect( covered, 'the title link covers the whole card' ).toBe( true );
 	}
 	// A recipe with a picture and stored facts: picture beside the text, course and time as text.
 	const full = cards.filter( { has: page.locator( '.pk-recipe-facts' ) } ).filter( { has: page.locator( '.pk-media img' ) } ).first();
@@ -1486,6 +1628,46 @@ test( 'the Stream shows a recipe as a 3x5 card: picture, label, title link, cour
 	} );
 	expect( beside.imgRight, 'the picture stands left of the title' ).toBeLessThanOrEqual( beside.titleLeft );
 	expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBe( 0 );
+} );
+
+// PKIW #229: a Stream card names one course, the recipe's first. The plugin
+// sorts a recipe's courses by name, case-insensitively, and first_course()
+// (inc/recipe.php) keeps the first, so Corn Chowder, filed under Main Course
+// and Soup, reads "Main Course". The courses come from the single's Recipe
+// structured data. The test pages through the Stream until it has checked a
+// recipe filed under two courses.
+test( 'a recipe card on the Stream names one course, the recipe\'s first by name', async ( { page } ) => {
+	const byName = ( a, b ) => {
+		const [ x, y ] = [ a.toLowerCase(), b.toLowerCase() ];
+		if ( x === y ) {
+			return 0;
+		}
+		return x < y ? -1 : 1;
+	};
+	let url = RECIPE_STREAM;
+	let checked = 0;
+	let twoCourse = 0;
+	for ( let pages = 0; url && pages < 6 && 0 === twoCourse; pages++ ) {
+		await page.goto( url, { waitUntil: 'load' } );
+		const cards = page.locator( 'main li.kind-recipe article.cr-recipe-stream' ).filter( { has: page.locator( '.pk-recipe-course' ) } );
+		for ( const card of await cards.all() ) {
+			const shown = ( await card.locator( '.pk-recipe-course' ).textContent() ).trim();
+			const href = await card.locator( 'h2.pk-title a' ).evaluate( ( a ) => a.href );
+			const html = await ( await page.request.get( href ) ).text();
+			const category = html.match( /"recipeCategory":(\[[^\]]*\]|"[^"]*")/ );
+			const courses = category ? [].concat( JSON.parse( category[ 1 ] ) ).sort( byName ) : [];
+			expect( courses.length, `${ href } lists its courses in its structured data` ).toBeGreaterThan( 0 );
+			expect( shown, `${ href } names one course, its first of ${ courses.join( ', ' ) }` ).toBe( courses[ 0 ] );
+			checked++;
+			if ( courses.length > 1 ) {
+				twoCourse++;
+			}
+		}
+		const next = page.locator( 'main .wp-block-query-pagination a.wp-block-query-pagination-next' );
+		url = ( await next.count() ) ? await next.first().evaluate( ( a ) => a.href ) : null;
+	}
+	test.skip( 0 === checked, 'no recipe card with a course on this Stream' );
+	test.skip( 0 === twoCourse, 'no recipe filed under two courses on the first six Stream pages' );
 } );
 
 // Paper has no use for site navigation. In print the header, the footer, the

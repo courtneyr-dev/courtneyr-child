@@ -1352,17 +1352,15 @@ body .pk-card {
 	content: "";
 	position: absolute;
 	top: -0.6rem;
-	left: 50%;
+	left: 18%;
 	width: 4.5rem;
 	height: 1.3rem;
-	transform: translateX(-50%) rotate(-4deg);
-	background: rgba(243, 229, 184, 0.9);
-	box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.18);
+	transform: rotate(var(--cr-rotate-neg));
+	background: var(--cr-tape);
 	z-index: 3;
 	pointer-events: none;
 	border: 0;
 }
-.cr-stream-page .pk-card.k-recipe::after { left: 18%; transform: rotate(-8deg); }
 .cr-stream-page .pk-card.k-read::after,
 .cr-stream-page .pk-card.k-acquisition::after {
 	content: "";
