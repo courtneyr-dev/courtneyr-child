@@ -218,11 +218,15 @@ function checkin_stamp( string $family, array $f, string $ink, int $tilt, string
 }
 
 /**
- * The stamp footer: one lead stamp, an optional second one, and the entry
- * line as text so the entry number exists outside the drawing.
+ * The stamp footer: one lead stamp, a second one on a single whose place
+ * shows, and the entry line as text so the entry number exists outside the
+ * drawing.
  *
- * Everything varies from the seed and nothing else: which family leads,
- * whether a second stamp appears, each stamp's ink and tilt.
+ * The seed picks which family leads and each stamp's ink and tilt. How many
+ * stamps print follows the approved mockups (PKIW issue 224, mockups 08 to
+ * 13): an ARRIVED and a CHECKED IN stamp on a single whose place shows,
+ * public or approximate; one stamp on a Stream card and on a check-in whose
+ * place is hidden or missing.
  *
  * @param array<string, mixed> $attrs Block attributes.
  * @param \WP_Post             $post  Post being rendered.
@@ -238,7 +242,7 @@ function render_stamps( array $attrs, \WP_Post $post, int $max = 2 ): string {
 	$ink_a     = INKS[ pick( $seed, 3, 3 ) ];
 	$ink_b     = INKS[ ( pick( $seed, 3, 3 ) + 1 ) % 3 ];
 	$has_place = '' !== $f['place'] || '' !== $f['country'];
-	$second    = $max > 1 && $has_place && 0 !== pick( $seed, 12, 3 );
+	$second    = $max > 1 && $has_place;
 	$uid       = 'cr-seal-' . $post->ID;
 
 	// A second stamp always changes shape: a rectangle beside a round or
