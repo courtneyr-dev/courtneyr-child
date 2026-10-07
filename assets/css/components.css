@@ -8321,12 +8321,34 @@ figure.wp-block-image.is-style-overlay-caption figcaption {
 
 /* R-17: keep focused and anchored targets clear of the sticky header
    (WCAG 2.4.11), and give standalone card links a 24px target (2.5.8).
+   --cr-sticky-header-clearance is the header's height plus a gap; the
+   check-in archive map (cr-checkin-archive.css) sticks at the same offset.
+   Both add the admin bar's height, because this rule replaces core's
+   admin-bar.css scroll-padding-top (the variable is unset logged out).
+   The header is one row, 65px, except from 1025px (where the compact
+   header ends) to 1261px, where the controls wrap under the brand and it
+   is 101 to 103px tall (measured on dev, 0.7.101). The band runs to 1279px
+   so a 17px classic scrollbar is covered too. It starts right above
+   1024px, the exact complement of the compact header's max-width, so a
+   zoomed-in fractional width can't fall between the two.
+   The band doesn't cover two taller headers (dev, 2026-10-07): with focus
+   in the search field it widens and the header is 103 to 104px up to
+   1300px (one row at 1320), and without JavaScript the nav takes its own
+   row up to 1024px, 146 to 151px tall.
    The bottom padding clears Complianz's fixed Manage consent button
    (50px tall at bottom: 0, its own --cmplz-manage-consent-height), which
    covered focused links at 320 by 225 (PKIW 224). */
 html {
-	scroll-padding-top: calc(4rem + var(--wp--preset--spacing--small, 1rem));
-	scroll-padding-bottom: calc(var(--cmplz-manage-consent-height, 50px) + var(--wp--preset--spacing--small, 1rem));
+	--cr-sticky-header-clearance: calc(4rem + var(--wp--preset--spacing--md, 1rem));
+	scroll-padding-top: calc(var(--wp-admin--admin-bar--height, 0px) + var(--cr-sticky-header-clearance));
+	scroll-padding-bottom: calc(var(--cmplz-manage-consent-height, 50px) + var(--wp--preset--spacing--md, 1rem));
+}
+
+@media (1024px < width < 1280px) {
+
+	html {
+		--cr-sticky-header-clearance: calc(6.5rem + var(--wp--preset--spacing--md, 1rem));
+	}
 }
 .pk-card .pk-link,
 .pk-card .pk-map-link {
