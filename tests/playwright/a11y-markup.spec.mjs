@@ -623,7 +623,10 @@ test( 'the watch archive asks for one cover at high priority and each case cites
 					const permalink = li.querySelector( '.pk-title a' )?.href;
 					const own = ( r ) => [ ...li.querySelectorAll( '.u-url' ) ].filter( ( u ) => root( u ) === r ).map( urlOf );
 					const watched = [ ...cite.querySelectorAll( 'data[hidden]' ) ].filter( ( d ) => root( d ) === cite && ! d.classList.contains( 'u-uid' ) && ! d.classList.contains( 'p-rating' ) ).map( ( d ) => d.getAttribute( 'value' ) ).filter( webUrl );
-					return { post: li.className.match( /\bpost-(\d+)/ )?.[ 1 ], permalink, entry: own( li ), cite: own( cite ), watched };
+					// Since PKIW 329 the plugin also prints the title's URL as hidden
+					// data.u-url, so one watched URL can sit in two <data>; the
+					// h-cite should still name it once.
+					return { post: li.className.match( /\bpost-(\d+)/ )?.[ 1 ], permalink, entry: own( li ), cite: own( cite ), watched: [ ...new Set( watched ) ] };
 				} ),
 			};
 		} );

@@ -246,13 +246,16 @@ function is_web_url( string $url ): bool {
 /**
  * Make a watch card's h-cite cite what was watched, not the post (PKIW #227).
  *
- * On a Stream card the plugin's link_title_to_post() points the title at
- * the post and keeps the title's u-url, so the watch-of h-cite names the
- * post as the thing watched, and the watched URL sits in a hidden <data>
- * with no class. Inside the card, a u-url link to the post loses u-url
- * (the title still links to the post) and that <data> becomes the h-cite's
- * u-url when it holds a web URL. The entry keeps its one u-url, the
- * plugin's `.pk-entry-props` data outside the card.
+ * Before PKIW 329, link_title_to_post() pointed a Stream card's title at
+ * the post and kept the title's u-url, so the watch-of h-cite named the
+ * post as the thing watched; the watched URL sat in a hidden <data> with
+ * no class. Inside the card, a u-url link to the post loses u-url (the
+ * title still links to the post). When nothing else in the card is a
+ * u-url, the first unclassed hidden <data> holding a web URL becomes one.
+ * Since PKIW 329 the plugin moves the title's URL to a hidden
+ * <data class="u-url"> itself, and this leaves that card as it is. The
+ * entry keeps its one u-url, the plugin's `.pk-entry-props` data outside
+ * the card.
  *
  * @param string $html      Rendered stream card.
  * @param string $permalink The post's permalink.
@@ -268,18 +271,27 @@ function cite_watched_url( string $html, string $permalink ): string {
 	) ) {
 		return $html;
 	}
-	$depth = 1;
+	$depth   = 1;
+	$cited   = false;
+	$watched = false;
 	while ( $depth > 0 && $tags->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 		$tag = $tags->get_tag();
 		if ( 'ARTICLE' === $tag ) {
 			$depth += $tags->is_tag_closer() ? -1 : 1;
 		} elseif ( $tags->is_tag_closer() ) {
 			continue;
-		} elseif ( 'A' === $tag && $tags->has_class( 'u-url' ) && $permalink === $tags->get_attribute( 'href' ) ) {
-			$tags->remove_class( 'u-url' );
-		} elseif ( 'DATA' === $tag && null === $tags->get_attribute( 'class' ) && null !== $tags->get_attribute( 'hidden' ) && is_web_url( (string) $tags->get_attribute( 'value' ) ) ) {
-			$tags->add_class( 'u-url' );
+		} elseif ( $tags->has_class( 'u-url' ) ) {
+			if ( 'A' === $tag && $permalink === $tags->get_attribute( 'href' ) ) {
+				$tags->remove_class( 'u-url' );
+			} else {
+				$cited = true;
+			}
+		} elseif ( ! $watched && 'DATA' === $tag && null === $tags->get_attribute( 'class' ) && null !== $tags->get_attribute( 'hidden' ) && is_web_url( (string) $tags->get_attribute( 'value' ) ) ) {
+			$watched = $tags->set_bookmark( 'watched' );
 		}
+	}
+	if ( ! $cited && $watched && $tags->seek( 'watched' ) ) {
+		$tags->add_class( 'u-url' );
 	}
 	return $tags->get_updated_html();
 }
