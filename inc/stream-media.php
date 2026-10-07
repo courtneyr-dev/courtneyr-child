@@ -230,6 +230,61 @@ function cut_div( string $html, string $open ): string {
 }
 
 /**
+ * Whether a stored URL is an absolute http(s) URL with a hostname.
+ *
+ * FILTER_VALIDATE_URL rejects a title typed into the URL field, which
+ * esc_url() prints as "http://ted%20lasso".
+ *
+ * @param string $url URL.
+ * @return bool
+ */
+function is_web_url( string $url ): bool {
+	return in_array( strtolower( (string) wp_parse_url( $url, PHP_URL_SCHEME ) ), array( 'http', 'https' ), true )
+		&& false !== filter_var( $url, FILTER_VALIDATE_URL );
+}
+
+/**
+ * Make a watch card's h-cite cite what was watched, not the post (PKIW #227).
+ *
+ * On a Stream card the plugin's link_title_to_post() points the title at
+ * the post and keeps the title's u-url, so the watch-of h-cite names the
+ * post as the thing watched, and the watched URL sits in a hidden <data>
+ * with no class. Inside the card, a u-url link to the post loses u-url
+ * (the title still links to the post) and that <data> becomes the h-cite's
+ * u-url when it holds a web URL. The entry keeps its one u-url, the
+ * plugin's `.pk-entry-props` data outside the card.
+ *
+ * @param string $html      Rendered stream card.
+ * @param string $permalink The post's permalink.
+ * @return string
+ */
+function cite_watched_url( string $html, string $permalink ): string {
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	if ( ! $tags->next_tag(
+		array(
+			'tag_name'   => 'article',
+			'class_name' => 'h-cite',
+		)
+	) ) {
+		return $html;
+	}
+	$depth = 1;
+	while ( $depth > 0 && $tags->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
+		$tag = $tags->get_tag();
+		if ( 'ARTICLE' === $tag ) {
+			$depth += $tags->is_tag_closer() ? -1 : 1;
+		} elseif ( $tags->is_tag_closer() ) {
+			continue;
+		} elseif ( 'A' === $tag && $tags->has_class( 'u-url' ) && $permalink === $tags->get_attribute( 'href' ) ) {
+			$tags->remove_class( 'u-url' );
+		} elseif ( 'DATA' === $tag && null === $tags->get_attribute( 'class' ) && null !== $tags->get_attribute( 'hidden' ) && is_web_url( (string) $tags->get_attribute( 'value' ) ) ) {
+			$tags->add_class( 'u-url' );
+		}
+	}
+	return $tags->get_updated_html();
+}
+
+/**
  * Dress a watch or listen stream card as its object.
  *
  * @param string    $html     Rendered stream card.
@@ -395,6 +450,10 @@ function media_card( string $html, array $block, $instance ): string {
 	} elseif ( '' !== $date_html ) {
 		$close = strrpos( $html, '</article>' );
 		$html  = false === $close ? $html . $date_html : substr( $html, 0, $close ) . $date_html . substr( $html, $close );
+	}
+
+	if ( 'watch' === $kind ) {
+		$html = cite_watched_url( $html, (string) get_permalink( $post ) );
 	}
 
 	$html = \Courtneyr\Child\Journal\skip_lazy_iframes( $html );
