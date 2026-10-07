@@ -223,18 +223,83 @@ function load_order( array $items, bool $first_page ): array {
 }
 
 /**
- * Keep Perfmatters' critical-image preload off the watch shelf (PKIW #227).
+ * Cases in the listen shelf's widest row (4 / 2 / 1 columns at 1440 / 720
+ * / 375). The covers of these cases can sit in the first row at any width.
+ */
+const LISTEN_FIRST_ROW = 4;
+
+/**
+ * Width of a cassette's cover print on the shelf: the label's 9cqw square
+ * in cr-post-kinds.css measures 20 to 29px from 320 to 1536px wide.
+ */
+const LISTEN_COVER_SIZES = '2rem';
+
+/**
+ * Dress the listen shelf's cover art (PKIW #226 mockup fidelity).
+ *
+ * Each case's title link covers the whole cassette and names it, so the
+ * cover's alt is emptied here and the case isn't announced twice; the
+ * stored alt stays on the single and the Stream. The covers of the first
+ * LISTEN_FIRST_ROW cases load eagerly at high priority on every page, since
+ * that row stands in the first screen; the rest stay lazy. A media library
+ * cover's `sizes` names the print's width, so the browser picks the small
+ * file from core's srcset; `auto` leads it only on a lazy cover, the one
+ * place it is valid.
+ *
+ * @param string $html  Rendered core/post-template.
+ * @param array  $block Parsed block.
+ * @return string
+ */
+function listen_covers( string $html, array $block ): string {
+	$class = (string) ( $block['attrs']['className'] ?? '' );
+	if ( 'listen' !== shelf_kind() || false === strpos( $class, 'cr-media-shelf__list' ) ) {
+		return $html;
+	}
+
+	$tags        = new \WP_HTML_Tag_Processor( $html );
+	$item        = 0;
+	$after_media = false;
+	while ( $tags->next_tag() ) {
+		$tag         = $tags->get_tag();
+		$is_cover    = $after_media && 'IMG' === $tag;
+		$after_media = 'DIV' === $tag && $tags->has_class( 'pk-media' );
+		if ( 'LI' === $tag && $tags->has_class( 'wp-block-post' ) ) {
+			++$item;
+			continue;
+		}
+		if ( ! $is_cover ) {
+			continue;
+		}
+		$tags->set_attribute( 'alt', '' );
+		$first_row = $item <= LISTEN_FIRST_ROW;
+		$tags->set_attribute( 'loading', $first_row ? 'eager' : 'lazy' );
+		if ( $first_row ) {
+			$tags->set_attribute( 'fetchpriority', 'high' );
+		} else {
+			$tags->remove_attribute( 'fetchpriority' );
+		}
+		if ( null !== $tags->get_attribute( 'srcset' ) ) {
+			$tags->set_attribute( 'sizes', ( $first_row ? '' : 'auto, ' ) . LISTEN_COVER_SIZES );
+		}
+	}
+	return $tags->get_updated_html();
+}
+add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\listen_covers', 10, 2 );
+
+/**
+ * Keep Perfmatters' critical-image preload off the shelves (PKIW #227, #226).
  *
  * The site option preloads the first two images on a page at
  * fetchpriority high: two face-out covers on page 1, and on page 2 the
- * first spine and the footer avatar. load_order() picks the shelf's one.
+ * first spine and the footer avatar. load_order() picks the watch
+ * shelf's one and listen_covers() the listen shelf's first row.
  * Perfmatters reads this on `wp`, after the main query.
  *
  * @param mixed $count Images Perfmatters preloads.
  * @return mixed
  */
 function no_critical_image_preload( $count ) {
-	return 'watch' === shelf_kind() ? 0 : $count;
+	return '' !== shelf_kind() ? 0 : $count;
 }
 add_filter( 'perfmatters_preload_critical_images', __NAMESPACE__ . '\\no_critical_image_preload' );
 
