@@ -1475,6 +1475,110 @@ test( 'a recipe single is one binder page: title and picture once, the recipe pl
 	await expect( page.locator( 'main nav.cr-post-nav' ) ).toHaveCount( 1 );
 } );
 
+// PKIW #229: the recipe single's kind tape is sky blue with violet ink in light
+// mode and the dark tape with yellow ink in dark mode. The tape switches on the
+// same selectors as its ink (tokens.css), so the label holds 4.5:1 whatever
+// picks the mode: the OS scheme when there's no JavaScript to set data-theme,
+// or a choice the theme toggle stored. The sheet stays ivory in dark mode, so
+// a focused link printed on it takes the sheet's ink as its halo, 3:1 or more
+// against the sheet.
+test( 'the recipe single\'s kind tape and focus halos hold their contrast with and without JavaScript', async ( { browser, page } ) => {
+	const ratio = ( a, b ) => {
+		const lum = ( c ) => c.match( /\d+(\.\d+)?/g ).slice( 0, 3 ).map( ( v ) => v / 255 ).map( ( v ) => ( v <= 0.03928 ? v / 12.92 : ( ( v + 0.055 ) / 1.055 ) ** 2.4 ) ).reduce( ( sum, v, i ) => sum + v * [ 0.2126, 0.7152, 0.0722 ][ i ], 0 );
+		const [ hi, lo ] = [ lum( a ), lum( b ) ].sort( ( x, y ) => y - x );
+		return ( hi + 0.05 ) / ( lo + 0.05 );
+	};
+	const tape = ( p ) => p.locator( 'main .single-post__header .single-post__kind.cr-chip' ).evaluate( ( chip ) => {
+		const token = ( name ) => {
+			const probe = document.createElement( 'span' );
+			probe.style.color = `var(${ name })`;
+			chip.append( probe );
+			const value = getComputedStyle( probe ).color;
+			probe.remove();
+			return value;
+		};
+		const theme = document.documentElement.getAttribute( 'data-theme' );
+		const osDark = matchMedia( '(prefers-color-scheme: dark)' ).matches;
+		return {
+			theme,
+			osDark,
+			dark: 'dark' === theme || ( ( null === theme || 'system' === theme ) && osDark ),
+			background: getComputedStyle( chip ).backgroundColor,
+			ink: getComputedStyle( chip.querySelector( 'a' ) ).color,
+			sky: token( '--cr-sky-blue' ),
+			tape: token( '--cr-tape' ),
+			tapeInk: token( '--cr-tape-ink' ),
+		};
+	} );
+	const holds = ( t, mode ) => {
+		expect( t.background, `${ mode }: the tape is ${ t.dark ? 'the dark tape' : 'sky blue' }` ).toBe( t.dark ? t.tape : t.sky );
+		expect( t.ink, `${ mode }: the label takes the tape's ink` ).toBe( t.tapeInk );
+		expect( ratio( t.background, t.ink ), `${ mode }: ${ t.ink } on ${ t.background }` ).toBeGreaterThanOrEqual( 4.5 );
+	};
+
+	// No JavaScript: no data-theme, so the OS scheme decides.
+	const context = await browser.newContext( { javaScriptEnabled: false } );
+	const off = await context.newPage();
+	const response = await off.goto( RECIPE_SINGLE, { waitUntil: 'load' } );
+	if ( 404 === response.status() ) {
+		await context.close();
+		test.skip( true, 'no recipe fixture on this site' );
+	}
+	const plain = await tape( off );
+	expect( plain.theme, 'without JavaScript nothing sets data-theme' ).toBeNull();
+	holds( plain, `no JavaScript, OS ${ plain.osDark ? 'dark' : 'light' }` );
+
+	// Reach the kind label and the print link with Tab: their halos are
+	// :focus-visible rules. Without JavaScript there's no consent dialog.
+	const targets = { 'the kind label': 'main .single-post__header .single-post__kind a', 'the print link': 'main .single-post__header a.wprm-recipe-print' };
+	const halos = {};
+	for ( let presses = 0; presses < 120 && Object.keys( halos ).length < 2; presses++ ) {
+		await off.keyboard.press( 'Tab' );
+		const hit = await off.evaluate( ( selectors ) => {
+			const el = document.activeElement;
+			const label = el && Object.keys( selectors ).find( ( key ) => el.matches( selectors[ key ] ) );
+			if ( ! label ) {
+				return null;
+			}
+			document.getAnimations().filter( ( a ) => a instanceof CSSTransition ).forEach( ( a ) => a.finish() );
+			const token = ( name ) => {
+				const probe = document.createElement( 'span' );
+				probe.style.color = `var(${ name })`;
+				el.parentElement.append( probe );
+				const value = getComputedStyle( probe ).color;
+				probe.remove();
+				return value;
+			};
+			return { label, visible: el.matches( ':focus-visible' ), shadow: getComputedStyle( el ).boxShadow, halo: token( '--cr-focus-halo' ), paper: token( '--page-paper' ) };
+		}, targets );
+		if ( hit ) {
+			halos[ hit.label ] = hit;
+		}
+	}
+	for ( const label of Object.keys( targets ) ) {
+		const hit = halos[ label ];
+		expect( hit, `Tab reaches ${ label }` ).toBeTruthy();
+		expect( hit.visible, `${ label } shows its focus ring` ).toBe( true );
+		const halo = ( hit.shadow.match( /rgba?\([^)]*\)/ ) || [ '' ] )[ 0 ];
+		expect( halo, `${ label }'s halo is --cr-focus-halo` ).toBe( hit.halo );
+		expect( ratio( halo, hit.paper ), `${ label }'s halo ${ halo } against the sheet ${ hit.paper }` ).toBeGreaterThanOrEqual( 3 );
+	}
+	await context.close();
+
+	// JavaScript on, with the opposite of the OS scheme stored by the toggle.
+	const stored = plain.osDark ? 'light' : 'dark';
+	await page.addInitScript( ( value ) => {
+		try {
+			localStorage.setItem( 'courtneyr-theme', value );
+		} catch ( e ) {}
+	}, stored );
+	await page.goto( RECIPE_SINGLE, { waitUntil: 'load' } );
+	await page.evaluate( () => document.getAnimations().filter( ( a ) => a instanceof CSSTransition ).forEach( ( a ) => a.finish() ) );
+	const chosen = await tape( page );
+	expect( chosen.theme ).toBe( stored );
+	holds( chosen, `${ stored } chosen over OS ${ plain.osDark ? 'dark' : 'light' }` );
+} );
+
 test( 'a recipe post with no recipe card keeps the default single', async ( { page } ) => {
 	const response = await page.goto( RECIPE_PLAIN_SINGLE, { waitUntil: 'load' } );
 	test.skip( response.status() === 404, 'no recipe fixture on this site' );
