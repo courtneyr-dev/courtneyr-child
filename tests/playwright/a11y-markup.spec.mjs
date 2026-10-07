@@ -1630,6 +1630,46 @@ test( 'the Stream shows a recipe as a 3x5 card: picture, label, title link, cour
 	expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBe( 0 );
 } );
 
+// PKIW #229: a Stream card names one course, the recipe's first. The plugin
+// sorts a recipe's courses by name, case-insensitively, and first_course()
+// (inc/recipe.php) keeps the first, so Corn Chowder, filed under Main Course
+// and Soup, reads "Main Course". The courses come from the single's Recipe
+// structured data. The test pages through the Stream until it has checked a
+// recipe filed under two courses.
+test( 'a recipe card on the Stream names one course, the recipe\'s first by name', async ( { page } ) => {
+	const byName = ( a, b ) => {
+		const [ x, y ] = [ a.toLowerCase(), b.toLowerCase() ];
+		if ( x === y ) {
+			return 0;
+		}
+		return x < y ? -1 : 1;
+	};
+	let url = RECIPE_STREAM;
+	let checked = 0;
+	let twoCourse = 0;
+	for ( let pages = 0; url && pages < 6 && 0 === twoCourse; pages++ ) {
+		await page.goto( url, { waitUntil: 'load' } );
+		const cards = page.locator( 'main li.kind-recipe article.cr-recipe-stream' ).filter( { has: page.locator( '.pk-recipe-course' ) } );
+		for ( const card of await cards.all() ) {
+			const shown = ( await card.locator( '.pk-recipe-course' ).textContent() ).trim();
+			const href = await card.locator( 'h2.pk-title a' ).evaluate( ( a ) => a.href );
+			const html = await ( await page.request.get( href ) ).text();
+			const category = html.match( /"recipeCategory":(\[[^\]]*\]|"[^"]*")/ );
+			const courses = category ? [].concat( JSON.parse( category[ 1 ] ) ).sort( byName ) : [];
+			expect( courses.length, `${ href } lists its courses in its structured data` ).toBeGreaterThan( 0 );
+			expect( shown, `${ href } names one course, its first of ${ courses.join( ', ' ) }` ).toBe( courses[ 0 ] );
+			checked++;
+			if ( courses.length > 1 ) {
+				twoCourse++;
+			}
+		}
+		const next = page.locator( 'main .wp-block-query-pagination a.wp-block-query-pagination-next' );
+		url = ( await next.count() ) ? await next.first().evaluate( ( a ) => a.href ) : null;
+	}
+	test.skip( 0 === checked, 'no recipe card with a course on this Stream' );
+	test.skip( 0 === twoCourse, 'no recipe filed under two courses on the first six Stream pages' );
+} );
+
 // Paper has no use for site navigation. In print the header, the footer, the
 // Browse all lists, the pager, Previous/Next and the skip link are left out
 // on every template; the page's own heading and content stay. On screen they
