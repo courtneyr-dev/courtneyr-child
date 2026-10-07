@@ -102,6 +102,12 @@
 	z-index: 3;
 }
 
+/* The provider tape keeps its label, outline and hard shadow and grows to
+   the contract's 44px target. */
+.cr-archive--listen .cr-media-shelf .cr-media-shelf__list > li.kind-listen .pk-card.pk-card--stream.cr-media--shelf .pk-sources__link {
+	min-block-size: 2.75rem;
+}
+
 /* Focus: the site's two-tone ring around the whole case (the mockup's
    selective-yellow outline), drawn on the item so it isn't clipped. */
 .cr-media-shelf .wp-block-post-template.cr-media-shelf__list > li:has(.pk-title a:focus-visible) {
