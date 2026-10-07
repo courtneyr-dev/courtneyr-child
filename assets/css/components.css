@@ -8350,6 +8350,29 @@ html {
 		--cr-sticky-header-clearance: calc(6.5rem + var(--wp--preset--spacing--md, 1rem));
 	}
 }
+
+/* Up to Complianz's own phone breakpoint (768px) its fixed Manage consent
+   tab, 143 by 50px at the bottom right, covered page content in every
+   viewport: on a 390 by 844 check-in single it sat over the passport stamps
+   (PKIW issue 224). Here the same button leaves the fixed layer and closes
+   the page instead, centered in a band of the footer's own color, so it
+   covers nothing and Tab and touch still reach it as the last control.
+   Wider screens keep the fixed tab and the scroll-padding-bottom above.
+   The id and two classes outrank Complianz's #cmplz-manage-consent
+   .cmplz-manage-consent rule whichever stylesheet loads last. */
+@media (max-width: 768px) {
+
+	#cmplz-manage-consent {
+		display: flex;
+		justify-content: center;
+		background-color: var(--wp--preset--color--primary);
+	}
+
+	#cmplz-manage-consent .cmplz-manage-consent.cmplz-btn {
+		position: static;
+		animation: none;
+	}
+}
 .pk-card .pk-link,
 .pk-card .pk-map-link {
 	display: inline-flex;

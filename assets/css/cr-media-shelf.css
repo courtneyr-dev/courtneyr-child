@@ -8,7 +8,7 @@
    row shows empty shelf, never placeholder posts. This file only paints:
    blue-green boards, Prussian-blue uprights, the cassettes standing
    upright (no collage tilt), the whole case as one link, and the
-   decorative boombox behind the archive header.
+   decorative still life (boombox, plant, tapes, pen cup) on the top board.
 
    The cassettes themselves are the Stream's (inc/stream-media.php adds
    `cr-media--shelf` on this archive; cr-post-kinds.css paints them).
@@ -102,6 +102,12 @@
 	z-index: 3;
 }
 
+/* The provider tape keeps its label, outline and hard shadow and grows to
+   the contract's 44px target. */
+.cr-archive--listen .cr-media-shelf .cr-media-shelf__list > li.kind-listen .pk-card.pk-card--stream.cr-media--shelf .pk-sources__link {
+	min-block-size: 2.75rem;
+}
+
 /* Focus: the site's two-tone ring around the whole case (the mockup's
    selective-yellow outline), drawn on the item so it isn't clipped. */
 .cr-media-shelf .wp-block-post-template.cr-media-shelf__list > li:has(.pk-title a:focus-visible) {
@@ -131,15 +137,63 @@
 	box-shadow: var(--cr-shadow-hard);
 }
 
-/* ---- Decorative boombox above the shelf (listen) ----
-   A CSS background on a pseudo-element: no DOM, never focused or read. */
-.cr-archive--listen .cr-archive__header::after {
+/* ---- Listen: the still life on the top board ----
+   The approved mockup stands a houseplant, a cassette stack, the boombox,
+   upright cassette spines and a pen cup on the shelf's top board. Each is
+   its own asset in assets/img/, painted as a background layer of the
+   shelf group's ::before: no DOM, never focused or read. The layer sits
+   in flow right above the list, so its bottom edge is the top board and
+   every object, drawn with its foot on its image's bottom edge, stands on
+   it. Its height follows the shelf's width (the viewport less the page
+   and shelf gutters), so the composition scales as one picture up to
+   17rem tall, then spreads along wider boards. Below 64rem the stack and
+   spines drop; on phones only the boombox stays. */
+.cr-archive--listen .cr-media-shelf::before {
 	content: "";
 	display: block;
-	width: min(26rem, 78%);
-	aspect-ratio: 480 / 270;
-	margin: 1.25rem auto 0;
-	background: url(../img/cr-boombox.svg) center / contain no-repeat;
+	height: min(17rem, (100vw - 2 * (var(--wp--preset--spacing--md) + var(--wp--preset--spacing--xl))) * 272 / 1440);
+	background:
+		url(../img/cr-houseplant.svg) 2.2% bottom / auto 75% no-repeat,
+		url(../img/cr-cassette-stack.svg) 17.8% bottom / auto 50% no-repeat,
+		url(../img/cr-boombox.svg) center bottom / auto 100% no-repeat,
+		url(../img/cr-cassette-spines.svg) 81% bottom / auto 64% no-repeat,
+		url(../img/cr-pen-cup.svg) 94.5% bottom / auto 60% no-repeat;
+	pointer-events: none;
+}
+
+/* ---- Listen: a near-full-width shelf ----
+   The mockup's shelf spans about 94% of a 1536px view. Once the page is
+   wider than the 1100px wide column plus gutters, the shelf group leaves
+   that column and keeps the xl spacing step inside the page's own md
+   gutter on each side (48px from the viewport edge), topping out at 96rem
+   so very wide screens don't grow the cases past the mockup's. Narrower
+   pages keep the column's width. Off phones the wider list keeps the
+   approved four columns: each track is at least a quarter of the row. */
+.cr-archive--listen .cr-media-shelf.alignwide {
+	max-width: max(min(100%, var(--wp--style--global--wide-size)), min(100% - 2 * var(--wp--preset--spacing--xl), 96rem));
+}
+
+@media (min-width: 40.0625rem) {
+
+	.cr-archive--listen .cr-media-shelf .wp-block-post-template.cr-media-shelf__list {
+		--pkiw-shelf-item-min: max(15rem, (100% - 3 * var(--pkiw-shelf-gap-column)) / 4);
+	}
+}
+
+.cr-archive--listen .cr-media-shelf .wp-block-post-template.cr-media-shelf__list,
+.cr-archive--listen .cr-media-shelf .wp-block-query:not(:has(.wp-block-post-template))::before {
+	max-width: none;
+}
+
+@media (max-width: 64rem) {
+
+	.cr-archive--listen .cr-media-shelf::before {
+		height: min(12rem, (100vw - 2 * (var(--wp--preset--spacing--md) + var(--wp--preset--spacing--xl))) * 200 / 640);
+		background:
+			url(../img/cr-houseplant.svg) 2.6% bottom / auto 70% no-repeat,
+			url(../img/cr-boombox.svg) center bottom / auto 100% no-repeat,
+			url(../img/cr-pen-cup.svg) 95.1% bottom / auto 58% no-repeat;
+	}
 }
 
 /* ---- Small screens: one case per row, a narrower frame ---- */
@@ -150,8 +204,12 @@
 		border-inline-width: 0.5rem;
 	}
 
-	.cr-archive--listen .cr-archive__header::after {
+	.cr-archive--listen .cr-media-shelf::before {
 		width: min(16rem, 70%);
+		height: auto;
+		margin-inline: auto;
+		aspect-ratio: 480 / 262;
+		background: url(../img/cr-boombox.svg) center bottom / contain no-repeat;
 	}
 }
 
@@ -176,7 +234,7 @@
 		box-shadow: none;
 	}
 
-	.cr-archive--listen .cr-archive__header::after {
+	.cr-archive--listen .cr-media-shelf::before {
 		display: none;
 	}
 }

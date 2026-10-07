@@ -3986,12 +3986,16 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 /* A check-in arrives as the Status format, which the theme treats as
    title-less. This page opens with its title, so undo that here (the
    hiding rule is !important) and drop the floating format avatar the
-   title-less path injects — the passport is the page's identity. */
+   title-less path injects — the passport is the page's identity.
+   The inline margins go back to the header's constrained layout (auto),
+   so the h1 starts on the edge the chips, lede and card share
+   (PKIW issue 224, mockups 08 to 12); 0 left it 43px out at 1440. */
 body.single-post.kind-checkin.pfbt-format-titleless .single-post__title {
 	position: relative !important;
 	width: auto !important;
 	height: auto !important;
-	margin: 0 !important;
+	margin-block: 0 !important;
+	margin-inline: auto !important;
 	overflow: visible !important;
 	clip: auto !important;
 	clip-path: none !important;
@@ -4835,7 +4839,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	margin: 0;
 	padding: 0;
 	border: 0;
-	color: #241c4a;
+	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-accent, serif);
 	font-weight: 700;
 	font-size: 0.8rem;
@@ -4850,7 +4854,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	position: static;
 	margin: 0;
 	padding: 0;
-	color: #3d2f6e;
+	color: var(--cr-russian-violet-soft);
 	font-size: max(0.6rem, var(--cr-text-floor, 0.7rem));
 	line-height: 1.25;
 	white-space: nowrap;
@@ -4869,7 +4873,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	gap: 0.1rem;
 	margin: 0.55rem 0.15rem 0;
 	padding: 0;
-	color: #c46200;
+	color: var(--cr-ut-orange-dark);
 }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stars svg { width: 0.9rem; height: 0.9rem; flex: none; }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-rating-value {
@@ -4911,21 +4915,21 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	gap: 0.25rem;
 	min-height: 1.5rem;
 	padding: 0.1rem 0.45rem;
-	border: 1.5px solid #241c4a;
+	border: 1.5px solid var(--cr-russian-violet);
 	border-radius: 2px;
-	background: #f6f3ea;
-	box-shadow: 2px 2px 0 #b89d55;
+	background: var(--cr-printer-ivory);
+	box-shadow: 2px 2px 0 var(--cr-selective-yellow);
 	font-family: var(--cr-font-mono, monospace);
 	font-size: 0.875rem;
 	font-weight: 700;
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: #241c4a;
+	color: var(--cr-russian-violet);
 	text-decoration: none;
 }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-sources__link--watch { background: #fee2c3; }
-.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-sources__link:hover { background: #ffb703; }
-.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-sources__link:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
+.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-sources__link:hover { background: var(--cr-selective-yellow); }
+.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-sources__link:focus-visible { outline: 3px solid var(--cr-focus-ring); outline-offset: 3px; }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-sources__arrow { font-family: var(--cr-font-body, sans-serif); }
 .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stream-date {
 	grid-area: date;
@@ -5108,21 +5112,30 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	border-radius: 6px 6px 9px 9px;
 	background:
 		/* screws: top corners, bottom corners, bottom centre */
-		radial-gradient(circle 2.4px at 9px 8px, #120e2a 98%, transparent),
-		radial-gradient(circle 2.4px at calc(100% - 9px) 8px, #120e2a 98%, transparent),
-		radial-gradient(circle 2.4px at 9px calc(100% - 8px), #120e2a 98%, transparent),
-		radial-gradient(circle 2.4px at calc(100% - 9px) calc(100% - 8px), #120e2a 98%, transparent),
-		radial-gradient(circle 2.4px at 50% calc(100% - 8px), #120e2a 98%, transparent),
+		radial-gradient(circle 2.4px at 9px 8px, var(--cr-photocopier-blk) 98%, transparent),
+		radial-gradient(circle 2.4px at calc(100% - 9px) 8px, var(--cr-photocopier-blk) 98%, transparent),
+		radial-gradient(circle 2.4px at 9px calc(100% - 8px), var(--cr-photocopier-blk) 98%, transparent),
+		radial-gradient(circle 2.4px at calc(100% - 9px) calc(100% - 8px), var(--cr-photocopier-blk) 98%, transparent),
+		radial-gradient(circle 2.4px at 50% calc(100% - 8px), var(--cr-photocopier-blk) 98%, transparent),
 		/* label paper wrapping the window: colour stripe, ruled lines */
-		linear-gradient(90deg, #8ecae6 0 50%, #fb8500 50%) left 3cqw top 2.2cqw / calc(100% - 6cqw) 0.9cqw no-repeat,
-		repeating-linear-gradient(180deg, transparent 0 calc(1rem - 1px), rgba(36, 28, 74, 0.14) calc(1rem - 1px) 1rem) left 3cqw top 4cqw / calc(100% - 6cqw) 9cqw no-repeat,
-		linear-gradient(#f6f3ea, #f6f3ea) left 3cqw top 2.2cqw / calc(100% - 6cqw) 30cqw no-repeat,
+		linear-gradient(90deg, var(--cr-sky-blue) 0 50%, var(--cr-ut-orange) 50%) left 3cqw top 2.2cqw / calc(100% - 6cqw) 0.9cqw no-repeat,
+		repeating-linear-gradient(180deg, transparent 0 calc(1rem - 1px), color-mix(in srgb, var(--cr-russian-violet) 14%, transparent) calc(1rem - 1px) 1rem) left 3cqw top 4cqw / calc(100% - 6cqw) 9cqw no-repeat,
+		linear-gradient(var(--cr-printer-ivory), var(--cr-printer-ivory)) left 3cqw top 2.2cqw / calc(100% - 6cqw) 30cqw no-repeat,
 		/* shell */
-		repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 5px),
-		#2b2357;
-	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+		repeating-linear-gradient(180deg, color-mix(in srgb, var(--cr-printer-ivory) 3%, transparent) 0 1px, transparent 1px 5px),
+		var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a), inset 0 0 0 1px color-mix(in srgb, var(--cr-printer-ivory) 8%, transparent);
 }
-.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-kindlabel { margin-left: 4cqw; color: #b9b5c4; }
+.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-kindlabel { margin-left: 4cqw; color: var(--cr-periwinkle); }
+/* The window, tape and hubs of mech_svg() (inc/stream-media.php), by role. */
+.cr-media__mech .cr-mech__window { fill: var(--cr-night-elevated); stroke: var(--cr-photocopier-blk); }
+.cr-media__mech .cr-mech__dark { fill: var(--cr-photocopier-blk); }
+.cr-media__mech .cr-mech__tape { stroke: var(--cr-photocopier-blk); }
+.cr-media__mech .cr-mech__ring { stroke: var(--cr-night-elevated); }
+.cr-media__mech .cr-mech__teeth,
+.cr-media__mech .cr-mech__edge { stroke: var(--cr-printer-ivory); }
+.cr-media__mech .cr-mech__hub,
+.cr-media__mech .cr-mech__glass { fill: var(--cr-printer-ivory); }
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-caption { margin: 3.4cqw 5cqw 0 1cqw; }
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-title {
 	font-family: var(--cr-font-display, cursive);
@@ -5139,8 +5152,8 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	margin: 3.6cqw 0 0 5cqw;
 	width: 9cqw;
 	height: 9cqw;
-	border: 1px solid rgba(36, 28, 74, 0.35);
-	background: #fff;
+	border: 1px solid color-mix(in srgb, var(--cr-russian-violet) 35%, transparent);
+	background: var(--cr-printer-ivory);
 	overflow: hidden;
 }
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-media img {
@@ -5161,8 +5174,8 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	margin: 0 3cqw;
 	padding: 3px;
 	border-radius: 5px;
-	background: #0d0b09;
-	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 1px 0 rgba(255, 255, 255, 0.06);
+	background: var(--cr-photocopier-blk);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cr-printer-ivory) 10%, transparent), 0 1px 0 color-mix(in srgb, var(--cr-printer-ivory) 6%, transparent);
 	overflow: hidden;
 }
 .cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-embed iframe,
@@ -5183,11 +5196,11 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	line-height: 1.3;
 	padding: 0.35rem 0.6rem;
 	border-radius: 5px;
-	background: rgba(36, 28, 74, 0.94);
-	color: #fbfaf5;
+	background: color-mix(in srgb, var(--cr-russian-violet) 94%, transparent);
+	color: var(--cr-printer-ivory);
 	cursor: pointer;
 }
-.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-embed:focus-within { outline: 3px solid #ffb703; outline-offset: 2px; }
+.cr-stream-page li.kind-listen .pk-card.pk-card--stream.cr-cassette--stream .pk-embed:focus-within { outline: 3px solid var(--cr-focus-ring); outline-offset: 2px; }
 /* No player stored: the tray stays as bare shell, same silhouette. */
 
 /* Phones: less tilt. */
@@ -5199,9 +5212,9 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 	.cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-body { transition: transform 200ms ease; }
 }
 /* Dark page ground: the tail's stars warm up; the objects keep their own colours. */
-:root[data-theme="dark"] .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stars { color: #ffb703; }
+:root[data-theme="dark"] .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stars { color: var(--cr-selective-yellow); }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stars { color: #ffb703; }
+	:root:not([data-theme="light"]) .cr-stream-page li:is(.kind-watch, .kind-listen) .pk-card.pk-card--stream:is(.cr-vhs--stream, .cr-cassette--stream) .pk-stars { color: var(--cr-selective-yellow); }
 }
 
 /* ---- v0.7.15 / v0.7.22: kind singles — no box inside the kind chip ----

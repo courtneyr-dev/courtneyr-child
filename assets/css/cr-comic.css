@@ -12,7 +12,8 @@
    The bag, board and rack use the palette tokens (not the semantic
    ones), so they keep their colour in dark mode like the other physical
    objects; page text, focus and hard shadows use the semantic tokens.
-   Text stays upright: only the tape and the sticker's underline tilt.
+   Text stays upright except the stickers on the rack's bag and the
+   single's, which tilt by --cr-rotate-neg like the tape beside them.
    ============================================================ */
 
 /* ---- The bag: a backing board in a clear sleeve ---- */
@@ -139,21 +140,56 @@
 	columns: auto;
 	border: 2px solid var(--cr-russian-violet);
 	background:
-		/* Each tier's front lip. */
-		repeating-linear-gradient(180deg, transparent 0 calc(var(--rack-tier) - var(--rack-lip)), var(--cr-russian-violet) calc(var(--rack-tier) - var(--rack-lip)) calc(var(--rack-tier) - var(--rack-lip) + 2px), var(--cr-glaucous) calc(var(--rack-tier) - var(--rack-lip) + 2px) calc(var(--rack-tier) - 2px), var(--cr-russian-violet) calc(var(--rack-tier) - 2px) var(--rack-tier)),
-		/* The slotted uprights between bays. */
-		linear-gradient(90deg, var(--cr-glaucous-dark) 0 0.4rem, transparent 0.4rem) 0 0 / calc(100% / var(--rack-cols)) 100%,
+		/* Each tier's front lip, in layers: the ink edge, a lit top edge,
+		   the front face, its shaded underside, the ink foot. */
+		repeating-linear-gradient(180deg, transparent 0 calc(var(--rack-tier) - var(--rack-lip)), var(--cr-russian-violet) calc(var(--rack-tier) - var(--rack-lip)) calc(var(--rack-tier) - var(--rack-lip) + 2px), var(--cr-light-gray) calc(var(--rack-tier) - var(--rack-lip) + 2px) calc(var(--rack-tier) - var(--rack-lip) + 4px), var(--cr-glaucous) calc(var(--rack-tier) - var(--rack-lip) + 4px) calc(var(--rack-tier) - 6px), var(--cr-glaucous-dark) calc(var(--rack-tier) - 6px) calc(var(--rack-tier) - 2px), var(--cr-russian-violet) calc(var(--rack-tier) - 2px) var(--rack-tier)),
+		/* Slot cuts down every upright: the rack's back through the steel. */
+		conic-gradient(at 0.12rem 0.45rem, transparent 75%, var(--cr-prussian-blue) 0) 0.14rem 0 / calc(100% / var(--rack-cols)) 0.9rem,
+		repeating-linear-gradient(180deg, var(--cr-prussian-blue) 0 0.45rem, transparent 0.45rem 0.9rem) calc(100% - 0.14rem) 0 / 0.12rem 100% no-repeat,
+		/* The uprights: one at the left of each bay and one closing the
+		   right end, lit along one edge. */
+		linear-gradient(90deg, var(--cr-glaucous) 0 0.12rem, var(--cr-glaucous-dark) 0.12rem 0.4rem, transparent 0.4rem) 0 0 / calc(100% / var(--rack-cols)) 100%,
+		linear-gradient(90deg, var(--cr-glaucous) 0 0.12rem, var(--cr-glaucous-dark) 0.12rem) 100% 0 / 0.4rem 100% no-repeat,
 		var(--cr-prussian-blue);
 	box-shadow: var(--cr-shadow-hard-2);
 }
 
-/* The wire rail that keeps issues from tipping forward. */
+/* The wire rail that keeps issues from tipping forward, with a post at
+   each end of each bay where it bends down into the lip. */
 .cr-comic-rack .wp-block-post-template.cr-comic-rack__list::after {
+	--rail: calc(var(--rack-tier) - var(--rack-lip) - 2.4rem);
 	content: "";
 	position: absolute;
 	inset: 0;
-	background: repeating-linear-gradient(180deg, transparent 0 calc(var(--rack-tier) - var(--rack-lip) - 2.4rem), var(--cr-light-gray) calc(var(--rack-tier) - var(--rack-lip) - 2.4rem) calc(var(--rack-tier) - var(--rack-lip) - 2.4rem + 2px), transparent calc(var(--rack-tier) - var(--rack-lip) - 2.4rem + 2px) var(--rack-tier));
+	background:
+		conic-gradient(at 2px 2.4rem, transparent 75%, var(--cr-light-gray) 0) 0.85rem var(--rail) / calc(100% / var(--rack-cols)) var(--rack-tier),
+		conic-gradient(at 2px 2.4rem, transparent 75%, var(--cr-light-gray) 0) calc(-0.85rem - 2px) var(--rail) / calc(100% / var(--rack-cols)) var(--rack-tier),
+		repeating-linear-gradient(180deg, transparent 0 var(--rail), var(--cr-light-gray) var(--rail) calc(var(--rail) + 2px), transparent calc(var(--rail) + 2px) var(--rack-tier));
 	pointer-events: none;
+}
+
+/* The side brackets: a shallow end panel on each side of every tier,
+   widening toward its lip. They paint behind the rack and its shadow
+   (the rack's wrapper is the stacking context), and only where the page
+   has room for them beside the rack. */
+@media (min-width: 72rem) {
+
+	.cr-comic-rack {
+		isolation: isolate;
+	}
+
+	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list::before {
+		--rack-bracket: 1rem;
+		content: "";
+		position: absolute;
+		z-index: -1;
+		inset-block: 0;
+		inset-inline: calc(var(--rack-bracket) * -1);
+		background:
+			linear-gradient(to bottom right, transparent 50%, var(--cr-glaucous-dark) 50%) 0 0 / var(--rack-bracket) var(--rack-tier) repeat-y,
+			linear-gradient(to bottom left, transparent 50%, var(--cr-glaucous-dark) 50%) 100% 0 / var(--rack-bracket) var(--rack-tier) repeat-y;
+		pointer-events: none;
+	}
 }
 
 .cr-comic-rack .wp-block-post-template.cr-comic-rack__list > li {
@@ -609,19 +645,19 @@ body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-kindlab
 	border-radius: var(--cr-radius-full);
 	background: var(--cr-selective-yellow);
 	color: var(--cr-russian-violet);
-	font-family: var(--cr-font-body);
+	font-family: var(--cr-font-display);
 	font-size: var(--cr-text-base);
-	font-weight: var(--cr-weight-extrabold);
-	letter-spacing: var(--cr-tracking-wide);
+	font-weight: var(--cr-weight-regular);
+	letter-spacing: normal;
 	line-height: 1;
-	text-transform: uppercase;
-	transform: none;
+	text-transform: none;
+	transform: rotate(var(--cr-rotate-neg));
 }
 
 body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-kindlabel::after {
 	content: "";
 	position: absolute;
-	inset: auto 1.1rem 1.3rem;
+	inset: auto 1.1rem 1.65rem;
 	height: 2px;
 	background: var(--cr-russian-violet);
 	transform: rotate(var(--cr-rotate-neg));
@@ -633,27 +669,29 @@ body.cr-comic-single .cr-journal--comic {
 	gap: 1.75rem;
 }
 
-/* ---- Notes: a torn notebook sheet (the Read single's) ---- */
+/* ---- Notes: a ruled sheet torn along its top and foot ----
+   The menu's and the order ticket's tear: the paper is a pseudo-element
+   cut by clip-path, and drop-shadow filters draw the ink edge and the
+   hard shadow, so both follow the torn edge. */
 body.cr-comic-single .cr-journal__notes {
+	--notes-tear: polygon(0 0.3rem, 4% 0.05rem, 11% 0.4rem, 19% 0.1rem, 27% 0.45rem, 36% 0.15rem, 44% 0.35rem, 53% 0, 61% 0.4rem, 70% 0.1rem, 78% 0.45rem, 86% 0.05rem, 93% 0.35rem, 100% 0.1rem, 100% calc(100% - 0.35rem), 94% calc(100% - 0.05rem), 87% calc(100% - 0.4rem), 79% calc(100% - 0.1rem), 71% calc(100% - 0.45rem), 62% calc(100% - 0.05rem), 54% calc(100% - 0.35rem), 45% 100%, 37% calc(100% - 0.4rem), 28% calc(100% - 0.1rem), 20% calc(100% - 0.45rem), 12% calc(100% - 0.05rem), 5% calc(100% - 0.3rem), 0 calc(100% - 0.1rem));
 	position: relative;
+	isolation: isolate;
 	margin: 0;
 	padding: 1.4rem 1.6rem 1.6rem 2.9rem;
-	border: 1.5px solid var(--cr-ink);
-	background-color: var(--cr-printer-ivory);
-	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.7rem - 1px), color-mix(in srgb, var(--cr-russian-violet) 13%, transparent) calc(1.7rem - 1px) 1.7rem);
-	background-position: 0 1.25rem;
-	box-shadow: var(--cr-shadow-hard);
 	color: var(--cr-russian-violet);
+	filter: drop-shadow(1.5px 0 0 var(--cr-ink)) drop-shadow(-1.5px 0 0 var(--cr-ink)) drop-shadow(0 1.5px 0 var(--cr-ink)) drop-shadow(0 -1.5px 0 var(--cr-ink)) drop-shadow(var(--cr-shadow-hard));
 }
 
 body.cr-comic-single .cr-journal__notes::before {
 	content: "";
 	position: absolute;
-	inset-block: 1rem;
-	inset-inline-start: 0.85rem;
-	width: 0.9rem;
-	background: radial-gradient(circle 0.3rem at 50% 50%, var(--cr-russian-violet) 0 55%, transparent 60%) 0 0 / 0.9rem 1.7rem repeat-y;
-	opacity: 0.85;
+	z-index: -1;
+	inset: 0;
+	background-color: var(--cr-printer-ivory);
+	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.7rem - 1px), color-mix(in srgb, var(--cr-russian-violet) 13%, transparent) calc(1.7rem - 1px) 1.7rem);
+	background-position: 0 1.25rem;
+	clip-path: var(--notes-tear);
 	pointer-events: none;
 }
 
@@ -852,12 +890,15 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 /* Wide screens: the bag stands left of the header, notes and record.
    The header and the post content are siblings in <main>, so the content's
    wrappers step aside (display: contents) and the bag, notes and record
-   join the header as items of one grid. The gap leaves room for the H1's
-   own flank marks (format avatar, starburst), which hang to its left. */
+   join the header as items of one grid. The bag grows with the screen,
+   from 22rem at 64rem to 36rem (about 34rem at 1536px), so it takes most
+   of the first screen's height. The gap stays 8rem: the H1's format
+   avatar hangs 7.25rem to its left and the bag's hard shadow 6px to its
+   right, so a narrower gap would put the avatar on the COMIC sticker. */
 @media (min-width: 64rem) {
 
 	body.cr-comic-single main.single-post {
-		--comic-bag: 22rem;
+		--comic-bag: clamp(22rem, 40vw - 4rem, 36rem);
 		--comic-gap: 8rem;
 		display: grid;
 		grid-template-columns:
@@ -896,15 +937,20 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 		margin: 0.5rem 0 0;
 	}
 
+	/* Beside the tall bag the notes and the record stay sheets, not strips:
+	   at least nine notebook rules and eight card rules, so a short note
+	   leaves blank ruled lines under it the way the paper would. */
 	body.cr-comic-single .cr-journal--comic > .cr-journal__notes {
 		grid-column: details;
 		grid-row: 2;
+		min-height: calc(1.7rem * 9);
 		margin-top: 2rem;
 	}
 
 	body.cr-comic-single .cr-journal--comic > .cr-record {
 		grid-column: details;
 		grid-row: 3;
+		min-height: calc(1.9rem * 8);
 		margin-top: 2rem;
 	}
 
@@ -1185,8 +1231,13 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 	}
 
 	.pk-card.cr-comic .pk-media::before,
-	.pk-card.cr-comic .pk-media::after {
+	.pk-card.cr-comic .pk-media::after,
+	body.cr-comic-single .cr-journal__notes::before {
 		content: none;
+	}
+
+	body.cr-comic-single .cr-journal__notes {
+		filter: none;
 	}
 
 	.pk-card.cr-comic .pk-media.cr-comic__cover--type,
@@ -1219,6 +1270,7 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 		forced-color-adjust: none;
 	}
 
+	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list::before,
 	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list::after {
 		content: none;
 	}

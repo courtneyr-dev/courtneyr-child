@@ -15,7 +15,9 @@
  *     shared stamps (inc/stream-checkin.php on inc/stamps.php) close it;
  *   - the photo returns after the notes as a pasted snapshot with a
  *     handwritten caption;
- *   - three short handwritten margin notes are placed in the page grid;
+ *   - a handwritten margin note sits beside the notes section and the
+ *     snapshot when there is one; nothing sits between the card and the
+ *     footer, as the approved mockup draws it (PKIW issue 224, mockup 08);
  *   - a quiet time / place row closes the entry.
  *
  * All handwriting is theme copy chosen by the post's seed, so a page never
@@ -55,17 +57,14 @@ const NOTE_INLINE_LIMIT = 140;
 function margin_copy(): array {
 	return array(
 		array(
-			__( 'Same places. A more curious life.', 'courtneyr-child' ),
 			__( 'Good people. Better ideas.', 'courtneyr-child' ),
 			__( 'Collecting moments, not things.', 'courtneyr-child' ),
 		),
 		array(
-			__( 'People. Places. Ideas.', 'courtneyr-child' ),
 			__( 'Go, look, listen.', 'courtneyr-child' ),
 			__( 'Worth the trip.', 'courtneyr-child' ),
 		),
 		array(
-			__( 'Notes from the road.', 'courtneyr-child' ),
 			__( 'Same city, different conversations.', 'courtneyr-child' ),
 			__( 'Always something new.', 'courtneyr-child' ),
 		),
@@ -241,21 +240,21 @@ function journal_page( string $html, array $block ): string {
 		break;
 	}
 
-	// 4. What follows the card: margin notes, notes section, snapshot,
-	//    time and place row. Margin notes are asides in the page grid.
-	$copy   = margin_copy()[ pick( $s, 2, count( margin_copy() ) ) ];
-	$after  = '';
-	$after .= '<div class="cr-journal__margin cr-journal__margin--1"><p class="cr-hand cr-hand--underline">' . esc_html( $copy[0] ) . '</p></div>';
+	// 4. What follows the card: notes section, snapshot, time and place
+	//    row. Mockup 08 runs card, footer, Previous: no margin note before
+	// the footer. The notes section and the snapshot each keep theirs.
+	$copy  = margin_copy()[ pick( $s, 2, count( margin_copy() ) ) ];
+	$after = '';
 
 	if ( '' !== $note_html ) {
 		$after .= '<section class="cr-journal__notes"><h2 class="cr-journal__notes-title">' . esc_html__( 'Notes from this check-in', 'courtneyr-child' ) . '</h2>' . $note_html . '</section>';
-		$after .= '<div class="cr-journal__margin cr-journal__margin--2"><p class="cr-hand cr-hand--orange cr-hand--burst">' . esc_html( $copy[1] ) . '</p></div>';
+		$after .= '<div class="cr-journal__margin cr-journal__margin--2"><p class="cr-hand cr-hand--orange cr-hand--burst">' . esc_html( $copy[0] ) . '</p></div>';
 	}
 
 	if ( '' !== $photo_html ) {
 		$caption = caption_copy()[ pick( $s, 5, count( caption_copy() ) ) ];
 		$after  .= '<figure class="cr-journal__photo">' . $photo_html . '<figcaption class="cr-hand cr-hand--caption">' . esc_html( $caption ) . ' <span class="cr-hand__heart" aria-hidden="true">♡</span></figcaption></figure>';
-		$after  .= '<div class="cr-journal__margin cr-journal__margin--3"><p class="cr-hand cr-hand--underline">' . esc_html( $copy[ '' !== $note_html ? 2 : 1 ] ) . '</p></div>';
+		$after  .= '<div class="cr-journal__margin cr-journal__margin--3"><p class="cr-hand cr-hand--underline">' . esc_html( $copy[ '' !== $note_html ? 1 : 0 ] ) . '</p></div>';
 	}
 
 	$ts = checkin_timestamp( $attrs, $post );
