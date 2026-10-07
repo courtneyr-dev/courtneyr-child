@@ -533,9 +533,15 @@ test( 'the listen archive is a shelf of cassette cases, one title link each, no 
 		return el?.closest( 'a' ) === li.querySelector( '.pk-title a' );
 	} );
 	expect( hit ).toBe( true );
-	expect( await page.locator( '.cr-archive--listen .cr-archive__header img, .cr-archive--listen .cr-archive__header svg[aria-label]' ).count(), 'the boombox adds no content' ).toBe( 0 );
-	const boombox = await page.locator( '.cr-archive--listen .cr-archive__header' ).evaluate( ( el ) => getComputedStyle( el, '::after' ).backgroundImage );
-	expect( boombox ).toContain( 'cr-boombox.svg' );
+	expect( await page.locator( '.cr-archive--listen .cr-archive__header img, .cr-archive--listen .cr-archive__header svg[aria-label], .cr-archive--listen .cr-media-shelf > img' ).count(), 'the still life adds no content' ).toBe( 0 );
+	// The boombox still life is the shelf's ::before, standing on the top board.
+	const stillLife = await page.locator( '.cr-archive--listen .cr-media-shelf' ).evaluate( ( group ) => {
+		const art = getComputedStyle( group, '::before' );
+		const top = group.querySelector( 'ul.cr-media-shelf__list' ).getBoundingClientRect().top;
+		return { image: art.backgroundImage, gap: top - group.getBoundingClientRect().top - parseFloat( art.height ) };
+	} );
+	expect( stillLife.image ).toContain( 'cr-boombox.svg' );
+	expect( Math.abs( stillLife.gap ), 'the still life stands on the top board' ).toBeLessThan( 1 );
 } );
 
 // PKIW #226 mockup fidelity: the title link names each case, so a cover's

@@ -8,7 +8,7 @@
    row shows empty shelf, never placeholder posts. This file only paints:
    blue-green boards, Prussian-blue uprights, the cassettes standing
    upright (no collage tilt), the whole case as one link, and the
-   decorative boombox behind the archive header.
+   decorative still life (boombox, plant, tapes, pen cup) on the top board.
 
    The cassettes themselves are the Stream's (inc/stream-media.php adds
    `cr-media--shelf` on this archive; cr-post-kinds.css paints them).
@@ -131,15 +131,39 @@
 	box-shadow: var(--cr-shadow-hard);
 }
 
-/* ---- Decorative boombox above the shelf (listen) ----
-   A CSS background on a pseudo-element: no DOM, never focused or read. */
-.cr-archive--listen .cr-archive__header::after {
+/* ---- Listen: the still life on the top board ----
+   The approved mockup stands a houseplant, a cassette stack, the boombox,
+   upright cassette spines and a pen cup on the shelf's top board. Each is
+   its own asset in assets/img/, painted as a background layer of the
+   shelf group's ::before: no DOM, never focused or read. The layer sits
+   in flow right above the list, so its bottom edge is the top board and
+   every object, drawn with its foot on its image's bottom edge, stands on
+   it. Its height follows the shelf's width (the viewport less the page
+   and shelf gutters), so the composition scales as one picture up to
+   17rem tall, then spreads along wider boards. Below 64rem the stack and
+   spines drop; on phones only the boombox stays. */
+.cr-archive--listen .cr-media-shelf::before {
 	content: "";
 	display: block;
-	width: min(26rem, 78%);
-	aspect-ratio: 480 / 270;
-	margin: 1.25rem auto 0;
-	background: url(../img/cr-boombox.svg) center / contain no-repeat;
+	height: min(17rem, (100vw - 2 * (var(--wp--preset--spacing--md) + var(--wp--preset--spacing--xl))) * 272 / 1440);
+	background:
+		url(../img/cr-houseplant.svg) 2.2% bottom / auto 75% no-repeat,
+		url(../img/cr-cassette-stack.svg) 17.8% bottom / auto 50% no-repeat,
+		url(../img/cr-boombox.svg) center bottom / auto 100% no-repeat,
+		url(../img/cr-cassette-spines.svg) 81% bottom / auto 64% no-repeat,
+		url(../img/cr-pen-cup.svg) 94.5% bottom / auto 60% no-repeat;
+	pointer-events: none;
+}
+
+@media (max-width: 64rem) {
+
+	.cr-archive--listen .cr-media-shelf::before {
+		height: min(12rem, (100vw - 2 * (var(--wp--preset--spacing--md) + var(--wp--preset--spacing--xl))) * 200 / 640);
+		background:
+			url(../img/cr-houseplant.svg) 2.6% bottom / auto 70% no-repeat,
+			url(../img/cr-boombox.svg) center bottom / auto 100% no-repeat,
+			url(../img/cr-pen-cup.svg) 95.1% bottom / auto 58% no-repeat;
+	}
 }
 
 /* ---- Small screens: one case per row, a narrower frame ---- */
@@ -150,8 +174,12 @@
 		border-inline-width: 0.5rem;
 	}
 
-	.cr-archive--listen .cr-archive__header::after {
+	.cr-archive--listen .cr-media-shelf::before {
 		width: min(16rem, 70%);
+		height: auto;
+		margin-inline: auto;
+		aspect-ratio: 480 / 262;
+		background: url(../img/cr-boombox.svg) center bottom / contain no-repeat;
 	}
 }
 
@@ -176,7 +204,7 @@
 		box-shadow: none;
 	}
 
-	.cr-archive--listen .cr-archive__header::after {
+	.cr-archive--listen .cr-media-shelf::before {
 		display: none;
 	}
 }
