@@ -12,7 +12,8 @@
    The bag, board and rack use the palette tokens (not the semantic
    ones), so they keep their colour in dark mode like the other physical
    objects; page text, focus and hard shadows use the semantic tokens.
-   Text stays upright: only the tape and the sticker's underline tilt.
+   Text stays upright except the stickers on the rack's bag and the
+   single's, which tilt by --cr-rotate-neg like the tape beside them.
    ============================================================ */
 
 /* ---- The bag: a backing board in a clear sleeve ---- */
@@ -609,19 +610,19 @@ body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-kindlab
 	border-radius: var(--cr-radius-full);
 	background: var(--cr-selective-yellow);
 	color: var(--cr-russian-violet);
-	font-family: var(--cr-font-body);
+	font-family: var(--cr-font-display);
 	font-size: var(--cr-text-base);
-	font-weight: var(--cr-weight-extrabold);
-	letter-spacing: var(--cr-tracking-wide);
+	font-weight: var(--cr-weight-regular);
+	letter-spacing: normal;
 	line-height: 1;
-	text-transform: uppercase;
-	transform: none;
+	text-transform: none;
+	transform: rotate(var(--cr-rotate-neg));
 }
 
 body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-kindlabel::after {
 	content: "";
 	position: absolute;
-	inset: auto 1.1rem 1.3rem;
+	inset: auto 1.1rem 1.65rem;
 	height: 2px;
 	background: var(--cr-russian-violet);
 	transform: rotate(var(--cr-rotate-neg));
