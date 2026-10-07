@@ -1068,6 +1068,8 @@ body.cr-recipe-single .cr-binder-recipe__more:not(:has(.wprm-recipe-header)) {
 	flex-wrap: wrap;
 	gap: 0.25rem 0.9rem;
 	margin: 0.45rem 0 0;
+	padding-inline: 0;
+	overflow: hidden;
 	font-family: var(--cr-font-body);
 	font-size: var(--cr-text-sm);
 	line-height: var(--cr-leading-snug);
@@ -1079,6 +1081,21 @@ body.cr-recipe-single .cr-binder-recipe__more:not(:has(.wprm-recipe-header)) {
 	display: inline-flex;
 	gap: 0.4rem;
 	align-items: center;
+}
+
+/* A rule halfway across the gap between course and time. When the time
+   wraps to its own line, the row's overflow clips the rule. */
+.cr-stream-page .pk-card.k-recipe.cr-recipe-stream .pk-recipe-course + .pk-recipe-time {
+	position: relative;
+}
+
+.cr-stream-page .pk-card.k-recipe.cr-recipe-stream .pk-recipe-course + .pk-recipe-time::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: calc(-0.45rem - 0.5px);
+	border-left: 1px solid var(--cr-periwinkle);
 }
 
 .cr-stream-page .pk-card.k-recipe.cr-recipe-stream .pk-recipe-course::before,
