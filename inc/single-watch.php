@@ -126,7 +126,9 @@ function find_watch_block( \WP_Post $post ): ?array {
 }
 
 /**
- * The factual line for a watch: year · type (· S1E2 for television).
+ * The factual line for a watch: year · type · director. Television reads
+ * S1E2 only when both numbers are stored; one alone reads "Season 1" or
+ * "Episode 2", so the line never prints a number the post doesn't hold.
  *
  * @param array<string, mixed> $attrs Block attributes.
  * @return string[] Parts, in order.
@@ -143,9 +145,15 @@ function film_facts( array $attrs ): array {
 	} else {
 		$season  = (int) ( $attrs['seasonNumber'] ?? 0 );
 		$episode = (int) ( $attrs['episodeNumber'] ?? 0 );
-		$parts[] = ( $season > 0 || $episode > 0 )
-			? sprintf( 'S%dE%d', $season, $episode )
-			: __( 'TV', 'courtneyr-child' );
+		if ( $season > 0 && $episode > 0 ) {
+			$parts[] = sprintf( 'S%dE%d', $season, $episode );
+		} elseif ( $season > 0 ) {
+			$parts[] = sprintf( /* translators: %d: season */ __( 'Season %d', 'courtneyr-child' ), $season );
+		} elseif ( $episode > 0 ) {
+			$parts[] = sprintf( /* translators: %d: episode */ __( 'Episode %d', 'courtneyr-child' ), $episode );
+		} else {
+			$parts[] = __( 'TV', 'courtneyr-child' );
+		}
 	}
 	$director = trim( (string) ( $attrs['director'] ?? '' ) );
 	if ( '' !== $director ) {
@@ -331,14 +339,22 @@ function journal_page( string $html, array $block ): string {
 		}
 	}
 
-	// 3. The kind label becomes the flap marking.
+	// 3. The kind label becomes the flap marking. Post Kinds prints the
+	// label as a <span> since 1.8.6 (a <p> before); either is written back
+	// as the <p> that step 3b looks for and inc/a11y-output.php turns into
+	// a <span> after every relabel.
 	$label = '<p class="pk-kindlabel">';
-	$lpos  = strpos( $html, $label );
-	if ( false !== $lpos ) {
-		$lend = strpos( $html, '</p>', $lpos );
-		if ( false !== $lend ) {
-			$html = substr( $html, 0, $lpos ) . $label . esc_html__( 'Watch · VHS', 'courtneyr-child' ) . substr( $html, $lend );
+	foreach ( array( 'span', 'p' ) as $ltag ) {
+		$lpos = strpos( $html, '<' . $ltag . ' class="pk-kindlabel">' );
+		if ( false === $lpos ) {
+			continue;
 		}
+		$lclose = '</' . $ltag . '>';
+		$lend   = strpos( $html, $lclose, $lpos );
+		if ( false !== $lend ) {
+			$html = substr( $html, 0, $lpos ) . $label . esc_html__( 'Watch · VHS', 'courtneyr-child' ) . '</p>' . substr( $html, $lend + strlen( $lclose ) );
+		}
+		break;
 	}
 
 	$ts = ! empty( $attrs['watchedAt'] ) ? (int) strtotime( (string) $attrs['watchedAt'] ) : 0;

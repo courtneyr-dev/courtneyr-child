@@ -185,16 +185,18 @@ function decorative_duplicate_featured_image( string $content, array $block, \WP
 add_filter( 'render_block_core/post-featured-image', __NAMESPACE__ . '\\decorative_duplicate_featured_image', 10, 3 );
 
 /**
- * Post Kinds prints its kind label as <p class="pk-kindlabel">. It is a label,
- * not prose, and on single pages the theme sets it large enough that checkers
- * read a short, large <p> as a heading. Swap the tag; the class-based CSS
+ * Post Kinds prints its kind label as <span class="pk-kindlabel"> since 1.8.6
+ * (<p class="pk-kindlabel"> before). It is a label, not prose, and on single
+ * pages the theme sets it large enough that checkers read a short, large <p>
+ * as a heading. Swap any <p> label for a <span>; the class-based CSS
  * (inline-block, explicit margin) renders identically.
  *
- * The theme's own relabels (stream-checkin, single-checkin, single-watch,
- * single-eat-drink, stream-media, aside-scrap) match the <p> literal, so this
- * must run after all of them: on the OUTER blocks, via the block-specific
- * hooks (which WordPress fires after the generic render_block filters) at a
- * late priority. Inner card blocks are left alone.
+ * The theme's own relabels (single-checkin, single-watch, stream-media,
+ * aside-scrap) accept either tag and write the new text back as a <p>, and
+ * stream-checkin inserts after either tag, so this must run after all of
+ * them: on the OUTER blocks, via the block-specific hooks (which WordPress
+ * fires after the generic render_block filters) at a late priority. Inner
+ * card blocks are left alone.
  *
  * @param string $content Rendered block.
  * @return string
