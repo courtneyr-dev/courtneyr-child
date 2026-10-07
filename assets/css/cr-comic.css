@@ -852,12 +852,15 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 /* Wide screens: the bag stands left of the header, notes and record.
    The header and the post content are siblings in <main>, so the content's
    wrappers step aside (display: contents) and the bag, notes and record
-   join the header as items of one grid. The gap leaves room for the H1's
-   own flank marks (format avatar, starburst), which hang to its left. */
+   join the header as items of one grid. The bag grows with the screen,
+   from 22rem at 64rem to 36rem (about 34rem at 1536px), so it takes most
+   of the first screen's height. The gap stays 8rem: the H1's format
+   avatar hangs 7.25rem to its left and the bag's hard shadow 6px to its
+   right, so a narrower gap would put the avatar on the COMIC sticker. */
 @media (min-width: 64rem) {
 
 	body.cr-comic-single main.single-post {
-		--comic-bag: 22rem;
+		--comic-bag: clamp(22rem, 40vw - 4rem, 36rem);
 		--comic-gap: 8rem;
 		display: grid;
 		grid-template-columns:
@@ -896,15 +899,20 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 		margin: 0.5rem 0 0;
 	}
 
+	/* Beside the tall bag the notes and the record stay sheets, not strips:
+	   at least nine notebook rules and eight card rules, so a short note
+	   leaves blank ruled lines under it the way the paper would. */
 	body.cr-comic-single .cr-journal--comic > .cr-journal__notes {
 		grid-column: details;
 		grid-row: 2;
+		min-height: calc(1.7rem * 9);
 		margin-top: 2rem;
 	}
 
 	body.cr-comic-single .cr-journal--comic > .cr-record {
 		grid-column: details;
 		grid-row: 3;
+		min-height: calc(1.9rem * 8);
 		margin-top: 2rem;
 	}
 
