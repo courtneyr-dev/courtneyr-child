@@ -223,14 +223,21 @@ function journal_page( string $html, array $block ): string {
 	if ( false === $close ) {
 		return $html;
 	}
-	$html  = substr( $html, 0, $close ) . render_stamps( $attrs, $post ) . substr( $html, $close );
+	$html = substr( $html, 0, $close ) . render_stamps( $attrs, $post ) . substr( $html, $close );
+	// Post Kinds prints the label as a <span> since 1.8.6 (a <p> before);
+	// either is written back as the <p> inc/a11y-output.php expects.
 	$label = '<p class="pk-kindlabel">';
-	$lpos  = strpos( $html, $label );
-	if ( false !== $lpos ) {
-		$lend = strpos( $html, '</p>', $lpos );
-		if ( false !== $lend ) {
-			$html = substr( $html, 0, $lpos ) . $label . esc_html__( 'Checked in at', 'courtneyr-child' ) . substr( $html, $lend );
+	foreach ( array( 'span', 'p' ) as $ltag ) {
+		$lpos = strpos( $html, '<' . $ltag . ' class="pk-kindlabel">' );
+		if ( false === $lpos ) {
+			continue;
 		}
+		$lclose = '</' . $ltag . '>';
+		$lend   = strpos( $html, $lclose, $lpos );
+		if ( false !== $lend ) {
+			$html = substr( $html, 0, $lpos ) . $label . esc_html__( 'Checked in at', 'courtneyr-child' ) . '</p>' . substr( $html, $lend + strlen( $lclose ) );
+		}
+		break;
 	}
 
 	// 4. What follows the card: margin notes, notes section, snapshot,
