@@ -950,7 +950,9 @@ test( 'the comics archive is a rack of bagged comics, one title link each, no me
 // one rotation token while the shelf tag stays upright. One broad reflection
 // fades at both edges; one hard shadow lifts the bag off the rack. The status
 // sticker is on the plastic: small, tilted, hand-lettered on two lines, with
-// plastic showing above and beside it. Nothing here adds content.
+// plastic showing above and beside it. Its lettering is at least the text
+// floor and its ink stays inside the circle, forced colours included.
+// Nothing here adds content.
 test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft reflection, small tilted hand-lettered sticker', async ( { page } ) => {
 	await page.goto( COMICS_ARCHIVE, { waitUntil: 'load' } );
 	await page.evaluate( () => document.fonts.ready );
@@ -999,6 +1001,47 @@ test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft
 			range.selectNodeContents( n );
 			return new Set( [ ...range.getClientRects() ].map( ( r ) => Math.round( r.top ) ) ).size;
 		};
+		// How far the lettering's ink reaches past the circle's inner edge, in
+		// px, read untilted (nothing above the sticker is transformed). Rock
+		// Salt's font box is far taller than its ink, so each line's glyph
+		// bounds come from canvas metrics, not from the text boxes.
+		const inkPastCircle = ( n ) => {
+			const cs = getComputedStyle( n );
+			const tilt = n.style.transform;
+			n.style.transform = 'none';
+			const box = n.getBoundingClientRect();
+			const cx = box.left + box.width / 2;
+			const cy = box.top + box.height / 2;
+			const radius = box.width / 2 - parseFloat( cs.borderTopWidth );
+			const pen = document.createElement( 'canvas' ).getContext( '2d' );
+			pen.font = `${ cs.fontWeight } ${ cs.fontSize } ${ cs.fontFamily }`;
+			const text = n.firstChild;
+			const range = document.createRange();
+			const rows = new Map();
+			for ( let i = 0; i < text.length; i++ ) {
+				range.setStart( text, i );
+				range.setEnd( text, i + 1 );
+				const r = range.getClientRects()[ 0 ];
+				const key = r && Math.round( r.top );
+				if ( r && ( rows.has( key ) || /\S/.test( text.data[ i ] ) ) ) {
+					const row = rows.get( key ) || { top: r.top, left: r.left, text: '' };
+					row.text += text.data[ i ];
+					rows.set( key, row );
+				}
+			}
+			let past = -Infinity;
+			for ( const row of rows.values() ) {
+				const m = pen.measureText( row.text.trimEnd() );
+				const base = row.top + m.fontBoundingBoxAscent;
+				for ( const x of [ row.left - m.actualBoundingBoxLeft, row.left + m.actualBoundingBoxRight ] ) {
+					for ( const y of [ base - m.actualBoundingBoxAscent, base + m.actualBoundingBoxDescent ] ) {
+						past = Math.max( past, Math.hypot( x - cx, y - cy ) - radius );
+					}
+				}
+			}
+			n.style.transform = tilt;
+			return past;
+		};
 		return {
 			rack: list.clientWidth,
 			sleeve: { width: media.offsetWidth, height: media.offsetHeight, bounds: bounds( media ) },
@@ -1026,6 +1069,10 @@ test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft
 				border: rgb( getComputedStyle( sticker ).borderTopColor ),
 				lines: lines( sticker ),
 				text: sticker.textContent.trim(),
+				size: parseFloat( getComputedStyle( sticker ).fontSize ),
+				floor: parseFloat( probe( 'fontSize', 'var(--cr-text-floor)' ) ),
+				overflow: [ sticker.scrollWidth - sticker.clientWidth, sticker.scrollHeight - sticker.clientHeight ],
+				spill: inkPastCircle( sticker ),
 			} : null,
 			paint: { yellow: rgb( probe( 'color', 'var(--cr-selective-yellow)' ) ), violet: rgb( probe( 'color', 'var(--cr-russian-violet)' ) ) },
 			ring: { style: ring.outlineStyle, offset: parseFloat( ring.outlineOffset ), box: ( () => {
@@ -1106,10 +1153,13 @@ test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft
 		// The sticker is on the plastic: small, tilted, hand-lettered, with plastic above and beside it.
 		if ( o.sticker ) {
 			if ( wide ) {
-				expect( o.sticker.width / o.sleeve.width, 'the sticker is 28 to 30% of the bag' ).toBeGreaterThanOrEqual( 0.275 );
-				expect( o.sticker.width / o.sleeve.width ).toBeLessThanOrEqual( 0.305 );
+				expect( o.sticker.width / o.sleeve.width, 'the sticker is about 40% of the bag' ).toBeGreaterThanOrEqual( 0.38 );
+				expect( o.sticker.width / o.sleeve.width ).toBeLessThanOrEqual( 0.415 );
 			}
 			expect( o.sticker.font, 'hand-lettered' ).toMatch( /^"?Rock Salt/ );
+			expect( o.sticker.size, `"${ o.sticker.text }" is lettered at the text floor or larger` ).toBeGreaterThanOrEqual( o.sticker.floor );
+			expect( o.sticker.overflow, 'and fits the sticker' ).toEqual( [ 0, 0 ] );
+			expect( o.sticker.spill, 'with its ink inside the circle' ).toBeLessThanOrEqual( 0 );
 			expect( o.sticker.tilt, 'the sticker is tilted' ).not.toBe( 0 );
 			expect( o.tilts, 'by a rotation token' ).toContain( o.sticker.tilt );
 			expect( [ o.sticker.fill, o.sticker.ink, o.sticker.border ], 'yellow, or its status colour, with violet ink and border' ).toEqual( [ o.sticker.fill, o.paint.violet, o.paint.violet ] );
@@ -1145,6 +1195,15 @@ test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft
 	expect( forced.shadow.value, 'no shadow in forced colours' ).toBe( 'none' );
 	expect( forced.edge.style ).toBe( 'solid' );
 	expect( forced.edge.width ).toBeGreaterThanOrEqual( 1 );
+	// The sticker's border thickens in forced colours; every status still fits.
+	for ( const card of await bagged.all() ) {
+		const { sticker } = await card.evaluate( measure );
+		if ( sticker ) {
+			expect( sticker.size, `"${ sticker.text }" keeps the text floor in forced colours` ).toBeGreaterThanOrEqual( sticker.floor );
+			expect( sticker.overflow, 'and fits the sticker' ).toEqual( [ 0, 0 ] );
+			expect( sticker.spill, 'with its ink inside the circle' ).toBeLessThanOrEqual( 0 );
+		}
+	}
 } );
 
 // PKIW #228: a comic read's single keeps the bagged comic left of the post
