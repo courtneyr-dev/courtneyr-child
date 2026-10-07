@@ -976,8 +976,18 @@ test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft
 	// Relative luminance of an "r g b" string, and one colour laid over another at an alpha.
 	const luminance = ( c ) => c.split( ' ' ).map( ( n ) => n / 255 ).map( ( n ) => ( n <= 0.03928 ? n / 12.92 : ( ( n + 0.055 ) / 1.055 ) ** 2.4 ) ).reduce( ( sum, n, i ) => sum + n * [ 0.2126, 0.7152, 0.0722 ][ i ], 0 );
 	const over = ( top, a, under ) => top.split( ' ' ).map( ( n, i ) => Math.round( n * a + under.split( ' ' )[ i ] * ( 1 - a ) ) ).join( ' ' );
+	// Reach each title link with Tab, as a keyboard user does. The ring is a
+	// :focus-visible rule (cr-comic.css), and element.focus() after setup closed
+	// the consent dialog with a mouse click matches :focus-visible in some runs
+	// and not others, so it could read no ring.
 	for ( const card of await bagged.all() ) {
-		await card.locator( '.pk-title a' ).focus();
+		const link = card.locator( '.pk-title a' );
+		let presses = 0;
+		while ( presses < 100 && ! await link.evaluate( ( el ) => el === document.activeElement ) ) {
+			await page.keyboard.press( 'Tab' );
+			presses++;
+		}
+		expect( await link.evaluate( ( el ) => el === document.activeElement ), 'Tab reaches the comic\'s title link' ).toBe( true );
 		const o = await card.evaluate( measure );
 		// Scale: about a fifth of the rack on a wide screen.
 		if ( wide ) {
@@ -1140,14 +1150,17 @@ test( 'a comic single is a bagged comic beside its header, notes and reading rec
 	} );
 	expect( husks, 'no empty wrapper is left where the repeats were' ).toEqual( [] );
 	// The "Read / find it" link's focus ring holds 3:1 against the page: it has the halo.
-	const sourceFocus = await page.evaluate( () => {
-		const a = document.querySelector( '.cr-journal--comic .pk-sources__link' );
-		if ( ! a ) return null;
-		a.focus();
-		return getComputedStyle( a ).boxShadow;
-	} );
-	if ( sourceFocus !== null ) {
-		expect( sourceFocus ).toMatch( /0px 0px 0px 8px/ );
+	// Reach it with Tab: the halo is a :focus-visible rule (cr-comic.css), which
+	// element.focus() after setup's mouse click doesn't always match.
+	const source = page.locator( '.cr-journal--comic .pk-sources__link' ).first();
+	if ( await source.count() ) {
+		let presses = 0;
+		while ( presses < 100 && ! await source.evaluate( ( el ) => el === document.activeElement ) ) {
+			await page.keyboard.press( 'Tab' );
+			presses++;
+		}
+		expect( await source.evaluate( ( el ) => el === document.activeElement ), 'Tab reaches the "Read / find it" link' ).toBe( true );
+		expect( await source.evaluate( ( el ) => getComputedStyle( el ).boxShadow ) ).toMatch( /0px 0px 0px 8px/ );
 	}
 	const spread = await page.evaluate( () => {
 		const b = document.querySelector( 'article.cr-comic--single' ).getBoundingClientRect();
@@ -1830,7 +1843,7 @@ test( 'a link keeps its 3px focus ring when a script writes a thinner outline in
 	expect( checked, 'at least one link was checked' ).toBeGreaterThan( 0 );
 } );
 
-// courtneyr-child#95: the consent dialog belongs to the consent plugin, so this
+// courtneyr-child#109: the consent dialog belongs to the consent plugin, so this
 // test keeps it open to keep its effect on record. Complianz traps Tab inside
 // the dialog but leaves the page behind it focusable (no inert), so focus that
 // arrives another way (pointer, script, assistive technology) can sit under it.
@@ -1849,7 +1862,7 @@ test.describe( 'with the consent dialog open', () => {
 		const dialog = page.locator( '.cmplz-cookiebanner' ).filter( { visible: true } );
 		await dialog.first().waitFor( { state: 'visible', timeout: 5000 } ).catch( () => {} );
 		test.skip( 0 === await dialog.count(), 'no consent dialog on this site' );
-		test.fail( true, 'Complianz leaves the page focusable under its dialog (courtneyr-child#95)' );
+		test.fail( true, 'Complianz leaves the page focusable under its dialog (courtneyr-child#109)' );
 		const state = await page.evaluate( () => {
 			const box = document.querySelector( '.cmplz-cookiebanner:not(.cmplz-hidden)' ).getBoundingClientRect();
 			const hidden = [];
@@ -2136,8 +2149,16 @@ test( 'the Stream shows an eat or drink post as one compact card with one link a
 		expect( o.stars ).toBe( 0 );
 		expect( o.date ).toBe( 1 );
 		expect( o.food ).toBe( true );
-		await card.locator( 'a.cr-chit__link' ).focus();
-		const ring = await card.locator( 'a.cr-chit__link' ).evaluate( ( el ) => {
+		// Reach the link with Tab: the ring is a :focus-visible rule (cr-eat-drink.css),
+		// which element.focus() after setup's mouse click doesn't always match.
+		const link = card.locator( 'a.cr-chit__link' );
+		let presses = 0;
+		while ( presses < 100 && ! await link.evaluate( ( el ) => el === document.activeElement ) ) {
+			await page.keyboard.press( 'Tab' );
+			presses++;
+		}
+		expect( await link.evaluate( ( el ) => el === document.activeElement ), 'Tab reaches the card\'s link' ).toBe( true );
+		const ring = await link.evaluate( ( el ) => {
 			const cs = getComputedStyle( el, '::after' );
 			return [ cs.outlineStyle, parseFloat( cs.outlineWidth ) ];
 		} );
