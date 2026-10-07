@@ -608,9 +608,11 @@ test( 'the listen shelf empties cover alt, loads the first row first and drops a
 // PKIW #227: the watch archive's page 1 is a "New releases" shelf of up to
 // three face-out clamshells and an "All watches" shelf of spines, each a
 // real h2 over card titles at h3. Later pages are all spines. A spine is
-// one link (its title) and its markup holds none of the card's metadata,
-// which stays on the single; no players anywhere on the shelf.
+// one link (its title) and its markup holds none of the card's metadata
+// (review and kind badge included) on any page, which stays on the
+// single; no players anywhere on the shelf.
 test( 'the watch archive is labelled VHS shelves, face-out new releases then titled spines', async ( { page } ) => {
+	const singleOnly = '.pk-sub, .pk-stars, .p-rating, .pk-media, .pk-sources, .pk-meta, .pk-kindlabel, .pk-note, .pk-badge';
 	await page.goto( WATCH_ARCHIVE, { waitUntil: 'load' } );
 	const shelf = page.locator( '.cr-archive--watch .cr-vhs-shelf' );
 	await expect( shelf ).toHaveCount( 1 );
@@ -632,7 +634,7 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 		for ( const item of await spines.all() ) {
 			const visibleLinks = await item.evaluate( ( li ) => [ ...li.querySelectorAll( 'a' ) ].filter( ( a ) => a.getClientRects().length > 0 ).length );
 			expect( visibleLinks, 'a spine is one link' ).toBe( 1 );
-			expect( await item.locator( '.pk-sub, .pk-stars, .p-rating, .pk-media, .pk-sources, .pk-meta, .pk-kindlabel' ).count(), 'a spine\'s markup is its title alone' ).toBe( 0 );
+			expect( await item.locator( singleOnly ).count(), 'a spine\'s markup is its title alone' ).toBe( 0 );
 			const mode = await item.locator( '.pk-caption' ).evaluate( ( el ) => getComputedStyle( el ).writingMode );
 			expect( mode ).toBe( 'vertical-rl' );
 		}
@@ -640,18 +642,31 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 	const decor = await page.locator( '.cr-archive--watch .cr-vhs-shelf' ).evaluate( ( el ) => getComputedStyle( el, '::before' ).backgroundImage );
 	expect( decor, 'the TV still life is a CSS background on the unit, not content' ).toContain( 'cr-tv-vcr.svg' );
 	expect( await page.locator( '.cr-archive--watch .cr-vhs-shelf img, .cr-archive--watch .cr-vhs-shelf svg' ).evaluateAll( ( els ) => els.filter( ( e ) => ! e.closest( '.pk-card' ) ).length ), 'no decoration enters the DOM' ).toBe( 0 );
+
+	const later = await page.goto( `${ WATCH_ARCHIVE }page/2/`, { waitUntil: 'load' } );
+	if ( 404 !== later.status() ) {
+		const laterShelf = page.locator( '.cr-archive--watch .cr-vhs-shelf' );
+		expect( await laterShelf.locator( 'ul.cr-vhs-shelf__list--face' ).count(), 'page 2 has no face-out shelf' ).toBe( 0 );
+		const laterSpines = laterShelf.locator( 'ul.cr-vhs-shelf__list--spine[aria-labelledby="cr-vhs-all"] > li' );
+		expect( await laterSpines.count(), 'page 2 is a shelf of spines' ).toBeGreaterThan( 0 );
+		expect( await laterSpines.locator( singleOnly ).count(), 'a page 2 spine\'s markup is its title alone' ).toBe( 0 );
+	}
 } );
 
 // PKIW #227: page 1's face-out covers are the first row, so each loads
-// eagerly at high priority (the contract's accessibility floor), with no
-// preload link; later pages ask for none. Every other image is lazy, as
-// loading="lazy" or as Perfmatters' data-src swap (perfmatters-lazy),
-// which drops the loading attribute. A cover from the media library keeps
-// core's srcset. Each case's h-cite cites what was watched: its u-url is
+// eagerly with an empty alt (the title names the case), and the first
+// cover alone asks for high priority, as #106 did: on a phone the row is
+// one column, so the other covers sit below the first screen. No preload
+// link; later pages ask for none. An eager cover's sizes names its width
+// and never starts with `auto`, which is valid only on a lazy image.
+// Every other image is lazy, as loading="lazy" or as Perfmatters'
+// data-src swap (perfmatters-lazy), which drops the loading attribute. A
+// cover from the media library keeps core's srcset. Each case's h-cite
+// cites what was watched: its u-url is
 // the stored watch URL when that is a real http(s) URL, never the post,
 // so the title that links to the post carries no u-url, and the entry
 // keeps exactly one u-url, its permalink.
-test( 'the watch archive loads its first-row covers eagerly at high priority and each case cites what was watched, not the post (PKIW #227)', async ( { page } ) => {
+test( 'the watch archive loads its first-row covers eagerly, the first at high priority, and each case cites what was watched, not the post (PKIW #227)', async ( { page } ) => {
 	let checked = 0;
 	for ( const [ n, path ] of [ WATCH_ARCHIVE, `${ WATCH_ARCHIVE }page/2/` ].entries() ) {
 		const response = await page.goto( path, { waitUntil: 'load' } );
@@ -685,7 +700,9 @@ test( 'the watch archive loads its first-row covers eagerly at high priority and
 			const covers = [ ...el.querySelectorAll( 'ul.cr-vhs-shelf__list--face > li .pk-media img' ) ];
 			return {
 				covers: covers.length,
-				high: [ ...document.querySelectorAll( 'img[fetchpriority="high"]' ) ].map( ( i ) => covers.includes( i ) ),
+				high: [ ...document.querySelectorAll( 'img[fetchpriority="high"]' ) ].map( ( i ) => covers.indexOf( i ) ),
+				coverAlts: covers.map( ( i ) => i.getAttribute( 'alt' ) ),
+				autoSizes: covers.filter( ( i ) => /^\s*auto\b/i.test( i.getAttribute( 'sizes' ) ?? i.getAttribute( 'data-sizes' ) ?? '' ) ).length,
 				lazyCovers: covers.filter( ( i ) => 'lazy' === i.getAttribute( 'loading' ) || i.classList.contains( 'perfmatters-lazy' ) ).length,
 				imagePreloads: document.querySelectorAll( 'link[rel="preload"][as="image"]' ).length,
 				eagerNotCover: imgs.filter( ( i ) => ! covers.includes( i ) && 'lazy' !== i.getAttribute( 'loading' ) && ! i.classList.contains( 'perfmatters-lazy' ) ).length,
@@ -702,8 +719,12 @@ test( 'the watch archive loads its first-row covers eagerly at high priority and
 				} ),
 			};
 		} );
-		expect.soft( report.high.every( Boolean ), `${ path }: every image at high priority is a face-out cover` ).toBe( true );
-		expect.soft( report.high.length, `${ path }: every face-out cover is at high priority` ).toBe( report.covers );
+		if ( 0 === n ) {
+			expect( report.covers, `${ path }: the first row holds a stored cover` ).toBeGreaterThan( 0 );
+		}
+		expect.soft( report.high, `${ path }: the first face-out cover is the one image at high priority` ).toEqual( report.covers ? [ 0 ] : [] );
+		expect.soft( report.coverAlts.filter( ( alt ) => '' !== alt ), `${ path }: every face-out cover's alt is empty` ).toEqual( [] );
+		expect.soft( report.autoSizes, `${ path }: no eager cover's sizes starts with auto` ).toBe( 0 );
 		expect.soft( report.lazyCovers, `${ path }: no face-out cover loads lazily` ).toBe( 0 );
 		expect.soft( report.imagePreloads, `${ path }: no image preload` ).toBe( 0 );
 		expect.soft( report.eagerNotCover, `${ path }: every other image loads lazily` ).toBe( 0 );
