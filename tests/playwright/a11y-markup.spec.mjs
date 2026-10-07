@@ -1371,7 +1371,9 @@ test( 'the recipe archive is a binder of four recipe cards, one title link each,
 	}
 
 	// Later pages promote their own top cards.
-	const nextPage = await page.locator( '.cr-archive--recipes .wp-block-query-pagination a.wp-block-query-pagination-next' ).getAttribute( 'href' ).catch( () => null );
+	// Count first: getAttribute() on a missing link waits out the test's timeout.
+	const next = page.locator( '.cr-archive--recipes .wp-block-query-pagination a.wp-block-query-pagination-next' );
+	const nextPage = ( await next.count() ) ? await next.first().getAttribute( 'href' ) : null;
 	if ( nextPage ) {
 		await page.goto( nextPage, { waitUntil: 'load' } );
 		checkPriority( await priority() );
