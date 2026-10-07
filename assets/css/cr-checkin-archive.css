@@ -159,8 +159,22 @@
 		grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
 	}
 
+	/*
+	 * The map stays in view while the list scrolls. It sticks below the
+	 * sticky header (admin bar included) and is no taller than the space
+	 * under it, so Leaflet fits the pins inside the first screen instead of
+	 * the middle of a list-tall column. The grid still stretches it, so a
+	 * short list keeps a map no taller than the list.
+	 *
+	 * Literal offsets, not components.css tokens: components.css loads
+	 * after first paint, and Leaflet measures the map when its deferred
+	 * script runs. This file blocks rendering, so the height is final then.
+	 */
 	.cr-checkin-archive .pkiw-checkin-archive__map {
-		min-height: 30rem;
+		position: sticky;
+		top: calc(var(--wp-admin--admin-bar--height, 0px) + 4rem + var(--wp--preset--spacing--small, 1rem));
+		min-height: min(30rem, calc(100svh - var(--wp-admin--admin-bar--height, 0px) - 4rem - 2 * var(--wp--preset--spacing--small, 1rem)));
+		max-height: calc(100svh - var(--wp-admin--admin-bar--height, 0px) - 4rem - 2 * var(--wp--preset--spacing--small, 1rem));
 		border-block-end: 0;
 		border-inline-end: 2px dashed var(--cr-ink);
 	}
