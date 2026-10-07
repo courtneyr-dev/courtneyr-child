@@ -230,6 +230,73 @@ function cut_div( string $html, string $open ): string {
 }
 
 /**
+ * Whether a stored URL is an absolute http(s) URL with a hostname.
+ *
+ * FILTER_VALIDATE_URL rejects a title typed into the URL field, which
+ * esc_url() prints as "http://ted%20lasso".
+ *
+ * @param string $url URL.
+ * @return bool
+ */
+function is_web_url( string $url ): bool {
+	return in_array( strtolower( (string) wp_parse_url( $url, PHP_URL_SCHEME ) ), array( 'http', 'https' ), true )
+		&& false !== filter_var( $url, FILTER_VALIDATE_URL );
+}
+
+/**
+ * Make a watch card's h-cite cite what was watched, not the post (PKIW #227).
+ *
+ * Before PKIW 329, link_title_to_post() pointed a Stream card's title at
+ * the post and kept the title's u-url, so the watch-of h-cite named the
+ * post as the thing watched; the watched URL sat in a hidden <data> with
+ * no class. Inside the card, a u-url link to the post loses u-url (the
+ * title still links to the post). When nothing else in the card is a
+ * u-url, the first unclassed hidden <data> holding a web URL becomes one.
+ * Since PKIW 329 the plugin moves the title's URL to a hidden
+ * <data class="u-url"> itself, and this leaves that card as it is. The
+ * entry keeps its one u-url, the plugin's `.pk-entry-props` data outside
+ * the card.
+ *
+ * @param string $html      Rendered stream card.
+ * @param string $permalink The post's permalink.
+ * @return string
+ */
+function cite_watched_url( string $html, string $permalink ): string {
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	if ( ! $tags->next_tag(
+		array(
+			'tag_name'   => 'article',
+			'class_name' => 'h-cite',
+		)
+	) ) {
+		return $html;
+	}
+	$depth   = 1;
+	$cited   = false;
+	$watched = false;
+	while ( $depth > 0 && $tags->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
+		$tag = $tags->get_tag();
+		if ( 'ARTICLE' === $tag ) {
+			$depth += $tags->is_tag_closer() ? -1 : 1;
+		} elseif ( $tags->is_tag_closer() ) {
+			continue;
+		} elseif ( $tags->has_class( 'u-url' ) ) {
+			if ( 'A' === $tag && $permalink === $tags->get_attribute( 'href' ) ) {
+				$tags->remove_class( 'u-url' );
+			} else {
+				$cited = true;
+			}
+		} elseif ( ! $watched && 'DATA' === $tag && null === $tags->get_attribute( 'class' ) && null !== $tags->get_attribute( 'hidden' ) && is_web_url( (string) $tags->get_attribute( 'value' ) ) ) {
+			$watched = $tags->set_bookmark( 'watched' );
+		}
+	}
+	if ( ! $cited && $watched && $tags->seek( 'watched' ) ) {
+		$tags->add_class( 'u-url' );
+	}
+	return $tags->get_updated_html();
+}
+
+/**
  * Dress a watch or listen stream card as its object.
  *
  * @param string    $html     Rendered stream card.
@@ -307,23 +374,14 @@ function media_card( string $html, array $block, $instance ): string {
 		// (in place of the plugin's poster art), as the generic stream card
 		// did; a post without one keeps whatever the plugin rendered.
 		if ( has_post_thumbnail( $post ) ) {
-			// The watch shelf's face-out covers (page 1, first NEW_RELEASES
-			// posts) load eagerly: they sit at the top of the archive, and
-			// Perfmatters' lazy load skips an image whose fetchpriority is
-			// high, so its fade-in can't hold the recess empty (PKIW #227).
+			// Lazy here; on the watch shelf, MediaShelf\load_order() lifts
+			// the first face-out cover to high priority (PKIW #227).
 			$thumb_attrs = array(
 				'class'   => 'u-photo',
 				'loading' => 'lazy',
 			);
-			if ( 'watch' === $shelf && ! is_paged() && in_the_loop() && $GLOBALS['wp_query']->current_post < \Courtneyr\Child\MediaShelf\NEW_RELEASES ) {
-				$thumb_attrs = array(
-					'class'         => 'u-photo',
-					'loading'       => 'eager',
-					'fetchpriority' => 'high',
-				);
-			}
-			$thumb = '<div class="pk-media pk-media--stream">' . get_the_post_thumbnail( $post, 'medium_large', $thumb_attrs ) . '</div>';
-			$m_pos = strpos( $html, '<div class="pk-media' );
+			$thumb       = '<div class="pk-media pk-media--stream">' . get_the_post_thumbnail( $post, 'medium_large', $thumb_attrs ) . '</div>';
+			$m_pos       = strpos( $html, '<div class="pk-media' );
 			if ( false !== $m_pos ) {
 				$m_open = substr( $html, $m_pos, strpos( $html, '>', $m_pos ) - $m_pos + 1 );
 				$html   = cut_div( $html, $m_open );
@@ -404,6 +462,10 @@ function media_card( string $html, array $block, $instance ): string {
 	} elseif ( '' !== $date_html ) {
 		$close = strrpos( $html, '</article>' );
 		$html  = false === $close ? $html . $date_html : substr( $html, 0, $close ) . $date_html . substr( $html, $close );
+	}
+
+	if ( 'watch' === $kind ) {
+		$html = cite_watched_url( $html, (string) get_permalink( $post ) );
 	}
 
 	$html = \Courtneyr\Child\Journal\skip_lazy_iframes( $html );
