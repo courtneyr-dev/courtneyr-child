@@ -166,6 +166,7 @@ function split_vhs_shelf( string $html, array $block ): string {
 	}
 
 	$paged   = max( 1, (int) get_query_var( 'paged' ) );
+	$parts   = load_order( $parts, 1 === $paged );
 	$face    = 1 === $paged ? array_map( __NAMESPACE__ . '\\case_only', array_slice( $parts, 0, NEW_RELEASES ) ) : array();
 	$spine   = 1 === $paged ? array_slice( $parts, NEW_RELEASES ) : $parts;
 	$heading = static fn( string $id, string $text ): string => '<h2 class="cr-vhs-shelf__label" id="' . esc_attr( $id ) . '">' . esc_html( $text ) . '</h2>';
@@ -187,6 +188,55 @@ function split_vhs_shelf( string $html, array $block ): string {
 	return '<div class="cr-vhs-shelf">' . $out . '</div>';
 }
 add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\split_vhs_shelf', 10, 2 );
+
+/**
+ * Ask for one cover at high priority and load the rest lazily (PKIW #227).
+ *
+ * On page 1 the first face-out cover, whether a featured image or the
+ * plugin's poster, is the one image the archive asks for first; when that
+ * case has no cover, none is. Every other cover and spine is lazy, which
+ * on the live site means Perfmatters' data-src swap (it drops
+ * loading="lazy" for its own, and skips an image at fetchpriority high).
+ * Later pages ask for none. Core keeps each attachment's srcset and sizes.
+ *
+ * @param string[] $items      Rendered <li> items in query order.
+ * @param bool     $first_page Whether this is page 1.
+ * @return string[]
+ */
+function load_order( array $items, bool $first_page ): array {
+	foreach ( $items as $i => $item ) {
+		$lead = $first_page && 0 === $i;
+		$tags = new \WP_HTML_Tag_Processor( $item );
+		while ( $tags->next_tag( 'img' ) ) {
+			if ( $lead ) {
+				$tags->set_attribute( 'fetchpriority', 'high' );
+				$tags->remove_attribute( 'loading' );
+				$lead = false;
+				continue;
+			}
+			$tags->set_attribute( 'loading', 'lazy' );
+			$tags->remove_attribute( 'fetchpriority' );
+		}
+		$items[ $i ] = $tags->get_updated_html();
+	}
+	return $items;
+}
+
+/**
+ * Keep Perfmatters' critical-image preload off the watch shelf (PKIW #227).
+ *
+ * The site option preloads the first two images on a page at
+ * fetchpriority high: two face-out covers on page 1, and on page 2 the
+ * first spine and the footer avatar. load_order() picks the shelf's one.
+ * Perfmatters reads this on `wp`, after the main query.
+ *
+ * @param mixed $count Images Perfmatters preloads.
+ * @return mixed
+ */
+function no_critical_image_preload( $count ) {
+	return 'watch' === shelf_kind() ? 0 : $count;
+}
+add_filter( 'perfmatters_preload_critical_images', __NAMESPACE__ . '\\no_critical_image_preload' );
 
 /**
  * Cut every element of one tag that carries a class from a fragment.

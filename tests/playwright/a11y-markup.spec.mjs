@@ -573,6 +573,77 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 	expect( await page.locator( '.cr-archive--watch .cr-vhs-shelf img, .cr-archive--watch .cr-vhs-shelf svg' ).evaluateAll( ( els ) => els.filter( ( e ) => ! e.closest( '.pk-card' ) ).length ), 'no decoration enters the DOM' ).toBe( 0 );
 } );
 
+// PKIW #227: the shelf asks for one image at high priority, the first
+// face-out cover on page 1, and nothing on later pages; every other cover
+// and spine is lazy, as loading="lazy" or as Perfmatters' data-src swap
+// (perfmatters-lazy), which drops the loading attribute. A cover from the
+// media library keeps core's srcset. Each case's h-cite cites what was
+// watched: its u-url is the stored watch URL when that is a real http(s)
+// URL, never the post, so the title that links to the post carries no
+// u-url, and the entry keeps exactly one u-url, its permalink.
+test( 'the watch archive asks for one cover at high priority and each case cites what was watched, not the post (PKIW #227)', async ( { page } ) => {
+	let checked = 0;
+	for ( const [ n, path ] of [ WATCH_ARCHIVE, `${ WATCH_ARCHIVE }page/2/` ].entries() ) {
+		const response = await page.goto( path, { waitUntil: 'load' } );
+		if ( 0 < n && 404 === response.status() ) {
+			continue;
+		}
+		const shelf = page.locator( '.cr-archive--watch .cr-vhs-shelf' );
+		await expect( shelf ).toHaveCount( 1 );
+		const report = await shelf.evaluate( ( el ) => {
+			const root = ( node ) => {
+				for ( let p = node.parentElement; p; p = p.parentElement ) {
+					if ( [ ...p.classList ].some( ( c ) => /^h-[a-z]+(-[a-z]+)*$/.test( c ) ) ) {
+						return p;
+					}
+				}
+				return null;
+			};
+			const urlOf = ( u ) => u.getAttribute( 'href' ) ?? u.getAttribute( 'value' ) ?? '';
+			// An http(s) URL whose host is a hostname. Chrome's URL parser
+			// takes "http://ted%20lasso" (a title typed into the URL field);
+			// PHP's FILTER_VALIDATE_URL, which the theme uses, does not.
+			const webUrl = ( value ) => {
+				try {
+					const url = new URL( value );
+					return [ 'http:', 'https:' ].includes( url.protocol ) && /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i.test( url.hostname );
+				} catch {
+					return false;
+				}
+			};
+			const imgs = [ ...el.querySelectorAll( 'img' ) ];
+			const first = el.querySelector( 'ul.cr-vhs-shelf__list--face > li:first-child img' );
+			return {
+				high: [ ...document.querySelectorAll( 'img[fetchpriority="high"]' ) ].map( ( i ) => i === first ),
+				imagePreloads: document.querySelectorAll( 'link[rel="preload"][as="image"]' ).length,
+				eagerNotFirst: imgs.filter( ( i ) => i !== first && 'lazy' !== i.getAttribute( 'loading' ) && ! i.classList.contains( 'perfmatters-lazy' ) ).length,
+				noSrcset: imgs.filter( ( i ) => i.classList.contains( 'wp-post-image' ) && ! i.getAttribute( 'srcset' ) && ! i.getAttribute( 'data-srcset' ) ).length,
+				cases: [ ...el.querySelectorAll( 'li.h-entry' ) ].map( ( li ) => {
+					const cite = li.querySelector( 'article.pk-card.h-cite' );
+					const permalink = li.querySelector( '.pk-title a' )?.href;
+					const own = ( r ) => [ ...li.querySelectorAll( '.u-url' ) ].filter( ( u ) => root( u ) === r ).map( urlOf );
+					const watched = [ ...cite.querySelectorAll( 'data[hidden]' ) ].filter( ( d ) => root( d ) === cite && ! d.classList.contains( 'u-uid' ) && ! d.classList.contains( 'p-rating' ) ).map( ( d ) => d.getAttribute( 'value' ) ).filter( webUrl );
+					// Since PKIW 329 the plugin also prints the title's URL as hidden
+					// data.u-url, so one watched URL can sit in two <data>; the
+					// h-cite should still name it once.
+					return { post: li.className.match( /\bpost-(\d+)/ )?.[ 1 ], permalink, entry: own( li ), cite: own( cite ), watched: [ ...new Set( watched ) ] };
+				} ),
+			};
+		} );
+		expect.soft( report.high.length, `${ path }: at most one image on the page at high priority` ).toBeLessThanOrEqual( 0 === n ? 1 : 0 );
+		expect.soft( report.high.every( Boolean ), `${ path }: the high-priority image is the first face-out cover` ).toBe( true );
+		expect.soft( report.imagePreloads, `${ path }: no image preload beyond that cover` ).toBeLessThanOrEqual( 0 === n ? 1 : 0 );
+		expect.soft( report.eagerNotFirst, `${ path }: every other cover and spine loads lazily` ).toBe( 0 );
+		expect.soft( report.noSrcset, `${ path }: media library covers keep core's srcset` ).toBe( 0 );
+		for ( const c of report.cases ) {
+			expect.soft( c.entry, `${ path } post ${ c.post }: the entry's one u-url is its permalink` ).toEqual( [ c.permalink ] );
+			expect.soft( c.cite, `${ path } post ${ c.post }: the h-cite's u-url is the watched URL, not the post` ).toEqual( c.watched );
+		}
+		checked += report.cases.length;
+	}
+	expect( checked, 'the archive shows at least one watch' ).toBeGreaterThan( 0 );
+} );
+
 // These tests record defects fixed by a separate theme PR and fail on a site without that fix.
 // PKIW #227: the watch single's flap reads "Watch · VHS" and its reels and
 // tape are drawn, as on the Stream's VHS card.
