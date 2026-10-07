@@ -312,6 +312,21 @@ function map_thumbnail( array $attrs ): string {
 }
 
 /**
+ * The offset just past the plugin's kind label in a card.
+ *
+ * Post Kinds prints the label as a <span> since 1.8.6 (a <p> before).
+ *
+ * @param string $card Rendered checkin-card HTML.
+ * @return int|false False when the card has no label.
+ */
+function after_kind_label( string $card ) {
+	if ( ! preg_match( '#<(span|p) class="pk-kindlabel"[^>]*>.*?</\1>#s', $card, $m, PREG_OFFSET_CAPTURE ) ) {
+		return false;
+	}
+	return (int) $m[0][1] + strlen( $m[0][0] );
+}
+
+/**
  * Render a check-in on /stream/ through the plugin's checkin-card block,
  * then add the post title, the date, and the stamp footer.
  *
@@ -353,28 +368,23 @@ function passport_card( string $html, array $block, $instance ): string {
 		$card = \PKIW\inject_post_date_into_card( $card, $post );
 	}
 
-	// The post title is the entry's headline; the h2 stays the venue so the
-	// plugin's p-name / h-card structure is untouched.
+	// The post title is the entry's headline, directly under the eyebrow; the
+	// h2 stays the venue so the plugin's p-name / h-card structure is untouched.
 	$title = trim( get_the_title( $post ) );
 	$venue = trim( (string) ( $checkin['attrs']['venueName'] ?? '' ) );
-	if ( '' !== $title && 0 !== strcasecmp( $title, $venue ) ) {
-		$label_end = strpos( $card, '</p>', (int) strpos( $card, 'pk-kindlabel' ) );
-		if ( false !== $label_end ) {
-			$label_end += 4;
-			$headline   = '<div class="cr-passport__title"><a href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( $title ) . '</a></div>';
-			$card       = substr( $card, 0, $label_end ) . $headline . substr( $card, $label_end );
-		}
+	$at    = after_kind_label( $card );
+	if ( false !== $at && '' !== $title && 0 !== strcasecmp( $title, $venue ) ) {
+		$headline = '<div class="cr-passport__title"><a href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( $title ) . '</a></div>';
+		$card     = substr( $card, 0, $at ) . $headline . substr( $card, $at );
+		$at      += strlen( $headline );
 	}
 
 	// A private check-in has no title for the plugin helper to hang a date
-	// on, so the date goes under the eyebrow instead.
-	if ( false === strpos( $card, 'dt-published' ) ) {
-		$label_end = strpos( $card, '</p>', (int) strpos( $card, 'pk-kindlabel' ) );
-		if ( false !== $label_end ) {
-			$label_end += 4;
-			$date_html  = '<p class="pk-sub pk-stream-date"><time class="dt-published" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time></p>';
-			$card       = substr( $card, 0, $label_end ) . $date_html . substr( $card, $label_end );
-		}
+	// on, so the date goes under the eyebrow (and the headline) instead, in
+	// the order the CSS shows them.
+	if ( false !== $at && false === strpos( $card, 'dt-published' ) ) {
+		$date_html = '<p class="pk-sub pk-stream-date"><time class="dt-published" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time></p>';
+		$card      = substr( $card, 0, $at ) . $date_html . substr( $card, $at );
 	}
 
 	$close = strrpos( $card, '</article>' );
@@ -400,10 +410,9 @@ function passport_card( string $html, array $block, $instance ): string {
 		$thumb = map_thumbnail( (array) ( $checkin['attrs'] ?? array() ) );
 		if ( '' !== $thumb ) {
 			$card      = (string) preg_replace( '#<div class="pk-embed pk-embed--map">.*?</div>#is', '', $card, 1 );
-			$label_end = strpos( $card, '</span>', (int) strpos( $card, 'pk-kindlabel' ) );
+			$label_end = after_kind_label( $card );
 			if ( false !== $label_end ) {
-				$label_end += 7;
-				$card       = substr( $card, 0, $label_end ) . $thumb . substr( $card, $label_end );
+				$card = substr( $card, 0, $label_end ) . $thumb . substr( $card, $label_end );
 			}
 		}
 	}

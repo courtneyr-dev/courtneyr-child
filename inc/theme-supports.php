@@ -174,12 +174,14 @@ const CARD_GRID_POSTS = 5;
  * full rows. 5 is odd, and the featured always consumes one slot, so the parity
  * holds on paginated pages too (page 2+ = featured + 4 as well).
  *
- * Scoped to the surfaces that use the grid: blog home, archives, search.
+ * Scoped to the surfaces that use the grid: blog home, archives, search. A
+ * kind archive with a size in kind_archive_page_sizes() is left to
+ * size_kind_archive().
  *
  * @param \WP_Query $query The query about to run.
  */
 function fill_card_grid_post_count( $query ): void {
-	if ( is_admin() || ! $query->is_main_query() ) {
+	if ( is_admin() || ! $query->is_main_query() || kind_archive_page_size( $query ) > 0 ) {
 		return;
 	}
 	if ( $query->is_home() || $query->is_archive() || $query->is_search() ) {
@@ -191,7 +193,8 @@ add_action( 'pre_get_posts', __NAMESPACE__ . '\\fill_card_grid_post_count' );
 /**
  * The Site Editor previews a kind archive with the same page size.
  *
- * Runs before the per-kind sizes (the recipe binder, the comic rack).
+ * Runs before preview_kind_archive_page_size(), which gives a kind with a
+ * size of its own that size.
  *
  * @return int
  */
@@ -199,3 +202,79 @@ function preview_card_grid_post_count(): int {
 	return CARD_GRID_POSTS;
 }
 add_filter( 'pkiw_kind_archive_preview_per_page', __NAMESPACE__ . '\\preview_card_grid_post_count', 5 );
+
+/**
+ * Posts per page on each kind archive whose template sets its own size.
+ *
+ * A kind's module adds its slug and size on the
+ * `courtneyr_child_kind_archive_page_sizes` filter: comic.php (the rack),
+ * recipe.php (the binder), media-shelf.php (the listen and watch shelves).
+ * Eat, drink and check-in stay out: the plugin sizes those archives from a
+ * block attribute in the template (the menu entry's linesPerPage, the
+ * Check-ins Feed's count), so the number stays editable in the Site Editor.
+ *
+ * @return array<string, int> Sizes above zero, keyed by kind slug.
+ */
+function kind_archive_page_sizes(): array {
+	/**
+	 * Filters the posts per page of kind archives.
+	 *
+	 * @param array<string, int> $sizes Kind slug => posts per page.
+	 */
+	$sizes = apply_filters( 'courtneyr_child_kind_archive_page_sizes', array() );
+	$clean = array();
+	foreach ( is_array( $sizes ) ? $sizes : array() as $kind => $size ) {
+		if ( is_string( $kind ) && '' !== $kind && (int) $size > 0 ) {
+			$clean[ $kind ] = (int) $size;
+		}
+	}
+	return $clean;
+}
+
+/**
+ * The registered size of the kind archive a query is for.
+ *
+ * @param \WP_Query $query Query.
+ * @return int Posts per page, or 0 when the query isn't for a kind archive with a size.
+ */
+function kind_archive_page_size( $query ): int {
+	foreach ( kind_archive_page_sizes() as $kind => $size ) {
+		if ( $query->is_tax( 'kind', $kind ) ) {
+			return $size;
+		}
+	}
+	return 0;
+}
+
+/**
+ * Page a kind archive by its registered size.
+ *
+ * Priority 11 runs after fill_card_grid_post_count() and the plugin's
+ * maybe_group_main_query() at 10. Main query only, and never a feed (core
+ * pages feeds by posts_per_rss), wp-admin or a REST request.
+ *
+ * @param \WP_Query $query The query about to run.
+ * @return void
+ */
+function size_kind_archive( $query ): void {
+	if ( is_admin() || wp_is_rest_endpoint() || ! $query->is_main_query() || $query->is_feed() ) {
+		return;
+	}
+	$size = kind_archive_page_size( $query );
+	if ( $size > 0 ) {
+		$query->set( 'posts_per_page', $size );
+	}
+}
+add_action( 'pre_get_posts', __NAMESPACE__ . '\\size_kind_archive', 11 );
+
+/**
+ * The Site Editor previews a kind archive with its registered size.
+ *
+ * @param int    $per_page Posts per page. Zero keeps the editor's own size.
+ * @param string $kind     Kind slug.
+ * @return int
+ */
+function preview_kind_archive_page_size( $per_page, $kind ): int {
+	return kind_archive_page_sizes()[ (string) $kind ] ?? (int) $per_page;
+}
+add_filter( 'pkiw_kind_archive_preview_per_page', __NAMESPACE__ . '\\preview_kind_archive_page_size', 10, 2 );
