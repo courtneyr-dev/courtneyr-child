@@ -2129,6 +2129,7 @@ for ( const path of KIND_ARCHIVE_HEADERS ) {
 				bandAboveTitle: box( title ).top - box( el ).top,
 				pad,
 				inBand,
+				rem: parseFloat( getComputedStyle( document.documentElement ).fontSize ),
 				wide: matchMedia( '(min-width: 48rem)' ).matches,
 				glyph: { top: box( glyph ).top, left: box( glyph ).left, right: box( glyph ).right, bottom: box( glyph ).bottom, width: box( glyph ).width },
 				tile: { top: box( tile ).top, left: box( tile ).left },
@@ -2148,12 +2149,19 @@ for ( const path of KIND_ARCHIVE_HEADERS ) {
 		expect( o.kind, 'the shared kind-archive identity' ).toBe( true );
 
 		// 2. No empty wrapper and no reserved row: the holder has only the badge and no height,
-		//    the band above the title is the header's own padding, and the badge is the only
-		//    thing in it. The padding differs by width (1.5rem wide, 3.5rem on a phone, where
-		//    the badge sits whole above the title: PKIW #224), so the test reads it, not a number.
+		//    the band above the title is the header's own padding with no gap after it, and the
+		//    badge is the only thing in it. The page's padding can't size the band by itself,
+		//    since a taller padding would pass, so the band also has a ceiling per width: wide,
+		//    no taller than the badge; on a phone, the 3.5rem that cr-archives.css's
+		//    (max-width: 47.9375rem) rule sets so the badge sits whole above the title (PKIW #224).
 		expect( o.children, 'the holder holds the badge and nothing else' ).toBe( 1 );
 		expect( o.holderHeight, 'the holder takes no row' ).toBe( 0 );
 		expect( o.bandAboveTitle, 'the band above the title is the header\'s padding, not a reserved row' ).toBeCloseTo( o.pad, 0 );
+		if ( o.wide ) {
+			expect( o.bandAboveTitle, 'the band above the title is no taller than the badge' ).toBeLessThanOrEqual( o.glyph.width );
+		} else {
+			expect( o.bandAboveTitle, 'on a phone the band above the title is 3.5rem' ).toBeCloseTo( 3.5 * o.rem, 0 );
+		}
 		expect( o.inBand, 'nothing but the badge above the title' ).toEqual( [] );
 
 		// The badge anchors the title's upper-left corner: wide, it overlaps the first letter's
