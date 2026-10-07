@@ -590,9 +590,14 @@ body.cr-recipe-single .cr-recipe__actions .wprm-recipe-print {
 	border-width: 2px;
 	border-style: solid;
 	font-family: var(--cr-font-body);
-	font-size: var(--cr-text-md);
+	font-size: var(--cr-text-lg);
 	text-decoration: none;
-	box-shadow: 3px 3px 0 var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard-sm);
+}
+
+body.cr-recipe-single .cr-recipe__actions .wprm-recipe-print svg {
+	width: 1.25em;
+	height: 1.25em;
 }
 
 body.cr-recipe-single .cr-recipe__actions .wprm-recipe-print:hover {

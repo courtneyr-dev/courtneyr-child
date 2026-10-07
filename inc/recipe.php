@@ -348,7 +348,7 @@ function add_title_lede( string $html, array $block ): string {
 		$out .= '<p class="cr-recipe__summary">' . esc_html( $summary ) . '</p>';
 	}
 
-	$print = trim( do_shortcode( '[wprm-recipe-print id="' . (int) $recipe['id'] . '" style="button" icon="printer" text_color="var(--cr-russian-violet)" icon_color="var(--cr-russian-violet)" button_color="var(--cr-ut-orange)" border_color="var(--cr-russian-violet)" border_radius="6px" horizontal_padding="18px" vertical_padding="10px" text_style="bold"]' ) );
+	$print = trim( do_shortcode( '[wprm-recipe-print id="' . (int) $recipe['id'] . '" style="button" icon="printer" text_color="var(--cr-russian-violet)" icon_color="var(--cr-russian-violet)" button_color="var(--cr-ut-orange)" border_color="var(--cr-russian-violet)" border_radius="0px" horizontal_padding="var(--cr-space-lg)" vertical_padding="var(--cr-space-sm)" text_style="bold"]' ) );
 	if ( '' !== $print ) {
 		$out .= '<p class="cr-recipe__actions">' . $print . '</p>';
 	}
