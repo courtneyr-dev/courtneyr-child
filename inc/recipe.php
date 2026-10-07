@@ -155,6 +155,44 @@ function enqueue_styles(): void {
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_styles' );
 
 /**
+ * Print one course on a recipe card: the archive's course tab when the
+ * recipe is filed under it, otherwise the recipe's first course.
+ *
+ * The plugin lists every course a recipe holds. A card names one, so a
+ * two-course recipe on the Soup tab reads "Soup", not "Main Course, Soup".
+ *
+ * @param string         $html     Rendered stream card.
+ * @param \WP_Block|null $instance Block instance.
+ * @return string
+ */
+function first_course( string $html, $instance ): string {
+	if ( false === strpos( $html, 'pk-recipe-course' ) || ! function_exists( '\\PKIW\\recipe_facts' ) ) {
+		return $html;
+	}
+
+	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) ) ? (int) $instance->context['postId'] : (int) get_the_ID();
+	$courses = \PKIW\recipe_facts( $post_id )['courses'] ?? array();
+	if ( count( $courses ) < 2 ) {
+		return $html;
+	}
+
+	$name = (string) $courses[0]['name'];
+	$tab  = is_binder() ? sanitize_title( (string) get_query_var( 'pkiw_recipe_course' ) ) : '';
+	foreach ( $courses as $course ) {
+		if ( '' !== $tab && $tab === $course['slug'] ) {
+			$name = (string) $course['name'];
+		}
+	}
+
+	return (string) preg_replace_callback(
+		'#(<span class="pk-recipe-course">)[^<]*(</span>)#',
+		static fn( array $m ): string => $m[1] . esc_html( $name ) . $m[2],
+		$html,
+		1
+	);
+}
+
+/**
  * Reduce a recipe to its binder card on the archive.
  *
  * What stays is the picture, the h2 title link and the course and time
@@ -166,8 +204,8 @@ add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_styles' );
  * @param \WP_Block|null       $instance Block instance.
  * @return string
  */
-function binder_card( string $html, array $block, $instance ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- filter signature.
-	static $printed = 0;
+function binder_card( string $html, array $block, $instance ): string {
+	static $position = 0;
 
 	if ( ! is_binder_card( $block ) || false === strpos( $html, 'pk-card' ) ) {
 		return $html;
@@ -187,12 +225,14 @@ function binder_card( string $html, array $block, $instance ): string { // phpcs
 	$has_picture = false !== strpos( $html, 'pk-media' );
 	$classes     = 'cr-recipe-card ' . ( $has_picture ? 'has-picture' : 'cr-recipe-card--no-picture' );
 	$html        = (string) preg_replace( '/(<article\b[^>]*\bclass=")/', '$1' . $classes . ' ', $html, 1 );
+	$html        = first_course( $html, $instance );
 
-	// The top card of each leaf is above the fold: load its picture now.
-	if ( $has_picture && $printed < 2 && ! is_paged() ) {
+	// The list fills the left leaf first, so cards 0 and 2 are the top card
+	// of each leaf: the first row on every page. Load their pictures now.
+	if ( $has_picture && in_array( $position % BINDER_SIZE, array( 0, 2 ), true ) ) {
 		$html = (string) preg_replace( '/(<img\b[^>]*?)\sloading="lazy"/', '$1 loading="eager" fetchpriority="high"', $html, 1 );
 	}
-	++$printed;
+	++$position;
 
 	return $html;
 }
@@ -210,7 +250,7 @@ add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\b
  * @param \WP_Block|null       $instance Block instance.
  * @return string
  */
-function stream_card( string $html, array $block, $instance ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- filter signature.
+function stream_card( string $html, array $block, $instance ): string {
 	if ( is_binder_card( $block ) || ! is_stream_surface() || 1 !== preg_match( '/<article\b[^>]*\bclass="[^"]*(?<![\w-])k-recipe(?![\w-])/', $html ) ) {
 		return $html;
 	}
@@ -226,7 +266,7 @@ function stream_card( string $html, array $block, $instance ): string { // phpcs
 
 	$classes = 'cr-recipe-stream ' . ( false !== strpos( $html, 'pk-media' ) ? 'has-picture' : 'cr-recipe-stream--no-picture' );
 
-	return (string) preg_replace( '/(<article\b[^>]*\bclass=")/', '$1' . $classes . ' ', $html, 1 );
+	return first_course( (string) preg_replace( '/(<article\b[^>]*\bclass=")/', '$1' . $classes . ' ', $html, 1 ), $instance );
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\stream_card', 10, 3 );
 

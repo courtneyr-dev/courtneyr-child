@@ -1275,6 +1275,20 @@ test( 'the recipe archive is a binder of four recipe cards, one title link each,
 	// A card with no picture is text, not a broken image.
 	expect( await list.locator( 'img' ).evaluateAll( ( imgs ) => imgs.filter( ( i ) => i.complete && i.naturalWidth === 0 ).length ) ).toBe( 0 );
 
+	// The list fills the left leaf first, so items 0 and 2 are the top card of
+	// each leaf. Their pictures load first on every page; the rest stay lazy.
+	const priority = async () => list.locator( ':scope > li' ).evaluateAll( ( lis ) => lis.map( ( li, i ) => {
+		const img = li.querySelector( 'img' );
+		return img ? { i, loading: img.getAttribute( 'loading' ), fetchpriority: img.getAttribute( 'fetchpriority' ) } : null;
+	} ).filter( Boolean ) );
+	const checkPriority = ( pictures ) => {
+		for ( const p of pictures ) {
+			const top = 0 === p.i % 4 || 2 === p.i % 4;
+			expect( [ p.loading, p.fetchpriority ], `card ${ p.i } is ${ top ? '' : 'not ' }a top card` ).toEqual( top ? [ 'eager', 'high' ] : [ 'lazy', null ] );
+		}
+	};
+	checkPriority( await priority() );
+
 	const shape = await list.evaluate( ( ul ) => ( { cols: getComputedStyle( ul ).gridTemplateColumns.split( ' ' ).length, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth } ) );
 	expect( shape.cols, 'two binder pages side by side on a wide screen, one on a phone' ).toBe( page.viewportSize().width >= 1024 ? 2 : 1 );
 	expect( shape.overflow ).toBe( 0 );
@@ -1289,23 +1303,36 @@ test( 'the recipe archive is a binder of four recipe cards, one title link each,
 		expect( new URL( href ).pathname, 'a tab stays on the recipe archive' ).toBe( archivePath );
 	}
 
-	// A course tab filters the archive, and the pager keeps the filter.
-	const courseTab = tabs.locator( 'a[href*="pkiw_recipe_course="]' ).first();
-	const course = ( await courseTab.textContent() ).trim();
-	await courseTab.click();
+	// Later pages promote their own top cards.
+	const nextPage = await page.locator( '.cr-archive--recipes .wp-block-query-pagination a.wp-block-query-pagination-next' ).getAttribute( 'href' ).catch( () => null );
+	if ( nextPage ) {
+		await page.goto( nextPage, { waitUntil: 'load' } );
+		checkPriority( await priority() );
+		await page.goto( RECIPE_ARCHIVE, { waitUntil: 'load' } );
+	}
+
+	// A course tab filters the archive, and the pager keeps the filter. Each
+	// card names one course: the tab's, even for a recipe filed under two.
+	const courseTabs = await tabs.locator( 'a[href*="pkiw_recipe_course="]' ).evaluateAll( ( as ) => as.map( ( a ) => ( { href: a.href, name: a.textContent.trim() } ) ) );
+	expect( courseTabs.length ).toBeGreaterThan( 0 );
+	const course = courseTabs[ 0 ].name;
+	await tabs.locator( 'a[href*="pkiw_recipe_course="]' ).first().click();
 	await page.waitForLoadState( 'load' );
 	expect( new URL( page.url() ).searchParams.get( 'pkiw_recipe_course' ) ).toBeTruthy();
 	await expect( page.locator( '.cr-archive--recipes nav.cr-recipe-tabs a[aria-current]' ) ).toHaveText( course );
 	const filtered = page.locator( '.cr-archive--recipes ul.cr-recipe-binder__list article.cr-recipe-card' );
 	expect( await filtered.count() ).toBeGreaterThan( 0 );
-	for ( const text of await filtered.locator( '.pk-recipe-course' ).allTextContents() ) {
-		expect( text.split( ',' ).map( ( t ) => t.trim() ), `every card on the ${ course } tab is filed under it` ).toContain( course );
-	}
-	expect( await filtered.locator( '.pk-recipe-course' ).count(), 'and every card names its course' ).toBe( await filtered.count() );
 	const param = new URL( page.url() ).searchParams.get( 'pkiw_recipe_course' );
 	for ( const href of await page.locator( '.cr-archive--recipes .wp-block-query-pagination a' ).evaluateAll( ( as ) => as.map( ( a ) => a.href ) ) ) {
 		expect( new URL( href ).searchParams.get( 'pkiw_recipe_course' ), 'pager links keep the course' ).toBe( param );
 	}
+	for ( const tab of courseTabs ) {
+		await page.goto( tab.href, { waitUntil: 'load' } );
+		const cards = await filtered.count();
+		expect( cards, `the ${ tab.name } tab lists its recipes` ).toBeGreaterThan( 0 );
+		expect( await filtered.locator( '.pk-recipe-course' ).allTextContents(), `every card on the ${ tab.name } tab names that one course` ).toEqual( Array( cards ).fill( tab.name ) );
+	}
+	await page.goto( RECIPE_ARCHIVE, { waitUntil: 'load' } );
 
 	// The A-Z tab is the same archive in title order, and the pager keeps the order.
 	await page.locator( '.cr-archive--recipes nav.cr-recipe-tabs a[href*="orderby=title"]' ).click();
