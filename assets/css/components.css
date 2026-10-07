@@ -8331,6 +8331,10 @@ figure.wp-block-image.is-style-overlay-caption figcaption {
    so a 17px classic scrollbar is covered too. It starts right above
    1024px, the exact complement of the compact header's max-width, so a
    zoomed-in fractional width can't fall between the two.
+   The band doesn't cover two taller headers (dev, 2026-10-07): with focus
+   in the search field it widens and the header is 103 to 104px up to
+   1300px (one row at 1320), and without JavaScript the nav takes its own
+   row up to 1024px, 146 to 151px tall.
    The bottom padding clears Complianz's fixed Manage consent button
    (50px tall at bottom: 0, its own --cmplz-manage-consent-height), which
    covered focused links at 320 by 225 (PKIW 224). */
