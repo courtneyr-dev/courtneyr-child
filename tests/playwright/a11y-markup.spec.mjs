@@ -511,7 +511,11 @@ test( 'the listen archive is a shelf of cassette cases, one title link each, no 
 		await expect( card ).toHaveCount( 1 );
 		await expect( card.locator( '.pk-kindlabel' ) ).toHaveText( 'Listen · Cassette' );
 		await expect( card.locator( '.cr-media__mech' ) ).toHaveCount( 1 );
+		expect( await card.locator( '.cr-media__mech :is([fill^="#"], [stroke^="#"], [fill^="rgb"], [stroke^="rgb"])' ).count(), 'the mechanics take palette tokens, not baked colours' ).toBe( 0 );
 		await expect( card.locator( '.pk-title a' ) ).toHaveCount( 1 );
+		for ( const link of await card.locator( '.pk-sources__link' ).all() ) {
+			expect( ( await link.boundingBox() ).height, 'a provider link is a 44px target' ).toBeGreaterThanOrEqual( 44 );
+		}
 		const shape = await item.evaluate( ( li ) => {
 			const board = getComputedStyle( li, '::after' );
 			return {
