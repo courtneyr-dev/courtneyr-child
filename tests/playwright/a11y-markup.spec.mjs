@@ -511,7 +511,11 @@ test( 'the listen archive is a shelf of cassette cases, one title link each, no 
 		await expect( card ).toHaveCount( 1 );
 		await expect( card.locator( '.pk-kindlabel' ) ).toHaveText( 'Listen · Cassette' );
 		await expect( card.locator( '.cr-media__mech' ) ).toHaveCount( 1 );
+		expect( await card.locator( '.cr-media__mech :is([fill^="#"], [stroke^="#"], [fill^="rgb"], [stroke^="rgb"])' ).count(), 'the mechanics take palette tokens, not baked colours' ).toBe( 0 );
 		await expect( card.locator( '.pk-title a' ) ).toHaveCount( 1 );
+		for ( const link of await card.locator( '.pk-sources__link' ).all() ) {
+			expect( ( await link.boundingBox() ).height, 'a provider link is a 44px target' ).toBeGreaterThanOrEqual( 44 );
+		}
 		const shape = await item.evaluate( ( li ) => {
 			const board = getComputedStyle( li, '::after' );
 			return {
@@ -533,9 +537,72 @@ test( 'the listen archive is a shelf of cassette cases, one title link each, no 
 		return el?.closest( 'a' ) === li.querySelector( '.pk-title a' );
 	} );
 	expect( hit ).toBe( true );
-	expect( await page.locator( '.cr-archive--listen .cr-archive__header img, .cr-archive--listen .cr-archive__header svg[aria-label]' ).count(), 'the boombox adds no content' ).toBe( 0 );
-	const boombox = await page.locator( '.cr-archive--listen .cr-archive__header' ).evaluate( ( el ) => getComputedStyle( el, '::after' ).backgroundImage );
-	expect( boombox ).toContain( 'cr-boombox.svg' );
+	expect( await page.locator( '.cr-archive--listen .cr-archive__header img, .cr-archive--listen .cr-archive__header svg[aria-label], .cr-archive--listen .cr-media-shelf > img' ).count(), 'the still life adds no content' ).toBe( 0 );
+	// The boombox still life is the shelf's ::before, standing on the top board.
+	const stillLife = await page.locator( '.cr-archive--listen .cr-media-shelf' ).evaluate( ( group ) => {
+		const art = getComputedStyle( group, '::before' );
+		const top = group.querySelector( 'ul.cr-media-shelf__list' ).getBoundingClientRect().top;
+		return { image: art.backgroundImage, gap: top - group.getBoundingClientRect().top - parseFloat( art.height ) };
+	} );
+	expect( stillLife.image ).toContain( 'cr-boombox.svg' );
+	expect( Math.abs( stillLife.gap ), 'the still life stands on the top board' ).toBeLessThan( 1 );
+} );
+
+// PKIW #226 mockup fidelity: the title link names each case, so a cover's
+// alt is empty on the shelf. The covers of the first four cases (the widest
+// first row) load eagerly at high priority on every page, the rest lazily,
+// as loading="lazy" or Perfmatters' data-src swap (perfmatters-lazy). A
+// cover from this site's uploads keeps core's srcset. A cover that fails to
+// load leaves the case, which then prints the cassette's typographic label.
+test( 'the listen shelf empties cover alt, loads the first row first and drops a failed cover (PKIW #226)', async ( { page } ) => {
+	let covers = 0;
+	for ( const [ n, path ] of [ LISTEN_ARCHIVE, `${ LISTEN_ARCHIVE }page/2/` ].entries() ) {
+		const response = await page.goto( path, { waitUntil: 'load' } );
+		if ( 0 < n && 404 === response.status() ) {
+			continue;
+		}
+		const report = await page.locator( 'ul.cr-media-shelf__list' ).evaluate( ( list ) =>
+			[ ...list.querySelectorAll( ':scope > li' ) ].flatMap( ( li, item ) =>
+				[ ...li.querySelectorAll( '.pk-media img' ) ].map( ( img ) => {
+					const src = new URL( img.getAttribute( 'data-src' ) ?? img.getAttribute( 'src' ), location.href );
+					return {
+						item,
+						alt: img.getAttribute( 'alt' ),
+						lazy: 'lazy' === img.getAttribute( 'loading' ) || img.classList.contains( 'perfmatters-lazy' ),
+						high: 'high' === img.getAttribute( 'fetchpriority' ),
+						upload: src.origin === location.origin && src.pathname.includes( '/wp-content/uploads/' ),
+						srcset: Boolean( img.getAttribute( 'srcset' ) ?? img.getAttribute( 'data-srcset' ) ),
+					};
+				} )
+			)
+		);
+		for ( const c of report ) {
+			expect.soft( c.alt, `${ path } case ${ c.item + 1 }: the cover's alt is empty, the title names the case` ).toBe( '' );
+			expect.soft( c.high, `${ path } case ${ c.item + 1 }: only first-row covers load at high priority` ).toBe( c.item < 4 );
+			expect.soft( c.lazy, `${ path } case ${ c.item + 1 }: first-row covers load eagerly, the rest lazily` ).toBe( c.item >= 4 );
+			if ( c.upload ) {
+				expect.soft( c.srcset, `${ path } case ${ c.item + 1 }: a media library cover keeps core's srcset` ).toBe( true );
+			}
+		}
+		covers += report.length;
+	}
+	test.skip( 0 === covers, `no listen cover on ${ LISTEN_ARCHIVE }` );
+
+	await page.route( /\/wp-content\/uploads\/.+\.(png|jpe?g|gif|webp|avif)(\?|$)/i, ( route ) => route.abort() );
+	await page.goto( LISTEN_ARCHIVE, { waitUntil: 'load' } );
+	await page.evaluate( async () => {
+		for ( let y = 0; y < document.documentElement.scrollHeight; y += 400 ) {
+			window.scrollTo( 0, y );
+			await new Promise( ( resolve ) => setTimeout( resolve, 50 ) );
+		}
+		window.scrollTo( 0, 0 );
+	} );
+	const list = page.locator( 'ul.cr-media-shelf__list' );
+	await expect( list.locator( '.pk-media' ), 'a failed cover leaves no empty recess' ).toHaveCount( 0 );
+	for ( const item of await list.locator( ':scope > li' ).all() ) {
+		await expect( item.locator( '.pk-title a' ) ).toHaveCount( 1 );
+		await expect( item.locator( '.pk-kindlabel' ) ).toHaveText( 'Listen · Cassette' );
+	}
 } );
 
 // PKIW #227: the watch archive's page 1 is a "New releases" shelf of up to
