@@ -166,9 +166,9 @@ function split_vhs_shelf( string $html, array $block ): string {
 	}
 
 	$paged   = max( 1, (int) get_query_var( 'paged' ) );
-	$parts   = load_order( $parts, 1 === $paged );
+	$parts   = load_order( $parts );
 	$face    = 1 === $paged ? array_map( __NAMESPACE__ . '\\case_only', array_slice( $parts, 0, NEW_RELEASES ) ) : array();
-	$spine   = 1 === $paged ? array_slice( $parts, NEW_RELEASES ) : $parts;
+	$spine   = array_map( __NAMESPACE__ . '\\spine_only', 1 === $paged ? array_slice( $parts, NEW_RELEASES ) : $parts );
 	$heading = static fn( string $id, string $text ): string => '<h2 class="cr-vhs-shelf__label" id="' . esc_attr( $id ) . '">' . esc_html( $text ) . '</h2>';
 	$list    = static function ( string $modifier, string $labelled_by, array $lis ) use ( $list_open ): string {
 		$open = new \WP_HTML_Tag_Processor( $list_open );
@@ -190,30 +190,20 @@ function split_vhs_shelf( string $html, array $block ): string {
 add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\split_vhs_shelf', 10, 2 );
 
 /**
- * Ask for one cover at high priority and load the rest lazily (PKIW #227).
+ * Load every image on the shelf lazily (PKIW #227).
  *
- * On page 1 the first face-out cover, whether a featured image or the
- * plugin's poster, is the one image the archive asks for first; when that
- * case has no cover, none is. Every other cover and spine is lazy, which
- * on the live site means Perfmatters' data-src swap (it drops
- * loading="lazy" for its own, and skips an image at fetchpriority high).
- * Later pages ask for none. Core keeps each attachment's srcset and sizes.
+ * On the live site lazy means Perfmatters' data-src swap (it drops
+ * loading="lazy" for its own). case_only() then lifts page 1's face-out
+ * covers, the first row, to eager at high priority, which Perfmatters
+ * skips. Core keeps each attachment's srcset and sizes.
  *
- * @param string[] $items      Rendered <li> items in query order.
- * @param bool     $first_page Whether this is page 1.
+ * @param string[] $items Rendered <li> items in query order.
  * @return string[]
  */
-function load_order( array $items, bool $first_page ): array {
+function load_order( array $items ): array {
 	foreach ( $items as $i => $item ) {
-		$lead = $first_page && 0 === $i;
 		$tags = new \WP_HTML_Tag_Processor( $item );
 		while ( $tags->next_tag( 'img' ) ) {
-			if ( $lead ) {
-				$tags->set_attribute( 'fetchpriority', 'high' );
-				$tags->remove_attribute( 'loading' );
-				$lead = false;
-				continue;
-			}
 			$tags->set_attribute( 'loading', 'lazy' );
 			$tags->remove_attribute( 'fetchpriority' );
 		}
@@ -227,7 +217,8 @@ function load_order( array $items, bool $first_page ): array {
  *
  * The site option preloads the first two images on a page at
  * fetchpriority high: two face-out covers on page 1, and on page 2 the
- * first spine and the footer avatar. load_order() picks the shelf's one.
+ * first spine and the footer avatar. case_only() marks the shelf's
+ * first-row covers instead, with no preload link.
  * Perfmatters reads this on `wp`, after the main query.
  *
  * @param mixed $count Images Perfmatters preloads.
@@ -269,24 +260,67 @@ function cut_elements( string $html, string $tag, string $class_name ): string {
 }
 
 /**
+ * What a watch case leaves on the single post (PKIW #227, Courtney's
+ * 2026-10-03 ruling: no metadata on archive pages): the year and rewatch
+ * line, the watched date (also a pk-sub), the stars and p-rating, the
+ * "Watch / find it" links, the meta links and the kind label. Each is
+ * [ tag, class ] for cut_elements().
+ */
+const SINGLE_ONLY = array(
+	array( 'p', 'pk-sub' ),
+	array( 'div', 'pk-stars' ),
+	array( 'data', 'p-rating' ),
+	array( 'div', 'pk-sources' ),
+	array( 'div', 'pk-meta' ),
+	array( 'span', 'pk-kindlabel' ),
+);
+
+/**
+ * Cut a list of [ tag, class ] elements from one rendered item.
+ *
+ * @param string     $item One rendered <li>.
+ * @param string[][] $cuts [ tag, class ] pairs.
+ * @return string
+ */
+function cut_all( string $item, array $cuts ): string {
+	foreach ( $cuts as $cut ) {
+		$item = cut_elements( $item, $cut[0], $cut[1] );
+	}
+	return $item;
+}
+
+/**
+ * Reduce a spine-out watch item to its title (PKIW #227).
+ *
+ * A spine is the h3 title link alone: SINGLE_ONLY and the poster are cut
+ * from the markup, so nothing stays behind for CSS to hide. The h-entry,
+ * the h-cite's u-watch-of and watched URL, and `.pk-entry-props` (author,
+ * url, dt-published) stay for microformats.
+ *
+ * @param string $item One rendered <li>.
+ * @return string
+ */
+function spine_only( string $item ): string {
+	return cut_all( $item, array_merge( SINGLE_ONLY, array( array( 'div', 'pk-media' ) ) ) );
+}
+
+/**
  * Reduce a face-out watch item to its case (PKIW #227, approved 2026-10-03).
  *
- * The archive is for browsing cases; the year, rating, "Watch / find it"
- * links, date and meta links stay on the single post. What remains in the
- * item is the clamshell (cover or title sleeve) and its h3 title link,
- * which the stylesheet turns into the whole case's link. With a cover,
- * the title is the link's one accessible name and the cover's alt is
- * emptied so it isn't announced a second time; without one, the title
- * shows on the sleeve. `.pk-entry-props` outside the card keeps the
- * entry's dt-published for microformats.
+ * The archive is for browsing cases; SINGLE_ONLY stays on the single
+ * post. What remains in the item is the clamshell (cover or title sleeve)
+ * and its h3 title link, which the stylesheet turns into the whole case's
+ * link. With a cover, the title is the link's one accessible name and the
+ * cover's alt is emptied so it isn't announced a second time; the cover
+ * is first-row imagery, so it loads eagerly at high priority. Without
+ * one, the title shows on the sleeve. `.pk-entry-props` outside the card
+ * keeps the entry's dt-published for microformats.
  *
  * @param string $item One rendered <li>.
  * @return string
  */
 function case_only( string $item ): string {
-	foreach ( array( array( 'p', 'pk-sub' ), array( 'div', 'pk-stars' ), array( 'data', 'p-rating' ), array( 'div', 'pk-sources' ), array( 'div', 'pk-meta' ), array( 'span', 'pk-kindlabel' ) ) as $cut ) {
-		$item = cut_elements( $item, $cut[0], $cut[1] );
-	}
+	$item  = cut_all( $item, SINGLE_ONLY );
 	$card  = array(
 		'tag_name'   => 'article',
 		'class_name' => 'pk-card',
@@ -303,6 +337,8 @@ function case_only( string $item ): string {
 	$has_cover = $tags->next_tag( $cover );
 	if ( $has_cover && $tags->next_tag( 'img' ) ) {
 		$tags->set_attribute( 'alt', '' );
+		$tags->set_attribute( 'loading', 'eager' );
+		$tags->set_attribute( 'fetchpriority', 'high' );
 	}
 	$item = $tags->get_updated_html();
 	if ( $has_cover ) {

@@ -541,7 +541,8 @@ test( 'the listen archive is a shelf of cassette cases, one title link each, no 
 // PKIW #227: the watch archive's page 1 is a "New releases" shelf of up to
 // three face-out clamshells and an "All watches" shelf of spines, each a
 // real h2 over card titles at h3. Later pages are all spines. A spine is
-// one link (its title); no players anywhere on the shelf.
+// one link (its title) and its markup holds none of the card's metadata,
+// which stays on the single; no players anywhere on the shelf.
 test( 'the watch archive is labelled VHS shelves, face-out new releases then titled spines', async ( { page } ) => {
 	await page.goto( WATCH_ARCHIVE, { waitUntil: 'load' } );
 	const shelf = page.locator( '.cr-archive--watch .cr-vhs-shelf' );
@@ -564,6 +565,7 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 		for ( const item of await spines.all() ) {
 			const visibleLinks = await item.evaluate( ( li ) => [ ...li.querySelectorAll( 'a' ) ].filter( ( a ) => a.getClientRects().length > 0 ).length );
 			expect( visibleLinks, 'a spine is one link' ).toBe( 1 );
+			expect( await item.locator( '.pk-sub, .pk-stars, .p-rating, .pk-media, .pk-sources, .pk-meta, .pk-kindlabel' ).count(), 'a spine\'s markup is its title alone' ).toBe( 0 );
 			const mode = await item.locator( '.pk-caption' ).evaluate( ( el ) => getComputedStyle( el ).writingMode );
 			expect( mode ).toBe( 'vertical-rl' );
 		}
@@ -573,15 +575,16 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 	expect( await page.locator( '.cr-archive--watch .cr-vhs-shelf img, .cr-archive--watch .cr-vhs-shelf svg' ).evaluateAll( ( els ) => els.filter( ( e ) => ! e.closest( '.pk-card' ) ).length ), 'no decoration enters the DOM' ).toBe( 0 );
 } );
 
-// PKIW #227: the shelf asks for one image at high priority, the first
-// face-out cover on page 1, and nothing on later pages; every other cover
-// and spine is lazy, as loading="lazy" or as Perfmatters' data-src swap
-// (perfmatters-lazy), which drops the loading attribute. A cover from the
-// media library keeps core's srcset. Each case's h-cite cites what was
-// watched: its u-url is the stored watch URL when that is a real http(s)
-// URL, never the post, so the title that links to the post carries no
-// u-url, and the entry keeps exactly one u-url, its permalink.
-test( 'the watch archive asks for one cover at high priority and each case cites what was watched, not the post (PKIW #227)', async ( { page } ) => {
+// PKIW #227: page 1's face-out covers are the first row, so each loads
+// eagerly at high priority (the contract's accessibility floor), with no
+// preload link; later pages ask for none. Every other image is lazy, as
+// loading="lazy" or as Perfmatters' data-src swap (perfmatters-lazy),
+// which drops the loading attribute. A cover from the media library keeps
+// core's srcset. Each case's h-cite cites what was watched: its u-url is
+// the stored watch URL when that is a real http(s) URL, never the post,
+// so the title that links to the post carries no u-url, and the entry
+// keeps exactly one u-url, its permalink.
+test( 'the watch archive loads its first-row covers eagerly at high priority and each case cites what was watched, not the post (PKIW #227)', async ( { page } ) => {
 	let checked = 0;
 	for ( const [ n, path ] of [ WATCH_ARCHIVE, `${ WATCH_ARCHIVE }page/2/` ].entries() ) {
 		const response = await page.goto( path, { waitUntil: 'load' } );
@@ -612,11 +615,13 @@ test( 'the watch archive asks for one cover at high priority and each case cites
 				}
 			};
 			const imgs = [ ...el.querySelectorAll( 'img' ) ];
-			const first = el.querySelector( 'ul.cr-vhs-shelf__list--face > li:first-child img' );
+			const covers = [ ...el.querySelectorAll( 'ul.cr-vhs-shelf__list--face > li .pk-media img' ) ];
 			return {
-				high: [ ...document.querySelectorAll( 'img[fetchpriority="high"]' ) ].map( ( i ) => i === first ),
+				covers: covers.length,
+				high: [ ...document.querySelectorAll( 'img[fetchpriority="high"]' ) ].map( ( i ) => covers.includes( i ) ),
+				lazyCovers: covers.filter( ( i ) => 'lazy' === i.getAttribute( 'loading' ) || i.classList.contains( 'perfmatters-lazy' ) ).length,
 				imagePreloads: document.querySelectorAll( 'link[rel="preload"][as="image"]' ).length,
-				eagerNotFirst: imgs.filter( ( i ) => i !== first && 'lazy' !== i.getAttribute( 'loading' ) && ! i.classList.contains( 'perfmatters-lazy' ) ).length,
+				eagerNotCover: imgs.filter( ( i ) => ! covers.includes( i ) && 'lazy' !== i.getAttribute( 'loading' ) && ! i.classList.contains( 'perfmatters-lazy' ) ).length,
 				noSrcset: imgs.filter( ( i ) => i.classList.contains( 'wp-post-image' ) && ! i.getAttribute( 'srcset' ) && ! i.getAttribute( 'data-srcset' ) ).length,
 				cases: [ ...el.querySelectorAll( 'li.h-entry' ) ].map( ( li ) => {
 					const cite = li.querySelector( 'article.pk-card.h-cite' );
@@ -630,10 +635,11 @@ test( 'the watch archive asks for one cover at high priority and each case cites
 				} ),
 			};
 		} );
-		expect.soft( report.high.length, `${ path }: at most one image on the page at high priority` ).toBeLessThanOrEqual( 0 === n ? 1 : 0 );
-		expect.soft( report.high.every( Boolean ), `${ path }: the high-priority image is the first face-out cover` ).toBe( true );
-		expect.soft( report.imagePreloads, `${ path }: no image preload beyond that cover` ).toBeLessThanOrEqual( 0 === n ? 1 : 0 );
-		expect.soft( report.eagerNotFirst, `${ path }: every other cover and spine loads lazily` ).toBe( 0 );
+		expect.soft( report.high.every( Boolean ), `${ path }: every image at high priority is a face-out cover` ).toBe( true );
+		expect.soft( report.high.length, `${ path }: every face-out cover is at high priority` ).toBe( report.covers );
+		expect.soft( report.lazyCovers, `${ path }: no face-out cover loads lazily` ).toBe( 0 );
+		expect.soft( report.imagePreloads, `${ path }: no image preload` ).toBe( 0 );
+		expect.soft( report.eagerNotCover, `${ path }: every other image loads lazily` ).toBe( 0 );
 		expect.soft( report.noSrcset, `${ path }: media library covers keep core's srcset` ).toBe( 0 );
 		for ( const c of report.cases ) {
 			expect.soft( c.entry, `${ path } post ${ c.post }: the entry's one u-url is its permalink` ).toEqual( [ c.permalink ] );

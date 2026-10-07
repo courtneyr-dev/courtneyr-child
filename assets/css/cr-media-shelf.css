@@ -195,8 +195,9 @@
    a rental clamshell (the stored poster, or a typographic sleeve when
    there is none) or a titled spine. The archive is for browsing cases:
    inc/media-shelf.php strips the Stream card's year, rating, services,
-   date and meta from face-out items, so a case is the clamshell and its
-   title link alone, and that link covers the whole case. Physical parts
+   date and meta from every item, so a case is the clamshell and its
+   title link alone, and that link covers the whole case; a spine also
+   loses the poster and is its title link alone. Physical parts
    use the palette tokens, so they keep their colour in dark mode; text
    and shadows use the semantic ones.
    ============================================================ */
@@ -542,29 +543,6 @@
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;
-}
-
-/* The spine is a label only: the poster and sources stay on the single.
-   Date and rating stay in the markup for screen readers (the spine is
-   too narrow to print them legibly). */
-.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--spine > li .pk-card.cr-vhs--stream.cr-media--shelf :is(.pk-sources, .pk-meta) {
-	display: none;
-}
-
-/* cr-post-kinds.css forces the VHS poster slot to display:flex
-   !important (the single and Stream share that rule), so the spine
-   has to answer in kind to keep the poster off it. */
-.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--spine > li .pk-card.cr-vhs--stream.cr-media--shelf .pk-media {
-	display: none !important;
-}
-
-.cr-archive--watch .cr-media-shelf .cr-vhs-shelf .cr-vhs-shelf__list--spine > li .pk-card.cr-vhs--stream.cr-media--shelf :is(.pk-stars, .pk-rating-value, .pk-stream-date, .pk-caption .pk-sub) {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	overflow: hidden;
-	clip-path: inset(50%);
-	white-space: nowrap;
 }
 
 /* A rewinder at the end of the bottom plank (assets/img/cr-rewinder.svg),
