@@ -5474,10 +5474,9 @@ body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-med
 	left: -0.95rem;
 	width: 1rem;
 	z-index: 1;
-	background: linear-gradient(90deg, #17123a, #2d2560 55%, #241c4a);
+	background: var(--cr-russian-violet);
 	border-radius: 4px 0 0 4px;
-	box-shadow: inset -2px 0 0 rgba(255, 255, 255, 0.08), -3px 3px 0 rgba(36, 28, 74, 0.35);
-	background-image: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 4px), linear-gradient(90deg, #17123a, #2d2560 55%, #241c4a);
+	box-shadow: inset -2px 0 0 var(--cr-russian-violet-soft), -3px 3px 0 rgba(36, 28, 74, 0.35);
 }
 /* Page block, right and bottom. */
 body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media::after {
@@ -6240,8 +6239,8 @@ body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem
 	width: 0.76rem;
 	z-index: 1;
 	border-radius: 3px 0 0 3px;
-	background-image: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 4px), linear-gradient(90deg, #17123a, #2d2560 55%, #241c4a);
-	box-shadow: inset -2px 0 0 rgba(255, 255, 255, 0.08), -2px 2px 0 rgba(36, 28, 74, 0.35);
+	background: var(--cr-russian-violet);
+	box-shadow: inset -2px 0 0 var(--cr-russian-violet-soft), -2px 2px 0 rgba(36, 28, 74, 0.35);
 }
 .cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-media::after {
 	content: "";
@@ -6398,15 +6397,6 @@ body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem
 	overflow: hidden;
 }
 .cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-note p { margin: 0; display: inline; }
-.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__hand {
-	order: 6;
-	margin: 0.55rem 0 0;
-	font-family: var(--cr-font-display, cursive);
-	font-size: 1rem;
-	line-height: 1.5;
-	color: #126782;
-	transform: rotate(-1.5deg);
-}
 .cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__stamp {
 	order: 7;
 	align-self: flex-end;
