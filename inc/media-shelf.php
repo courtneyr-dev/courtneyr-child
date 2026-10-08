@@ -382,12 +382,15 @@ function spine_only( string $item ): string {
  * would share a link name. The title link gets the post's published date,
  * from get_the_date() in the site's date format, as hidden text: "Dune,
  * watched 4 May 2026". Nothing visible changes. Face-out cases get it too:
- * SINGLE_ONLY cuts their date line as well. The h3 is the h-cite's p-name,
- * so a hidden, empty `value-title` span opens it with the title: under the
- * microformats value class pattern, parsers take the name from it (a direct
- * child of the h3; php-mf2 doesn't look deeper) and the cited name stays
- * the title alone. The post ID comes from the post template's `post-{ID}`
- * class on the item.
+ * SINGLE_ONLY cuts their date line as well. The hidden text holds the
+ * whole name, title included, and the visible title is aria-hidden: a
+ * positioned .cr-sr-only is a block box, and Chromium and Playwright put
+ * a space between a block and the text before it, "Dune , watched". The
+ * h3 is the h-cite's p-name, so a hidden, empty `value-title` span opens
+ * it with the title: under the microformats value class pattern, parsers
+ * take the name from it (a direct child of the h3; php-mf2 doesn't look
+ * deeper) and the cited name stays the title alone. The post ID comes
+ * from the post template's `post-{ID}` class on the item.
  *
  * @param string $item One rendered <li>.
  * @return string
@@ -417,13 +420,15 @@ function name_watch_date( string $item ): string {
 	if ( false === $end ) {
 		return $item;
 	}
-	$title = wp_strip_all_tags( substr( $item, $start, $end - $start ) );
+	$shown = substr( $item, $start, $end - $start );
+	$title = wp_strip_all_tags( $shown );
 	/* translators: %s: the date the watch was posted, in the site's date format. */
 	$hidden = sprintf( __( 'watched %s', 'courtneyr-child' ), $date );
 	return substr( $item, 0, $heading )
 		. '<span class="value-title" title="' . esc_attr( $title ) . '" hidden></span>'
-		. substr( $item, $heading, $end - $heading )
-		. '<span class="cr-sr-only">, ' . esc_html( $hidden ) . '</span>'
+		. substr( $item, $heading, $start - $heading )
+		. '<span aria-hidden="true">' . $shown . '</span>'
+		. '<span class="cr-sr-only">' . $shown . ', ' . esc_html( $hidden ) . '</span>'
 		. substr( $item, $end );
 }
 
