@@ -733,3 +733,83 @@
 }
 
 /* stylelint-enable no-descending-specificity */
+
+/* ============================================================
+   Shelf boards for sectioned archives (PKIW W1: play and read).
+
+   A template that wraps its sectioned Query in .cr-shelf-boards gets the
+   shipped shelf paint (X13) on each section's list: Prussian-blue
+   uprights and base, a blue-green top board, and under every item a
+   blue-green board with a sky-blue top edge and a cerulean under-edge,
+   run to the row's end so a short row shows empty board. The kind's own
+   stylesheet sets the columns; --pkiw-shelf-gap-column is the column gap
+   the boards meet across. The selectors carry four classes because the
+   archive's post divider (.cr-archive :is(.cr-archive-stream, .cr-stories)
+   .wp-block-post:not(:last-child)::after) would otherwise erase every board
+   but the last; each property the divider sets is restated. There is no
+   empty-archive rule: with no posts there are no sections, so a play or
+   read archive shows its no-results copy and no bare boards.
+   ============================================================ */
+.cr-shelf-boards .pkiw-group > .pkiw-group__items {
+	--pkiw-shelf-board-size: 0.85rem;
+	--pkiw-shelf-board-color: var(--cr-blue-green);
+	--pkiw-shelf-board-opacity: 1;
+	--pkiw-shelf-gap-column: 1.5rem;
+	column-gap: var(--pkiw-shelf-gap-column);
+	margin-inline: 0;
+	padding: 1.75rem calc(var(--pkiw-shelf-gap-column) / 2) 0;
+	list-style: none;
+	border: 0 solid var(--cr-prussian-blue);
+	border-inline-width: 0.9rem;
+	border-block-end-width: 0.9rem;
+	background: linear-gradient(var(--cr-blue-green), var(--cr-blue-green)) top / 100% var(--pkiw-shelf-board-size) no-repeat;
+	box-shadow: var(--cr-shadow-hard);
+	overflow-x: clip;
+}
+
+.cr-shelf-boards .pkiw-group > .pkiw-group__items > li.wp-block-post {
+	position: relative;
+	margin: 0;
+	padding: 0 0 calc(var(--pkiw-shelf-board-size) + 0.75rem);
+}
+
+.cr-shelf-boards .pkiw-group > .pkiw-group__items > li.wp-block-post::after {
+	content: "";
+	position: absolute;
+	display: block;
+	inset-block-end: 0;
+	inset-inline-start: calc(var(--pkiw-shelf-gap-column) / -2);
+	inset-inline-end: -100vw;
+	width: auto;
+	max-width: none;
+	height: var(--pkiw-shelf-board-size);
+	margin: 0;
+	transform: none;
+	background: var(--pkiw-shelf-board-color);
+	opacity: 1;
+	box-shadow: inset 0 3px 0 var(--cr-sky-blue), 0 4px 0 var(--cr-cerulean);
+	pointer-events: none;
+}
+
+@media (max-width: 40rem) {
+
+	.cr-shelf-boards .pkiw-group > .pkiw-group__items {
+		border-inline-width: 0.5rem;
+	}
+}
+
+/* Forced colours: uprights and boards as system lines. */
+@media (forced-colors: active) {
+
+	.cr-shelf-boards .pkiw-group > .pkiw-group__items {
+		border-color: CanvasText;
+		background: none;
+		box-shadow: none;
+	}
+
+	.cr-shelf-boards .pkiw-group > .pkiw-group__items > li.wp-block-post::after {
+		background: CanvasText;
+		box-shadow: none;
+		forced-color-adjust: none;
+	}
+}
