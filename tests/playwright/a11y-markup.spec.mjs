@@ -605,10 +605,33 @@ test( 'the listen shelf empties cover alt, loads the first row first and drops a
 	}
 } );
 
+// The link's name in Chromium's own accessibility tree, the one screen
+// readers get, or null outside Chromium. Chromium applies text-transform
+// to it and keeps a title's no-break space, so compare it without case
+// and with whitespace collapsed.
+async function chromiumName( link ) {
+	const page = link.page();
+	if ( 'chromium' !== page.context().browser()?.browserType().name() ) {
+		return null;
+	}
+	await link.evaluate( ( a ) => a.setAttribute( 'data-cr-ax', '' ) );
+	const cdp = await page.context().newCDPSession( page );
+	try {
+		const { root } = await cdp.send( 'DOM.getDocument', { depth: 0 } );
+		const { nodeId } = await cdp.send( 'DOM.querySelector', { nodeId: root.nodeId, selector: '[data-cr-ax]' } );
+		const { nodes } = await cdp.send( 'Accessibility.getPartialAXTree', { nodeId, fetchRelatives: false } );
+		return nodes[ 0 ]?.name?.value ?? '';
+	} finally {
+		await cdp.detach();
+		await link.evaluate( ( a ) => a.removeAttribute( 'data-cr-ax' ) );
+	}
+}
+
 // Each watch case's link is named by its visible title, then its watch
 // date as hidden text, "Dune, watched 4 May 2026" (Courtney, PKIW #227,
 // 2026-10-07), so a first watch and a rewatch of one title get different
-// names. The date is the entry's published date, so it names the year of
+// names. No space before the comma, in Playwright's name or in Chromium's.
+// The date is the entry's published date, so it names the year of
 // its dt-published, and the hidden part takes no space on screen. The h3
 // is the h-cite's p-name, so its value class pattern keeps the cited name
 // the title alone.
@@ -642,13 +665,18 @@ async function expectWatchDateNames( items, where ) {
 		} );
 		expect( facts.hidden, `${ where } "${ facts.title }": one hidden watch date in the link` ).toHaveLength( 1 );
 		expect( facts.published, `${ where } "${ facts.title }": the entry keeps its dt-published` ).toMatch( /^\d{4}-/ );
-		const date = ( facts.hidden[ 0 ] ?? '' ).replace( /^, watched /, '' );
-		expect( facts.hidden[ 0 ], `${ where } "${ facts.title }": the hidden text reads ", watched <date>"` ).toMatch( /^, watched \S/ );
+		const date = /, watched (\S.*)$/.exec( facts.hidden[ 0 ] ?? '' )?.[ 1 ] ?? '';
+		expect( facts.hidden[ 0 ], `${ where } "${ facts.title }": the hidden text ends ", watched <date>"` ).toMatch( /, watched \S/ );
 		expect( date, `${ where } "${ facts.title }": the date is the entry's published date` ).toContain( facts.published.slice( 0, 4 ) );
 		expect( facts.onScreen, `${ where } "${ facts.title }": the date is hidden from view` ).toBe( 0 );
 		expect( facts.cited, `${ where } "${ facts.title }": the h-cite's p-name stays the title alone` ).toBe( facts.title );
 		await expect( link, `${ where }: the link's accessible name is the title, then the watch date` ).toHaveAccessibleName( `${ facts.title }, watched ${ date }` );
 		await expect( item.getByRole( 'link', { name: `${ facts.title }, watched ${ date }`, exact: true } ) ).toHaveCount( 1 );
+		const native = await chromiumName( link );
+		if ( null !== native ) {
+			const plain = ( s ) => s.replace( /\s+/g, ' ' ).trim().toLowerCase();
+			expect( plain( native ), `${ where }: Chromium's accessibility tree names the link the same way` ).toBe( plain( `${ facts.title }, watched ${ date }` ) );
+		}
 	}
 }
 
