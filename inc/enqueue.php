@@ -849,14 +849,17 @@ add_filter( 'perfmatters_minify_js_exclusions', __NAMESPACE__ . '\\perfmatters_e
  * option already excludes cr-post-kinds.css, cr-archives.css and
  * cr-home-sections.css for the same reason; these join them in code.
  * cr-print.css joins them as a precaution: none of its rules match on
- * screen. That one isn't verified against Perfmatters.
+ * screen. That one isn't verified against Perfmatters. The play and read
+ * archive sheets (cr-play.css, cr-play-board.css, cr-play-video.css and
+ * cr-read-shelf.css, PKIW W1) are listed before their files exist, so the
+ * kind lanes that add them don't edit this list.
  *
  * @param array<int, string> $exclusions URL fragments Remove Unused CSS skips.
  * @return array<int, string>
  */
 function perfmatters_rucss_exclusions( $exclusions ): array {
 	$exclusions = is_array( $exclusions ) ? $exclusions : array();
-	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css', 'cr-checkin-archive.css', 'leaflet.css', 'MarkerCluster.css', 'checkins-feed/style.css' ) as $file ) {
+	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css', 'cr-checkin-archive.css', 'cr-play.css', 'cr-play-board.css', 'cr-play-video.css', 'cr-read-shelf.css', 'leaflet.css', 'MarkerCluster.css', 'checkins-feed/style.css' ) as $file ) {
 		$exclusions[] = $file;
 	}
 	return array_values( array_unique( $exclusions ) );
