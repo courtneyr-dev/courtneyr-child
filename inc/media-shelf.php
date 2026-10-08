@@ -191,7 +191,7 @@ function split_vhs_shelf( string $html, array $block ): string {
 add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\split_vhs_shelf', 10, 2 );
 
 /**
- * Load every image on the shelf lazily (PKIW #227).
+ * Load every image on the shelf lazily (PKIW issue 227).
  *
  * On the live site lazy means Perfmatters' data-src swap (it drops
  * loading="lazy" for its own). case_only() then lifts page 1's face-out
@@ -327,7 +327,7 @@ function cut_elements( string $html, string $tag, string $class_name ): string {
 }
 
 /**
- * What a watch case leaves on the single post (PKIW #227, Courtney's
+ * What a watch case leaves on the single post (PKIW issue 227, Courtney's
  * 2026-10-03 ruling: no metadata on archive pages): the year and rewatch
  * line, the watched date (also a pk-sub), the stars and p-rating, the
  * "Watch / find it" links, the review, the meta links, the kind label
@@ -360,7 +360,7 @@ function cut_all( string $item, array $cuts ): string {
 }
 
 /**
- * Reduce a spine-out watch item to its title (PKIW #227).
+ * Reduce a spine-out watch item to its title (PKIW issue 227).
  *
  * A spine is the h3 title link alone: SINGLE_ONLY and the poster are cut
  * from the markup, so nothing stays behind for CSS to hide. The h-entry,
@@ -514,7 +514,7 @@ function case_only( string $item ): string {
 }
 
 /**
- * Give the first face-out cover high priority (PKIW #227, after #106).
+ * Give the first face-out cover high priority (PKIW issue 227, after issue 106).
  *
  * The other first-row covers stay eager without it: on a phone the
  * face-out list is one column, so they sit below the first screen and

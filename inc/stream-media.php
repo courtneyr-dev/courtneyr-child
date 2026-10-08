@@ -376,7 +376,7 @@ function media_card( string $html, array $block, $instance ): string {
 		// did; a post without one keeps whatever the plugin rendered.
 		if ( has_post_thumbnail( $post ) ) {
 			// Lazy here; on the watch shelf, MediaShelf\case_only() lifts
-			// the face-out covers to eager at high priority (PKIW #227).
+			// the face-out covers to eager at high priority (PKIW issue 227).
 			$thumb_attrs = array(
 				'class'   => 'u-photo',
 				'loading' => 'lazy',
