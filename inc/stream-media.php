@@ -375,8 +375,8 @@ function media_card( string $html, array $block, $instance ): string {
 		// (in place of the plugin's poster art), as the generic stream card
 		// did; a post without one keeps whatever the plugin rendered.
 		if ( has_post_thumbnail( $post ) ) {
-			// Lazy here; on the watch shelf, MediaShelf\load_order() lifts
-			// the first face-out cover to high priority (PKIW #227).
+			// Lazy here; on the watch shelf, MediaShelf\case_only() lifts
+			// the face-out covers to eager at high priority (PKIW issue 227).
 			$thumb_attrs = array(
 				'class'   => 'u-photo',
 				'loading' => 'lazy',

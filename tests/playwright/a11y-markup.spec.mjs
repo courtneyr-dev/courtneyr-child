@@ -605,11 +605,93 @@ test( 'the listen shelf empties cover alt, loads the first row first and drops a
 	}
 } );
 
+// The link's name in Chromium's own accessibility tree, the one screen
+// readers get, or null outside Chromium. Chromium applies text-transform
+// to it and keeps a title's no-break space, so compare it without case
+// and with whitespace collapsed.
+async function chromiumName( link ) {
+	const page = link.page();
+	if ( 'chromium' !== page.context().browser()?.browserType().name() ) {
+		return null;
+	}
+	await link.evaluate( ( a ) => a.setAttribute( 'data-cr-ax', '' ) );
+	const cdp = await page.context().newCDPSession( page );
+	try {
+		const { root } = await cdp.send( 'DOM.getDocument', { depth: 0 } );
+		const { nodeId } = await cdp.send( 'DOM.querySelector', { nodeId: root.nodeId, selector: '[data-cr-ax]' } );
+		const { nodes } = await cdp.send( 'Accessibility.getPartialAXTree', { nodeId, fetchRelatives: false } );
+		return nodes[ 0 ]?.name?.value ?? '';
+	} finally {
+		await cdp.detach();
+		await link.evaluate( ( a ) => a.removeAttribute( 'data-cr-ax' ) );
+	}
+}
+
+// Each watch case's link is named by its visible title, then its watch
+// date as hidden text, "Dune, watched 4 May 2026" (Courtney, PKIW #227,
+// 2026-10-07), so a first watch and a rewatch of one title get different
+// names. No space before the comma, in Playwright's name or in Chromium's.
+// The date is the entry's published date, so it names the year of
+// its dt-published, and the hidden part takes no space on screen. The h3
+// is the h-cite's p-name, so its value class pattern keeps the cited name
+// the title alone.
+async function expectWatchDateNames( items, where ) {
+	for ( const item of await items.all() ) {
+		const link = item.locator( '.pk-title a' );
+		await expect( link, `${ where }: one title link` ).toHaveCount( 1 );
+		const facts = await link.evaluate( ( a ) => {
+			const shown = a.cloneNode( true );
+			shown.querySelectorAll( '.cr-sr-only' ).forEach( ( n ) => n.remove() );
+			const hidden = [ ...a.querySelectorAll( '.cr-sr-only' ) ];
+			// The h-cite's name as a microformats parser reads the h3: its
+			// direct .value children, else its .value-title titles, else its text.
+			const pName = a.closest( '.p-name' );
+			const kids = pName ? [ ...pName.children ] : [];
+			const values = kids.filter( ( c ) => c.classList.contains( 'value' ) );
+			const titles = kids.filter( ( c ) => c.classList.contains( 'value-title' ) );
+			let cited = pName?.textContent ?? '';
+			if ( values.length ) {
+				cited = values.map( ( c ) => c.textContent ).join( '' );
+			} else if ( titles.length ) {
+				cited = titles.map( ( c ) => c.getAttribute( 'title' ) ?? '' ).join( '' );
+			}
+			return {
+				cited: cited.trim(),
+				title: shown.textContent.trim(),
+				hidden: hidden.map( ( n ) => n.textContent ),
+				onScreen: hidden.filter( ( n ) => n.getBoundingClientRect().width > 1 || 'inset(50%)' !== getComputedStyle( n ).clipPath ).length,
+				published: a.closest( 'li' ).querySelector( '.pk-entry-props .dt-published' )?.getAttribute( 'value' ) ?? '',
+			};
+		} );
+		expect( facts.hidden, `${ where } "${ facts.title }": one hidden watch date in the link` ).toHaveLength( 1 );
+		expect( facts.published, `${ where } "${ facts.title }": the entry keeps its dt-published` ).toMatch( /^\d{4}-/ );
+		const date = /, watched (\S.*)$/.exec( facts.hidden[ 0 ] ?? '' )?.[ 1 ] ?? '';
+		expect( facts.hidden[ 0 ], `${ where } "${ facts.title }": the hidden text ends ", watched <date>"` ).toMatch( /, watched \S/ );
+		expect( date, `${ where } "${ facts.title }": the date is the entry's published date` ).toContain( facts.published.slice( 0, 4 ) );
+		expect( facts.onScreen, `${ where } "${ facts.title }": the date is hidden from view` ).toBe( 0 );
+		expect( facts.cited, `${ where } "${ facts.title }": the h-cite's p-name stays the title alone` ).toBe( facts.title );
+		await expect( link, `${ where }: the link's accessible name is the title, then the watch date` ).toHaveAccessibleName( `${ facts.title }, watched ${ date }` );
+		await expect( item.getByRole( 'link', { name: `${ facts.title }, watched ${ date }`, exact: true } ) ).toHaveCount( 1 );
+		const native = await chromiumName( link );
+		if ( null !== native ) {
+			const plain = ( s ) => s.replace( /\s+/g, ' ' ).trim().toLowerCase();
+			expect( plain( native ), `${ where }: Chromium's accessibility tree names the link the same way` ).toBe( plain( `${ facts.title }, watched ${ date }` ) );
+		}
+	}
+}
+
 // PKIW #227: the watch archive's page 1 is a "New releases" shelf of up to
 // three face-out clamshells and an "All watches" shelf of spines, each a
 // real h2 over card titles at h3. Later pages are all spines. A spine is
-// one link (its title); no players anywhere on the shelf.
+// one link (its title) and its markup holds none of the card's metadata
+// (review and kind badge included) on any page, which stays on the
+// single; a face-out case keeps its cover and drops the same metadata.
+// Every case link names its watch date for screen readers. No players
+// anywhere on the shelf.
 test( 'the watch archive is labelled VHS shelves, face-out new releases then titled spines', async ( { page } ) => {
+	// SINGLE_ONLY in inc/media-shelf.php; a spine drops its cover too.
+	const singleOnly = '.pk-sub, .pk-stars, .p-rating, .pk-sources, .pk-meta, .pk-kindlabel, .pk-note, .pk-badge';
+	const spineCuts = `${ singleOnly }, .pk-media`;
 	await page.goto( WATCH_ARCHIVE, { waitUntil: 'load' } );
 	const shelf = page.locator( '.cr-archive--watch .cr-vhs-shelf' );
 	await expect( shelf ).toHaveCount( 1 );
@@ -624,13 +706,17 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 	expect( faceCount ).toBeLessThanOrEqual( 3 );
 	for ( const item of await face.all() ) {
 		await expect( item.locator( 'h3.pk-title a' ) ).toHaveCount( 1 );
+		expect( await item.locator( singleOnly ).count(), 'a face-out case\'s markup holds no single-only metadata' ).toBe( 0 );
 	}
+	await expectWatchDateNames( face, 'page 1 face-out' );
 	const spines = shelf.locator( 'ul.cr-vhs-shelf__list--spine[aria-labelledby="cr-vhs-all"] > li' );
 	if ( await spines.count() ) {
 		expect( texts[ 1 ] ).toBe( 'All watches' );
+		await expectWatchDateNames( spines, 'page 1 spine' );
 		for ( const item of await spines.all() ) {
 			const visibleLinks = await item.evaluate( ( li ) => [ ...li.querySelectorAll( 'a' ) ].filter( ( a ) => a.getClientRects().length > 0 ).length );
 			expect( visibleLinks, 'a spine is one link' ).toBe( 1 );
+			expect( await item.locator( spineCuts ).count(), 'a spine\'s markup is its title alone' ).toBe( 0 );
 			const mode = await item.locator( '.pk-caption' ).evaluate( ( el ) => getComputedStyle( el ).writingMode );
 			expect( mode ).toBe( 'vertical-rl' );
 		}
@@ -638,17 +724,34 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 	const decor = await page.locator( '.cr-archive--watch .cr-vhs-shelf' ).evaluate( ( el ) => getComputedStyle( el, '::before' ).backgroundImage );
 	expect( decor, 'the TV still life is a CSS background on the unit, not content' ).toContain( 'cr-tv-vcr.svg' );
 	expect( await page.locator( '.cr-archive--watch .cr-vhs-shelf img, .cr-archive--watch .cr-vhs-shelf svg' ).evaluateAll( ( els ) => els.filter( ( e ) => ! e.closest( '.pk-card' ) ).length ), 'no decoration enters the DOM' ).toBe( 0 );
+
+	const later = await page.goto( `${ WATCH_ARCHIVE }page/2/`, { waitUntil: 'load' } );
+	if ( 404 !== later.status() ) {
+		const laterShelf = page.locator( '.cr-archive--watch .cr-vhs-shelf' );
+		expect( await laterShelf.locator( 'ul.cr-vhs-shelf__list--face' ).count(), 'page 2 has no face-out shelf' ).toBe( 0 );
+		const laterSpines = laterShelf.locator( 'ul.cr-vhs-shelf__list--spine[aria-labelledby="cr-vhs-all"] > li' );
+		expect( await laterSpines.count(), 'page 2 is a shelf of spines' ).toBeGreaterThan( 0 );
+		expect( await laterSpines.locator( spineCuts ).count(), 'a page 2 spine\'s markup is its title alone' ).toBe( 0 );
+		await expectWatchDateNames( laterSpines, 'page 2 spine' );
+	}
 } );
 
-// PKIW #227: the shelf asks for one image at high priority, the first
-// face-out cover on page 1, and nothing on later pages; every other cover
-// and spine is lazy, as loading="lazy" or as Perfmatters' data-src swap
-// (perfmatters-lazy), which drops the loading attribute. A cover from the
-// media library keeps core's srcset. Each case's h-cite cites what was
-// watched: its u-url is the stored watch URL when that is a real http(s)
-// URL, never the post, so the title that links to the post carries no
-// u-url, and the entry keeps exactly one u-url, its permalink.
-test( 'the watch archive asks for one cover at high priority and each case cites what was watched, not the post (PKIW #227)', async ( { page } ) => {
+// PKIW #227: page 1's face-out covers are the first row, so each loads
+// eagerly with an empty alt (the title names the case), and the first
+// cover alone asks for high priority, as #106 did: on a phone the row is
+// one column, so the other covers sit below the first screen. No preload
+// link; later pages ask for none. An eager cover's sizes names its width
+// and never starts with `auto`, which is valid only on a lazy image; that
+// holds for every <source> Modern Image Formats' picture mode puts beside
+// it (dev runs picture mode). Each cover carries skip-lazy and
+// data-skip-lazy="1" so Perfmatters leaves it eager. Every other image is lazy, as loading="lazy" or as Perfmatters'
+// data-src swap (perfmatters-lazy), which drops the loading attribute. A
+// cover from the media library keeps core's srcset. Each case's h-cite
+// cites what was watched: its u-url is
+// the stored watch URL when that is a real http(s) URL, never the post,
+// so the title that links to the post carries no u-url, and the entry
+// keeps exactly one u-url, its permalink.
+test( 'the watch archive loads its first-row covers eagerly, the first at high priority, and each case cites what was watched, not the post (PKIW #227)', async ( { page } ) => {
 	let checked = 0;
 	for ( const [ n, path ] of [ WATCH_ARCHIVE, `${ WATCH_ARCHIVE }page/2/` ].entries() ) {
 		const response = await page.goto( path, { waitUntil: 'load' } );
@@ -679,11 +782,18 @@ test( 'the watch archive asks for one cover at high priority and each case cites
 				}
 			};
 			const imgs = [ ...el.querySelectorAll( 'img' ) ];
-			const first = el.querySelector( 'ul.cr-vhs-shelf__list--face > li:first-child img' );
+			const covers = [ ...el.querySelectorAll( 'ul.cr-vhs-shelf__list--face > li .pk-media img' ) ];
 			return {
-				high: [ ...document.querySelectorAll( 'img[fetchpriority="high"]' ) ].map( ( i ) => i === first ),
+				covers: covers.length,
+				high: [ ...document.querySelectorAll( 'img[fetchpriority="high"]' ) ].map( ( i ) => covers.indexOf( i ) ),
+				coverAlts: covers.map( ( i ) => i.getAttribute( 'alt' ) ),
+				// Every <img> and <source> in a face-out case, sizes or Perfmatters' data-sizes.
+				autoSizes: [ ...el.querySelectorAll( 'ul.cr-vhs-shelf__list--face > li :is(img, source)' ) ].filter( ( i ) => /^\s*auto\b/i.test( i.getAttribute( 'sizes' ) ?? i.getAttribute( 'data-sizes' ) ?? '' ) ).map( ( i ) => `<${ i.localName } sizes="${ i.getAttribute( 'sizes' ) ?? i.getAttribute( 'data-sizes' ) }">` ),
+				sources: el.querySelectorAll( 'ul.cr-vhs-shelf__list--face > li source' ).length,
+				notSkipLazy: covers.filter( ( i ) => ! i.classList.contains( 'skip-lazy' ) || '1' !== i.getAttribute( 'data-skip-lazy' ) ).length,
+				lazyCovers: covers.filter( ( i ) => 'lazy' === i.getAttribute( 'loading' ) || i.classList.contains( 'perfmatters-lazy' ) ).length,
 				imagePreloads: document.querySelectorAll( 'link[rel="preload"][as="image"]' ).length,
-				eagerNotFirst: imgs.filter( ( i ) => i !== first && 'lazy' !== i.getAttribute( 'loading' ) && ! i.classList.contains( 'perfmatters-lazy' ) ).length,
+				eagerNotCover: imgs.filter( ( i ) => ! covers.includes( i ) && 'lazy' !== i.getAttribute( 'loading' ) && ! i.classList.contains( 'perfmatters-lazy' ) ).length,
 				noSrcset: imgs.filter( ( i ) => i.classList.contains( 'wp-post-image' ) && ! i.getAttribute( 'srcset' ) && ! i.getAttribute( 'data-srcset' ) ).length,
 				cases: [ ...el.querySelectorAll( 'li.h-entry' ) ].map( ( li ) => {
 					const cite = li.querySelector( 'article.pk-card.h-cite' );
@@ -697,10 +807,19 @@ test( 'the watch archive asks for one cover at high priority and each case cites
 				} ),
 			};
 		} );
-		expect.soft( report.high.length, `${ path }: at most one image on the page at high priority` ).toBeLessThanOrEqual( 0 === n ? 1 : 0 );
-		expect.soft( report.high.every( Boolean ), `${ path }: the high-priority image is the first face-out cover` ).toBe( true );
-		expect.soft( report.imagePreloads, `${ path }: no image preload beyond that cover` ).toBeLessThanOrEqual( 0 === n ? 1 : 0 );
-		expect.soft( report.eagerNotFirst, `${ path }: every other cover and spine loads lazily` ).toBe( 0 );
+		if ( 0 === n ) {
+			expect( report.covers, `${ path }: the first row holds a stored cover` ).toBeGreaterThan( 0 );
+		}
+		expect.soft( report.high, `${ path }: the first face-out cover is the one image at high priority` ).toEqual( report.covers ? [ 0 ] : [] );
+		expect.soft( report.coverAlts.filter( ( alt ) => '' !== alt ), `${ path }: every face-out cover's alt is empty` ).toEqual( [] );
+		expect.soft( report.autoSizes, `${ path }: no <img> or <source> in a face-out case has sizes starting with auto` ).toEqual( [] );
+		expect.soft( report.notSkipLazy, `${ path }: every face-out cover carries skip-lazy and data-skip-lazy="1"` ).toBe( 0 );
+		if ( 0 === n ) {
+			test.info().annotations.push( { type: 'face-out <source> elements', description: `${ report.sources } (0 means this site doesn't wrap covers in <picture>)` } );
+		}
+		expect.soft( report.lazyCovers, `${ path }: no face-out cover loads lazily` ).toBe( 0 );
+		expect.soft( report.imagePreloads, `${ path }: no image preload` ).toBe( 0 );
+		expect.soft( report.eagerNotCover, `${ path }: every other image loads lazily` ).toBe( 0 );
 		expect.soft( report.noSrcset, `${ path }: media library covers keep core's srcset` ).toBe( 0 );
 		for ( const c of report.cases ) {
 			expect.soft( c.entry, `${ path } post ${ c.post }: the entry's one u-url is its permalink` ).toEqual( [ c.permalink ] );
