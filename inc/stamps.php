@@ -71,6 +71,25 @@ function pick( int $seed, int $shift, int $mod ): int {
 }
 
 /**
+ * A palette paper for a post, the same on every surface (P26).
+ *
+ * The seed is the post ID alone, so the archive, the Stream and the single
+ * agree; shift 9 keeps it apart from the ink and tilt picks (shifts 3 and 6)
+ * the stamp adapters make from their own seeds.
+ *
+ * @param int                       $post_id Post ID.
+ * @param array<int|string, string> $set     Token names to choose from, such as 'sky-blue'.
+ * @return string One of $set, or '' when the set is empty.
+ */
+function seeded_paper( int $post_id, array $set ): string {
+	$set = array_values( $set );
+	if ( empty( $set ) ) {
+		return '';
+	}
+	return (string) $set[ pick( seed( (string) $post_id ), 9, count( $set ) ) ];
+}
+
+/**
  * Trim a stamp line so it fits its stroke without spilling.
  *
  * A "one, two" pair that overruns drops back to its first part before
@@ -89,6 +108,37 @@ function fit( string $text, int $limit ): string {
 		return fit( trim( mb_substr( $text, 0, $comma ) ), $limit );
 	}
 	return rtrim( mb_substr( $text, 0, $limit - 1 ) ) . '…';
+}
+
+/**
+ * Keep a big line inside its stamp (P21).
+ *
+ * The smaller lines are trimmed by length in fit(); the big line carries
+ * words that can't be cut, such as the plugin's "Currently Reading". When its width
+ * would pass the room the shape gives it, the line is held to that room
+ * with textLength, as the rect's mid line already is. The estimate mirrors
+ * cr-post-kinds.css: the big line is monospace (0.6em per character) at
+ * 21px with 2px tracking on a rect and 12.5px with 1.4px on a seal or
+ * octagon. Every shipped word fits, so their markup doesn't change.
+ *
+ * @param string $big   The big line, uppercased.
+ * @param string $shape 'rect' | 'seal' | 'octagon'.
+ * @param bool   $glyph Whether the stamp prints a glyph (rect only moves the line for it).
+ * @return string A textLength attribute pair, or ''.
+ */
+function big_fit( string $big, string $shape, bool $glyph ): string {
+	$n = mb_strlen( $big );
+	if ( $n < 2 ) {
+		return '';
+	}
+	if ( 'rect' === $shape ) {
+		$width = $n * 12.6 + ( $n - 1 ) * 2;
+		$room  = $glyph ? 130 : 150; // Inside the inner frame, right of the glyph when there is one.
+	} else {
+		$width = $n * 7.5 + ( $n - 1 ) * 1.4;
+		$room  = 'seal' === $shape ? 80 : 90; // The seal's inner ring; the octagon's inner edge.
+	}
+	return $width > $room ? ' textLength="' . $room . '" lengthAdjust="spacingAndGlyphs"' : '';
 }
 
 /**
@@ -137,7 +187,7 @@ function render( array $spec ): string {
 			$svg .= '<g class="cr-stamp__glyph" transform="translate(30 50) scale(0.9)">' . $glyph . '</g>';
 		}
 		$tx   = '' !== $glyph ? 104 : 92;
-		$svg .= '<text x="' . $tx . '" y="43" class="cr-stamp__big">' . esc_html( $big ) . '</text>'
+		$svg .= '<text x="' . $tx . '" y="43" class="cr-stamp__big"' . big_fit( $big, 'rect', '' !== $glyph ) . '>' . esc_html( $big ) . '</text>'
 			. '<text x="' . $tx . '" y="64" class="cr-stamp__mid"' . ( mb_strlen( $mid ) > 15 ? ' textLength="' . ( '' !== $glyph ? 120 : 150 ) . '" lengthAdjust="spacingAndGlyphs"' : '' ) . '>' . esc_html( $mid ) . '</text>'
 			. '<text x="' . $tx . '" y="81" class="cr-stamp__small">' . esc_html( $small ) . '</text>'
 			. '</svg>';
@@ -148,7 +198,7 @@ function render( array $spec ): string {
 		if ( '' !== $glyph ) {
 			$svg .= '<g class="cr-stamp__glyph" transform="translate(62 40) scale(0.85)">' . $glyph . '</g>';
 		}
-		$svg .= '<text x="62" y="' . ( '' !== $glyph ? 70 : 58 ) . '" class="cr-stamp__big cr-stamp__big--seal">' . esc_html( $big ) . '</text>'
+		$svg .= '<text x="62" y="' . ( '' !== $glyph ? 70 : 58 ) . '" class="cr-stamp__big cr-stamp__big--seal"' . big_fit( $big, 'octagon', '' !== $glyph ) . '>' . esc_html( $big ) . '</text>'
 			. '<text x="62" y="' . ( '' !== $glyph ? 84 : 74 ) . '" class="cr-stamp__mid cr-stamp__mid--seal">' . esc_html( $mid ) . '</text>'
 			. '<text x="62" y="' . ( '' !== $glyph ? 97 : 88 ) . '" class="cr-stamp__small">' . esc_html( $small ) . '</text>'
 			. ( '' === $glyph && '' !== $tiny ? '<text x="62" y="101" class="cr-stamp__tiny">' . esc_html( $tiny ) . '</text>' : '' )
@@ -167,7 +217,7 @@ function render( array $spec ): string {
 		if ( '' !== $glyph ) {
 			$svg .= '<g class="cr-stamp__glyph" transform="translate(62 45) scale(0.8)">' . $glyph . '</g>';
 		}
-		$svg .= '<text x="62" y="' . ( '' !== $glyph ? 71 : 60 ) . '" class="cr-stamp__big cr-stamp__big--seal">' . esc_html( $big ) . '</text>'
+		$svg .= '<text x="62" y="' . ( '' !== $glyph ? 71 : 60 ) . '" class="cr-stamp__big cr-stamp__big--seal"' . big_fit( $big, 'seal', '' !== $glyph ) . '>' . esc_html( $big ) . '</text>'
 			. '<text x="62" y="' . ( '' !== $glyph ? 83 : 74 ) . '" class="cr-stamp__small">' . esc_html( '' !== $mid ? $mid : $small ) . '</text>'
 			. '<text x="62" y="' . ( '' !== $glyph ? 94 : 86 ) . '" class="cr-stamp__tiny">' . esc_html( '' !== $mid ? $small : $tiny ) . '</text>'
 			. ( '' !== $mid && '' !== $tiny && '' === $glyph ? '<text x="62" y="97" class="cr-stamp__tiny">' . esc_html( $tiny ) . '</text>' : '' );

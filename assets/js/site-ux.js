@@ -16,6 +16,11 @@
  *
  * Comic covers (0.7.77): a cover that fails to load leaves its bag, and
  * the card is marked so the stylesheet prints the title on the board.
+ *
+ * Any cover (PKIW W1): a container that carries data-cr-cover-fallback is
+ * marked cr-cover--failed and loses its image, so the kind's stylesheet
+ * draws its own fallback there. Kind adapters add the attribute and style
+ * the class; this file stays the same for each new kind.
  */
 ( function () {
 	'use strict';
@@ -25,6 +30,15 @@
 	// title sleeve or the cassette's typographic label instead of an empty
 	// recess. `error` doesn't bubble, so listen in capture.
 	function dropFailedCover( img ) {
+		// Marked containers (W1 contract): the image leaves, and a <picture>
+		// around it goes too, so no empty <source> frame stays behind.
+		const fallback = img.closest( '[data-cr-cover-fallback]' );
+		if ( fallback ) {
+			fallback.classList.add( 'cr-cover--failed' );
+			const picture = img.parentElement && img.parentElement.tagName === 'PICTURE' && img.parentElement !== fallback ? img.parentElement : null;
+			( picture || img ).remove();
+			return;
+		}
 		const media = img.closest( '.cr-vhs-shelf .pk-media, .pk-card.cr-cassette.cr-media--shelf .pk-media' );
 		if ( media ) {
 			media.remove();
@@ -47,7 +61,7 @@
 	document.addEventListener( 'error', function ( e ) {
 		if ( e.target && e.target.tagName === 'IMG' ) dropFailedCover( e.target );
 	}, true );
-	document.querySelectorAll( '.cr-vhs-shelf .pk-media img, .pk-card.cr-cassette.cr-media--shelf .pk-media img, .pk-card.cr-comic .pk-media img, .pk-card.cr-comic-strip .pk-media img' ).forEach( function ( img ) {
+	document.querySelectorAll( '[data-cr-cover-fallback] img, .cr-vhs-shelf .pk-media img, .pk-card.cr-cassette.cr-media--shelf .pk-media img, .pk-card.cr-comic .pk-media img, .pk-card.cr-comic-strip .pk-media img' ).forEach( function ( img ) {
 		if ( img.complete && img.naturalWidth === 0 && ! img.classList.contains( 'perfmatters-lazy' ) ) dropFailedCover( img );
 	} );
 
