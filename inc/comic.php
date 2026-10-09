@@ -507,9 +507,10 @@ function bag_card( string $html, array $block, $instance ): string {
 		$classes[] = 'has-cover';
 	}
 
-	// The cover is not inside the title link, so a stored description of
-	// the art stays. The plugin's fallback ("Cover of …") repeats the
-	// heading, so it is emptied.
+	// On the rack the title link covers the whole bag and names it, so the
+	// cover's alt is emptied and the comic isn't announced twice. On the
+	// Stream a stored description of the art stays; the plugin's fallback
+	// ("Cover of …") repeats the heading, so it is emptied.
 	$eager = $rack && ! is_paged() && in_the_loop() && $GLOBALS['wp_query']->current_post < FIRST_ROW;
 	$tags  = new \WP_HTML_Tag_Processor( $html );
 	if ( $has_cover && $tags->next_tag(
@@ -518,7 +519,7 @@ function bag_card( string $html, array $block, $instance ): string {
 			'class_name' => 'u-photo',
 		)
 	) ) {
-		if ( '' === trim( (string) ( $a['coverImageAlt'] ?? '' ) ) ) {
+		if ( $rack || '' === trim( (string) ( $a['coverImageAlt'] ?? '' ) ) ) {
 			$tags->set_attribute( 'alt', '' );
 		}
 		if ( $eager ) {
