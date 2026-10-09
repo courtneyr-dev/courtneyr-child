@@ -1245,12 +1245,12 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 	background: var(--cr-selective-yellow);
 	box-shadow: none;
 	color: var(--cr-russian-violet);
-	font-family: var(--cr-font-body);
-	font-size: var(--cr-text-sm);
-	font-weight: var(--cr-weight-extrabold);
-	letter-spacing: var(--cr-tracking-wide);
+	font-family: var(--cr-font-display);
+	font-size: var(--cr-text-base);
+	font-weight: var(--cr-weight-regular);
+	letter-spacing: var(--cr-tracking-normal);
 	line-height: 1;
-	text-transform: uppercase;
+	text-transform: none;
 	transform: none;
 	pointer-events: none;
 }
