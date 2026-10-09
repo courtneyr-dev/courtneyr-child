@@ -215,6 +215,46 @@ function load_order( array $items ): array {
 }
 
 /**
+ * What a listen case leaves on the single post (PKIW #226, Courtney's
+ * 2026-10-09 ruling, which brings the listen shelf under the 2026-10-03 "no
+ * metadata on archive pages" ruling): the stars, the "Listen / find it" row,
+ * the date and the meta row's second Listen link. Narrower than SINGLE_ONLY,
+ * which would also cut the artist and album line (a pk-sub), the hidden
+ * p-rating and the kind label the cassette prints. Each is [ tag, class ]
+ * for cut_elements().
+ */
+const LISTEN_SINGLE_ONLY = array(
+	array( 'div', 'pk-stars' ),
+	array( 'div', 'pk-sources' ),
+	array( 'p', 'pk-stream-date' ),
+	array( 'div', 'pk-meta' ),
+);
+
+/**
+ * Reduce each listen case to its cassette, title and artist line (PKIW #226).
+ *
+ * LISTEN_SINGLE_ONLY is cut from the markup, not hidden with CSS, so the
+ * case keeps one link, the title's, and name_listen_date() puts the cut
+ * date in that link's name. The h-entry, the h-cite's u-listen-of, the
+ * hidden p-rating and `.pk-entry-props` (author, url, dt-published) stay
+ * for microformats. Items split where each post template item opens, so a
+ * card's own lists never end one early.
+ *
+ * @param string $html  Rendered core/post-template.
+ * @param array  $block Parsed block.
+ * @return string
+ */
+function listen_case_only( string $html, array $block ): string {
+	$class = (string) ( $block['attrs']['className'] ?? '' );
+	if ( 'listen' !== shelf_kind() || false === strpos( $class, 'cr-media-shelf__list' ) ) {
+		return $html;
+	}
+	$parts = preg_split( '/(?=<li\b[^>]*\bclass="[^"]*(?<![\w-])wp-block-post(?![\w-]))/', cut_all( $html, LISTEN_SINGLE_ONLY ) );
+	return implode( '', array_map( __NAMESPACE__ . '\\name_listen_date', (array) $parts ) );
+}
+add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\listen_case_only', 9, 2 );
+
+/**
  * Cases in the listen shelf's widest row (4 / 2 / 1 columns at 1440 / 720
  * / 375). The covers of these cases can sit in the first row at any width.
  */
@@ -396,6 +436,34 @@ function spine_only( string $item ): string {
  * @return string
  */
 function name_watch_date( string $item ): string {
+	/* translators: %s: the date the watch was posted, in the site's date format. */
+	return name_with_date( $item, __( 'watched %s', 'courtneyr-child' ) );
+}
+
+/**
+ * Name a listen case's link with its listen date for screen readers (PKIW
+ * issue 226, Courtney's 2026-10-09 ruling), the way name_watch_date() names
+ * a watch case: the shelf no longer shows the date, so two listens of one
+ * track would otherwise share a link name. The date is the one the case
+ * printed before the cut, get_the_date() in the site's date format.
+ *
+ * @param string $item One rendered <li>.
+ * @return string
+ */
+function name_listen_date( string $item ): string {
+	/* translators: %s: the date the listen was posted, in the site's date format. */
+	return name_with_date( $item, __( 'listened %s', 'courtneyr-child' ) );
+}
+
+/**
+ * Put a case's post date in its title link's name as hidden text (see
+ * name_watch_date() for the markup and why the whole name is hidden).
+ *
+ * @param string $item   One rendered <li>.
+ * @param string $format Hidden suffix, %s the date.
+ * @return string
+ */
+function name_with_date( string $item, string $format ): string {
 	$tags = new \WP_HTML_Tag_Processor( $item );
 	if ( ! $tags->next_tag( 'li' ) ) {
 		return $item;
@@ -411,7 +479,7 @@ function name_watch_date( string $item ): string {
 	if ( ! is_string( $date ) || '' === $date ) {
 		return $item;
 	}
-	if ( ! preg_match( '/(<h3\b[^>]*\bclass="[^"]*(?<![\w-])pk-title(?![\w-])[^"]*"[^>]*>)\s*<a\b[^>]*>/', $item, $open, PREG_OFFSET_CAPTURE ) ) {
+	if ( ! preg_match( '/(<h[1-6]\b[^>]*\bclass="[^"]*(?<![\w-])pk-title(?![\w-])[^"]*"[^>]*>)\s*<a\b[^>]*>/', $item, $open, PREG_OFFSET_CAPTURE ) ) {
 		return $item;
 	}
 	$heading = (int) $open[1][1] + strlen( $open[1][0] );
@@ -420,10 +488,9 @@ function name_watch_date( string $item ): string {
 	if ( false === $end ) {
 		return $item;
 	}
-	$shown = substr( $item, $start, $end - $start );
-	$title = wp_strip_all_tags( $shown );
-	/* translators: %s: the date the watch was posted, in the site's date format. */
-	$hidden = sprintf( __( 'watched %s', 'courtneyr-child' ), $date );
+	$shown  = substr( $item, $start, $end - $start );
+	$title  = wp_strip_all_tags( $shown );
+	$hidden = sprintf( $format, $date );
 	return substr( $item, 0, $heading )
 		. '<span class="value-title" title="' . esc_attr( $title ) . '" hidden></span>'
 		. substr( $item, $heading, $start - $heading )
