@@ -138,12 +138,8 @@ function rating_text( float $rating ): string {
  * @return array<string, mixed>
  */
 function read_attrs( \WP_Post $post, array $block ): array {
-	$attrs  = (array) ( $block['attrs'] ?? array() );
-	$rating = $attrs['rating'] ?? null;
-	$a      = \Courtneyr\Child\Journal\card_attrs( $post, 'post-kinds-indieweb/read-card', $attrs );
-	if ( ! is_numeric( $rating ) || (float) $rating <= 0 ) {
-		$rating = get_post_meta( $post->ID, '_pkiw_read_rating', true );
-	}
+	$a           = \Courtneyr\Child\Journal\card_attrs( $post, 'post-kinds-indieweb/read-card', (array) ( $block['attrs'] ?? array() ) );
+	$rating      = $a['rating'] ?? null;
 	$a['rating'] = is_numeric( $rating ) ? max( 0.0, min( 5.0, (float) $rating ) ) : 0.0;
 	if ( ! in_array( $a['readStatus'] ?? '', STATUSES, true ) ) {
 		$a['readStatus'] = 'reading';
@@ -199,7 +195,7 @@ function book_cover( \WP_Post $post, array $a, array $block, string $size ): str
 	$title = trim( (string) ( $a['bookTitle'] ?? '' ) );
 	$title = '' !== $title ? $title : get_the_title( $post );
 	if ( '' !== (string) ( $pic['source'] ?? '' ) && '' !== (string) ( $pic['url'] ?? '' ) ) {
-		$alt = trim( (string) ( $block['attrs']['coverImageAlt'] ?? '' ) );
+		$alt = trim( (string) ( $a['coverImageAlt'] ?? '' ) );
 		if ( '' === $alt ) {
 			$alt = trim( (string) ( $pic['alt'] ?? '' ) );
 		}

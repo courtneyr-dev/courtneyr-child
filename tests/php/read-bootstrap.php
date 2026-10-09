@@ -301,6 +301,9 @@ namespace PKIW {
 				'readStatus' => 'read_status',
 				'rating' => 'read_rating',
 			),
+			'post-kinds-indieweb/watch-card' => array(
+				'rating' => 'watch_rating',
+			),
 		);
 	}
 

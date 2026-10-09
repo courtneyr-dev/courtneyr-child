@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 require __DIR__ . '/read-bootstrap.php';
 
+use function Courtneyr\Child\Journal\card_attrs;
 use function Courtneyr\Child\SingleRead\add_title_lede;
 use function Courtneyr\Child\SingleRead\book_cover;
 use function Courtneyr\Child\SingleRead\date_pair;
@@ -97,10 +98,33 @@ cr_read_group(
 		$block = cr_read_single_block( array( 'rating' => 0 ) );
 		unset( $block['attrs']['rating'] );
 		cr_read_same( 4.5, read_attrs( $post, $block )['rating'], 'meta float' );
+		$GLOBALS['cr_read_meta'][ $post->ID ]['_pkiw_read_rating'] = '5';
+		cr_read_same( 5.0, read_attrs( $post, $block )['rating'], 'meta five' );
+		$GLOBALS['cr_read_meta'][ $post->ID ]['_pkiw_read_rating'] = '3.5';
+		cr_read_same( 3.5, read_attrs( $post, $block )['rating'], 'meta half' );
+		$GLOBALS['cr_read_meta'][ $post->ID ]['_pkiw_read_rating'] = '9';
+		cr_read_same( 5.0, read_attrs( $post, $block )['rating'], 'meta clamp' );
+		unset( $GLOBALS['cr_read_meta'][ $post->ID ]['_pkiw_read_rating'] );
+		cr_read_same( 0.0, read_attrs( $post, $block )['rating'], 'missing rating' );
 		cr_read_same( 'reading', read_attrs( $post, cr_read_single_block( array( 'readStatus' => 'other' ) ) )['readStatus'], 'invalid status' );
 		$missing = cr_read_single_block();
 		unset( $missing['attrs']['readStatus'] );
 		cr_read_same( 'reading', read_attrs( $post, $missing )['readStatus'], 'missing status' );
+	}
+);
+
+cr_read_group(
+	'card_attrs keeps read ratings fractional and leaves watch ratings alone',
+	static function (): void {
+		$post = cr_read_reset();
+		$GLOBALS['cr_read_meta'][ $post->ID ]['_pkiw_read_rating'] = '3.5';
+		cr_read_same( 3.5, card_attrs( $post, 'post-kinds-indieweb/read-card', array() )['rating'], 'read meta half' );
+		$GLOBALS['cr_read_meta'][ $post->ID ]['_pkiw_read_rating'] = '5';
+		cr_read_same( 5.0, card_attrs( $post, 'post-kinds-indieweb/read-card', array() )['rating'], 'read meta five' );
+		unset( $GLOBALS['cr_read_meta'][ $post->ID ]['_pkiw_read_rating'] );
+		cr_read_same( 4.5, card_attrs( $post, 'post-kinds-indieweb/read-card', array( 'rating' => 4.5 ) )['rating'], 'read block half' );
+		$GLOBALS['cr_read_meta'][ $post->ID ]['_pkiw_watch_rating'] = '3.5';
+		cr_read_same( 3, card_attrs( $post, 'post-kinds-indieweb/watch-card', array() )['rating'], 'watch meta integer' );
 	}
 );
 
@@ -125,17 +149,21 @@ cr_read_group(
 		$a    = cr_read_single_block()['attrs'];
 		$GLOBALS['cr_read_attachments'][71] = 'https://media.test/featured.jpg';
 		$GLOBALS['cr_read_pictures'][42]    = array( 'source' => 'featured', 'attachment_id' => 71, 'url' => 'https://media.test/featured.jpg', 'alt' => 'Picture alt' );
-		$html = book_cover( $post, $a, cr_read_single_block( array( 'coverImageAlt' => 'Block alt' ) ), 'large' );
+		$a_with_block_alt = array_merge( $a, array( 'coverImageAlt' => 'Block alt' ) );
+		$a_without_alt    = array_merge( $a, array( 'coverImageAlt' => '' ) );
+		$html             = book_cover( $post, $a_with_block_alt, cr_read_single_block( array( 'coverImageAlt' => 'Block alt' ) ), 'large' );
 		cr_read_contains( 'cr-book__cover--featured', $html, 'featured class' );
 		cr_read_contains( 'class="cr-book__img u-photo"', $html, 'image class' );
 		cr_read_contains( 'alt="Block alt"', $html, 'block alt' );
-		$html = book_cover( $post, $a, cr_read_single_block( array( 'coverImageAlt' => '' ) ), 'large' );
+		$html = book_cover( $post, $a_with_block_alt, array(), 'large' );
+		cr_read_contains( 'alt="Block alt"', $html, 'resolved block alt' );
+		$html = book_cover( $post, $a_without_alt, cr_read_single_block( array( 'coverImageAlt' => '' ) ), 'large' );
 		cr_read_contains( 'alt="Picture alt"', $html, 'picture alt' );
 		$GLOBALS['cr_read_pictures'][42]['alt'] = '';
-		$html = book_cover( $post, $a, cr_read_single_block( array( 'coverImageAlt' => '' ) ), 'large' );
+		$html = book_cover( $post, $a_without_alt, cr_read_single_block( array( 'coverImageAlt' => '' ) ), 'large' );
 		cr_read_contains( 'alt="Cover of Fixture Book"', $html, 'fallback alt' );
 		$GLOBALS['cr_read_pictures'][42] = array( 'source' => 'cover', 'attachment_id' => 0, 'url' => 'https://remote.test/cover.jpg', 'alt' => '' );
-		cr_read_contains( '<img class="cr-book__img u-photo" src="https://remote.test/cover.jpg"', book_cover( $post, $a, cr_read_single_block( array( 'coverImageAlt' => '' ) ), 'large' ), 'remote cover' );
+		cr_read_contains( '<img class="cr-book__img u-photo" src="https://remote.test/cover.jpg"', book_cover( $post, $a_without_alt, cr_read_single_block( array( 'coverImageAlt' => '' ) ), 'large' ), 'remote cover' );
 		$GLOBALS['cr_read_pictures'][42] = array( 'source' => '', 'attachment_id' => 0, 'url' => '', 'alt' => '' );
 		$html = book_cover( $post, $a, cr_read_single_block(), 'large' );
 		cr_read_contains( 'cr-book__cover--type" aria-hidden="true"', $html, 'type cover' );

@@ -257,7 +257,8 @@ const LOCATION_ATTR_VISIBILITY_MAP = array(
  * The plugin mirrors card attributes into `_pkiw_*` meta (Card_Meta_Sync)
  * and fills empty attributes from that meta when it renders, so a post
  * whose block stores only some fields still shows the rest. Read them
- * the same way. Numeric attributes come back as integers.
+ * the same way. Numeric attributes come back as integers, except read
+ * ratings, which may be fractional.
  *
  * Location-related attributes (name/address/locality/region/country/
  * coordinates/url — see LOCATION_ATTR_VISIBILITY_MAP) are only filled
@@ -289,6 +290,8 @@ function card_attrs( \WP_Post $post, string $block_name, array $attrs ): array {
 
 	$numeric = array( 'pageCount', 'currentPage', 'rating', 'seasonNumber', 'episodeNumber', 'releaseYear' );
 	$floats  = array( 'geoLatitude', 'geoLongitude' );
+	// Read cards store half-star ratings; watch/comic ratings keep their integer behavior.
+	$fractional = 'post-kinds-indieweb/read-card' === $block_name ? array( 'rating' ) : array();
 	foreach ( $map as $attr => $suffix ) {
 		if ( isset( $attrs[ $attr ] ) && '' !== $attrs[ $attr ] && 0 !== $attrs[ $attr ] && 0.0 !== $attrs[ $attr ] ) {
 			continue;
@@ -303,6 +306,10 @@ function card_attrs( \WP_Post $post, string $block_name, array $attrs ): array {
 				if ( is_numeric( $value ) ) {
 					$attrs[ $attr ] = (float) $value;
 				}
+				continue;
+			}
+			if ( in_array( $attr, $fractional, true ) && is_numeric( $value ) ) {
+				$attrs[ $attr ] = (float) $value;
 				continue;
 			}
 			$attrs[ $attr ] = in_array( $attr, $numeric, true ) && is_numeric( $value ) ? (int) $value : $value;
