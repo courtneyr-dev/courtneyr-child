@@ -19,16 +19,26 @@ namespace {
 	$GLOBALS['cr_read_stream']      = true;
 	$GLOBALS['cr_read_post']        = null;
 	$GLOBALS['cr_read_failures']    = array();
+	$GLOBALS['cr_read_has_term']    = true;
+	$GLOBALS['cr_read_protected']   = array();
+	$GLOBALS['cr_read_dates']       = array();
+	$GLOBALS['cr_read_render']      = null;
+	$GLOBALS['cr_read_enqueued']    = array();
+
+	define( 'COURTNEYR_CHILD_URI', 'https://example.test/theme' );
+	define( 'COURTNEYR_CHILD_VERSION', 'test' );
 
 	class WP_Post {
 		public int $ID;
 		public string $post_title;
 		public string $post_content;
+		public string $post_name;
 
 		public function __construct( int $id = 1, string $title = 'Test Book', string $content = '' ) {
 			$this->ID           = $id;
 			$this->post_title   = $title;
 			$this->post_content = $content;
+			$this->post_name    = sanitize_title( $title );
 		}
 	}
 
@@ -48,6 +58,21 @@ namespace {
 
 	function add_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ): void {
 		$GLOBALS['cr_read_filters'][] = array( $hook, $callback, $priority, $accepted_args );
+	}
+
+	function register_block_style( $block_name, $args ): void {
+	}
+
+	function is_admin(): bool {
+		return false;
+	}
+
+	function is_tax( $taxonomy = '', $term = '' ): bool {
+		return 'kind' === $taxonomy && 'read' === $term;
+	}
+
+	function wp_enqueue_style( $handle, $src = '', $deps = array(), $version = false ): void {
+		$GLOBALS['cr_read_enqueued'][] = array( $handle, $src, $deps, $version );
 	}
 
 	function __( $text, $domain = null ): string {
@@ -99,7 +124,13 @@ namespace {
 	}
 
 	function get_the_date( $format = '', $post = null ): string {
-		return 'October 9, 2026';
+		$p = $post instanceof WP_Post ? $post : $GLOBALS['cr_read_post'];
+		return $p instanceof WP_Post ? ( $GLOBALS['cr_read_dates'][ $p->ID ]['text'] ?? 'October 9, 2026' ) : 'October 9, 2026';
+	}
+
+	function get_post_time( $format = 'U', $gmt = false, $post = null ) {
+		$p = $post instanceof WP_Post ? $post : $GLOBALS['cr_read_post'];
+		return $p instanceof WP_Post ? ( $GLOBALS['cr_read_dates'][ $p->ID ]['iso'] ?? '2026-10-09T12:00:00+00:00' ) : '';
 	}
 
 	function get_post_meta( $post_id, $key = '', $single = false ) {
@@ -107,7 +138,12 @@ namespace {
 	}
 
 	function has_term( $term, $taxonomy, $post = null ): bool {
-		return 'read' === $term && 'kind' === $taxonomy;
+		return (bool) $GLOBALS['cr_read_has_term'] && 'read' === $term && 'kind' === $taxonomy;
+	}
+
+	function post_password_required( $post = null ): bool {
+		$p = $post instanceof WP_Post ? $post : $GLOBALS['cr_read_post'];
+		return $p instanceof WP_Post && ! empty( $GLOBALS['cr_read_protected'][ $p->ID ] );
 	}
 
 	function has_post_thumbnail( $post = null ): bool {
@@ -172,6 +208,9 @@ namespace {
 	}
 
 	function render_block( $block ): string {
+		if ( is_callable( $GLOBALS['cr_read_render'] ) ) {
+			return (string) call_user_func( $GLOBALS['cr_read_render'], $block );
+		}
 		return (string) ( $block['rendered'] ?? '' );
 	}
 
@@ -195,6 +234,10 @@ namespace {
 		$GLOBALS['cr_read_blocks']      = array();
 		$GLOBALS['cr_read_stream']      = true;
 		$GLOBALS['cr_read_post']        = $post;
+		$GLOBALS['cr_read_has_term']    = true;
+		$GLOBALS['cr_read_protected']   = array();
+		$GLOBALS['cr_read_dates']       = array();
+		$GLOBALS['cr_read_render']      = null;
 		return $post;
 	}
 
@@ -248,6 +291,54 @@ namespace {
 }
 
 namespace PKIW {
+	final class Card_Meta_Sync {
+		public const ATTR_META_MAP = array(
+			'post-kinds-indieweb/read-card' => array(
+				'bookTitle' => 'read_title',
+				'authorName' => 'read_author',
+				'isbn' => 'read_isbn',
+				'bookUrl' => 'read_url',
+				'readStatus' => 'read_status',
+				'rating' => 'read_rating',
+			),
+		);
+	}
+
+	final class Shelf_Group {
+		public function __construct( private string $key, private string $slug ) {
+		}
+
+		public function key(): string {
+			return $this->key;
+		}
+
+		public function slug(): string {
+			return $this->slug;
+		}
+	}
+
+	final class Grouped_Archive {
+		public static bool $sectioning = false;
+		public static bool $preview = false;
+		public static ?Shelf_Group $group = null;
+
+		public static function is_sectioning(): bool {
+			return self::$sectioning;
+		}
+
+		public static function current_group(): ?Shelf_Group {
+			return self::$group;
+		}
+
+		public static function is_block_preview(): bool {
+			return self::$preview;
+		}
+
+		public static function group_of_post( string $kind, int $post_id ): ?Shelf_Group {
+			return 'read' === $kind ? self::$group : null;
+		}
+	}
+
 	function read_status_labels(): array {
 		return array( 'reading' => 'Currently Reading', 'to-read' => 'To Read', 'finished' => 'Finished', 'abandoned' => 'Abandoned' );
 	}
@@ -274,6 +365,18 @@ namespace PKIW {
 
 	function kind_picture( int $post_id ): array {
 		return $GLOBALS['cr_read_pictures'][ $post_id ] ?? array( 'source' => '', 'attachment_id' => 0, 'url' => '', 'alt' => '' );
+	}
+
+	function link_title_to_post( string $html, \WP_Post $post ): string {
+		$tags = new \WP_HTML_Tag_Processor( $html );
+		if ( $tags->next_tag( array( 'class_name' => 'pk-title' ) ) && $tags->next_tag( 'a' ) ) {
+			$tags->set_attribute( 'href', \get_permalink( $post ) );
+		}
+		return $tags->get_updated_html();
+	}
+
+	function untitled_name( \WP_Post $post ): string {
+		return 'Untitled';
 	}
 }
 
