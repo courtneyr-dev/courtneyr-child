@@ -102,7 +102,7 @@ function facts_line( array $a, string $status, string $label ): array {
 		list( $machine, $display ) = date_pair( (string) ( $a['finishedAt'] ?? '' ) );
 		if ( '' !== $machine ) {
 			$facts[] = $display;
-			$done_ts = (int) strtotime( (string) $a['finishedAt'] . ' 12:00:00 UTC' );
+			$done_ts = (int) strtotime( $machine . ' 12:00:00 UTC' );
 		}
 	}
 	return array( implode( ' · ', $facts ), $done_ts );

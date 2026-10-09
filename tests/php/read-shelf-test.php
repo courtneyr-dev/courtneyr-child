@@ -148,6 +148,55 @@ if ( ! in_array( '--html', $argv, true ) ) {
 	);
 
 	cr_read_group(
+		'p-name only for real titles',
+		static function (): void {
+			$post = cr_shelf_shell_reset();
+			$GLOBALS['cr_read_blocks'] = array(
+				array(
+					'blockName' => 'post-kinds-indieweb/read-card',
+					'attrs'     => array( 'bookTitle' => 'Named Book' ),
+					'rendered'  => cr_shelf_card_fixture( 'Named Book', '' ),
+				),
+			);
+			$out = Shelf\shelf_card( cr_shelf_card_fixture( 'Named Book', '' ), cr_shelf_style_block(), new WP_Block( array( 'postId' => $post->ID ) ) );
+			cr_read_contains( '<h3 class="pk-title p-name">', $out, 'bookTitle is named' );
+
+			$post             = cr_shelf_shell_reset();
+			$post->post_title = '';
+			$GLOBALS['cr_read_blocks'] = array(
+				array(
+					'blockName' => 'post-kinds-indieweb/read-card',
+					'attrs'     => array( 'bookTitle' => 'Named Book' ),
+					'rendered'  => cr_shelf_card_fixture( 'Named Book', '' ),
+				),
+			);
+			$out = Shelf\shelf_card( cr_shelf_card_fixture( 'Named Book', '' ), cr_shelf_style_block(), new WP_Block( array( 'postId' => $post->ID ) ) );
+			cr_read_contains( '<h3 class="pk-title p-name">', $out, 'bookTitle alone is named' );
+
+			$post = cr_shelf_shell_reset();
+			$out  = Shelf\shelf_card( cr_shelf_generic_fixture(), cr_shelf_style_block(), new WP_Block( array( 'postId' => $post->ID ) ) );
+			cr_read_contains( '<h3 class="pk-title p-name">', $out, 'stored post title is named' );
+
+			$post             = cr_shelf_shell_reset();
+			$post->post_title = '';
+			$out              = Shelf\shelf_card( cr_shelf_generic_fixture(), cr_shelf_style_block(), new WP_Block( array( 'postId' => $post->ID ) ) );
+			cr_read_contains( '<h3 class="pk-title"><a', $out, 'synthetic title is not named' );
+			cr_read_not_contains( '<h3 class="pk-title p-name">', $out, 'synthetic heading omits p-name' );
+			cr_read_contains( '>Untitled</a></h3>', $out, 'synthetic title remains visible' );
+
+			// The bootstrap always defines \PKIW\untitled_name(), so PHP cannot exercise the post_name fallback in-process.
+
+			$unnamed = Shelf\title_heading( cr_shelf_item( array( 'title' => 'Untitled', 'named' => false ) ) );
+			cr_read_contains( '<h3 class="pk-title"><a', $unnamed, 'direct unnamed item omits p-name' );
+			cr_read_not_contains( 'p-name', $unnamed, 'direct unnamed item has no p-name' );
+			$named = Shelf\title_heading( cr_shelf_item( array( 'named' => true ) ) );
+			cr_read_contains( '<h3 class="pk-title p-name">', $named, 'direct named item has p-name' );
+			$default = Shelf\title_heading( cr_shelf_item() );
+			cr_read_contains( '<h3 class="pk-title p-name">', $default, 'missing named key defaults to named' );
+		}
+	);
+
+	cr_read_group(
 		'shelf item reduction and naming',
 		static function (): void {
 			$out = Shelf\shelf_item( cr_shelf_card_fixture(), cr_shelf_item() );

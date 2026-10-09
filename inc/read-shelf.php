@@ -240,7 +240,8 @@ function title_heading( array $item ): string {
 		$attrs .= ' aria-labelledby="' . esc_attr( implode( ' ', $ids ) ) . '"';
 	}
 	$level = (int) $item['level'];
-	return '<h' . $level . ' class="pk-title p-name"><a' . $attrs . '>' . esc_html( $item['title'] ) . '</a></h' . $level . ">\n";
+	$class = ( $item['named'] ?? true ) ? 'pk-title p-name' : 'pk-title';
+	return '<h' . $level . ' class="' . $class . '"><a' . $attrs . '>' . esc_html( $item['title'] ) . '</a></h' . $level . ">\n";
 }
 
 /**
@@ -395,6 +396,7 @@ function shelf_card( string $html, array $block, $instance ): string {
 	$protected = post_password_required( $post );
 	$read      = $protected ? null : find_read_block( $post );
 	$a         = $protected ? array() : read_attrs( $post, $read ?? array() );
+	$named     = '' !== trim( (string) ( $a['bookTitle'] ?? '' ) ) || '' !== trim( (string) $post->post_title );
 	$title     = trim( (string) ( $a['bookTitle'] ?? '' ) );
 	if ( '' === $title ) {
 		$title = trim( (string) get_the_title( $post ) );
@@ -478,6 +480,7 @@ function shelf_card( string $html, array $block, $instance ): string {
 			'post_id'   => $post->ID,
 			'uid'       => $uid,
 			'title'     => $title,
+			'named'     => $named,
 			'author'    => $author,
 			'permalink' => (string) get_permalink( $post ),
 			'shape'     => $shape,

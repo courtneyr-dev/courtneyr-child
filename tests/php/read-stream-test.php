@@ -69,11 +69,19 @@ cr_read_group(
 		cr_read_same( 'Currently Reading', $facts, 'reading without pages' );
 		list( $facts, $ts ) = facts_line( array( 'pageCount' => 240, 'finishedAt' => '2026-09-14' ), 'finished', 'Finished' );
 		cr_read_same( 'Finished · 240 pages · September 14, 2026', $facts, 'finished' );
-		cr_read_assert( $ts > 0, 'finished timestamp is non-zero' );
+		cr_read_same( gmmktime( 12, 0, 0, 9, 14, 2026 ), $ts, 'bare finished date timestamp' );
 		cr_read_not_contains( 'September 13', $facts, 'timezone shift' );
+		foreach ( array( '2026-09-14T08:00:00-04:00', '2026-09-14 08:00:00' ) as $finished_at ) {
+			list( $facts, $ts ) = facts_line( array( 'finishedAt' => $finished_at ), 'finished', 'Finished' );
+			cr_read_same( 'Finished · September 14, 2026', $facts, 'finished datetime facts ' . $finished_at );
+			cr_read_same( gmmktime( 12, 0, 0, 9, 14, 2026 ), $ts, 'finished datetime timestamp ' . $finished_at );
+		}
 		list( $facts, $ts ) = facts_line( array( 'finishedAt' => '2026-09-14' ), 'abandoned', 'Abandoned' );
 		cr_read_same( 'Abandoned · September 14, 2026', $facts, 'abandoned' );
-		cr_read_assert( $ts > 0, 'abandoned timestamp is non-zero' );
+		cr_read_same( gmmktime( 12, 0, 0, 9, 14, 2026 ), $ts, 'abandoned timestamp' );
+		list( $facts, $ts ) = facts_line( array( 'finishedAt' => '2026-09-14T08:00:00-04:00' ), 'abandoned', 'Abandoned' );
+		cr_read_same( 'Abandoned · September 14, 2026', $facts, 'abandoned datetime facts' );
+		cr_read_same( gmmktime( 12, 0, 0, 9, 14, 2026 ), $ts, 'abandoned datetime timestamp' );
 		list( $facts, $ts ) = facts_line( array( 'pageCount' => 240 ), 'to-read', 'To Read' );
 		cr_read_same( 'To Read · 240 pages', $facts, 'to-read pages' );
 		cr_read_same( 0, $ts, 'to-read timestamp' );
