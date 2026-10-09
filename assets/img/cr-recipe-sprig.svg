@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 200" width="120" height="200"><!-- Decorative herb sprig for the recipe single's binder page margin (PKIW #229). Cerulean line art from the palette; a CSS background, never content. -->
+<g fill="none" stroke="#126782" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M104 6 C98 52 78 118 30 194"/>
+<path d="M102 30 C108 16 114 10 118 6 C118 18 112 28 102 30 Z M103 28 L115 10"/>
+<path d="M99 50 C86 40 80 30 78 20 C90 24 98 36 99 50 Z M98 48 L81 23"/>
+<path d="M93 76 C104 64 112 60 118 58 C114 72 104 78 93 76 Z M94 75 L115 60"/>
+<path d="M86 98 C72 92 64 82 60 70 C74 74 84 84 86 98 Z M85 96 L63 73"/>
+<path d="M75 124 C88 116 98 114 106 114 C98 128 86 130 75 124 Z M76 123 L103 115"/>
+<path d="M64 146 C50 142 42 134 36 122 C50 124 60 134 64 146 Z M63 144 L39 125"/>
+<path d="M52 166 C62 160 72 160 80 162 C72 174 60 174 52 166 Z M53 166 L77 163"/>
+</g>
+</svg>
