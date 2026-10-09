@@ -196,7 +196,7 @@ add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\split_vhs_shel
  * On the live site lazy means Perfmatters' data-src swap (it drops
  * loading="lazy" for its own). case_only() then lifts page 1's face-out
  * covers, the first row, to eager and marks them skip-lazy, and
- * lead_cover() gives the first of them high priority. Core keeps each
+ * lead_cover() gives each of them high priority. Core keeps each
  * attachment's srcset.
  *
  * @param string[] $items Rendered <li> items in query order.
@@ -581,11 +581,12 @@ function case_only( string $item ): string {
 }
 
 /**
- * Give the first face-out cover high priority (PKIW issue 227, after issue 106).
+ * Give every face-out cover high priority (PKIW issue 227).
  *
- * The other first-row covers stay eager without it: on a phone the
- * face-out list is one column, so they sit below the first screen and
- * would compete with the first cover for bandwidth.
+ * The face-out covers are page 1's first row, and the precedent digest's
+ * accessibility floor asks for first-row covers eager with
+ * fetchpriority high. A sleeve without a cover has no image and is
+ * skipped; spines and later pages stay lazy without it.
  *
  * @param string[] $items Face-out items after case_only().
  * @return string[]
@@ -597,7 +598,7 @@ function lead_cover( array $items ): array {
 			if ( 'eager' === $tags->get_attribute( 'loading' ) ) {
 				$tags->set_attribute( 'fetchpriority', 'high' );
 				$items[ $i ] = $tags->get_updated_html();
-				return $items;
+				break;
 			}
 		}
 	}
