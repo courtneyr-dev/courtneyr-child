@@ -255,3 +255,22 @@ function suppress_featured_image_on_photo_single( string $html, array $block ): 
 	return '';
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\suppress_featured_image_on_photo_single', 10, 2 );
+
+/**
+ * Drop the featured image block when the read object prints that picture.
+ *
+ * @param string               $html  Rendered block HTML.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function suppress_featured_image_on_read_single( string $html, array $block ): string {
+	if ( 'core/post-featured-image' !== ( $block['blockName'] ?? '' ) || ! is_singular( 'post' ) ) {
+		return $html;
+	}
+	$post = get_post();
+	if ( ! $post instanceof \WP_Post || ! has_term( 'read', 'kind', $post ) ) {
+		return $html;
+	}
+	return '';
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\suppress_featured_image_on_read_single', 10, 2 );

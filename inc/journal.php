@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Handwritten margin lines, in sets of three so a page never repeats a
  * line. Short, place-neutral, time-neutral: nothing here claims a fact.
  *
- * @param string $flavour 'travel', 'film', 'read', 'food', 'drink' or 'quote'.
+ * @param string $flavour 'travel', 'film', 'food', 'drink' or 'quote'.
  * @return array<int, array<int, string>>
  */
 function margin_copy( string $flavour ): array {
@@ -106,25 +106,6 @@ function margin_copy( string $flavour ): array {
 			),
 		);
 	}
-	if ( 'read' === $flavour ) {
-		return array(
-			array(
-				__( 'Good books. Brighter days.', 'courtneyr-child' ),
-				__( 'Keep reading. Keep exploring.', 'courtneyr-child' ),
-				__( 'Notes in the margins.', 'courtneyr-child' ),
-			),
-			array(
-				__( 'Books make a quieter, kinder world.', 'courtneyr-child' ),
-				__( 'Different places. Same pull.', 'courtneyr-child' ),
-				__( 'Read. Noted. Kept.', 'courtneyr-child' ),
-			),
-			array(
-				__( 'Same shelf. New doors.', 'courtneyr-child' ),
-				__( 'Pages over pixels.', 'courtneyr-child' ),
-				__( 'Come back to this one.', 'courtneyr-child' ),
-			),
-		);
-	}
 	return array(
 		array(
 			__( 'Same places. A more curious life.', 'courtneyr-child' ),
@@ -148,7 +129,7 @@ function margin_copy( string $flavour ): array {
  * Pick one set of margin lines for a seed.
  *
  * @param int    $seed    Stable seed.
- * @param string $flavour 'travel', 'film', 'read', 'food', 'drink' or 'quote'.
+ * @param string $flavour 'travel', 'film', 'food', 'drink' or 'quote'.
  * @return string[] Three lines.
  */
 function margin_lines( int $seed, string $flavour ): array {

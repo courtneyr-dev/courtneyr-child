@@ -6,9 +6,9 @@
  * stars, cover, review); this file adds only what the object needs:
  * classes for the book shell, a status tab hung on the cover (the
  * status text the card already prints), the rating as a number beside
- * the stars, a mono facts line, a short generic handwritten mark, and a
- * dated stamp for finished or set-aside books. cr-post-kinds.css paints
- * the spine, page block, perspective and slip. Nothing here touches
+ * the stars, a mono facts line, and a dated stamp for finished or
+ * abandoned books. cr-post-kinds.css paints the spine, page block,
+ * perspective and slip. Nothing here touches
  * single read posts or other kinds.
  *
  * @package CourtneyrChild
@@ -18,8 +18,11 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\StreamRead;
 
-use function Courtneyr\Child\Journal\card_attrs;
-use function Courtneyr\Child\Journal\margin_lines;
+use function Courtneyr\Child\MediaShelf\cut_elements;
+use function Courtneyr\Child\SingleRead\book_cover;
+use function Courtneyr\Child\SingleRead\date_pair;
+use function Courtneyr\Child\SingleRead\rating_text;
+use function Courtneyr\Child\SingleRead\read_attrs;
 use function Courtneyr\Child\SingleRead\status_copy;
 use function Courtneyr\Child\Stamps\pick;
 use function Courtneyr\Child\Stamps\render;
@@ -58,15 +61,66 @@ function find_read_block( \WP_Post $post ): ?array {
 }
 
 /**
+ * Put the stored rating number inside the plugin's stars element.
+ *
+ * @param string $html   Card HTML.
+ * @param float  $rating Stored rating.
+ * @return string
+ */
+function with_rating_value( string $html, float $rating ): string {
+	$value = rating_text( $rating );
+	if ( '' === $value ) {
+		return $html;
+	}
+	$start = strpos( $html, '<div class="pk-stars' );
+	$end   = false !== $start ? strpos( $html, '</div>', $start ) : false;
+	if ( false === $end ) {
+		return $html;
+	}
+	return substr( $html, 0, $end ) . '<span class="pk-rating-value">' . esc_html( $value . ' / 5' ) . '</span>' . substr( $html, $end );
+}
+
+/**
+ * Visible read facts and the finished-day timestamp used by the stamp.
+ *
+ * @param array<string, mixed> $a      Resolved attributes.
+ * @param string               $status Read status.
+ * @param string               $label  Plugin status label.
+ * @return array{0: string, 1: int}
+ */
+function facts_line( array $a, string $status, string $label ): array {
+	$facts   = array( $label );
+	$pages   = (int) ( $a['pageCount'] ?? 0 );
+	$current = (int) ( $a['currentPage'] ?? 0 );
+	if ( 'reading' === $status && $pages > 0 && $current > 0 ) {
+		$facts[] = sprintf( /* translators: 1: page, 2: pages */ __( 'page %1$d of %2$d', 'courtneyr-child' ), $current, $pages );
+	} elseif ( $pages > 0 ) {
+		$facts[] = sprintf( /* translators: %d: pages */ __( '%d pages', 'courtneyr-child' ), $pages );
+	}
+	$done_ts = 0;
+	if ( in_array( $status, array( 'finished', 'abandoned' ), true ) ) {
+		list( $machine, $display ) = date_pair( (string) ( $a['finishedAt'] ?? '' ) );
+		if ( '' !== $machine ) {
+			$facts[] = $display;
+			$done_ts = (int) strtotime( (string) $a['finishedAt'] . ' 12:00:00 UTC' );
+		}
+	}
+	return array( implode( ' · ', $facts ), $done_ts );
+}
+
+/**
  * Dress a read stream card as a book.
  *
  * @param string    $html     Rendered stream card.
- * @param array     $block    Parsed stream-card block (unused).
+ * @param array     $block    Parsed stream-card block.
  * @param \WP_Block $instance Block instance with the Query Loop's postId.
  * @return string
  */
 function book_card( string $html, array $block, $instance ): string {
 	if ( ! \Courtneyr\Child\HomeSections\is_stream_surface() ) {
+		return $html;
+	}
+	if ( str_contains( (string) ( $block['attrs']['className'] ?? '' ), 'is-style-cr-shelf-book' ) ) {
 		return $html;
 	}
 	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
@@ -98,59 +152,39 @@ function book_card( string $html, array $block, $instance ): string {
 		}
 		$html = $card;
 	}
-	$a      = card_attrs( $post, 'post-kinds-indieweb/read-card', (array) ( $read['attrs'] ?? array() ) );
-	$status = (string) ( $a['readStatus'] ?? 'to-read' );
+	$a      = read_attrs( $post, $read );
+	$status = (string) $a['readStatus'];
 	list( $label, $word ) = status_copy( $status );
 	$seed   = seed( (string) $post->ID, (string) ( $a['isbn'] ?? '' ), (string) ( $a['bookTitle'] ?? '' ) );
 
-	// 1. The rating as a number, read back from the plugin's own stars.
-	if ( preg_match( '/<div class="pk-stars[^"]*" aria-label="[^"]*?(\d)[^"]*"/', $html, $m, PREG_OFFSET_CAPTURE ) ) {
-		$s_end = strpos( $html, '</div>', (int) $m[0][1] );
-		if ( false !== $s_end ) {
-			$html = substr( $html, 0, $s_end ) . '<span class="pk-rating-value">' . esc_html( sprintf( '%d / 5', (int) $m[1][0] ) ) . '</span>' . substr( $html, $s_end );
-		}
-	}
+	// 1. The stored rating appears beside the plugin's stars.
+	$html = with_rating_value( $html, (float) $a['rating'] );
+	$html = cut_elements( $html, 'div', 'pk-progress' );
 
 	$meta_pos = strpos( $html, '<div class="pk-meta">' );
 	if ( false === $meta_pos ) {
 		return $html;
 	}
 
-	// 2. No stored cover: the post's featured image (the plugin's generic
-	//    card showed it too), else a typographic cover so the book still
-	//    has a face.
-	$insert = '';
-	if ( false === strpos( $html, 'class="pk-media"' ) ) {
+	// 2. The plugin's featured-first picture replaces the card cover. When
+	//    that helper is unavailable, retain the earlier local fallback.
+	$cover = book_cover( $post, $a, $read, 'medium_large' );
+	if ( '' !== $cover ) {
+		$html     = cut_elements( $html, 'div', 'pk-media' );
+		$meta_pos = strpos( $html, '<div class="pk-meta">' );
+	} elseif ( false === strpos( $html, 'class="pk-media"' ) ) {
 		if ( has_post_thumbnail( $post ) ) {
-			$insert .= '<div class="pk-media cr-book__cover cr-book__cover--featured">' . get_the_post_thumbnail( $post, 'medium_large', array( 'class' => 'cr-book__img u-photo', 'loading' => 'lazy' ) ) . '</div>';
+			$cover = '<div class="pk-media cr-book__cover cr-book__cover--featured">' . get_the_post_thumbnail( $post, 'medium_large', array( 'class' => 'cr-book__img u-photo', 'loading' => 'lazy' ) ) . '</div>';
 		} else {
-			$insert .= '<div class="pk-media cr-book__cover cr-book__cover--type" aria-hidden="true"><span class="cr-book__type-title">' . esc_html( (string) ( $a['bookTitle'] ?? $post->post_title ) ) . '</span><span class="cr-book__type-author">' . esc_html( (string) ( $a['authorName'] ?? '' ) ) . '</span></div>';
+			$cover = '<div class="pk-media cr-book__cover cr-book__cover--type" aria-hidden="true"><span class="cr-book__type-title">' . esc_html( (string) ( $a['bookTitle'] ?? $post->post_title ) ) . '</span><span class="cr-book__type-author">' . esc_html( (string) ( $a['authorName'] ?? '' ) ) . '</span></div>';
 		}
 	}
 
 	// 3. Facts line: status, pages, and the finished date when there is one.
-	$facts   = array( $label );
-	$pages   = (int) ( $a['pageCount'] ?? 0 );
-	$current = (int) ( $a['currentPage'] ?? 0 );
-	if ( 'reading' === $status && $pages > 0 && $current > 0 ) {
-		$facts[] = sprintf( /* translators: 1: page, 2: pages */ __( 'page %1$d of %2$d', 'courtneyr-child' ), $current, $pages );
-	} elseif ( $pages > 0 ) {
-		$facts[] = sprintf( /* translators: %d: pages */ __( '%d pages', 'courtneyr-child' ), $pages );
-	}
-	$done_ts = 0;
-	if ( in_array( $status, array( 'finished', 'abandoned' ), true ) && ! empty( $a['finishedAt'] ) ) {
-		$done_ts = (int) strtotime( (string) $a['finishedAt'] );
-		if ( $done_ts > 0 ) {
-			$facts[] = (string) wp_date( (string) get_option( 'date_format' ), $done_ts );
-		}
-	}
-	$insert .= '<p class="cr-book__facts">' . esc_html( implode( ' · ', $facts ) ) . '</p>';
+	list( $facts, $done_ts ) = facts_line( $a, $status, $label );
+	$insert                  = $cover . '<p class="cr-book__facts">' . esc_html( $facts ) . '</p>';
 
-	// 4. One short handwritten mark, generic, decorative.
-	$lines   = margin_lines( $seed, 'read' );
-	$insert .= '<p class="cr-hand cr-book__hand" aria-hidden="true">' . esc_html( $lines[ pick( $seed, 4, 3 ) ] ) . '</p>';
-
-	// 5. A dated stamp for a finished or set-aside book.
+	// 4. A dated stamp for a finished or abandoned book.
 	if ( $done_ts > 0 ) {
 		$insert .= '<div class="cr-book__stamp">' . render(
 			array(
@@ -166,7 +200,7 @@ function book_card( string $html, array $block, $instance ): string {
 	}
 	$html = substr( $html, 0, $meta_pos ) . $insert . substr( $html, $meta_pos );
 
-	// 6. The status tab hangs on the cover (the card prints the status as
+	// 5. The status tab hangs on the cover (the card prints the status as
 	//    text already, so the tab is decorative).
 	$m_start = strpos( $html, 'class="pk-media' );
 	$m_end   = false !== $m_start ? strpos( $html, '</div>', $m_start ) : false;
