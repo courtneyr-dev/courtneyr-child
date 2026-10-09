@@ -397,7 +397,7 @@ function reading_record( array $block, \WP_Post $post ): string {
 		array(
 			'shape'  => 'seal',
 			'big'    => $word,
-			'small'  => '' !== $f_disp && in_array( $status, array( 'finished', 'abandoned' ), true ) ? gmdate( 'd M Y', (int) strtotime( (string) $a['finishedAt'] ) ) : ( '' !== $s_disp ? gmdate( 'd M Y', (int) strtotime( (string) $a['startedAt'] ) ) : '' ),
+			'small'  => '' !== $f_disp && in_array( $status, array( 'finished', 'abandoned' ), true ) ? gmdate( 'd M Y', (int) strtotime( $f_iso . ' 12:00:00 UTC' ) ) : ( '' !== $s_disp ? gmdate( 'd M Y', (int) strtotime( $s_iso . ' 12:00:00 UTC' ) ) : '' ),
 			'ring'   => __( 'Reading record', 'courtneyr-child' ),
 			'ink'    => INKS[ pick( $seed, 3, count( INKS ) ) ],
 			'tilt'   => pick( $seed, 6, TILTS ),

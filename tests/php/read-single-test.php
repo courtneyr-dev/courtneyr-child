@@ -176,6 +176,65 @@ cr_read_group(
 );
 
 cr_read_group(
+	'reading record stamp uses the calendar day the rows print',
+	static function (): void {
+		$post  = cr_read_reset();
+		$block = cr_read_single_block(
+			array(
+				'readStatus' => 'finished',
+				'startedAt'  => '2026-09-01',
+				'finishedAt' => '2026-09-14T00:30:00+14:00',
+			)
+		);
+		$html  = reading_record( $block, $post );
+		cr_read_contains( '<time datetime="2026-09-14">', $html, 'positive offset row date' );
+		cr_read_contains( '<text x="62" y="74" class="cr-stamp__small">14 SEP 2026</text>', $html, 'positive offset finished stamp' );
+		cr_read_not_contains( '<text x="62" y="74" class="cr-stamp__small">13 SEP 2026</text>', $html, 'shifted positive offset stamp' );
+
+		$post  = cr_read_reset();
+		$block = cr_read_single_block(
+			array(
+				'readStatus' => 'finished',
+				'finishedAt' => '2026-09-14 23:30:00-05:00',
+			)
+		);
+		$html  = reading_record( $block, $post );
+		cr_read_contains( '<text x="62" y="74" class="cr-stamp__small">14 SEP 2026</text>', $html, 'negative offset finished stamp' );
+
+		$post  = cr_read_reset();
+		$block = cr_read_single_block(
+			array(
+				'readStatus' => 'abandoned',
+				'finishedAt' => '2026-09-14T00:30:00+14:00',
+			)
+		);
+		$html  = reading_record( $block, $post );
+		cr_read_contains( '<text x="62" y="74" class="cr-stamp__small">14 SEP 2026</text>', $html, 'abandoned stamp' );
+
+		$post  = cr_read_reset();
+		$block = cr_read_single_block(
+			array(
+				'readStatus' => 'reading',
+				'startedAt'  => '2026-09-14T00:30:00+14:00',
+				'finishedAt' => '',
+			)
+		);
+		$html  = reading_record( $block, $post );
+		cr_read_contains( '<text x="62" y="74" class="cr-stamp__small">14 SEP 2026</text>', $html, 'started stamp' );
+
+		$post  = cr_read_reset();
+		$block = cr_read_single_block(
+			array(
+				'readStatus' => 'finished',
+				'finishedAt' => '2026-09-14',
+			)
+		);
+		$html  = reading_record( $block, $post );
+		cr_read_contains( '<text x="62" y="74" class="cr-stamp__small">14 SEP 2026</text>', $html, 'bare finished stamp' );
+	}
+);
+
+cr_read_group(
 	'journal page removes slogans and uses one featured-first cover',
 	static function (): void {
 		foreach ( array( true, false ) as $with_card_cover ) {
