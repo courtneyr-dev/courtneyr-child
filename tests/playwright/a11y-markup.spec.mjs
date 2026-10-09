@@ -740,9 +740,11 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 } );
 
 // PKIW #227: page 1's face-out covers are the first row, so each loads
-// eagerly with an empty alt (the title names the case), and the first
-// cover alone asks for high priority, as #106 did: on a phone the row is
-// one column, so the other covers sit below the first screen. No preload
+// eagerly with an empty alt (the title names the case) and asks for high
+// priority, per the precedent digest's accessibility floor. A face-out
+// sleeve without a cover has no image, and the covers after it still get
+// high priority (the 2026-10-09 round 2 regression: the first result had no
+// cover, and the one high-priority cover was the second case's). No preload
 // link; later pages ask for none. An eager cover's sizes names its width
 // and never starts with `auto`, which is valid only on a lazy image; that
 // holds for every <source> Modern Image Formats' picture mode puts beside
@@ -754,7 +756,7 @@ test( 'the watch archive is labelled VHS shelves, face-out new releases then tit
 // the stored watch URL when that is a real http(s) URL, never the post,
 // so the title that links to the post carries no u-url, and the entry
 // keeps exactly one u-url, its permalink.
-test( 'the watch archive loads its first-row covers eagerly, the first at high priority, and each case cites what was watched, not the post (PKIW #227)', async ( { page } ) => {
+test( 'the watch archive loads its first-row covers eagerly at high priority, and each case cites what was watched, not the post (PKIW #227)', async ( { page } ) => {
 	let checked = 0;
 	for ( const [ n, path ] of [ WATCH_ARCHIVE, `${ WATCH_ARCHIVE }page/2/` ].entries() ) {
 		const response = await page.goto( path, { waitUntil: 'load' } );
@@ -788,6 +790,7 @@ test( 'the watch archive loads its first-row covers eagerly, the first at high p
 			const covers = [ ...el.querySelectorAll( 'ul.cr-vhs-shelf__list--face > li .pk-media img' ) ];
 			return {
 				covers: covers.length,
+				coverlessFirst: ! el.querySelector( 'ul.cr-vhs-shelf__list--face > li:first-child .pk-media img' ),
 				high: [ ...document.querySelectorAll( 'img[fetchpriority="high"]' ) ].map( ( i ) => covers.indexOf( i ) ),
 				coverAlts: covers.map( ( i ) => i.getAttribute( 'alt' ) ),
 				// Every <img> and <source> in a face-out case, sizes or Perfmatters' data-sizes.
@@ -813,7 +816,10 @@ test( 'the watch archive loads its first-row covers eagerly, the first at high p
 		if ( 0 === n ) {
 			expect( report.covers, `${ path }: the first row holds a stored cover` ).toBeGreaterThan( 0 );
 		}
-		expect.soft( report.high, `${ path }: the first face-out cover is the one image at high priority` ).toEqual( report.covers ? [ 0 ] : [] );
+		if ( 0 === n ) {
+			test.info().annotations.push( { type: 'first face-out case', description: report.coverlessFirst ? 'a sleeve with no cover (the covers after it are checked for high priority)' : 'has a cover' } );
+		}
+		expect.soft( report.high, `${ path }: every face-out cover, and no other image, is at high priority${ report.coverlessFirst ? ', though the first case has no cover' : '' }` ).toEqual( Array.from( { length: report.covers }, ( _, i ) => i ) );
 		expect.soft( report.coverAlts.filter( ( alt ) => '' !== alt ), `${ path }: every face-out cover's alt is empty` ).toEqual( [] );
 		expect.soft( report.autoSizes, `${ path }: no <img> or <source> in a face-out case has sizes starting with auto` ).toEqual( [] );
 		expect.soft( report.notSkipLazy, `${ path }: every face-out cover carries skip-lazy and data-skip-lazy="1"` ).toBe( 0 );
