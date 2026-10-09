@@ -38,6 +38,8 @@ const EMPTY_GROUP_CUTS = array(
 	array( 'div', 'pk-meta' ),
 	array( 'p', 'pk-stream-date' ),
 	array( 'p', 'pk-excerpt' ),
+	array( 'p', 'pk-media__caption' ),
+	array( 'ul', 'pk-media__thumbs' ),
 );
 
 /**

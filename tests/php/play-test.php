@@ -240,6 +240,7 @@ namespace Courtneyr\Child\Play\Tests {
 	/** Print one named test case. */
 	function check_case( string $name, callable $test ): void {
 		global $failures;
+		$GLOBALS['cr_case_count'] = ( $GLOBALS['cr_case_count'] ?? 0 ) + 1;
 		try {
 			$ok = (bool) $test();
 		} catch ( \Throwable $error ) {
@@ -387,6 +388,39 @@ namespace Courtneyr\Child\Play\Tests {
 	);
 
 	check_case(
+		'empty-group generic cards remove media extras without changing grouped cards',
+		static function (): bool {
+			reset_state();
+			play_post( 12 );
+			$media_extras = '<p class="pk-media__caption" aria-live="polite">Photo by <a href="https://x.example/">Sam</a></p><ul class="pk-media__thumbs"><li class="pk-media__thumb"><button type="button" class="pk-media__thumb-button" aria-label="Show image 1 of 2"><img src="t.jpg" alt=""/></button></li><li class="pk-media__thumb pk-media__thumb--more"><a class="pk-media__thumb-more-link" href="/p/11">+3<span class="pk-sr-only"> more images on this post</span></a></li></ul>';
+			$html         = '<article class="pk-card"><div class="pk-body"><h3 class="pk-title"><a href="/twelve">Twelve</a></h3><div class="pk-media"><img src="cover.jpg" alt="">' . $media_extras . '</div></div></article>';
+			$out          = render_card( $html, 12, array( 'className' => 'is-style-cr-play-item' ) );
+			$gone         = array( 'pk-media__caption', 'pk-media__thumbs', 'pk-media__thumb' );
+			foreach ( $gone as $class_name ) {
+				if ( false !== strpos( $out, $class_name ) ) {
+					return false;
+				}
+			}
+			$ungrouped = 1 === substr_count( $out, '<a ' )
+				&& false !== strpos( $out, 'href="/twelve"' )
+				&& 0 === substr_count( $out, '<button' )
+				&& false !== strpos( $out, 'class="pk-media"' )
+				&& false !== strpos( $out, '<img src="cover.jpg" alt="">' )
+				&& false !== strpos( $out, 'data-cr-cover-fallback' )
+				&& false !== strpos( $out, 'has-cover' )
+				&& false !== strpos( $out, 'cr-play-item--ungrouped' )
+				&& preg_match_all( '/<div\b/', $out ) === substr_count( $out, '</div>' );
+
+			play_post( 13, 'video' );
+			$video = render_card( $html, 13, array( 'className' => 'is-style-cr-play-item' ) );
+			return $ungrouped
+				&& false !== strpos( $video, $media_extras )
+				&& 3 === substr_count( $video, '<a ' )
+				&& 1 === substr_count( $video, '<button' );
+		}
+	);
+
+	check_case(
 		'empty-group play cards remove nested notes and every metadata link cleanly',
 		static function (): bool {
 			reset_state();
@@ -520,6 +554,6 @@ namespace Courtneyr\Child\Play\Tests {
 		}
 	);
 
-	echo "\n", count( $failures ) ? count( $failures ) . ' failed' : '11 passed', "\n";
+	echo "\n", count( $failures ) ? count( $failures ) . ' failed' : $GLOBALS['cr_case_count'] . ' passed', "\n";
 	exit( count( $failures ) ? 1 : 0 );
 }
