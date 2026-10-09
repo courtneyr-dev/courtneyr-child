@@ -155,28 +155,28 @@
 
 @media (min-width: 48.0625rem) {
 
-	.cr-checkin-archive .pkiw-checkin-archive:has(.pkiw-checkin-archive__map) {
-		grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-	}
-
 	/*
-	 * The map stays in view while the list scrolls. It sticks below the
-	 * sticky header (admin bar included) and is no taller than the space
-	 * under it, so Leaflet fits the pins inside the first screen instead of
-	 * the middle of a list-tall column. The grid stretches the map to the
-	 * row, so beside a list taller than 30rem it matches the list, up to
-	 * the space under the header; a shorter list sits beside a 30rem map
-	 * (min-height), as in 0.7.97.
+	 * The placemat is at most 39.375rem (630px) tall, the approved mockup's
+	 * map height, and never taller than the space under the sticky header
+	 * (admin bar included), so Leaflet fits the pins inside the first
+	 * screen. A list taller than that scrolls inside the placemat; Tab
+	 * through its links scrolls each entry into view. A shorter list sits
+	 * beside a 30rem map (min-height), as in 0.7.97. With no map, the list
+	 * isn't capped.
 	 *
 	 * --cr-sticky-header-clearance comes from components.css (R-17), which
 	 * also sets scroll-padding-top from it, and grows while the header wraps
 	 * to two rows. Leaflet measures the map when its deferred script runs;
 	 * Perfmatters inlines components.css's html rules in its Used CSS block
 	 * at the top of <head>, so the token is set by then. Without it, the
-	 * one-row fallback gives 0.7.101's geometry.
+	 * one-row fallback applies.
 	 */
+	.cr-checkin-archive .pkiw-checkin-archive:has(.pkiw-checkin-archive__map) {
+		--cr-checkin-map-cap: min(39.375rem, calc(100svh - var(--wp-admin--admin-bar--height, 0px) - var(--cr-sticky-header-clearance, 5rem) - var(--wp--preset--spacing--md, 1rem)));
+		grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+	}
+
 	.cr-checkin-archive .pkiw-checkin-archive__map {
-		--cr-checkin-map-cap: calc(100svh - var(--wp-admin--admin-bar--height, 0px) - var(--cr-sticky-header-clearance, 5rem) - var(--wp--preset--spacing--md, 1rem));
 		position: sticky;
 		top: calc(var(--wp-admin--admin-bar--height, 0px) + var(--cr-sticky-header-clearance, 5rem));
 		min-height: min(30rem, var(--cr-checkin-map-cap));
@@ -187,6 +187,12 @@
 
 	.cr-checkin-archive .pkiw-checkin-archive__list {
 		padding: var(--cr-space-lg);
+	}
+
+	.cr-checkin-archive .pkiw-checkin-archive:has(.pkiw-checkin-archive__map) .pkiw-checkin-archive__list {
+		max-height: var(--cr-checkin-map-cap);
+		overflow-y: auto;
+		scroll-padding-block: var(--cr-space-lg) var(--cr-space-3xl);
 	}
 }
 
