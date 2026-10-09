@@ -85,8 +85,8 @@
 
 /* ---- One link per case ----
    The title link's hit area covers the cassette body (the nearest
-   positioned box); the accessible name stays the track title. The
-   "Listen / find it" row sits above it and keeps its own links. */
+   positioned box); the accessible name stays the track title, with the
+   date as hidden text (inc/media-shelf.php name_listen_date()). */
 .cr-media-shelf .cr-media-shelf__list > li:is(.kind-listen, .kind-watch) .pk-card.pk-card--stream.cr-media--shelf .pk-body > .pk-caption {
 	position: static;
 }
@@ -96,16 +96,6 @@
 	position: absolute;
 	inset: 0;
 	z-index: 2;
-}
-
-.cr-media-shelf .cr-media-shelf__list > li:is(.kind-listen, .kind-watch) .pk-card.pk-card--stream.cr-media--shelf .pk-body > .pk-sources {
-	z-index: 3;
-}
-
-/* The provider tape keeps its label, outline and hard shadow and grows to
-   the contract's 44px target. */
-.cr-archive--listen .cr-media-shelf .cr-media-shelf__list > li.kind-listen .pk-card.pk-card--stream.cr-media--shelf .pk-sources__link {
-	min-block-size: 2.75rem;
 }
 
 /* Focus: the site's two-tone ring around the whole case (the mockup's
