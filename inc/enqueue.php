@@ -403,6 +403,21 @@ function enqueue_card_paint_for_quote_single(): void {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_card_paint_for_quote_single' );
 
 /**
+ * Load the shelf boards (cr-shelf-boards.css, PKIW W1) on the play and read
+ * archives, and in the editor where their templates are edited. Those
+ * templates wrap their sectioned Query in .cr-shelf-boards.
+ *
+ * @return void
+ */
+function enqueue_shelf_boards(): void {
+	if ( ! is_admin() && ! is_tax( 'kind', array( 'play', 'read' ) ) ) {
+		return;
+	}
+	wp_enqueue_style( 'courtneyr-shelf-boards', COURTNEYR_CHILD_URI . '/assets/css/cr-shelf-boards.css', array(), COURTNEYR_CHILD_VERSION );
+}
+add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_shelf_boards' );
+
+/**
  * Enqueue editor-specific styles so the block editor preview matches
  * the front end. Same per-block files are reused; this hook adds them
  * to the editor iframe.
@@ -849,17 +864,18 @@ add_filter( 'perfmatters_minify_js_exclusions', __NAMESPACE__ . '\\perfmatters_e
  * option already excludes cr-post-kinds.css, cr-archives.css and
  * cr-home-sections.css for the same reason; these join them in code.
  * cr-print.css joins them as a precaution: none of its rules match on
- * screen. That one isn't verified against Perfmatters. The play and read
- * archive sheets (cr-play.css, cr-play-board.css, cr-play-video.css and
- * cr-read-shelf.css, PKIW W1) are listed before their files exist, so the
- * kind lanes that add them don't edit this list.
+ * screen. That one isn't verified against Perfmatters. cr-shelf-boards.css
+ * paints the play and read archives. Their own sheets (cr-play.css,
+ * cr-play-board.css, cr-play-video.css and cr-read-shelf.css, PKIW W1) are
+ * listed before their files exist, so the kind lanes that add them don't
+ * edit this list.
  *
  * @param array<int, string> $exclusions URL fragments Remove Unused CSS skips.
  * @return array<int, string>
  */
 function perfmatters_rucss_exclusions( $exclusions ): array {
 	$exclusions = is_array( $exclusions ) ? $exclusions : array();
-	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css', 'cr-checkin-archive.css', 'cr-play.css', 'cr-play-board.css', 'cr-play-video.css', 'cr-read-shelf.css', 'leaflet.css', 'MarkerCluster.css', 'checkins-feed/style.css' ) as $file ) {
+	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css', 'cr-checkin-archive.css', 'cr-shelf-boards.css', 'cr-play.css', 'cr-play-board.css', 'cr-play-video.css', 'cr-read-shelf.css', 'leaflet.css', 'MarkerCluster.css', 'checkins-feed/style.css' ) as $file ) {
 		$exclusions[] = $file;
 	}
 	return array_values( array_unique( $exclusions ) );

@@ -1,5 +1,5 @@
 // `CR_SPEC=shared-paint.spec.mjs npm run captures -- --project=1280-light`: the W1
-// shared paint in cr-post-kinds.css, cr-media-shelf.css and inc/stamps.php, checked
+// shared paint in cr-post-kinds.css, cr-shelf-boards.css and inc/stamps.php, checked
 // on a blank page with the stylesheets inlined, so it needs no site. The stamp test
 // runs `php tests/php/stamps-test.php --svg` for its markup.
 import fs from 'node:fs';
@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { test, expect } from '@playwright/test';
 
 const css = ( file ) => fs.readFileSync( new URL( `../../assets/css/${ file }`, import.meta.url ), 'utf8' );
-const STYLES = [ 'tokens.css', 'cr-post-kinds.css', 'cr-media-shelf.css' ];
+const STYLES = [ 'tokens.css', 'cr-post-kinds.css' ];
 
 async function page( p, bodyClass, html, styles = STYLES ) {
 	await p.setContent( `<!doctype html><html><head></head><body class="${ bodyClass }">${ html }</body></html>` );
@@ -162,7 +162,8 @@ const shelf = ( items ) => `
 		</div>
 	</div></div>`;
 
-const ARCHIVE_STYLES = [ ...STYLES, 'components.css', 'cr-archives.css' ];
+// The sheets a play or read archive serves (inc/enqueue.php loads the boards).
+const ARCHIVE_STYLES = [ ...STYLES, 'components.css', 'cr-archives.css', 'cr-shelf-boards.css' ];
 
 test( 'shelf boards: .cr-shelf-boards section items stand on the shipped boards (X13)', async ( { page: p } ) => {
 	await page( p, 'archive tax-kind', `${ shelf( 3 ) }
@@ -195,7 +196,7 @@ test( 'shelf boards: .cr-shelf-boards section items stand on the shipped boards 
 } );
 
 test( 'shelf boards: a zero-post play or read archive draws no bare boards', async ( { page: p } ) => {
-	await page( p, 'archive tax-kind', `${ shelf( 0 ) }<div class="cr-media-shelf"><div class="wp-block-query"><p class="wp-block-query-no-results">No listens yet.</p></div></div>`, ARCHIVE_STYLES );
+	await page( p, 'archive tax-kind', `${ shelf( 0 ) }<div class="cr-media-shelf"><div class="wp-block-query"><p class="wp-block-query-no-results">No listens yet.</p></div></div>`, [ ...ARCHIVE_STYLES, 'cr-media-shelf.css' ] );
 	const got = await p.evaluate( () => {
 		const boards = [ ...document.querySelectorAll( '.cr-shelf-boards, .cr-shelf-boards *' ) ].flatMap( ( el ) => [ '::before', '::after' ].map( ( pe ) => getComputedStyle( el, pe ).content ) ).filter( ( c ) => 'none' !== c && 'normal' !== c );
 		return { boards, mediaShelf: getComputedStyle( document.querySelector( '.cr-media-shelf .wp-block-query' ), '::before' ).content };
