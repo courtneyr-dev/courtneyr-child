@@ -65,16 +65,19 @@
 	pointer-events: none;
 }
 
-/* No stored artwork: a typographic cover from the card's own title. */
-.pk-card.cr-comic .pk-media.cr-comic__cover--type {
+/* No stored artwork: a typographic cover from the card's own title, on
+   the board and in the sleeve where a picture would be. */
+.pk-card.cr-comic .cr-comic__type-cover {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	gap: 0.5rem;
+	box-sizing: border-box;
+	width: 100%;
 	aspect-ratio: 2 / 3;
 	padding: clamp(0.85rem, 3.5vw, 1.4rem) clamp(0.8rem, 3vw, 1.2rem);
+	border: 1px solid var(--cr-russian-violet);
 	background: var(--cr-cerulean);
-	box-shadow: inset 0 0 0 0.5rem var(--cr-periwinkle), var(--cr-shadow-hard);
 	color: var(--cr-printer-ivory);
 	overflow: hidden;
 }
@@ -299,9 +302,13 @@
 	border-color: var(--sleeve-fold);
 }
 
-/* No artwork: the typographic cover is painted inside the sleeve, the
-   same distance from its edge as a picture would be. */
-.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media.cr-comic__cover--type,
+/* No artwork: the typographic cover stands in the bag where a picture
+   would, and a failed picture's board is painted the same distance from
+   the sleeve's edge. */
+.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .cr-comic__type-cover {
+	border-color: var(--sleeve-fold);
+}
+
 .cr-comic-rack .cr-comic-rack__list > li .cr-comic--rack.cr-comic--no-art .pk-media {
 	padding: calc(var(--sleeve-flap) + 0.85rem) calc(var(--sleeve-gap) + 0.8rem) calc(var(--sleeve-foot) + 0.85rem);
 	background:
@@ -577,14 +584,22 @@ body.cr-comic-single .cr-comic__status--to-read .cr-comic__status-chip {
 }
 
 /* The bag. Title, creators, stars and dates stay in the card for
-   microformats; the header and the record show them. */
+   microformats; the header and the record show them. The card's padding
+   is the room the clear rim of the sleeve takes outside the board. */
 body.cr-comic-single .single-post__content .pk-card.cr-comic--single {
+	--sleeve-rim: clamp(0.45rem, 1vw, 0.75rem);
+	--sleeve-flap: calc(var(--sleeve-rim) + max(1.1rem, 4.5cqi));
+	--sleeve-film: color-mix(in srgb, var(--cr-light-gray) 55%, transparent);
+	--sleeve-seam: color-mix(in srgb, var(--cr-russian-violet) 35%, transparent);
+	--sleeve-glint: color-mix(in srgb, var(--cr-white) 26%, transparent);
+	--sleeve-glint-2: color-mix(in srgb, var(--cr-white) 18%, transparent);
 	position: relative;
 	display: block;
 	box-sizing: border-box;
 	width: min(100% - 1.5rem, 18rem);
 	margin: 1.5rem auto 0;
-	padding: 0;
+	padding: var(--sleeve-rim) var(--sleeve-rim) 0;
+	container-type: inline-size;
 	border: 0;
 	border-radius: 0;
 	background: none;
@@ -608,9 +623,43 @@ body.cr-comic-single .single-post__content .pk-card.cr-comic--single :is(.pk-bad
 	display: none;
 }
 
+/* A broad periwinkle board, and round it the sleeve's clear rim: pale
+   film (the outline) inside an inked edge. The sleeve carries the hard
+   shadow, a seam where the flap folds over, the tape on the flap and two
+   hard reflections across the plastic. */
 body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-media {
-	padding: 0.85rem;
+	padding: max(0.85rem, 4.5cqi);
+	box-shadow: none;
+	outline: var(--sleeve-rim) solid var(--sleeve-film);
+	outline-offset: 0;
+}
+
+/* The page in the bag is 3:4, as the approved mockup draws it. A 2:3
+   cover isn't cropped: the page's ivory edge shows beside it. */
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-media img,
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single .cr-comic__type-cover {
+	aspect-ratio: 3 / 4;
+}
+
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-media img {
+	object-fit: contain;
+}
+
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-media::after {
+	inset: calc((var(--sleeve-rim) + 1.5px) * -1);
+	border: 1.5px solid var(--sleeve-seam);
+	background:
+		linear-gradient(180deg, transparent 0 calc(var(--sleeve-flap) - 1.5px), var(--sleeve-seam) calc(var(--sleeve-flap) - 1.5px) var(--sleeve-flap), transparent var(--sleeve-flap)),
+		linear-gradient(180deg, var(--sleeve-film) 0 var(--sleeve-flap), transparent var(--sleeve-flap)) 0 0 / 100% 100% no-repeat,
+		linear-gradient(112deg, transparent 0 58%, var(--sleeve-glint) 58% 64%, transparent 64% 67%, var(--sleeve-glint-2) 67% 69.5%, transparent 69.5%);
 	box-shadow: var(--cr-shadow-hard-2);
+}
+
+body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-media::before {
+	inset-block-start: calc(var(--sleeve-rim) * -1 - 0.6rem);
+	inset-inline-end: 2rem;
+	width: 4.4rem;
+	height: max(1.15rem, calc(var(--sleeve-flap) * 0.75));
 }
 
 body.cr-comic-single .single-post__content .pk-card.cr-comic--single .cr-comic__type-title {
@@ -626,7 +675,7 @@ body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-body::a
 	content: "";
 	display: block;
 	height: 0.9rem;
-	margin: 0.35rem -0.9rem 0;
+	margin: calc(var(--sleeve-rim) + 0.35rem) calc(var(--sleeve-rim) * -1 - 0.6rem) 0;
 	border: 1.5px solid var(--cr-russian-violet);
 	border-radius: var(--cr-radius-xs);
 	background: var(--cr-light-gray);
@@ -893,21 +942,25 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
    The header and the post content are siblings in <main>, so the content's
    wrappers step aside (display: contents) and the bag, notes and record
    join the header as items of one grid. The bag grows with the screen,
-   from 22rem at 64rem to 36rem (about 34rem at 1536px), so it takes most
-   of the first screen's height. The gap stays 8rem: the H1's format
-   avatar hangs 7.25rem to its left and the bag's hard shadow 6px to its
-   right, so a narrower gap would put the avatar on the COMIC sticker. */
+   from 22rem at 64rem to 44rem (42rem at 1536px, close to half the
+   screen, as the approved mockup draws it). The details column keeps the
+   width it had beside the 22-36rem bag, so the bag takes its extra width
+   from the page margins, not from the notes and record. The gap stays
+   8rem: the H1's format avatar hangs 7.25rem to its left and the bag's
+   hard shadow 6px to its right, so a narrower gap would put the avatar on
+   the COMIC sticker. */
 @media (min-width: 64rem) {
 
 	body.cr-comic-single main.single-post {
-		--comic-bag: clamp(22rem, 40vw - 4rem, 36rem);
+		--comic-bag: clamp(22rem, 62.5vw - 18rem, 44rem);
 		--comic-gap: 8rem;
+		--comic-details: calc(var(--wp--style--global--wide-size) - clamp(22rem, 40vw - 4rem, 36rem) - var(--comic-gap));
 		display: grid;
 		grid-template-columns:
 			minmax(0, 1fr)
 			[bag-start] minmax(0, var(--comic-bag)) [bag-end]
 			var(--comic-gap)
-			[details-start] minmax(0, calc(var(--wp--style--global--wide-size) - var(--comic-bag) - var(--comic-gap))) [details-end]
+			[details-start] minmax(0, var(--comic-details)) [details-end]
 			minmax(0, 1fr);
 		grid-template-rows: repeat(6, auto) minmax(0, 1fr);
 	}
@@ -1238,11 +1291,15 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 		content: none;
 	}
 
+	body.cr-comic-single .single-post__content .pk-card.cr-comic--single .pk-media {
+		outline: none;
+	}
+
 	body.cr-comic-single .cr-journal__notes {
 		filter: none;
 	}
 
-	.pk-card.cr-comic .pk-media.cr-comic__cover--type,
+	.pk-card.cr-comic .cr-comic__type-cover,
 	.pk-card.cr-comic .cr-comic__type-title,
 	.pk-card.cr-comic .cr-comic__type-creators {
 		background: Canvas;
@@ -1251,7 +1308,6 @@ body.cr-comic-single .cr-journal--comic > .cr-journal__more {
 
 	/* The rack's bag loses its film, flap, reflections and shadow and keeps its outline. */
 	.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media,
-	.cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media.cr-comic__cover--type,
 	.cr-comic-rack .cr-comic-rack__list > li .cr-comic--rack.cr-comic--no-art .pk-media {
 		border: 2px solid CanvasText;
 		background: Canvas;

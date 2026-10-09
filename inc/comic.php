@@ -259,7 +259,9 @@ function take_element( string &$html, string $tag, string $class_name ): string 
  * A typographic cover for a comic with no stored artwork.
  *
  * The text is the card's own title and creators. It is hidden from
- * assistive technology because the card's heading already says it.
+ * assistive technology because the card's heading already says it. The
+ * outer box is the same bag and board a picture sits on; the cover inside
+ * it takes the picture's place.
  *
  * @param array<string, mixed> $a             Attributes.
  * @param \WP_Post             $post          Post.
@@ -269,11 +271,11 @@ function take_element( string &$html, string $tag, string $class_name ): string 
 function type_cover( array $a, \WP_Post $post, bool $with_creators ): string {
 	$title    = trim( (string) ( $a['title'] ?? '' ) );
 	$creators = trim( (string) ( $a['creators'] ?? '' ) );
-	$out      = '<div class="pk-media cr-comic__cover--type" aria-hidden="true"><span class="cr-comic__type-title">' . esc_html( '' !== $title ? $title : get_the_title( $post ) ) . '</span>';
+	$out      = '<div class="pk-media cr-comic__cover--type" aria-hidden="true"><div class="cr-comic__type-cover"><span class="cr-comic__type-title">' . esc_html( '' !== $title ? $title : get_the_title( $post ) ) . '</span>';
 	if ( $with_creators && '' !== $creators ) {
 		$out .= '<span class="cr-comic__type-creators">' . esc_html( $creators ) . '</span>';
 	}
-	return $out . '</div>';
+	return $out . '</div></div>';
 }
 
 /**
