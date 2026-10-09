@@ -513,9 +513,12 @@ test( 'the listen archive is a shelf of cassette cases, one title link each, no 
 		await expect( card.locator( '.cr-media__mech' ) ).toHaveCount( 1 );
 		expect( await card.locator( '.cr-media__mech :is([fill^="#"], [stroke^="#"], [fill^="rgb"], [stroke^="rgb"])' ).count(), 'the mechanics take palette tokens, not baked colours' ).toBe( 0 );
 		await expect( card.locator( '.pk-title a' ) ).toHaveCount( 1 );
-		for ( const link of await card.locator( '.pk-sources__link' ).all() ) {
-			expect( ( await link.boundingBox() ).height, 'a provider link is a 44px target' ).toBeGreaterThanOrEqual( 44 );
-		}
+		// Courtney's 2026-10-09 ruling: stars, "Listen / find it" and the date
+		// stay on the single; the title link names the date instead.
+		expect( await item.locator( '.pk-stars, .pk-sources, .pk-stream-date, .pk-meta' ).count(), 'no metadata on the shelf' ).toBe( 0 );
+		expect( await card.locator( 'a[href]' ).count(), 'one link per case' ).toBe( 1 );
+		await expect( card.locator( '.pk-title a' ) ).toHaveAccessibleName( /, listened .+\d{4}$/ );
+		await expect( item.locator( '.pk-entry-props .dt-published' ) ).toHaveCount( 1 );
 		const shape = await item.evaluate( ( li ) => {
 			const board = getComputedStyle( li, '::after' );
 			return {
