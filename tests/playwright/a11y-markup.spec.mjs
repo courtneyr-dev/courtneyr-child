@@ -1042,6 +1042,9 @@ test( 'the comics archive is a rack of bagged comics, one title link each, no me
 		} );
 		expect( hit.link, 'the bag is the title link' ).toBe( true );
 		expect( hit.imgInLink ).toBe( false );
+		if ( await card.evaluate( ( el ) => el.matches( '.cr-comic--rack' ) ) ) {
+			expect( await card.locator( 'img.u-photo:not([alt=""])' ).count(), 'the title names the bag, so its cover is silent' ).toBe( 0 );
+		}
 		for ( const sticker of await card.locator( '.cr-comic__sticker' ).allTextContents() ) {
 			expect( [ 'Currently reading', 'To read', 'Set aside' ] ).toContain( sticker.trim() );
 		}
