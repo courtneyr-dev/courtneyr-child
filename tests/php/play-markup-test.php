@@ -271,8 +271,8 @@ check_case(
 				return false;
 			}
 		}
-		$at_64 = strpos( $css, '@media (max-width: 64rem)' );
-		$at_40 = strpos( $css, '@media (max-width: 40rem)' );
+		$at_64 = strpos( $css, '@media (max-width: 63.98rem)' );
+		$at_40 = strpos( $css, '@media (max-width: 39.98rem)' );
 		$at_reduced = strpos( $css, '@media (prefers-reduced-motion: reduce)' );
 		$at_forced  = strpos( $css, '@media (forced-colors: active)' );
 		$segment_64 = false !== $at_64 && false !== $at_40 ? substr( $css, $at_64, $at_40 - $at_64 ) : '';

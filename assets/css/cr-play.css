@@ -98,7 +98,7 @@
 	outline: none;
 }
 
-@media (max-width: 64rem) {
+@media (max-width: 63.98rem) {
 
 	.cr-play .pkiw-group,
 	.cr-play .pkiw-group[data-pkiw-group="video"] {
@@ -106,7 +106,7 @@
 	}
 }
 
-@media (max-width: 40rem) {
+@media (max-width: 39.98rem) {
 
 	.cr-play .pkiw-group,
 	.cr-play .pkiw-group[data-pkiw-group="video"] {
