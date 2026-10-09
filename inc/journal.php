@@ -293,7 +293,9 @@ function card_attrs( \WP_Post $post, string $block_name, array $attrs ): array {
 	// Read cards store half-star ratings; watch/comic ratings keep their integer behavior.
 	$fractional = 'post-kinds-indieweb/read-card' === $block_name ? array( 'rating' ) : array();
 	foreach ( $map as $attr => $suffix ) {
-		if ( isset( $attrs[ $attr ] ) && '' !== $attrs[ $attr ] && 0 !== $attrs[ $attr ] && 0.0 !== $attrs[ $attr ] ) {
+		$filled              = isset( $attrs[ $attr ] ) && '' !== $attrs[ $attr ] && 0 !== $attrs[ $attr ] && 0.0 !== $attrs[ $attr ];
+		$fractional_unfilled = $filled && in_array( $attr, $fractional, true ) && ( ! is_numeric( $attrs[ $attr ] ) || (float) $attrs[ $attr ] <= 0.0 );
+		if ( $filled && ! $fractional_unfilled ) {
 			continue;
 		}
 		$location_field = LOCATION_ATTR_VISIBILITY_MAP[ $attr ] ?? null;

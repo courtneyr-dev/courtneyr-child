@@ -98,6 +98,10 @@ cr_read_group(
 		$block = cr_read_single_block( array( 'rating' => 0 ) );
 		unset( $block['attrs']['rating'] );
 		cr_read_same( 4.5, read_attrs( $post, $block )['rating'], 'meta float' );
+		cr_read_same( 4.5, read_attrs( $post, cr_read_single_block( array( 'rating' => -1 ) ) )['rating'], 'negative block falls back to meta' );
+		cr_read_same( 4.5, read_attrs( $post, cr_read_single_block( array( 'rating' => 'nope' ) ) )['rating'], 'non-numeric block falls back to meta' );
+		cr_read_same( 4.5, read_attrs( $post, cr_read_single_block( array( 'rating' => 0 ) ) )['rating'], 'zero block falls back to meta' );
+		cr_read_same( 3.5, read_attrs( $post, cr_read_single_block( array( 'rating' => 3.5 ) ) )['rating'], 'positive block wins over meta' );
 		$GLOBALS['cr_read_meta'][ $post->ID ]['_pkiw_read_rating'] = '5';
 		cr_read_same( 5.0, read_attrs( $post, $block )['rating'], 'meta five' );
 		$GLOBALS['cr_read_meta'][ $post->ID ]['_pkiw_read_rating'] = '3.5';
@@ -106,6 +110,8 @@ cr_read_group(
 		cr_read_same( 5.0, read_attrs( $post, $block )['rating'], 'meta clamp' );
 		unset( $GLOBALS['cr_read_meta'][ $post->ID ]['_pkiw_read_rating'] );
 		cr_read_same( 0.0, read_attrs( $post, $block )['rating'], 'missing rating' );
+		cr_read_same( 0.0, read_attrs( $post, cr_read_single_block( array( 'rating' => -1 ) ) )['rating'], 'negative block without meta' );
+		cr_read_same( 0.0, read_attrs( $post, cr_read_single_block( array( 'rating' => 'nope' ) ) )['rating'], 'non-numeric block without meta' );
 		cr_read_same( 'reading', read_attrs( $post, cr_read_single_block( array( 'readStatus' => 'other' ) ) )['readStatus'], 'invalid status' );
 		$missing = cr_read_single_block();
 		unset( $missing['attrs']['readStatus'] );
@@ -125,6 +131,7 @@ cr_read_group(
 		cr_read_same( 4.5, card_attrs( $post, 'post-kinds-indieweb/read-card', array( 'rating' => 4.5 ) )['rating'], 'read block half' );
 		$GLOBALS['cr_read_meta'][ $post->ID ]['_pkiw_watch_rating'] = '3.5';
 		cr_read_same( 3, card_attrs( $post, 'post-kinds-indieweb/watch-card', array() )['rating'], 'watch meta integer' );
+		cr_read_same( 'nope', card_attrs( $post, 'post-kinds-indieweb/watch-card', array( 'rating' => 'nope' ) )['rating'], 'watch non-numeric block stays filled' );
 	}
 );
 
