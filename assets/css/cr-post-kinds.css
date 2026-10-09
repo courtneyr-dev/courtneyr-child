@@ -5476,7 +5476,7 @@ body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-med
 	z-index: 1;
 	background: var(--cr-russian-violet);
 	border-radius: 4px 0 0 4px;
-	box-shadow: inset -2px 0 0 var(--cr-russian-violet-soft), -3px 3px 0 rgba(36, 28, 74, 0.35);
+	box-shadow: inset -2px 0 0 var(--cr-russian-violet-soft), -3px 3px 0 color-mix(in srgb, var(--cr-russian-violet) 35%, transparent);
 }
 /* Page block, right and bottom. */
 body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media::after {
@@ -6240,7 +6240,7 @@ body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem
 	z-index: 1;
 	border-radius: 3px 0 0 3px;
 	background: var(--cr-russian-violet);
-	box-shadow: inset -2px 0 0 var(--cr-russian-violet-soft), -2px 2px 0 rgba(36, 28, 74, 0.35);
+	box-shadow: inset -2px 0 0 var(--cr-russian-violet-soft), -2px 2px 0 color-mix(in srgb, var(--cr-russian-violet) 35%, transparent);
 }
 .cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-media::after {
 	content: "";
