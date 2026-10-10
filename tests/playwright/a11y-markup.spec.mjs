@@ -3251,6 +3251,55 @@ test( 'board spines are one linked object each: an h3, a date-only time, no rati
 	}
 } );
 
+// Fidelity round 2 (decision-2026-10-06.md:73): every Game Night link is named
+// by its own title plus date through aria-labelledby, not only repeat titles.
+test( 'every board spine link is named by its own title and date ids on each archive page (PKIW #232)', async ( { page } ) => {
+	let checked = 0;
+	for ( const path of [ PLAY_ARCHIVE, `${ PLAY_ARCHIVE }page/2/` ] ) {
+		const response = await page.goto( path, { waitUntil: 'load' } );
+		if ( 200 !== response?.status() ) {
+			continue;
+		}
+		const bad = await page.locator( 'article.cr-spine[data-pkiw-play-group="board"] .pk-title a.u-url' ).evaluateAll( ( links ) => links.flatMap( ( link ) => {
+			const spine = link.closest( 'article' );
+			const title = spine.querySelector( '[id^="cr-play-title-"]' );
+			const date = spine.querySelector( 'time[id^="cr-play-date-"]' );
+			const ids = ( link.getAttribute( 'aria-labelledby' ) || '' ).split( /\s+/ ).filter( Boolean );
+			return title && date && 2 === ids.length && ids[0] === title.id && ids[1] === date.id ? [] : [ link.textContent.trim() ];
+		} ) );
+		checked += await page.locator( 'article.cr-spine[data-pkiw-play-group="board"]' ).count();
+		expect( bad, `${ path } spines missing title plus date names: ${ bad.join( ' | ' ) }` ).toEqual( [] );
+	}
+	test.skip( 0 === checked, 'no board spines on the play archive' );
+} );
+
+// Fidelity round 2: a protected board play on the Game Night shelf is one
+// spine-width box with its safe title only, not the badge grid's narrow column.
+test( 'a protected board play on the Game Night shelf is a full-width spine with only its title (PKIW #232)', async ( { page } ) => {
+	let found = 0;
+	for ( const path of [ PLAY_ARCHIVE, `${ PLAY_ARCHIVE }page/2/` ] ) {
+		const response = await page.goto( path, { waitUntil: 'load' } );
+		if ( 200 !== response?.status() ) {
+			continue;
+		}
+		for ( const card of await page.locator( '.pkiw-group[data-pkiw-group="board"] .pk-card--protected' ).all() ) {
+			found++;
+			expect( await focusableLinks( card ), 'one focusable link on the protected box' ).toHaveLength( 1 );
+			await expect( card.locator( 'time:not(.dt-published), img, .pk-stars, .pk-facts, .pk-box, .pk-scorepad, .pkiw-staff-picks__rating' ) ).toHaveCount( 0 );
+			const geometry = await card.evaluate( ( el ) => {
+				const cs = getComputedStyle( el );
+				const title = el.querySelector( '.pk-title' ).getBoundingClientRect();
+				return { ratio: title.width / ( el.clientWidth - parseFloat( cs.paddingLeft ) - parseFloat( cs.paddingRight ) ), border: cs.borderTopWidth, shadow: cs.boxShadow, text: el.innerText.trim() };
+			} );
+			expect( geometry.ratio, 'the protected title spans the spine width' ).toBeGreaterThan( 0.95 );
+			expect( geometry.border ).toBe( '2px' );
+			expect( geometry.shadow, 'side strip and hard shadow' ).toMatch( /inset.*,/ );
+			expect( geometry.text ).toMatch( /^Protected: / );
+		}
+	}
+	test.skip( 0 === found, 'no protected board play on the play archive' );
+} );
+
 // W1-TBOARD Staff Picks proof: the shelf boxes are painted objects ordered by
 // rating, and a failed cover must become a typographic box instead of a blank.
 test( 'Staff Picks boxes run in rating order, fall back to the typographic box on a 404 cover and carry the shelf paint (PKIW #232)', async ( { page } ) => {
