@@ -462,10 +462,12 @@ function filter_stream_card( $html, $group, $post ) {
 
 	$platform = trim( (string) ( $facts['platform'] ?? '' ) );
 	$inside   = '' !== $platform ? '<p class="cr-cartridge__platform">' . esc_html( $platform ) . '</p>' : '';
-	$label    = art_html( 'cr-cartridge', 'label', picture( $post->ID ), '', 'medium_large', 'lazy', false );
-	$html     = substr( $html, 0, $span[1] - 6 ) . $inside . substr( $html, $span[1] - 6 );
-	$span     = element_span( $html, 'div', 'pk-caption' );
-	return null === $span ? $html : substr( $html, 0, $span[1] ) . $label . substr( $html, $span[1] );
+	$caption  = substr( $html, $span[0], $span[1] - $span[0] );
+	$date     = element_span( $caption, 'p', 'pk-stream-date' );
+	$at       = null === $date ? strlen( $caption ) - 6 : $date[0];
+	$caption  = substr( $caption, 0, $at ) . $inside . substr( $caption, $at );
+	$art      = art_html( 'cr-cartridge', 'art', picture( $post->ID ), '', 'medium_large', 'lazy', false );
+	return substr( $html, 0, $span[0] ) . '<div class="cr-cartridge__label">' . $caption . $art . '</div>' . substr( $html, $span[1] );
 }
 add_filter( 'courtneyr_child_play_stream_card', __NAMESPACE__ . '\\filter_stream_card', 10, 3 );
 
@@ -605,7 +607,9 @@ function single_cabinet_html( \WP_Post $post, array $facts ): string {
 		? '<section class="cr-cabinet__review"><h2 class="cr-cabinet__review-title">' . esc_html__( 'Review', 'courtneyr-child' ) . '</h2><div class="cr-cabinet__review-body p-content">' . wp_kses_post( $review ) . '</div></section>'
 		: '';
 
-	$sheet = '<div class="cr-cabinet__sheet"><dl class="cr-cabinet__record">' . $rows . '</dl>' . $links . $review . '</div>';
+	$paper = '' === $rows ? '' : '<dl class="cr-cabinet__record">' . $rows . '</dl>';
+	$paper = '' === $paper . $links ? '' : '<div class="cr-cabinet__paper">' . $paper . $links . '</div>';
+	$sheet = '<div class="cr-cabinet__sheet">' . $paper . $review . '</div>';
 	return $entry . '<article class="cr-cabinet cr-cabinet--single h-cite u-play-of" data-pkiw-play-group="video">' . $body . $sheet . uid_html( $facts ) . '</article>';
 }
 

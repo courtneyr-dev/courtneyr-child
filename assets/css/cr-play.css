@@ -35,6 +35,9 @@
 
 .cr-play .pk-card.cr-play-item--ungrouped {
 	position: relative;
+	display: block;
+	grid-template-columns: none;
+	gap: 0;
 	box-sizing: border-box;
 	width: 100%;
 	max-width: 100%;
@@ -43,6 +46,11 @@
 	background: var(--cr-periwinkle);
 	box-shadow: var(--cr-shadow-hard);
 	color: var(--cr-russian-violet);
+}
+
+.cr-play .pk-card.cr-play-item--ungrouped .pk-body {
+	width: 100%;
+	min-width: 0;
 }
 
 .cr-play .pk-card.cr-play-item--ungrouped .pk-title a {

@@ -3535,8 +3535,8 @@ test( 'the Stream shows a video play as a cartridge with one link and no stars, 
 		const uids = cartridge.locator( '.u-uid' );
 		expect( await uids.count(), 'at least one u-uid' ).toBeGreaterThan( 0 );
 		for ( const uid of await uids.all() ) await expect( uid ).toHaveAttribute( 'value', /\S/ );
-		const label = cartridge.locator( '.cr-cartridge__label' );
-		if ( await label.locator( 'img' ).count() ) await expect( label ).toHaveAttribute( 'data-cr-cover-fallback', '' );
+		const art = cartridge.locator( '.cr-cartridge__label .cr-cartridge__art' );
+		if ( await art.locator( 'img' ).count() ) await expect( art ).toHaveAttribute( 'data-cr-cover-fallback', '' );
 	}
 } );
 
@@ -3559,7 +3559,7 @@ test( 'a video play cover that fails to load shows the glyph on the screen, the 
 	test.skip( ! path, 'no video fixture (The Extraordinarily Long Chronicle...) on this site' );
 	for ( const [ surface, url, selector ] of [
 		[ 'archive cabinet', PLAY_ARCHIVE, 'article.cr-cabinet:has-text("The Extraordinarily Long Chronicle") .cr-cabinet__screen' ],
-		[ 'Stream cartridge', STREAM, 'article.cr-cartridge:has-text("The Extraordinarily Long Chronicle") .cr-cartridge__label' ],
+		[ 'Stream cartridge', STREAM, 'article.cr-cartridge:has-text("The Extraordinarily Long Chronicle") .cr-cartridge__art' ],
 		[ 'single screen', path, '.cr-cabinet--single .cr-cabinet__screen' ],
 	] ) {
 		await page.goto( url, { waitUntil: 'load' } );
