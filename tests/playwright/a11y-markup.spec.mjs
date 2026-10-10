@@ -3354,6 +3354,7 @@ test( 'the Review heading on a board single sits one level below the heading abo
 // W1-TBOARD Stream proof: a board play becomes a score-pad slip on both
 // Stream surfaces, without external game links or review text.
 test( 'the Stream shows a board play as a score-pad slip with one link and no review (PKIW #232)', async ( { page } ) => {
+	let seen = 0;
 	for ( const path of [ STREAM, '/' ] ) {
 		await page.goto( path, { waitUntil: 'load' } );
 		const slips = page.locator( 'article.cr-scorepad' );
@@ -3362,9 +3363,14 @@ test( 'the Stream shows a board play as a score-pad slip with one link and no re
 			continue;
 		}
 		for ( const slip of await slips.all() ) {
+			seen++;
 			expect( await focusableLinks( slip ), `${ path } one score-pad link` ).toHaveLength( 1 );
 			const parts = await slip.evaluate( ( el ) => [ ...el.children ].map( ( child ) => child.className || child.tagName ).filter( ( value ) => ! String( value ).includes( 'cr-scorepad__thumb' ) ) );
-			expect( parts.slice( 0, 5 ).join( ' ' ), `${ path } score-pad order` ).toMatch( /cr-scorepad__label .*cr-scorepad__title.*cr-scorepad__(platform|date).*cr-scorepad__(date|rating)/ );
+			// Label, title, platform (when stored), date, rating (when stored): the plan's order.
+			const printed = parts.map( ( name ) => String( name ).match( /cr-scorepad__(label|title|platform|date|rating)\b/ )?.[1] ).filter( Boolean );
+			expect( printed, `${ path } score-pad order` ).toEqual( [ 'label', 'title', 'platform', 'date', 'rating' ].filter( ( part ) => printed.includes( part ) ) );
+			expect( printed.slice( 0, 2 ), `${ path } score-pad starts with the label and title` ).toEqual( [ 'label', 'title' ] );
+			expect( printed, `${ path } score-pad prints its date` ).toContain( 'date' );
 			await expect( slip.locator( '.cr-scorepad__label' ) ).toHaveText( 'Play' );
 			expect( await slip.locator( 'a[href*="boardgamegeek.com"], text=/\\b(BGG|Official|Buy)\\b/' ).count(), `${ path } no external board links` ).toBe( 0 );
 			expect( ( await slip.textContent() ), `${ path } no review text` ).not.toMatch( /Review/ );
@@ -3372,6 +3378,7 @@ test( 'the Stream shows a board play as a score-pad slip with one link and no re
 			if ( ( await slip.textContent() ).includes( 'Forest Paths' ) ) await expect( slip.locator( '.cr-scorepad__rating' ) ).toHaveText( 'Rated 5 of 5' );
 		}
 	}
+	test.skip( 0 === seen, 'no board score-pad slip on the Stream or the front page: seed a board play dated today' );
 } );
 
 // W1-TVIDEO archive proof: cabinets are single-link objects, and the first
@@ -3535,7 +3542,8 @@ test( 'the read archive is a library of shelves: title and author only, one link
 	await expect( page.locator( '.cr-read-shelf .pkiw-group__heading' ) ).toHaveCount( await page.locator( '.cr-read-shelf .pkiw-group h2.pkiw-group__heading' ).count() );
 	await expect( page.locator( '.cr-read-shelf article.cr-shelf-book .pk-title:not(h3)' ) ).toHaveCount( 0 );
 	const eager = await page.locator( 'article.cr-shelf-book--faceout img' ).evaluateAll( ( imgs ) => imgs.slice( 0, 4 ).map( ( img ) => img.getAttribute( 'loading' ) ) );
-	expect( eager.every( ( value ) => 'eager' === value ), 'first face-out cover row loads eagerly' ).toBe( true );
+	if ( eager.length ) expect( eager, 'first face-out cover row loads eagerly' ).toEqual( eager.map( () => 'eager' ) );
+	else fixtureSkippedPart( 'no face-out cover image on this site' );
 
 	await page.goto( READ_AZ_ARCHIVE, { waitUntil: 'load' } );
 	await expect( page.locator( 'article.cr-shelf-book--faceout' ) ).toHaveCount( 0 );
@@ -3546,30 +3554,40 @@ test( 'the read archive is a library of shelves: title and author only, one link
 } );
 
 // W1-TREAD responsive proof: the archive CSS changes the shelf grid by
-// viewport width without introducing horizontal scroll.
-test( 'read shelf columns hold 4/3/2/2 for face-out and 4/2/1/1 for slabs with no horizontal scroll (PKIW #234)', async ( { page }, testInfo ) => {
+// viewport width without introducing horizontal scroll. Tracks are counted
+// from the computed grid, since a group of two books fills only two cells.
+async function readShelfTracks( page, width, kind ) {
+	await page.setViewportSize( { width, height: 900 } );
+	await page.goto( READ_ARCHIVE, { waitUntil: 'load' } );
+	return page.evaluate( ( shape ) => {
+		const book = document.querySelector( `article.cr-shelf-book--${ shape }` );
+		const list = book?.closest( '.pkiw-group__items' );
+		return {
+			tracks: list ? getComputedStyle( list ).gridTemplateColumns.split( ' ' ).filter( Boolean ).length : 0,
+			scroll: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+		};
+	}, kind );
+}
+
+test( 'read shelf face-out columns hold 4/3/2/2 with no horizontal scroll (PKIW #234)', async ( { page }, testInfo ) => {
 	test.skip( '1280-light' !== testInfo.project.name, 'runs once, in the 1280-light project' );
 	await page.goto( READ_ARCHIVE, { waitUntil: 'load' } );
 	test.skip( 0 === await page.locator( 'article.cr-shelf-book--faceout' ).count(), 'no face-out read shelf books on this site' );
-	for ( const [ width, face, slab ] of [ [ 1440, 4, 4 ], [ 800, 3, 2 ], [ 375, 2, 1 ], [ 320, 2, 1 ] ] ) {
-		await page.setViewportSize( { width, height: 900 } );
-		await page.goto( READ_ARCHIVE, { waitUntil: 'load' } );
-		const counts = await page.evaluate( () => {
-			const tracks = ( selector ) => {
-				const list = document.querySelector( selector );
-				if ( ! list ) return 0;
-				return getComputedStyle( list ).gridTemplateColumns.split( ' ' ).filter( Boolean ).length;
-			};
-			return {
-				face: tracks( '.pkiw-group[data-pkiw-group="reading"] > .pkiw-group__items, .pkiw-group[data-pkiw-group="to-read"] > .pkiw-group__items' ),
-				slab: tracks( '.pkiw-group:not([data-pkiw-group="reading"]):not([data-pkiw-group="to-read"]) > .pkiw-group__items' ),
-				scroll: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-			};
-		} );
-		expect( counts.face, `${ width }px face-out columns` ).toBe( face );
-		if ( counts.slab ) expect( counts.slab, `${ width }px slab columns` ).toBe( slab );
-		else fixtureSkippedPart( `no slab group at ${ width }px` );
-		expect( counts.scroll, `${ width }px no horizontal scroll` ).toBe( 0 );
+	for ( const [ width, columns ] of [ [ 1440, 4 ], [ 800, 3 ], [ 375, 2 ], [ 320, 2 ] ] ) {
+		const o = await readShelfTracks( page, width, 'faceout' );
+		expect( o.tracks, `${ width }px face-out columns` ).toBe( columns );
+		expect( o.scroll, `${ width }px no horizontal scroll` ).toBe( 0 );
+	}
+} );
+
+test( 'read shelf slab columns hold 4/2/1/1 with no horizontal scroll (PKIW #234)', async ( { page }, testInfo ) => {
+	test.skip( '1280-light' !== testInfo.project.name, 'runs once, in the 1280-light project' );
+	await page.goto( READ_ARCHIVE, { waitUntil: 'load' } );
+	test.skip( 0 === await page.locator( 'article.cr-shelf-book--slab' ).count(), 'no slab read shelf books on this site: seed finished or abandoned reads' );
+	for ( const [ width, columns ] of [ [ 1440, 4 ], [ 800, 2 ], [ 375, 1 ], [ 320, 1 ] ] ) {
+		const o = await readShelfTracks( page, width, 'slab' );
+		expect( o.tracks, `${ width }px slab columns` ).toBe( columns );
+		expect( o.scroll, `${ width }px no horizontal scroll` ).toBe( 0 );
 	}
 } );
 
@@ -3634,7 +3652,7 @@ test( 'a read single drops the margin asides, shows a since-date and one rating,
 
 // W1-TREAD Stream proof: read cards keep review content, cut progress bars,
 // and print the actual stored rating value as N / 5.
-test( 'the Stream shows a read as a book card with a real N / 5, no hand-drawn line and no progress bar (PKIW #234)', async ( { page } ) => {
+test( 'the Stream shows a read as a book card with no hand-drawn line or progress bar, and its stored rating as N / 5 (PKIW #234)', async ( { page } ) => {
 	await page.goto( STREAM, { waitUntil: 'load' } );
 	const cards = page.locator( 'article.k-read.cr-book--stream' );
 	test.skip( 0 === await cards.count(), `no read card on ${ STREAM }` );

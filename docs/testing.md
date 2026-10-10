@@ -102,7 +102,7 @@ The script is adapted from the SG-10 accessibility harness in the vault, `1. Pro
 
 ### `npm run captures`
 
-Runs `tests/playwright/captures.spec.mjs` in four projects, `390-light`, `390-dark`, `1280-light` and `1280-dark`, which gives 20 full-page PNGs in `tests/output/captures/`, named `<route>-<width>-<scheme>.png`. `CR_CAPTURE_FULL_PAGE=0` captures the viewport only. A test fails when its route doesn't return HTTP 200, and it saves the screenshot first.
+Runs `tests/playwright/captures.spec.mjs` in four projects, `390-light`, `390-dark`, `1280-light` and `1280-dark`, which gives 28 full-page PNGs in `tests/output/captures/`, named `<route>-<width>-<scheme>.png`. `CR_CAPTURE_FULL_PAGE=0` captures the viewport only. A test fails when its route doesn't return HTTP 200, and it saves the screenshot first.
 
 Dark and light mode set both the browser color scheme and the theme's `courtneyr-theme` localStorage value, which the no-flash script reads before first paint.
 
