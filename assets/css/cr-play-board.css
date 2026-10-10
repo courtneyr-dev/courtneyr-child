@@ -294,6 +294,13 @@
 	color: var(--cr-russian-violet);
 }
 
+/* cr-post-kinds.css gives every single's kind card the elevated surface
+   (white, night elevated in dark) at higher specificity; the tabletop keeps
+   its sky blue and Russian violet ink in both schemes (review-synthesis X1). */
+body[class*="kind-"].single .single-post__content .pk-card.pk-card--tabletop {
+	background: var(--cr-sky-blue);
+}
+
 .pk-card.pk-card--tabletop::before {
 	content: none;
 }
@@ -682,7 +689,8 @@
 
 	.pk-card.pk-card--tabletop .pk-scorepad {
 		grid-column: 2;
-		grid-row: 2 / span 3;
+		grid-row: 1 / span 3;
+		align-self: start;
 	}
 }
 
