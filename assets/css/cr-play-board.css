@@ -515,17 +515,21 @@ body[class*="kind-"].single .single-post__content .pk-card.pk-card--tabletop {
 	background: var(--cr-printer-ivory);
 	box-shadow: var(--cr-shadow-hard);
 	color: var(--cr-russian-violet);
+	isolation: isolate;
 }
 
+/* The paper: punched holes down the edge and faint ruled lines, one masked
+   ink layer under the text, so the rules stay faint on the ivory slip in
+   both schemes. */
 .cr-scorepad.pk-card.k-play::before {
 	content: "";
 	position: absolute;
+	z-index: -1;
 	inset-block: var(--cr-space-sm);
-	inset-inline-start: var(--cr-space-xs);
-	inline-size: 0.55rem;
+	inset-inline: var(--cr-space-xs) 0;
 	background-color: var(--cr-russian-violet);
-	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 24'%3E%3Ccircle cx='4' cy='4' r='2.2'/%3E%3C/svg%3E") top / 0.55rem 1.5rem repeat-y;
-	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 24'%3E%3Ccircle cx='4' cy='4' r='2.2'/%3E%3C/svg%3E") top / 0.55rem 1.5rem repeat-y;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 24'%3E%3Ccircle cx='4' cy='4' r='2.2'/%3E%3C/svg%3E") left top / 0.55rem 1.5rem repeat-y, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 24' preserveAspectRatio='none'%3E%3Crect y='23' width='8' height='1' fill-opacity='0.2'/%3E%3C/svg%3E") 0 0 / 100% 1.5rem repeat-y;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 24'%3E%3Ccircle cx='4' cy='4' r='2.2'/%3E%3C/svg%3E") left top / 0.55rem 1.5rem repeat-y, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 24' preserveAspectRatio='none'%3E%3Crect y='23' width='8' height='1' fill-opacity='0.2'/%3E%3C/svg%3E") 0 0 / 100% 1.5rem repeat-y;
 }
 
 .cr-scorepad.pk-card.k-play::after {
@@ -592,30 +596,21 @@ body[class*="kind-"].single .single-post__content .pk-card.pk-card--tabletop {
 .cr-scorepad .cr-scorepad__date,
 .cr-scorepad .cr-scorepad__rating {
 	margin: 0;
-	line-height: var(--cr-leading-snug);
-}
-
-.cr-scorepad .cr-scorepad__platform {
-	color: var(--cr-cerulean);
-	font-family: var(--cr-font-body);
-	font-size: var(--cr-text-sm);
-	font-weight: var(--cr-weight-regular);
-}
-
-.cr-scorepad .cr-scorepad__date {
-	color: var(--cr-russian-violet);
-	font-family: var(--cr-font-body);
-	font-size: var(--cr-text-sm);
-	font-weight: var(--cr-weight-regular);
-}
-
-.cr-scorepad .cr-scorepad__rating {
-	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-mono);
 	font-size: var(--cr-text-xs);
 	font-weight: var(--cr-weight-semibold);
 	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-snug);
 	text-transform: uppercase;
+}
+
+.cr-scorepad .cr-scorepad__platform {
+	color: var(--cr-cerulean);
+}
+
+.cr-scorepad .cr-scorepad__date,
+.cr-scorepad .cr-scorepad__rating {
+	color: var(--cr-russian-violet);
 }
 
 .cr-scorepad .cr-scorepad__image {

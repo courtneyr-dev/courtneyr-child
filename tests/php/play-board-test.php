@@ -224,7 +224,7 @@ namespace PKIW {
 
 		/** Hidden author. */
 		function entry_author_html( \WP_Post $post ): string {
-			return '<span class="p-author h-card"><a class="u-url p-name" href="https://example.test/author/courtney/" tabindex="-1">Courtney</a></span>';
+			return '<span class="p-author h-card"><span class="p-name">Courtney</span><data class="u-url" value="https://example.test/author/courtney/"></data></span>';
 		}
 	}
 }
@@ -414,6 +414,8 @@ namespace Courtneyr\Child\PlayBoard\Tests {
 			$post = board_post( 101 );
 			$out  = spine( '<article><h3 class="pk-title">Old</h3><div class="pk-box">Box</div></article>', 'board', $post, array( 'title' => 'cr-play-title-101', 'date' => 'cr-play-date-101', 'repeats' => false ) );
 			return 1 === visible_anchor_count( $out )
+				&& 1 === substr_count( $out, '<a ' )
+				&& false !== strpos( $out, '<span class="p-author h-card"><span class="p-name">Courtney</span>' )
 				&& false !== strpos( $out, 'class="pk-title p-name"' )
 				&& false !== strpos( $out, 'cr-spine' )
 				&& 1 === preg_match( '/cr-paper--(?:' . implode( '|', array_map( 'preg_quote', PAPERS ) ) . ')/', $out )
@@ -523,6 +525,8 @@ namespace Courtneyr\Child\PlayBoard\Tests {
 			$out = slip( '<h2 class="pk-title">Old</h2><div class="pk-meta">Old</div>', 'board', $post );
 			$platformless = slip( '<h2 class="pk-title">Old</h2>', 'board', board_post( 108, array( 'title' => 'No Meta', 'platform' => '', 'rating_label' => '', 'game_url' => 'https://example.test/games/no-meta', 'bgg_id' => '9990001' ) ) );
 			return 1 === visible_anchor_count( $out )
+				&& 1 === substr_count( $out, '<a ' )
+				&& false !== strpos( $out, '<span class="p-author h-card"><span class="p-name">Courtney</span>' )
 				&& false !== strpos( $out, 'Play' )
 				&& strpos( $out, 'cr-scorepad__label' ) < strpos( $out, 'cr-scorepad__title' )
 				&& strpos( $out, 'cr-scorepad__title' ) < strpos( $out, 'cr-scorepad__platform' )
