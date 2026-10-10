@@ -310,12 +310,16 @@ body.cr-video-single .cr-cabinet--single .cr-cabinet__review-body {
 	--cr-cabinet-edge: var(--cr-russian-violet);
 	--cr-cabinet-shadow: var(--cr-shadow-hard);
 	position: relative;
+	display: block;
+	grid-template-columns: none;
+	gap: 0;
 	box-sizing: border-box;
 	width: 100%;
 	max-width: 100%;
 	margin: 0;
 	padding: 0;
 	border: 2px solid var(--cr-cabinet-edge);
+	border-bottom-width: var(--cr-space-xs);
 	background: var(--cr-prussian-blue);
 	box-shadow: var(--cr-cabinet-shadow);
 	color: var(--cr-printer-ivory);
@@ -323,20 +327,25 @@ body.cr-video-single .cr-cabinet--single .cr-cabinet__review-body {
 
 .cr-play .pk-card.cr-cabinet .pk-body {
 	display: grid;
+	grid-template-columns: minmax(0, 1fr);
 	grid-template-areas:
 		"marquee"
 		"screen"
 		"score"
 		"panel";
+	width: 100%;
 	min-width: 0;
 }
 
 .cr-play .pk-card.cr-cabinet .pk-caption {
 	grid-area: marquee;
+	min-width: 0;
+	margin: var(--cr-space-xs) var(--cr-space-xs) 0;
 	padding: var(--cr-space-sm);
-	border-bottom: 2px solid var(--cr-sky-blue);
+	border: 2px solid var(--cr-sky-blue);
 	background: var(--cr-russian-violet);
 	color: var(--cr-printer-ivory);
+	text-align: center;
 }
 
 .cr-play .pk-card.cr-cabinet .pk-title {
@@ -364,10 +373,13 @@ body.cr-video-single .cr-cabinet--single .cr-cabinet__review-body {
 .cr-play .pk-card.cr-cabinet .cr-cabinet__screen {
 	display: grid;
 	grid-area: screen;
+	box-sizing: border-box;
 	aspect-ratio: 4 / 3;
+	min-width: 0;
 	margin: var(--cr-space-md);
 	overflow: hidden;
-	border: 2px solid var(--cr-sky-blue);
+	border: var(--cr-space-xs) solid var(--cr-russian-violet-soft);
+	outline: 2px solid var(--cr-sky-blue);
 	background: var(--cr-russian-violet);
 	place-items: center;
 }
@@ -381,6 +393,7 @@ body.cr-video-single .cr-cabinet--single .cr-cabinet__review-body {
 
 .cr-play .pk-card.cr-cabinet .cr-cabinet__score {
 	grid-area: score;
+	min-width: 0;
 	margin: 0 var(--cr-space-md) var(--cr-space-md);
 	padding: var(--cr-space-xs) var(--cr-space-sm);
 	border: 2px solid var(--cr-sky-blue);
@@ -394,6 +407,8 @@ body.cr-video-single .cr-cabinet--single .cr-cabinet__review-body {
 
 .cr-play .pk-card.cr-cabinet .cr-cabinet__panel {
 	grid-area: panel;
+	min-width: 0;
+	border-top: 2px solid var(--cr-sky-blue);
 }
 
 .cr-play .pk-card.cr-cabinet--locked {
