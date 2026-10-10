@@ -109,3 +109,58 @@ function mark_repeated_listen_title( string $html, array $block, $instance = nul
 	return $tags->get_updated_html();
 }
 add_filter( 'render_block_post-kinds-indieweb/listen-card', __NAMESPACE__ . '\\mark_repeated_listen_title', 10, 3 );
+
+/**
+ * When the single's sources row prints the same rating text, keep the card
+ * stars visible but make them decorative.
+ *
+ * @param string               $html     Rendered listen card.
+ * @param array<string, mixed> $block    Parsed block.
+ * @param \WP_Block|null       $instance Block instance.
+ * @return string
+ */
+function hide_duplicate_listen_stars_label( string $html, array $block, $instance = null ): string {
+	if ( ! is_singular( 'post' ) ) {
+		return $html;
+	}
+	$post_id = (int) get_queried_object_id();
+	if ( $instance instanceof \WP_Block && isset( $instance->context['postId'] ) && (int) $instance->context['postId'] !== $post_id ) {
+		return $html;
+	}
+	$post = get_post( $post_id );
+	if ( ! $post instanceof \WP_Post || ! has_term( 'listen', 'kind', $post ) || ! listen_rating_row_prints( $instance ) ) {
+		return $html;
+	}
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	if ( ! $tags->next_tag( array( 'class_name' => 'pk-stars' ) ) ) {
+		return $html;
+	}
+	$tags->set_attribute( 'aria-hidden', 'true' );
+	$tags->remove_attribute( 'role' );
+	$tags->remove_attribute( 'aria-label' );
+	return $tags->get_updated_html();
+}
+add_filter( 'render_block_post-kinds-indieweb/listen-card', __NAMESPACE__ . '\\hide_duplicate_listen_stars_label', 20, 3 );
+
+/**
+ * Whether the single's sources row prints a rating as text.
+ *
+ * The row (patterns/cr-listen-sources.php) binds its value to the
+ * post-kinds/kind-meta source with key rating and hides itself when that
+ * value is empty, so the same source decides here. Without the source, or
+ * with an empty value, the stars keep their own accessible name.
+ *
+ * @param \WP_Block|null $instance The listen card block instance.
+ * @return bool
+ */
+function listen_rating_row_prints( $instance ): bool {
+	if ( ! $instance instanceof \WP_Block || ! class_exists( '\\WP_Block_Bindings_Registry' ) ) {
+		return false;
+	}
+	$source = \WP_Block_Bindings_Registry::get_instance()->get_registered( 'post-kinds/kind-meta' );
+	if ( ! $source ) {
+		return false;
+	}
+	$value = $source->get_value( array( 'key' => 'rating' ), $instance, 'content' );
+	return is_scalar( $value ) && '' !== trim( (string) $value );
+}

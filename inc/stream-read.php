@@ -23,6 +23,7 @@ use function Courtneyr\Child\SingleRead\book_cover;
 use function Courtneyr\Child\SingleRead\date_pair;
 use function Courtneyr\Child\SingleRead\rating_text;
 use function Courtneyr\Child\SingleRead\read_attrs;
+use function Courtneyr\Child\SingleRead\replace_status_label;
 use function Courtneyr\Child\SingleRead\status_copy;
 use function Courtneyr\Child\Stamps\pick;
 use function Courtneyr\Child\Stamps\render;
@@ -207,7 +208,10 @@ function book_card( string $html, array $block, $instance ): string {
 	$a      = read_attrs( $post, $read );
 	$status = (string) $a['readStatus'];
 	list( $label, $word ) = status_copy( $status );
-	$seed   = seed( (string) $post->ID, (string) ( $a['isbn'] ?? '' ), (string) ( $a['bookTitle'] ?? '' ) );
+	if ( 'other' === $status ) {
+		$html = replace_status_label( $html, $label );
+	}
+	$seed = seed( (string) $post->ID, (string) ( $a['isbn'] ?? '' ), (string) ( $a['bookTitle'] ?? '' ) );
 
 	// 1. The stored rating appears beside the plugin's stars.
 	$html = with_rating_value( $html, (float) $a['rating'] );

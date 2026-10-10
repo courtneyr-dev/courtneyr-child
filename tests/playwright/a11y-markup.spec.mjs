@@ -1025,10 +1025,16 @@ test( 'a listen single shows its rating once, as text, and one Listen link (PKIW
 	await expect( card ).toHaveClass( /\bh-cite\b/ );
 	await expect( card ).toHaveClass( /\bu-listen-of\b/ );
 	await expect( card.locator( '.p-rating' ) ).toHaveCount( 1 );
-	const ratings = page.locator( 'main .pk-stars, main .cr-listen-sources__rating' ).filter( { visible: true } );
-	await expect( ratings ).toHaveCount( 1 );
-	const ratingText = await ratings.first().getAttribute( 'aria-label' ) || await ratings.first().innerText();
-	expect( ratingText.replace( /\s+/g, ' ' ).trim() ).toMatch( /^Rated \d+ of 5$/ );
+	// Courtney, 2026-10-10 (ledger 26): the stars show again beside the
+	// sources row's "Rated N of 5" text, and are decorative so the rating is
+	// announced once.
+	const row = page.locator( 'main .cr-listen-sources__rating' ).filter( { visible: true } );
+	await expect( row ).toHaveCount( 1 );
+	expect( ( await row.innerText() ).replace( /\s+/g, ' ' ).trim() ).toMatch( /^Rated \d+ of 5$/ );
+	const stars = card.locator( '.pk-stars' );
+	await expect( stars ).toBeVisible();
+	await expect( stars ).toHaveAttribute( 'aria-hidden', 'true' );
+	await expect( page.locator( 'main [role="img"][aria-label^="Rated "]' ) ).toHaveCount( 0 );
 	const listenUrl = await card.locator( 'a.u-url' ).first().evaluate( ( a ) => a.href );
 	expect( listenUrl ).toBeTruthy();
 	// One visible link per destination, for every place the card and the

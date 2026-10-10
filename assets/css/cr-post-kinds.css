@@ -4406,7 +4406,6 @@ body.single-post.kind-listen .single-post__content .pk-card.k-listen:has(.pk-sou
    title, and the artist line stays on the label. Hide them so each reads
    once, and close the paper label at the caption. A single template
    without the kind part keeps the card's own. */
-body.single-post.kind-listen:has(.cr-listen-sources__value:not(:empty)) .single-post__content .pk-card.k-listen .pk-stars,
 body.single-post.kind-listen:has(.cr-listen-sources__link > a[href]) .single-post__content .pk-card.k-listen.cr-listen--title-repeats .pk-title:has(a[href]),
 body.single-post.kind-listen:has(.cr-listen-sources__link > a[href]) .single-post__content .pk-card.k-listen .pk-meta .pk-link,
 body.single-post.kind-listen:has(.cr-listen-sources__link > a[href]) .single-post__content .pk-card.k-listen .pk-meta .pk-dot,

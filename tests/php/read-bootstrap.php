@@ -18,6 +18,7 @@ namespace {
 	$GLOBALS['cr_read_blocks']      = array();
 	$GLOBALS['cr_read_stream']      = true;
 	$GLOBALS['cr_read_post']        = null;
+	$GLOBALS['cr_read_kind']        = 'read';
 	$GLOBALS['cr_read_failures']    = array();
 	$GLOBALS['cr_read_has_term']    = true;
 	$GLOBALS['cr_read_protected']   = array();
@@ -138,7 +139,7 @@ namespace {
 	}
 
 	function has_term( $term, $taxonomy, $post = null ): bool {
-		return (bool) $GLOBALS['cr_read_has_term'] && 'read' === $term && 'kind' === $taxonomy;
+		return (bool) $GLOBALS['cr_read_has_term'] && (string) $GLOBALS['cr_read_kind'] === (string) $term && 'kind' === $taxonomy;
 	}
 
 	function post_password_required( $post = null ): bool {
@@ -239,6 +240,7 @@ namespace {
 		$GLOBALS['cr_read_blocks']      = array();
 		$GLOBALS['cr_read_stream']      = true;
 		$GLOBALS['cr_read_post']        = $post;
+		$GLOBALS['cr_read_kind']        = 'read';
 		$GLOBALS['cr_read_has_term']    = true;
 		$GLOBALS['cr_read_protected']   = array();
 		$GLOBALS['cr_read_dates']       = array();
@@ -348,7 +350,7 @@ namespace PKIW {
 	}
 
 	function read_status_labels(): array {
-		return array( 'reading' => 'Currently Reading', 'to-read' => 'To Read', 'finished' => 'Finished', 'abandoned' => 'Abandoned' );
+		return array( 'reading' => 'Currently Reading', 'to-read' => 'To Read', 'finished' => 'Finished', 'abandoned' => 'Abandoned', 'other' => 'Other' );
 	}
 
 	function card_calendar_date( string $raw ): array {

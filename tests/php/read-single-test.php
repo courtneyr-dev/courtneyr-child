@@ -62,7 +62,8 @@ cr_read_group(
 			'to-read'   => 'To Read',
 			'finished'  => 'Finished',
 			'abandoned' => 'Abandoned',
-			'unknown'   => 'To Read',
+			'other'     => 'Other',
+			'unknown'   => 'Other',
 		);
 		foreach ( $expected as $status => $label ) {
 			cr_read_same( array( $label, $label ), status_copy( $status ), $status );
@@ -113,10 +114,11 @@ cr_read_group(
 		cr_read_same( 0.0, read_attrs( $post, $block )['rating'], 'missing rating' );
 		cr_read_same( 0.0, read_attrs( $post, cr_read_single_block( array( 'rating' => -1 ) ) )['rating'], 'negative block without meta' );
 		cr_read_same( 0.0, read_attrs( $post, cr_read_single_block( array( 'rating' => 'nope' ) ) )['rating'], 'non-numeric block without meta' );
-		cr_read_same( 'reading', read_attrs( $post, cr_read_single_block( array( 'readStatus' => 'other' ) ) )['readStatus'], 'invalid status' );
+		cr_read_same( 'other', read_attrs( $post, cr_read_single_block( array( 'readStatus' => 'other' ) ) )['readStatus'], 'other status' );
+		cr_read_same( 'other', read_attrs( $post, cr_read_single_block( array( 'readStatus' => 'nope' ) ) )['readStatus'], 'invalid status' );
 		$missing = cr_read_single_block();
 		unset( $missing['attrs']['readStatus'] );
-		cr_read_same( 'reading', read_attrs( $post, $missing )['readStatus'], 'missing status' );
+		cr_read_same( 'other', read_attrs( $post, $missing )['readStatus'], 'missing status' );
 	}
 );
 
@@ -210,6 +212,13 @@ cr_read_group(
 		cr_read_same( $chip, protected_header_terms( $chip, array( 'attrs' => array( 'className' => 'related-post__terms' ) ) ), 'other term lists stay' );
 		$GLOBALS['cr_read_protected'] = array();
 		cr_read_same( $chip, protected_header_terms( $chip, array( 'attrs' => array( 'className' => 'cr-chip single-post__kind' ) ) ), 'public read keeps its chips' );
+
+		cr_read_reset();
+		$GLOBALS['cr_read_blocks'] = array( cr_read_single_block( array( 'readStatus' => 'nope' ) ) );
+		$html = add_title_lede( '<h1>Reading now</h1>', array( 'blockName' => 'core/post-title' ) );
+		cr_read_contains( 'Other', $html, 'invalid status label' );
+		cr_read_not_contains( 'Currently Reading', $html, 'invalid status is not reading' );
+		cr_read_not_contains( 'cr-read__status-progress', $html, 'invalid status has no progress' );
 	}
 );
 
@@ -290,6 +299,12 @@ cr_read_group(
 cr_read_group(
 	'journal page removes slogans and uses one featured-first cover',
 	static function (): void {
+		$post                      = cr_read_reset();
+		$GLOBALS['cr_read_blocks'] = array( cr_read_single_block( array( 'readStatus' => 'nope' ) ) );
+		$html                      = journal_page( cr_read_single_card(), array( 'blockName' => 'core/post-content' ) );
+		cr_read_contains( '<p class="pk-sub"><span>Other</span></p>', $html, 'invalid card status label' );
+		cr_read_not_contains( '<p class="pk-sub"><span>Currently Reading</span></p>', $html, 'invalid card status is not reading' );
+
 		foreach ( array( true, false ) as $with_card_cover ) {
 			$post                       = cr_read_reset();
 			$block                      = cr_read_single_block();
