@@ -159,7 +159,7 @@ function spine( string $html, string $group, $post, array $ids ): string {
 
 	$heading_class = $title['synthetic'] ? 'pk-title' : 'pk-title p-name';
 	$labelledby    = '';
-	if ( ! empty( $ids['repeats'] ) && '' !== $title_id && '' !== $date_id ) {
+	if ( '' !== $title_id && '' !== $date_id ) {
 		$labelledby = ' aria-labelledby="' . esc_attr( $title_id . ' ' . $date_id ) . '"';
 	}
 	$title_id_attr = '' !== $title_id ? ' id="' . esc_attr( $title_id ) . '"' : '';

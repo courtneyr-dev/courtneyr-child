@@ -15,10 +15,13 @@
 	--cr-play-columns: 3;
 }
 
+/* tokens.css caps every list at --cr-measure; the shelves take the Play
+   group's wide size, as the Listen shelf does (cr-media-shelf.css). */
 .cr-play .pkiw-group > .pkiw-group__items {
 	display: grid;
 	grid-template-columns: repeat(var(--cr-play-columns), minmax(0, 1fr));
 	row-gap: 0;
+	max-width: none;
 	margin-block-end: var(--cr-space-2xl);
 }
 

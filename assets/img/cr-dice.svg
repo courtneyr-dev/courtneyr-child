@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 224" width="200" height="224"><!-- Decorative pair of dice for the play archive's still life (PKIW #232). Palette only, tilts from the rotation tokens (-2.5deg, 2.8deg); a CSS background, never content. The lower die's foot is at the bottom edge so it stands on the band. -->
+<g transform="rotate(-2.5 70 164)" stroke="#241c4a" stroke-width="4" stroke-linejoin="round">
+<rect x="28" y="120" width="100" height="100" rx="14" fill="#241c4a"/>
+<rect x="20" y="112" width="100" height="100" rx="14" fill="#fbfaf5"/>
+<g fill="#241c4a" stroke="none"><circle cx="44" cy="136" r="9"/><circle cx="96" cy="136" r="9"/><circle cx="70" cy="162" r="9"/><circle cx="44" cy="188" r="9"/><circle cx="96" cy="188" r="9"/></g>
+</g>
+<g transform="rotate(2.8 125 64)" stroke="#241c4a" stroke-width="4" stroke-linejoin="round">
+<rect x="86" y="27" width="86" height="86" rx="12" fill="#241c4a"/>
+<rect x="80" y="21" width="86" height="86" rx="12" fill="#8ecae6"/>
+<g fill="#241c4a" stroke="none"><circle cx="101" cy="42" r="8"/><circle cx="123" cy="64" r="8"/><circle cx="145" cy="86" r="8"/></g>
+</g>
+</svg>
