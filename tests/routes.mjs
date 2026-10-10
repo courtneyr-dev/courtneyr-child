@@ -11,13 +11,15 @@ export function assertLocalTarget( base = BASE_URL ) {
 	}
 }
 
-export const ROUTE_NAMES = [ 'home', 'stream', 'single-post', 'kind-archive', 'story-archive' ];
+export const ROUTE_NAMES = [ 'home', 'stream', 'single-post', 'kind-archive', 'story-archive', 'play-archive', 'read-archive' ];
 
 const fixed = {
 	home: '/',
 	stream: '/stream/',
 	'kind-archive': process.env.CR_KIND_ARCHIVE_PATH || '/kind/mood/',
 	'story-archive': process.env.CR_STORY_ARCHIVE_PATH || '/web-stories/',
+	'play-archive': process.env.CR_PLAY_ARCHIVE_PATH || '/kind/play/',
+	'read-archive': process.env.CR_READ_ARCHIVE_PATH || '/kind/read/',
 };
 
 // Newest published post from the public REST API, unless CR_SINGLE_POST_PATH is set.
