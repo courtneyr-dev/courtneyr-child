@@ -97,6 +97,32 @@ function paper_constant( string $php ): array {
 	return $papers[1];
 }
 
+/** Extract the contents of one top-level CSS block. */
+function css_block_body( string $css, string $marker ): string {
+	$clean = (string) preg_replace( '#/\*.*?\*/#s', '', $css );
+	$start = strpos( $clean, $marker );
+	if ( false === $start ) {
+		return '';
+	}
+	$open = strpos( $clean, '{', $start );
+	if ( false === $open ) {
+		return '';
+	}
+	$depth = 0;
+	$len   = strlen( $clean );
+	for ( $i = $open; $i < $len; ++$i ) {
+		if ( '{' === $clean[ $i ] ) {
+			++$depth;
+		} elseif ( '}' === $clean[ $i ] ) {
+			--$depth;
+			if ( 0 === $depth ) {
+				return substr( $clean, $open + 1, $i - $open - 1 );
+			}
+		}
+	}
+	return '';
+}
+
 check_case(
 	'stylesheet uses allowed paint, tokens and type values',
 	static function () use ( $theme_dir ): bool {
@@ -356,5 +382,52 @@ check_case(
 	}
 );
 
-echo "\n", count( $failures ) ? count( $failures ) . ' failed' : '9 passed', "\n";
+check_case(
+	'reduced motion clears the four tape transforms',
+	static function () use ( $theme_dir ): bool {
+		$css = (string) file_get_contents( $theme_dir . '/assets/css/cr-play-board.css' );
+		$reduced = css_block_body( $css, '@media (prefers-reduced-motion: reduce)' );
+		if ( '' === $reduced ) {
+			return false;
+		}
+		$reduced_rules = css_rules( $reduced );
+		$required = array(
+			'.cr-play .pkiw-staff-picks__heading::before',
+			'.cr-play .pkiw-group[data-pkiw-group="board"] > .pkiw-group__heading::before',
+			'.pk-card.pk-card--tabletop .pk-box::before',
+			'.pk-card.pk-card--tabletop .pk-scorepad::before',
+			'.cr-scorepad.pk-card.k-play::after',
+		);
+
+		$has_reset = static function ( string $target ) use ( $reduced_rules ): bool {
+			foreach ( $reduced_rules as $rule ) {
+				if ( false !== strpos( $rule[0], $target ) && 1 === preg_match( '/(?:^|;)\s*transform\s*:\s*none\s*(?:;|$)/i', $rule[1] ) ) {
+					return true;
+				}
+			}
+			return false;
+		};
+
+		foreach ( $required as $target ) {
+			if ( ! $has_reset( $target ) ) {
+				return false;
+			}
+		}
+
+		$base_css = str_replace( $reduced, '', $css );
+		foreach ( css_rules( $base_css ) as $rule ) {
+			if ( 1 !== preg_match( '/(?:^|;)\s*transform\s*:\s*rotate\(/i', $rule[1] ) ) {
+				continue;
+			}
+			foreach ( array_map( 'trim', explode( ',', $rule[0] ) ) as $selector ) {
+				if ( '' !== $selector && ! $has_reset( $selector ) ) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+);
+
+echo "\n", count( $failures ) ? count( $failures ) . ' failed' : '10 passed', "\n";
 exit( count( $failures ) ? 1 : 0 );

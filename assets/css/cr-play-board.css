@@ -696,6 +696,14 @@
 		transition: none;
 		animation: none;
 	}
+
+	.cr-play .pkiw-staff-picks__heading::before,
+	.cr-play .pkiw-group[data-pkiw-group="board"] > .pkiw-group__heading::before,
+	.pk-card.pk-card--tabletop .pk-box::before,
+	.pk-card.pk-card--tabletop .pk-scorepad::before,
+	.cr-scorepad.pk-card.k-play::after {
+		transform: none;
+	}
 }
 
 @media (forced-colors: active) {
