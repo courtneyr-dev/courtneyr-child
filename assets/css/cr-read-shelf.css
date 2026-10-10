@@ -465,7 +465,7 @@
 		position: absolute;
 		inset-block-start: var(--cr-space-4xl);
 		width: var(--cr-book-art-width);
-		height: calc(var(--cr-book-art-width) * 0.91);
+		aspect-ratio: 220 / 200;
 		background: url(../img/cr-book-stack.svg) bottom / contain no-repeat;
 		content: "";
 		pointer-events: none;

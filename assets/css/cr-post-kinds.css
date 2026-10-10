@@ -5332,7 +5332,7 @@ body.single-post.kind-read .cr-read__author::after {
 	height: 0.3rem;
 	margin-top: 0.4rem;
 	background: var(--cr-cerulean, #126782);
-	transform: rotate(-1.2deg);
+	transform: rotate(var(--cr-rotate-1));
 	border-radius: 1px;
 }
 body.single-post.kind-read .cr-read__status {
@@ -5437,7 +5437,7 @@ body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-kin
 	letter-spacing: -0.02em;
 	text-transform: uppercase;
 	color: var(--cr-ink, #241c4a);
-	transform: rotate(-4deg);
+	transform: rotate(var(--cr-rotate-neg));
 	-webkit-mask-image: repeating-linear-gradient(-32deg, #000 0 6px, rgba(0, 0, 0, 0.55) 6px 7px);
 	mask-image: repeating-linear-gradient(-32deg, #000 0 6px, rgba(0, 0, 0, 0.55) 6px 7px);
 	opacity: 0.92;
@@ -5450,7 +5450,7 @@ body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-med
 	width: min(100%, 19rem);
 	margin: 0.6rem 0 0 1.4rem !important;
 	gap: 0 !important;
-	transform: perspective(1200px) rotateY(-6deg) rotate(-1.5deg);
+	transform: perspective(1200px) rotateY(-6deg) rotate(var(--cr-rotate-1));
 	transform-origin: left center;
 }
 body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media img,
@@ -5624,7 +5624,6 @@ body.single-post:is(.kind-read, .kind-watch) .cr-journal__notes {
 	background-position: 0 1.25rem;
 	border: 1.5px solid var(--cr-ink, #241c4a);
 	box-shadow: 5px 5px 0 var(--cr-ink, #241c4a);
-	transform: rotate(-0.5deg);
 	color: #241c4a;
 }
 body.single-post:is(.kind-read, .kind-watch) .cr-journal__notes::before {
@@ -5671,10 +5670,12 @@ body.single-post:is(.kind-read, .kind-watch) .cr-record {
 	background-image: repeating-linear-gradient(180deg, transparent 0 1.9rem, rgba(36, 28, 74, 0.08) 1.9rem calc(1.9rem + 1px));
 	border: 1.5px solid var(--cr-ink, #241c4a);
 	box-shadow: 4px 4px 0 var(--cr-ink, #241c4a);
-	transform: rotate(0.6deg);
 	color: #241c4a;
 	font-family: var(--cr-font-mono, monospace);
 }
+/* The read single keeps both panels upright; the watch single keeps its tilt. */
+body.single-post.kind-watch .cr-journal__notes { transform: rotate(-0.5deg); }
+body.single-post.kind-watch .cr-record { transform: rotate(0.6deg); }
 body.single-post:is(.kind-read, .kind-watch) .cr-record::before {
 	content: "";
 	position: absolute;
@@ -6186,8 +6187,7 @@ body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem
 	align-items: stretch;
 	width: auto;
 	padding: 1.2rem 0.95rem 0.85rem;
-	background: #fbf7ea;
-	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.35rem - 1px), rgba(36, 28, 74, 0.1) calc(1.35rem - 1px) 1.35rem);
+	background: radial-gradient(circle 0.24rem at 0.45rem 50%, var(--cr-surface) 0 0.16rem, var(--cr-ink) 0.17rem 0.24rem, transparent 0.25rem) 0 0.7rem / 0.9rem 1.35rem repeat-y, repeating-linear-gradient(180deg, transparent 0 calc(1.35rem - 1px), rgba(36, 28, 74, 0.1) calc(1.35rem - 1px) 1.35rem), #fbf7ea;
 	border: 1.5px solid #241c4a;
 	border-radius: 0;
 	box-shadow: var(--cr-shadow-hard);
