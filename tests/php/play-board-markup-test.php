@@ -250,6 +250,32 @@ check_case(
 );
 
 check_case(
+	'scorepad thumb rule beats child grid placement',
+	static function () use ( $theme_dir ): bool {
+		$rules = css_rules( (string) file_get_contents( $theme_dir . '/assets/css/cr-play-board.css' ) );
+		$thumb_index = null;
+		foreach ( $rules as $index => $rule ) {
+			if ( '.cr-scorepad.pk-card.k-play > .cr-scorepad__thumb' === $rule[0] ) {
+				$thumb_index = $index;
+				if ( 1 !== preg_match( '/(?:^|;)\s*grid-column\s*:\s*2\s*(?:;|$)/i', $rule[1] ) ) {
+					return false;
+				}
+				break;
+			}
+		}
+		if ( null === $thumb_index ) {
+			return false;
+		}
+		foreach ( array_slice( $rules, $thumb_index + 1 ) as $rule ) {
+			if ( '.cr-scorepad.pk-card.k-play > *' === $rule[0] && 1 === preg_match( '/(?:^|;)\s*grid-column\s*:/i', $rule[1] ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+);
+
+check_case(
 	'lane files contain no hex notation and PHP papers match CSS',
 	static function () use ( $theme_dir ): bool {
 		$files = array(
@@ -330,5 +356,5 @@ check_case(
 	}
 );
 
-echo "\n", count( $failures ) ? count( $failures ) . ' failed' : '8 passed', "\n";
+echo "\n", count( $failures ) ? count( $failures ) . ' failed' : '9 passed', "\n";
 exit( count( $failures ) ? 1 : 0 );

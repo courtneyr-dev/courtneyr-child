@@ -167,7 +167,8 @@ function spine( string $html, string $group, $post, array $ids ): string {
 
 	return '<article class="' . esc_attr( $classes ) . '" data-pkiw-play-group="board">'
 		. '<h' . $level . ' class="' . esc_attr( $heading_class ) . '"><a class="u-url" href="' . esc_url( $permalink ) . '"' . $labelledby . '><span' . $title_id_attr . '>' . esc_html( $title['name'] ) . '</span></a></h' . $level . '>'
-		. '<p class="cr-spine__date"><time' . $date_id_attr . ' class="dt-published" datetime="' . esc_attr( (string) get_post_time( 'Y-m-d', false, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time></p>'
+		. '<p class="cr-spine__date"><time' . $date_id_attr . ' datetime="' . esc_attr( (string) get_post_time( 'Y-m-d', false, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time></p>'
+		. '<span class="pk-entry-props" hidden><time class="dt-published" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '" aria-hidden="true"></time></span>'
 		. hidden_props( $post )
 		. '</article>';
 }
@@ -296,8 +297,9 @@ function picks( string $html ): string {
 				return $item;
 			}
 
-			$span = '<span class="cr-box__title" aria-hidden="true">' . esc_html( $title ) . '</span>';
-			return preg_replace( '#(</div>)#', $span . '$1', $item, 1 );
+			$span  = '<span class="cr-box__title" aria-hidden="true">' . esc_html( $title ) . '</span>';
+			$close = strpos( $item, '</div>' );
+			return false === $close ? $item : substr_replace( $item, $span, $close, 0 );
 		},
 		$html
 	);

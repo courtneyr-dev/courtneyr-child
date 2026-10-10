@@ -418,7 +418,8 @@ namespace Courtneyr\Child\PlayBoard\Tests {
 				&& false !== strpos( $out, 'cr-spine' )
 				&& 1 === preg_match( '/cr-paper--(?:' . implode( '|', array_map( 'preg_quote', PAPERS ) ) . ')/', $out )
 				&& false === strpos( $out, 'glaucous' )
-				&& preg_match( '/<time id="cr-play-date-101" class="dt-published" datetime="\d{4}-\d{2}-\d{2}">Sep 18, 2026<\/time>/', $out )
+				&& preg_match( '/<time id="cr-play-date-101" datetime="\d{4}-\d{2}-\d{2}">Sep 18, 2026<\/time>/', $out )
+				&& false !== strpos( $out, '<span class="pk-entry-props" hidden><time class="dt-published" datetime="2026-09-18T12:34:56+00:00" aria-hidden="true"></time></span>' )
 				&& false === has_forbidden_class( $out )
 				&& false === strpos( $out, 'Board Game' )
 				&& false === strpos( $out, 'Rated' )
@@ -587,6 +588,37 @@ namespace Courtneyr\Child\PlayBoard\Tests {
 	);
 
 	check_case(
+		'picks title spans keep replacement metacharacters literal',
+		static function (): bool {
+			reset_state();
+			$titles = array( 'Cost $0 Game', 'Pay $1 Now', 'Back\1slash' );
+			$html = '<ul class="pkiw-staff-picks__list">';
+			foreach ( $titles as $index => $title ) {
+				$html .= '<li class="pkiw-staff-picks__item"><div class="pkiw-staff-picks__box"><img class="pkiw-staff-picks__cover" src="pick-' . $index . '.jpg" alt="" /></div><h3 class="pkiw-staff-picks__title"><a class="pkiw-staff-picks__link" href="https://example.test/pick-' . $index . '/">' . esc_html( $title ) . '</a></h3><p class="pkiw-staff-picks__rating">Rated 5 of 5</p></li>';
+			}
+			$html .= '</ul>';
+			$out = picks( $html );
+			if ( count( $titles ) !== substr_count( $out, '<span class="cr-box__title" aria-hidden="true">' ) ) {
+				return false;
+			}
+			foreach ( $titles as $title ) {
+				if ( 1 !== substr_count( $out, '<span class="cr-box__title" aria-hidden="true">' . esc_html( $title ) . '</span></div>' ) ) {
+					return false;
+				}
+			}
+			preg_match_all( '#<span class="cr-box__title" aria-hidden="true">(.*?)</span></div>#s', $out, $matches );
+			$span_titles = array_map(
+				static function ( string $title ): string {
+					return html_entity_decode( $title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+				},
+				$matches[1] ?? array()
+			);
+			return $span_titles === $titles
+				&& false === strpos( implode( '', $matches[1] ?? array() ), '</div>' );
+		}
+	);
+
+	check_case(
 		'drop_featured_image only drops duplicate board featured images',
 		static function (): bool {
 			reset_state();
@@ -667,7 +699,9 @@ namespace Courtneyr\Child\PlayBoard\Tests {
 			require_once $parser;
 			reset_state();
 			$post = board_post( 401 );
-			$spine = '<ul><li class="wp-block-post h-entry">' . spine( '<h3 class="pk-title">Old</h3>', 'board', $post, array( 'title' => 't401', 'date' => 'd401', 'repeats' => true ) ) . '</li></ul>';
+			$expected_published = get_post_time( 'c', true, $post );
+			$spine_inner = spine( '<h3 class="pk-title">Old</h3>', 'board', $post, array( 'title' => 't401', 'date' => 'd401', 'repeats' => true ) );
+			$spine = '<ul><li class="wp-block-post h-entry">' . $spine_inner . '</li></ul>';
 			$slip = '<ul><li class="wp-block-post h-entry">' . slip( '<h2 class="pk-title">Old</h2>', 'board', $post ) . '</li></ul>';
 			$a = ( new \Mf2\Parser( $spine, 'https://example.test/' ) )->parse();
 			$b = ( new \Mf2\Parser( $slip, 'https://example.test/' ) )->parse();
@@ -677,8 +711,15 @@ namespace Courtneyr\Child\PlayBoard\Tests {
 			$play_of_a = $entry_a['properties']['play-of'][0] ?? array();
 			$uid_a = $entry_a['properties']['play-of'][0]['properties']['uid'][0] ?? '';
 			$uid_b = $entry_b['properties']['play-of'][0]['properties']['uid'][0] ?? '';
+			$visible = array();
+			preg_match( '/<p class="cr-spine__date"><time\b([^>]*)datetime="([^"]+)"([^>]*)>/', $spine_inner, $visible );
 			return 1 === count( $a['items'] ?? array() )
 				&& isset( $entry_a['properties']['url'], $entry_a['properties']['published'], $entry_a['properties']['author'][0]['type'] )
+				&& $expected_published === ( $entry_a['properties']['published'][0] ?? '' )
+				&& 1 === substr_count( $spine_inner, 'class="dt-published"' )
+				&& 0 === preg_match( '/<p class="cr-spine__date"><time\b[^>]*class="[^"]*\bdt-published\b/i', $spine_inner )
+				&& isset( $visible[2] )
+				&& 1 === preg_match( '/^\d{4}-\d{2}-\d{2}$/', $visible[2] )
 				&& in_array( 'h-card', $entry_a['properties']['author'][0]['type'], true )
 				&& in_array( 'h-cite', $play_of_a['type'] ?? array(), true )
 				&& 'https://boardgamegeek.com/boardgame/9990001' === $uid_a
