@@ -605,7 +605,9 @@ function single_cabinet_html( \WP_Post $post, array $facts ): string {
 		? '<section class="cr-cabinet__review"><h2 class="cr-cabinet__review-title">' . esc_html__( 'Review', 'courtneyr-child' ) . '</h2><div class="cr-cabinet__review-body p-content">' . wp_kses_post( $review ) . '</div></section>'
 		: '';
 
-	$sheet = '<div class="cr-cabinet__sheet"><dl class="cr-cabinet__record">' . $rows . '</dl>' . $links . $review . '</div>';
+	$paper = '' === $rows ? '' : '<dl class="cr-cabinet__record">' . $rows . '</dl>';
+	$paper = '' === $paper . $links ? '' : '<div class="cr-cabinet__paper">' . $paper . $links . '</div>';
+	$sheet = '<div class="cr-cabinet__sheet">' . $paper . $review . '</div>';
 	return $entry . '<article class="cr-cabinet cr-cabinet--single h-cite u-play-of" data-pkiw-play-group="video">' . $body . $sheet . uid_html( $facts ) . '</article>';
 }
 
