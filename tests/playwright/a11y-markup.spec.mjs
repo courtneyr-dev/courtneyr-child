@@ -96,12 +96,15 @@ const WATCH_STREAM = process.env.CR_WATCH_STREAM_PATH || '/stream/'; // a Stream
 const LISTEN_SINGLE = process.env.CR_LISTEN_SINGLE_PATH || '/2026/07/06/american-obituary/'; // a listen post with the listen card, a rating and a listen URL; dev 37754
 const LISTEN_ARCHIVE = process.env.CR_LISTEN_ARCHIVE_PATH || '/kind/listen/'; // listen archive with at least one listen post (PKIW #226)
 const WATCH_ARCHIVE = process.env.CR_WATCH_ARCHIVE_PATH || '/kind/watch/'; // watch archive page 1 (PKIW #227)
+const PLAY_ARCHIVE = process.env.CR_PLAY_ARCHIVE_PATH || '/kind/play/'; // play archive, sectioned into video, board and empty play objects (PKIW #232, #237)
+const READ_ARCHIVE = process.env.CR_READ_ARCHIVE_PATH || '/kind/read/'; // read archive, grouped into shelf books (PKIW #234)
+const READ_AZ_ARCHIVE = READ_ARCHIVE + '?pkiw_read_order=author'; // read archive in A-Z order, which stays unsectioned
 const COMICS_ARCHIVE = process.env.CR_COMICS_ARCHIVE_PATH || '/kind/comics/'; // comics archive with at least one comic read (PKIW #228)
 const COMIC_SINGLE = process.env.CR_COMIC_SINGLE_PATH || '/2026/09/06/anzuelo/'; // a comic read (comic-card) still being read, with a cover and a stored start date
 const RECIPE_ARCHIVE = process.env.CR_RECIPE_ARCHIVE_PATH || '/kind/recipe/'; // recipe archive (PKIW #229); its tests skip on a site with no recipe posts
 const EAT_ARCHIVE = process.env.CR_EAT_ARCHIVE_PATH || '/kind/eat/'; // eat archive (PKIW #230); its test skips on a site with fewer than three eat posts
 const DRINK_ARCHIVE = process.env.CR_DRINK_ARCHIVE_PATH || '/kind/drink/'; // drink archive (PKIW #230); its test skips on a site with fewer than three drink posts
-const KIND_ARCHIVE_HEADERS = ( process.env.CR_KIND_ARCHIVE_HEADER_PATHS || '/kind/comics/,/kind/watch/,/kind/listen/,/kind/recipe/,/kind/eat/,/kind/drink/,/kind/note/' ).split( ',' ); // every dressed kind archive and one on the generic template; a path with no posts is skipped
+const KIND_ARCHIVE_HEADERS = ( process.env.CR_KIND_ARCHIVE_HEADER_PATHS || '/kind/comics/,/kind/watch/,/kind/listen/,/kind/recipe/,/kind/eat/,/kind/drink/,/kind/note/,/kind/play/,/kind/read/' ).split( ',' ); // every dressed kind archive and one on the generic template; a path with no posts is skipped
 const EAT_SINGLE = process.env.CR_EAT_SINGLE_PATH || '/2026/09/25/mushroom-tacos/'; // an eat post with the eat card, a photo and public coordinates (local fixture)
 const DRINK_SINGLE = process.env.CR_DRINK_SINGLE_PATH || '/2026/09/24/honey-lavender-latte/'; // a drink post with the drink card, a photo and public coordinates (local fixture)
 const ORDER_HIDDEN = ( process.env.CR_ORDER_HIDDEN_PATHS || '/2026/08/05/salmon-sashimi/,/2026/08/07/spicy-margarita/' ).split( ',' ); // eat and drink posts whose location privacy is private (local fixtures)
@@ -119,6 +122,12 @@ const RECIPE_PLAIN_SINGLE = process.env.CR_RECIPE_PLAIN_SINGLE_PATH || '/2026/08
 const RECIPE_STREAM = process.env.CR_RECIPE_STREAM_PATH || '/stream/'; // a Stream page that shows a recipe post (local fixture); the test skips when it shows none
 const COMIC_TRAILING = process.env.CR_COMIC_TRAILING_PATH || ''; // a comic read with body text after the card (no such post on dev: set it to run the test)
 const AUTOEMBED_CAPTIONED_POST = process.env.CR_AUTOEMBED_CAPTIONED_POST_PATH || '/?p=3010'; // bare YouTube URL whose video has a registered VTT (_cr_youtube_id)
+const BOARD_SINGLE = process.env.CR_BOARD_SINGLE_PATH || ''; // B1 Forest Paths; discovered by exact title when unset
+const BOARD_POSTER_SINGLE = process.env.CR_BOARD_POSTER_SINGLE_PATH || ''; // B15 Poster Problem; skipped when absent
+const PLAY_CONTROL = process.env.CR_PLAY_CONTROL_PATH || ''; // C1 watch post with play meta; only checked when explicitly supplied
+const VIDEO_SINGLE = process.env.CR_VIDEO_SINGLE_PATH || ''; // V1 Starbound Courier; discovered by exact title when unset
+const READ_SINGLE = process.env.CR_READ_SINGLE_PATH || ''; // read single; discovered from the read archive when unset
+const READ_ABANDONED = process.env.CR_READ_ABANDONED_PATH || ''; // abandoned read fixture; skipped when unset
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
 const DARK_FIXTURES = [
 	[ process.env.CR_RESUME_PAGE_PATH || '/?page_id=37840', 'code', 'beta-rc' ], // inline code inside page content
@@ -135,6 +144,71 @@ async function postNavLinks( page ) {
 		label: ( link.querySelector( '.post-navigation-link__label' )?.textContent || '' ).trim(),
 		href: link.href,
 	} ) ) );
+}
+
+// W1 fixtures are sparse locally and full on dev. Find a named fixture by the
+// post title the plan names, and never run a fixture assertion against a
+// different post.
+async function fixturePath( page, title, envPath ) {
+	if ( envPath ) {
+		return envPath;
+	}
+	const response = await page.request.get( `/wp-json/wp/v2/posts?search=${ encodeURIComponent( title ) }&per_page=20&_fields=link,title` );
+	if ( ! response.ok() ) {
+		return null;
+	}
+	const posts = await response.json();
+	for ( const post of posts ) {
+		const rendered = await page.evaluate( ( html ) => {
+			const textarea = document.createElement( 'textarea' );
+			textarea.innerHTML = html || '';
+			return textarea.value.replace( /\s+/g, ' ' ).trim();
+		}, post.title?.rendered || '' );
+		if ( rendered === title ) {
+			return new URL( post.link ).pathname;
+		}
+	}
+	return null;
+}
+
+// The plugin's hidden entry-props can contain tabindex="-1" h-card links.
+// Served link-count assertions count only visible, focusable destinations.
+async function focusableLinks( locator ) {
+	return locator.locator( 'a[href]' ).evaluateAll( ( links ) => links.filter( ( link ) => {
+		if ( link.closest( '[hidden]' ) || link.getAttribute( 'tabindex' ) === '-1' ) {
+			return false;
+		}
+		const box = link.getBoundingClientRect();
+		const style = getComputedStyle( link );
+		return box.width > 0 && box.height > 0 && 'hidden' !== style.visibility && 'none' !== style.display;
+	} ).map( ( link ) => ( { href: link.href, text: link.textContent.replace( /\s+/g, ' ' ).trim() } ) ) );
+}
+
+async function kindCount( page, slug ) {
+	const response = await page.request.get( `/wp-json/wp/v2/kind?slug=${ encodeURIComponent( slug ) }` );
+	if ( ! response.ok() ) {
+		return null;
+	}
+	const terms = await response.json();
+	return Number( terms[0]?.count ?? 0 );
+}
+
+async function archiveDescription( page, slug ) {
+	const response = await page.request.get( `/wp-json/wp/v2/kind?slug=${ encodeURIComponent( slug ) }` );
+	if ( ! response.ok() ) {
+		return '';
+	}
+	const terms = await response.json();
+	return ( terms[0]?.description || '' ).replace( /<[^>]+>/g, ' ' ).replace( /\s+/g, ' ' ).trim();
+}
+
+function fixtureSkippedPart( description ) {
+	test.info().annotations.push( { type: 'skipped-part', description } );
+}
+
+async function waitForCoverFallback( locator ) {
+	await expect( locator ).toHaveClass( /cr-cover--failed/, { timeout: 5000 } );
+	await expect( locator.locator( 'img' ) ).toHaveCount( 0 );
 }
 
 // The body classes of the page at href, read from a GET (no navigation).
@@ -2980,3 +3054,625 @@ test( 'every check-in card on the Stream puts its title right after the kind lab
 	}
 } );
 
+// ---------------------------------------------------------------------------
+// Play archive (W1-TPLAY, PKIW #232, #237)
+// ---------------------------------------------------------------------------
+
+// W1-TPLAY zero-post proof: an empty play archive should still have the
+// dressed archive header, but no shelf boards, Staff Picks or pager because
+// those would imply placeholder content.
+test( 'the play archive with no plays is a bare header and the no-results copy (PKIW #232, #237)', async ( { page } ) => {
+	await page.goto( PLAY_ARCHIVE, { waitUntil: 'load' } );
+	const count = await kindCount( page, 'play' );
+	const hasContent = await page.locator( 'main .pkiw-group, main li.wp-block-post' ).count();
+	test.skip( hasContent > 0 || count !== 0, `play archive is not empty: REST count ${ count }, rendered content ${ hasContent }` );
+
+	await expect( page.locator( 'h1' ) ).toHaveText( 'Play' );
+	const h1 = page.locator( 'h1.cr-cutout' );
+	await expect( h1.locator( '.cr-cutout__tiles' ) ).toHaveAttribute( 'aria-hidden', 'true' );
+	await expect( h1.locator( '.cr-cutout__tile' ) ).toHaveCount( 4 );
+	const rotations = await h1.locator( '.cr-cutout__tile' ).evaluateAll( ( tiles ) => tiles.map( ( tile ) => [ ...tile.classList ].find( ( className ) => /^is-r\d+$/.test( className ) ) || '' ) );
+	for ( let i = 1; i < rotations.length; i++ ) {
+		expect( rotations[i], `tile ${ i } does not repeat ${ rotations[i - 1] }` ).not.toBe( rotations[i - 1] );
+	}
+	const identity = page.locator( '.cr-archive-identity' );
+	await expect( identity.locator( '.cr-archive-identity__glyph' ) ).toHaveAttribute( 'aria-hidden', 'true' );
+	expect( await identity.locator( 'a, button, [tabindex]:not([tabindex="-1"])' ).count(), 'decorative identity has no focusable controls' ).toBe( 0 );
+	await expect( page.locator( '.cr-archive__description' ) ).toHaveText( await archiveDescription( page, 'play' ) );
+	await expect( page.locator( '.cr-archive-stream__empty' ) ).toHaveText( 'Nothing here yet. Browse every kind and format below, or jump to the Stream.' );
+	await expect( page.locator( 'nav.cr-browse-all' ) ).toHaveCount( 1 );
+	expect( await page.locator( '.pkiw-staff-picks, main h2:not(nav.cr-browse-all h2), nav[aria-label="Pagination"]' ).count(), 'no shelf-only sections on the empty archive' ).toBe( 0 );
+	const pseudo = await page.evaluate( () => [ '.cr-play', '.cr-play__query', '.cr-shelf-boards .pkiw-group > .pkiw-group__items' ].flatMap( ( selector ) => [ ...document.querySelectorAll( selector ) ].flatMap( ( el ) => [ getComputedStyle( el, '::before' ).content, getComputedStyle( el, '::after' ).content ] ) ) );
+	expect( pseudo.every( ( value ) => 'none' === value ), `empty archive pseudo content: ${ pseudo.join( ', ' ) }` ).toBe( true );
+} );
+
+// W1-TPLAY paging proof: the combined seeded set is 27 published plays, so
+// the archive engine must split at 12 lines without moving the pager before
+// the last section.
+test( 'the play archive pages 12, 12 and 3 with repeated section headings and the pager after the last section (PKIW #232, #237)', async ( { page } ) => {
+	await page.goto( PLAY_ARCHIVE, { waitUntil: 'load' } );
+	const count = await kindCount( page, 'play' );
+	test.skip( count !== 27, `play fixture count is ${ count }, not the 27-post W1 plan set` );
+
+	const pages = [
+		[ PLAY_ARCHIVE, 12, [ 'Video games', 'Game Night' ] ],
+		[ `${ PLAY_ARCHIVE }page/2/`, 12, [ 'Game Night' ] ],
+		[ `${ PLAY_ARCHIVE }page/3/`, 3, [ 'Game Night', 'Play' ] ],
+	];
+	let total = 0;
+	for ( const [ path, expected, headings ] of pages ) {
+		await page.goto( path, { waitUntil: 'load' } );
+		const items = page.locator( '.pkiw-group__items > li' );
+		const itemCount = await items.count();
+		total += itemCount;
+		expect( itemCount, `${ path } item count` ).toBe( expected );
+		expect( ( await page.locator( 'main .pkiw-group > .pkiw-group__heading' ).allTextContents() ).map( ( text ) => text.trim() ), `${ path } section headings` ).toEqual( headings );
+		const order = await page.evaluate( () => {
+			const groups = [ ...document.querySelectorAll( 'main .pkiw-group' ) ];
+			const pager = document.querySelector( 'main nav[aria-label="Pagination"]' );
+			return Boolean( groups.length && pager && groups.at( -1 ).compareDocumentPosition( pager ) & Node.DOCUMENT_POSITION_FOLLOWING );
+		} );
+		expect( order, `${ path } pager follows the last section` ).toBe( true );
+	}
+	expect( total, 'page totals match REST count' ).toBe( count );
+
+	await page.goto( PLAY_ARCHIVE, { waitUntil: 'load' } );
+	await expect( page.locator( '.pkiw-staff-picks h2' ) ).toHaveCount( 1 );
+	const picks = ( await page.locator( '.pkiw-staff-picks__title' ).allTextContents() ).map( ( text ) => text.trim() );
+	expect( picks.slice( 0, 3 ), 'Staff Picks order' ).toEqual( [ 'Forest Paths', 'Orbit Table', 'Meadow Songs' ] );
+	for ( const title of [ 'Backyard Tag', 'Rainy Day Charades' ] ) {
+		const item = page.locator( `.pkiw-group__items > li:has-text("${ title }")` ).first();
+		if ( 0 === await item.count() ) {
+			fixtureSkippedPart( `no empty-group fixture (${ title }) on page 1` );
+			continue;
+		}
+		expect( await focusableLinks( item ), `${ title } has one focusable link` ).toHaveLength( 1 );
+		expect( ( await item.locator( '.pk-excerpt, .pk-stream-date, .pk-kindlabel' ).allTextContents() ).join( '' ).trim(), `${ title } has no card chrome text` ).toBe( '' );
+	}
+	const badText = await page.locator( 'main .cr-play' ).evaluate( ( root ) => {
+		const allowed = [
+			/^Staff Picks$/, /^Video games$/, /^Game Night$/, /^Play$/, /^Rated \d(?:\.5)? of 5$/, /^\d+(?:\.5)? hours played$/, /^1 hour played$/,
+			/^(Previous|Next|Page \d+|\d+)$/, /^[A-Z][a-z]+ \d{1,2}, \d{4}$/,
+		];
+		const walker = document.createTreeWalker( root, NodeFilter.SHOW_TEXT, { acceptNode( node ) {
+			const parent = node.parentElement;
+			if ( ! parent || parent.closest( 'script, style, [hidden], [aria-hidden="true"], .cr-archive__description' ) ) return NodeFilter.FILTER_REJECT;
+			const text = node.textContent.replace( /\s+/g, ' ' ).trim();
+			return text ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+		} } );
+		const misses = [];
+		for ( let node = walker.nextNode(); node; node = walker.nextNode() ) {
+			const text = node.textContent.replace( /\s+/g, ' ' ).trim();
+			if ( node.parentElement.closest( '.pk-title, .pkiw-staff-picks__title' ) ) continue;
+			if ( ! allowed.some( ( pattern ) => pattern.test( text ) ) ) misses.push( text );
+		}
+		return misses;
+	} );
+	expect( badText, `unexpected visible play archive text: ${ badText.join( ' | ' ) }` ).toEqual( [] );
+} );
+
+// W1-TPLAY generic object proof: every archive item is one linked title and
+// grouped play objects retain hidden microformat data after their visible
+// Stream metadata is removed.
+test( 'every item on the play archive is one object with one link and keeps its microformat data (PKIW #232, #237)', async ( { page } ) => {
+	await page.goto( PLAY_ARCHIVE, { waitUntil: 'load' } );
+	const items = page.locator( '.pkiw-group__items > li' );
+	test.skip( 0 === await items.count(), 'no play archive items on this site' );
+	for ( const item of await items.all() ) {
+		expect( await focusableLinks( item ), 'one focusable link per play item' ).toHaveLength( 1 );
+		await expect( item.locator( 'h3:has(a[href])' ) ).toHaveCount( 1 );
+		if ( await item.locator( '[data-pkiw-play-group="board"], .cr-cabinet' ).count() ) {
+			await expect( item.locator( '.u-play-of .u-uid' ) ).toHaveAttribute( 'value', /\S/ );
+			await expect( item.locator( '.dt-published' ) ).toHaveCount( 1 );
+			await expect( item.locator( '.p-author.h-card' ) ).toHaveCount( 1 );
+			await expect( item.locator( '.pk-sub, .pk-stars, .pk-meta, .pk-note, .pk-kindlabel, .pk-stream-date, .pk-excerpt' ) ).toHaveCount( 0 );
+		}
+	}
+	await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
+	const skipped = await page.locator( 'main :is(h1,h2,h3,h4,h5,h6)' ).evaluateAll( ( headings ) => headings.map( ( h ) => Number( h.tagName.slice( 1 ) ) ).some( ( level, index, levels ) => index > 0 && level > levels[index - 1] + 1 ) );
+	expect( skipped, 'heading levels do not skip' ).toBe( false );
+} );
+
+// W1-TPLAY paint proof: the served objects must keep flat palette paper,
+// meet AA text contrast, and avoid legacy W1 mockup colors.
+test( 'the play archive paper holds AA contrast and no spine, cabinet or Staff Picks box uses a gradient, a blur or a banned colour (PKIW #232, #237)', async ( { page } ) => {
+	await page.goto( PLAY_ARCHIVE, { waitUntil: 'load' } );
+	const objects = page.locator( '.cr-spine, .cr-cabinet, .pkiw-staff-picks__box' );
+	test.skip( 0 === await objects.count(), 'no spine, cabinet or Staff Picks box on the play archive' );
+	const failures = await objects.evaluateAll( ( els ) => {
+		const rgb = ( value ) => ( value.match( /\d+(?:\.\d+)?/g ) || [] ).slice( 0, 3 ).map( Number ).join( ',' );
+		const lum = ( value ) => rgb( value ).split( ',' ).map( Number ).map( ( n ) => n / 255 ).map( ( n ) => n <= 0.03928 ? n / 12.92 : ( ( n + 0.055 ) / 1.055 ) ** 2.4 ).reduce( ( sum, n, i ) => sum + n * [ 0.2126, 0.7152, 0.0722 ][i], 0 );
+		const contrast = ( a, b ) => ( Math.max( lum( a ), lum( b ) ) + 0.05 ) / ( Math.min( lum( a ), lum( b ) ) + 0.05 );
+		const opaqueBg = ( el ) => {
+			for ( let node = el; node; node = node.parentElement ) {
+				const bg = getComputedStyle( node ).backgroundColor;
+				if ( ! /rgba?\(\s*0\s*,\s*0\s*,\s*0\s*(?:,\s*0\s*)?\)/.test( bg ) && ! bg.endsWith( ', 0)' ) ) return bg;
+			}
+			return 'rgb(255,255,255)';
+		};
+		const probe = document.createElement( 'span' );
+		probe.style.backgroundColor = 'var(--cr-glaucous)';
+		document.body.append( probe );
+		const glaucous = rgb( getComputedStyle( probe ).backgroundColor );
+		probe.remove();
+		const banned = new Set( [ '93,114,163', '159,176,216', '221,227,240' ] );
+		return els.flatMap( ( el ) => {
+			const cs = getComputedStyle( el );
+			const bad = [];
+			if ( /gradient\(/i.test( cs.backgroundImage ) ) bad.push( 'gradient' );
+			if ( 'none' !== cs.backdropFilter || 'none' !== cs.filter ) bad.push( 'filter' );
+			for ( const node of [ el, ...el.querySelectorAll( '*' ) ] ) {
+				const ns = getComputedStyle( node );
+				for ( const value of [ ns.color, ns.backgroundColor, ns.borderTopColor, ns.borderRightColor, ns.borderBottomColor, ns.borderLeftColor ] ) {
+					if ( banned.has( rgb( value ) ) ) bad.push( `banned ${ value }` );
+				}
+			}
+			if ( el.classList.contains( 'cr-spine' ) ) {
+				const title = el.querySelector( '.pk-title' );
+				if ( title && contrast( getComputedStyle( title ).color, opaqueBg( title ) ) < 4.5 ) bad.push( 'low spine contrast' );
+				if ( rgb( cs.backgroundColor ) === glaucous ) bad.push( 'glaucous spine' );
+			}
+			return bad.map( ( reason ) => `${ el.className }: ${ reason }` );
+		} );
+	} );
+	expect( failures, failures.join( ' | ' ) ).toEqual( [] );
+} );
+
+// ---------------------------------------------------------------------------
+// Board and video objects (W1-TBOARD, W1-TVIDEO, PKIW #232, #237)
+// ---------------------------------------------------------------------------
+
+// W1-TBOARD archive proof: a board spine is title plus date only, with the
+// date in its accessible name when duplicate titles need disambiguation.
+test( 'board spines are one linked object each: an h3, a date-only time, no rating, review or links (PKIW #232)', async ( { page } ) => {
+	await page.goto( PLAY_ARCHIVE, { waitUntil: 'load' } );
+	const spines = page.locator( 'article.cr-spine' );
+	test.skip( 0 === await spines.count(), 'no board spines on the play archive' );
+	const names = [];
+	for ( const spine of await spines.all() ) {
+		expect( await focusableLinks( spine ), 'one focusable link per spine' ).toHaveLength( 1 );
+		await expect( spine.locator( 'h3.pk-title' ) ).toHaveCount( 1 );
+		const visibleDate = spine.locator( 'time[datetime]:not(.dt-published)' );
+		await expect( visibleDate ).toHaveCount( 1 );
+		await expect( visibleDate ).toHaveAttribute( 'datetime', /^\d{4}-\d{2}-\d{2}$/ );
+		expect( ( await visibleDate.textContent() ).trim().length, 'visible spine date' ).toBeGreaterThan( 0 );
+		await expect( spine.locator( 'time.dt-published' ) ).toHaveCount( 1 );
+		await expect( spine.locator( '.pk-stars, .pk-meta, .pk-note, .pk-kindlabel, .pk-sub, figure.pk-box, dl.pk-facts, .pk-links, section.pk-scorepad' ) ).toHaveCount( 0 );
+		names.push( await spine.locator( 'a' ).first().evaluate( ( link ) => link.getAttribute( 'aria-labelledby' ) ? link.getAttribute( 'aria-labelledby' ).split( /\s+/ ).map( ( id ) => document.getElementById( id )?.textContent.trim() || '' ).join( ' ' ) : link.textContent.trim() ) );
+	}
+	expect( new Set( names ).size, 'accessible names are unique across board spines' ).toBe( names.length );
+	for ( const title of [ 'Locked Box', 'Harbor Lights' ] ) {
+		const spine = page.locator( `article.cr-spine:has-text("${ title }")` ).first();
+		if ( 0 === await spine.count() ) {
+			fixtureSkippedPart( `no board fixture (${ title }) on the play archive` );
+			continue;
+		}
+		expect( ( await spine.textContent() ), `${ title } has no rating or review text` ).not.toMatch( /Rated|Review/ );
+	}
+} );
+
+// W1-TBOARD Staff Picks proof: the shelf boxes are painted objects ordered by
+// rating, and a failed cover must become a typographic box instead of a blank.
+test( 'Staff Picks boxes run in rating order, fall back to the typographic box on a 404 cover and carry the shelf paint (PKIW #232)', async ( { page } ) => {
+	await page.goto( PLAY_ARCHIVE, { waitUntil: 'load' } );
+	const picks = page.locator( '.pkiw-staff-picks' );
+	test.skip( 0 === await picks.count(), 'no Staff Picks on the play archive' );
+	await expect( picks.locator( 'h2.pkiw-staff-picks__heading' ) ).toHaveCount( 1 );
+	await expect( picks.locator( 'h2.is-style-cr-tape-label' ) ).toHaveCount( 0 );
+	for ( const item of await picks.locator( '.pkiw-staff-picks__item' ).all() ) {
+		expect( await focusableLinks( item ), 'one focusable Staff Picks link' ).toHaveLength( 1 );
+		await expect( item.locator( '.pkiw-staff-picks__box' ) ).toHaveAttribute( 'data-cr-cover-fallback', '' );
+		const paint = await item.locator( '.pkiw-staff-picks__box' ).evaluate( ( box ) => {
+			const cs = getComputedStyle( box );
+			return [ cs.filter, cs.backdropFilter, cs.backgroundImage ];
+		} );
+		expect( paint, 'Staff Picks boxes use flat paint' ).toEqual( [ 'none', 'none', 'none' ] );
+	}
+	const titles = ( await picks.locator( '.pkiw-staff-picks__title' ).allTextContents() ).map( ( text ) => text.trim() );
+	if ( [ 'Forest Paths', 'Orbit Table', 'Meadow Songs' ].every( ( title ) => titles.includes( title ) ) ) {
+		expect( titles.slice( 0, 3 ), 'fixture Staff Picks order' ).toEqual( [ 'Forest Paths', 'Orbit Table', 'Meadow Songs' ] );
+		const meadow = picks.locator( '.pkiw-staff-picks__item:has-text("Meadow Songs") [data-cr-cover-fallback]' );
+		await waitForCoverFallback( meadow );
+		for ( const title of [ 'Harbor Lanterns', 'Clockwork Harbor', 'Locked Box' ] ) {
+			expect( titles, `${ title } is absent from Staff Picks` ).not.toContain( title );
+		}
+	} else {
+		fixtureSkippedPart( 'no complete B1/B3/B4 Staff Picks fixture set on this site' );
+	}
+	await page.goto( `${ PLAY_ARCHIVE }page/2/`, { waitUntil: 'load' } );
+	if ( await kindCount( page, 'play' ) === 27 ) {
+		await expect( page.locator( '.pkiw-staff-picks' ) ).toHaveCount( 0 );
+	}
+} );
+
+// W1-TBOARD single proof: the theme suppresses duplicate featured imagery
+// while leaving the plugin-owned tabletop facts, score pad and review.
+test( 'a board play single is a tabletop: one h1, one box image, no featured image, a score pad and a Review section (PKIW #232)', async ( { page } ) => {
+	let path = await fixturePath( page, 'Forest Paths', BOARD_SINGLE );
+	if ( ! path ) {
+		await page.goto( PLAY_ARCHIVE, { waitUntil: 'load' } );
+		path = ( await focusableLinks( page.locator( 'article.cr-spine' ).first() ) )[0]?.href;
+	}
+	test.skip( ! path, 'no board fixture (Forest Paths) and no generic board spine on this site' );
+	await page.goto( path, { waitUntil: 'load' } );
+	await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
+	await expect( page.locator( 'main .single-post__featured' ) ).toHaveCount( 0 );
+	const boxImages = page.locator( 'main .pk-card--tabletop .pk-box img' );
+	expect( await boxImages.count(), 'at most one tabletop box image' ).toBeLessThanOrEqual( 1 );
+	if ( await boxImages.count() ) expect( ( await boxImages.first().getAttribute( 'alt' ) ).trim().length, 'box image alt is non-empty' ).toBeGreaterThan( 0 );
+	if ( await page.locator( 'main .pk-scorepad__rating' ).count() ) {
+		expect( await page.locator( 'main' ).locator( 'text=/Rated \\d(?:\\.5)? of 5/' ).count(), 'rating text appears once in main' ).toBe( 1 );
+		await expect( page.locator( 'main .pk-scorepad .pk-stars' ) ).toHaveCount( 1 );
+		await expect( page.locator( 'main .pk-scorepad .pk-stars' ) ).toHaveAttribute( 'aria-hidden', 'true' );
+	}
+	for ( const href of await page.locator( 'main .pk-links a[href]' ).evaluateAll( ( as ) => as.map( ( a ) => ( { href: a.href, text: a.textContent.replace( /\s+/g, ' ' ).trim() } ) ) ) ) {
+		expect( href.text, `${ href.href } has a host label and new-tab hint` ).toMatch( /^[a-z0-9.-]+ .*opens in a new tab/i );
+	}
+	await expect( page.locator( 'main .u-play-of .u-uid' ) ).toHaveAttribute( 'value', /\S/ );
+	if ( path.includes( 'forest-paths' ) || ( await page.locator( 'main h1' ).textContent() ).trim() === 'Forest Paths' ) {
+		await expect( boxImages ).toHaveAttribute( 'alt', 'Forest Paths box' );
+		const rows = await page.locator( 'main .pk-facts .pk-fact' ).evaluateAll( ( rows ) => rows.map( ( row ) => [ row.querySelector( 'dt' )?.textContent.trim(), row.querySelector( 'dd' )?.textContent.replace( /\s+/g, ' ' ).trim(), row.querySelector( 'time' )?.getAttribute( 'datetime' ) || '' ] ) );
+		expect( rows.map( ( row ) => row[0] ), 'Forest Paths fact rows' ).toEqual( expect.arrayContaining( [ 'Platform', 'Status', 'Played', 'Hours' ] ) );
+		expect( rows.find( ( row ) => 'Status' === row[0] )?.[1], 'Forest Paths status' ).toBe( 'Completed' );
+		expect( rows.find( ( row ) => 'Played' === row[0] )?.[2], 'Forest Paths played day' ).toBe( '2026-09-20' );
+		expect( await page.locator( 'main .pk-links a[href="https://example.test/games/forest-paths"]' ).count(), 'one Forest Paths gameUrl' ).toBe( 1 );
+	}
+	const posterPath = await fixturePath( page, 'Poster Problem', BOARD_POSTER_SINGLE );
+	if ( posterPath ) {
+		await page.goto( posterPath, { waitUntil: 'load' } );
+		await expect( page.locator( 'main .pk-box img' ) ).toHaveAttribute( 'alt', 'Box art for Poster Problem' );
+	} else {
+		fixtureSkippedPart( 'no board fixture (Poster Problem) on this site' );
+	}
+} );
+
+// W1-TBOARD asks for the Review heading as an h2 under the page title. The
+// plugin's play-card prints it one level below the card's own title heading
+// when the card prints one (src/blocks/play-card/render.php:97), so the
+// expected level is 3 under a card h2 and 2 when the card prints no title.
+test( 'the Review heading on a board single sits one level below the heading above it (PKIW #232)', async ( { page } ) => {
+	let path = await fixturePath( page, 'Forest Paths', BOARD_SINGLE );
+	if ( ! path ) {
+		await page.goto( PLAY_ARCHIVE, { waitUntil: 'load' } );
+		path = ( await focusableLinks( page.locator( 'article.cr-spine' ).first() ) )[0]?.href;
+	}
+	test.skip( ! path, 'no board fixture (Forest Paths) and no generic board spine on this site' );
+	await page.goto( path, { waitUntil: 'load' } );
+	test.skip( 0 === await page.locator( 'main .pk-scorepad__review' ).count(), 'board single has no Review section' );
+	const cardTitles = await page.locator( 'main article.pk-card--tabletop h2.pk-title' ).count();
+	const level = cardTitles ? 3 : 2;
+	await expect( page.getByRole( 'heading', { name: 'Review', level } ), `Review is an h${ level } with ${ cardTitles } card title h2` ).toHaveCount( 1 );
+	await expect( page.locator( 'main .pk-scorepad__review.p-content, main .pk-scorepad__review .p-content' ) ).toHaveCount( 1 );
+	const follows = await page.evaluate( () => {
+		const heading = document.querySelector( 'main .pk-scorepad__heading' );
+		const body = document.querySelector( 'main .pk-scorepad__review.p-content, main .pk-scorepad__review .p-content' );
+		return Boolean( heading && body && heading.compareDocumentPosition( body ) & Node.DOCUMENT_POSITION_FOLLOWING );
+	} );
+	expect( follows, 'Review body follows its heading' ).toBe( true );
+} );
+
+// W1-TBOARD Stream proof: a board play becomes a score-pad slip on both
+// Stream surfaces, without external game links or review text.
+test( 'the Stream shows a board play as a score-pad slip with one link and no review (PKIW #232)', async ( { page } ) => {
+	let seen = 0;
+	for ( const path of [ STREAM, '/' ] ) {
+		await page.goto( path, { waitUntil: 'load' } );
+		const slips = page.locator( 'article.cr-scorepad' );
+		if ( 0 === await slips.count() ) {
+			fixtureSkippedPart( `no board score-pad slip on ${ path }` );
+			continue;
+		}
+		for ( const slip of await slips.all() ) {
+			seen++;
+			expect( await focusableLinks( slip ), `${ path } one score-pad link` ).toHaveLength( 1 );
+			const parts = await slip.evaluate( ( el ) => [ ...el.children ].map( ( child ) => child.className || child.tagName ).filter( ( value ) => ! String( value ).includes( 'cr-scorepad__thumb' ) ) );
+			// Label, title, platform (when stored), date, rating (when stored): the plan's order.
+			const printed = parts.map( ( name ) => String( name ).match( /cr-scorepad__(label|title|platform|date|rating)\b/ )?.[1] ).filter( Boolean );
+			expect( printed, `${ path } score-pad order` ).toEqual( [ 'label', 'title', 'platform', 'date', 'rating' ].filter( ( part ) => printed.includes( part ) ) );
+			expect( printed.slice( 0, 2 ), `${ path } score-pad starts with the label and title` ).toEqual( [ 'label', 'title' ] );
+			expect( printed, `${ path } score-pad prints its date` ).toContain( 'date' );
+			await expect( slip.locator( '.cr-scorepad__label' ) ).toHaveText( 'Play' );
+			expect( await slip.locator( 'a[href*="boardgamegeek.com"], text=/\\b(BGG|Official|Buy)\\b/' ).count(), `${ path } no external board links` ).toBe( 0 );
+			expect( ( await slip.textContent() ), `${ path } no review text` ).not.toMatch( /Review/ );
+			await expect( slip.locator( '.u-play-of .u-uid' ) ).toHaveAttribute( 'value', /\S/ );
+			if ( ( await slip.textContent() ).includes( 'Forest Paths' ) ) await expect( slip.locator( '.cr-scorepad__rating' ) ).toHaveText( 'Rated 5 of 5' );
+		}
+	}
+	test.skip( 0 === seen, 'no board score-pad slip on the Stream or the front page: seed a board play dated today' );
+} );
+
+// W1-TVIDEO archive proof: cabinets are single-link objects, and the first
+// image-bearing cabinets load eagerly because they sit above the fold.
+test( 'video cabinets are one linked object each with a glyph or a screen, and the first three load first (PKIW #237)', async ( { page } ) => {
+	await page.goto( PLAY_ARCHIVE, { waitUntil: 'load' } );
+	const cabinets = page.locator( 'article.cr-cabinet' );
+	test.skip( 0 === await cabinets.count(), 'no video cabinets on the play archive' );
+	let imageRank = 0;
+	for ( const cabinet of await cabinets.all() ) {
+		expect( await focusableLinks( cabinet ), 'one focusable cabinet link' ).toHaveLength( 1 );
+		await expect( cabinet.locator( '.pk-sub, .pk-stars, .pk-meta, .pk-note, .pk-kindlabel' ) ).toHaveCount( 0 );
+		const image = cabinet.locator( '.cr-cabinet__screen img' );
+		if ( await image.count() ) {
+			await expect( image ).toHaveAttribute( 'alt', '' );
+			if ( imageRank < 3 ) {
+				await expect( image ).toHaveAttribute( 'loading', 'eager' );
+				await expect( image ).toHaveAttribute( 'fetchpriority', 'high' );
+			} else {
+				await expect( image ).toHaveAttribute( 'loading', 'lazy' );
+			}
+			imageRank++;
+		} else {
+			await expect( cabinet.locator( '.cr-cabinet__glyph[aria-hidden="true"]' ) ).toBeVisible();
+			await expect( cabinet.locator( '.cr-cabinet__screen:not(.cr-cabinet__screen--empty):empty' ) ).toHaveCount( 0 );
+		}
+		if ( await cabinet.locator( '.cr-cabinet__score' ).count() ) {
+			await expect( cabinet.locator( '.cr-cabinet__score' ) ).toHaveText( /^(?:1 hour|\d+(?:\.5)? hours) played$/ );
+		}
+	}
+	const nightNames = await page.locator( 'article.cr-cabinet:has-text("Night Shift") a' ).evaluateAll( ( links ) => links.map( ( link ) => link.getAttribute( 'aria-labelledby' ) || link.textContent.trim() ) );
+	if ( nightNames.length >= 2 ) expect( new Set( nightNames ).size, 'Night Shift duplicate names differ' ).toBe( nightNames.length );
+	else fixtureSkippedPart( 'no duplicate Night Shift video fixtures on this site' );
+	if ( PLAY_CONTROL ) {
+		await page.goto( PLAY_CONTROL, { waitUntil: 'load' } );
+		await expect( page.locator( 'main .cr-cabinet, main .cr-cartridge, main .cr-scorepad, main .cr-spine' ), 'C1 watch post with play meta is not routed as play' ).toHaveCount( 0 );
+	} else {
+		fixtureSkippedPart( 'CR_PLAY_CONTROL_PATH unset' );
+	}
+} );
+
+// W1-TVIDEO single proof: the video cabinet lives inside the h-entry and
+// restores hidden microformats after the template header is replaced.
+test( 'a video play single is a cabinet and record sheet, one h1, the hours once, and the microformat data restored (PKIW #237)', async ( { page } ) => {
+	const path = await fixturePath( page, 'Starbound Courier', VIDEO_SINGLE );
+	test.skip( ! path, 'no video fixture (Starbound Courier) on this site: seed the plan set or set CR_VIDEO_SINGLE_PATH' );
+	await page.goto( path, { waitUntil: 'load' } );
+	await expect( page.locator( 'main h1' ) ).toHaveText( 'Starbound Courier' );
+	expect( await page.locator( 'main' ).getByText( /hours played/ ).count(), 'hours appears once' ).toBe( 1 );
+	expect( await page.locator( '.cr-cabinet__record dt' ).allTextContents(), 'record row order' ).toEqual( expect.arrayContaining( [ 'Platform', 'Status', 'Rating', 'Played' ] ) );
+	expect( await page.locator( 'main' ).getByText( 'Rated 4 of 5' ).count(), 'one video rating' ).toBe( 1 );
+	await expect( page.locator( '.cr-cabinet__label' ) ).toHaveAttribute( 'aria-hidden', 'true' );
+	await expect( page.locator( '.h-entry .cr-cabinet--single.u-play-of' ) ).toHaveCount( 1 );
+	await expect( page.locator( '.h-entry .cr-cabinet__entry .dt-published, .h-entry .cr-cabinet__entry .p-name, .h-entry .cr-cabinet__entry .p-author.h-card' ) ).toHaveCount( 3 );
+	await expect( page.locator( '.cr-cabinet--single.u-play-of .p-name, .cr-cabinet--single.u-play-of .u-uid' ) ).toHaveCount( 2 );
+	for ( const [ title, assertion ] of [
+		[ 'Clockwork Harbor', async () => {
+			expect( await page.locator( 'main' ).getByText( /hours played|Rated/ ).count(), 'Clockwork Harbor no score text' ).toBe( 0 );
+			await expect( page.locator( '.cr-cabinet__glyph' ) ).toBeVisible();
+		} ],
+		[ 'Copper Kite', async () => {
+			await expect( page.locator( '.cr-cabinet__fact--platform, .cr-cabinet__review' ) ).toHaveCount( 0 );
+		} ],
+		[ 'Lantern Drift', async () => {
+			await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
+			await expect( page.locator( '.cr-cabinet' ) ).toHaveCount( 0 );
+		} ],
+	] ) {
+		const extra = await fixturePath( page, title, '' );
+		if ( ! extra ) {
+			fixtureSkippedPart( `no video fixture (${ title }) on this site` );
+			continue;
+		}
+		await page.goto( extra, { waitUntil: 'load' } );
+		await assertion();
+	}
+	for ( const [ title, env ] of [ [ 'Forest Paths', BOARD_SINGLE ], [ 'Backyard Tag', '' ] ] ) {
+		const other = await fixturePath( page, title, env );
+		if ( other ) {
+			await page.goto( other, { waitUntil: 'load' } );
+			await expect( page.locator( 'main .cr-cabinet--single' ), `${ title } is not a video cabinet` ).toHaveCount( 0 );
+		}
+	}
+} );
+
+// W1-TVIDEO Stream proof: cartridges keep one stretched title link and no
+// star, note or meta chrome from the full play card.
+test( 'the Stream shows a video play as a cartridge with one link and no stars, notes or meta (PKIW #237)', async ( { page } ) => {
+	await page.goto( STREAM, { waitUntil: 'load' } );
+	const cartridges = page.locator( 'article.cr-cartridge' );
+	test.skip( 0 === await cartridges.count(), `no video cartridge on ${ STREAM }` );
+	for ( const cartridge of await cartridges.all() ) {
+		expect( await focusableLinks( cartridge ), 'one cartridge link' ).toHaveLength( 1 );
+		await expect( cartridge.locator( '.pk-stars, .pk-meta, .pk-note' ) ).toHaveCount( 0 );
+		expect( await cartridge.locator( '.pk-title' ).evaluate( ( title ) => getComputedStyle( title, '::before' ).content ), 'title has no pseudo label' ).toBe( 'none' );
+		await expect( cartridge.locator( '.u-play-of .u-uid' ) ).toHaveAttribute( 'value', /\S/ );
+		const label = cartridge.locator( '.cr-cartridge__label' );
+		if ( await label.locator( 'img' ).count() ) await expect( label ).toHaveAttribute( 'data-cr-cover-fallback', '' );
+	}
+} );
+
+// W1-TVIDEO reflow proof: cartridge and score-pad objects must fit the
+// Stream column at phone, tablet, desktop and 400% zoom widths.
+test( 'video and board play Stream objects have no horizontal scroll at W1 widths (PKIW #232, #237)', async ( { page }, testInfo ) => {
+	test.skip( '1280-light' !== testInfo.project.name, 'runs once, in the 1280-light project' );
+	for ( const width of [ 320, 375, 768, 1440 ] ) {
+		await page.setViewportSize( { width, height: 900 } );
+		await page.goto( STREAM, { waitUntil: 'load' } );
+		test.skip( 0 === await page.locator( 'article.cr-cartridge, article.cr-scorepad' ).count(), `no cartridge or score-pad on ${ STREAM }` );
+		expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ), `${ width }px has no horizontal scroll` ).toBe( 0 );
+	}
+} );
+
+// W1-TVIDEO failed-cover proof: the shared cover-fallback script must remove
+// failed images and expose the glyph on every video surface.
+test( 'a video play cover that fails to load shows the glyph on the screen, the cartridge and the single (PKIW #237)', async ( { page } ) => {
+	const path = await fixturePath( page, 'The Extraordinarily Long Chronicle of the Lighthouse Keeper\'s Third Apprentice: Definitive Edition', '' );
+	test.skip( ! path, 'no video fixture (The Extraordinarily Long Chronicle...) on this site' );
+	for ( const [ surface, url, selector ] of [
+		[ 'archive cabinet', PLAY_ARCHIVE, 'article.cr-cabinet:has-text("The Extraordinarily Long Chronicle") .cr-cabinet__screen' ],
+		[ 'Stream cartridge', STREAM, 'article.cr-cartridge:has-text("The Extraordinarily Long Chronicle") .cr-cartridge__label' ],
+		[ 'single screen', path, '.cr-cabinet--single .cr-cabinet__screen' ],
+	] ) {
+		await page.goto( url, { waitUntil: 'load' } );
+		const box = page.locator( selector ).first();
+		test.skip( 0 === await box.count(), `missing ${ surface } for V4` );
+		await waitForCoverFallback( box );
+		await expect( box.locator( '.cr-cabinet__glyph, .cr-cartridge__glyph' ), `${ surface } glyph visible` ).toBeVisible();
+	}
+} );
+
+// ---------------------------------------------------------------------------
+// Read shelves, single and Stream (W1-TREAD, PKIW #234)
+// ---------------------------------------------------------------------------
+
+// W1-TREAD archive proof: shelf objects reduce a read to book title plus
+// author, while grouped shelves choose face-out or slab shapes.
+test( 'the read archive is a library of shelves: title and author only, one link each, face-out for reading, slabs elsewhere (PKIW #234)', async ( { page } ) => {
+	await page.goto( READ_ARCHIVE, { waitUntil: 'load' } );
+	const books = page.locator( 'article.cr-shelf-book' );
+	test.skip( 0 === await books.count(), 'no read shelf books on this site' );
+	for ( const book of await books.all() ) {
+		expect( await focusableLinks( book ), 'one shelf-book link' ).toHaveLength( 1 );
+		const lines = await book.evaluate( ( el ) => el.innerText.split( /\n+/ ).map( ( line ) => line.trim() ).filter( Boolean ) );
+		const title = ( await book.locator( '.pk-title a' ).textContent() ).trim();
+		const author = ( await book.locator( '.cr-shelf-book__author, .p-author' ).first().textContent() || '' ).trim();
+		// innerText reflects the shelf CSS text-transform on authors, while
+		// textContent preserves the stored author casing.
+		expect( lines.map( ( line ) => line.toLowerCase() ), `${ title } visible shelf text` ).toEqual( ( author ? [ title, author ] : [ title ] ).map( ( line ) => line.toLowerCase() ) );
+		expect( ( await book.textContent() ), `${ title } has no single-only facts` ).not.toMatch( /pages|%|★|of 5|Published|ISBN|Review|↗/ );
+		await expect( book.locator( '.pk-kindlabel, .cr-stamp' ) ).toHaveCount( 0 );
+	}
+	for ( const group of await page.locator( '.cr-read-shelf .pkiw-group' ).all() ) {
+		const heading = ( await group.locator( '.pkiw-group__heading' ).textContent() || '' ).trim();
+		const expected = [ 'Currently Reading', 'To Read' ].includes( heading ) ? 'cr-shelf-book--faceout' : 'cr-shelf-book--slab';
+		const groupBooks = group.locator( 'article.cr-shelf-book' );
+		for ( const className of await groupBooks.evaluateAll( ( els ) => els.map( ( el ) => el.className ) ) ) {
+			expect( className, `${ heading } shape` ).toContain( expected );
+		}
+	}
+	await expect( page.locator( '.cr-read-shelf .pkiw-group__heading' ) ).toHaveCount( await page.locator( '.cr-read-shelf .pkiw-group h2.pkiw-group__heading' ).count() );
+	await expect( page.locator( '.cr-read-shelf article.cr-shelf-book .pk-title:not(h3)' ) ).toHaveCount( 0 );
+	const eager = await page.locator( 'article.cr-shelf-book--faceout img' ).evaluateAll( ( imgs ) => imgs.slice( 0, 4 ).map( ( img ) => img.getAttribute( 'loading' ) ) );
+	if ( eager.length ) expect( eager, 'first face-out cover row loads eagerly' ).toEqual( eager.map( () => 'eager' ) );
+	else fixtureSkippedPart( 'no face-out cover image on this site' );
+
+	await page.goto( READ_AZ_ARCHIVE, { waitUntil: 'load' } );
+	await expect( page.locator( 'article.cr-shelf-book--faceout' ) ).toHaveCount( 0 );
+	await expect( page.locator( 'article.cr-shelf-book .pk-title:not(h2)' ) ).toHaveCount( 0 );
+	const duplicateNames = await page.locator( 'article.cr-shelf-book:has-text("The Quiet Orchard"), article.cr-shelf-book:has-text("Salt and Paper")' ).evaluateAll( ( els ) => els.map( ( el ) => el.querySelector( 'a' )?.getAttribute( 'aria-labelledby' ) || '' ).filter( Boolean ) );
+	if ( duplicateNames.length ) expect( new Set( duplicateNames ).size, 'duplicate read accessible names differ' ).toBe( duplicateNames.length );
+	else fixtureSkippedPart( 'no duplicate-title read fixtures (The Quiet Orchard or Salt and Paper) on this site' );
+} );
+
+// W1-TREAD responsive proof: the archive CSS changes the shelf grid by
+// viewport width without introducing horizontal scroll. Tracks are counted
+// from the computed grid, since a group of two books fills only two cells.
+async function readShelfTracks( page, width, kind ) {
+	await page.setViewportSize( { width, height: 900 } );
+	await page.goto( READ_ARCHIVE, { waitUntil: 'load' } );
+	return page.evaluate( ( shape ) => {
+		const book = document.querySelector( `article.cr-shelf-book--${ shape }` );
+		const list = book?.closest( '.pkiw-group__items' );
+		return {
+			tracks: list ? getComputedStyle( list ).gridTemplateColumns.split( ' ' ).filter( Boolean ).length : 0,
+			scroll: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+		};
+	}, kind );
+}
+
+test( 'read shelf face-out columns hold 4/3/2/2 with no horizontal scroll (PKIW #234)', async ( { page }, testInfo ) => {
+	test.skip( '1280-light' !== testInfo.project.name, 'runs once, in the 1280-light project' );
+	await page.goto( READ_ARCHIVE, { waitUntil: 'load' } );
+	test.skip( 0 === await page.locator( 'article.cr-shelf-book--faceout' ).count(), 'no face-out read shelf books on this site' );
+	for ( const [ width, columns ] of [ [ 1440, 4 ], [ 800, 3 ], [ 375, 2 ], [ 320, 2 ] ] ) {
+		const o = await readShelfTracks( page, width, 'faceout' );
+		expect( o.tracks, `${ width }px face-out columns` ).toBe( columns );
+		expect( o.scroll, `${ width }px no horizontal scroll` ).toBe( 0 );
+	}
+} );
+
+test( 'read shelf slab columns hold 4/2/1/1 with no horizontal scroll (PKIW #234)', async ( { page }, testInfo ) => {
+	test.skip( '1280-light' !== testInfo.project.name, 'runs once, in the 1280-light project' );
+	await page.goto( READ_ARCHIVE, { waitUntil: 'load' } );
+	test.skip( 0 === await page.locator( 'article.cr-shelf-book--slab' ).count(), 'no slab read shelf books on this site: seed finished or abandoned reads' );
+	for ( const [ width, columns ] of [ [ 1440, 4 ], [ 800, 2 ], [ 375, 1 ], [ 320, 1 ] ] ) {
+		const o = await readShelfTracks( page, width, 'slab' );
+		expect( o.tracks, `${ width }px slab columns` ).toBe( columns );
+		expect( o.scroll, `${ width }px no horizontal scroll` ).toBe( 0 );
+	}
+} );
+
+// W1-TREAD contrast proof: slab shelves are flat paper objects, so their
+// visible title and author text must meet AA against that paper.
+test( 'slab text holds 4.5:1 against its paper (PKIW #234)', async ( { page } ) => {
+	await page.goto( READ_ARCHIVE, { waitUntil: 'load' } );
+	const slabs = page.locator( 'article.cr-shelf-book--slab' );
+	test.skip( 0 === await slabs.count(), 'no slab read shelf books on this site' );
+	const failures = await slabs.evaluateAll( ( els ) => {
+		const channels = ( value ) => ( value.match( /\d+(?:\.\d+)?/g ) || [] ).slice( 0, 3 ).map( Number );
+		const lum = ( value ) => channels( value ).map( ( n ) => n / 255 ).map( ( n ) => n <= 0.03928 ? n / 12.92 : ( ( n + 0.055 ) / 1.055 ) ** 2.4 ).reduce( ( sum, n, i ) => sum + n * [ 0.2126, 0.7152, 0.0722 ][i], 0 );
+		const contrast = ( a, b ) => ( Math.max( lum( a ), lum( b ) ) + 0.05 ) / ( Math.min( lum( a ), lum( b ) ) + 0.05 );
+		const bg = ( el ) => {
+			for ( let node = el; node; node = node.parentElement ) {
+				const value = getComputedStyle( node ).backgroundColor;
+				if ( ! value.endsWith( ', 0)' ) && value !== 'rgba(0, 0, 0, 0)' ) return value;
+			}
+			return 'rgb(255,255,255)';
+		};
+		return els.flatMap( ( el ) => [ ...el.querySelectorAll( '.pk-title, .cr-shelf-book__author, .p-author' ) ].map( ( text ) => ( {
+			label: text.textContent.trim(),
+			ratio: contrast( getComputedStyle( text ).color, bg( text ) ),
+		} ) ).filter( ( item ) => item.ratio < 4.5 ).map( ( item ) => `${ item.label }: ${ item.ratio.toFixed( 2 ) }` ) );
+	} );
+	expect( failures, failures.join( ' | ' ) ).toEqual( [] );
+} );
+
+// W1-TREAD single proof: the read single keeps the journal record but drops
+// the old marginal slogans and duplicate featured image.
+test( 'a read single drops the margin asides, shows a since-date and one rating, and hides the featured image (PKIW #234)', async ( { page } ) => {
+	let path = READ_SINGLE;
+	if ( ! path ) {
+		await page.goto( READ_ARCHIVE, { waitUntil: 'load' } );
+		path = ( await focusableLinks( page.locator( 'article.cr-shelf-book' ).first() ) )[0]?.href;
+	}
+	test.skip( ! path, 'no read single fixture on this site: set CR_READ_SINGLE_PATH or seed reads' );
+	await page.goto( path, { waitUntil: 'load' } );
+	await expect( page.locator( 'main .cr-journal__margin, main .single-post__featured, main .cr-book__hand' ) ).toHaveCount( 0 );
+	expect( await page.locator( 'main' ).getByText( 'peek inside' ).count(), 'peek inside copy removed' ).toBe( 0 );
+	const since = page.locator( '.cr-read__status--reading .cr-read__status-when time' );
+	if ( await since.count() ) {
+		await expect( since ).toHaveAttribute( 'datetime', /^\d{4}-\d{2}-\d{2}$/ );
+		const parts = await since.evaluate( ( time ) => ( { iso: time.getAttribute( 'datetime' ), text: time.textContent.trim() } ) );
+		expect( Date.parse( `${ parts.text } UTC` ), `long date ${ parts.text } parses` ).toBe( Date.parse( `${ parts.iso }T12:00:00Z` ) );
+	}
+	const ratings = await page.locator( 'main' ).getByText( /Rated \d(?:\.5)? of 5/ ).count();
+	expect( ratings, 'read rating appears at most once' ).toBeLessThanOrEqual( 1 );
+	const stampFailures = await page.locator( 'main .cr-stamp text' ).evaluateAll( ( texts ) => texts.map( ( text ) => {
+		const box = text.getBBox();
+		const view = text.ownerSVGElement.viewBox.baseVal;
+		return box.x >= view.x && box.y >= view.y && box.x + box.width <= view.x + view.width && box.y + box.height <= view.y + view.height ? '' : text.textContent.trim();
+	} ).filter( Boolean ) );
+	expect( stampFailures, `stamp text outside viewBox: ${ stampFailures.join( ' | ' ) }` ).toEqual( [] );
+	if ( READ_ABANDONED ) {
+		await page.goto( READ_ABANDONED, { waitUntil: 'load' } );
+		await expect( page.locator( 'main .cr-record' ) ).toContainText( 'Abandoned' );
+	} else {
+		fixtureSkippedPart( 'CR_READ_ABANDONED_PATH unset' );
+	}
+} );
+
+// W1-TREAD Stream proof: read cards keep review content, cut progress bars,
+// and print the actual stored rating value as N / 5.
+test( 'the Stream shows a read as a book card with no hand-drawn line or progress bar, and its stored rating as N / 5 (PKIW #234)', async ( { page } ) => {
+	await page.goto( STREAM, { waitUntil: 'load' } );
+	const cards = page.locator( 'article.k-read.cr-book--stream' );
+	test.skip( 0 === await cards.count(), `no read card on ${ STREAM }` );
+	for ( const card of await cards.all() ) {
+		await expect( card.locator( '.cr-book__hand, .pk-progress' ) ).toHaveCount( 0 );
+		if ( await card.locator( '.pk-rating-value' ).count() ) {
+			await expect( card.locator( '.pk-rating-value' ) ).toHaveText( /^\d(?:\.5)? \/ 5$/ );
+		}
+		if ( await card.locator( '.pk-note a' ).count() ) {
+			const clickable = await card.locator( '.pk-note a' ).evaluateAll( ( links ) => links.every( ( link ) => {
+				const box = link.getBoundingClientRect();
+				return box.width > 0 && box.height > 0 && getComputedStyle( link ).pointerEvents !== 'none';
+			} ) );
+			expect( clickable, 'review links stay clickable' ).toBe( true );
+		}
+		const stampFailures = await card.locator( '.cr-stamp text' ).evaluateAll( ( texts ) => texts.map( ( text ) => {
+			const box = text.getBBox();
+			const view = text.ownerSVGElement.viewBox.baseVal;
+			return box.x >= view.x && box.y >= view.y && box.x + box.width <= view.x + view.width && box.y + box.height <= view.y + view.height ? '' : text.textContent.trim();
+		} ).filter( Boolean ) );
+		expect( stampFailures, `Stream stamp text outside viewBox: ${ stampFailures.join( ' | ' ) }` ).toEqual( [] );
+	}
+} );

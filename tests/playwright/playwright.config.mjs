@@ -1,4 +1,4 @@
-// `npm run captures`: five routes at 390 and 1280 px, light and dark, saved to
+// `npm run captures`: seven routes at 390 and 1280 px, light and dark, saved to
 // tests/output/captures/. Needs a running site, so it stays out of CI (docs/testing.md).
 import { defineConfig } from '@playwright/test';
 import { BASE_URL, assertLocalTarget } from '../routes.mjs';

@@ -22,8 +22,8 @@ Versions are pinned exactly in `composer.json` and `package.json`. The repo igno
 | `npm run lint` | Runs the three above; stops at the first failure | no |
 | `npm run lint:php:baseline` | Rewrites the PHPCS baseline from the current results | no |
 | `npm run lint:css:baseline` | Rewrites the stylelint baseline from the current results | no |
-| `npm run evidence` | Loads five routes, saves screenshots and console errors, runs axe; fails on serious or critical violations | no |
-| `npm run captures` | Playwright screenshots of five routes at 390 and 1280 px, light and dark | no |
+| `npm run evidence` | Loads seven routes, saves screenshots and console errors, runs axe; fails on serious or critical violations | no |
+| `npm run captures` | Playwright screenshots of seven routes at 390 and 1280 px, light and dark | no |
 
 ## Baseline policy
 
@@ -85,6 +85,8 @@ Routes, from `tests/routes.mjs`:
 | `single-post` | newest post from `/wp-json/wp/v2/posts` | `CR_SINGLE_POST_PATH` |
 | `kind-archive` | `/kind/mood/` | `CR_KIND_ARCHIVE_PATH` |
 | `story-archive` | `/web-stories/` | `CR_STORY_ARCHIVE_PATH` |
+| `play-archive` | `/kind/play/` | `CR_PLAY_ARCHIVE_PATH` |
+| `read-archive` | `/kind/read/` | `CR_READ_ARCHIVE_PATH` |
 
 The story archive uses `templates/archive-web-story.html`, which needs the Web Stories plugin. The replica doesn't have it active, so `/web-stories/` returns 404 there.
 
@@ -100,7 +102,7 @@ The script is adapted from the SG-10 accessibility harness in the vault, `1. Pro
 
 ### `npm run captures`
 
-Runs `tests/playwright/captures.spec.mjs` in four projects, `390-light`, `390-dark`, `1280-light` and `1280-dark`, which gives 20 full-page PNGs in `tests/output/captures/`, named `<route>-<width>-<scheme>.png`. `CR_CAPTURE_FULL_PAGE=0` captures the viewport only. A test fails when its route doesn't return HTTP 200, and it saves the screenshot first.
+Runs `tests/playwright/captures.spec.mjs` in four projects, `390-light`, `390-dark`, `1280-light` and `1280-dark`, which gives 28 full-page PNGs in `tests/output/captures/`, named `<route>-<width>-<scheme>.png`. `CR_CAPTURE_FULL_PAGE=0` captures the viewport only. A test fails when its route doesn't return HTTP 200, and it saves the screenshot first.
 
 Dark and light mode set both the browser color scheme and the theme's `courtneyr-theme` localStorage value, which the no-flash script reads before first paint.
 

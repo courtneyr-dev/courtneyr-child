@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.106' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.108' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -52,6 +52,10 @@ require_once __DIR__ . '/inc/single-read.php';
 require_once __DIR__ . '/inc/media-shelf.php';
 require_once __DIR__ . '/inc/stream-media.php';
 require_once __DIR__ . '/inc/stream-read.php';
+require_once __DIR__ . '/inc/read-shelf.php';
+require_once __DIR__ . '/inc/play.php';
+require_once __DIR__ . '/inc/play-board.php';
+require_once __DIR__ . '/inc/play-video.php';
 require_once __DIR__ . '/inc/comic.php';
 require_once __DIR__ . '/inc/recipe.php';
 require_once __DIR__ . '/inc/menu.php';
