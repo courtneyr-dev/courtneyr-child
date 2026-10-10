@@ -64,6 +64,10 @@
 	align-items: flex-end;
 }
 
+.cr-play .pkiw-group[data-pkiw-group="board"] > .pkiw-group__items > li.wp-block-post > .pk-card--protected {
+	flex: 1 1 auto;
+}
+
 .cr-spine.pk-card {
 	display: flex;
 	flex: 1 1 auto;
@@ -152,6 +156,7 @@
 	grid-template-columns: minmax(0, 1fr);
 	column-gap: var(--pkiw-shelf-gap-column);
 	row-gap: 0;
+	max-width: none;
 	margin-inline: 0;
 	margin-block: var(--cr-space-md) var(--cr-space-2xl);
 	padding: 1.75rem calc(var(--pkiw-shelf-gap-column) / 2) 0;
@@ -689,6 +694,60 @@ body[class*="kind-"].single .single-post__content .pk-card.pk-card--tabletop {
 	}
 }
 
+/* ---- Archive still life (decision correction: dice, one meeple, the Watch
+   houseplant and at most two tape scraps, here none; CSS background layers
+   only, nothing inside a shelf). Where the page leaves room beside the 1100px
+   wide shelf (two 8rem gutters, from 86rem), the pieces stand in those
+   gutters as in the approved composition. Narrower, they stand in a band
+   above the shelf, as the Listen still life does: the full set down to
+   64rem, dice and houseplant to 40rem, none below. ---- */
+@media (min-width: 40.0625rem) and (max-width: 85.98rem) {
+
+	.cr-archive--play .cr-play::before {
+		content: "";
+		display: block;
+		block-size: 8rem;
+		background:
+			url(../img/cr-houseplant.svg) 4% bottom / auto 100% no-repeat,
+			url(../img/cr-dice.svg) 24% bottom / auto 70% no-repeat,
+			url(../img/cr-meeple.svg) 92% bottom / auto 62% no-repeat;
+		pointer-events: none;
+	}
+}
+
+@media (min-width: 40.0625rem) and (max-width: 64rem) {
+
+	.cr-archive--play .cr-play::before {
+		background:
+			url(../img/cr-houseplant.svg) 4% bottom / auto 100% no-repeat,
+			url(../img/cr-dice.svg) 96% bottom / auto 70% no-repeat;
+	}
+}
+
+@media (min-width: 86rem) {
+
+	.cr-archive--play::before,
+	.cr-archive--play::after {
+		content: "";
+		position: absolute;
+		inset-block: 0;
+		inline-size: calc((100% - var(--wp--style--global--wide-size)) / 2);
+		pointer-events: none;
+	}
+
+	.cr-archive--play::before {
+		inset-inline-start: 0;
+		background: url(../img/cr-dice.svg) 55% 22rem / min(70%, 11rem) auto no-repeat;
+	}
+
+	.cr-archive--play::after {
+		inset-inline-end: 0;
+		background:
+			url(../img/cr-houseplant.svg) 45% 12rem / min(60%, 9rem) auto no-repeat,
+			url(../img/cr-meeple.svg) 50% 29rem / min(40%, 5.5rem) auto no-repeat;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 
 	.cr-spine,
@@ -745,7 +804,10 @@ body[class*="kind-"].single .single-post__content .pk-card.pk-card--tabletop {
 	.pk-card.pk-card--tabletop .pk-scorepad::before,
 	.cr-play .pkiw-staff-picks__item::after,
 	.cr-play .pkiw-staff-picks__heading::before,
-	.cr-play .pkiw-group[data-pkiw-group="board"] > .pkiw-group__heading::before {
+	.cr-play .pkiw-group[data-pkiw-group="board"] > .pkiw-group__heading::before,
+	.cr-archive--play::before,
+	.cr-archive--play::after,
+	.cr-archive--play .cr-play::before {
 		display: none;
 	}
 }
