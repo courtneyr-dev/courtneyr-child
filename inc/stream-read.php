@@ -81,6 +81,34 @@ function with_rating_value( string $html, float $rating ): string {
 }
 
 /**
+ * Remove the first element with a class from a fragment and return it.
+ *
+ * @param string $html       Card HTML, without the element afterwards.
+ * @param string $tag        Tag name.
+ * @param string $class_name Class on the element.
+ * @return string The element's HTML, or '' when absent or unclosed.
+ */
+function take_element( string &$html, string $tag, string $class_name ): string {
+	$open = '/<' . $tag . '\\b[^>]*\\bclass="[^"]*(?<![\\w-])' . preg_quote( $class_name, '/' ) . '(?![\\w-])[^"]*"[^>]*>/';
+	if ( ! preg_match( $open, $html, $m, PREG_OFFSET_CAPTURE ) ) {
+		return '';
+	}
+	$start = (int) $m[0][1];
+	$pos   = $start + strlen( $m[0][0] );
+	$depth = 1;
+	while ( $depth > 0 && preg_match( '/<(\\/?)' . $tag . '\\b[^>]*>/', $html, $t, PREG_OFFSET_CAPTURE, $pos ) ) {
+		$pos    = (int) $t[0][1] + strlen( $t[0][0] );
+		$depth += '/' === $t[1][0] ? -1 : 1;
+	}
+	if ( $depth > 0 ) {
+		return '';
+	}
+	$element = substr( $html, $start, $pos - $start );
+	$html    = substr( $html, 0, $start ) . substr( $html, $pos );
+	return $element;
+}
+
+/**
  * Visible read facts and the finished-day timestamp used by the stamp.
  *
  * @param array<string, mixed> $a      Resolved attributes.
@@ -109,6 +137,25 @@ function facts_line( array $a, string $status, string $label ): array {
 }
 
 /**
+ * The plugin's protected card plus the book author and the password form.
+ *
+ * @param string                    $html Plugin's protected Stream card.
+ * @param \WP_Post                  $post Protected post.
+ * @param array<string, mixed>|null $read Read-card block, when the post has one.
+ * @return string
+ */
+function protected_card( string $html, \WP_Post $post, ?array $read ): string {
+	$end = strrpos( $html, '</article>' );
+	if ( false === $end || false === strpos( $html, 'pk-card--protected' ) ) {
+		return $html;
+	}
+	$author = null !== $read ? trim( (string) ( read_attrs( $post, $read )['authorName'] ?? '' ) ) : '';
+	$insert = ( '' !== $author ? '<p class="pk-sub cr-book__protected-author">' . esc_html( $author ) . '</p>' : '' )
+		. '<div class="cr-book__protected-form">' . get_the_password_form( $post ) . '</div>';
+	return substr( $html, 0, $end ) . $insert . substr( $html, $end );
+}
+
+/**
  * Dress a read stream card as a book.
  *
  * @param string    $html     Rendered stream card.
@@ -131,6 +178,11 @@ function book_card( string $html, array $block, $instance ): string {
 		return $html;
 	}
 	$read = find_read_block( $post );
+	// A password-protected read shows its title link, the stored book
+	// author and the password form, nothing else from the read card.
+	if ( post_password_required( $post ) ) {
+		return protected_card( $html, $post, $read );
+	}
 	if ( null === $read ) {
 		return $html;
 	}
@@ -160,6 +212,8 @@ function book_card( string $html, array $block, $instance ): string {
 	// 1. The stored rating appears beside the plugin's stars.
 	$html = with_rating_value( $html, (float) $a['rating'] );
 	$html = cut_elements( $html, 'div', 'pk-progress' );
+	// The rating and review follow the cover and facts line (contract order).
+	$after_facts = take_element( $html, 'div', 'pk-stars' ) . take_element( $html, 'data', 'p-rating' ) . take_element( $html, 'div', 'pk-note' );
 
 	$meta_pos = strpos( $html, '<div class="pk-meta">' );
 	if ( false === $meta_pos ) {
@@ -182,7 +236,7 @@ function book_card( string $html, array $block, $instance ): string {
 
 	// 3. Facts line: status, pages, and the finished date when there is one.
 	list( $facts, $done_ts ) = facts_line( $a, $status, $label );
-	$insert                  = $cover . '<p class="cr-book__facts">' . esc_html( $facts ) . '</p>';
+	$insert                  = $cover . '<p class="cr-book__facts">' . esc_html( $facts ) . '</p>' . $after_facts;
 
 	// 4. A dated stamp for a finished or abandoned book.
 	if ( $done_ts > 0 ) {

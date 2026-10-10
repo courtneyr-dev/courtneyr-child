@@ -276,9 +276,12 @@ if ( ! in_array( '--html', $argv, true ) ) {
 			$GLOBALS['cr_read_blocks'] = array( array( 'blockName' => 'post-kinds-indieweb/read-card', 'attrs' => array( 'bookTitle' => 'Secret book', 'authorName' => 'Secret author' ) ) );
 			$GLOBALS['cr_read_pictures'][42] = array( 'source' => 'cover', 'attachment_id' => 0, 'url' => 'https://media.test/secret.jpg' );
 			$out = Shelf\shelf_card( cr_shelf_protected_fixture(), cr_shelf_style_block(), new WP_Block( array( 'postId' => 42 ) ) );
-			cr_read_same( 'Private notes', cr_shelf_visible_text( $out ), 'protected title only' );
+			cr_read_same( 'Private notesSecret authorPassword:', cr_shelf_visible_text( $out ), 'protected title, author and form only' );
+			cr_read_contains( 'class="post-password-form"', $out, 'protected password form' );
 			cr_read_not_contains( '<img ', $out, 'protected cover omitted' );
-			cr_read_contains( 'cr-shelf-book__cover--type', $out, 'protected face-out gets type cover' );
+			cr_read_not_contains( 'cr-shelf-book__cover', $out, 'protected has no cover' );
+			cr_read_contains( 'cr-shelf-book--slab', $out, 'protected read lies flat' );
+			cr_read_not_contains( 'Secret book', $out, 'protected book title omitted' );
 
 			$post = cr_shelf_shell_reset();
 			$block = array( 'blockName' => 'post-kinds-indieweb/read-card', 'attrs' => array( 'bookTitle' => 'Micropub Book', 'authorName' => 'Mira Page' ), 'rendered' => cr_shelf_card_fixture( 'Micropub Book', 'Mira Page' ) );
@@ -303,6 +306,21 @@ if ( ! in_array( '--html', $argv, true ) ) {
 				$loads[] = str_contains( $out, 'loading="eager"' );
 			}
 			cr_read_same( array( true, true, true, true, false ), $loads, 'first row eager' );
+
+			cr_shelf_shell_reset();
+			Shelf\reset_page_state();
+			$loads = array();
+			for ( $i = 1; $i <= 5; ++$i ) {
+				$post = new WP_Post( $i, 'Book ' . $i );
+				$GLOBALS['cr_read_post'] = $post;
+				$GLOBALS['cr_read_blocks'] = array( array( 'blockName' => 'post-kinds-indieweb/read-card', 'attrs' => array( 'bookTitle' => 'Book ' . $i ), 'rendered' => cr_shelf_card_fixture( 'Book ' . $i, '' ) ) );
+				if ( 1 < $i ) {
+					$GLOBALS['cr_read_pictures'][ $i ] = array( 'source' => 'cover', 'attachment_id' => 0, 'url' => 'https://media.test/' . $i . '.jpg' );
+				}
+				$out = Shelf\shelf_card( cr_shelf_card_fixture( 'Book ' . $i, '' ), cr_shelf_style_block(), new WP_Block( array( 'postId' => $i ) ) );
+				$loads[] = str_contains( $out, 'loading="eager"' );
+			}
+			cr_read_same( array( false, true, true, true, false ), $loads, 'typographic books count toward the first row' );
 
 			$post = cr_shelf_shell_reset();
 			cr_shelf_group_state( false, true, new Shelf_Group( 'reading', 'reading' ) );

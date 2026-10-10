@@ -53,7 +53,7 @@
 	padding: 0 0 calc(var(--pkiw-shelf-board-size) + 0.75rem);
 }
 
-.cr-read-shelf > .wp-block-query > ul.wp-block-post-template > li::after {
+.cr-read-shelf > .wp-block-query > ul.wp-block-post-template > li.wp-block-post::after {
 	position: absolute;
 	inset-block-end: 0;
 	inset-inline: calc(var(--pkiw-shelf-gap-column) / -2) -100vw;
@@ -73,9 +73,14 @@
 .cr-shelf-book.pk-card {
 	--cr-book-shadow: var(--cr-shadow-hard);
 	position: relative;
+	display: block;
+	width: 100%;
 	min-width: 0;
+	max-width: none;
 	margin: 0;
 	padding: 0;
+	grid-template-columns: none;
+	gap: 0;
 	border: 0;
 	background: none;
 	box-shadow: none;
@@ -161,6 +166,24 @@
 	text-transform: uppercase;
 }
 
+.cr-shelf-book__password {
+	position: relative;
+	z-index: 3;
+	margin-block-start: var(--cr-space-sm);
+	font-size: var(--cr-text-sm);
+	line-height: var(--cr-leading-snug);
+}
+
+.cr-shelf-book__password p {
+	margin: 0 0 var(--cr-space-2xs);
+}
+
+.cr-shelf-book__password input[type="password"] {
+	box-sizing: border-box;
+	max-width: 100%;
+	min-height: 44px;
+}
+
 .cr-shelf-book--faceout .pk-body {
 	display: flex;
 	flex-direction: column;
@@ -206,8 +229,8 @@
 	text-align: start;
 }
 
-.cr-shelf-book__cover--type,
-.cr-shelf-book__cover.cr-cover--failed {
+.cr-shelf-book--faceout .cr-shelf-book__cover--type,
+.cr-shelf-book--faceout .cr-shelf-book__cover.cr-cover--failed {
 	background: var(--cr-periwinkle);
 	color: var(--cr-russian-violet);
 }
@@ -219,7 +242,8 @@
 	font-weight: var(--cr-weight-extrabold);
 	line-height: var(--cr-leading-tight);
 	content: attr(data-title);
-	overflow-wrap: anywhere;
+	overflow-wrap: break-word;
+	hyphens: auto;
 }
 
 .cr-shelf-book__cover--type::after,
@@ -254,6 +278,14 @@
 }
 
 .cr-shelf-book--slab .pk-body > .pk-caption {
+	padding: 0;
+}
+
+.cr-shelf-book--slab.pk-card--protected {
+	padding: var(--cr-space-md) var(--cr-space-lg);
+}
+
+.cr-shelf-book--slab.pk-card--protected > .pk-title {
 	padding: 0;
 }
 
@@ -418,6 +450,11 @@
 	.cr-read-shelf > .wp-block-query > ul.wp-block-post-template {
 		border-inline-width: 0.5rem;
 	}
+
+	.cr-shelf-book__cover--type::before,
+	.cr-shelf-book__cover.cr-cover--failed::before {
+		font-size: var(--cr-text-base);
+	}
 }
 
 @media (min-width: 80rem) {
@@ -428,7 +465,7 @@
 		position: absolute;
 		inset-block-start: var(--cr-space-4xl);
 		width: var(--cr-book-art-width);
-		height: calc(var(--cr-book-art-width) * 0.91);
+		aspect-ratio: 220 / 200;
 		background: url(../img/cr-book-stack.svg) bottom / contain no-repeat;
 		content: "";
 		pointer-events: none;
@@ -453,12 +490,14 @@
 	--cr-book-shadow: 4px 4px 0 var(--cr-selective-yellow);
 }
 
-:root[data-theme="dark"] .cr-shelf-book--faceout .pk-caption,
-:root[data-theme="dark"] .cr-shelf-book__cover--type,
-:root[data-theme="dark"] .cr-shelf-book__cover.cr-cover--failed,
-:root[data-theme="dark"] .cr-shelf-book.pk-card.cr-shelf-book--slab {
+:root[data-theme="dark"] .cr-shelf-book--faceout .pk-caption {
 	background-color: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
+}
+
+:root[data-theme="dark"] .cr-shelf-book.pk-card.cr-shelf-book--paper-prussian-blue,
+:root[data-theme="dark"] .cr-shelf-book.pk-card.cr-shelf-book--paper-cerulean {
+	border-color: var(--cr-printer-ivory);
 }
 
 :root[data-theme="dark"] .cr-read-order .pk-read-order__link:not([aria-current="page"]) {
@@ -483,12 +522,14 @@
 		--cr-book-shadow: 4px 4px 0 var(--cr-selective-yellow);
 	}
 
-	:root:not([data-theme="light"]) .cr-shelf-book--faceout .pk-caption,
-	:root:not([data-theme="light"]) .cr-shelf-book__cover--type,
-	:root:not([data-theme="light"]) .cr-shelf-book__cover.cr-cover--failed,
-	:root:not([data-theme="light"]) .cr-shelf-book.pk-card.cr-shelf-book--slab {
+	:root:not([data-theme="light"]) .cr-shelf-book--faceout .pk-caption {
 		background-color: var(--cr-printer-ivory);
 		color: var(--cr-russian-violet);
+	}
+
+	:root:not([data-theme="light"]) .cr-shelf-book.pk-card.cr-shelf-book--paper-prussian-blue,
+	:root:not([data-theme="light"]) .cr-shelf-book.pk-card.cr-shelf-book--paper-cerulean {
+		border-color: var(--cr-printer-ivory);
 	}
 
 	:root:not([data-theme="light"]) .cr-read-order .pk-read-order__link:not([aria-current="page"]) {
@@ -519,7 +560,7 @@
 	}
 
 	.cr-read-shelf .pkiw-group > .pkiw-group__items > li::after,
-	.cr-read-shelf > .wp-block-query > ul.wp-block-post-template > li::after {
+	.cr-read-shelf > .wp-block-query > ul.wp-block-post-template > li.wp-block-post::after {
 		background: CanvasText;
 		box-shadow: none;
 		forced-color-adjust: none;
