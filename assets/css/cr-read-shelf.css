@@ -151,6 +151,7 @@
 
 .cr-shelf-book .pk-sub {
 	margin: var(--cr-space-2xs) 0 0;
+	color: inherit;
 	font-family: var(--cr-font-mono);
 	font-size: var(--cr-text-floor);
 	font-weight: var(--cr-weight-bold);

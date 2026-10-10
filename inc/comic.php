@@ -35,7 +35,6 @@ use function Courtneyr\Child\Journal\card_attrs;
 use function Courtneyr\Child\Journal\notes_section;
 use function Courtneyr\Child\MediaShelf\cut_elements;
 use function Courtneyr\Child\SingleRead\book_label;
-use function Courtneyr\Child\SingleRead\status_copy;
 use function Courtneyr\Child\Stamps\pick;
 use function Courtneyr\Child\Stamps\render;
 use function Courtneyr\Child\Stamps\seed;
@@ -58,6 +57,25 @@ const FIRST_ROW = 4;
  * tiers at three and two across.
  */
 const RACK_SIZE = 12;
+
+/**
+ * Comic-facing copy for a stored read status.
+ *
+ * @param string $status readStatus attribute.
+ * @return array{0: string, 1: string} label and stamp word.
+ */
+function comic_status_copy( string $status ): array {
+	switch ( $status ) {
+		case 'reading':
+			return array( __( 'Currently reading', 'courtneyr-child' ), __( 'Reading', 'courtneyr-child' ) );
+		case 'finished':
+			return array( __( 'Finished', 'courtneyr-child' ), __( 'Finished', 'courtneyr-child' ) );
+		case 'abandoned':
+			return array( __( 'Set aside', 'courtneyr-child' ), __( 'Set aside', 'courtneyr-child' ) );
+		default:
+			return array( __( 'To read', 'courtneyr-child' ), __( 'To read', 'courtneyr-child' ) );
+	}
+}
 
 /**
  * Fill the rack: the comics archive pages by RACK_SIZE, and the Site
@@ -557,7 +575,7 @@ function bag_card( string $html, array $block, $instance ): string {
 		}
 		$extra = $has_cover ? '' : type_cover( $a, $post, false );
 		if ( 'finished' !== $status ) {
-			list( $label ) = status_copy( $status );
+			list( $label ) = comic_status_copy( $status );
 			$extra        .= '<p class="cr-comic__sticker cr-comic__sticker--' . esc_attr( $status ) . '">' . esc_html( $label ) . '</p>';
 		}
 		$html = before_meta( $html, $extra );
@@ -617,7 +635,7 @@ function add_title_lede( string $html, array $block ): string {
 
 	// The date beside the status says what the status means: a comic still
 	// being read shows when it was started, never a completion.
-	list( $label ) = status_copy( $status );
+	list( $label ) = comic_status_copy( $status );
 	$when          = '';
 	if ( 'reading' === $status ) {
 		list( $iso, $disp ) = day( (string) ( $a['startedAt'] ?? '' ) );
@@ -673,7 +691,7 @@ function reading_record( array $a, \WP_Post $post ): string {
 		return '';
 	}
 
-	list( , $word ) = status_copy( $status );
+	list( , $word ) = comic_status_copy( $status );
 	$stamp_day      = '' !== $f_iso ? $f_iso : $s_iso;
 	$seed           = seed( (string) $post->ID, (string) ( $a['title'] ?? '' ) );
 	$stamp          = render(
