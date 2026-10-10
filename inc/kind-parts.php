@@ -109,3 +109,64 @@ function mark_repeated_listen_title( string $html, array $block, $instance = nul
 	return $tags->get_updated_html();
 }
 add_filter( 'render_block_post-kinds-indieweb/listen-card', __NAMESPACE__ . '\\mark_repeated_listen_title', 10, 3 );
+
+/**
+ * When the single's sources row prints the same rating text, keep the card
+ * stars visible but make them decorative.
+ *
+ * @param string               $html     Rendered listen card.
+ * @param array<string, mixed> $block    Parsed block.
+ * @param \WP_Block|null       $instance Block instance.
+ * @return string
+ */
+function hide_duplicate_listen_stars_label( string $html, array $block, $instance = null ): string {
+	if ( ! is_singular( 'post' ) ) {
+		return $html;
+	}
+	$post_id = (int) get_queried_object_id();
+	if ( $instance instanceof \WP_Block && isset( $instance->context['postId'] ) && (int) $instance->context['postId'] !== $post_id ) {
+		return $html;
+	}
+	$post = get_post( $post_id );
+	if ( ! $post instanceof \WP_Post || ! has_term( 'listen', 'kind', $post ) || ! listen_card_has_rating( $html, $post, $block ) ) {
+		return $html;
+	}
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	if ( ! $tags->next_tag( array( 'class_name' => 'pk-stars' ) ) ) {
+		return $html;
+	}
+	$tags->set_attribute( 'aria-hidden', 'true' );
+	$tags->remove_attribute( 'role' );
+	$tags->remove_attribute( 'aria-label' );
+	return $tags->get_updated_html();
+}
+add_filter( 'render_block_post-kinds-indieweb/listen-card', __NAMESPACE__ . '\\hide_duplicate_listen_stars_label', 20, 3 );
+
+/**
+ * Whether the listen card carries the rating that the sources row repeats.
+ *
+ * @param string               $html  Rendered listen card.
+ * @param \WP_Post             $post  The listen post.
+ * @param array<string, mixed> $block Parsed block.
+ * @return bool
+ */
+function listen_card_has_rating( string $html, \WP_Post $post, array $block ): bool {
+	$attrs  = \Courtneyr\Child\Journal\card_attrs( $post, 'post-kinds-indieweb/listen-card', (array) ( $block['attrs'] ?? array() ) );
+	$rating = $attrs['rating'] ?? null;
+	if ( is_numeric( $rating ) && (float) $rating > 0.0 ) {
+		return true;
+	}
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	while ( $tags->next_tag(
+		array(
+			'tag_name'   => 'data',
+			'class_name' => 'p-rating',
+		)
+	) ) {
+		$value = $tags->get_attribute( 'value' );
+		if ( is_numeric( $value ) && (float) $value > 0.0 ) {
+			return true;
+		}
+	}
+	return false;
+}

@@ -79,15 +79,17 @@ function find_read_block( \WP_Post $post ): ?array {
  * @return array<string, string> Status to label.
  */
 function read_labels(): array {
-	if ( function_exists( '\\PKIW\\read_status_labels' ) ) {
-		return \PKIW\read_status_labels();
-	}
-	return array(
+	$fallback = array(
 		'reading'   => __( 'Currently Reading', 'courtneyr-child' ),
 		'to-read'   => __( 'To Read', 'courtneyr-child' ),
 		'finished'  => __( 'Finished', 'courtneyr-child' ),
 		'abandoned' => __( 'Abandoned', 'courtneyr-child' ),
+		'other'     => __( 'Other', 'courtneyr-child' ),
 	);
+	if ( function_exists( '\\PKIW\\read_status_labels' ) ) {
+		return array_merge( $fallback, \PKIW\read_status_labels() );
+	}
+	return $fallback;
 }
 
 /**
@@ -98,8 +100,33 @@ function read_labels(): array {
  */
 function status_copy( string $status ): array {
 	$labels = read_labels();
-	$label  = $labels[ in_array( $status, STATUSES, true ) ? $status : 'to-read' ];
+	$label  = $labels[ isset( $labels[ $status ] ) ? $status : 'other' ];
 	return array( $label, $label );
+}
+
+/**
+ * Replace the plugin card's visible status label.
+ *
+ * @param string $html  Card HTML.
+ * @param string $label Replacement label.
+ * @return string
+ */
+function replace_status_label( string $html, string $label ): string {
+	$labels = array_filter(
+		array_unique( array_values( read_labels() ) ),
+		static fn( string $value ): bool => $value !== $label
+	);
+	if ( empty( $labels ) ) {
+		return $html;
+	}
+	$pattern = '#<p class="pk-sub"><span>(' . implode( '|', array_map( static fn( string $value ): string => preg_quote( $value, '#' ), $labels ) ) . ')</span></p>#';
+	$updated = preg_replace_callback(
+		$pattern,
+		static fn(): string => '<p class="pk-sub"><span>' . esc_html( $label ) . '</span></p>',
+		$html,
+		1
+	);
+	return is_string( $updated ) ? $updated : $html;
 }
 
 /**
@@ -142,7 +169,7 @@ function read_attrs( \WP_Post $post, array $block ): array {
 	$rating      = $a['rating'] ?? null;
 	$a['rating'] = is_numeric( $rating ) ? max( 0.0, min( 5.0, (float) $rating ) ) : 0.0;
 	if ( ! in_array( $a['readStatus'] ?? '', STATUSES, true ) ) {
-		$a['readStatus'] = 'reading';
+		$a['readStatus'] = 'other';
 	}
 	return $a;
 }
@@ -526,6 +553,10 @@ function journal_page( string $html, array $block ): string {
 	}
 	$a      = read_attrs( $post, $read );
 	$status = (string) $a['readStatus'];
+	if ( 'other' === $status ) {
+		list( $label ) = status_copy( $status );
+		$html          = replace_status_label( $html, $label );
+	}
 
 	// 1. The Kindle figure leaves the flow (returns as "Read a sample").
 	//    Off by default: read.amazon.com answers the preview URL with a

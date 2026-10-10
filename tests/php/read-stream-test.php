@@ -85,6 +85,9 @@ cr_read_group(
 		list( $facts, $ts ) = facts_line( array( 'pageCount' => 240 ), 'to-read', 'To Read' );
 		cr_read_same( 'To Read · 240 pages', $facts, 'to-read pages' );
 		cr_read_same( 0, $ts, 'to-read timestamp' );
+		list( $facts, $ts ) = facts_line( array( 'pageCount' => 240, 'currentPage' => 120 ), 'other', 'Other' );
+		cr_read_same( 'Other · 240 pages', $facts, 'other pages' );
+		cr_read_same( 0, $ts, 'other timestamp' );
 	}
 );
 
@@ -110,6 +113,24 @@ cr_read_group(
 		$sorted = $order;
 		sort( $sorted );
 		cr_read_same( $sorted, $order, 'caption, cover, facts, rating, review, stamp in contract order' );
+	}
+);
+
+cr_read_group(
+	'Stream read treats invalid status as Other',
+	static function (): void {
+		$post                              = cr_read_reset();
+		$GLOBALS['cr_read_blocks']         = array( cr_read_stream_read_block( array( 'readStatus' => 'nope' ) ) );
+		$GLOBALS['cr_read_pictures'][42]   = array( 'source' => 'featured', 'attachment_id' => 91, 'url' => 'https://media.test/stream-featured.jpg', 'alt' => 'Featured Stream' );
+		$GLOBALS['cr_read_attachments'][91] = 'https://media.test/stream-featured.jpg';
+		$input = str_replace( '<p class="pk-sub"><span>Finished</span></p>', '<p class="pk-sub"><span>Currently Reading</span></p>', cr_read_stream_card() );
+		$html  = book_card( $input, array( 'attrs' => array() ), new WP_Block( array( 'postId' => $post->ID ) ) );
+		cr_read_contains( '<p class="cr-book__facts">Other · 240 pages</p>', $html, 'other facts' );
+		cr_read_contains( '<p class="pk-sub"><span>Other</span></p>', $html, 'other caption status' );
+		cr_read_contains( '<span class="cr-book__tab cr-book__tab--other" aria-hidden="true">Other</span>', $html, 'other tab' );
+		cr_read_contains( 'cr-book--other', $html, 'other card class' );
+		cr_read_not_contains( 'page 120 of 240', $html, 'other has no progress line' );
+		cr_read_not_contains( 'Currently Reading', $html, 'other is not reading' );
 	}
 );
 
