@@ -128,7 +128,7 @@ function hide_duplicate_listen_stars_label( string $html, array $block, $instanc
 		return $html;
 	}
 	$post = get_post( $post_id );
-	if ( ! $post instanceof \WP_Post || ! has_term( 'listen', 'kind', $post ) || ! listen_card_has_rating( $html, $post, $block ) ) {
+	if ( ! $post instanceof \WP_Post || ! has_term( 'listen', 'kind', $post ) || ! listen_rating_row_prints( $instance ) ) {
 		return $html;
 	}
 	$tags = new \WP_HTML_Tag_Processor( $html );
@@ -143,30 +143,24 @@ function hide_duplicate_listen_stars_label( string $html, array $block, $instanc
 add_filter( 'render_block_post-kinds-indieweb/listen-card', __NAMESPACE__ . '\\hide_duplicate_listen_stars_label', 20, 3 );
 
 /**
- * Whether the listen card carries the rating that the sources row repeats.
+ * Whether the single's sources row prints a rating as text.
  *
- * @param string               $html  Rendered listen card.
- * @param \WP_Post             $post  The listen post.
- * @param array<string, mixed> $block Parsed block.
+ * The row (patterns/cr-listen-sources.php) binds its value to the
+ * post-kinds/kind-meta source with key rating and hides itself when that
+ * value is empty, so the same source decides here. Without the source, or
+ * with an empty value, the stars keep their own accessible name.
+ *
+ * @param \WP_Block|null $instance The listen card block instance.
  * @return bool
  */
-function listen_card_has_rating( string $html, \WP_Post $post, array $block ): bool {
-	$attrs  = \Courtneyr\Child\Journal\card_attrs( $post, 'post-kinds-indieweb/listen-card', (array) ( $block['attrs'] ?? array() ) );
-	$rating = $attrs['rating'] ?? null;
-	if ( is_numeric( $rating ) && (float) $rating > 0.0 ) {
-		return true;
+function listen_rating_row_prints( $instance ): bool {
+	if ( ! $instance instanceof \WP_Block || ! class_exists( '\\WP_Block_Bindings_Registry' ) ) {
+		return false;
 	}
-	$tags = new \WP_HTML_Tag_Processor( $html );
-	while ( $tags->next_tag(
-		array(
-			'tag_name'   => 'data',
-			'class_name' => 'p-rating',
-		)
-	) ) {
-		$value = $tags->get_attribute( 'value' );
-		if ( is_numeric( $value ) && (float) $value > 0.0 ) {
-			return true;
-		}
+	$source = \WP_Block_Bindings_Registry::get_instance()->get_registered( 'post-kinds/kind-meta' );
+	if ( ! $source ) {
+		return false;
 	}
-	return false;
+	$value = $source->get_value( array( 'key' => 'rating' ), $instance, 'content' );
+	return is_scalar( $value ) && '' !== trim( (string) $value );
 }
