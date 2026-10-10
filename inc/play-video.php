@@ -46,6 +46,16 @@ const CUT_CARTRIDGE = array(
 );
 
 /**
+ * Protected-card elements removed before locked output returns.
+ */
+const CUT_LOCKED = array(
+	array( 'div', 'pk-stars' ),
+	array( 'div', 'pk-note' ),
+	array( 'div', 'pk-meta' ),
+	array( 'div', 'pk-media' ),
+);
+
+/**
  * The first full element span for a tag carrying a class.
  *
  * @param string $html       Fragment.
@@ -250,6 +260,19 @@ function has_class_token( string $html, string $class_name ): bool {
 }
 
 /**
+ * Strip protected-card content that must stay behind the password gate.
+ *
+ * @param string $html Fragment.
+ * @return string Fragment without protected-only details.
+ */
+function strip_locked( string $html ): string {
+	foreach ( CUT_LOCKED as $cut ) {
+		$html = cut_elements( $html, $cut[0], $cut[1] );
+	}
+	return $html;
+}
+
+/**
  * Collapse whitespace and lowercase text for title comparison.
  *
  * @param string $text Text.
@@ -325,6 +348,7 @@ function filter_item( $html, $group, $post, $ids ) {
 
 	$facts = facts( $post->ID );
 	if ( array() === $facts || has_class_token( $html, 'pk-card--protected' ) ) {
+		$html = strip_locked( $html );
 		$tags = new \WP_HTML_Tag_Processor( $html );
 		if ( $tags->next_tag(
 			array(
@@ -397,8 +421,11 @@ function filter_stream_card( $html, $group, $post ) {
 	}
 
 	$facts = facts( $post->ID );
-	if ( array() === $facts || has_class_token( $html, 'pk-card--protected' ) ) {
+	if ( array() === $facts ) {
 		return $html;
+	}
+	if ( has_class_token( $html, 'pk-card--protected' ) ) {
+		return strip_locked( $html );
 	}
 
 	$tags = new \WP_HTML_Tag_Processor( $html );

@@ -661,12 +661,27 @@ namespace Courtneyr\Child\PlayVideo\Tests {
 			$GLOBALS['cr_kind_facts'][23] = base_facts();
 			$protected = filter_item( protected_shape(), 'video', $post, array() );
 			$stream_protected = filter_stream_card( protected_shape(), 'video', $post );
+			$protected_full = '<article class="pk-card pk-card--stream pk-card--protected k-play h-entry"><h3 class="pk-title p-name"><a class="u-url" href="PERMALINK">Protected: Title</a></h3><div class="pk-note p-content"><p>Private note.</p><div class="inner">Nested</div></div><div class="pk-meta"><a class="pk-link" href="https://example.test/private">Private link</a></div><div class="pk-stars" role="img" aria-label="Rated 4 of 5">SVGS</div><div class="pk-media"><img class="u-photo" src="https://img.example/private.jpg" alt=""></div></article>';
+			$protected_full_item = filter_item( $protected_full, 'video', $post, array() );
+			$protected_full_stream = filter_stream_card( $protected_full, 'video', $post );
 			return false !== strpos( $empty, 'cr-cabinet--locked' )
 				&& false !== strpos( $protected, 'cr-cabinet--locked' )
 				&& false === strpos( $empty, 'cr-cabinet__screen' )
 				&& false === strpos( $protected, 'cr-cabinet__screen' )
 				&& shape_b() === $stream_empty
-				&& protected_shape() === $stream_protected;
+				&& protected_shape() === $stream_protected
+				&& false === strpos( $protected_full_item, 'pk-note' )
+				&& false === strpos( $protected_full_item, 'pk-meta' )
+				&& false === strpos( $protected_full_item, 'pk-stars' )
+				&& false === strpos( $protected_full_item, 'pk-media' )
+				&& false === strpos( $protected_full_item, 'https://example.test/private' )
+				&& false !== strpos( $protected_full_item, '<a class="u-url" href="PERMALINK">Protected: Title</a>' )
+				&& false === strpos( $protected_full_stream, 'pk-note' )
+				&& false === strpos( $protected_full_stream, 'pk-meta' )
+				&& false === strpos( $protected_full_stream, 'pk-stars' )
+				&& false === strpos( $protected_full_stream, 'pk-media' )
+				&& false === strpos( $protected_full_stream, 'https://example.test/private' )
+				&& false !== strpos( $protected_full_stream, '<a class="u-url" href="PERMALINK">Protected: Title</a>' );
 		}
 	);
 
