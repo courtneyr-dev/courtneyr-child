@@ -259,7 +259,9 @@ function take_element( string &$html, string $tag, string $class_name ): string 
  * A typographic cover for a comic with no stored artwork.
  *
  * The text is the card's own title and creators. It is hidden from
- * assistive technology because the card's heading already says it.
+ * assistive technology because the card's heading already says it. The
+ * outer box is the same bag and board a picture sits on; the cover inside
+ * it takes the picture's place.
  *
  * @param array<string, mixed> $a             Attributes.
  * @param \WP_Post             $post          Post.
@@ -269,11 +271,11 @@ function take_element( string &$html, string $tag, string $class_name ): string 
 function type_cover( array $a, \WP_Post $post, bool $with_creators ): string {
 	$title    = trim( (string) ( $a['title'] ?? '' ) );
 	$creators = trim( (string) ( $a['creators'] ?? '' ) );
-	$out      = '<div class="pk-media cr-comic__cover--type" aria-hidden="true"><span class="cr-comic__type-title">' . esc_html( '' !== $title ? $title : get_the_title( $post ) ) . '</span>';
+	$out      = '<div class="pk-media cr-comic__cover--type" aria-hidden="true"><div class="cr-comic__type-cover"><span class="cr-comic__type-title">' . esc_html( '' !== $title ? $title : get_the_title( $post ) ) . '</span>';
 	if ( $with_creators && '' !== $creators ) {
 		$out .= '<span class="cr-comic__type-creators">' . esc_html( $creators ) . '</span>';
 	}
-	return $out . '</div>';
+	return $out . '</div></div>';
 }
 
 /**
@@ -507,9 +509,10 @@ function bag_card( string $html, array $block, $instance ): string {
 		$classes[] = 'has-cover';
 	}
 
-	// The cover is not inside the title link, so a stored description of
-	// the art stays. The plugin's fallback ("Cover of …") repeats the
-	// heading, so it is emptied.
+	// On the rack the title link covers the whole bag and names it, so the
+	// cover's alt is emptied and the comic isn't announced twice. On the
+	// Stream a stored description of the art stays; the plugin's fallback
+	// ("Cover of …") repeats the heading, so it is emptied.
 	$eager = $rack && ! is_paged() && in_the_loop() && $GLOBALS['wp_query']->current_post < FIRST_ROW;
 	$tags  = new \WP_HTML_Tag_Processor( $html );
 	if ( $has_cover && $tags->next_tag(
@@ -518,7 +521,7 @@ function bag_card( string $html, array $block, $instance ): string {
 			'class_name' => 'u-photo',
 		)
 	) ) {
-		if ( '' === trim( (string) ( $a['coverImageAlt'] ?? '' ) ) ) {
+		if ( $rack || '' === trim( (string) ( $a['coverImageAlt'] ?? '' ) ) ) {
 			$tags->set_attribute( 'alt', '' );
 		}
 		if ( $eager ) {

@@ -4,9 +4,10 @@
    The recipe archive is an open ring binder: a cover, two paper
    leaves, rings down the gutter and course tabs on its edge. Each
    recipe is a card taped to a leaf. Everything drawn here is CSS on
-   the Query Loop's own list; nothing is added to the DOM, and an
-   archive page with fewer than four recipes leaves the rest of the
-   spread empty.
+   the spread, a group that always renders around the Query Loop's
+   list and its no-results text, so a course with no recipes still
+   opens the binder. An archive page with fewer than four recipes
+   leaves the rest of the spread empty.
 
    The binder, its leaves and its cards are objects, so they take
    palette tokens and keep their colours in dark mode. Focus and the
@@ -32,20 +33,17 @@
 }
 
 /* Each leaf is its own sheet: fibred paper inside a 2px ink edge. */
-.cr-recipe-binder .wp-block-post-template.cr-recipe-binder__list {
+.cr-recipe-binder .cr-recipe-binder__spread {
 	--binder-gutter: 3.5rem;
 	--binder-leaf: var(--cr-printer-ivory);
 	--leaf-paper: linear-gradient(var(--binder-leaf), var(--binder-leaf));
 	--leaf-ink: linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet));
 	position: relative;
-	display: grid;
-	grid-template-columns: minmax(0, 1fr);
-	gap: 0;
+	box-sizing: border-box;
+	min-width: 0;
 	margin: 0;
 	padding: 0.9rem;
 	overflow: hidden;
-	list-style: none;
-	columns: auto;
 	border: 2px solid var(--cr-russian-violet);
 	border-radius: var(--cr-radius-md);
 	background:
@@ -54,6 +52,29 @@
 		var(--leaf-ink) content-box,
 		var(--cr-cerulean);
 	box-shadow: var(--cr-shadow-hard-2);
+}
+
+/* The cards' grid: transparent, so the leaves show through. */
+.cr-recipe-binder .wp-block-post-template.cr-recipe-binder__list {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 0;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	columns: auto;
+}
+
+/* No recipes: the sentence is printed on the leaf, in line with a card's text. */
+.cr-recipe-binder .cr-recipe-binder__spread > .wp-block-query-no-results {
+	box-sizing: border-box;
+	margin: 0;
+	padding: calc(1.25rem + 2px + 0.9rem) calc(1rem + 2px + 0.9rem);
+}
+
+.cr-recipe-binder .cr-recipe-binder__spread .cr-archive-stream__empty {
+	margin: 0;
+	color: var(--cr-russian-violet);
 }
 
 .cr-recipe-binder .wp-block-post-template.cr-recipe-binder__list > li {
@@ -290,7 +311,7 @@
 	border-bottom: 0;
 	border-radius: var(--cr-radius-sm) var(--cr-radius-sm) 0 0;
 	background: var(--tab);
-	font-family: var(--cr-font-mono);
+	font-family: var(--cr-font-body);
 	font-size: var(--cr-text-sm);
 	font-weight: var(--cr-weight-bold);
 	letter-spacing: var(--cr-tracking-wide);
@@ -317,6 +338,29 @@
 	box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 
+/* Dark mode: ink turns ivory, so the tab edges do, and the current tab
+   inverts the way the archive pager's current page does. The papers stay. */
+@media (prefers-color-scheme: dark) {
+
+	:root:is(:not([data-theme]), [data-theme="system"]) .cr-recipe-binder .pk-recipe-courses__link {
+		border-color: var(--cr-printer-ivory);
+	}
+
+	:root:is(:not([data-theme]), [data-theme="system"]) .cr-recipe-binder .pk-recipe-courses__link[aria-current] {
+		background: var(--cr-printer-ivory);
+		color: var(--cr-russian-violet);
+	}
+}
+
+:root[data-theme="dark"] .cr-recipe-binder .pk-recipe-courses__link {
+	border-color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-recipe-binder .pk-recipe-courses__link[aria-current] {
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+}
+
 /* The spread: two leaves, the first two cards on the left. */
 @media (min-width: 64rem) {
 
@@ -333,16 +377,13 @@
 		grid-column: 1 / -1;
 	}
 
-	/* Each leaf is a sheet with a second page under its foot edge. */
-	.cr-recipe-binder .wp-block-post-template.cr-recipe-binder__list {
+	/* Each leaf is a sheet with a second page under its foot edge. The
+	   spread stretches to the tabs' height, so they stay on its edge. */
+	.cr-recipe-binder .cr-recipe-binder__spread {
 		--leaf-w: calc(50% - var(--binder-gutter) / 2);
 		--leaf-page: linear-gradient(var(--cr-light-gray), var(--cr-light-gray));
 		grid-column: 1;
 		grid-row: 1;
-		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-		grid-template-rows: repeat(2, minmax(18rem, auto));
-		grid-auto-flow: column;
-		column-gap: var(--binder-gutter);
 		padding: 1.25rem;
 		border-radius: var(--cr-radius-lg);
 		background:
@@ -356,6 +397,23 @@
 			var(--leaf-ink) left 3px bottom 0 / calc(var(--leaf-w) - 6px) 14px no-repeat content-box,
 			var(--leaf-ink) right 3px bottom 0 / calc(var(--leaf-w) - 6px) 14px no-repeat content-box,
 			var(--cr-cerulean);
+	}
+
+	.cr-recipe-binder .wp-block-post-template.cr-recipe-binder__list {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		grid-template-rows: repeat(2, minmax(18rem, auto));
+		grid-auto-flow: column;
+		column-gap: var(--binder-gutter);
+	}
+
+	/* An empty spread is as tall as its rings and tabs; the sentence sits on the left leaf. */
+	.cr-recipe-binder .cr-recipe-binder__spread:has(> .wp-block-query-no-results) {
+		min-height: 24rem;
+	}
+
+	.cr-recipe-binder .cr-recipe-binder__spread > .wp-block-query-no-results {
+		width: var(--leaf-w);
+		padding: calc(1.5rem + 2px + 1rem);
 	}
 
 	.cr-recipe-binder .wp-block-post-template.cr-recipe-binder__list > li,
@@ -401,7 +459,7 @@
 	}
 
 	/* The rings: one bar across the gutter, two beside each row of cards. */
-	.cr-recipe-binder .wp-block-post-template.cr-recipe-binder__list::before {
+	.cr-recipe-binder .cr-recipe-binder__spread::before {
 		content: "";
 		position: absolute;
 		top: 7.25rem;
@@ -421,6 +479,15 @@
 			0 24.5rem 0 -2px var(--cr-light-gray),
 			0 24.5rem 0 0 var(--cr-russian-violet);
 		pointer-events: none;
+	}
+
+	/* An empty spread has three rings, all inside its foot edge. */
+	.cr-recipe-binder .cr-recipe-binder__spread:has(> .wp-block-query-no-results)::before {
+		box-shadow:
+			0 6.5rem 0 -2px var(--cr-light-gray),
+			0 6.5rem 0 0 var(--cr-russian-violet),
+			0 13rem 0 -2px var(--cr-light-gray),
+			0 13rem 0 0 var(--cr-russian-violet);
 	}
 
 	.cr-recipe-binder .cr-recipe-tabs {
@@ -501,8 +568,9 @@ body.cr-recipe-single main.single-post::before {
 	width: min(100% - 1rem, var(--wp--style--global--wide-size) + 5rem);
 	margin-block: 0.75rem 0;
 	border: 2px solid var(--cr-russian-violet);
-	border-radius: 0.25rem;
+	border-radius: 0;
 	background:
+		url(../img/cr-recipe-dots.svg) right 1rem bottom 0.6rem / 2.5rem auto no-repeat,
 		radial-gradient(circle, var(--wp--preset--color--main-accent, var(--cr-surface)) 0 0.4rem, var(--cr-russian-violet) 0.4rem calc(0.4rem + 2px), transparent calc(0.4rem + 2px)) 0.5rem 1.5rem / 1.5rem 3.25rem repeat-y,
 		var(--page-paper);
 	box-shadow: var(--cr-shadow-hard-2);
@@ -538,6 +606,20 @@ body.cr-recipe-single .single-post__content :is(p, li, h2, h3, span, div) {
    JavaScript to set data-theme the OS scheme picks both. */
 body.cr-recipe-single .single-post__header .single-post__kind.cr-chip {
 	background: var(--cr-sky-blue);
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+/* Only the kind tape sits over the title, as the approved page draws it.
+   The h-recipe keeps its own hidden dt-published; this date and the
+   category are the template's copies. The site's post-terms chip sets
+   its display with !important, so hiding it needs it too. */
+body.cr-recipe-single .single-post__header :is(.single-post__date, .single-post__category) {
+	display: none !important;
+}
+
+/* The sprigs on the sheet replace the article's corner burst. */
+body.cr-recipe-single main.single-post > .single-post__content::before {
+	content: none;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -872,6 +954,8 @@ body.cr-recipe-single .cr-binder-recipe__more:not(:has(.wprm-recipe-header)) {
 
 	/* A binding column down the sheet's left edge holds the rings. */
 	body.cr-recipe-single main.single-post {
+		--page-photo: 23rem;
+		--page-gap: 3rem;
 		--page-binding: clamp(4.5rem, 7vw, 7rem);
 		grid-template-columns:
 			minmax(1rem, 1fr)
@@ -881,36 +965,61 @@ body.cr-recipe-single .cr-binder-recipe__more:not(:has(.wprm-recipe-header)) {
 			minmax(1rem, 1fr);
 	}
 
-	/* The sheet lies on a band of sky-blue paper as wide as the page;
-	   its spread shadow is that band, clipped to the sheet's rows. The
-	   rings punch their own holes, so the sheet has none here. */
+	/* The sheet lies on a band of sky-blue paper as wide as the page and
+	   nearly fills it; its spread shadow is that band, clipped to the
+	   sheet's rows. The rings punch their own holes, so the sheet has
+	   none here. Line-art sprigs and dot marks sit in its margins. */
 	body.cr-recipe-single main.single-post::before {
 		grid-row: 1 / 3;
-		grid-column: binding-start / details-end;
+		grid-column: 1 / -1;
 		justify-self: stretch;
 		width: auto;
-		margin: 1.25rem -3.5rem 2rem -1.5rem;
-		background: var(--cr-fiber), var(--page-paper);
+		margin: 1.25rem 0.75rem 2rem;
+		background:
+			url(../img/cr-recipe-sprig.svg) right 0.75rem top 1.25rem / clamp(2.5rem, 13vw - 7rem, 6rem) auto no-repeat,
+			url(../img/cr-recipe-tomato.svg) left 4.25rem bottom 2.5rem / clamp(2.5rem, 14vw - 6.5rem, 6.5rem) auto no-repeat,
+			url(../img/cr-recipe-sprig.svg) right 1rem bottom 2.25rem / clamp(2rem, 8vw - 4rem, 3.5rem) auto no-repeat,
+			url(../img/cr-recipe-dots.svg) left 5.25rem top 40% / 2.75rem auto no-repeat,
+			url(../img/cr-recipe-dots.svg) right 1.5rem top 55% / 2.5rem auto no-repeat,
+			var(--cr-fiber),
+			var(--page-paper);
 		box-shadow: var(--cr-shadow-hard-2), 0 0 0 100vmax var(--cr-accent-shape);
 		clip-path: inset(-1.25rem -100vmax -2rem);
 	}
 
-	/* The rings: a bar over the sheet's edge into a hole, every 5rem. */
+	/* The rings: a metal loop around the sheet's edge into a punched
+	   hole, every 5rem. The loop is open, so the band and the paper show
+	   through it; whole loops only, stopping clear of the torn foot. */
 	body.cr-recipe-single main.single-post::after {
 		--ring-ink: var(--cr-russian-violet);
 		--ring-metal: var(--cr-light-gray);
 		content: "";
 		z-index: -1;
 		grid-row: 1 / 3;
-		grid-column: binding-start / binding-end;
+		grid-column: 1 / -1;
 		justify-self: start;
-		width: 5rem;
-		margin: 1.25rem 0 2rem -3.25rem;
+		width: 5.5rem;
+		margin: 1.25rem 0 3.5rem -0.75rem;
 		background:
-			linear-gradient(transparent 2rem, var(--ring-ink) 2rem calc(2rem + 2px), var(--ring-metal) calc(2rem + 2px) calc(3rem - 2px), var(--ring-ink) calc(3rem - 2px) 3rem, transparent 3rem) 0.5rem 0 / 3.75rem 5rem repeat-y,
-			radial-gradient(circle 0.5rem at 0.5rem 2.5rem, var(--ring-metal) calc(0.5rem - 2px), var(--ring-ink) calc(0.5rem - 2px) 0.5rem, transparent 0.5rem) 0 0 / 1rem 5rem repeat-y,
-			radial-gradient(circle 0.5rem at 0.5rem 2.5rem, var(--ring-metal) calc(0.5rem - 2px), var(--ring-ink) calc(0.5rem - 2px) 0.5rem, transparent 0.5rem) 3.75rem 0 / 1rem 5rem repeat-y,
-			radial-gradient(circle 0.7rem at 0.7rem 2.5rem, var(--cr-accent-shape) calc(0.7rem - 2px), var(--ring-ink) calc(0.7rem - 2px) 0.7rem, transparent 0.7rem) 3.55rem 0 / 1.4rem 5rem repeat-y;
+			radial-gradient(circle 0.55rem at 4.8rem 2.5rem, var(--cr-accent-shape) calc(0.55rem - 2px), var(--ring-ink) calc(0.55rem - 2px) 0.55rem, transparent 0.55rem) 0 0 / 5.5rem 5rem,
+			radial-gradient(2.5rem 1.1rem at 2.6rem 2.5rem, transparent 62%, var(--ring-ink) 62% 70%, var(--ring-metal) 70% 90%, var(--ring-ink) 90% 100%, transparent 100%) 0 0 / 5.5rem 5rem;
+		background-repeat: no-repeat space;
+		pointer-events: none;
+	}
+
+	/* The sheet's foot is torn: a strip of the band, ragged along its top,
+	   covers the straight edge and its shadow. main clips it at the page's
+	   sides (overflow-x: clip), and the band hides it beside the sheet. */
+	body.cr-recipe-single main.single-post > .single-post__content::after {
+		content: "";
+		position: absolute;
+		right: -100vmax;
+		bottom: 1.25rem;
+		left: -100vmax;
+		z-index: -1;
+		height: 2rem;
+		background: var(--cr-accent-shape);
+		mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 32' preserveAspectRatio='none'%3E%3Cpath d='M0 9 L9 6 L18 11 L29 5 L38 10 L50 8 L59 14 L71 7 L82 11 L93 4 L104 10 L116 7 L125 13 L137 6 L148 10 L160 8 L169 15 L181 9 L192 12 L203 5 L215 11 L226 7 L237 13 L247 8 L256 9 V32 H0 Z'/%3E%3C/svg%3E") 0 0 / 16rem 100% repeat-x;
 		pointer-events: none;
 	}
 
@@ -937,6 +1046,28 @@ body.cr-recipe-single .cr-binder-recipe__more:not(:has(.wprm-recipe-header)) {
 		width: 100%;
 		max-width: none;
 		margin: 3rem 0 0.75rem !important;
+	}
+
+	body.cr-recipe-single .single-post__featured img {
+		aspect-ratio: 5 / 4;
+	}
+
+	/* The title is the page's largest type, one display step up. */
+	body.cr-recipe-single .single-post__header .single-post__title.wp-block-post-title {
+		font-size: var(--cr-text-5xl);
+	}
+
+	/* The facts are one row of equal cells with a thin rule between them. */
+	body.cr-recipe-single .cr-binder-recipe__facts .wprm-recipe-meta-container {
+		grid-template-columns: none;
+		grid-auto-columns: minmax(0, 1fr);
+		grid-auto-flow: column;
+		column-gap: 0;
+	}
+
+	body.cr-recipe-single .cr-binder-recipe__facts .wprm-recipe-block-container + .wprm-recipe-block-container {
+		padding-left: 1.25rem;
+		border-left: 1px solid var(--cr-periwinkle);
 	}
 
 	body.cr-recipe-single main.single-post > .single-post__content {
@@ -1137,7 +1268,7 @@ body.cr-recipe-single .cr-binder-recipe__more:not(:has(.wprm-recipe-header)) {
 
 @media (forced-colors: active) {
 
-	.cr-recipe-binder .wp-block-post-template.cr-recipe-binder__list,
+	.cr-recipe-binder .cr-recipe-binder__spread,
 	.cr-recipe-binder .cr-recipe-binder__list > li .pk-card.cr-recipe-card,
 	.cr-recipe-binder .pk-recipe-courses__link {
 		border-color: CanvasText;
@@ -1145,7 +1276,7 @@ body.cr-recipe-single .cr-binder-recipe__more:not(:has(.wprm-recipe-header)) {
 		box-shadow: none;
 	}
 
-	.cr-recipe-binder .wp-block-post-template.cr-recipe-binder__list::before,
+	.cr-recipe-binder .cr-recipe-binder__spread::before,
 	.cr-recipe-binder .cr-recipe-binder__list > li .pk-card.cr-recipe-card::before {
 		content: none;
 	}
@@ -1181,8 +1312,13 @@ body.cr-recipe-single .cr-binder-recipe__more:not(:has(.wprm-recipe-header)) {
 		box-shadow: none;
 	}
 
-	body.cr-recipe-single main.single-post::after {
+	body.cr-recipe-single main.single-post::after,
+	body.cr-recipe-single main.single-post > .single-post__content::after {
 		content: none;
+	}
+
+	body.cr-recipe-single main.single-post::before {
+		background: Canvas;
 	}
 }
 
@@ -1194,14 +1330,14 @@ body.cr-recipe-single .cr-binder-recipe__more:not(:has(.wprm-recipe-header)) {
 		display: none;
 	}
 
-	.cr-recipe-binder .wp-block-post-template.cr-recipe-binder__list {
+	.cr-recipe-binder .cr-recipe-binder__spread {
 		padding: 0;
 		border: 0;
 		background: none;
 		box-shadow: none;
 	}
 
-	.cr-recipe-binder .wp-block-post-template.cr-recipe-binder__list::before {
+	.cr-recipe-binder .cr-recipe-binder__spread::before {
 		content: none;
 	}
 
@@ -1214,7 +1350,8 @@ body.cr-recipe-single .cr-binder-recipe__more:not(:has(.wprm-recipe-header)) {
 		box-shadow: none;
 	}
 
-	body.cr-recipe-single main.single-post::after {
+	body.cr-recipe-single main.single-post::after,
+	body.cr-recipe-single main.single-post > .single-post__content::after {
 		content: none;
 	}
 }

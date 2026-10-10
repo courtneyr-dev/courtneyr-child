@@ -9,8 +9,8 @@
  * book (spine, page block, bookmark), a "Read / find it" row from
  * stored URLs, the review moved to "Notes from this read", a library
  * card "Reading record", the plugin's Kindle preview (rendered through
- * its own bridge) as "Read a sample", Rock Salt margin marks, and a
- * quiet meta row. cr-post-kinds.css paints it. Scope:
+ * its own bridge) as "Read a sample", and a quiet meta row.
+ * cr-post-kinds.css paints it. Scope:
  * body.single-post.kind-read.
  *
  * @package CourtneyrChild
@@ -20,12 +20,11 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\SingleRead;
 
-use function Courtneyr\Child\Journal\aside;
-use function Courtneyr\Child\Journal\margin_lines;
 use function Courtneyr\Child\Journal\meta_item;
 use function Courtneyr\Child\Journal\meta_row;
 use function Courtneyr\Child\Journal\notes_section;
 use function Courtneyr\Child\Journal\wrap;
+use function Courtneyr\Child\MediaShelf\cut_elements;
 use function Courtneyr\Child\Stamps\pick;
 use function Courtneyr\Child\Stamps\render;
 use function Courtneyr\Child\Stamps\seed;
@@ -35,6 +34,9 @@ use const Courtneyr\Child\Stamps\TILTS;
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+/** Read statuses stored by the plugin. */
+const STATUSES = array( 'reading', 'to-read', 'finished', 'abandoned' );
 
 /**
  * Is this the single view of a read?
@@ -72,22 +74,32 @@ function find_read_block( \WP_Post $post ): ?array {
 }
 
 /**
- * Reader-facing copy for a stored status. The stored value is untouched.
+ * The plugin's read status labels, with its shipped copy as fallback.
+ *
+ * @return array<string, string> Status to label.
+ */
+function read_labels(): array {
+	if ( function_exists( '\\PKIW\\read_status_labels' ) ) {
+		return \PKIW\read_status_labels();
+	}
+	return array(
+		'reading'   => __( 'Currently Reading', 'courtneyr-child' ),
+		'to-read'   => __( 'To Read', 'courtneyr-child' ),
+		'finished'  => __( 'Finished', 'courtneyr-child' ),
+		'abandoned' => __( 'Abandoned', 'courtneyr-child' ),
+	);
+}
+
+/**
+ * Reader-facing copy for a stored status.
  *
  * @param string $status readStatus attribute.
- * @return array{0: string, 1: string} label, short stamp word.
+ * @return array{0: string, 1: string} label and stamp word.
  */
 function status_copy( string $status ): array {
-	switch ( $status ) {
-		case 'reading':
-			return array( __( 'Currently reading', 'courtneyr-child' ), __( 'Reading', 'courtneyr-child' ) );
-		case 'finished':
-			return array( __( 'Finished', 'courtneyr-child' ), __( 'Finished', 'courtneyr-child' ) );
-		case 'abandoned':
-			return array( __( 'Set aside', 'courtneyr-child' ), __( 'Set aside', 'courtneyr-child' ) );
-		default:
-			return array( __( 'To read', 'courtneyr-child' ), __( 'To read', 'courtneyr-child' ) );
-	}
+	$labels = read_labels();
+	$label  = $labels[ in_array( $status, STATUSES, true ) ? $status : 'to-read' ];
+	return array( $label, $label );
 }
 
 /**
@@ -97,11 +109,115 @@ function status_copy( string $status ): array {
  * @return array{0: string, 1: string}
  */
 function date_pair( string $raw ): array {
-	$ts = '' !== $raw ? strtotime( $raw ) : false;
-	if ( ! $ts ) {
+	if ( function_exists( '\\PKIW\\card_calendar_date' ) ) {
+		return \PKIW\card_calendar_date( $raw );
+	}
+	if ( ! preg_match( '/^(\d{4})-(\d{2})-(\d{2})/', trim( $raw ), $m ) || ! checkdate( (int) $m[2], (int) $m[3], (int) $m[1] ) ) {
 		return array( '', '' );
 	}
-	return array( gmdate( 'c', $ts ), wp_date( (string) get_option( 'date_format' ), $ts ) );
+	$ts = gmmktime( 12, 0, 0, (int) $m[2], (int) $m[3], (int) $m[1] );
+	return array( (string) wp_date( 'Y-m-d', $ts, new \DateTimeZone( 'UTC' ) ), (string) wp_date( (string) get_option( 'date_format' ), $ts, new \DateTimeZone( 'UTC' ) ) );
+}
+
+/**
+ * A rating as visible text.
+ *
+ * @param float $rating Stored rating.
+ * @return string
+ */
+function rating_text( float $rating ): string {
+	$value = max( 0.0, min( 5.0, $rating ) );
+	return $value > 0 ? rtrim( rtrim( number_format( $value, 2, '.', '' ), '0' ), '.' ) : '';
+}
+
+/**
+ * Read attributes with the block defaults and rating precision restored.
+ *
+ * @param \WP_Post             $post  Post.
+ * @param array<string, mixed> $block Read-card block.
+ * @return array<string, mixed>
+ */
+function read_attrs( \WP_Post $post, array $block ): array {
+	$a           = \Courtneyr\Child\Journal\card_attrs( $post, 'post-kinds-indieweb/read-card', (array) ( $block['attrs'] ?? array() ) );
+	$rating      = $a['rating'] ?? null;
+	$a['rating'] = is_numeric( $rating ) ? max( 0.0, min( 5.0, (float) $rating ) ) : 0.0;
+	if ( ! in_array( $a['readStatus'] ?? '', STATUSES, true ) ) {
+		$a['readStatus'] = 'reading';
+	}
+	return $a;
+}
+
+/**
+ * Rating beneath the title, including fractional stars.
+ *
+ * @param float $rating Stored rating.
+ * @return string
+ */
+function rating_html( float $rating ): string {
+	$value = max( 0.0, min( 5.0, $rating ) );
+	if ( $value <= 0 ) {
+		return '';
+	}
+	$counts = function_exists( '\\PKIW\\card_star_counts' )
+		? \PKIW\card_star_counts( $value )
+		: array(
+			'full'  => (int) floor( $value ),
+			'half'  => ( $value - floor( $value ) ) >= 0.5,
+			'empty' => 5 - (int) floor( $value ) - ( ( $value - floor( $value ) ) >= 0.5 ? 1 : 0 ),
+		);
+	$label  = function_exists( '\\PKIW\\card_rating_label' )
+		? \PKIW\card_rating_label( $value )
+		: sprintf( /* translators: %s: rating */ __( 'Rated %s of 5', 'courtneyr-child' ), rating_text( $value ) );
+	$path   = 'M12 2l3 6.5 7 .6-5.3 4.6 1.6 6.8L12 17l-6.9 3.5 1.6-6.8L1.4 9.1l7-.6z';
+	$full   = '<span class="cr-journal__star"><svg viewBox="0 0 24 24" fill="currentColor" focusable="false"><path d="' . $path . '"/></svg></span>';
+	$empty  = '<span class="cr-journal__star cr-journal__star--off"><svg viewBox="0 0 24 24" fill="currentColor" focusable="false"><path d="' . $path . '"/></svg></span>';
+	$clip   = is_rtl() ? 'inset(0 0 0 50%)' : 'inset(0 50% 0 0)';
+	$half   = '<span class="cr-journal__star cr-journal__star--half"><svg viewBox="0 0 24 24" fill="currentColor" focusable="false"><path opacity="0.3" d="' . $path . '"/><path style="clip-path:' . $clip . '" d="' . $path . '"/></svg></span>';
+	$out    = '<p class="cr-journal__rating" role="img" aria-label="' . esc_attr( $label ) . '">';
+	$out   .= str_repeat( $full, (int) $counts['full'] ) . ( ! empty( $counts['half'] ) ? $half : '' ) . str_repeat( $empty, (int) $counts['empty'] );
+	return $out . '<span class="cr-journal__rating-value">' . esc_html( rating_text( $value ) . ' / 5' ) . '</span></p>';
+}
+
+/**
+ * The featured-first cover for the book object.
+ *
+ * @param \WP_Post             $post  Post.
+ * @param array<string, mixed> $a     Resolved attributes.
+ * @param array<string, mixed> $block Read-card block.
+ * @param string               $size  WordPress image size.
+ * @return string
+ */
+function book_cover( \WP_Post $post, array $a, array $block, string $size ): string {
+	if ( ! function_exists( '\\PKIW\\kind_picture' ) ) {
+		return '';
+	}
+	$pic   = \PKIW\kind_picture( $post->ID );
+	$title = trim( (string) ( $a['bookTitle'] ?? '' ) );
+	$title = '' !== $title ? $title : get_the_title( $post );
+	if ( '' !== (string) ( $pic['source'] ?? '' ) && '' !== (string) ( $pic['url'] ?? '' ) ) {
+		$alt = trim( (string) ( $a['coverImageAlt'] ?? '' ) );
+		if ( '' === $alt ) {
+			$alt = trim( (string) ( $pic['alt'] ?? '' ) );
+		}
+		if ( '' === $alt ) {
+			$alt = sprintf( /* translators: %s: book title */ __( 'Cover of %s', 'courtneyr-child' ), $title );
+		}
+		$image = (int) ( $pic['attachment_id'] ?? 0 ) > 0
+			? wp_get_attachment_image(
+				(int) $pic['attachment_id'],
+				$size,
+				false,
+				array(
+					'class'    => 'cr-book__img u-photo',
+					'alt'      => $alt,
+					'loading'  => 'lazy',
+					'decoding' => 'async',
+				)
+			)
+			: '<img class="cr-book__img u-photo" src="' . esc_url( (string) $pic['url'] ) . '" alt="' . esc_attr( $alt ) . '" loading="lazy" decoding="async">';
+		return '<div class="pk-media cr-book__cover cr-book__cover--' . ( 'featured' === $pic['source'] ? 'featured' : 'cover' ) . '">' . $image . '</div>';
+	}
+	return '<div class="pk-media cr-book__cover cr-book__cover--type" aria-hidden="true"><span class="cr-book__type-title">' . esc_html( $title ) . '</span><span class="cr-book__type-author">' . esc_html( (string) ( $a['authorName'] ?? '' ) ) . '</span></div>';
 }
 
 /**
@@ -198,10 +314,9 @@ function add_title_lede( string $html, array $block ): string {
 	if ( null === $read ) {
 		return $html;
 	}
-	$a      = \Courtneyr\Child\Journal\card_attrs( $post, 'post-kinds-indieweb/read-card', (array) ( $read['attrs'] ?? array() ) );
+	$a      = read_attrs( $post, $read );
 	$author = trim( (string) ( $a['authorName'] ?? '' ) );
-	$status = (string) ( $a['readStatus'] ?? 'to-read' );
-	$rating = (int) ( $a['rating'] ?? 0 );
+	$status = (string) $a['readStatus'];
 	$pages  = (int) ( $a['pageCount'] ?? 0 );
 	$cur    = (int) ( $a['currentPage'] ?? 0 );
 	$out    = '';
@@ -209,13 +324,7 @@ function add_title_lede( string $html, array $block ): string {
 	if ( '' !== $author ) {
 		$out .= '<div class="cr-journal__lede cr-read__author">' . esc_html( $author ) . '</div>';
 	}
-	if ( $rating > 0 ) {
-		$out .= '<p class="cr-journal__rating" role="img" aria-label="' . esc_attr( sprintf( /* translators: %d: rating */ __( 'Rated %d of 5', 'courtneyr-child' ), $rating ) ) . '">';
-		for ( $i = 1; $i <= 5; $i++ ) {
-			$out .= '<span class="cr-journal__star' . ( $i <= $rating ? '' : ' cr-journal__star--off' ) . '"><svg viewBox="0 0 24 24" fill="currentColor" focusable="false"><path d="M12 2l3 6.5 7 .6-5.3 4.6 1.6 6.8L12 17l-6.9 3.5 1.6-6.8L1.4 9.1l7-.6z"/></svg></span>';
-		}
-		$out .= '<span class="cr-journal__rating-value">' . esc_html( sprintf( '%d / 5', $rating ) ) . '</span></p>';
-	}
+	$out .= rating_html( (float) $a['rating'] );
 
 	list( $label ) = status_copy( $status );
 	$when          = '';
@@ -245,12 +354,13 @@ add_filter( 'render_block', __NAMESPACE__ . '\\add_title_lede', 20, 2 );
 /**
  * The library card.
  *
- * @param array<string, mixed> $a    Attributes.
+ * @param array<string, mixed> $block Read-card block.
  * @param \WP_Post             $post Post.
  * @return string Empty when no fact is stored.
  */
-function reading_record( array $a, \WP_Post $post ): string {
-	$status = (string) ( $a['readStatus'] ?? 'to-read' );
+function reading_record( array $block, \WP_Post $post ): string {
+	$a      = read_attrs( $post, $block );
+	$status = (string) $a['readStatus'];
 	$rows   = array();
 	list( $s_iso, $s_disp ) = date_pair( (string) ( $a['startedAt'] ?? '' ) );
 	list( $f_iso, $f_disp ) = date_pair( (string) ( $a['finishedAt'] ?? '' ) );
@@ -258,7 +368,7 @@ function reading_record( array $a, \WP_Post $post ): string {
 		$rows[] = array( __( 'Started', 'courtneyr-child' ), '<time datetime="' . esc_attr( $s_iso ) . '">' . esc_html( $s_disp ) . '</time>' );
 	}
 	if ( '' !== $f_iso && in_array( $status, array( 'finished', 'abandoned' ), true ) ) {
-		$rows[] = array( 'abandoned' === $status ? __( 'Set aside', 'courtneyr-child' ) : __( 'Finished', 'courtneyr-child' ), '<time datetime="' . esc_attr( $f_iso ) . '">' . esc_html( $f_disp ) . '</time>' );
+		$rows[] = array( 'abandoned' === $status ? __( 'Abandoned', 'courtneyr-child' ) : __( 'Finished', 'courtneyr-child' ), '<time datetime="' . esc_attr( $f_iso ) . '">' . esc_html( $f_disp ) . '</time>' );
 	}
 	$pages = (int) ( $a['pageCount'] ?? 0 );
 	$cur   = (int) ( $a['currentPage'] ?? 0 );
@@ -283,7 +393,7 @@ function reading_record( array $a, \WP_Post $post ): string {
 		array(
 			'shape'  => 'seal',
 			'big'    => $word,
-			'small'  => '' !== $f_disp && in_array( $status, array( 'finished', 'abandoned' ), true ) ? gmdate( 'd M Y', (int) strtotime( (string) $a['finishedAt'] ) ) : ( '' !== $s_disp ? gmdate( 'd M Y', (int) strtotime( (string) $a['startedAt'] ) ) : '' ),
+			'small'  => '' !== $f_disp && in_array( $status, array( 'finished', 'abandoned' ), true ) ? gmdate( 'd M Y', (int) strtotime( $f_iso . ' 12:00:00 UTC' ) ) : ( '' !== $s_disp ? gmdate( 'd M Y', (int) strtotime( $s_iso . ' 12:00:00 UTC' ) ) : '' ),
 			'ring'   => __( 'Reading record', 'courtneyr-child' ),
 			'ink'    => INKS[ pick( $seed, 3, count( INKS ) ) ],
 			'tilt'   => pick( $seed, 6, TILTS ),
@@ -300,6 +410,30 @@ function reading_record( array $a, \WP_Post $post ): string {
 	}
 	$out .= '</dl><div class="cr-record-stamp">' . $stamp . '</div></section>';
 	return $out;
+}
+
+/**
+ * The single read footer's one date item.
+ *
+ * @param array<string, mixed> $a      Resolved attributes.
+ * @param string               $status Read status.
+ * @param \WP_Post             $post   Post.
+ * @return string
+ */
+function journal_meta( array $a, string $status, \WP_Post $post ): string {
+	list( $s_iso, $s_disp ) = date_pair( (string) ( $a['startedAt'] ?? '' ) );
+	list( $f_iso, $f_disp ) = date_pair( (string) ( $a['finishedAt'] ?? '' ) );
+	$when = '';
+	if ( '' !== $s_iso ) {
+		$when = '<time datetime="' . esc_attr( $s_iso ) . '">' . esc_html( $s_disp ) . '</time>';
+	}
+	if ( '' !== $f_iso && in_array( $status, array( 'finished', 'abandoned' ), true ) ) {
+		$when .= ( '' !== $when ? ' – ' : '' ) . '<time datetime="' . esc_attr( $f_iso ) . '">' . esc_html( $f_disp ) . '</time>';
+	}
+	if ( '' === $when ) {
+		$when = esc_html( get_the_date( '', $post ) );
+	}
+	return meta_row( array( meta_item( 'time', $when, '' ) ) );
 }
 
 /**
@@ -361,9 +495,8 @@ function journal_page( string $html, array $block ): string {
 	if ( null === $read || false === strpos( $html, 'k-read' ) ) {
 		return $html;
 	}
-	$a      = \Courtneyr\Child\Journal\card_attrs( $post, 'post-kinds-indieweb/read-card', (array) ( $read['attrs'] ?? array() ) );
-	$status = (string) ( $a['readStatus'] ?? 'to-read' );
-	$seed   = seed( (string) $post->ID, (string) ( $a['isbn'] ?? '' ), (string) ( $a['bookTitle'] ?? '' ) );
+	$a      = read_attrs( $post, $read );
+	$status = (string) $a['readStatus'];
 
 	// 1. The Kindle figure leaves the flow (returns as "Read a sample").
 	//    Off by default: read.amazon.com answers the preview URL with a
@@ -388,13 +521,17 @@ function journal_page( string $html, array $block ): string {
 			$html      = substr( $html, 0, $n_start ) . substr( $html, $n_end );
 		}
 	}
+	$html = cut_elements( $html, 'div', 'pk-stars' );
 
-	// 3. The cover: the card's own, else the post's featured image, else
-	//    a typographic cover. The bookmark follows the stored status.
+	// 3. The plugin's featured-first picture replaces the card cover. When
+	//    that helper is unavailable, retain the earlier local fallback.
 	$meta_pos = strpos( $html, '<div class="pk-meta">' );
 	if ( false !== $meta_pos ) {
-		$cover = '';
-		if ( false === strpos( $html, 'class="pk-media"' ) ) {
+		$cover = book_cover( $post, $a, $read, 'large' );
+		if ( '' !== $cover ) {
+			$html     = cut_elements( $html, 'div', 'pk-media' );
+			$meta_pos = strpos( $html, '<div class="pk-meta">' );
+		} elseif ( false === strpos( $html, 'class="pk-media"' ) ) {
 			if ( has_post_thumbnail( $post ) ) {
 				$cover = '<div class="pk-media cr-book__cover cr-book__cover--featured">' . get_the_post_thumbnail( $post, 'large', array( 'class' => 'cr-book__img', 'loading' => 'lazy' ) ) . '</div>';
 			} else {
@@ -424,36 +561,17 @@ function journal_page( string $html, array $block ): string {
 		$html = $tags->get_updated_html();
 	}
 
-	// 5. What follows the book: margin marks, notes, record, sample, meta.
-	$lines = margin_lines( $seed, 'read' );
-	$after = aside( $lines[0], 1 ) . aside( $lines[1], 2, 'cr-hand--orange cr-hand--underline' );
+	// 5. What follows the book: notes, record, sample, meta.
+	$after = '';
 	if ( '' !== $note_html ) {
 		$after .= notes_section( __( 'Notes from this read', 'courtneyr-child' ), $note_html );
 	}
-	$after .= reading_record( $a, $post );
+	$after .= reading_record( $read, $post );
 	if ( '' !== $kindle ) {
 		$after .= '<section class="cr-read__sample"><h2 class="cr-read__sample-title">' . esc_html__( 'Read a sample', 'courtneyr-child' ) . '</h2>'
-			. '<p class="cr-hand cr-hand--small cr-read__sample-note" aria-hidden="true">' . esc_html__( 'peek inside →', 'courtneyr-child' ) . '</p>'
 			. $kindle . '</section>';
 	}
-	$after .= aside( $lines[2], 3 );
-
-	$items = array();
-	list( $label ) = status_copy( $status );
-	list( $s_iso, $s_disp ) = date_pair( (string) ( $a['startedAt'] ?? '' ) );
-	list( $f_iso, $f_disp ) = date_pair( (string) ( $a['finishedAt'] ?? '' ) );
-	$when = '';
-	if ( '' !== $s_iso ) {
-		$when .= '<time datetime="' . esc_attr( $s_iso ) . '">' . esc_html( $s_disp ) . '</time>';
-	}
-	if ( '' !== $f_iso && in_array( $status, array( 'finished', 'abandoned' ), true ) ) {
-		$when .= ( '' !== $when ? ' – ' : '' ) . '<time datetime="' . esc_attr( $f_iso ) . '">' . esc_html( $f_disp ) . '</time>';
-	}
-	$items[] = meta_item( 'time', ( '' !== $when ? $when : esc_html( get_the_date( '', $post ) ) ), $label );
-	$book    = esc_html( (string) ( $a['bookTitle'] ?? $post->post_title ) );
-	$facts   = array_filter( array( (string) ( $a['authorName'] ?? '' ), ( (int) ( $a['pageCount'] ?? 0 ) > 0 ? sprintf( /* translators: %d: pages */ __( '%d pages', 'courtneyr-child' ), (int) $a['pageCount'] ) : '' ) ) );
-	$items[] = meta_item( 'book', $book . ( ! empty( $facts ) ? '<br>' . esc_html( implode( ' · ', $facts ) ) : '' ), __( 'Book', 'courtneyr-child' ) );
-	$after  .= meta_row( $items );
+	$after .= journal_meta( $a, $status, $post );
 
 	return wrap( $html, $after );
 }

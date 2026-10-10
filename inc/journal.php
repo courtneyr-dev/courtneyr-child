@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Handwritten margin lines, in sets of three so a page never repeats a
  * line. Short, place-neutral, time-neutral: nothing here claims a fact.
  *
- * @param string $flavour 'travel', 'film', 'read', 'food', 'drink' or 'quote'.
+ * @param string $flavour 'travel', 'film', 'food', 'drink' or 'quote'.
  * @return array<int, array<int, string>>
  */
 function margin_copy( string $flavour ): array {
@@ -106,25 +106,6 @@ function margin_copy( string $flavour ): array {
 			),
 		);
 	}
-	if ( 'read' === $flavour ) {
-		return array(
-			array(
-				__( 'Good books. Brighter days.', 'courtneyr-child' ),
-				__( 'Keep reading. Keep exploring.', 'courtneyr-child' ),
-				__( 'Notes in the margins.', 'courtneyr-child' ),
-			),
-			array(
-				__( 'Books make a quieter, kinder world.', 'courtneyr-child' ),
-				__( 'Different places. Same pull.', 'courtneyr-child' ),
-				__( 'Read. Noted. Kept.', 'courtneyr-child' ),
-			),
-			array(
-				__( 'Same shelf. New doors.', 'courtneyr-child' ),
-				__( 'Pages over pixels.', 'courtneyr-child' ),
-				__( 'Come back to this one.', 'courtneyr-child' ),
-			),
-		);
-	}
 	return array(
 		array(
 			__( 'Same places. A more curious life.', 'courtneyr-child' ),
@@ -148,7 +129,7 @@ function margin_copy( string $flavour ): array {
  * Pick one set of margin lines for a seed.
  *
  * @param int    $seed    Stable seed.
- * @param string $flavour 'travel', 'film', 'read', 'food', 'drink' or 'quote'.
+ * @param string $flavour 'travel', 'film', 'food', 'drink' or 'quote'.
  * @return string[] Three lines.
  */
 function margin_lines( int $seed, string $flavour ): array {
@@ -276,7 +257,8 @@ const LOCATION_ATTR_VISIBILITY_MAP = array(
  * The plugin mirrors card attributes into `_pkiw_*` meta (Card_Meta_Sync)
  * and fills empty attributes from that meta when it renders, so a post
  * whose block stores only some fields still shows the rest. Read them
- * the same way. Numeric attributes come back as integers.
+ * the same way. Numeric attributes come back as integers, except read
+ * ratings, which may be fractional.
  *
  * Location-related attributes (name/address/locality/region/country/
  * coordinates/url — see LOCATION_ATTR_VISIBILITY_MAP) are only filled
@@ -308,8 +290,12 @@ function card_attrs( \WP_Post $post, string $block_name, array $attrs ): array {
 
 	$numeric = array( 'pageCount', 'currentPage', 'rating', 'seasonNumber', 'episodeNumber', 'releaseYear' );
 	$floats  = array( 'geoLatitude', 'geoLongitude' );
+	// Read cards store half-star ratings; watch/comic ratings keep their integer behavior.
+	$fractional = 'post-kinds-indieweb/read-card' === $block_name ? array( 'rating' ) : array();
 	foreach ( $map as $attr => $suffix ) {
-		if ( isset( $attrs[ $attr ] ) && '' !== $attrs[ $attr ] && 0 !== $attrs[ $attr ] && 0.0 !== $attrs[ $attr ] ) {
+		$filled              = isset( $attrs[ $attr ] ) && '' !== $attrs[ $attr ] && 0 !== $attrs[ $attr ] && 0.0 !== $attrs[ $attr ];
+		$fractional_unfilled = $filled && in_array( $attr, $fractional, true ) && ( ! is_numeric( $attrs[ $attr ] ) || (float) $attrs[ $attr ] <= 0.0 );
+		if ( $filled && ! $fractional_unfilled ) {
 			continue;
 		}
 		$location_field = LOCATION_ATTR_VISIBILITY_MAP[ $attr ] ?? null;
@@ -322,6 +308,10 @@ function card_attrs( \WP_Post $post, string $block_name, array $attrs ): array {
 				if ( is_numeric( $value ) ) {
 					$attrs[ $attr ] = (float) $value;
 				}
+				continue;
+			}
+			if ( in_array( $attr, $fractional, true ) && is_numeric( $value ) ) {
+				$attrs[ $attr ] = (float) $value;
 				continue;
 			}
 			$attrs[ $attr ] = in_array( $attr, $numeric, true ) && is_numeric( $value ) ? (int) $value : $value;
