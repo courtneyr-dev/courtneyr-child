@@ -521,20 +521,28 @@ namespace Courtneyr\Child\PlayVideo\Mf2Tests {
 		return '<span class="pk-entry-props" hidden><data class="u-url" value="https://example.test/p/' . $post_id . '"></data><data class="dt-published" value="2026-09-22T10:00:00+00:00"></data><span class="p-author h-card"><data class="p-name" value="Courtney"></data></span></span>';
 	}
 
+	/** Real post-content block shape after the plugin wraps singular content. */
+	function single_content_shape( int $post_id ): string {
+		return '<div class="entry-content wp-block-post-content single-post__content"><div class="h-entry kind-play pkiw-singular-entry"><p>Intro</p><article class="pk-card k-play h-cite u-play-of"><h2>Old</h2></article><a class="u-url" href="https://example.test/play/' . $post_id . '" hidden></a><time class="dt-published" datetime="2026-09-22T10:00:00+00:00" hidden></time></div></div>';
+	}
+
 	check_case(
 		'single cabinet mf2',
 		static function (): bool {
 			reset_state();
 			play_post( 50, 'video', 'Post Title' );
 			$GLOBALS['cr_request'] = array( 'single' => true, 'queried_id' => 50 );
-			$html  = single_cabinet( '<p>Intro</p><article class="pk-card k-play h-cite u-play-of"><h2>Old</h2></article>', array( 'blockName' => 'core/post-content' ) );
-			$entry = first_item( parse_fragment( '<div class="h-entry">' . $html . '</div>' ), 'h-entry' );
-			if ( null === $entry ) {
+			$html   = single_cabinet( single_content_shape( 50 ), array( 'blockName' => 'core/post-content' ) );
+			$parsed = parse_fragment( $html );
+			$items  = $parsed['items'] ?? array();
+			if ( 1 !== count( $items ) || ! is_array( $items[0] ?? null ) || ! in_array( 'h-entry', $items[0]['type'] ?? array(), true ) ) {
 				return false;
 			}
+			$entry  = $items[0];
 			$cite   = nested_prop( $entry, 'play-of', 'h-cite' );
 			$author = nested_prop( $entry, 'author', 'h-card' );
 			return array( 'Post Title' ) === string_values( prop( $entry, 'name' ) )
+				&& 1 === count( prop( $entry, 'name' ) )
 				&& has_value( $entry, 'published', '2026-09-22T10:00:00+00:00' )
 				&& has_value( $entry, 'url', 'https://example.test/play/50' )
 				&& null !== $author
@@ -543,7 +551,7 @@ namespace Courtneyr\Child\PlayVideo\Mf2Tests {
 				&& has_value( $cite, 'name', 'Game Title' )
 				&& has_value( $cite, 'rating', '4' )
 				&& cite_has_provider_uids( $cite )
-				&& 1 === count( prop( $entry, 'name' ) );
+				&& false === strpos( $html, 'Old' );
 		}
 	);
 
@@ -554,11 +562,50 @@ namespace Courtneyr\Child\PlayVideo\Mf2Tests {
 			play_post( 51, 'video', '' );
 			$GLOBALS['cr_kind_facts'][51]['title'] = '';
 			$GLOBALS['cr_request'] = array( 'single' => true, 'queried_id' => 51 );
-			$html  = single_cabinet( '<article class="pk-card k-play h-cite u-play-of"><h2>Old</h2></article>', array( 'blockName' => 'core/post-content' ) );
-			$entry = first_item( parse_fragment( '<div class="h-entry">' . $html . '</div>' ), 'h-entry' );
-			return null !== $entry
-				&& false !== strpos( $html, '<h1 class="cr-cabinet__title">Untitled 51</h1>' )
+			$html   = single_cabinet( single_content_shape( 51 ), array( 'blockName' => 'core/post-content' ) );
+			$parsed = parse_fragment( $html );
+			$items  = $parsed['items'] ?? array();
+			if ( 1 !== count( $items ) || ! is_array( $items[0] ?? null ) || ! in_array( 'h-entry', $items[0]['type'] ?? array(), true ) ) {
+				return false;
+			}
+			$entry = $items[0];
+			return false !== strpos( $html, '<h1 class="cr-cabinet__title">Untitled 51</h1>' )
 				&& array() === prop( $entry, 'name' );
+		}
+	);
+
+	check_case(
+		'single cabinet fallback without wrapper',
+		static function (): bool {
+			reset_state();
+			play_post( 52, 'video', 'Post Title' );
+			$GLOBALS['cr_request'] = array( 'single' => true, 'queried_id' => 52 );
+			$html = single_cabinet( '<p>Intro</p><article class="pk-card k-play h-cite u-play-of"><h2>Old</h2></article>', array( 'blockName' => 'core/post-content' ) );
+			return str_starts_with( $html, '<span class="cr-cabinet__entry" hidden>' )
+				&& 1 === substr_count( $html, '<article class="cr-cabinet cr-cabinet--single h-cite u-play-of"' )
+				&& false === strpos( $html, 'Old' );
+		}
+	);
+
+	check_case(
+		'single cabinet lands inside the wrapper',
+		static function (): bool {
+			reset_state();
+			play_post( 53, 'video', 'Post Title' );
+			$GLOBALS['cr_request'] = array( 'single' => true, 'queried_id' => 53 );
+			$html         = single_cabinet( single_content_shape( 53 ), array( 'blockName' => 'core/post-content' ) );
+			$wrapper_open = '<div class="h-entry kind-play pkiw-singular-entry">';
+			$open_pos     = strpos( $html, $wrapper_open );
+			$span_pos     = strpos( $html, '<span class="cr-cabinet__entry"' );
+			$url_pos      = strpos( $html, '<a class="u-url" href="https://example.test/play/53" hidden></a>' );
+			$url_close    = false === $url_pos ? false : strpos( $html, '</a>', $url_pos );
+			return false !== $open_pos
+				&& false !== $span_pos
+				&& false !== $url_pos
+				&& false !== $url_close
+				&& $span_pos >= $open_pos + strlen( $wrapper_open )
+				&& $span_pos < $url_close
+				&& ! str_starts_with( $html, '<span class="cr-cabinet__entry" hidden>' );
 		}
 	);
 

@@ -295,6 +295,21 @@ function card_article_span( string $html ): ?array {
 }
 
 /**
+ * Opening span for the plugin's singular entry wrapper.
+ *
+ * @param string $html Rendered post-content block.
+ * @return array{0: int, 1: int}|null Start and end offsets, or null.
+ */
+function singular_entry_open_span( string $html ): ?array {
+	if ( ! preg_match( '/<div\\b[^>]*\\bclass="[^"]*(?<![\\w-])pkiw-singular-entry(?![\\w-])[^"]*"[^>]*>/i', $html, $match, PREG_OFFSET_CAPTURE ) ) {
+		return null;
+	}
+
+	$start = (int) $match[0][1];
+	return array( $start, $start + strlen( $match[0][0] ) );
+}
+
+/**
  * Turn an archive play item into an arcade cabinet.
  *
  * @param mixed $html  Rendered HTML.
@@ -570,6 +585,10 @@ function single_cabinet_html( \WP_Post $post, array $facts ): string {
 /**
  * Replace the play card in post content with the single cabinet.
  *
+ * The cabinet lands inside the plugin's h-entry wrapper so the single is one
+ * h-entry with a play-of h-cite; prepending remains the fallback when that
+ * wrapper is absent.
+ *
  * @param string               $html  Rendered post-content block.
  * @param array<string, mixed> $block Parsed block.
  * @return string Rendered HTML.
@@ -589,6 +608,12 @@ function single_cabinet( string $html, array $block ): string {
 	if ( null !== $span ) {
 		$html = substr( $html, 0, $span[0] ) . substr( $html, $span[1] );
 	}
+
+	$entry = singular_entry_open_span( $html );
+	if ( null !== $entry ) {
+		return substr( $html, 0, $entry[1] ) . $cabinet . substr( $html, $entry[1] );
+	}
+
 	return $cabinet . $html;
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\single_cabinet', 20, 2 );
