@@ -431,7 +431,7 @@ namespace Courtneyr\Child\PlayBoard\Tests {
 	);
 
 	check_case(
-		'spine duplicate titles and headings are accessible',
+		'spine titles plus dates name every link and headings are accessible',
 		static function (): bool {
 			reset_state();
 			$a = board_post( 102 );
@@ -445,7 +445,7 @@ namespace Courtneyr\Child\PlayBoard\Tests {
 				&& false !== strpos( $plain, 'class="pk-title p-name"' )
 				&& false !== strpos( $one, 'aria-labelledby="t102 d102"' )
 				&& false !== strpos( $two, 'aria-labelledby="t103 d103"' )
-				&& false === strpos( $plain, 'aria-labelledby' )
+				&& false !== strpos( $plain, 'aria-labelledby="t102 d102"' )
 				&& false !== strpos( $one, 'id="d102"' )
 				&& false !== strpos( $two, 'id="d103"' )
 				&& false !== strpos( $one, 'Sep 19, 2026' )
