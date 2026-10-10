@@ -361,6 +361,26 @@ function add_title_lede( string $html, array $block ): string {
 add_filter( 'render_block', __NAMESPACE__ . '\\add_title_lede', 20, 2 );
 
 /**
+ * A password-protected read prints no kind or category chips in its
+ * header: the title, author and password form are all it shows.
+ *
+ * @param string               $html  Rendered post-terms block.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function protected_header_terms( string $html, array $block ): string {
+	if ( ! is_read_single() || ! post_password_required( \get_queried_object_id() ) ) {
+		return $html;
+	}
+	$class = (string) ( $block['attrs']['className'] ?? '' );
+	if ( 1 === preg_match( '/(?<![\w-])single-post__(kind|category)(?![\w-])/', $class ) ) {
+		return '';
+	}
+	return $html;
+}
+add_filter( 'render_block_core/post-terms', __NAMESPACE__ . '\\protected_header_terms', 10, 2 );
+
+/**
  * The library card.
  *
  * @param array<string, mixed> $block Read-card block.

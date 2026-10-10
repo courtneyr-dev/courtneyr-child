@@ -14,6 +14,7 @@ use function Courtneyr\Child\SingleRead\add_title_lede;
 use function Courtneyr\Child\SingleRead\book_cover;
 use function Courtneyr\Child\SingleRead\date_pair;
 use function Courtneyr\Child\SingleRead\journal_page;
+use function Courtneyr\Child\SingleRead\protected_header_terms;
 use function Courtneyr\Child\SingleRead\rating_html;
 use function Courtneyr\Child\SingleRead\rating_text;
 use function Courtneyr\Child\SingleRead\read_attrs;
@@ -203,6 +204,12 @@ cr_read_group(
 		cr_read_contains( 'cr-read__author', $html, 'protected keeps the author' );
 		cr_read_not_contains( 'cr-journal__rating', $html, 'protected drops the rating' );
 		cr_read_not_contains( 'cr-read__status', $html, 'protected drops status and dates' );
+		$chip = '<div class="taxonomy-kind single-post__kind"><a href="/kind/read/">Read</a></div>';
+		cr_read_same( '', protected_header_terms( $chip, array( 'attrs' => array( 'className' => 'cr-chip single-post__kind' ) ) ), 'protected drops the kind chip' );
+		cr_read_same( '', protected_header_terms( $chip, array( 'attrs' => array( 'className' => 'cr-chip single-post__category' ) ) ), 'protected drops the category chip' );
+		cr_read_same( $chip, protected_header_terms( $chip, array( 'attrs' => array( 'className' => 'related-post__terms' ) ) ), 'other term lists stay' );
+		$GLOBALS['cr_read_protected'] = array();
+		cr_read_same( $chip, protected_header_terms( $chip, array( 'attrs' => array( 'className' => 'cr-chip single-post__kind' ) ) ), 'public read keeps its chips' );
 	}
 );
 
