@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 300" width="110" height="300"><!-- Decorative tomato vine for the recipe single's binder page margin (PKIW #229). Cerulean line art from the palette; a CSS background, never content. -->
+<g fill="none" stroke="#126782" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M40 296 C46 240 40 190 58 140 C70 104 66 60 80 8"/>
+<path d="M56 150 C38 150 26 140 18 126 C34 124 48 132 56 150 Z M55 148 L22 128"/>
+<path d="M62 120 C78 112 90 112 100 116 C90 130 74 132 62 120 Z M63 120 L96 117"/>
+<path d="M68 82 C54 76 48 64 46 52 C60 56 68 68 68 82 Z M67 80 L49 55"/>
+<path d="M74 46 C84 36 94 32 102 32 C98 46 86 50 74 46 Z M75 46 L99 34"/>
+<path d="M44 236 C28 232 20 220 16 206 C32 208 42 220 44 236 Z M43 234 L19 209"/>
+<path d="M46 196 C58 184 70 182 80 184 C74 198 60 202 46 196 Z M47 196 L77 186"/>
+<path d="M58 140 C54 156 44 164 36 170"/>
+<circle cx="32" cy="196" r="20"/>
+<path d="M22 178 L32 184 L42 178 M32 184 L32 174"/>
+<path d="M24 202 C26 208 30 211 35 212"/>
+</g>
+</svg>

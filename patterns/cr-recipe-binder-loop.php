@@ -22,15 +22,19 @@ declare( strict_types = 1 );
 		<!-- wp:post-kinds-indieweb/recipe-courses {"className":"cr-recipe-tabs"} /-->
 		<?php endif; ?>
 
-		<!-- wp:post-template {"className":"cr-archive-stream__list cr-recipe-binder__list"} -->
-			<!-- wp:post-kinds-indieweb/stream-card {"headingLevel":2,"className":"is-style-cr-binder-card"} /-->
-		<!-- /wp:post-template -->
+		<!-- wp:group {"metadata":{"name":"Binder spread"},"className":"cr-recipe-binder__spread","layout":{"type":"default"}} -->
+		<div class="wp-block-group cr-recipe-binder__spread">
+			<!-- wp:post-template {"className":"cr-archive-stream__list cr-recipe-binder__list"} -->
+				<!-- wp:post-kinds-indieweb/stream-card {"headingLevel":2,"className":"is-style-cr-binder-card"} /-->
+			<!-- /wp:post-template -->
 
-		<!-- wp:query-no-results -->
-			<!-- wp:paragraph {"className":"cr-archive-stream__empty"} -->
-			<p class="cr-archive-stream__empty"><?php esc_html_e( 'Nothing here yet. Browse every kind and format below, or jump to the Stream.', 'courtneyr-child' ); ?></p>
-			<!-- /wp:paragraph -->
-		<!-- /wp:query-no-results -->
+			<!-- wp:query-no-results -->
+				<!-- wp:paragraph {"className":"cr-archive-stream__empty"} -->
+				<p class="cr-archive-stream__empty"><?php esc_html_e( 'Nothing here yet. Browse every kind and format below, or jump to the Stream.', 'courtneyr-child' ); ?></p>
+				<!-- /wp:paragraph -->
+			<!-- /wp:query-no-results -->
+		</div>
+		<!-- /wp:group -->
 
 		<!-- wp:query-pagination {"paginationArrow":"arrow","layout":{"type":"flex","justifyContent":"center"}} -->
 			<!-- wp:query-pagination-previous <?php echo wp_json_encode( array( 'label' => __( 'Previous', 'courtneyr-child' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- block attribute JSON. ?> /-->

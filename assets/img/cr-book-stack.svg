@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 200" width="220" height="200">
+<!-- Decorative halftone stack of four books; a CSS background with its foot on the bottom edge. -->
+<defs>
+<pattern id="dots-blue" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#8ecae6"/><circle cx="3" cy="3" r="2.2" fill="#023047"/><circle cx="9" cy="9" r="2.2" fill="#023047"/></pattern>
+<pattern id="dots-ivory" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#fbfaf5"/><circle cx="3" cy="3" r="2.2" fill="#126782"/><circle cx="9" cy="9" r="2.2" fill="#126782"/></pattern>
+</defs>
+<g stroke="#241c4a" stroke-width="4" stroke-linejoin="round">
+<path d="M10 158h198v40H10z" fill="url(#dots-blue)"/>
+<path d="M30 112h174v42H30z" fill="url(#dots-ivory)"/>
+<path d="M16 66h184v42H16z" fill="url(#dots-blue)"/>
+<path d="M44 20h156v42H44z" fill="url(#dots-ivory)"/>
+</g>
+<g fill="#fbfaf5" stroke="#241c4a" stroke-width="4">
+<path d="M28 169h72v18H28z"/><path d="M116 123h70v18h-70z"/>
+</g>
+<g fill="#126782" stroke="#241c4a" stroke-width="4">
+<path d="M108 169h82v18h-82z"/><path d="M34 77h78v18H34z"/><path d="M60 31h62v18H60z"/>
+</g>
+</svg>

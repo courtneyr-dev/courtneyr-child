@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 
 const CHECKIN_ARCHIVE = process.env.CR_CHECKIN_ARCHIVE_PATH || '/kind/checkin/';
 const CHECKIN_MONTH = process.env.CR_CHECKIN_MONTH_QUERY || '?monthnum=7'; // narrows the archive to July (local fixtures 576 and 583)
-const CHECKIN_SINGLES = ( process.env.CR_CHECKIN_SINGLE_PATHS || '/2026/09/12/evening-walk/,/2026/08/20/train-day/,/2026/07/20/quiet-afternoon/,/2026/08/09/checked-in-at-hidden-venue/' ).split( ',' ); // public, approximate, private, private with a generated title
+const CHECKIN_SINGLES = ( process.env.CR_CHECKIN_SINGLE_PATHS || '/2026/09/12/evening-walk/,/2026/08/20/train-day/,/2026/07/20/quiet-afternoon/,/2026/08/09/check-in-august-9-2026/' ).split( ',' ); // public, approximate, private, private with a generated title
 const CHECKIN_STREAMS = ( process.env.CR_CHECKIN_STREAM_PATHS || '/stream/,/stream/?query-1-page=2,/stream/?query-1-page=3' ).split( ',' ); // Stream pages that show public, approximate and private check-ins
 
 const MONTHS = [ 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC' ];
