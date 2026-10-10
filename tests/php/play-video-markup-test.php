@@ -135,6 +135,7 @@ $new_files = array(
 	'assets/css/cr-play-video.css',
 	'tests/php/play-video-test.php',
 	'tests/php/play-video-markup-test.php',
+	'tests/php/play-video-mf2-test.php',
 );
 
 check_case(
@@ -282,6 +283,20 @@ check_case(
 );
 
 check_case(
+	'archive panel owns its grid area',
+	static function () use ( $rules ): bool {
+		return has_decls( $rules, '.cr-play .pk-card.cr-cabinet .cr-cabinet__panel', array( 'grid-area' => 'panel' ) );
+	}
+);
+
+check_case(
+	'hover lift requires motion preference',
+	static function () use ( $css ): bool {
+		return (bool) preg_match( '/@media\s*\(\s*hover\s*:\s*hover\s*\)\s*and\s*\(\s*prefers-reduced-motion\s*:\s*no-preference\s*\)\s*\{[\s\S]*?\.cr-play\s+\.pk-card\.cr-cabinet:hover\s*\{[\s\S]*?transform\s*:\s*translateY\(-1px\)\s*;/i', $css );
+	}
+);
+
+check_case(
 	'contrast pairs pass',
 	static function () use ( $tokens ): bool {
 		$defs = css_var_defs( $tokens );
@@ -348,5 +363,5 @@ check_case(
 	}
 );
 
-echo "\n", count( $failures ) ? count( $failures ) . ' failed' : '9 passed', "\n";
+echo "\n", count( $failures ) ? count( $failures ) . ' failed' : '11 passed', "\n";
 exit( count( $failures ) ? 1 : 0 );

@@ -1,78 +1,4 @@
 /* Video play objects: arcade cabinets, single record sheets and Stream cartridges. */
-/* stylelint-disable no-descending-specificity */
-
-.cr-play .pk-card.cr-cabinet {
-	--cr-cabinet-edge: var(--cr-russian-violet);
-	--cr-cabinet-shadow: var(--cr-shadow-hard);
-	position: relative;
-	box-sizing: border-box;
-	width: 100%;
-	max-width: 100%;
-	margin: 0;
-	padding: 0;
-	border: 2px solid var(--cr-cabinet-edge);
-	background: var(--cr-prussian-blue);
-	box-shadow: var(--cr-cabinet-shadow);
-	color: var(--cr-printer-ivory);
-}
-
-.cr-play .pk-card.cr-cabinet .pk-body {
-	display: grid;
-	grid-template-areas:
-		"marquee"
-		"screen"
-		"score"
-		"panel";
-	min-width: 0;
-}
-
-.cr-play .pk-card.cr-cabinet .pk-caption {
-	grid-area: marquee;
-	padding: var(--cr-space-sm);
-	border-bottom: 2px solid var(--cr-sky-blue);
-	background: var(--cr-russian-violet);
-	color: var(--cr-printer-ivory);
-}
-
-.cr-play .pk-card.cr-cabinet .pk-title {
-	margin: 0;
-	color: var(--cr-printer-ivory);
-	font-family: var(--cr-font-accent);
-	font-size: max( var(--cr-text-md), var(--cr-text-floor) );
-	font-weight: var(--cr-weight-bold);
-	line-height: var(--cr-leading-tight);
-	overflow-wrap: anywhere;
-	text-wrap: balance;
-}
-
-.cr-play .pk-card.cr-cabinet .pk-title a {
-	color: var(--cr-printer-ivory);
-	text-decoration: none;
-}
-
-.cr-play .pk-card.cr-cabinet .pk-title a::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-}
-
-.cr-play .pk-card.cr-cabinet .cr-cabinet__screen {
-	display: grid;
-	grid-area: screen;
-	aspect-ratio: 4 / 3;
-	margin: var(--cr-space-md);
-	overflow: hidden;
-	border: 2px solid var(--cr-sky-blue);
-	background: var(--cr-russian-violet);
-	place-items: center;
-}
-
-.cr-play .pk-card.cr-cabinet .cr-cabinet__image {
-	width: 100%;
-	max-width: 100%;
-	height: 100%;
-	object-fit: contain;
-}
 
 .cr-cabinet__glyph,
 .cr-cartridge__glyph {
@@ -92,19 +18,6 @@
 .cr-cartridge__glyph svg {
 	width: 100%;
 	height: auto;
-}
-
-.cr-play .pk-card.cr-cabinet .cr-cabinet__score {
-	grid-area: score;
-	margin: 0 var(--cr-space-md) var(--cr-space-md);
-	padding: var(--cr-space-xs) var(--cr-space-sm);
-	border: 2px solid var(--cr-sky-blue);
-	background: var(--cr-russian-violet);
-	color: var(--cr-selective-yellow);
-	font-family: var(--cr-font-mono);
-	font-size: max( var(--cr-text-sm), var(--cr-text-floor) );
-	letter-spacing: var(--cr-tracking-wide);
-	overflow-wrap: anywhere;
 }
 
 .cr-cabinet__panel {
@@ -152,28 +65,6 @@
 
 	.cr-cabinet__panel {
 		display: none;
-	}
-}
-
-.cr-play .pk-card.cr-cabinet--locked {
-	padding: var(--cr-space-md);
-	background: var(--cr-russian-violet);
-}
-
-.cr-play .pk-card.cr-cabinet:focus-within {
-	outline: 3px solid var(--cr-selective-yellow);
-	outline-offset: 4px;
-	box-shadow: var(--cr-cabinet-shadow), 0 0 0 7px var(--cr-ink);
-}
-
-.cr-play .pk-card.cr-cabinet:focus-within .pk-title a:focus {
-	outline: none;
-}
-
-@media (hover: hover) {
-
-	.cr-play .pk-card.cr-cabinet:hover {
-		transform: translateY(-1px);
 	}
 }
 
@@ -415,6 +306,101 @@ body.cr-video-single .cr-cabinet--single .cr-cabinet__review-body {
 	transform: rotate(var(--cr-rotate-neg));
 }
 
+.cr-play .pk-card.cr-cabinet {
+	--cr-cabinet-edge: var(--cr-russian-violet);
+	--cr-cabinet-shadow: var(--cr-shadow-hard);
+	position: relative;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+	border: 2px solid var(--cr-cabinet-edge);
+	background: var(--cr-prussian-blue);
+	box-shadow: var(--cr-cabinet-shadow);
+	color: var(--cr-printer-ivory);
+}
+
+.cr-play .pk-card.cr-cabinet .pk-body {
+	display: grid;
+	grid-template-areas:
+		"marquee"
+		"screen"
+		"score"
+		"panel";
+	min-width: 0;
+}
+
+.cr-play .pk-card.cr-cabinet .pk-caption {
+	grid-area: marquee;
+	padding: var(--cr-space-sm);
+	border-bottom: 2px solid var(--cr-sky-blue);
+	background: var(--cr-russian-violet);
+	color: var(--cr-printer-ivory);
+}
+
+.cr-play .pk-card.cr-cabinet .pk-title {
+	margin: 0;
+	color: var(--cr-printer-ivory);
+	font-family: var(--cr-font-accent);
+	font-size: max( var(--cr-text-md), var(--cr-text-floor) );
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+	text-wrap: balance;
+}
+
+.cr-play .pk-card.cr-cabinet .pk-title a {
+	color: var(--cr-printer-ivory);
+	text-decoration: none;
+}
+
+.cr-play .pk-card.cr-cabinet .pk-title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-play .pk-card.cr-cabinet .cr-cabinet__screen {
+	display: grid;
+	grid-area: screen;
+	aspect-ratio: 4 / 3;
+	margin: var(--cr-space-md);
+	overflow: hidden;
+	border: 2px solid var(--cr-sky-blue);
+	background: var(--cr-russian-violet);
+	place-items: center;
+}
+
+.cr-play .pk-card.cr-cabinet .cr-cabinet__image {
+	width: 100%;
+	max-width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.cr-play .pk-card.cr-cabinet .cr-cabinet__score {
+	grid-area: score;
+	margin: 0 var(--cr-space-md) var(--cr-space-md);
+	padding: var(--cr-space-xs) var(--cr-space-sm);
+	border: 2px solid var(--cr-sky-blue);
+	background: var(--cr-russian-violet);
+	color: var(--cr-selective-yellow);
+	font-family: var(--cr-font-mono);
+	font-size: max( var(--cr-text-sm), var(--cr-text-floor) );
+	letter-spacing: var(--cr-tracking-wide);
+	overflow-wrap: anywhere;
+}
+
+.cr-play .pk-card.cr-cabinet .cr-cabinet__panel {
+	grid-area: panel;
+}
+
+.cr-play .pk-card.cr-cabinet--locked {
+	padding: var(--cr-space-md);
+	background: var(--cr-russian-violet);
+}
+
 .pk-card.cr-cartridge:focus-within {
 	outline: 3px solid var(--cr-selective-yellow);
 	outline-offset: 4px;
@@ -423,6 +409,23 @@ body.cr-video-single .cr-cabinet--single .cr-cabinet__review-body {
 
 .pk-card.cr-cartridge:focus-within .pk-title a:focus {
 	outline: none;
+}
+
+.cr-play .pk-card.cr-cabinet:focus-within {
+	outline: 3px solid var(--cr-selective-yellow);
+	outline-offset: 4px;
+	box-shadow: var(--cr-cabinet-shadow), 0 0 0 7px var(--cr-ink);
+}
+
+.cr-play .pk-card.cr-cabinet:focus-within .pk-title a:focus {
+	outline: none;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+
+	.cr-play .pk-card.cr-cabinet:hover {
+		transform: translateY(-1px);
+	}
 }
 
 @media (prefers-color-scheme: dark) {

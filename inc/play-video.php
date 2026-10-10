@@ -586,7 +586,10 @@ function single_cabinet( string $html, array $block ): string {
 
 	$cabinet = single_cabinet_html( $post, facts( $post->ID ) );
 	$span    = card_article_span( $html );
-	return null === $span ? $cabinet . $html : substr( $html, 0, $span[0] ) . $cabinet . substr( $html, $span[1] );
+	if ( null !== $span ) {
+		$html = substr( $html, 0, $span[0] ) . substr( $html, $span[1] );
+	}
+	return $cabinet . $html;
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\single_cabinet', 20, 2 );
 

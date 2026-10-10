@@ -756,8 +756,11 @@ namespace Courtneyr\Child\PlayVideo\Tests {
 			reset_state();
 			$post = play_post( 32, 'video', 'Post Title' );
 			$GLOBALS['cr_request'] = array( 'single' => true, 'queried_id' => 32 );
-			$html = '<article class="pk-card k-play h-cite u-play-of"><h2>Old</h2></article><p class="after">After <a href="/after">link</a>.</p>';
+			$html = '<p class="before">Before.</p><article class="pk-card k-play h-cite u-play-of"><h2>Old</h2></article><p class="after">After <a href="/after">link</a>.</p>';
 			$out  = single_cabinet( $html, array( 'blockName' => 'core/post-content' ) );
+			$article_end = strpos( $out, '</article>' );
+			$fallback    = single_cabinet( '<p>Intro</p>', array( 'blockName' => 'core/post-content' ) );
+			$fallback_end = strpos( $fallback, '</article>' );
 			$statuses = array( 'backlog' => 'INSERT COIN', 'wishlist' => 'INSERT COIN', 'playing' => 'CONTINUE', 'completed' => 'GAME OVER', 'abandoned' => 'GAME OVER' );
 			$status_ok = true;
 			foreach ( $statuses as $status => $label ) {
@@ -781,7 +784,8 @@ namespace Courtneyr\Child\PlayVideo\Tests {
 			$GLOBALS['cr_kind_facts'][32] = base_facts();
 			$GLOBALS['cr_kind_pictures'][32] = array( 'source' => '', 'attachment_id' => 0, 'url' => '', 'alt' => '', 'remote' => false, 'suppress_featured' => false );
 			$no_picture = single_cabinet( $html, array( 'blockName' => 'core/post-content' ) );
-			return 1 === substr_count( $out, '<h1' )
+			return str_starts_with( $out, '<span class="cr-cabinet__entry" hidden>' )
+				&& 1 === substr_count( $out, '<h1' )
 				&& false !== strpos( $out, '<h1 class="cr-cabinet__title">Post Title</h1>' )
 				&& strpos( $out, 'cr-cabinet__entry' ) < strpos( $out, '<article class="cr-cabinet' )
 				&& false !== strpos( $out, 'data class="p-name" value="Post Title"' )
@@ -810,9 +814,14 @@ namespace Courtneyr\Child\PlayVideo\Tests {
 				&& false !== strpos( $no_picture, 'cr-cabinet__screen--empty' )
 				&& strpos( $out, 'boardgamegeek.com/boardgame/100' ) < strpos( $out, 'rawg.io/games/900001' )
 				&& strpos( $out, 'rawg.io/games/900001' ) < strpos( $out, 'store.steampowered.com/app/1234' )
+				&& false !== $article_end
+				&& strpos( $out, '<p class="before">Before.</p>' ) > $article_end
 				&& false !== strpos( $out, '<p class="after">After <a href="/after">link</a>.</p>' )
+				&& strpos( $out, '<p class="after">After <a href="/after">link</a>.</p>' ) > $article_end
 				&& false === strpos( $out, 'pk-card' )
-				&& false !== strpos( single_cabinet( '<p>Intro</p>', array( 'blockName' => 'core/post-content' ) ), '<article class="cr-cabinet' )
+				&& str_starts_with( $fallback, '<span class="cr-cabinet__entry" hidden>' )
+				&& false !== $fallback_end
+				&& strpos( $fallback, '<p>Intro</p>' ) > $fallback_end
 				&& '<p>x</p>' === single_cabinet( '<p>x</p>', array( 'blockName' => 'core/paragraph' ) );
 		}
 	);
