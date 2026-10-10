@@ -215,7 +215,11 @@ function book_cover( \WP_Post $post, array $a, array $block, string $size ): str
 				)
 			)
 			: '<img class="cr-book__img u-photo" src="' . esc_url( (string) $pic['url'] ) . '" alt="' . esc_attr( $alt ) . '" loading="lazy" decoding="async">';
-		return '<div class="pk-media cr-book__cover cr-book__cover--' . ( 'featured' === $pic['source'] ? 'featured' : 'cover' ) . '">' . $image . '</div>';
+		// site-ux.js marks a failed load cr-cover--failed and removes the
+		// image; these hidden nodes then print the typographic face.
+		$fallback = '<span class="cr-book__type-title cr-book__fallback" aria-hidden="true">' . esc_html( $title ) . '</span>'
+			. '<span class="cr-book__type-author cr-book__fallback" aria-hidden="true">' . esc_html( (string) ( $a['authorName'] ?? '' ) ) . '</span>';
+		return '<div class="pk-media cr-book__cover cr-book__cover--' . ( 'featured' === $pic['source'] ? 'featured' : 'cover' ) . '" data-cr-cover-fallback>' . $image . $fallback . '</div>';
 	}
 	return '<div class="pk-media cr-book__cover cr-book__cover--type" aria-hidden="true"><span class="cr-book__type-title">' . esc_html( $title ) . '</span><span class="cr-book__type-author">' . esc_html( (string) ( $a['authorName'] ?? '' ) ) . '</span></div>';
 }
@@ -323,6 +327,11 @@ function add_title_lede( string $html, array $block ): string {
 
 	if ( '' !== $author ) {
 		$out .= '<div class="cr-journal__lede cr-read__author">' . esc_html( $author ) . '</div>';
+	}
+	// A password-protected read shows its title, author and the password
+	// form only: no rating, status, dates or progress.
+	if ( post_password_required( $post ) ) {
+		return $html . $out;
 	}
 	$out .= rating_html( (float) $a['rating'] );
 

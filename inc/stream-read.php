@@ -130,6 +130,11 @@ function book_card( string $html, array $block, $instance ): string {
 	if ( ! $post instanceof \WP_Post || ! has_term( 'read', 'kind', $post ) ) {
 		return $html;
 	}
+	// A password-protected read keeps the plugin's protected card: its
+	// title link and nothing rebuilt from the read card.
+	if ( post_password_required( $post ) ) {
+		return $html;
+	}
 	$read = find_read_block( $post );
 	if ( null === $read ) {
 		return $html;

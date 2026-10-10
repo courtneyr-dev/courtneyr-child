@@ -171,6 +171,9 @@ cr_read_group(
 		cr_read_contains( 'alt="Cover of Fixture Book"', $html, 'fallback alt' );
 		$GLOBALS['cr_read_pictures'][42] = array( 'source' => 'cover', 'attachment_id' => 0, 'url' => 'https://remote.test/cover.jpg', 'alt' => '' );
 		cr_read_contains( '<img class="cr-book__img u-photo" src="https://remote.test/cover.jpg"', book_cover( $post, $a_without_alt, cr_read_single_block( array( 'coverImageAlt' => '' ) ), 'large' ), 'remote cover' );
+		$html = book_cover( $post, $a_without_alt, cr_read_single_block( array( 'coverImageAlt' => '' ) ), 'large' );
+		cr_read_contains( 'data-cr-cover-fallback', $html, 'image cover marked for the failed-load fallback' );
+		cr_read_contains( '<span class="cr-book__type-title cr-book__fallback" aria-hidden="true">Fixture Book</span>', $html, 'fallback title' );
 		$GLOBALS['cr_read_pictures'][42] = array( 'source' => '', 'attachment_id' => 0, 'url' => '', 'alt' => '' );
 		$html = book_cover( $post, $a, cr_read_single_block(), 'large' );
 		cr_read_contains( 'cr-book__cover--type" aria-hidden="true"', $html, 'type cover' );
@@ -192,6 +195,14 @@ cr_read_group(
 		cr_read_same( 1, substr_count( $html, 'Rated 3.5 of 5' ), 'rating label count' );
 		cr_read_same( 1, substr_count( $html, '3.5 / 5' ), 'rating value count' );
 		cr_read_not_contains( 'Set aside', $html, 'old copy' );
+
+		$post = cr_read_reset();
+		$GLOBALS['cr_read_blocks']              = array( cr_read_single_block() );
+		$GLOBALS['cr_read_protected'][ $post->ID ] = true;
+		$html = add_title_lede( '<h1>Reading now</h1>', array( 'blockName' => 'core/post-title' ) );
+		cr_read_contains( 'cr-read__author', $html, 'protected keeps the author' );
+		cr_read_not_contains( 'cr-journal__rating', $html, 'protected drops the rating' );
+		cr_read_not_contains( 'cr-read__status', $html, 'protected drops status and dates' );
 	}
 );
 

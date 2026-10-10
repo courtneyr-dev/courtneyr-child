@@ -5372,6 +5372,7 @@ body.single-post.kind-read .cr-read__status-progress { color: var(--cr-ink, #241
 	body.single-post.kind-read .cr-journal > .cr-book { grid-column: 1; grid-row: 1 / span 2; }
 	body.single-post.kind-read .cr-journal > .cr-journal__notes { grid-column: 2; grid-row: 1; }
 	body.single-post.kind-read .cr-journal > .cr-record { grid-column: 2; grid-row: 2; }
+	body.single-post.kind-read .cr-journal:not(:has(> .cr-journal__notes)) > .cr-record { grid-row: 1; }
 	body.single-post.kind-read .cr-journal > .cr-read__sample { grid-column: 1 / 3; grid-row: 3; }
 	body.single-post.kind-read .cr-journal > .cr-journal__margin--1 { grid-column: 3; grid-row: 1; align-self: start; padding-top: 3.5rem; }
 	body.single-post.kind-read .cr-journal > .cr-journal__margin--2 { grid-column: 1; grid-row: 3; align-self: start; justify-self: end; padding-right: 1rem; }
@@ -5465,6 +5466,16 @@ body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-med
 	border-radius: 2px 5px 5px 2px !important;
 	box-shadow: inset 0 0 0 1px rgba(36, 28, 74, 0.3);
 }
+/* Image covers sit in the same bounded 2:3 frame as the typographic face;
+   the whole image stays visible and the board color fills any margin. */
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media:is(.cr-book__cover--featured, .cr-book__cover--cover) { aspect-ratio: 2 / 3; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media:is(.cr-book__cover--featured, .cr-book__cover--cover) .cr-book__img {
+	position: absolute;
+	inset: 0;
+	height: 100% !important;
+	object-fit: contain;
+	background: var(--cr-russian-violet);
+}
 /* Spine. */
 body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-media::before {
 	content: "";
@@ -5491,19 +5502,26 @@ body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-med
 	background: repeating-linear-gradient(180deg, #f8f5ec 0 2px, #d8d3c5 2px 3px);
 	box-shadow: 6px 6px 0 var(--cr-ink, #241c4a);
 }
-/* Typographic cover when no image is stored anywhere. */
-body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .cr-book__cover--type {
+/* Typographic cover when no image is stored anywhere, or when the stored
+   image fails to load (site-ux.js adds cr-cover--failed). The page block
+   is a solid offset here, since the ::after page block would paint over
+   the face. */
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book :is(.cr-book__cover--type, .cr-book__cover.cr-cover--failed) {
 	aspect-ratio: 2 / 3;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-end;
 	gap: 0.6rem;
 	padding: 1.4rem 1.2rem;
-	background: #241c4a;
-	color: #fbfaf5;
+	background: var(--cr-russian-violet);
+	color: var(--cr-printer-ivory);
 	border-radius: 2px 5px 5px 2px;
-	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0.6rem 0.6rem 0 #d8d3c5, calc(0.6rem + 6px) calc(0.6rem + 6px) 0 var(--cr-ink, #241c4a);
 }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book :is(.cr-book__cover--type, .cr-book__cover.cr-cover--failed)::after { content: none; }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book :is(.cr-book__cover--type, .cr-book__cover.cr-cover--failed) { padding-right: calc(17% + 1.6rem); }
+body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book :is(.cr-book__type-title, .cr-book__type-author) { display: block; }
+.cr-book__cover:not(.cr-cover--failed) .cr-book__fallback.cr-book__fallback { display: none !important; }
 body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .cr-book__type-title {
 	font-family: var(--cr-font-accent, serif);
 	font-weight: 900;
@@ -5758,7 +5776,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 /* Dark page ground: the paper objects keep their ink. */
 :root[data-theme="dark"] body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.cr-journal__notes, .cr-journal__notes *, .cr-record, .cr-record *, .cr-read__sample, .cr-read__sample *) { color: #241c4a !important; }
 :root[data-theme="dark"] body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.cr-record-eyebrow, .cr-read__sample-note) { color: #126782 !important; }
-:root[data-theme="dark"] body.single-post.kind-read.single .single-post__content :is(.cr-book__cover--type, .cr-book__cover--type *) { color: #fbfaf5 !important; }
+:root[data-theme="dark"] body.single-post.kind-read.single .single-post__content :is(.cr-book__cover--type, .cr-book__cover--type *, .cr-cover--failed, .cr-cover--failed *) { color: #fbfaf5 !important; }
 :root[data-theme="dark"] body.single-post.kind-read.single .single-post__content .cr-book__type-author { color: #bcb5e3 !important; }
 :root[data-theme="dark"] body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.pk-sources__link, .pk-sources__link *) { color: #241c4a !important; }
 :root[data-theme="dark"] body.single-post.kind-read.single .single-post .single-post__header .cr-read__status .cr-read__status-chip { color: #023047 !important; }
@@ -5766,7 +5784,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme="light"]) body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.cr-journal__notes, .cr-journal__notes *, .cr-record, .cr-record *, .cr-read__sample, .cr-read__sample *) { color: #241c4a !important; }
 	:root:not([data-theme="light"]) body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.cr-record-eyebrow, .cr-read__sample-note) { color: #126782 !important; }
-	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content :is(.cr-book__cover--type, .cr-book__cover--type *) { color: #fbfaf5 !important; }
+	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content :is(.cr-book__cover--type, .cr-book__cover--type *, .cr-cover--failed, .cr-cover--failed *) { color: #fbfaf5 !important; }
 	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content .cr-book__type-author { color: #bcb5e3 !important; }
 	:root:not([data-theme="light"]) body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.pk-sources__link, .pk-sources__link *) { color: #241c4a !important; }
 	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post .single-post__header .cr-read__status .cr-read__status-chip { color: #023047 !important; }
@@ -6150,7 +6168,6 @@ body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem
 	box-shadow: none;
 	overflow: visible;
 	aspect-ratio: auto;
-	transform: none;
 	color: #241c4a;
 	--cr-ink: #241c4a;
 	--cr-ink-muted: #126782;
@@ -6173,8 +6190,7 @@ body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem
 	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.35rem - 1px), rgba(36, 28, 74, 0.1) calc(1.35rem - 1px) 1.35rem);
 	border: 1.5px solid #241c4a;
 	border-radius: 0;
-	box-shadow: 4px 4px 0 #241c4a;
-	transform: rotate(0.4deg);
+	box-shadow: var(--cr-shadow-hard);
 	overflow: visible;
 }
 /* Kind label: a caption box on the book's top corner. */
@@ -6203,7 +6219,7 @@ body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem
 	text-transform: uppercase;
 	text-align: left;
 	color: #241c4a;
-	transform: rotate(-2deg);
+	transform: none;
 	overflow: visible;
 }
 /* The book. */
@@ -6214,7 +6230,7 @@ body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem
 	display: block;
 	width: 70%;
 	margin: 0.35rem auto 1.15rem;
-	transform: rotate(-1.2deg) perspective(900px) rotateY(-3deg);
+	transform: rotate(var(--cr-rotate-1)) perspective(900px) rotateY(-3deg);
 	transform-origin: left center;
 	overflow: visible;
 }
@@ -6252,11 +6268,22 @@ body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem
 	z-index: 0;
 	border-radius: 0 4px 4px 0;
 	background: repeating-linear-gradient(180deg, #f8f5ec 0 2px, #d8d3c5 2px 3px);
-	box-shadow: 4px 4px 0 #241c4a;
+	box-shadow: var(--cr-shadow-hard);
 }
-/* No stored cover: a typographic face (the page block is a solid offset
+/* Image covers stand in the same bounded 2:3 book as the typographic face;
+   the whole image stays visible and the board color fills any margin. */
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-media:is(.cr-book__cover--featured, .cr-book__cover--cover) { aspect-ratio: 2 / 3; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-media:is(.cr-book__cover--featured, .cr-book__cover--cover) img {
+	position: absolute;
+	inset: 0;
+	height: 100%;
+	object-fit: contain;
+	background: var(--cr-russian-violet);
+}
+/* No stored cover, or a stored cover that failed to load (site-ux.js adds
+   cr-cover--failed): a typographic face (the page block is a solid offset
    here, since a pseudo-element would paint over the face). */
-.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__cover--type {
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream :is(.cr-book__cover--type, .cr-book__cover.cr-cover--failed) {
 	aspect-ratio: 2 / 3;
 	display: flex;
 	flex-direction: column;
@@ -6266,9 +6293,17 @@ body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem
 	background: #241c4a;
 	color: #fbfaf5;
 	border-radius: 2px 5px 5px 2px;
-	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0.45rem 0.45rem 0 #d8d3c5, calc(0.45rem + 4px) calc(0.45rem + 4px) 0 #241c4a;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0.45rem 0.45rem 0 #d8d3c5, calc(0.45rem + 4px) calc(0.45rem + 4px) 0 var(--cr-russian-violet);
 }
-.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__cover--type::after { content: none; }
+.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream :is(.cr-book__cover--type, .cr-book__cover.cr-cover--failed)::after { content: none; }
+:root[data-theme="dark"] .cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream :is(.cr-book__cover--type, .cr-book__cover.cr-cover--failed) {
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0.45rem 0.45rem 0 #d8d3c5, calc(0.45rem + 4px) calc(0.45rem + 4px) 0 var(--cr-selective-yellow);
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream :is(.cr-book__cover--type, .cr-book__cover.cr-cover--failed) {
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0.45rem 0.45rem 0 #d8d3c5, calc(0.45rem + 4px) calc(0.45rem + 4px) 0 var(--cr-selective-yellow);
+	}
+}
 .cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__type-title { position: relative; z-index: 2; font-family: var(--cr-font-accent, serif); font-weight: 900; font-size: 1.15rem; line-height: 1.05; color: #fbfaf5; }
 .cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .cr-book__type-author { position: relative; z-index: 2; font-family: var(--cr-font-mono, monospace); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: #bcb5e3; }
 /* Status tab hung on the cover. */
@@ -6409,7 +6444,7 @@ body.single-post.kind-watch .cr-journal::after { right: -1.6rem; bottom: -1.2rem
 .cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-meta,
 .cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-excerpt { display: none; }
 @media (max-width: 40rem) {
-	.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-media { width: 62%; transform: rotate(-1deg); }
+	.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-media { width: 62%; transform: rotate(var(--cr-rotate-1)); }
 	.cr-stream-page li.kind-read .pk-card.pk-card--stream.cr-book--stream .pk-body { transform: none; }
 }
 

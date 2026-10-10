@@ -117,6 +117,9 @@ cr_read_group(
 		$input                     = cr_read_stream_card();
 		$instance                  = new WP_Block( array( 'postId' => $post->ID ) );
 		cr_read_same( $input, book_card( $input, array( 'attrs' => array( 'className' => 'x is-style-cr-shelf-book y' ) ), $instance ), 'archive-owned card' );
+		$GLOBALS['cr_read_protected'][ $post->ID ] = true;
+		cr_read_same( $input, book_card( $input, array( 'attrs' => array() ), $instance ), 'protected card' );
+		$GLOBALS['cr_read_protected'] = array();
 		$GLOBALS['cr_read_stream'] = false;
 		cr_read_same( $input, book_card( $input, array( 'attrs' => array() ), $instance ), 'non-Stream card' );
 	}
