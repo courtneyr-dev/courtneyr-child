@@ -3601,8 +3601,15 @@ test( 'the read archive is a library of shelves: title and author only, one link
 	}
 	await expect( page.locator( '.cr-read-shelf .pkiw-group__heading' ) ).toHaveCount( await page.locator( '.cr-read-shelf .pkiw-group h2.pkiw-group__heading' ).count() );
 	await expect( page.locator( '.cr-read-shelf article.cr-shelf-book .pk-title:not(h3)' ) ).toHaveCount( 0 );
-	const eager = await page.locator( 'article.cr-shelf-book--faceout img' ).evaluateAll( ( imgs ) => imgs.slice( 0, 4 ).map( ( img ) => img.getAttribute( 'loading' ) ) );
-	if ( eager.length ) expect( eager, 'first face-out cover row loads eagerly' ).toEqual( eager.map( () => 'eager' ) );
+	// Every face-out book counts toward the first row, with or without an image.
+	const loads = await page.locator( 'article.cr-shelf-book--faceout' ).evaluateAll( ( items ) => items.map( ( item, i ) => {
+		const img = item.querySelector( 'img' );
+		if ( ! img ) return null;
+		const eagerHigh = 'eager' === img.getAttribute( 'loading' ) && 'high' === img.getAttribute( 'fetchpriority' );
+		return i < 4 ? eagerHigh : 'lazy' === img.getAttribute( 'loading' ) && ! img.hasAttribute( 'fetchpriority' );
+	} ).filter( ( ok ) => null !== ok ) );
+	const eager = loads;
+	if ( eager.length ) expect( eager, 'first-row covers load eager and high, the rest lazy' ).toEqual( eager.map( () => true ) );
 	else fixtureSkippedPart( 'no face-out cover image on this site' );
 
 	await page.goto( READ_AZ_ARCHIVE, { waitUntil: 'load' } );

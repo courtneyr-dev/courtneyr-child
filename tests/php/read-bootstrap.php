@@ -146,6 +146,11 @@ namespace {
 		return $p instanceof WP_Post && ! empty( $GLOBALS['cr_read_protected'][ $p->ID ] );
 	}
 
+	function get_the_password_form( $post = 0 ): string {
+		$p = $post instanceof WP_Post ? $post : $GLOBALS['cr_read_post'];
+		return '<form class="post-password-form" method="post"><p><label for="pwbox-' . (int) ( $p->ID ?? 0 ) . '">Password: <input name="post_password" id="pwbox-' . (int) ( $p->ID ?? 0 ) . '" type="password"></label></p></form>';
+	}
+
 	function has_post_thumbnail( $post = null ): bool {
 		$p = $post instanceof WP_Post ? $post : $GLOBALS['cr_read_post'];
 		return $p instanceof WP_Post && isset( $GLOBALS['cr_read_pictures'][ $p->ID ] ) && 'featured' === ( $GLOBALS['cr_read_pictures'][ $p->ID ]['source'] ?? '' );

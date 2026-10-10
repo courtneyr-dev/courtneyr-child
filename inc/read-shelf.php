@@ -142,7 +142,7 @@ function &used_names(): array {
 	return $used;
 }
 
-/** Per-request count of real face-out covers. */
+/** Per-request count of face-out items, with or without an image. */
 function &cover_count(): int {
 	static $count = 0;
 	return $count;
@@ -326,9 +326,22 @@ function shelf_item( string $html, array $item ): string {
 	}
 
 	$author_id  = 'cr-shelf-a-' . $item['uid'];
+	$password   = (string) ( $item['password'] ?? '' );
 	$tags       = new \WP_HTML_Tag_Processor( $html );
 	$has_author = false;
-	if ( '' !== $item['author'] && $tags->next_tag( array( 'class_name' => 'p-author' ) ) ) {
+	if ( '' !== $password ) {
+		// A protected read shows its title, author and the password form only.
+		// The card's one p-author is the hidden site h-card, so the author
+		// line is added here rather than found.
+		$close = '</h' . (int) $item['level'] . '>';
+		$at    = strpos( $html, $close );
+		if ( false !== $at ) {
+			$at  += strlen( $close );
+			$line = '' !== $item['author'] ? '<p class="pk-sub"><span id="' . esc_attr( $author_id ) . '" class="cr-shelf-book__author">' . esc_html( $item['author'] ) . '</span></p>' : '';
+			$html = substr( $html, 0, $at ) . $line . '<div class="cr-shelf-book__password">' . $password . '</div>' . substr( $html, $at );
+		}
+		$has_author = true;
+	} elseif ( '' !== $item['author'] && $tags->next_tag( array( 'class_name' => 'p-author' ) ) ) {
 		$tags->set_attribute( 'id', $author_id );
 		$html       = $tags->get_updated_html();
 		$has_author = true;
@@ -394,10 +407,13 @@ function shelf_card( string $html, array $block, $instance ): string {
 	}
 
 	$protected = post_password_required( $post );
-	$read      = $protected ? null : find_read_block( $post );
-	$a         = $protected ? array() : read_attrs( $post, $read ?? array() );
-	$named     = '' !== trim( (string) ( $a['bookTitle'] ?? '' ) ) || '' !== trim( (string) $post->post_title );
-	$title     = trim( (string) ( $a['bookTitle'] ?? '' ) );
+	$read      = find_read_block( $post );
+	$a         = read_attrs( $post, $read ?? array() );
+	if ( $protected ) {
+		$a = array( 'authorName' => $a['authorName'] ?? '' );
+	}
+	$named = '' !== trim( (string) ( $a['bookTitle'] ?? '' ) ) || '' !== trim( (string) $post->post_title );
+	$title = trim( (string) ( $a['bookTitle'] ?? '' ) );
 	if ( '' === $title ) {
 		$title = trim( (string) get_the_title( $post ) );
 	}
@@ -445,7 +461,7 @@ function shelf_card( string $html, array $block, $instance ): string {
 		}
 	}
 	$key      = $group ? (string) $group->key() : '';
-	$shape    = shape_of( $key, $sectioned );
+	$shape    = $protected ? 'slab' : shape_of( $key, $sectioned );
 	$level    = $sectioned ? 3 : 2;
 	$shelf_id = $sectioned && $group ? group_heading_id( (string) $group->slug() ) : '';
 
@@ -462,9 +478,9 @@ function shelf_card( string $html, array $block, $instance ): string {
 	}
 	$paper = 'slab' === $shape ? seeded_paper( $post->ID, PAPERS ) : '';
 	$eager = false;
-	if ( 'faceout' === $shape && null !== $picture ) {
+	if ( 'faceout' === $shape ) {
 		$count = &cover_count();
-		$eager = $count < FIRST_ROW;
+		$eager = null !== $picture && $count < FIRST_ROW;
 		++$count;
 	}
 	$uid       = wp_unique_id( '' );
@@ -493,6 +509,7 @@ function shelf_card( string $html, array $block, $instance ): string {
 			'date_iso'  => $date_iso,
 			'date_text' => $date_text,
 			'size_attr' => '(min-width: 64rem) 22vw, (min-width: 40rem) 30vw, 46vw',
+			'password'  => $protected ? (string) get_the_password_form( $post ) : '',
 		)
 	);
 }
