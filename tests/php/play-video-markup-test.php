@@ -198,7 +198,7 @@ check_case(
 		}
 		preg_match_all( '/(?:^|[;{])\s*transform\s*:\s*([^;]+);/i', $css, $transforms );
 		foreach ( $transforms[1] as $value ) {
-			if ( ! in_array( trim( $value ), array( 'translateY(-1px)', 'none', 'rotate(var(--cr-rotate-neg))' ), true ) ) {
+			if ( ! in_array( trim( $value ), array( 'translateY(-1px)', 'none', 'rotate(var(--cr-rotate-neg))', 'rotate(var(--cr-rotate-1))' ), true ) ) {
 				return false;
 			}
 		}
@@ -263,15 +263,16 @@ check_case(
 			array( 'body.cr-video-single .cr-cabinet--single .cr-cabinet__record dd', array( 'margin' => '0' ) ),
 			array( 'body.cr-video-single .cr-cabinet--single .cr-cabinet__link', array( 'color' => 'var(--cr-cerulean)', 'text-decoration' => 'underline' ) ),
 			array( 'body.cr-video-single .cr-cabinet--single .cr-cabinet__review-title', array( 'font-family' => 'var(--cr-font-accent)', 'background' => 'var(--cr-tape)', 'color' => 'var(--cr-tape-ink)' ) ),
-			array( '.pk-card.cr-cartridge', array( '--cr-cartridge-edge' => 'var(--cr-russian-violet)', '--cr-cartridge-shadow' => 'var(--cr-shadow-hard)', 'position' => 'relative', 'box-sizing' => 'border-box', 'width' => '100%', 'max-width' => '100%', 'border' => '2px solid var(--cr-cartridge-edge)', 'background' => 'var(--cr-glaucous-dark)', 'box-shadow' => 'var(--cr-cartridge-shadow)', 'color' => 'var(--cr-printer-ivory)' ) ),
+			array( '.pk-card.cr-cartridge', array( '--cr-cartridge-edge' => 'var(--cr-russian-violet)', '--cr-cartridge-shadow' => 'var(--cr-shadow-hard)', 'position' => 'relative', 'box-sizing' => 'border-box', 'width' => '100%', 'max-width' => '100%', 'border' => '2px solid var(--cr-cartridge-edge)', 'background' => 'var(--cr-glaucous-dark)', 'box-shadow' => 'var(--cr-cartridge-shadow)', 'color' => 'var(--cr-printer-ivory)', 'transform' => 'rotate(var(--cr-rotate-1))' ) ),
 			array( '.pk-card.cr-cartridge .pk-kindlabel', array( 'color' => 'var(--cr-printer-ivory)', 'font-family' => 'var(--cr-font-mono)', 'letter-spacing' => 'var(--cr-tracking-eyebrow)', 'text-transform' => 'uppercase', 'font-size' => 'max( var(--cr-text-xs), var(--cr-text-floor) )' ) ),
-			array( '.pk-card.cr-cartridge .pk-caption', array( 'background' => 'var(--cr-surface-elevated)', 'color' => 'var(--cr-ink)', 'border' => '2px solid var(--cr-cartridge-edge)' ) ),
+			array( '.pk-card.cr-cartridge .cr-cartridge__label', array( 'display' => 'grid', 'background' => 'var(--cr-surface-elevated)', 'color' => 'var(--cr-ink)', 'border' => '2px solid var(--cr-cartridge-edge)' ) ),
+			array( '.pk-card.cr-cartridge .pk-caption', array( 'min-width' => '0' ) ),
 			array( '.pk-card.cr-cartridge .pk-title', array( 'margin' => '0', 'font-family' => 'var(--cr-font-accent)', 'font-weight' => 'var(--cr-weight-bold)', 'color' => 'var(--cr-ink)', 'overflow-wrap' => 'anywhere', 'font-size' => 'max( var(--cr-text-md), var(--cr-text-floor) )' ) ),
 			array( '.pk-card.cr-cartridge .pk-title a', array( 'color' => 'var(--cr-ink)', 'text-decoration' => 'none' ) ),
 			array( '.pk-card.cr-cartridge .pk-title a::after', array( 'content' => '""', 'position' => 'absolute', 'inset' => '0' ) ),
 			array( '.pk-card.cr-cartridge .pk-title::before', array( 'content' => 'none' ) ),
 			array( '.pk-card.cr-cartridge .cr-cartridge__platform', array( 'margin' => '0', 'color' => 'var(--cr-ink-soft)', 'font-family' => 'var(--cr-font-mono)', 'font-size' => 'max( var(--cr-text-sm), var(--cr-text-floor) )' ) ),
-			array( '.pk-card.cr-cartridge .cr-cartridge__label', array( 'aspect-ratio' => '4 / 3', 'border' => '2px solid var(--cr-sky-blue)', 'background' => 'var(--cr-russian-violet)', 'display' => 'grid', 'place-items' => 'center', 'overflow' => 'hidden' ) ),
+			array( '.pk-card.cr-cartridge .cr-cartridge__art', array( 'aspect-ratio' => '4 / 3', 'border' => '2px solid var(--cr-sky-blue)', 'background' => 'var(--cr-russian-violet)', 'display' => 'grid', 'place-items' => 'center', 'overflow' => 'hidden' ) ),
 			array( '.pk-card.cr-cartridge .cr-cartridge__image', array( 'width' => '100%', 'height' => '100%', 'max-width' => '100%', 'object-fit' => 'contain' ) ),
 			array( '.pk-card.cr-cartridge::before', array( 'content' => '""', 'position' => 'absolute', 'background' => 'var(--cr-tape)', 'transform' => 'rotate(var(--cr-rotate-neg))' ) ),
 			array( '.pk-card.cr-cartridge:focus-within', array( 'outline' => '3px solid var(--cr-selective-yellow)', 'outline-offset' => '4px', 'box-shadow' => 'var(--cr-cartridge-shadow), 0 0 0 7px var(--cr-ink)' ) ),

@@ -462,10 +462,12 @@ function filter_stream_card( $html, $group, $post ) {
 
 	$platform = trim( (string) ( $facts['platform'] ?? '' ) );
 	$inside   = '' !== $platform ? '<p class="cr-cartridge__platform">' . esc_html( $platform ) . '</p>' : '';
-	$label    = art_html( 'cr-cartridge', 'label', picture( $post->ID ), '', 'medium_large', 'lazy', false );
-	$html     = substr( $html, 0, $span[1] - 6 ) . $inside . substr( $html, $span[1] - 6 );
-	$span     = element_span( $html, 'div', 'pk-caption' );
-	return null === $span ? $html : substr( $html, 0, $span[1] ) . $label . substr( $html, $span[1] );
+	$caption  = substr( $html, $span[0], $span[1] - $span[0] );
+	$date     = element_span( $caption, 'p', 'pk-stream-date' );
+	$at       = null === $date ? strlen( $caption ) - 6 : $date[0];
+	$caption  = substr( $caption, 0, $at ) . $inside . substr( $caption, $at );
+	$art      = art_html( 'cr-cartridge', 'art', picture( $post->ID ), '', 'medium_large', 'lazy', false );
+	return substr( $html, 0, $span[0] ) . '<div class="cr-cartridge__label">' . $caption . $art . '</div>' . substr( $html, $span[1] );
 }
 add_filter( 'courtneyr_child_play_stream_card', __NAMESPACE__ . '\\filter_stream_card', 10, 3 );
 
