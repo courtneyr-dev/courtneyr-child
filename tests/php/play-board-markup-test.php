@@ -207,12 +207,19 @@ check_case(
 			if ( ! $is_object ) {
 				continue;
 			}
-			if ( false !== strpos( $selector, '::before' ) || false !== strpos( $selector, '::after' ) ) {
-				continue;
-			}
 			preg_match_all( '/(?:^|;)\s*(color|background|background-color)\s*:\s*([^;]+);/i', $body, $values, PREG_SET_ORDER );
 			foreach ( $values as $value ) {
 				if ( preg_match( '/var\(--cr-(?:ink|ink-inverse|ink-soft|surface[a-z-]*)\)/', $value[2] ) ) {
+					return false;
+				}
+			}
+			$is_inner = 1 === preg_match( '/(?:\.pk-box|\.pk-facts|\.pk-scorepad|\.pk-links|\.pkiw-staff-picks__box|\.cr-scorepad__thumb|\.cr-scorepad[^,{]*(?:::before|::after))/', $selector );
+			if ( ! $is_inner ) {
+				continue;
+			}
+			preg_match_all( '/(?:^|;)\s*((?:-webkit-)?(?:border[a-z-]*|outline[a-z-]*|background-color|mask-color))\s*:\s*([^;]+);/i', $body, $inner_values, PREG_SET_ORDER );
+			foreach ( $inner_values as $value ) {
+				if ( preg_match( '/var\(--cr-(?:ink|ink-inverse|ink-soft|surface[a-z-]*|rule|border[a-z-]*|focus-halo)\)/', $value[2] ) ) {
 					return false;
 				}
 			}
@@ -281,5 +288,47 @@ check_case(
 	}
 );
 
-echo "\n", count( $failures ) ? count( $failures ) . ' failed' : '6 passed', "\n";
+check_case(
+	'board adapter uses only fact APIs and no tape-label block style',
+	static function () use ( $theme_dir ): bool {
+		$php = (string) file_get_contents( $theme_dir . '/inc/play-board.php' );
+		foreach ( array( 'get_post_meta', 'get_post_field', 'get_post_custom', 'get_metadata', 'get_post_metadata', 'parse_blocks', 'is-style-cr-tape-label' ) as $forbidden ) {
+			if ( false !== strpos( $php, $forbidden ) ) {
+				return false;
+			}
+		}
+		return 0 === preg_match( '/\b(?:metadata_exists|update_post_meta|delete_post_meta|add_post_meta)\b/', $php );
+	}
+);
+
+check_case(
+	'board archive and Staff Picks headings use tape pseudo-elements',
+	static function () use ( $theme_dir ): bool {
+		$css = (string) file_get_contents( $theme_dir . '/assets/css/cr-play-board.css' );
+		$targets = array(
+			'.cr-play .pkiw-staff-picks__heading',
+			'.cr-play .pkiw-group[data-pkiw-group="board"] > .pkiw-group__heading',
+		);
+		foreach ( $targets as $target ) {
+			$has_base = false;
+			$has_tape = false;
+			foreach ( css_rules( $css ) as $rule ) {
+				$selector = $rule[0];
+				$body = $rule[1];
+				if ( false !== strpos( $selector, $target ) && false === strpos( $selector, '::before' ) ) {
+					$has_base = true;
+				}
+				if ( false !== strpos( $selector, $target . '::before' ) && false !== strpos( $body, 'background: var(--cr-tape)' ) ) {
+					$has_tape = true;
+				}
+			}
+			if ( ! $has_base || ! $has_tape ) {
+				return false;
+			}
+		}
+		return true;
+	}
+);
+
+echo "\n", count( $failures ) ? count( $failures ) . ' failed' : '8 passed', "\n";
 exit( count( $failures ) ? 1 : 0 );

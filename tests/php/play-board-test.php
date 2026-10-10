@@ -287,7 +287,13 @@ namespace Courtneyr\Child\PlayBoard\Tests {
 		global $failures;
 		$GLOBALS['cr_case_count'] = ( $GLOBALS['cr_case_count'] ?? 0 ) + 1;
 		try {
-			$ok = (bool) $test();
+			$result = $test();
+			if ( is_string( $result ) && 0 === strpos( $result, 'SKIP ' ) ) {
+				$GLOBALS['cr_skipped_count'] = ( $GLOBALS['cr_skipped_count'] ?? 0 ) + 1;
+				echo $result, "\n";
+				return;
+			}
+			$ok = (bool) $result;
 		} catch ( \Throwable $error ) {
 			$ok   = false;
 			$name = $name . ' (' . $error->getMessage() . ')';
@@ -445,15 +451,29 @@ namespace Courtneyr\Child\PlayBoard\Tests {
 	);
 
 	check_case(
-		'spine untitled omits visible and hidden names',
+		'spine and slip untitled omit heading and hidden data names',
 		static function (): bool {
 			reset_state();
 			$post = board_post( 104, array( 'title' => '', 'game_url' => 'https://example.test/games/untitled', 'bgg_id' => '9990001', 'post_title' => '' ) );
-			$out  = spine( '<h3 class="pk-title">Old</h3>', 'board', $post, array( 'title' => 't104', 'date' => 'd104', 'repeats' => false ) );
-			return false !== strpos( $out, 'Untitled stand-in 104' )
-				&& false !== strpos( $out, 'class="pk-title"' )
-				&& false === strpos( $out, 'class="pk-title p-name"' )
-				&& false === strpos( $out, '<data class="p-name"' );
+			$spine = spine( '<h3 class="pk-title">Old</h3>', 'board', $post, array( 'title' => 't104', 'date' => 'd104', 'repeats' => false ) );
+			$slip  = slip( '<h2 class="pk-title">Old</h2>', 'board', $post );
+			return false !== strpos( $spine, 'Untitled stand-in 104' )
+				&& false !== strpos( $slip, 'Untitled stand-in 104' )
+				&& 0 === preg_match( '/<h[2-6]\b[^>]*class="[^"]*\bp-name\b[^"]*"/', $spine )
+				&& 0 === preg_match( '/<h[2-6]\b[^>]*class="[^"]*\bp-name\b[^"]*"/', $slip )
+				&& false === strpos( $spine, '<data class="p-name"' )
+				&& false === strpos( $slip, '<data class="p-name"' );
+		}
+	);
+
+	check_case(
+		'spine omits empty ids and repeated-title labels',
+		static function (): bool {
+			reset_state();
+			$post = board_post( 1041 );
+			$out  = spine( '<h3 class="pk-title">Old</h3>', 'board', $post, array() );
+			return false === strpos( $out, 'id=""' )
+				&& false === strpos( $out, 'aria-labelledby' );
 		}
 	);
 
@@ -624,27 +644,43 @@ namespace Courtneyr\Child\PlayBoard\Tests {
 
 	check_case(
 		'mf2 parses the spine and slip nested play citation',
-		static function (): bool {
-			$parser = getenv( 'MF2_PARSER_FILE' ) ?: getenv( 'HOME' ) . '/Developer/pkiw-w1-pcard-fu/vendor/mf2/mf2/Mf2/Parser.php';
-			if ( ! is_file( $parser ) ) {
-				echo "SKIP mf2 (parser not found)\n";
-				return true;
+		static function () {
+			$home = (string) getenv( 'HOME' );
+			$candidates = array_filter(
+				array(
+					getenv( 'MF2_PARSER_FILE' ) ?: '',
+					$home . '/projects/post-kinds-for-indieweb/vendor/mf2/mf2/Mf2/Parser.php',
+					$home . '/Developer/pkiw-w1-pcard-fu/vendor/mf2/mf2/Mf2/Parser.php',
+				)
+			);
+			$parser = '';
+			foreach ( $candidates as $candidate ) {
+				if ( is_file( $candidate ) ) {
+					$parser = $candidate;
+					break;
+				}
+			}
+			if ( '' === $parser ) {
+				return 'SKIP mf2 (parser not found)';
 			}
 			$old = error_reporting( E_ALL & ~E_DEPRECATED );
 			require_once $parser;
 			reset_state();
 			$post = board_post( 401 );
-			$spine = '<ul><li class="wp-block-post h-entry">' . spine( '<h3 class="pk-title">Old</h3>', 'board', $post, array( 'title' => 't401', 'date' => 'd401', 'repeats' => false ) ) . '</li></ul>';
+			$spine = '<ul><li class="wp-block-post h-entry">' . spine( '<h3 class="pk-title">Old</h3>', 'board', $post, array( 'title' => 't401', 'date' => 'd401', 'repeats' => true ) ) . '</li></ul>';
 			$slip = '<ul><li class="wp-block-post h-entry">' . slip( '<h2 class="pk-title">Old</h2>', 'board', $post ) . '</li></ul>';
 			$a = ( new \Mf2\Parser( $spine, 'https://example.test/' ) )->parse();
 			$b = ( new \Mf2\Parser( $slip, 'https://example.test/' ) )->parse();
 			error_reporting( $old );
 			$entry_a = $a['items'][0] ?? array();
 			$entry_b = $b['items'][0] ?? array();
+			$play_of_a = $entry_a['properties']['play-of'][0] ?? array();
 			$uid_a = $entry_a['properties']['play-of'][0]['properties']['uid'][0] ?? '';
 			$uid_b = $entry_b['properties']['play-of'][0]['properties']['uid'][0] ?? '';
-			return isset( $entry_a['properties']['url'], $entry_a['properties']['published'], $entry_a['properties']['author'][0]['type'] )
+			return 1 === count( $a['items'] ?? array() )
+				&& isset( $entry_a['properties']['url'], $entry_a['properties']['published'], $entry_a['properties']['author'][0]['type'] )
 				&& in_array( 'h-card', $entry_a['properties']['author'][0]['type'], true )
+				&& in_array( 'h-cite', $play_of_a['type'] ?? array(), true )
 				&& 'https://boardgamegeek.com/boardgame/9990001' === $uid_a
 				&& 'https://boardgamegeek.com/boardgame/9990001' === $uid_b
 				&& ! empty( $entry_b['properties']['url'] )
@@ -663,6 +699,8 @@ namespace Courtneyr\Child\PlayBoard\Tests {
 		}
 	);
 
-	echo "\n", count( $failures ) ? count( $failures ) . ' failed' : $GLOBALS['cr_case_count'] . ' passed', "\n";
+	$skipped = (int) ( $GLOBALS['cr_skipped_count'] ?? 0 );
+	$passed  = (int) ( $GLOBALS['cr_case_count'] ?? 0 ) - $skipped - count( $failures );
+	echo "\n", count( $failures ) ? count( $failures ) . ' failed' : $passed . ' passed' . ( $skipped ? ', ' . $skipped . ' skipped' : '' ), "\n";
 	exit( count( $failures ) ? 1 : 0 );
 }

@@ -1,5 +1,4 @@
 /* Play board-game objects: archive spines, Staff Picks boxes, tabletop singles and Stream score-pad slips. Dark mode keeps object palette fills with Russian violet or printer ivory ink. The tabletop token is sky blue. The Stream slip keeps the collage rotation from cr-post-kinds.css. */
-/* stylelint-disable no-descending-specificity */
 :where(.cr-spine, .cr-play .pkiw-staff-picks__box) {
 	--cr-paper: var(--cr-periwinkle);
 	--cr-paper-ink: var(--cr-russian-violet);
@@ -110,10 +109,6 @@
 	inset: 0;
 }
 
-.cr-spine .pk-title a:hover {
-	text-decoration: underline;
-}
-
 .cr-spine__date {
 	margin: 0;
 	color: var(--cr-paper-ink);
@@ -121,16 +116,6 @@
 	font-size: var(--cr-text-sm);
 	font-weight: var(--cr-weight-regular);
 	line-height: var(--cr-leading-snug);
-}
-
-.cr-spine:focus-within {
-	outline: 3px solid var(--cr-selective-yellow);
-	outline-offset: 4px;
-	box-shadow: inset -0.75rem 0 0 var(--cr-paper-side), var(--cr-shadow-hard), 0 0 0 7px var(--cr-ink);
-}
-
-.cr-spine:focus-within .pk-title a:focus {
-	outline: none;
 }
 
 .cr-play .pkiw-staff-picks {
@@ -209,12 +194,22 @@
 	box-sizing: border-box;
 	min-width: 0;
 	overflow: hidden;
-	border: 2px solid var(--cr-ink);
+	border: 2px solid var(--cr-russian-violet);
 	border-inline-end: 0.75rem solid var(--cr-paper-side);
 	border-radius: 0;
 	background: var(--cr-paper);
 	box-shadow: var(--cr-shadow-hard);
 	color: var(--cr-paper-ink);
+}
+
+.cr-play .pkiw-staff-picks__cover {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+
+.cr-play .cr-box__title {
+	display: none;
 }
 
 .cr-play .pkiw-staff-picks__box--text,
@@ -228,16 +223,6 @@
 	line-height: var(--cr-leading-snug);
 	text-align: center;
 	overflow-wrap: anywhere;
-}
-
-.cr-play .pkiw-staff-picks__cover {
-	display: block;
-	width: 100%;
-	height: auto;
-}
-
-.cr-play .cr-box__title {
-	display: none;
 }
 
 .cr-play .pkiw-staff-picks__box.cr-cover--failed .cr-box__title {
@@ -347,7 +332,7 @@
 .pk-card.pk-card--tabletop .pk-scorepad {
 	box-sizing: border-box;
 	min-width: 0;
-	border: 2px solid var(--cr-ink);
+	border: 2px solid var(--cr-russian-violet);
 	border-radius: 0;
 	background: var(--cr-printer-ivory);
 	box-shadow: var(--cr-shadow-hard);
@@ -398,7 +383,7 @@
 .pk-card.pk-card--tabletop .pk-facts dd {
 	margin: 0;
 	padding-block-end: var(--cr-space-xs);
-	border-block-end: 1px solid var(--cr-rule);
+	border-block-end: 1px solid var(--cr-russian-violet);
 }
 
 .pk-card.pk-card--tabletop .pk-facts dt {
@@ -423,12 +408,28 @@
 	min-width: 0;
 }
 
+.cr-scorepad .cr-scorepad__title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.cr-scorepad .cr-scorepad__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-scorepad .cr-scorepad__title a:hover,
+.cr-spine .pk-title a:hover {
+	text-decoration: underline;
+}
+
 .pk-card.pk-card--tabletop .pk-links a {
 	display: inline-flex;
 	align-items: center;
 	min-width: 0;
 	padding: var(--cr-space-xs) var(--cr-space-sm);
-	border: 2px solid var(--cr-ink);
+	border: 2px solid var(--cr-russian-violet);
 	background: var(--cr-printer-ivory);
 	box-shadow: var(--cr-shadow-hard-sm);
 	color: var(--cr-russian-violet);
@@ -490,7 +491,7 @@
 .pk-card.pk-card--tabletop .pk-scorepad__review p {
 	margin-block: 0 var(--cr-space-md);
 	padding-block-end: var(--cr-space-sm);
-	border-block-end: 1px solid var(--cr-rule);
+	border-block-end: 1px solid var(--cr-russian-violet);
 }
 
 .cr-scorepad.pk-card.k-play {
@@ -515,7 +516,7 @@
 	inset-block: var(--cr-space-sm);
 	inset-inline-start: var(--cr-space-xs);
 	inline-size: 0.55rem;
-	background-color: var(--cr-ink);
+	background-color: var(--cr-russian-violet);
 	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 24'%3E%3Ccircle cx='4' cy='4' r='2.2'/%3E%3C/svg%3E") top / 0.55rem 1.5rem repeat-y;
 	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 24'%3E%3Ccircle cx='4' cy='4' r='2.2'/%3E%3C/svg%3E") top / 0.55rem 1.5rem repeat-y;
 }
@@ -557,19 +558,14 @@
 	overflow-wrap: anywhere;
 }
 
-.cr-scorepad .cr-scorepad__title a {
-	color: inherit;
-	text-decoration: none;
+.cr-spine:focus-within {
+	outline: 3px solid var(--cr-selective-yellow);
+	outline-offset: 4px;
+	box-shadow: inset -0.75rem 0 0 var(--cr-paper-side), var(--cr-shadow-hard), 0 0 0 7px var(--cr-ink);
 }
 
-.cr-scorepad .cr-scorepad__title a::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-}
-
-.cr-scorepad .cr-scorepad__title a:hover {
-	text-decoration: underline;
+.cr-spine:focus-within .pk-title a:focus {
+	outline: none;
 }
 
 .cr-scorepad .cr-scorepad__platform,

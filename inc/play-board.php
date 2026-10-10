@@ -157,15 +157,17 @@ function spine( string $html, string $group, $post, array $ids ): string {
 		$classes .= ' cr-paper cr-paper--' . $paper;
 	}
 
-		$heading_class = $title['synthetic'] ? 'pk-title' : 'pk-title p-name';
-		$labelledby    = '';
+	$heading_class = $title['synthetic'] ? 'pk-title' : 'pk-title p-name';
+	$labelledby    = '';
 	if ( ! empty( $ids['repeats'] ) && '' !== $title_id && '' !== $date_id ) {
 		$labelledby = ' aria-labelledby="' . esc_attr( $title_id . ' ' . $date_id ) . '"';
 	}
+	$title_id_attr = '' !== $title_id ? ' id="' . esc_attr( $title_id ) . '"' : '';
+	$date_id_attr  = '' !== $date_id ? ' id="' . esc_attr( $date_id ) . '"' : '';
 
 	return '<article class="' . esc_attr( $classes ) . '" data-pkiw-play-group="board">'
-		. '<h' . $level . ' class="' . esc_attr( $heading_class ) . '"><a class="u-url" href="' . esc_url( $permalink ) . '"' . $labelledby . '><span id="' . esc_attr( $title_id ) . '">' . esc_html( $title['name'] ) . '</span></a></h' . $level . '>'
-		. '<p class="cr-spine__date"><time id="' . esc_attr( $date_id ) . '" class="dt-published" datetime="' . esc_attr( (string) get_post_time( 'Y-m-d', false, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time></p>'
+		. '<h' . $level . ' class="' . esc_attr( $heading_class ) . '"><a class="u-url" href="' . esc_url( $permalink ) . '"' . $labelledby . '><span' . $title_id_attr . '>' . esc_html( $title['name'] ) . '</span></a></h' . $level . '>'
+		. '<p class="cr-spine__date"><time' . $date_id_attr . ' class="dt-published" datetime="' . esc_attr( (string) get_post_time( 'Y-m-d', false, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time></p>'
 		. hidden_props( $post )
 		. '</article>';
 }
@@ -218,18 +220,19 @@ function slip( string $html, string $group, $post ): string {
 		return $html;
 	}
 
-	$level        = heading_level( $html, 2 );
-	$title        = object_title( $post, $facts );
-	$permalink    = (string) get_permalink( $post );
-	$kind_label   = function_exists( '\\PKIW\\get_kind_label' )
+	$level         = heading_level( $html, 2 );
+	$title         = object_title( $post, $facts );
+	$permalink     = (string) get_permalink( $post );
+	$kind_label    = function_exists( '\\PKIW\\get_kind_label' )
 		? \PKIW\get_kind_label( __( 'Play', 'courtneyr-child' ), 'play', 'stream-card' )
 		: __( 'Play', 'courtneyr-child' );
-	$platform     = is_scalar( $facts['platform'] ?? null ) ? trim( (string) $facts['platform'] ) : '';
-	$rating_label = is_scalar( $facts['rating_label'] ?? null ) ? trim( (string) $facts['rating_label'] ) : '';
+	$platform      = is_scalar( $facts['platform'] ?? null ) ? trim( (string) $facts['platform'] ) : '';
+	$rating_label  = is_scalar( $facts['rating_label'] ?? null ) ? trim( (string) $facts['rating_label'] ) : '';
+	$heading_class = $title['synthetic'] ? 'pk-title cr-scorepad__title' : 'pk-title p-name cr-scorepad__title';
 
 	$out = '<article class="pk-card k-play cr-scorepad" data-pkiw-play-group="board">'
 		. '<span class="cr-scorepad__label">' . esc_html( $kind_label ) . '</span>'
-		. '<h' . $level . ' class="pk-title p-name cr-scorepad__title"><a class="u-url" href="' . esc_url( $permalink ) . '">' . esc_html( $title['name'] ) . '</a></h' . $level . '>';
+		. '<h' . $level . ' class="' . esc_attr( $heading_class ) . '"><a class="u-url" href="' . esc_url( $permalink ) . '">' . esc_html( $title['name'] ) . '</a></h' . $level . '>';
 	if ( '' !== $platform ) {
 		$out .= '<p class="cr-scorepad__platform">' . esc_html( $platform ) . '</p>';
 	}
