@@ -41,6 +41,21 @@ function cr_reply_contrast( string $a, string $b ): float {
 	return ( max( $la, $lb ) + 0.05 ) / ( min( $la, $lb ) + 0.05 );
 }
 
+function cr_reply_font_below_floor( string $css ): array {
+	preg_match_all( '/font-size:\s*([0-9]*\.?[0-9]+)(rem|em|px)\b/', $css, $matches, PREG_SET_ORDER );
+
+	$offending = array();
+	foreach ( $matches as $match ) {
+		$value = (float) $match[1];
+		$px    = 'px' === $match[2] ? $value : $value * 16;
+		if ( $px < 12 ) {
+			$offending[] = $match[0];
+		}
+	}
+
+	return $offending;
+}
+
 cr_reply_group(
 	'css avoids forbidden primitives',
 	static function () use ( $css ): void {
@@ -55,7 +70,13 @@ cr_reply_group(
 		cr_reply_assert( $rotate_count > 0, 'rotate tokens present' );
 		cr_reply_same( $rotate_count, preg_match_all( '/rotate\(\s*var\(--cr-rotate-(?:1|2|neg|neg2)\)\s*\)/', $css ), 'every rotate uses an allowed token' );
 		cr_reply_assert( preg_match( '/\.cr-letters \.pkiw-group__heading\s*{[^}]*(?:^|\s)(?:transform|rotate):/s', $css ) === 0, 'host heading stays upright' );
-		cr_reply_assert( preg_match( '/font-size:\s*(?:0\.[0-6][0-9]*rem|[0-9](?:\.[0-9]+)?px|1[01](?:\.[0-9]+)?px)/', $css ) === 0, 'no font below text floor' );
+		foreach ( array( 'font-size: 0.7rem', 'font-size: 0.74rem', 'font-size: 0.65rem', 'font-size: 11px', 'font-size: 0.7em' ) as $too_small ) {
+			cr_reply_assert( count( cr_reply_font_below_floor( $too_small ) ) > 0, 'no font below text floor proof catches ' . $too_small );
+		}
+		foreach ( array( 'font-size: 0.75rem', 'font-size: 12px', 'font-size: 0.875rem', 'font-size: 1rem' ) as $allowed ) {
+			cr_reply_assert( count( cr_reply_font_below_floor( $allowed ) ) === 0, 'no font below text floor proof allows ' . $allowed );
+		}
+		cr_reply_assert( count( cr_reply_font_below_floor( $css ) ) === 0, 'no font below text floor' );
 		cr_reply_assert( preg_match( '/\.cr-letters li\.wp-block-post\.cr-paper-sheet > \*[^{}]*{[^}]*(?:^|\s)position:/s', $css ) === 0, 'letter children are not positioned' );
 		foreach ( array( 'transform', 'position', 'z-index' ) as $property ) {
 			cr_reply_assert( preg_match( '/\.cr-envelope__insert(?:--tilt-[1-4])?\s*{[^}]*' . preg_quote( $property, '/' ) . '\s*:/s', $css ) === 0, 'insert subject has no ' . $property );
