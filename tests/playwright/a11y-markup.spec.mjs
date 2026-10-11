@@ -3981,6 +3981,7 @@ for ( const archive of W2_ARCHIVES ) {
 	} );
 
 	test( `${ archive.kind } archive item text holds WCAG AA contrast, 3:1 for large text and 4.5:1 for the rest (PKIW #${ archive.issue })`, async ( { page } ) => {
+		await requireKindCount( page, archive.kind, 1 );
 		await page.goto( archive.path, { waitUntil: 'load' } );
 		await page.evaluate( () => document.fonts.ready );
 		const targets = await page.evaluate( () => {
@@ -3999,31 +4000,41 @@ for ( const archive of W2_ARCHIVES ) {
 				};
 			} ) );
 		} );
-		test.skip( 0 === targets.length, `${ archive.kind } archive has no text to measure` );
+		expect( targets.length, `${ archive.kind } archive has text to measure` ).toBeGreaterThan( 0 );
 		const channels = ( value ) => ( value.match( /\d+(?:\.\d+)?/g ) ?? [] ).slice( 0, 3 ).map( Number );
 		const luminance = ( rgb ) => rgb.map( ( n ) => n / 255 ).map( ( n ) => n <= 0.03928 ? n / 12.92 : ( ( n + 0.055 ) / 1.055 ) ** 2.4 ).reduce( ( sum, n, i ) => sum + n * [ 0.2126, 0.7152, 0.0722 ][i], 0 );
 		const failures = [];
+		const pad = 6;
 		for ( const target of targets ) {
-			// Sample the painted pixels: the background under the text is the most common colour that is not the ink.
-			const png = ( await page.screenshot( { clip: target.box, fullPage: true } ) ).toString( 'base64' );
-			const ink = channels( target.color );
-			const background = await page.evaluate( async ( { png: data, ink: inkColor } ) => {
+			// Sample the painted pixels in a 2px ring, 6px outside the text box: that is the background the text sits on, whatever colour the ink is.
+			const x = Math.max( 0, target.box.x - pad );
+			const y = Math.max( 0, target.box.y - pad );
+			const clip = { x, y, width: target.box.width + ( target.box.x - x ) + pad, height: target.box.height + ( target.box.y - y ) + pad };
+			const png = ( await page.screenshot( { clip, fullPage: true } ) ).toString( 'base64' );
+			const background = await page.evaluate( async ( data ) => {
 				const bitmap = await createImageBitmap( new Blob( [ Uint8Array.from( atob( data ), ( char ) => char.charCodeAt( 0 ) ) ], { type: 'image/png' } ) );
 				const canvas = new OffscreenCanvas( bitmap.width, bitmap.height );
 				const context = canvas.getContext( '2d' );
 				context.drawImage( bitmap, 0, 0 );
-				const counts = new Map();
 				const pixels = context.getImageData( 0, 0, bitmap.width, bitmap.height ).data;
-				for ( let i = 0; i < pixels.length; i += 4 ) {
-					const distance = Math.hypot( pixels[i] - inkColor[0], pixels[i + 1] - inkColor[1], pixels[i + 2] - inkColor[2] );
-					if ( distance < 48 ) continue;
-					const key = `${ pixels[i] },${ pixels[i + 1] },${ pixels[i + 2] }`;
-					counts.set( key, ( counts.get( key ) ?? 0 ) + 1 );
+				const ring = [ [], [], [] ];
+				for ( let row = 0; row < bitmap.height; row++ ) {
+					for ( let col = 0; col < bitmap.width; col++ ) {
+						if ( row >= 2 && col >= 2 && row < bitmap.height - 2 && col < bitmap.width - 2 ) continue;
+						const at = ( row * bitmap.width + col ) * 4;
+						ring[0].push( pixels[at] );
+						ring[1].push( pixels[at + 1] );
+						ring[2].push( pixels[at + 2] );
+					}
 				}
-				const top = [ ...counts.entries() ].sort( ( a, b ) => b[1] - a[1] )[0];
-				return top ? top[0].split( ',' ).map( Number ) : null;
-			}, { png, ink } );
-			if ( ! background ) continue;
+				if ( 0 === ring[0].length ) return null;
+				return ring.map( ( values ) => values.sort( ( a, b ) => a - b )[ Math.floor( values.length / 2 ) ] );
+			}, png );
+			if ( ! background ) {
+				failures.push( `${ target.label }: no background pixels sampled` );
+				continue;
+			}
+			const ink = channels( target.color );
 			const [ light, dark ] = [ luminance( ink ), luminance( background ) ].sort( ( a, b ) => b - a );
 			const ratio = ( light + 0.05 ) / ( dark + 0.05 );
 			const required = target.large ? 3 : 4.5;
@@ -4214,7 +4225,7 @@ test( 'the reply archive is host groups of letters: one h2 per host, one h3 and 
 		expect( classes, 'article is not h-entry' ).not.toContain( 'h-entry' );
 		expect( classes, 'article is not pk-card' ).not.toContain( 'pk-card' );
 	}
-	const offOrigin = await page.locator( '.cr-letters a[href]' ).evaluateAll( ( links ) => links.filter( ( link ) => link.origin !== location.origin ).map( ( link ) => link.href ) );
+	const offOrigin = ( await focusableLinks( page.locator( '.cr-letters' ) ) ).filter( ( link ) => new URL( link.href ).origin !== new URL( page.url() ).origin );
 	expect( offOrigin, 'no focusable archive letters point off-site' ).toEqual( [] );
 } );
 
@@ -4227,7 +4238,7 @@ test( 'a whole letter is one click and focus target (PKIW #253)', async ( { page
 		const box = li.getBoundingClientRect();
 		const el = window.crHitAt( ( box.left + box.right ) / 2, ( box.top + box.bottom ) / 2 );
 		const link = li.querySelector( '.cr-letter__title a' );
-		return el === link || Boolean( el.closest( '.cr-letter__title a' ) );
+		return el.closest( '.cr-letter__title a' ) === link;
 	} );
 	expect( hit, 'center hit target is the title link' ).toBe( true );
 	await page.keyboard.press( 'Home' );
@@ -4401,6 +4412,13 @@ test( 'the Stream shows a reply as an envelope: one link, the host as the addres
 } );
 
 test( 'the Stream keeps the full replied-to URL, query included, in the hidden data and links nowhere near it (PKIW #253)', async ( { page } ) => {
+	// The fixture is known from the reply archive, which prints the same hidden data; once it exists there, the Stream must show it too.
+	const hidden = 'class="u-in-reply-to" value="https://indieweb.example/thread?token=abc123"';
+	let onArchive = false;
+	for ( const path of await archivePaths( page, 'reply', REPLY_ARCHIVE, 9 ) ) {
+		onArchive ||= ( await ( await page.request.get( path ) ).text() ).includes( hidden );
+	}
+	test.skip( ! onArchive, 'the F05 reply with a query string is not on the reply archive of this site' );
 	// F05 is an older reply, so it sits on a later Stream page: read the Stream pages until its envelope shows.
 	let found = null;
 	for await ( const { html } of streamPages( page, STREAM ) ) {
@@ -4409,8 +4427,8 @@ test( 'the Stream keeps the full replied-to URL, query included, in the hidden d
 			break;
 		}
 	}
-	test.skip( null === found, 'the F05 reply with a query string is not on the first 30 Stream pages' );
-	expect( found, 'hidden reply-to keeps the exact URL with its query' ).toContain( 'class="u-in-reply-to" value="https://indieweb.example/thread?token=abc123"' );
+	expect( found, 'the F05 reply shows on the first 30 Stream pages' ).not.toBeNull();
+	expect( found, 'hidden reply-to keeps the exact URL with its query' ).toContain( hidden );
 	expect( found, 'no link to the replied-to URL' ).not.toMatch( /href=["']https:\/\/indieweb\.example\/thread/ );
 	const visible = await page.evaluate( ( html ) => {
 		const doc = new DOMParser().parseFromString( html, 'text/html' );
@@ -4765,7 +4783,7 @@ test( 'a bookmark single is an index card: one h1, the fields in order, one sour
 		await expect( page.locator( 'main .single-post__featured' ) ).toHaveCount( 0 );
 		expect( await page.locator( '.cr-index-card--single img' ).count(), `${ slug } image count` ).toBeLessThanOrEqual( 1 );
 		if ( 'filed-under-the-first-tag' === slug ) {
-			await expect( page.locator( 'main a[href="https://example.com/f4"]' ) ).toHaveCount( 1 );
+			expect( ( await focusableLinks( page.locator( 'main' ) ) ).filter( ( link ) => 'https://example.com/f4' === link.href ), `${ slug } one visible source link` ).toHaveLength( 1 );
 		}
 		if ( 'the-plain-text-almanac' === slug ) {
 			await expect( page.locator( '.cr-index-card__row--author dd' ) ).toHaveText( 'Jun Calloway' );
