@@ -239,6 +239,21 @@ namespace PKIW {
 		function untitled_name( \WP_Post $post ): string {
 			return $GLOBALS['cr_untitled_override'] ?? 'Stub kind label ' . $post->ID;
 		}
+
+		/** Kind-and-date fallback name. */
+		function untitled_fallback_name( \WP_Post $post ): array {
+			return array( 'name' => 'Like, ' . get_the_date( '', $post ) );
+		}
+	}
+}
+
+namespace Courtneyr\Child\Like {
+	/** Like facts: a real cited title unless a case stores its own facts. */
+	function like_facts( int $post_id ): array {
+		if ( $GLOBALS['no_plugin'] ) {
+			return array();
+		}
+		return $GLOBALS['cr_like_facts'][ $post_id ] ?? array( 'cited_title' => \PKIW\untitled_name( $GLOBALS['cr_posts'][ $post_id ] ) );
 	}
 }
 
@@ -305,7 +320,7 @@ namespace Courtneyr\Child\W2T0MicroformatsTests {
 		$GLOBALS['cr_current_post']                = 0;
 		$GLOBALS['pkiw_stream_card_root_seen']     = array();
 		$GLOBALS['cr_hooks']['the_title']          = array();
-		unset( $GLOBALS['cr_untitled_override'] );
+		unset( $GLOBALS['cr_untitled_override'], $GLOBALS['cr_like_facts'] );
 	}
 
 	/** Add a post fixture. */
@@ -437,6 +452,37 @@ namespace Courtneyr\Child\W2T0MicroformatsTests {
 	check( false === apply_filters( 'pkiw_like_card_title_is_heading', false, $GLOBALS['cr_posts'][72] ), 'untitled reply returns incoming heading flag' );
 	post_fixture( 73, 'like', '', false );
 	check( false === apply_filters( 'pkiw_like_card_title_is_heading', false, $GLOBALS['cr_posts'][73] ), 'non-singular like returns incoming false heading flag' );
+
+	// F8 and F17: an untitled like whose card has no real cited title names its host in the clipping, so the H1 is its kind and date.
+	reset_state();
+	post_fixture( 74, 'like' );
+	$GLOBALS['cr_untitled_override'] = 'zine.example.org';
+	$GLOBALS['cr_like_facts'][74]    = array(
+		'url'         => 'https://zine.example.org/issue-13',
+		'host'        => 'zine.example.org',
+		'cited_title' => '',
+	);
+	$html     = render_title_pipeline( title_block() );
+	$f8_label = $GLOBALS['no_plugin'] ? 'Entry from October 74, 2026' : 'Like, October 74, 2026';
+	check( 1 === substr_count( $html, '<h1' ), 'untitled url-only like prints one H1' );
+	check( false !== strpos( $html, $f8_label ), 'untitled url-only like H1 is its kind and date' );
+	check( false === strpos( $html, 'zine.example.org' ), 'untitled url-only like H1 is not the host' );
+	check( false === strpos( $html, 'p-name' ), 'untitled url-only like H1 has no p-name' );
+	no_title_filter_left( 'untitled url-only like leaves no the_title filter behind' );
+
+	// F1: a real cited title stays the H1.
+	reset_state();
+	post_fixture( 75, 'like' );
+	$GLOBALS['cr_untitled_override'] = 'Field notes on paper sites';
+	$GLOBALS['cr_like_facts'][75]    = array(
+		'url'         => 'https://notes.example.com/paper-sites',
+		'host'        => 'notes.example.com',
+		'cited_title' => 'Field notes on paper sites',
+	);
+	$html     = render_title_pipeline( title_block() );
+	$f1_label = $GLOBALS['no_plugin'] ? 'Entry from October 75, 2026' : 'Field notes on paper sites';
+	check( false !== strpos( $html, $f1_label ), 'untitled like with a cited title keeps it as the H1' );
+	no_title_filter_left( 'untitled cited like leaves no the_title filter behind' );
 
 	if ( $GLOBALS['no_plugin'] ) {
 		reset_state();
