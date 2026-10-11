@@ -657,10 +657,19 @@ function enqueue_styles(): void {
 	if ( ! is_admin() && ! is_like_archive() && ! is_like_single() && ! is_stream_surface() ) {
 		return;
 	}
+	if ( ! function_exists( 'wp_register_style' ) ) {
+		wp_enqueue_style(
+			STYLE_HANDLE,
+			COURTNEYR_CHILD_URI . '/assets/css/cr-like.css',
+			array( 'courtneyr-paper' ),
+			COURTNEYR_CHILD_VERSION
+		);
+		return;
+	}
 	wp_enqueue_style(
 		STYLE_HANDLE,
 		COURTNEYR_CHILD_URI . '/assets/css/cr-like.css',
-		array( 'courtneyr-paper' ),
+		array( 'courtneyr-paper', 'courtneyr-sticker' ),
 		COURTNEYR_CHILD_VERSION
 	);
 }

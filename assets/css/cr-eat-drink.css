@@ -137,25 +137,6 @@ body.cr-order-single .single-post__content .cr-placemat--drink {
 	overflow-wrap: anywhere;
 }
 
-.cr-placemat .cr-order__facts {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
-	gap: 0.9rem 2rem;
-	margin: 0;
-	padding: 0.9rem 0;
-	border-block: 1px solid var(--cr-glaucous);
-	overflow: clip;
-}
-
-/* A rule stands between facts. Each fact draws it at its own left, a gap
-   away, and the list clips the one that would stand before a row's first. */
-.cr-placemat .cr-order__fact {
-	min-width: 0;
-	margin-inline-start: -1rem;
-	padding-inline-start: 1rem;
-	border-inline-start: 1px solid var(--cr-glaucous);
-}
-
 .cr-placemat .cr-order__label {
 	margin: 0 0 0.15rem;
 	color: var(--cr-cerulean);
@@ -203,20 +184,7 @@ body.cr-order-single .single-post__content .cr-placemat--drink {
    is the clipboard's bar and its clip.
    ============================================================ */
 .cr-placemat .cr-order--ticket {
-	--ticket-tear: polygon(0 0, 100% 0, 100% calc(100% - 0.35rem), 94% calc(100% - 0.05rem), 87% calc(100% - 0.4rem), 79% calc(100% - 0.1rem), 71% calc(100% - 0.45rem), 62% calc(100% - 0.05rem), 54% calc(100% - 0.35rem), 45% 100%, 37% calc(100% - 0.4rem), 28% calc(100% - 0.1rem), 20% calc(100% - 0.45rem), 12% calc(100% - 0.05rem), 5% calc(100% - 0.3rem), 0 calc(100% - 0.1rem));
-	position: relative;
-	isolation: isolate;
 	padding: 2.6rem 1rem 1.75rem;
-	filter: drop-shadow(1px 1px 0 var(--cr-russian-violet)) drop-shadow(-1px -1px 0 var(--cr-russian-violet)) drop-shadow(var(--cr-shadow-hard));
-}
-
-.cr-placemat .cr-order--ticket::before {
-	content: "";
-	position: absolute;
-	z-index: -1;
-	inset: 0;
-	background: var(--cr-printer-ivory);
-	clip-path: var(--ticket-tear);
 }
 
 .cr-placemat .cr-order--ticket::after {

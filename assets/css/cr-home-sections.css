@@ -21,7 +21,6 @@
    therefore set their own ink instead of inheriting the band's text colour.
    ---------------------------------------------------------------------------- */
 
-
 /* =============================================================================
    Newsletter reasons
    ============================================================================= */
@@ -508,7 +507,7 @@
 	max-width: none;
 }
 .cr-fieldnotes .cr-home-stream .wp-block-post-template > li { margin: 0.5rem 0 2rem; }
-.cr-fieldnotes .cr-home-stream .pk-card.k-photo,
+
 .cr-fieldnotes .cr-home-stream .pk-card--gallery { max-width: 13.75rem; margin-inline: auto; }
 .cr-fieldnotes .cr-home-stream .pk-card--gallery .cr-booth { width: 10rem; max-width: 100%; margin-inline: auto; }
 .cr-fieldnotes .cr-home-stream .pk-card--gallery .pk-title { font-size: 0.875rem; line-height: 1.5; }
@@ -523,7 +522,7 @@
 @media (max-width: 56.1875em) { .cr-fieldnotes .cr-home-stream .wp-block-post-template { columns: 2; } }
 @media (max-width: 37.5em) {
 	.cr-fieldnotes .cr-home-stream .wp-block-post-template { columns: 1; }
-	.cr-fieldnotes .cr-home-stream .pk-card.k-photo,
+
 	.cr-fieldnotes .cr-home-stream .pk-card--gallery,
 	.cr-fieldnotes .cr-home-stream .pk-card.k-read,
 	.cr-fieldnotes .cr-home-stream .cr-note-artifact--stream { margin-inline: auto; }

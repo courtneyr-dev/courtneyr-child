@@ -1,0 +1,86 @@
+:where(.cr-like-sticker, .cr-sticker) {
+	--cr-paper: var(--cr-light-gray);
+	--cr-paper-ink: var(--cr-russian-violet);
+}
+
+/* ============================================================
+   Shared sticker object (PKIW W3).
+
+   A sticker is a paper layer behind its content: an ivory border, the paper
+   fibre, a hard shadow and a small tilt. cr-like.css loads this sheet as a
+   dependency and reads its paper tokens and focus rules from here. Other
+   kind lanes (the favorite star) take .cr-sticker for the same paper layer
+   and override the ::before transform with another --cr-rotate-* token.
+   ============================================================ */
+
+.cr-sticker {
+	position: relative;
+	isolation: isolate;
+	box-sizing: border-box;
+	min-width: 0;
+	color: var(--cr-paper-ink);
+}
+
+.cr-sticker::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	border: 0.5rem solid var(--cr-printer-ivory);
+	background: var(--cr-paper) var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard);
+	transform: rotate(var(--cr-rotate-1));
+	opacity: 1;
+}
+
+.cr-like article.pk-card.cr-like-sticker:has(:focus-visible),
+article.pk-card.cr-like-sticker--stream:has(:focus-visible),
+body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping:has(:focus-visible),
+.cr-sticker:has(:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: var(--cr-space-xs);
+	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-like article.pk-card.cr-like-sticker:focus-within,
+article.pk-card.cr-like-sticker--stream:focus-within,
+body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping:focus-within,
+.cr-sticker:focus-within {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: var(--cr-space-xs);
+	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-sticker::before {
+		outline: 2px solid var(--cr-russian-violet);
+	}
+}
+
+:root[data-theme="dark"] .cr-sticker::before {
+	outline: 2px solid var(--cr-russian-violet);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.cr-sticker {
+		transition: none;
+		animation: none;
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-sticker {
+		border: 2px solid CanvasText;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-sticker::before {
+		border-color: CanvasText;
+		background: transparent;
+		box-shadow: none;
+	}
+}

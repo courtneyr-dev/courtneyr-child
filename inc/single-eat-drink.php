@@ -287,20 +287,16 @@ function is_order(): bool {
 }
 
 /**
- * The template's post header and featured image don't print on an order
- * page: the order carries the title, the label, the date and the photo.
+ * Tell the shared single-object filter that an order owns the page H1.
  *
- * @param string               $html  Rendered block HTML.
- * @param array<string, mixed> $block Parsed block.
- * @return string
+ * @param mixed    $holds Whether another lane already owns the H1.
+ * @param \WP_Post $post  Post being rendered.
+ * @return bool
  */
-function drop_template_header( string $html, array $block ): string {
-	$name  = (string) ( $block['blockName'] ?? '' );
-	$class = (string) ( $block['attrs']['className'] ?? '' );
-	$is    = ( 'core/group' === $name && str_contains( $class, 'single-post__header' ) ) || ( 'core/post-featured-image' === $name && str_contains( $class, 'single-post__featured' ) );
-	return $is && is_order() ? '' : $html;
+function holds_h1( $holds, \WP_Post $post ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	return true === $holds || is_order();
 }
-add_filter( 'render_block', __NAMESPACE__ . '\\drop_template_header', 10, 2 );
+add_filter( 'courtneyr_child_single_object_holds_h1', __NAMESPACE__ . '\\holds_h1', 10, 2 );
 
 /**
  * Rebuild the plugin's card into the placemat: the order, then the map slip.
@@ -366,7 +362,7 @@ function enqueue_styles(): void {
 	wp_enqueue_style(
 		'courtneyr-eat-drink',
 		COURTNEYR_CHILD_URI . '/assets/css/cr-eat-drink.css',
-		array(),
+		array( 'courtneyr-ticket' ),
 		COURTNEYR_CHILD_VERSION
 	);
 }

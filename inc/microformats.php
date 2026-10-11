@@ -10,7 +10,7 @@
  *
  *   core/post-title  className "cr-u-url"        -> <a class="u-url">
  *   core/post-date   className "cr-dt-published" -> <time class="dt-published">
- *   untitled review/reply/like/bookmark singles -> visible H1, no p-name
+ *   untitled review/reply/like/bookmark/photo/acquisition singles -> visible H1, no p-name
  *   review posts                              -> h-review is the entry root
  *
  * @package CourtneyrChild
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Kinds whose untitled singles need a visible, non-mf2-name H1.
  */
-const UNTITLED_SINGLE_KINDS = array( 'review', 'reply', 'like', 'bookmark' );
+const UNTITLED_SINGLE_KINDS = array( 'review', 'reply', 'like', 'bookmark', 'photo', 'acquisition' );
 
 /**
  * Add a class to the first tag of a kind inside the rendered block.
@@ -154,6 +154,42 @@ function untitled_single_label( int $post_id ): string {
 		__( 'Entry from %s', 'courtneyr-child' ),
 		get_the_date( '', $post_id )
 	);
+}
+
+/**
+ * Whether the cited title already stands in for the single H1.
+ *
+ * A raw empty post title lets the visible fallback H1 carry the entry name.
+ * Otherwise the plugin facts can show that the saved post title and cited
+ * title are the same text after trimming and case-folding.
+ *
+ * @param int $post_id Post ID.
+ * @return bool
+ */
+function cited_title_is_h1( int $post_id ): bool {
+	$post = get_post( $post_id );
+	if ( ! $post instanceof \WP_Post ) {
+		return false;
+	}
+
+	$title = trim( (string) get_post_field( 'post_title', $post_id, 'raw' ) );
+	if ( '' === $title ) {
+		return true;
+	}
+	if ( ! function_exists( '\\PKIW\\kind_facts' ) ) {
+		return false;
+	}
+	$facts = \PKIW\kind_facts( $post_id );
+	if ( ! is_array( $facts ) ) {
+		return false;
+	}
+	$cited_title = trim( (string) ( $facts['cited_title'] ?? '' ) );
+	if ( '' === $cited_title ) {
+		return false;
+	}
+
+	$fold = static fn( string $text ): string => function_exists( 'mb_strtolower' ) ? mb_strtolower( $text, 'UTF-8' ) : strtolower( $text );
+	return $fold( $title ) === $fold( $cited_title );
 }
 
 /**

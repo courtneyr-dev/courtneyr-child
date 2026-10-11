@@ -436,6 +436,25 @@ function register_paper_style(): void {
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\register_paper_style' );
 
 /**
+ * Register shared kind object sheets and load them in the editor.
+ *
+ * On the front end these handles are dependencies for kind-specific sheets.
+ * In the editor they load directly so shared tickets and stickers preview
+ * anywhere their markup appears.
+ *
+ * @return void
+ */
+function register_shared_kind_styles(): void {
+	wp_register_style( 'courtneyr-ticket', COURTNEYR_CHILD_URI . '/assets/css/cr-ticket.css', array(), COURTNEYR_CHILD_VERSION );
+	wp_register_style( 'courtneyr-sticker', COURTNEYR_CHILD_URI . '/assets/css/cr-sticker.css', array(), COURTNEYR_CHILD_VERSION );
+	if ( is_admin() ) {
+		wp_enqueue_style( 'courtneyr-ticket' );
+		wp_enqueue_style( 'courtneyr-sticker' );
+	}
+}
+add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\register_shared_kind_styles' );
+
+/**
  * Enqueue editor-specific styles so the block editor preview matches
  * the front end. Same per-block files are reused; this hook adds them
  * to the editor iframe.
@@ -886,15 +905,19 @@ add_filter( 'perfmatters_minify_js_exclusions', __NAMESPACE__ . '\\perfmatters_e
  * paints the play and read archives. Their own sheets (cr-play.css,
  * cr-play-board.css, cr-play-video.css and cr-read-shelf.css, PKIW W1) and
  * the shared-kind sheets (cr-review.css, cr-letters.css, cr-like.css,
- * cr-bookmark.css and cr-paper.css, PKIW W2) are listed before their files
- * exist, so the kind lanes that add them don't edit this list.
+ * cr-bookmark.css and cr-paper.css, PKIW W2) are joined by the plugin's W3
+ * kind sheets (cr-chicken.css, chicken-entry.css, cr-photo.css,
+ * photo-projector.css, cr-favorite.css, cr-acquisition.css, cr-repost.css and
+ * article-stream-card.css) plus their shared theme dependencies
+ * (cr-ticket.css and cr-sticker.css). Several W3 files are listed before their
+ * files exist, so the kind lanes that add them don't edit this list.
  *
  * @param array<int, string> $exclusions URL fragments Remove Unused CSS skips.
  * @return array<int, string>
  */
 function perfmatters_rucss_exclusions( $exclusions ): array {
 	$exclusions = is_array( $exclusions ) ? $exclusions : array();
-	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css', 'cr-checkin-archive.css', 'cr-shelf-boards.css', 'cr-play.css', 'cr-play-board.css', 'cr-play-video.css', 'cr-read-shelf.css', 'cr-review.css', 'cr-letters.css', 'cr-like.css', 'cr-bookmark.css', 'cr-paper.css', 'leaflet.css', 'MarkerCluster.css', 'checkins-feed/style.css' ) as $file ) {
+	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css', 'cr-checkin-archive.css', 'cr-shelf-boards.css', 'cr-play.css', 'cr-play-board.css', 'cr-play-video.css', 'cr-read-shelf.css', 'cr-review.css', 'cr-letters.css', 'cr-like.css', 'cr-bookmark.css', 'cr-paper.css', 'cr-chicken.css', 'chicken-entry.css', 'cr-photo.css', 'photo-projector.css', 'cr-favorite.css', 'cr-sticker.css', 'cr-acquisition.css', 'cr-ticket.css', 'cr-repost.css', 'article-stream-card.css', 'leaflet.css', 'MarkerCluster.css', 'checkins-feed/style.css' ) as $file ) {
 		$exclusions[] = $file;
 	}
 	return array_values( array_unique( $exclusions ) );
@@ -923,4 +946,3 @@ function perfmatters_lazyload_exclusions( $exclusions ): array {
 }
 add_filter( 'perfmatters_lazyload_exclusions', __NAMESPACE__ . '\\perfmatters_lazyload_exclusions' );
 add_filter( 'perfmatters_lazyload_iframe_exclusions', __NAMESPACE__ . '\\perfmatters_lazyload_exclusions' );
-
