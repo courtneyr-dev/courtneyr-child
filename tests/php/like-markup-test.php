@@ -234,7 +234,7 @@ check_case(
 			&& false !== strpos( (string) ( $posts[0]['attrs']['className'] ?? '' ), 'cr-sticker-book' )
 			&& array( 'linesPerPage' => 12, 'headingLevel' => 2, 'emptyLabel' => 'Other' ) === $section[0]['attrs']
 			&& $section[0]['offset'] < $card[0]['offset']
-			&& $card[0]['offset'] < $posts[0]['offset'] + strlen( $markup )
+			&& true === is_child_block( $tokens, $card[0]['offset'], 'post-template' )
 			&& array( 'headingLevel' => 3, 'className' => 'is-style-cr-sticker' ) === $card[0]['attrs']
 			&& $posts[0]['offset'] < $empty[0]['offset']
 			&& $posts[0]['offset'] < $pager[0]['offset']

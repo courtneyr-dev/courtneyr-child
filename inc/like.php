@@ -440,9 +440,9 @@ function insert_after_caption( string $html, string $insert ): string {
 	if ( '' === $insert ) {
 		return $html;
 	}
-	return (string) preg_replace(
+	return (string) preg_replace_callback(
 		'/(<div\b[^>]*\bclass="[^"]*(?<![\w-])pk-caption(?![\w-])[^"]*"[^>]*>.*?<\/div>)/s',
-		'$1' . $insert,
+		static fn( array $m ): string => $m[0] . $insert,
 		$html,
 		1
 	);

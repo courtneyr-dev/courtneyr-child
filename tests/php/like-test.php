@@ -529,6 +529,54 @@ namespace Courtneyr\Child\Like\Tests {
 	);
 
 	check_case(
+		'archive card with a required password keeps the full card and prints no picture',
+		static function (): bool {
+			reset_state();
+			like_post( 161 );
+			like_post( 163 );
+			$GLOBALS['cr_request']['kind'] = 'like';
+			$GLOBALS['wp_query']           = (object) array( 'posts' => array( $GLOBALS['cr_posts'][161] ), 'current_post' => 0 );
+			$GLOBALS['cr_passwords'][161]  = true;
+			$out                           = render_stream_card( main_fixture(), 161, array( 'className' => 'is-style-cr-sticker' ) );
+			$control                       = render_stream_card( main_fixture(), 163, array( 'className' => 'is-style-cr-sticker' ) );
+			return false === strpos( $out, 'cover-161.jpg' )
+				&& false === strpos( $out, 'data-cr-cover-fallback' )
+				&& false !== strpos( $out, 'pk-badge' )
+				&& false !== strpos( $out, 'pk-kindlabel' )
+				&& false !== strpos( $out, 'pk-note' )
+				&& false !== strpos( $out, 'pk-meta' )
+				&& false !== strpos( article_class( $out ), 'cr-like-sticker' )
+				&& false !== strpos( $control, 'data-cr-cover-fallback' )
+				&& false !== strpos( $control, 'cover-163.jpg' );
+		}
+	);
+
+	check_case(
+		'archive card with the protected class keeps the full card and prints no picture',
+		static function (): bool {
+			reset_state();
+			like_post( 162 );
+			like_post( 164 );
+			$GLOBALS['cr_request']['kind'] = 'like';
+			$GLOBALS['wp_query']           = (object) array( 'posts' => array( $GLOBALS['cr_posts'][162] ), 'current_post' => 0 );
+			$plain_input                   = main_fixture();
+			$protected_input               = str_replace( 'pk-card k-like', 'pk-card pk-card--protected k-like', $plain_input );
+			$out                           = render_stream_card( $protected_input, 162, array( 'className' => 'is-style-cr-sticker' ) );
+			$control                       = render_stream_card( main_fixture(), 164, array( 'className' => 'is-style-cr-sticker' ) );
+			return $protected_input !== $plain_input
+				&& false === strpos( $out, 'cover-162.jpg' )
+				&& false === strpos( $out, 'data-cr-cover-fallback' )
+				&& false !== strpos( $out, 'pk-badge' )
+				&& false !== strpos( $out, 'pk-kindlabel' )
+				&& false !== strpos( $out, 'pk-note' )
+				&& false !== strpos( $out, 'pk-meta' )
+				&& false !== strpos( article_class( $out ), 'cr-like-sticker' )
+				&& false !== strpos( $control, 'data-cr-cover-fallback' )
+				&& false !== strpos( $control, 'cover-164.jpg' );
+		}
+	);
+
+	check_case(
 		'archive duplicate labels are scoped to repeated titles in one group',
 		static function (): bool {
 			reset_state();
@@ -686,6 +734,41 @@ namespace Courtneyr\Child\Like\Tests {
 				&& false !== strpos( $out, 'alt="Attachment alt text"' )
 				&& false !== strpos( $kept, 'src="https://notes.example.com/old.jpg"' )
 				&& false !== strpos( $kept, 'alt="Keep this"' );
+		}
+	);
+
+	check_case(
+		'picture alt and URL with dollar-digit sequences print unchanged',
+		static function (): bool {
+			$cases  = array(
+				array( 'https://notes.example.com/a.jpg', 'Costs $10' ),
+				array( 'https://notes.example.com/a.jpg', '$1' ),
+				array( 'https://cdn.example/img$1.jpg?w=$2', 'Plain' ),
+			);
+			$no_img = '<article class="pk-card k-like"><div class="pk-body"><div class="pk-caption"><h2 class="pk-title p-name"><a href="https://courtneyr.dev/p/171/">Field notes</a></h2></div><p class="pk-original"><a class="u-url" href="https://notes.example.com/paper-sites">Read the original</a></p></div></article>';
+			foreach ( $cases as $case ) {
+				reset_state();
+				like_post( 171 );
+				$GLOBALS['cr_request'] = array( 'single' => true, 'queried_id' => 171 );
+				$GLOBALS['cr_kind_pictures'][171] = array( 'source' => 'featured', 'url' => $case[0], 'alt' => $case[1] );
+				$out = render_like_card( $no_img, 171 );
+				if ( false === strpos( $out, 'alt="' . htmlspecialchars( $case[1], ENT_QUOTES, 'UTF-8' ) . '"' )
+					|| false === strpos( $out, 'src="' . htmlspecialchars( $case[0], ENT_QUOTES, 'UTF-8' ) . '"' )
+					|| 1 !== substr_count( $out, 'pk-caption' )
+				) {
+					return false;
+				}
+			}
+
+			reset_state();
+			like_post( 172 );
+			$url = 'https://cdn.example/img$1.jpg?w=$2';
+			$GLOBALS['cr_kind_facts'][172]['picture']['url'] = $url;
+			$GLOBALS['cr_request']['kind'] = 'like';
+			$GLOBALS['wp_query']           = (object) array( 'posts' => array( $GLOBALS['cr_posts'][172] ), 'current_post' => 0 );
+			$out                           = render_stream_card( main_fixture(), 172, array( 'className' => 'is-style-cr-sticker' ) );
+			return false !== strpos( $out, 'src="' . htmlspecialchars( $url, ENT_QUOTES, 'UTF-8' ) . '"' )
+				&& 1 === substr_count( $out, 'pk-caption' );
 		}
 	);
 
