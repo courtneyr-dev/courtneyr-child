@@ -24,18 +24,85 @@ if ( ! defined( 'ABSPATH' ) ) {
 const ROUTER_SLUG = 'kind';
 
 /**
+ * The first Post Kind slug for a post.
+ *
+ * @param int $post_id Post ID.
+ * @return string Sanitized kind slug, or '' when the post has no kind.
+ */
+function kind_slug_for_post( int $post_id ): string {
+	$terms = get_the_terms( $post_id, 'kind' );
+	if ( ! is_array( $terms ) || empty( $terms ) ) {
+		return '';
+	}
+	return sanitize_key( $terms[0]->slug );
+}
+
+/**
+ * Known Post Kind slugs.
+ *
+ * @return array<int, string> Sanitized kind slugs.
+ */
+function kind_slugs(): array {
+	$terms = get_terms(
+		array(
+			'taxonomy'   => 'kind',
+			'hide_empty' => false,
+			'fields'     => 'slugs',
+		)
+	);
+	if ( ! is_array( $terms ) ) {
+		return array();
+	}
+	$slugs = array();
+	foreach ( $terms as $term ) {
+		$slug = sanitize_key( $term );
+		if ( '' === $slug || in_array( $slug, $slugs, true ) ) {
+			continue;
+		}
+		$slugs[] = $slug;
+	}
+	return array_values( $slugs );
+}
+
+/**
+ * The theme part slug for a kind, when the theme ships one.
+ *
+ * @param string $kind Kind slug.
+ * @return string `kind-{slug}`, or '' when no part exists.
+ */
+function part_slug_for_kind( string $kind ): string {
+	$kind = sanitize_key( $kind );
+	if ( '' === $kind ) {
+		return '';
+	}
+	$slug = 'kind-' . $kind;
+	return get_block_template( get_stylesheet() . '//' . $slug, 'wp_template_part' ) ? $slug : '';
+}
+
+/**
+ * Theme part slugs keyed by kind slug.
+ *
+ * @return array<string, string> Existing kind part slugs.
+ */
+function part_slugs(): array {
+	$parts = array();
+	foreach ( kind_slugs() as $kind ) {
+		$part = part_slug_for_kind( $kind );
+		if ( '' !== $part ) {
+			$parts[ $kind ] = $part;
+		}
+	}
+	return $parts;
+}
+
+/**
  * The theme part slug for a post's kind, when the theme ships one.
  *
  * @param int $post_id Post ID.
  * @return string `kind-{slug}`, or '' when the post has no kind or no part exists.
  */
 function part_slug_for( int $post_id ): string {
-	$terms = get_the_terms( $post_id, 'kind' );
-	if ( ! is_array( $terms ) || empty( $terms ) ) {
-		return '';
-	}
-	$slug = 'kind-' . sanitize_key( $terms[0]->slug );
-	return get_block_template( get_stylesheet() . '//' . $slug, 'wp_template_part' ) ? $slug : '';
+	return part_slug_for_kind( kind_slug_for_post( $post_id ) );
 }
 
 /**
