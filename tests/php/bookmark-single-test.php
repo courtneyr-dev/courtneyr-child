@@ -280,13 +280,16 @@ namespace Courtneyr\Child\SingleBookmark\Tests {
 		'cited title prints only when it differs from the stored title',
 		static function (): bool {
 			reset_state();
-			bookmark_single( full_facts( array( 'cited_title' => 'release  NOTES' ) ), 'Release notes' );
+			bookmark_single( full_facts( array( 'cited_title' => ' release NOTES ' ) ), 'Release notes' );
 			$same = dom( \Courtneyr\Child\SingleBookmark\prepend_card( '', array( 'blockName' => 'core/post-content' ) ) )->query( '//p[contains(@class,"cr-index-card__cited")]' )->length;
+			bookmark_single( full_facts( array( 'cited_title' => 'Pocket Guide  To Small Sites' ) ), 'Pocket guide to small sites' );
+			$spaced = dom( \Courtneyr\Child\SingleBookmark\prepend_card( '', array( 'blockName' => 'core/post-content' ) ) );
 			bookmark_single( full_facts( array( 'cited_title' => 'Accessible drawers, explained' ) ), '' );
 			$empty = dom( \Courtneyr\Child\SingleBookmark\prepend_card( '', array( 'blockName' => 'core/post-content' ) ) )->query( '//p[contains(@class,"cr-index-card__cited")]' )->length;
 			bookmark_single( full_facts( array( 'cited_title' => '' ) ), 'Release notes' );
 			$none = dom( \Courtneyr\Child\SingleBookmark\prepend_card( '', array( 'blockName' => 'core/post-content' ) ) )->query( '//p[contains(@class,"cr-index-card__cited")]' )->length;
-			return 0 === $same && 1 === $empty && 0 === $none;
+			return 0 === $same && 1 === $empty && 0 === $none
+				&& 'Pocket Guide  To Small Sites' === $spaced->query( '//p[contains(@class,"cr-index-card__cited")]' )->item( 0 )?->textContent;
 		}
 	);
 
