@@ -97,7 +97,7 @@ namespace PKIW {
 	}
 
 	function get_kind_label( string $label, string $kind, string $context ): string {
-		return $label;
+		return $GLOBALS['cr_kind_label'] ?? $label;
 	}
 
 	function get_kind_icon_svg( string $kind ): string {
@@ -140,9 +140,14 @@ namespace Courtneyr\Child\SingleBookmark\Tests {
 		$GLOBALS['cr_posts']      = array();
 		$GLOBALS['cr_terms']      = array();
 		$GLOBALS['cr_kind_facts'] = array();
+		unset( $GLOBALS['cr_kind_label'] );
 		if ( function_exists( 'Courtneyr\\Child\\SingleBookmark\\in_content' ) ) {
 			\Courtneyr\Child\SingleBookmark\in_content( false );
 		}
+	}
+
+	function hostile( string $name ): string {
+		return '"><img src=x onerror=1 data-sink=' . $name . '>';
 	}
 
 	function full_facts( array $overrides = array() ): array {
@@ -334,6 +339,60 @@ namespace Courtneyr\Child\SingleBookmark\Tests {
 			return ! str_contains( $out, '<script>' )
 				&& str_contains( $out, '&lt;script&gt;x&lt;/script&gt;' )
 				&& str_contains( $out, '&lt;b&gt;bold&lt;/b&gt;' );
+		}
+	);
+
+	check_case(
+		'single card escapes cited title, drawer, source, date, label and picture alt',
+		static function (): bool {
+			reset_state();
+			$url       = hostile( 'url' );
+			$cited     = hostile( 'cited' );
+			$drawer    = hostile( 'drawer' );
+			$date_attr = hostile( 'date-attr' );
+			$date_text = hostile( 'date-text' );
+			$label     = hostile( 'label' );
+			$alt       = hostile( 'alt' );
+			$srchost   = hostile( 'srchost' );
+			bookmark_single(
+				full_facts(
+					array(
+						'url'         => 'https://example.com/p?q=' . $url,
+						'host'        => $srchost,
+						'cited_title' => $cited,
+						'date'        => array( $date_attr, $date_text ),
+						'drawer'      => array( 'key' => 'alpha', 'label' => $drawer ),
+						'picture'     => array( 'source' => 'featured', 'attachment_id' => 0, 'url' => 'https://img.example/f.jpg', 'alt' => $alt, 'remote' => true, 'suppress_featured' => true ),
+					)
+				),
+				'Release notes'
+			);
+			$GLOBALS['cr_kind_label'] = $label;
+			$xp          = dom( \Courtneyr\Child\SingleBookmark\prepend_card( '', array( 'blockName' => 'core/post-content' ) ) );
+			$source      = $xp->query( '//div[contains(@class,"cr-index-card__row--source")]//a' )->item( 0 );
+			$cited_node  = $xp->query( '//p[contains(@class,"cr-index-card__cited")]' )->item( 0 );
+			$drawer_node = $xp->query( '//p[contains(@class,"cr-bookmark-single__tab")]' )->item( 0 );
+			$time        = $xp->query( '//time' )->item( 0 );
+			$img         = $xp->query( '//figure//img' )->item( 0 );
+			$kind        = $xp->query( '//span[contains(@class,"cr-index-card__kind")]' )->item( 0 );
+			return $source instanceof \DOMElement
+				&& $cited_node instanceof \DOMElement
+				&& $drawer_node instanceof \DOMElement
+				&& $time instanceof \DOMElement
+				&& $img instanceof \DOMElement
+				&& $kind instanceof \DOMElement
+				&& 0 === $xp->query( '//*[@onerror]' )->length
+				&& 0 === $xp->query( '//*[@data-sink]' )->length
+				&& 1 === $xp->query( '//img' )->length
+				&& 'https://img.example/f.jpg' === $img->getAttribute( 'src' )
+				&& 'https://example.com/p?q=' . $url === $source->getAttribute( 'href' )
+				&& $srchost === $source->textContent
+				&& $cited === $cited_node->textContent
+				&& $drawer === $drawer_node->textContent
+				&& $date_attr === $time->getAttribute( 'datetime' )
+				&& $date_text === $time->textContent
+				&& $alt === $img->getAttribute( 'alt' )
+				&& $label === $kind->textContent;
 		}
 	);
 

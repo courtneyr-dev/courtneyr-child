@@ -178,7 +178,7 @@ namespace PKIW {
 		}
 
 		function get_kind_label( string $label, string $kind, string $context ): string {
-			return $label;
+			return $GLOBALS['cr_kind_label'] ?? $label;
 		}
 
 		function get_kind_icon_svg( string $kind ): string {
@@ -249,7 +249,12 @@ namespace Courtneyr\Child\Bookmark\Tests {
 		$GLOBALS['cr_current_post']   = 0;
 		$GLOBALS['cr_styles']         = array();
 		$GLOBALS['cr_stream_surface'] = false;
+		unset( $GLOBALS['cr_kind_label'] );
 		unset( $GLOBALS['wp_query'] );
+	}
+
+	function hostile( string $name ): string {
+		return '"><img src=x onerror=1 data-sink=' . $name . '>';
 	}
 
 	function full_facts( array $overrides = array() ): array {
@@ -433,6 +438,48 @@ namespace Courtneyr\Child\Bookmark\Tests {
 			return ! str_contains( $out, '<b>x</b>' )
 				&& str_contains( $out, '&lt;b&gt;x&lt;/b&gt; &amp; &quot;q&quot;' )
 				&& str_contains( $out, 'ex&quot;ample.com' );
+		}
+	);
+
+	check_case(
+		'Stream card escapes label title host and date',
+		static function (): bool {
+			reset_state();
+			$title     = hostile( 'title' );
+			$host      = hostile( 'host' );
+			$date_attr = hostile( 'date-attr' );
+			$date_text = hostile( 'date-text' );
+			$label     = hostile( 'label' );
+			bookmark_post(
+				61,
+				$title,
+				full_facts(
+					array(
+						'title' => $title,
+						'host'  => $host,
+						'date'  => array( $date_attr, $date_text ),
+					)
+				)
+			);
+			$GLOBALS['cr_stream_surface'] = true;
+			$GLOBALS['cr_kind_label']     = $label;
+			$xp        = dom( render_card( 61, array(), '<article class="pk-card k-bookmark">x</article>' ) );
+			$a         = $xp->query( '//a' )->item( 0 );
+			$host_node = $xp->query( '//p[contains(@class,"cr-bookmark-stream__host")]' )->item( 0 );
+			$time      = $xp->query( '//time' )->item( 0 );
+			$kind      = $xp->query( '//span[contains(@class,"cr-bookmark-stream__kind")]' )->item( 0 );
+			return $a instanceof \DOMElement
+				&& $host_node instanceof \DOMElement
+				&& $time instanceof \DOMElement
+				&& $kind instanceof \DOMElement
+				&& 0 === $xp->query( '//*[@onerror]' )->length
+				&& 0 === $xp->query( '//*[@data-sink]' )->length
+				&& 0 === $xp->query( '//img' )->length
+				&& $title === $a->textContent
+				&& $host === $host_node->textContent
+				&& $date_attr === $time->getAttribute( 'datetime' )
+				&& $date_text === $time->textContent
+				&& $label === $kind->textContent;
 		}
 	);
 
