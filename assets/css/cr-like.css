@@ -102,6 +102,7 @@ article.pk-card.cr-like-sticker--stream::before,
 	background: var(--cr-paper) var(--cr-fiber);
 	box-shadow: var(--cr-shadow-hard);
 	transform: rotate(var(--cr-rotate-1));
+
 	/* The plugin's .pk-card::before sets opacity 0.5; the sticker paper is the text's background. */
 	opacity: 1;
 }
