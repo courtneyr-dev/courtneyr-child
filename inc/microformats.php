@@ -10,7 +10,8 @@
  *
  *   core/post-title  className "cr-u-url"        -> <a class="u-url">
  *   core/post-date   className "cr-dt-published" -> <time class="dt-published">
- *   untitled review/reply/like/bookmark singles -> visible H1, no p-name
+ *   untitled review/reply/like/bookmark/photo/acquisition singles -> visible H1, no p-name
+ *   repost singles whose card title is the H1 -> suppress Core template title
  *   review posts                              -> h-review is the entry root
  *
  * @package CourtneyrChild
@@ -28,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Kinds whose untitled singles need a visible, non-mf2-name H1.
  */
-const UNTITLED_SINGLE_KINDS = array( 'review', 'reply', 'like', 'bookmark' );
+const UNTITLED_SINGLE_KINDS = array( 'review', 'reply', 'like', 'bookmark', 'photo', 'acquisition' );
 
 /**
  * Add a class to the first tag of a kind inside the rendered block.
@@ -155,6 +156,83 @@ function untitled_single_label( int $post_id ): string {
 		get_the_date( '', $post_id )
 	);
 }
+
+/**
+ * Whether the cited title already stands in for the single H1.
+ *
+ * True when the title is empty, or equals the cited title, or equals the host
+ * when there is no cited title, all compared after wp_strip_all_tags, trim and
+ * mb_strtolower.
+ *
+ * @param int $post_id Post ID.
+ * @return bool
+ */
+function cited_title_is_h1( int $post_id ): bool {
+	$post = get_post( $post_id );
+	if ( ! $post instanceof \WP_Post ) {
+		return false;
+	}
+
+	$normalize = static function ( $text ): string {
+		$text = trim( wp_strip_all_tags( (string) $text ) );
+		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $text, 'UTF-8' ) : strtolower( $text );
+	};
+
+	$title = $normalize( get_post_field( 'post_title', $post_id, 'raw' ) );
+	if ( '' === $title ) {
+		return true;
+	}
+	if ( ! function_exists( '\\PKIW\\kind_facts' ) ) {
+		return false;
+	}
+	$facts = \PKIW\kind_facts( $post_id );
+	if ( ! is_array( $facts ) ) {
+		return false;
+	}
+	$h1_source = $normalize( $facts['cited_title'] ?? '' );
+	if ( '' === $h1_source ) {
+		$h1_source = $normalize( $facts['host'] ?? '' );
+	}
+	if ( '' === $h1_source ) {
+		return false;
+	}
+
+	return $title === $h1_source;
+}
+
+/**
+ * Suppress Core's title when the repost card already carries the single H1.
+ *
+ * The repost card (retagged to h1 by the repost lane) carries the single H1,
+ * so Core's template title prints nothing for that post on its own single.
+ *
+ * @param string               $content Rendered block HTML.
+ * @param array<string, mixed> $block   Parsed block.
+ * @return string
+ */
+function suppress_cited_title_post_title( string $content, array $block ): string {
+	if ( 1 !== (int) ( $block['attrs']['level'] ?? 0 ) ) {
+		return $content;
+	}
+	if ( ! is_singular( 'post' ) ) {
+		return $content;
+	}
+	$post_id = (int) get_the_ID();
+	if ( 0 >= $post_id || (int) get_queried_object_id() !== $post_id ) {
+		return $content;
+	}
+	if ( isset( $block['context']['postId'] ) && (int) $block['context']['postId'] !== $post_id ) {
+		return $content;
+	}
+	if ( ! has_term( 'repost', 'kind', $post_id ) || post_password_required( $post_id ) ) {
+		return $content;
+	}
+	if ( true !== cited_title_is_h1( $post_id ) ) {
+		return $content;
+	}
+	return '';
+}
+add_filter( 'render_block_core/post-title', __NAMESPACE__ . '\\suppress_cited_title_post_title', 30, 2 );
 
 /**
  * Temporarily provide a visible title while Core renders the single H1.

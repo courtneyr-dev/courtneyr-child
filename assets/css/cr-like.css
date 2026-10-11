@@ -1,8 +1,3 @@
-:where(.cr-like-sticker) {
-	--cr-paper: var(--cr-light-gray);
-	--cr-paper-ink: var(--cr-russian-violet);
-}
-
 .cr-like .cr-sticker-book {
 	display: grid;
 	gap: var(--cr-space-xl);
@@ -367,22 +362,6 @@ body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clippin
 	box-shadow: var(--cr-shadow-hard-sm);
 	font-family: var(--cr-font-body);
 	font-size: max( var(--cr-text-sm), var(--cr-text-floor) );
-}
-
-.cr-like article.pk-card.cr-like-sticker:has(:focus-visible),
-article.pk-card.cr-like-sticker--stream:has(:focus-visible),
-body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping:has(:focus-visible) {
-	outline: 3px solid var(--cr-focus-ring);
-	outline-offset: var(--cr-space-xs);
-	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
-}
-
-.cr-like article.pk-card.cr-like-sticker:focus-within,
-article.pk-card.cr-like-sticker--stream:focus-within,
-body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping:focus-within {
-	outline: 3px solid var(--cr-focus-ring);
-	outline-offset: var(--cr-space-xs);
-	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
 }
 
 body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-original a:focus-visible {

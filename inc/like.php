@@ -660,7 +660,7 @@ function enqueue_styles(): void {
 	wp_enqueue_style(
 		STYLE_HANDLE,
 		COURTNEYR_CHILD_URI . '/assets/css/cr-like.css',
-		array( 'courtneyr-paper' ),
+		array( 'courtneyr-paper', 'courtneyr-sticker' ),
 		COURTNEYR_CHILD_VERSION
 	);
 }

@@ -30,8 +30,10 @@ function check_case( string $name, callable $test ): void {
 
 /** Read the stylesheet when it exists. */
 function like_css(): string {
-	global $css_path;
-	return is_file( $css_path ) ? (string) file_get_contents( $css_path ) : '';
+	global $css_path, $theme_dir;
+	$sticker_path = $theme_dir . '/assets/css/cr-sticker.css';
+	$sticker      = is_file( $sticker_path ) ? "\n" . (string) file_get_contents( $sticker_path ) : '';
+	return ( is_file( $css_path ) ? (string) file_get_contents( $css_path ) : '' ) . $sticker;
 }
 
 /** Read the token stylesheet when it exists. */
@@ -330,8 +332,8 @@ check_case(
 			return false;
 		}
 		return false === strpos( $css, 'var(--cr-white,' )
-			&& 'var(--cr-light-gray)' === declaration_value( $css, ':where(.cr-like-sticker)', '--cr-paper' )
-			&& 'var(--cr-russian-violet)' === declaration_value( $css, ':where(.cr-like-sticker)', '--cr-paper-ink' )
+			&& 'var(--cr-light-gray)' === declaration_value( $css, ':where(.cr-like-sticker, .cr-sticker)', '--cr-paper' )
+			&& 'var(--cr-russian-violet)' === declaration_value( $css, ':where(.cr-like-sticker, .cr-sticker)', '--cr-paper-ink' )
 			&& 'isolate' === declaration_value( $css, '.cr-like article.pk-card.cr-like-sticker', 'isolation' )
 			&& 'isolate' === declaration_value( $css, 'article.pk-card.cr-like-sticker--stream', 'isolation' );
 	}

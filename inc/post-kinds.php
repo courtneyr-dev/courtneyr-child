@@ -219,28 +219,49 @@ function oembed_html( $html, $url ) {
 add_filter( 'embed_oembed_html', __NAMESPACE__ . '\\oembed_html', 10, 2 );
 
 /**
- * Drop the featured image from a photo post's single view.
+ * Drop template-owned heading/image blocks when the single object holds the H1.
  *
- * `single.html` renders `wp:post-featured-image`, and a photo posted from
- * Outpost already carries its picture in the body as a core/image block. Once
- * Outpost starts setting a featured image so the Stream polaroid has something
- * to show, that same picture would appear twice on the post itself: once above
- * the title and once in the entry. Suppressing it here keeps the single view
- * reading as one photo, and leaves the thumbnail free to do its real job in
- * cards, archives, and previews.
- *
- * Scoped to the `photo` kind. Other kinds keep their featured image, since for
- * them it is a lede rather than a duplicate of the body.
+ * Kind lanes declare H1 ownership through
+ * `courtneyr_child_single_object_holds_h1`. This shared render filter stays
+ * kind-agnostic and drops only the template's post header group and featured
+ * image after a lane returns exactly true.
  *
  * @param string               $html  Rendered block HTML.
  * @param array<string, mixed> $block Parsed block.
  * @return string
  */
-function suppress_featured_image_on_photo_single( string $html, array $block ): string {
-	if ( 'core/post-featured-image' !== ( $block['blockName'] ?? '' ) ) {
+function drop_template_header( string $html, array $block ): string {
+	$name  = (string) ( $block['blockName'] ?? '' );
+	$class = (string) ( $block['attrs']['className'] ?? '' );
+	$drop  = ( 'core/group' === $name && str_contains( $class, 'single-post__header' ) )
+		|| ( 'core/post-featured-image' === $name && str_contains( $class, 'single-post__featured' ) );
+	if ( ! $drop || ! is_singular( 'post' ) ) {
 		return $html;
 	}
-	if ( ! is_singular( 'post' ) ) {
+
+	$post = get_post( get_queried_object_id() );
+	if ( ! $post instanceof \WP_Post ) {
+		return $html;
+	}
+
+	return true === apply_filters( 'courtneyr_child_single_object_holds_h1', false, $post ) ? '' : $html;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\drop_template_header', 10, 2 );
+
+/**
+ * Drop repeated featured images for kinds whose object already prints them.
+ *
+ * Kind lanes opt into the listed-kind gate through
+ * `courtneyr_child_featured_repeat_kinds` and into custom repeat detection
+ * through `courtneyr_child_featured_repeats`. The theme reads the plugin only
+ * through `\PKIW\kind_facts()`, specifically the `featured_in_content` fact.
+ *
+ * @param string               $html  Rendered block HTML.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function suppress_repeated_featured_image( string $html, array $block ): string {
+	if ( 'core/post-featured-image' !== ( $block['blockName'] ?? '' ) || ! is_singular( 'post' ) ) {
 		return $html;
 	}
 
@@ -248,13 +269,37 @@ function suppress_featured_image_on_photo_single( string $html, array $block ): 
 	if ( ! $post instanceof \WP_Post ) {
 		return $html;
 	}
-	if ( ! has_term( 'photo', 'kind', $post ) ) {
+
+	$kinds = apply_filters( 'courtneyr_child_featured_repeat_kinds', array( 'photo', 'chicken', 'repost' ) );
+	$kinds = array_values(
+		array_unique(
+			array_filter(
+				array_map(
+					static fn( $kind ): string => is_string( $kind ) ? trim( $kind ) : '',
+					(array) $kinds
+				),
+				static fn( string $kind ): bool => '' !== $kind
+			)
+		)
+	);
+	if ( empty( $kinds ) || ! has_term( $kinds, 'kind', $post ) ) {
 		return $html;
 	}
 
-	return '';
+	if ( post_password_required( $post ) ) {
+		return '';
+	}
+
+	if ( function_exists( '\\PKIW\\kind_facts' ) ) {
+		$facts = \PKIW\kind_facts( $post->ID );
+		if ( is_array( $facts ) && ! empty( $facts['featured_in_content'] ) ) {
+			return '';
+		}
+	}
+
+	return true === apply_filters( 'courtneyr_child_featured_repeats', false, $post ) ? '' : $html;
 }
-add_filter( 'render_block', __NAMESPACE__ . '\\suppress_featured_image_on_photo_single', 10, 2 );
+add_filter( 'render_block', __NAMESPACE__ . '\\suppress_repeated_featured_image', 10, 2 );
 
 /**
  * Drop the featured image block when the read object prints that picture.

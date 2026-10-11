@@ -800,7 +800,7 @@ namespace Courtneyr\Child\Like\Tests {
 	check_case(
 		'enqueues the like stylesheet only on like archive, like single, Stream and admin',
 		static function (): bool {
-			$expected = array( COURTNEYR_CHILD_URI . '/assets/css/cr-like.css', array( 'courtneyr-paper' ), COURTNEYR_CHILD_VERSION );
+			$expected = array( COURTNEYR_CHILD_URI . '/assets/css/cr-like.css', array( 'courtneyr-paper', 'courtneyr-sticker' ), COURTNEYR_CHILD_VERSION );
 			$run      = static function ( array $request, bool $surface = false ): array {
 				$GLOBALS['cr_request']        = $request;
 				$GLOBALS['cr_stream_surface'] = $surface;
