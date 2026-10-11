@@ -91,6 +91,15 @@ cr_reply_group(
 		foreach ( array( 'p-summary', 'dt-published', 'u-in-reply-to' ) as $gone ) {
 			cr_reply_not_contains( $gone, $html, $gone . ' omitted' );
 		}
+
+		$post             = cr_reply_reset();
+		$post->post_title = '';
+		$GLOBALS['cr_reply_protected'][ $post->ID ] = true;
+		cr_reply_fixture_facts( $post );
+		$html = Letters\letter_card( 'x', cr_reply_letter_block(), new WP_Block( array( 'postId' => $post->ID ) ) );
+		cr_reply_not_contains( '>Protected: </a>', $html, 'untitled protected reply has a name' );
+		cr_reply_contains( '>Reply, October 11, 2026</a>', $html, 'untitled protected reply takes the plugin untitled name' );
+		cr_reply_not_contains( 'p-name', $html, 'untitled protected reply prints no p-name' );
 	}
 );
 

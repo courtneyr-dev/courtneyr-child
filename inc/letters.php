@@ -72,6 +72,13 @@ function facts_for( \WP_Post $post ): array {
 	$protected = function_exists( 'post_password_required' ) && post_password_required( $post );
 	$title     = function_exists( 'get_the_title' ) ? (string) get_the_title( $post ) : (string) $post->post_title;
 	if ( $protected ) {
+		// Core prefixes "Protected: " even to an empty title; an untitled reply
+		// takes the plugin's untitled name, as its own protected card does.
+		if ( '' === trim( (string) $post->post_title ) ) {
+			$title = function_exists( '\\PKIW\\untitled_name' )
+				? (string) \PKIW\untitled_name( $post, false )
+				: __( 'Protected reply', 'courtneyr-child' );
+		}
 		return array(
 			'url'       => '',
 			'host'      => '',

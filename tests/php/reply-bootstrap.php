@@ -312,6 +312,10 @@ namespace PKIW {
 	function get_kind_label( string $fallback, string $kind, string $context ): string {
 		return 'reply' === $kind && 'stream-card' === $context ? 'Letter' : $fallback;
 	}
+
+	function untitled_name( \WP_Post $post, bool $with_time = true ): string {
+		return 'Reply, October 11, 2026';
+	}
 }
 
 namespace Courtneyr\Child\HomeSections {
