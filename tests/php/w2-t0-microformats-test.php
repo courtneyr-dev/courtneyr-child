@@ -237,7 +237,7 @@ namespace PKIW {
 	if ( ! $GLOBALS['no_plugin'] ) {
 		/** Untitled fallback. */
 		function untitled_name( \WP_Post $post ): string {
-			return 'Stub kind label ' . $post->ID;
+			return $GLOBALS['cr_untitled_override'] ?? 'Stub kind label ' . $post->ID;
 		}
 	}
 }
@@ -305,6 +305,7 @@ namespace Courtneyr\Child\W2T0MicroformatsTests {
 		$GLOBALS['cr_current_post']                = 0;
 		$GLOBALS['pkiw_stream_card_root_seen']     = array();
 		$GLOBALS['cr_hooks']['the_title']          = array();
+		unset( $GLOBALS['cr_untitled_override'] );
 	}
 
 	/** Add a post fixture. */
@@ -326,7 +327,7 @@ namespace Courtneyr\Child\W2T0MicroformatsTests {
 			'<h%1$d class="wp-block-post-title %2$s">%3$s</h%1$d>',
 			$level,
 			esc_attr( (string) ( $block['attrs']['className'] ?? '' ) ),
-			esc_html( $title )
+			$title
 		);
 		return apply_filters( 'render_block_core/post-title', $content, $block );
 	}
@@ -377,6 +378,19 @@ namespace Courtneyr\Child\W2T0MicroformatsTests {
 		check( '' === get_the_title( $id ), "$kind title filter does not leak to later title reads" );
 		no_title_filter_left( "$kind leaves no the_title filter behind" );
 	}
+
+	reset_state();
+	post_fixture( 90, 'reply' );
+	if ( $GLOBALS['no_plugin'] ) {
+		$GLOBALS['cr_dates'][90] = '<img src=x onerror=alert(1)>';
+	} else {
+		$GLOBALS['cr_untitled_override'] = '<img src=x onerror=alert(1)>';
+	}
+	$html = render_title_pipeline( title_block() );
+	check( false !== strpos( $html, '&lt;img' ), 'untitled single label is escaped in the H1' );
+	check( false === strpos( $html, '<img' ), 'untitled single label does not render markup in the H1' );
+	check( 1 === substr_count( $html, '<h1' ), 'untitled single escaped label still prints one H1' );
+	no_title_filter_left( 'untitled single escaped label leaves no the_title filter behind' );
 
 	$negative = array(
 		'titled review'               => array( 40, 'review', 'Has title', true, 1, false, false ),

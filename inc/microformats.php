@@ -172,7 +172,8 @@ function untitled_single_title( string $title, int $post_id ): string {
 	$state = untitled_single_state();
 	if ( (int) $post_id === $state['post_id'] && '' === trim( $title ) ) {
 		untitled_single_state( $state['post_id'], true );
-		return untitled_single_label( $post_id );
+		// Core prints the filtered post-title block content raw.
+		return esc_html( untitled_single_label( $post_id ) );
 	}
 	return $title;
 }
