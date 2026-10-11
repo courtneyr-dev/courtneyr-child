@@ -337,6 +337,12 @@ async function requireKindCount( page, kind, min ) {
 	return count;
 }
 
+// Every page of a kind archive, from the term count and the page size the archive prints.
+async function archivePaths( page, kind, path, perPage ) {
+	const count = await kindCount( page, kind );
+	return Array.from( { length: Math.max( 1, Math.ceil( ( count ?? 0 ) / perPage ) ) }, ( _, i ) => ( 0 === i ? path : pagedPath( path, i + 1 ) ) );
+}
+
 async function goToSlug( page, slug, label = slug ) {
 	const path = await postBySlug( page, slug );
 	test.skip( ! path, `no ${ label } on this site` );
@@ -3931,9 +3937,10 @@ test( 'the Stream shows a read as a book card with no hand-drawn line or progres
 
 for ( const archive of W2_ARCHIVES ) {
 	test( `the ${ archive.kind } archive has one h1 and a centered 44px pager (PKIW #${ archive.issue })`, async ( { page } ) => {
+		await requireKindCount( page, archive.kind, archive.min );
 		await page.goto( archive.path, { waitUntil: 'load' } );
 		const pager = page.locator( 'nav.wp-block-query-pagination[aria-label="Pagination"]' );
-		test.skip( 0 === await pager.locator( 'a.wp-block-query-pagination-next' ).count(), `${ archive.kind } archive has fewer than 2 pages` );
+		await expect( pager.locator( 'a.wp-block-query-pagination-next' ), `${ archive.kind } archive has a Next link` ).toHaveCount( 1 );
 		await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
 		await expect( page.locator( 'main h1 .cr-cutout__text' ) ).toHaveText( archive.label );
 		await expect( pager ).toHaveCount( 1 );
@@ -3973,38 +3980,57 @@ for ( const archive of W2_ARCHIVES ) {
 		expect( await hasHorizontalScroll( page ), '320px no horizontal scroll' ).toBeLessThanOrEqual( 0 );
 	} );
 
-	test( `${ archive.kind } archive item text holds 4.5:1 (PKIW #${ archive.issue })`, async ( { page } ) => {
+	test( `${ archive.kind } archive item text holds WCAG AA contrast, 3:1 for large text and 4.5:1 for the rest (PKIW #${ archive.issue })`, async ( { page } ) => {
 		await page.goto( archive.path, { waitUntil: 'load' } );
-		const items = page.locator( 'main li.wp-block-post' );
-		test.skip( 0 === await items.count(), `${ archive.kind } archive has no items` );
-		const failures = await items.evaluateAll( ( els ) => {
-			const channels = ( value ) => ( value.match( /\d+(?:\.\d+)?/g ) ?? [] ).slice( 0, 3 ).map( Number );
-			const lum = ( value ) => channels( value ).map( ( n ) => n / 255 ).map( ( n ) => n <= 0.03928 ? n / 12.92 : ( ( n + 0.055 ) / 1.055 ) ** 2.4 ).reduce( ( sum, n, i ) => sum + n * [ 0.2126, 0.7152, 0.0722 ][i], 0 );
-			const contrast = ( a, b ) => ( Math.max( lum( a ), lum( b ) ) + 0.05 ) / ( Math.min( lum( a ), lum( b ) ) + 0.05 );
-			const bg = ( el ) => {
-				for ( let node = el; node; node = node.parentElement ) {
-					for ( const pseudo of [ '::before', '::after' ] ) {
-						const style = getComputedStyle( node, pseudo );
-						const value = style.backgroundColor;
-						if ( ! [ 'none', 'normal' ].includes( style.content ) && 'rgba(0, 0, 0, 0)' !== value && 'transparent' !== value && ! value.endsWith( ', 0)' ) ) {
-							return value;
-						}
-					}
-					const value = getComputedStyle( node ).backgroundColor;
-					if ( 'rgba(0, 0, 0, 0)' !== value && 'transparent' !== value && ! value.endsWith( ', 0)' ) ) {
-						return value;
-					}
-				}
-				return 'rgb(255, 255, 255)';
-			};
-			return els.slice( 0, 6 ).flatMap( ( item ) => [ ...item.querySelectorAll( '.pk-title a, .pkiw-review-entry__title a, .cr-letter__title a, .cr-index-card__host, .cr-bookmark-stream__kind, .pk-kindlabel, .pkiw-review-entry__item' ) ].filter( ( el ) => {
+		await page.evaluate( () => document.fonts.ready );
+		const targets = await page.evaluate( () => {
+			const visible = ( el ) => {
 				const box = el.getBoundingClientRect();
 				return box.width > 0 && box.height > 0 && 'hidden' !== getComputedStyle( el ).visibility;
-			} ).map( ( el ) => {
-				const ratio = contrast( getComputedStyle( el ).color, bg( el ) );
-				return ratio < 4.5 ? `${ el.textContent.replace( /\s+/g, ' ' ).trim() }: ${ ratio.toFixed( 2 ) }` : '';
-			} ).filter( Boolean ) );
+			};
+			return [ ...document.querySelectorAll( 'main li.wp-block-post' ) ].slice( 0, 6 ).flatMap( ( item ) => [ ...item.querySelectorAll( '.pk-title a, .pkiw-review-entry__title a, .cr-letter__title a, .cr-index-card__host, .cr-bookmark-stream__kind, .pk-kindlabel, .pkiw-review-entry__item' ) ].filter( visible ).map( ( el ) => {
+				const box = el.getBoundingClientRect();
+				return {
+					label: el.textContent.replace( /\s+/g, ' ' ).trim(),
+					color: getComputedStyle( el ).color,
+					// WCAG large text: 24px or more, or 18.66px or more at weight 700 or more.
+					large: parseFloat( getComputedStyle( el ).fontSize ) >= 24 || ( parseFloat( getComputedStyle( el ).fontSize ) >= 18.66 && Number( getComputedStyle( el ).fontWeight ) >= 700 ),
+					box: { x: box.left + scrollX, y: box.top + scrollY, width: box.width, height: box.height },
+				};
+			} ) );
 		} );
+		test.skip( 0 === targets.length, `${ archive.kind } archive has no text to measure` );
+		const channels = ( value ) => ( value.match( /\d+(?:\.\d+)?/g ) ?? [] ).slice( 0, 3 ).map( Number );
+		const luminance = ( rgb ) => rgb.map( ( n ) => n / 255 ).map( ( n ) => n <= 0.03928 ? n / 12.92 : ( ( n + 0.055 ) / 1.055 ) ** 2.4 ).reduce( ( sum, n, i ) => sum + n * [ 0.2126, 0.7152, 0.0722 ][i], 0 );
+		const failures = [];
+		for ( const target of targets ) {
+			// Sample the painted pixels: the background under the text is the most common colour that is not the ink.
+			const png = ( await page.screenshot( { clip: target.box, fullPage: true } ) ).toString( 'base64' );
+			const ink = channels( target.color );
+			const background = await page.evaluate( async ( { png: data, ink: inkColor } ) => {
+				const bitmap = await createImageBitmap( new Blob( [ Uint8Array.from( atob( data ), ( char ) => char.charCodeAt( 0 ) ) ], { type: 'image/png' } ) );
+				const canvas = new OffscreenCanvas( bitmap.width, bitmap.height );
+				const context = canvas.getContext( '2d' );
+				context.drawImage( bitmap, 0, 0 );
+				const counts = new Map();
+				const pixels = context.getImageData( 0, 0, bitmap.width, bitmap.height ).data;
+				for ( let i = 0; i < pixels.length; i += 4 ) {
+					const distance = Math.hypot( pixels[i] - inkColor[0], pixels[i + 1] - inkColor[1], pixels[i + 2] - inkColor[2] );
+					if ( distance < 48 ) continue;
+					const key = `${ pixels[i] },${ pixels[i + 1] },${ pixels[i + 2] }`;
+					counts.set( key, ( counts.get( key ) ?? 0 ) + 1 );
+				}
+				const top = [ ...counts.entries() ].sort( ( a, b ) => b[1] - a[1] )[0];
+				return top ? top[0].split( ',' ).map( Number ) : null;
+			}, { png, ink } );
+			if ( ! background ) continue;
+			const [ light, dark ] = [ luminance( ink ), luminance( background ) ].sort( ( a, b ) => b - a );
+			const ratio = ( light + 0.05 ) / ( dark + 0.05 );
+			const required = target.large ? 3 : 4.5;
+			if ( ratio < required ) {
+				failures.push( `${ target.label }: ${ ratio.toFixed( 2 ) } under ${ required } (ink ${ target.color } on rgb(${ background.join( ', ' ) }))` );
+			}
+		}
 		expect( failures, failures.join( ' | ' ) ).toEqual( [] );
 	} );
 }
@@ -4080,6 +4106,7 @@ test( 'review archive sections never split and nothing scrolls sideways at 1440,
 		await page.setViewportSize( { width, height: 1000 } );
 		await page.goto( REVIEW_ARCHIVE, { waitUntil: 'load' } );
 		expect( await hasHorizontalScroll( page ), `${ width }px no horizontal scroll` ).toBeLessThanOrEqual( 0 );
+		expect( await page.locator( 'section.pkiw-review-section' ).count(), `${ width }px review sections exist` ).toBeGreaterThan( 0 );
 		const failures = await page.locator( 'section.pkiw-review-section' ).evaluateAll( ( sections ) => sections.flatMap( ( section ) => {
 			const box = section.getBoundingClientRect();
 			const heading = section.querySelector( '.pkiw-review-section__heading' )?.getBoundingClientRect();
@@ -4166,6 +4193,8 @@ test( 'Stream review clippings are one link, no picture, no excerpt and a single
 test( 'the reply archive is host groups of letters: one h2 per host, one h3 and one link per letter, none external (PKIW #253)', async ( { page } ) => {
 	await requireKindCount( page, 'reply', 10 );
 	await page.goto( REPLY_ARCHIVE, { waitUntil: 'load' } );
+	expect( await page.locator( '.cr-letters section.pkiw-group' ).count(), 'reply archive has host groups' ).toBeGreaterThan( 0 );
+	await expect( page.locator( '.cr-letters li.wp-block-post' ), 'reply archive prints nine letters per page' ).toHaveCount( 9 );
 	for ( const group of await page.locator( '.cr-letters section.pkiw-group' ).all() ) {
 		await expect( group.locator( 'h2.pkiw-group__heading' ) ).toHaveCount( 1 );
 	}
@@ -4339,13 +4368,14 @@ test( 'a reply single is a torn sheet: the cited host once, the body, then a pla
 } );
 
 test( 'an untitled reply single has a visible h1 and no p-name on it (PKIW #253)', async ( { page } ) => {
-	const posts = await kindPosts( page, 'reply' );
-	const fixture = posts.find( ( post ) => '' === post.title && post.path.includes( '/2026/10/11/' ) );
-	test.skip( ! fixture, 'no F04 untitled reply on this site' );
-	await page.goto( fixture.path, { waitUntil: 'load' } );
-	await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
-	expect( ( await page.locator( 'main h1' ).innerText() ).trim(), 'untitled reply h1 text' ).not.toBe( '' );
-	await expect( page.locator( 'main h1.p-name' ) ).toHaveCount( 0 );
+	const untitled = ( await kindPosts( page, 'reply' ) ).filter( ( post ) => '' === post.title );
+	test.skip( 0 === untitled.length, 'no untitled reply on this site' );
+	for ( const post of untitled ) {
+		await page.goto( post.path, { waitUntil: 'load' } );
+		await expect( page.locator( 'main h1' ), `${ post.path } has one h1` ).toHaveCount( 1 );
+		expect( ( await page.locator( 'main h1' ).innerText() ).trim(), `${ post.path } untitled reply h1 text` ).not.toBe( '' );
+		await expect( page.locator( 'main h1.p-name' ), `${ post.path } h1 has no p-name` ).toHaveCount( 0 );
+	}
 } );
 
 test( 'the Stream shows a reply as an envelope: one link, the host as the address, no link to the replied-to URL, no h-entry on the article (PKIW #253)', async ( { page } ) => {
@@ -4368,6 +4398,25 @@ test( 'the Stream shows a reply as an envelope: one link, the host as the addres
 		expect( await card.evaluate( ( article ) => article.classList.contains( 'h-entry' ) ), 'envelope article is not h-entry' ).toBe( false );
 		expect( await hEntryClassCount( card.locator( 'xpath=ancestor::li[1]' ) ), 'one h-entry among the reply li and descendants' ).toBe( 1 );
 	}
+} );
+
+test( 'the Stream keeps the full replied-to URL, query included, in the hidden data and links nowhere near it (PKIW #253)', async ( { page } ) => {
+	// F05 is an older reply, so it sits on a later Stream page: read the Stream pages until its envelope shows.
+	let found = null;
+	for await ( const { html } of streamPages( page, STREAM ) ) {
+		if ( html.includes( 'indieweb.example/thread?token=abc123' ) ) {
+			found = html;
+			break;
+		}
+	}
+	test.skip( null === found, 'the F05 reply with a query string is not on the first 30 Stream pages' );
+	expect( found, 'hidden reply-to keeps the exact URL with its query' ).toContain( 'class="u-in-reply-to" value="https://indieweb.example/thread?token=abc123"' );
+	expect( found, 'no link to the replied-to URL' ).not.toMatch( /href=["']https:\/\/indieweb\.example\/thread/ );
+	const visible = await page.evaluate( ( html ) => {
+		const doc = new DOMParser().parseFromString( html, 'text/html' );
+		return doc.body.textContent.includes( 'token=abc123' );
+	}, found );
+	expect( visible, 'the token appears in no text node' ).toBe( false );
 } );
 
 test( 'Stream reply envelopes do not scroll sideways at 375 and 320 (PKIW #253)', async ( { page }, testInfo ) => {
@@ -4411,7 +4460,7 @@ test( 'every sticker is one link to its own post with nothing else printed (PKIW
 		await expect( item.locator( 'a[target]' ) ).toHaveCount( 0 );
 		const printed = await visibleLinkText( item.locator( '.pk-title a' ) );
 		expect( await itemVisibleTextWithoutSr( item ), 'like visible text is only the title' ).toBe( printed );
-		const offOrigin = await item.locator( 'a[href]' ).evaluateAll( ( links ) => links.filter( ( link ) => link.origin !== location.origin ).map( ( link ) => link.href ) );
+		const offOrigin = links.filter( ( link ) => new URL( link.href ).origin !== new URL( page.url() ).origin );
 		expect( offOrigin, 'like archive has no off-origin focusable links' ).toEqual( [] );
 		await expect( item.locator( '.u-like-of' ) ).toHaveCount( 1 );
 		await expect( item.locator( '.u-like-of data.u-url' ) ).toHaveAttribute( 'value', /^https?:\/\// );
@@ -4552,6 +4601,7 @@ test( 'the Stream shows a like as a yellow sticker: heart, Liked, title link and
 	for ( const card of await cards.all() ) {
 		const links = await focusableLinks( card );
 		expect( links, 'stream like has one link' ).toHaveLength( 1 );
+		expect( links[0].href, 'stream like link is the title link' ).toBe( await card.locator( '.pk-title a' ).evaluate( ( link ) => link.href ) );
 		await expect( card.locator( '.pk-badge' ) ).toHaveAttribute( 'aria-hidden', 'true' );
 		await expect( card.locator( '.pk-kindlabel' ) ).toHaveText( 'Liked' );
 		await expect( card.locator( 'img' ) ).toHaveCount( 0 );
@@ -4561,15 +4611,13 @@ test( 'the Stream shows a like as a yellow sticker: heart, Liked, title link and
 	}
 } );
 
-test( 'the bookmark archive is tag drawers: twelve per page, three pages, drawers A to Z, Other last (PKIW #258)', async ( { page } ) => {
-	await requireKindCount( page, 'bookmark', 13 );
-	await page.goto( BOOKMARK_ARCHIVE, { waitUntil: 'load' } );
-	await expect( page.locator( 'li.wp-block-post' ) ).toHaveCount( 12 );
-	await page.goto( pagedPath( BOOKMARK_ARCHIVE, 2 ), { waitUntil: 'load' } );
-	expect( await page.locator( 'li.wp-block-post' ).count(), 'bookmark page 2 exists' ).toBeGreaterThan( 0 );
+test( 'the bookmark archive is tag drawers: twelve per page, every page filled, drawers A to Z, Other last (PKIW #258)', async ( { page } ) => {
+	const total = await requireKindCount( page, 'bookmark', 13 );
+	const paths = await archivePaths( page, 'bookmark', BOOKMARK_ARCHIVE, 12 );
 	const headings = [];
-	for ( const path of [ BOOKMARK_ARCHIVE, pagedPath( BOOKMARK_ARCHIVE, 2 ), pagedPath( BOOKMARK_ARCHIVE, 3 ) ] ) {
+	for ( const [ i, path ] of paths.entries() ) {
 		await page.goto( path, { waitUntil: 'load' } );
+		await expect( page.locator( 'li.wp-block-post' ), `${ path } prints ${ i + 1 < paths.length ? 12 : total - 12 * i } bookmarks` ).toHaveCount( i + 1 < paths.length ? 12 : total - 12 * i );
 		const pageHeadings = await page.locator( '.pkiw-group__heading' ).evaluateAll( ( els ) => els.map( ( el ) => el.textContent.trim() ) );
 		if ( pageHeadings.includes( 'Other' ) ) {
 			expect( pageHeadings.at( -1 ), `${ path } Other drawer is last` ).toBe( 'Other' );
@@ -4577,6 +4625,8 @@ test( 'the bookmark archive is tag drawers: twelve per page, three pages, drawer
 		headings.push( ...pageHeadings );
 	}
 	expect( headings.at( -1 ), 'final page ends with Other' ).toBe( 'Other' );
+	const after = await page.goto( pagedPath( BOOKMARK_ARCHIVE, paths.length + 1 ), { waitUntil: 'load' } );
+	expect( after?.status(), 'there is no bookmark page after the last' ).toBe( 404 );
 	const sortedHeadings = headings.filter( ( heading ) => 'Other' !== heading );
 	expect( sortedHeadings, 'drawers sort A to Z before Other' ).toEqual( [ ...sortedHeadings ].sort( ( a, b ) => a.localeCompare( b, undefined, { sensitivity: 'base' } ) ) );
 	await page.goto( BOOKMARK_ARCHIVE, { waitUntil: 'load' } );
@@ -4587,10 +4637,13 @@ test( 'the bookmark archive is tag drawers: twelve per page, three pages, drawer
 test( 'every bookmark is one link to its own post, no target, named by title and host when the title repeats (PKIW #258)', async ( { page } ) => {
 	await requireKindCount( page, 'bookmark', 13 );
 	let repeatedSeen = 0;
-	for ( const path of [ BOOKMARK_ARCHIVE, pagedPath( BOOKMARK_ARCHIVE, 2 ), pagedPath( BOOKMARK_ARCHIVE, 3 ) ] ) {
+	let checkedItems = 0;
+	for ( const path of await archivePaths( page, 'bookmark', BOOKMARK_ARCHIVE, 12 ) ) {
 		await page.goto( path, { waitUntil: 'load' } );
 		const items = await page.locator( 'li.wp-block-post' ).all();
+		expect( items.length, `${ path } has bookmarks` ).toBeGreaterThan( 0 );
 		for ( const item of items ) {
+			checkedItems++;
 			const links = await focusableLinks( item );
 			expect( links, 'bookmark item has one focusable link' ).toHaveLength( 1 );
 			expect( await sameOrigin( page, links[0].href ), 'bookmark archive link is same-origin' ).toBe( true );
@@ -4617,8 +4670,9 @@ test( 'every bookmark is one link to its own post, no target, named by title and
 		expect( new Set( labels ).size, `${ path } repeated bookmark titles get different names` ).toBe( labels.length );
 		repeatedSeen += labels.length;
 	}
+	expect( checkedItems, 'bookmark archive items checked' ).toBeGreaterThan( 0 );
 	if ( 0 === repeatedSeen ) {
-		fixtureSkippedPart( 'no repeated bookmark titles on the first three pages' );
+		fixtureSkippedPart( 'no repeated bookmark titles on any bookmark page' );
 	}
 } );
 
@@ -4660,34 +4714,41 @@ test( 'bookmark drawers sit 4, 2, 2, 1 and 1 to a row at 1440, 1024, 768, 375 an
 		expect( layout.ordered, `${ width }px DOM order equals visual order` ).toBe( true );
 		expect( await hasHorizontalScroll( page ), `${ width }px no horizontal scroll` ).toBeLessThanOrEqual( 0 );
 	}
-	// A short row is centered: page 2 ends with a row of fewer drawers, and a page with one drawer (the last page) is centered alone.
+	// A short row is centered: every archive page with fewer than four drawers (the last pages), at least one of them.
 	await page.setViewportSize( { width: 1440, height: 1000 } );
-	for ( const path of [ pagedPath( BOOKMARK_ARCHIVE, 2 ), pagedPath( BOOKMARK_ARCHIVE, 3 ) ] ) {
+	let shortPages = 0;
+	for ( const path of await archivePaths( page, 'bookmark', BOOKMARK_ARCHIVE, 12 ) ) {
 		await page.goto( path, { waitUntil: 'load' } );
-		const offset = await page.locator( '.pkiw-grouped' ).evaluate( ( container ) => {
+		const row = await page.locator( '.pkiw-grouped' ).evaluate( ( container ) => {
 			const groups = [ ...container.querySelectorAll( ':scope > .pkiw-group' ) ];
 			const left = Math.min( ...groups.map( ( group ) => group.offsetLeft ) );
 			const right = Math.max( ...groups.map( ( group ) => group.offsetLeft + group.offsetWidth ) );
 			return { drawers: groups.length, offset: Math.abs( ( left + right ) / 2 - ( container.offsetLeft + container.offsetWidth / 2 ) ) };
 		} );
-		expect( offset.drawers, `${ path } is a short row` ).toBeLessThan( 4 );
-		expect( offset.offset, `${ path } short row of ${ offset.drawers } is centered` ).toBeLessThanOrEqual( 2 );
+		if ( row.drawers < 4 ) {
+			shortPages++;
+			expect( row.offset, `${ path } short row of ${ row.drawers } is centered` ).toBeLessThanOrEqual( 2 );
+		}
+	}
+	if ( 0 === shortPages ) {
+		fixtureSkippedPart( 'no bookmark archive page has fewer than four drawers' );
 	}
 } );
 
 test( 'private and draft bookmarks never show, and a protected one prints only its title in the last drawer (PKIW #258)', async ( { page } ) => {
 	await requireKindCount( page, 'bookmark', 13 );
-	for ( const path of [ BOOKMARK_ARCHIVE, pagedPath( BOOKMARK_ARCHIVE, 2 ), pagedPath( BOOKMARK_ARCHIVE, 3 ) ] ) {
+	const paths = await archivePaths( page, 'bookmark', BOOKMARK_ARCHIVE, 12 );
+	for ( const path of paths ) {
 		await page.goto( path, { waitUntil: 'load' } );
+		await expect( page.locator( 'li.wp-block-post' ).first(), `${ path } has bookmarks` ).toBeVisible();
 		const text = await page.locator( 'body' ).innerText();
 		expect( text, `${ path } private bookmark hidden` ).not.toContain( 'A private bookmark' );
 		expect( text, `${ path } draft bookmark hidden` ).not.toContain( 'A draft bookmark' );
 	}
 	const protectedPath = await postBySlug( page, 'a-bookmark-behind-a-password' );
 	test.skip( ! protectedPath, 'no protected bookmark on this site' );
-	await page.goto( pagedPath( BOOKMARK_ARCHIVE, 3 ), { waitUntil: 'load' } );
-	const item = page.locator( `li.wp-block-post:has(a[href$="${ protectedPath }"])` ).first();
-	await expect( item ).toHaveCount( 1 );
+	const item = await firstMatchingArchiveItem( page, paths, `( item ) => Boolean( item.querySelector( 'a[href$="${ protectedPath }"]' ) )` );
+	expect( item, 'the protected bookmark is on a bookmark archive page' ).not.toBeNull();
 	await expect( item.locator( 'xpath=ancestor::section[contains(@class,"pkiw-group")][1]' ).locator( 'h2' ) ).toHaveText( 'Other' );
 	await expect( item.locator( '.cr-index-card__host, .u-bookmark-of' ) ).toHaveCount( 0 );
 	await expect( item.locator( '.cr-index-card--locked' ) ).toHaveCount( 1 );
@@ -4733,7 +4794,8 @@ test( 'the Stream shows a bookmark as label, title, host and date with an inert 
 	const cards = page.locator( 'li.kind-bookmark article.cr-bookmark-stream' );
 	test.skip( 0 === await cards.count(), `no bookmark card on ${ STREAM }` );
 	for ( const card of await cards.all() ) {
-		const parts = await card.evaluate( ( el ) => [ '.cr-bookmark-stream__kind', '.pk-title', '.cr-bookmark-stream__host', '.cr-bookmark-stream__date' ].map( ( selector ) => el.querySelector( selector )?.textContent.trim() ?? '' ).filter( Boolean ) );
+		const parts = await card.evaluate( ( el ) => [ '.cr-bookmark-stream__kind', '.pk-title', '.cr-bookmark-stream__host', '.cr-bookmark-stream__date' ].map( ( selector ) => el.querySelector( selector )?.textContent.trim() ?? '' ) );
+		expect( parts.every( Boolean ), `bookmark stream card prints label, title, host and date: ${ parts.join( ' | ' ) }` ).toBe( true );
 		const visibleText = await card.evaluate( ( el ) => {
 			const walker = document.createTreeWalker( el, NodeFilter.SHOW_TEXT, {
 				acceptNode: ( node ) => node.parentElement.closest( '[hidden], [aria-hidden="true"]' ) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
