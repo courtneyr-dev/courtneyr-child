@@ -310,7 +310,7 @@ function group_key( int $post_id ): string {
 }
 
 /**
- * Normalize a title for duplicate detection.
+ * Normalize visible title text for duplicate detection.
  *
  * @param int $post_id Post ID.
  * @return string
@@ -319,10 +319,10 @@ function title_key( int $post_id ): string {
 	$facts = like_facts( $post_id );
 	$title = (string) ( $facts['cited_title'] ?? '' );
 	if ( '' === trim( $title ) ) {
-		$title = (string) get_the_title( $post_id );
+		$title = (string) ( $facts['host'] ?? '' );
 	}
 	if ( '' === trim( $title ) ) {
-		$title = (string) ( $facts['url'] ?? '' );
+		$title = (string) get_the_title( $post_id );
 	}
 	$title = trim( (string) preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $title ) ) );
 	return function_exists( 'mb_strtolower' ) ? mb_strtolower( $title, 'UTF-8' ) : strtolower( $title );
@@ -538,16 +538,18 @@ function mark_embed( string $html ): string {
 }
 
 /**
- * Replace the first image source and preserve its alt text.
+ * Replace the first image source and alt text.
  *
  * @param string $html Fragment.
  * @param string $url  Image URL.
+ * @param string $alt  Image alt text.
  * @return string
  */
-function replace_image_source( string $html, string $url ): string {
+function replace_image_source( string $html, string $url, string $alt ): string {
 	$tags = new \WP_HTML_Tag_Processor( $html );
 	if ( $tags->next_tag( 'img' ) ) {
 		$tags->set_attribute( 'src', esc_url( $url ) );
+		$tags->set_attribute( 'alt', $alt );
 		return $tags->get_updated_html();
 	}
 	return $html;
@@ -592,7 +594,7 @@ function single_clipping( string $html, array $block, $instance ): string {
 	if ( $has_box ) {
 		$html = mark_embed( $html );
 		if ( '' !== $url ) {
-			$html = replace_image_source( $html, $url );
+			$html = replace_image_source( $html, $url, (string) ( $picture['alt'] ?? '' ) );
 		}
 	} elseif ( '' !== $url ) {
 		$html = insert_after_caption( $html, single_picture( $picture ) );

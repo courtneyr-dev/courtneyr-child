@@ -551,6 +551,37 @@ namespace Courtneyr\Child\Like\Tests {
 	);
 
 	check_case(
+		'archive duplicate labels cover URL-only likes by host',
+		static function (): bool {
+			reset_state();
+			like_post( 211, 'same.example.com', '' );
+			like_post( 212, 'same.example.com', '' );
+			like_post( 213, 'same.example.com', 'Different title' );
+			like_post( 214, 'other.example.com', '' );
+			$GLOBALS['cr_kind_facts'][211]['url'] = 'https://same.example.com/one';
+			$GLOBALS['cr_kind_facts'][212]['url'] = 'https://same.example.com/two';
+			$GLOBALS['cr_titles'][211] = '';
+			$GLOBALS['cr_titles'][212] = '';
+			$GLOBALS['cr_titles'][214] = '';
+			$GLOBALS['cr_request']['kind'] = 'like';
+			$GLOBALS['wp_query']           = (object) array(
+				'posts'        => array( $GLOBALS['cr_posts'][211], $GLOBALS['cr_posts'][212], $GLOBALS['cr_posts'][213], $GLOBALS['cr_posts'][214] ),
+				'current_post' => 0,
+			);
+			$same  = str_replace( 'Field notes on paper sites', 'same.example.com', main_fixture() );
+			$other = str_replace( 'Field notes on paper sites', 'other.example.com', main_fixture() );
+			$a     = render_stream_card( $same, 211, array( 'className' => 'is-style-cr-sticker' ) );
+			$b     = render_stream_card( $same, 212, array( 'className' => 'is-style-cr-sticker' ) );
+			$c     = render_stream_card( main_fixture(), 213, array( 'className' => 'is-style-cr-sticker' ) );
+			$d     = render_stream_card( $other, 214, array( 'className' => 'is-style-cr-sticker' ) );
+			return false !== strpos( $a, 'aria-labelledby="cr-like-title-211 cr-like-date-211"' )
+				&& false !== strpos( $b, 'aria-labelledby="cr-like-title-212 cr-like-date-212"' )
+				&& false === strpos( $c, 'aria-labelledby=' )
+				&& false === strpos( $d, 'aria-labelledby=' );
+		}
+	);
+
+	check_case(
 		'archive classes are deterministic and cover the full paper set across post IDs',
 		static function (): bool {
 			reset_state();
@@ -629,12 +660,32 @@ namespace Courtneyr\Child\Like\Tests {
 				&& false !== strpos( article_class( $out ), 'cr-paper--printer-ivory' )
 				&& false !== strpos( $out, 'data-cr-cover-fallback' )
 				&& false !== strpos( $out, 'src="https://notes.example.com/featured.jpg"' )
-				&& false !== strpos( $out, 'alt="Keep this"' )
+				&& false !== strpos( $out, 'alt="Featured alt"' )
+				&& false === strpos( $out, 'alt="Keep this"' )
 				&& anchor_count( $single ) === anchor_count( $out )
 				&& substr_count( $single, '<data ' ) === substr_count( $out, '<data ' )
 				&& false !== strpos( $out, '<p class="pk-original"><a class="u-url"' )
 				&& false !== strpos( $added, 'src="https://notes.example.com/featured.jpg"' )
 				&& false !== strpos( $added, 'alt="Featured alt"' );
+		}
+	);
+
+	check_case(
+		'single clipping prints the featured picture alt over an empty card alt',
+		static function (): bool {
+			reset_state();
+			like_post( 142 );
+			$GLOBALS['cr_request'] = array( 'single' => true, 'queried_id' => 142 );
+			$GLOBALS['cr_kind_pictures'][142] = array( 'source' => 'featured', 'url' => 'https://notes.example.com/featured.jpg', 'alt' => 'Attachment alt text', 'suppress_featured' => true );
+			$empty = '<article class="wp-block-post-kinds-indieweb-like-card pk-card k-like h-cite u-like-of"><div class="pk-body"><span class="pk-kindlabel">Liked</span><div class="pk-caption"><data class="u-url" value="https://notes.example.com/paper-sites" hidden></data><h2 class="pk-title p-name"><a href="https://courtneyr.dev/2026/10/field-notes/">Field notes</a></h2></div><div class="pk-embed pk-embed--photo"><img class="u-photo" src="https://notes.example.com/old.jpg" alt="" loading="lazy"></div><p class="pk-original"><a class="u-url" href="https://notes.example.com/paper-sites">Read the original</a></p></div></article>';
+			$out   = render_like_card( $empty, 142 );
+			$GLOBALS['cr_kind_pictures'][142]['url'] = '';
+			$keep = '<article class="wp-block-post-kinds-indieweb-like-card pk-card k-like h-cite u-like-of"><div class="pk-body"><span class="pk-kindlabel">Liked</span><div class="pk-caption"><data class="u-url" value="https://notes.example.com/paper-sites" hidden></data><h2 class="pk-title p-name"><a href="https://courtneyr.dev/2026/10/field-notes/">Field notes</a></h2></div><div class="pk-embed pk-embed--photo"><img class="u-photo" src="https://notes.example.com/old.jpg" alt="Keep this" loading="lazy"></div><p class="pk-original"><a class="u-url" href="https://notes.example.com/paper-sites">Read the original</a></p></div></article>';
+			$kept = render_like_card( $keep, 142 );
+			return false !== strpos( $out, 'src="https://notes.example.com/featured.jpg"' )
+				&& false !== strpos( $out, 'alt="Attachment alt text"' )
+				&& false !== strpos( $kept, 'src="https://notes.example.com/old.jpg"' )
+				&& false !== strpos( $kept, 'alt="Keep this"' );
 		}
 	);
 

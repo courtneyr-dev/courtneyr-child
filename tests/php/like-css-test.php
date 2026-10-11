@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 $theme_dir = dirname( __DIR__, 2 );
 $css_path   = $theme_dir . '/assets/css/cr-like.css';
+$tokens_path = $theme_dir . '/assets/css/tokens.css';
 $failures   = array();
 
 /** Print one named check. */
@@ -33,6 +34,12 @@ function like_css(): string {
 	return is_file( $css_path ) ? (string) file_get_contents( $css_path ) : '';
 }
 
+/** Read the token stylesheet when it exists. */
+function token_css(): string {
+	global $tokens_path;
+	return is_file( $tokens_path ) ? (string) file_get_contents( $tokens_path ) : '';
+}
+
 /** Extract one declaration value from a rule that contains a selector. */
 function declaration_value( string $css, string $selector_part, string $property ): string {
 	$pattern = '/' . preg_quote( $selector_part, '/' ) . '[^{]*\{([^}]*)\}/s';
@@ -49,6 +56,103 @@ function declaration_value( string $css, string $selector_part, string $property
 function exact_rule( string $css, string $selector ): string {
 	$pattern = '/(?:^|})\s*' . preg_quote( $selector, '/' ) . '\s*\{([^}]*)\}/s';
 	return preg_match( $pattern, $css, $rule ) ? $rule[1] : '';
+}
+
+/** Extract every block opened by a CSS selector or at-rule. */
+function css_blocks( string $css, string $needle ): array {
+	$blocks = array();
+	$offset = 0;
+	$length = strlen( $css );
+	while ( false !== ( $start = strpos( $css, $needle, $offset ) ) ) {
+		$open = strpos( $css, '{', $start );
+		if ( false === $open ) {
+			$offset = $start + strlen( $needle );
+			continue;
+		}
+		$depth = 0;
+		for ( $i = $open; $i < $length; ++$i ) {
+			if ( '{' === $css[ $i ] ) {
+				++$depth;
+			} elseif ( '}' === $css[ $i ] ) {
+				--$depth;
+				if ( 0 === $depth ) {
+					$blocks[] = substr( $css, $open + 1, $i - $open - 1 );
+					$offset   = $i + 1;
+					continue 2;
+				}
+			}
+		}
+		$offset = $open + 1;
+	}
+	return $blocks;
+}
+
+/** Whether a CSS fragment assigns a custom property. */
+function assigns_token( string $css, string $name ): bool {
+	return (bool) preg_match( '/(?<![\w-])' . preg_quote( $name, '/' ) . '\s*:/', $css );
+}
+
+/** Whether dark-mode branches in the like stylesheet assign a custom property. */
+function like_dark_assigns_token( string $css, string $name ): bool {
+	if ( assigns_token( implode( "\n", css_blocks( $css, '@media (prefers-color-scheme: dark)' ) ), $name ) ) {
+		return true;
+	}
+	return assigns_token( implode( "\n", css_blocks( $css, ':root[data-theme="dark"]' ) ), $name );
+}
+
+/** Parse custom property declarations from one rule body. */
+function token_map( string $rule ): array {
+	$map = array();
+	if ( preg_match_all( '/(?<![\w-])(--[\w-]+)\s*:\s*([^;]+);/', $rule, $matches, PREG_SET_ORDER ) ) {
+		foreach ( $matches as $match ) {
+			$map[ $match[1] ] = trim( $match[2] );
+		}
+	}
+	return $map;
+}
+
+/** Resolve a custom property to a literal hex value through bounded var() hops. */
+function resolve_token_hex( array $tokens, string $name ): string {
+	for ( $i = 0; $i < 4; ++$i ) {
+		$value = trim( (string) ( $tokens[ $name ] ?? '' ) );
+		if ( preg_match( '/^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/', $value ) ) {
+			return $value;
+		}
+		if ( ! preg_match( '/^var\(\s*(--[\w-]+)\s*\)$/', $value, $next ) ) {
+			return '';
+		}
+		$name = $next[1];
+	}
+	return '';
+}
+
+/** Return a WCAG relative luminance value for a literal hex colour. */
+function relative_luminance( string $hex ): float {
+	$hex = ltrim( $hex, '#' );
+	if ( 3 === strlen( $hex ) ) {
+		$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+	}
+	$channels = array(
+		hexdec( substr( $hex, 0, 2 ) ) / 255,
+		hexdec( substr( $hex, 2, 2 ) ) / 255,
+		hexdec( substr( $hex, 4, 2 ) ) / 255,
+	);
+	foreach ( $channels as $index => $channel ) {
+		$channels[ $index ] = $channel <= 0.03928 ? $channel / 12.92 : ( ( $channel + 0.055 ) / 1.055 ) ** 2.4;
+	}
+	return 0.2126 * $channels[0] + 0.7152 * $channels[1] + 0.0722 * $channels[2];
+}
+
+/** Return the contrast ratio between two literal hex colours. */
+function contrast_ratio( string $a, string $b ): float {
+	$l1 = relative_luminance( $a );
+	$l2 = relative_luminance( $b );
+	if ( $l2 > $l1 ) {
+		$tmp = $l1;
+		$l1  = $l2;
+		$l2  = $tmp;
+	}
+	return ( $l1 + 0.05 ) / ( $l2 + 0.05 );
 }
 
 /** Whether a selector rule declares all named property values. */
@@ -313,6 +417,45 @@ check_case(
 			&& false !== strpos( $css, '@media (prefers-color-scheme: dark)' )
 			&& false !== strpos( $css, ':root:not([data-theme="light"])' )
 			&& false !== strpos( $css, ':root[data-theme="dark"]' );
+	}
+);
+
+check_case(
+	'clipping link colour holds on ivory in both schemes',
+	static function (): bool {
+		$css    = like_css();
+		$tokens = token_css();
+		if ( '' === $css || '' === $tokens ) {
+			return false;
+		}
+		$selector = 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping a';
+		$rule     = exact_rule( $css, $selector );
+		$value    = '' === $rule ? '' : declaration_value( $css, $selector, 'color' );
+		if ( ! preg_match( '/^var\(\s*(--[\w-]+)\s*\)$/', $value, $match ) ) {
+			return false;
+		}
+		$link_name      = $match[1];
+		$dark_media     = css_blocks( $tokens, '@media (prefers-color-scheme: dark)' );
+		$dark_attribute = css_blocks( $tokens, ':root[data-theme="dark"]' );
+		if ( empty( $dark_media ) || empty( $dark_attribute ) ) {
+			return false;
+		}
+		$dark_media_css     = implode( "\n", $dark_media );
+		$dark_attribute_css = implode( "\n", $dark_attribute );
+		if ( assigns_token( $dark_media_css, $link_name ) || assigns_token( $dark_attribute_css, $link_name ) || like_dark_assigns_token( $css, $link_name ) ) {
+			return false;
+		}
+		$roots       = css_blocks( $tokens, ':root' );
+		$root        = token_map( $roots[0] ?? '' );
+		$link_hex    = resolve_token_hex( $root, $link_name );
+		$surface_hex = resolve_token_hex( $root, '--cr-printer-ivory' );
+		if ( '' === $link_hex || '' === $surface_hex ) {
+			return false;
+		}
+		if ( assigns_token( $dark_media_css, '--cr-printer-ivory' ) || assigns_token( $dark_attribute_css, '--cr-printer-ivory' ) ) {
+			return false;
+		}
+		return contrast_ratio( $link_hex, $surface_hex ) >= 4.5;
 	}
 );
 

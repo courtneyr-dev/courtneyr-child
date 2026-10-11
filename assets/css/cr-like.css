@@ -272,7 +272,7 @@ body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clippin
 }
 
 body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping a {
-	color: var(--cr-link);
+	color: var(--cr-cerulean);
 }
 
 body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-embed img {
