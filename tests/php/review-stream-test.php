@@ -128,6 +128,21 @@ cr_review_group(
 );
 
 cr_review_group(
+	'pullquote with regex replacement tokens prints literally',
+	static function (): void {
+		$post = cr_review_stream_request();
+		foreach ( array( '$1', '\\1', '${1}', '$0', '\\0', 'Only $1 well spent', 'Costs \\0 a month', 'Pay ${1}now' ) as $quote ) {
+			$GLOBALS['cr_review_facts'][ $post->ID ] = cr_review_default_facts();
+			$GLOBALS['cr_review_facts'][ $post->ID ]['pullquote'] = $quote;
+			$html = \Courtneyr\Child\StreamReview\clipping( cr_review_stream_card(), array(), new WP_Block( array( 'postId' => $post->ID ) ) );
+			cr_review_contains( '<p class="cr-clipping__quote">' . esc_html( $quote ) . '</p>', $html, 'literal pullquote ' . $quote );
+			cr_review_same( 1, substr_count( $html, 'class="pk-caption"' ), 'one caption for ' . $quote );
+			cr_review_same( 1, substr_count( $html, 'cr-clipping__quote' ), 'one quote paragraph for ' . $quote );
+		}
+	}
+);
+
+cr_review_group(
 	'hidden machine-readable elements stay byte-for-byte',
 	static function (): void {
 		$post   = cr_review_stream_request();

@@ -112,9 +112,9 @@ function insert_quote( string $html, array $facts ): string {
 		return $html;
 	}
 
-	return (string) preg_replace(
+	return (string) preg_replace_callback(
 		'/(<div\b[^>]*\bclass="[^"]*(?<![\w-])pk-caption(?![\w-])[^"]*"[^>]*>.*?<\/div>)/is',
-		'$1<p class="cr-clipping__quote">' . esc_html( $quote ) . '</p>',
+		static fn( array $found ): string => $found[1] . '<p class="cr-clipping__quote">' . esc_html( $quote ) . '</p>',
 		$html,
 		1
 	);
