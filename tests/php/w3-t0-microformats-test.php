@@ -203,6 +203,7 @@ namespace {
 	function esc_html( $text ) { return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' ); }
 	function esc_attr( $text ) { return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' ); }
 	function esc_url( $url ) { return htmlspecialchars( (string) $url, ENT_QUOTES, 'UTF-8' ); }
+	function wp_strip_all_tags( $text ) { return trim( preg_replace( '/<[^>]*>/', '', (string) $text ) ); }
 	function __( $text ) { return $text; }
 	function get_the_author_meta() { return 'Courtney Robertson'; }
 	function get_site_icon_url() { return ''; }
@@ -364,6 +365,10 @@ namespace Courtneyr\Child\W3T0MicroformatsTests {
 	check( true === call_cited_title_is_h1( 91 ), 'cited_title_is_h1 returns true for raw empty titles' );
 
 	reset_state();
+	post_fixture( 100, 'bookmark', '<span> </span>' );
+	check( true === call_cited_title_is_h1( 100 ), 'cited_title_is_h1 returns true for tags-only titles' );
+
+	reset_state();
 	post_fixture( 92, 'bookmark', 'Field Notes on Paper Sites' );
 	$GLOBALS['cr_kind_facts'][92] = array( 'cited_title' => ' field notes on paper sites ' );
 	if ( ! $GLOBALS['no_plugin'] ) {
@@ -387,6 +392,78 @@ namespace Courtneyr\Child\W3T0MicroformatsTests {
 	}
 
 	if ( ! $GLOBALS['no_plugin'] ) {
+		reset_state();
+		post_fixture( 96, 'repost', 'quiet.example.com' );
+		$GLOBALS['cr_kind_facts'][96] = array( 'cited_title' => '', 'host' => 'quiet.example.com' );
+		check( true === call_cited_title_is_h1( 96 ), 'host fallback true when cited title is empty and host matches' );
+
+		reset_state();
+		post_fixture( 97, 'repost', 'other.example.com' );
+		$GLOBALS['cr_kind_facts'][97] = array( 'cited_title' => '', 'host' => 'quiet.example.com' );
+		check( false === call_cited_title_is_h1( 97 ), 'host fallback false when cited title is empty and host differs' );
+
+		reset_state();
+		post_fixture( 98, 'repost', 'quiet.example.com' );
+		$GLOBALS['cr_kind_facts'][98] = array( 'cited_title' => 'Something else', 'host' => 'quiet.example.com' );
+		check( false === call_cited_title_is_h1( 98 ), 'host ignored when a cited title exists' );
+
+		reset_state();
+		post_fixture( 99, 'repost', 'Quiet Web' );
+		$GLOBALS['cr_kind_facts'][99] = array( 'cited_title' => '<span>Quiet Web</span>' );
+		check( true === call_cited_title_is_h1( 99 ), 'tag normalization matches cited title markup' );
+
+		reset_state();
+		post_fixture( 101, 'repost', '<em>Quiet</em> Web' );
+		$GLOBALS['cr_kind_facts'][101] = array( 'cited_title' => 'quiet web' );
+		check( true === call_cited_title_is_h1( 101 ), 'tag normalization matches post title markup' );
+
+		reset_state();
+		post_fixture( 102, 'repost', 'Quiet Web' );
+		$GLOBALS['cr_kind_facts'][102] = array( 'cited_title' => 'Quiet Web' );
+		check( '' === render_title_pipeline( title_block() ), 'suppression drops repost single title when cited title is the H1' );
+
+		reset_state();
+		post_fixture( 103, 'repost', 'Local Title' );
+		$GLOBALS['cr_kind_facts'][103] = array( 'cited_title' => 'Cited Title' );
+		$html = render_title_pipeline( title_block() );
+		check( 1 === substr_count( $html, '<h1' ) && false !== strpos( $html, 'Local Title' ), 'suppression keeps repost title when cited title differs' );
+
+		reset_state();
+		post_fixture( 104, 'repost', 'Quiet Web' );
+		$GLOBALS['cr_kind_facts'][104] = array( 'cited_title' => 'Quiet Web' );
+		$level_2 = title_block();
+		$level_2['attrs']['level'] = 2;
+		$html = render_title_pipeline( $level_2 );
+		check( 1 === substr_count( $html, '<h2' ) && false !== strpos( $html, 'Quiet Web' ), 'suppression keeps level-2 repost title blocks' );
+
+		reset_state();
+		post_fixture( 105, 'repost', 'Quiet Web' );
+		$GLOBALS['cr_kind_facts'][105] = array( 'cited_title' => 'Quiet Web' );
+		$GLOBALS['cr_passwords'][105] = true;
+		$html = render_title_pipeline( title_block() );
+		check( 1 === substr_count( $html, '<h1' ) && false !== strpos( $html, 'Quiet Web' ), 'suppression keeps password-required repost titles' );
+
+		reset_state();
+		post_fixture( 106, 'bookmark', 'Quiet Web' );
+		$GLOBALS['cr_kind_facts'][106] = array( 'cited_title' => 'Quiet Web' );
+		$html = render_title_pipeline( title_block() );
+		check( 1 === substr_count( $html, '<h1' ) && false !== strpos( $html, 'Quiet Web' ), 'suppression keeps non-repost titles' );
+
+		reset_state();
+		post_fixture( 107, 'repost', 'Quiet Web' );
+		$GLOBALS['cr_kind_facts'][107] = array( 'cited_title' => 'Quiet Web' );
+		$GLOBALS['cr_request']['queried_id'] = 999;
+		$html = render_title_pipeline( title_block() );
+		check( 1 === substr_count( $html, '<h1' ) && false !== strpos( $html, 'Quiet Web' ), 'suppression keeps repost title when post is not queried object' );
+
+		reset_state();
+		post_fixture( 108, 'repost', '' );
+		$cr_u_url = title_block();
+		$cr_u_url['attrs']['className'] .= ' cr-u-url';
+		check( '' === render_title_pipeline( $cr_u_url ), 'suppression drops untitled cr-u-url repost fallback title after pipeline' );
+
+		check( 30 === \has_filter( 'render_block_core/post-title', 'Courtneyr\\Child\\Microformats\\suppress_cited_title_post_title' ), 'hook order registers suppress_cited_title_post_title at priority 30' );
+
 		echo $GLOBALS['child_out'];
 		if ( '' !== $GLOBALS['child_err'] ) {
 			fwrite( STDERR, $GLOBALS['child_err'] );
