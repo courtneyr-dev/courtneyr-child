@@ -673,7 +673,9 @@ body.cr-recipe-single .single-post__featured::before {
 	transform: rotate(var(--cr-rotate-neg));
 }
 
-/* Under the title: the summary and the recipe plugin's print link. */
+/* Under the title: the summary and the recipe plugin's print link.
+   The print link is a sharp-cornered zine button, following the design
+   system's no-radius button rule in case the plugin rounds it. */
 body.cr-recipe-single .cr-recipe__summary {
 	margin: 0.5rem 0 0;
 	font-family: var(--cr-font-accent);
@@ -693,6 +695,7 @@ body.cr-recipe-single .cr-recipe__actions .wprm-recipe-print {
 	min-height: 2.75rem;
 	border-width: 2px;
 	border-style: solid;
+	border-radius: 0;
 	font-family: var(--cr-font-body);
 	font-size: var(--cr-text-lg);
 	text-decoration: none;
