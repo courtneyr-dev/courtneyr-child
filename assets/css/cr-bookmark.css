@@ -10,36 +10,67 @@
 	gap: var(--cr-bookmark-gap);
 }
 
+/* The drawer is a two-row grid: the cards stand in the open drawer, and the
+   front panel below them carries the label plate and the round pull. The
+   front and the pull are the section's own grid pseudo-elements. */
 .cr-bookmark-drawers .pkiw-group {
+	--cr-bookmark-pull: var(--cr-space-xl);
 	position: relative;
 	box-sizing: border-box;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows: auto auto;
+	row-gap: var(--cr-space-md);
 	flex: 0 0 calc( ( 100% - ( var(--cr-bookmark-columns) - 1 ) * var(--cr-bookmark-gap) ) / var(--cr-bookmark-columns) );
 	min-width: 0;
-	padding: var(--cr-space-xl) var(--cr-space-md) var(--cr-space-md);
+	margin-block: 0;
+	padding: var(--cr-space-md) var(--cr-space-md) 0;
 	border: 2px solid var(--cr-ink);
 	background: var(--cr-prussian-blue);
 	box-shadow: var(--cr-shadow-hard);
 }
 
-.cr-bookmark-drawers .pkiw-group:nth-child(even) {
+.cr-bookmark-drawers .pkiw-group::after {
+	content: "";
+	grid-row: 2;
+	grid-column: 1;
+	z-index: 0;
+	margin-inline: calc(-1 * var(--cr-space-md));
+	border-block-start: 2px solid var(--cr-ink);
 	background: var(--cr-cerulean);
+	pointer-events: none;
 }
 
 .cr-bookmark-drawers .pkiw-group::before {
 	content: "";
-	position: absolute;
-	inset-block-start: var(--cr-space-xs);
-	inset-inline: 35%;
-	block-size: var(--cr-space-sm);
+	grid-row: 2;
+	grid-column: 1;
+	z-index: 1;
+	align-self: end;
+	justify-self: center;
+	box-sizing: border-box;
+	inline-size: var(--cr-bookmark-pull);
+	block-size: var(--cr-bookmark-pull);
+	margin-block-end: var(--cr-space-md);
 	border: 2px solid var(--cr-ink);
+	border-radius: var(--cr-radius-full);
 	background: var(--cr-selective-yellow);
 	pointer-events: none;
 }
 
 .cr-bookmark-drawers .pkiw-group__heading {
 	position: relative;
-	margin: 0 auto var(--cr-space-md);
-	padding: var(--cr-space-xs) var(--cr-space-md);
+	z-index: 1;
+	grid-row: 2;
+	grid-column: 1;
+	align-self: start;
+	justify-self: center;
+	box-sizing: border-box;
+	inline-size: fit-content;
+	min-inline-size: 70%;
+	max-inline-size: 100%;
+	margin: var(--cr-space-md) 0 calc(var(--cr-bookmark-pull) + 2 * var(--cr-space-md));
+	padding: var(--cr-space-xs) var(--cr-space-lg);
 	border: 2px solid var(--cr-ink);
 	background: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
@@ -72,6 +103,8 @@
 }
 
 .cr-bookmark-drawers .pkiw-group__items {
+	grid-row: 1;
+	grid-column: 1;
 	display: grid;
 	gap: var(--cr-space-md);
 	max-width: none;
@@ -95,6 +128,24 @@
 		repeating-linear-gradient(180deg, transparent 0, transparent calc(var(--cr-leading-normal) * 1em - var(--cr-space-3xs)), var(--cr-sky-blue) calc(var(--cr-leading-normal) * 1em - var(--cr-space-3xs)), var(--cr-sky-blue) calc(var(--cr-leading-normal) * 1em));
 	color: var(--cr-russian-violet);
 	overflow-wrap: anywhere;
+}
+
+/* Archive cards carry the plugin's .pk-card class, whose badge grid and tint
+   don't apply to an index card. Children go static so the title overlay
+   covers the whole card. */
+.cr-bookmark-drawers .cr-index-card {
+	display: block;
+	grid-template-columns: none;
+	gap: 0;
+	max-width: none;
+}
+
+.cr-bookmark-drawers .cr-index-card::before {
+	content: none;
+}
+
+.cr-bookmark-drawers .cr-index-card > * {
+	position: static;
 }
 
 .cr-index-card__title {
@@ -152,24 +203,54 @@
 	height: auto;
 }
 
+/* The pulled card: a drawer body behind it (narrower than the card), the
+   drawer-label tab tucked behind the card's top edge, and the drawer front
+   (wider than the card) covering the card's padded bottom. */
 .cr-bookmark-single {
+	--cr-bookmark-front: var(--cr-space-3xl);
+	--cr-bookmark-tuck: var(--cr-space-lg);
+	--cr-bookmark-after: var(--cr-space-lg);
 	position: relative;
 	box-sizing: border-box;
 	margin-block: var(--cr-space-xl);
-	padding: var(--cr-space-xl) var(--cr-space-md) var(--cr-space-md);
+	padding: var(--cr-space-md) var(--cr-space-md) calc(var(--cr-bookmark-front) - var(--cr-bookmark-tuck) + var(--cr-bookmark-after));
+}
+
+.cr-bookmark-single::before,
+.cr-bookmark-single::after {
+	content: "";
+	position: absolute;
+	box-sizing: border-box;
 	border: 2px solid var(--cr-ink);
-	background: var(--cr-prussian-blue);
 	box-shadow: var(--cr-shadow-hard);
+	pointer-events: none;
+}
+
+.cr-bookmark-single::before {
+	inset-block: 0 calc(var(--cr-space-md) + var(--cr-bookmark-after));
+	inset-inline: var(--cr-space-xl);
+	background: var(--cr-prussian-blue);
+}
+
+.cr-bookmark-single::after {
+	z-index: 3;
+	inset-inline: 0;
+	inset-block-end: var(--cr-bookmark-after);
+	block-size: var(--cr-bookmark-front);
+	background: var(--cr-cerulean);
 }
 
 .cr-bookmark-single__tab {
-	position: absolute;
-	inset-block-start: calc(-1 * var(--cr-space-lg));
-	inset-inline-start: var(--cr-space-md);
-	margin: 0;
-	padding: var(--cr-space-xs) var(--cr-space-md);
+	position: relative;
+	z-index: 1;
+	box-sizing: border-box;
+	inline-size: fit-content;
+	max-inline-size: min(20rem, 100% - 2 * var(--cr-space-2xl));
+	margin: 0 0 calc(-1 * var(--cr-space-xs)) var(--cr-space-2xl);
+	padding: var(--cr-space-xs) var(--cr-space-md) var(--cr-space-sm);
 	border: 2px solid var(--cr-ink);
-	background: var(--cr-printer-ivory);
+	border-block-end: 0;
+	background: var(--cr-sky-blue);
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-accent);
 	font-size: max( var(--cr-text-sm), var(--cr-text-floor) );
@@ -178,8 +259,10 @@
 }
 
 .cr-index-card--single {
+	z-index: 2;
 	width: 100%;
 	max-width: none;
+	padding-block-end: calc(var(--cr-space-md) + var(--cr-bookmark-tuck));
 }
 
 .cr-index-card__cited {
@@ -208,14 +291,14 @@
 	grid-template-columns: minmax(7rem, 0.7fr) minmax(0, 2fr);
 	gap: var(--cr-space-sm);
 	align-items: baseline;
-	padding-block: var(--cr-space-xs);
+	padding-block: var(--cr-space-sm);
 	border-bottom: 1px solid var(--cr-sky-blue);
 }
 
 .cr-index-card__row dt {
 	margin: 0;
 	font-family: var(--cr-font-mono);
-	font-size: max( var(--cr-text-xs), var(--cr-text-floor) );
+	font-size: max( var(--cr-text-sm), var(--cr-text-floor) );
 	font-weight: var(--cr-weight-bold);
 	letter-spacing: var(--cr-tracking-wide);
 	text-transform: uppercase;
@@ -224,6 +307,7 @@
 .cr-index-card__row dd {
 	min-width: 0;
 	margin: 0;
+	font-size: var(--cr-text-md);
 	overflow-wrap: anywhere;
 }
 
@@ -366,12 +450,25 @@
 @media (max-width: 480px) {
 
 	.cr-index-card {
-		padding-inline: var(--cr-space-md);
+		padding-inline: calc(var(--cr-space-xl) + var(--cr-space-sm)) var(--cr-space-sm);
 	}
 
 	.cr-index-card__row {
 		grid-template-columns: minmax(0, 1fr);
 		gap: var(--cr-space-2xs);
+	}
+
+	.cr-bookmark-single {
+		padding-inline: var(--cr-space-xs);
+	}
+
+	.cr-bookmark-single::before {
+		inset-inline: var(--cr-space-md);
+	}
+
+	.cr-bookmark-single__tab {
+		max-inline-size: calc(100% - 2 * var(--cr-space-lg));
+		margin-inline-start: var(--cr-space-lg);
 	}
 
 	.cr-stream-page .pk-card.k-bookmark .pk-title,
@@ -411,13 +508,15 @@
 
 	.cr-bookmark-stream,
 	.cr-stream-page .pk-card.k-bookmark,
-	.cr-bookmark-single {
+	.cr-bookmark-single::before,
+	.cr-bookmark-single::after {
 		border: 2px solid CanvasText;
 		box-shadow: none;
 		background-image: none;
 	}
 
 	.cr-bookmark-drawers .pkiw-group::before,
+	.cr-bookmark-drawers .pkiw-group::after,
 	.cr-bookmark-drawers .pkiw-group__heading::before,
 	.cr-bookmark-drawers .pkiw-group__heading::after,
 	.cr-stream-page .pk-card.k-bookmark::after,
