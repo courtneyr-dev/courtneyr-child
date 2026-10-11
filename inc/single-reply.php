@@ -4,8 +4,10 @@
  *
  * The plugin's reply-card owns the cited source microformats. This file
  * removes Stream-only chrome from that card, adds the cited host when the
- * card title does not already show it, and wraps the reply body plus a
- * plain author signature in one torn sheet.
+ * card title does not already show it, appends a plain author signature to
+ * the reply body, and wraps the post header (date, kind chip, H1) and that
+ * body in one torn letter sheet. Comments, the newsletter and the post
+ * navigation stay outside the sheet.
  *
  * @package CourtneyrChild
  */
@@ -73,6 +75,11 @@ function cite_link_text( string $html ): string {
 function insert_host( string $html, string $host ): string {
 	if ( '' === $host || strtolower( $host ) === strtolower( cite_link_text( $html ) ) ) {
 		return $html;
+	}
+	// With a cited author, the host follows the author on the same supporting line; the dot is decorative.
+	$sub = '/(<p\b[^>]*\bclass="[^"]*(?<![\\w-])pk-sub(?![\\w-])[^"]*"[^>]*>.*?)(\s*<\/p>)/is';
+	if ( preg_match( $sub, $html ) ) {
+		return (string) preg_replace( $sub, '$1<span class="cr-letter-cite__sep" aria-hidden="true">·</span><span class="cr-letter-cite__host">' . esc_html( $host ) . '</span>$2', $html, 1 );
 	}
 	return (string) preg_replace( '/(<h2\b[^>]*\bclass="[^"]*(?<![\\w-])pk-title(?![\\w-])[^"]*"[^>]*>.*?<\/h2>)/is', '$1<p class="cr-letter-cite__host">' . esc_html( $host ) . '</p>', $html, 1 );
 }
@@ -179,8 +186,19 @@ function signature_html( \WP_Post $post ): string {
 	return '<p class="cr-letter__signature">' . esc_html( $name ) . '</p>';
 }
 
+/** Marker the header filter leaves where the letter sheet opens. */
+const LETTER_OPEN = '<!-- cr-letter:open -->';
+
+/** Marker the content filter leaves where the letter sheet closes. */
+const LETTER_CLOSE = '<!-- cr-letter:close -->';
+
+/** Whether this request is a reply single that prints its letter. */
+function is_open_letter(): bool {
+	return is_reply_single() && ! ( function_exists( 'post_password_required' ) && post_password_required( get_queried_object_id() ) );
+}
+
 /**
- * Wrap the single reply content and signature in one sheet.
+ * Append the signature to the reply body and mark where the letter closes.
  *
  * @param string $html  Rendered post-content block.
  * @param array  $block Parsed post-content block.
@@ -189,16 +207,60 @@ function signature_html( \WP_Post $post ): string {
 function sheet( string $html, array $block ): string {
 	unset( $block );
 
-	if ( ! is_reply_single() || ( function_exists( 'post_password_required' ) && post_password_required( get_queried_object_id() ) ) ) {
+	if ( ! is_open_letter() ) {
 		return $html;
 	}
 	$post = function_exists( 'get_post' ) ? get_post( get_queried_object_id() ) : null;
 	if ( ! $post instanceof \WP_Post ) {
 		return $html;
 	}
-	return '<div class="cr-letter-sheet cr-paper-sheet cr-paper-sheet--torn">' . $html . signature_html( $post ) . '</div>';
+	return '<div class="cr-letter-sheet">' . $html . signature_html( $post ) . '</div>' . LETTER_CLOSE;
 }
 
 if ( function_exists( 'add_filter' ) ) {
 	add_filter( 'render_block_core/post-content', __NAMESPACE__ . '\\sheet', 25, 2 );
+}
+
+/**
+ * Mark where the letter opens: before the post header, so the date, kind chip and H1 sit on the sheet.
+ *
+ * @param string $html  Rendered group block.
+ * @param array  $block Parsed group block.
+ * @return string
+ */
+function letter_open( string $html, array $block ): string {
+	if ( ! block_has_class( $block, 'single-post__header' ) || ! is_open_letter() ) {
+		return $html;
+	}
+	return LETTER_OPEN . $html;
+}
+
+/**
+ * Turn the two markers into one letter sheet inside the single's main group.
+ *
+ * Both markers or neither: a missing half leaves the page unwrapped rather than unbalanced.
+ *
+ * @param string $html  Rendered group block.
+ * @param array  $block Parsed group block.
+ * @return string
+ */
+function letter( string $html, array $block ): string {
+	if ( ! block_has_class( $block, 'single-post' ) || ! str_contains( $html, '<!-- cr-letter:' ) ) {
+		return $html;
+	}
+	$open  = strpos( $html, LETTER_OPEN );
+	$close = strpos( $html, LETTER_CLOSE );
+	if ( false === $open || false === $close || $close < $open ) {
+		return str_replace( array( LETTER_OPEN, LETTER_CLOSE ), '', $html );
+	}
+	return str_replace(
+		array( LETTER_OPEN, LETTER_CLOSE ),
+		array( '<div class="cr-letter alignwide cr-paper-sheet cr-paper-sheet--torn cr-paper--printer-ivory">', '</div>' ),
+		$html
+	);
+}
+
+if ( function_exists( 'add_filter' ) ) {
+	add_filter( 'render_block_core/group', __NAMESPACE__ . '\\letter_open', 25, 2 );
+	add_filter( 'render_block_core/group', __NAMESPACE__ . '\\letter', 26, 2 );
 }
