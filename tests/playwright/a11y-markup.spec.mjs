@@ -4401,6 +4401,33 @@ test( 'a reply single is a torn sheet: the cited host once, the body, then a pla
 	expect( sheetFailures, sheetFailures.join( ' | ' ) ).toEqual( [] );
 } );
 
+test( 'a reply citation is one full-width column with only its rail, at 1280 and 320 (PKIW #253)', async ( { page }, testInfo ) => {
+	test.skip( '1280-light' !== testInfo.project.name, 'runs once, in the 1280-light project' );
+	for ( const width of [ 1280, 320 ] ) {
+		await page.setViewportSize( { width, height: 900 } );
+		await goToSlug( page, 're-alt-text-is-a-draft', 'Re: Alt text is a draft' );
+		const o = await page.locator( '.cr-letter-cite' ).evaluate( ( card ) => {
+			const cs = getComputedStyle( card );
+			const content = card.clientWidth - parseFloat( cs.paddingLeft ) - parseFloat( cs.paddingRight );
+			return {
+				content,
+				body: card.querySelector( '.pk-body' ).getBoundingClientRect().width,
+				sheet: card.closest( '.cr-letter-sheet' ).clientWidth,
+				card: card.getBoundingClientRect().width,
+				top: cs.borderTopWidth,
+				shadow: cs.boxShadow,
+				rail: parseFloat( cs.borderLeftWidth ),
+			};
+		} );
+		expect( o.body, `${ width }px citation body fills the card` ).toBeGreaterThanOrEqual( o.content - 1 );
+		expect( o.card, `${ width }px citation spans the sheet's reading width` ).toBeGreaterThan( o.sheet * 0.6 );
+		expect( o.top, `${ width }px citation has no full border` ).toBe( '0px' );
+		expect( o.shadow, `${ width }px citation has no hard shadow` ).toBe( 'none' );
+		expect( o.rail, `${ width }px citation keeps its rail` ).toBeGreaterThan( 2 );
+		expect( await hasHorizontalScroll( page ), `${ width }px no horizontal scroll` ).toBeLessThanOrEqual( 0 );
+	}
+} );
+
 test( 'an untitled reply single has a visible h1 and no p-name on it (PKIW #253)', async ( { page } ) => {
 	const untitled = ( await kindPosts( page, 'reply' ) ).filter( ( post ) => '' === post.title );
 	test.skip( 0 === untitled.length, 'no untitled reply on this site' );

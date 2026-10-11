@@ -109,6 +109,63 @@ if ( function_exists( 'add_filter' ) ) {
 }
 
 /**
+ * Whether a block's className holds one class.
+ *
+ * @param array  $block      Parsed block.
+ * @param string $class_name Class name.
+ * @return bool
+ */
+function block_has_class( array $block, string $class_name ): bool {
+	return 1 === preg_match( '/(?:^|\\s)' . preg_quote( $class_name, '/' ) . '(?:\\s|$)/', (string) ( $block['attrs']['className'] ?? '' ) );
+}
+
+/**
+ * Drop the category chip from the reply lede, so the kind chip is its only label.
+ *
+ * @param string $html  Rendered post-terms block.
+ * @param array  $block Parsed post-terms block.
+ * @return string
+ */
+function lede_category( string $html, array $block ): string {
+	if ( ! block_has_class( $block, 'single-post__category' ) || ! is_reply_single() ) {
+		return $html;
+	}
+	return '';
+}
+
+if ( function_exists( 'add_filter' ) ) {
+	add_filter( 'render_block_core/post-terms', __NAMESPACE__ . '\\lede_category', 20, 2 );
+}
+
+/**
+ * Print the stored day on a protected reply, which core's post-data source leaves empty.
+ *
+ * The date is already public in the permalink; the citation and signature stay hidden.
+ *
+ * @param string $html     Rendered post-date block.
+ * @param array  $block    Parsed post-date block.
+ * @param mixed  $instance Block instance.
+ * @return string
+ */
+function protected_date( string $html, array $block, $instance = null ): string {
+	if ( '' !== trim( $html ) || ! block_has_class( $block, 'single-post__date' ) || ! is_reply_single() ) {
+		return $html;
+	}
+	$post_id = is_object( $instance ) && isset( $instance->context['postId'] ) ? (int) $instance->context['postId'] : (int) get_queried_object_id();
+	$post    = function_exists( 'get_post' ) ? get_post( $post_id ) : null;
+	if ( ! $post instanceof \WP_Post || (int) get_queried_object_id() !== (int) $post->ID || ! post_password_required( $post ) ) {
+		return $html;
+	}
+	$format = (string) ( $block['attrs']['format'] ?? '' );
+	$class  = trim( (string) ( $block['attrs']['className'] ?? '' ) . ' wp-block-post-date' );
+	return '<div class="' . esc_attr( $class ) . '"><time datetime="' . esc_attr( (string) get_the_date( 'c', $post ) ) . '">' . esc_html( (string) get_the_date( $format, $post ) ) . '</time></div>';
+}
+
+if ( function_exists( 'add_filter' ) ) {
+	add_filter( 'render_block_core/post-date', __NAMESPACE__ . '\\protected_date', 5, 3 );
+}
+
+/**
  * Plain signature line.
  *
  * @param \WP_Post $post Post.

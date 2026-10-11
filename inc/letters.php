@@ -345,7 +345,7 @@ function decorate_post_template( string $html, array $block ): string {
 			}
 			$post_id   = (int) $m[3];
 			$protected = str_contains( $m[5], 'cr-letter--protected' );
-			$classes   = array( 'cr-paper-sheet', 'cr-paper--' . ( $protected ? 'printer-ivory' : paper_for( $post_id ) ) );
+			$classes   = array( 'cr-paper-sheet', 'cr-paper-sheet--torn', 'cr-paper--' . ( $protected ? 'printer-ivory' : paper_for( $post_id ) ) );
 			if ( ! $protected ) {
 				$classes[] = 'cr-letter-trim--' . trim_for( $post_id );
 			}
