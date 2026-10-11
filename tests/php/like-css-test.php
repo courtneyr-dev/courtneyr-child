@@ -45,6 +45,39 @@ function declaration_value( string $css, string $selector_part, string $property
 	return trim( $decl[1] );
 }
 
+/** Extract declarations for one exact selector. */
+function exact_rule( string $css, string $selector ): string {
+	$pattern = '/(?:^|})\s*' . preg_quote( $selector, '/' ) . '\s*\{([^}]*)\}/s';
+	return preg_match( $pattern, $css, $rule ) ? $rule[1] : '';
+}
+
+/** Whether a selector rule declares all named property values. */
+function rule_has_declarations( string $css, string $selector, array $expected ): bool {
+	$rule = exact_rule( $css, $selector );
+	if ( '' === $rule ) {
+		return false;
+	}
+	foreach ( $expected as $property => $value ) {
+		if ( $value !== declaration_value( $css, $selector, (string) $property ) ) {
+			return false;
+		}
+	}
+	return true;
+}
+
+/** Whether any selector starts with the bare Stream sticker class. */
+function has_bare_stream_selector( string $css ): bool {
+	preg_match_all( '/(^|})\s*([^{@}][^{]*)\{/m', $css, $matches );
+	foreach ( $matches[2] as $selector_list ) {
+		foreach ( explode( ',', $selector_list ) as $selector ) {
+			if ( 0 === strpos( trim( $selector ), '.cr-like-sticker--stream' ) ) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 /** Whether a font-size declaration stays at or above the floor. */
 function font_size_allowed( string $value ): bool {
 	$value = trim( $value );
@@ -87,7 +120,7 @@ check_case(
 			'/\bbackdrop-filter\s*:/i',
 			'/text-overflow\s*:\s*ellipsis/i',
 			'/--cr-black\b/',
-			'/--cr-white\b(?![^;{}]*cr-like-sticker--stream|[^;{}]*border)/',
+			'/(?<!border: solid 0\.4rem var\()--cr-white\b/',
 		);
 		foreach ( $bad as $pattern ) {
 			if ( preg_match( $pattern, $css ) ) {
@@ -182,6 +215,88 @@ check_case(
 			&& preg_match( '/\.cr-like-sticker--stream\s+\.pk-kindlabel[^{]*\{[^}]*font-size\s*:\s*(?:1rem|max\(\s*1rem\s*,)/s', $css )
 			&& preg_match( '/body\.single-post\.kind-like\s+[^{}]*\.pk-kindlabel[^{]*\{[^}]*font-size\s*:\s*(?:1rem|max\(\s*1rem\s*,)/s', $css )
 			&& in_array( $original_min, array( '44px', '2.75rem' ), true );
+	}
+);
+
+check_case(
+	'sticker paint has stacking contexts and paper defaults',
+	static function (): bool {
+		$css = like_css();
+		if ( '' === $css ) {
+			return false;
+		}
+		return false === strpos( $css, 'var(--cr-white,' )
+			&& 'var(--cr-light-gray)' === declaration_value( $css, ':where(.cr-like-sticker)', '--cr-paper' )
+			&& 'var(--cr-russian-violet)' === declaration_value( $css, ':where(.cr-like-sticker)', '--cr-paper-ink' )
+			&& 'isolate' === declaration_value( $css, '.cr-like article.pk-card.cr-like-sticker', 'isolation' )
+			&& 'isolate' === declaration_value( $css, 'article.pk-card.cr-like-sticker--stream', 'isolation' );
+	}
+);
+
+check_case(
+	'card shell resets and Stream selectors outrank global card styles',
+	static function (): bool {
+		$css = like_css();
+		if ( '' === $css ) {
+			return false;
+		}
+		$archive = rule_has_declarations(
+			$css,
+			'.cr-like article.pk-card.cr-like-sticker',
+			array(
+				'display'               => 'block',
+				'grid-template-columns' => 'none',
+				'gap'                   => '0',
+				'max-width'             => '100%',
+				'border'                => '0',
+				'border-radius'         => '0',
+				'background'            => 'transparent',
+				'box-shadow'            => 'none',
+			)
+		);
+		$stream = rule_has_declarations(
+			$css,
+			'article.pk-card.cr-like-sticker--stream',
+			array(
+				'display'               => 'block',
+				'grid-template-columns' => 'none',
+				'gap'                   => '0',
+				'border'                => '0',
+				'background'            => 'transparent',
+				'box-shadow'            => 'none',
+			)
+		);
+		$before = exact_rule( $css, 'article.pk-card.cr-like-sticker--stream::before' );
+		return $archive
+			&& $stream
+			&& false === has_bare_stream_selector( $css )
+			&& false !== strpos( $before, 'content: ""' )
+			&& false !== strpos( $before, 'var(--cr-white)' );
+	}
+);
+
+check_case(
+	'badge and media placement rules keep stickers visible',
+	static function (): bool {
+		$css = like_css();
+		if ( '' === $css ) {
+			return false;
+		}
+		return '2rem' === declaration_value( $css, 'article.pk-card.cr-like-sticker--stream .pk-badge', 'width' )
+			&& '2rem' === declaration_value( $css, 'article.pk-card.cr-like-sticker--stream .pk-badge', 'height' )
+			&& '100%' === declaration_value( $css, 'article.pk-card.cr-like-sticker--stream .pk-badge svg', 'width' )
+			&& '100%' === declaration_value( $css, 'article.pk-card.cr-like-sticker--stream .pk-badge svg', 'height' )
+			&& 'var(--cr-space-sm)' === declaration_value( $css, '.cr-like article.pk-card.cr-like-sticker .pk-embed', 'margin-block-start' )
+			&& 'absolute' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge', 'position' )
+			&& 'calc(-1 * var(--cr-space-md))' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge', 'inset-block-start' )
+			&& 'var(--cr-space-md)' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge', 'inset-inline-end' )
+			&& '1.5rem' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge svg', 'width' )
+			&& '1.5rem' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge svg', 'height' )
+			&& 'var(--cr-space-xs)' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-body', 'padding-block-start' )
+			&& 'block' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping', 'display' )
+			&& 'none' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping', 'grid-template-columns' )
+			&& '0' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping', 'gap' )
+			&& 'var(--cr-space-lg)' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping', 'margin-block-start' );
 	}
 );
 
