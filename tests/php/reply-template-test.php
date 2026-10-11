@@ -15,15 +15,13 @@ $pattern  = (string) file_get_contents( $root . '/patterns/cr-letters-loop.php' 
 
 cr_reply_group(
 	'template owns the reply archive structure',
-	static function () use ( $template, $root ): void {
+	static function () use ( $template ): void {
 		foreach ( array( 'template-part {"slug":"header"', 'template-part {"slug":"footer"', 'courtneyr/archive-identity', 'query-title', 'term-description', 'is-style-cr-marker-bar-short', 'courtneyr-child/cr-letters-loop', 'courtneyr-child/cr-browse-all', 'cr-archive cr-archive--stream cr-archive--reply' ) as $needle ) {
 			cr_reply_contains( $needle, $template, $needle );
 		}
 		cr_reply_contains( '"metadata":{"name":"Reply archive"}', $template, 'metadata name' );
 		cr_reply_not_contains( 'Read order', $template, 'no read order group' );
 		cr_reply_not_contains( 'read-order', $template, 'no read order block' );
-		$functions = (string) file_get_contents( $root . '/functions.php' );
-		cr_reply_not_contains( 'letters.php', $functions, 'functions does not load lane file yet' );
 	}
 );
 
