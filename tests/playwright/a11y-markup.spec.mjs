@@ -4171,6 +4171,29 @@ test( 'a review written somewhere prints no place logged out (PKIW #252)', async
 	await expect( page.locator( 'main .sloc, main .p-location, main .h-geo, main .geo, main [class*="simple-location"]' ) ).toHaveCount( 0 );
 } );
 
+test( 'a protected review single shows its title and the password form, with no syndication area (PKIW #252)', async ( { page } ) => {
+	const path = await postBySlugPath( page, 'the-sealed-cabinet-review', 'protected review' );
+	await page.goto( path, { waitUntil: 'load' } );
+	await expect( page.locator( 'main form.post-password-form' ) ).toHaveCount( 1 );
+	const html = await page.content();
+	expect( html, 'no syndication wrapper' ).not.toContain( 'single-post__syndication' );
+	expect( html, 'no interactions heading' ).not.toContain( 'Likes, Bookmarks, and Reposts' );
+} );
+
+test( 'on an image-bearing review single, Previous sits at the left edge of the post nav and Next at the right (PKIW #252)', async ( { page } ) => {
+	await goToSlug( page, 'harbor-light-field-guide', 'Harbor Light Field Guide' );
+	const edges = await page.evaluate( () => {
+		const nav = document.querySelector( 'main nav.cr-post-nav' );
+		const box = ( el ) => el?.getBoundingClientRect() ?? null;
+		const main = box( document.querySelector( 'main' ) );
+		return { main, nav: box( nav ), prev: box( nav?.querySelector( '.post-navigation-link-previous a' ) ), next: box( nav?.querySelector( '.post-navigation-link-next a' ) ) };
+	} );
+	test.skip( ! edges.prev || ! edges.next, 'this review has no neighbor on one side' );
+	expect( edges.nav.width, 'the nav is wider than half of main' ).toBeGreaterThan( edges.main.width / 2 );
+	expect( Math.abs( edges.prev.left - edges.nav.left ), 'Previous at the left edge' ).toBeLessThan( 2 );
+	expect( Math.abs( edges.nav.right - edges.next.right ), 'Next at the right edge' ).toBeLessThan( 2 );
+} );
+
 test( 'Stream review clippings are one link, no picture, no excerpt and a single tilt (PKIW #252)', async ( { page } ) => {
 	await page.goto( STREAM, { waitUntil: 'load' } );
 	const cards = page.locator( 'li.kind-review article.pk-card--stream.k-review' );

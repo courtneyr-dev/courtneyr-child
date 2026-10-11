@@ -179,9 +179,46 @@ function title_extras( string $html, array $block, $instance = null ): string {
 	}
 
 	$facts = Review\facts( get_queried_object_id() );
-	return $html . byline_html( $facts ) . rating_box_html( $facts );
+	return $html . byline_html( $facts ) . held_date() . rating_box_html( $facts );
 }
 add_filter( 'render_block_core/post-title', __NAMESPACE__ . '\\title_extras', 30, 3 );
+
+/**
+ * The header date block, held back from the lede row until the title prints it.
+ *
+ * @param string|null $html Rendered date to hold; null takes the held date and clears it.
+ * @return string The held date when taking, '' otherwise.
+ */
+function held_date( ?string $html = null ): string {
+	static $held = '';
+	if ( null !== $html ) {
+		$held = $html;
+		return '';
+	}
+	$out  = $held;
+	$held = '';
+	return $out;
+}
+
+/**
+ * Move the review single's header date from the lede row to between the byline and the star box.
+ *
+ * The lede row keeps the category chip alone, so the header reads chip,
+ * title, byline, date, rating. Runs after the microformats filter, so the
+ * date moves with its hidden author card.
+ *
+ * @param string               $html     Rendered post-date block.
+ * @param array<string, mixed> $block    Parsed block.
+ * @param mixed                $instance Block instance.
+ * @return string
+ */
+function hold_header_date( string $html, array $block, $instance = null ): string {
+	if ( ! Review\is_review_single() || ! matches_queried_post( $instance ) || ! block_has_class( $block, 'single-post__date' ) ) {
+		return $html;
+	}
+	return held_date( $html );
+}
+add_filter( 'render_block_core/post-date', __NAMESPACE__ . '\\hold_header_date', 20, 3 );
 
 /**
  * Insert the stored picture as the first child of the single header group.
@@ -223,3 +260,18 @@ function drop_star_rating( string $html, array $block, $instance = null ): strin
 	return Review\is_review_single() ? '' : $html;
 }
 add_filter( 'render_block_post-kinds-indieweb/star-rating', __NAMESPACE__ . '\\drop_star_rating', 20, 3 );
+
+/**
+ * Remove the syndication area from a password-protected review single.
+ *
+ * The protected review shows only its title and the password form, so the
+ * whole wrapper goes, heading included.
+ *
+ * @param string               $html  Rendered group block.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function drop_protected_syndication( string $html, array $block ): string {
+	return Review\is_review_single() && post_password_required( get_queried_object_id() ) && block_has_class( $block, 'single-post__syndication' ) ? '' : $html;
+}
+add_filter( 'render_block_core/group', __NAMESPACE__ . '\\drop_protected_syndication', 10, 2 );
