@@ -136,6 +136,13 @@ function untitled_single_label( int $post_id ): string {
 	if ( $post instanceof \WP_Post && function_exists( '\Courtneyr\Child\Nav\kind_date_name' ) && has_term( 'reply', 'kind', $post ) ) {
 		return \Courtneyr\Child\Nav\kind_date_name( $post );
 	}
+	// An untitled like with no real cited title names its host in the clipping, so the H1 is its kind and date.
+	if ( $post instanceof \WP_Post && function_exists( '\PKIW\untitled_fallback_name' ) && function_exists( '\Courtneyr\Child\Like\like_facts' ) && has_term( 'like', 'kind', $post ) ) {
+		$facts = \Courtneyr\Child\Like\like_facts( $post_id );
+		if ( '' === trim( (string) ( $facts['cited_title'] ?? '' ) ) ) {
+			return (string) \PKIW\untitled_fallback_name( $post )['name'];
+		}
+	}
 	if ( $post instanceof \WP_Post && function_exists( '\PKIW\untitled_name' ) ) {
 		$label = (string) \PKIW\untitled_name( $post );
 		if ( '' !== trim( $label ) ) {
