@@ -192,6 +192,8 @@ cr_read_group(
 		cr_read_reset();
 		$GLOBALS['cr_read_blocks'] = array( cr_read_single_block() );
 		$html = add_title_lede( '<h1>Reading now</h1>', array( 'blockName' => 'core/post-title' ) );
+		cr_read_contains( 'cr-read__author', $html, 'public keeps the author element' );
+		cr_read_contains( 'A. Reader', $html, 'public keeps the author text' );
 		cr_read_contains( 'Currently Reading', $html, 'status' );
 		cr_read_contains( 'since', $html, 'since' );
 		cr_read_contains( '<time datetime="2026-09-14">September 14, 2026</time>', $html, 'date' );
@@ -203,7 +205,8 @@ cr_read_group(
 		$GLOBALS['cr_read_blocks']              = array( cr_read_single_block() );
 		$GLOBALS['cr_read_protected'][ $post->ID ] = true;
 		$html = add_title_lede( '<h1>Reading now</h1>', array( 'blockName' => 'core/post-title' ) );
-		cr_read_contains( 'cr-read__author', $html, 'protected keeps the author' );
+		cr_read_not_contains( 'cr-read__author', $html, 'protected drops the author element' );
+		cr_read_not_contains( 'A. Reader', $html, 'protected drops the author text' );
 		cr_read_not_contains( 'cr-journal__rating', $html, 'protected drops the rating' );
 		cr_read_not_contains( 'cr-read__status', $html, 'protected drops status and dates' );
 		$chip = '<div class="taxonomy-kind single-post__kind"><a href="/kind/read/">Read</a></div>';

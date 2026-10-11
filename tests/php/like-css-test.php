@@ -220,7 +220,7 @@ check_case(
 			'/\bhsla?\s*\(/i',
 			'/\b(?:linear|radial|conic|repeating-linear|repeating-radial|repeating-conic)-gradient\s*\(/i',
 			'/\bclip-path\s*:/i',
-			'/(?:^|[;{])\s*filter\s*:/im',
+			'/(?:^|[;{])\s*filter\s*:(?!\s*drop-shadow\(var\(--cr-shadow-hard)/im',
 			'/\bbackdrop-filter\s*:/i',
 			'/text-overflow\s*:\s*ellipsis/i',
 			'/--cr-black\b/',
@@ -392,10 +392,10 @@ check_case(
 			&& '100%' === declaration_value( $css, 'article.pk-card.cr-like-sticker--stream .pk-badge svg', 'height' )
 			&& 'var(--cr-space-sm)' === declaration_value( $css, '.cr-like article.pk-card.cr-like-sticker .pk-embed', 'margin-block-start' )
 			&& 'absolute' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge', 'position' )
-			&& 'calc(-1 * var(--cr-space-md))' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge', 'inset-block-start' )
-			&& 'var(--cr-space-md)' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge', 'inset-inline-end' )
-			&& '1.5rem' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge svg', 'width' )
-			&& '1.5rem' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge svg', 'height' )
+			&& 'calc(-1 * var(--cr-space-2xl))' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge', 'inset-block-start' )
+			&& 'calc(-1 * var(--cr-space-xs))' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge', 'inset-inline-end' )
+			&& '100%' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge svg', 'width' )
+			&& '100%' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-badge svg', 'height' )
 			&& 'var(--cr-space-xs)' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping .pk-body', 'padding-block-start' )
 			&& 'block' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping', 'display' )
 			&& 'none' === declaration_value( $css, 'body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping', 'grid-template-columns' )

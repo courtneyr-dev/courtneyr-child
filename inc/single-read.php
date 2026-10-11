@@ -352,13 +352,13 @@ function add_title_lede( string $html, array $block ): string {
 	$cur    = (int) ( $a['currentPage'] ?? 0 );
 	$out    = '';
 
-	if ( '' !== $author ) {
-		$out .= '<div class="cr-journal__lede cr-read__author">' . esc_html( $author ) . '</div>';
-	}
-	// A password-protected read shows its title, author and the password
-	// form only: no rating, status, dates or progress.
+	// A password-protected read shows its title and the password form only:
+	// no author, rating, status, dates or progress.
 	if ( post_password_required( $post ) ) {
 		return $html . $out;
+	}
+	if ( '' !== $author ) {
+		$out .= '<div class="cr-journal__lede cr-read__author">' . esc_html( $author ) . '</div>';
 	}
 	$out .= rating_html( (float) $a['rating'] );
 
@@ -389,7 +389,7 @@ add_filter( 'render_block', __NAMESPACE__ . '\\add_title_lede', 20, 2 );
 
 /**
  * A password-protected read prints no kind or category chips in its
- * header: the title, author and password form are all it shows.
+ * header: the title and password form are all it shows.
  *
  * @param string               $html  Rendered post-terms block.
  * @param array<string, mixed> $block Parsed block.
