@@ -4636,36 +4636,42 @@ test( 'each bookmark archive item carries one bookmark-of equal to the bookmarke
 	await expect( page.locator( `li.wp-block-post:has(a[href$="${ filed }"]) .u-bookmark-of data.u-url` ) ).toHaveAttribute( 'value', 'https://example.com/f4' );
 } );
 
-test( 'bookmark drawers hold 4, 2, 2, 1 and 1 columns at 1440, 1024, 768, 375 and 320, in reading order, and a lone drawer is centered (PKIW #258)', async ( { page }, testInfo ) => {
+test( 'bookmark drawers sit 4, 2, 2, 1 and 1 to a row at 1440, 1024, 768, 375 and 320, in reading order, and a short row is centered (PKIW #258)', async ( { page }, testInfo ) => {
 	test.skip( '1280-light' !== testInfo.project.name, 'runs once, in the 1280-light project' );
 	await requireKindCount( page, 'bookmark', 13 );
-	for ( const [ width, columns ] of [ [ 1440, 4 ], [ 1024, 2 ], [ 768, 2 ], [ 375, 1 ], [ 320, 1 ] ] ) {
+	// A drawer is a `.pkiw-group`; the drawers wrap in a centered flex row, so drawers per row = the drawers that share the first drawer's top.
+	await page.goto( BOOKMARK_ARCHIVE, { waitUntil: 'load' } );
+	const drawers = await page.locator( '.pkiw-group' ).count();
+	test.skip( drawers < 4, 'fewer than four bookmark drawers on page 1' );
+	for ( const [ width, perRow ] of [ [ 1440, 4 ], [ 1024, 2 ], [ 768, 2 ], [ 375, 1 ], [ 320, 1 ] ] ) {
 		await page.setViewportSize( { width, height: 1000 } );
 		await page.goto( BOOKMARK_ARCHIVE, { waitUntil: 'load' } );
-		const list = page.locator( '.pkiw-group__items' ).filter( { has: page.locator( 'li:nth-child(4)' ) } ).first();
-		test.skip( 0 === await list.count(), 'no bookmark drawer has at least four items' );
-		const actual = await gridColumns( list );
-		expect( actual, `${ width }px drawer columns` ).toBe( columns );
+		const layout = await page.locator( '.pkiw-group' ).evaluateAll( ( groups ) => {
+			// The row of a drawer is its margin-box top: the WordPress flow-layout rule gives every drawer after the first a block-gap margin-top, which puts the first drawer 24px higher than the rest of its row.
+			const rowTop = ( group ) => group.offsetTop - parseFloat( getComputedStyle( group ).marginTop );
+			const firstTop = rowTop( groups[0] );
+			const visual = [ ...groups ].sort( ( a, b ) => rowTop( a ) - rowTop( b ) || a.offsetLeft - b.offsetLeft );
+			return {
+				perRow: groups.filter( ( group ) => rowTop( group ) === firstTop ).length,
+				ordered: groups.every( ( group, i ) => group === visual[i] ),
+			};
+		} );
+		expect( layout.perRow, `${ width }px drawers per row` ).toBe( perRow );
+		expect( layout.ordered, `${ width }px DOM order equals visual order` ).toBe( true );
 		expect( await hasHorizontalScroll( page ), `${ width }px no horizontal scroll` ).toBeLessThanOrEqual( 0 );
-		const ordered = await list.evaluate( ( list ) => {
-			const dom = [ ...list.children ];
-			const visual = [ ...dom ].sort( ( a, b ) => Math.round( a.getBoundingClientRect().top ) - Math.round( b.getBoundingClientRect().top ) || a.getBoundingClientRect().left - b.getBoundingClientRect().left );
-			return dom.every( ( item, i ) => item === visual[i] );
-		} );
-		expect( ordered, `${ width }px DOM order equals visual order` ).toBe( true );
 	}
+	// A short row is centered: page 2 ends with a row of fewer drawers, and a page with one drawer (the last page) is centered alone.
 	await page.setViewportSize( { width: 1440, height: 1000 } );
-	await page.goto( BOOKMARK_ARCHIVE, { waitUntil: 'load' } );
-	const lone = page.locator( '.pkiw-group' ).filter( { has: page.locator( 'li:first-child:last-child' ) } ).first();
-	if ( 0 === await lone.count() ) {
-		fixtureSkippedPart( 'no one-item bookmark drawer' );
-	} else {
-		const centered = await lone.evaluate( ( group ) => {
-			const item = group.querySelector( 'li.wp-block-post' ).getBoundingClientRect();
-			const list = group.querySelector( '.pkiw-group__items' ).getBoundingClientRect();
-			return Math.abs( ( item.left + item.right ) / 2 - ( list.left + list.right ) / 2 );
+	for ( const path of [ pagedPath( BOOKMARK_ARCHIVE, 2 ), pagedPath( BOOKMARK_ARCHIVE, 3 ) ] ) {
+		await page.goto( path, { waitUntil: 'load' } );
+		const offset = await page.locator( '.pkiw-grouped' ).evaluate( ( container ) => {
+			const groups = [ ...container.querySelectorAll( ':scope > .pkiw-group' ) ];
+			const left = Math.min( ...groups.map( ( group ) => group.offsetLeft ) );
+			const right = Math.max( ...groups.map( ( group ) => group.offsetLeft + group.offsetWidth ) );
+			return { drawers: groups.length, offset: Math.abs( ( left + right ) / 2 - ( container.offsetLeft + container.offsetWidth / 2 ) ) };
 		} );
-		expect( centered, 'single bookmark is centered in drawer' ).toBeLessThanOrEqual( 2 );
+		expect( offset.drawers, `${ path } is a short row` ).toBeLessThan( 4 );
+		expect( offset.offset, `${ path } short row of ${ offset.drawers } is centered` ).toBeLessThanOrEqual( 2 );
 	}
 } );
 
