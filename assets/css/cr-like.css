@@ -154,6 +154,18 @@ article.pk-card.cr-like-sticker--stream .pk-body,
 	min-width: 0;
 }
 
+/* inc/enqueue.php widens --cr-measure-wide to 86vw on every single at
+   1024px and up; the like single keeps the token's 80ch reading width so
+   the header, clipping and note share one centered editorial column. */
+body.single-post.kind-like .single-post__header,
+body.single-post.kind-like .single-post__content {
+	--cr-measure-wide: 80ch;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: var(--cr-measure-wide);
+	margin-inline: auto;
+}
+
 body.single-post.kind-like .single-post__content .pk-card.k-like.cr-like-clipping {
 	position: relative;
 	display: block;
