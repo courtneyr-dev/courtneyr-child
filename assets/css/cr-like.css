@@ -102,12 +102,16 @@ article.pk-card.cr-like-sticker--stream::before,
 	background: var(--cr-paper) var(--cr-fiber);
 	box-shadow: var(--cr-shadow-hard);
 	transform: rotate(var(--cr-rotate-1));
+
+	/* The plugin's .pk-card::before sets opacity 0.5; the sticker paper is the text's background. */
+	opacity: 1;
 }
 
 article.pk-card.cr-like-sticker--stream::before {
 	content: "";
 	border: solid 0.4rem var(--cr-white);
 	transform: rotate(var(--cr-rotate-neg));
+	opacity: 1;
 }
 
 .cr-like .pkiw-group__items > li:nth-child(4n+1) article.pk-card.cr-like-sticker::before {

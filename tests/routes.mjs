@@ -11,7 +11,7 @@ export function assertLocalTarget( base = BASE_URL ) {
 	}
 }
 
-export const ROUTE_NAMES = [ 'home', 'stream', 'single-post', 'kind-archive', 'story-archive', 'play-archive', 'read-archive' ];
+export const ROUTE_NAMES = [ 'home', 'stream', 'single-post', 'kind-archive', 'story-archive', 'play-archive', 'read-archive', 'review-archive', 'reply-archive', 'like-archive', 'bookmark-archive' ];
 
 const fixed = {
 	home: '/',
@@ -20,6 +20,10 @@ const fixed = {
 	'story-archive': process.env.CR_STORY_ARCHIVE_PATH || '/web-stories/',
 	'play-archive': process.env.CR_PLAY_ARCHIVE_PATH || '/kind/play/',
 	'read-archive': process.env.CR_READ_ARCHIVE_PATH || '/kind/read/',
+	'review-archive': process.env.CR_REVIEW_ARCHIVE_PATH || '/kind/review/',
+	'reply-archive': process.env.CR_REPLY_ARCHIVE_PATH || '/kind/reply/',
+	'like-archive': process.env.CR_LIKE_ARCHIVE_PATH || '/kind/like/',
+	'bookmark-archive': process.env.CR_BOOKMARK_ARCHIVE_PATH || '/kind/bookmark/',
 };
 
 // Newest published post from the public REST API, unless CR_SINGLE_POST_PATH is set.

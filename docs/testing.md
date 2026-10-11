@@ -22,8 +22,8 @@ Versions are pinned exactly in `composer.json` and `package.json`. The repo igno
 | `npm run lint` | Runs the three above; stops at the first failure | no |
 | `npm run lint:php:baseline` | Rewrites the PHPCS baseline from the current results | no |
 | `npm run lint:css:baseline` | Rewrites the stylelint baseline from the current results | no |
-| `npm run evidence` | Loads seven routes, saves screenshots and console errors, runs axe; fails on serious or critical violations | no |
-| `npm run captures` | Playwright screenshots of seven routes at 390 and 1280 px, light and dark | no |
+| `npm run evidence` | Loads eleven routes, saves screenshots and console errors, runs axe; fails on serious or critical violations | no |
+| `npm run captures` | Playwright screenshots of eleven routes at 390 and 1280 px, light and dark | no |
 
 ## Baseline policy
 
@@ -87,6 +87,10 @@ Routes, from `tests/routes.mjs`:
 | `story-archive` | `/web-stories/` | `CR_STORY_ARCHIVE_PATH` |
 | `play-archive` | `/kind/play/` | `CR_PLAY_ARCHIVE_PATH` |
 | `read-archive` | `/kind/read/` | `CR_READ_ARCHIVE_PATH` |
+| `review-archive` | `/kind/review/` | `CR_REVIEW_ARCHIVE_PATH` |
+| `reply-archive` | `/kind/reply/` | `CR_REPLY_ARCHIVE_PATH` |
+| `like-archive` | `/kind/like/` | `CR_LIKE_ARCHIVE_PATH` |
+| `bookmark-archive` | `/kind/bookmark/` | `CR_BOOKMARK_ARCHIVE_PATH` |
 
 The story archive uses `templates/archive-web-story.html`, which needs the Web Stories plugin. The replica doesn't have it active, so `/web-stories/` returns 404 there.
 
