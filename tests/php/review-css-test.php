@@ -170,7 +170,7 @@ cr_review_css_check(
 cr_review_css_check(
 	'archive, single and clipping contract hooks are present',
 	static function ( string $css ): bool {
-		foreach ( array( 'data-pkiw-sections', '40rem', '64rem', 'column-count', ':has(', 'break-inside: avoid', '--cr-glaucous-dark', '--cr-tape', '--cr-link', '--cr-night-elevated', '--cr-shadow-marker', 'cr-cover--failed', '-webkit-line-clamp' ) as $needle ) {
+		foreach ( array( 'data-pkiw-sections', '40rem', '64rem', 'grid-template-columns', ':has(', 'break-inside: avoid', '--cr-glaucous-dark', '--cr-tape', '--cr-link', '--cr-night-elevated', '--cr-shadow-marker', 'cr-cover--failed', '-webkit-line-clamp' ) as $needle ) {
 			if ( ! str_contains( $css, $needle ) ) {
 				return false;
 			}

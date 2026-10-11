@@ -162,6 +162,27 @@ cr_review_group(
 );
 
 cr_review_group(
+	'hold_header_date moves the date between the byline and the star box',
+	static function (): void {
+		cr_review_contains( serialize( array( 'render_block_core/post-date', 'Courtneyr\\Child\\SingleReview\\hold_header_date', 20, 3 ) ), serialize( $GLOBALS['cr_review_hooks'] ), 'post date hook' );
+		$post  = cr_review_single_request();
+		$date  = '<div class="single-post__date wp-block-post-date"><time class="dt-published">August 30, 2026</time></div>';
+		$block = array( 'attrs' => array( 'className' => 'single-post__date cr-dt-published' ) );
+		cr_review_same( '', \Courtneyr\Child\SingleReview\hold_header_date( $date, $block, new WP_Block( array( 'postId' => $post->ID ) ) ), 'lede row loses the date' );
+		$html = \Courtneyr\Child\SingleReview\title_extras( '<h1 class="single-post__title">Title</h1>', array( 'attrs' => array( 'className' => 'single-post__title' ) ), null );
+		cr_review_same( 1, substr_count( $html, 'August 30, 2026' ), 'date prints once' );
+		cr_review_assert( cr_review_single_pos( $html, 'cr-review__byline' ) < cr_review_single_pos( $html, 'single-post__date' ), 'byline before date' );
+		cr_review_assert( cr_review_single_pos( $html, 'single-post__date' ) < cr_review_single_pos( $html, 'cr-review__rating' ), 'date before rating' );
+		$html = \Courtneyr\Child\SingleReview\title_extras( '<h1 class="single-post__title">Title</h1>', array( 'attrs' => array( 'className' => 'single-post__title' ) ), null );
+		cr_review_not_contains( 'August 30, 2026', $html, 'the held date prints only once' );
+		cr_review_same( $date, \Courtneyr\Child\SingleReview\hold_header_date( $date, array( 'attrs' => array( 'className' => 'other' ) ), null ), 'other date blocks stay' );
+		cr_review_same( $date, \Courtneyr\Child\SingleReview\hold_header_date( $date, $block, new WP_Block( array( 'postId' => 99 ) ) ), 'other post context stays' );
+		cr_review_reset();
+		cr_review_same( $date, \Courtneyr\Child\SingleReview\hold_header_date( $date, $block, null ), 'non-review date stays' );
+	}
+);
+
+cr_review_group(
 	'header_picture inserts the figure after the header group opening tag',
 	static function (): void {
 		$post = cr_review_single_request();
