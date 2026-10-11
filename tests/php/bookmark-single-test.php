@@ -172,6 +172,9 @@ namespace Courtneyr\Child\SingleBookmark\Tests {
 		if ( $protected ) {
 			$GLOBALS['cr_request']['protected'] = true;
 		}
+		if ( function_exists( 'Courtneyr\\Child\\SingleBookmark\\single_facts' ) ) {
+			\Courtneyr\Child\SingleBookmark\single_facts( true );
+		}
 		return $post;
 	}
 

@@ -1,0 +1,432 @@
+/* Bookmark archive drawers, index cards and Stream scraps. */
+
+.cr-bookmark-drawers .pkiw-grouped {
+	--cr-bookmark-gap: var(--cr-space-lg);
+	--cr-bookmark-columns: 1;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: flex-start;
+	gap: var(--cr-bookmark-gap);
+}
+
+.cr-bookmark-drawers .pkiw-group {
+	position: relative;
+	box-sizing: border-box;
+	flex: 0 0 calc( ( 100% - ( var(--cr-bookmark-columns) - 1 ) * var(--cr-bookmark-gap) ) / var(--cr-bookmark-columns) );
+	min-width: 0;
+	padding: var(--cr-space-xl) var(--cr-space-md) var(--cr-space-md);
+	border: 2px solid var(--cr-ink);
+	background: var(--cr-prussian-blue);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-bookmark-drawers .pkiw-group:nth-child(even) {
+	background: var(--cr-cerulean);
+}
+
+.cr-bookmark-drawers .pkiw-group::before {
+	content: "";
+	position: absolute;
+	inset-block-start: var(--cr-space-xs);
+	inset-inline: 35%;
+	block-size: var(--cr-space-sm);
+	border: 2px solid var(--cr-ink);
+	background: var(--cr-selective-yellow);
+	pointer-events: none;
+}
+
+.cr-bookmark-drawers .pkiw-group__heading {
+	position: relative;
+	margin: 0 auto var(--cr-space-md);
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	border: 2px solid var(--cr-ink);
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max( var(--cr-text-lg), var(--cr-text-floor) );
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+	text-align: center;
+}
+
+.cr-bookmark-drawers .pkiw-group__heading::before,
+.cr-bookmark-drawers .pkiw-group__heading::after {
+	content: "";
+	position: absolute;
+	inset-block-start: 50%;
+	width: var(--cr-space-xs);
+	height: var(--cr-space-xs);
+	border: 2px solid var(--cr-ink);
+	border-radius: var(--cr-radius-full);
+	background: var(--cr-cerulean);
+	pointer-events: none;
+}
+
+.cr-bookmark-drawers .pkiw-group__heading::before {
+	inset-inline-start: var(--cr-space-sm);
+}
+
+.cr-bookmark-drawers .pkiw-group__heading::after {
+	inset-inline-end: var(--cr-space-sm);
+}
+
+.cr-bookmark-drawers .pkiw-group__items {
+	display: grid;
+	gap: var(--cr-space-md);
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-bookmark-drawers .pkiw-group__items > li.wp-block-post {
+	min-width: 0;
+}
+
+.cr-index-card {
+	position: relative;
+	box-sizing: border-box;
+	padding: var(--cr-space-lg) var(--cr-space-md) var(--cr-space-md) calc(var(--cr-space-xl) + var(--cr-space-sm));
+	border: 2px solid var(--cr-russian-violet);
+	background-color: var(--cr-printer-ivory);
+	background-image:
+		linear-gradient(90deg, transparent 0, transparent var(--cr-space-xl), var(--cr-ut-orange) var(--cr-space-xl), var(--cr-ut-orange) calc(var(--cr-space-xl) + var(--cr-space-3xs)), transparent calc(var(--cr-space-xl) + var(--cr-space-3xs))),
+		repeating-linear-gradient(180deg, transparent 0, transparent calc(var(--cr-leading-normal) * 1em - var(--cr-space-3xs)), var(--cr-sky-blue) calc(var(--cr-leading-normal) * 1em - var(--cr-space-3xs)), var(--cr-sky-blue) calc(var(--cr-leading-normal) * 1em));
+	color: var(--cr-russian-violet);
+	overflow-wrap: anywhere;
+}
+
+.cr-index-card__title {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max( var(--cr-text-md), var(--cr-text-floor) );
+	line-height: var(--cr-leading-tight);
+}
+
+.cr-index-card__title a {
+	color: var(--cr-russian-violet);
+	text-decoration: none;
+}
+
+.cr-index-card__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-index-card__host,
+.cr-bookmark-stream__host {
+	margin: var(--cr-space-sm) 0 0;
+	font-family: var(--cr-font-mono);
+	font-size: max( var(--cr-text-sm), var(--cr-text-floor) );
+	overflow-wrap: anywhere;
+}
+
+.cr-index-card__label,
+.cr-bookmark-stream__label {
+	display: flex;
+	align-items: center;
+	gap: var(--cr-space-xs);
+	margin: 0 0 var(--cr-space-sm);
+	padding-inline-end: var(--cr-space-3xl);
+	font-family: var(--cr-font-mono);
+	font-size: max( var(--cr-text-xs), var(--cr-text-floor) );
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	line-height: var(--cr-leading-tight);
+	text-transform: uppercase;
+}
+
+.cr-index-card__glyph,
+.cr-bookmark-stream__glyph {
+	display: inline-flex;
+	width: 1.25rem;
+	height: 1.25rem;
+}
+
+.cr-index-card__glyph svg,
+.cr-bookmark-stream__glyph svg {
+	width: 100%;
+	height: auto;
+}
+
+.cr-bookmark-single {
+	position: relative;
+	box-sizing: border-box;
+	margin-block: var(--cr-space-xl);
+	padding: var(--cr-space-xl) var(--cr-space-md) var(--cr-space-md);
+	border: 2px solid var(--cr-ink);
+	background: var(--cr-prussian-blue);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-bookmark-single__tab {
+	position: absolute;
+	inset-block-start: calc(-1 * var(--cr-space-lg));
+	inset-inline-start: var(--cr-space-md);
+	margin: 0;
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	border: 2px solid var(--cr-ink);
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max( var(--cr-text-sm), var(--cr-text-floor) );
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+}
+
+.cr-index-card--single {
+	width: 100%;
+	max-width: none;
+}
+
+.cr-index-card__cited {
+	margin: 0 0 var(--cr-space-md);
+	font-family: var(--cr-font-accent);
+	font-size: max( var(--cr-text-lg), var(--cr-text-floor) );
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+}
+
+.cr-index-card__body {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-lg);
+}
+
+.cr-index-card__fields {
+	display: grid;
+	gap: var(--cr-space-xs);
+	min-width: 0;
+	margin: 0;
+}
+
+.cr-index-card__row {
+	display: grid;
+	grid-template-columns: minmax(7rem, 0.7fr) minmax(0, 2fr);
+	gap: var(--cr-space-sm);
+	align-items: baseline;
+	padding-block: var(--cr-space-xs);
+	border-bottom: 1px solid var(--cr-sky-blue);
+}
+
+.cr-index-card__row dt {
+	margin: 0;
+	font-family: var(--cr-font-mono);
+	font-size: max( var(--cr-text-xs), var(--cr-text-floor) );
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	text-transform: uppercase;
+}
+
+.cr-index-card__row dd {
+	min-width: 0;
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.cr-index-card__row--source a {
+	color: var(--cr-cerulean);
+	text-decoration: underline;
+}
+
+.cr-index-card__note {
+	font-family: var(--cr-font-body);
+}
+
+.cr-index-card__picture {
+	display: grid;
+	min-width: 0;
+	margin: 0;
+	place-items: center;
+}
+
+.cr-index-card__picture.cr-cover--failed {
+	display: none;
+}
+
+.cr-index-card__image {
+	width: auto;
+	max-width: 100%;
+	height: auto;
+	object-fit: contain;
+}
+
+.cr-stream-page .pk-card.k-bookmark {
+	position: relative;
+	box-sizing: border-box;
+	width: 88%;
+	max-width: 100%;
+	padding: 0.9rem 1rem 1rem;
+	border: 2px solid var(--cr-ink);
+	background: var(--cr-surface-elevated);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-ink);
+	overflow-wrap: anywhere;
+}
+
+.cr-stream-page .pk-card.k-bookmark:has(:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-stream-page .wp-block-post-template > li:nth-child(even) .pk-card.k-bookmark {
+	margin-left: auto;
+}
+
+.cr-stream-page .pk-card.k-bookmark::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	right: 0;
+	border-style: solid;
+	border-width: 0 1.4rem 1.4rem 0;
+	border-color: transparent var(--cr-sky-blue) transparent transparent;
+	pointer-events: none;
+}
+
+.cr-stream-page .pk-card.k-bookmark .pk-title {
+	margin: 0;
+	padding: 0 var(--cr-space-4xl) 0 0;
+	font-family: var(--cr-font-accent);
+	font-size: 1rem;
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+}
+
+.cr-stream-page .pk-card.k-bookmark .pk-title a {
+	color: var(--cr-ink);
+	text-decoration: none;
+}
+
+.cr-stream-page .pk-card.k-bookmark .pk-title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-bookmark-stream__label,
+.cr-bookmark-stream__host,
+.cr-bookmark-stream__date {
+	padding-inline-end: var(--cr-space-4xl);
+}
+
+.cr-bookmark-stream__date {
+	margin: var(--cr-space-xs) 0 0;
+	font-family: var(--cr-font-mono);
+	font-size: max( var(--cr-text-sm), var(--cr-text-floor) );
+}
+
+.cr-bookmark-stream__stamp {
+	position: absolute;
+	inset-block-start: var(--cr-space-md);
+	inset-inline-end: var(--cr-space-md);
+	width: min(6rem, 32%);
+	pointer-events: none;
+}
+
+.cr-bookmark-stream__stamp .cr-stamp-mark {
+	display: block;
+}
+
+.cr-bookmark-stream__stamp svg {
+	width: 100%;
+	height: auto;
+}
+
+.cr-bookmark-drawers .wp-block-query-pagination {
+	margin-block-start: var(--cr-space-xl);
+}
+
+@media (min-width: 600px) {
+
+	.cr-bookmark-drawers .pkiw-grouped {
+		--cr-bookmark-columns: 2;
+	}
+}
+
+@media (min-width: 1200px) {
+
+	.cr-bookmark-drawers .pkiw-grouped {
+		--cr-bookmark-columns: 4;
+	}
+}
+
+@media (min-width: 1100px) {
+
+	.cr-index-card__body:has(.cr-index-card__picture:not(.cr-cover--failed)) {
+		grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.8fr);
+		align-items: start;
+	}
+}
+
+@media (max-width: 480px) {
+
+	.cr-index-card {
+		padding-inline: var(--cr-space-md);
+	}
+
+	.cr-index-card__row {
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--cr-space-2xs);
+	}
+
+	.cr-stream-page .pk-card.k-bookmark .pk-title,
+	.cr-bookmark-stream__label,
+	.cr-bookmark-stream__host,
+	.cr-bookmark-stream__date {
+		padding-inline-end: 0;
+	}
+
+	.cr-bookmark-stream__stamp {
+		position: static;
+		display: block;
+		margin-block-start: var(--cr-space-sm);
+		width: 7rem;
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-bookmark-drawers .pkiw-group {
+		border: 2px solid CanvasText;
+		box-shadow: none;
+		background-image: none;
+	}
+
+	.cr-bookmark-drawers .pkiw-group__heading {
+		border: 2px solid CanvasText;
+		box-shadow: none;
+		background-image: none;
+	}
+
+	.cr-index-card {
+		border: 2px solid CanvasText;
+		box-shadow: none;
+		background-image: none;
+	}
+
+	.cr-bookmark-stream,
+	.cr-stream-page .pk-card.k-bookmark,
+	.cr-bookmark-single {
+		border: 2px solid CanvasText;
+		box-shadow: none;
+		background-image: none;
+	}
+
+	.cr-bookmark-drawers .pkiw-group::before,
+	.cr-bookmark-drawers .pkiw-group__heading::before,
+	.cr-bookmark-drawers .pkiw-group__heading::after,
+	.cr-stream-page .pk-card.k-bookmark::after,
+	.cr-bookmark-stream__stamp {
+		display: none;
+	}
+
+	.cr-index-card a,
+	.cr-bookmark-stream a {
+		color: LinkText;
+	}
+}

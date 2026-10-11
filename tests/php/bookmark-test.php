@@ -352,7 +352,7 @@ namespace Courtneyr\Child\Bookmark\Tests {
 				&& 0 === $xp->query( '//img|//svg|//time|//dl|//script' )->length
 				&& 'example.com' === text_of( $xp, '//p[contains(@class,"cr-index-card__host")]' )
 				&& 1 === $xp->query( '//*[contains(concat(" ", @class, " "), " u-bookmark-of ")]' )->length
-				&& 'https://example.com/p?q=1' === $xp->query( '//*[contains(concat(" ", @class, " "), " u-url ")]' )->item( 0 )->getAttribute( 'value' )
+				&& 'https://example.com/p?q=1' === $xp->query( '//span[contains(concat(" ", @class, " "), " u-bookmark-of ")]/data[contains(concat(" ", @class, " "), " u-url ")]' )->item( 0 )->getAttribute( 'value' )
 				&& ! $h->hasAttribute( 'id' )
 				&& ! $a->item( 0 )->hasAttribute( 'aria-labelledby' );
 		}
@@ -389,11 +389,11 @@ namespace Courtneyr\Child\Bookmark\Tests {
 		static function (): bool {
 			reset_state();
 			bookmark_post( 41, 'Release notes', full_facts( array( 'title' => '  release   NOTES ' ) ) );
-			$equal = dom( render_card( 41, array( 'className' => 'is-style-cr-bookmark-card' ) ) )->query( '//*[contains(concat(" ", @class, " "), " p-name ")]' )->length;
+			$equal = dom( render_card( 41, array( 'className' => 'is-style-cr-bookmark-card' ) ) )->query( '//*[contains(concat(" ", @class, " "), " p-name ")][not(ancestor::*[@hidden])]' )->length;
 			bookmark_post( 42, '', full_facts( array( 'title' => 'example.com' ) ) );
-			$empty = dom( render_card( 42, array( 'className' => 'is-style-cr-bookmark-card' ) ) )->query( '//*[contains(concat(" ", @class, " "), " p-name ")]' )->length;
+			$empty = dom( render_card( 42, array( 'className' => 'is-style-cr-bookmark-card' ) ) )->query( '//*[contains(concat(" ", @class, " "), " p-name ")][not(ancestor::*[@hidden])]' )->length;
 			bookmark_post( 43, 'Bookmarked: X', full_facts( array( 'title' => 'Cited X' ) ) );
-			$diff = dom( render_card( 43, array( 'className' => 'is-style-cr-bookmark-card' ) ) )->query( '//*[contains(concat(" ", @class, " "), " p-name ")]' )->length;
+			$diff = dom( render_card( 43, array( 'className' => 'is-style-cr-bookmark-card' ) ) )->query( '//*[contains(concat(" ", @class, " "), " p-name ")][not(ancestor::*[@hidden])]' )->length;
 			return 1 === $equal && 0 === $empty && 0 === $diff;
 		}
 	);
@@ -440,7 +440,8 @@ namespace Courtneyr\Child\Bookmark\Tests {
 		'protected cards only gain locked index-card classes',
 		static function (): bool {
 			reset_state();
-			bookmark_post( 41, 'Protected: x', array() );
+			bookmark_post( 41, 'Protected: x' );
+			$GLOBALS['cr_kind_facts'][41] = array();
 			$html = '<article class="pk-card pk-card--stream pk-card--protected k-bookmark h-entry"><h3 class="pk-title p-name"><a class="u-url" href="...">Protected: x</a></h3></article>';
 			$out  = render_card( 41, array( 'className' => 'is-style-cr-bookmark-card' ), $html );
 			$raw  = render_card( 41, array( 'className' => 'is-style-cr-bookmark-card' ), '<article class="pk-card k-bookmark">x</article>' );
