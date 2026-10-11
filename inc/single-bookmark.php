@@ -16,12 +16,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Normalize visible text for comparison.
  *
- * @param string $text Text or HTML.
+ * The cited title compares after trimming and ignoring case only, so
+ * `$collapse` is false there and a doubled inner space still counts as a
+ * difference. The note check collapses whitespace runs.
+ *
+ * @param string $text     Text or HTML.
+ * @param bool   $collapse Whether to collapse inner whitespace runs.
  * @return string Normalized text.
  */
-function comparable_text( string $text ): string {
+function comparable_text( string $text, bool $collapse = true ): string {
 	$text = html_entity_decode( wp_strip_all_tags( $text ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-	$text = trim( (string) preg_replace( '/\s+/u', ' ', $text ) );
+	$text = $collapse ? trim( (string) preg_replace( '/\s+/u', ' ', $text ) ) : trim( $text );
 	return function_exists( 'mb_strtolower' ) ? mb_strtolower( $text, 'UTF-8' ) : strtolower( $text );
 }
 
@@ -264,7 +269,7 @@ function index_card( \WP_Post $post, array $facts ): string {
 	}
 	$html .= '<article class="cr-index-card cr-index-card--single cr-paper-sheet cr-paper--printer-ivory">';
 	$html .= '<p class="cr-index-card__label"><span class="cr-index-card__glyph" aria-hidden="true">' . $glyph . '</span><span class="cr-index-card__kind">' . esc_html( $label ) . '</span></p>';
-	if ( '' !== $cited && comparable_text( $cited ) !== comparable_text( (string) $post->post_title ) ) {
+	if ( '' !== $cited && comparable_text( $cited, false ) !== comparable_text( (string) $post->post_title, false ) ) {
 		$html .= '<p class="cr-index-card__cited">' . esc_html( $cited ) . '</p>';
 	}
 	$html .= $body . '</article></div>';
