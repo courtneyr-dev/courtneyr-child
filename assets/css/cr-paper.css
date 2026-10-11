@@ -1,0 +1,137 @@
+/**
+ * Shared paper sheet API for Post Kinds lane sheets.
+ *
+ * Use `.cr-paper-sheet` for the physical sheet, `.cr-paper-sheet--flat` to
+ * remove the hard shadow, `.cr-paper-sheet--torn` for a decorative torn lower
+ * edge, and `.cr-paper--<token>` to choose one of the fixed palette fills
+ * below. This sheet carries no filter of any kind; the clipping image's
+ * grayscale belongs to a later lane.
+ *
+ * `.cr-paper-sheet--torn::after` is reserved for the tear, so a kind that
+ * needs another pseudo-element on the same element should use `::before` or a
+ * child element.
+ */
+
+:where(.cr-paper-sheet) {
+	--cr-paper: var(--cr-light-gray);
+	--cr-paper-ink: var(--cr-russian-violet);
+	--cr-paper-side: var(--cr-russian-violet-soft);
+	--cr-paper-tear: 0.5rem;
+}
+
+.cr-paper-sheet {
+	position: relative;
+	box-sizing: border-box;
+	border: 0;
+	border-radius: 0;
+	background-color: var(--cr-paper);
+	background-image: var(--cr-fiber);
+	color: var(--cr-paper-ink);
+	box-shadow: var(--cr-shadow-hard);
+	overflow-wrap: anywhere;
+}
+
+.cr-paper-sheet--flat {
+	box-shadow: none;
+}
+
+.cr-paper-sheet--torn {
+	margin-block-end: var(--cr-paper-tear);
+}
+
+.cr-paper-sheet--torn::after {
+	content: "";
+	position: absolute;
+	inset-inline: 0;
+	inset-block-start: 100%;
+	block-size: var(--cr-paper-tear);
+	background-color: var(--cr-paper);
+	pointer-events: none;
+	-webkit-mask:
+		linear-gradient(135deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x,
+		linear-gradient(225deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x;
+	mask:
+		linear-gradient(135deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x,
+		linear-gradient(225deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x;
+}
+
+.cr-paper--sky-blue {
+	--cr-paper: var(--cr-sky-blue);
+	--cr-paper-ink: var(--cr-russian-violet);
+	--cr-paper-side: var(--cr-blue-green);
+}
+
+.cr-paper--periwinkle {
+	--cr-paper: var(--cr-periwinkle);
+	--cr-paper-ink: var(--cr-russian-violet);
+	--cr-paper-side: var(--cr-russian-violet-soft);
+}
+
+.cr-paper--light-orange {
+	--cr-paper: var(--cr-light-orange);
+	--cr-paper-ink: var(--cr-russian-violet);
+	--cr-paper-side: var(--cr-light-orange-dark);
+}
+
+.cr-paper--selective-yellow {
+	--cr-paper: var(--cr-selective-yellow);
+	--cr-paper-ink: var(--cr-russian-violet);
+	--cr-paper-side: var(--cr-ut-orange);
+}
+
+.cr-paper--ut-orange {
+	--cr-paper: var(--cr-ut-orange);
+	--cr-paper-ink: var(--cr-russian-violet);
+	--cr-paper-side: var(--cr-ut-orange-dark);
+}
+
+.cr-paper--printer-ivory {
+	--cr-paper: var(--cr-printer-ivory);
+	--cr-paper-ink: var(--cr-russian-violet);
+	--cr-paper-side: var(--cr-periwinkle);
+}
+
+.cr-paper--prussian-blue {
+	--cr-paper: var(--cr-prussian-blue);
+	--cr-paper-ink: var(--cr-printer-ivory);
+	--cr-paper-side: var(--cr-cerulean);
+}
+
+.cr-paper--cerulean {
+	--cr-paper: var(--cr-cerulean);
+	--cr-paper-ink: var(--cr-printer-ivory);
+	--cr-paper-side: var(--cr-prussian-blue);
+}
+
+.cr-paper--russian-violet {
+	--cr-paper: var(--cr-russian-violet);
+	--cr-paper-ink: var(--cr-printer-ivory);
+	--cr-paper-side: var(--cr-russian-violet-soft);
+}
+
+.cr-paper-sheet:has(:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-paper-sheet--flat:has(:focus-visible) {
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+@media (forced-colors: active) {
+
+	.cr-paper-sheet {
+		border: 2px solid CanvasText;
+		box-shadow: none;
+		background-image: none;
+	}
+
+	.cr-paper-sheet--torn {
+		margin-block-end: 0;
+	}
+
+	.cr-paper-sheet--torn::after {
+		display: none;
+	}
+}
