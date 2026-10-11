@@ -330,15 +330,12 @@ function shelf_item( string $html, array $item ): string {
 	$tags       = new \WP_HTML_Tag_Processor( $html );
 	$has_author = false;
 	if ( '' !== $password ) {
-		// A protected read shows its title, author and the password form only.
-		// The card's one p-author is the hidden site h-card, so the author
-		// line is added here rather than found.
+		// A protected read shows its title and the password form only.
 		$close = '</h' . (int) $item['level'] . '>';
 		$at    = strpos( $html, $close );
 		if ( false !== $at ) {
 			$at  += strlen( $close );
-			$line = '' !== $item['author'] ? '<p class="pk-sub"><span id="' . esc_attr( $author_id ) . '" class="cr-shelf-book__author">' . esc_html( $item['author'] ) . '</span></p>' : '';
-			$html = substr( $html, 0, $at ) . $line . '<div class="cr-shelf-book__password">' . $password . '</div>' . substr( $html, $at );
+			$html = substr( $html, 0, $at ) . '<div class="cr-shelf-book__password">' . $password . '</div>' . substr( $html, $at );
 		}
 		$has_author = true;
 	} elseif ( '' !== $item['author'] && $tags->next_tag( array( 'class_name' => 'p-author' ) ) ) {
@@ -410,7 +407,7 @@ function shelf_card( string $html, array $block, $instance ): string {
 	$read      = find_read_block( $post );
 	$a         = read_attrs( $post, $read ?? array() );
 	if ( $protected ) {
-		$a = array( 'authorName' => $a['authorName'] ?? '' );
+		$a = array();
 	}
 	$named = '' !== trim( (string) ( $a['bookTitle'] ?? '' ) ) || '' !== trim( (string) $post->post_title );
 	$title = trim( (string) ( $a['bookTitle'] ?? '' ) );

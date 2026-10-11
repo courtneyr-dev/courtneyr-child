@@ -276,7 +276,9 @@ if ( ! in_array( '--html', $argv, true ) ) {
 			$GLOBALS['cr_read_blocks'] = array( array( 'blockName' => 'post-kinds-indieweb/read-card', 'attrs' => array( 'bookTitle' => 'Secret book', 'authorName' => 'Secret author' ) ) );
 			$GLOBALS['cr_read_pictures'][42] = array( 'source' => 'cover', 'attachment_id' => 0, 'url' => 'https://media.test/secret.jpg' );
 			$out = Shelf\shelf_card( cr_shelf_protected_fixture(), cr_shelf_style_block(), new WP_Block( array( 'postId' => 42 ) ) );
-			cr_read_same( 'Private notesSecret authorPassword:', cr_shelf_visible_text( $out ), 'protected title, author and form only' );
+			cr_read_same( 'Private notesPassword:', cr_shelf_visible_text( $out ), 'protected title and form only' );
+			cr_read_not_contains( 'Secret author', $out, 'protected drops the author text' );
+			cr_read_not_contains( 'cr-shelf-book__author', $out, 'protected drops the author element' );
 			cr_read_contains( 'class="post-password-form"', $out, 'protected password form' );
 			cr_read_not_contains( '<img ', $out, 'protected cover omitted' );
 			cr_read_not_contains( 'cr-shelf-book__cover', $out, 'protected has no cover' );
