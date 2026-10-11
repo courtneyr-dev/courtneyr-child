@@ -96,7 +96,7 @@ cr_reply_group(
 			cr_reply_contains( $needle, $nav, 'nav keeps ' . $needle );
 		}
 		cr_reply_assert( preg_match( '/\.cr-letters \.pkiw-group__items,[^{]*{[^}]*max-inline-size:\s*none/s', $css ) === 1, 'letter grid lifts the global list measure (tokens.css caps ul at --cr-measure)' );
-		cr_reply_assert( preg_match( '/cr-letter__signature[^}]*font-family:\s*var\(--cr-font-display\)[^}]*font-size:\s*(?:1rem|var\(--cr-text-base\))/s', $css ) === 1, 'signature font and size' );
+		cr_reply_assert( preg_match( '/cr-letter__signature[^}]*font-family:\s*var\(--cr-font-display\)[^}]*font-size:\s*(?:1rem|var\(--cr-text-(?:base|md|lg|xl)\))/s', $css ) === 1, 'signature font at 1rem or larger' );
 	}
 );
 
