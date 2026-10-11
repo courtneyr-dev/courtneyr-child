@@ -249,7 +249,9 @@ body.kind-reply.single .cr-letter .single-post__content::before {
 	display: none !important;
 }
 
+/* Single posts widen --cr-measure to 80vw; the letter keeps the tokens.css reading measure. */
 .cr-letter-sheet {
+	--cr-measure: 65ch;
 	margin-block-start: var(--cr-space-lg);
 	color: var(--cr-paper-ink);
 	font-family: var(--cr-font-body);
@@ -329,8 +331,17 @@ body.kind-reply.single .single-post__content .pk-card.cr-letter-cite {
 	block-size: auto;
 }
 
+/* The cited picture supports the letter; it stops at the reading measure. */
+.cr-letter-cite .pk-embed--photo {
+	inline-size: var(--cr-measure);
+	max-inline-size: 100%;
+	block-size: auto;
+}
+
 .cr-letter-sheet .e-content,
 .cr-letter-sheet .pkiw-singular-entry > .wp-block-paragraph {
+	max-inline-size: var(--cr-measure);
+	margin-inline: 0;
 	font-size: var(--cr-text-md);
 }
 
