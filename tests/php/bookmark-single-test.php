@@ -343,7 +343,7 @@ namespace Courtneyr\Child\SingleBookmark\Tests {
 	);
 
 	check_case(
-		'single card escapes cited title, drawer, source, date, label and picture alt',
+		'single card escapes cited title, drawer, source, date, label, picture alt and picture url',
 		static function (): bool {
 			reset_state();
 			$url       = hostile( 'url' );
@@ -354,6 +354,7 @@ namespace Courtneyr\Child\SingleBookmark\Tests {
 			$label     = hostile( 'label' );
 			$alt       = hostile( 'alt' );
 			$srchost   = hostile( 'srchost' );
+			$picurl    = hostile( 'picurl' );
 			bookmark_single(
 				full_facts(
 					array(
@@ -362,7 +363,7 @@ namespace Courtneyr\Child\SingleBookmark\Tests {
 						'cited_title' => $cited,
 						'date'        => array( $date_attr, $date_text ),
 						'drawer'      => array( 'key' => 'alpha', 'label' => $drawer ),
-						'picture'     => array( 'source' => 'featured', 'attachment_id' => 0, 'url' => 'https://img.example/f.jpg', 'alt' => $alt, 'remote' => true, 'suppress_featured' => true ),
+						'picture'     => array( 'source' => 'featured', 'attachment_id' => 0, 'url' => 'https://img.example/f.jpg?x=' . $picurl, 'alt' => $alt, 'remote' => true, 'suppress_featured' => true ),
 					)
 				),
 				'Release notes'
@@ -384,7 +385,7 @@ namespace Courtneyr\Child\SingleBookmark\Tests {
 				&& 0 === $xp->query( '//*[@onerror]' )->length
 				&& 0 === $xp->query( '//*[@data-sink]' )->length
 				&& 1 === $xp->query( '//img' )->length
-				&& 'https://img.example/f.jpg' === $img->getAttribute( 'src' )
+				&& 'https://img.example/f.jpg?x=' . $picurl === $img->getAttribute( 'src' )
 				&& 'https://example.com/p?q=' . $url === $source->getAttribute( 'href' )
 				&& $srchost === $source->textContent
 				&& $cited === $cited_node->textContent

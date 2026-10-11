@@ -404,6 +404,34 @@ namespace Courtneyr\Child\Bookmark\Tests {
 	);
 
 	check_case(
+		'Stream heading prints p-name only when the stored title is the real visible name',
+		static function (): bool {
+			reset_state();
+			$visible_name = '//*[contains(concat(" ", @class, " "), " p-name ")][not(ancestor-or-self::*[@hidden])]';
+
+			bookmark_post( 61, '', full_facts( array( 'title' => 'example.com' ) ) );
+			$GLOBALS['cr_stream_surface'] = true;
+			$untitled = dom( render_card( 61, array(), '<article class="pk-card k-bookmark">x</article>' ) )->query( $visible_name )->length;
+
+			bookmark_post( 62, 'Bookmarked: X', full_facts( array( 'title' => 'Cited X' ) ) );
+			$GLOBALS['cr_stream_surface'] = true;
+			$differs = dom( render_card( 62, array(), '<article class="pk-card k-bookmark">x</article>' ) )->query( $visible_name )->length;
+
+			bookmark_post( 63, 'Release notes', full_facts( array( 'title' => '  release   NOTES ' ) ) );
+			$GLOBALS['cr_stream_surface'] = true;
+			$xp_equal    = dom( render_card( 63, array(), '<article class="pk-card k-bookmark">x</article>' ) );
+			$equal_nodes = $xp_equal->query( $visible_name );
+			$node        = $equal_nodes->item( 0 );
+			return 0 === $untitled
+				&& 0 === $differs
+				&& 1 === $equal_nodes->length
+				&& $node instanceof \DOMElement
+				&& in_array( $node->nodeName, array( 'h2', 'h3', 'h4' ), true )
+				&& has_class( $node, 'pk-title' );
+		}
+	);
+
+	check_case(
 		'duplicate archive titles add title and host labels per query',
 		static function (): bool {
 			reset_state();
