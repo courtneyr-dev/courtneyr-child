@@ -260,3 +260,18 @@ function drop_star_rating( string $html, array $block, $instance = null ): strin
 	return Review\is_review_single() ? '' : $html;
 }
 add_filter( 'render_block_post-kinds-indieweb/star-rating', __NAMESPACE__ . '\\drop_star_rating', 20, 3 );
+
+/**
+ * Remove the syndication area from a password-protected review single.
+ *
+ * The protected review shows only its title and the password form, so the
+ * whole wrapper goes, heading included.
+ *
+ * @param string               $html  Rendered group block.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function drop_protected_syndication( string $html, array $block ): string {
+	return Review\is_review_single() && post_password_required( get_queried_object_id() ) && block_has_class( $block, 'single-post__syndication' ) ? '' : $html;
+}
+add_filter( 'render_block_core/group', __NAMESPACE__ . '\\drop_protected_syndication', 10, 2 );

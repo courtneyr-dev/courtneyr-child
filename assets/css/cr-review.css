@@ -717,6 +717,12 @@ body.cr-review-single .wp-block-pullquote blockquote {
 	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__content {
 		grid-row: 7;
 	}
+
+	/* Auto margins shrink a grid item to its content, so the wide post nav takes the picture-to-text span at full width. */
+	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .cr-post-nav {
+		grid-column: picture-start / text-end;
+		inline-size: 100%;
+	}
 }
 
 @media (max-width: 63.99rem) {

@@ -209,6 +209,26 @@ cr_review_group(
 );
 
 cr_review_group(
+	'drop_protected_syndication removes the whole syndication area on a protected review single',
+	static function (): void {
+		cr_review_contains( serialize( array( 'render_block_core/group', 'Courtneyr\\Child\\SingleReview\\drop_protected_syndication', 10, 2 ) ), serialize( $GLOBALS['cr_review_hooks'] ), 'group hook' );
+		$html  = '<div class="wp-block-group single-post__syndication"><h2 class="wp-block-heading">Likes, Bookmarks, and Reposts</h2></div>';
+		$block = array( 'blockName' => 'core/group', 'attrs' => array( 'className' => 'single-post__syndication' ) );
+		$post  = cr_review_single_request();
+		$GLOBALS['cr_review_request']['protected'][ $post->ID ] = true;
+		$out = \Courtneyr\Child\SingleReview\drop_protected_syndication( $html, $block );
+		cr_review_not_contains( 'single-post__syndication', $out, 'protected single has no syndication wrapper' );
+		cr_review_not_contains( 'Likes, Bookmarks, and Reposts', $out, 'protected single has no interactions heading' );
+		cr_review_same( '<div>Other</div>', \Courtneyr\Child\SingleReview\drop_protected_syndication( '<div>Other</div>', array( 'attrs' => array( 'className' => 'single-post__header' ) ) ), 'other groups stay on a protected single' );
+		cr_review_single_request();
+		cr_review_same( $html, \Courtneyr\Child\SingleReview\drop_protected_syndication( $html, $block ), 'unprotected review keeps the syndication area' );
+		$post = cr_review_reset();
+		$GLOBALS['cr_review_request']['protected'][ $post->ID ] = true;
+		cr_review_same( $html, \Courtneyr\Child\SingleReview\drop_protected_syndication( $html, $block ), 'non-review request keeps the syndication area' );
+	}
+);
+
+cr_review_group(
 	'prints rating, item and category exactly once across header edits',
 	static function (): void {
 		cr_review_single_request();
