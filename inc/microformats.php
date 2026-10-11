@@ -10,6 +10,8 @@
  *
  *   core/post-title  className "cr-u-url"        -> <a class="u-url">
  *   core/post-date   className "cr-dt-published" -> <time class="dt-published">
+ *   untitled review/reply/like/bookmark singles -> visible H1, no p-name
+ *   review posts                              -> h-review is the entry root
  *
  * @package CourtneyrChild
  * @since 0.7.46
@@ -22,6 +24,11 @@ namespace Courtneyr\Child\Microformats;
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+/**
+ * Kinds whose untitled singles need a visible, non-mf2-name H1.
+ */
+const UNTITLED_SINGLE_KINDS = array( 'review', 'reply', 'like', 'bookmark' );
 
 /**
  * Add a class to the first tag of a kind inside the rendered block.
@@ -68,6 +75,132 @@ function post_title_u_url( string $content, array $block ): string {
 }
 // Priority 20: after IndieBlocks' theme-mf2 pass, so the untitled fallback is not re-labelled p-name.
 add_filter( 'render_block_core/post-title', __NAMESPACE__ . '\\post_title_u_url', 20, 2 );
+
+/**
+ * Shared state for the temporary untitled-single title filter.
+ *
+ * @param int|null  $post_id        Post ID to store, or null to leave as-is.
+ * @param bool|null $label_injected Whether the title callback injected a label.
+ * @return array{post_id: int, label_injected: bool}
+ */
+function untitled_single_state( ?int $post_id = null, ?bool $label_injected = null ): array {
+	static $state = array(
+		'post_id'        => 0,
+		'label_injected' => false,
+	);
+
+	if ( null !== $post_id ) {
+		$state['post_id'] = $post_id;
+	}
+	if ( null !== $label_injected ) {
+		$state['label_injected'] = $label_injected;
+	}
+	return $state;
+}
+
+/**
+ * Return the current post ID when a post-title block needs the untitled H1.
+ *
+ * @param array<string, mixed> $block Parsed block.
+ * @return int Post ID, or 0 when the block is not the target.
+ */
+function untitled_single_post_id( array $block ): int {
+	if ( 'core/post-title' !== ( $block['blockName'] ?? '' ) || 1 !== (int) ( $block['attrs']['level'] ?? 0 ) ) {
+		return 0;
+	}
+	if ( ! is_singular( 'post' ) ) {
+		return 0;
+	}
+	$post_id = (int) get_the_ID();
+	if ( 0 >= $post_id || (int) get_queried_object_id() !== $post_id ) {
+		return 0;
+	}
+	if ( '' !== trim( (string) get_post_field( 'post_title', $post_id, 'raw' ) ) ) {
+		return 0;
+	}
+	if ( ! has_term( UNTITLED_SINGLE_KINDS, 'kind', $post_id ) || post_password_required( $post_id ) ) {
+		return 0;
+	}
+	return $post_id;
+}
+
+/**
+ * Label for an untitled single H1.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function untitled_single_label( int $post_id ): string {
+	$post = get_post( $post_id );
+	if ( $post instanceof \WP_Post && function_exists( '\PKIW\untitled_name' ) ) {
+		$label = (string) \PKIW\untitled_name( $post );
+		if ( '' !== trim( $label ) ) {
+			return $label;
+		}
+	}
+	return sprintf(
+		/* translators: %s: post date */
+		__( 'Entry from %s', 'courtneyr-child' ),
+		get_the_date( '', $post_id )
+	);
+}
+
+/**
+ * Temporarily provide a visible title while Core renders the single H1.
+ *
+ * @param array<string, mixed> $parsed_block Parsed block.
+ * @return array<string, mixed>
+ */
+function prepare_untitled_single_title( array $parsed_block ): array {
+	$post_id = untitled_single_post_id( $parsed_block );
+	if ( $post_id > 0 ) {
+		untitled_single_state( $post_id, false );
+		add_filter( 'the_title', __NAMESPACE__ . '\\untitled_single_title', 10, 2 );
+	}
+	return $parsed_block;
+}
+add_filter( 'render_block_data', __NAMESPACE__ . '\\prepare_untitled_single_title', 10, 3 );
+
+/**
+ * Inject the temporary H1 label for the targeted untitled single only.
+ *
+ * @param string $title   Incoming title.
+ * @param int    $post_id Post ID.
+ * @return string
+ */
+function untitled_single_title( string $title, int $post_id ): string {
+	$state = untitled_single_state();
+	if ( (int) $post_id === $state['post_id'] && '' === trim( $title ) ) {
+		untitled_single_state( $state['post_id'], true );
+		return untitled_single_label( $post_id );
+	}
+	return $title;
+}
+
+/**
+ * Clean up the temporary title filter and remove p-name from the fallback H1.
+ *
+ * @param string               $content Rendered block HTML.
+ * @param array<string, mixed> $block   Parsed block.
+ * @return string
+ */
+function render_untitled_single_title( string $content, array $block ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	$state = untitled_single_state();
+	remove_filter( 'the_title', __NAMESPACE__ . '\\untitled_single_title', 10 );
+	untitled_single_state( 0, false );
+
+	if ( empty( $state['label_injected'] ) || ! str_contains( $content, 'wp-block-post-title' ) ) {
+		return $content;
+	}
+	$p = new \WP_HTML_Tag_Processor( $content );
+	if ( $p->next_tag( array( 'class_name' => 'wp-block-post-title' ) ) ) {
+		$p->remove_class( 'p-name' );
+		$p->add_class( 'cr-untitled-title' );
+		return $p->get_updated_html();
+	}
+	return $content;
+}
+add_filter( 'render_block_core/post-title', __NAMESPACE__ . '\\render_untitled_single_title', 20, 2 );
 
 function post_date_dt_published( string $content, array $block ): string {
 	$class = (string) ( $block['attrs']['className'] ?? '' );
@@ -171,9 +304,30 @@ add_filter( 'indieblocks_body_class', __NAMESPACE__ . '\\indieblocks_body_class'
  * @return string[]
  */
 function single_entry_root_per_item( array $classes, array $class, int $post_id ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-	if ( ! empty( $GLOBALS['pkiw_stream_card_root_seen'][ $post_id ] ) ) {
+	if ( ! empty( $GLOBALS['pkiw_stream_card_root_seen'][ $post_id ] ) || has_term( 'review', 'kind', $post_id ) ) {
 		$classes = array_values( array_diff( $classes, array( 'h-entry', 'hentry' ) ) );
 	}
 	return $classes;
 }
 add_filter( 'post_class', __NAMESPACE__ . '\\single_entry_root_per_item', 100, 3 );
+
+/**
+ * Let the like card title remain a heading when the single H1 is synthetic.
+ *
+ * @param bool     $is   Whether the card title is a heading.
+ * @param \WP_Post $post Post object.
+ * @return bool
+ */
+function like_card_title_is_heading( bool $is, \WP_Post $post ): bool {
+	if (
+		has_term( 'like', 'kind', $post->ID )
+		&& is_singular( 'post' )
+		&& (int) get_queried_object_id() === (int) $post->ID
+		&& '' === trim( (string) get_post_field( 'post_title', $post->ID, 'raw' ) )
+		&& ! post_password_required( $post->ID )
+	) {
+		return true;
+	}
+	return $is;
+}
+add_filter( 'pkiw_like_card_title_is_heading', __NAMESPACE__ . '\\like_card_title_is_heading', 10, 2 );
