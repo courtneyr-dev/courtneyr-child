@@ -14,6 +14,7 @@
 	display: grid;
 	grid-template-columns: minmax( 0, 1fr );
 	gap: var(--cr-space-lg);
+	align-items: start;
 	max-inline-size: none;
 	margin: 0;
 	padding: 0;
@@ -33,7 +34,7 @@
 	padding: var(--cr-space-2xs) var(--cr-space-sm);
 	border: 2px solid var(--cr-russian-violet);
 	color: var(--cr-ink);
-	font-family: var(--cr-font-accent);
+	font-family: var(--cr-font-mono);
 	font-size: var(--cr-text-base);
 	font-weight: var(--cr-weight-bold);
 	line-height: var(--cr-leading-snug);
@@ -55,13 +56,19 @@
 	min-width: 0;
 	margin: 0;
 	padding: var(--cr-space-lg);
-	overflow: hidden;
+	overflow: clip visible;
 	overflow-wrap: anywhere;
 }
 
-.cr-letters li.wp-block-post.cr-paper-sheet::after {
-	display: none;
-	content: none;
+/* The torn lower edge replaces the archive's marker-bar divider on letters. */
+.cr-letters li.wp-block-post.cr-paper-sheet--torn::after {
+	display: block;
+	inline-size: auto;
+	max-inline-size: none;
+	block-size: var(--cr-paper-tear);
+	margin: 0;
+	background-color: var(--cr-paper);
+	transform: none;
 }
 
 .cr-letters li.wp-block-post.cr-paper-sheet:hover {
@@ -70,7 +77,7 @@
 
 .cr-letter__title {
 	margin: 0 0 var(--cr-space-sm);
-	color: var(--cr-ink);
+	color: var(--cr-paper-ink);
 	font-family: var(--cr-font-accent);
 	font-size: var(--cr-text-lg);
 	font-weight: var(--cr-weight-bold);
@@ -79,7 +86,7 @@
 }
 
 .cr-letter__title a {
-	color: var(--cr-ink);
+	color: var(--cr-paper-ink);
 	text-decoration: none;
 }
 
@@ -98,7 +105,7 @@
 
 .cr-letter__excerpt {
 	margin: 0;
-	color: var(--cr-ink);
+	color: var(--cr-paper-ink);
 	font-family: var(--cr-font-body);
 	font-size: 1rem;
 	line-height: var(--cr-leading-normal);
@@ -207,15 +214,22 @@ body.kind-reply h1 {
 	overflow-wrap: anywhere;
 }
 
-.cr-letter-cite {
+.cr-letter-cite,
+body.kind-reply.single .single-post__content .pk-card.cr-letter-cite {
+	display: block;
 	margin-block: 0 var(--cr-space-lg);
 	padding: var(--cr-space-md);
 	border: 0;
 	border-inline-start: 0.375rem solid var(--cr-type-reply);
-	background: var(--cr-surface-elevated);
+	background: var(--cr-white);
 	color: var(--cr-ink);
 	box-shadow: none;
 	overflow-wrap: anywhere;
+}
+
+.cr-letter-cite > .pk-body {
+	inline-size: 100%;
+	min-inline-size: 0;
 }
 
 .cr-letter-cite h2.pk-title {
@@ -263,63 +277,86 @@ body.kind-reply h1 {
 	block-size: auto;
 }
 
+.cr-letter-sheet .e-content,
+.cr-letter-sheet .pkiw-singular-entry > .wp-block-paragraph {
+	font-size: var(--cr-text-md);
+}
+
 .cr-letter__signature {
 	margin: var(--cr-space-lg) 0 0;
 	color: var(--cr-ink);
 	font-family: var(--cr-font-display);
-	font-size: 1rem;
+	font-size: var(--cr-text-xl);
 	line-height: var(--cr-leading-loose);
 }
 
 .cr-envelope {
+	--cr-envelope-tuck: var(--cr-space-2xl);
+	--cr-envelope-fold: var(--cr-space-lg);
 	position: relative;
 	isolation: isolate;
 	box-sizing: border-box;
 	max-inline-size: 100%;
 	min-width: 0;
-	padding: var(--cr-space-md);
+	padding: var(--cr-space-md) var(--cr-space-md) 0;
 	background: var(--cr-light-gray);
 	box-shadow: var(--cr-shadow-hard);
 	color: var(--cr-ink);
 	overflow-wrap: anywhere;
 }
 
-.cr-envelope::before {
+/*
+ * Front pocket: a light-gray layer over the insert's blank lower edge, with a
+ * V-shaped mouth and two folds converging toward its center, drawn as 1px
+ * rule lines. The address prints on it; with no address the envelope itself
+ * draws an empty pocket.
+ */
+.cr-envelope__address::before,
+.cr-envelope__address::after,
+.cr-envelope:not( :has( > .cr-envelope__address ) )::before,
+.cr-envelope:not( :has( > .cr-envelope__address ) )::after {
 	position: absolute;
-	z-index: -2;
-	inset-block-start: 0;
+	z-index: -1;
 	inset-inline: 0;
-	block-size: 46%;
-	background: var(--cr-rule);
-	clip-path: polygon( 0 0, 100% 0, 50% 100% );
+	inset-block-end: 0;
+	block-size: 100%;
 	content: "";
 	pointer-events: none;
 }
 
-.cr-envelope::after {
-	position: absolute;
-	z-index: -2;
-	inset-block-start: 0;
-	inset-inline: 0;
-	block-size: 46%;
-	background: var(--cr-light-gray);
-	clip-path: polygon( 1px 0, calc( 100% - 1px ) 0, 50% calc( 100% - 2px ) );
-	content: "";
-	pointer-events: none;
+.cr-envelope:not( :has( > .cr-envelope__address ) )::before,
+.cr-envelope:not( :has( > .cr-envelope__address ) )::after {
+	z-index: 1;
+	block-size: calc( var(--cr-envelope-tuck) + var(--cr-space-xs) );
+}
+
+.cr-envelope__address::before,
+.cr-envelope:not( :has( > .cr-envelope__address ) )::before {
+	background: var(--cr-rule);
+	clip-path: polygon( 0 0, 50% var(--cr-envelope-fold), 100% 0, 100% 100%, 0 100% );
+}
+
+.cr-envelope__address::after,
+.cr-envelope:not( :has( > .cr-envelope__address ) )::after {
+	background:
+		linear-gradient( to top left, transparent calc( 50% - 0.5px ), var(--cr-rule) calc( 50% - 0.5px ) calc( 50% + 0.5px ), transparent calc( 50% + 0.5px ) ) left bottom / 50% 100% no-repeat,
+		linear-gradient( to top right, transparent calc( 50% - 0.5px ), var(--cr-rule) calc( 50% - 0.5px ) calc( 50% + 0.5px ), transparent calc( 50% + 0.5px ) ) right bottom / 50% 100% no-repeat,
+		var(--cr-light-gray);
+	clip-path: polygon( 0 1px, 50% calc( var(--cr-envelope-fold) + 1px ), 100% 1px, 100% 100%, 0 100% );
 }
 
 .cr-envelope__insert {
 	display: grid;
 	grid-template-rows: repeat( 3, auto );
-	margin-block-end: var(--cr-space-md);
-	padding: var(--cr-space-md);
+	margin-block-end: 0;
+	padding: var(--cr-space-md) var(--cr-space-md) calc( var(--cr-space-md) + var(--cr-envelope-tuck) );
 }
 
 .cr-envelope__insert::before {
 	z-index: -1;
 	grid-row: 1 / -1;
 	grid-column: 1;
-	margin: calc( var(--cr-space-md) * -1 );
+	margin: calc( var(--cr-space-md) * -1 ) calc( var(--cr-space-md) * -1 ) calc( ( var(--cr-space-md) + var(--cr-envelope-tuck) ) * -1 );
 	background: var(--cr-printer-ivory);
 	box-shadow: var(--cr-shadow-hard-sm);
 	content: "";
@@ -362,6 +399,7 @@ body.kind-reply h1 {
 	display: flex;
 	flex-wrap: wrap;
 	gap: var(--cr-space-xs);
+	justify-content: space-between;
 	align-items: center;
 	margin: 0 0 var(--cr-space-xs);
 	color: var(--cr-ink-soft);
@@ -426,7 +464,8 @@ body.kind-reply h1 {
 .cr-envelope__address {
 	position: relative;
 	z-index: 1;
-	margin: var(--cr-space-md) 0 0;
+	margin: calc( var(--cr-envelope-tuck) * -1 ) calc( var(--cr-space-md) * -1 ) 0;
+	padding: calc( var(--cr-envelope-fold) + var(--cr-space-sm) ) var(--cr-space-md) var(--cr-space-lg);
 	color: var(--cr-ink);
 	font-family: var(--cr-font-mono);
 	font-size: var(--cr-text-floor);
@@ -436,10 +475,19 @@ body.kind-reply h1 {
 	text-align: center;
 }
 
-:root[data-theme="dark"] .cr-letters .cr-paper-sheet {
-	--cr-paper: var(--cr-surface-elevated);
-	--cr-paper-ink: var(--cr-ink);
-	color: var(--cr-ink);
+/*
+ * Dark mode (ruling X1): letters, the single's sheet and citation, and the
+ * Stream envelope keep their light palette papers with Russian violet ink.
+ * Only the page, text outside the papers, focus and the hard shadow flip.
+ */
+:root[data-theme="dark"] :is( .cr-letters li.cr-paper-sheet, .cr-letter-sheet, .cr-envelope ) {
+	--cr-ink: var(--cr-russian-violet);
+	--cr-ink-soft: var(--cr-russian-violet-soft);
+	--cr-ink-muted: var(--cr-cerulean);
+	--cr-link: var(--cr-cerulean);
+	--cr-link-hover: var(--cr-russian-violet);
+	--cr-link-visited: var(--cr-russian-violet-soft);
+	--cr-type-reply: var(--cr-glaucous-dark);
 }
 
 :root[data-theme="dark"] .cr-letters .pkiw-group__heading {
@@ -451,45 +499,16 @@ body.kind-reply h1 {
 	border-color: var(--cr-selective-yellow);
 }
 
-:root[data-theme="dark"] .cr-letter__excerpt,
-:root[data-theme="dark"] .cr-envelope__meta,
-:root[data-theme="dark"] .cr-letter-cite__host,
-:root[data-theme="dark"] .cr-letter-cite .pk-meta {
-	color: var(--cr-ink-soft);
-}
-
-:root[data-theme="dark"] .cr-letter__title a,
-:root[data-theme="dark"] .cr-envelope__title a {
-	color: var(--cr-link);
-}
-
-:root[data-theme="dark"] .cr-letter-sheet {
-	--cr-paper: var(--cr-surface-elevated);
-	--cr-paper-ink: var(--cr-ink);
-}
-
-:root[data-theme="dark"] .cr-letter-cite {
-	background: var(--cr-surface);
-}
-
-:root[data-theme="dark"] .cr-envelope {
-	background: var(--cr-surface-elevated);
-}
-
-:root[data-theme="dark"] .cr-envelope::after {
-	background: var(--cr-surface-elevated);
-}
-
-:root[data-theme="dark"] .cr-envelope__insert::before {
-	background: var(--cr-surface);
-}
-
 @media ( prefers-color-scheme: dark ) {
 
-	:root:not( [data-theme="light"] ) .cr-letters .cr-paper-sheet {
-		--cr-paper: var(--cr-surface-elevated);
-		--cr-paper-ink: var(--cr-ink);
-		color: var(--cr-ink);
+	:root:not( [data-theme="light"] ) :is( .cr-letters li.cr-paper-sheet, .cr-letter-sheet, .cr-envelope ) {
+		--cr-ink: var(--cr-russian-violet);
+		--cr-ink-soft: var(--cr-russian-violet-soft);
+		--cr-ink-muted: var(--cr-cerulean);
+		--cr-link: var(--cr-cerulean);
+		--cr-link-hover: var(--cr-russian-violet);
+		--cr-link-visited: var(--cr-russian-violet-soft);
+		--cr-type-reply: var(--cr-glaucous-dark);
 	}
 
 	:root:not( [data-theme="light"] ) .cr-letters .pkiw-group__heading {
@@ -499,39 +518,6 @@ body.kind-reply h1 {
 
 	:root:not( [data-theme="light"] ) .cr-letters .cr-letters__host--ink-1 {
 		border-color: var(--cr-selective-yellow);
-	}
-
-	:root:not( [data-theme="light"] ) .cr-letter__excerpt,
-	:root:not( [data-theme="light"] ) .cr-envelope__meta,
-	:root:not( [data-theme="light"] ) .cr-letter-cite__host,
-	:root:not( [data-theme="light"] ) .cr-letter-cite .pk-meta {
-		color: var(--cr-ink-soft);
-	}
-
-	:root:not( [data-theme="light"] ) .cr-letter__title a,
-	:root:not( [data-theme="light"] ) .cr-envelope__title a {
-		color: var(--cr-link);
-	}
-
-	:root:not( [data-theme="light"] ) .cr-letter-sheet {
-		--cr-paper: var(--cr-surface-elevated);
-		--cr-paper-ink: var(--cr-ink);
-	}
-
-	:root:not( [data-theme="light"] ) .cr-letter-cite {
-		background: var(--cr-surface);
-	}
-
-	:root:not( [data-theme="light"] ) .cr-envelope {
-		background: var(--cr-surface-elevated);
-	}
-
-	:root:not( [data-theme="light"] ) .cr-envelope::after {
-		background: var(--cr-surface-elevated);
-	}
-
-	:root:not( [data-theme="light"] ) .cr-envelope__insert::before {
-		background: var(--cr-surface);
 	}
 }
 
@@ -551,6 +537,8 @@ body.kind-reply h1 {
 	.cr-letters li.cr-letter-trim--2::before,
 	.cr-envelope::before,
 	.cr-envelope::after,
+	.cr-envelope__address::before,
+	.cr-envelope__address::after,
 	.cr-envelope__insert::before {
 		display: none;
 		content: none;
@@ -561,7 +549,8 @@ body.kind-reply h1 {
 		color: CanvasText;
 	}
 
-	.cr-letter-cite {
+	.cr-letter-cite,
+	body.kind-reply.single .single-post__content .pk-card.cr-letter-cite {
 		border-inline-start: 0.375rem solid CanvasText;
 		background: none;
 	}
