@@ -216,11 +216,21 @@ function name_untitled( string $html, array $block ): string {
 	if ( ! $adjacent instanceof \WP_Post || '' !== trim( get_the_title( $adjacent ) ) ) {
 		return $html;
 	}
-	$terms = get_the_terms( $adjacent, 'kind' );
-	$kind  = ( is_array( $terms ) && $terms ) ? $terms[0]->name : __( 'Post', 'courtneyr-child' );
-	/* translators: 1: post kind name, 2: post date, 3: post time. */
-	$name     = sprintf( __( '%1$s, %2$s at %3$s', 'courtneyr-child' ), $kind, get_the_date( '', $adjacent ), get_the_time( '', $adjacent ) );
+	$name     = kind_date_name( $adjacent );
 	$fallback = $previous ? __( 'Previous Post' ) : __( 'Next Post' ); // phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- core's own fallback string.
 	return str_replace( '>' . esc_html( $fallback ) . '</span>', '>' . esc_html( $name ) . '</span>', $html );
 }
 add_filter( 'render_block_core/post-navigation-link', __NAMESPACE__ . '\\hide_title_visually', 10, 2 );
+
+/**
+ * Name an untitled post by its kind, date and time: "Reply, October 11, 2026 at 7:19 am".
+ *
+ * @param \WP_Post $post Post.
+ * @return string
+ */
+function kind_date_name( \WP_Post $post ): string {
+	$terms = get_the_terms( $post, 'kind' );
+	$kind  = ( is_array( $terms ) && $terms ) ? $terms[0]->name : __( 'Post', 'courtneyr-child' );
+	/* translators: 1: post kind name, 2: post date, 3: post time. */
+	return sprintf( __( '%1$s, %2$s at %3$s', 'courtneyr-child' ), $kind, get_the_date( '', $post ), get_the_time( '', $post ) );
+}

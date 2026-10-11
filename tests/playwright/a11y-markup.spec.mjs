@@ -4439,6 +4439,31 @@ test( 'an untitled reply single has a visible h1 and no p-name on it (PKIW #253)
 	}
 } );
 
+test( 'untitled reply singles F04 and F05 name the h1 by kind, date and time, apart from the citation (PKIW #253, X8)', async ( { page } ) => {
+	let checked = 0;
+	for ( const id of [ 728, 730 ] ) {
+		const response = await page.request.get( `/wp-json/wp/v2/posts/${ id }?_fields=link,title` );
+		if ( ! response.ok() ) {
+			continue;
+		}
+		const post = await response.json();
+		if ( '' !== ( post.title?.rendered ?? '' ) ) {
+			continue;
+		}
+		await page.goto( post.link, { waitUntil: 'load' } );
+		const h1 = page.locator( 'main h1' );
+		await expect( h1, `${ id } has one h1` ).toHaveCount( 1 );
+		await expect( h1, `${ id } h1 keeps the untitled class` ).toHaveClass( /\bcr-untitled-title\b/ );
+		await expect( page.locator( 'main h1.p-name' ), `${ id } h1 has no p-name` ).toHaveCount( 0 );
+		const name = ( await h1.innerText() ).trim();
+		expect( name, `${ id } h1 is the kind, date and time` ).toMatch( /^Reply, .+ at .+$/ );
+		const cited = ( await page.locator( '.cr-letter-cite h2.pk-title' ).first().innerText() ).trim();
+		expect( name, `${ id } h1 differs from the citation title` ).not.toBe( cited );
+		checked++;
+	}
+	test.skip( 0 === checked, 'F04 and F05 are not on this site' );
+} );
+
 test( 'the Stream shows a reply as an envelope: one link, the host as the address, no link to the replied-to URL, no h-entry on the article (PKIW #253)', async ( { page } ) => {
 	await page.goto( STREAM, { waitUntil: 'load' } );
 	const cards = page.locator( 'li.kind-reply article.cr-envelope' );

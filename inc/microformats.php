@@ -132,6 +132,10 @@ function untitled_single_post_id( array $block ): int {
  */
 function untitled_single_label( int $post_id ): string {
 	$post = get_post( $post_id );
+	// Ruling X8: an untitled reply's H1 is its kind, date and time; the cited name belongs to the citation.
+	if ( $post instanceof \WP_Post && function_exists( '\Courtneyr\Child\Nav\kind_date_name' ) && has_term( 'reply', 'kind', $post ) ) {
+		return \Courtneyr\Child\Nav\kind_date_name( $post );
+	}
 	if ( $post instanceof \WP_Post && function_exists( '\PKIW\untitled_name' ) ) {
 		$label = (string) \PKIW\untitled_name( $post );
 		if ( '' !== trim( $label ) ) {
