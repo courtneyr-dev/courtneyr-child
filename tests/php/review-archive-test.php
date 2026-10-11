@@ -15,7 +15,8 @@ function cr_review_archive_assets_for( array $request ): array {
 	$GLOBALS['cr_review_request'] = array_merge( $GLOBALS['cr_review_request'], $request );
 	$GLOBALS['cr_review_enqueued'] = array();
 	cr_review_fire_hook( 'enqueue_block_assets' );
-	return $GLOBALS['cr_review_enqueued'];
+	// Other kind modules loaded by the bootstrap enqueue their own styles; this test is about the review handle.
+	return array_values( array_filter( $GLOBALS['cr_review_enqueued'], static fn( array $style ): bool => 'courtneyr-review' === $style[0] ) );
 }
 
 /** The sectioned entry fixture. */

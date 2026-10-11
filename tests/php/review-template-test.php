@@ -282,20 +282,25 @@ check_case(
 		if ( ! file_exists( $parser ) ) {
 			return true;
 		}
-		require_once $parser;
+		foreach ( array( 'class-wp-block-parser-block.php', 'class-wp-block-parser-frame.php', 'class-wp-block-parser.php' ) as $parser_file ) {
+			require_once $core . '/wp-includes/' . $parser_file;
+		}
 		foreach ( array( '/templates/taxonomy-kind-review.html', '/patterns/cr-review-columns-loop.php' ) as $relative ) {
 			$path = $theme_dir . $relative;
 			if ( ! file_exists( $path ) ) {
 				return false;
 			}
 			$source = str_ends_with( $relative, '.php' ) ? render_pattern( $path, true, true ) : (string) file_get_contents( $path );
-			$blocks = parse_blocks( $source );
+			$blocks = ( new WP_Block_Parser() )->parse( $source );
 			if ( empty( $blocks ) ) {
 				return false;
 			}
 			$flat = array();
 			$walk = static function ( array $items ) use ( &$walk, &$flat ): void {
 				foreach ( $items as $item ) {
+					if ( null === ( $item['blockName'] ?? null ) && '' === trim( (string) ( $item['innerHTML'] ?? '' ) ) ) {
+						continue;
+					}
 					$flat[] = $item['blockName'] ?? null;
 					if ( ! empty( $item['innerBlocks'] ) ) {
 						$walk( $item['innerBlocks'] );

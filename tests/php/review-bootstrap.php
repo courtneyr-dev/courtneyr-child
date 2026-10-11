@@ -294,6 +294,7 @@ namespace {
 			exit( 1 );
 		}
 		echo "all passed\n";
+		exit( 0 );
 	}
 
 	$core = getenv( 'CR_WP_CORE' ) ?: (string) getenv( 'HOME' ) . '/.wp-tests/wordpress';
