@@ -19,14 +19,16 @@
 	list-style: none;
 }
 
+/* One grid track per section, up to three; data-pkiw-sections on each section says how many share the page. */
 .cr-review .cr-review__list.pkiw-review--sectioned {
-	column-count: 1;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
 	column-gap: var(--cr-space-xl);
-	column-rule: 1px solid var(--cr-periwinkle);
 }
 
 .cr-review .pkiw-review-section {
-	margin-block-end: var(--cr-space-xl);
+	min-width: 0;
+	margin-block: 0 var(--cr-space-xl);
 	break-inside: avoid;
 }
 
@@ -122,14 +124,14 @@
 }
 
 .cr-review .pkiw-review-entry__title a {
-	color: inherit;
+	color: var(--cr-link);
 	text-decoration: underline;
 	text-decoration-thickness: 2px;
 	text-underline-offset: 0.2em;
 }
 
 .cr-review .pkiw-review-entry__title a:hover {
-	color: var(--cr-cerulean);
+	color: var(--cr-link-hover);
 }
 
 .cr-review .pkiw-review-entry__title a::after {
@@ -144,6 +146,40 @@
 	font-family: var(--cr-font-body);
 	font-size: var(--cr-text-sm);
 	overflow-wrap: anywhere;
+}
+
+/* A protected review's password form sits above the headline link's whole-item overlay. */
+.cr-review .pkiw-review-entry__password {
+	position: relative;
+	z-index: 1;
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+}
+
+.cr-review .pkiw-review-entry__password p {
+	margin: 0 0 var(--cr-space-xs);
+}
+
+.cr-review .pkiw-review-entry__password input[type="password"],
+.cr-review .pkiw-review-entry__password input[type="submit"] {
+	box-sizing: border-box;
+	min-block-size: 2.75rem;
+	border-radius: 0;
+	font: inherit;
+}
+
+.cr-review .pkiw-review-entry__password input[type="password"] {
+	max-inline-size: 100%;
+	padding-inline: var(--cr-space-xs);
+	border: 2px solid var(--cr-russian-violet);
+	background-color: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+}
+
+.cr-review .pkiw-review-entry__password input:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 
 .cr-review .pkiw-review-entry:has(a:focus-visible) {
@@ -266,7 +302,9 @@ body.cr-review-single .cr-review__byline a:focus-visible {
 }
 
 body.cr-review-single .single-post__date {
+	margin: 0;
 	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
 	font-style: normal;
 	letter-spacing: var(--cr-tracking-wide);
 	text-transform: uppercase;
@@ -334,12 +372,37 @@ body.cr-review-single .cr-review__rating .pk-stars svg.half path.off {
 	opacity: 1;
 }
 
+/* theme.json draws the pullquote's ink rules above and below; the global blockquote bar stays off it. */
+body.cr-review-single .wp-block-pullquote blockquote {
+	border: 0;
+}
+
 .cr-clipping {
 	min-width: 0;
 	max-inline-size: 100%;
 	padding: var(--cr-space-md);
 	color: var(--cr-russian-violet);
 	transform: rotate(var(--cr-rotate-2));
+}
+
+/* The Stream's .pk-card reset strips padding, paper and shadow; the clipping takes them back. */
+.cr-clipping.pk-card.cr-paper-sheet {
+	padding: var(--cr-space-md);
+	background-color: var(--cr-paper);
+	background-image: var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+/* The paper keeps its light fill in dark mode (X1), so its muted text keeps the light-scheme cerulean. */
+.cr-clipping.pk-card.cr-paper-sheet .pk-kindlabel,
+.cr-clipping.pk-card.cr-paper-sheet .cr-clipping__item,
+.cr-clipping.pk-card.cr-paper-sheet .pk-stream-date,
+.cr-clipping.pk-card.cr-paper-sheet .pk-stream-date time {
+	color: var(--cr-cerulean);
+}
+
+.cr-clipping.pk-card.cr-paper-sheet:has(:focus-visible) {
+	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
 }
 
 .cr-clipping .pk-body {
@@ -483,29 +546,89 @@ body.cr-review-single .cr-review__rating .pk-stars svg.half path.off {
 @media (min-width: 40rem) {
 
 	.cr-review .cr-review__list:has(> section[data-pkiw-sections]:not([data-pkiw-sections="1"])) {
-		column-count: 2;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
-	/* A rule between items would start a column; spacing separates a lone section's items instead. */
-	.cr-review .cr-review__list:has(> section[data-pkiw-sections="1"]) .pkiw-review-section__items > li + li {
+	/* The 1px rule sits on the later track's start edge, with the gap on one side and padding on the other. */
+	.cr-review .pkiw-review-section:not([data-pkiw-sections="1"]):nth-of-type(2n) {
+		padding-inline-start: var(--cr-space-xl);
+		border-inline-start: 1px solid var(--cr-periwinkle);
+	}
+
+	/* A lone section lays its items in the same columns, read across each row. */
+	.cr-review .pkiw-review-section[data-pkiw-sections="1"] > .pkiw-review-section__items {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		column-gap: var(--cr-space-xl);
+	}
+
+	.cr-review .pkiw-review-section[data-pkiw-sections="1"] > .pkiw-review-section__items > li:nth-child(n) {
 		border-block-start: 0;
 	}
 
-	.cr-review .cr-review__list:has(> section[data-pkiw-sections="1"]) .pkiw-review-section__items {
-		column-count: 2;
-		column-gap: var(--cr-space-xl);
-		column-rule: 1px solid var(--cr-periwinkle);
+	.cr-review .pkiw-review-section[data-pkiw-sections="1"] > .pkiw-review-section__items > li:nth-child(n+3) {
+		border-block-start: 1px solid var(--cr-periwinkle);
+	}
+
+	.cr-review .pkiw-review-section[data-pkiw-sections="1"] > .pkiw-review-section__items > li:nth-child(2n) {
+		padding-inline-start: var(--cr-space-xl);
+		border-inline-start: 1px solid var(--cr-periwinkle);
 	}
 }
 
 @media (min-width: 64rem) {
 
 	.cr-review .cr-review__list:has(> section[data-pkiw-sections]:not([data-pkiw-sections="1"]):not([data-pkiw-sections="2"])) {
-		column-count: 3;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 
-	.cr-review .cr-review__list:has(> section[data-pkiw-sections="1"]) .pkiw-review-section__items {
-		column-count: 3;
+	.cr-review .pkiw-review-section:not([data-pkiw-sections="1"]):not([data-pkiw-sections="2"]):nth-of-type(n) {
+		padding-inline-start: 0;
+		border-inline-start: 0;
+	}
+
+	.cr-review .pkiw-review-section:not([data-pkiw-sections="1"]):not([data-pkiw-sections="2"]):not(:nth-of-type(3n+1)) {
+		padding-inline-start: var(--cr-space-xl);
+		border-inline-start: 1px solid var(--cr-periwinkle);
+	}
+
+	.cr-review .pkiw-review-section[data-pkiw-sections="1"] > .pkiw-review-section__items {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	/* Four Stars reads as a band: the heading block, a 1px rule, then three link columns. */
+	.cr-review .cr-four-stars {
+		display: grid;
+		grid-template-columns: minmax(0, 12rem) minmax(0, 1fr);
+		align-items: center;
+		column-gap: var(--cr-space-lg);
+	}
+
+	.cr-review .pkiw-four-stars__heading {
+		justify-self: start;
+		margin: 0;
+		font-size: var(--cr-text-2xl);
+	}
+
+	.cr-review .pkiw-four-stars__list {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		padding-inline-start: var(--cr-space-lg);
+		border-inline-start: 1px solid var(--cr-russian-violet);
+	}
+
+	.cr-review .pkiw-review-section[data-pkiw-sections="1"] > .pkiw-review-section__items > li:nth-child(n) {
+		padding-inline-start: 0;
+		border-block-start: 0;
+		border-inline-start: 0;
+	}
+
+	.cr-review .pkiw-review-section[data-pkiw-sections="1"] > .pkiw-review-section__items > li:nth-child(n+4) {
+		border-block-start: 1px solid var(--cr-periwinkle);
+	}
+
+	.cr-review .pkiw-review-section[data-pkiw-sections="1"] > .pkiw-review-section__items > li:not(:nth-child(3n+1)) {
+		padding-inline-start: var(--cr-space-xl);
+		border-inline-start: 1px solid var(--cr-periwinkle);
 	}
 
 	/* The picture stands left of the header and the content. The header and the
@@ -538,7 +661,7 @@ body.cr-review-single .cr-review__rating .pk-stars svg.half path.off {
 	}
 
 	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__header > .cr-review__picture {
-		grid-row: 1 / 7;
+		grid-row: 1 / 8;
 		grid-column: picture;
 		align-self: start;
 	}
@@ -546,6 +669,7 @@ body.cr-review-single .cr-review__rating .pk-stars svg.half path.off {
 	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__header > .single-post__lede-meta,
 	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__header > .single-post__title,
 	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__header > .cr-review__byline,
+	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__header > .single-post__date,
 	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__header > .cr-review__rating,
 	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__header::after,
 	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__content {
@@ -567,17 +691,37 @@ body.cr-review-single .cr-review__rating .pk-stars svg.half path.off {
 		grid-row: 3;
 	}
 
-	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__header > .cr-review__rating {
+	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__header > .single-post__date {
 		grid-row: 4;
+	}
+
+	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__header > .cr-review__rating {
+		grid-row: 5;
 		justify-self: start;
 	}
 
 	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__header::after {
-		grid-row: 5;
+		grid-row: 6;
+	}
+
+	/* A 1px rule stands in the gap between the picture and the column, down through the review text. */
+	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__header::before {
+		grid-row: 1 / 8;
+		grid-column: picture-end / text-start;
+		justify-self: center;
+		inline-size: 1px;
+		background-color: var(--cr-rule);
+		content: "";
 	}
 
 	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__content {
-		grid-row: 6;
+		grid-row: 7;
+	}
+
+	/* Auto margins shrink a grid item to its content, so the wide post nav takes the picture-to-text span at full width. */
+	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .cr-post-nav {
+		grid-column: picture-start / text-end;
+		inline-size: 100%;
 	}
 }
 
@@ -589,6 +733,8 @@ body.cr-review-single .cr-review__rating .pk-stars svg.half path.off {
 }
 
 :root[data-theme="dark"] .cr-review .cr-review__list {
+	--cr-link: var(--cr-cerulean);
+	--cr-link-hover: var(--cr-russian-violet);
 	border-color: var(--cr-printer-ivory);
 	background-color: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
@@ -606,6 +752,8 @@ body.cr-review-single .cr-review__rating .pk-stars svg.half path.off {
 @media (prefers-color-scheme: dark) {
 
 	:root:not([data-theme="light"]) .cr-review .cr-review__list {
+		--cr-link: var(--cr-cerulean);
+		--cr-link-hover: var(--cr-russian-violet);
 		border-color: var(--cr-printer-ivory);
 		background-color: var(--cr-printer-ivory);
 		color: var(--cr-russian-violet);
@@ -633,17 +781,17 @@ body.cr-review-single .cr-review__rating .pk-stars svg.half path.off {
 		color: CanvasText;
 		}
 
-	.cr-review .cr-review__list,
-	.cr-review .cr-review__list.pkiw-review--sectioned,
-	.cr-review .cr-review__list:has(> section[data-pkiw-sections="1"]) .pkiw-review-section__items {
-		column-rule-color: CanvasText;
+	.cr-review .pkiw-review-section,
+	.cr-review .pkiw-review-section__items > li {
+		border-color: CanvasText;
 	}
 
 	.cr-review .pkiw-review-entry__cover,
 	body.cr-review-single .cr-review__picture,
 	body.cr-review-single .cr-review__img,
 	body.cr-review-single .cr-review__rating,
-	.cr-clipping {
+	.cr-clipping,
+	.cr-clipping.pk-card.cr-paper-sheet {
 		border: 2px solid CanvasText;
 		background: Canvas;
 		background-image: none;
@@ -666,6 +814,11 @@ body.cr-review-single .cr-review__rating .pk-stars svg.half path.off {
 	body.cr-review-single .cr-review__picture::before,
 	body.cr-review-single .cr-review__rating .pk-stars {
 		display: none;
+	}
+
+	body.cr-review-single main.single-post:has(> .single-post__header > .cr-review__picture:not(.cr-cover--failed)) > .single-post__header::before {
+		background-color: CanvasText;
+		forced-color-adjust: none;
 	}
 
 	.cr-clipping {
