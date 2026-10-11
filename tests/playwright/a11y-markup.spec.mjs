@@ -890,48 +890,53 @@ async function chromiumName( link ) {
 	}
 }
 
-// Each watch case's link is named by its visible title, then its watch
-// date as hidden text, "Dune, watched 4 May 2026" (Courtney, PKIW #227,
-// 2026-10-07), so a first watch and a rewatch of one title get different
-// names. No space before the comma, in Playwright's name or in Chromium's.
-// The date is the entry's published date, so it names the year of
-// its dt-published, and the hidden part takes no space on screen. The h3
-// is the h-cite's p-name, so its value class pattern keeps the cited name
-// the title alone.
+// Each watch case's link keeps its visible title as the only link text and
+// gets an aria-label such as "Dune, watched 4 May 2026" (Courtney, PKIW
+// issue 227, 2026-10-07), so a first watch and a rewatch of one title get
+// different names. No space before the comma, in Playwright's name or in
+// Chromium's. The date is the entry's published date, so it names the year
+// of its dt-published. The h3 is the h-cite's p-name, so its text stays the
+// title alone without value-class or hidden duplicate title markup.
 async function expectWatchDateNames( items, where ) {
 	for ( const item of await items.all() ) {
 		const link = item.locator( '.pk-title a' );
 		await expect( link, `${ where }: one title link` ).toHaveCount( 1 );
 		const facts = await link.evaluate( ( a ) => {
-			const shown = a.cloneNode( true );
-			shown.querySelectorAll( '.cr-sr-only' ).forEach( ( n ) => n.remove() );
-			const hidden = [ ...a.querySelectorAll( '.cr-sr-only' ) ];
-			// The h-cite's name as a microformats parser reads the h3: its
-			// direct .value children, else its .value-title titles, else its text.
-			const pName = a.closest( '.p-name' );
-			const kids = pName ? [ ...pName.children ] : [];
-			const values = kids.filter( ( c ) => c.classList.contains( 'value' ) );
-			const titles = kids.filter( ( c ) => c.classList.contains( 'value-title' ) );
-			let cited = pName?.textContent ?? '';
-			if ( values.length ) {
-				cited = values.map( ( c ) => c.textContent ).join( '' );
-			} else if ( titles.length ) {
-				cited = titles.map( ( c ) => c.getAttribute( 'title' ) ?? '' ).join( '' );
-			}
+			const li = a.closest( 'li' );
+			const textOnly = li.cloneNode( true );
+			textOnly.querySelectorAll( '.pk-entry-props' ).forEach( ( n ) => n.remove() );
+			const title = a.textContent.replace( /\s+/g, ' ' ).trim();
+			const countIn = ( text, needle ) => {
+				let count = 0;
+				let at = text.indexOf( needle );
+				while ( -1 !== at ) {
+					count++;
+					at = text.indexOf( needle, at + needle.length );
+				}
+				return count;
+			};
 			return {
-				cited: cited.trim(),
-				title: shown.textContent.trim(),
-				hidden: hidden.map( ( n ) => n.textContent ),
-				onScreen: hidden.filter( ( n ) => n.getBoundingClientRect().width > 1 || 'inset(50%)' !== getComputedStyle( n ).clipPath ).length,
-				published: a.closest( 'li' ).querySelector( '.pk-entry-props .dt-published' )?.getAttribute( 'value' ) ?? '',
+				label: a.getAttribute( 'aria-label' ) ?? '',
+				title,
+				linkText: a.textContent.replace( /\s+/g, ' ' ).trim(),
+				linkSrOnly: a.querySelectorAll( '.cr-sr-only' ).length,
+				linkAriaHidden: a.querySelectorAll( '[aria-hidden]' ).length,
+				liValueTitle: li.querySelectorAll( '.value-title' ).length,
+				titleInItem: countIn( textOnly.textContent.replace( /\s+/g, ' ' ).trim(), title ),
+				cited: a.closest( '.p-name' )?.textContent.replace( /\s+/g, ' ' ).trim() ?? '',
+				published: li.querySelector( '.pk-entry-props .dt-published' )?.getAttribute( 'value' ) ?? '',
 			};
 		} );
-		expect( facts.hidden, `${ where } "${ facts.title }": one hidden watch date in the link` ).toHaveLength( 1 );
+		expect( facts.linkText, `${ where } "${ facts.title }": the link text is the visible title only` ).toBe( facts.title );
+		expect( facts.linkSrOnly, `${ where } "${ facts.title }": no sr-only duplicate in the link` ).toBe( 0 );
+		expect( facts.linkAriaHidden, `${ where } "${ facts.title }": no aria-hidden title child in the link` ).toBe( 0 );
+		expect( facts.liValueTitle, `${ where } "${ facts.title }": no value-title duplicate in the item` ).toBe( 0 );
 		expect( facts.published, `${ where } "${ facts.title }": the entry keeps its dt-published` ).toMatch( /^\d{4}-/ );
-		const date = /, watched (\S.*)$/.exec( facts.hidden[ 0 ] ?? '' )?.[ 1 ] ?? '';
-		expect( facts.hidden[ 0 ], `${ where } "${ facts.title }": the hidden text ends ", watched <date>"` ).toMatch( /, watched \S/ );
+		const date = /, watched (\S.*)$/.exec( facts.label )?.[ 1 ] ?? '';
+		expect( facts.label, `${ where } "${ facts.title }": aria-label ends ", watched <date>"` ).toMatch( /, watched \S/ );
+		expect( facts.label, `${ where } "${ facts.title }": aria-label is title, then watch date` ).toBe( `${ facts.title }, watched ${ date }` );
 		expect( date, `${ where } "${ facts.title }": the date is the entry's published date` ).toContain( facts.published.slice( 0, 4 ) );
-		expect( facts.onScreen, `${ where } "${ facts.title }": the date is hidden from view` ).toBe( 0 );
+		expect( facts.titleInItem, `${ where } "${ facts.title }": the item text names the title once before metadata` ).toBe( 1 );
 		expect( facts.cited, `${ where } "${ facts.title }": the h-cite's p-name stays the title alone` ).toBe( facts.title );
 		await expect( link, `${ where }: the link's accessible name is the title, then the watch date` ).toHaveAccessibleName( `${ facts.title }, watched ${ date }` );
 		await expect( item.getByRole( 'link', { name: `${ facts.title }, watched ${ date }`, exact: true } ) ).toHaveCount( 1 );
@@ -943,7 +948,7 @@ async function expectWatchDateNames( items, where ) {
 	}
 }
 
-// PKIW #227: the watch archive's page 1 is a "New releases" shelf of up to
+// PKIW issue 227: the watch archive's page 1 is a "New releases" shelf of up to
 // three face-out clamshells and an "All watches" shelf of spines, each a
 // real h2 over card titles at h3. Later pages are all spines. A spine is
 // one link (its title) and its markup holds none of the card's metadata

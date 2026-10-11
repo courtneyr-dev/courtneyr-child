@@ -419,18 +419,9 @@ function spine_only( string $item ): string {
  * issue 227, Courtney's 2026-10-07 decision).
  *
  * The shelf shows no dates, so a first watch and a rewatch of one title
- * would share a link name. The title link gets the post's published date,
- * from get_the_date() in the site's date format, as hidden text: "Dune,
- * watched 4 May 2026". Nothing visible changes. Face-out cases get it too:
- * SINGLE_ONLY cuts their date line as well. The hidden text holds the
- * whole name, title included, and the visible title is aria-hidden: a
- * positioned .cr-sr-only is a block box, and Chromium and Playwright put
- * a space between a block and the text before it, "Dune , watched". The
- * h3 is the h-cite's p-name, so a hidden, empty `value-title` span opens
- * it with the title: under the microformats value class pattern, parsers
- * take the name from it (a direct child of the h3; php-mf2 doesn't look
- * deeper) and the cited name stays the title alone. The post ID comes
- * from the post template's `post-{ID}` class on the item.
+ * would share a link name. The title link keeps its visible text once and
+ * gets an aria-label with the title and date, avoiding an empty first-child
+ * span, an aria-hidden title, and an sr-only block that adds stray spacing.
  *
  * @param string $item One rendered <li>.
  * @return string
@@ -456,11 +447,11 @@ function name_listen_date( string $item ): string {
 }
 
 /**
- * Put a case's post date in its title link's name as hidden text (see
- * name_watch_date() for the markup and why the whole name is hidden).
+ * Put a case's post date in its title link's aria-label. The h3 text stays
+ * the cited name, so no value-title span or hidden duplicate text is needed.
  *
  * @param string $item   One rendered <li>.
- * @param string $format Hidden suffix, %s the date.
+ * @param string $format Label suffix, %s the date.
  * @return string
  */
 function name_with_date( string $item, string $format ): string {
@@ -479,24 +470,25 @@ function name_with_date( string $item, string $format ): string {
 	if ( ! is_string( $date ) || '' === $date ) {
 		return $item;
 	}
-	if ( ! preg_match( '/(<h[1-6]\b[^>]*\bclass="[^"]*(?<![\w-])pk-title(?![\w-])[^"]*"[^>]*>)\s*<a\b[^>]*>/', $item, $open, PREG_OFFSET_CAPTURE ) ) {
+	if ( ! preg_match( '/(<h[1-6]\b[^>]*\bclass="[^"]*(?<![\w-])pk-title(?![\w-])[^"]*"[^>]*>)\s*(<a\b[^>]*>)/', $item, $open, PREG_OFFSET_CAPTURE ) ) {
 		return $item;
 	}
-	$heading = (int) $open[1][1] + strlen( $open[1][0] );
-	$start   = (int) $open[0][1] + strlen( $open[0][0] );
-	$end     = strpos( $item, '</a>', $start );
+	if ( preg_match( '/\saria-label\s*=/i', $open[2][0] ) ) {
+		return $item;
+	}
+	$anchor = (int) $open[2][1];
+	$start  = $anchor + strlen( $open[2][0] );
+	$end    = strpos( $item, '</a>', $start );
 	if ( false === $end ) {
 		return $item;
 	}
-	$shown  = substr( $item, $start, $end - $start );
-	$title  = wp_strip_all_tags( $shown );
-	$hidden = sprintf( $format, $date );
-	return substr( $item, 0, $heading )
-		. '<span class="value-title" title="' . esc_attr( $title ) . '" hidden></span>'
-		. substr( $item, $heading, $start - $heading )
-		. '<span aria-hidden="true">' . $shown . '</span>'
-		. '<span class="cr-sr-only">' . $shown . ', ' . esc_html( $hidden ) . '</span>'
-		. substr( $item, $end );
+	$shown = substr( $item, $start, $end - $start );
+	$title = html_entity_decode( wp_strip_all_tags( $shown ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	$title = trim( (string) preg_replace( '/\s+/u', ' ', $title ) );
+	$label = $title . ', ' . sprintf( $format, $date );
+	return substr( $item, 0, $anchor + 2 )
+		. ' aria-label="' . esc_attr( $label ) . '"'
+		. substr( $item, $anchor + 2 );
 }
 
 /**

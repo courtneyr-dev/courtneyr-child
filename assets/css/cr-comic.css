@@ -428,7 +428,7 @@
    hand-lettered on two lines at the text floor. 5.75rem is the smallest
    circle that holds "Currently reading" in Rock Salt at 12px with its ink
    inside the border, forced colours' 2px border included: 40% of the
-   widest bag and most of a phone's. */
+   widest bag and most of a phone's; phones use the pill below 40rem. */
 .cr-comic-rack .cr-comic__sticker {
 	position: absolute;
 	z-index: 1;
@@ -481,6 +481,20 @@
 
 	.cr-comic-rack .wp-block-post-template.cr-comic-rack__list > li {
 		padding-inline: 0.6rem;
+	}
+
+	/* Phone racks use a pill because "Currently" is 77.5px wide at the 12px
+	   floor, so no circle under 5.75rem can hold it. The pill is as wide as
+	   its label up to the circle's old width, wrapping "Currently reading"
+	   onto two lines: 92 by 40px at most, about 18% of the bag at 320px and
+	   12% at 390px. The circle returns above 40rem. */
+	.cr-comic-rack .cr-comic__sticker {
+		width: fit-content;
+		max-width: calc(var(--cr-space-4xl) - var(--cr-space-2xs));
+		aspect-ratio: auto;
+		padding: 0.2rem 0.3rem;
+		border-radius: var(--cr-radius-full);
+		line-height: 1.3;
 	}
 }
 
