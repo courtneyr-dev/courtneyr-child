@@ -241,16 +241,18 @@ test.describe( 'single', () => {
 		const board = page.locator( '.cr-coop__board' );
 		await expect( board ).toHaveCount( 1 );
 		const children = await board.evaluate( ( node ) => [ ...node.children ].map( ( c ) => c.tagName.toLowerCase() + ( c.matches( '.cr-coop__date' ) ? '.date' : '' ) ) );
-		expect( children ).toEqual( [ 'div.date', 'h1', 'figure', 'div' ] );
+		// The picture sits inside the content (figure.wp-block-image); W3-T0 P23 suppresses a second copy above it when the featured image is already in the content, so there is no figure child.
+		expect( children ).toEqual( [ 'div.date', 'h1', 'div' ] );
 		await expect( board.locator( 'h1' ) ).toHaveText( 'Crossing the garden path' );
 		await expect( page.locator( 'main h1' ), 'one H1 on the page' ).toHaveCount( 1 );
 		await expect( board.locator( 'img' ), 'the picture prints once' ).toHaveCount( 1 );
-		await expect( board.locator( 'figcaption' ) ).toHaveText( 'Pepper on the path' );
+		// The seeded Details block carries its own figcaption, so scope to the picture's.
+		await expect( board.locator( 'figure.wp-block-image figcaption' ) ).toHaveText( 'Pepper on the path' );
 		const css = ( selector, property ) => page.locator( selector ).first().evaluate( ( node, p ) => getComputedStyle( node )[ p ], property );
 		expect( await css( '.cr-coop__board', 'backgroundColor' ) ).toBe( PRUSSIAN_BLUE );
 		expect( await css( '.cr-coop', 'backgroundColor' ), isDark( testInfo ) ? 'dark frame' : 'light frame' ).toBe( LIGHT_GRAY );
 		expect( await css( '.cr-coop', 'borderTopColor' ) ).toBe( RUSSIAN_VIOLET );
-		expect( await css( '.cr-coop__board figcaption', 'color' ) ).toBe( PERIWINKLE );
+		expect( await css( '.cr-coop__board figure.wp-block-image figcaption', 'color' ) ).toBe( PERIWINKLE );
 		expect( await css( '.cr-coop__title', 'fontStyle' ) ).toBe( 'normal' );
 		expect( await css( '.cr-coop__title', 'transform' ), 'upright' ).toBe( 'none' );
 		await expect( page.locator( '.single-post__kind, .single-post__category, .single-post__header' ) ).toHaveCount( 0 );
@@ -328,7 +330,10 @@ test.describe( 'single', () => {
 		await open( page, 'S01' );
 		const read = () => page.locator( '.cr-coop__board .wp-block-post-content' ).first().evaluate( ( content ) => {
 			content.insertAdjacentHTML( 'beforeend', '<h2>Heading two</h2><h3>Heading three</h3><h4>Heading four</h4><h5>Heading five</h5><h6>Heading six</h6><blockquote><p>Quoted.</p><cite>Cited</cite></blockquote>' );
-			const color = ( selector ) => getComputedStyle( content.querySelector( selector ) ).color;
+			// Read the nodes this test added, which are the last six children. A bare querySelector( 'h3' ) finds the seeded Details block's h3 first,
+			// and that heading correctly reads ink on the Details surface in light mode.
+			const added = [ ...content.children ].slice( -6 );
+			const color = ( selector ) => getComputedStyle( added.map( ( node ) => ( node.matches( selector ) ? node : node.querySelector( selector ) ) ).find( Boolean ) ).color;
 			return { headings: [ 'h2', 'h3', 'h4', 'h5', 'h6' ].map( color ), cite: color( 'cite' ) };
 		} );
 		const seen = await read();
@@ -400,9 +405,14 @@ test.describe( 'stream', () => {
 		for ( const gone of [ '.pk-excerpt', '.pk-meta', '.pk-badge', '.pk-media__caption', '.pk-media', 'button' ] ) {
 			await expect( s01.locator( gone ), gone ).toHaveCount( 0 );
 		}
-		const box = await s01.boundingBox();
-		const neighbour = await page.locator( '.wp-block-post-template > li' ).first().boundingBox();
-		expect( Math.abs( box.width - neighbour.width ), 'same column width as a neighbour' ).toBeLessThan( 2 );
+		// offsetWidth ignores the collage rotation, which widens the bounding box, and the neighbour's column is its li minus the Stream's li padding.
+		const widths = await s01.evaluate( ( node ) => {
+			const own = node.closest( 'li' );
+			const other = [ ...document.querySelectorAll( '.wp-block-post-template > li' ) ].find( ( li ) => li !== own ) || own;
+			const style = getComputedStyle( other );
+			return { egg: node.offsetWidth, column: other.clientWidth - Number.parseFloat( style.paddingLeft ) - Number.parseFloat( style.paddingRight ) };
+		} );
+		expect( Math.abs( widths.egg - widths.column ), 'same column width as a neighbour' ).toBeLessThan( 2 );
 	} );
 
 	test( 'S02 has no picture and a 120-character title that stays inside the egg; S04 is a title link only', async ( { page } ) => {
@@ -429,7 +439,8 @@ test.describe( 'stream', () => {
 		test.skip( ( await s03.count() ) === 0, 'S03 is not on this Stream page' );
 		await expect( s03.locator( '.pk-title a' ) ).toContainText( 'Chicken' );
 		await expect( s03.locator( '.pk-title a .pk-sr-only' ) ).toHaveCount( 1 );
-		await expect( s03.locator( '.p-name' ) ).toHaveCount( 0 );
+		// The hidden author h-card carries a p-name; only a p-name that renders would name the card.
+		expect( await s03.evaluate( ( node ) => [ ...node.querySelectorAll( '.p-name' ) ].filter( ( n ) => ! n.closest( '[hidden]' ) ).length ), 'no rendered p-name' ).toBe( 0 );
 		await expect( s03.locator( 'figure' ) ).toHaveClass( /cr-cover--failed/ );
 		await expect( s03.locator( 'figure img' ) ).toHaveCount( 0 );
 	} );
@@ -446,7 +457,8 @@ test.describe( 'stream', () => {
 		for ( const p of positions ) {
 			const shouldRotate = p.position % 4 === 1 || p.position % 4 === 3;
 			expect( p.transform === 'none', `slot ${ p.position }` ).toBe( ! shouldRotate );
-			expect( p.children.every( ( t ) => t === 'none' ) ).toBe( true );
+			// The plugin sets .pk-kindlabel to rotate( var( --pk-label-rot ) ), which computes to the identity matrix at zero; both mean upright.
+			expect( p.children.every( ( t ) => t === 'none' || t === 'matrix(1, 0, 0, 1, 0, 0)' ), `slot ${ p.position } children upright` ).toBe( true );
 		}
 	} );
 

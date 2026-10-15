@@ -278,9 +278,13 @@
 		color: CanvasText;
 	}
 
-	.cr-chicken .pkiw-chicken__entries::after,
 	.cr-chicken .pkiw-chicken__title a::before {
 		display: none;
+	}
+
+	/* The spare-cup rules above add a :has() and two structural pseudo-classes, so they outrank this selector; !important keeps every cup count dropped. */
+	.cr-chicken .pkiw-chicken__entries::after {
+		display: none !important;
 	}
 
 	.cr-chicken .pkiw-chicken__month-label,
@@ -376,7 +380,8 @@
 	height: auto;
 }
 
-.cr-coop figcaption {
+/* Ollie sets div[class*="wp-block-"] figcaption to its secondary color at (0,1,2), so the board name carries two classes to stay periwinkle. */
+.cr-coop .cr-coop__board figcaption {
 	margin-block-start: var(--cr-space-2xs);
 	color: var(--cr-periwinkle);
 	font-family: var(--cr-font-mono);
@@ -455,7 +460,7 @@
 
 	.cr-coop .cr-coop__date,
 	.cr-coop .cr-coop__title,
-	.cr-coop figcaption,
+	.cr-coop .cr-coop__board figcaption,
 	.cr-coop .wp-block-post-content p,
 	.cr-coop .wp-block-post-content :is(h2, h3, h4, h5, h6),
 	.cr-coop .wp-block-post-content cite,
@@ -589,8 +594,9 @@
 
 @media (forced-colors: active) {
 
+	/* components.css forces every .pk-card to a 1px CanvasText border with !important in this mode; the egg takes the same weight as the carton and coop, so it needs !important too, and its three-class selector wins. */
 	.pk-card.pk-card--stream.cr-egg-card {
-		border: 2px solid CanvasText;
+		border: 2px solid CanvasText !important;
 		background: Canvas;
 		color: CanvasText;
 	}
