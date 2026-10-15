@@ -330,6 +330,12 @@ function booth_strip_card( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
+	// A photo post is a slide mount on the Stream (inc/stream-photo.php),
+	// whatever its format: no strip, no stamps, no place.
+	if ( has_term( 'photo', 'kind', $post ) ) {
+		return $html;
+	}
+
 	$media_open = '<div class="pk-media pk-media--stream">';
 	$meta_open  = '<div class="pk-meta">';
 

@@ -10,8 +10,9 @@
  * every location-tagged post.
  *
  * Simple Location appends the map to the_content at priority 11. This runs at
- * 12 and injects a descriptive alt (built from the post's geo_address) into any
- * sloc-map image that doesn't already have one. Runs before Perfmatters' lazy
+ * 12 and injects an alt into any sloc-map image that doesn't already have one:
+ * the post's geo_address when the plugin's location rule shows the street,
+ * otherwise a generic line. Runs before Perfmatters' lazy
  * pass, so the alt survives onto the final markup.
  *
  * @package CourtneyrChild
@@ -38,8 +39,12 @@ function add_map_alt( string $content ): string {
 		return $content;
 	}
 
-	$place = get_post_meta( (int) get_the_ID(), 'geo_address', true );
-	$label = is_string( $place ) && '' !== trim( $place )
+	// The street goes into the alt only when the plugin's one location rule
+	// shows it to this visitor; without the plugin the alt stays generic.
+	$post_id = (int) get_the_ID();
+	$place   = get_post_meta( $post_id, 'geo_address', true );
+	$visible = function_exists( 'pkiw_get_visible_location_fields' ) ? (array) pkiw_get_visible_location_fields( $post_id ) : array();
+	$label   = ! empty( $visible['street'] ) && is_string( $place ) && '' !== trim( $place )
 		? sprintf( 'Map showing %s', wp_strip_all_tags( $place ) )
 		: "Map showing this post's location";
 	$alt = esc_attr( $label );
