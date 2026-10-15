@@ -1,0 +1,565 @@
+/* Chicken kind surfaces for issue 250: the egg carton archive, the coop board single and the Stream egg. */
+/* stylelint-disable no-descending-specificity -- the archive, the board and the egg are separate surfaces; their selectors never match one element. */
+
+/* ============================================================
+   Archive: one carton per calendar month, one egg per post.
+   The carton, cups, eggs, chips and titles are physical objects,
+   so they keep their light-mode look on the black page (X1).
+   Only the seam and visited colors are re-pinned in dark mode,
+   because the tokens they come from flip.
+   ============================================================ */
+
+.cr-chicken {
+	--cr-cups: 2;
+	--cr-focus-halo: var(--cr-russian-violet);
+	--cr-chicken-seam: var(--cr-rule);
+	--cr-chicken-visited: var(--cr-link-visited);
+}
+
+.cr-chicken [hidden] {
+	display: none;
+}
+
+.cr-chicken .pkiw-chicken__month {
+	margin-block: 0 var(--cr-space-xl);
+}
+
+.cr-chicken .pkiw-chicken__month-label {
+	display: inline-block;
+	margin: 0 0 var(--cr-space-xs);
+	padding: var(--cr-space-2xs) var(--cr-space-sm);
+	border: 2px solid var(--cr-russian-violet);
+	background-color: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-tight);
+	text-transform: uppercase;
+}
+
+/* The carton: flat light gray, a Prussian edge, dashed seams between cups. */
+.cr-chicken .pkiw-chicken__entries {
+	display: grid;
+	grid-template-columns: repeat(var(--cr-cups), minmax(0, 1fr));
+	gap: 0;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	border: 2px solid var(--cr-prussian-blue);
+	background-color: var(--cr-light-gray);
+	color: var(--cr-russian-violet);
+	list-style: none;
+}
+
+.cr-chicken .pkiw-chicken__entries > li {
+	position: relative;
+	display: grid;
+	align-content: start;
+	justify-items: center;
+	min-width: 0;
+	margin: 0;
+	padding: 3.75rem var(--cr-space-2xs) var(--cr-space-xs);
+	border-inline-end: 1px dashed var(--cr-chicken-seam);
+	border-block-end: 1px dashed var(--cr-chicken-seam);
+	text-align: center;
+}
+
+/* The date chip: upright ivory paper with violet mono text. */
+.cr-chicken .pkiw-chicken__date {
+	display: inline-block;
+	padding: var(--cr-space-3xs) var(--cr-space-2xs);
+	border: 1px solid var(--cr-russian-violet);
+	background-color: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-tight);
+	text-transform: uppercase;
+}
+
+.cr-chicken .pkiw-chicken__title {
+	margin: 0;
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-semibold);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+/* Links use the site's link tokens, not Core's: violet and underlined, the visited violet after a visit. */
+.cr-chicken .pkiw-chicken__title a {
+	color: var(--cr-russian-violet);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.2em;
+}
+
+.cr-chicken .pkiw-chicken__title a:visited {
+	color: var(--cr-chicken-visited);
+}
+
+.cr-chicken .pkiw-chicken__title a:hover {
+	color: var(--cr-russian-violet);
+	text-decoration-thickness: 2px;
+}
+
+/* The egg is the link's ::before, so it adds nothing to the accessibility tree. */
+.cr-chicken .pkiw-chicken__title a::before {
+	content: "";
+	position: absolute;
+	inset-block-start: var(--cr-space-xs);
+	inset-inline-start: calc(50% - 1.25rem);
+	box-sizing: border-box;
+	width: 2.5rem;
+	height: 2.5rem;
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: 50%;
+	background-color: var(--cr-periwinkle);
+}
+
+/* One target over the whole cup, at least 44 by 44. */
+.cr-chicken .pkiw-chicken__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-chicken .pkiw-chicken__title a.cr-egg--russian-violet::before { background-color: var(--cr-russian-violet); }
+
+.cr-chicken .pkiw-chicken__title a.cr-egg--periwinkle::before { background-color: var(--cr-periwinkle); }
+
+.cr-chicken .pkiw-chicken__title a.cr-egg--glaucous::before { background-color: var(--cr-glaucous); }
+
+.cr-chicken .pkiw-chicken__title a.cr-egg--sky-blue::before { background-color: var(--cr-sky-blue); }
+
+.cr-chicken .pkiw-chicken__title a.cr-egg--blue-green::before { background-color: var(--cr-blue-green); }
+
+.cr-chicken .pkiw-chicken__title a.cr-egg--cerulean::before { background-color: var(--cr-cerulean); }
+
+.cr-chicken .pkiw-chicken__title a.cr-egg--prussian-blue::before { background-color: var(--cr-prussian-blue); }
+
+.cr-chicken .pkiw-chicken__title a.cr-egg--selective-yellow::before { background-color: var(--cr-selective-yellow); }
+
+.cr-chicken .pkiw-chicken__title a.cr-egg--ut-orange::before { background-color: var(--cr-ut-orange); }
+
+.cr-chicken .pkiw-chicken__title a.cr-egg--light-orange::before { background-color: var(--cr-light-orange); }
+
+/* A focused cup draws the ring and a violet halo around the whole item. */
+.cr-chicken .pkiw-chicken__entries > li:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-chicken .pkiw-chicken__title a:focus-visible {
+	outline: none;
+}
+
+/* Trailing spare cups complete the last row. They are not list items, links or focus stops, and print no date. */
+.cr-chicken .pkiw-chicken__entries::after {
+	content: "";
+	display: none;
+	background-color: var(--cr-chicken-seam);
+	grid-column: span var(--cr-spare, 1);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='34' fill='none' stroke='black' stroke-width='5'/%3E%3C/svg%3E") repeat-x left top / calc(100% / var(--cr-spare, 1)) 3.6rem;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='34' fill='none' stroke='black' stroke-width='5'/%3E%3C/svg%3E") repeat-x left top / calc(100% / var(--cr-spare, 1)) 3.6rem;
+}
+
+/* Cup columns: 12 from 64rem, 6 from 40rem, 3 from 22rem, 2 below. */
+@media (min-width: 22rem) {
+
+	.cr-chicken {
+		--cr-cups: 3;
+	}
+}
+
+@media (min-width: 40rem) {
+
+	.cr-chicken {
+		--cr-cups: 6;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-chicken {
+		--cr-cups: 12;
+	}
+}
+
+/* One rule per remainder, so a full row matches none and there is never a row of only empty cups. */
+@media (min-width: 64rem) {
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(12n+1))::after { --cr-spare: 11; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(12n+2))::after { --cr-spare: 10; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(12n+3))::after { --cr-spare: 9; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(12n+4))::after { --cr-spare: 8; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(12n+5))::after { --cr-spare: 7; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(12n+6))::after { --cr-spare: 6; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(12n+7))::after { --cr-spare: 5; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(12n+8))::after { --cr-spare: 4; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(12n+9))::after { --cr-spare: 3; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(12n+10))::after { --cr-spare: 2; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(12n+11))::after { --cr-spare: 1; display: block; }
+}
+
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(6n+1))::after { --cr-spare: 5; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(6n+2))::after { --cr-spare: 4; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(6n+3))::after { --cr-spare: 3; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(6n+4))::after { --cr-spare: 2; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(6n+5))::after { --cr-spare: 1; display: block; }
+}
+
+@media (min-width: 22rem) and (max-width: 39.99rem) {
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(3n+1))::after { --cr-spare: 2; display: block; }
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(3n+2))::after { --cr-spare: 1; display: block; }
+}
+
+@media (max-width: 21.99rem) {
+
+	.cr-chicken .pkiw-chicken__entries:has(> li:last-child:nth-child(2n+1))::after { --cr-spare: 1; display: block; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.cr-chicken .pkiw-chicken__title a {
+		transition: text-decoration-thickness 0.15s ease;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.cr-chicken .pkiw-chicken__title a {
+		transition: none;
+	}
+}
+
+:root[data-theme="dark"] .cr-chicken {
+	--cr-chicken-seam: var(--cr-periwinkle);
+	--cr-chicken-visited: var(--cr-russian-violet-soft);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-chicken {
+		--cr-chicken-seam: var(--cr-periwinkle);
+		--cr-chicken-visited: var(--cr-russian-violet-soft);
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-chicken .pkiw-chicken__entries {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.cr-chicken .pkiw-chicken__entries::after,
+	.cr-chicken .pkiw-chicken__title a::before {
+		display: none;
+	}
+
+	.cr-chicken .pkiw-chicken__month-label,
+	.cr-chicken .pkiw-chicken__date {
+		border-color: CanvasText;
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.cr-chicken .pkiw-chicken__title a,
+	.cr-chicken .pkiw-chicken__title a:visited {
+		color: LinkText;
+	}
+
+	.cr-chicken .pkiw-chicken__entries > li:has(a:focus-visible) {
+		outline-color: Highlight;
+		box-shadow: none;
+	}
+}
+
+/* ============================================================
+   Single: a coop chalkboard in a light gray frame.
+   The frame and board use raw palette tokens, so they hold
+   in dark mode (X1). The H1 is the post title in Roboto Slab.
+   ============================================================ */
+
+.cr-coop {
+	box-sizing: border-box;
+	max-width: 100%;
+	margin-inline: auto;
+	padding: var(--cr-space-md);
+	border: 2px solid var(--cr-russian-violet);
+	background-color: var(--cr-light-gray);
+}
+
+.cr-coop__board {
+	box-sizing: border-box;
+	padding: var(--cr-space-xl) var(--cr-space-lg);
+	background-color: var(--cr-prussian-blue);
+	color: var(--cr-printer-ivory);
+	font-family: var(--cr-font-body);
+}
+
+.cr-coop .cr-coop__date {
+	margin: 0;
+	color: var(--cr-sky-blue);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	letter-spacing: var(--cr-tracking-wide);
+	text-transform: uppercase;
+}
+
+/* Chalk strokes are decoration: pseudo-elements with no text. */
+.cr-coop .cr-coop__date::after,
+.cr-coop .cr-coop__title::after {
+	content: "";
+	display: block;
+	width: 4rem;
+	height: 3px;
+	margin-block-start: var(--cr-space-2xs);
+	background-color: var(--cr-periwinkle);
+}
+
+.cr-coop .cr-coop__title {
+	margin: var(--cr-space-xs) 0 var(--cr-space-md);
+	color: var(--cr-printer-ivory);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-3xl);
+	font-style: normal;
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-normal);
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+	transform: none;
+}
+
+.cr-coop .cr-coop__title::after {
+	width: 6rem;
+	background-color: var(--cr-selective-yellow);
+}
+
+.cr-coop .cr-coop__photo,
+.cr-coop .wp-block-image {
+	margin: var(--cr-space-md) 0;
+}
+
+.cr-coop .cr-coop__photo.cr-cover--failed {
+	display: none;
+}
+
+.cr-coop img {
+	max-width: 100%;
+	height: auto;
+}
+
+.cr-coop figcaption {
+	margin-block-start: var(--cr-space-2xs);
+	color: var(--cr-periwinkle);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	line-height: var(--cr-leading-snug);
+}
+
+.cr-coop .wp-block-post-content p {
+	color: var(--cr-printer-ivory);
+	font-family: var(--cr-font-body);
+}
+
+.cr-coop .wp-block-post-content a {
+	color: var(--cr-sky-blue);
+}
+
+.cr-coop .wp-block-post-content a:visited {
+	color: var(--cr-periwinkle);
+}
+
+.cr-coop .wp-block-post-content a:hover {
+	color: var(--cr-selective-yellow);
+}
+
+/* The editor canvas paints the same board; editor parity adds cr-chicken-board to its body. */
+.cr-chicken-board .is-root-container {
+	padding: var(--cr-space-xl) var(--cr-space-lg);
+	border: 2px solid var(--cr-russian-violet);
+	background-color: var(--cr-prussian-blue);
+	color: var(--cr-printer-ivory);
+}
+
+@media (forced-colors: active) {
+
+	.cr-coop,
+	.cr-coop__board {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.cr-coop .cr-coop__date::after,
+	.cr-coop .cr-coop__title::after {
+		display: none;
+	}
+
+	.cr-coop .cr-coop__date,
+	.cr-coop .cr-coop__title,
+	.cr-coop figcaption,
+	.cr-coop .wp-block-post-content p {
+		color: CanvasText;
+	}
+
+	.cr-coop .wp-block-post-content a,
+	.cr-coop .wp-block-post-content a:visited,
+	.cr-coop .wp-block-post-content a:hover {
+		color: LinkText;
+	}
+}
+
+/* ============================================================
+   Stream: one egg. The article keeps .pk-card, so the collage
+   gives it one of its rotations; the children never rotate.
+   ============================================================ */
+
+.pk-card.pk-card--stream.cr-egg-card {
+	--cr-focus-halo: var(--cr-ink);
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding: var(--cr-space-xl) var(--cr-space-lg);
+	border: 2px solid var(--cr-prussian-blue);
+	border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+	background: var(--cr-selective-yellow);
+	box-shadow: none;
+	color: var(--cr-russian-violet);
+	text-align: center;
+}
+
+.cr-egg-card .cr-egg-card__photo {
+	width: min(100%, 12rem);
+	margin: 0 auto var(--cr-space-xs);
+}
+
+.cr-egg-card .cr-egg-card__photo.cr-cover--failed {
+	display: none;
+}
+
+.cr-egg-card .cr-egg-card__photo img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border: 2px solid var(--cr-prussian-blue);
+}
+
+.cr-egg-card .pk-kindlabel {
+	display: block;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	letter-spacing: var(--cr-tracking-wide);
+	text-transform: uppercase;
+}
+
+.cr-egg-card .cr-egg-card__date {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	letter-spacing: var(--cr-tracking-wide);
+}
+
+.cr-egg-card .pk-title {
+	margin: var(--cr-space-xs) 0 0;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+	transform: none;
+}
+
+.cr-egg-card .pk-title a {
+	color: var(--cr-russian-violet);
+	text-decoration: underline;
+}
+
+/* The one link covers the whole egg: one tab stop, one name, a large target. */
+.cr-egg-card .pk-title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-egg-card:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-egg-card .pk-title a:focus-visible {
+	outline: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	/* translate is its own property, so the collage's rotate() stays. */
+	.pk-card.pk-card--stream.cr-egg-card {
+		transition: translate 0.15s ease;
+	}
+
+	.pk-card.pk-card--stream.cr-egg-card:hover {
+		translate: 0 -2px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.pk-card.pk-card--stream.cr-egg-card {
+		transition: none;
+	}
+}
+
+@media (forced-colors: active) {
+
+	.pk-card.pk-card--stream.cr-egg-card {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.cr-egg-card .pk-kindlabel,
+	.cr-egg-card .cr-egg-card__date {
+		color: CanvasText;
+	}
+
+	.cr-egg-card .pk-title a {
+		color: LinkText;
+	}
+
+	.cr-egg-card:has(a:focus-visible) {
+		outline-color: Highlight;
+		box-shadow: none;
+	}
+}
