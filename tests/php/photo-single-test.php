@@ -1,0 +1,161 @@
+<?php
+/**
+ * `php tests/php/photo-single-test.php`: the photo single hooks (issue 241)
+ * and the Simple Location map alt, without WordPress.
+ *
+ * @package CourtneyrChild
+ */
+
+declare( strict_types = 1 );
+
+require __DIR__ . '/photo-bootstrap.php';
+
+use function Courtneyr\Child\SinglePhoto\projector_labelledby;
+use function Courtneyr\Child\SinglePhoto\title_id;
+
+/** A photo single request for $id with the template's H1 block. */
+function cr_photo_single_request( int $id = 42, string $title = 'Blue Hour at Example Lake' ): WP_Post {
+	$post                                  = cr_photo_reset( $id, $title );
+	$GLOBALS['cr_photo_request']['single'] = true;
+	return $post;
+}
+
+/** The core post-title H1 as the single template prints it. */
+function cr_photo_h1( string $text = 'Blue Hour at Example Lake' ): string {
+	return '<h1 class="wp-block-post-title cr-flank cr-flank--blue single-post__title">' . $text . '</h1>';
+}
+
+if ( ! empty( $GLOBALS['cr_photo_no_plugin'] ) ) {
+	cr_photo_group(
+		'no plugin: the map alt is generic, never the address',
+		static function (): void {
+			cr_photo_assert( ! function_exists( 'pkiw_get_visible_location_fields' ), 'the stand-in rule is not defined' );
+			cr_photo_single_request();
+			$GLOBALS['cr_photo_meta'][42]['geo_address'] = '100 Example Avenue, Sampletown';
+			$html = \Courtneyr\Child\SlocMapAlt\add_map_alt( '<img class="sloc-map" src="https://example.test/m.png" />' );
+			cr_photo_contains( 'alt="Map showing this post&#039;s location"', $html, 'generic alt' );
+			cr_photo_not_contains( 'Example Avenue', $html, 'no address' );
+		}
+	);
+	cr_photo_finish();
+}
+
+cr_photo_group(
+	'the hooks are registered',
+	static function (): void {
+		cr_photo_assert( cr_photo_hooked( 'render_block_core/post-title', 'Courtneyr\\Child\\SinglePhoto\\title_id', 10, 2 ), 'title_id on the post title' );
+		cr_photo_assert( cr_photo_hooked( 'pkiw_photo_projector_labelledby', 'Courtneyr\\Child\\SinglePhoto\\projector_labelledby', 10, 2 ), 'the plugin labelledby filter' );
+		cr_photo_assert( cr_photo_hooked( 'body_class', 'Courtneyr\\Child\\SinglePhoto\\body_class' ), 'body class' );
+		cr_photo_assert( cr_photo_hooked( 'courtneyr_child_editor_parity_kinds', 'Courtneyr\\Child\\SinglePhoto\\editor_parity_kinds' ), 'editor parity registration' );
+		cr_photo_assert( ! cr_photo_hooked( 'courtneyr_child_single_object_holds_h1', 'Courtneyr\\Child\\SinglePhoto\\holds_h1' ), 'the template keeps its H1 and header (no object H1)' );
+	}
+);
+
+cr_photo_group(
+	'a titled photo single gives its H1 the id the projector is labelled by',
+	static function (): void {
+		cr_photo_single_request();
+		$html = title_id( cr_photo_h1(), array( 'blockName' => 'core/post-title', 'attrs' => array( 'level' => 1 ) ) );
+		cr_photo_contains( '<h1 class="wp-block-post-title cr-flank cr-flank--blue single-post__title" id="cr-photo-title">Blue Hour at Example Lake</h1>', $html, 'id added, text untouched' );
+		cr_photo_same( 'cr-photo-title', projector_labelledby( '', 42 ), 'labelledby names the H1' );
+	}
+);
+
+cr_photo_group(
+	'the id and labelledby stay out of the way in every other case',
+	static function (): void {
+		$block = array( 'blockName' => 'core/post-title', 'attrs' => array( 'level' => 1 ) );
+		cr_photo_single_request( 42, '' );
+		cr_photo_same( cr_photo_h1( 'Photo, September 8, 2026' ), title_id( cr_photo_h1( 'Photo, September 8, 2026' ), $block ), 'untitled: no id' );
+		cr_photo_same( '', projector_labelledby( '', 42 ), 'untitled: the projector falls back to aria-label Photo' );
+
+		cr_photo_single_request();
+		$GLOBALS['cr_photo_request']['post_kinds'][42] = array( 'note' );
+		cr_photo_same( cr_photo_h1(), title_id( cr_photo_h1(), $block ), 'not a photo: no id' );
+		cr_photo_same( '', projector_labelledby( '', 42 ), 'not a photo: no labelledby' );
+
+		cr_photo_single_request();
+		cr_photo_same( cr_photo_h1(), title_id( cr_photo_h1(), array( 'blockName' => 'core/post-title', 'attrs' => array( 'level' => 2 ) ) ), 'only the H1 block' );
+		cr_photo_same( '<h2>Related</h2>', title_id( '<h2>Related</h2>', $block ), 'no h1 in the html' );
+
+		cr_photo_single_request();
+		$GLOBALS['cr_photo_request']['queried_id'] = 77;
+		cr_photo_same( cr_photo_h1(), title_id( cr_photo_h1(), $block ), 'a post that is not the queried one' );
+		cr_photo_same( '', projector_labelledby( '', 42 ), 'a post that is not the queried one: no labelledby' );
+
+		cr_photo_single_request();
+		$GLOBALS['cr_photo_request']['single'] = false;
+		cr_photo_same( cr_photo_h1(), title_id( cr_photo_h1(), $block ), 'not a singular request' );
+
+		cr_photo_single_request();
+		$already = '<h1 id="mine">T</h1>';
+		cr_photo_same( $already, title_id( $already, $block ), 'an existing id stays' );
+		cr_photo_same( 'earlier', projector_labelledby( 'earlier', 42 ), 'an earlier filter value is passed through for other posts' );
+	}
+);
+
+cr_photo_group(
+	'body class and editor parity',
+	static function (): void {
+		cr_photo_single_request();
+		cr_photo_assert( in_array( 'cr-photo-single', \Courtneyr\Child\SinglePhoto\body_class( array( 'single' ) ), true ), 'photo single class' );
+		cr_photo_single_request();
+		$GLOBALS['cr_photo_request']['post_kinds'][42] = array( 'note' );
+		cr_photo_same( array( 'single' ), \Courtneyr\Child\SinglePhoto\body_class( array( 'single' ) ), 'no class on a note single' );
+		$kinds = \Courtneyr\Child\SinglePhoto\editor_parity_kinds(
+			array(
+				'photo' => array( 'classes' => array( 'single-post', 'kind-photo' ) ),
+				'note'  => array( 'classes' => array( 'single-post', 'kind-note' ) ),
+			)
+		);
+		cr_photo_same( array( 'single-post', 'kind-photo', 'cr-photo-single' ), $kinds['photo']['classes'], 'photo classes gain the single paint class' );
+		cr_photo_same( array( 'single-post', 'kind-note' ), $kinds['note']['classes'], 'other kinds untouched' );
+		cr_photo_same( array( 'note' ), array_keys( \Courtneyr\Child\SinglePhoto\editor_parity_kinds( array( 'note' => array( 'classes' => array() ) ) ) ), 'no photo entry is invented' );
+		$again = \Courtneyr\Child\SinglePhoto\editor_parity_kinds( $kinds );
+		cr_photo_same( $kinds['photo']['classes'], $again['photo']['classes'], 'idempotent' );
+	}
+);
+
+cr_photo_group(
+	'the Simple Location map alt names the address only when the street is visible',
+	static function (): void {
+		cr_photo_single_request();
+		$map = '<a target="_blank" href=""><img class="sloc-map" src="https://example.test/m.png" /></a>';
+		$GLOBALS['cr_photo_meta'][42]['geo_address'] = '100 Example Avenue, Sampletown';
+
+		$GLOBALS['cr_photo_visible'][42] = array( 'street' => true );
+		cr_photo_contains( 'alt="Map showing 100 Example Avenue, Sampletown"', \Courtneyr\Child\SlocMapAlt\add_map_alt( $map ), 'street visible: the address' );
+
+		$GLOBALS['cr_photo_visible'][42] = array( 'street' => false );
+		$html = \Courtneyr\Child\SlocMapAlt\add_map_alt( $map );
+		cr_photo_contains( 'alt="Map showing this post&#039;s location"', $html, 'street hidden: generic alt' );
+		cr_photo_not_contains( 'Example Avenue', $html, 'street hidden: no address' );
+		cr_photo_not_contains( '<a ', $html, 'the empty-href wrapper still goes' );
+
+		$GLOBALS['cr_photo_meta'][42]['geo_address'] = '';
+		$GLOBALS['cr_photo_visible'][42]             = array( 'street' => true );
+		cr_photo_contains( 'alt="Map showing this post&#039;s location"', \Courtneyr\Child\SlocMapAlt\add_map_alt( $map ), 'no address stored: generic alt' );
+
+		$existing = '<img class="sloc-map" alt="Mine" src="x" />';
+		cr_photo_same( $existing, \Courtneyr\Child\SlocMapAlt\add_map_alt( $existing ), 'an existing alt stays' );
+		cr_photo_same( '<p>no map</p>', \Courtneyr\Child\SlocMapAlt\add_map_alt( '<p>no map</p>' ), 'content without a map is untouched' );
+	}
+);
+
+cr_photo_group(
+	'without the plugin the map alt never names the address',
+	static function (): void {
+		$child = proc_open(
+			array( PHP_BINARY, __FILE__, '--no-plugin' ),
+			array( 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) ),
+			$pipes
+		);
+		cr_photo_assert( is_resource( $child ), 'could launch the no-plugin child' );
+		$out  = stream_get_contents( $pipes[1] );
+		$err  = stream_get_contents( $pipes[2] );
+		$code = proc_close( $child );
+		cr_photo_same( 0, $code, 'no-plugin child exit code (' . trim( $out . $err ) . ')' );
+	}
+);
+
+cr_photo_finish();
