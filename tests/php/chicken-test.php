@@ -215,11 +215,11 @@ cr_chk_group(
 		cr_chk_contains( 'var(--cr-periwinkle)', $rule( '.cr-coop .wp-block-post-content cite' ), 'coop cite is periwinkle on the Prussian board' );
 		cr_chk_contains( 'var(--cr-ink)', $rule( '.cr-coop .wp-block-post-content :is(details, kbd)' ), 'coop details and kbd keep the ink that suits their elevated surface' );
 		$details = '.cr-coop .wp-block-post-content details';
-		cr_chk_contains( 'var(--cr-ink)', $rule( $details . ' :is(p, li, h2, h3, h4, h5, h6, cite)' ), 'coop text inside a Details block is ink, past the ivory and periwinkle board rules, on the elevated surface' );
+		cr_chk_contains( 'var(--cr-ink)', $rule( $details . ' :is(p, li, h2, h3, h4, h5, h6, cite, figcaption)' ), 'coop text inside a Details block is ink, past the ivory and periwinkle board rules, on the elevated surface' );
 		cr_chk_contains( 'var(--cr-link)', $rule( $details . ' a' ), 'coop links inside a Details block use the surface link color, not the sky blue made for the Prussian board' );
 		cr_chk_contains( 'var(--cr-link-visited)', $rule( $details . ' a:visited' ), 'coop visited links inside a Details block use the surface visited token, not periwinkle' );
 		cr_chk_contains( 'var(--cr-link-hover)', $rule( $details . ' a:hover' ), 'coop hovered links inside a Details block use the surface hover token, not selective yellow' );
-		cr_chk_assert( 1 === preg_match( '/forced-colors: active\).*\.cr-coop \.wp-block-post-content details :is\(p, li, h2, h3, h4, h5, h6, cite\)[^{]*\{\s*color: CanvasText;/s', $css ), 'forced colors give Details text CanvasText' );
+		cr_chk_assert( 1 === preg_match( '/forced-colors: active\).*\.cr-coop \.wp-block-post-content details :is\(p, li, h2, h3, h4, h5, h6, cite, figcaption\)[^{]*\{\s*color: CanvasText;/s', $css ), 'forced colors give Details text CanvasText' );
 		cr_chk_assert( 1 === preg_match( '/forced-colors: active\).*\.cr-coop \.wp-block-post-content details a[^{]*\{\s*color: LinkText;/s', $css ), 'forced colors give Details links LinkText' );
 		foreach ( array( '.cr-chicken .pkiw-chicken__title a:focus-visible', '.cr-egg-card .pk-title a:focus-visible' ) as $focus ) {
 			$block = $rule( $focus );

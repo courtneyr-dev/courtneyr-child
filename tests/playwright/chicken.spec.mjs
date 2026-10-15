@@ -342,7 +342,7 @@ test.describe( 'single', () => {
 			// The seeded S01 carries a Details block; inject one when the stack still has the older seed.
 			let details = content.querySelector( 'details' );
 			if ( ! details ) {
-				content.insertAdjacentHTML( 'beforeend', '<details open><summary>More</summary><p>Inside text.</p><h3>Inside heading</h3><ul><li>Inside item</li></ul><p><a href="#inside">Inside link</a></p></details>' );
+				content.insertAdjacentHTML( 'beforeend', '<details open><summary>More</summary><p>Inside text.</p><h3>Inside heading</h3><ul><li>Inside item</li></ul><p><a href="#inside">Inside link</a></p><figure><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="" width="1" height="1"><figcaption>Inside caption</figcaption></figure></details>' );
 				details = content.querySelector( 'details' );
 			}
 			details.open = true;
@@ -354,7 +354,7 @@ test.describe( 'single', () => {
 				return ( hi + 0.05 ) / ( lo + 0.05 );
 			};
 			const surface = parse( getComputedStyle( details ).backgroundColor );
-			return [ 'summary', 'p', 'h3', 'li', 'a' ].map( ( selector ) => {
+			return [ 'summary', 'p', 'h3', 'li', 'a', 'figcaption' ].map( ( selector ) => {
 				const node = details.querySelector( selector );
 				return { selector, ratio: node ? ratio( parse( getComputedStyle( node ).color ), surface ) : null };
 			} );

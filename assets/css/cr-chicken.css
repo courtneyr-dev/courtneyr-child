@@ -407,7 +407,7 @@
 }
 
 /* The board recolors text and links for Prussian blue; a Details block keeps its elevated surface, so its content takes the surface tokens. */
-.cr-coop .wp-block-post-content details :is(p, li, h2, h3, h4, h5, h6, cite) {
+.cr-coop .wp-block-post-content details :is(p, li, h2, h3, h4, h5, h6, cite, figcaption) {
 	color: var(--cr-ink);
 }
 
@@ -460,7 +460,7 @@
 	.cr-coop .wp-block-post-content :is(h2, h3, h4, h5, h6),
 	.cr-coop .wp-block-post-content cite,
 	.cr-coop .wp-block-post-content :is(details, kbd),
-	.cr-coop .wp-block-post-content details :is(p, li, h2, h3, h4, h5, h6, cite) {
+	.cr-coop .wp-block-post-content details :is(p, li, h2, h3, h4, h5, h6, cite, figcaption) {
 		color: CanvasText;
 	}
 
