@@ -1,0 +1,746 @@
+/**
+ * Reposts (issue 255): a photocopied zine.
+ *
+ * Archive: one ivory sheet per month, the reposts taped on as clippings.
+ * Single: the plugin's repost card as one taped clipping.
+ * Stream: a compact taped clipping in the collage.
+ *
+ * Objects are paper, so the sheets, clippings and month strips keep their
+ * palette fill in dark mode with the ink pinned to Russian violet. The page
+ * ground, the pager, the hard shadows and the focus ring flip through the
+ * semantic tokens. Tokens only: no raw colour, no soft shadow and no fill ramp. The
+ * one filter on a stored image is the archive clipping's grayscale.
+ */
+
+/* ==========================================================================
+   Archive: the zine spreads
+   ========================================================================== */
+
+/* The engine prints each item as li.wp-block-post. components.css gives every
+   .cr-archive .wp-block-post padding, a hover lift and an orange marker bar,
+   and cr-archives.css undoes those only for the collage and stories. */
+.cr-archive .cr-repost-zine .wp-block-post {
+	position: relative;
+	z-index: 1;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	transition: none;
+	list-style: none;
+	filter: drop-shadow(var(--cr-shadow-hard));
+}
+
+.cr-archive .cr-repost-zine .wp-block-post:not(:last-child)::after {
+	content: none;
+}
+
+.cr-archive .cr-repost-zine .wp-block-post:hover {
+	transform: none;
+}
+
+.cr-repost-zine__spreads {
+	display: grid;
+	gap: var(--cr-space-2xl);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* One sheet per month. Its height follows its rows. */
+.cr-repost-zine__spreads .pkiw-group {
+	--cr-spread-strip: var(--cr-periwinkle);
+
+	position: relative;
+	box-sizing: border-box;
+	min-width: 0;
+	margin: 0;
+	padding: var(--cr-space-md);
+	border: 2px solid var(--cr-ink);
+	background-color: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard-2);
+	color: var(--cr-russian-violet);
+}
+
+.cr-repost-zine__spreads .pkiw-group:nth-child(3n+2) {
+	--cr-spread-strip: var(--cr-sky-blue);
+}
+
+.cr-repost-zine__spreads .pkiw-group:nth-child(3n+3) {
+	--cr-spread-strip: var(--cr-light-orange);
+}
+
+/* Month heading: upright Roboto Slab on a paper strip. Only the strip tilts. */
+.cr-repost-zine__spreads .pkiw-group__heading {
+	position: relative;
+	z-index: 0;
+	display: inline-block;
+	margin: 0 0 var(--cr-space-lg);
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-xl), var(--cr-text-floor));
+	font-style: normal;
+	font-weight: var(--cr-weight-extrabold);
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+}
+
+.cr-repost-zine__spreads .pkiw-group__heading::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background: var(--cr-spread-strip);
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-repost-zine__spreads .pkiw-group:nth-child(even) .pkiw-group__heading::before {
+	transform: rotate(var(--cr-rotate-1));
+}
+
+/* Items: one grid for every month, 1, 2 then 4 across. Cells after the last
+   item stay blank sheet paper. */
+.cr-repost-zine__spreads .pkiw-group__items {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-xl) var(--cr-space-lg);
+	align-items: start;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+@media (min-width: 40rem) {
+
+	.cr-repost-zine__spreads .pkiw-group__items {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	/* The fold sits at the centre of the sheet, between two columns of
+	   clippings. A pseudo-element stays out of the accessibility tree. */
+	.cr-repost-zine__spreads .pkiw-group__items::before {
+		content: "";
+		position: absolute;
+		inset-block: calc(-1 * var(--cr-space-md));
+		inset-inline-start: 50%;
+		inline-size: 0;
+		border-inline-start: 2px solid var(--cr-russian-violet-soft);
+		pointer-events: none;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-repost-zine__spreads .pkiw-group__items {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+}
+
+/* The pager sits after the last spread, outside it. cr-nav.css draws it. */
+.cr-repost-zine .wp-block-query-pagination {
+	margin-block-start: var(--cr-space-2xl);
+}
+
+/* Clipping: the wrapper is unclipped so it can hold the tape, the focus ring
+   and the link overlay; the paper inside takes the torn edge. */
+.cr-repost-zine .cr-repost-clip {
+	position: relative;
+	isolation: isolate;
+	min-width: 0;
+	padding-block-start: var(--cr-space-xs);
+}
+
+.cr-repost-zine .cr-repost-clip::before {
+	content: "";
+	position: absolute;
+	inset-block-start: 0;
+	inset-inline-start: 50%;
+	z-index: 2;
+	inline-size: var(--cr-space-3xl);
+	block-size: var(--cr-space-md);
+	margin-inline-start: calc(-0.5 * var(--cr-space-3xl));
+	background: var(--cr-tape);
+	transform: rotate(var(--cr-rotate-1));
+	pointer-events: none;
+}
+
+.cr-repost-zine .cr-repost-clip--tape-1::before {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-repost-zine .cr-repost-clip--tape-2::before {
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-repost-zine .cr-repost-clip--tape-3::before {
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.cr-repost-zine .cr-repost-clip__paper {
+	box-sizing: border-box;
+	min-width: 0;
+	padding: var(--cr-space-sm);
+	color: var(--cr-russian-violet);
+}
+
+.cr-repost-zine .cr-repost-clip__frame {
+	margin-block-end: var(--cr-space-sm);
+	overflow: hidden;
+	aspect-ratio: 1.91 / 1;
+}
+
+/* Courtney's one exception to "no filter on a stored image": archive only. */
+.cr-repost-zine .cr-repost-clip__frame img {
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	max-inline-size: 100%;
+	object-fit: cover;
+	filter: grayscale(1);
+}
+
+.cr-repost-zine .cr-repost-clip__frame.cr-cover--failed {
+	display: none;
+}
+
+/* A protected post keeps the plugin's card, laid flat on the paper. */
+.cr-repost-clip--protected .pk-card {
+	display: block;
+	grid-template-columns: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+	color: var(--cr-russian-violet);
+}
+
+.cr-repost-clip--protected .pk-card::before {
+	content: none;
+}
+
+.cr-repost-clip--protected .pk-title {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-md), var(--cr-text-floor));
+	overflow-wrap: anywhere;
+}
+
+.cr-repost-clip--protected .pk-title a {
+	color: inherit;
+}
+
+.cr-repost-clip--protected .pk-title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+/* The title wraps in full: no clamp, no ellipsis. */
+.cr-repost-zine .cr-repost-clip__title {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-md), var(--cr-text-floor));
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.cr-repost-zine .cr-repost-clip__title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.cr-repost-zine .cr-repost-clip__title a:hover {
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.2em;
+}
+
+/* The title link covers the paper, so a click anywhere opens the single. */
+.cr-repost-zine .cr-repost-clip__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+.cr-repost-zine .cr-repost-clip__credit {
+	margin: var(--cr-space-2xs) 0 0;
+	color: var(--cr-cerulean);
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+/* The focus ring goes round the whole clipping, tape included. The paper
+   sheet's own ring would draw a second one, so it stays off. */
+.cr-repost-zine .cr-repost-clip:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-repost-zine .cr-repost-clip .cr-repost-clip__paper:has(:focus-visible) {
+	outline: 0;
+	box-shadow: none;
+}
+
+.cr-repost-zine .cr-repost-clip__title a:focus-visible,
+.cr-repost-clip--protected .pk-title a:focus-visible {
+	outline: 0;
+	box-shadow: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.cr-repost-zine .cr-repost-clip {
+		transition: transform 0.15s ease;
+	}
+
+	.cr-repost-zine .cr-repost-clip:hover {
+		transform: translate(-2px, -2px);
+	}
+}
+
+@media (max-width: 39.99rem) {
+
+	.cr-repost-zine__spreads .pkiw-group {
+		padding: var(--cr-space-sm);
+	}
+}
+
+/* ==========================================================================
+   Stream: a compact taped clipping
+   ========================================================================== */
+
+/* Every selector carries .pk-card.pk-card--stream.cr-repost-clip--stream under
+   the Stream surface, so it outranks the shipped .cr-stream-page .pk-card
+   reset. The tilt rules name li.wp-block-post as well, to outrank the
+   collage's own nth-child rotations. */
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream {
+	position: relative;
+	display: block;
+	grid-template-columns: none;
+	box-sizing: border-box;
+	inline-size: 80%;
+	max-inline-size: 100%;
+	min-width: 0;
+	margin-inline: auto;
+	padding: var(--cr-space-md);
+	border: 0;
+	border-radius: 0;
+	background-color: var(--cr-light-gray);
+	background-image: var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+	isolation: isolate;
+}
+
+:is(.cr-stream-page, .cr-home-stream) li.wp-block-post .pk-card.pk-card--stream.cr-repost-clip--stream.cr-repost-clip--tilt-0 {
+	transform: rotate(var(--cr-rotate-1));
+}
+
+:is(.cr-stream-page, .cr-home-stream) li.wp-block-post .pk-card.pk-card--stream.cr-repost-clip--stream.cr-repost-clip--tilt-1 {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+:is(.cr-stream-page, .cr-home-stream) li.wp-block-post .pk-card.pk-card--stream.cr-repost-clip--stream.cr-repost-clip--tilt-2 {
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+:is(.cr-stream-page, .cr-home-stream) li.wp-block-post .pk-card.pk-card--stream.cr-repost-clip--stream.cr-repost-clip--tilt-3 {
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+/* One flat tape strip stands where the shipped pushpin was. */
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream::before {
+	content: "";
+	position: absolute;
+	inset-block-start: calc(-1 * var(--cr-space-xs));
+	inset-inline-start: 50%;
+	z-index: 2;
+	inline-size: var(--cr-space-3xl);
+	block-size: var(--cr-space-md);
+	margin-inline-start: calc(-0.5 * var(--cr-space-3xl));
+	border: 0;
+	border-radius: 0;
+	background: var(--cr-tape);
+	box-shadow: none;
+	opacity: 1;
+	pointer-events: none;
+}
+
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream .pk-body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cr-space-2xs);
+	min-width: 0;
+	padding: 0;
+}
+
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream .pk-kindlabel {
+	color: var(--cr-cerulean);
+	font-family: var(--cr-font-mono);
+	font-size: max(var(--cr-text-xs), var(--cr-text-floor));
+	letter-spacing: var(--cr-tracking-wide);
+	text-transform: uppercase;
+}
+
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream .pk-stream-date {
+	margin: 0;
+	padding: 0;
+}
+
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream .pk-stream-date time {
+	display: inline;
+	padding: 0;
+	border: 0;
+	color: var(--cr-cerulean);
+	font-family: var(--cr-font-mono);
+	font-size: max(var(--cr-text-xs), var(--cr-text-floor));
+	font-weight: var(--cr-weight-regular);
+	letter-spacing: var(--cr-tracking-wide);
+	text-transform: uppercase;
+}
+
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream .pk-caption {
+	display: grid;
+	gap: var(--cr-space-2xs);
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+}
+
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream .pk-title {
+	margin: 0;
+	padding: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-md), var(--cr-text-floor));
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream .pk-title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+/* The title link's overlay makes the whole card the target. */
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream .pk-title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream .pk-sub {
+	margin: 0;
+	padding: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+}
+
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream .cr-repost-clip__host {
+	color: var(--cr-cerulean);
+	font-family: var(--cr-font-mono);
+	overflow-wrap: anywhere;
+}
+
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream .pk-note {
+	display: -webkit-box;
+	max-inline-size: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	line-height: var(--cr-leading-snug);
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+}
+
+:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
+}
+
+@media (max-width: 39.99rem) {
+
+	:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream {
+		inline-size: 92%;
+	}
+}
+
+/* ==========================================================================
+   Single: one taped clipping
+   ========================================================================== */
+
+/* inc/enqueue.php widens --cr-measure-wide on every single; the clipping and
+   Courtney's note share the token's reading width. */
+body.single-post.kind-repost .single-post__header,
+body.single-post.kind-repost .single-post__content {
+	--cr-measure-wide: 80ch;
+
+	box-sizing: border-box;
+	inline-size: 100%;
+	max-inline-size: var(--cr-measure-wide);
+	margin-inline: auto;
+}
+
+body.single-post.kind-repost .single-post__date {
+	font-family: var(--cr-font-mono);
+}
+
+/* Barlow for the clipping's body and for Courtney's note after it. */
+body.single-post.kind-repost .single-post__content {
+	font-family: var(--cr-font-body);
+}
+
+body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-clip--single {
+	position: relative;
+	display: block;
+	grid-template-columns: none;
+	box-sizing: border-box;
+	inline-size: 100%;
+	max-inline-size: 100%;
+	margin-block: var(--cr-space-xl);
+	padding: var(--cr-space-xl) var(--cr-space-lg);
+	border: 0;
+	border-radius: 0;
+	background-color: var(--cr-paper);
+	background-image: var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+}
+
+body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-clip--single::before {
+	content: "";
+	position: absolute;
+	inset-block-start: var(--cr-space-2xs);
+	inset-inline-start: var(--cr-space-lg);
+	z-index: 2;
+	inline-size: var(--cr-space-3xl);
+	block-size: var(--cr-space-md);
+	background: var(--cr-tape);
+	transform: rotate(var(--cr-rotate-1));
+	pointer-events: none;
+}
+
+body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-clip--single .pk-body {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-md);
+	min-width: 0;
+	padding: 0;
+}
+
+body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-clip--single .pk-body::before {
+	content: "";
+	position: absolute;
+	inset-block-end: calc(-1 * var(--cr-space-md));
+	inset-inline-end: var(--cr-space-md);
+	z-index: 2;
+	inline-size: var(--cr-space-3xl);
+	block-size: var(--cr-space-md);
+	background: var(--cr-tape);
+	transform: rotate(var(--cr-rotate-neg));
+	pointer-events: none;
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-caption {
+	display: grid;
+	gap: var(--cr-space-2xs);
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-sub.cr-repost-clip__from {
+	margin: 0;
+	padding: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	letter-spacing: var(--cr-tracking-wide);
+	text-transform: uppercase;
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-title {
+	margin: 0;
+	padding: 0;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-2xl);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: normal;
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-title a {
+	color: var(--cr-cerulean);
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.2em;
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-title a:hover {
+	color: var(--cr-russian-violet);
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-title a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-sub {
+	margin: 0;
+	padding: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-md), var(--cr-text-floor));
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-note {
+	max-inline-size: none;
+	margin: 0;
+	padding: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-md), var(--cr-text-floor));
+	line-height: var(--cr-leading-normal);
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-meta[hidden] {
+	display: none;
+}
+
+/* The picture is not filtered on the single. */
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-embed {
+	margin: 0;
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-embed img {
+	display: block;
+	inline-size: 100%;
+	max-inline-size: 100%;
+	block-size: auto;
+	filter: none;
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-embed.cr-cover--failed {
+	display: none;
+}
+
+@media (min-width: 48rem) {
+
+	body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-body:has(> .pk-embed:not(.cr-cover--failed)) {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		column-gap: var(--cr-space-lg);
+		align-items: start;
+	}
+
+	body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-body:has(> .pk-embed:not(.cr-cover--failed)) > .pk-embed {
+		grid-column: 1;
+		grid-row: 1 / span 2;
+	}
+
+	body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-body:has(> .pk-embed:not(.cr-cover--failed)) > :is(.pk-caption, .pk-note) {
+		grid-column: 2;
+	}
+}
+
+/* The Stream card's ring goes round the whole card, so its link draws none. */
+:is(.cr-stream-page, .cr-home-stream) li.wp-block-post .pk-card.pk-card--stream.cr-repost-clip--stream .pk-title a:focus-visible {
+	outline: 0;
+}
+
+/* ==========================================================================
+   Forced colors: 2px outlines, no tape, fold, torn edge or fibre
+   ========================================================================== */
+
+@media (forced-colors: active) {
+
+	.cr-archive .cr-repost-zine .wp-block-post {
+		filter: none;
+	}
+
+	.cr-repost-zine__spreads .pkiw-group {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-repost-zine__spreads .pkiw-group__heading::before,
+	.cr-repost-zine__spreads .pkiw-group__items::before,
+	.cr-repost-zine .cr-repost-clip::before,
+	body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-clip--single::before,
+	body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-clip--single .pk-body::before,
+	:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream::before {
+		display: none;
+	}
+
+	.cr-repost-zine__spreads .pkiw-group__heading {
+		border: 2px solid CanvasText;
+		color: CanvasText;
+	}
+
+	.cr-repost-zine .cr-repost-clip__paper {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		background-image: none;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	/* components.css gives every .pk-card a 1px border with !important in forced colors. The
+	   clipping's 2px outline has to win it, and a protected card inside a paper loses its own. */
+	body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-clip--single,
+	:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream {
+		border: 2px solid CanvasText !important;
+		background: Canvas;
+		background-image: none;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-repost-clip--protected .pk-card {
+		border: 0 !important;
+	}
+
+	.cr-repost-zine .cr-repost-clip__title,
+	.cr-repost-zine .cr-repost-clip__credit,
+	body.single-post.kind-repost .single-post__content .cr-repost-clip--single :is(.pk-title, .pk-sub, .pk-note, .cr-repost-clip__from),
+	:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream :is(.pk-kindlabel, .pk-stream-date time, .pk-title, .pk-sub, .pk-note, .cr-repost-clip__host) {
+		color: CanvasText;
+	}
+
+	.cr-repost-zine .cr-repost-clip__frame img {
+		filter: none;
+	}
+
+	.cr-repost-zine .cr-repost-clip:has(a:focus-visible),
+	:is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream:has(a:focus-visible) {
+		outline-color: Highlight;
+		box-shadow: none;
+	}
+
+	:is(.cr-stream-page, .cr-home-stream) li.wp-block-post .pk-card.pk-card--stream.cr-repost-clip--stream {
+		transform: none;
+	}
+}
