@@ -284,7 +284,7 @@ function frame_card( string $html, array $block, $instance = null ): string {
 	// missing or failed image, or when an empty alt leaves the link unnamed.
 	$alt_names_link = ! $titled && '' !== $image && '' !== trim( (string) ( $lead['alt'] ?? '' ) );
 	$sleeve_hidden  = $titled || ( ! $titled && '' !== $image && ! $alt_names_link );
-	$sleeve         = '<span class="cr-photo-frame__sleeve' . ( '' !== $paper ? ' ' . esc_attr( $paper ) : '' ) . '"' . ( $sleeve_hidden ? ' aria-hidden="true"' : '' ) . '>' . esc_html( $name ) . '</span>';
+	$sleeve         = '<span class="cr-photo-frame__sleeve' . ( '' !== $paper ? ' ' . esc_attr( $paper ) : '' ) . '"' . ( $sleeve_hidden ? ' aria-hidden="true"' : '' ) . '><span class="cr-photo-frame__sleeve-text">' . esc_html( $name ) . '</span></span>';
 	$media          = '<span class="cr-photo-frame__media' . ( '' === $image ? ' cr-photo-frame__media--paper' : '' ) . '"' . ( $titled ? ' aria-hidden="true"' : '' ) . ' data-cr-cover-fallback>' . $image . $sleeve . '</span>';
 	$number         = '<span class="cr-photo-frame__number" aria-hidden="true"></span>';
 

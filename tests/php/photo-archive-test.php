@@ -137,13 +137,13 @@ cr_photo_group(
 		cr_photo_not_contains( 'p-name', $html, 'no p-name on an untitled frame' );
 		cr_photo_contains( 'alt="A red kite over a field"', $html, 'stored alt names the link' );
 		cr_photo_not_contains( 'cr-photo-frame__sr', $html, 'no screen-reader text when the alt names the link' );
-		cr_photo_assert( 1 === preg_match( '/<span class="cr-photo-frame__sleeve[^"]*">Photo, September 8, 2026<\/span>/', $html ), 'the sleeve is exposed (not aria-hidden) so a failed image still leaves a name' );
+		cr_photo_assert( 1 === preg_match( '/<span class="cr-photo-frame__sleeve[^"]*"><span class="cr-photo-frame__sleeve-text">Photo, September 8, 2026<\/span><\/span>/', $html ), 'the sleeve is exposed (not aria-hidden) so a failed image still leaves a name' );
 		cr_photo_assert( 0 === preg_match( '/<h3[^>]*>.*?<\/h3>\s*<div class="cr-photo-frame__label">[^<]*<span[^>]*><\/span>[^<]+</s', $html ), 'the label shows the number only' );
 
 		$GLOBALS['cr_photo_facts'][43]['lead']['alt'] = '';
 		$html = cr_photo_frame( 43, array( 'headingLevel' => 3 ), str_replace( 'Blue Hour at Example Lake', 'Photo, September 8, 2026', cr_photo_plugin_card() ) );
 		cr_photo_contains( '<span class="cr-photo-frame__sr">Photo, September 8, 2026</span>', $html, 'empty alt: visually hidden Photo, <date> names the link' );
-		cr_photo_contains( 'aria-hidden="true">Photo, September 8, 2026', $html, 'empty alt: the sleeve is aria-hidden so the name is not doubled' );
+		cr_photo_contains( 'aria-hidden="true"><span class="cr-photo-frame__sleeve-text">Photo, September 8, 2026', $html, 'empty alt: the sleeve is aria-hidden so the name is not doubled' );
 		cr_photo_same( 1, cr_photo_rendered_anchors( $html ), 'still one rendered link' );
 	}
 );

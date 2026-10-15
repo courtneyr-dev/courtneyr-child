@@ -49,6 +49,7 @@ body.cr-photo-single .pkiw-projector [hidden] {
 	display: flex;
 	flex-wrap: wrap;
 	row-gap: var(--cr-space-lg);
+	max-width: none;
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -56,6 +57,7 @@ body.cr-photo-single .pkiw-projector [hidden] {
 }
 
 .cr-photo-sheets .pkiw-group__items > li {
+	display: flex;
 	flex: 0 0 50%;
 	box-sizing: border-box;
 	min-width: 0;
@@ -91,6 +93,9 @@ body.cr-photo-single .pkiw-projector [hidden] {
 	position: relative;
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows: auto 1fr;
+	width: 100%;
+	min-width: 0;
 	max-width: none;
 	margin: 0;
 	padding: 0;
@@ -142,7 +147,15 @@ body.cr-photo-single .pkiw-projector [hidden] {
 	font-weight: var(--cr-weight-bold);
 	line-height: var(--cr-leading-snug);
 	overflow-wrap: anywhere;
+	overflow: hidden;
 	text-align: center;
+}
+
+.cr-photo-frame__sleeve-text {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 4;
 }
 
 .cr-photo-frame__label {
@@ -274,6 +287,7 @@ body.cr-photo-single .pkiw-projector__mount {
 	position: relative;
 	margin: 0;
 	padding: var(--cr-space-md) var(--cr-space-xl);
+	border: 2px solid var(--cr-russian-violet);
 	border-radius: var(--cr-radius-md);
 	background-color: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
@@ -370,6 +384,7 @@ body.cr-photo-single .pkiw-projector__status {
 	justify-content: space-between;
 	gap: var(--cr-space-2xs) var(--cr-space-md);
 	padding: var(--cr-space-sm) var(--cr-space-md);
+	border: 2px solid var(--cr-russian-violet);
 	border-radius: var(--cr-radius-md);
 	background-color: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
