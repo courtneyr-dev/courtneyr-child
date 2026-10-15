@@ -193,7 +193,7 @@ cr_chk_group(
 		foreach ( $sizes[1] as $size ) {
 			cr_chk_assert( 1 === preg_match( '/^var\(--cr-text-(xs|sm|base|md|lg|xl|2xl|3xl)\)$/', trim( $size ) ), 'font-size comes from a token at or above the text floor: ' . $size );
 		}
-		cr_chk_lacks( 'var(--cr-link)', $css, 'titles do not take the cerulean link token' );
+		cr_chk_lacks( 'var(--cr-link)', preg_replace( '/\.cr-coop \.wp-block-post-content details a\s*\{[^}]*\}/', '', $css ), 'titles do not take the cerulean link token (the Details link rule is the one use)' );
 		cr_chk_lacks( 'night-elevated', $css, 'the carton and board do not flip to the night surface (X1)' );
 		cr_chk_contains( 'var(--cr-light-gray)', $css, 'carton and frame are light gray' );
 		cr_chk_contains( 'var(--cr-prussian-blue)', $css, 'board is Prussian blue' );
@@ -214,6 +214,13 @@ cr_chk_group(
 		cr_chk_contains( 'var(--cr-printer-ivory)', $rule( '.cr-coop .wp-block-post-content :is(h2, h3, h4, h5, h6)' ), 'coop headings are printer ivory on the Prussian board' );
 		cr_chk_contains( 'var(--cr-periwinkle)', $rule( '.cr-coop .wp-block-post-content cite' ), 'coop cite is periwinkle on the Prussian board' );
 		cr_chk_contains( 'var(--cr-ink)', $rule( '.cr-coop .wp-block-post-content :is(details, kbd)' ), 'coop details and kbd keep the ink that suits their elevated surface' );
+		$details = '.cr-coop .wp-block-post-content details';
+		cr_chk_contains( 'var(--cr-ink)', $rule( $details . ' :is(p, li, h2, h3, h4, h5, h6, cite)' ), 'coop text inside a Details block is ink, past the ivory and periwinkle board rules, on the elevated surface' );
+		cr_chk_contains( 'var(--cr-link)', $rule( $details . ' a' ), 'coop links inside a Details block use the surface link color, not the sky blue made for the Prussian board' );
+		cr_chk_contains( 'var(--cr-link-visited)', $rule( $details . ' a:visited' ), 'coop visited links inside a Details block use the surface visited token, not periwinkle' );
+		cr_chk_contains( 'var(--cr-link-hover)', $rule( $details . ' a:hover' ), 'coop hovered links inside a Details block use the surface hover token, not selective yellow' );
+		cr_chk_assert( 1 === preg_match( '/forced-colors: active\).*\.cr-coop \.wp-block-post-content details :is\(p, li, h2, h3, h4, h5, h6, cite\)[^{]*\{\s*color: CanvasText;/s', $css ), 'forced colors give Details text CanvasText' );
+		cr_chk_assert( 1 === preg_match( '/forced-colors: active\).*\.cr-coop \.wp-block-post-content details a[^{]*\{\s*color: LinkText;/s', $css ), 'forced colors give Details links LinkText' );
 		foreach ( array( '.cr-chicken .pkiw-chicken__title a:focus-visible', '.cr-egg-card .pk-title a:focus-visible' ) as $focus ) {
 			$block = $rule( $focus );
 			cr_chk_contains( 'outline: none;', $block, $focus . ' drops the outline' );

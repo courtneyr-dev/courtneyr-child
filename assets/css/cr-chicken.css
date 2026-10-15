@@ -406,6 +406,23 @@
 	color: var(--cr-sky-blue);
 }
 
+/* The board recolors text and links for Prussian blue; a Details block keeps its elevated surface, so its content takes the surface tokens. */
+.cr-coop .wp-block-post-content details :is(p, li, h2, h3, h4, h5, h6, cite) {
+	color: var(--cr-ink);
+}
+
+.cr-coop .wp-block-post-content details a {
+	color: var(--cr-link);
+}
+
+.cr-coop .wp-block-post-content details a:visited {
+	color: var(--cr-link-visited);
+}
+
+.cr-coop .wp-block-post-content details a:hover {
+	color: var(--cr-link-hover);
+}
+
 .cr-coop .wp-block-post-content a:visited {
 	color: var(--cr-periwinkle);
 }
@@ -442,13 +459,17 @@
 	.cr-coop .wp-block-post-content p,
 	.cr-coop .wp-block-post-content :is(h2, h3, h4, h5, h6),
 	.cr-coop .wp-block-post-content cite,
-	.cr-coop .wp-block-post-content :is(details, kbd) {
+	.cr-coop .wp-block-post-content :is(details, kbd),
+	.cr-coop .wp-block-post-content details :is(p, li, h2, h3, h4, h5, h6, cite) {
 		color: CanvasText;
 	}
 
 	.cr-coop .wp-block-post-content a,
 	.cr-coop .wp-block-post-content a:visited,
-	.cr-coop .wp-block-post-content a:hover {
+	.cr-coop .wp-block-post-content a:hover,
+	.cr-coop .wp-block-post-content details a,
+	.cr-coop .wp-block-post-content details a:visited,
+	.cr-coop .wp-block-post-content details a:hover {
 		color: LinkText;
 	}
 }

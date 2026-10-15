@@ -336,6 +336,35 @@ test.describe( 'single', () => {
 		expect( seen.cite ).toBe( PERIWINKLE );
 	} );
 
+	test( 'a Details block keeps readable text, headings and links on its own surface in both schemes', async ( { page } ) => {
+		await open( page, 'S01' );
+		const rows = await page.locator( '.cr-coop__board .wp-block-post-content' ).first().evaluate( ( content ) => {
+			// The seeded S01 carries a Details block; inject one when the stack still has the older seed.
+			let details = content.querySelector( 'details' );
+			if ( ! details ) {
+				content.insertAdjacentHTML( 'beforeend', '<details open><summary>More</summary><p>Inside text.</p><h3>Inside heading</h3><ul><li>Inside item</li></ul><p><a href="#inside">Inside link</a></p></details>' );
+				details = content.querySelector( 'details' );
+			}
+			details.open = true;
+			const parse = ( value ) => value.match( /[\d.]+/g ).slice( 0, 3 ).map( Number );
+			const channel = ( v ) => ( ( v /= 255 ) <= 0.03928 ? v / 12.92 : ( ( v + 0.055 ) / 1.055 ) ** 2.4 );
+			const luminance = ( [ r, g, b ] ) => 0.2126 * channel( r ) + 0.7152 * channel( g ) + 0.0722 * channel( b );
+			const ratio = ( a, b ) => {
+				const [ hi, lo ] = [ luminance( a ), luminance( b ) ].sort( ( x, y ) => y - x );
+				return ( hi + 0.05 ) / ( lo + 0.05 );
+			};
+			const surface = parse( getComputedStyle( details ).backgroundColor );
+			return [ 'summary', 'p', 'h3', 'li', 'a' ].map( ( selector ) => {
+				const node = details.querySelector( selector );
+				return { selector, ratio: node ? ratio( parse( getComputedStyle( node ).color ), surface ) : null };
+			} );
+		} );
+		for ( const row of rows ) {
+			expect( row.ratio, `${ row.selector } in a Details block has a ratio` ).not.toBeNull();
+			expect( row.ratio, `${ row.selector } in a Details block reads at 4.5:1 on its surface` ).toBeGreaterThanOrEqual( 4.5 );
+		}
+	} );
+
 	test( 'dark mode and forced colors keep the board', async ( { page }, testInfo ) => {
 		await open( page, 'S01' );
 		if ( isDark( testInfo ) ) {
