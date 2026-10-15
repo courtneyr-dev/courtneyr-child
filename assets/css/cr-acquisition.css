@@ -1,0 +1,556 @@
+/* Acquisition archive bags, receipts, single receipt and Stream stub (PKIW issue 239).
+
+   Palette and derived tokens only. Receipts, the photo frame and the stub are
+   paper objects: they keep ivory paper and Russian violet text in dark mode,
+   and the ground, hard shadows and tape flip through their tokens. Rotation
+   comes from the --cr-rotate-* tokens on tape and the stub only. */
+
+/* ============================================================
+   Archive: one paper bag per month, receipts standing in it.
+   ============================================================ */
+.cr-acq .pkiw-grouped {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-3xl) var(--cr-space-2xl);
+	align-items: start;
+	padding-block-start: var(--cr-space-xl);
+}
+
+.cr-acq .pkiw-group {
+	--cr-acq-bag: var(--cr-periwinkle);
+	--cr-acq-handle: var(--cr-space-xl);
+	container-type: inline-size;
+	position: relative;
+	box-sizing: border-box;
+	display: grid;
+	gap: var(--cr-space-md);
+	min-width: 0;
+	margin-block: 0;
+	padding: var(--cr-space-lg) 0;
+	border: 2px solid var(--cr-ink);
+	background:
+		linear-gradient(90deg, transparent 0 7%, var(--cr-russian-violet) 7% calc(7% + 2px), transparent calc(7% + 2px) calc(93% - 2px), var(--cr-russian-violet) calc(93% - 2px) 93%, transparent 93%),
+		var(--cr-fiber),
+		var(--cr-acq-bag);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-acq .pkiw-group:nth-of-type(4n + 2) {
+	--cr-acq-bag: var(--cr-sky-blue);
+}
+
+.cr-acq .pkiw-group:nth-of-type(4n + 3) {
+	--cr-acq-bag: var(--cr-blue-green);
+}
+
+.cr-acq .pkiw-group:nth-of-type(4n + 4) {
+	--cr-acq-bag: var(--cr-cerulean);
+}
+
+/* The handle: a light orange strip above the bag, outlined in ink. */
+.cr-acq .pkiw-group::before {
+	content: "";
+	position: absolute;
+	inset-block-start: calc(-1 * var(--cr-acq-handle) - 2px);
+	inset-inline: 0;
+	box-sizing: border-box;
+	inline-size: var(--cr-space-4xl);
+	block-size: var(--cr-acq-handle);
+	margin-inline: auto;
+	border: 2px solid var(--cr-ink);
+	border-block-end: 0;
+	border-radius: var(--cr-radius-full) var(--cr-radius-full) 0 0;
+	background: var(--cr-light-orange);
+	pointer-events: none;
+}
+
+/* The month label sits on tape, above the receipts. The text stays upright;
+   only the tape behind it tilts. */
+.cr-acq .pkiw-group__heading {
+	position: relative;
+	z-index: 0;
+	isolation: isolate;
+	box-sizing: border-box;
+	justify-self: center;
+	inline-size: fit-content;
+	max-inline-size: calc(100% - 2 * var(--cr-space-md));
+	margin: 0;
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-lg), var(--cr-text-floor));
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+	text-align: center;
+	transform: none;
+}
+
+.cr-acq .pkiw-group__heading::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	border: 2px solid var(--cr-ink);
+	background: var(--cr-tape);
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-acq .pkiw-group__items {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-md);
+	align-items: start;
+	max-width: none;
+	margin: 0 var(--cr-space-md);
+	padding: 0;
+	list-style: none;
+}
+
+.cr-acq .pkiw-group__items > li.wp-block-post {
+	min-width: 0;
+	margin: 0;
+}
+
+/* Two receipts across once the bag is 18rem wide (284px of content inside its 2px edges). */
+@container (min-width: 17.75rem) {
+
+	.cr-acq .pkiw-group__items {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+/* The receipt: upright ivory paper with a torn edge from cr-ticket.css. */
+.cr-receipt {
+	box-sizing: border-box;
+	min-width: 0;
+	padding: var(--cr-space-sm) var(--cr-space-sm) calc(var(--cr-space-sm) + 0.5rem);
+	color: var(--cr-russian-violet);
+	overflow-wrap: anywhere;
+	transform: none;
+}
+
+.cr-receipt__title {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-md), var(--cr-text-floor));
+	line-height: var(--cr-leading-tight);
+}
+
+.cr-receipt__title a {
+	color: var(--cr-russian-violet);
+	text-decoration: none;
+}
+
+/* The title link covers the whole receipt. */
+.cr-receipt__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-receipt__photo {
+	margin: var(--cr-space-sm) 0 0;
+}
+
+.cr-receipt__photo.cr-cover--failed {
+	display: none;
+}
+
+.cr-receipt__img {
+	display: block;
+	width: 100%;
+	height: auto;
+	filter: none;
+}
+
+.cr-receipt:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-acq .wp-block-query-pagination {
+	margin-block-start: var(--cr-space-xl);
+}
+
+@media (min-width: 48rem) {
+
+	.cr-acq .pkiw-grouped {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-acq .pkiw-grouped {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+/* ============================================================
+   Single: the taped photo, the receipt and the notes sheet.
+   ============================================================ */
+.cr-acq-single {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-xl);
+	align-items: start;
+	box-sizing: border-box;
+	max-width: none;
+	margin-block: var(--cr-space-xl);
+	padding: 0;
+	border: 0;
+	background: none;
+	box-shadow: none;
+	color: var(--cr-ink);
+}
+
+.cr-acq-single__photo {
+	position: relative;
+	box-sizing: border-box;
+	min-width: 0;
+	margin: 0;
+	padding: var(--cr-space-md);
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-acq-single__photo.cr-cover--failed {
+	display: none;
+}
+
+.cr-acq-single__tape {
+	position: absolute;
+	inset-block-start: calc(-1 * var(--cr-space-sm));
+	inset-inline-start: var(--cr-space-lg);
+	inline-size: var(--cr-space-4xl);
+	block-size: var(--cr-space-lg);
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-tape);
+	transform: rotate(var(--cr-rotate-neg));
+	pointer-events: none;
+}
+
+.cr-acq-single__img {
+	display: block;
+	width: 100%;
+	height: auto;
+	filter: none;
+}
+
+.cr-acq-single__receipt {
+	box-sizing: border-box;
+	min-width: 0;
+	padding: var(--cr-space-lg) var(--cr-space-lg) calc(var(--cr-space-lg) + 0.5rem);
+	color: var(--cr-russian-violet);
+	overflow-wrap: anywhere;
+}
+
+.cr-acq-single__title {
+	margin: 0 0 var(--cr-space-md);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-2xl), var(--cr-text-floor));
+	line-height: var(--cr-leading-tight);
+	transform: none;
+}
+
+/* The receipt paper stays ivory in dark mode, and main.has-main-accent-background-color h1 flips the ink to ivory, so the title pins its ink at (0,2,0). */
+.cr-acq-single__receipt .cr-acq-single__title {
+	color: var(--cr-russian-violet);
+}
+
+.cr-acq-single__facts {
+	margin: 0;
+}
+
+.cr-acq-single__fact dt {
+	display: inline-block;
+	margin: 0;
+	padding: var(--cr-space-3xs) var(--cr-space-xs);
+	background: var(--cr-sky-blue);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: max(var(--cr-text-xs), var(--cr-text-floor));
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-tight);
+	text-transform: uppercase;
+}
+
+.cr-acq-single__fact dd {
+	margin: var(--cr-space-xs) 0 0;
+	color: var(--cr-russian-violet);
+	font-size: var(--cr-text-md);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.cr-acq-single__link {
+	color: var(--cr-russian-violet);
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+
+.cr-acq-single__link:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-russian-violet);
+}
+
+.cr-acq-single__icon {
+	margin-inline-start: var(--cr-space-3xs);
+	vertical-align: -0.1em;
+}
+
+.cr-acq-single__notes {
+	box-sizing: border-box;
+	min-width: 0;
+	padding: var(--cr-space-lg);
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard);
+	overflow-wrap: anywhere;
+}
+
+.cr-acq-single__notes-title {
+	position: relative;
+	z-index: 0;
+	isolation: isolate;
+	display: inline-block;
+	margin: 0 0 var(--cr-space-md);
+	padding: var(--cr-space-3xs) var(--cr-space-md);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-lg), var(--cr-text-floor));
+	line-height: var(--cr-leading-tight);
+	transform: none;
+}
+
+/* The tape flips dark with the scheme, so the ink follows the tape token and outranks the accent-background heading override. */
+.cr-acq-single__notes .cr-acq-single__notes-title {
+	color: var(--cr-tape-ink);
+}
+
+.cr-acq-single__notes-title::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background: var(--cr-tape);
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-acq-single__notes p {
+	margin: 0;
+	font-size: var(--cr-text-md);
+	line-height: var(--cr-leading-relaxed);
+}
+
+/* Later cards in the same post print as the plugin's card, set as a compact receipt. The body.single prefix outranks the generic kind card rule in cr-post-kinds.css. */
+body.cr-acq-single-page.single .single-post__content .pk-card.k-acquisition {
+	display: block;
+	width: auto;
+	max-width: none;
+	margin: var(--cr-space-xl) 0 0;
+	padding: var(--cr-space-md);
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard);
+	transform: none;
+}
+
+.cr-acq-single-page .single-post__content .pk-card.k-acquisition .pk-badge {
+	display: none;
+}
+
+.cr-acq-single-page .single-post__content .pk-card.k-acquisition .pk-title {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-lg), var(--cr-text-floor));
+	line-height: var(--cr-leading-tight);
+}
+
+@media (min-width: 64rem) {
+
+	.cr-acq-single:has(> .cr-acq-single__photo:not(.cr-cover--failed)) {
+		grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+	}
+
+	.cr-acq-single:has(> .cr-acq-single__photo:not(.cr-cover--failed)) > .cr-acq-single__photo {
+		grid-row: 1 / span 2;
+		grid-column: 1;
+	}
+
+	.cr-acq-single:has(> .cr-acq-single__photo:not(.cr-cover--failed)) > .cr-acq-single__receipt {
+		grid-row: 1;
+		grid-column: 2;
+	}
+
+	.cr-acq-single:has(> .cr-acq-single__photo:not(.cr-cover--failed)) > .cr-acq-single__notes {
+		grid-row: 2;
+		grid-column: 2;
+	}
+}
+
+/* ============================================================
+   Stream: a small receipt stub in the collage.
+   ============================================================ */
+.cr-acq-stub {
+	--ticket-tear: polygon(0 0.4rem, 5% 0, 10% 0.4rem, 15% 0, 20% 0.4rem, 25% 0, 30% 0.4rem, 35% 0, 40% 0.4rem, 45% 0, 50% 0.4rem, 55% 0, 60% 0.4rem, 65% 0, 70% 0.4rem, 75% 0, 80% 0.4rem, 85% 0, 90% 0.4rem, 95% 0, 100% 0.4rem, 100% 100%, 0 100%);
+	box-sizing: border-box;
+	display: block;
+	min-block-size: 2.75rem;
+	padding: calc(var(--cr-space-sm) + 0.4rem) var(--cr-space-md) var(--cr-space-md);
+	color: var(--cr-russian-violet);
+	overflow-wrap: anywhere;
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-acq-stub__thumb {
+	margin: 0 0 var(--cr-space-sm);
+}
+
+.cr-acq-stub__thumb.cr-cover--failed {
+	display: none;
+}
+
+.cr-acq-stub__img {
+	display: block;
+	width: 100%;
+	height: auto;
+	filter: none;
+}
+
+.cr-acq-stub__title {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-md), var(--cr-text-floor));
+	line-height: var(--cr-leading-tight);
+}
+
+.cr-acq-stub__title a {
+	color: var(--cr-russian-violet);
+	text-decoration: none;
+}
+
+.cr-acq-stub__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-acq-stub .pk-kindlabel {
+	display: block;
+	margin: var(--cr-space-xs) 0 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: max(var(--cr-text-xs), var(--cr-text-floor));
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-tight);
+	text-transform: uppercase;
+}
+
+/* The later card stays ivory in dark, so its label can't take the dark pk-muted ink from cr-post-kinds.css. */
+body.cr-acq-single-page.single .single-post__content .pk-card.k-acquisition .pk-kindlabel {
+	color: var(--cr-russian-violet);
+}
+
+.cr-acq-stub__where,
+.cr-acq-stub__date {
+	margin: var(--cr-space-2xs) 0 0;
+	color: var(--cr-russian-violet);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	line-height: var(--cr-leading-snug);
+}
+
+.cr-acq-stub__date {
+	font-family: var(--cr-font-mono);
+}
+
+.cr-acq-stub:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+/* The front-page lane gives its compact cards a 15.625rem measure. */
+.cr-fieldnotes .cr-home-stream .cr-acq-stub {
+	max-width: 15.625rem;
+	margin-inline: auto;
+}
+
+/* ============================================================
+   Forced colors and reduced motion.
+   ============================================================ */
+@media (forced-colors: active) {
+
+	.cr-acq .pkiw-group {
+		border: 2px solid CanvasText;
+		background-image: none;
+		box-shadow: none;
+	}
+
+	.cr-acq .pkiw-group::before,
+	.cr-acq-single__tape {
+		display: none;
+	}
+
+	.cr-acq .pkiw-group__heading {
+		color: CanvasText;
+	}
+
+	.cr-acq .pkiw-group__heading::before,
+	.cr-acq-single__notes-title::before {
+		display: none;
+	}
+
+	.cr-receipt,
+	.cr-acq-stub,
+	.cr-acq-single__receipt {
+		border: 2px solid CanvasText;
+		box-shadow: none;
+	}
+
+	.cr-receipt::before,
+	.cr-acq-stub::before,
+	.cr-acq-single__receipt::before {
+		display: none;
+	}
+
+	.cr-acq-single__photo,
+	.cr-acq-single__notes,
+	body.cr-acq-single-page.single .single-post__content .pk-card.k-acquisition {
+		border: 2px solid CanvasText;
+		background-image: none;
+		box-shadow: none;
+	}
+
+	.cr-receipt a,
+	.cr-acq-stub a,
+	.cr-acq-single__link {
+		color: LinkText;
+	}
+
+	.cr-acq-single__fact dt {
+		border: 1px solid CanvasText;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.cr-receipt,
+	.cr-acq-stub,
+	.cr-acq-single__photo,
+	.cr-acq-single__notes {
+		transition: none;
+		transform: none;
+	}
+}
