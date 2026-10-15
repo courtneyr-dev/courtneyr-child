@@ -294,6 +294,36 @@ check_case(
 	}
 );
 
+check_case(
+	'frame rules beat the plugin card base: the root keys on .pk-card.cr-photo-frame and drops its tint, the title and screen-reader text key on the frame',
+	static function () use ( $code ): bool {
+		preg_match( '/(?:^|[}\s])\.pk-card\.cr-photo-frame\s*\{([^{}]*)\}/', $code, $found );
+		$root = $found[1] ?? '';
+		if ( '' === $root
+			|| false === strpos( $root, 'grid-template-columns: minmax(0, 1fr)' )
+			|| false === strpos( $root, 'padding: 0' )
+			|| false === strpos( $root, 'border: 0' )
+			|| false === strpos( $root, 'background: none' )
+			|| false === strpos( $root, 'box-shadow: none' )
+			|| false === strpos( $root, 'gap: 0' )
+			|| false === strpos( $root, 'align-items: stretch' ) ) {
+			return false;
+		}
+		if ( 1 !== preg_match( '/\.pk-card\.cr-photo-frame::before\s*\{[^{}]*content:\s*none;/', $code ) ) {
+			return false;
+		}
+		// No frame selector may stand at the plugin card's one-class weight.
+		foreach ( array( '.cr-photo-frame', '.cr-photo-frame--protected', '.cr-photo-frame__title', '.cr-photo-frame__title--object', '.cr-photo-frame__sr' ) as $bare ) {
+			if ( 1 === preg_match( '/(^|[{};,])\s*' . preg_quote( $bare, '/' ) . '\s*\{/', $code ) ) {
+				return false;
+			}
+		}
+		return false !== strpos( $code, '.pk-card.cr-photo-frame.cr-photo-frame--protected {' )
+			&& false !== strpos( $code, '.cr-photo-frame .cr-photo-frame__title {' )
+			&& false !== strpos( $code, '.cr-photo-frame .cr-photo-frame__sr {' );
+	}
+);
+
 if ( $failures ) {
 	foreach ( $failures as $failure ) {
 		fwrite( STDERR, '  ' . $failure . "\n" );

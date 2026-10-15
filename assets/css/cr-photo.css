@@ -88,12 +88,15 @@ body.cr-photo-single .pkiw-projector [hidden] {
 	}
 }
 
-/* ---- The frame ---- */
-.cr-photo-frame {
+/* ---- The frame ----
+   The plugin's .pk-card base (build/blocks.css) loads after this sheet at one class of weight, so every frame rule keys on two. */
+.pk-card.cr-photo-frame {
 	position: relative;
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
 	grid-template-rows: auto 1fr;
+	align-items: stretch;
+	gap: 0;
 	width: 100%;
 	min-width: 0;
 	max-width: none;
@@ -104,6 +107,11 @@ body.cr-photo-single .pkiw-projector [hidden] {
 	background: none;
 	box-shadow: none;
 	color: var(--cr-russian-violet);
+}
+
+/* The plugin tints every card with a ::before; a frame is a plain contact-sheet cell. */
+.pk-card.cr-photo-frame::before {
+	content: none;
 }
 
 .cr-photo-frame__media {
@@ -178,7 +186,7 @@ body.cr-photo-single .pkiw-projector [hidden] {
 	content: counter(cr-frame, decimal-leading-zero) / "";
 }
 
-.cr-photo-frame__title {
+.cr-photo-frame .cr-photo-frame__title {
 	min-width: 0;
 	margin: 0;
 	padding: 0;
@@ -191,7 +199,7 @@ body.cr-photo-single .pkiw-projector [hidden] {
 	overflow-wrap: anywhere;
 }
 
-.cr-photo-frame__title--object {
+.cr-photo-frame .cr-photo-frame__title--object {
 	grid-row: 1;
 	display: block;
 }
@@ -224,7 +232,7 @@ body.cr-photo-single .pkiw-projector [hidden] {
 	box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 
-.cr-photo-frame__sr {
+.cr-photo-frame .cr-photo-frame__sr {
 	position: absolute;
 	width: 1px;
 	height: 1px;
@@ -237,7 +245,7 @@ body.cr-photo-single .pkiw-projector [hidden] {
 }
 
 /* A protected post keeps the plugin's title link on a paper frame. */
-.cr-photo-frame--protected {
+.pk-card.cr-photo-frame.cr-photo-frame--protected {
 	grid-template-rows: auto;
 	min-height: 8rem;
 	padding: var(--cr-space-sm);
@@ -712,7 +720,7 @@ body.cr-photo-single .pkiw-photo-place {
 	.cr-photo-frame__label,
 	.cr-photo-frame__media--paper .cr-photo-frame__sleeve,
 	.cr-photo-frame__media.cr-cover--failed .cr-photo-frame__sleeve,
-	.cr-photo-frame--protected {
+	.pk-card.cr-photo-frame.cr-photo-frame--protected {
 		border: 2px solid CanvasText;
 		background-color: Canvas;
 		background-image: none;
