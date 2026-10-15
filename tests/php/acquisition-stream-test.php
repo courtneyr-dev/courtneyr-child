@@ -39,7 +39,7 @@ cr_acq_group(
 		$html = cr_acq_render_stub( 42 );
 
 		cr_acq_contains( '<article class="cr-acq-stub cr-ticket">', $html, 'article root' );
-		$order = array( '<figure class="cr-acq-stub__thumb" data-cr-cover-fallback>', '<h2 class="cr-acq-stub__title">', '<p class="pk-kindlabel">Purchase</p>', '<p class="cr-acq-stub__where">Riverside Audio</p>', '<time datetime="2026-08-01">August 1, 2026</time>' );
+		$order = array( '<figure class="cr-acq-stub__thumb" data-cr-cover-fallback>', '<h2 class="cr-acq-stub__title">', '<span class="pk-kindlabel">Purchase</span>', '<p class="cr-acq-stub__where">Riverside Audio</p>', '<time datetime="2026-08-01">August 1, 2026</time>' );
 		$last  = -1;
 		foreach ( $order as $needle ) {
 			$at = strpos( $html, $needle );

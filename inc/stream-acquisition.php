@@ -65,7 +65,7 @@ function stub_html( \WP_Post $post, array $facts, int $level ): string {
 
 	$type = plain_text( (string) ( $facts['type_label'] ?? '' ) );
 	if ( '' !== $type ) {
-		$out .= '<p class="pk-kindlabel">' . esc_html( $type ) . '</p>';
+		$out .= '<span class="pk-kindlabel">' . esc_html( $type ) . '</span>';
 	}
 	$where = plain_text( (string) ( $facts['where'] ?? '' ) );
 	if ( '' !== $where ) {

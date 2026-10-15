@@ -97,7 +97,10 @@ cr_acq_assets_check( 1 === preg_match( '/@media \(min-width: 48rem\)[^{]*\{\s*\.
 cr_acq_assets_check( 4 === preg_match_all( '/--cr-acq-bag:\s*var\(--cr-(periwinkle|sky-blue|blue-green|cerulean)\)/', $css ), 'css: bag fills cycle periwinkle, sky blue, blue-green, cerulean' );
 cr_acq_assets_check( str_contains( $css, '.cr-receipt:has(a:focus-visible)' ) && str_contains( $css, '.cr-acq-stub:has(a:focus-visible)' ) && str_contains( $css, 'var(--cr-focus-ring)' ), 'css: receipts and the stub draw the 3px focus ring' );
 cr_acq_assets_check( str_contains( $css, '.cr-fieldnotes .cr-home-stream .cr-acq-stub' ) && str_contains( $css, 'max-width: 15.625rem' ), 'css: the front-page lane gives the stub its 15.625rem measure' );
-cr_acq_assets_check( 1 === preg_match( '/\.cr-acq-single-page \.single-post__content \.pk-card\.k-acquisition\s*\{/', $css ), 'css: later cards print as a compact receipt' );
+cr_acq_assets_check( 1 === preg_match( '/body\.cr-acq-single-page\.single \.single-post__content \.pk-card\.k-acquisition\s*\{/', $css ), 'css: later cards print as a compact receipt' );
+cr_acq_assets_check( 1 === preg_match( '/\.cr-acq-single__receipt \.cr-acq-single__title\s*\{[^}]*color:\s*var\(--cr-russian-violet\)/', $css ), 'css: the single title pins violet ink above the accent-background h1 override' );
+cr_acq_assets_check( 1 === preg_match( '/\.cr-acq-single__notes \.cr-acq-single__notes-title\s*\{[^}]*color:\s*var\(--cr-tape-ink\)/', $css ), 'css: the notes title follows the tape ink token' );
+cr_acq_assets_check( 1 === preg_match( '/\.cr-acq-stub \.pk-kindlabel\s*\{[^}]*display:\s*block/', $css ), 'css: the stub label is a block so its margin applies to the span' );
 cr_acq_assets_check( str_contains( cr_acq_assets_read( 'inc/enqueue.php' ), "'cr-acquisition.css'" ) && str_contains( cr_acq_assets_read( 'inc/enqueue.php' ), "'cr-ticket.css'" ), 'RUCSS list already names cr-acquisition.css and cr-ticket.css' );
 
 if ( $failures ) {

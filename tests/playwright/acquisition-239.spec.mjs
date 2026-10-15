@@ -141,7 +141,7 @@ test.describe( 'archive (PKIW 239)', () => {
 		expect( ( await h1.getAttribute( 'aria-label' ) ) || ( await h1.locator( '.cr-cutout__text' ).textContent() ).trim() ).toBe( 'Acquisition' );
 		const tiles = h1.locator( '.cr-cutout__tile' );
 		expect( await tiles.allTextContents() ).toEqual( [ ...'Acquisition' ] );
-		expect( await tiles.evaluateAll( ( els ) => els.every( ( el ) => el.getAttribute( 'aria-hidden' ) === 'true' && getComputedStyle( el ).textTransform === 'none' ) ) ).toBe( true );
+		expect( await tiles.evaluateAll( ( els ) => els.every( ( el ) => el.closest( '[aria-hidden="true"]' ) !== null && getComputedStyle( el ).textTransform === 'none' ) ) ).toBe( true );
 		const rotations = await tiles.evaluateAll( ( els ) => els.map( ( el ) => [ ...el.classList ].find( ( c ) => /^is-r/.test( c ) ) || '' ) );
 		for ( let i = 1; i < rotations.length; i++ ) {
 			expect( rotations[ i ] === rotations[ i - 1 ] && rotations[ i ] !== '', `tiles ${ i - 1 } and ${ i } differ` ).toBe( false );
@@ -302,7 +302,7 @@ test.describe( 'archive (PKIW 239)', () => {
 		await page.keyboard.press( 'Tab' );
 		const first = page.locator( '.cr-receipt__title a' ).first();
 		await first.focus();
-		const receipt = page.locator( '.cr-receipt', { has: first } );
+		const receipt = first.locator( 'xpath=ancestor::article[contains(@class,"cr-receipt")]' );
 		const style = await computed( receipt, [ 'outline-width', 'outline-color', 'box-shadow' ] );
 		expect( style[ 'outline-width' ] ).toBe( '3px' );
 		expect( style[ 'outline-color' ] ).toBe( RED.rgb );
@@ -594,7 +594,7 @@ test.describe( 'stream (PKIW 239)', () => {
 		expect( await page.locator( '.cr-stream-page .wp-block-post-template' ).count() ).toBeGreaterThan( 0 );
 		const stub = stubs.filter( { has: page.getByRole( 'link', { name: 'Field Recorder' } ) } ).first();
 		const order = await stub.evaluate( ( el ) => [ ...el.children ].filter( ( c ) => ! c.hasAttribute( 'hidden' ) ).map( ( c ) => c.tagName.toLowerCase() + ( c.className ? '.' + c.className.split( ' ' )[ 0 ] : '' ) ) );
-		expect( order ).toEqual( [ 'figure.cr-acq-stub__thumb', 'h2.cr-acq-stub__title', 'p.pk-kindlabel', 'p.cr-acq-stub__where', 'p.cr-acq-stub__date' ] );
+		expect( order ).toEqual( [ 'figure.cr-acq-stub__thumb', 'h2.cr-acq-stub__title', 'span.pk-kindlabel', 'p.cr-acq-stub__where', 'p.cr-acq-stub__date' ] );
 		expect( ( await stub.locator( '.pk-kindlabel' ).textContent() ).trim() ).toBe( 'Purchase' );
 		expect( ( await stub.locator( 'time' ).getAttribute( 'class' ) ) || '' ).toBe( '' );
 		expect( await visibleLinks( stub ) ).toBe( 1 );

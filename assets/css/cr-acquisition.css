@@ -257,6 +257,11 @@
 	transform: none;
 }
 
+/* The receipt paper stays ivory in dark mode, and main.has-main-accent-background-color h1 flips the ink to ivory, so the title pins its ink at (0,2,0). */
+.cr-acq-single__receipt .cr-acq-single__title {
+	color: var(--cr-russian-violet);
+}
+
 .cr-acq-single__facts {
 	margin: 0;
 }
@@ -325,6 +330,11 @@
 	transform: none;
 }
 
+/* The tape flips dark with the scheme, so the ink follows the tape token and outranks the accent-background heading override. */
+.cr-acq-single__notes .cr-acq-single__notes-title {
+	color: var(--cr-tape-ink);
+}
+
 .cr-acq-single__notes-title::before {
 	content: "";
 	position: absolute;
@@ -340,8 +350,8 @@
 	line-height: var(--cr-leading-relaxed);
 }
 
-/* Later cards in the same post print as the plugin's card, set as a compact receipt. */
-.cr-acq-single-page .single-post__content .pk-card.k-acquisition {
+/* Later cards in the same post print as the plugin's card, set as a compact receipt. The body.single prefix outranks the generic kind card rule in cr-post-kinds.css. */
+body.cr-acq-single-page.single .single-post__content .pk-card.k-acquisition {
 	display: block;
 	width: auto;
 	max-width: none;
@@ -437,6 +447,7 @@
 }
 
 .cr-acq-stub .pk-kindlabel {
+	display: block;
 	margin: var(--cr-space-xs) 0 0;
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-mono);
@@ -511,7 +522,7 @@
 
 	.cr-acq-single__photo,
 	.cr-acq-single__notes,
-	.cr-acq-single-page .single-post__content .pk-card.k-acquisition {
+	body.cr-acq-single-page.single .single-post__content .pk-card.k-acquisition {
 		border: 2px solid CanvasText;
 		background-image: none;
 		box-shadow: none;
