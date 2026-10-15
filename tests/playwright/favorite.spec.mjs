@@ -479,7 +479,7 @@ test.describe( 'single', () => {
 
 	test( 'S3 (protected): the template header and its visible h1 stay; no sheet', async ( { page } ) => {
 		await visit( page, STREAM );
-		const link = page.locator( 'a:text-is("Locked Favorite Sample")' ).first();
+		const link = page.locator( 'a:text-matches("^(Protected: )?Locked Favorite Sample$")' ).first();
 		test.skip( 0 === await link.count(), 'S3 is not on the first Stream page' );
 		await visit( page, await link.getAttribute( 'href' ) );
 		await expect( page.locator( '.cr-fav-sheet' ) ).toHaveCount( 0 );
