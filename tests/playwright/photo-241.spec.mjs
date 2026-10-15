@@ -34,6 +34,26 @@ async function openFixture( page, request, label ) {
 	await page.goto( path, { waitUntil: 'load' } );
 }
 
+// The place line on G01 and G02 comes from Simple Location's location_content,
+// which the plugin's Photo_Location gate lets through. The lane doc lists G01-G04
+// under Dev, and the local stack doesn't install Simple Location. The plugin
+// registers the REST namespace sloc_geo/1.0, so the REST index says whether it's
+// active. CR_SIMPLE_LOCATION=1 forces the check on, 0 forces it off.
+async function simpleLocationActive( request ) {
+	if ( '1' === process.env.CR_SIMPLE_LOCATION ) {
+		return true;
+	}
+	if ( '0' === process.env.CR_SIMPLE_LOCATION ) {
+		return false;
+	}
+	const response = await request.get( '/wp-json/' );
+	if ( ! response.ok() ) {
+		return false;
+	}
+	const index = await response.json();
+	return ( index?.namespaces || [] ).includes( 'sloc_geo/1.0' );
+}
+
 // W3-G2: a rendered anchor is an a[href] with no [hidden] on it or an ancestor.
 const renderedAnchors = ( scope ) => scope.evaluate( ( el ) => [ ...el.querySelectorAll( 'a[href]' ) ].filter( ( a ) => ! a.closest( '[hidden]' ) ).length );
 const visibleNegativeTabindex = ( scope ) => scope.evaluate( ( el ) => [ ...el.querySelectorAll( 'a[tabindex="-1"]' ) ].filter( ( a ) => ! a.closest( '[hidden]' ) ).length );
@@ -412,6 +432,7 @@ test.describe( 'single', () => {
 	} );
 
 	test( 'G01 and G02 show the place line and no street, map, coordinates or head geo meta (logged out)', async ( { page, request } ) => {
+		test.skip( ! await simpleLocationActive( request ), 'Simple Location is not active (no sloc_geo/1.0 REST namespace); its location_content filter prints the place line, and the lane doc lists G01-G04 under Dev. Set CR_SIMPLE_LOCATION=1 to force.' );
 		for ( const label of [ 'G01', 'G02' ] ) {
 			await openFixture( page, request, label );
 			const html = await page.content();
