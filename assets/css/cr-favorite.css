@@ -253,13 +253,6 @@
 	}
 }
 
-/* A protected favorite keeps the plugin's generic card and takes no clipping or star.
-   The band is paper in both schemes, and --cr-link flips to sky blue in dark, so
-   the card's title link takes the same cerulean as .cr-fav-link. */
-.cr-favorite-chart .pk-card--protected .pk-title a {
-	color: var(--cr-cerulean);
-}
-
 /* ============================================================
    Single: the scrapbook sheet.
 
