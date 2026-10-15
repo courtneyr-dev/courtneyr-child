@@ -86,18 +86,44 @@ test.describe( 'archive', () => {
 		await expect( page.locator( '.cr-photo-frame .pk-kindlabel, .cr-photo-frame .pk-media__caption, .cr-photo-frame .pk-excerpt' ) ).toHaveCount( 0 );
 	} );
 
+	test( 'served cascade: the plugin card base does not shrink the frame (media wider than 100px, no padding, no tint)', async ( { page } ) => {
+		await page.setViewportSize( { width: 1440, height: 900 } );
+		await openArchive( page );
+		const sizes = await page.locator( '.pkiw-group__items > li .cr-photo-frame' ).first().evaluate( ( frame ) => {
+			const cs = getComputedStyle( frame );
+			const media = frame.querySelector( '.cr-photo-frame__media' ).getBoundingClientRect();
+			const title = frame.querySelector( '.cr-photo-frame__title' ).getBoundingClientRect();
+			return { frame: frame.getBoundingClientRect().width, media: media.width, title: title.width, padding: cs.paddingLeft, columns: cs.gridTemplateColumns.split( ' ' ).length, before: getComputedStyle( frame, '::before' ).content, shadow: cs.boxShadow };
+		} );
+		expect( sizes.media, 'frame media width' ).toBeGreaterThan( 100 );
+		expect( sizes.media, 'media fills the frame' ).toBeCloseTo( sizes.frame, 0 );
+		expect( sizes.title, 'title is not a one-letter column' ).toBeGreaterThan( 60 );
+		expect( sizes.padding ).toBe( '0px' );
+		expect( sizes.columns ).toBe( 1 );
+		expect( [ 'none', 'normal' ] ).toContain( sizes.before );
+		expect( sizes.shadow ).toBe( 'none' );
+	} );
+
 	for ( const width of WIDTHS ) {
 		test( `DOM, reading and Tab order agree and nothing scrolls sideways at ${ width }`, async ( { page } ) => {
 			await page.setViewportSize( { width, height: 900 } );
 			await openArchive( page );
-			const boxes = await page.locator( '.cr-photo-frame' ).evaluateAll( ( els ) => els.map( ( el, i ) => {
-				const r = el.getBoundingClientRect();
-				return { i, top: Math.round( r.top + scrollY ), left: Math.round( r.left ), width: Math.round( r.width ) };
-			} ) );
+			const boxes = await page.locator( '.cr-photo-frame' ).evaluateAll( ( els ) => {
+				const sheets = [ ...document.querySelectorAll( '.pkiw-group' ) ];
+				return els.map( ( el, i ) => {
+					const r = el.getBoundingClientRect();
+					return { i, sheet: sheets.indexOf( el.closest( '.pkiw-group' ) ), top: Math.round( r.top + scrollY ), left: Math.round( r.left ), width: Math.round( r.width ) };
+				} );
+			} );
 			const reading = [ ...boxes ].sort( ( a, b ) => ( Math.abs( a.top - b.top ) > 40 ? a.top - b.top : a.left - b.left ) ).map( ( b ) => b.i );
 			expect( reading, 'reading order is DOM order' ).toEqual( boxes.map( ( b ) => b.i ) );
-			const across = new Set( boxes.filter( ( b ) => Math.abs( b.top - boxes[0].top ) < 40 ).map( ( b ) => b.left ) ).size;
-			expect( Math.min( boxes.length, across ), 'frames in the first row' ).toBe( Math.min( boxes.length, width >= 1024 ? 4 : width >= 640 ? 3 : 2 ) );
+			// The first sheet may hold fewer frames than a row (October holds three), so measure the first sheet that fills one.
+			const perRow = width >= 1024 ? 4 : width >= 640 ? 3 : 2;
+			const sheetSizes = boxes.reduce( ( map, b ) => map.set( b.sheet, ( map.get( b.sheet ) || 0 ) + 1 ), new Map() );
+			const rowSheet = [ ...sheetSizes ].find( ( [ , count ] ) => count >= perRow )?.[ 0 ] ?? [ ...sheetSizes ].sort( ( a, b ) => b[1] - a[1] )[0][0];
+			const inSheet = boxes.filter( ( b ) => b.sheet === rowSheet );
+			const across = new Set( inSheet.filter( ( b ) => Math.abs( b.top - inSheet[0].top ) < 40 ).map( ( b ) => b.left ) ).size;
+			expect( Math.min( inSheet.length, across ), 'frames in the first full row' ).toBe( Math.min( inSheet.length, perRow ) );
 			expect( new Set( boxes.map( ( b ) => b.width ) ).size, 'one frame width per breakpoint' ).toBe( 1 );
 			const hrefs = await page.locator( '.cr-photo-frame a.u-url' ).evaluateAll( ( els ) => els.filter( ( a ) => ! a.closest( '[hidden]' ) ).map( ( a ) => a.href ) );
 			const tabbed = [];
@@ -132,7 +158,8 @@ test.describe( 'archive', () => {
 			expect( info.filter ).toBe( 'none' );
 			expect( info.blend ).toBe( 'normal' );
 			expect( info.srcset ).toBeTruthy();
-			expect( info.src ).not.toMatch( /-scaled|\.png$/ ); // a sub-size file, never the original
+			expect( info.src ).not.toMatch( /-scaled/ );
+			expect( info.src ).toMatch( /-\d+x\d+\.\w+$/ ); // a sub-size file, never the original
 			expect( Math.abs( info.ratio - 1.5 ) ).toBeLessThan( 0.02 );
 			expect( [ 'none', 'normal' ] ).toContain( info.before );
 			expect( [ 'none', 'normal' ] ).toContain( info.after );
@@ -280,7 +307,8 @@ test.describe( 'single', () => {
 			window.__docKeydown = 0;
 			const original = document.addEventListener.bind( document );
 			document.addEventListener = ( type, ...rest ) => {
-				if ( type === 'keydown' ) {
+				// Count only registrations made from the projector script; the theme's own Complianz Space-key handler also lands on document.
+				if ( type === 'keydown' && /photo-projector/.test( new Error().stack || '' ) ) {
 					window.__docKeydown++;
 				}
 				return original( type, ...rest );
@@ -498,7 +526,38 @@ async function staticArchive( page, sheets ) {
 	await page.addStyleTag( { content: css( 'cr-photo.css' ) } );
 }
 
+// The plugin's build/blocks.css rules for .pk-card (develop), loaded after the theme sheet at the same one-class weight.
+const PLUGIN_CARD_BASE = ':where(.pk-card){--pk-space-3:0.75rem;--pk-space-4:1rem;--pk-space-5:1.5rem;--pk-radius:14px;--pk-badge:34px;--pk-maxw:38rem}.pk-card{align-items:start;background:var(--pk-surface,white);border:1px solid var(--pk-border,gray);border-left:3px solid var(--pk-kind,red);border-radius:var(--pk-radius);box-shadow:var(--pk-shadow,0 1px 4px rgba(0,0,0,.2));color:var(--pk-ink);display:grid;gap:var(--pk-space-3) var(--pk-space-4);grid-template-columns:var(--pk-badge) 1fr;max-width:var(--pk-maxw);padding:var(--pk-space-5);position:relative}.pk-card:before{background:var(--pk-tint,pink);border-radius:inherit;content:"";inset:0;opacity:.5;pointer-events:none;position:absolute}.pk-card>*{position:relative}.pk-title{color:var(--pk-ink);font-size:1.075rem;font-weight:700;line-height:1.3;margin:0}.pk-title a{color:inherit;text-decoration:none}';
+
 test.describe( 'static: cr-photo.css on a blank page', () => {
+	test( 'the plugin card base loaded after the sheet leaves the frame whole: full-width media, no padding, no tint, a readable title', async ( { page } ) => {
+		await page.setViewportSize( { width: 1440, height: 900 } );
+		await staticArchive( page, [ 9, 3 ] );
+		await page.addStyleTag( { content: PLUGIN_CARD_BASE } );
+		const sizes = await page.locator( '.pkiw-group__items > li .cr-photo-frame' ).first().evaluate( ( frame ) => {
+			const cs = getComputedStyle( frame );
+			return {
+				frame: frame.getBoundingClientRect().width,
+				media: frame.querySelector( '.cr-photo-frame__media' ).getBoundingClientRect().width,
+				title: frame.querySelector( '.cr-photo-frame__title' ).getBoundingClientRect().width,
+				titleHeight: frame.querySelector( '.cr-photo-frame__title' ).getBoundingClientRect().height,
+				padding: cs.paddingLeft,
+				border: cs.borderLeftWidth,
+				columns: cs.gridTemplateColumns.split( ' ' ).length,
+				before: getComputedStyle( frame, '::before' ).content,
+				shadow: cs.boxShadow,
+				fontSize: getComputedStyle( frame.querySelector( '.cr-photo-frame__title' ) ).fontSize,
+			};
+		} );
+		expect( sizes.media ).toBeGreaterThan( 100 );
+		expect( sizes.media ).toBeCloseTo( sizes.frame, 0 );
+		expect( sizes.title, 'title is not a one-letter column' ).toBeGreaterThan( 40 );
+		expect( sizes.titleHeight, 'a short title stands on one line' ).toBeLessThan( 40 );
+		expect( sizes ).toMatchObject( { padding: '0px', border: '0px', columns: 1, shadow: 'none' } );
+		expect( [ 'none', 'normal' ] ).toContain( sizes.before );
+		expect( sizes.fontSize, 'the frame title keeps the theme size, not the plugin pk-title size' ).not.toBe( '17.2px' );
+	} );
+
 	for ( const [ width, perRow ] of [ [ 1440, 4 ], [ 800, 3 ], [ 375, 2 ], [ 320, 2 ] ] ) {
 		test( `${ perRow } frames across at ${ width }, one width, a short row ends after its last frame`, async ( { page } ) => {
 			await page.setViewportSize( { width, height: 900 } );
