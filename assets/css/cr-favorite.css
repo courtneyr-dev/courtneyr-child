@@ -51,14 +51,16 @@
 /* One link look for the title links, the Source link and the Stream title:
    cerulean on paper in both schemes (--cr-link flips to sky blue, which
    reads 1.71:1 on ivory), violet on hover. */
-.cr-fav-link {
+.cr-fav-link,
+.cr-fav-item--protected .pk-card--protected .pk-title a {
 	color: var(--cr-cerulean);
 	text-decoration: underline;
 	text-decoration-thickness: 2px;
 	text-underline-offset: 0.2em;
 }
 
-.cr-fav-link:hover {
+.cr-fav-link:hover,
+.cr-fav-item--protected .pk-card--protected .pk-title a:hover {
 	color: var(--cr-russian-violet);
 }
 
@@ -221,7 +223,8 @@
 	transform: none;
 }
 
-.cr-fav-title {
+.cr-fav-title,
+.cr-fav-item--protected .pk-card--protected .pk-title {
 	margin: 0;
 	font-family: var(--cr-font-accent);
 	font-size: var(--cr-text-base);
@@ -232,10 +235,39 @@
 }
 
 /* One link per item: its box covers the star and the clipping, so hovering the item hovers the link. */
-.cr-fav-title .cr-fav-link::after {
+.cr-fav-title .cr-fav-link::after,
+.cr-fav-item--protected .pk-card--protected .pk-title a::after {
 	content: "";
 	position: absolute;
 	inset: 0;
+}
+
+/*
+ * A protected item holds the plugin's protected card, which is a bordered
+ * grid with a badge column. Inside the clipping it is only the title: no box
+ * of its own, no tint layer, and no positioning, so the link's hit area
+ * resolves against the clipping.
+ */
+.cr-fav-item--protected .pk-card--protected {
+	position: static;
+	display: block;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	color: inherit;
+}
+
+.cr-fav-item--protected .pk-card--protected::before {
+	content: none;
+}
+
+/* The plugin positions its titles; static lets the link's hit area reach the whole clipping. */
+.cr-fav-item--protected .pk-card--protected .pk-title {
+	position: static;
 }
 
 /* The ring and halo outline the whole clipping while its title has focus. */
@@ -247,7 +279,8 @@
 
 @supports selector(:has(*)) {
 
-	.cr-fav-title .cr-fav-link:focus-visible {
+	.cr-fav-title .cr-fav-link:focus-visible,
+	.cr-fav-item--protected .pk-card--protected .pk-title a:focus-visible {
 		outline: none;
 		box-shadow: none;
 	}
@@ -263,17 +296,54 @@
 
 .cr-fav-sheet {
 	--cr-focus-halo: var(--cr-russian-violet);
+	--cr-paper-tear: 0.5rem;
 	position: relative;
 	isolation: isolate;
 	box-sizing: border-box;
 	max-inline-size: 100%;
-	margin-block: var(--cr-space-xl);
+	margin-block: var(--cr-space-xl) calc(var(--cr-space-xl) + var(--cr-paper-tear));
 	padding: var(--cr-space-3xl) var(--cr-space-lg) var(--cr-space-xl);
 	background-color: var(--cr-white);
 	background-image: var(--cr-fiber);
 	box-shadow: var(--cr-shadow-hard);
 	color: var(--cr-russian-violet);
 	overflow-wrap: anywhere;
+}
+
+/*
+ * The torn top and bottom edges, the archive clipping's flat mask. Each
+ * strip sits outside the sheet's box in the sheet's own fill, so it never
+ * clips the hard shadow or a focus ring. The star and the tape sit above the
+ * top strip.
+ */
+.cr-fav-sheet::before,
+.cr-fav-sheet::after {
+	content: "";
+	position: absolute;
+	inset-inline: 0;
+	block-size: var(--cr-paper-tear);
+	background-color: var(--cr-white);
+	pointer-events: none;
+}
+
+.cr-fav-sheet::before {
+	inset-block-end: 100%;
+	-webkit-mask:
+		linear-gradient(45deg, var(--cr-black) 25%, transparent 25%) top left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x,
+		linear-gradient(315deg, var(--cr-black) 25%, transparent 25%) top left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x;
+	mask:
+		linear-gradient(45deg, var(--cr-black) 25%, transparent 25%) top left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x,
+		linear-gradient(315deg, var(--cr-black) 25%, transparent 25%) top left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x;
+}
+
+.cr-fav-sheet::after {
+	inset-block-start: 100%;
+	-webkit-mask:
+		linear-gradient(135deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x,
+		linear-gradient(225deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x;
+	mask:
+		linear-gradient(135deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x,
+		linear-gradient(225deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x;
 }
 
 .cr-fav-sheet__star {
@@ -321,7 +391,7 @@
 	border-block-end: 3px solid var(--cr-ut-orange);
 }
 
-.cr-fav-sheet__title {
+.cr-fav-sheet .cr-fav-sheet__title {
 	margin: 0 0 var(--cr-space-md);
 	font-family: var(--cr-font-accent);
 	font-size: var(--cr-text-3xl);
@@ -547,6 +617,24 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 	overflow-wrap: anywhere;
 }
 
+/*
+ * The Stream title carries the plugin's pk-title class, and the plugin's own
+ * `.pk-title a` (color: inherit, no underline) and its hover rule would
+ * outrank the shared link look. Two extra classes win both, so the title
+ * reads as a link on the ivory clipping in light and dark.
+ */
+.cr-fav-card .cr-fav-card__title .cr-fav-link {
+	color: var(--cr-cerulean);
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.2em;
+}
+
+.cr-fav-card .cr-fav-card__title .cr-fav-link:hover {
+	color: var(--cr-russian-violet);
+	text-decoration-color: currentcolor;
+}
+
 /* The link's box reaches up over the star, so the whole card is the hit area. */
 .cr-fav-card__title .cr-fav-link::after {
 	content: "";
@@ -629,6 +717,8 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 	.cr-favorite-chart .pkiw-group::after,
 	.cr-fav-clipping::after,
 	.cr-fav-card__clipping::after,
+	.cr-fav-sheet::before,
+	.cr-fav-sheet::after,
 	.cr-fav-sheet__mount::before,
 	.cr-fav-star__shape,
 	.cr-fav-item > .cr-fav-star,
@@ -650,7 +740,8 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 	}
 
 	.cr-fav-link,
-	.cr-favorite-chart .pk-card--protected .pk-title a {
+	.cr-fav-card .cr-fav-card__title .cr-fav-link,
+	.cr-fav-item--protected .pk-card--protected .pk-title a {
 		color: LinkText;
 	}
 

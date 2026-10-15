@@ -314,6 +314,32 @@ function item_html( array $facts, int $level, int $post_id, string $tilt ): stri
 }
 
 /**
+ * A protected archive item: the star and clipping shell around the plugin's
+ * protected card.
+ *
+ * The card stays whole, so its article remains the entry root and its title
+ * link the item's one link. The shell reads no favorite facts and prints no
+ * favorite-of data.
+ *
+ * @param string $card    The plugin's protected stream card.
+ * @param int    $post_id Post ID.
+ * @return string Shell markup, or the card unchanged when it isn't the protected card.
+ */
+function protected_item_html( string $card, int $post_id ): string {
+	if ( false === strpos( $card, 'pk-card--protected' ) ) {
+		return $card;
+	}
+
+	$tilt = star_tilt( $post_id, last_tilt() );
+	last_tilt( $tilt );
+
+	return '<div class="cr-fav-item cr-fav-item--protected">'
+		. '<span class="cr-fav-star" aria-hidden="true" style="--cr-fav-tilt:var(' . esc_attr( $tilt ) . ')">' . star_svg() . '</span>'
+		. '<div class="cr-fav-clipping">' . $card . '</div>'
+		. '</div>';
+}
+
+/**
  * Paint a favorite's stream-card block as a month-band clipping.
  *
  * @param string    $html     Rendered stream card.
@@ -332,9 +358,14 @@ function item( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
-	// A protected favorite keeps the plugin's generic protected card: the title
-	// link and nothing else. No clipping, star or tilt, and no facts are read.
-	$facts = post_password_required( $post ) ? array() : facts( $post_id );
+	// A protected favorite is still an item: a star and a clipping around the
+	// plugin's protected card, which holds the title link and nothing else.
+	// No facts are read, so no cited URL, author or date reaches the page.
+	if ( post_password_required( $post ) ) {
+		return protected_item_html( $html, $post_id );
+	}
+
+	$facts = facts( $post_id );
 	if ( array() === $facts ) {
 		return $html;
 	}
