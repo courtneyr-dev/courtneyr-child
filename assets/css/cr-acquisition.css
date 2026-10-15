@@ -458,6 +458,11 @@ body.cr-acq-single-page.single .single-post__content .pk-card.k-acquisition {
 	text-transform: uppercase;
 }
 
+/* The later card stays ivory in dark, so its label can't take the dark pk-muted ink from cr-post-kinds.css. */
+body.cr-acq-single-page.single .single-post__content .pk-card.k-acquisition .pk-kindlabel {
+	color: var(--cr-russian-violet);
+}
+
 .cr-acq-stub__where,
 .cr-acq-stub__date {
 	margin: var(--cr-space-2xs) 0 0;

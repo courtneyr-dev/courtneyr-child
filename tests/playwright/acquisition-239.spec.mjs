@@ -574,6 +574,18 @@ test.describe( 'single (PKIW 239)', () => {
 		expect( photos.length, 'the archive receipt shows the first card photo only' ).toBe( 1 );
 	} );
 
+	test( 'A54 dark: the second card stays ivory and its kind label keeps violet ink at 4.5:1 (J04)', async ( { page } ) => {
+		await openSingle( page, 'Bike Bell', { scheme: 'dark' } );
+		const later = page.locator( '.pk-card.k-acquisition' );
+		expect( ( await computed( later, [ 'background-color' ] ) )[ 'background-color' ] ).toBe( 'rgb(251, 250, 245)' );
+		const label = later.locator( '.pk-kindlabel' );
+		expect( await label.count() ).toBeGreaterThan( 0 );
+		const style = await computed( label.first(), [ 'color' ] );
+		expect( contrast( style.color, 'rgb(251, 250, 245)' ), 'later card label on ivory' ).toBeGreaterThanOrEqual( 4.5 );
+		const title = await computed( later.locator( 'h2.pk-title' ), [ 'color' ] );
+		expect( contrast( title.color, 'rgb(251, 250, 245)' ), 'later card title on ivory' ).toBeGreaterThanOrEqual( 4.5 );
+	} );
+
 	test( 'A55 a remote card photo prints no frame and no request to images.example.com (A05 Paper Lantern)', async ( { page } ) => {
 		const requested = [];
 		page.on( 'request', ( request ) => requested.push( request.url() ) );
