@@ -236,6 +236,7 @@
 .cr-acq-single__img {
 	display: block;
 	width: 100%;
+	max-width: none;
 	height: auto;
 	filter: none;
 }
@@ -289,6 +290,10 @@
 }
 
 .cr-acq-single__link {
+	display: inline-flex;
+	align-items: baseline;
+	align-items: last baseline;
+	max-width: 100%;
 	color: var(--cr-russian-violet);
 	text-decoration: underline;
 	text-underline-offset: 0.15em;
@@ -380,6 +385,7 @@ body.cr-acq-single-page.single .single-post__content .pk-card.k-acquisition {
 
 	.cr-acq-single:has(> .cr-acq-single__photo:not(.cr-cover--failed)) {
 		grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+		grid-template-rows: max-content 1fr;
 	}
 
 	.cr-acq-single:has(> .cr-acq-single__photo:not(.cr-cover--failed)) > .cr-acq-single__photo {
@@ -467,12 +473,9 @@ body.cr-acq-single-page.single .single-post__content .pk-card.k-acquisition .pk-
 .cr-acq-stub__date {
 	margin: var(--cr-space-2xs) 0 0;
 	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
 	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
 	line-height: var(--cr-leading-snug);
-}
-
-.cr-acq-stub__date {
-	font-family: var(--cr-font-mono);
 }
 
 .cr-acq-stub:has(a:focus-visible) {
