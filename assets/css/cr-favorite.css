@@ -1,0 +1,711 @@
+/**
+ * Favorites (issue 259): the star chart archive, the scrapbook single and the
+ * Stream clipping.
+ *
+ * Tokens only. Paper, stars and tape are physical objects, so they keep their
+ * light fills in dark mode (the raw palette never changes) and only the page
+ * around them, the tape and the hard shadows flip through their tokens.
+ * Text never drops below --cr-text-floor, shadows are the hard tokens, and
+ * nothing here filters an image.
+ *
+ * Markup: inc/favorite.php (archive item), inc/single-favorite.php (sheet),
+ * inc/stream-favorite.php (Stream card).
+ */
+
+/* ============================================================
+   Shared: the flat star sticker.
+
+   A flat --cr-selective-yellow fill with a 2px --cr-russian-violet edge,
+   never metallic. Each lane sets the size; the archive and the sheet set the
+   lean through --cr-fav-tilt.
+   ============================================================ */
+
+.cr-fav-star {
+	position: relative;
+	display: inline-grid;
+	flex: none;
+	place-items: center;
+	box-sizing: border-box;
+	inline-size: 3rem;
+	aspect-ratio: 1;
+	color: var(--cr-russian-violet);
+	transform: rotate(var(--cr-fav-tilt, var(--cr-rotate-1)));
+}
+
+.cr-fav-star__shape {
+	grid-area: 1 / 1;
+	inline-size: 100%;
+	block-size: 100%;
+	overflow: visible;
+	fill: var(--cr-selective-yellow);
+	stroke: var(--cr-russian-violet);
+	stroke-width: 2px;
+	stroke-linejoin: round;
+}
+
+.cr-fav-star__shape path {
+	vector-effect: non-scaling-stroke;
+}
+
+/* One link look for the title links, the Source link and the Stream title:
+   cerulean on paper in both schemes (--cr-link flips to sky blue, which
+   reads 1.71:1 on ivory), violet on hover. */
+.cr-fav-link {
+	color: var(--cr-cerulean);
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.2em;
+}
+
+.cr-fav-link:hover {
+	color: var(--cr-russian-violet);
+}
+
+/* ============================================================
+   Archive: one torn-paper band for each month.
+
+   --cr-focus-halo is violet inside paper in both schemes: the shipped halo
+   is --cr-ink, which turns printer ivory in dark and reads 1.14:1 against
+   the light-gray band.
+   ============================================================ */
+
+.cr-favorite-chart {
+	--cr-focus-halo: var(--cr-russian-violet);
+	min-inline-size: 0;
+}
+
+.cr-favorite-chart .pkiw-grouped {
+	display: grid;
+	gap: var(--cr-space-2xl);
+	margin: 0;
+	padding: 0;
+}
+
+.cr-favorite-chart .pkiw-group {
+	--cr-paper-tear: 0.5rem;
+	position: relative;
+	isolation: isolate;
+	box-sizing: border-box;
+	inline-size: 100%;
+	min-inline-size: 0;
+	margin-block-end: var(--cr-paper-tear);
+	padding: var(--cr-space-2xl) var(--cr-space-lg) var(--cr-space-lg);
+	background-color: var(--cr-light-gray);
+	background-image: var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+}
+
+/* The torn lower edge: a flat mask, so it never clips a shadow or a focus ring. */
+.cr-favorite-chart .pkiw-group::after,
+.cr-fav-clipping::after {
+	content: "";
+	position: absolute;
+	inset-inline: 0;
+	inset-block-start: 100%;
+	block-size: var(--cr-paper-tear, 0.5rem);
+	background-color: var(--cr-light-gray);
+	pointer-events: none;
+	-webkit-mask:
+		linear-gradient(135deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear, 0.5rem) var(--cr-paper-tear, 0.5rem) repeat-x,
+		linear-gradient(225deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear, 0.5rem) var(--cr-paper-tear, 0.5rem) repeat-x;
+	mask:
+		linear-gradient(135deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear, 0.5rem) var(--cr-paper-tear, 0.5rem) repeat-x,
+		linear-gradient(225deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear, 0.5rem) var(--cr-paper-tear, 0.5rem) repeat-x;
+}
+
+.cr-fav-clipping::after {
+	background-color: var(--cr-printer-ivory);
+}
+
+/*
+ * Constellation marks: one static background for each band, in the gutter
+ * beside the items, never a line from one item to the next. The shape is a
+ * mask; the color is --cr-cerulean, and --cr-prussian-blue on even bands.
+ */
+.cr-favorite-chart .pkiw-group::before {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	inset-block: var(--cr-space-lg);
+	inset-inline-end: var(--cr-space-2xs);
+	inline-size: var(--cr-space-lg);
+	background-color: var(--cr-cerulean);
+	pointer-events: none;
+	-webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 120'><g fill='black' stroke='black' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'><path fill='none' d='M5 8L17 30L8 58L18 86L10 112'/><circle cx='5' cy='8' r='2'/><circle cx='8' cy='58' r='2'/><circle cx='10' cy='112' r='2'/><path d='M17 24l1.5 4.5 4.5.4-3.4 3 1 4.4-3.6-2.4-3.6 2.4 1-4.4-3.4-3 4.5-.4z'/><path d='M18 81l1.2 3.6 3.6.3-2.7 2.4.8 3.5-2.9-1.9-2.9 1.9.8-3.5-2.7-2.4 3.6-.3z'/></g></svg>") center top / 100% auto repeat-y;
+	mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 120'><g fill='black' stroke='black' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'><path fill='none' d='M5 8L17 30L8 58L18 86L10 112'/><circle cx='5' cy='8' r='2'/><circle cx='8' cy='58' r='2'/><circle cx='10' cy='112' r='2'/><path d='M17 24l1.5 4.5 4.5.4-3.4 3 1 4.4-3.6-2.4-3.6 2.4 1-4.4-3.4-3 4.5-.4z'/><path d='M18 81l1.2 3.6 3.6.3-2.7 2.4.8 3.5-2.9-1.9-2.9 1.9.8-3.5-2.7-2.4 3.6-.3z'/></g></svg>") center top / 100% auto repeat-y;
+}
+
+.cr-favorite-chart .pkiw-group:nth-child(even)::before {
+	background-color: var(--cr-prussian-blue);
+}
+
+/* The month label: tape on the band's top-left edge, upright. */
+.cr-favorite-chart .pkiw-group__heading {
+	position: absolute;
+	inset-block-start: calc(-1 * var(--cr-space-sm));
+	inset-inline-start: var(--cr-space-md);
+	box-sizing: border-box;
+	max-inline-size: calc(100% - var(--cr-space-xl));
+	margin: 0;
+	padding: var(--cr-space-2xs) var(--cr-space-md);
+	background-color: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	letter-spacing: normal;
+	overflow-wrap: anywhere;
+	transform: none;
+}
+
+/* Items: 3 columns from 64rem, 2 from 40rem, 1 below. The last row stays left. */
+.cr-favorite-chart .pkiw-group__items {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-lg);
+	max-inline-size: none;
+	margin: 0;
+	padding: 0;
+	padding-inline-end: var(--cr-space-lg);
+	list-style: none;
+}
+
+@media (min-width: 40rem) {
+
+	.cr-favorite-chart .pkiw-group__items {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-favorite-chart .pkiw-group__items {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+.cr-favorite-chart .pkiw-group__items > li {
+	position: relative;
+	min-inline-size: 0;
+	margin: 0;
+	padding: 0;
+}
+
+.cr-fav-item {
+	position: relative;
+	padding-block-start: var(--cr-space-md);
+	padding-inline-start: var(--cr-space-md);
+}
+
+.cr-fav-item > .cr-fav-star {
+	position: absolute;
+	z-index: 1;
+	inset-block-start: 0;
+	inset-inline-start: 0;
+}
+
+.cr-fav-clipping {
+	--cr-paper-tear: 0.375rem;
+	position: relative;
+	box-sizing: border-box;
+	min-block-size: 4.5rem;
+	margin-block-end: var(--cr-paper-tear);
+	padding: var(--cr-space-lg) var(--cr-space-md) var(--cr-space-md) var(--cr-space-2xl);
+	background-color: var(--cr-printer-ivory);
+	background-image: var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard-sm);
+	color: var(--cr-russian-violet);
+	transform: none;
+}
+
+.cr-fav-title {
+	margin: 0;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-base);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	letter-spacing: normal;
+	overflow-wrap: anywhere;
+}
+
+/* One link per item: its box covers the star and the clipping, so hovering the item hovers the link. */
+.cr-fav-title .cr-fav-link::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+/* The ring and halo outline the whole clipping while its title has focus. */
+.cr-fav-item:has(a:focus-visible) .cr-fav-clipping {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 7px;
+	box-shadow: var(--cr-shadow-hard-sm), 0 0 0 7px var(--cr-focus-halo);
+}
+
+@supports selector(:has(*)) {
+
+	.cr-fav-title .cr-fav-link:focus-visible {
+		outline: none;
+		box-shadow: none;
+	}
+}
+
+/* A protected favorite keeps the plugin's title-only card inside the clipping. */
+.cr-fav-item--protected > .pk-card {
+	position: relative;
+	box-sizing: border-box;
+	display: block;
+	max-inline-size: none;
+	min-block-size: 4.5rem;
+	margin: 0;
+	padding: var(--cr-space-lg) var(--cr-space-md) var(--cr-space-md) var(--cr-space-2xl);
+	border: 0;
+	border-radius: 0;
+	background-color: var(--cr-printer-ivory);
+	background-image: var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard-sm);
+	color: var(--cr-russian-violet);
+	transform: none;
+}
+
+.cr-fav-item--protected > .pk-card::before {
+	content: none;
+}
+
+.cr-fav-item--protected .pk-title {
+	margin: 0;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-base);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.cr-fav-item--protected .pk-title a {
+	color: var(--cr-cerulean);
+}
+
+.cr-fav-item--protected .pk-title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+/* ============================================================
+   Single: the scrapbook sheet.
+
+   Upright on white with violet ink in both schemes. The star and the tape are
+   the only rotated layers; neither sits over the H1 (the sheet's top padding
+   clears them), and the picture mount is a flat taped paper.
+   ============================================================ */
+
+.cr-fav-sheet {
+	--cr-focus-halo: var(--cr-russian-violet);
+	position: relative;
+	isolation: isolate;
+	box-sizing: border-box;
+	max-inline-size: 100%;
+	margin-block: var(--cr-space-xl);
+	padding: var(--cr-space-3xl) var(--cr-space-lg) var(--cr-space-xl);
+	background-color: var(--cr-white);
+	background-image: var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+	overflow-wrap: anywhere;
+}
+
+.cr-fav-sheet__star {
+	position: absolute;
+	z-index: 1;
+	inset-block-start: calc(-1 * var(--cr-space-md));
+	inset-inline-start: calc(-1 * var(--cr-space-md));
+	inline-size: 4.5rem;
+	aspect-ratio: 1;
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-fav-sheet__star .cr-fav-star__shape {
+	display: block;
+}
+
+.cr-fav-sheet__tape {
+	position: absolute;
+	z-index: 1;
+	inset-block-start: calc(-1 * var(--cr-space-sm));
+	inset-inline-start: 4.5rem;
+	box-sizing: border-box;
+	max-inline-size: calc(100% - 5rem);
+	margin: 0;
+	padding: var(--cr-space-2xs) var(--cr-space-md);
+	background-color: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-fav-sheet__tape .pk-kindlabel {
+	display: inline-block;
+	font-family: var(--cr-font-display);
+	font-size: max(1rem, var(--cr-text-base));
+	font-weight: var(--cr-weight-regular);
+	line-height: var(--cr-leading-snug);
+	letter-spacing: normal;
+	text-transform: uppercase;
+}
+
+.cr-fav-sheet__marker {
+	display: block;
+	block-size: 0;
+	margin-block-start: var(--cr-space-3xs);
+	border-block-end: 3px solid var(--cr-ut-orange);
+}
+
+.cr-fav-sheet__title {
+	margin: 0 0 var(--cr-space-md);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-3xl);
+	font-style: normal;
+	font-weight: var(--cr-weight-black);
+	letter-spacing: normal;
+	line-height: var(--cr-leading-tight);
+	color: var(--cr-russian-violet);
+	overflow-wrap: anywhere;
+}
+
+.cr-fav-sheet__body {
+	display: grid;
+	gap: var(--cr-space-lg);
+	align-items: start;
+}
+
+@media (min-width: 64rem) {
+
+	.cr-fav-sheet__body:has(.cr-fav-sheet__mount:not(.cr-cover--failed)) {
+		grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+	}
+}
+
+.cr-fav-sheet__record {
+	display: grid;
+	gap: var(--cr-space-md);
+	min-inline-size: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+}
+
+.cr-fav-sheet__cited {
+	margin: 0;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+}
+
+.cr-fav-rows {
+	display: grid;
+	gap: var(--cr-space-sm);
+	margin: 0;
+}
+
+.cr-fav-row {
+	display: grid;
+	gap: var(--cr-space-3xs);
+	margin: 0;
+}
+
+.cr-fav-row dt {
+	margin: 0;
+	color: var(--cr-glaucous-dark);
+	font-family: var(--cr-font-mono);
+	font-size: max(var(--cr-text-xs), var(--cr-text-floor));
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: 0.08em;
+	line-height: var(--cr-leading-snug);
+	text-transform: uppercase;
+}
+
+.cr-fav-row dd {
+	margin: 0;
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-md);
+	line-height: var(--cr-leading-normal);
+}
+
+.cr-fav-row .cr-fav-link:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 5px var(--cr-focus-halo);
+}
+
+.cr-fav-sheet__description {
+	margin: 0;
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-md);
+	line-height: var(--cr-leading-relaxed);
+}
+
+/* The picture, on a flat taped paper mount. */
+.cr-fav-sheet__mount {
+	position: relative;
+	box-sizing: border-box;
+	min-inline-size: 0;
+	padding: var(--cr-space-sm);
+	background-color: var(--cr-printer-ivory);
+	background-image: var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard-sm);
+}
+
+.cr-fav-sheet__mount::before {
+	content: "";
+	position: absolute;
+	inset-block-start: calc(-1 * var(--cr-space-sm));
+	inset-inline-start: 50%;
+	inline-size: 4rem;
+	block-size: var(--cr-space-lg);
+	margin-inline-start: -2rem;
+	background-color: var(--cr-tape);
+}
+
+.cr-fav-sheet__mount.cr-cover--failed {
+	display: none;
+}
+
+.cr-fav-sheet__img {
+	display: block;
+	inline-size: 100%;
+	max-inline-size: 100%;
+	block-size: auto;
+}
+
+/* Card-less favorites keep their content inside the sheet. */
+.cr-fav-sheet > :is(p, ul, ol, figure, blockquote, h2, h3, h4) {
+	margin-block: var(--cr-space-md) 0;
+}
+
+/*
+ * A protected favorite keeps the template header. PFBT hides the title of an
+ * aside through !important rules, so the title comes back the way the
+ * check-in single does it, and the format avatar goes.
+ */
+body.single-post.kind-favorite.pfbt-format-titleless .single-post__title {
+	position: relative !important;
+	width: auto !important;
+	height: auto !important;
+	margin-block: 0 !important;
+	margin-inline: auto !important;
+	overflow: visible !important;
+	clip: auto !important;
+	clip-path: none !important;
+	white-space: normal !important;
+}
+
+body.single-post.kind-favorite .single-post__content > .single-post__format-avatar {
+	display: none;
+}
+
+/* ============================================================
+   Stream: a paper clipping with a star sticker.
+
+   The star carries the live kind label and overlaps the clipping's top-left
+   corner inside the card's own box. The card takes the collage lean; the
+   star is the second rotated layer. Date and author use --cr-glaucous-dark,
+   which stays put in dark mode.
+   ============================================================ */
+
+.cr-fav-card {
+	--cr-fav-star-size: 7rem;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	max-inline-size: 100%;
+	min-inline-size: 0;
+	margin: 0;
+	padding: 0;
+	color: var(--cr-russian-violet);
+}
+
+.cr-fav-card > .cr-fav-star {
+	z-index: 1;
+	inline-size: var(--cr-fav-star-size);
+	margin-block-end: calc(-1 * var(--cr-space-lg));
+	align-self: flex-start;
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-fav-card .cr-fav-star .pk-kindlabel {
+	position: relative;
+	z-index: 1;
+	grid-area: 1 / 1;
+	font-family: var(--cr-font-display);
+	font-size: max(1rem, var(--cr-text-base));
+	line-height: var(--cr-leading-tight);
+	letter-spacing: normal;
+	color: var(--cr-russian-violet);
+	text-align: center;
+}
+
+.cr-fav-card__clipping {
+	--cr-paper-tear: 0.375rem;
+	position: relative;
+	box-sizing: border-box;
+	margin-block-end: var(--cr-paper-tear);
+	padding: var(--cr-space-xl) var(--cr-space-md) var(--cr-space-md);
+	background-color: var(--cr-printer-ivory);
+	background-image: var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-fav-card__clipping::after {
+	content: "";
+	position: absolute;
+	inset-inline: 0;
+	inset-block-start: 100%;
+	block-size: var(--cr-paper-tear);
+	background-color: var(--cr-printer-ivory);
+	pointer-events: none;
+	-webkit-mask:
+		linear-gradient(135deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x,
+		linear-gradient(225deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x;
+	mask:
+		linear-gradient(135deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x,
+		linear-gradient(225deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x;
+}
+
+.cr-fav-card__title {
+	margin: 0;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	letter-spacing: normal;
+	overflow-wrap: anywhere;
+}
+
+/* The link's box reaches up over the star, so the whole card is the hit area. */
+.cr-fav-card__title .cr-fav-link::after {
+	content: "";
+	position: absolute;
+	inset-block: calc(var(--cr-space-lg) - var(--cr-fav-star-size)) 0;
+	inset-inline: 0;
+}
+
+.cr-fav-card__author,
+.cr-fav-card__date {
+	margin: var(--cr-space-xs) 0 0;
+	color: var(--cr-glaucous-dark);
+	font-size: var(--cr-text-sm);
+	line-height: var(--cr-leading-snug);
+}
+
+.cr-fav-card__author {
+	font-family: var(--cr-font-body);
+}
+
+.cr-fav-card__date {
+	font-family: var(--cr-font-mono);
+	font-size: max(var(--cr-text-xs), var(--cr-text-floor));
+	letter-spacing: 0.04em;
+}
+
+/* The Stream collage leans a card to the left or the right. */
+.wp-block-post-template > li:nth-child(4n+1) .cr-fav-card {
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.wp-block-post-template > li:nth-child(4n+3) .cr-fav-card {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-fav-card:has(a:focus-visible) .cr-fav-card__clipping {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 7px;
+	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
+}
+
+@supports selector(:has(*)) {
+
+	.cr-fav-card__title .cr-fav-link:focus-visible {
+		outline: none;
+		box-shadow: none;
+	}
+}
+
+/* ============================================================
+   Motion, forced colors and print.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+	.cr-fav-item,
+	.cr-fav-clipping,
+	.cr-fav-card,
+	.cr-fav-sheet,
+	.cr-fav-link {
+		transition: none;
+		animation: none;
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-favorite-chart .pkiw-group,
+	.cr-fav-clipping,
+	.cr-fav-item--protected > .pk-card,
+	.cr-fav-sheet,
+	.cr-fav-sheet__mount,
+	.cr-fav-card__clipping {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-favorite-chart .pkiw-group::before,
+	.cr-favorite-chart .pkiw-group::after,
+	.cr-fav-clipping::after,
+	.cr-fav-card__clipping::after,
+	.cr-fav-sheet__mount::before,
+	.cr-fav-star__shape,
+	.cr-fav-item > .cr-fav-star,
+	.cr-fav-sheet__star,
+	.cr-fav-sheet__marker {
+		display: none;
+	}
+
+	.cr-fav-card .cr-fav-star .pk-kindlabel {
+		display: block;
+		color: CanvasText;
+	}
+
+	.cr-favorite-chart .pkiw-group__heading,
+	.cr-fav-sheet__tape {
+		border: 1px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.cr-fav-link,
+	.cr-fav-item--protected .pk-title a {
+		color: LinkText;
+	}
+
+	.cr-fav-row dt,
+	.cr-fav-card__author,
+	.cr-fav-card__date {
+		color: CanvasText;
+	}
+}
+
+@media print {
+
+	.cr-favorite-chart .pkiw-group::before,
+	.cr-fav-star__shape,
+	.cr-fav-item > .cr-fav-star,
+	.cr-fav-sheet__star,
+	.cr-fav-sheet__marker {
+		display: none;
+	}
+}
