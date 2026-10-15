@@ -292,8 +292,10 @@
 	box-shadow: none;
 }
 
-.cr-repost-zine .cr-repost-clip__title a:focus-visible {
+.cr-repost-zine .cr-repost-clip__title a:focus-visible,
+.cr-repost-clip--protected .pk-title a:focus-visible {
 	outline: 0;
+	box-shadow: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {

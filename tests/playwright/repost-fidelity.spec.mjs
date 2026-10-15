@@ -411,10 +411,35 @@ test( 'focus draws a 3px selective-yellow ring with an ink halo round the whole 
 	expect( ring.style ).toBe( 'solid' );
 	expect( ring.color, 'selective yellow' ).toBe( YELLOW );
 	expect( ring.shadow, 'a 7px halo' ).toMatch( /7px/ );
-	const link = await itemFor( page, 'A01' ).locator( 'h3 a' ).evaluate( ( el ) => getComputedStyle( el ).outlineStyle );
-	expect( link, 'the link draws no second ring' ).toBe( 'none' );
+	const link = await itemFor( page, 'A01' ).locator( 'h3 a' ).evaluate( ( el ) => {
+		const s = getComputedStyle( el );
+		return { outline: s.outlineStyle, shadow: s.boxShadow };
+	} );
+	expect( link.outline, 'the link draws no second ring' ).toBe( 'none' );
+	expect( link.shadow, 'the link draws no second halo' ).toBe( 'none' );
 	const target = await itemFor( page, 'A01' ).locator( '.cr-repost-clip' ).boundingBox();
 	expect( target.height, 'the target is at least 44px' ).toBeGreaterThanOrEqual( 44 );
+} );
+
+test( 'the protected archive item draws one ring, round the clipping, and none on its link', async ( { page } ) => {
+	await seeded( page, ARCHIVE_PAGE_2 );
+	const item = itemFor( page, 'P1' );
+	await item.locator( 'a' ).focus();
+	await page.keyboard.press( 'Shift+Tab' );
+	await page.keyboard.press( 'Tab' );
+	const clip = await item.locator( '.cr-repost-clip' ).evaluate( ( el ) => {
+		const s = getComputedStyle( el );
+		return { style: s.outlineStyle, width: s.outlineWidth, shadow: s.boxShadow };
+	} );
+	expect( clip.style ).toBe( 'solid' );
+	expect( clip.width ).toBe( '3px' );
+	expect( clip.shadow, 'a 7px halo on the clipping' ).toMatch( /7px/ );
+	const link = await item.locator( 'a' ).evaluate( ( el ) => {
+		const s = getComputedStyle( el );
+		return { outline: s.outlineStyle, shadow: s.boxShadow };
+	} );
+	expect( link.outline, 'the link draws no second ring' ).toBe( 'none' );
+	expect( link.shadow, 'the link draws no second halo' ).toBe( 'none' );
 } );
 
 test( 'clicking the clipping, image included, opens the single', async ( { page } ) => {

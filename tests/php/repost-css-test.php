@@ -329,6 +329,20 @@ repost_css_case(
 );
 
 repost_css_case(
+	'a focused title link draws no ring or halo of its own, archive item and protected card alike',
+	static function (): bool {
+		$css = repost_css();
+		foreach ( array( '.cr-repost-zine .cr-repost-clip__title a:focus-visible', '.cr-repost-clip--protected .pk-title a:focus-visible' ) as $selector ) {
+			$rule = repost_rule( $css, $selector );
+			if ( '0' !== repost_decl( $rule, 'outline' ) || 'none' !== repost_decl( $rule, 'box-shadow' ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+);
+
+repost_css_case(
 	'the single is a two-column clipping from 48rem, with unfiltered art and mono, slab and Barlow voices',
 	static function (): bool {
 		$css = repost_css();
