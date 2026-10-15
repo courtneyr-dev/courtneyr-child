@@ -29,6 +29,7 @@
 	inline-size: 3rem;
 	aspect-ratio: 1;
 	color: var(--cr-russian-violet);
+	pointer-events: none;
 	transform: rotate(var(--cr-fav-tilt, var(--cr-rotate-1)));
 }
 
@@ -530,6 +531,8 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 .cr-fav-card > .cr-fav-star {
 	z-index: 1;
 	inline-size: var(--cr-fav-star-size);
+	margin-block-start: var(--cr-space-2xs);
+	margin-inline-start: var(--cr-space-2xs);
 	margin-block-end: calc(-1 * var(--cr-space-lg));
 	align-self: flex-start;
 	transform: rotate(var(--cr-rotate-neg));

@@ -149,6 +149,23 @@ test.describe( 'archive', () => {
 		expect( second, 'F10 stores no favorite meta' ).not.toContain( 'Favorite, June 24, 2026' );
 	} );
 
+	test( 'the clipping and the star center both hit the item link', async ( { page } ) => {
+		await page.setViewportSize( { width: 1440, height: 900 } );
+		await visit( page, ARCHIVE );
+		for ( const li of await page.locator( '.cr-favorite-chart .pkiw-group__items > li' ).all() ) {
+			await li.scrollIntoViewIfNeeded();
+			const hit = await li.evaluate( ( el ) => {
+				const a = el.querySelector( 'a' );
+				const clip = el.querySelector( '.cr-fav-clipping' ).getBoundingClientRect();
+				const star = el.querySelector( '.cr-fav-star' ).getBoundingClientRect();
+				const at = ( x, y ) => a.contains( document.elementFromPoint( x, y ) );
+				return { clip: at( clip.left + clip.width / 2, clip.top + clip.height / 2 ), star: at( star.left + star.width / 2, star.top + star.height / 2 ) };
+			} );
+			expect( hit.clip, 'the clipping center hits the link' ).toBe( true );
+			expect( hit.star, 'the star center hits the link' ).toBe( true );
+		}
+	} );
+
 	test( 'each item carries hidden url, date and author, and the named duplicates are told apart by month', async ( { page } ) => {
 		await visit( page, `${ ARCHIVE }page/2/` );
 		const li = page.locator( '.cr-favorite-chart .pkiw-group__items > li' ).first();
@@ -461,6 +478,7 @@ test.describe( 'stream', () => {
 		const expected = [ 'Field Notes on Slow Feeds', 'zine.example.org' ];
 		const names = [];
 		for ( const card of await cards.all() ) {
+			await card.scrollIntoViewIfNeeded();
 			const links = await visibleLinks( card );
 			expect( links.count, 'one visible link' ).toBe( 1 );
 			expect( links.stray ).toBe( 0 );
@@ -475,6 +493,11 @@ test.describe( 'stream', () => {
 				return [ [ r.left + 4, r.top + 4 ], [ r.right - 4, r.bottom - 4 ] ].every( ( [ x, y ] ) => a.contains( document.elementFromPoint( x, y ) ) );
 			} );
 			expect( hit, 'the card corners hit the link' ).toBe( true );
+			const starHit = await card.locator( 'a' ).first().evaluate( ( a ) => {
+				const r = a.closest( 'article.cr-fav-card' ).querySelector( '.cr-fav-star' ).getBoundingClientRect();
+				return a.contains( document.elementFromPoint( r.left + r.width / 2, r.top + r.height / 2 ) );
+			} );
+			expect( starHit, 'the star center hits the link' ).toBe( true );
 		}
 		for ( const name of expected ) {
 			expect( names ).toContain( name );
