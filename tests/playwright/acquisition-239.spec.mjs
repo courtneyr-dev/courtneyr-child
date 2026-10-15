@@ -294,7 +294,8 @@ test.describe( 'archive (PKIW 239)', () => {
 		}
 		const next = pager.locator( 'a.wp-block-query-pagination-next' );
 		await next.hover();
-		expect( ( await computed( next, [ 'transform' ] ) ).transform ).toBe( 'matrix(1, 0, 0, 1, -1, -1)' );
+		// The chip carries `transition: transform 0.15s`, so a single read right after hover sees the start or a mid-frame value. Poll until the transition ends.
+		await expect.poll( async () => ( await computed( next, [ 'transform' ] ) ).transform, { message: 'the hovered Next chip settles on its 1px lift', timeout: 2000 } ).toBe( 'matrix(1, 0, 0, 1, -1, -1)' );
 	} );
 
 	test( 'A10 focus: the receipt draws a 3px yellow ring plus an ink halo; one tab stop each', async ( { page } ) => {
@@ -646,7 +647,14 @@ test.describe( 'stream (PKIW 239)', () => {
 		expect( colors ).not.toContain( 'rgb(207, 224, 230)' );
 		expect( colors ).not.toContain( 'rgb(109, 155, 181)' );
 		expect( ( await computed( stub, [ 'transform' ] ) ).transform ).not.toBe( 'none' );
-		const widths = await stub.evaluate( ( el ) => ( { stub: el.offsetWidth, li: parseFloat( getComputedStyle( el.closest( 'li' ) ).width ) } ) );
+		// The shared Stream li is border-box with its own padding, so its computed width includes that padding. The stub fills the li's content box.
+		const widths = await stub.evaluate( ( el ) => {
+			const li = getComputedStyle( el.closest( 'li' ) );
+			const padding = parseFloat( li.paddingLeft ) + parseFloat( li.paddingRight );
+			const border = parseFloat( li.borderLeftWidth ) + parseFloat( li.borderRightWidth );
+			const box = li.boxSizing === 'border-box' ? padding + border : 0;
+			return { stub: el.offsetWidth, li: parseFloat( li.width ) - box };
+		} );
 		expect( Math.abs( widths.stub - widths.li ) ).toBeLessThanOrEqual( 1 );
 		expect( ( await stub.boundingBox() ).height ).toBeGreaterThanOrEqual( 44 );
 		await stub.locator( 'a' ).focus();
