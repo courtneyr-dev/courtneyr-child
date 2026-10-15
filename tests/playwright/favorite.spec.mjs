@@ -490,9 +490,10 @@ test.describe( 'stream', () => {
 			expect( await card.locator( 'time.dt-published' ).count() ).toBe( 1 );
 			const hit = await card.locator( 'a' ).first().evaluate( ( a ) => {
 				const r = a.closest( '.cr-fav-card__clipping' ).getBoundingClientRect();
-				return [ [ r.left + 4, r.top + 4 ], [ r.right - 4, r.bottom - 4 ] ].every( ( [ x, y ] ) => a.contains( document.elementFromPoint( x, y ) ) );
+				// Inset 10% so a leaning card's bounding-box corners, which fall outside the rotated shape, are not probed.
+				return [ [ r.left + r.width * 0.1, r.top + r.height * 0.1 ], [ r.left + r.width / 2, r.top + r.height / 2 ], [ r.right - r.width * 0.1, r.bottom - r.height * 0.1 ] ].every( ( [ x, y ] ) => a.contains( document.elementFromPoint( x, y ) ) );
 			} );
-			expect( hit, 'the card corners hit the link' ).toBe( true );
+			expect( hit, 'the clipping area hits the link' ).toBe( true );
 			const starHit = await card.locator( 'a' ).first().evaluate( ( a ) => {
 				const r = a.closest( 'article.cr-fav-card' ).querySelector( '.cr-fav-star' ).getBoundingClientRect();
 				return a.contains( document.elementFromPoint( r.left + r.width / 2, r.top + r.height / 2 ) );
