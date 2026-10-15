@@ -203,6 +203,28 @@ cr_chk_group(
 );
 
 cr_chk_group(
+	'cr-chicken.css: contrast fixes for the Stream egg link and the coop board, one focus indicator on links',
+	static function (): void {
+		$css = cr_chk_file( 'assets/css/cr-chicken.css' );
+		$rule = static function ( string $selector ) use ( $css ): string {
+			return 1 === preg_match( '/' . preg_quote( $selector, '/' ) . '\s*\{([^}]*)\}/', $css, $found ) ? $found[1] : '';
+		};
+		$stream = '.cr-stream-page .pk-card.cr-egg-card .pk-title';
+		cr_chk_contains( 'var(--cr-russian-violet)', $rule( $stream . ",\n" . $stream . ' a' ), 'the egg title and its link are Russian violet past the Stream rule that inherits the ink' );
+		cr_chk_contains( 'var(--cr-printer-ivory)', $rule( '.cr-coop .wp-block-post-content :is(h2, h3, h4, h5, h6)' ), 'coop headings are printer ivory on the Prussian board' );
+		cr_chk_contains( 'var(--cr-periwinkle)', $rule( '.cr-coop .wp-block-post-content cite' ), 'coop cite is periwinkle on the Prussian board' );
+		cr_chk_contains( 'var(--cr-ink)', $rule( '.cr-coop .wp-block-post-content :is(details, kbd)' ), 'coop details and kbd keep the ink that suits their elevated surface' );
+		foreach ( array( '.cr-chicken .pkiw-chicken__title a:focus-visible', '.cr-egg-card .pk-title a:focus-visible' ) as $focus ) {
+			$block = $rule( $focus );
+			cr_chk_contains( 'outline: none;', $block, $focus . ' drops the outline' );
+			cr_chk_contains( 'box-shadow: none;', $block, $focus . ' drops the global halo so the card ring is the only indicator' );
+			cr_chk_contains( 'border-radius: 0;', $block, $focus . ' drops the global radius' );
+		}
+		cr_chk_assert( 1 === preg_match( '/forced-colors: active\).*\.cr-coop \.wp-block-post-content :is\(h2, h3, h4, h5, h6\)[^{]*\{\s*color: CanvasText;/s', $css ), 'forced colors give coop headings and cite CanvasText' );
+	}
+);
+
+cr_chk_group(
 	'nothing in the theme prints sample copy',
 	static function (): void {
 		$hits = array();

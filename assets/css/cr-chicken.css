@@ -156,6 +156,8 @@
 
 .cr-chicken .pkiw-chicken__title a:focus-visible {
 	outline: none;
+	box-shadow: none;
+	border-radius: 0;
 }
 
 /* Trailing spare cups complete the last row. They are not list items, links or focus stops, and print no date. */
@@ -387,6 +389,19 @@
 	font-family: var(--cr-font-body);
 }
 
+.cr-coop .wp-block-post-content :is(h2, h3, h4, h5, h6) {
+	color: var(--cr-printer-ivory);
+}
+
+.cr-coop .wp-block-post-content cite {
+	color: var(--cr-periwinkle);
+}
+
+/* details and kbd keep the elevated surface the base styles give them, so they keep the ink that suits it. */
+.cr-coop .wp-block-post-content :is(details, kbd) {
+	color: var(--cr-ink);
+}
+
 .cr-coop .wp-block-post-content a {
 	color: var(--cr-sky-blue);
 }
@@ -424,7 +439,10 @@
 	.cr-coop .cr-coop__date,
 	.cr-coop .cr-coop__title,
 	.cr-coop figcaption,
-	.cr-coop .wp-block-post-content p {
+	.cr-coop .wp-block-post-content p,
+	.cr-coop .wp-block-post-content :is(h2, h3, h4, h5, h6),
+	.cr-coop .wp-block-post-content cite,
+	.cr-coop .wp-block-post-content :is(details, kbd) {
 		color: CanvasText;
 	}
 
@@ -501,8 +519,13 @@
 }
 
 .cr-egg-card .pk-title a {
-	color: var(--cr-russian-violet);
 	text-decoration: underline;
+}
+
+/* The Stream sets the title link to inherit the ink, which is ivory in dark mode, so these selectors outrank it. */
+.cr-stream-page .pk-card.cr-egg-card .pk-title,
+.cr-stream-page .pk-card.cr-egg-card .pk-title a {
+	color: var(--cr-russian-violet);
 }
 
 /* The one link covers the whole egg: one tab stop, one name, a large target. */
@@ -520,6 +543,8 @@
 
 .cr-egg-card .pk-title a:focus-visible {
 	outline: none;
+	box-shadow: none;
+	border-radius: 0;
 }
 
 @media (prefers-reduced-motion: no-preference) {

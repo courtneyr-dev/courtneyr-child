@@ -1,4 +1,4 @@
-// `CR_SPEC=chicken.spec.mjs npx playwright test --config tests/playwright/playwright.config.mjs`: PKIW #250
+// `CR_SPEC=chicken.spec.mjs npx playwright test --config tests/playwright/playwright.config.mjs`: PKIW issue 250
 // chicken pages against the approved decision (decision-2026-10-06.md): the egg-carton archive, the coop
 // board single and the Stream egg. Read-only GETs; needs the local stack with the `_cr_seed_250` fixtures
 // (vault assets/250-chicken/seed-250.php) and cr-local-stream-chicken.php mapped. The projects are the
@@ -21,6 +21,7 @@ const PRUSSIAN_BLUE = 'rgb(2, 48, 71)';
 const LIGHT_GRAY = 'rgb(235, 235, 235)';
 const SELECTIVE_YELLOW = 'rgb(255, 183, 3)';
 const PERIWINKLE = 'rgb(188, 181, 227)';
+const PRINTER_IVORY = 'rgb(251, 250, 245)';
 
 const isDark = ( testInfo ) => testInfo.project.name.endsWith( 'dark' );
 
@@ -187,6 +188,9 @@ test.describe( 'archive', () => {
 		expect( await css( item, 'outlineWidth' ) ).toBe( '3px' );
 		expect( await css( item, 'outlineColor' ) ).toBe( SELECTIVE_YELLOW );
 		expect( await css( item, 'boxShadow' ), 'the halo is Russian violet in both schemes' ).toContain( RUSSIAN_VIOLET );
+		const focused = page.locator( '.pkiw-chicken__title a' ).first();
+		expect( await css( focused, 'boxShadow' ), 'the link adds no second halo over the item ring' ).toBe( 'none' );
+		expect( await css( focused, 'outlineStyle' ) ).toBe( 'none' );
 	} );
 
 	test( 'the page holds its width and no cup text is clipped (A04, a 120-character title)', async ( { page } ) => {
@@ -320,6 +324,18 @@ test.describe( 'single', () => {
 		}
 	} );
 
+	test( 'headings and cite inside the board stay readable in both schemes', async ( { page } ) => {
+		await open( page, 'S01' );
+		const read = () => page.locator( '.cr-coop__board .wp-block-post-content' ).first().evaluate( ( content ) => {
+			content.insertAdjacentHTML( 'beforeend', '<h2>Heading two</h2><h3>Heading three</h3><h4>Heading four</h4><h5>Heading five</h5><h6>Heading six</h6><blockquote><p>Quoted.</p><cite>Cited</cite></blockquote>' );
+			const color = ( selector ) => getComputedStyle( content.querySelector( selector ) ).color;
+			return { headings: [ 'h2', 'h3', 'h4', 'h5', 'h6' ].map( color ), cite: color( 'cite' ) };
+		} );
+		const seen = await read();
+		expect( seen.headings, 'h2 to h6 are printer ivory on the Prussian board' ).toEqual( Array( 5 ).fill( PRINTER_IVORY ) );
+		expect( seen.cite ).toBe( PERIWINKLE );
+	} );
+
 	test( 'dark mode and forced colors keep the board', async ( { page }, testInfo ) => {
 		await open( page, 'S01' );
 		if ( isDark( testInfo ) ) {
@@ -412,11 +428,15 @@ test.describe( 'stream', () => {
 		const css = ( property ) => first.evaluate( ( node, p ) => getComputedStyle( node )[ p ], property );
 		expect( await css( 'backgroundColor' ) ).toBe( SELECTIVE_YELLOW );
 		expect( await css( 'color' ) ).toBe( RUSSIAN_VIOLET );
+		const titleLink = first.locator( '.pk-title a' );
+		expect( await titleLink.evaluate( ( node ) => getComputedStyle( node ).color ), 'the title link is Russian violet on the yellow egg in both schemes, not the inherited ink' ).toBe( RUSSIAN_VIOLET );
+		expect( await first.locator( '.pk-title' ).evaluate( ( node ) => getComputedStyle( node ).color ) ).toBe( RUSSIAN_VIOLET );
 		expect( await css( 'boxShadow' ) ).toBe( 'none' );
 		expect( await css( 'borderTopColor' ) ).toBe( PRUSSIAN_BLUE );
 		await first.locator( '.pk-title a' ).focus();
 		expect( await css( 'outlineWidth' ) ).toBe( '3px' );
 		expect( await css( 'outlineColor' ) ).toBe( SELECTIVE_YELLOW );
+		expect( await titleLink.evaluate( ( node ) => getComputedStyle( node ).boxShadow ), 'the link adds no second halo over the card ring' ).toBe( 'none' );
 		await page.emulateMedia( { forcedColors: 'active' } );
 		expect( await css( 'borderTopWidth' ) ).toBe( '2px' );
 	} );
