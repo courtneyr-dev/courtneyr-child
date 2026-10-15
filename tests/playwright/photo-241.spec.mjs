@@ -452,7 +452,9 @@ test.describe( 'stream', () => {
 		test.skip( 0 === await mount.count(), 'no photo cards on /stream/' );
 		const info = await mount.evaluate( ( el ) => {
 			const li = el.closest( 'li' );
-			const neighbour = [ ...li.parentElement.children ].find( ( other ) => other !== li && other.querySelector( '.pk-card' ) && ! other.querySelector( '.cr-slide-mount' ) );
+			// Note stickies are 82% of the column by design (.cr-sticky-artifact--stream), so they are not a width reference.
+			const isReference = ( card ) => ! card.classList.contains( 'cr-slide-mount' ) && ! card.closest( '.cr-sticky-artifact' ) && ! card.querySelector( '.cr-sticky-artifact' );
+			const neighbour = [ ...li.parentElement.children ].find( ( other ) => other !== li && [ ...other.querySelectorAll( '.pk-card' ) ].some( isReference ) && ! other.querySelector( '.cr-sticky-artifact, .cr-slide-mount' ) );
 			const fam = ( node ) => getComputedStyle( node ).fontFamily.split( ',' )[0].replace( /"/g, '' ).trim();
 			return { width: el.offsetWidth, neighbour: neighbour ? neighbour.querySelector( '.pk-card' ).offsetWidth : null, transform: getComputedStyle( el ).transform, title: fam( el.querySelector( '.pk-title' ) ), caption: el.querySelector( '.pk-media__caption' ) ? fam( el.querySelector( '.pk-media__caption' ) ) : null, filter: getComputedStyle( el.querySelector( 'img' ) ).filter, shadow: getComputedStyle( el ).boxShadow };
 		} );
