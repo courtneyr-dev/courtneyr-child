@@ -76,15 +76,17 @@ cr_fav_group(
 );
 
 cr_fav_group(
-	'a protected favorite keeps the plugin card inside the clipping and reads no facts',
+	'a protected favorite keeps the plugin card whole: no clipping, no star, no facts, no tilt',
 	static function (): void {
 		$post = cr_fav_post( 106, 'Locked Favorite Sample', cr_fav_facts(), true );
 		$card = '<article class="pk-card pk-card--protected h-entry"><h3 class="pk-title"><a href="https://example.test/favorite-106/">Locked Favorite Sample</a></h3></article>';
-		$out  = cr_fav_item( $post, array(), $card );
-		cr_fav_assert( str_contains( $out, 'cr-fav-item cr-fav-item--protected' ), 'protected wrapper' );
-		cr_fav_assert( str_contains( $out, $card ), 'the plugin card is kept whole' );
+		Favorite\last_tilt( '' );
+		$out = cr_fav_item( $post, array(), $card );
+		cr_fav_same( $card, $out, 'the plugin card comes back byte for byte' );
+		cr_fav_assert( ! str_contains( $out, 'cr-fav-' ), 'no favorite class on the protected item' );
 		cr_fav_assert( ! str_contains( $out, 'u-favorite-of' ) && ! str_contains( $out, 'Rowan Vale' ), 'no facts leak' );
 		cr_fav_same( 1, cr_fav_count( '/<a\b/', $out ), 'one anchor' );
+		cr_fav_same( '', Favorite\last_tilt(), 'a protected item does not advance the star tilt' );
 	}
 );
 

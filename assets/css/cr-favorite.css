@@ -253,44 +253,11 @@
 	}
 }
 
-/* A protected favorite keeps the plugin's title-only card inside the clipping. */
-.cr-fav-item--protected > .pk-card {
-	position: relative;
-	box-sizing: border-box;
-	display: block;
-	max-inline-size: none;
-	min-block-size: 4.5rem;
-	margin: 0;
-	padding: var(--cr-space-lg) var(--cr-space-md) var(--cr-space-md) var(--cr-space-2xl);
-	border: 0;
-	border-radius: 0;
-	background-color: var(--cr-printer-ivory);
-	background-image: var(--cr-fiber);
-	box-shadow: var(--cr-shadow-hard-sm);
-	color: var(--cr-russian-violet);
-	transform: none;
-}
-
-.cr-fav-item--protected > .pk-card::before {
-	content: none;
-}
-
-.cr-fav-item--protected .pk-title {
-	margin: 0;
-	font-family: var(--cr-font-accent);
-	font-size: var(--cr-text-base);
-	line-height: var(--cr-leading-snug);
-	overflow-wrap: anywhere;
-}
-
-.cr-fav-item--protected .pk-title a {
+/* A protected favorite keeps the plugin's generic card and takes no clipping or star.
+   The band is paper in both schemes, and --cr-link flips to sky blue in dark, so
+   the card's title link takes the same cerulean as .cr-fav-link. */
+.cr-favorite-chart .pk-card--protected .pk-title a {
 	color: var(--cr-cerulean);
-}
-
-.cr-fav-item--protected .pk-title a::after {
-	content: "";
-	position: absolute;
-	inset: 0;
 }
 
 /* ============================================================
@@ -656,7 +623,6 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 
 	.cr-favorite-chart .pkiw-group,
 	.cr-fav-clipping,
-	.cr-fav-item--protected > .pk-card,
 	.cr-fav-sheet,
 	.cr-fav-sheet__mount,
 	.cr-fav-card__clipping {
@@ -691,7 +657,7 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 	}
 
 	.cr-fav-link,
-	.cr-fav-item--protected .pk-title a {
+	.cr-favorite-chart .pk-card--protected .pk-title a {
 		color: LinkText;
 	}
 

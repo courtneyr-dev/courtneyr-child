@@ -91,7 +91,9 @@ test.describe( 'archive', () => {
 		for ( let i = 1; i < transforms.length; i++ ) {
 			expect( transforms[ i ], `tile ${ i } leans differently from tile ${ i - 1 }` ).not.toBe( transforms[ i - 1 ] );
 		}
-		await expect( page.locator( '.cr-archive__header .courtneyr-archive-identity, .cr-archive__header [class*="archive-identity"]' ).first() ).toBeVisible();
+		// A kind archive's identity holder is block-size 0 on purpose (cr-archives.css, "A kind archive"):
+		// the badge hangs from it by position:absolute, so the badge is the visible part.
+		await expect( page.locator( '.cr-archive__header .cr-archive-identity--kind .cr-archive-identity__glyph' ) ).toBeVisible();
 		expect( await page.locator( 'body' ).innerText() ).not.toMatch( /SAMPLE CONTENT|curated by month/i );
 	} );
 
@@ -114,7 +116,12 @@ test.describe( 'archive', () => {
 		await visit( page, ARCHIVE );
 		expect( await page.locator( 'main h1' ).count() ).toBe( 1 );
 		expect( await page.locator( '.cr-favorite-chart .pkiw-group > h2.pkiw-group__heading' ).count() ).toBe( 3 );
-		expect( await page.locator( '.cr-favorite-chart .pkiw-group__items h3.cr-fav-title' ).count() ).toBe( 12 );
+		// Orchestrator ruling 2026-10-15: a protected item keeps the plugin's generic card (an h3.pk-title
+		// and no favorite classes). Only the unprotected items carry h3.cr-fav-title.
+		const protectedCount = await page.locator( '.cr-favorite-chart .pkiw-group__items > li .pk-card--protected' ).count();
+		expect( await page.locator( '.cr-favorite-chart .pkiw-group__items > li h3' ).count(), 'every item has one h3' ).toBe( 12 );
+		expect( await page.locator( '.cr-favorite-chart .pkiw-group__items h3.cr-fav-title' ).count() ).toBe( 12 - protectedCount );
+		expect( await page.locator( '.cr-favorite-chart .pkiw-group__items .pk-card--protected > h3.pk-title' ).count() ).toBe( protectedCount );
 		const pager = await page.locator( '.cr-favorite-chart .pkiw-grouped' ).evaluate( ( el ) => {
 			const next = el.nextElementSibling;
 			return { tag: next?.tagName, cls: next?.className, label: next?.getAttribute( 'aria-label' ) };
@@ -152,7 +159,7 @@ test.describe( 'archive', () => {
 	test( 'the clipping and the star center both hit the item link', async ( { page } ) => {
 		await page.setViewportSize( { width: 1440, height: 900 } );
 		await visit( page, ARCHIVE );
-		for ( const li of await page.locator( '.cr-favorite-chart .pkiw-group__items > li' ).all() ) {
+		for ( const li of await page.locator( '.cr-favorite-chart .pkiw-group__items > li:not(:has(.pk-card--protected))' ).all() ) {
 			await li.scrollIntoViewIfNeeded();
 			const hit = await li.evaluate( ( el ) => {
 				const a = el.querySelector( 'a' );
@@ -163,6 +170,21 @@ test.describe( 'archive', () => {
 			} );
 			expect( hit.clip, 'the clipping center hits the link' ).toBe( true );
 			expect( hit.star, 'the star center hits the link' ).toBe( true );
+		}
+	} );
+
+	// Orchestrator ruling 2026-10-15: a password-protected item renders the plugin's generic protected
+	// card as the W2 review archive does: the title link, no facts, no kind clipping or decoration.
+	test( 'a protected item shows its title link only: no facts, clipping, star or favorite-of data', async ( { page } ) => {
+		await visit( page, ARCHIVE );
+		const locked = page.locator( '.cr-favorite-chart .pkiw-group__items > li:has(.pk-card--protected)' );
+		test.skip( 0 === await locked.count(), 'S3 is not on the first archive page (run seed-259.php first)' );
+		for ( const li of await locked.all() ) {
+			expect( await li.locator( '.pk-card--protected > h3.pk-title a[href]' ).count(), 'the title link' ).toBe( 1 );
+			expect( ( await visibleLinks( li ) ).count, 'one visible link' ).toBe( 1 );
+			const kept = await li.evaluate( ( el ) => [ '.cr-fav-item', '.cr-fav-clipping', '.cr-fav-star', '.cr-fav-title', 'data.u-favorite-of', 'img', 'figure' ].filter( ( selector ) => el.querySelector( selector ) ) );
+			expect( kept, 'no kind decoration and no facts' ).toEqual( [] );
+			expect( await li.innerText(), 'no cited host, author or date' ).not.toMatch( /notes\.example\.com|Rowan Vale|\b20\d\d\b/ );
 		}
 	} );
 

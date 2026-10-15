@@ -332,14 +332,15 @@ function item( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
+	// A protected favorite keeps the plugin's generic protected card: the title
+	// link and nothing else. No clipping, star or tilt, and no facts are read.
+	$facts = post_password_required( $post ) ? array() : facts( $post_id );
+	if ( array() === $facts ) {
+		return $html;
+	}
+
 	$tilt = star_tilt( $post_id, last_tilt() );
 	last_tilt( $tilt );
-
-	$facts = facts( $post_id );
-	if ( array() === $facts || post_password_required( $post ) ) {
-		// The plugin's protected card keeps its title link and reads no facts.
-		return '<div class="cr-fav-item cr-fav-item--protected"><span class="cr-fav-star" aria-hidden="true" style="--cr-fav-tilt:var(' . esc_attr( $tilt ) . ')">' . star_svg() . '</span>' . $html . '</div>';
-	}
 
 	return item_html( $facts, heading_level( $block, 3 ), $post_id, $tilt );
 }
