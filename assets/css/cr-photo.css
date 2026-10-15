@@ -1,0 +1,745 @@
+/* Photo surfaces for issue 241: the archive's month strips, the single's projector mount and the Stream slide mount. */
+/* stylelint-disable no-descending-specificity -- the archive, the single and the Stream are separate surfaces; their selectors never match one element. */
+
+/* ============================================================
+   Archive: one film strip per month, numbered frames
+   ============================================================ */
+.cr-photo-sheets [hidden],
+body.cr-photo-single .pkiw-projector [hidden] {
+	display: none;
+}
+
+.cr-photo-sheets {
+	--cr-strip-edge: var(--cr-photocopier-blk);
+	--cr-strip-hole: var(--cr-surface);
+	margin-block: 0;
+}
+
+.cr-photo-sheets .pkiw-group {
+	margin-block: 0 var(--cr-space-2xl);
+}
+
+/* The month is real, upright text. Only the tape behind it tilts. */
+.cr-photo-sheets .pkiw-group__heading {
+	position: relative;
+	display: inline-block;
+	margin: 0 0 var(--cr-space-sm) var(--cr-space-sm);
+	padding: var(--cr-space-2xs) var(--cr-space-md);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-tight);
+	text-transform: uppercase;
+	isolation: isolate;
+}
+
+.cr-photo-sheets .pkiw-group__heading::before {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	inset: 0;
+	background-color: var(--cr-tape);
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+/* The strip is built from its frames, so a short row ends after its last frame and no blank frame or filler is drawn. */
+.cr-photo-sheets .pkiw-group__items {
+	display: flex;
+	flex-wrap: wrap;
+	row-gap: var(--cr-space-lg);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	counter-reset: cr-frame;
+}
+
+.cr-photo-sheets .pkiw-group__items > li {
+	flex: 0 0 50%;
+	box-sizing: border-box;
+	min-width: 0;
+	margin: 0;
+	padding: var(--cr-space-lg) var(--cr-space-xs);
+	border-block: 2px solid var(--cr-strip-edge);
+	background-color: var(--cr-photocopier-blk);
+	background-image:
+		repeating-linear-gradient(90deg, var(--cr-strip-hole) 0 0.6rem, transparent 0.6rem 1.3rem),
+		repeating-linear-gradient(90deg, var(--cr-strip-hole) 0 0.6rem, transparent 0.6rem 1.3rem);
+	background-repeat: no-repeat;
+	background-size: 100% 0.55rem;
+	background-position: 0 0.45rem, 0 calc(100% - 0.45rem);
+	counter-increment: cr-frame;
+}
+
+@media (min-width: 40rem) {
+
+	.cr-photo-sheets .pkiw-group__items > li {
+		flex: 0 0 33.3333%;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-photo-sheets .pkiw-group__items > li {
+		flex: 0 0 25%;
+	}
+}
+
+/* ---- The frame ---- */
+.cr-photo-frame {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	color: var(--cr-russian-violet);
+}
+
+.cr-photo-frame__media {
+	position: relative;
+	display: block;
+	grid-row: 1;
+	aspect-ratio: 3 / 2;
+	overflow: hidden;
+	background-color: var(--cr-light-gray);
+}
+
+.cr-photo-frame__media :is(picture, img) {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.cr-photo-frame__media img {
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+}
+
+/* No image, or one that failed to load: the title on a palette paper. */
+.cr-photo-frame__sleeve {
+	display: none;
+}
+
+.cr-photo-frame__media--paper .cr-photo-frame__sleeve,
+.cr-photo-frame__media.cr-cover--failed .cr-photo-frame__sleeve {
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	padding: var(--cr-space-sm);
+	background-color: var(--cr-paper, var(--cr-light-gray));
+	background-image: var(--cr-fiber);
+	color: var(--cr-paper-ink, var(--cr-russian-violet));
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+	text-align: center;
+}
+
+.cr-photo-frame__label {
+	display: flex;
+	grid-row: 2;
+	align-items: baseline;
+	gap: var(--cr-space-xs);
+	min-width: 0;
+	padding: var(--cr-space-2xs) var(--cr-space-xs);
+	background-color: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	line-height: var(--cr-leading-snug);
+}
+
+/* The number is drawn by the counter and given empty alternative text, so no reader announces it and no link name holds it. */
+.cr-photo-frame__number::before {
+	content: counter(cr-frame, decimal-leading-zero);
+	content: counter(cr-frame, decimal-leading-zero) / "";
+}
+
+.cr-photo-frame__title {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	color: inherit;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-regular);
+	letter-spacing: var(--cr-tracking-normal);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.cr-photo-frame__title--object {
+	grid-row: 1;
+	display: block;
+}
+
+.cr-photo-frame__title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.cr-photo-frame__title a:hover {
+	text-decoration: underline;
+}
+
+/* One link covers the whole frame, so the frame is one target and one tab stop. */
+.cr-photo-frame__title a::after {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset: 0;
+}
+
+.cr-photo-frame__title a:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+.cr-photo-frame__title a:focus-visible::after {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-photo-frame__sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+/* A protected post keeps the plugin's title link on a paper frame. */
+.cr-photo-frame--protected {
+	grid-template-rows: auto;
+	min-height: 8rem;
+	padding: var(--cr-space-sm);
+	background-color: var(--cr-paper, var(--cr-light-gray));
+	background-image: var(--cr-fiber);
+	color: var(--cr-paper-ink, var(--cr-russian-violet));
+}
+
+.cr-photo-frame--protected .cr-photo-frame__number {
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+}
+
+.cr-photo-frame--protected .pk-title {
+	margin: var(--cr-space-xs) 0 0;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	line-height: var(--cr-leading-snug);
+}
+
+.cr-photo-frame--protected .pk-title a {
+	color: inherit;
+}
+
+.cr-photo-frame--protected .pk-title a::after {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset: 0;
+}
+
+.cr-photo-frame--protected .pk-title a:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+.cr-photo-frame--protected .pk-title a:focus-visible::after {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+/* ============================================================
+   Single: the projector's mount, controls and rail
+   ============================================================ */
+body.cr-photo-single .pkiw-projector__mount {
+	position: relative;
+	margin: 0;
+	padding: var(--cr-space-md) var(--cr-space-xl);
+	border-radius: var(--cr-radius-md);
+	background-color: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+body.cr-photo-single :not(.pkiw-projector) > .pkiw-projector__mount {
+	margin-block: var(--cr-space-lg);
+}
+
+/* Mount slots: two decorative notches at the mount's sides. */
+body.cr-photo-single .pkiw-projector__mount::before,
+body.cr-photo-single .pkiw-projector__mount::after {
+	content: "";
+	position: absolute;
+	inset-block: 38%;
+	width: 0.45rem;
+	border-radius: var(--cr-radius-full);
+	background-color: var(--cr-russian-violet);
+}
+
+body.cr-photo-single .pkiw-projector__mount::before {
+	inset-inline-start: var(--cr-space-xs);
+}
+
+body.cr-photo-single .pkiw-projector__mount::after {
+	inset-inline-end: var(--cr-space-xs);
+}
+
+body.cr-photo-single .pkiw-projector__mount img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: var(--cr-radius-sm);
+}
+
+body.cr-photo-single .pkiw-projector__mount > figcaption {
+	margin: var(--cr-space-xs) 0 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-base);
+	line-height: var(--cr-leading-snug);
+}
+
+body.cr-photo-single .pkiw-projector {
+	position: relative;
+	display: grid;
+	gap: var(--cr-space-lg);
+	margin-block: var(--cr-space-lg);
+}
+
+/* A strip of tape across the mount's top edge. */
+body.cr-photo-single .pkiw-projector::before {
+	content: "";
+	position: absolute;
+	z-index: 1;
+	inset-block-start: calc(var(--cr-space-sm) * -1);
+	inset-inline-end: var(--cr-space-2xl);
+	width: 5rem;
+	height: 1.5rem;
+	background-color: var(--cr-tape);
+	pointer-events: none;
+	transform: rotate(var(--cr-rotate-2));
+}
+
+/* Once the script runs: mount, caption plate, controls, then the rail. */
+body.cr-photo-single .pkiw-projector--enhanced {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	grid-template-areas:
+		"mount mount"
+		"status status"
+		"prev next"
+		"rail rail";
+	gap: var(--cr-space-md);
+	align-items: start;
+}
+
+body.cr-photo-single .pkiw-projector__controls {
+	display: contents;
+}
+
+body.cr-photo-single .pkiw-projector--enhanced .pkiw-projector__mount {
+	grid-area: mount;
+}
+
+body.cr-photo-single .pkiw-projector__note {
+	grid-column: 1 / -1;
+}
+
+body.cr-photo-single .pkiw-projector__status {
+	display: flex;
+	flex-wrap: wrap;
+	grid-area: status;
+	justify-content: space-between;
+	gap: var(--cr-space-2xs) var(--cr-space-md);
+	padding: var(--cr-space-sm) var(--cr-space-md);
+	border-radius: var(--cr-radius-md);
+	background-color: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard);
+	text-align: start;
+}
+
+body.cr-photo-single .pkiw-projector__caption {
+	order: 1;
+	margin-inline-end: auto;
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-base);
+	line-height: var(--cr-leading-snug);
+}
+
+body.cr-photo-single .pkiw-projector__counter {
+	order: 2;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+}
+
+body.cr-photo-single .pkiw-projector__button {
+	min-width: 2.75rem;
+	min-height: 2.75rem;
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	border: 2px solid var(--cr-cerulean);
+	border-radius: 0;
+	background-color: var(--cr-cerulean);
+	color: var(--cr-printer-ivory);
+	cursor: pointer;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-base);
+	line-height: var(--cr-leading-tight);
+}
+
+body.cr-photo-single .pkiw-projector__button--prev {
+	grid-area: prev;
+}
+
+body.cr-photo-single .pkiw-projector__button--next {
+	grid-area: next;
+}
+
+body.cr-photo-single .pkiw-projector__button[aria-disabled="true"] {
+	border-color: var(--cr-russian-violet-soft);
+	background-color: var(--cr-light-gray);
+	color: var(--cr-russian-violet-soft);
+	cursor: not-allowed;
+}
+
+body.cr-photo-single .pkiw-projector__rail {
+	display: flex;
+	flex-wrap: wrap;
+	grid-area: rail;
+	justify-content: center;
+	gap: var(--cr-space-xs);
+	margin: 0;
+	padding: var(--cr-space-md);
+	border-radius: var(--cr-radius-sm);
+	background-color: var(--cr-russian-violet);
+}
+
+body.cr-photo-single .pkiw-projector__thumb {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--cr-space-2xs);
+	min-width: 2.75rem;
+	min-height: 2.75rem;
+	padding: var(--cr-space-2xs);
+	border: 2px solid var(--cr-printer-ivory);
+	border-radius: var(--cr-radius-xs);
+	background-color: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	cursor: pointer;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	line-height: var(--cr-leading-tight);
+}
+
+body.cr-photo-single .pkiw-projector__thumb img {
+	border-radius: var(--cr-radius-xs);
+	object-fit: cover;
+}
+
+body.cr-photo-single .pkiw-projector__current {
+	padding: 0 var(--cr-space-2xs);
+	background-color: var(--cr-selective-yellow);
+	color: var(--cr-russian-violet);
+	font-size: var(--cr-text-xs);
+	font-weight: var(--cr-weight-bold);
+}
+
+body.cr-photo-single .pkiw-projector__thumb[aria-current="true"] {
+	outline: 3px solid var(--cr-selective-yellow);
+	outline-offset: 0;
+}
+
+body.cr-photo-single .pkiw-projector__button:focus-visible,
+body.cr-photo-single .pkiw-projector__thumb:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+body.cr-photo-single .pkiw-photo-place {
+	margin-block: var(--cr-space-sm);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-base);
+	line-height: var(--cr-leading-snug);
+}
+
+@media (min-width: 64rem) {
+
+	body.cr-photo-single .pkiw-projector--enhanced {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 11rem;
+		grid-template-areas:
+			"mount mount rail"
+			"status status rail"
+			"prev next rail";
+	}
+
+	body.cr-photo-single .pkiw-projector::before {
+		inset-inline-end: calc(11rem + var(--cr-space-3xl));
+	}
+}
+
+@media (max-width: 39.99rem) {
+
+	body.cr-photo-single .pkiw-projector::before {
+		display: none;
+	}
+
+	body.cr-photo-single .pkiw-projector__mount {
+		padding-inline: var(--cr-space-lg);
+	}
+}
+
+/* ============================================================
+   Stream: a compact slide mount in the collage's own column
+   ============================================================ */
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount {
+	position: relative;
+	box-sizing: border-box;
+	padding: var(--cr-space-sm) var(--cr-space-md) var(--cr-space-md);
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: var(--cr-radius-md);
+	background-color: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.pk-card.cr-slide-mount[data-cr-rotate="0"],
+.cr-stream-page .wp-block-post-template > li .pk-card.cr-slide-mount[data-cr-rotate="0"] {
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.pk-card.cr-slide-mount[data-cr-rotate="1"],
+.cr-stream-page .wp-block-post-template > li .pk-card.cr-slide-mount[data-cr-rotate="1"] {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.pk-card.cr-slide-mount[data-cr-rotate="2"],
+.cr-stream-page .wp-block-post-template > li .pk-card.cr-slide-mount[data-cr-rotate="2"] {
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.pk-card.cr-slide-mount[data-cr-rotate="3"],
+.cr-stream-page .wp-block-post-template > li .pk-card.cr-slide-mount[data-cr-rotate="3"] {
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media {
+	position: relative;
+	margin: 0;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 2;
+	border: 0;
+	border-radius: var(--cr-radius-sm);
+	object-fit: cover;
+}
+
+/* Mount slots: two decorative notches either side of the slide. */
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media::before,
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media::after {
+	content: "";
+	position: absolute;
+	inset-block: 38%;
+	width: 0.4rem;
+	border-radius: var(--cr-radius-full);
+	background-color: var(--cr-russian-violet);
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media::before {
+	inset-inline-start: calc(var(--cr-space-sm) * -1);
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media::after {
+	inset-inline-end: calc(var(--cr-space-sm) * -1);
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media__caption {
+	margin: var(--cr-space-xs) 0 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	line-height: var(--cr-leading-snug);
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-kindlabel {
+	margin: var(--cr-space-sm) 0 0;
+	padding: 0;
+	color: var(--cr-russian-violet-soft);
+	font-size: var(--cr-text-xs);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-title {
+	margin: var(--cr-space-2xs) 0 0;
+	padding: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-sub {
+	margin: var(--cr-space-2xs) 0 0;
+	padding: 0;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-stream-date time {
+	padding: 0;
+	border: 0;
+	color: var(--cr-russian-violet-soft);
+	font-size: var(--cr-text-xs);
+}
+
+/* One link, whose area is the whole mount. */
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-title a::after {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset: 0;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-title a:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-title a:focus-visible::after {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+/* An image that failed to load leaves the mount and its caption. */
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media.cr-cover--failed::before,
+:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media.cr-cover--failed::after {
+	content: none;
+}
+
+/* ============================================================
+   Dark: the strip's edge stays visible; the rail goes soft violet.
+   The mounts stay printer ivory with violet text.
+   ============================================================ */
+:root[data-theme="dark"] .cr-photo-sheets {
+	--cr-strip-edge: var(--cr-periwinkle);
+	--cr-strip-hole: var(--cr-rule);
+}
+
+:root[data-theme="dark"] body.cr-photo-single .pkiw-projector__rail {
+	background-color: var(--cr-russian-violet-soft);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-photo-sheets {
+		--cr-strip-edge: var(--cr-periwinkle);
+		--cr-strip-hole: var(--cr-rule);
+	}
+
+	:root:not([data-theme="light"]) body.cr-photo-single .pkiw-projector__rail {
+		background-color: var(--cr-russian-violet-soft);
+	}
+}
+
+/* ============================================================
+   Forced colors: outlines, system colors, no decoration. Photos stay.
+   ============================================================ */
+@media (forced-colors: active) {
+
+	.cr-photo-sheets .pkiw-group__items > li {
+		border: 2px solid CanvasText;
+		background-color: Canvas;
+		background-image: none;
+	}
+
+	.cr-photo-sheets .pkiw-group__heading {
+		color: CanvasText;
+	}
+
+	.cr-photo-sheets .pkiw-group__heading::before,
+	body.cr-photo-single .pkiw-projector::before,
+	body.cr-photo-single .pkiw-projector__mount::before,
+	body.cr-photo-single .pkiw-projector__mount::after,
+	:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media::before,
+	:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media::after {
+		display: none;
+	}
+
+	.cr-photo-frame__label,
+	.cr-photo-frame__media--paper .cr-photo-frame__sleeve,
+	.cr-photo-frame__media.cr-cover--failed .cr-photo-frame__sleeve,
+	.cr-photo-frame--protected {
+		border: 2px solid CanvasText;
+		background-color: Canvas;
+		background-image: none;
+		color: CanvasText;
+	}
+
+	.cr-photo-frame__title a:focus-visible::after,
+	.cr-photo-frame--protected .pk-title a:focus-visible::after,
+	:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-title a:focus-visible::after {
+		outline-color: Highlight;
+		box-shadow: none;
+	}
+
+	body.cr-photo-single .pkiw-projector__mount,
+	body.cr-photo-single .pkiw-projector__status,
+	body.cr-photo-single .pkiw-projector__rail,
+	:is(body, .cr-stream-page) .pk-card.cr-slide-mount {
+		border: 2px solid CanvasText;
+		background-color: Canvas;
+		color: CanvasText;
+		box-shadow: none;
+	}
+
+	body.cr-photo-single .pkiw-projector__button,
+	body.cr-photo-single .pkiw-projector__thumb {
+		border: 2px solid ButtonText;
+		background-color: ButtonFace;
+		color: ButtonText;
+	}
+
+	body.cr-photo-single .pkiw-projector__button[aria-disabled="true"] {
+		border-color: GrayText;
+		color: GrayText;
+	}
+
+	body.cr-photo-single .pkiw-projector__thumb[aria-current="true"] {
+		outline: 4px solid Highlight;
+	}
+
+	body.cr-photo-single .pkiw-projector__current {
+		border: 2px solid ButtonText;
+		background-color: ButtonFace;
+		color: ButtonText;
+	}
+}

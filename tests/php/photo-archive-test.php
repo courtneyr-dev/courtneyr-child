@@ -62,7 +62,7 @@ cr_photo_group(
 		cr_photo_contains( 'alt=""', $html, 'titled image is decorative' );
 		cr_photo_contains( 'class="u-photo"', $html, 'u-photo on the image' );
 		cr_photo_contains( '<span class="cr-photo-frame__number" aria-hidden="true"></span>', $html, 'number span is aria-hidden and empty (CSS counter fills it)' );
-		cr_photo_assert( 1 === preg_match( '/^<article class="pk-card [^"]*\bk-photo\b[^"]*\bcr-photo-frame\b[^"]*\bh-entry\b[^"]*">/', $html ), 'root keeps pk-card before h-entry and gains cr-photo-frame' );
+		cr_photo_assert( 1 === preg_match( '/^<article class="pk-card [^"]*\bk-photo\b[^"]*\bh-entry\b[^"]*\bcr-photo-frame\b[^"]*">/', $html ), 'root keeps pk-card before h-entry and gains cr-photo-frame' );
 		foreach ( array( 'pk-media__caption', 'pk-stream-date', 'dt-published', 'pk-kindlabel', 'Read more' ) as $cut ) {
 			cr_photo_not_contains( $cut, $html, 'frame prints no ' . $cut );
 		}

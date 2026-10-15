@@ -142,7 +142,7 @@ check_case(
 			preg_match( '/\.cr-photo-sheets \.pkiw-group__heading\s*\{([^{}]*)\}/', $code, $m );
 			$heading = $m[1] ?? '';
 		}
-		if ( '' === $heading || false !== strpos( $heading, 'transform' ) || false === strpos( $heading, 'var(--cr-font-mono)' ) ) {
+		if ( '' === $heading || 1 === preg_match( '/(?<![\w-])transform\s*:/', $heading ) || false === strpos( $heading, 'var(--cr-font-mono)' ) ) {
 			return false;
 		}
 		preg_match( '/\.pkiw-group__heading::before\s*\{([^{}]*)\}/', $code, $tape );

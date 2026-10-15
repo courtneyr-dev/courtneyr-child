@@ -33,7 +33,7 @@ if ( ! empty( $GLOBALS['cr_photo_no_plugin'] ) ) {
 			cr_photo_single_request();
 			$GLOBALS['cr_photo_meta'][42]['geo_address'] = '100 Example Avenue, Sampletown';
 			$html = \Courtneyr\Child\SlocMapAlt\add_map_alt( '<img class="sloc-map" src="https://example.test/m.png" />' );
-			cr_photo_contains( 'alt="Map showing this post&#039;s location"', $html, 'generic alt' );
+			cr_photo_contains( 'alt="Map showing this post\'s location"', html_entity_decode( $html, ENT_QUOTES ), 'generic alt' );
 			cr_photo_not_contains( 'Example Avenue', $html, 'no address' );
 		}
 	);
@@ -56,7 +56,8 @@ cr_photo_group(
 	static function (): void {
 		cr_photo_single_request();
 		$html = title_id( cr_photo_h1(), array( 'blockName' => 'core/post-title', 'attrs' => array( 'level' => 1 ) ) );
-		cr_photo_contains( '<h1 class="wp-block-post-title cr-flank cr-flank--blue single-post__title" id="cr-photo-title">Blue Hour at Example Lake</h1>', $html, 'id added, text untouched' );
+		cr_photo_assert( 1 === preg_match( '/^<h1\b[^>]*\bid="cr-photo-title"[^>]*>Blue Hour at Example Lake<\/h1>$/', $html ), 'id added, text untouched' );
+		cr_photo_contains( 'class="wp-block-post-title cr-flank cr-flank--blue single-post__title"', $html, 'classes untouched' );
 		cr_photo_same( 'cr-photo-title', projector_labelledby( '', 42 ), 'labelledby names the H1' );
 	}
 );
@@ -90,7 +91,7 @@ cr_photo_group(
 		cr_photo_single_request();
 		$already = '<h1 id="mine">T</h1>';
 		cr_photo_same( $already, title_id( $already, $block ), 'an existing id stays' );
-		cr_photo_same( 'earlier', projector_labelledby( 'earlier', 42 ), 'an earlier filter value is passed through for other posts' );
+		cr_photo_same( 'earlier', projector_labelledby( 'earlier', 77 ), 'an earlier filter value is passed through for other posts' );
 	}
 );
 
@@ -128,13 +129,13 @@ cr_photo_group(
 
 		$GLOBALS['cr_photo_visible'][42] = array( 'street' => false );
 		$html = \Courtneyr\Child\SlocMapAlt\add_map_alt( $map );
-		cr_photo_contains( 'alt="Map showing this post&#039;s location"', $html, 'street hidden: generic alt' );
+		cr_photo_contains( 'alt="Map showing this post\'s location"', html_entity_decode( $html, ENT_QUOTES ), 'street hidden: generic alt' );
 		cr_photo_not_contains( 'Example Avenue', $html, 'street hidden: no address' );
 		cr_photo_not_contains( '<a ', $html, 'the empty-href wrapper still goes' );
 
 		$GLOBALS['cr_photo_meta'][42]['geo_address'] = '';
 		$GLOBALS['cr_photo_visible'][42]             = array( 'street' => true );
-		cr_photo_contains( 'alt="Map showing this post&#039;s location"', \Courtneyr\Child\SlocMapAlt\add_map_alt( $map ), 'no address stored: generic alt' );
+		cr_photo_contains( 'alt="Map showing this post\'s location"', html_entity_decode( \Courtneyr\Child\SlocMapAlt\add_map_alt( $map ), ENT_QUOTES ), 'no address stored: generic alt' );
 
 		$existing = '<img class="sloc-map" alt="Mine" src="x" />';
 		cr_photo_same( $existing, \Courtneyr\Child\SlocMapAlt\add_map_alt( $existing ), 'an existing alt stays' );

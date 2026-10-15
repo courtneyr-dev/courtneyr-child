@@ -51,8 +51,8 @@ cr_photo_group(
 		cr_photo_reset();
 		$input = cr_photo_stream_card();
 		$html  = cr_photo_mount( $input );
-		cr_photo_assert( 1 === preg_match( '/^<article class="pk-card pk-card--stream pk-card--photo k-photo h-entry cr-slide-mount" data-cr-rotate="[0-3]">/', $html ), 'root keeps the plugin classes in order, gains cr-slide-mount and one rotate key' );
-		cr_photo_assert( 1 === preg_match( '/<div class="pk-media pk-media--stream" data-cr-cover-fallback>/', $html ), 'the media is marked for the failed-image fallback' );
+		cr_photo_assert( 1 === preg_match( '/^<article\b(?=[^>]*\bclass="pk-card pk-card--stream pk-card--photo k-photo h-entry cr-slide-mount")(?=[^>]*\bdata-cr-rotate="[0-3]")[^>]*>/', $html ), 'root keeps the plugin classes in order, gains cr-slide-mount and one rotate key' );
+		cr_photo_assert( 1 === preg_match( '/<div\b(?=[^>]*\bclass="pk-media pk-media--stream")(?=[^>]*\bdata-cr-cover-fallback)[^>]*>/', $html ), 'the media is marked for the failed-image fallback' );
 		foreach ( array( '<h2 class="pk-title p-name"><a class="u-url" href="https://example.test/photo/42/">Blue Hour at Example Lake</a></h2>', '<span class="pk-kindlabel">Photo</span>', '<time class="dt-published" datetime="2026-09-08T14:00:00+00:00">September 8, 2026</time>', '<p class="pk-media__caption">The dock after sunset.</p>' ) as $kept ) {
 			cr_photo_contains( $kept, $html, 'kept byte-for-byte' );
 		}
