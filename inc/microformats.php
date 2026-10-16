@@ -10,7 +10,7 @@
  *
  *   core/post-title  className "cr-u-url"        -> <a class="u-url">
  *   core/post-date   className "cr-dt-published" -> <time class="dt-published">
- *   untitled review/reply/like/bookmark/photo/acquisition singles -> visible H1, no p-name
+ *   untitled review/reply/like/bookmark/photo/acquisition/weather/craft/exercise/sleep singles -> visible H1, no p-name
  *   repost singles whose card title is the H1 -> suppress Core template title
  *   review posts                              -> h-review is the entry root
  *
@@ -29,7 +29,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Kinds whose untitled singles need a visible, non-mf2-name H1.
  */
-const UNTITLED_SINGLE_KINDS = array( 'review', 'reply', 'like', 'bookmark', 'photo', 'acquisition' );
+const UNTITLED_SINGLE_KINDS = array( 'review', 'reply', 'like', 'bookmark', 'photo', 'acquisition', 'weather', 'craft', 'exercise', 'sleep' );
+
+/**
+ * Untitled kinds whose single H1 is the kind and date name from Nav\kind_date_name().
+ *
+ * The time follows unless courtneyr_child_untitled_name_shows_time says no:
+ * weather and craft print "Craft, August 20, 2026 at 3:05 pm", exercise and
+ * sleep print "Sleep, August 19, 2026".
+ */
+const KIND_DATE_NAME_KINDS = array( 'reply', 'weather', 'craft', 'exercise', 'sleep' );
 
 /**
  * Add a class to the first tag of a kind inside the rendered block.
@@ -41,6 +50,30 @@ function add_class_to_tag( string $html, string $tag, string $class ): string {
 		return $p->get_updated_html();
 	}
 	return $html;
+}
+
+/**
+ * Link text for an untitled entry on a card or list.
+ *
+ * A sleep post reads its facts name, "Sleep, August 20, 2026", from Post Kinds
+ * (public tier, no clock time). Every other kind reads "Entry from <date>".
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function untitled_entry_label( int $post_id ): string {
+	if ( has_term( 'sleep', 'kind', $post_id ) && function_exists( '\\PKIW\\kind_facts' ) ) {
+		$facts = \PKIW\kind_facts( $post_id );
+		$name  = is_array( $facts ) && is_string( $facts['name'] ?? null ) ? trim( $facts['name'] ) : '';
+		if ( '' !== $name ) {
+			return $name;
+		}
+	}
+	return sprintf(
+		/* translators: %s: post date */
+		__( 'Entry from %s', 'courtneyr-child' ),
+		get_the_date( '', $post_id )
+	);
 }
 
 function post_title_u_url( string $content, array $block ): string {
@@ -56,13 +89,9 @@ function post_title_u_url( string $content, array $block ): string {
 		if ( $post_id <= 0 || '' !== trim( (string) get_the_title( $post_id ) ) ) {
 			return $content;
 		}
-		$level = (int) ( $block['attrs']['level'] ?? 2 );
-		$level = $level >= 1 && $level <= 6 ? $level : 2;
-		$label = sprintf(
-			/* translators: %s: post date */
-			__( 'Entry from %s', 'courtneyr-child' ),
-			get_the_date( '', $post_id )
-		);
+		$level   = (int) ( $block['attrs']['level'] ?? 2 );
+		$level   = $level >= 1 && $level <= 6 ? $level : 2;
+		$label   = untitled_entry_label( $post_id );
 		$classes = trim( str_replace( array( 'cr-u-url', 'p-name' ), '', $class ) ) . ' cr-untitled-title';
 		return sprintf(
 			'<h%1$d class="wp-block-post-title %2$s"><a class="u-url" href="%3$s">%4$s</a></h%1$d>',
@@ -134,7 +163,8 @@ function untitled_single_post_id( array $block ): int {
 function untitled_single_label( int $post_id ): string {
 	$post = get_post( $post_id );
 	// Ruling X8: an untitled reply's H1 is its kind, date and time; the cited name belongs to the citation.
-	if ( $post instanceof \WP_Post && function_exists( '\Courtneyr\Child\Nav\kind_date_name' ) && has_term( 'reply', 'kind', $post ) ) {
+	// Weather, craft, exercise and sleep use the same name; exercise and sleep drop the time.
+	if ( $post instanceof \WP_Post && function_exists( '\Courtneyr\Child\Nav\kind_date_name' ) && has_term( KIND_DATE_NAME_KINDS, 'kind', $post ) ) {
 		return \Courtneyr\Child\Nav\kind_date_name( $post );
 	}
 	// An untitled like with no real cited title names its host in the clipping, so the H1 is its kind and date.

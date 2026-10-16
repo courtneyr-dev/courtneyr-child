@@ -223,7 +223,10 @@ function name_untitled( string $html, array $block ): string {
 add_filter( 'render_block_core/post-navigation-link', __NAMESPACE__ . '\\hide_title_visually', 10, 2 );
 
 /**
- * Name an untitled post by its kind, date and time: "Reply, October 11, 2026 at 7:19 am".
+ * Name an untitled post by its kind and date, with its time unless the filter drops it.
+ *
+ * "Reply, October 11, 2026 at 7:19 am", or "Sleep, August 19, 2026" for a kind
+ * whose clock time is private.
  *
  * @param \WP_Post $post Post.
  * @return string
@@ -231,6 +234,38 @@ add_filter( 'render_block_core/post-navigation-link', __NAMESPACE__ . '\\hide_ti
 function kind_date_name( \WP_Post $post ): string {
 	$terms = get_the_terms( $post, 'kind' );
 	$kind  = ( is_array( $terms ) && $terms ) ? $terms[0]->name : __( 'Post', 'courtneyr-child' );
+	if ( ! untitled_name_shows_time( $post ) ) {
+		/* translators: 1: post kind name, 2: post date. */
+		return sprintf( __( '%1$s, %2$s', 'courtneyr-child' ), $kind, get_the_date( '', $post ) );
+	}
 	/* translators: 1: post kind name, 2: post date, 3: post time. */
 	return sprintf( __( '%1$s, %2$s at %3$s', 'courtneyr-child' ), $kind, get_the_date( '', $post ), get_the_time( '', $post ) );
 }
+
+/**
+ * Whether an untitled post's name carries its time.
+ *
+ * Exercise and sleep never print a clock time (the health answer, Q1): sleep
+ * posts publish at a neutral noon, and an exercise post's publish time sits
+ * near the workout's end. Every other kind keeps the time. The filter is the
+ * one place the untitled single H1 (inc/microformats.php) and the Previous/Next
+ * link names both read.
+ *
+ * @param \WP_Post $post Post.
+ * @return bool
+ */
+function untitled_name_shows_time( \WP_Post $post ): bool {
+	return (bool) apply_filters( 'courtneyr_child_untitled_name_shows_time', true, $post );
+}
+
+/**
+ * Drop the time from the names of untitled exercise and sleep posts.
+ *
+ * @param bool     $show Whether the name shows the time.
+ * @param \WP_Post $post Post.
+ * @return bool
+ */
+function hide_time_for_health_kinds( bool $show, \WP_Post $post ): bool {
+	return has_term( array( 'exercise', 'sleep' ), 'kind', $post ) ? false : $show;
+}
+add_filter( 'courtneyr_child_untitled_name_shows_time', __NAMESPACE__ . '\\hide_time_for_health_kinds', 10, 2 );

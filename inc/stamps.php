@@ -71,6 +71,11 @@ function pick( int $seed, int $shift, int $mod ): int {
 }
 
 /**
+ * Papers for the exercise bibs: token names for seeded_paper(), as in tokens.css.
+ */
+const BIB_PAPERS = array( 'sky-blue', 'periwinkle', 'light-orange', 'light-gray', 'printer-ivory' );
+
+/**
  * A palette paper for a post, the same on every surface (P26).
  *
  * The seed is the post ID alone, so the archive, the Stream and the single

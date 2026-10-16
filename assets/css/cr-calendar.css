@@ -1,0 +1,97 @@
+/* ============================================================
+   Shared calendar cells (PKIW W4, P5).
+
+   The plugin's mood year grid, almanac month and exercise week list all
+   print .pkiw-cal, .pkiw-cal__day and .pkiw-cal__link. This sheet holds
+   what those three share: the 44px cell, the raised focus cell, the
+   forced-colors border, and the month and week layouts. Kind paint
+   (cr-mood-year.css, cr-weather.css, cr-exercise.css) lists
+   'courtneyr-calendar' as a dependency, so it prints after this sheet
+   and overrides it. The layout selectors are one class in specificity
+   (:where() holds the rest down), so a kind's one- or two-class rule
+   overrides them at any breakpoint. Sleep opts out and never loads it.
+
+   Palette and derived tokens only. In dark mode --cr-surface-elevated
+   and --cr-rule flip to the night elevated and night rule tokens.
+   ============================================================ */
+
+.pkiw-cal {
+	--cr-cal-cell: 2.75rem;
+}
+
+.pkiw-cal__day {
+	position: relative;
+	box-sizing: border-box;
+	min-width: var(--cr-cal-cell);
+	min-height: var(--cr-cal-cell);
+	border: 1px solid var(--cr-rule);
+	background: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+}
+
+.pkiw-cal__link {
+	display: inline-flex;
+	align-items: center;
+	box-sizing: border-box;
+	min-width: var(--cr-cal-cell);
+	min-height: var(--cr-cal-cell);
+}
+
+/* Year: one 44px square per day. */
+:where(.pkiw-cal--year) .pkiw-cal__day {
+	width: var(--cr-cal-cell);
+	height: var(--cr-cal-cell);
+}
+
+/* Month and week: a chronological list below 48rem, a 7-column grid from
+   48rem. Cells that only hold a place in the grid (aria-hidden) leave the
+   list. The month's first day cell carries --cr-almanac-offset, its column
+   (1 to 7), set inline by the almanac paint in inc/weather.php. */
+:where(.pkiw-cal--month) :has(> .pkiw-cal__day),
+.pkiw-cal--week {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-xs);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+:where(.pkiw-cal--month, .pkiw-cal--week) .pkiw-cal__day:where([aria-hidden="true"]) {
+	display: none;
+}
+
+@media (min-width: 48rem) {
+
+	:where(.pkiw-cal--month) :has(> .pkiw-cal__day),
+	.pkiw-cal--week {
+		grid-template-columns: repeat(7, minmax(0, 1fr));
+	}
+
+	:where(.pkiw-cal--month, .pkiw-cal--week) .pkiw-cal__day:where([aria-hidden="true"]) {
+		display: block;
+	}
+
+	:where(.pkiw-cal--month) .pkiw-cal__day {
+		grid-column-start: var(--cr-almanac-offset, auto);
+	}
+}
+
+/* A focused cell sits above its neighbours so the link's ring and halo
+   (tokens.css, a:focus-visible) are never painted under the next cell. */
+.pkiw-cal__day:has(:focus-visible) {
+	z-index: 1;
+}
+
+@media (forced-colors: active) {
+
+	.pkiw-cal__day {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.pkiw-cal__link {
+		color: LinkText;
+	}
+}
