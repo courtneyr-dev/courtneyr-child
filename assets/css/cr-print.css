@@ -20,3 +20,26 @@ footer.wp-block-template-part,
 .skip-link {
 	display: none !important;
 }
+
+/* ============================================================
+   Craft (PKIW W4)
+
+   Written to the class contract of the craft archive (cr-craft.css,
+   W4-T249). The pegboard's fill and its holes are the board's background, so
+   one declaration drops both. The tool drawings and the peg hooks are
+   decoration. A card and a step are kept whole across a page break.
+   ============================================================ */
+.cr-pegboard__board {
+	background: none !important;
+}
+
+.cr-pegboard::before,
+.cr-pegboard::after,
+.cr-peg-card::before {
+	display: none !important;
+}
+
+.cr-peg-card,
+.pkiw-craft-step {
+	break-inside: avoid;
+}
