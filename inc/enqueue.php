@@ -455,6 +455,51 @@ function register_shared_kind_styles(): void {
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\register_shared_kind_styles' );
 
 /**
+ * Calendar blocks that load the shared calendar sheet (PKIW W4, P5).
+ *
+ * The sleep night block is not here: sleep opts out of the shared sheet.
+ */
+const CALENDAR_BLOCKS = array(
+	'post-kinds-indieweb/mood-year-grid',
+	'post-kinds-indieweb/almanac-month',
+	'post-kinds-indieweb/exercise-entry',
+);
+
+/**
+ * Attach cr-calendar.css to each calendar block under one handle.
+ *
+ * The handle is registered and enqueued by wp_enqueue_block_style() when the
+ * block renders (and in the editor), so the sheet loads only where a calendar
+ * exists and the call does nothing before the block does. Kind sheets list
+ * 'courtneyr-calendar' as a dependency; WordPress skips a style whose
+ * dependency isn't registered yet, so this runs on init at priority 9,
+ * ahead of the kind files' priority-10 calls, and the handle is registered
+ * first on every render.
+ *
+ * @return void
+ */
+function register_calendar_styles(): void {
+	$file_path = COURTNEYR_CHILD_DIR . '/assets/css/cr-calendar.css';
+
+	if ( ! is_readable( $file_path ) ) {
+		return;
+	}
+
+	foreach ( CALENDAR_BLOCKS as $block_name ) {
+		wp_enqueue_block_style(
+			$block_name,
+			array(
+				'handle' => 'courtneyr-calendar',
+				'src'    => COURTNEYR_CHILD_URI . '/assets/css/cr-calendar.css',
+				'path'   => $file_path,
+				'ver'    => COURTNEYR_CHILD_VERSION,
+			)
+		);
+	}
+}
+add_action( 'init', __NAMESPACE__ . '\\register_calendar_styles', 9 );
+
+/**
  * Enqueue editor-specific styles so the block editor preview matches
  * the front end. Same per-block files are reused; this hook adds them
  * to the editor iframe.
@@ -911,13 +956,19 @@ add_filter( 'perfmatters_minify_js_exclusions', __NAMESPACE__ . '\\perfmatters_e
  * article-stream-card.css) plus their shared theme dependencies
  * (cr-ticket.css and cr-sticker.css). Several W3 files are listed before their
  * files exist, so the kind lanes that add them don't edit this list.
+ * The W4 sheets join the same way: the shared cr-calendar.css, the kind sheets
+ * (cr-mood-year.css, cr-weather.css, cr-exercise.css, cr-sleep.css,
+ * cr-craft.css and cr-note-board.css) and the plugin's mood-year-grid.css,
+ * exercise-entry.css, medal-row.css and sleep-night.css. The plugin's
+ * note-entry.css stays off the list: every rule in it sits under the note
+ * board block style, which paints nothing on this site.
  *
  * @param array<int, string> $exclusions URL fragments Remove Unused CSS skips.
  * @return array<int, string>
  */
 function perfmatters_rucss_exclusions( $exclusions ): array {
 	$exclusions = is_array( $exclusions ) ? $exclusions : array();
-	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css', 'cr-checkin-archive.css', 'cr-shelf-boards.css', 'cr-play.css', 'cr-play-board.css', 'cr-play-video.css', 'cr-read-shelf.css', 'cr-review.css', 'cr-letters.css', 'cr-like.css', 'cr-bookmark.css', 'cr-paper.css', 'cr-chicken.css', 'chicken-entry.css', 'cr-photo.css', 'photo-projector.css', 'cr-favorite.css', 'cr-sticker.css', 'cr-acquisition.css', 'cr-ticket.css', 'cr-repost.css', 'article-stream-card.css', 'leaflet.css', 'MarkerCluster.css', 'checkins-feed/style.css' ) as $file ) {
+	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css', 'cr-checkin-archive.css', 'cr-shelf-boards.css', 'cr-play.css', 'cr-play-board.css', 'cr-play-video.css', 'cr-read-shelf.css', 'cr-review.css', 'cr-letters.css', 'cr-like.css', 'cr-bookmark.css', 'cr-paper.css', 'cr-chicken.css', 'chicken-entry.css', 'cr-photo.css', 'photo-projector.css', 'cr-favorite.css', 'cr-sticker.css', 'cr-acquisition.css', 'cr-ticket.css', 'cr-repost.css', 'article-stream-card.css', 'cr-calendar.css', 'cr-mood-year.css', 'mood-year-grid.css', 'cr-weather.css', 'cr-exercise.css', 'exercise-entry.css', 'medal-row.css', 'cr-sleep.css', 'sleep-night.css', 'cr-craft.css', 'cr-note-board.css', 'leaflet.css', 'MarkerCluster.css', 'checkins-feed/style.css' ) as $file ) {
 		$exclusions[] = $file;
 	}
 	return array_values( array_unique( $exclusions ) );
