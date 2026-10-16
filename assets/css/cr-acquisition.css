@@ -263,8 +263,18 @@
 	color: var(--cr-russian-violet);
 }
 
-.cr-acq-single__facts {
+.cr-acq-single .cr-acq-single__facts {
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-md) 0;
 	margin: 0;
+	overflow: visible;
+}
+
+/* The receipt stacks one fact per row, so it drops the shared between-fact rule. */
+.cr-acq-single .cr-acq-single__fact {
+	margin-inline-start: 0;
+	padding-inline-start: 0;
+	border-inline-start: 0;
 }
 
 .cr-acq-single__fact dt {
@@ -290,9 +300,6 @@
 }
 
 .cr-acq-single__link {
-	display: inline-flex;
-	align-items: baseline;
-	align-items: last baseline;
 	max-width: 100%;
 	color: var(--cr-russian-violet);
 	text-decoration: underline;
@@ -384,7 +391,7 @@ body.cr-acq-single-page.single .single-post__content .pk-card.k-acquisition {
 @media (min-width: 64rem) {
 
 	.cr-acq-single:has(> .cr-acq-single__photo:not(.cr-cover--failed)) {
-		grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+		grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem);
 		grid-template-rows: max-content 1fr;
 	}
 
