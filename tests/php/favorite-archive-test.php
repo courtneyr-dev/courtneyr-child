@@ -76,17 +76,33 @@ cr_fav_group(
 );
 
 cr_fav_group(
-	'a protected favorite keeps the plugin card whole: no clipping, no star, no facts, no tilt',
+	'a protected favorite sits in the star and clipping shell with the plugin card whole: no facts, no favorite-of data',
 	static function (): void {
 		$post = cr_fav_post( 106, 'Locked Favorite Sample', cr_fav_facts(), true );
 		$card = '<article class="pk-card pk-card--protected h-entry"><h3 class="pk-title"><a href="https://example.test/favorite-106/">Locked Favorite Sample</a></h3></article>';
 		Favorite\last_tilt( '' );
 		$out = cr_fav_item( $post, array(), $card );
-		cr_fav_same( $card, $out, 'the plugin card comes back byte for byte' );
-		cr_fav_assert( ! str_contains( $out, 'cr-fav-' ), 'no favorite class on the protected item' );
-		cr_fav_assert( ! str_contains( $out, 'u-favorite-of' ) && ! str_contains( $out, 'Rowan Vale' ), 'no facts leak' );
+		cr_fav_assert( str_starts_with( $out, '<div class="cr-fav-item cr-fav-item--protected">' ), 'the item shell wraps the card' );
+		cr_fav_same( 1, cr_fav_count( '/<span class="cr-fav-star" aria-hidden="true" style="--cr-fav-tilt:var\(--cr-rotate-[a-z0-9-]+\)">/', $out ), 'one decorative star with a rotation token' );
+		cr_fav_same( 1, cr_fav_count( '/<div class="cr-fav-clipping">' . preg_quote( $card, '/' ) . '<\/div>/', $out ), 'the clipping holds the plugin card byte for byte' );
+		cr_fav_assert( ! str_contains( $out, 'u-favorite-of' ) && ! str_contains( $out, 'Rowan Vale' ) && ! str_contains( $out, 'notes.example.com' ), 'no facts leak' );
 		cr_fav_same( 1, cr_fav_count( '/<a\b/', $out ), 'one anchor' );
-		cr_fav_same( '', Favorite\last_tilt(), 'a protected item does not advance the star tilt' );
+		cr_fav_same( 1, cr_fav_count( '/<h[1-6]\b/', $out ), 'one heading' );
+		cr_fav_assert( '' !== Favorite\last_tilt(), 'a protected item advances the star tilt like its neighbours' );
+	}
+);
+
+cr_fav_group(
+	'the protected shell wraps only the protected card',
+	static function (): void {
+		cr_fav_same( '<p>card</p>', Favorite\protected_item_html( '<p>card</p>', 107 ), 'markup that is not the protected card comes back unchanged' );
+		$GLOBALS['cr_fav_kinds'][108] = true;
+		$post                         = cr_fav_post( 108, 'Locked', cr_fav_facts(), true );
+		$prev                         = '--cr-rotate-1';
+		Favorite\last_tilt( $prev );
+		$out = cr_fav_item( $post, array(), '<article class="pk-card pk-card--protected h-entry"><h3 class="pk-title"><a href="https://example.test/108/">Locked</a></h3></article>' );
+		preg_match( '/--cr-fav-tilt:var\((--cr-rotate-[a-z0-9-]+)\)/', $out, $m );
+		cr_fav_assert( isset( $m[1] ) && $m[1] !== $prev, 'the protected star never repeats the previous token' );
 	}
 );
 

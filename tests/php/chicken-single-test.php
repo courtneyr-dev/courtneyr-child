@@ -130,12 +130,18 @@ cr_chk_group(
 		$GLOBALS['cr_chk_request']['protected'][42] = true;
 		$GLOBALS['cr_chk_facts'][42]               = array();
 		$GLOBALS['cr_chk_blocks']['core/post-title'] = '<h1 class="wp-block-post-title cr-coop__title">Protected: Locked coop log</h1>';
+		$GLOBALS['cr_chk_blocks']['core/post-date']  = '';
 		$form = '<div class="entry-content wp-block-post-content"><form class="post-password-form"></form></div>';
 		$out  = SingleChicken\board( $form );
 		cr_chk_same( array( 'div.wp-block-post-date', 'h1.wp-block-post-title', 'div.entry-content' ), cr_chk_board_children( $out ), 'date, title, form' );
 		cr_chk_lacks( '<img', $out, 'no image' );
 		cr_chk_lacks( '<figure', $out, 'no figure' );
 		cr_chk_contains( 'Protected: Locked coop log', $out, 'the protected title' );
+		cr_chk_contains( '<div class="wp-block-post-date cr-coop__date"><time datetime="', $out, 'the date prints though Core renders none' );
+		cr_chk_contains( 'September 24, 2026</time></div>', $out, 'with the post date text' );
+
+		$GLOBALS['cr_chk_request']['protected'][42] = false;
+		cr_chk_lacks( 'cr-coop__date', SingleChicken\board( $form ), 'an unprotected post with no date block prints none' );
 	}
 );
 

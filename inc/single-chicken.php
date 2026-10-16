@@ -123,6 +123,18 @@ function picture( array $facts ): string {
 }
 
 /**
+ * The date for a password-protected post, where Core's post-date block renders ''.
+ *
+ * Same markup as protected_date() in inc/single-reply.php, so the board opens with the date.
+ *
+ * @param \WP_Post $post Single post.
+ * @return string
+ */
+function protected_date( \WP_Post $post ): string {
+	return '<div class="wp-block-post-date cr-coop__date"><time datetime="' . esc_attr( (string) get_the_date( 'c', $post ) ) . '">' . esc_html( (string) get_the_date( 'F j, Y', $post ) ) . '</time></div>';
+}
+
+/**
  * Wrap the post content in the board: date, H1, picture, content.
  *
  * @param string               $html     Rendered Post Content block.
@@ -151,6 +163,9 @@ function board( string $html, array $block = array(), $instance = null ): string
 			'className' => 'cr-coop__date',
 		)
 	);
+	if ( '' === trim( $date ) && post_password_required( $post ) ) {
+		$date = protected_date( $post );
+	}
 	if ( '' === trim( (string) get_post_field( 'post_title', $post->ID, 'raw' ) ) ) {
 		$title = untitled_h1( $post, $facts );
 	} else {
