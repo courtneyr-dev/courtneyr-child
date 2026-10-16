@@ -236,6 +236,7 @@
 .cr-acq-single__img {
 	display: block;
 	width: 100%;
+	max-width: none;
 	height: auto;
 	filter: none;
 }
@@ -262,8 +263,18 @@
 	color: var(--cr-russian-violet);
 }
 
-.cr-acq-single__facts {
+.cr-acq-single .cr-acq-single__facts {
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-md) 0;
 	margin: 0;
+	overflow: visible;
+}
+
+/* The receipt stacks one fact per row, so it drops the shared between-fact rule. */
+.cr-acq-single .cr-acq-single__fact {
+	margin-inline-start: 0;
+	padding-inline-start: 0;
+	border-inline-start: 0;
 }
 
 .cr-acq-single__fact dt {
@@ -289,6 +300,7 @@
 }
 
 .cr-acq-single__link {
+	max-width: 100%;
 	color: var(--cr-russian-violet);
 	text-decoration: underline;
 	text-underline-offset: 0.15em;
@@ -379,7 +391,8 @@ body.cr-acq-single-page.single .single-post__content .pk-card.k-acquisition {
 @media (min-width: 64rem) {
 
 	.cr-acq-single:has(> .cr-acq-single__photo:not(.cr-cover--failed)) {
-		grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+		grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem);
+		grid-template-rows: max-content 1fr;
 	}
 
 	.cr-acq-single:has(> .cr-acq-single__photo:not(.cr-cover--failed)) > .cr-acq-single__photo {
@@ -467,12 +480,9 @@ body.cr-acq-single-page.single .single-post__content .pk-card.k-acquisition .pk-
 .cr-acq-stub__date {
 	margin: var(--cr-space-2xs) 0 0;
 	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
 	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
 	line-height: var(--cr-leading-snug);
-}
-
-.cr-acq-stub__date {
-	font-family: var(--cr-font-mono);
 }
 
 .cr-acq-stub:has(a:focus-visible) {
