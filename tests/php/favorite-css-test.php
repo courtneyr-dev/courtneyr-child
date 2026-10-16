@@ -107,6 +107,17 @@ cr_fav_css_check( (bool) preg_match( '/@media \(min-width: 40rem\)\s*\{[^}]*pkiw
 cr_fav_css_check( str_contains( $css, '--cr-focus-halo: var(--cr-russian-violet)' ), 'the halo is violet inside paper in both schemes' );
 cr_fav_css_check( (bool) preg_match( '/\.cr-fav-item:has\(a:focus-visible\) \.cr-fav-clipping\s*\{[^}]*3px solid var\(--cr-focus-ring\)[^}]*0 0 0 7px var\(--cr-focus-halo\)/s', $css ), 'archive focus: 3px ring and 7px halo around the clipping' );
 
+// Fidelity fixes (2026-10-15): specificity against the rules that outranked the sheet.
+cr_fav_css_check( (bool) preg_match( '/\.cr-fav-sheet \.cr-fav-sheet__title\s*\{[^}]*color:\s*var\(--cr-russian-violet\)/s', $css ), 'single H1 pins violet at two classes, above components.css has-main-accent-background-color h1' );
+cr_fav_css_check( (bool) preg_match( '/\.cr-fav-card \.cr-fav-card__title \.cr-fav-link\s*\{[^}]*color:\s*var\(--cr-cerulean\)[^}]*text-decoration:\s*underline/s', $css ), 'Stream title link: cerulean and underlined at three classes, above the plugin pk-title a' );
+cr_fav_css_check( (bool) preg_match( '/\.cr-fav-card \.cr-fav-card__title \.cr-fav-link:hover\s*\{[^}]*color:\s*var\(--cr-russian-violet\)/s', $css ), 'Stream title link hover: violet, above the plugin hover rule' );
+cr_fav_css_check( (bool) preg_match( '/\.cr-fav-sheet::before,\s*\.cr-fav-sheet::after\s*\{[^}]*background-color:\s*var\(--cr-white\)/s', $css ) && (bool) preg_match( '/\.cr-fav-sheet::before\s*\{[^}]*inset-block-end:\s*100%[^}]*mask:/s', $css ) && (bool) preg_match( '/\.cr-fav-sheet::after\s*\{[^}]*inset-block-start:\s*100%[^}]*mask:/s', $css ), 'sheet: torn top and bottom strips, flat masks in the sheet fill' );
+cr_fav_css_check( (bool) preg_match( '/forced-colors: active\).*\.cr-fav-sheet::before,\s*\.cr-fav-sheet::after,\s*\.cr-fav-sheet__mount::before/s', $css ), 'forced colors: the sheet tear drops' );
+cr_fav_css_check( (bool) preg_match( '/\.cr-fav-item--protected \.pk-card--protected\s*\{[^}]*position:\s*static[^}]*display:\s*block[^}]*border:\s*0[^}]*box-shadow:\s*none/s', $css ), 'protected item: the plugin card loses its box, grid and positioning' );
+cr_fav_css_check( (bool) preg_match( '/\.cr-fav-link,\s*\.cr-fav-item--protected \.pk-card--protected \.pk-title a\s*\{[^}]*color:\s*var\(--cr-cerulean\)/s', $css ), 'protected item: the title link takes the shared link look' );
+
+cr_fav_css_check( (bool) preg_match( '/\.cr-fav-item--protected \.pk-card--protected \.pk-title\s*\{\s*position:\s*static/s', $css ), 'protected item: the plugin title is unpositioned so the link covers the whole clipping' );
+
 // Modes.
 cr_fav_css_check( str_contains( $css, '@media (forced-colors: active)' ) && str_contains( $css, '2px solid CanvasText' ) && str_contains( $css, 'LinkText' ), 'forced colors: CanvasText outlines and LinkText links' );
 cr_fav_css_check( (bool) preg_match( '/forced-colors: active\).*\.cr-fav-star__shape/s', $css ), 'forced colors: star art drops' );

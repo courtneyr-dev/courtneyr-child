@@ -116,8 +116,8 @@ test.describe( 'archive', () => {
 		await visit( page, ARCHIVE );
 		expect( await page.locator( 'main h1' ).count() ).toBe( 1 );
 		expect( await page.locator( '.cr-favorite-chart .pkiw-group > h2.pkiw-group__heading' ).count() ).toBe( 3 );
-		// Orchestrator ruling 2026-10-15: a protected item keeps the plugin's generic card (an h3.pk-title
-		// and no favorite classes). Only the unprotected items carry h3.cr-fav-title.
+		// A protected item sits in the same star and clipping shell, but its title is the plugin's
+		// protected card (h3.pk-title). Only the unprotected items carry h3.cr-fav-title.
 		const protectedCount = await page.locator( '.cr-favorite-chart .pkiw-group__items > li .pk-card--protected' ).count();
 		expect( await page.locator( '.cr-favorite-chart .pkiw-group__items > li h3' ).count(), 'every item has one h3' ).toBe( 12 );
 		expect( await page.locator( '.cr-favorite-chart .pkiw-group__items h3.cr-fav-title' ).count() ).toBe( 12 - protectedCount );
@@ -159,7 +159,7 @@ test.describe( 'archive', () => {
 	test( 'the clipping and the star center both hit the item link', async ( { page } ) => {
 		await page.setViewportSize( { width: 1440, height: 900 } );
 		await visit( page, ARCHIVE );
-		for ( const li of await page.locator( '.cr-favorite-chart .pkiw-group__items > li:not(:has(.pk-card--protected))' ).all() ) {
+		for ( const li of await page.locator( '.cr-favorite-chart .pkiw-group__items > li' ).all() ) {
 			await li.scrollIntoViewIfNeeded();
 			const hit = await li.evaluate( ( el ) => {
 				const a = el.querySelector( 'a' );
@@ -173,18 +173,43 @@ test.describe( 'archive', () => {
 		}
 	} );
 
-	// Orchestrator ruling 2026-10-15: a password-protected item renders the plugin's generic protected
-	// card as the W2 review archive does: the title link, no facts, no kind clipping or decoration.
-	test( 'a protected item shows its title link only: no facts, clipping, star or favorite-of data', async ( { page } ) => {
+	// The 2026-10-06 contract gives every item a star and a clipping around its title and says nothing
+	// that exempts a protected one, so a protected item wears the shell. It reads no facts: the plugin's
+	// protected card (title link only) sits inside the clipping, with no favorite-of data.
+	// This supersedes the orchestrator's 2026-10-15 generic-card ruling.
+	test( 'a protected item wears the star and clipping with its title link only: no facts or favorite-of data', async ( { page } ) => {
+		await page.setViewportSize( { width: 1440, height: 900 } );
 		await visit( page, ARCHIVE );
 		const locked = page.locator( '.cr-favorite-chart .pkiw-group__items > li:has(.pk-card--protected)' );
 		test.skip( 0 === await locked.count(), 'S3 is not on the first archive page (run seed-259.php first)' );
+		const widths = await page.locator( '.cr-favorite-chart .pkiw-group__items > li:not(:has(.pk-card--protected)) .cr-fav-clipping' ).evaluateAll( ( els ) => els.map( ( el ) => Math.round( el.getBoundingClientRect().width ) ) );
 		for ( const li of await locked.all() ) {
-			expect( await li.locator( '.pk-card--protected > h3.pk-title a[href]' ).count(), 'the title link' ).toBe( 1 );
+			await li.scrollIntoViewIfNeeded();
+			expect( await li.locator( '.cr-fav-item--protected > .cr-fav-star[aria-hidden="true"]' ).count(), 'the star' ).toBe( 1 );
+			expect( await li.locator( '.cr-fav-item--protected > .cr-fav-clipping > .pk-card--protected > h3.pk-title a[href]' ).count(), 'the title link inside the clipping' ).toBe( 1 );
 			expect( ( await visibleLinks( li ) ).count, 'one visible link' ).toBe( 1 );
-			const kept = await li.evaluate( ( el ) => [ '.cr-fav-item', '.cr-fav-clipping', '.cr-fav-star', '.cr-fav-title', 'data.u-favorite-of', 'img', 'figure' ].filter( ( selector ) => el.querySelector( selector ) ) );
+			const kept = await li.evaluate( ( el ) => [ '.cr-fav-title', 'data.u-favorite-of', 'img', 'figure', '.pk-kindlabel' ].filter( ( selector ) => el.querySelector( selector ) ) );
 			expect( kept, 'no kind decoration and no facts' ).toEqual( [] );
 			expect( await li.innerText(), 'no cited host, author or date' ).not.toMatch( /notes\.example\.com|Rowan Vale|\b20\d\d\b/ );
+			const box = await li.evaluate( ( el ) => {
+				const a = el.querySelector( 'a' );
+				const clip = el.querySelector( '.cr-fav-clipping' );
+				const art = el.querySelector( '.pk-card--protected' );
+				return { clip: Math.round( clip.getBoundingClientRect().width ), link: a.getBoundingClientRect().height, line: parseFloat( getComputedStyle( a ).lineHeight ), color: getComputedStyle( a ).color, deco: getComputedStyle( a ).textDecorationLine, border: getComputedStyle( art ).borderTopWidth, shadow: getComputedStyle( art ).boxShadow };
+			} );
+			expect( widths, 'the clipping is as wide as its neighbours' ).toContain( box.clip );
+			expect( box.link, 'the title wraps by phrase, not one word per line' ).toBeLessThan( box.line * 3.5 );
+			expect( box.color, 'cerulean link' ).toBe( 'rgb(18, 103, 130)' );
+			expect( box.deco ).toBe( 'underline' );
+			expect( [ box.border, box.shadow ], 'the plugin card keeps no box of its own' ).toEqual( [ '0px', 'none' ] );
+			const hit = await li.evaluate( ( el ) => {
+				const a = el.querySelector( 'a' );
+				const clip = el.querySelector( '.cr-fav-clipping' ).getBoundingClientRect();
+				const star = el.querySelector( '.cr-fav-star' ).getBoundingClientRect();
+				const at = ( x, y ) => a.contains( document.elementFromPoint( x, y ) );
+				return { clip: at( clip.left + clip.width / 2, clip.top + clip.height / 2 ), star: at( star.left + star.width / 2, star.top + star.height / 2 ) };
+			} );
+			expect( hit, 'the clipping and the star center both hit the link' ).toEqual( { clip: true, star: true } );
 		}
 	} );
 
@@ -451,9 +476,24 @@ test.describe( 'single', () => {
 			await visit( page, await permalink( page, 'Field Guide to Quiet Software' ), scheme );
 			const colors = await page.locator( '.cr-fav-sheet' ).evaluate( ( el ) => ( { bg: getComputedStyle( el ).backgroundColor, label: getComputedStyle( el.querySelector( 'dt' ) ).color, link: getComputedStyle( el.querySelector( '.cr-fav-row a' ) ).color } ) );
 			expect( colors ).toEqual( { bg: 'rgb(255, 255, 255)', label: 'rgb(61, 82, 125)', link: 'rgb(18, 103, 130)' } );
+			// The H1 stays violet on the white sheet in dark: the has-main-accent-background-color h1 rule flips ink to ivory.
+			expect( await page.locator( 'h1.cr-fav-sheet__title' ).evaluate( ( el ) => getComputedStyle( el ).color ), 'H1 ink' ).toBe( VIOLET );
 			expect( await axe( page ) ).toEqual( [] );
 		} );
 	}
+
+	test( 'the sheet has a torn top and bottom edge, and keeps its hard shadow', async ( { page } ) => {
+		await visit( page, await permalink( page, 'Field Guide to Quiet Software' ) );
+		const edges = await page.locator( '.cr-fav-sheet' ).evaluate( ( el ) => [ '::before', '::after' ].map( ( pseudo ) => {
+			const cs = getComputedStyle( el, pseudo );
+			return { mask: cs.maskImage !== 'none' && cs.maskImage !== '', height: parseFloat( cs.height ), bg: cs.backgroundColor };
+		} ).concat( [ { shadow: getComputedStyle( el ).boxShadow !== 'none' } ] ) );
+		expect( edges[ 0 ].mask && edges[ 1 ].mask, 'both edges are masked' ).toBe( true );
+		expect( edges[ 0 ].height, 'top tear height' ).toBeGreaterThan( 0 );
+		expect( edges[ 1 ].height, 'bottom tear height' ).toBeGreaterThan( 0 );
+		expect( [ edges[ 0 ].bg, edges[ 1 ].bg ], 'the tear takes the sheet fill' ).toEqual( [ 'rgb(255, 255, 255)', 'rgb(255, 255, 255)' ] );
+		expect( edges[ 2 ].shadow, 'the hard shadow stays' ).toBe( true );
+	} );
 
 	test( 'post navigation follows the comments with Previous and Next chips scoped to favorites', async ( { page } ) => {
 		await page.setViewportSize( { width: 1440, height: 900 } );
@@ -527,6 +567,18 @@ test.describe( 'stream', () => {
 		}
 		await expect( page.locator( 'article.cr-fav-card:has(a:text-is("zine.example.org")) data.u-url[value="https://zine.example.org/issue-9"]' ) ).toHaveCount( 1 );
 	} );
+
+	for ( const scheme of [ 'light', 'dark' ] ) {
+		test( `the title reads as a link (${ scheme }): cerulean and underlined, violet on hover`, async ( { page } ) => {
+			await visit( page, STREAM, scheme );
+			const link = page.locator( 'article.cr-fav-card .cr-fav-card__title a' ).first();
+			test.skip( 0 === await link.count(), 'no favorite on the first Stream page' );
+			const look = async () => link.evaluate( ( a ) => ( { color: getComputedStyle( a ).color, deco: getComputedStyle( a ).textDecorationLine } ) );
+			expect( await look() ).toEqual( { color: 'rgb(18, 103, 130)', deco: 'underline' } );
+			await link.hover();
+			await expect.poll( async () => ( await look() ).color ).toBe( VIOLET );
+		} );
+	}
 
 	test( 'none of the retired legacy colors is computed on a favorite Stream card', async ( { page } ) => {
 		await visit( page, STREAM );
