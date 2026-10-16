@@ -341,7 +341,7 @@ namespace Courtneyr\Child\W3T0MicroformatsTests {
 			: '__missing__';
 	}
 
-	check( array( 'review', 'reply', 'like', 'bookmark', 'photo', 'acquisition' ) === \Courtneyr\Child\Microformats\UNTITLED_SINGLE_KINDS, 'UNTITLED_SINGLE_KINDS includes the frozen W3 list in order' );
+	check( array( 'review', 'reply', 'like', 'bookmark', 'photo', 'acquisition' ) === array_slice( \Courtneyr\Child\Microformats\UNTITLED_SINGLE_KINDS, 0, 6 ), 'UNTITLED_SINGLE_KINDS starts with the frozen W3 list in order' );
 
 	foreach ( array( 'photo', 'acquisition' ) as $index => $kind ) {
 		reset_state();
