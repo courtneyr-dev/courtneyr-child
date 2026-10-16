@@ -389,21 +389,35 @@ body.cr-photo-single .pkiw-projector__controls {
 
 body.cr-photo-single .pkiw-projector--enhanced .pkiw-projector__mount {
 	grid-area: mount;
+	padding-block-end: 0;
+	border-block-end: 0;
+	border-end-start-radius: 0;
+	border-end-end-radius: 0;
 }
 
 body.cr-photo-single .pkiw-projector__note {
 	grid-column: 1 / -1;
 }
 
-body.cr-photo-single .pkiw-projector__status {
+/* The mount and its status region read as one slide mount: the status
+   region is the mount's lower lip, flush under the photo, so the mount's
+   border runs on around it and the hard shadow belongs to the pair. */
+body.cr-photo-single .pkiw-projector--enhanced .pkiw-projector__status {
+	position: relative;
+	z-index: 1;
 	display: flex;
 	flex-wrap: wrap;
 	grid-area: status;
 	justify-content: space-between;
 	gap: var(--cr-space-2xs) var(--cr-space-md);
-	padding: var(--cr-space-sm) var(--cr-space-md);
+	margin-block-start: calc(var(--cr-space-md) * -1);
+	padding: var(--cr-space-md) var(--cr-space-xl);
 	border: 2px solid var(--cr-russian-violet);
-	border-radius: var(--cr-radius-md);
+	border-block-start: 0;
+	border-start-start-radius: 0;
+	border-start-end-radius: 0;
+	border-end-start-radius: var(--cr-radius-md);
+	border-end-end-radius: var(--cr-radius-md);
 	background-color: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
 	box-shadow: var(--cr-shadow-hard);
@@ -538,6 +552,10 @@ body.cr-photo-single .pkiw-photo-place {
 	}
 
 	body.cr-photo-single .pkiw-projector__mount {
+		padding-inline: var(--cr-space-lg);
+	}
+
+	body.cr-photo-single .pkiw-projector--enhanced .pkiw-projector__status {
 		padding-inline: var(--cr-space-lg);
 	}
 }
