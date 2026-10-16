@@ -546,7 +546,7 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
    ============================================================ */
 
 .cr-fav-card {
-	--cr-fav-star-size: 7rem;
+	--cr-fav-star-size: 14rem;
 	position: relative;
 	display: flex;
 	flex-direction: column;
@@ -563,7 +563,7 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 	inline-size: var(--cr-fav-star-size);
 	margin-block-start: var(--cr-space-2xs);
 	margin-inline-start: var(--cr-space-2xs);
-	margin-block-end: calc(-1 * var(--cr-space-lg));
+	margin-block-end: calc(-0.5 * var(--cr-fav-star-size));
 	align-self: flex-start;
 	transform: rotate(var(--cr-rotate-neg));
 }
@@ -578,6 +578,9 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 	letter-spacing: normal;
 	color: var(--cr-russian-violet);
 	text-align: center;
+
+	/* The star's widest chord sits above its center, so the word rides there and stays inside the outline. */
+	transform: translateY(calc(var(--cr-fav-star-size) * -0.04));
 }
 
 .cr-fav-card__clipping {
@@ -585,7 +588,8 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 	position: relative;
 	box-sizing: border-box;
 	margin-block-end: var(--cr-paper-tear);
-	padding: var(--cr-space-xl) var(--cr-space-md) var(--cr-space-md);
+	padding: calc(var(--cr-fav-star-size) / 2 + var(--cr-space-sm)) var(--cr-space-md) var(--cr-space-md);
+	border: 2px solid var(--cr-russian-violet);
 	background-color: var(--cr-printer-ivory);
 	background-image: var(--cr-fiber);
 	box-shadow: var(--cr-shadow-hard);
@@ -639,7 +643,7 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 .cr-fav-card__title .cr-fav-link::after {
 	content: "";
 	position: absolute;
-	inset-block: calc(var(--cr-space-lg) - var(--cr-fav-star-size)) 0;
+	inset-block: calc(-0.5 * var(--cr-fav-star-size) - var(--cr-space-2xs) - 2px) 0;
 	inset-inline: 0;
 }
 
