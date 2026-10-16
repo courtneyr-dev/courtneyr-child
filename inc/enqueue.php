@@ -470,11 +470,13 @@ const CALENDAR_BLOCKS = array(
  *
  * The handle is registered and enqueued by wp_enqueue_block_style() when the
  * block renders (and in the editor), so the sheet loads only where a calendar
- * exists and the call does nothing before the block does. Kind sheets list
- * 'courtneyr-calendar' as a dependency; WordPress skips a style whose
- * dependency isn't registered yet, so this runs on init at priority 9,
- * ahead of the kind files' priority-10 calls, and the handle is registered
- * first on every render.
+ * exists and the call does nothing before the block does. Dependencies
+ * resolve at print time, so call order doesn't decide the print order. A kind
+ * sheet that lists 'courtneyr-calendar' as a dependency must attach to one of
+ * these three calendar blocks (mood-year-grid, almanac-month,
+ * exercise-entry), or it is dropped on requests where no calendar block
+ * renders. The call stays on init at priority 9, ahead of the kind files'
+ * priority-10 calls.
  *
  * @return void
  */

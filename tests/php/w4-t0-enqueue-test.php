@@ -174,7 +174,7 @@ namespace Courtneyr\Child\W4T0EnqueueTests {
 
 	$callback = 'Courtneyr\\Child\\Enqueue\\register_calendar_styles';
 	check( function_exists( $callback ), 'register_calendar_styles exists' );
-	check( 9 === \has_filter( 'init', $callback ), 'register_calendar_styles runs on init at priority 9, ahead of the kind sheets at 10' );
+	check( 9 === \has_filter( 'init', $callback ), 'register_calendar_styles runs on init at priority 9, ahead of the kind files at 10 (print order comes from dependencies, not call order)' );
 	$callback();
 
 	$blocks = array();

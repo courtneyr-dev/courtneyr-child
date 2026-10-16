@@ -53,8 +53,8 @@ check_case(
 			"\n.cr-sticky-artifact {",
 			"\n.cr-sticky__curl {",
 			"\n.cr-sticky,\n.cr-stream-page .cr-sticky-artifact--stream .pk-card.k-note.cr-sticky,",
-			"\n:root[data-theme=\"dark\"] .cr-sticky-artifact { filter: drop-shadow(4px 4px 0 var(--cr-selective-yellow, #ffb703)); }",
-			"\n\t:root:not([data-theme=\"light\"]) .cr-sticky-artifact { filter: drop-shadow(4px 4px 0 var(--cr-selective-yellow, #ffb703)); }",
+			"\n:root[data-theme=\"dark\"] .cr-sticky-artifact { filter: drop-shadow(4px 4px 0 var(--cr-selective-yellow",
+			"\n\t:root:not([data-theme=\"light\"]) .cr-sticky-artifact { filter: drop-shadow(4px 4px 0 var(--cr-selective-yellow",
 		) as $needle ) {
 			if ( false === strpos( $post_kinds, $needle ) ) {
 				return false;
