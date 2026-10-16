@@ -84,7 +84,7 @@ const QUOTE_POST = process.env.CR_QUOTE_POST_PATH || '/?p=38049'; // Syndication
 const BROWSE_PAGE = process.env.CR_BROWSE_ALL_PATH || '/stream/'; // cr-browse-all pattern (post_format list)
 const TABLE_POST = process.env.CR_TABLE_POST_PATH || '/?p=551'; // legacy comparison table with headings and links in <th>
 const TERM_ARCHIVE = process.env.CR_TERM_ARCHIVE_PATH || '/type/aside/'; // term archive with a description
-const CUTOUT_ARCHIVES = ( process.env.CR_CUTOUT_ARCHIVE_PATHS || '/kind/mood/,/type/aside/,/?s=wordpress,/stream/' ).split( ',' ); // cut-paper archive titles
+const CUTOUT_ARCHIVES = ( process.env.CR_CUTOUT_ARCHIVE_PATHS || '/kind/mood/,/type/aside/,/?s=wordpress,/stream/,/kind/chicken/,/kind/photo/,/kind/favorite/,/kind/acquisition/,/kind/repost/,/kind/article/' ).split( ',' ); // cut-paper archive titles
 const PAGED_KIND_ARCHIVE = process.env.CR_PAGED_KIND_ARCHIVE_PATH || '/kind/note/page/2/'; // a /kind/* archive with at least three pages
 const POST_NAV_POST = process.env.CR_POST_NAV_POST_PATH || '/?p=8660'; // a post with a titled post on each side (dev and test 8660; 38071 lost its Next neighbour)
 const STREAM = process.env.CR_STREAM_PATH || '/stream/'; // the Stream page whose query order a kind's only post follows (PKIW #233)
@@ -104,7 +104,7 @@ const COMIC_SINGLE = process.env.CR_COMIC_SINGLE_PATH || '/2026/09/06/anzuelo/';
 const RECIPE_ARCHIVE = process.env.CR_RECIPE_ARCHIVE_PATH || '/kind/recipe/'; // recipe archive (PKIW #229); its tests skip on a site with no recipe posts
 const EAT_ARCHIVE = process.env.CR_EAT_ARCHIVE_PATH || '/kind/eat/'; // eat archive (PKIW #230); its test skips on a site with fewer than three eat posts
 const DRINK_ARCHIVE = process.env.CR_DRINK_ARCHIVE_PATH || '/kind/drink/'; // drink archive (PKIW #230); its test skips on a site with fewer than three drink posts
-const KIND_ARCHIVE_HEADERS = ( process.env.CR_KIND_ARCHIVE_HEADER_PATHS || '/kind/comics/,/kind/watch/,/kind/listen/,/kind/recipe/,/kind/eat/,/kind/drink/,/kind/note/,/kind/play/,/kind/read/,/kind/review/,/kind/reply/,/kind/like/,/kind/bookmark/' ).split( ',' ); // every dressed kind archive and one on the generic template; a path with no posts is skipped
+const KIND_ARCHIVE_HEADERS = ( process.env.CR_KIND_ARCHIVE_HEADER_PATHS || '/kind/comics/,/kind/watch/,/kind/listen/,/kind/recipe/,/kind/eat/,/kind/drink/,/kind/note/,/kind/play/,/kind/read/,/kind/review/,/kind/reply/,/kind/like/,/kind/bookmark/,/kind/chicken/,/kind/photo/,/kind/favorite/,/kind/acquisition/,/kind/repost/,/kind/article/' ).split( ',' ); // every dressed kind archive and one on the generic template; a path with no posts is skipped
 const EAT_SINGLE = process.env.CR_EAT_SINGLE_PATH || '/2026/09/25/mushroom-tacos/'; // an eat post with the eat card, a photo and public coordinates (local fixture)
 const DRINK_SINGLE = process.env.CR_DRINK_SINGLE_PATH || '/2026/09/24/honey-lavender-latte/'; // a drink post with the drink card, a photo and public coordinates (local fixture)
 const ORDER_HIDDEN = ( process.env.CR_ORDER_HIDDEN_PATHS || '/2026/08/05/salmon-sashimi/,/2026/08/07/spicy-margarita/' ).split( ',' ); // eat and drink posts whose location privacy is private (local fixtures)
@@ -132,6 +132,12 @@ const REVIEW_ARCHIVE = process.env.CR_REVIEW_ARCHIVE_PATH || '/kind/review/'; //
 const REPLY_ARCHIVE = process.env.CR_REPLY_ARCHIVE_PATH || '/kind/reply/'; // reply archive (PKIW #253)
 const LIKE_ARCHIVE = process.env.CR_LIKE_ARCHIVE_PATH || '/kind/like/'; // like archive (PKIW #254)
 const BOOKMARK_ARCHIVE = process.env.CR_BOOKMARK_ARCHIVE_PATH || '/kind/bookmark/'; // bookmark archive (PKIW #258)
+const CHICKEN_ARCHIVE = process.env.CR_CHICKEN_ARCHIVE_PATH || '/kind/chicken/'; // chicken archive (PKIW #250)
+const PHOTO_ARCHIVE = process.env.CR_PHOTO_ARCHIVE_PATH || '/kind/photo/'; // photo archive (PKIW #241)
+const FAVORITE_ARCHIVE = process.env.CR_FAVORITE_ARCHIVE_PATH || '/kind/favorite/'; // favorite archive (PKIW #259)
+const ACQUISITION_ARCHIVE = process.env.CR_ACQUISITION_ARCHIVE_PATH || '/kind/acquisition/'; // acquisition archive (PKIW #239)
+const REPOST_ARCHIVE = process.env.CR_REPOST_ARCHIVE_PATH || '/kind/repost/'; // repost archive (PKIW #255)
+const ARTICLE_ARCHIVE = process.env.CR_ARTICLE_ARCHIVE_PATH || '/kind/article/'; // article archive (PKIW #263)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
 const DARK_FIXTURES = [
 	[ process.env.CR_RESUME_PAGE_PATH || '/?page_id=37840', 'code', 'beta-rc' ], // inline code inside page content
@@ -324,6 +330,16 @@ const W2_ARCHIVES = [
 	{ kind: 'reply', label: 'Reply', path: REPLY_ARCHIVE, issue: 253, min: 10 },
 	{ kind: 'like', label: 'Like', path: LIKE_ARCHIVE, issue: 254, min: 13 },
 	{ kind: 'bookmark', label: 'Bookmark', path: BOOKMARK_ARCHIVE, issue: 258, min: 13 },
+];
+
+// min is one more than a page, so page 1 has a Next link: 25 at 24 a page for chicken, 13 at 12 for the rest, 11 at 10 for article.
+const W3_ARCHIVES = [
+	{ kind: 'chicken', label: 'Chicken', path: CHICKEN_ARCHIVE, issue: 250, min: 25 },
+	{ kind: 'photo', label: 'Photo', path: PHOTO_ARCHIVE, issue: 241, min: 13 },
+	{ kind: 'favorite', label: 'Favorite', path: FAVORITE_ARCHIVE, issue: 259, min: 13 },
+	{ kind: 'acquisition', label: 'Acquisition', path: ACQUISITION_ARCHIVE, issue: 239, min: 13 },
+	{ kind: 'repost', label: 'Repost', path: REPOST_ARCHIVE, issue: 255, min: 13 },
+	{ kind: 'article', label: 'Article', path: ARTICLE_ARCHIVE, issue: 263, min: 11 },
 ];
 
 function pagedPath( path, n ) {
@@ -4925,4 +4941,62 @@ test( 'the Stream shows a bookmark as label, title, host and date with an inert 
 		const oldBlue = await card.evaluate( ( el ) => [ el, ...el.querySelectorAll( '*' ) ].some( ( node ) => getComputedStyle( node ).color === 'rgb(44, 95, 138)' ) );
 		expect( oldBlue, 'bookmark stream avoids old blue' ).toBe( false );
 	}
+} );
+
+for ( const archive of W3_ARCHIVES ) {
+	test( `the ${ archive.kind } archive has one h1 and a centered 44px pager (PKIW #${ archive.issue })`, async ( { page } ) => {
+		await requireKindCount( page, archive.kind, archive.min );
+		await page.goto( archive.path, { waitUntil: 'load' } );
+		const pager = page.locator( 'nav.wp-block-query-pagination[aria-label="Pagination"]' );
+		await expect( pager ).toHaveCount( 1 );
+		await expect( pager.locator( 'a.wp-block-query-pagination-next' ), `${ archive.kind } archive has a Next link` ).toHaveCount( 1 );
+		await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
+		await expect( page.locator( 'main h1 .cr-cutout__text' ) ).toHaveText( archive.label );
+		const order = await page.evaluate( () => {
+			const list = document.querySelector( '.wp-block-post-template' );
+			const nav = document.querySelector( 'nav.wp-block-query-pagination[aria-label="Pagination"]' );
+			return Boolean( list ) && Boolean( nav ) && 0 < ( list.compareDocumentPosition( nav ) & Node.DOCUMENT_POSITION_FOLLOWING );
+		} );
+		expect( order, 'pagination follows the post template' ).toBe( true );
+		const targets = pager.locator( 'a.page-numbers, a.wp-block-query-pagination-next' );
+		for ( const box of await targets.evaluateAll( ( els ) => els.map( ( el ) => el.getBoundingClientRect().toJSON() ) ) ) {
+			expect( box.height, 'pager target height' ).toBeGreaterThanOrEqual( 44 );
+			expect( box.width, 'pager target width' ).toBeGreaterThanOrEqual( 44 );
+		}
+		await expect( pager.locator( '[aria-current="page"]' ) ).toHaveCount( 1 );
+		const center = await page.evaluate( () => {
+			const main = document.querySelector( 'main' ).getBoundingClientRect();
+			const nav = document.querySelector( 'nav.wp-block-query-pagination[aria-label="Pagination"]' ).getBoundingClientRect();
+			return Math.abs( ( main.left + main.right ) / 2 - ( nav.left + nav.right ) / 2 );
+		} );
+		expect( center, 'pager center aligns with main center' ).toBeLessThanOrEqual( 2 );
+	} );
+}
+
+// PKIW #263: an article card has one link, the title, which opens the single.
+// No Read more and no div.pk-meta strip. The hidden author anchor carries
+// tabindex -1 and doesn't count (W3-G2). A focused title link rings the card.
+test( 'every article card has one focusable link, no meta strip, and a focus ring around the card (PKIW #263)', async ( { page } ) => {
+	await requireKindCount( page, 'article', 1 );
+	await page.goto( ARTICLE_ARCHIVE, { waitUntil: 'load' } );
+	const cards = page.locator( 'main article.k-article' );
+	const total = await cards.count();
+	test.skip( 0 === total, `no article card on ${ ARTICLE_ARCHIVE }` );
+	for ( let i = 0; i < total; i++ ) {
+		const card = cards.nth( i );
+		expect( await focusableLinks( card ), `article card ${ i + 1 } has one focusable link` ).toHaveLength( 1 );
+		await expect( card.locator( 'div.pk-meta' ), `article card ${ i + 1 } has no meta strip` ).toHaveCount( 0 );
+	}
+	const link = cards.first().locator( 'a[href]:not([tabindex="-1"])' ).first();
+	await link.focus();
+	// Step off and back on with the keyboard, so :focus-visible applies.
+	await page.keyboard.press( 'Shift+Tab' );
+	await page.keyboard.press( 'Tab' );
+	await expect( link ).toBeFocused();
+	const ring = await cards.first().evaluate( ( el ) => {
+		const cs = getComputedStyle( el );
+		return { style: cs.outlineStyle, width: parseFloat( cs.outlineWidth ) };
+	} );
+	expect( ring.style, 'the focused card has an outline' ).not.toBe( 'none' );
+	expect( ring.width, 'the outline has width' ).toBeGreaterThan( 0 );
 } );
