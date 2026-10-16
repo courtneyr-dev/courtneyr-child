@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.111' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.112' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -41,6 +41,20 @@ require_once __DIR__ . '/inc/mood-pin.php';
 require_once __DIR__ . '/inc/stamps.php';
 require_once __DIR__ . '/inc/journal.php';
 require_once __DIR__ . '/inc/stream-gallery.php';
+require_once __DIR__ . '/inc/chicken.php';
+require_once __DIR__ . '/inc/single-chicken.php';
+require_once __DIR__ . '/inc/stream-chicken.php';
+require_once __DIR__ . '/inc/photo.php';
+require_once __DIR__ . '/inc/single-photo.php';
+require_once __DIR__ . '/inc/stream-photo.php';
+require_once __DIR__ . '/inc/favorite.php';
+require_once __DIR__ . '/inc/single-favorite.php';
+require_once __DIR__ . '/inc/stream-favorite.php';
+require_once __DIR__ . '/inc/acquisition.php';
+require_once __DIR__ . '/inc/single-acquisition.php';
+require_once __DIR__ . '/inc/stream-acquisition.php';
+require_once __DIR__ . '/inc/repost.php';
+require_once __DIR__ . '/inc/stream-repost.php';
 require_once __DIR__ . '/inc/stream-checkin.php';
 require_once __DIR__ . '/inc/single-checkin.php';
 require_once __DIR__ . '/inc/kind-parts.php';

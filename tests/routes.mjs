@@ -11,7 +11,7 @@ export function assertLocalTarget( base = BASE_URL ) {
 	}
 }
 
-export const ROUTE_NAMES = [ 'home', 'stream', 'single-post', 'kind-archive', 'story-archive', 'play-archive', 'read-archive', 'review-archive', 'reply-archive', 'like-archive', 'bookmark-archive' ];
+export const ROUTE_NAMES = [ 'home', 'stream', 'single-post', 'kind-archive', 'story-archive', 'play-archive', 'read-archive', 'review-archive', 'reply-archive', 'like-archive', 'bookmark-archive', 'chicken-archive', 'photo-archive', 'photo-archive-page-2', 'favorite-archive', 'favorite-archive-page-2', 'acquisition-archive', 'acquisition-archive-page-2', 'repost-archive', 'repost-archive-page-2', 'article-archive' ];
 
 const fixed = {
 	home: '/',
@@ -24,6 +24,16 @@ const fixed = {
 	'reply-archive': process.env.CR_REPLY_ARCHIVE_PATH || '/kind/reply/',
 	'like-archive': process.env.CR_LIKE_ARCHIVE_PATH || '/kind/like/',
 	'bookmark-archive': process.env.CR_BOOKMARK_ARCHIVE_PATH || '/kind/bookmark/',
+	'chicken-archive': process.env.CR_CHICKEN_ARCHIVE_PATH || '/kind/chicken/',
+	'photo-archive': process.env.CR_PHOTO_ARCHIVE_PATH || '/kind/photo/',
+	'photo-archive-page-2': process.env.CR_PHOTO_ARCHIVE_PAGE_2_PATH || '/kind/photo/page/2/',
+	'favorite-archive': process.env.CR_FAVORITE_ARCHIVE_PATH || '/kind/favorite/',
+	'favorite-archive-page-2': process.env.CR_FAVORITE_ARCHIVE_PAGE_2_PATH || '/kind/favorite/page/2/',
+	'acquisition-archive': process.env.CR_ACQUISITION_ARCHIVE_PATH || '/kind/acquisition/',
+	'acquisition-archive-page-2': process.env.CR_ACQUISITION_ARCHIVE_PAGE_2_PATH || '/kind/acquisition/page/2/',
+	'repost-archive': process.env.CR_REPOST_ARCHIVE_PATH || '/kind/repost/',
+	'repost-archive-page-2': process.env.CR_REPOST_ARCHIVE_PAGE_2_PATH || '/kind/repost/page/2/',
+	'article-archive': process.env.CR_ARTICLE_ARCHIVE_PATH || '/kind/article/',
 };
 
 // Newest published post from the public REST API, unless CR_SINGLE_POST_PATH is set.
