@@ -67,7 +67,7 @@ check_case(
 check_case(
 	'cr-calendar.css holds the shared cell, year, month and week rules',
 	static function () use ( $calendar ): bool {
-		foreach ( array( '.pkiw-cal {', '.pkiw-cal__day {', '.pkiw-cal__link {', '.pkiw-cal--year .pkiw-cal__day', '.pkiw-cal--month', '.pkiw-cal--week', '--cr-almanac-offset', '@media (min-width: 48rem)', '@media (forced-colors: active)', '2.75rem' ) as $needle ) {
+		foreach ( array( '.pkiw-cal {', '.pkiw-cal__day {', '.pkiw-cal__link {', ':where(.pkiw-cal--year) .pkiw-cal__day', ':where(.pkiw-cal--month)', '.pkiw-cal--week', '--cr-almanac-offset', '@media (min-width: 48rem)', '@media (forced-colors: active)', '2.75rem' ) as $needle ) {
 			if ( false === strpos( $calendar, $needle ) ) {
 				return false;
 			}

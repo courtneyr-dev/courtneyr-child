@@ -7,7 +7,9 @@
    forced-colors border, and the month and week layouts. Kind paint
    (cr-mood-year.css, cr-weather.css, cr-exercise.css) lists
    'courtneyr-calendar' as a dependency, so it prints after this sheet
-   and overrides it. Sleep opts out and never loads it.
+   and overrides it. The layout selectors are one class in specificity
+   (:where() holds the rest down), so a kind's one- or two-class rule
+   overrides them at any breakpoint. Sleep opts out and never loads it.
 
    Palette and derived tokens only. In dark mode --cr-surface-elevated
    and --cr-rule flip to the night elevated and night rule tokens.
@@ -35,14 +37,8 @@
 	min-height: var(--cr-cal-cell);
 }
 
-/* A focused cell sits above its neighbours so the link's ring and halo
-   (tokens.css, a:focus-visible) are never painted under the next cell. */
-.pkiw-cal__day:has(:focus-visible) {
-	z-index: 1;
-}
-
 /* Year: one 44px square per day. */
-.pkiw-cal--year .pkiw-cal__day {
+:where(.pkiw-cal--year) .pkiw-cal__day {
 	width: var(--cr-cal-cell);
 	height: var(--cr-cal-cell);
 }
@@ -51,7 +47,7 @@
    48rem. Cells that only hold a place in the grid (aria-hidden) leave the
    list. The month's first day cell carries --cr-almanac-offset, its column
    (1 to 7), set inline by the almanac paint in inc/weather.php. */
-.pkiw-cal--month :has(> .pkiw-cal__day),
+:where(.pkiw-cal--month) :has(> .pkiw-cal__day),
 .pkiw-cal--week {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
@@ -61,26 +57,30 @@
 	list-style: none;
 }
 
-.pkiw-cal--month .pkiw-cal__day[aria-hidden="true"],
-.pkiw-cal--week .pkiw-cal__day[aria-hidden="true"] {
+:where(.pkiw-cal--month, .pkiw-cal--week) .pkiw-cal__day:where([aria-hidden="true"]) {
 	display: none;
 }
 
 @media (min-width: 48rem) {
 
-	.pkiw-cal--month :has(> .pkiw-cal__day),
+	:where(.pkiw-cal--month) :has(> .pkiw-cal__day),
 	.pkiw-cal--week {
 		grid-template-columns: repeat(7, minmax(0, 1fr));
 	}
 
-	.pkiw-cal--month .pkiw-cal__day[aria-hidden="true"],
-	.pkiw-cal--week .pkiw-cal__day[aria-hidden="true"] {
+	:where(.pkiw-cal--month, .pkiw-cal--week) .pkiw-cal__day:where([aria-hidden="true"]) {
 		display: block;
 	}
 
-	.pkiw-cal--month .pkiw-cal__day {
+	:where(.pkiw-cal--month) .pkiw-cal__day {
 		grid-column-start: var(--cr-almanac-offset, auto);
 	}
+}
+
+/* A focused cell sits above its neighbours so the link's ring and halo
+   (tokens.css, a:focus-visible) are never painted under the next cell. */
+.pkiw-cal__day:has(:focus-visible) {
+	z-index: 1;
 }
 
 @media (forced-colors: active) {
