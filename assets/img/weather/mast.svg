@@ -1,0 +1,12 @@
+<!-- Decorative weather station mast for issue 246; CSS background only. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 320" width="120" height="320">
+	<g fill="none" stroke="#241c4a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+		<path d="M60 45v255M34 300h52"/>
+		<path d="M60 66 31 49M60 66l30-18M60 66v-34"/>
+		<circle cx="60" cy="66" r="6" fill="#ffb703"/>
+		<path d="M19 44c0-9 9-15 18-11l7 4-13 23-7-4c-4-2-5-7-5-12ZM101 43c0-9-9-15-18-11l-7 4 13 23 7-4c4-2 5-7 5-12ZM48 17c7-6 18-2 20 7l1 8-27 1-1-8c0-3 3-6 7-8Z" fill="#023047"/>
+		<rect x="39" y="132" width="42" height="52" fill="#8ecae6"/>
+		<circle cx="52" cy="151" r="5" fill="#219ebc"/>
+		<path d="M64 151h9M48 169h25M42 228h36"/>
+	</g>
+</svg>

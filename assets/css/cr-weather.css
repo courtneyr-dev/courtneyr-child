@@ -1,0 +1,725 @@
+/* Weather surfaces for issue 246: the archive almanac, single station log and Stream thermometer card. */
+/* stylelint-disable no-descending-specificity -- the almanac, station log and Stream card are separate surfaces; their selectors never match one element. */
+
+/* ============================================================
+   Archive: cut-paper monthly almanac.
+   ============================================================ */
+
+.cr-weather-almanac .pkiw-almanac {
+	--cr-focus-halo: var(--cr-russian-violet);
+	--cr-weather-grid-gap: var(--cr-space-xs);
+	box-sizing: border-box;
+	min-width: 0;
+	padding: var(--cr-space-md);
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+}
+
+.cr-weather-almanac .pkiw-almanac__heading {
+	margin: 0 0 var(--cr-space-md);
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	background: var(--cr-periwinkle);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	font-weight: var(--cr-weight-extrabold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	line-height: var(--cr-leading-tight);
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.cr-weather-almanac .pkiw-almanac__weekdays {
+	display: none;
+}
+
+.cr-weather-almanac .pkiw-almanac__days {
+	gap: var(--cr-weather-grid-gap);
+}
+
+.pkiw-almanac.pkiw-cal .pkiw-almanac__day {
+	min-width: 0;
+	min-height: 2.75rem;
+	padding: var(--cr-space-xs);
+	border: 1px solid var(--cr-sky-blue);
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+}
+
+.pkiw-almanac.pkiw-cal .pkiw-almanac__day:not([aria-hidden="true"]) {
+	display: grid;
+	grid-template-columns: minmax(2.75rem, auto) minmax(0, 1fr);
+	gap: var(--cr-space-xs);
+	align-items: start;
+}
+
+.cr-weather-almanac .pkiw-almanac__daynum {
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+}
+
+.cr-weather-almanac .pkiw-almanac__entries {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-xs);
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-weather-almanac .pkiw-almanac__entry {
+	position: relative;
+	display: flow-root;
+	box-sizing: border-box;
+	min-width: 0;
+	min-height: 2.75rem;
+	margin: 0;
+	padding: var(--cr-space-xs);
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-light-orange);
+	color: var(--cr-russian-violet);
+	overflow-wrap: anywhere;
+}
+
+.cr-weather-almanac .pkiw-almanac__entry:has(.pkiw-almanac__mark) {
+	background: var(--cr-sky-blue);
+}
+
+.cr-weather-almanac .pkiw-almanac__title {
+	min-width: 0;
+	margin: 0;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.cr-weather-almanac .pkiw-almanac__title a,
+.cr-weather-almanac .pkiw-almanac__title a:visited,
+.cr-weather-almanac .pkiw-almanac__title a:hover {
+	color: var(--cr-russian-violet);
+}
+
+.cr-weather-almanac .pkiw-almanac__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-weather-almanac .pkiw-almanac__title a:focus-visible {
+	border-radius: 0;
+	outline: none;
+	box-shadow: none;
+}
+
+.cr-weather-almanac .pkiw-almanac__entry:has(a:focus-visible) {
+	z-index: 1;
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-weather-almanac .pkiw-almanac__entry .p-weather {
+	min-width: 0;
+	margin: var(--cr-space-2xs) 0 0;
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-xs);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+/* The mark floats at the chip's start, so a code with no art (display:none) leaves no empty column. */
+.cr-weather-almanac .pkiw-almanac__entry .pkiw-almanac__mark {
+	float: inline-start;
+	margin-inline-end: var(--cr-space-xs);
+}
+
+/* Condition marks share one family cascade. Later equal-specificity rules win. */
+.cr-weather-almanac .pkiw-almanac__mark {
+	--cr-weather-mark-size: 2rem;
+}
+
+.cr-thermo .pk-weather-mark {
+	--cr-weather-mark-size: 4.5rem;
+	margin-block: var(--cr-space-sm);
+}
+
+.cr-weather-station .cr-weather-art {
+	--cr-weather-mark-size: 5rem;
+}
+
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon] {
+	display: none;
+	flex: 0 0 var(--cr-weather-mark-size);
+	width: var(--cr-weather-mark-size);
+	height: var(--cr-weather-mark-size);
+	background: none;
+}
+
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="sunny"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="clear"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="hot"] {
+	display: block;
+	background: url(../img/weather/sun.svg) center / contain no-repeat;
+}
+
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="cloud"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="overcast"] {
+	display: block;
+	background: url(../img/weather/cloud.svg) center / contain no-repeat;
+}
+
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="day-cloudy"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="sunny-overcast"] {
+	display: block;
+	background:
+		url(../img/weather/cloud.svg) center / contain no-repeat,
+		url(../img/weather/sun.svg) left top / 70% 70% no-repeat;
+}
+
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="fog"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="haze"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="smoke"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="smog"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="dust"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="sand"] {
+	display: block;
+	background: url(../img/weather/fog.svg) center / contain no-repeat;
+}
+
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="wind"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="gale"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="tornado"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="hurricane"] {
+	display: block;
+	background: url(../img/weather/wind.svg) center / contain no-repeat;
+}
+
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="rain"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="shower"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="sprinkle"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="drizzle"] {
+	display: block;
+	background: url(../img/weather/rain.svg) center / contain no-repeat;
+}
+
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="snow"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="sleet"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="hail"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="flurr"] {
+	display: block;
+	background: url(../img/weather/snow.svg) center / contain no-repeat;
+}
+
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="storm"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="thunder"],
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="lightning"] {
+	display: block;
+	background: url(../img/weather/storm.svg) center / contain no-repeat;
+}
+
+:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon="wi-night-clear"] {
+	display: none;
+	background: none;
+}
+
+.cr-weather-almanac .pkiw-year-strip {
+	--cr-focus-halo: var(--cr-russian-violet);
+	margin-block-start: var(--cr-space-md);
+}
+
+.cr-weather-almanac .pkiw-year-strip__months {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(2.75rem, 1fr));
+	gap: var(--cr-space-2xs);
+	min-width: 0;
+	margin: 0;
+	padding: var(--cr-space-xs);
+	background: var(--cr-sky-blue);
+	list-style: none;
+}
+
+.cr-weather-almanac .pkiw-year-strip__item {
+	display: flex;
+	min-width: 2.75rem;
+	min-height: 2.75rem;
+	margin: 0;
+}
+
+.cr-weather-almanac .pkiw-year-strip__link,
+.cr-weather-almanac .pkiw-year-strip__month {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 100%;
+	min-width: 2.75rem;
+	min-height: 2.75rem;
+	padding: var(--cr-space-2xs);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-tight);
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.cr-weather-almanac .pkiw-year-strip__link,
+.cr-weather-almanac .pkiw-year-strip__link:visited {
+	color: var(--cr-russian-violet);
+	text-decoration: none;
+}
+
+.cr-weather-almanac .pkiw-year-strip__link:hover {
+	color: var(--cr-russian-violet);
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.2em;
+}
+
+.cr-weather-almanac .pkiw-year-strip__link[aria-current="page"] {
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-selective-yellow);
+}
+
+.cr-weather-almanac .pkiw-year-strip__link:focus-visible {
+	border-radius: 0;
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+/* The wrapper reserves the exact region occupied by its CSS-only still life. */
+.cr-weather-almanac {
+	position: relative;
+	box-sizing: border-box;
+	min-width: 0;
+}
+
+.cr-weather-almanac::before,
+.cr-weather-almanac::after {
+	content: "";
+	position: absolute;
+	display: none;
+	pointer-events: none;
+}
+
+/* ============================================================
+   Single: ruled station log and static instruments.
+   ============================================================ */
+
+.cr-weather-station {
+	--cr-focus-halo: var(--cr-russian-violet);
+	display: block;
+	min-width: 0;
+	margin-block: var(--cr-space-xl);
+}
+
+.cr-weather-station .cr-weather-log {
+	display: block;
+	box-sizing: border-box;
+	min-width: 0;
+	margin: 0;
+	padding: var(--cr-space-md);
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-light-orange);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+}
+
+.cr-weather-station .cr-weather-log dt,
+.cr-weather-station .cr-weather-log dd {
+	min-width: 0;
+	margin: 0;
+	padding: var(--cr-space-xs) 0;
+	overflow-wrap: anywhere;
+}
+
+.cr-weather-station .cr-weather-log dt {
+	color: var(--cr-cerulean);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-snug);
+	text-transform: uppercase;
+}
+
+.cr-weather-station .cr-weather-log dd {
+	border-block-end: 1px solid var(--cr-sky-blue);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-base);
+	line-height: var(--cr-leading-normal);
+}
+
+.cr-weather-station .cr-weather-log dd:last-child {
+	border-block-end: 0;
+}
+
+.cr-weather-station .cr-weather-art,
+.cr-weather-station .cr-weather-thermo {
+	margin: var(--cr-space-lg) auto 0;
+}
+
+.cr-weather-station .cr-weather-thermo {
+	display: block;
+	width: 3rem;
+	height: 8rem;
+	background: url(../img/weather/thermometer.svg) center / contain no-repeat;
+}
+
+/* ============================================================
+   Stream: compact thermometer card inside the existing collage.
+   ============================================================ */
+
+.pk-card.pk-card--stream.cr-thermo {
+	--cr-focus-halo: var(--cr-russian-violet);
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	box-sizing: border-box;
+	width: 100%;
+	max-width: none;
+	min-width: 0;
+	height: auto;
+	margin: 0;
+	padding: var(--cr-space-xl) var(--cr-space-lg) var(--cr-space-lg);
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+	overflow-wrap: anywhere;
+}
+
+.pk-card.pk-card--stream.cr-thermo:has(.cr-thermo__glass) {
+	padding-inline-end: var(--cr-space-4xl);
+}
+
+.pk-card.pk-card--stream.cr-thermo::before {
+	content: "";
+	position: absolute;
+	z-index: 1;
+	inset-block-start: calc(-1 * var(--cr-space-xs));
+	inset-inline-start: 50%;
+	width: 5rem;
+	height: 1.25rem;
+	background: var(--cr-tape);
+	translate: -50% 0;
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-thermo .pk-kindlabel {
+	display: block;
+	margin: 0 0 var(--cr-space-xs);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-tight);
+	text-transform: uppercase;
+}
+
+.cr-thermo .pk-title {
+	min-width: 0;
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	font-weight: var(--cr-weight-extrabold);
+	line-height: var(--cr-leading-tight);
+	text-transform: uppercase;
+	overflow-wrap: anywhere;
+}
+
+.cr-stream-page .pk-card.cr-thermo .pk-title,
+.cr-stream-page .pk-card.cr-thermo .pk-title a,
+.cr-stream-page .pk-card.cr-thermo .pk-title a:visited,
+.cr-stream-page .pk-card.cr-thermo .pk-title a:hover {
+	color: var(--cr-russian-violet);
+}
+
+.cr-thermo .pk-title a {
+	text-decoration: none;
+}
+
+.cr-thermo .pk-title a:hover {
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.2em;
+}
+
+.cr-thermo .pk-title a::after {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset: 0;
+}
+
+.cr-thermo .pk-title a:focus-visible {
+	border-radius: 0;
+	outline: none;
+	box-shadow: none;
+}
+
+.cr-thermo p.pk-weather,
+.cr-thermo .pk-stream-date {
+	min-width: 0;
+	margin: var(--cr-space-xs) 0 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.cr-thermo .cr-thermo__glass {
+	position: absolute;
+	inset-block-start: 50%;
+	inset-inline-end: var(--cr-space-md);
+	width: 1.75rem;
+	height: 5.5rem;
+	background: url(../img/weather/thermometer.svg) center / contain no-repeat;
+	translate: 0 -50%;
+}
+
+.pk-card.pk-card--stream.cr-thermo:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+@media (min-width: 30rem) {
+
+	.cr-weather-station .cr-weather-log {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		column-gap: var(--cr-space-md);
+	}
+
+	.cr-weather-station .cr-weather-log dt,
+	.cr-weather-station .cr-weather-log dd {
+		border-block-end: 1px solid var(--cr-sky-blue);
+	}
+
+	.cr-weather-station .cr-weather-log dt:nth-last-child(2),
+	.cr-weather-station .cr-weather-log dd:last-child {
+		border-block-end: 0;
+	}
+}
+
+@media (min-width: 40rem) and (max-width: 63.999rem) {
+
+	.cr-weather-almanac {
+		padding-block-end: 7rem;
+	}
+
+	.cr-weather-almanac::after {
+		inset-block-end: 0;
+		inset-inline: 0;
+		display: block;
+		height: 6rem;
+		background:
+			url(../img/weather/leaves.svg) left bottom / auto 90% no-repeat,
+			url(../img/weather/torn-paper.svg) center bottom / auto 75% no-repeat,
+			url(../img/weather/sun-wheel.svg) right bottom / auto 95% no-repeat;
+	}
+}
+
+@media (min-width: 48rem) {
+
+	.cr-weather-almanac .pkiw-almanac__weekdays {
+		display: grid;
+		grid-template-columns: repeat(7, minmax(0, 1fr));
+		gap: var(--cr-weather-grid-gap);
+		margin-block-end: var(--cr-weather-grid-gap);
+		padding: var(--cr-space-xs);
+		background: var(--cr-sky-blue);
+	}
+
+	.cr-weather-almanac .pkiw-almanac__weekday {
+		min-width: 0;
+		color: var(--cr-russian-violet);
+		font-family: var(--cr-font-mono);
+		font-size: var(--cr-text-xs);
+		font-weight: var(--cr-weight-bold);
+		letter-spacing: var(--cr-tracking-wide);
+		line-height: var(--cr-leading-tight);
+		text-align: center;
+		text-transform: uppercase;
+	}
+
+	.pkiw-almanac.pkiw-cal .pkiw-almanac__day {
+		min-height: 6.5rem;
+	}
+
+	.pkiw-almanac.pkiw-cal .pkiw-almanac__day:not([aria-hidden="true"]) {
+		display: block;
+	}
+
+	.cr-weather-almanac .pkiw-almanac__daynum {
+		display: block;
+		margin-block-end: var(--cr-space-xs);
+	}
+
+	.cr-weather-station {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 12rem;
+		grid-template-rows: auto auto;
+		gap: var(--cr-space-lg);
+		align-items: start;
+	}
+
+	.cr-weather-station .cr-weather-log {
+		grid-column: 1;
+		grid-row: 1 / span 2;
+	}
+
+	.cr-weather-station .cr-weather-art {
+		--cr-weather-mark-size: 10rem;
+		grid-column: 2;
+		margin: 0 auto;
+	}
+
+	.cr-weather-station .cr-weather-thermo {
+		grid-column: 2;
+		margin: 0 auto;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-weather-almanac {
+		--cr-weather-gutter: 8rem;
+		padding-inline: var(--cr-weather-gutter);
+	}
+
+	.cr-weather-almanac::before,
+	.cr-weather-almanac::after {
+		inset-block: 0;
+		display: block;
+		width: calc(var(--cr-weather-gutter) - var(--cr-space-md));
+	}
+
+	.cr-weather-almanac::before {
+		inset-inline-start: 0;
+		background:
+			url(../img/weather/cloud-halftone.svg) left top / 100% auto no-repeat,
+			url(../img/weather/leaves.svg) left 42% / 90% auto no-repeat,
+			url(../img/weather/torn-paper.svg) left 75% / 95% auto no-repeat,
+			url(../img/weather/sun-wheel.svg) left bottom / 110% auto no-repeat;
+	}
+
+	.cr-weather-almanac::after {
+		inset-inline-end: 0;
+		background:
+			url(../img/weather/mast.svg) right top / 90% auto no-repeat,
+			url(../img/weather/leaves.svg) right 62% / 85% auto no-repeat,
+			url(../img/weather/sun-wheel.svg) right bottom / 105% auto no-repeat;
+	}
+}
+
+@media (max-width: 29.999rem) {
+
+	.cr-weather-station .cr-weather-art {
+		display: none;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.cr-weather-almanac .pkiw-almanac__entry,
+	.pk-card.pk-card--stream.cr-thermo {
+		transition: translate var(--cr-motion-fast) var(--cr-ease-out);
+	}
+
+	.cr-weather-almanac .pkiw-almanac__entry:hover,
+	.pk-card.pk-card--stream.cr-thermo:hover {
+		translate: 0 -2px;
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-weather-almanac {
+		padding: 0;
+	}
+
+	.cr-weather-almanac .pkiw-almanac,
+	.cr-weather-almanac .pkiw-almanac__heading,
+	.pkiw-almanac.pkiw-cal .pkiw-almanac__day,
+	.cr-weather-almanac .pkiw-almanac__entry,
+	.cr-weather-almanac .pkiw-year-strip__months,
+	.cr-weather-almanac .pkiw-year-strip__item,
+	.cr-weather-station .cr-weather-log {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-weather-almanac .pkiw-almanac__weekdays,
+	.cr-weather-almanac::before,
+	.cr-weather-almanac::after,
+	:is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon],
+	.cr-weather-station .cr-weather-thermo,
+	.cr-thermo .cr-thermo__glass {
+		display: none;
+	}
+
+	.cr-weather-almanac .pkiw-year-strip__link,
+	.cr-weather-almanac .pkiw-year-strip__month {
+		color: CanvasText;
+	}
+
+	.cr-weather-almanac .pkiw-year-strip__link[aria-current="page"] {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.cr-weather-station .cr-weather-log dt,
+	.cr-weather-station .cr-weather-log dd {
+		border-block-end-color: CanvasText;
+		color: CanvasText;
+	}
+
+	.cr-weather-station {
+		display: block;
+	}
+
+	.pk-card.pk-card--stream.cr-thermo {
+		padding-inline-end: var(--cr-space-lg);
+		border: 2px solid CanvasText !important;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.pk-card.pk-card--stream.cr-thermo::before {
+		display: none;
+	}
+
+	.cr-stream-page .pk-card.cr-thermo .pk-title,
+	.cr-stream-page .pk-card.cr-thermo .pk-title a,
+	.cr-thermo .pk-kindlabel,
+	.cr-thermo p.pk-weather,
+	.cr-thermo .pk-stream-date {
+		color: CanvasText;
+	}
+
+	.pk-card.pk-card--stream.cr-thermo:has(a:focus-visible),
+	.cr-weather-almanac .pkiw-almanac__entry:has(a:focus-visible) {
+		outline-color: Highlight;
+		box-shadow: none;
+	}
+}

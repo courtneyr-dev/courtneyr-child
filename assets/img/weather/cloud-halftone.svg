@@ -1,0 +1,11 @@
+<!-- Decorative halftone cloud scrap for issue 246; CSS background only. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 150" width="180" height="150">
+	<defs>
+		<pattern id="weather-dots" width="12" height="12" patternUnits="userSpaceOnUse">
+			<circle cx="3" cy="3" r="2.5" fill="#647baf"/>
+			<circle cx="9" cy="9" r="2" fill="#8ecae6"/>
+		</pattern>
+	</defs>
+	<path d="M8 17 31 8l22 5 25-8 23 8 27-5 17 10 25-3-4 25 7 22-7 19 6 26-23 5-19 15-24-5-22 12-19-11-28 4-12-19-24-8 7-24-8-22 12-17Z" fill="#ebebeb" stroke="#241c4a" stroke-width="3" stroke-linejoin="round"/>
+	<path d="M38 99h99c14 0 24-10 24-23s-10-23-24-23h-7C123 34 106 23 87 25 68 27 56 39 51 54h-8c-15 0-25 10-25 23s8 22 20 22Z" fill="url(#weather-dots)" stroke="#241c4a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

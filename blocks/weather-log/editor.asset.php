@@ -1,0 +1,1 @@
+<?php return array( 'dependencies' => array( 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-block-editor', 'wp-server-side-render' ), 'version' => '0.7.112' ); // phpcs:ignoreFile -- WordPress requires the editor.asset.php filename and generated one-line metadata shape.
