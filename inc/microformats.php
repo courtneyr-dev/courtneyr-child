@@ -10,7 +10,7 @@
  *
  *   core/post-title  className "cr-u-url"        -> <a class="u-url">
  *   core/post-date   className "cr-dt-published" -> <time class="dt-published">
- *   untitled review/reply/like/bookmark/photo/acquisition/weather/craft/exercise/sleep singles -> visible H1, no p-name
+ *   untitled review/reply/like/bookmark/photo/acquisition/weather/craft/exercise/sleep/mood singles -> visible H1, no p-name
  *   repost singles whose card title is the H1 -> suppress Core template title
  *   review posts                              -> h-review is the entry root
  *

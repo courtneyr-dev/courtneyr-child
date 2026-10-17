@@ -379,7 +379,7 @@ namespace Courtneyr\Child\W2T0MicroformatsTests {
 	check( array( 'post-11' ) === apply_filters( 'post_class', array( 'post-11', 'h-entry', 'hentry' ), array(), 11 ), 'stream-card root still drops h-entry and hentry' );
 	check( array( 'post-9', 'h-review' ) === apply_filters( 'post_class', array( 'post-9', 'h-review' ), array(), 9 ), 'review with no h-entry classes is unchanged' );
 
-	foreach ( array( 'review', 'reply', 'like', 'bookmark' ) as $index => $kind ) {
+	foreach ( array( 'review', 'reply', 'like', 'bookmark', 'mood' ) as $index => $kind ) {
 		reset_state();
 		$id = 20 + $index;
 		post_fixture( $id, $kind );
