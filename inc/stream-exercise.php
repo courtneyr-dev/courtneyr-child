@@ -85,8 +85,9 @@ function bib_corner( string $html, array $block = array(), $instance = null ): s
 		$link_text = '<span class="screen-reader-text">' . esc_html( $name_kind ) . ', </span>' . esc_html( $name_date );
 	}
 
+	// No h-entry here: the plugin's priority-99 filter then treats the card as unrooted, so the Query Loop li carries the entry root.
 	$level = heading_level( $block );
-	$out   = '<article class="pk-card pk-card--stream k-exercise cr-bib-corner h-entry">';
+	$out   = '<article class="pk-card pk-card--stream k-exercise cr-bib-corner">';
 	$out  .= '<span class="cr-bib-corner__kind pk-kindlabel">' . esc_html( kind_label() ) . '</span>';
 	$out  .= '<h' . $level . ' class="' . esc_attr( $title_class ) . '"><a class="u-url cr-bib-corner__link" href="' . esc_url( (string) get_permalink( $post ) ) . '">' . $link_text . '</a></h' . $level . '>';
 

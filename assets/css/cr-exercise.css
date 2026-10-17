@@ -138,14 +138,18 @@
 	color: var(--cr-ink);
 }
 
+/* The date range is the week's heading: a centered paper strip several steps above the day bars. */
 .cr-exercise .pkiw-exercise-week__heading {
 	display: table;
-	padding: var(--cr-space-2xs) var(--cr-space-sm);
+	margin-inline: auto;
+	margin-block-end: var(--cr-space-lg);
+	padding: var(--cr-space-xs) var(--cr-space-lg);
 	border: 2px solid var(--cr-russian-violet);
 	background: var(--cr-printer-ivory);
 	font-family: var(--cr-font-mono);
-	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	font-size: max(var(--cr-text-lg), var(--cr-text-floor));
 	letter-spacing: var(--cr-tracking-wide);
+	text-align: center;
 }
 
 /* These two-class rules beat both the plugin sheet and cr-calendar.css at
@@ -315,30 +319,48 @@
 	line-height: var(--cr-leading-snug);
 }
 
+/* Still life: from 40rem the group is a three-column grid. The two
+   pseudo-elements are the side columns, painted as aria-hidden background
+   layers, and the medal row and calendar sit in the middle column. The group
+   widens past wideSize by the art columns, so the calendar keeps its 1100px
+   wherever the viewport has room and the art sits in the page margins. */
 @media (min-width: 40rem) {
 
-	.cr-exercise::before {
+	.cr-archive .cr-exercise.alignwide {
+		--cr-exercise-art: clamp(4.5rem, 9vw, 5.5rem);
+
+		display: grid;
+		grid-template-columns: var(--cr-exercise-art) minmax(0, 1fr) var(--cr-exercise-art);
+		align-content: start;
+		column-gap: var(--cr-space-md);
+		max-width: min(100%, var(--wp--style--global--wide-size) + 2 * (var(--cr-exercise-art) + var(--cr-space-md)));
+	}
+
+	.cr-exercise > * {
+		grid-column: 2;
+		min-width: 0;
+	}
+
+	.cr-exercise::before,
+	.cr-exercise::after {
 		content: "";
-		display: block;
-		height: 8rem;
-		background-image: url(../img/exercise-shoes.svg);
-		background-position: left bottom;
+		grid-row: 1 / span 2;
+		align-self: stretch;
 		background-repeat: no-repeat;
-		background-size: auto 88%;
+	}
+
+	.cr-exercise::before {
+		grid-column: 1;
+		background-image: url(../img/exercise-shoes.svg);
+		background-position: center top;
+		background-size: 100% auto;
 	}
 
 	.cr-exercise::after {
-		content: "";
-		position: absolute;
-		inset-block-start: 0;
-		inset-inline-end: 0;
-		display: block;
-		inline-size: 40%;
-		block-size: 8rem;
+		grid-column: 3;
 		background-image: url(../img/exercise-fern.svg);
-		background-position: right bottom;
-		background-repeat: no-repeat;
-		background-size: auto 92%;
+		background-position: center top;
+		background-size: 90% auto;
 	}
 
 	.cr-exercise .pkiw-exercise-week__days {
@@ -348,6 +370,10 @@
 
 @media (min-width: 48rem) {
 
+	.cr-exercise .pkiw-exercise-week__heading {
+		font-size: max(var(--cr-text-2xl), var(--cr-text-floor));
+	}
+
 	.cr-exercise .pkiw-exercise-week__days {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
@@ -355,19 +381,21 @@
 
 @media (min-width: 64rem) {
 
+	/* Shoes over the towel in the left margin; the bottle over the fern in the right. */
+	.cr-archive .cr-exercise.alignwide {
+		--cr-exercise-art: clamp(6rem, 11vw, 11rem);
+	}
+
 	.cr-exercise::before {
-		height: 11rem;
 		background-image: url(../img/exercise-shoes.svg), url(../img/exercise-towel.svg);
-		background-position: left bottom, 31% bottom;
-		background-size: auto 92%, auto 62%;
+		background-position: center top, center calc(var(--cr-exercise-art) * 0.75);
+		background-size: 100% auto, 80% auto;
 	}
 
 	.cr-exercise::after {
-		inline-size: 48%;
-		block-size: 11rem;
 		background-image: url(../img/exercise-bottle.svg), url(../img/exercise-fern.svg);
-		background-position: 44% bottom, right bottom;
-		background-size: auto 72%, auto 96%;
+		background-position: center top, center calc(var(--cr-exercise-art) * 1.05);
+		background-size: 45% auto, 90% auto;
 	}
 
 	.cr-exercise .pkiw-exercise-week__days {
@@ -382,12 +410,17 @@
 	}
 }
 
-/* Paper bibs and medals stay light; only panels follow the night surface. */
+/* Panels follow the night surface. Every bib paper turns printer ivory with
+   violet ink, as the dark contract asks; medals stay selective yellow. */
 :root[data-theme="dark"] .cr-exercise .pkiw-exercise-week,
 :root[data-theme="dark"] .cr-exercise .pkiw-exercise-day {
 	border-color: var(--cr-rule);
 	background: var(--cr-surface-elevated);
 	color: var(--cr-ink);
+}
+
+:root[data-theme="dark"] .cr-exercise .pkiw-exercise-day__bibs > .wp-block-post[class*="cr-bib--"] {
+	background: var(--cr-printer-ivory);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -397,6 +430,10 @@
 		border-color: var(--cr-rule);
 		background: var(--cr-surface-elevated);
 		color: var(--cr-ink);
+	}
+
+	:root:not([data-theme="light"]) .cr-exercise .pkiw-exercise-day__bibs > .wp-block-post[class*="cr-bib--"] {
+		background: var(--cr-printer-ivory);
 	}
 }
 
@@ -437,6 +474,7 @@ body.cr-single--exercise main.single-post .pkiw-exercise::before {
 	content: "";
 	grid-column: 1;
 	grid-row: 1 / 6;
+	align-self: stretch; /* the 64rem grid sets align-items: start, which collapsed the paper to its 4px of border */
 	z-index: -1;
 	box-sizing: border-box;
 	min-width: 0;
@@ -601,6 +639,11 @@ body.cr-single--exercise main.single-post .pkiw-exercise__splits th {
 	font-weight: var(--cr-weight-bold);
 }
 
+/* One continuous paper fill: overrides the shared post-content zebra rows (components.css). */
+body.cr-single--exercise main.single-post .pkiw-exercise__splits tbody td {
+	background: var(--cr-printer-ivory);
+}
+
 @media (min-width: 40rem) {
 
 	body.cr-single--exercise main.single-post::after {
@@ -622,6 +665,18 @@ body.cr-single--exercise main.single-post .pkiw-exercise__splits th {
 		grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
 		column-gap: var(--cr-space-2xl);
 		align-items: start;
+	}
+
+	/* Distance and duration are the bib's primary stats, steps above the date and table. */
+	body.cr-single--exercise main.single-post .pkiw-exercise__distance {
+		padding-block-start: var(--cr-space-lg);
+		font-size: max(var(--cr-text-5xl), var(--cr-text-floor));
+		line-height: var(--cr-leading-tight);
+	}
+
+	body.cr-single--exercise main.single-post .pkiw-exercise__duration {
+		font-size: max(var(--cr-text-4xl), var(--cr-text-floor));
+		line-height: var(--cr-leading-tight);
 	}
 
 	body.cr-single--exercise main.single-post .pkiw-exercise__splits-heading {
@@ -648,6 +703,10 @@ body.cr-single--exercise main.single-post .pkiw-exercise__splits th {
 	border-color: var(--cr-rule);
 }
 
+:root[data-theme="dark"] body.cr-single--exercise main.single-post .pkiw-exercise__splits tbody td {
+	background: var(--cr-surface-elevated);
+}
+
 @media (prefers-color-scheme: dark) {
 
 	:root:not([data-theme="light"]) body.cr-single--exercise main.single-post .pkiw-exercise__splits {
@@ -659,6 +718,10 @@ body.cr-single--exercise main.single-post .pkiw-exercise__splits th {
 	:root:not([data-theme="light"]) body.cr-single--exercise main.single-post .pkiw-exercise__splits th,
 	:root:not([data-theme="light"]) body.cr-single--exercise main.single-post .pkiw-exercise__splits td {
 		border-color: var(--cr-rule);
+	}
+
+	:root:not([data-theme="light"]) body.cr-single--exercise main.single-post .pkiw-exercise__splits tbody td {
+		background: var(--cr-surface-elevated);
 	}
 }
 
@@ -672,6 +735,7 @@ body.cr-single--exercise main.single-post .pkiw-exercise__splits th {
 	position: relative;
 	display: flex;
 	flex-direction: column;
+	align-items: stretch; /* the shared .pk-card align-items: start shrank the band to its text */
 	box-sizing: border-box;
 	inline-size: 86%;
 	max-inline-size: 100%;

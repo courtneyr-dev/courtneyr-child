@@ -731,6 +731,21 @@ test.describe( 'exercise single', () => {
 		expect( marker.image ).toBe( 'none' );
 	} );
 
+	test( 'single paper layer paints behind the whole bib at 1440 and 1672', async ( { page } ) => {
+		for ( const width of [ 1440, 1672 ] ) {
+			await openSingle( page, 'A01', width );
+			const paint = await page.locator( '.pkiw-exercise' ).evaluate( ( node ) => {
+				const band = node.querySelector( '.pkiw-exercise__band' ).getBoundingClientRect();
+				const fields = [ ...node.querySelectorAll( '.pkiw-exercise__distance, .pkiw-exercise__duration, .pkiw-exercise__best, .pkiw-exercise__place' ) ].map( ( field ) => field.getBoundingClientRect() );
+				const paper = getComputedStyle( node, '::before' );
+				return { paperHeight: Number.parseFloat( paper.height ), paperWidth: Number.parseFloat( paper.width ), recordHeight: Math.max( ...fields.map( ( field ) => field.bottom ) ) - band.top, bandWidth: band.width };
+			} );
+			// The computed height of a grid pseudo-element is its used height, so a collapsed layer reads as its border.
+			expect( paint.paperHeight, `${ width }px paper covers band and fields` ).toBeGreaterThanOrEqual( paint.recordHeight - 1 );
+			expect( paint.paperWidth, `${ width }px paper spans the band column` ).toBeGreaterThanOrEqual( paint.bandWidth - 1 );
+		}
+	} );
+
 	test( 'sprig drops below 40rem and 320 or 400 percent zoom has no horizontal scroll', async ( { page } ) => {
 		await openSingle( page, 'A01', 800 );
 		expect( await page.locator( 'main.single-post' ).evaluate( ( node ) => getComputedStyle( node, '::after' ).backgroundImage ) ).toContain( 'exercise-sprig.svg' );
@@ -814,8 +829,10 @@ test.describe( 'exercise Stream', () => {
 			skipUnlessSeeded( 0 === found, `S01-S03 do not appear on ${ streamPath }` );
 			for ( const key of [ 'S01', 'S02', 'S03' ] ) {
 				const item = itemFor( page, key );
-				const card = item.locator( 'article.pk-card.pk-card--stream.k-exercise.cr-bib-corner.h-entry' );
+				const card = item.locator( 'article.pk-card.pk-card--stream.k-exercise.cr-bib-corner' );
 				await expect( card, `${ key } card` ).toHaveCount( 1 );
+				expect( await item.evaluate( ( node ) => node.matches( 'li.wp-block-post.h-entry' ) ), `${ key } list item is the h-entry root` ).toBe( true );
+				expect( await card.evaluate( ( node ) => node.classList.contains( 'h-entry' ) ), `${ key } article is not a second root` ).toBe( false );
 				await expect( card.locator( '.cr-bib-corner__kind' ) ).toHaveText( 'Exercise' );
 				expect( await card.locator( '.cr-bib-corner__title' ).evaluate( ( node ) => getComputedStyle( node ).fontFamily ), `${ key } title voice` ).toContain( 'Roboto Slab' );
 				const report = await linkReport( card );
@@ -825,8 +842,9 @@ test.describe( 'exercise Stream', () => {
 				expect( await card.locator( '.pkiw-exercise__duration, .pkiw-exercise__splits, .pkiw-exercise__best, .pkiw-exercise__place, .pk-note, .pk-excerpt' ).count(), `${ key } has no duration, splits, best, place or excerpt` ).toBe( 0 );
 				expect( await card.locator( '.cr-bib-corner__activity.p-exercise' ).count() ).toBe( 1 );
 				expect( await card.locator( '.cr-bib-corner__pin[aria-hidden="true"]' ).count() ).toBe( 1 );
-				const mf2 = await mf2Report( card );
+				const mf2 = await mf2Report( item );
 				expect( mf2.entry ).toBe( true );
+				expect( mf2.nestedEntries, `${ key } has one entry root` ).toBe( 0 );
 				expect( mf2.urls.length ).toBeGreaterThan( 0 );
 				expect( mf2.authors ).toBeGreaterThan( 0 );
 				expect( mf2.published[ 0 ] ).toMatch( /^\d{4}-\d{2}-\d{2}$/ );
@@ -863,8 +881,13 @@ test.describe( 'exercise Stream', () => {
 				before: getComputedStyle( node, '::before' ).content,
 				after: getComputedStyle( node, '::after' ).content,
 				pin: node.querySelectorAll( ':scope > .cr-bib-corner__pin' ).length,
+				// Layout widths, not rects: the card is rotated, so its bounding box is wider than its box.
+				innerWidth: node.clientWidth,
+				bandWidth: node.querySelector( '.cr-bib-corner__kind' ).offsetWidth,
 			} ) ),
 		] );
+		// The band spans the bib inside its border, so both grommets sit on it.
+		expect( paint[ 1 ].bandWidth, 'band spans the card' ).toBeGreaterThanOrEqual( paint[ 1 ].innerWidth - 1 );
 		expect( paint[ 0 ].filter ).toContain( 'drop-shadow' );
 		const lengths = [ ...paint[ 0 ].filter.matchAll( /-?(?:\d+\.?\d*|\.\d+)px/g ) ].map( ( match ) => Number.parseFloat( match[ 0 ] ) );
 		expect( lengths[ 2 ], 'drop-shadow blur radius' ).toBe( 0 );
