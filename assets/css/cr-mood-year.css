@@ -246,6 +246,7 @@
 	display: inline-flex;
 	align-items: center;
 	min-block-size: 2.75rem;
+	min-inline-size: 2.75rem;
 	font-family: var(--cr-font-body);
 	line-height: var(--cr-leading-snug);
 }
