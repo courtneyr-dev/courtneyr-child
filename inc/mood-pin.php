@@ -763,6 +763,112 @@ function stream_card( string $html, array $block, $instance ): string {
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\stream_card', 10, 3 );
 
 /**
+ * Text as a reader sees it: no tags, entities decoded, whitespace folded, lower case.
+ *
+ * @param string $text Text or HTML.
+ * @return string
+ */
+function comparable_text( string $text ): string {
+	$text = trim( (string) preg_replace( '/\s+/u', ' ', html_entity_decode( wp_strip_all_tags( $text ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+	return function_exists( 'mb_strtolower' ) ? mb_strtolower( $text, 'UTF-8' ) : strtolower( $text );
+}
+
+/**
+ * The queried mood single's stored mood-card note, compared as text; '' off a mood single.
+ *
+ * @return string
+ */
+function single_note(): string {
+	static $kept = array();
+	if ( ! is_singular( 'post' ) || post_password_required() ) {
+		return '';
+	}
+	$post_id = (int) get_queried_object_id();
+	if ( ! isset( $kept[ $post_id ] ) ) {
+		$post             = get_post( $post_id );
+		$attrs            = ( $post instanceof \WP_Post && has_term( 'mood', 'kind', $post ) ) ? (array) ( ( find_mood_block( $post ) ?? array() )['attrs'] ?? array() ) : array();
+		$kept[ $post_id ] = comparable_text( (string) ( $attrs['note'] ?? '' ) );
+	}
+	return $kept[ $post_id ];
+}
+
+/**
+ * Whether the main post-content block of a mood single is rendering.
+ *
+ * @param bool|null $set Optional new state.
+ * @return bool
+ */
+function in_single_content( ?bool $set = null ): bool {
+	static $inside = false;
+	if ( null !== $set ) {
+		$inside = $set;
+	}
+	return $inside;
+}
+
+/**
+ * Open the content flag when the queried mood single's post-content starts.
+ *
+ * @param mixed                $pre          Existing pre-render value.
+ * @param array<string, mixed> $parsed_block Parsed block.
+ * @return mixed
+ */
+function open_single_content( $pre, array $parsed_block ) {
+	if ( 'core/post-content' === ( $parsed_block['blockName'] ?? '' ) && (int) get_the_ID() === (int) get_queried_object_id() && '' !== single_note() ) {
+		in_single_content( true );
+	}
+	return $pre;
+}
+add_filter( 'pre_render_block', __NAMESPACE__ . '\\open_single_content', 10, 2 );
+
+/**
+ * Close the content flag after post-content renders.
+ *
+ * @param string $html Rendered post content.
+ * @return string
+ */
+function close_single_content( string $html ): string {
+	in_single_content( false );
+	return $html;
+}
+add_filter( 'render_block_core/post-content', __NAMESPACE__ . '\\close_single_content' );
+
+/**
+ * Drop a paragraph that repeats the mood card's note on the single.
+ *
+ * A Micropub mood stores the card's note and the same text again as a
+ * paragraph, so the single printed it twice. The card keeps its
+ * .pk-mood__note.p-content; only an exact repeat goes, and the stored post
+ * content is not touched.
+ *
+ * @param string $html Rendered paragraph.
+ * @return string
+ */
+function drop_duplicate_note( string $html ): string {
+	if ( ! in_single_content() ) {
+		return $html;
+	}
+	$text = comparable_text( $html );
+	return '' !== $text && single_note() === $text ? '' : $html;
+}
+add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\drop_duplicate_note' );
+
+/**
+ * Drop the e-content group that the repeat left empty, so the entry's
+ * content stays the card's p-content instead of gaining an empty value.
+ *
+ * @param string $html Rendered group.
+ * @return string
+ */
+function drop_emptied_content( string $html ): string {
+	if ( ! in_single_content() || ! preg_match( '#^\s*<div\b[^>]*\bclass="[^"]*(?<![\w-])e-content(?![\w-])[^"]*"[^>]*>\s*</div>\s*$#', $html ) ) {
+		return $html;
+	}
+	return '';
+}
+add_filter( 'render_block_core/group', __NAMESPACE__ . '\\drop_emptied_content' );
+
+/**
  * The pin's stylesheet, loaded only where a mood card or a stream card
  * renders (same on-demand discipline as cr-post-kinds.css).
  */

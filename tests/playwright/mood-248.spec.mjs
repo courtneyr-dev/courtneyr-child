@@ -710,6 +710,15 @@ test.describe( 'single mood posts', () => {
 		await expect( page.locator( 'main time.dt-published' ).first() ).toHaveAttribute( 'datetime', /\S/ );
 	} );
 
+	test( 'Single :97 — F15 prints its Micropub note once, in the card p-content, with no intensity line', async ( { page } ) => {
+		await openFixture( page, 'F15' );
+		await expect( page.locator( 'main' ).getByText( 'Seed note', { exact: true } ), 'F15 shows its note once' ).toHaveCount( 1 );
+		await expect( page.locator( 'main .pk-mood__note.p-content' ) ).toHaveText( 'Seed note' );
+		await expect( page.locator( 'main .p-content' ), 'one p-content carries the note' ).toHaveCount( 1 );
+		await expect( page.locator( 'main .e-content' ), 'no empty e-content is left behind' ).toHaveCount( 0 );
+		await expect( page.locator( 'main .cr-pin__intensity' ) ).toHaveCount( 0 );
+	} );
+
 	test( 'Single :99 — an adjacent mood keeps the shipped mood-scoped post navigation', async ( { page } ) => {
 		await openFixture( page, 'F02' );
 		const nav = page.locator( 'main nav.cr-post-nav[aria-label="Post navigation"]' );
