@@ -168,6 +168,21 @@ async function renderedAnchorFacts( locator ) {
 	} );
 }
 
+// Each aria-hidden gutter label must sit on its day row: compare label centers with December's cells.
+async function assertGutterRegistered( page, label ) {
+	const offsets = await page.evaluate( () => {
+		const labels = [ ...document.querySelectorAll( '.pkiw-mood-year__gutter[aria-hidden="true"] > li' ) ];
+		const cells = [ ...[ ...document.querySelectorAll( '.pkiw-mood-month' ) ].at( -1 ).querySelectorAll( '.pkiw-mood-day' ) ];
+		return labels.map( ( item, index ) => {
+			const a = item.getBoundingClientRect();
+			const b = cells[ index ].getBoundingClientRect();
+			return Math.abs( ( a.top + a.bottom ) / 2 - ( b.top + b.bottom ) / 2 );
+		} );
+	} );
+	expect( offsets, `${ label }: 31 gutter labels for December's 31 cells` ).toHaveLength( 31 );
+	expect( Math.max( ...offsets ), `${ label }: every gutter label center is within 2px of its December cell` ).toBeLessThanOrEqual( 2 );
+}
+
 async function assertNoOverflow( page, label ) {
 	expect( await page.evaluate( () => document.documentElement.scrollWidth <= document.documentElement.clientWidth ), `${ label }: document stays within its viewport` ).toBe( true );
 }
@@ -487,6 +502,9 @@ test.describe( 'archive paint and layout', () => {
 					return [ ...rows.values() ];
 				} );
 				expect( Math.max( ...rowCounts ), `${ width }: days per month row` ).toBeGreaterThanOrEqual( width === 375 ? 7 : 6 );
+			}
+			if ( width >= 768 ) {
+				await assertGutterRegistered( page, `${ width }px archive` );
 			}
 			await assertNoOverflow( page, `${ width }px archive` );
 

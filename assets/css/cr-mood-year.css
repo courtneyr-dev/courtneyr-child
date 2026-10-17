@@ -268,6 +268,17 @@
 		padding-inline: 0;
 		text-align: center;
 	}
+
+	/* tokens.css gives every li a block margin; the gutter rows must stay on the 44px day rows. */
+	.pkiw-mood-year .pkiw-mood-year__gutter > li,
+	.pkiw-mood-year .pkiw-mood-year__months > .pkiw-mood-month {
+		margin-block: 0;
+	}
+
+	/* The month-name row plus the grid's 2px frame. */
+	.pkiw-mood-year .pkiw-mood-year__gutter {
+		padding-block-start: calc(var(--pkiw-mood-cell) + 2px);
+	}
 }
 
 @media (min-width: 64rem) {
