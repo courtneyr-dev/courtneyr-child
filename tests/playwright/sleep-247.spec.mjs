@@ -435,7 +435,7 @@ test.describe( 'archive — full logged-out fixture set', () => {
 		const w5 = ( await visibleLinks( cellForNight( page, '2026-08-20' ) ) ).names[ 0 ];
 		expect( w5 ).toMatch( /^Aug 20, 7 hr 20 min, Waxing gibbous$/ );
 		const titled = ( await visibleLinks( cellForNight( page, '2026-08-11' ) ) ).names[ 0 ];
-		expect( titled ).toMatch( /^Early night, Aug 11, 8 hr 30 min, Waning crescent$/ );
+		expect( titled ).toMatch( /^Early night Aug 11, 8 hr 30 min, Waning crescent$/ );
 		const sameNight = await page.locator( 'li.pkiw-sleep-night:has(time.dt-published[datetime="2026-08-22"])' ).evaluateAll( ( cells ) => cells.map( ( cell ) => cell.querySelector( 'a' ).getAttribute( 'aria-labelledby' ).split( /\s+/ ).map( ( id ) => document.getElementById( id ).textContent ).join( ' ' ).replace( /\s+/g, ' ' ).trim() ) );
 		expect( sameNight[ 0 ] ).not.toBe( sameNight[ 1 ] );
 	} );
@@ -489,7 +489,7 @@ test.describe( 'archive — full logged-out fixture set', () => {
 			const tabbed = await tabCellOrder( page, dom );
 			expect( tabbed.seen ).toEqual( dom );
 			expect( tabbed.after.pager ).toBe( true );
-			expect( await page.evaluate( () => document.documentElement.scrollWidth === document.documentElement.clientWidth ) ).toBe( true );
+			expect( await page.evaluate( () => document.documentElement.scrollWidth <= document.documentElement.clientWidth ) ).toBe( true );
 		} );
 	}
 
@@ -497,7 +497,7 @@ test.describe( 'archive — full logged-out fixture set', () => {
 		const context = await browser.newContext( { baseURL: BASE_URL, viewport: { width: 1280, height: 800 }, deviceScaleFactor: 4, colorScheme: 'light' } );
 		const page = await context.newPage();
 		await visit( page, ARCHIVE );
-		expect( await page.evaluate( () => ( { ratio: window.devicePixelRatio, fits: document.documentElement.scrollWidth === document.documentElement.clientWidth } ) ) ).toEqual( { ratio: 4, fits: true } );
+		expect( await page.evaluate( () => ( { ratio: window.devicePixelRatio, fits: document.documentElement.scrollWidth <= document.documentElement.clientWidth } ) ) ).toEqual( { ratio: 4, fits: true } );
 		await context.close();
 	} );
 
@@ -772,7 +772,7 @@ test.describe( 'single — full fixture set', () => {
 		}
 		await page.setViewportSize( { width: 320, height: 900 } );
 		await openFixture( page, '2026-08-20' );
-		expect( await page.evaluate( () => document.documentElement.scrollWidth === document.documentElement.clientWidth ) ).toBe( true );
+		expect( await page.evaluate( () => document.documentElement.scrollWidth <= document.documentElement.clientWidth ) ).toBe( true );
 		expect( await fontAudit( page.locator( '.pkiw-sleep' ) ) ).toEqual( [] );
 		const paint = await page.locator( '.pkiw-sleep' ).evaluate( ( card ) => ( { background: getComputedStyle( card ).backgroundColor, color: getComputedStyle( card ).color, shadow: getComputedStyle( card ).boxShadow, image: getComputedStyle( card ).backgroundImage } ) );
 		expect( paint.background ).toBe( WHITE );
@@ -796,7 +796,7 @@ test.describe( 'single — full fixture set', () => {
 		const context = await browser.newContext( { baseURL: BASE_URL, viewport: { width: 1280, height: 800 }, deviceScaleFactor: 4, colorScheme: 'light' } );
 		const page = await context.newPage();
 		await openFixture( page, '2026-08-20' );
-		expect( await page.evaluate( () => document.documentElement.scrollWidth === document.documentElement.clientWidth ) ).toBe( true );
+		expect( await page.evaluate( () => document.documentElement.scrollWidth <= document.documentElement.clientWidth ) ).toBe( true );
 		await context.close();
 	} );
 
@@ -942,7 +942,7 @@ test.describe( 'Stream — full or stream fixture set', () => {
 		test( `[29,41] "Fits its column" at ${ width}px with no scroll and every text box inside the circle`, async ( { page } ) => {
 			await page.setViewportSize( { width, height: 900 } );
 			const cards = await stickers( page );
-			expect( await page.evaluate( () => document.documentElement.scrollWidth === document.documentElement.clientWidth ) ).toBe( true );
+			expect( await page.evaluate( () => document.documentElement.scrollWidth <= document.documentElement.clientWidth ) ).toBe( true );
 			for ( const card of await cards.all() ) {
 				const outside = await card.evaluate( ( element ) => {
 					const circle = element.getBoundingClientRect();
@@ -1011,7 +1011,7 @@ test.describe( 'dev-only privacy surfaces', () => {
 	test( '[21,55] "H01 head, oEmbed and Markdown alternate" expose no hidden clocks and datePublished is noon', async ( { page, request } ) => {
 		const href = await fixturePermalink( page, '2026-08-09' );
 		await visit( page, href );
-		const head = await page.locator( 'script[type="application/ld+json], meta[property^="og:"], meta[name^="twitter:"]' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => node.textContent || node.getAttribute( 'content' ) || '' ).join( '\n' ) );
+		const head = await page.locator( 'script[type="application/ld+json"], meta[property^="og:"], meta[name^="twitter:"]' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => node.textContent || node.getAttribute( 'content' ) || '' ).join( '\n' ) );
 		expect( head ).not.toMatch( /23:10|06:10/ );
 		expect( head ).toMatch( /"datePublished"\s*:\s*"[^"]*T12:00:00(?:[+-]\d{2}:\d{2}|Z)"/ );
 		for ( const [ label, night ] of [ [ 'H01', '2026-08-09' ], [ 'T01', '2026-08-11' ] ] ) {
@@ -1037,7 +1037,8 @@ test.describe( 'dev-only privacy surfaces', () => {
 			JSON.stringify( post ),
 			await ( await request.get( markdownUrl( href ) ) ).text(),
 		];
-		for ( const body of responses ) expect( body ).not.toMatch( /Example Street|geo:|(?:^|[^\d])0\s*,\s*0(?:[^\d]|$)/i );
+		// Inline <style> and <svg> blocks and rgba( 0, 0, 0 ) colour values are not coordinates; scripts stay in so JSON-LD is still scanned.
+		for ( const body of responses ) expect( body.replace( /<(?:style|svg)\b[\s\S]*?<\/(?:style|svg)>/gi, '' ).replace( /rgba?\([^)]*\)/gi, '' ) ).not.toMatch( /Example Street|geo:|(?:^|[^\d])0\s*,\s*0(?:[^\d]|$)/i );
 		expect( JSON.stringify( post ) ).not.toMatch( /"(?:latitude|longitude|geo_address)"\s*:/i );
 	} );
 

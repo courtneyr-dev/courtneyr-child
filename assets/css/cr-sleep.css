@@ -800,8 +800,9 @@
 		background: Canvas;
 	}
 
+	/* components.css gives every .pk-card a 1px forced-colors border with !important; the sticker's 2px outline must outrank it. */
 	.pk-card.pk-card--stream.cr-sleep-sticker {
-		border: 2px solid CanvasText;
+		border: 2px solid CanvasText !important;
 		background: Canvas;
 		box-shadow: none;
 		color: CanvasText;
