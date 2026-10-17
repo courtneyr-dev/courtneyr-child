@@ -1,0 +1,894 @@
+/* Sleep archive, single record and Stream sticker. */
+/* stylelint-disable no-descending-specificity -- each surface resets shared plugin elements after its surface-specific parent. */
+
+/* ============================================================
+   Archive: monthly graph-paper sheets.
+   ============================================================ */
+
+:is(.cr-sleep, body.cr-sleep-archive) {
+	--cr-sleep-bar: var(--cr-cerulean);
+	--cr-sleep-edge: var(--cr-ink);
+	--cr-sleep-ink: var(--cr-ink);
+	--cr-sleep-paper: var(--cr-surface-elevated);
+	--cr-sleep-rule: var(--cr-rule);
+	--cr-sleep-track: 7.5rem;
+	min-inline-size: 0;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-archive__month {
+	min-inline-size: 0;
+	margin-block: 0 var(--cr-space-2xl);
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-archive__month-label {
+	display: table;
+	max-inline-size: 100%;
+	margin: 0 0 var(--cr-space-md) var(--cr-space-md);
+	padding: var(--cr-space-2xs) var(--cr-space-md);
+	background-color: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-floor), var(--cr-text-lg));
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet {
+	--cr-sleep-columns: 1;
+	--cr-focus-halo: var(--cr-russian-violet);
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-auto-flow: row;
+	gap: 0;
+	box-sizing: border-box;
+	inline-size: 100%;
+	max-inline-size: 100%;
+	margin: 0;
+	padding: 0;
+	border: 2px solid var(--cr-sleep-edge);
+	border-radius: 0;
+	background-color: var(--cr-sleep-paper);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-sleep-ink);
+	list-style: none;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: var(--cr-space-xs) var(--cr-space-sm);
+	box-sizing: border-box;
+	min-inline-size: 0;
+	margin: 0;
+	padding: var(--cr-space-md);
+	border: 0;
+	border-block-end: 1px solid var(--cr-sleep-rule);
+	background-color: var(--cr-sleep-paper);
+	color: var(--cr-sleep-ink);
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:last-child {
+	border-block-end: 0;
+}
+
+/* The shared archive list gives every post a lift and an orange marker bar. Night cells are chart cells, so they reset both. */
+.cr-archive .cr-sleep .wp-block-post.pkiw-sleep-night {
+	transition: none;
+}
+
+.cr-archive .cr-sleep .wp-block-post.pkiw-sleep-night:hover {
+	transform: none;
+}
+
+.cr-archive .cr-sleep .wp-block-post.pkiw-sleep-night::after {
+	content: none;
+	display: none;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__title {
+	grid-column: 1 / -1;
+	grid-row: 1;
+	min-inline-size: 0;
+	margin: 0;
+	color: var(--cr-sleep-ink);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-floor), var(--cr-text-base));
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__title a.u-url {
+	color: inherit;
+	font-family: var(--cr-font-accent);
+	text-decoration: none;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night > a.u-url {
+	grid-column: 1;
+	grid-row: 1;
+	min-inline-size: 0;
+	color: inherit;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+	text-decoration: none;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__date {
+	grid-column: 1;
+	grid-row: 2;
+	align-self: center;
+	min-inline-size: 0;
+	color: var(--cr-sleep-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__duration {
+	grid-column: 2;
+	grid-row: 2;
+	align-self: center;
+	min-inline-size: 0;
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-floor), var(--cr-text-base));
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+	text-align: end;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:not(:has(> .pkiw-sleep-night__title)) .pkiw-sleep-night__duration {
+	grid-row: 1;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__duration :is(.p-sleep, time) {
+	font-family: var(--cr-font-accent);
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__bar {
+	grid-column: 1 / -1;
+	grid-row: 3;
+	display: block;
+	align-self: center;
+	box-sizing: border-box;
+	inline-size: calc(var(--pkiw-sleep-ratio, 0) * 100%);
+	min-inline-size: 0;
+	block-size: 1.25rem;
+	min-block-size: 0;
+	background-color: var(--cr-sleep-bar);
+	border-radius: 0;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__moon {
+	grid-column: 1;
+	grid-row: 4;
+	display: grid;
+	place-items: center;
+	min-inline-size: 0;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__moon svg {
+	display: block;
+	inline-size: 2.75rem;
+	block-size: 2.75rem;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__phase {
+	grid-column: 2;
+	grid-row: 4;
+	align-self: center;
+	min-inline-size: 0;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night a.u-url::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:has(a.u-url:focus-visible) {
+	z-index: 1;
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night a.u-url:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+@media (min-width: 40rem) and (max-width: 63.999rem) {
+
+	:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet {
+		--cr-sleep-columns: 4;
+		grid-template-columns: repeat(var(--cr-sleep-columns), minmax(0, 1fr));
+		inline-size: calc(100% * var(--cr-sleep-columns) / 4);
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet:has(> li:last-child:nth-child(1)) { --cr-sleep-columns: 1; }
+
+	:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet:has(> li:last-child:nth-child(2)) { --cr-sleep-columns: 2; }
+
+	:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet:has(> li:last-child:nth-child(3)) { --cr-sleep-columns: 3; }
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cr-space-xs);
+		min-block-size: calc(var(--cr-sleep-track) + 9rem);
+		border-inline-end: 1px solid var(--cr-sleep-rule);
+		border-block-end: 1px solid var(--cr-sleep-rule);
+		text-align: center;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:nth-child(4n),
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:last-child {
+		border-inline-end: 0;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:nth-child(4n + 1):nth-last-child(-n + 4),
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:nth-child(4n + 1):nth-last-child(-n + 4) ~ .pkiw-sleep-night {
+		border-block-end: 0;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night > * {
+		grid-column: auto;
+		grid-row: auto;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__duration {
+		text-align: center;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__bar {
+		align-self: center;
+		inline-size: 3rem;
+		block-size: calc(var(--pkiw-sleep-ratio, 0) * var(--cr-sleep-track));
+		margin-block-start: auto;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet {
+		--cr-sleep-columns: 7;
+		grid-template-columns: repeat(var(--cr-sleep-columns), minmax(0, 1fr));
+		grid-auto-rows: auto auto auto var(--cr-sleep-track) auto auto;
+		inline-size: calc(100% * var(--cr-sleep-columns) / 7);
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet:has(> li:last-child:nth-child(1)) { --cr-sleep-columns: 1; }
+
+	:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet:has(> li:last-child:nth-child(2)) { --cr-sleep-columns: 2; }
+
+	:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet:has(> li:last-child:nth-child(3)) { --cr-sleep-columns: 3; }
+
+	:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet:has(> li:last-child:nth-child(4)) { --cr-sleep-columns: 4; }
+
+	:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet:has(> li:last-child:nth-child(5)) { --cr-sleep-columns: 5; }
+
+	:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet:has(> li:last-child:nth-child(6)) { --cr-sleep-columns: 6; }
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night {
+		display: grid;
+		grid-row: span 6;
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: subgrid;
+		gap: 0;
+		min-block-size: 0;
+		border-inline-end: 1px solid var(--cr-sleep-rule);
+		border-block-end: 1px solid var(--cr-sleep-rule);
+		text-align: center;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:nth-child(7n),
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:last-child {
+		border-inline-end: 0;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:nth-child(7n + 1):nth-last-child(-n + 7),
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:nth-child(7n + 1):nth-last-child(-n + 7) ~ .pkiw-sleep-night {
+		border-block-end: 0;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__title {
+		grid-column: 1;
+		grid-row: 1;
+		align-self: end;
+		padding-block-end: var(--cr-space-xs);
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night > a.u-url,
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night > .pkiw-sleep-night__date {
+		grid-column: 1;
+		grid-row: 2;
+		align-self: center;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__duration,
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:not(:has(> .pkiw-sleep-night__title)) .pkiw-sleep-night__duration {
+		grid-column: 1;
+		grid-row: 3;
+		align-self: center;
+		padding-block: var(--cr-space-xs);
+		text-align: center;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__bar {
+		grid-column: 1;
+		grid-row: 4;
+		align-self: end;
+		justify-self: center;
+		inline-size: 3rem;
+		block-size: calc(var(--pkiw-sleep-ratio, 0) * var(--cr-sleep-track));
+		margin-block-start: 0;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__moon {
+		grid-column: 1;
+		grid-row: 5;
+		align-self: center;
+		padding-block: var(--cr-space-sm) var(--cr-space-xs);
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__phase {
+		grid-column: 1;
+		grid-row: 6;
+		align-self: start;
+		padding-block-end: var(--cr-space-md);
+	}
+}
+
+@media (min-width: 64rem) {
+
+	@supports not (grid-template-rows: subgrid) {
+
+		:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet {
+			grid-auto-rows: auto;
+		}
+
+		:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night {
+			display: flex;
+			flex-direction: column;
+			gap: var(--cr-space-xs);
+			min-block-size: calc(var(--cr-sleep-track) + 9rem);
+		}
+
+		:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__bar {
+			align-self: center;
+			margin-block-start: auto;
+		}
+
+		:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:not(:has(.pkiw-sleep-night__bar)) .pkiw-sleep-night__moon {
+			margin-block-start: auto;
+		}
+	}
+}
+
+/* ============================================================
+   Single: one paper record and a twelve-hour duration track.
+   ============================================================ */
+
+.pk-card.pkiw-sleep {
+	--cr-sleep-bar: var(--cr-cerulean);
+	--cr-sleep-edge: var(--cr-ink);
+	--cr-focus-halo: var(--cr-russian-violet);
+	--cr-sleep-ink: var(--cr-ink);
+	--cr-sleep-paper: var(--cr-surface-elevated);
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-lg);
+	box-sizing: border-box;
+	max-inline-size: 100%;
+	margin-block: var(--cr-space-xl);
+	padding: var(--cr-space-lg);
+	border: 2px solid var(--cr-sleep-edge);
+	border-radius: 0;
+	background-color: var(--cr-sleep-paper);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-sleep-ink);
+	font-family: var(--cr-font-body);
+}
+
+.pkiw-sleep > .pkiw-sleep__moon {
+	display: none;
+	place-self: center;
+}
+
+.pkiw-sleep > .pkiw-sleep__moon svg {
+	display: block;
+	inline-size: min(14rem, 100%);
+	block-size: auto;
+}
+
+.pkiw-sleep .pkiw-sleep__record {
+	display: grid;
+	gap: var(--cr-space-sm);
+	min-inline-size: 0;
+	margin: 0;
+}
+
+.pkiw-sleep .pkiw-sleep__row {
+	display: grid;
+	grid-template-columns: minmax(7rem, 0.7fr) minmax(0, 1fr);
+	gap: var(--cr-space-sm) var(--cr-space-md);
+	align-items: baseline;
+	min-inline-size: 0;
+	padding-block-end: var(--cr-space-sm);
+	border-block-end: 1px solid var(--cr-rule);
+}
+
+.pkiw-sleep .pkiw-sleep__row dt {
+	margin: 0;
+	color: var(--cr-sleep-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-tight);
+	text-transform: uppercase;
+}
+
+.pkiw-sleep .pkiw-sleep__row dd,
+.pkiw-sleep .pkiw-sleep__row dd time {
+	min-inline-size: 0;
+	margin: 0;
+	color: var(--cr-sleep-ink);
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-floor), var(--cr-text-base));
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.pkiw-sleep .pkiw-sleep__row dd.p-sleep,
+.pkiw-sleep .pkiw-sleep__row dd.p-sleep time {
+	font-family: var(--cr-font-accent);
+	font-size: 1.5rem;
+	font-weight: var(--cr-weight-bold);
+}
+
+.pkiw-sleep .pkiw-sleep__chart {
+	display: block;
+	box-sizing: border-box;
+	inline-size: 100%;
+	block-size: calc(1.25rem + 4px);
+	min-block-size: 0;
+	border: 2px solid var(--cr-sleep-ink);
+	background-color: var(--cr-sleep-paper);
+}
+
+.pkiw-sleep .pkiw-sleep__bar {
+	display: block;
+	box-sizing: border-box;
+	inline-size: calc(var(--pkiw-sleep-ratio, 0) * 100%);
+	block-size: 1.25rem;
+	min-block-size: 0;
+	background-color: var(--cr-sleep-bar);
+	border-radius: 0;
+}
+
+.cr-sleep-single .wp-block-post-content a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+@media (min-width: 40rem) {
+
+	.pk-card.pkiw-sleep {
+		padding: var(--cr-space-xl);
+	}
+
+	.pkiw-sleep > .pkiw-sleep__moon {
+		display: block;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.pk-card.pkiw-sleep {
+		grid-template-columns: 14rem minmax(0, 1fr);
+		align-items: center;
+	}
+
+	.pkiw-sleep > .pkiw-sleep__moon {
+		grid-column: 1;
+		grid-row: 1 / span 2;
+	}
+
+	.pkiw-sleep .pkiw-sleep__record {
+		grid-column: 2;
+		grid-row: 1;
+	}
+
+	.pkiw-sleep .pkiw-sleep__chart {
+		grid-column: 2;
+		grid-row: 2;
+	}
+}
+
+/* ============================================================
+   Stream: a flat round sleep sticker.
+   ============================================================ */
+
+.pk-card.pk-card--stream.cr-sleep-sticker {
+	--cr-sleep-ring-ink: var(--cr-ink);
+	--cr-sleep-shadow: var(--cr-ink);
+	position: relative;
+	z-index: 1;
+	isolation: isolate;
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	inline-size: min(11rem, 100%);
+	max-inline-size: 11rem;
+	block-size: auto;
+	aspect-ratio: 1 / 1;
+	margin-inline: auto;
+	padding: 0;
+	border: 3px solid var(--cr-sleep-ring-ink);
+	border-radius: 50%;
+	background-color: var(--cr-prussian-blue);
+	box-shadow:
+		0 0 0 4px var(--cr-printer-ivory),
+		0 0 0 6px var(--cr-sleep-ring-ink),
+		4px 4px 0 6px var(--cr-sleep-shadow);
+	color: var(--cr-printer-ivory);
+	overflow: visible;
+	text-align: center;
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-stream-page .wp-block-post-template > li.kind-sleep .pk-card.pk-card--stream.cr-sleep-sticker {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+/* Four lines need the allowed 11rem footprint at the text floor. */
+.cr-sleep-sticker__link {
+	position: absolute;
+	z-index: 2;
+	inset: 0;
+	display: grid;
+	grid-auto-flow: row;
+	place-content: center;
+	justify-items: center;
+	gap: 0.1rem;
+	box-sizing: border-box;
+	padding: 0.75rem 1rem;
+	border-radius: 50%;
+	color: var(--cr-printer-ivory);
+	text-align: center;
+	text-decoration: none;
+}
+
+.cr-sleep-sticker__title,
+.cr-sleep-sticker__sr {
+	position: absolute;
+	inline-size: 1px;
+	block-size: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-floor);
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.cr-sleep-sticker__moon {
+	display: grid;
+	place-items: center;
+	inline-size: 2.5rem;
+	block-size: 2.5rem;
+}
+
+.cr-sleep-sticker__moon svg {
+	display: block;
+	inline-size: 2.5rem;
+	block-size: 2.5rem;
+}
+
+.cr-sleep-sticker__duration,
+.cr-sleep-sticker__duration time {
+	font-family: var(--cr-font-accent);
+	font-size: 1.25rem;
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.05;
+	white-space: nowrap;
+}
+
+.cr-sleep-sticker__phase {
+	max-inline-size: 9rem;
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-semibold);
+	line-height: 1.05;
+	overflow-wrap: anywhere;
+}
+
+.cr-sleep-sticker__date {
+	max-inline-size: 9rem;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.05;
+	white-space: nowrap;
+}
+
+.pk-card.pk-card--stream.cr-sleep-sticker::after {
+	content: "";
+	position: absolute;
+	z-index: 0;
+	inset: auto -8% -6% auto;
+	inline-size: 60%;
+	block-size: 55%;
+	border-radius: 50%;
+	background-image: var(--cr-halftone);
+	background-size: var(--cr-halftone-size);
+	pointer-events: none;
+}
+
+.cr-sleep-sticker__spark {
+	position: absolute;
+	z-index: 3;
+	display: block;
+	inline-size: 0.65rem;
+	block-size: 0.65rem;
+	background-color: var(--cr-ut-orange);
+	clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+	pointer-events: none;
+}
+
+.cr-sleep-sticker__spark:nth-of-type(1) {
+	inset-block-start: 1.25rem;
+	inset-inline-end: 1.4rem;
+}
+
+.cr-sleep-sticker__spark:nth-of-type(2) {
+	inset-block-start: 2.2rem;
+	inset-inline-end: 0.8rem;
+	inline-size: 0.45rem;
+	block-size: 0.45rem;
+}
+
+.cr-stream-page .wp-block-post-template > li.kind-sleep:has(.cr-sleep-sticker),
+.editor-styles-wrapper li.kind-sleep:has(.cr-sleep-sticker) {
+	position: relative;
+}
+
+.cr-stream-page .wp-block-post-template > li.kind-sleep:has(.cr-sleep-sticker)::before,
+.editor-styles-wrapper li.kind-sleep:has(.cr-sleep-sticker)::before {
+	content: "";
+	position: absolute;
+	z-index: 0;
+	inset-block-start: 0.35rem;
+	inset-inline-start: 50%;
+	box-sizing: border-box;
+	inline-size: 3.2rem;
+	block-size: 0.85rem;
+	margin-inline-start: -1.6rem;
+	border: 2.5px solid var(--cr-ink);
+	border-radius: 999px;
+	background-color: var(--cr-light-gray);
+	box-shadow: 2px 2px 0 var(--cr-sleep-shadow, var(--cr-ink));
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.pk-card.pk-card--stream.cr-sleep-sticker:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 8px;
+	box-shadow:
+		0 0 0 4px var(--cr-printer-ivory),
+		0 0 0 6px var(--cr-sleep-ring-ink),
+		4px 4px 0 6px var(--cr-sleep-shadow),
+		0 0 0 14px var(--cr-focus-halo);
+}
+
+.cr-sleep-sticker__link:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+/* ============================================================
+   Moon drawings: one phase vocabulary on every surface.
+   ============================================================ */
+
+.cr-moon__limb {
+	fill: var(--cr-prussian-blue);
+}
+
+.cr-moon__lit {
+	fill: var(--cr-light-orange);
+}
+
+.cr-moon__rim {
+	fill: none;
+	stroke: var(--cr-ink);
+	stroke-width: 1.5;
+}
+
+:is(.cr-sleep, body.cr-sleep-archive, .pkiw-sleep) .cr-moon__rim {
+	stroke: var(--cr-sleep-ink);
+}
+
+.cr-sleep-sticker .cr-moon__rim {
+	stroke: var(--cr-printer-ivory);
+}
+
+/* ============================================================
+   Dark mode: paper objects keep their light palette.
+   ============================================================ */
+
+:root[data-theme="dark"] :is(.cr-sleep, body.cr-sleep-archive),
+:root[data-theme="dark"] .pkiw-sleep {
+	--cr-sleep-edge: var(--cr-printer-ivory);
+	--cr-sleep-ink: var(--cr-russian-violet);
+	--cr-sleep-paper: var(--cr-white);
+}
+
+:root[data-theme="dark"] .cr-sleep-sticker {
+	--cr-sleep-shadow: var(--cr-selective-yellow);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) :is(.cr-sleep, body.cr-sleep-archive),
+	:root:not([data-theme="light"]) .pkiw-sleep {
+		--cr-sleep-edge: var(--cr-printer-ivory);
+		--cr-sleep-ink: var(--cr-russian-violet);
+		--cr-sleep-paper: var(--cr-white);
+	}
+
+	:root:not([data-theme="light"]) .cr-sleep-sticker {
+		--cr-sleep-shadow: var(--cr-selective-yellow);
+	}
+}
+
+/* ============================================================
+   Forced colors: preserve data geometry and remove decoration.
+   ============================================================ */
+
+@media (forced-colors: active) {
+
+	:is(.cr-sleep, body.cr-sleep-archive),
+	.pk-card.pkiw-sleep {
+		--cr-sleep-edge: CanvasText;
+		--cr-sleep-ink: CanvasText;
+		--cr-sleep-paper: Canvas;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet,
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night,
+	.pk-card.pkiw-sleep {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-archive__month-label {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__bar,
+	.pkiw-sleep .pkiw-sleep__bar {
+		border: 2px solid CanvasText;
+		background: Canvas;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__moon,
+	.pkiw-sleep > .pkiw-sleep__moon,
+	.cr-sleep-sticker__moon,
+	.pk-card.pk-card--stream.cr-sleep-sticker::after,
+	.cr-sleep-sticker__spark,
+	.cr-stream-page .wp-block-post-template > li.kind-sleep:has(.cr-sleep-sticker)::before,
+	.editor-styles-wrapper li.kind-sleep:has(.cr-sleep-sticker)::before {
+		display: none;
+	}
+
+	.pk-card.pkiw-sleep {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.pkiw-sleep .pkiw-sleep__record,
+	.pkiw-sleep .pkiw-sleep__chart {
+		grid-column: 1;
+	}
+
+	.pkiw-sleep .pkiw-sleep__chart {
+		border: 2px solid CanvasText;
+		background: Canvas;
+	}
+
+	/* components.css gives every .pk-card a 1px forced-colors border with !important; the sticker's 2px outline must outrank it. */
+	.pk-card.pk-card--stream.cr-sleep-sticker {
+		border: 2px solid CanvasText !important;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-sleep-sticker__link {
+		color: LinkText;
+	}
+
+	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:has(a.u-url:focus-visible),
+	.pk-card.pk-card--stream.cr-sleep-sticker:has(a:focus-visible),
+	.cr-sleep-single .wp-block-post-content a:focus-visible {
+		outline: 3px solid Highlight;
+		box-shadow: 0 0 0 7px CanvasText;
+	}
+}
+
+/* ============================================================
+   Reduced motion: future edits cannot animate these objects.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+	:is(
+		.cr-sleep .pkiw-sleep-archive__month,
+		body.cr-sleep-archive .pkiw-sleep-archive__month,
+		.pkiw-sleep,
+		.cr-sleep-sticker,
+		li.kind-sleep:has(.cr-sleep-sticker),
+		.cr-sleep-single .wp-block-post-content a
+	),
+	:is(
+		.cr-sleep .pkiw-sleep-archive__month,
+		body.cr-sleep-archive .pkiw-sleep-archive__month,
+		.pkiw-sleep,
+		.cr-sleep-sticker,
+		li.kind-sleep:has(.cr-sleep-sticker)
+	) *,
+	:is(
+		.cr-sleep .pkiw-sleep-archive__month,
+		body.cr-sleep-archive .pkiw-sleep-archive__month,
+		.pkiw-sleep,
+		.cr-sleep-sticker,
+		li.kind-sleep:has(.cr-sleep-sticker)
+	)::before,
+	:is(
+		.cr-sleep .pkiw-sleep-archive__month,
+		body.cr-sleep-archive .pkiw-sleep-archive__month,
+		.pkiw-sleep,
+		.cr-sleep-sticker,
+		li.kind-sleep:has(.cr-sleep-sticker)
+	)::after {
+		animation: none;
+		transition: none;
+	}
+
+	:is(
+		.cr-sleep .pkiw-sleep-archive__month,
+		body.cr-sleep-archive .pkiw-sleep-archive__month,
+		.pkiw-sleep,
+		.cr-sleep-sticker,
+		li.kind-sleep:has(.cr-sleep-sticker)
+	) *::before,
+	:is(
+		.cr-sleep .pkiw-sleep-archive__month,
+		body.cr-sleep-archive .pkiw-sleep-archive__month,
+		.pkiw-sleep,
+		.cr-sleep-sticker,
+		li.kind-sleep:has(.cr-sleep-sticker)
+	) *::after {
+		animation: none;
+		transition: none;
+	}
+}
