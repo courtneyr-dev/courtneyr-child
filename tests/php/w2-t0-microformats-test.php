@@ -477,6 +477,8 @@ namespace Courtneyr\Child\W2T0MicroformatsTests {
 	);
 	$html = render_title_pipeline( title_block() );
 	check( false !== strpos( $html, '<span class="privacy">Members only:</span> Entry from October 52, 2026 &amp; &lt;b&gt;</h1>' ), 'a filtered protected format keeps its markup and escapes only the label' );
+	check( empty( $GLOBALS['cr_hooks']['protected_title_format'][ PHP_INT_MAX ] ), 'the protected format capture callback is removed after the render' );
+	check( ! empty( $GLOBALS['cr_hooks']['protected_title_format'][10] ), "the site's own protected format filter stays registered" );
 	unset( $GLOBALS['cr_hooks']['protected_title_format'] );
 
 	// A call-dependent format filter: only Core's own call counts.
@@ -495,7 +497,24 @@ namespace Courtneyr\Child\W2T0MicroformatsTests {
 	$label_53 = $GLOBALS['no_plugin'] ? 'Entry from October 53, 2026' : 'Stub kind label 53';
 	check( false !== strpos( $html, '>Hidden: ' . $label_53 . '</h1>' ), 'a call-dependent private format matches the call Core made' );
 	check( 1 === $GLOBALS['cr_format_calls'], 'the private format filter runs once per render' );
+	check( empty( $GLOBALS['cr_hooks']['private_title_format'][ PHP_INT_MAX ] ), 'the private format capture callback is removed after the render' );
+	check( ! empty( $GLOBALS['cr_hooks']['private_title_format'][10] ), "the site's own private format filter stays registered" );
 	unset( $GLOBALS['cr_hooks']['private_title_format'] );
+
+	// Another post's title read while the temporary callbacks are active stays Core's.
+	reset_state();
+	post_fixture( 56, 'review', '', true, true );
+	$GLOBALS['cr_posts'][56]->post_password = 'secret';
+	post_fixture( 55, 'review', '', true, true );
+	$GLOBALS['cr_posts'][55]->post_password = 'secret';
+	$block_55 = apply_filters( 'render_block_data', title_block(), array(), null );
+	check( 'Protected: ' === get_the_title( 56 ), 'another protected post read mid-render keeps Core title' );
+	$title_55 = get_the_title( 55 );
+	check( 'Protected: Entry from October 55, 2026' === $title_55, 'the targeted post still gets its label after the other read' );
+	apply_filters( 'render_block_core/post-title', '<h1 class="wp-block-post-title">' . $title_55 . '</h1>', $block_55 );
+	check( 'Protected: ' === get_the_title( 55 ), 'a later read of the targeted post gets Core title back' );
+	check( empty( $GLOBALS['cr_hooks']['protected_title_format'][ PHP_INT_MAX ] ) && empty( $GLOBALS['cr_hooks']['private_title_format'][ PHP_INT_MAX ] ), 'no capture callback survives the render' );
+	no_title_filter_left( 'mid-render read leaves no the_title filter behind' );
 
 	// A real title that equals the prefix text is a title, not an empty one.
 	reset_state();
