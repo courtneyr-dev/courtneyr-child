@@ -693,6 +693,11 @@
 		height: 12rem;
 	}
 
+	.cr-weather-almanac .pkiw-almanac__heading {
+		padding-block: var(--cr-space-sm);
+		font-size: var(--cr-text-2xl);
+	}
+
 	/* The page clips the still life at the viewport edge, so pieces crop off the frame without a horizontal scrollbar. */
 	.cr-archive--weather {
 		overflow-x: clip;
