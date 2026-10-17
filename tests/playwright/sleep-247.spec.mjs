@@ -3,6 +3,21 @@
 // rulings. Read-only GETs, logged out; needs a running site with the seed-247.php fixtures. Each test
 // sets its own viewport, so one project is enough. Optional flags: CR_SLEEP_ARCHIVE_PATH,
 // CR_SLEEP_STREAM_PATH, CR_SLEEP_STATE=full|empty|stream, CR_SLEEP_DEV=1 and CR_SLEEP_NO_STREAM=1.
+//
+// A missing fixture or a missing adapter fails the run; only the flags above skip anything.
+//
+// Fixture passes (seed-247.php), in this order. The probe set (G01, local-only M02 and M03) and the stream
+// set (S1-S4) each add sleep posts to the archive, so they shift the 31/11 page map (G01 sits on Aug 13,
+// S1-S4 on the newest nights). The page-map tests therefore run on the archive set alone:
+//   1. `seed archive`, then CR_SLEEP_STATE=full with `-g "archive —|single —"`: page map, singles, privacy.
+//   2. `seed probe` on top, then CR_SLEEP_STATE=full CR_SLEEP_DEV=1 with `-g "dev-only"`: the dev-only block
+//      (G01 needs the probe; the H01/N01/T01 checks need the archive set). The 31/11 tests fail with the
+//      probe in, so `remove probe` before any further page-map run.
+//   3. `remove probe`, map cr-local-stream-sleep.php into mu-plugins (local only; W4-G3 'yes'), `seed stream`,
+//      then CR_SLEEP_STATE=stream: the Stream sticker block only. On dev, cr-content-surfaces.php routes sleep.
+// The titled single's H1 p-name comes from IndieBlocks, which is active on dev only, so that assertion needs
+// CR_SLEEP_DEV=1.
+
 import { createRequire } from 'node:module';
 import { test, expect } from '@playwright/test';
 import { BASE_URL } from '../routes.mjs';
@@ -63,6 +78,13 @@ async function visibleLinks( locator ) {
 	} );
 }
 
+// Chromium's name computation joins aria-labelledby parts and inline children with a space, so
+// "Aug 3" plus a hidden ", " comes back as "Aug 3 , Waning gibbous". Match the words and commas, not the spacing.
+function nameMatcher( name ) {
+	const escaped = name.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+	return new RegExp( `^${ escaped.replace( /\s*,\s*/g, '\\s*,\\s*' ) }$` );
+}
+
 function cellForNight( page, night, occurrence = 0 ) {
 	return page.locator( `li.pkiw-sleep-night:has(time.dt-published[datetime="${ night }"])` ).nth( occurrence );
 }
@@ -75,7 +97,7 @@ async function fixturePermalink( page, night, occurrence = 0, seed = ARCHIVE_SEE
 			return cell.locator( 'a.u-url' ).getAttribute( 'href' );
 		}
 	}
-	test.skip( true, `fixture night ${ night } occurrence ${ occurrence + 1 } is missing (run ${ seed })` );
+	throw new Error( `fixture night ${ night } occurrence ${ occurrence + 1 } is missing (run ${ seed })` );
 }
 
 async function openFixture( page, night, occurrence = 0, scheme = 'light' ) {
@@ -91,6 +113,8 @@ async function normalizedMarkup( locator ) {
 			for ( const attribute of [ ...element.attributes ] ) {
 				if ( [ 'id', 'href', 'aria-labelledby' ].includes( attribute.name ) ) {
 					element.removeAttribute( attribute.name );
+				} else if ( attribute.name === 'class' ) {
+					element.setAttribute( 'class', attribute.value.replace( /\bpost-\d+\b/g, 'post-ID' ) );
 				} else if ( attribute.name === 'datetime' ) {
 					element.setAttribute( attribute.name, attribute.value.startsWith( 'PT' ) ? attribute.value : 'DATE' );
 				}
@@ -191,6 +215,16 @@ async function wholePageKeyboardWalk( page, limit = 160 ) {
 	return stops;
 }
 
+// tokens.css section 13 forces animation and transition durations to 0.001ms under reduced motion, so a
+// computed transition-duration reads 1e-06s and never '0s'. Treat anything at or under 0.001ms as off.
+function motionState( element ) {
+	const style = getComputedStyle( element );
+	return {
+		transition: style.transitionDuration.split( ',' ).every( ( value ) => Number.parseFloat( value ) <= 0.00001 ),
+		animation: style.animationName,
+	};
+}
+
 function parseRgb( value ) {
 	return ( value.match( /[\d.]+/g ) || [] ).slice( 0, 3 ).map( Number );
 }
@@ -208,7 +242,7 @@ function contrast( foreground, background ) {
 async function restObjectForPermalink( page, request, href ) {
 	await visit( page, href );
 	const alternate = page.locator( 'link[rel="alternate"][type="application/json"]' ).first();
-	test.skip( 0 === await alternate.count(), `REST alternate is missing for ${ href }` );
+	expect( await alternate.count(), `REST alternate is missing for ${ href }` ).toBeGreaterThan( 0 );
 	const response = await request.get( await alternate.getAttribute( 'href' ) );
 	expect( response.status() ).toBe( 200 );
 	return response.json();
@@ -225,7 +259,7 @@ test.describe( 'archive — full logged-out fixture set', () => {
 	test.beforeEach( async ( { page } ) => {
 		await page.setViewportSize( { width: 1280, height: 900 } );
 		await visit( page, ARCHIVE );
-		test.skip( 0 === await page.locator( 'li.pkiw-sleep-night' ).count(), `archive fixtures are missing (run ${ ARCHIVE_SEED })` );
+		expect( await page.locator( 'li.pkiw-sleep-night' ).count(), `archive fixtures are missing (run ${ ARCHIVE_SEED })` ).toBeGreaterThan( 0 );
 	} );
 
 	test( '[1] "one inherited Query and core pagination": pages are 31 then 11, equivalent page-2 URLs, then 404', async ( { page } ) => {
@@ -393,7 +427,7 @@ test.describe( 'archive — full logged-out fixture set', () => {
 				expect( links.count ).toBe( 1 );
 				expect( links.stray ).toBe( 0 );
 				names.push( links.names[ 0 ] );
-				await expect( cell.getByRole( 'link', { name: links.names[ 0 ], exact: true } ) ).toHaveCount( 1 );
+				await expect( cell.getByRole( 'link', { name: nameMatcher( links.names[ 0 ] ) } ) ).toHaveCount( 1 );
 			}
 			expect( new Set( names ).size ).toBe( names.length );
 		}
@@ -559,13 +593,13 @@ test.describe( 'archive — full logged-out fixture set', () => {
 		await visit( page, ARCHIVE );
 		await page.emulateMedia( { reducedMotion: 'reduce' } );
 		for ( const selector of [ 'ol.pkiw-sleep-sheet', '.pkiw-sleep-night', '.pkiw-sleep-night__bar' ] ) {
-			const motion = await page.locator( selector ).first().evaluate( ( element ) => ( { transition: getComputedStyle( element ).transitionDuration, animation: getComputedStyle( element ).animationName } ) );
-			expect( motion.transition ).toBe( '0s' );
+			const motion = await page.locator( selector ).first().evaluate( motionState );
+			expect( motion.transition ).toBe( true );
 			expect( motion.animation ).toBe( 'none' );
 		}
 		await openFixture( page, '2026-08-11' );
 		await page.emulateMedia( { reducedMotion: 'reduce' } );
-		expect( await page.locator( '.pkiw-sleep' ).evaluate( ( element ) => ( { transition: getComputedStyle( element ).transitionDuration, animation: getComputedStyle( element ).animationName } ) ) ).toEqual( { transition: '0s', animation: 'none' } );
+		expect( await page.locator( '.pkiw-sleep' ).evaluate( motionState ) ).toEqual( { transition: true, animation: 'none' } );
 	} );
 
 	test( '[18,49,50,55] "Feed and REST privacy": noon dates, no hidden terms, stripped meta, safe oEmbed', async ( { page, request } ) => {
@@ -581,9 +615,11 @@ test.describe( 'archive — full logged-out fixture set', () => {
 		expect( xml ).not.toMatch( /23:10|06:10/ );
 		expect( xml ).not.toContain( new URL( x01, BASE_URL ).pathname );
 		for ( const term of [ '23:10', 'bedtime', 'wakeTime', 'showTimesPublicly' ] ) {
-			const response = await request.get( `/wp-json/wp/v2/posts?search=${ encodeURIComponent( term ) }` );
+			const response = await request.get( `/wp-json/wp/v2/posts?_fields=slug&search=${ encodeURIComponent( term ) }` );
 			expect( response.status() ).toBe( 200 );
-			expect( await response.json() ).toEqual( [] );
+			// T01 opted in to public times, so its stored card may match; no other (hidden) fixture may.
+			const hidden = ( await response.json() ).map( ( item ) => item.slug ).filter( ( slug ) => ! /^cr-seed-247-t01(?:-\d+)?$/.test( slug ) );
+			expect( hidden, `logged-out search for "${ term }" matched a hidden fixture` ).toEqual( [] );
 		}
 		const post = await restObjectForPermalink( page, request, h01 );
 		expect( post.date ).toMatch( /T12:00:00$/ );
@@ -614,7 +650,7 @@ test.describe( 'single — full fixture set', () => {
 	test.beforeEach( async ( { page } ) => {
 		await page.setViewportSize( { width: 1280, height: 900 } );
 		await visit( page, ARCHIVE );
-		test.skip( 0 === await page.locator( 'li.pkiw-sleep-night' ).count(), `archive fixtures are missing (run ${ ARCHIVE_SEED })` );
+		expect( await page.locator( 'li.pkiw-sleep-night' ).count(), `archive fixtures are missing (run ${ ARCHIVE_SEED })` ).toBeGreaterThan( 0 );
 	} );
 
 	test( '[19,47] "T01 Early night": stored H1 and opted-in rows; H01/N01 hidden equals absent', async ( { page } ) => {
@@ -635,7 +671,8 @@ test.describe( 'single — full fixture set', () => {
 				const h1 = page.locator( 'main h1' );
 				await expect( h1 ).toHaveCount( 1 );
 				await expect( h1 ).toHaveText( 'Early night' );
-				await expect( h1 ).toHaveClass( /\bp-name\b/ );
+				// The titled H1's p-name comes from IndieBlocks' theme-mf2 pass (inc/microformats.php:106), which only dev runs.
+				if ( DEV ) await expect( h1 ).toHaveClass( /\bp-name\b/ );
 				const times = rows.filter( { has: page.getByText( /Bedtime|Wake time/ ) } ).locator( 'dd time' );
 				for ( const time of await times.all() ) {
 					expect( await time.getAttribute( 'datetime' ) ).toMatch( /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/ );
@@ -708,8 +745,8 @@ test.describe( 'single — full fixture set', () => {
 
 	test( '[23,28,51] "Microformats": one h-entry, p-sleep is duration only, and clock times carry no mf2 class', async ( { page } ) => {
 		await openFixture( page, '2026-08-11' );
-		await expect( page.locator( 'main .h-entry' ) ).toHaveCount( 1 );
-		const sleep = page.locator( 'main .h-entry .p-sleep' );
+		await expect( page.locator( 'main .h-entry.kind-sleep' ) ).toHaveCount( 1 );
+		const sleep = page.locator( 'main .h-entry.kind-sleep .p-sleep' );
 		await expect( sleep ).toHaveCount( 1 );
 		await expect( sleep ).toHaveText( '8 hr 30 min' );
 		const leaks = await page.locator( '.pkiw-sleep__row', { has: page.getByText( /Bedtime|Wake time/ ) } ).evaluateAll( ( rows ) => rows.filter( ( row ) => [ ...row.querySelectorAll( '*' ) ].some( ( element ) => /(?:^|\s)(?:p|dt|u)-/.test( element.className ) ) ).length );
@@ -802,7 +839,7 @@ test.describe( 'Stream — full or stream fixture set', () => {
 		test.skip( NO_STREAM, 'CR_SLEEP_NO_STREAM=1: sleep is not mapped onto /stream in this environment' );
 		await visit( page, STREAM, scheme );
 		const cards = page.locator( 'article.cr-sleep-sticker' );
-		test.skip( 0 === await cards.count(), `no article.cr-sleep-sticker exists (run ${ STREAM_SEED } after mapping sleep to /stream)` );
+		expect( await cards.count(), `no article.cr-sleep-sticker exists (run ${ STREAM_SEED } after mapping sleep to /stream)` ).toBeGreaterThan( 0 );
 		return cards;
 	}
 
@@ -817,7 +854,7 @@ test.describe( 'Stream — full or stream fixture set', () => {
 			expect( new URL( await card.locator( 'a.u-url' ).getAttribute( 'href' ), BASE_URL ).pathname ).toContain( `cr-seed-247-s${ index + 1 }` );
 			for ( const className of [ 'pk-card', 'pk-card--stream', 'k-sleep', 'h-entry', 'cr-sleep-sticker' ] ) await expect( card ).toHaveClass( new RegExp( `(?:^|\\s)${ className }(?:\\s|$)` ) );
 			if ( expected[ index ][ 0 ] ) await expect( card.locator( '.cr-sleep-sticker__duration' ) ).toHaveText( expected[ index ][ 0 ] ); else await expect( card.locator( '.cr-sleep-sticker__duration' ) ).toHaveCount( 0 );
-			if ( expected[ index ][ 1 ] ) await expect( card.locator( '.p-name' ) ).toHaveText( expected[ index ][ 1 ] );
+			if ( expected[ index ][ 1 ] ) await expect( card.locator( '.cr-sleep-sticker__title .p-name' ) ).toHaveText( expected[ index ][ 1 ] );
 			await expect( card.locator( '.pk-excerpt, .p-summary, .pk-kindlabel, .pk-badge, .pk-meta, img, button' ) ).toHaveCount( 0 );
 			const html = await card.evaluate( ( element ) => element.outerHTML );
 			expect( html ).not.toMatch( /Exact times|Fictional note|dreamt of Example Bay|lock|[←→➜]|\b(?:[01]?\d|2[0-3]):[0-5]\d\b/i );
@@ -840,9 +877,13 @@ test.describe( 'Stream — full or stream fixture set', () => {
 			const night = await card.locator( 'time.dt-published' ).getAttribute( 'datetime' );
 			const longDate = new Date( `${ night }T12:00:00` ).toLocaleDateString( 'en-US', { month: 'long', day: 'numeric', year: 'numeric' } );
 			const title = 1 === index ? 'Fictional title: storm night' : 'Sleep';
-			const expected = [ title, longDate, expectedDurations[ index ] ].filter( Boolean ).join( ', ' );
+			// WCAG 2.5.3 Label in Name: the visible phase, date and duration words are all in the link's name.
+			const visible = await card.locator( 'a.cr-sleep-sticker__link' ).evaluate( ( link ) => Object.fromEntries( [ 'phase', 'date', 'duration' ].map( ( part ) => [ part, ( link.querySelector( `.cr-sleep-sticker__${ part }` )?.firstChild?.textContent || link.querySelector( `.cr-sleep-sticker__${ part }` )?.textContent || '' ).replace( /\s+/g, ' ' ).trim() ] ) ) );
+			expect( visible.phase ).not.toBe( '' );
+			const expected = [ title, longDate, visible.phase, expectedDurations[ index ] ].filter( Boolean ).join( ', ' );
 			expect( links.names[ 0 ] ).toBe( expected );
-			await expect( card.getByRole( 'link', { name: expected, exact: true } ) ).toHaveCount( 1 );
+			for ( const word of [ visible.phase, visible.date, expectedDurations[ index ] ].filter( Boolean ) ) expect( links.names[ 0 ], `visible "${ word }" is in the accessible name` ).toContain( word );
+			await expect( card.getByRole( 'link', { name: nameMatcher( expected ) } ) ).toHaveCount( 1 );
 			const face = await card.locator( 'a.cr-sleep-sticker__link' ).evaluate( ( link ) => [ ...link.children ].map( ( child ) => child.className ) );
 			expect( face ).toEqual( expectedDurations[ index ] ? [ 'cr-sleep-sticker__moon', 'cr-sleep-sticker__duration p-sleep', 'cr-sleep-sticker__phase', 'dt-published cr-sleep-sticker__date' ] : [ 'cr-sleep-sticker__moon', 'cr-sleep-sticker__phase', 'dt-published cr-sleep-sticker__date' ] );
 		}
@@ -947,7 +988,7 @@ test.describe( 'Stream — full or stream fixture set', () => {
 		expect( paint.claspShadow ).not.toMatch( /rgba/ );
 		await page.emulateMedia( { forcedColors: 'none', reducedMotion: 'reduce' } );
 		card = page.locator( 'article.cr-sleep-sticker' ).first();
-		expect( await card.evaluate( ( element ) => ( { transition: getComputedStyle( element ).transitionDuration, animation: getComputedStyle( element ).animationName } ) ) ).toEqual( { transition: '0s', animation: 'none' } );
+		expect( await card.evaluate( motionState ) ).toEqual( { transition: true, animation: 'none' } );
 	} );
 
 	test( '[11] "Computed font-family sweep" passes on the Stream sticker', async ( { page } ) => {
@@ -986,7 +1027,7 @@ test.describe( 'dev-only privacy surfaces', () => {
 	test( '[50,58] "G01 location privacy": single, feed, REST and Markdown hold no place or coordinates', async ( { page, request } ) => {
 		await visit( page, ARCHIVE );
 		const cell = cellForNight( page, '2026-08-13' );
-		test.skip( 0 === await cell.count(), `G01 is missing (run ${ PROBE_SEED })` );
+		expect( await cell.count(), `G01 is missing (run ${ PROBE_SEED })` ).toBeGreaterThan( 0 );
 		await visit( page, await cell.locator( 'a.u-url' ).getAttribute( 'href' ) );
 		const href = page.url();
 		const post = await restObjectForPermalink( page, request, href );

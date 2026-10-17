@@ -3,8 +3,7 @@
  * Sleep archive, single and Stream wiring (PKIW issue 247).
  *
  * The plugin owns the public sleep facts and markup. This file loads the
- * theme paint where that markup can appear, supplies the moon drawings and
- * registers the sleep board with editor parity.
+ * theme paint where that markup can appear and supplies the moon drawings.
  *
  * @package CourtneyrChild
  */
@@ -129,22 +128,3 @@ function moon_svg( string $html, string $phase, int $post_id ): string {
 	return null === $cache[ $phase ] || '' === $cache[ $phase ] ? $html : $cache[ $phase ];
 }
 add_filter( 'pkiw_sleep_moon_html', __NAMESPACE__ . '\\moon_svg', 10, 3 );
-
-/**
- * Register the sleep board with editor parity, so the canvas paints it.
- *
- * @param array<string, array{classes?: array<int, string>}> $kinds Registry so far.
- * @return array<string, array{classes?: array<int, string>}>
- */
-function register_editor_parity( array $kinds ): array {
-	$classes = isset( $kinds[ KIND ]['classes'] ) && is_array( $kinds[ KIND ]['classes'] )
-		? $kinds[ KIND ]['classes']
-		: array( 'single-post', 'kind-' . KIND );
-	if ( ! in_array( 'cr-sleep-board', $classes, true ) ) {
-		$classes[] = 'cr-sleep-board';
-	}
-	$kinds[ KIND ]['classes'] = $classes;
-
-	return $kinds;
-}
-add_filter( 'courtneyr_child_editor_parity_kinds', __NAMESPACE__ . '\\register_editor_parity' );

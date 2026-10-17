@@ -58,10 +58,18 @@ function sleep_sticker( string $html, array $block, $instance ): string {
 	$title_id    = 'cr-sleep-t-' . $post->ID;
 	$date_id     = 'cr-sleep-d-' . $post->ID;
 	$duration_id = 'cr-sleep-h-' . $post->ID;
+	$phase_id    = 'cr-sleep-p-' . $post->ID;
 	$minutes     = (int) ( $facts['duration_minutes'] ?? 0 );
 	$has_length  = $minutes > 0;
+	$phase_label = (string) ( $facts['phase_label'] ?? '' );
+	$has_phase   = '' !== $phase_label;
 	$separator   = '<span class="cr-sleep-sticker__sr">, </span>';
-	$named_by    = array( $title_id, $date_id );
+
+	// WCAG 2.5.3: the link's name carries every visible word on the face (phase, date, duration).
+	$named_by = array( $title_id, $date_id );
+	if ( $has_phase ) {
+		$named_by[] = $phase_id;
+	}
 	if ( $has_length ) {
 		$named_by[] = $duration_id;
 	}
@@ -93,11 +101,12 @@ function sleep_sticker( string $html, array $block, $instance ): string {
 			. esc_attr( (string) ( $facts['duration_iso'] ?? '' ) ) . '">'
 			. esc_html( (string) ( $facts['duration_label'] ?? '' ) ) . '</time></span>';
 	}
-	$out .= '<span class="cr-sleep-sticker__phase">' . esc_html( (string) ( $facts['phase_label'] ?? '' ) ) . '</span>';
+	$out .= '<span class="cr-sleep-sticker__phase" id="' . esc_attr( $phase_id ) . '">' . esc_html( $phase_label )
+		. ( $has_phase && $has_length ? $separator : '' ) . '</span>';
 	$out .= '<time class="dt-published cr-sleep-sticker__date" id="' . esc_attr( $date_id ) . '" datetime="'
 		. esc_attr( (string) ( $facts['night'] ?? '' ) ) . '">'
 		. esc_html( (string) ( $facts['night_display'] ?? '' ) )
-		. ( $has_length ? $separator : '' ) . '</time>';
+		. ( $has_phase || $has_length ? $separator : '' ) . '</time>';
 	$out .= '</a>';
 	$out .= '<span class="cr-sleep-sticker__spark" aria-hidden="true"></span>';
 	$out .= '<span class="cr-sleep-sticker__spark" aria-hidden="true"></span>';
