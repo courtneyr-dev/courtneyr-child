@@ -50,12 +50,36 @@ function is_note_single(): bool {
  * The artifact's inline custom properties: paper tint and tilt, fixed per
  * post.
  *
- * @param int $seed Stable seed.
+ * @param int         $seed Stable seed.
+ * @param string|null $tilt Optional fixed tilt; null keeps the seeded tilt.
  * @return string A style attribute.
  */
-function sticky_style( int $seed ): string {
-	return 'style="--cr-sticky-paper:' . PAPERS[ pick( $seed, 3, count( PAPERS ) ) ] . ';--cr-sticky-tilt:' . TILTS[ pick( $seed, 5, count( TILTS ) ) ] . '"';
+function sticky_style( int $seed, ?string $tilt = null ): string {
+	return 'style="--cr-sticky-paper:' . PAPERS[ pick( $seed, 3, count( PAPERS ) ) ] . ';--cr-sticky-tilt:' . ( $tilt ?? TILTS[ pick( $seed, 5, count( TILTS ) ) ] ) . '"';
 }
+
+/**
+ * Register the Note archive's board and sticky block styles.
+ *
+ * @return void
+ */
+function register_board_styles(): void {
+	register_block_style(
+		'core/post-template',
+		array(
+			'name'  => 'cr-note-board',
+			'label' => __( 'Note board', 'courtneyr-child' ),
+		)
+	);
+	register_block_style(
+		'post-kinds-indieweb/note-entry',
+		array(
+			'name'  => 'cr-sticky',
+			'label' => __( 'Sticky', 'courtneyr-child' ),
+		)
+	);
+}
+add_action( 'init', __NAMESPACE__ . '\\register_board_styles' );
 
 /**
  * The lifted corner, a decorative layer over the paper's cut corner.
@@ -76,6 +100,47 @@ function plain( string $html ): string {
 	$text = wp_strip_all_tags( html_entity_decode( $html, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 	return mb_strtolower( trim( (string) preg_replace( '/\s+/u', ' ', $text ) ) );
 }
+
+/**
+ * Note archive: wrap a styled note entry in the shared sticky primitive.
+ *
+ * @param string    $html     Rendered note entry.
+ * @param array     $block    Parsed block (unused).
+ * @param \WP_Block $instance Block instance.
+ * @return string
+ */
+function board_item( string $html, array $block, $instance ): string {
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	if ( ! $tags->next_tag( array( 'class_name' => 'pkiw-note-entry' ) ) || ! $tags->has_class( 'is-style-cr-sticky' ) ) {
+		return $html;
+	}
+	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
+		? (int) $instance->context['postId']
+		: (int) get_the_ID();
+	$post    = $post_id ? get_post( $post_id ) : null;
+	if ( ! $post instanceof \WP_Post ) {
+		return $html;
+	}
+	$s = seed( (string) $post->ID, $post->post_title );
+
+	return '<div class="cr-sticky-artifact cr-sticky-artifact--board" ' . sticky_style( $s, '0deg' ) . '><div class="cr-sticky cr-sticky--board">' . $html . '</div>' . curl() . '</div>';
+}
+add_filter( 'render_block_post-kinds-indieweb/note-entry', __NAMESPACE__ . '\\board_item', 10, 3 );
+
+/**
+ * Load the Note board paint on its archive and in the editor.
+ *
+ * @return void
+ */
+function enqueue_board_styles(): void {
+	// Editor parity already lists every kind term; this board needs no body class.
+	if ( ! is_admin() && ! is_tax( 'kind', 'note' ) ) {
+		return;
+	}
+	wp_enqueue_style( 'courtneyr-post-kinds', COURTNEYR_CHILD_URI . '/assets/css/cr-post-kinds.css', array(), COURTNEYR_CHILD_VERSION );
+	wp_enqueue_style( 'courtneyr-note-board', COURTNEYR_CHILD_URI . '/assets/css/cr-note-board.css', array( 'courtneyr-post-kinds' ), COURTNEYR_CHILD_VERSION );
+}
+add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_board_styles' );
 
 /**
  * /stream: the plugin's generic note card becomes the sticky.

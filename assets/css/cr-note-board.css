@@ -1,0 +1,302 @@
+/* ============================================================
+   Note archive board (W4-T265).
+
+   This sheet paints the week boards, the note-entry type and the
+   archive-only states. It reuses the unscoped .cr-sticky primitive
+   from cr-post-kinds.css for each paper, curl, adhesive strip and
+   hard drop-shadow. The archive item selectors carry the board and
+   group classes so they beat components.css's generic post padding,
+   divider and hover-lift rules without changing other archives.
+   ============================================================ */
+
+.cr-note-board .is-style-cr-note-board {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cr-space-xl);
+	min-width: 0;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-note-board .is-style-cr-note-board .pkiw-group {
+	min-width: 0;
+	height: auto;
+	padding: clamp(var(--cr-space-md), 3vw, var(--cr-space-xl));
+	border: 2px solid var(--cr-ink);
+	border-radius: 0;
+	background-color: var(--cr-sky-blue);
+	background-image: var(--cr-fiber);
+	box-shadow: none;
+}
+
+.cr-note-board .is-style-cr-note-board .pkiw-group__heading {
+	box-sizing: border-box;
+	width: fit-content;
+	max-width: 100%;
+	margin: 0 0 var(--cr-space-lg);
+	padding: var(--cr-space-xs) var(--cr-space-sm) calc(var(--cr-space-xs) + 0.3em);
+	background: linear-gradient(var(--cr-marker), var(--cr-marker)) left bottom / 100% 0.3em no-repeat, var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: clamp(1.125rem, 0.9rem + 1.8vw, 1.75rem);
+	font-weight: 700;
+	line-height: 1.2;
+	text-transform: uppercase;
+	transform: none;
+	overflow-wrap: anywhere;
+}
+
+.cr-note-board .is-style-cr-note-board .pkiw-group__items {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-lg);
+	min-width: 0;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-archive .cr-note-board .pkiw-group__items > .wp-block-post {
+	display: flex;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	transition: none;
+	transform: none;
+}
+
+.cr-archive .cr-note-board .pkiw-group__items > .wp-block-post:hover {
+	transform: none;
+}
+
+.cr-archive .cr-note-board .pkiw-group__items > .wp-block-post::after {
+	content: none;
+	display: none;
+}
+
+.cr-note-board .cr-sticky-artifact--board {
+	display: flex;
+	flex: 1;
+	min-width: 0;
+	transition: none;
+	translate: none;
+}
+
+.cr-note-board .cr-sticky--board {
+	position: relative;
+	display: flex;
+	flex: 1;
+	min-width: 0;
+	padding: var(--cr-space-xl) var(--cr-space-lg) var(--cr-space-lg);
+	color: var(--cr-russian-violet);
+	overflow-wrap: anywhere;
+}
+
+.cr-note-board .cr-sticky--board .pkiw-note-entry {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: var(--cr-space-xs);
+	min-width: 0;
+	height: 100%;
+	color: var(--cr-russian-violet);
+}
+
+.cr-note-board .cr-sticky--board .pkiw-note-entry__title {
+	margin: 0 0 var(--cr-space-xs);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: 0.95rem;
+	font-weight: 700;
+	line-height: 1.3;
+}
+
+.cr-note-board .cr-sticky--board .pkiw-note-entry__title:only-child {
+	margin-block-end: 0;
+}
+
+.cr-note-board .cr-sticky--board .pkiw-note-entry__title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.cr-note-board .cr-sticky--board .pkiw-note-entry__title a:hover,
+.cr-note-board .cr-sticky--board .pkiw-note-entry__title a:focus-visible {
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+}
+
+.cr-note-board .cr-sticky--board .pkiw-note-entry__title a:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+.cr-note-board .cr-sticky--board .pkiw-note-entry__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+.cr-note-board .cr-sticky--board .pkiw-note-entry__thought {
+	display: -webkit-box;
+	margin: 0;
+	max-width: none;
+	padding: 0;
+	overflow: hidden;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-display);
+	font-size: 1rem;
+	font-weight: 400;
+	line-height: 1.85;
+	overflow-wrap: anywhere;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 7;
+	line-clamp: 7;
+}
+
+.cr-note-board .cr-sticky--board .pkiw-note-entry__date {
+	margin: 0;
+	margin-block-start: auto;
+	margin-inline-end: calc(var(--cr-sticky-curl) + 0.4rem);
+	max-width: none;
+	padding: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: max(0.75rem, var(--cr-text-floor));
+	font-weight: 700;
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+}
+
+.cr-note-board .cr-sticky--board .pkiw-note-entry__date time {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	text-decoration: none;
+}
+
+.cr-note-board .cr-sticky--board .pkiw-note-entry--dup-title .pkiw-note-entry__name {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	border: 0;
+	white-space: nowrap;
+}
+
+.cr-note-board .cr-sticky--board span.pk-entry-props[hidden] {
+	display: none;
+}
+
+.cr-note-board .cr-sticky-artifact--board:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+	translate: none;
+}
+
+@media (min-width: 48rem) {
+
+	.cr-note-board .is-style-cr-note-board .pkiw-group__items {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-note-board .is-style-cr-note-board .pkiw-group__items {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+/* Paper objects keep their light stock and violet ink in either dark-mode path. */
+:root[data-theme="dark"] .cr-note-board .is-style-cr-note-board .pkiw-group {
+	border: 2px solid var(--cr-printer-ivory);
+	background-color: var(--cr-sky-blue);
+	background-image: var(--cr-fiber);
+}
+
+:root[data-theme="dark"] .cr-note-board .is-style-cr-note-board .pkiw-group__heading {
+	background-color: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet) !important;
+}
+
+:root[data-theme="dark"] .cr-note-board .cr-sticky--board :is(.pkiw-note-entry__title, .pkiw-note-entry__title a, .pkiw-note-entry__thought, .pkiw-note-entry__date, .pkiw-note-entry__date time) {
+	color: var(--cr-russian-violet) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-note-board .is-style-cr-note-board .pkiw-group {
+		border: 2px solid var(--cr-printer-ivory);
+		background-color: var(--cr-sky-blue);
+		background-image: var(--cr-fiber);
+	}
+
+	:root:not([data-theme="light"]) .cr-note-board .is-style-cr-note-board .pkiw-group__heading {
+		background-color: var(--cr-printer-ivory);
+		color: var(--cr-russian-violet) !important;
+	}
+
+	:root:not([data-theme="light"]) .cr-note-board .cr-sticky--board :is(.pkiw-note-entry__title, .pkiw-note-entry__title a, .pkiw-note-entry__thought, .pkiw-note-entry__date, .pkiw-note-entry__date time) {
+		color: var(--cr-russian-violet) !important;
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-archive .cr-note-board .is-style-cr-note-board .pkiw-group,
+	.cr-archive .cr-note-board .cr-sticky-artifact--board .cr-sticky--board {
+		outline: 2px solid CanvasText;
+		background: Canvas !important;
+		background-image: none !important;
+		filter: none !important;
+		clip-path: none !important;
+		box-shadow: none !important;
+	}
+
+	.cr-note-board .cr-sticky-artifact--board {
+		filter: none !important;
+	}
+
+	.cr-note-board .cr-sticky__curl {
+		display: none;
+	}
+
+	.cr-note-board .is-style-cr-note-board .pkiw-group__heading {
+		background-image: none !important;
+		border-bottom: none;
+	}
+
+	.cr-note-board .cr-sticky-artifact--board:has(a:focus-visible) {
+		outline-color: Highlight;
+		box-shadow: none !important;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.cr-archive .cr-note-board .pkiw-group__items > .wp-block-post,
+	.cr-note-board .cr-sticky-artifact--board {
+		transition: none;
+	}
+
+	.cr-archive .cr-note-board .pkiw-group__items > .wp-block-post {
+		transform: none;
+	}
+
+	.cr-note-board .cr-sticky-artifact--board,
+	.cr-note-board .cr-sticky-artifact--board:hover,
+	.cr-note-board .cr-sticky-artifact--board:has(a:focus-visible) {
+		translate: none;
+	}
+}
