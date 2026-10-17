@@ -1,0 +1,7 @@
+<!-- Decorative weather wind mark for issue 246; CSS background only. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+	<g fill="none" stroke="#126782" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+		<path d="M7 22h34c7 0 8-10 1-11-4-1-7 2-7 5M7 32h46c8 0 8 11 1 12-4 1-7-2-7-5M7 42h25c7 0 8 10 1 11-4 1-7-2-7-5"/>
+	</g>
+	<circle cx="9" cy="22" r="2" fill="#ffb703" stroke="#241c4a" stroke-width="3"/>
+</svg>

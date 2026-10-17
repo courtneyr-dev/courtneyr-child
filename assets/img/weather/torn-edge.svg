@@ -1,0 +1,4 @@
+<!-- Torn paper perimeter for the issue 246 Stream card; a 9-slice border-image, slice 8. The seams at 8 and 88 sit on flat runs so round tiling joins cleanly. The hard shadow stays the box-shadow token. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+	<path d="M1.5 1.5 12 1.5 22 3.5 34 1 46 4 58 1.5 70 3.5 80 1.5 94.5 1.5 94.5 12 92.5 22 95 34 92 46 95.5 58 92.5 70 94.5 80 94.5 94.5 80 94.5 70 92.5 58 95 46 92 34 95.5 22 92.5 12 94.5 1.5 94.5 1.5 80 3.5 70 1 58 4 46 1.5 34 3.5 22 1.5 12Z" fill="#fbfaf5" stroke="#241c4a" stroke-width="2" stroke-linejoin="round"/>
+</svg>
