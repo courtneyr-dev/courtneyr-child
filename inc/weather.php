@@ -335,6 +335,8 @@ function thermometer_card( string $html, array $block = array(), $instance = nul
 		return $updated;
 	}
 
+	$updated = split_reading( $updated, $facts );
+
 	$close = strripos( $updated, '</article>' );
 	if ( false === $close ) {
 		return $updated;
@@ -343,3 +345,57 @@ function thermometer_card( string $html, array $block = array(), $instance = nul
 	return substr_replace( $updated, '<span class="cr-thermo__glass" aria-hidden="true"></span>', $close, 0 );
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\thermometer_card', 10, 3 );
+
+/**
+ * Set an untitled observation card's summary and temperature on separate lines.
+ *
+ * The heading keeps its one link and one p-weather; only the reading inside
+ * it gains two visual spans. The comma between them stays an inline text
+ * node, clipped from view, so the p-weather text and the link's accessible
+ * name read exactly as before.
+ * Authored readings, titled cards and any reading that doesn't end in the
+ * stored temperature come back unchanged.
+ *
+ * @param string               $html  Stream card markup.
+ * @param array<string, mixed> $facts kind_facts() for the card's post.
+ * @return string
+ */
+function split_reading( string $html, array $facts ): string {
+	if ( 'observation' !== ( $facts['reading_source'] ?? '' ) || empty( $facts['name_is_reading'] ) ) {
+		return $html;
+	}
+
+	$reading     = (string) ( $facts['reading'] ?? '' );
+	$temperature = '';
+	foreach ( (array) ( $facts['log'] ?? array() ) as $row ) {
+		if ( is_array( $row ) && 'temperature' === ( $row['key'] ?? '' ) ) {
+			$temperature = (string) ( $row['value'] ?? '' );
+			break;
+		}
+	}
+	if ( '' === $temperature || '' === $reading ) {
+		return $html;
+	}
+
+	if ( $reading === $temperature ) {
+		$summary = '';
+	} elseif ( str_ends_with( $reading, ', ' . $temperature ) ) {
+		$summary = substr( $reading, 0, -strlen( ', ' . $temperature ) );
+	} else {
+		return $html;
+	}
+
+	if ( 1 !== preg_match( '#<h2 class="pk-title"><a\b[^>]*><span class="p-weather">([^<]*)</span>#', $html, $match, PREG_OFFSET_CAPTURE ) ) {
+		return $html;
+	}
+	if ( html_entity_decode( $match[1][0], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) !== $reading ) {
+		return $html;
+	}
+
+	$inner  = '' === $summary
+		? ''
+		: '<span class="cr-thermo__summary">' . esc_html( $summary ) . '</span><span class="cr-thermo__comma">, </span>';
+	$inner .= '<span class="cr-thermo__temp">' . esc_html( $temperature ) . '</span>';
+
+	return substr_replace( $html, $inner, $match[1][1], strlen( $match[1][0] ) );
+}

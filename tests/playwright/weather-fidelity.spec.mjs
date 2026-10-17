@@ -905,6 +905,36 @@ test.describe( 'stream', () => {
 		for ( const key of [ 'S2', 'S5' ] ) await expect( streamCard( page, key ).locator( '.cr-thermo__glass' ), `${ key } has no glass` ).toHaveCount( 0 );
 	} );
 
+	test( 'an untitled observation card leads with a larger temperature line while its link and p-weather read unchanged', async ( { page } ) => {
+		await openSeeded( page, STREAM );
+		const s1 = streamCard( page, 'S1' );
+		requireFixture( await s1.count() === 0, 'S1 is not on this Stream page' );
+		await expect( s1.locator( '.p-weather' ), 'one p-weather' ).toHaveCount( 1 );
+		expect( ( await s1.locator( '.p-weather' ).textContent() ).trim(), 'p-weather text is the whole reading' ).toBe( 'Partly Cloudy, 80 °F' );
+		await expect( s1.locator( '.pk-title a' ), 'link name keeps the comma' ).toHaveAccessibleName( /^Partly Cloudy, 80 °F ?, October/ );
+		const lines = await s1.locator( '.pk-title' ).evaluate( ( node ) => {
+			const summary = node.querySelector( '.cr-thermo__summary' );
+			const temperature = node.querySelector( '.cr-thermo__temp' );
+			return {
+				summarySize: parseFloat( getComputedStyle( summary ).fontSize ),
+				temperatureSize: parseFloat( getComputedStyle( temperature ).fontSize ),
+				ownLine: ( () => {
+					const range = document.createRange();
+					range.selectNodeContents( temperature );
+					const text = range.getClientRects()[ 0 ];
+					return ( text.top + text.bottom ) / 2 > summary.getBoundingClientRect().bottom;
+				} )(),
+				temperatureText: temperature.textContent,
+			};
+		} );
+		expect( lines.temperatureText, 'temperature span' ).toBe( '80 °F' );
+		expect( lines.ownLine, 'temperature sits on its own line' ).toBe( true );
+		expect( lines.temperatureSize, 'temperature is the largest type step' ).toBeGreaterThan( lines.summarySize * 1.5 );
+		for ( const key of [ 'S2', 'S3' ] ) {
+			await expect( streamCard( page, key ).locator( '.cr-thermo__summary, .cr-thermo__temp' ), `${ key } reading stays unsplit` ).toHaveCount( 0 );
+		}
+	} );
+
 	test( 'the plugin\'s protected A13 card gets no thermometer, no glass, and exactly one rendered link', async ( { page } ) => {
 		const card = await openStreamCard( page, 'A13' );
 		await expect( card, 'A13 is the plugin protected card' ).toHaveClass( /\bpk-card--protected\b/ );

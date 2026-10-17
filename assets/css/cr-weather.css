@@ -518,6 +518,23 @@
 	box-shadow: none;
 }
 
+/* An untitled observation leads with the temperature: the summary keeps the heading step, the temperature takes its own larger line.
+   The spans and the comma stay inline (a blockified or absolutely placed span pads the accessible name with spaces), the comma is clipped from view,
+   and the break is generated whitespace at the comma's size, so line one keeps the summary's height and the link still reads "Partly Cloudy, 80 °F". */
+.cr-thermo .cr-thermo__comma {
+	clip-path: inset(50%);
+}
+
+.cr-thermo .cr-thermo__temp {
+	font-size: var(--cr-text-4xl);
+	line-height: var(--cr-leading-tight);
+}
+
+.cr-thermo .cr-thermo__comma::after {
+	content: "\A";
+	white-space: pre;
+}
+
 .cr-thermo p.pk-weather,
 .cr-thermo .pk-stream-date {
 	min-width: 0;
