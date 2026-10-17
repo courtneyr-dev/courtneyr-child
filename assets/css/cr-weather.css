@@ -576,32 +576,58 @@
 		margin-block-end: var(--cr-space-xs);
 	}
 
+	/* Art in the left margin, the log in the middle, the thermometer in a narrow right column. DOM order stays log, art, thermometer. */
 	.cr-weather-station {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 12rem;
-		grid-template-rows: auto auto;
+		grid-template-columns: 10rem minmax(0, 1fr) 3.5rem;
 		gap: var(--cr-space-lg);
 		align-items: start;
 	}
 
 	.cr-weather-station .cr-weather-log {
-		grid-column: 1;
-		grid-row: 1 / span 2;
+		grid-column: 2 / 3;
+		grid-row: 1;
+	}
+
+	.cr-weather-station:not(:has(.cr-weather-art)) .cr-weather-log {
+		grid-column-start: 1;
+	}
+
+	.cr-weather-station:not(:has(.cr-weather-thermo)) .cr-weather-log {
+		grid-column-end: 4;
 	}
 
 	.cr-weather-station .cr-weather-art {
-		--cr-weather-mark-size: 10rem;
-		grid-column: 2;
-		margin: 0 auto;
+		--cr-weather-mark-size: 9rem;
+		grid-column: 1;
+		grid-row: 1;
+		align-self: center;
+		justify-self: center;
+		margin: 0;
 	}
 
 	.cr-weather-station .cr-weather-thermo {
-		grid-column: 2;
-		margin: 0 auto;
+		grid-column: 3;
+		grid-row: 1;
+		justify-self: center;
+		margin: 0;
 	}
 }
 
 @media (min-width: 64rem) {
+
+	.cr-weather-station {
+		grid-template-columns: 17rem minmax(0, 1fr) 5rem;
+	}
+
+	.cr-weather-station .cr-weather-art {
+		--cr-weather-mark-size: 16rem;
+	}
+
+	.cr-weather-station .cr-weather-thermo {
+		width: 4.5rem;
+		height: 12rem;
+	}
 
 	.cr-weather-almanac {
 		--cr-weather-gutter: 8rem;

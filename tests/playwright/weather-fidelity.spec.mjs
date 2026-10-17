@@ -760,12 +760,30 @@ test.describe( 'single', () => {
 		await expect( page.locator( '.cr-weather-art, .cr-weather-thermo' ), 'A18 has no logged-out instruments' ).toHaveCount( 0 );
 	} );
 
-	test( 'station log is a two-column board at 1440 and stacks definition pairs without overflow at 375 and 320', async ( { page } ) => {
+	test( 'station puts art left, log center and thermometer right at 1440 and 800, and stacks definition pairs without overflow at 375 and 320', async ( { page } ) => {
+		for ( const width of [ 1440, 800 ] ) {
+			await page.setViewportSize( { width, height: 900 } );
+			await openSeeded( page, single( 'S1' ) );
+			const station = page.locator( '.cr-weather-station' );
+			expect( await station.evaluate( ( node ) => getComputedStyle( node ).gridTemplateColumns.split( ' ' ).length ), `${ width } station has three columns` ).toBe( 3 );
+			const order = await station.evaluate( ( node ) => [ ...node.children ].map( ( child ) => child.className ) );
+			expect( order, `${ width } DOM order stays log, art, thermometer` ).toEqual( [ 'cr-weather-log', 'cr-weather-art', 'cr-weather-thermo' ] );
+			const box = await station.evaluate( ( node ) => {
+				const rect = ( selector ) => node.querySelector( selector ).getBoundingClientRect();
+				return { log: rect( '.cr-weather-log' ).toJSON(), art: rect( '.cr-weather-art' ).toJSON(), thermo: rect( '.cr-weather-thermo' ).toJSON() };
+			} );
+			expect( box.art.right, `${ width } art sits left of the log` ).toBeLessThanOrEqual( box.log.left );
+			expect( box.thermo.left, `${ width } thermometer sits right of the log` ).toBeGreaterThanOrEqual( box.log.right );
+			expect( box.art.width, `${ width } art is wider than the thermometer column` ).toBeGreaterThan( box.thermo.width * 2 );
+		}
 		await page.setViewportSize( { width: 1440, height: 900 } );
-		await openSeeded( page, single( 'A15' ) );
-		const station = page.locator( '.cr-weather-station' );
-		expect( await station.evaluate( ( node ) => getComputedStyle( node ).gridTemplateColumns.split( ' ' ).length ), 'station has two columns' ).toBe( 2 );
-		expect( await station.locator( 'dl.cr-weather-log' ).evaluate( ( node ) => getComputedStyle( node ).gridColumnStart ), 'log is in column one' ).toBe( '1' );
+		await openSeeded( page, single( 'S4' ) );
+		const spans = await page.locator( '.cr-weather-station' ).evaluate( ( node ) => {
+			const station = node.getBoundingClientRect();
+			const log = node.querySelector( '.cr-weather-log' ).getBoundingClientRect();
+			return Math.abs( station.left - log.left ) <= 1 && Math.abs( station.right - log.right ) <= 1;
+		} );
+		expect( spans, 'a log with no art or thermometer spans the station' ).toBe( true );
 		for ( const width of [ 375, 320 ] ) {
 			await page.setViewportSize( { width, height: 900 } );
 			await openSeeded( page, single( 'A15' ) );
