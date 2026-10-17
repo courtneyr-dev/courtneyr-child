@@ -632,7 +632,7 @@ test.describe( 'archive', () => {
 		expect( await page.locator( 'nav[aria-label="Pagination"] [aria-current="page"]' ).evaluate( ( node ) => Number.parseFloat( getComputedStyle( node ).borderTopWidth ) > 0 ), 'current page stays bordered' ).toBe( true );
 	} );
 
-	test( 'still life is text-free, uses side gutters from 1024, a six-rem bottom strip at 1000, and disappears at 639', async ( { page } ) => {
+	test( 'still life is text-free, uses side gutters cropped at the page edge from 1024, a six-rem bottom strip at 1000, and disappears at 639', async ( { page } ) => {
 		for ( const width of [ 1672, 1440, 1024, 1000, 639 ] ) {
 			await page.setViewportSize( { width, height: 1000 } );
 			await openSeeded( page, archivePage( 2 ) );
@@ -658,11 +658,11 @@ test.describe( 'archive', () => {
 					const intersects = ( a, b ) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
 					return {
 						clear: ! intersects( left, sheet ) && ! intersects( right, sheet ) && ! intersects( left, pager ) && ! intersects( right, pager ),
-						inViewport: left.left >= 0 && right.right <= document.documentElement.clientWidth,
+						clipped: 'clip' === getComputedStyle( wrapper.closest( 'main' ) ).overflowX,
 						noScroll: document.documentElement.scrollWidth <= document.documentElement.clientWidth,
 					};
 				} );
-				expect( clear, `side pieces at ${ width } stay off the sheet and pager, inside the viewport, with no horizontal scroll` ).toEqual( { clear: true, inViewport: true, noScroll: true } );
+				expect( clear, `side pieces at ${ width } stay off the sheet and pager, crop at the clipped page edge, with no horizontal scroll` ).toEqual( { clear: true, clipped: true, noScroll: true } );
 			} else if ( width === 1000 ) {
 				expect( state.before.display, '1000 has no top or side piece' ).toBe( 'none' );
 				expect( state.after.display, '1000 shows the bottom strip' ).toBe( 'block' );
