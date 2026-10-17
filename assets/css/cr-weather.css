@@ -36,6 +36,8 @@
 }
 
 .cr-weather-almanac .pkiw-almanac__days {
+	width: 100%;
+	max-width: none;
 	gap: var(--cr-weather-grid-gap);
 }
 
@@ -238,6 +240,9 @@
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(2.75rem, 1fr));
 	gap: var(--cr-space-2xs);
+	box-sizing: border-box;
+	width: 100%;
+	max-width: none;
 	min-width: 0;
 	margin: 0;
 	padding: var(--cr-space-xs);

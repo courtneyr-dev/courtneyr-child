@@ -423,6 +423,25 @@ test.describe( 'archive', () => {
 				return Number.parseInt( getComputedStyle( node ).gridColumnStart, 10 ) || Math.round( ( cell.left - grid.left ) / ( grid.width / 7 ) ) + 1;
 			} );
 			expect( measured, 'August 1 column' ).toBe( expectedColumn );
+			const geometry = await page.locator( 'section.pkiw-almanac' ).evaluate( ( sheet, column ) => {
+				const box = ( node ) => node.getBoundingClientRect();
+				const list = box( sheet.querySelector( 'ol.pkiw-almanac__days' ) );
+				const row = box( sheet.querySelector( '.pkiw-almanac__weekdays' ) );
+				const strip = box( sheet.querySelector( '.pkiw-year-strip__months' ) );
+				const track = box( sheet.querySelectorAll( '.pkiw-almanac__weekday' )[ column - 1 ] );
+				const firstDay = box( sheet.querySelector( 'ol.pkiw-almanac__days > li.pkiw-almanac__day' ) );
+				const center = ( firstDay.left + firstDay.right ) / 2;
+				return {
+					listLeft: list.left, listRight: list.right, rowLeft: row.left, rowRight: row.right,
+					stripLeft: strip.left, stripRight: strip.right,
+					inTrack: center >= track.left && center <= track.right,
+				};
+			}, expectedColumn );
+			expect( Math.abs( geometry.listLeft - geometry.rowLeft ), 'day list and weekday row share a left edge' ).toBeLessThanOrEqual( 1 );
+			expect( Math.abs( geometry.listRight - geometry.rowRight ), 'day list and weekday row share a right edge' ).toBeLessThanOrEqual( 1 );
+			expect( geometry.inTrack, 'August 1 centers inside its weekday track' ).toBe( true );
+			expect( Math.abs( geometry.stripLeft - geometry.listLeft ), 'year strip starts with the day grid' ).toBeLessThanOrEqual( 1 );
+			expect( Math.abs( geometry.stripRight - geometry.listRight ), 'year strip ends with the day grid' ).toBeLessThanOrEqual( 1 );
 			const offsets = await days.locator( '> li.pkiw-almanac__day' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => node.style.getPropertyValue( '--cr-almanac-offset' ) ) );
 			expect( offsets.filter( Boolean ), 'one inline offset' ).toEqual( [ String( expectedColumn ) ] );
 			const firstTwo = await days.locator( '> li.pkiw-almanac__day' ).evaluateAll( ( nodes ) => nodes.slice( 0, 2 ).map( ( node ) => node.getBoundingClientRect().top ) );
