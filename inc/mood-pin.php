@@ -527,7 +527,7 @@ function ink_defs(): string {
  * emoji with no catalog entry prints as a text glyph, exposed only when
  * there is no word to name the mood.
  *
- * @param array<string, mixed> $spec From resolve().
+ * @param array<string, mixed> $spec From resolve(), optionally with family_label and intensity_text.
  * @param string               $size 'single' (12rem) or 'stream' (7.5rem).
  * @return string
  */
@@ -540,6 +540,14 @@ function render( array $spec, string $size ): string {
 	$size  = 'single' === $size ? 'single' : 'stream';
 	$p     = $spec['palette'];
 	$r     = $spec['rim'];
+
+	$has_facts      = isset( $spec['family_label'] );
+	$family_text    = $has_facts ? (string) $spec['family_label'] : (string) $spec['family'];
+	$intensity_text = $has_facts ? (string) ( $spec['intensity_text'] ?? '' ) : '';
+
+	// On /stream the pin stands in for the plugin's role=img emoji, so it
+	// keeps that role with the mood label as its name.
+	$as_image = 'stream' === $size && '' !== $name;
 
 	// A custom mood longer than the face can hold prints its word under the
 	// pin, as real text, instead of inside the artwork.
@@ -567,8 +575,8 @@ function render( array $spec, string $size ): string {
 
 	$html  = ink_defs();
 	$html .= '<span class="cr-pin-set cr-pin-set--' . $size . '">';
-	$html .= '<span class="' . esc_attr( implode( ' ', $classes ) ) . '" style="' . esc_attr( $style ) . '">';
-	if ( '' !== $name && ! $spec['word_below'] ) {
+	$html .= '<span class="' . esc_attr( implode( ' ', $classes ) ) . '" style="' . esc_attr( $style ) . '"' . ( $as_image ? ' role="img" aria-label="' . esc_attr( $name ) . '"' : '' ) . '>';
+	if ( '' !== $name && ! $spec['word_below'] && ! $as_image ) {
 		$html .= '<span class="cr-sr-only cr-pin__name">' . esc_html( $name ) . '</span>';
 	}
 	$html .= '<span class="cr-pin__rim" aria-hidden="true"></span>';
@@ -580,10 +588,13 @@ function render( array $spec, string $size ): string {
 	$html .= '<span class="cr-pin__wear" aria-hidden="true"></span>';
 	$html .= '</span>';
 	if ( $spec['word_below'] ) {
-		$html .= '<span class="cr-pin__name cr-pin__word-below">' . esc_html( $name ) . '</span>';
+		$html .= '<span class="cr-pin__name cr-pin__word-below"' . ( $as_image ? ' aria-hidden="true"' : '' ) . '>' . esc_html( $name ) . '</span>';
 	}
-	if ( 'single' === $size && '' !== $spec['family'] ) {
-		$html .= '<span class="cr-pin__family"><span class="cr-sr-only">' . esc_html__( 'Mood family:', 'courtneyr-child' ) . ' </span>' . esc_html( $spec['family'] ) . '</span>';
+	if ( 'single' === $size && '' !== $family_text ) {
+		$html .= '<span class="cr-pin__family"><span class="cr-sr-only">' . esc_html__( 'Mood family:', 'courtneyr-child' ) . ' </span>' . esc_html( $family_text ) . '</span>';
+	}
+	if ( 'single' === $size && '' !== $intensity_text ) {
+		$html .= '<span class="cr-pin__intensity">' . esc_html( $intensity_text ) . '</span>';
 	}
 	$html .= '</span>';
 	return $html;
@@ -651,6 +662,22 @@ function find_mood_block( \WP_Post $post ): ?array {
 }
 
 /**
+ * The mood reader's public facts for a post.
+ *
+ * @param int $post_id Post ID.
+ * @return array<string, mixed>|null Mood facts, or null when the mood reader did not answer.
+ */
+function mood_facts( int $post_id ): ?array {
+	if ( $post_id <= 0 || ! function_exists( '\\PKIW\\kind_facts' ) ) {
+		return null;
+	}
+
+	$facts = \PKIW\kind_facts( $post_id );
+
+	return array_key_exists( 'family_label', $facts ) ? $facts : null;
+}
+
+/**
  * The mood-card block itself: the single, and a card-only micro-post on
  * /stream. A note that only repeats the mood word is flagged so the
  * stream, where the word is on the pin, can hide it; the single keeps it as
@@ -667,7 +694,14 @@ function mood_card( string $html, array $block ): string {
 	$attrs = (array) ( $block['attrs'] ?? array() );
 	$mood  = (string) ( $attrs['mood'] ?? '' );
 	$spec  = resolve( $mood, (string) ( $attrs['emoji'] ?? '' ), (string) ( $attrs['moodKey'] ?? '' ) );
-	$html  = replace_emoji_span( $html, render( $spec, is_singular( 'post' ) ? 'single' : 'stream' ) );
+	if ( is_singular( 'post' ) ) {
+		$facts = mood_facts( (int) get_the_ID() );
+		if ( null !== $facts ) {
+			$spec['family_label']   = (string) $facts['family_label'];
+			$spec['intensity_text'] = (string) ( $facts['intensity_text'] ?? '' );
+		}
+	}
+	$html = replace_emoji_span( $html, render( $spec, is_singular( 'post' ) ? 'single' : 'stream' ) );
 
 	// A card-only micro-post on /stream with no moodAt has no date of its
 	// own; the post's date joins it, in the plugin's own meta markup.
@@ -682,6 +716,30 @@ function mood_card( string $html, array $block ): string {
 			if ( false !== $at ) {
 				$html = substr( $html, 0, $at ) . $date . substr( $html, $at );
 			}
+		}
+	}
+
+	// The Stream card's one link: the whole card goes to the single. A
+	// card-only mood has no title for link_title_to_post() to link, so the
+	// card carries its own; cr-mood-pin.css stretches it over the card and
+	// keeps links inside the note above it.
+	if ( ! is_singular( 'post' ) && \Courtneyr\Child\HomeSections\is_stream_surface() ) {
+		$post = get_post();
+		$url  = $post instanceof \WP_Post ? (string) get_permalink( $post ) : '';
+		if ( '' !== $url && false === strpos( $html, 'href="' . esc_url( $url ) . '"' ) ) {
+			$label = sprintf(
+				/* translators: 1: mood label, 2: post date. */
+				__( 'Mood: %1$s, %2$s', 'courtneyr-child' ),
+				(string) ( $spec['name'] ?? $spec['label'] ),
+				(string) get_the_date( '', $post )
+			);
+			$link = '<a class="cr-pin-card__link" href="' . esc_url( $url ) . '"><span class="cr-sr-only">' . esc_html( $label ) . '</span></a>';
+			$html = (string) preg_replace_callback(
+				'/<article\b[^>]*>/',
+				static fn( array $m ): string => $m[0] . $link,
+				$html,
+				1
+			);
 		}
 	}
 
@@ -733,6 +791,112 @@ function stream_card( string $html, array $block, $instance ): string {
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\stream_card', 10, 3 );
 
 /**
+ * Text as a reader sees it: no tags, entities decoded, whitespace folded, lower case.
+ *
+ * @param string $text Text or HTML.
+ * @return string
+ */
+function comparable_text( string $text ): string {
+	$text = trim( (string) preg_replace( '/\s+/u', ' ', html_entity_decode( wp_strip_all_tags( $text ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+	return function_exists( 'mb_strtolower' ) ? mb_strtolower( $text, 'UTF-8' ) : strtolower( $text );
+}
+
+/**
+ * The queried mood single's stored mood-card note, compared as text; '' off a mood single.
+ *
+ * @return string
+ */
+function single_note(): string {
+	static $kept = array();
+	if ( ! is_singular( 'post' ) || post_password_required() ) {
+		return '';
+	}
+	$post_id = (int) get_queried_object_id();
+	if ( ! isset( $kept[ $post_id ] ) ) {
+		$post             = get_post( $post_id );
+		$attrs            = ( $post instanceof \WP_Post && has_term( 'mood', 'kind', $post ) ) ? (array) ( ( find_mood_block( $post ) ?? array() )['attrs'] ?? array() ) : array();
+		$kept[ $post_id ] = comparable_text( (string) ( $attrs['note'] ?? '' ) );
+	}
+	return $kept[ $post_id ];
+}
+
+/**
+ * Whether the main post-content block of a mood single is rendering.
+ *
+ * @param bool|null $set Optional new state.
+ * @return bool
+ */
+function in_single_content( ?bool $set = null ): bool {
+	static $inside = false;
+	if ( null !== $set ) {
+		$inside = $set;
+	}
+	return $inside;
+}
+
+/**
+ * Open the content flag when the queried mood single's post-content starts.
+ *
+ * @param mixed                $pre          Existing pre-render value.
+ * @param array<string, mixed> $parsed_block Parsed block.
+ * @return mixed
+ */
+function open_single_content( $pre, array $parsed_block ) {
+	if ( 'core/post-content' === ( $parsed_block['blockName'] ?? '' ) && (int) get_the_ID() === (int) get_queried_object_id() && '' !== single_note() ) {
+		in_single_content( true );
+	}
+	return $pre;
+}
+add_filter( 'pre_render_block', __NAMESPACE__ . '\\open_single_content', 10, 2 );
+
+/**
+ * Close the content flag after post-content renders.
+ *
+ * @param string $html Rendered post content.
+ * @return string
+ */
+function close_single_content( string $html ): string {
+	in_single_content( false );
+	return $html;
+}
+add_filter( 'render_block_core/post-content', __NAMESPACE__ . '\\close_single_content' );
+
+/**
+ * Drop a paragraph that repeats the mood card's note on the single.
+ *
+ * A Micropub mood stores the card's note and the same text again as a
+ * paragraph, so the single printed it twice. The card keeps its
+ * .pk-mood__note.p-content; only an exact repeat goes, and the stored post
+ * content is not touched.
+ *
+ * @param string $html Rendered paragraph.
+ * @return string
+ */
+function drop_duplicate_note( string $html ): string {
+	if ( ! in_single_content() ) {
+		return $html;
+	}
+	$text = comparable_text( $html );
+	return '' !== $text && single_note() === $text ? '' : $html;
+}
+add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\drop_duplicate_note' );
+
+/**
+ * Drop the e-content group that the repeat left empty, so the entry's
+ * content stays the card's p-content instead of gaining an empty value.
+ *
+ * @param string $html Rendered group.
+ * @return string
+ */
+function drop_emptied_content( string $html ): string {
+	if ( ! in_single_content() || ! preg_match( '#^\s*<div\b[^>]*\bclass="[^"]*(?<![\w-])e-content(?![\w-])[^"]*"[^>]*>\s*</div>\s*$#', $html ) ) {
+		return $html;
+	}
+	return '';
+}
+add_filter( 'render_block_core/group', __NAMESPACE__ . '\\drop_emptied_content' );
+
+/**
  * The pin's stylesheet, loaded only where a mood card or a stream card
  * renders (same on-demand discipline as cr-post-kinds.css).
  */
@@ -766,7 +930,7 @@ function enqueue_editor(): void {
 	wp_enqueue_script(
 		'courtneyr-mood-pin-editor',
 		COURTNEYR_CHILD_URI . '/assets/js/cr-mood-pin-editor.js',
-		array( 'wp-hooks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-api-fetch', 'wp-i18n' ),
+		array( 'wp-hooks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-api-fetch', 'wp-i18n', 'wp-data' ),
 		COURTNEYR_CHILD_VERSION,
 		true
 	);
@@ -783,7 +947,7 @@ function enqueue_editor(): void {
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\enqueue_editor' );
 
 /**
- * GET /courtneyr/v1/mood-pin?mood=&emoji=&moodKey= → { html } for the editor preview.
+ * GET /courtneyr/v1/mood-pin?mood=&emoji=&moodKey=&intensity= → { html } for the editor preview.
  */
 function register_rest_route(): void {
 	\register_rest_route(
@@ -795,24 +959,39 @@ function register_rest_route(): void {
 				return current_user_can( 'edit_posts' );
 			},
 			'args'                => array(
-				'mood'    => array(
+				'mood'      => array(
 					'type'              => 'string',
 					'default'           => '',
 					'sanitize_callback' => 'sanitize_text_field',
 				),
-				'emoji'   => array(
+				'emoji'     => array(
 					'type'              => 'string',
 					'default'           => '',
 					'sanitize_callback' => 'sanitize_text_field',
 				),
-				'moodKey' => array(
+				'moodKey'   => array(
 					'type'              => 'string',
 					'default'           => '',
 					'sanitize_callback' => 'sanitize_key',
 				),
+				'intensity' => array(
+					'type'              => 'integer',
+					'default'           => 0,
+					'sanitize_callback' => 'absint',
+				),
 			),
 			'callback'            => static function ( \WP_REST_Request $request ): array {
 				$spec = resolve( (string) $request['mood'], (string) $request['emoji'], (string) $request['moodKey'] );
+				if (
+					class_exists( '\\PKIW\\Mood_Vocabulary' )
+					&& method_exists( '\\PKIW\\Mood_Vocabulary', 'family_of' )
+					&& method_exists( '\\PKIW\\Mood_Vocabulary', 'family' )
+					&& method_exists( '\\PKIW\\Mood_Vocabulary', 'intensity_text' )
+				) {
+					$n                      = (int) $request['intensity'];
+					$spec['family_label']   = (string) \PKIW\Mood_Vocabulary::family( \PKIW\Mood_Vocabulary::family_of( (string) $request['mood'], (string) $request['moodKey'] ) )['label'];
+					$spec['intensity_text'] = \PKIW\Mood_Vocabulary::intensity_text( $n >= 1 && $n <= 5 ? $n : null );
+				}
 				return array(
 					'html'   => render( $spec, 'single' ),
 					'custom' => (bool) $spec['custom'],
