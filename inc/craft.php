@@ -167,11 +167,10 @@ function peg_card( string $html, array $block, $instance ): string {
 			$image = wp_get_attachment_image( $attachment_id, 'medium', false, $image_attributes );
 			if ( '' !== $image ) {
 				$picture = '<figure class="cr-peg-card__cover">' . $image . '</figure>';
+				++$position;
 			}
 		}
 	}
-
-	++$position;
 
 	return '<div class="cr-peg-card" data-cr-cover-fallback="true">'
 		. $picture

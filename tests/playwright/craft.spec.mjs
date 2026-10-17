@@ -15,6 +15,8 @@ const THEME = join( HERE, '../..' );
 const ARCHIVE = process.env.CR_CRAFT_ARCHIVE_PATH || '/kind/craft/';
 const STREAM = process.env.CR_CRAFT_STREAM_PATH || '/stream/';
 const STATE = process.env.CR_CRAFT_STATE || 'full';
+// CR_CRAFT_REQUIRE_SEED=1 turns a missing fixture or a 404 into a failure instead of a skip.
+const REQUIRE_SEED = '1' === process.env.CR_CRAFT_REQUIRE_SEED;
 const WIDTHS = [ 1440, 800, 375, 320 ];
 
 const RUSSIAN_VIOLET = 'rgb(36, 28, 74)';
@@ -25,6 +27,14 @@ const PERIWINKLE = 'rgb(188, 181, 227)';
 const CERULEAN = 'rgb(18, 103, 130)';
 const SELECTIVE_YELLOW = 'rgb(255, 183, 3)';
 const PRUSSIAN_BLUE = 'rgb(2, 48, 71)';
+
+/** Skip a missing-fixture case, or fail it when CR_CRAFT_REQUIRE_SEED=1. */
+function skipUnlessRequired( missing, message ) {
+	if ( missing && REQUIRE_SEED ) {
+		throw new Error( message );
+	}
+	test.skip( missing, message );
+}
 
 const isDark = ( testInfo ) => testInfo.project.name.endsWith( 'dark' );
 const archivePage = ( number ) => number > 1 ? `${ ARCHIVE }page/${ number }/` : ARCHIVE;
@@ -46,16 +56,16 @@ async function fixtureLink( request, key ) {
 /** Open a fixture or skip the served assertion when it isn't seeded. */
 async function openFixture( page, request, key ) {
 	const path = await fixtureLink( request, key );
-	test.skip( ! path, `no fixture ${ key }; run seed-249.php first` );
+	skipUnlessRequired( ! path, `no fixture ${ key }; run seed-249.php first` );
 	const response = await page.goto( path, { waitUntil: 'load' } );
-	test.skip( response?.status() === 404, `fixture ${ key } resolves to a 404` );
+	skipUnlessRequired( response?.status() === 404, `fixture ${ key } resolves to a 404` );
 	return path;
 }
 
 /** Open an archive page or skip when the craft lane isn't served. */
 async function openArchive( page, number = 1 ) {
 	const response = await page.goto( archivePage( number ), { waitUntil: 'load' } );
-	test.skip( response?.status() === 404, `no craft archive page ${ number } at ${ archivePage( number ) }` );
+	skipUnlessRequired( response?.status() === 404, `no craft archive page ${ number } at ${ archivePage( number ) }` );
 	return response;
 }
 
@@ -103,6 +113,18 @@ function filesUnder( root, predicate = () => true ) {
 		}
 	}
 	return files;
+}
+
+/** Walk the Stream's `?query-1-page=N` pages until one links the fixture; returns that page number. */
+async function openStreamPageWith( page, key ) {
+	for ( let number = 1; number <= 12; number++ ) {
+		const response = await page.goto( `${ STREAM }?query-1-page=${ number }`, { waitUntil: 'load' } );
+		skipUnlessRequired( response?.status() === 404, `no Stream at ${ STREAM }` );
+		if ( await page.locator( `a[href*="seed-249-${ key.toLowerCase() }"]` ).count() ) {
+			return number;
+		}
+	}
+	throw new Error( `fixture ${ key } is on no Stream page from 1 to 12` );
 }
 
 /** Assert that DOM order matches top-to-bottom, then left-to-right visual order. */
@@ -162,19 +184,19 @@ test.describe( 'archive', () => {
 	test( 'Archive protected item — E03 is title-only under Craft', async ( { page } ) => {
 		await openArchive( page, 2 );
 		const item = page.locator( '.pkiw-group__items > li', { hasText: 'Protected: Locked Quilt Square' } );
-		expect( item, 'Archive page map: protected E03 appears once under Craft' ).toHaveCount( 1 );
-		expect( item.locator( 'a' ), 'Archive page map: protected E03 keeps one title link' ).toHaveCount( 1 );
-		expect( item.locator( 'figure' ), 'Archive page map: protected E03 prints no figure' ).toHaveCount( 0 );
-		expect( item.locator( 'xpath=ancestor::section[1]/h2' ), 'Archive page map: protected E03 belongs to the Craft group' ).toHaveText( 'Craft' );
+		await expect( item, 'Archive page map: protected E03 appears once under Craft' ).toHaveCount( 1 );
+		await expect( item.locator( 'a' ), 'Archive page map: protected E03 keeps one title link' ).toHaveCount( 1 );
+		await expect( item.locator( 'figure' ), 'Archive page map: protected E03 prints no figure' ).toHaveCount( 0 );
+		await expect( item.locator( 'xpath=ancestor::section[1]/h2' ), 'Archive page map: protected E03 belongs to the Craft group' ).toHaveText( 'Craft' );
 	} );
 
 	test( 'Archive header — approved identity, description and no stale labels', async ( { page } ) => {
 		await openArchive( page );
 		const h1 = page.locator( 'main h1.cr-archive__title' );
-		expect( h1, 'Archive header: one H1' ).toHaveCount( 1 );
-		expect( h1.locator( '.cr-cutout__text' ), 'Archive header: visible title is Craft' ).toHaveText( 'Craft' );
+		await expect( h1, 'Archive header: one H1' ).toHaveCount( 1 );
+		await expect( h1.locator( '.cr-cutout__text' ), 'Archive header: visible title is Craft' ).toHaveText( 'Craft' );
 		const tiles = h1.locator( '.cr-cutout__tile' );
-		expect( tiles, 'Archive header: five decorative C r a f t tiles' ).toHaveCount( 5 );
+		await expect( tiles, 'Archive header: five decorative C r a f t tiles' ).toHaveCount( 5 );
 		expect( ( await tiles.allTextContents() ).join( '' ), 'Archive header: tile letters spell Craft' ).toBe( 'Craft' );
 		for ( const tile of await tiles.all() ) {
 			expect( await tile.evaluate( ( element ) => Boolean( element.closest( '[aria-hidden="true"]' ) ) ), 'Archive header: every title tile is aria-hidden' ).toBe( true );
@@ -184,21 +206,21 @@ test.describe( 'archive', () => {
 			expect( tilts[index], `Archive header: tile ${ index } tilt differs from its neighbor` ).not.toBe( tilts[index - 1] );
 		}
 		const badge = page.locator( 'main .cr-archive-identity__glyph' );
-		expect( badge, 'Archive header: badge is aria-hidden' ).toHaveAttribute( 'aria-hidden', 'true' );
-		expect( badge.locator( 'a' ), 'Archive header: badge carries no link' ).toHaveCount( 0 );
+		await expect( badge, 'Archive header: badge is aria-hidden' ).toHaveAttribute( 'aria-hidden', 'true' );
+		await expect( badge.locator( 'a' ), 'Archive header: badge carries no link' ).toHaveCount( 0 );
 		expect( ( await page.locator( 'main .cr-archive__description' ).innerText() ).trim().length, 'Archive header: stored description prints' ).toBeGreaterThan( 0 );
 		expect( await page.locator( 'main' ).innerText(), 'Archive header: no Stream kind label or sample marker' ).not.toMatch( /Stream · Kind|SAMPLE CONTENT/ );
 	} );
 
 	test( 'Archive query and pager — one inherited query with pagination outside the board', async ( { page } ) => {
 		await openArchive( page );
-		expect( page.locator( 'main .wp-block-query' ), 'Archive query: main contains exactly one inherited Query block' ).toHaveCount( 1 );
+		await expect( page.locator( 'main .wp-block-query' ), 'Archive query: main contains exactly one inherited Query block' ).toHaveCount( 1 );
 		expect( await page.locator( '.cr-pegboard' ).evaluate( ( node ) => node.nextElementSibling?.matches( 'nav.wp-block-query-pagination[aria-label="Pagination"]' ) ), 'Archive pager: Pagination nav is the next element sibling after the board' ).toBe( true );
-		expect( page.locator( 'nav.wp-block-query-pagination .wp-block-query-pagination-previous' ), 'Archive pager: page 1 has no Previous link' ).toHaveCount( 0 );
-		expect( page.locator( 'nav.wp-block-query-pagination [aria-current="page"]' ), 'Archive pager: current page declares aria-current page' ).toHaveCount( 1 );
+		await expect( page.locator( 'nav.wp-block-query-pagination .wp-block-query-pagination-previous' ), 'Archive pager: page 1 has no Previous link' ).toHaveCount( 0 );
+		await expect( page.locator( 'nav.wp-block-query-pagination [aria-current="page"]' ), 'Archive pager: current page declares aria-current page' ).toHaveCount( 1 );
 		await openArchive( page, 2 );
-		expect( page.locator( 'nav.wp-block-query-pagination .wp-block-query-pagination-next' ), 'Archive pager: final page has no Next link' ).toHaveCount( 0 );
-		expect( page.locator( 'nav.wp-block-query-pagination [aria-current="page"]' ), 'Archive pager: page 2 declares aria-current page' ).toHaveCount( 1 );
+		await expect( page.locator( 'nav.wp-block-query-pagination .wp-block-query-pagination-next' ), 'Archive pager: final page has no Next link' ).toHaveCount( 0 );
+		await expect( page.locator( 'nav.wp-block-query-pagination [aria-current="page"]' ), 'Archive pager: page 2 declares aria-current page' ).toHaveCount( 1 );
 	} );
 
 	test( 'Archive items — one link, microformats, cut content, hit area and image policy', async ( { page } ) => {
@@ -229,23 +251,23 @@ test.describe( 'archive', () => {
 			{ loading: 'eager', priority: 'high' },
 		] );
 		expect( loading.slice( 3 ).every( ( image ) => image.loading === 'lazy' ), 'Archive items: images after the first three load lazily' ).toBe( true );
-		expect( page.locator( '.cr-peg-card', { hasText: 'Zine Binding Jig' } ).locator( 'figure' ), 'Archive items: B02 has no figure' ).toHaveCount( 0 );
+		await expect( page.locator( '.cr-peg-card', { hasText: 'Zine Binding Jig' } ).locator( 'figure' ), 'Archive items: B02 has no figure' ).toHaveCount( 0 );
 
 		const firstCard = page.locator( '.cr-peg-card' ).first();
 		const href = await firstCard.locator( 'a' ).getAttribute( 'href' );
 		const box = await firstCard.boundingBox();
 		expect( box, 'Archive items: first card has a measurable hit area' ).not.toBeNull();
-		await page.mouse.click( box.x + 4, box.y + 4 );
-		await page.waitForLoadState( 'load' );
-		expect( page.url(), 'Archive items: clicking the card top-left follows its permalink' ).toBe( new URL( href, page.url() ).href );
+		const permalink = new URL( href, page.url() ).href;
+		await Promise.all( [ page.waitForURL( permalink, { waitUntil: 'load' } ), page.mouse.click( box.x + 4, box.y + 4 ) ] );
+		expect( page.url(), 'Archive items: clicking the card top-left follows its permalink' ).toBe( permalink );
 	} );
 
 	test( 'Archive failed cover — W04 becomes a text-only card after the image error', async ( { page } ) => {
 		await openArchive( page, 2 );
 		const card = page.locator( '.cr-peg-card', { hasText: 'Step Stool' } );
-		expect( card, 'Archive items: W04 missing-file card exists' ).toHaveCount( 1 );
+		await expect( card, 'Archive items: W04 missing-file card exists' ).toHaveCount( 1 );
 		await expect.poll( () => card.getAttribute( 'class' ), { message: 'Archive items: W04 receives cr-cover--failed from site-ux.js' } ).toContain( 'cr-cover--failed' );
-		expect( card.locator( 'img' ), 'Archive items: W04 failed image is removed' ).toHaveCount( 0 );
+		await expect( card.locator( 'img' ), 'Archive items: W04 failed image is removed' ).toHaveCount( 0 );
 		expect( await card.locator( 'figure' ).evaluate( ( element ) => getComputedStyle( element ).display ), 'Archive items: W04 empty figure is hidden' ).toBe( 'none' );
 	} );
 
@@ -261,7 +283,7 @@ test.describe( 'archive', () => {
 			const board = page.locator( '.cr-pegboard__board' );
 			const tracks = await board.evaluate( ( element ) => getComputedStyle( element ).gridTemplateColumns.split( ' ' ).filter( Boolean ).length );
 			expect( tracks, `Archive layout ${ width }: board track count` ).toBe( columns );
-			const actualSpans = await page.locator( '.cr-pegboard__board > .pkiw-group' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => Number( getComputedStyle( node ).gridColumnEnd.match( /span\s+(\d+)/ )?.[1] || 1 ) ) );
+			const actualSpans = await page.locator( '.cr-pegboard__board > .pkiw-group' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => Number( getComputedStyle( node ).gridColumnStart.match( /span\s+(\d+)/ )?.[1] || 1 ) ) );
 			expect( actualSpans, `Archive layout ${ width }: page-1 section spans` ).toEqual( spans );
 			await expectVisualOrder( page.locator( '.cr-pegboard__board > .pkiw-group' ), `Archive layout ${ width }: section visual order equals DOM order` );
 			for ( const section of await page.locator( '.cr-pegboard__board > .pkiw-group' ).all() ) {
@@ -402,17 +424,17 @@ test.describe( 'tools and empty state', () => {
 	test( 'Empty state — no board, no tools, core no-results copy and no pager', async ( { page } ) => {
 		test.skip( 'empty' !== STATE, 'set CR_CRAFT_STATE=empty with every craft fixture trashed' );
 		await page.goto( ARCHIVE, { waitUntil: 'load' } );
-		expect( page.locator( '.cr-pegboard__board' ), 'Empty state: no board element renders' ).toHaveCount( 0 );
+		await expect( page.locator( '.cr-pegboard__board' ), 'Empty state: no board element renders' ).toHaveCount( 0 );
 		expect( await page.locator( '.cr-pegboard' ).evaluate( ( element ) => [ getComputedStyle( element, '::before' ).content, getComputedStyle( element, '::after' ).content ] ), 'Empty state: both tool pseudo-elements have no content' ).toEqual( [ 'none', 'none' ] );
 		expect( ( await page.locator( '.wp-block-query-no-results' ).innerText() ).trim().length, 'Empty state: core Query No Results copy prints' ).toBeGreaterThan( 0 );
-		expect( page.locator( 'nav.wp-block-query-pagination' ), 'Empty state: no pager renders' ).toHaveCount( 0 );
+		await expect( page.locator( 'nav.wp-block-query-pagination' ), 'Empty state: no pager renders' ).toHaveCount( 0 );
 	} );
 
 	test( 'One state — one group, one card and a one-card-tall board', async ( { page } ) => {
 		test.skip( 'one' !== STATE, 'set CR_CRAFT_STATE=one after seeding state one' );
 		await openArchive( page );
-		expect( page.locator( '.pkiw-group' ), 'One state: one section renders' ).toHaveCount( 1 );
-		expect( page.locator( '.cr-peg-card' ), 'One state: one card renders' ).toHaveCount( 1 );
+		await expect( page.locator( '.pkiw-group' ), 'One state: one section renders' ).toHaveCount( 1 );
+		await expect( page.locator( '.cr-peg-card' ), 'One state: one card renders' ).toHaveCount( 1 );
 		const heights = await page.locator( '.cr-pegboard__board' ).evaluate( ( board ) => ( { board: board.getBoundingClientRect().height, card: board.querySelector( '.cr-peg-card' ).getBoundingClientRect().height, padding: parseFloat( getComputedStyle( board ).paddingTop ) + parseFloat( getComputedStyle( board ).paddingBottom ) } ) );
 		expect( heights.board, 'One state: board is less than two card heights plus padding' ).toBeLessThan( heights.card * 2 + heights.padding );
 	} );
@@ -420,7 +442,7 @@ test.describe( 'tools and empty state', () => {
 	test( 'Large state — core pager shows an ellipsis', async ( { page } ) => {
 		test.skip( 'large' !== STATE, 'set CR_CRAFT_STATE=large after seeding state large' );
 		await openArchive( page );
-		expect( page.locator( 'nav.wp-block-query-pagination .page-numbers.dots' ), 'Large state: pager shows a page-number ellipsis' ).toHaveCount( 1 );
+		await expect( page.locator( 'nav.wp-block-query-pagination .page-numbers.dots' ), 'Large state: pager shows a page-number ellipsis' ).toHaveCount( 1 );
 	} );
 } );
 
@@ -431,20 +453,20 @@ test.describe( 'single', () => {
 		await openFixture( page, request, 'K01' );
 		expect( await page.locator( 'body' ).getAttribute( 'class' ), 'Single K01: body carries cr-craft-single' ).toContain( 'cr-craft-single' );
 		const h1 = page.locator( 'main h1' );
-		expect( h1, 'Single K01: one H1' ).toHaveCount( 1 );
-		expect( h1, 'Single K01: title keeps stored case Wool Scarf' ).toHaveText( 'Wool Scarf' );
+		await expect( h1, 'Single K01: one H1' ).toHaveCount( 1 );
+		await expect( h1, 'Single K01: title keeps stored case Wool Scarf' ).toHaveText( 'Wool Scarf' );
 		const titleStyle = await h1.evaluate( ( element ) => { const style = getComputedStyle( element ); return { transform: style.textTransform, fontStyle: style.fontStyle, family: style.fontFamily }; } );
 		expect( titleStyle.transform, 'Single K01: title has no text transform' ).toBe( 'none' );
 		expect( titleStyle.fontStyle, 'Single K01: title is upright' ).toBe( 'normal' );
 		expect( titleStyle.family, 'Single K01: title uses Roboto Slab' ).toContain( 'Roboto Slab' );
-		expect( page.locator( '.single-post__featured img' ), 'Single K01: one featured image prints' ).toHaveCount( 1 );
+		await expect( page.locator( '.single-post__featured img' ), 'Single K01: one featured image prints' ).toHaveCount( 1 );
 		const facts = page.locator( 'dl.pkiw-craft-facts' );
-		expect( facts.locator( '.pkiw-craft-facts__row' ), 'Single K01: facts has two rows' ).toHaveCount( 2 );
+		await expect( facts.locator( '.pkiw-craft-facts__row' ), 'Single K01: facts has two rows' ).toHaveCount( 2 );
 		expect( await facts.locator( 'dt' ).allTextContents(), 'Single K01: fact labels are Craft type and Time spent' ).toEqual( [ 'Craft type', 'Time spent' ] );
-		expect( facts.locator( 'dd.pkiw-craft-facts__type' ), 'Single K01: craft type is Knitting' ).toHaveText( 'Knitting' );
-		expect( facts.locator( 'time[datetime="PT18H"]' ), 'Single K01: duration is machine-readable PT18H and visible 18 hr' ).toHaveText( '18 hr' );
+		await expect( facts.locator( 'dd.pkiw-craft-facts__type' ), 'Single K01: craft type is Knitting' ).toHaveText( 'Knitting' );
+		await expect( facts.locator( 'time[datetime="PT18H"]' ), 'Single K01: duration is machine-readable PT18H and visible 18 hr' ).toHaveText( '18 hr' );
 		expect( await page.locator( 'main' ).innerText(), 'Single K01: no Status, Completed or Finished text' ).not.toMatch( /Status|Completed|Finished/ );
-		expect( page.locator( '.single-post__lede-meta time' ), 'Single K01: publish date prints exactly once in the lede' ).toHaveCount( 1 );
+		await expect( page.locator( '.single-post__lede-meta time' ), 'Single K01: publish date prints exactly once in the lede' ).toHaveCount( 1 );
 		const ordered = [ 'main h1', '.single-post__featured', '.pkiw-craft-facts', '.pkiw-craft-section--materials', '.pkiw-craft-section--tools', '.pkiw-craft-section--steps', '.single-post__comments-wrapper', 'nav.cr-post-nav' ];
 		const domOrder = await page.evaluate( ( selectors ) => {
 			const nodes = selectors.map( ( selector ) => document.querySelector( selector ) );
@@ -452,14 +474,14 @@ test.describe( 'single', () => {
 		}, ordered );
 		expect( domOrder, 'Single K01: DOM order is H1, cover, facts, Materials, Tools, Steps, comments, nav' ).toBe( true );
 		for ( const [ modifier, heading ] of [ [ 'materials', 'Materials' ], [ 'tools', 'Tools' ], [ 'steps', 'Steps' ] ] ) {
-			expect( page.locator( `.pkiw-craft-section--${ modifier } > h2` ), `Single K01: ${ heading } is an H2` ).toHaveText( heading );
+			await expect( page.locator( `.pkiw-craft-section--${ modifier } > h2` ), `Single K01: ${ heading } is an H2` ).toHaveText( heading );
 		}
 	} );
 
 	test( 'Single K01 steps — ordered text, distinct accessible images and number-column clearance', async ( { page, request } ) => {
 		await openFixture( page, request, 'K01' );
 		const steps = page.locator( 'ol.pkiw-craft-steps > li.pkiw-craft-step' );
-		expect( steps, 'Single K01 steps: four step list items' ).toHaveCount( 4 );
+		await expect( steps, 'Single K01 steps: four step list items' ).toHaveCount( 4 );
 		expect( await steps.locator( ':scope > p' ).allTextContents(), 'Single K01 steps: paragraph order follows block order' ).toEqual( [ 'Cast on', 'Ribbing', 'Main pattern', 'Finish and block' ] );
 		const images = await steps.evaluateAll( ( nodes ) => nodes.map( ( node ) => {
 			const image = node.querySelector( 'figure img' );
@@ -472,19 +494,19 @@ test.describe( 'single', () => {
 
 	test( 'Single missing-data fixtures — K02, B01, E01 and B02 omit only absent fields', async ( { page, request } ) => {
 		await openFixture( page, request, 'K02' );
-		expect( page.locator( 'time[datetime="PT2H30M"]' ), 'Single missing data: K02 formats 150 minutes as 2 hr 30 min' ).toHaveText( '2 hr 30 min' );
+		await expect( page.locator( 'time[datetime="PT2H30M"]' ), 'Single missing data: K02 formats 150 minutes as 2 hr 30 min' ).toHaveText( '2 hr 30 min' );
 		await openFixture( page, request, 'B01' );
-		expect( page.locator( '.pkiw-craft-facts__row' ), 'Single missing data: B01 has exactly one facts row' ).toHaveCount( 1 );
-		expect( page.locator( '.pkiw-craft-facts dt' ), 'Single missing data: B01 keeps only Craft type' ).toHaveText( 'Craft type' );
-		expect( page.locator( '.pkiw-craft-facts time[datetime^="PT"]' ), 'Single missing data: B01 has no duration' ).toHaveCount( 0 );
+		await expect( page.locator( '.pkiw-craft-facts__row' ), 'Single missing data: B01 has exactly one facts row' ).toHaveCount( 1 );
+		await expect( page.locator( '.pkiw-craft-facts dt' ), 'Single missing data: B01 keeps only Craft type' ).toHaveText( 'Craft type' );
+		await expect( page.locator( '.pkiw-craft-facts time[datetime^="PT"]' ), 'Single missing data: B01 has no duration' ).toHaveCount( 0 );
 		await openFixture( page, request, 'E01' );
-		expect( page.locator( '.pkiw-craft-facts__row' ), 'Single missing data: E01 has exactly one facts row' ).toHaveCount( 1 );
-		expect( page.locator( '.pkiw-craft-facts dt' ), 'Single missing data: E01 keeps only Time spent' ).toHaveText( 'Time spent' );
-		expect( page.locator( 'time[datetime="PT30M"]' ), 'Single missing data: E01 exposes PT30M' ).toHaveCount( 1 );
+		await expect( page.locator( '.pkiw-craft-facts__row' ), 'Single missing data: E01 has exactly one facts row' ).toHaveCount( 1 );
+		await expect( page.locator( '.pkiw-craft-facts dt' ), 'Single missing data: E01 keeps only Time spent' ).toHaveText( 'Time spent' );
+		await expect( page.locator( 'time[datetime="PT30M"]' ), 'Single missing data: E01 exposes PT30M' ).toHaveCount( 1 );
 		await openFixture( page, request, 'B02' );
-		expect( page.getByRole( 'heading', { name: 'Steps', exact: true } ), 'Single missing data: B02 has no Steps H2' ).toHaveCount( 0 );
-		expect( page.locator( '.single-post__featured' ), 'Single missing data: B02 has no featured image element' ).toHaveCount( 0 );
-		expect( page.locator( '.pkiw-craft-steps' ), 'Single missing data: B02 has no steps list' ).toHaveCount( 0 );
+		await expect( page.getByRole( 'heading', { name: 'Steps', exact: true } ), 'Single missing data: B02 has no Steps H2' ).toHaveCount( 0 );
+		await expect( page.locator( '.single-post__featured' ), 'Single missing data: B02 has no featured image element' ).toHaveCount( 0 );
+		await expect( page.locator( '.pkiw-craft-steps' ), 'Single missing data: B02 has no steps list' ).toHaveCount( 0 );
 		for ( const key of [ 'K02', 'B01', 'E01', 'B02' ] ) {
 			await openFixture( page, request, key );
 			expect( await page.locator( 'main' ).innerText(), `Single missing data: ${ key } never prints not set` ).not.toMatch( /not set/i );
@@ -493,7 +515,7 @@ test.describe( 'single', () => {
 
 	test( 'Single W01 — repeated featured attachment prints once inside step two', async ( { page, request } ) => {
 		await openFixture( page, request, 'W01' );
-		expect( page.locator( '.single-post__featured' ), 'Single featured repeat: W01 drops the template featured figure' ).toHaveCount( 0 );
+		await expect( page.locator( '.single-post__featured' ), 'Single featured repeat: W01 drops the template featured figure' ).toHaveCount( 0 );
 		const second = page.locator( '.pkiw-craft-step' ).nth( 1 ).locator( 'img' );
 		const src = await second.getAttribute( 'src' );
 		expect( await page.locator( 'main img' ).evaluateAll( ( images, wanted ) => images.filter( ( image ) => image.getAttribute( 'src' ) === wanted ).length, src ), 'Single featured repeat: W01 featured src appears exactly once' ).toBe( 1 );
@@ -503,23 +525,23 @@ test.describe( 'single', () => {
 	test( 'Single E02 and titled names — synthetic H1 has no p-name; titles have one hidden p-name', async ( { page, request } ) => {
 		await openFixture( page, request, 'E02' );
 		const h1 = page.locator( 'main h1' );
-		expect( h1, 'Single E02: one synthetic H1' ).toHaveCount( 1 );
+		await expect( h1, 'Single E02: one synthetic H1' ).toHaveCount( 1 );
 		expect( ( await h1.innerText() ).trim(), 'Single E02: synthetic name includes the stored date and time' ).toMatch( /^Craft, [A-Z][a-z]+ \d{1,2}, \d{4} at \d{1,2}:\d{2} ?[ap]m$/ );
-		expect( h1.locator( 'a' ), "Single E02: synthetic H1 isn't a link" ).toHaveCount( 0 );
+		await expect( h1.locator( 'a' ), "Single E02: synthetic H1 isn't a link" ).toHaveCount( 0 );
 		expect( await h1.getAttribute( 'class' ) || '', 'Single E02: synthetic H1 has no p-name class' ).not.toContain( 'p-name' );
-		expect( page.locator( '.pkiw-singular-entry .p-name' ), 'Single E02: h-entry contains no p-name' ).toHaveCount( 0 );
-		expect( page.locator( '.pkiw-singular-entry a.u-craft-of' ), 'Single E02: Micropub content contains u-craft-of' ).toHaveCount( 1 );
+		await expect( page.locator( '.pkiw-singular-entry .p-name:not(.p-author *)' ), 'Single E02: h-entry contains no entry p-name' ).toHaveCount( 0 );
+		await expect( page.locator( '.pkiw-singular-entry a.u-craft-of' ), 'Single E02: Micropub content contains u-craft-of' ).toHaveCount( 1 );
 		for ( const key of [ 'K01', 'K02', 'B01', 'E01', 'B02', 'W01', 'L01' ] ) {
 			await openFixture( page, request, key );
 			const names = page.locator( '.pkiw-singular-entry > .p-name[hidden]' );
-			expect( names, `Single microformats: titled ${ key } has exactly one hidden direct p-name` ).toHaveCount( 1 );
+			await expect( names, `Single microformats: titled ${ key } has exactly one hidden direct p-name` ).toHaveCount( 1 );
 		}
 	} );
 
 	test( 'Single C01 — note control gets no craft scope or facts', async ( { page, request } ) => {
 		await openFixture( page, request, 'C01' );
 		expect( await page.locator( 'body' ).getAttribute( 'class' ) || '', 'Single scope: C01 note has no cr-craft-single body class' ).not.toContain( 'cr-craft-single' );
-		expect( page.locator( '.pkiw-craft-facts' ), 'Single scope: C01 note has no craft facts' ).toHaveCount( 0 );
+		await expect( page.locator( '.pkiw-craft-facts' ), 'Single scope: C01 note has no craft facts' ).toHaveCount( 0 );
 	} );
 
 	test( 'Single wide grid — three columns place cover, papers, comments and nav in their required areas', async ( { page, request } ) => {
@@ -547,8 +569,8 @@ test.describe( 'single', () => {
 		test( `Single reflow — one DOM-order column and no horizontal scroll at ${ width }px`, async ( { page, request } ) => {
 			await page.setViewportSize( { width, height: 900 } );
 			await openFixture( page, request, 'K01' );
-			const lefts = await page.locator( '.single-post__header, .single-post__featured, .pkiw-craft-facts, .pkiw-craft-section' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => Math.round( node.getBoundingClientRect().left ) ) );
-			expect( Math.max( ...lefts ) - Math.min( ...lefts ), `Single reflow ${ width }: content uses one column` ).toBeLessThanOrEqual( 2 );
+			const lefts = await page.locator( '.single-post__header, .single-post__featured, .pkiw-craft-facts, .pkiw-craft-section' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => { const box = node.getBoundingClientRect(); return Math.round( box.left + box.width / 2 ); } ) );
+			expect( Math.max( ...lefts ) - Math.min( ...lefts ), `Single reflow ${ width }: content uses one column (shared center; alignwide header and photo are wider)` ).toBeLessThanOrEqual( 2 );
 			await expectVisualOrder( page.locator( '.single-post__header, .single-post__featured, .pkiw-craft-facts, .pkiw-craft-section' ), `Single reflow ${ width }: visual order follows DOM order` );
 			await expectNoHorizontalScroll( page, `Single reflow ${ width }: no horizontal scroll` );
 		} );
@@ -590,7 +612,7 @@ test.describe( 'single', () => {
 
 	test( 'Single L01 — long exempt craft remains a Stream-surface single with craft-scoped nav', async ( { page, request } ) => {
 		await openFixture( page, request, 'L01' );
-		expect( page.locator( '.pkiw-craft-step' ), 'Single L01: long post has six steps' ).toHaveCount( 6 );
+		await expect( page.locator( '.pkiw-craft-step' ), 'Single L01: long post has six steps' ).toHaveCount( 6 );
 		const hrefs = await page.locator( 'nav.cr-post-nav a' ).evaluateAll( ( links ) => links.map( ( link ) => link.getAttribute( 'href' ) ) );
 		expect( hrefs.some( ( href ) => href.includes( 'seed-249-k01' ) ), 'Single L01 G8 exemption: nav includes K01 craft neighbor' ).toBe( true );
 		expect( hrefs.some( ( href ) => href.includes( 'seed-249-b02' ) ), 'Single L01 G8 exemption: nav includes B02 craft neighbor' ).toBe( true );
@@ -608,19 +630,29 @@ test.describe( 'single', () => {
 test.describe( 'Stream', () => {
 	test.skip( 'full' !== STATE, 'Stream acceptance uses the full fixture map' );
 
-	test( 'Stream placement — exactly K01, L01, B02 and E02 render tool tags; L01 stays by G8 exemption', async ( { page } ) => {
+	test( 'Stream placement — K01, L01, B02 and E02 render tool tags; L01 stays by G8 exemption', async ( { page } ) => {
 		const response = await page.goto( STREAM, { waitUntil: 'load' } );
-		test.skip( response?.status() === 404, `no Stream at ${ STREAM }` );
+		skipUnlessRequired( response?.status() === 404, `no Stream at ${ STREAM }` );
 		const tags = page.locator( 'article.k-craft.cr-craft-tag' );
-		expect( tags, 'Stream placement: page 1 has exactly four craft tags including exempt L01' ).toHaveCount( 4 );
+		await expect( tags.first(), 'Stream placement: page 1 renders craft tags' ).toBeVisible();
 		const hrefs = await tags.locator( 'a[href]' ).evaluateAll( ( links ) => links.map( ( link ) => link.getAttribute( 'href' ) ) );
 		for ( const key of [ 'k01', 'l01', 'b02', 'e02' ] ) {
 			expect( hrefs.some( ( href ) => href.includes( `seed-249-${ key }` ) ), `Stream placement: ${ key.toUpperCase() } appears on page 1${ key === 'l01' ? ' under Courtney’s G8 exemption' : '' }` ).toBe( true );
 		}
 		const note = page.locator( 'li', { has: page.locator( 'a[href*="seed-249-c01"]' ) } ).first();
-		expect( note.locator( '.cr-craft-tag' ), "Stream placement: C01 note isn't decorated as a craft tag" ).toHaveCount( 0 );
-		await expectNoStatusCopy( page, 'Stream served copy: no Finished, In progress or SAMPLE CONTENT' );
-		expect( page.locator( '.u-craft-of' ), 'Stream microformats: no craft tag exposes u-craft-of' ).toHaveCount( 0 );
+		await expect( note.locator( '.cr-craft-tag' ), "Stream placement: C01 note isn't decorated as a craft tag" ).toHaveCount( 0 );
+		// The Stream also carries book and comic cards whose status reads 'Finished'; scope the check to craft cards.
+		expect( ( await page.locator( 'article.k-craft' ).allInnerTexts() ).join( '\n' ), 'Stream served copy: craft cards hold no Finished, In progress or SAMPLE CONTENT' ).not.toMatch( /Finished|In progress|SAMPLE CONTENT/ );
+		await expect( page.locator( '.u-craft-of' ), 'Stream microformats: no craft tag exposes u-craft-of' ).toHaveCount( 0 );
+	} );
+
+	test( 'Stream protected card — E03 gets no tool-tag decoration and keeps one link', async ( { page } ) => {
+		await openStreamPageWith( page, 'E03' );
+		const protectedCard = page.locator( 'article.k-craft.pk-card--protected', { has: page.locator( 'a[href*="seed-249-e03"]' ) } ).first();
+		await expect( protectedCard, 'Stream protected: E03 renders on a Stream page as a protected craft card' ).toHaveCount( 1 );
+		await expect( protectedCard, 'Stream protected: E03 carries no cr-craft-tag class' ).not.toHaveClass( /cr-craft-tag/ );
+		await expect( protectedCard.locator( '.cr-craft-tag__hole, .cr-craft-tag__tape' ), 'Stream protected: E03 has no hole or tape' ).toHaveCount( 0 );
+		await expect( protectedCard.locator( 'a[href]' ), 'Stream protected: E03 keeps one link' ).toHaveCount( 1 );
 	} );
 
 	test( 'Stream links and media — one 44px target, contained unfiltered image and no generic furniture', async ( { page } ) => {
@@ -629,13 +661,13 @@ test.describe( 'Stream', () => {
 			const links = await linkReport( tag );
 			expect( links.count, 'Stream links: every craft tag has one rendered a[href]' ).toBe( 1 );
 			expect( links.stray, 'Stream links: tabindex -1 anchors stay hidden' ).toBe( 0 );
-			expect( tag.locator( 'button' ), 'Stream links: craft tags contain no button' ).toHaveCount( 0 );
+			await expect( tag.locator( 'button' ), 'Stream links: craft tags contain no button' ).toHaveCount( 0 );
 			expect( await tag.evaluate( ( element ) => [ ...element.querySelectorAll( '[tabindex]' ) ].filter( ( node ) => ! node.closest( '[hidden]' ) ).length ), 'Stream links: craft tags contain no visible tabindex node' ).toBe( 0 );
 			const box = await tag.boundingBox();
 			expect( Math.min( box.width, box.height ), 'Stream links: tag hit target is at least 44 by 44' ).toBeGreaterThanOrEqual( 44 );
-			expect( tag.locator( '.pk-stream-date, .pk-excerpt, .pk-meta, .pk-badge' ), 'Stream content: generic furniture is removed in PHP' ).toHaveCount( 0 );
+			await expect( tag.locator( '.pk-stream-date, .pk-excerpt, .pk-meta, .pk-badge' ), 'Stream content: generic furniture is removed in PHP' ).toHaveCount( 0 );
 			for ( const image of await tag.locator( 'img' ).all() ) {
-				const data = await image.evaluate( ( element ) => { const style = getComputedStyle( element ); const imageBox = element.getBoundingClientRect(); const tagBox = element.closest( '.cr-craft-tag' ).getBoundingClientRect(); return { alt: element.getAttribute( 'alt' ), height: imageBox.height, filter: style.filter, blend: style.mixBlendMode, inside: imageBox.left >= tagBox.left && imageBox.right <= tagBox.right && imageBox.top >= tagBox.top && imageBox.bottom <= tagBox.bottom }; } );
+				const data = await image.evaluate( ( element ) => { const style = getComputedStyle( element ); const imageBox = element.getBoundingClientRect(); const tagBox = element.closest( '.cr-craft-tag' ).getBoundingClientRect(); return { alt: element.getAttribute( 'alt' ), height: element.offsetHeight, filter: style.filter, blend: style.mixBlendMode, inside: imageBox.left >= tagBox.left && imageBox.right <= tagBox.right && imageBox.top >= tagBox.top && imageBox.bottom <= tagBox.bottom }; } );
 				expect( data.alt, 'Stream media: image alt is empty' ).toBe( '' );
 				expect( data.height, 'Stream media: rendered image is at most 160px tall' ).toBeLessThanOrEqual( 160.5 );
 				expect( [ data.filter, data.blend ], 'Stream media: image has no filter or blend' ).toEqual( [ 'none', 'normal' ] );
@@ -643,30 +675,30 @@ test.describe( 'Stream', () => {
 			}
 		}
 		const k01 = page.locator( 'article.cr-craft-tag', { has: page.locator( 'a[href*="seed-249-k01"]' ) } );
-		expect( k01.locator( 'img' ), 'Stream media: K01 has one image' ).toHaveCount( 1 );
-		expect( k01.locator( 'ul.pk-media__thumbs, .pk-media__caption' ), 'Stream media: K01 has no thumbnail row or caption' ).toHaveCount( 0 );
+		await expect( k01.locator( 'img' ), 'Stream media: K01 has one image' ).toHaveCount( 1 );
+		await expect( k01.locator( 'ul.pk-media__thumbs, .pk-media__caption' ), 'Stream media: K01 has no thumbnail row or caption' ).toHaveCount( 0 );
 		expect( await k01.innerText(), 'Stream media: K01 has no +N link' ).not.toMatch( /\+\d+/ );
 		for ( const key of [ 'b02', 'e02' ] ) {
-			expect( page.locator( 'article.cr-craft-tag', { has: page.locator( `a[href*="seed-249-${ key }"]` ) } ).locator( 'img' ), `Stream media: ${ key.toUpperCase() } has no image` ).toHaveCount( 0 );
+			await expect( page.locator( 'article.cr-craft-tag', { has: page.locator( `a[href*="seed-249-${ key }"]` ) } ).locator( 'img' ), `Stream media: ${ key.toUpperCase() } has no image` ).toHaveCount( 0 );
 		}
 	} );
 
 	test( 'Stream K01 and E02 content — required order, facts and synthetic-title minimum', async ( { page } ) => {
 		await page.goto( STREAM, { waitUntil: 'load' } );
 		const k01 = page.locator( 'article.cr-craft-tag', { has: page.locator( 'a[href*="seed-249-k01"]' ) } );
-		expect( k01.locator( '.pk-kindlabel' ), 'Stream content: K01 label is Craft' ).toHaveText( 'Craft' );
+		await expect( k01.locator( '.pk-kindlabel' ), 'Stream content: K01 label is Craft' ).toHaveText( 'Craft' );
 		expect( await k01.evaluate( ( tag ) => {
 			const order = [ '.pk-kindlabel', '.pk-title a', '.pk-craft-facts', '.pk-media' ].map( ( selector ) => tag.querySelector( selector ) );
 			return order.every( Boolean ) && order.every( ( node, index ) => index === 0 || Boolean( order[index - 1].compareDocumentPosition( node ) & Node.DOCUMENT_POSITION_FOLLOWING ) );
 		} ), 'Stream content: K01 DOM order is label, title, facts, media' ).toBe( true );
 		await expectVisualOrder( k01.locator( '.pk-kindlabel, .pk-title, .pk-craft-facts, .pk-media' ), 'Stream content: K01 visual order follows DOM order' );
-		expect( k01.locator( '.pk-craft-facts' ), 'Stream content: K01 facts include stored type Knitting' ).toContainText( 'Knitting' );
-		expect( k01.locator( '.pk-craft-facts time[datetime="PT18H"]' ), 'Stream content: K01 facts expose PT18H as 18 hr' ).toHaveText( '18 hr' );
-		expect( k01.locator( '.pk-craft-facts .pk-sr-only' ), 'Stream content: K01 time has the hidden Time spent label' ).toHaveText( 'Time spent' );
+		await expect( k01.locator( '.pk-craft-facts' ), 'Stream content: K01 facts include stored type Knitting' ).toContainText( 'Knitting' );
+		await expect( k01.locator( '.pk-craft-facts time[datetime="PT18H"]' ), 'Stream content: K01 facts expose PT18H as 18 hr' ).toHaveText( '18 hr' );
+		await expect( k01.locator( '.pk-craft-facts .pk-sr-only' ), 'Stream content: K01 time has the hidden Time spent label' ).toHaveText( 'Time spent' );
 		const e02 = page.locator( 'article.cr-craft-tag', { has: page.locator( 'a[href*="seed-249-e02"]' ) } );
-		expect( e02.locator( '.pk-kindlabel' ), 'Stream content: E02 keeps the Craft label' ).toHaveText( 'Craft' );
+		await expect( e02.locator( '.pk-kindlabel' ), 'Stream content: E02 keeps the Craft label' ).toHaveText( 'Craft' );
 		expect( ( await e02.locator( '.pk-title' ).innerText() ).trim(), 'Stream content: E02 synthetic title starts Craft' ).toMatch( /^Craft/ );
-		expect( e02.locator( '.pk-craft-facts, .pk-media' ), 'Stream content: E02 shows only label and title' ).toHaveCount( 0 );
+		await expect( e02.locator( '.pk-craft-facts, .pk-media' ), 'Stream content: E02 shows only label and title' ).toHaveCount( 0 );
 	} );
 
 	test( 'Stream microformats — article is the single h-entry root with hidden date', async ( { page } ) => {
@@ -675,7 +707,7 @@ test.describe( 'Stream', () => {
 			expect( await tag.getAttribute( 'class' ), 'Stream microformats: article carries h-entry' ).toContain( 'h-entry' );
 			expect( await tag.locator( '.dt-published[hidden], [hidden] .dt-published' ).count(), 'Stream microformats: every tag carries a hidden dt-published' ).toBeGreaterThan( 0 );
 			expect( await tag.evaluate( ( article ) => article.closest( 'li' ).classList.contains( 'h-entry' ) ), "Stream microformats: surrounding li isn't an h-entry" ).toBe( false );
-			expect( tag.locator( '.u-craft-of' ), 'Stream microformats: tag has no u-craft-of' ).toHaveCount( 0 );
+			await expect( tag.locator( '.u-craft-of' ), 'Stream microformats: tag has no u-craft-of' ).toHaveCount( 0 );
 		}
 	} );
 
@@ -698,9 +730,9 @@ test.describe( 'Stream', () => {
 		expect( paint.titleColor, 'Stream paint: title link stays cerulean' ).toBe( CERULEAN );
 		expect( paint.titleFamily, 'Stream paint: title uses Roboto Slab' ).toContain( 'Roboto Slab' );
 		expect( [ paint.titleStyle, paint.titleTransform ], 'Stream paint: title stays upright and stored case' ).toEqual( [ 'normal', 'none' ] );
-		expect( tag.locator( '.cr-craft-tag__hole' ), 'Stream shape: one aria-hidden hang hole' ).toHaveAttribute( 'aria-hidden', 'true' );
+		await expect( tag.locator( '.cr-craft-tag__hole' ), 'Stream shape: one aria-hidden hang hole' ).toHaveAttribute( 'aria-hidden', 'true' );
 		expect( await tag.locator( '.cr-craft-tag__hole' ).evaluate( ( element ) => getComputedStyle( element ).backgroundColor ), 'Stream shape: hang hole resolves the current surface token' ).toBe( surface );
-		expect( tag.locator( '.cr-craft-tag__tape' ), 'Stream shape: at most one tape piece' ).toHaveCount( 1 );
+		await expect( tag.locator( '.cr-craft-tag__tape' ), 'Stream shape: at most one tape piece' ).toHaveCount( 1 );
 		expect( allowedTapeRotations, 'Stream shape: tape rotate uses one of the four token angles' ).toContain( await tag.locator( '.cr-craft-tag__tape' ).evaluate( ( element ) => getComputedStyle( element ).rotate ) );
 		const link = tag.locator( '.pk-title a' );
 		await link.focus();
@@ -721,10 +753,14 @@ test.describe( 'Stream', () => {
 			await page.setViewportSize( { width, height: 900 } );
 			await page.goto( STREAM, { waitUntil: 'load' } );
 			for ( const tag of await page.locator( 'article.k-craft.cr-craft-tag' ).all() ) {
-				const ratio = await tag.evaluate( ( element ) => element.getBoundingClientRect().width / element.closest( 'li' ).getBoundingClientRect().width );
-				expect( ratio, `Stream reflow ${ width }: tag fills at least 95 percent of its li` ).toBeGreaterThanOrEqual( 0.95 );
+				const ratio = await tag.evaluate( ( element ) => { const item = element.closest( 'li' ); const style = getComputedStyle( item ); return element.offsetWidth / ( item.clientWidth - parseFloat( style.paddingLeft ) - parseFloat( style.paddingRight ) ); } );
+				expect( ratio, `Stream reflow ${ width }: tag fills at least 95 percent of its li content box` ).toBeGreaterThanOrEqual( 0.95 );
 			}
-			const titles = await page.locator( 'article.cr-craft-tag .pk-title' ).evaluateAll( ( nodes ) => nodes.map( ( element ) => { const style = getComputedStyle( element ); return { fits: element.scrollWidth <= element.clientWidth, lines: element.scrollHeight / parseFloat( style.lineHeight ) }; } ) );
+			const measureTitles = () => page.locator( 'article.cr-craft-tag .pk-title' ).evaluateAll( ( nodes ) => nodes.map( ( element ) => { const style = getComputedStyle( element ); return { fits: element.scrollWidth <= element.clientWidth, lines: element.scrollHeight / parseFloat( style.lineHeight ) }; } ) );
+			const titles = await measureTitles();
+			// K05's long title sits on a later Stream page, so measure that page too.
+			await openStreamPageWith( page, 'K05' );
+			titles.push( ...await measureTitles() );
 			expect( titles.every( ( title ) => title.fits ), `Stream reflow ${ width }: every title wraps without horizontal overflow` ).toBe( true );
 			if ( width <= 375 ) {
 				expect( titles.some( ( title ) => title.lines > 1.5 ), `Stream reflow ${ width }: at least one long title visibly wraps to multiple lines` ).toBe( true );

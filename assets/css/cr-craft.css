@@ -413,6 +413,10 @@ body.cr-craft-single.single main.single-post > .single-post__header::after {
 	color: var(--cr-russian-violet);
 }
 
+.cr-craft-single .pkiw-craft-section--materials a {
+	color: var(--cr-russian-violet);
+}
+
 .cr-craft-single .pkiw-craft-section > :last-child,
 .cr-craft-single .pkiw-craft-section > :last-child > :last-child {
 	margin-block-end: 0;
@@ -762,6 +766,11 @@ body.cr-craft-single.single main.single-post > .single-post__header::after {
 		background: Canvas;
 		box-shadow: none;
 		color: CanvasText;
+	}
+
+	/* components.css forces every .pk-card to a 1px CanvasText border with !important in this mode; the tag takes the same 2px weight as the other craft papers, so it needs !important too. */
+	.wp-block-post-template > li > .pk-card.cr-craft-tag {
+		border: 2px solid CanvasText !important;
 	}
 
 	.cr-pegboard::before,

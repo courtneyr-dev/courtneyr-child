@@ -41,7 +41,11 @@ function tool_tag( string $html, array $block, $instance ): string {
 	}
 	$classes = preg_split( '/\s+/', trim( $root[1] ) );
 	$classes = is_array( $classes ) ? $classes : array();
-	if ( ! in_array( 'pk-card--stream', $classes, true ) || ! in_array( 'k-craft', $classes, true ) ) {
+	if (
+		! in_array( 'pk-card--stream', $classes, true )
+		|| ! in_array( 'k-craft', $classes, true )
+		|| in_array( 'pk-card--protected', $classes, true )
+	) {
 		return $html;
 	}
 
