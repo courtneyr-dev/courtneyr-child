@@ -113,6 +113,10 @@ namespace {
 		return new WP_Post( (int) $id );
 	}
 
+	function post_password_required( $post = null ) {
+		return false;
+	}
+
 	function get_adjacent_post() {
 		return $GLOBALS['cr_adjacent'];
 	}

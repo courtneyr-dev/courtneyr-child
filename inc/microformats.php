@@ -148,7 +148,7 @@ function untitled_single_post_id( array $block ): int {
 	if ( '' !== trim( (string) get_post_field( 'post_title', $post_id, 'raw' ) ) ) {
 		return 0;
 	}
-	if ( ! has_term( UNTITLED_SINGLE_KINDS, 'kind', $post_id ) || post_password_required( $post_id ) ) {
+	if ( ! has_term( UNTITLED_SINGLE_KINDS, 'kind', $post_id ) ) {
 		return 0;
 	}
 	return $post_id;
@@ -162,6 +162,14 @@ function untitled_single_post_id( array $block ): int {
  */
 function untitled_single_label( int $post_id ): string {
 	$post = get_post( $post_id );
+	// A locked post names itself by kind and date only: nothing read from its facts or content.
+	if ( $post instanceof \WP_Post && post_password_required( $post ) ) {
+		if ( function_exists( '\Courtneyr\Child\Nav\kind_date_name' ) ) {
+			return \Courtneyr\Child\Nav\kind_date_name( $post );
+		}
+		/* translators: %s: post date */
+		return sprintf( __( 'Entry from %s', 'courtneyr-child' ), get_the_date( '', $post_id ) );
+	}
 	// Ruling X8: an untitled reply's H1 is its kind, date and time; the cited name belongs to the citation.
 	// Weather, craft, exercise and sleep use the same name; exercise and sleep drop the time.
 	if ( $post instanceof \WP_Post && function_exists( '\Courtneyr\Child\Nav\kind_date_name' ) && has_term( KIND_DATE_NAME_KINDS, 'kind', $post ) ) {
@@ -289,12 +297,44 @@ add_filter( 'render_block_data', __NAMESPACE__ . '\\prepare_untitled_single_titl
  */
 function untitled_single_title( string $title, int $post_id ): string {
 	$state = untitled_single_state();
-	if ( (int) $post_id === $state['post_id'] && '' === trim( $title ) ) {
+	if ( (int) $post_id !== $state['post_id'] ) {
+		return $title;
+	}
+	if ( '' === trim( $title ) ) {
 		untitled_single_state( $state['post_id'], true );
 		// Core prints the filtered post-title block content raw.
 		return esc_html( untitled_single_label( $post_id ) );
 	}
+	// Core has already wrapped the empty title in its "Protected: %s" or
+	// "Private: %s" format; keep that prefix and fill in the label.
+	$format = visibility_title_format( $post_id );
+	if ( '' !== $format && trim( $title ) === trim( sprintf( $format, '' ) ) ) {
+		untitled_single_state( $state['post_id'], true );
+		return esc_html( sprintf( $format, untitled_single_label( $post_id ) ) );
+	}
 	return $title;
+}
+
+/**
+ * Core's title format for a password-protected or private post, or ''.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function visibility_title_format( int $post_id ): string {
+	$post = get_post( $post_id );
+	if ( ! $post instanceof \WP_Post ) {
+		return '';
+	}
+	if ( '' !== (string) ( $post->post_password ?? '' ) ) {
+		/* translators: %s: Protected post title. */
+		return (string) apply_filters( 'protected_title_format', __( 'Protected: %s' ), $post ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound, WordPress.WP.I18n.MissingArgDomain -- Core's own filter and string, matched to get_the_title().
+	}
+	if ( 'private' === ( $post->post_status ?? '' ) ) {
+		/* translators: %s: Private post title. */
+		return (string) apply_filters( 'private_title_format', __( 'Private: %s' ), $post ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound, WordPress.WP.I18n.MissingArgDomain -- Core's own filter and string, matched to get_the_title().
+	}
+	return '';
 }
 
 /**

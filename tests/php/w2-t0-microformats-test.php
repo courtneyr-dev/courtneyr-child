@@ -58,6 +58,12 @@ namespace {
 		/** @var string Post title. */
 		public $post_title = '';
 
+		/** @var string Post password. */
+		public $post_password = '';
+
+		/** @var string Post status. */
+		public $post_status = 'publish';
+
 		/**
 		 * Construct a post.
 		 *
@@ -156,7 +162,14 @@ namespace {
 	/** Post title, filtered like Core. */
 	function get_the_title( $post = 0 ) {
 		$id    = $post instanceof WP_Post ? $post->ID : ( 0 === $post ? (int) $GLOBALS['cr_current_post'] : (int) $post );
-		$title = (string) ( $GLOBALS['cr_posts'][ $id ]->post_title ?? '' );
+		$post  = $GLOBALS['cr_posts'][ $id ] ?? null;
+		$title = (string) ( $post->post_title ?? '' );
+		// Core's get_the_title() wraps protected and private titles before the_title.
+		if ( $post && '' !== $post->post_password ) {
+			$title = sprintf( apply_filters( 'protected_title_format', 'Protected: %s', $post ), $title );
+		} elseif ( $post && 'private' === $post->post_status ) {
+			$title = sprintf( apply_filters( 'private_title_format', 'Private: %s', $post ), $title );
+		}
 		return apply_filters( 'the_title', $title, $id );
 	}
 
@@ -413,7 +426,6 @@ namespace Courtneyr\Child\W2T0MicroformatsTests {
 		'untitled review non-single'  => array( 42, 'review', '', false, 1, false, false ),
 		'level two review'            => array( 43, 'review', '', true, 2, false, false ),
 		'wrong queried object review' => array( 44, 'review', '', true, 1, false, true ),
-		'password review'             => array( 45, 'review', '', true, 1, true, false ),
 	);
 	foreach ( $negative as $label => $case ) {
 		reset_state();
@@ -427,6 +439,36 @@ namespace Courtneyr\Child\W2T0MicroformatsTests {
 		check( $before === $html || ( '' !== $before && false !== strpos( $html, $title ) ), "$label leaves content unchanged" );
 		no_title_filter_left( "$label leaves no the_title filter behind" );
 	}
+
+	// Password-protected and private untitled singles keep Core's prefix and get the label.
+	$visibility = array(
+		'locked'   => array( 47, 'secret', true, 'publish', 'Protected: Entry from October 47, 2026' ),
+		'unlocked' => array( 48, 'secret', false, 'publish', $GLOBALS['no_plugin'] ? 'Protected: Entry from October 48, 2026' : 'Protected: Stub kind label 48' ),
+		'private'  => array( 49, '', false, 'private', $GLOBALS['no_plugin'] ? 'Private: Entry from October 49, 2026' : 'Private: Stub kind label 49' ),
+	);
+	foreach ( $visibility as $label => $case ) {
+		reset_state();
+		list( $id, $password, $required, $status, $expected ) = $case;
+		post_fixture( $id, 'review', '', true, $required );
+		$GLOBALS['cr_posts'][ $id ]->post_password = $password;
+		$GLOBALS['cr_posts'][ $id ]->post_status   = $status;
+		$html = render_title_pipeline( title_block() );
+		check( 1 === substr_count( $html, '<h1' ), "$label untitled review prints one H1" );
+		check( false !== strpos( $html, '>' . $expected . '</h1>' ), "$label untitled review H1 reads '$expected'" );
+		check( false === strpos( $html, 'p-name' ), "$label untitled review H1 has no p-name" );
+		no_title_filter_left( "$label untitled review leaves no the_title filter behind" );
+	}
+	reset_state();
+	post_fixture( 50, 'review', '', true, true );
+	$GLOBALS['cr_posts'][50]->post_password = 'secret';
+	$GLOBALS['cr_untitled_override']        = 'Leaked facts name';
+	$html = render_title_pipeline( title_block() );
+	check( false === strpos( $html, 'Leaked facts name' ), 'a locked untitled single never asks PKIW for its name' );
+	reset_state();
+	post_fixture( 51, 'review', 'Real title' );
+	$GLOBALS['cr_posts'][51]->post_password = 'secret';
+	$html = render_title_pipeline( title_block() );
+	check( false !== strpos( $html, 'Protected: Real title' ) && false === strpos( $html, 'cr-untitled-title' ), 'a titled protected single keeps Core title untouched' );
 
 	reset_state();
 	post_fixture( 46, 'review', '   ' );
