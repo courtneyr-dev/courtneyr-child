@@ -688,6 +688,7 @@
 		height: 12rem;
 	}
 
+	/* The side pieces keep the 8rem gutters and bleed outward into the page margin, up to 10rem, stopping 2rem short of the viewport edge. */
 	.cr-weather-almanac {
 		--cr-weather-gutter: 8rem;
 		padding-inline: var(--cr-weather-gutter);
@@ -695,13 +696,14 @@
 
 	.cr-weather-almanac::before,
 	.cr-weather-almanac::after {
+		--cr-weather-bleed: max(0px, min(10rem, (100vw - 100%) / 2 - 2rem));
 		inset-block: 0;
 		display: block;
-		width: calc(var(--cr-weather-gutter) - var(--cr-space-md));
+		width: calc(var(--cr-weather-gutter) - var(--cr-space-md) + var(--cr-weather-bleed));
 	}
 
 	.cr-weather-almanac::before {
-		inset-inline-start: 0;
+		inset-inline-start: calc(-1 * var(--cr-weather-bleed));
 		background:
 			url(../img/weather/cloud-halftone.svg) left top / 100% auto no-repeat,
 			url(../img/weather/leaves.svg) left 42% / 90% auto no-repeat,
@@ -710,7 +712,7 @@
 	}
 
 	.cr-weather-almanac::after {
-		inset-inline-end: 0;
+		inset-inline-end: calc(-1 * var(--cr-weather-bleed));
 		background:
 			url(../img/weather/mast.svg) right top / 90% auto no-repeat,
 			url(../img/weather/leaves.svg) right 62% / 85% auto no-repeat,

@@ -631,7 +631,7 @@ test.describe( 'archive', () => {
 	} );
 
 	test( 'still life is text-free, uses side gutters from 1024, a six-rem bottom strip at 1000, and disappears at 639', async ( { page } ) => {
-		for ( const width of [ 1440, 1024, 1000, 639 ] ) {
+		for ( const width of [ 1672, 1440, 1024, 1000, 639 ] ) {
 			await page.setViewportSize( { width, height: 1000 } );
 			await openSeeded( page, archivePage( 2 ) );
 			const state = await page.locator( '.cr-weather-almanac' ).evaluate( ( node ) => {
@@ -649,12 +649,18 @@ test.describe( 'archive', () => {
 					const pager = wrapper.querySelector( 'nav[aria-label="Pagination"]' ).getBoundingClientRect();
 					const before = getComputedStyle( wrapper, '::before' );
 					const after = getComputedStyle( wrapper, '::after' );
-					const left = { left: box.left, right: box.left + parseFloat( before.width ), top: box.top, bottom: box.bottom };
-					const right = { left: box.right - parseFloat( after.width ), right: box.right, top: box.top, bottom: box.bottom };
+					const leftEdge = box.left + parseFloat( before.left );
+					const rightEdge = box.right - parseFloat( after.right );
+					const left = { left: leftEdge, right: leftEdge + parseFloat( before.width ), top: box.top, bottom: box.bottom };
+					const right = { left: rightEdge - parseFloat( after.width ), right: rightEdge, top: box.top, bottom: box.bottom };
 					const intersects = ( a, b ) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
-					return ! intersects( left, sheet ) && ! intersects( right, sheet ) && ! intersects( left, pager ) && ! intersects( right, pager );
+					return {
+						clear: ! intersects( left, sheet ) && ! intersects( right, sheet ) && ! intersects( left, pager ) && ! intersects( right, pager ),
+						inViewport: left.left >= 0 && right.right <= document.documentElement.clientWidth,
+						noScroll: document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+					};
 				} );
-				expect( clear, 'side pieces do not overlap the sheet or pager' ).toBe( true );
+				expect( clear, `side pieces at ${ width } stay off the sheet and pager, inside the viewport, with no horizontal scroll` ).toEqual( { clear: true, inViewport: true, noScroll: true } );
 			} else if ( width === 1000 ) {
 				expect( state.before.display, '1000 has no top or side piece' ).toBe( 'none' );
 				expect( state.after.display, '1000 shows the bottom strip' ).toBe( 'block' );
