@@ -201,6 +201,8 @@ namespace Courtneyr\Child\W4T0NavTests {
 	foreach ( array( 'craft', 'exercise', 'sleep' ) as $kind ) {
 		check( in_array( $kind, \Courtneyr\Child\Microformats\UNTITLED_SINGLE_KINDS, true ), "$kind joins the untitled single H1 kinds" );
 	}
+	check( in_array( 'mood', \Courtneyr\Child\Microformats\UNTITLED_SINGLE_KINDS, true ), 'mood joins the untitled single H1 kinds (decision 248, Single: one H1)' );
+	check( false === in_array( 'mood', \Courtneyr\Child\Microformats\KIND_DATE_NAME_KINDS, true ), 'mood names itself through PKIW untitled_name(), date only' );
 	check( false === in_array( 'note', \Courtneyr\Child\Microformats\UNTITLED_SINGLE_KINDS, true ), 'note stays out of the untitled single H1 kinds' );
 	foreach ( array( 1, 2, 3, 4, 6 ) as $id ) {
 		check( untitled_single_label( $id ) === ( $no_time + $with_time )[ $id ], "single H1 label for post $id matches its post-nav name" );

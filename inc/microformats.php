@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Kinds whose untitled singles need a visible, non-mf2-name H1.
  */
-const UNTITLED_SINGLE_KINDS = array( 'review', 'reply', 'like', 'bookmark', 'photo', 'acquisition', 'weather', 'craft', 'exercise', 'sleep' );
+const UNTITLED_SINGLE_KINDS = array( 'review', 'reply', 'like', 'bookmark', 'photo', 'acquisition', 'weather', 'craft', 'exercise', 'sleep', 'mood' );
 
 /**
  * Untitled kinds whose single H1 is the kind and date name from Nav\kind_date_name().
