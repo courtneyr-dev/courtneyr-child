@@ -10,7 +10,7 @@
  *
  *   core/post-title  className "cr-u-url"        -> <a class="u-url">
  *   core/post-date   className "cr-dt-published" -> <time class="dt-published">
- *   untitled review/reply/like/bookmark/photo/acquisition/weather/craft/exercise/sleep singles -> visible H1, no p-name
+ *   untitled review/reply/like/bookmark/photo/acquisition/weather/craft/exercise/sleep/mood singles -> visible H1, no p-name
  *   repost singles whose card title is the H1 -> suppress Core template title
  *   review posts                              -> h-review is the entry root
  *
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Kinds whose untitled singles need a visible, non-mf2-name H1.
  */
-const UNTITLED_SINGLE_KINDS = array( 'review', 'reply', 'like', 'bookmark', 'photo', 'acquisition', 'weather', 'craft', 'exercise', 'sleep' );
+const UNTITLED_SINGLE_KINDS = array( 'review', 'reply', 'like', 'bookmark', 'photo', 'acquisition', 'weather', 'craft', 'exercise', 'sleep', 'mood' );
 
 /**
  * Untitled kinds whose single H1 is the kind and date name from Nav\kind_date_name().
@@ -148,7 +148,7 @@ function untitled_single_post_id( array $block ): int {
 	if ( '' !== trim( (string) get_post_field( 'post_title', $post_id, 'raw' ) ) ) {
 		return 0;
 	}
-	if ( ! has_term( UNTITLED_SINGLE_KINDS, 'kind', $post_id ) || post_password_required( $post_id ) ) {
+	if ( ! has_term( UNTITLED_SINGLE_KINDS, 'kind', $post_id ) ) {
 		return 0;
 	}
 	return $post_id;
@@ -162,6 +162,14 @@ function untitled_single_post_id( array $block ): int {
  */
 function untitled_single_label( int $post_id ): string {
 	$post = get_post( $post_id );
+	// A locked post names itself by kind and date only: nothing read from its facts or content.
+	if ( $post instanceof \WP_Post && post_password_required( $post ) ) {
+		if ( function_exists( '\Courtneyr\Child\Nav\kind_date_name' ) ) {
+			return \Courtneyr\Child\Nav\kind_date_name( $post );
+		}
+		/* translators: %s: post date */
+		return sprintf( __( 'Entry from %s', 'courtneyr-child' ), get_the_date( '', $post_id ) );
+	}
 	// Ruling X8: an untitled reply's H1 is its kind, date and time; the cited name belongs to the citation.
 	// Weather, craft, exercise and sleep use the same name; exercise and sleep drop the time.
 	if ( $post instanceof \WP_Post && function_exists( '\Courtneyr\Child\Nav\kind_date_name' ) && has_term( KIND_DATE_NAME_KINDS, 'kind', $post ) ) {
@@ -274,6 +282,9 @@ function prepare_untitled_single_title( array $parsed_block ): array {
 	$post_id = untitled_single_post_id( $parsed_block );
 	if ( $post_id > 0 ) {
 		untitled_single_state( $post_id, false );
+		untitled_title_format( '' );
+		add_filter( 'protected_title_format', __NAMESPACE__ . '\\capture_untitled_title_format', PHP_INT_MAX, 2 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core's own filter.
+		add_filter( 'private_title_format', __NAMESPACE__ . '\\capture_untitled_title_format', PHP_INT_MAX, 2 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core's own filter.
 		add_filter( 'the_title', __NAMESPACE__ . '\\untitled_single_title', 10, 2 );
 	}
 	return $parsed_block;
@@ -289,12 +300,54 @@ add_filter( 'render_block_data', __NAMESPACE__ . '\\prepare_untitled_single_titl
  */
 function untitled_single_title( string $title, int $post_id ): string {
 	$state = untitled_single_state();
-	if ( (int) $post_id === $state['post_id'] && '' === trim( $title ) ) {
+	if ( (int) $post_id !== $state['post_id'] ) {
+		return $title;
+	}
+	if ( '' === trim( $title ) ) {
 		untitled_single_state( $state['post_id'], true );
 		// Core prints the filtered post-title block content raw.
 		return esc_html( untitled_single_label( $post_id ) );
 	}
+	// Core has already wrapped the empty title in its "Protected: %s" or
+	// "Private: %s" format. Reuse the exact format Core applied, as Core
+	// prints it, and escape only the label.
+	$format = untitled_title_format();
+	if ( '' !== $format && trim( $title ) === trim( sprintf( $format, '' ) ) ) {
+		untitled_single_state( $state['post_id'], true );
+		return sprintf( $format, esc_html( untitled_single_label( $post_id ) ) );
+	}
 	return $title;
+}
+
+/**
+ * The protected or private title format Core applied to the targeted post.
+ *
+ * @param string|null $format Format to store, or null to read.
+ * @return string
+ */
+function untitled_title_format( ?string $format = null ): string {
+	static $stored = '';
+	if ( null !== $format ) {
+		$stored = $format;
+	}
+	return $stored;
+}
+
+/**
+ * Record Core's protected or private title format for the targeted post.
+ *
+ * Runs last on protected_title_format and private_title_format, so the stored
+ * value is the one Core passes to sprintf() in get_the_title().
+ *
+ * @param string   $format Title format.
+ * @param \WP_Post $post   Post.
+ * @return string Unchanged format.
+ */
+function capture_untitled_title_format( $format, $post = null ) {
+	if ( $post instanceof \WP_Post && untitled_single_state()['post_id'] === (int) $post->ID ) {
+		untitled_title_format( (string) $format );
+	}
+	return $format;
 }
 
 /**
@@ -307,7 +360,10 @@ function untitled_single_title( string $title, int $post_id ): string {
 function render_untitled_single_title( string $content, array $block ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	$state = untitled_single_state();
 	remove_filter( 'the_title', __NAMESPACE__ . '\\untitled_single_title', 10 );
+	remove_filter( 'protected_title_format', __NAMESPACE__ . '\\capture_untitled_title_format', PHP_INT_MAX );
+	remove_filter( 'private_title_format', __NAMESPACE__ . '\\capture_untitled_title_format', PHP_INT_MAX );
 	untitled_single_state( 0, false );
+	untitled_title_format( '' );
 
 	if ( empty( $state['label_injected'] ) || ! str_contains( $content, 'wp-block-post-title' ) ) {
 		return $content;

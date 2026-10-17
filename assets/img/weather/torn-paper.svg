@@ -1,0 +1,6 @@
+<!-- Decorative torn paper scrap for issue 246; CSS background only. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 140" width="220" height="140">
+	<path d="M9 17 30 7l23 6 27-8 28 10 24-7 25 10 26-5 28 12-7 22 9 22-8 19 5 25-27 5-22 12-29-6-24 11-25-9-25 8-19-15-29 2 7-24-9-20 10-21Z" fill="#8ecae6" stroke="#241c4a" stroke-width="3" stroke-linejoin="round"/>
+	<path d="M28 45h153M39 68h142M23 91h136" fill="none" stroke="#ebebeb" stroke-width="5" stroke-linecap="round"/>
+	<path d="M49 112h114" fill="none" stroke="#126782" stroke-width="3" stroke-linecap="round"/>
+</svg>
