@@ -48,8 +48,9 @@ const visibleNegativeTabindex = ( scope ) => scope.evaluate( ( el ) => [ ...el.q
 async function openArchive( page, number = 1 ) {
 	test.skip( ! NOTE_MAP, 'CR_NOTE_MAP must name a valid PAGE_MAP_JSON file for served Note checks' );
 	const response = await page.goto( archivePath( number ), { waitUntil: 'load' } );
-	test.skip( ! response || 200 !== response.status(), `no Note archive page ${ number } at ${ archivePath( number ) }` );
-	test.skip( 0 === await page.locator( BOARD ).count(), 'the Note board lane or seeded archive is absent' );
+	// With a seed map named, a missing page or board is a failure, not a skip.
+	expect( response && response.status(), `Note archive page ${ number } at ${ archivePath( number ) }` ).toBe( 200 );
+	expect( await page.locator( BOARD ).count(), 'the Note board lane renders on the seeded archive' ).toBeGreaterThan( 0 );
 }
 
 async function fixturePath( request, label ) {
@@ -186,7 +187,8 @@ test.describe( 'served Note archive', () => {
 			for ( const item of await page.locator( ITEM ).all() ) {
 				expect( await renderedAnchors( item ) ).toBe( 1 );
 				expect( await visibleNegativeTabindex( item ) ).toBe( 0 );
-				await expect( item.locator( '.pkiw-note-entry.h-entry' ) ).toHaveCount( 1 );
+				await expect( item ).toHaveClass( /\bh-entry\b/ );
+				await expect( item.locator( '.pkiw-note-entry' ) ).toHaveCount( 1 );
 				await expect( item.locator( 'time.dt-published' ) ).toHaveCount( 1 );
 				await expect( item.locator( 'img, video, iframe' ) ).toHaveCount( 0 );
 				const style = await item.evaluate( ( el ) => ( { padding: getComputedStyle( el ).paddingTop, duration: getComputedStyle( el ).transitionDuration, after: getComputedStyle( el, '::after' ).content } ) );

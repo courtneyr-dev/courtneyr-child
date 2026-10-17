@@ -690,7 +690,8 @@ TSV;
 	check( $fixed_ok, 'a fixed 0deg tilt preserves every seeded paper and null preserves the default' );
 
 	if ( ! load_html_api() ) {
-		echo "SKIP board_item(): set CR_WP_CORE to a WordPress checkout\n";
+		echo "FAIL board_item() gate not proven: set CR_WP_CORE to a WordPress checkout\n";
+		exit( 2 );
 	} else {
 		$post                                  = new \WP_Post( 73, 'A field note' );
 		$GLOBALS['cr_note_posts'][ $post->ID ] = $post;

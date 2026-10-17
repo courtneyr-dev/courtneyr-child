@@ -114,10 +114,6 @@
 	line-height: 1.3;
 }
 
-.cr-note-board .cr-sticky--board .pkiw-note-entry__title:only-child {
-	margin-block-end: 0;
-}
-
 .cr-note-board .cr-sticky--board .pkiw-note-entry__title a {
 	color: inherit;
 	text-decoration: none;

@@ -10,8 +10,9 @@
  * that curls up, and the thought handwritten. The plugin's kind label and
  * a heading that only repeats the thought stay in the DOM for assistive
  * technology and hide visually. cr-post-kinds.css paints it. A Note whose
- * format is Aside is a margin scrap instead (inc/aside-scrap.php) and is
- * left alone here.
+ * format is Aside is a margin scrap on its single and on /stream
+ * (inc/aside-scrap.php); on the /kind/note/ board it gets the board sticky
+ * like every other note (board_item()).
  *
  * @package CourtneyrChild
  */
