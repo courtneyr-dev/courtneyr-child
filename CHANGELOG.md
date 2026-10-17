@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.7.113
+
+What you see change on courtneyr.dev:
+
+- Mood posts print as a year grid at /kind/mood/, one cell per day coloured by mood family, with a legend and a card for each day. The mood single gains the family name and an "Intensity N of 5" line beside the pin.
+- Weather posts print as an almanac month at /kind/weather/, with one station log per weather single and a thermometer card on the Stream.
+- Exercise posts print as a training log at /kind/exercise/, four weeks a page, with a medal row for personal bests and a race bib for each workout. The bib has a matching corner on the Stream.
+- Sleep posts print as monthly chart sheets at /kind/sleep/, 31 nights a page, with a night record and moon phase on each single. A sleep sticker for the Stream is in the theme and appears once the site repo adds sleep to the Stream kinds at release.
+- Craft posts print as a pegboard at /kind/craft/, with a three-column project single (cover and facts, materials and tools, numbered steps) and a tool tag on the Stream.
+- Notes print as week boards of sticky notes at /kind/note/.
+- The Previous and Next links on an untitled exercise or sleep post name it by kind and date, without the time. A note keeps its time.
+- An untitled sleep post on a Blog card reads "Sleep, <date>". An untitled note keeps "Entry from <date>".
+- Untitled mood posts, and protected or private untitled singles, print a real H1 (#170).
+
+Under the hood: functions.php requires the 10 new kind files (the three craft files arrive with #173, and note needs no new file). tests/routes.mjs adds the mood, weather, exercise, sleep, craft and note archives, page 2 for weather, exercise, sleep, craft and note, and a seeded single for each kind. a11y-markup.spec.mjs covers the new archives and points the generic-template checks at /kind/article/, which still serves taxonomy-kind.html.
+
 ## 0.7.112
 
 What you see change on courtneyr.dev:
