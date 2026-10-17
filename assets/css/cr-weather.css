@@ -156,7 +156,15 @@
 	--cr-weather-mark-size: 5rem;
 }
 
+/* Art files come through custom properties so the single can swap in its dark-page variants. */
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon] {
+	--cr-weather-sun: url(../img/weather/sun.svg);
+	--cr-weather-cloud: url(../img/weather/cloud.svg);
+	--cr-weather-fog: url(../img/weather/fog.svg);
+	--cr-weather-wind: url(../img/weather/wind.svg);
+	--cr-weather-rain: url(../img/weather/rain.svg);
+	--cr-weather-snow: url(../img/weather/snow.svg);
+	--cr-weather-storm: url(../img/weather/storm.svg);
 	display: none;
 	flex: 0 0 var(--cr-weather-mark-size);
 	width: var(--cr-weather-mark-size);
@@ -168,21 +176,21 @@
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="clear"],
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="hot"] {
 	display: block;
-	background: url(../img/weather/sun.svg) center / contain no-repeat;
+	background: var(--cr-weather-sun) center / contain no-repeat;
 }
 
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="cloud"],
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="overcast"] {
 	display: block;
-	background: url(../img/weather/cloud.svg) center / contain no-repeat;
+	background: var(--cr-weather-cloud) center / contain no-repeat;
 }
 
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="day-cloudy"],
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="sunny-overcast"] {
 	display: block;
 	background:
-		url(../img/weather/cloud.svg) center / contain no-repeat,
-		url(../img/weather/sun.svg) left top / 70% 70% no-repeat;
+		var(--cr-weather-cloud) center / contain no-repeat,
+		var(--cr-weather-sun) left top / 70% 70% no-repeat;
 }
 
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="fog"],
@@ -192,7 +200,7 @@
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="dust"],
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="sand"] {
 	display: block;
-	background: url(../img/weather/fog.svg) center / contain no-repeat;
+	background: var(--cr-weather-fog) center / contain no-repeat;
 }
 
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="wind"],
@@ -200,7 +208,7 @@
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="tornado"],
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="hurricane"] {
 	display: block;
-	background: url(../img/weather/wind.svg) center / contain no-repeat;
+	background: var(--cr-weather-wind) center / contain no-repeat;
 }
 
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="rain"],
@@ -208,7 +216,7 @@
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="sprinkle"],
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="drizzle"] {
 	display: block;
-	background: url(../img/weather/rain.svg) center / contain no-repeat;
+	background: var(--cr-weather-rain) center / contain no-repeat;
 }
 
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="snow"],
@@ -216,19 +224,53 @@
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="hail"],
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="flurr"] {
 	display: block;
-	background: url(../img/weather/snow.svg) center / contain no-repeat;
+	background: var(--cr-weather-snow) center / contain no-repeat;
 }
 
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="storm"],
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="thunder"],
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon*="lightning"] {
 	display: block;
-	background: url(../img/weather/storm.svg) center / contain no-repeat;
+	background: var(--cr-weather-storm) center / contain no-repeat;
 }
 
 :is(.pkiw-almanac__mark, .pk-weather-mark, .cr-weather-art)[data-pkiw-weather-icon="wi-night-clear"] {
 	display: none;
 	background: none;
+}
+
+/* The single's art sits on the page, not on paper, so dark mode draws it with printer-ivory ink. */
+:root[data-theme="dark"] .cr-weather-station .cr-weather-art {
+	--cr-weather-sun: url(../img/weather/sun-dark.svg);
+	--cr-weather-cloud: url(../img/weather/cloud-dark.svg);
+	--cr-weather-fog: url(../img/weather/fog-dark.svg);
+	--cr-weather-wind: url(../img/weather/wind-dark.svg);
+	--cr-weather-rain: url(../img/weather/rain-dark.svg);
+	--cr-weather-snow: url(../img/weather/snow-dark.svg);
+	--cr-weather-storm: url(../img/weather/storm-dark.svg);
+}
+
+:root[data-theme="dark"] .cr-weather-station .cr-weather-thermo {
+	background-image: url(../img/weather/thermometer-dark.svg);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme]) .cr-weather-station .cr-weather-art,
+	:root[data-theme="system"] .cr-weather-station .cr-weather-art {
+		--cr-weather-sun: url(../img/weather/sun-dark.svg);
+		--cr-weather-cloud: url(../img/weather/cloud-dark.svg);
+		--cr-weather-fog: url(../img/weather/fog-dark.svg);
+		--cr-weather-wind: url(../img/weather/wind-dark.svg);
+		--cr-weather-rain: url(../img/weather/rain-dark.svg);
+		--cr-weather-snow: url(../img/weather/snow-dark.svg);
+		--cr-weather-storm: url(../img/weather/storm-dark.svg);
+	}
+
+	:root:not([data-theme]) .cr-weather-station .cr-weather-thermo,
+	:root[data-theme="system"] .cr-weather-station .cr-weather-thermo {
+		background-image: url(../img/weather/thermometer-dark.svg);
+	}
 }
 
 .cr-weather-almanac .pkiw-year-strip {

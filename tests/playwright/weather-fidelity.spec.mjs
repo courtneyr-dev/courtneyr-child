@@ -40,9 +40,10 @@ const AUGUST_KEYS = [
 	'A03', 'A04', 'A14', 'A15', 'A16', 'A17', 'A18', 'M01',
 ];
 const EXPECTED_SVGS = [
-	'cloud-halftone.svg', 'cloud.svg', 'fog.svg', 'leaves.svg', 'mast.svg', 'rain.svg',
-	'snow.svg', 'storm.svg', 'sun-wheel.svg', 'sun.svg', 'thermometer.svg',
-	'torn-paper.svg', 'wind.svg',
+	'cloud-dark.svg', 'cloud-halftone.svg', 'cloud.svg', 'fog-dark.svg', 'fog.svg', 'leaves.svg',
+	'mast.svg', 'rain-dark.svg', 'rain.svg', 'snow-dark.svg', 'snow.svg', 'storm-dark.svg',
+	'storm.svg', 'sun-dark.svg', 'sun-wheel.svg', 'sun.svg', 'thermometer-dark.svg',
+	'thermometer.svg', 'torn-paper.svg', 'wind-dark.svg', 'wind.svg',
 ];
 
 const isDark = ( testInfo ) => testInfo.project.name.endsWith( 'dark' );
@@ -811,6 +812,14 @@ test.describe( 'single', () => {
 		expect( contrast( paint.label, paint.background ), 'dt contrast' ).toBeGreaterThanOrEqual( 4.5 );
 	} );
 
+	test( 'S1 condition art and thermometer switch to printer-ivory ink variants only on the dark page', async ( { page }, testInfo ) => {
+		await openSeeded( page, single( 'S1' ) );
+		const images = await page.locator( '.cr-weather-station' ).evaluate( ( node ) => [ '.cr-weather-art', '.cr-weather-thermo' ].map( ( selector ) => getComputedStyle( node.querySelector( selector ) ).backgroundImage ) );
+		for ( const image of images ) {
+			expect( /-dark\.svg/.test( image ), `${ image } follows the scheme` ).toBe( isDark( testInfo ) );
+		}
+	} );
+
 	test( 'forced colors gives the log a two-pixel border and removes thermometer and condition art', async ( { page } ) => {
 		await openSeeded( page, single( 'A15' ) );
 		await page.emulateMedia( { forcedColors: 'active' } );
@@ -988,7 +997,7 @@ test.describe( 'static files', () => {
 		expect( checkWeatherCss(), 'cr-weather.css static failures' ).toEqual( [] );
 	} );
 
-	test( 'thirteen weather SVGs parse with viewBoxes, no text or effects, and lowercase palette colors', async () => {
+	test( 'weather SVGs parse with viewBoxes, no text or effects, and lowercase palette colors', async () => {
 		expect( checkWeatherSvgs(), 'weather SVG static failures' ).toEqual( [] );
 	} );
 
