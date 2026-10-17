@@ -115,6 +115,11 @@ function filesUnder( root, predicate = () => true ) {
 	return files;
 }
 
+/** Wait for running CSS transitions so a focus halo is read at its end value. */
+async function settleTransitions( page ) {
+	await page.evaluate( () => Promise.all( document.getAnimations().map( ( animation ) => animation.finished.catch( () => null ) ) ) );
+}
+
 /** Walk the Stream's `?query-1-page=N` pages until one links the fixture; returns that page number. */
 async function openStreamPageWith( page, key ) {
 	for ( let number = 1; number <= 12; number++ ) {
@@ -356,6 +361,7 @@ test.describe( 'archive', () => {
 		await openArchive( page );
 		const link = page.locator( '.cr-peg-card__title a' ).first();
 		await link.focus();
+		await settleTransitions( page );
 		const focus = await link.evaluate( ( element ) => { const card = getComputedStyle( element.closest( '.cr-peg-card' ) ); const own = getComputedStyle( element ); return { width: card.outlineWidth, color: card.outlineColor, shadow: card.boxShadow, linkOutline: own.outlineStyle }; } );
 		expect( focus.width, 'Archive focus: card ring is 3px' ).toBe( '3px' );
 		expect( focus.color, 'Archive focus: card ring is selective yellow' ).toBe( SELECTIVE_YELLOW );
@@ -736,6 +742,7 @@ test.describe( 'Stream', () => {
 		expect( allowedTapeRotations, 'Stream shape: tape rotate uses one of the four token angles' ).toContain( await tag.locator( '.cr-craft-tag__tape' ).evaluate( ( element ) => getComputedStyle( element ).rotate ) );
 		const link = tag.locator( '.pk-title a' );
 		await link.focus();
+		await settleTransitions( page );
 		const focus = await tag.evaluate( ( element ) => { const style = getComputedStyle( element ); return { width: style.outlineWidth, color: style.outlineColor, shadow: style.boxShadow }; } );
 		expect( focus.width, 'Stream focus: whole tag ring is 3px' ).toBe( '3px' );
 		expect( focus.color, 'Stream focus: tag ring is selective yellow' ).toBe( SELECTIVE_YELLOW );
