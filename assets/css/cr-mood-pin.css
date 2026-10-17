@@ -339,6 +339,24 @@ body.single-post .pk-card.k-mood .pk-meta .dt-published {
 	display: none;
 }
 
+/* The card's one link (inc/mood-pin.php mood_card()) covers the card;
+   links inside the note sit above it. Focus takes the site ring. */
+.cr-stream-page .pk-card.k-mood .cr-pin-card__link {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+.cr-stream-page .pk-card.k-mood .pk-mood__note a {
+	position: relative;
+	z-index: 2;
+}
+
+/* The date takes the muted ink role: cerulean on paper, periwinkle at night. */
+.cr-stream-page article.pk-card.k-mood :is(.pk-sub, .pk-stream-date, .pk-meta .dt-published) {
+	color: var(--cr-ink-muted);
+}
+
 /* Editor sidebar preview (inc/mood-pin.php enqueues this sheet there). */
 .cr-mood-pin-preview {
 	display: grid;

@@ -545,6 +545,10 @@ function render( array $spec, string $size ): string {
 	$family_text    = $has_facts ? (string) $spec['family_label'] : (string) $spec['family'];
 	$intensity_text = $has_facts ? (string) ( $spec['intensity_text'] ?? '' ) : '';
 
+	// On /stream the pin stands in for the plugin's role=img emoji, so it
+	// keeps that role with the mood label as its name.
+	$as_image = 'stream' === $size && '' !== $name;
+
 	// A custom mood longer than the face can hold prints its word under the
 	// pin, as real text, instead of inside the artwork.
 	$spec['word_below'] = ! empty( $spec['custom'] ) && mb_strlen( $label ) > 14;
@@ -571,8 +575,8 @@ function render( array $spec, string $size ): string {
 
 	$html  = ink_defs();
 	$html .= '<span class="cr-pin-set cr-pin-set--' . $size . '">';
-	$html .= '<span class="' . esc_attr( implode( ' ', $classes ) ) . '" style="' . esc_attr( $style ) . '">';
-	if ( '' !== $name && ! $spec['word_below'] ) {
+	$html .= '<span class="' . esc_attr( implode( ' ', $classes ) ) . '" style="' . esc_attr( $style ) . '"' . ( $as_image ? ' role="img" aria-label="' . esc_attr( $name ) . '"' : '' ) . '>';
+	if ( '' !== $name && ! $spec['word_below'] && ! $as_image ) {
 		$html .= '<span class="cr-sr-only cr-pin__name">' . esc_html( $name ) . '</span>';
 	}
 	$html .= '<span class="cr-pin__rim" aria-hidden="true"></span>';
@@ -584,7 +588,7 @@ function render( array $spec, string $size ): string {
 	$html .= '<span class="cr-pin__wear" aria-hidden="true"></span>';
 	$html .= '</span>';
 	if ( $spec['word_below'] ) {
-		$html .= '<span class="cr-pin__name cr-pin__word-below">' . esc_html( $name ) . '</span>';
+		$html .= '<span class="cr-pin__name cr-pin__word-below"' . ( $as_image ? ' aria-hidden="true"' : '' ) . '>' . esc_html( $name ) . '</span>';
 	}
 	if ( 'single' === $size && '' !== $family_text ) {
 		$html .= '<span class="cr-pin__family"><span class="cr-sr-only">' . esc_html__( 'Mood family:', 'courtneyr-child' ) . ' </span>' . esc_html( $family_text ) . '</span>';
@@ -712,6 +716,30 @@ function mood_card( string $html, array $block ): string {
 			if ( false !== $at ) {
 				$html = substr( $html, 0, $at ) . $date . substr( $html, $at );
 			}
+		}
+	}
+
+	// The Stream card's one link: the whole card goes to the single. A
+	// card-only mood has no title for link_title_to_post() to link, so the
+	// card carries its own; cr-mood-pin.css stretches it over the card and
+	// keeps links inside the note above it.
+	if ( ! is_singular( 'post' ) && \Courtneyr\Child\HomeSections\is_stream_surface() ) {
+		$post = get_post();
+		$url  = $post instanceof \WP_Post ? (string) get_permalink( $post ) : '';
+		if ( '' !== $url && false === strpos( $html, 'href="' . esc_url( $url ) . '"' ) ) {
+			$label = sprintf(
+				/* translators: 1: mood label, 2: post date. */
+				__( 'Mood: %1$s, %2$s', 'courtneyr-child' ),
+				(string) ( $spec['name'] ?? $spec['label'] ),
+				(string) get_the_date( '', $post )
+			);
+			$link = '<a class="cr-pin-card__link" href="' . esc_url( $url ) . '"><span class="cr-sr-only">' . esc_html( $label ) . '</span></a>';
+			$html = (string) preg_replace_callback(
+				'/<article\b[^>]*>/',
+				static fn( array $m ): string => $m[0] . $link,
+				$html,
+				1
+			);
 		}
 	}
 

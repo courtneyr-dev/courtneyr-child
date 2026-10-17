@@ -736,31 +736,55 @@ test.describe( 'single mood posts', () => {
 } );
 
 test.describe( 'Stream mood cards', () => {
-	test( 'Stream :104-108 and W3-G2 — S1 and S2 retain pin cards, one rendered link and no archive or intensity markup', async ( { page } ) => {
+	test( 'Stream :104-108 and W3-G2 — S1 keeps its pin card, one link to the single above the note link, and no archive or intensity markup', async ( { page } ) => {
 		const response = await page.goto( STREAM, { waitUntil: 'load' } );
 		expect( response?.status(), `Stream at ${ STREAM }` ).toBe( 200 );
 		const s1 = page.locator( 'article.pk-card.k-mood', { has: page.locator( 'a[href="https://example.org/seed-note"]' ) } );
 		await expect( s1, 'S1 is on the first Stream page' ).toHaveCount( 1 );
 		// S2 is over the 4,000-character long-form threshold, so Post_Surface files it under main and /stream/ omits it.
-		// The plugin's generic stream card for a long-form mood is not reachable on this stack's Stream.
 		await expect( page.locator( 'a[href*="cr-seed-248-s2"]' ), 'S2 is main-surface and absent from /stream/' ).toHaveCount( 0 );
 		await expect( page.locator( '.cr-pin__intensity' ), 'no Stream card prints an intensity line' ).toHaveCount( 0 );
-		for ( const [ key, card ] of [ [ 'S1', s1 ] ] ) {
-			await expect( card.locator( '.cr-pin' ), `${ key } pin` ).toHaveCount( 1 );
-			await expect( card.locator( '.cr-pin__intensity' ) ).toHaveCount( 0 );
-			await expect( card ).not.toContainText( 'Intensity' );
-			const facts = await renderedAnchorFacts( card );
-			expect( facts, `${ key } follows W3-G2` ).toEqual( { links: 1, strayNegativeTabindex: 0 } );
-		}
+		await expect( s1.locator( '.cr-pin' ) ).toHaveCount( 1 );
+		await expect( s1 ).not.toContainText( 'Intensity' );
+		await expect( s1.getByRole( 'img', { name: 'Happy', exact: true } ), 'the pin keeps role=img named by the mood label' ).toHaveCount( 1 );
+		await expect( s1.locator( '.cr-pin .cr-pin__name' ), 'no second name inside the pin image' ).toHaveCount( 0 );
+
+		const hrefs = await s1.evaluate( ( card ) => [ ...card.querySelectorAll( 'a[href]' ) ].filter( ( anchor ) => ! anchor.closest( '[hidden]' ) ).map( ( anchor ) => anchor.getAttribute( 'href' ) ) );
+		expect( hrefs.filter( ( href ) => /\/cr-seed-248-s1\/?$/.test( href ) ), 'one rendered link goes to the single' ).toHaveLength( 1 );
+		expect( hrefs.filter( ( href ) => href === 'https://example.org/seed-note' ), 'the authored note link stays' ).toHaveLength( 1 );
+		expect( hrefs, 'W3-G2: the card link and the note link are the only rendered anchors' ).toHaveLength( 2 );
+		expect( ( await renderedAnchorFacts( s1 ) ).strayNegativeTabindex ).toBe( 0 );
+
+		const hitHref = ( selector ) => s1.locator( selector ).first().evaluate( ( node ) => {
+			const box = node.getBoundingClientRect();
+			const top = node.ownerDocument.elementFromPoint( box.left + box.width / 2, box.top + box.height / 2 );
+			return top?.closest( 'a[href]' )?.getAttribute( 'href' ) || null;
+		} );
+		expect( await hitHref( '.cr-pin' ), 'a click on the pin opens the single' ).toMatch( /\/cr-seed-248-s1\/?$/ );
+		expect( await hitHref( '.pk-meta time' ), 'a click on the date opens the single' ).toMatch( /\/cr-seed-248-s1\/?$/ );
+		expect( await hitHref( 'a[href="https://example.org/seed-note"]' ), 'the authored S1 note link sits above the card overlay' ).toBe( 'https://example.org/seed-note' );
+
 		await expect( page.locator( '.pkiw-mood-legend, .pkiw-mood-day' ) ).toHaveCount( 0 );
 		await expect( page.locator( 'article.pk-card.k-mood :is(audio, video, .mejs-container, .wp-block-audio, .wp-block-video, .pk-card__cta, .wp-block-query-pagination)' ) ).toHaveCount( 0 );
+	} );
 
-		const note = s1.locator( 'a[href="https://example.org/seed-note"]' );
-		expect( await note.evaluate( ( link ) => {
-			const box = link.getBoundingClientRect();
-			const top = link.ownerDocument.elementFromPoint( box.left + box.width / 2, box.top + box.height / 2 );
-			return top === link || link.contains( top );
-		} ), 'the authored S1 note link sits above any card overlay' ).toBe( true );
+	test( 'Stream :109 and AA — the S1 date meets 4.5:1 in light and dark', async ( { page } ) => {
+		for ( const colorScheme of [ 'light', 'dark' ] ) {
+			await page.emulateMedia( { colorScheme } );
+			const response = await page.goto( STREAM, { waitUntil: 'load' } );
+			expect( response?.status() ).toBe( 200 );
+			const date = page.locator( 'article.pk-card.k-mood', { has: page.locator( 'a[href="https://example.org/seed-note"]' ) } ).locator( '.pk-meta time' );
+			const [ color, background ] = await date.evaluate( ( node ) => {
+				let host = node;
+				let fill = 'rgba(0, 0, 0, 0)';
+				while ( host && 'rgba(0, 0, 0, 0)' === ( fill = getComputedStyle( host ).backgroundColor ) ) {
+					host = host.parentElement;
+				}
+				return [ getComputedStyle( node ).color, fill ];
+			} );
+			expect( color, `${ colorScheme }: the date takes the muted ink role` ).toBe( colorScheme === 'dark' ? PERIWINKLE : CERULEAN );
+			expect( contrast( color, background ), `${ colorScheme }: S1 date contrast` ).toBeGreaterThanOrEqual( 4.5 );
+		}
 	} );
 
 	test( 'Stream :109 — mood cards do not overflow at 320 or 375 in light or dark projects', async ( { page } ) => {
