@@ -282,6 +282,9 @@ function prepare_untitled_single_title( array $parsed_block ): array {
 	$post_id = untitled_single_post_id( $parsed_block );
 	if ( $post_id > 0 ) {
 		untitled_single_state( $post_id, false );
+		untitled_title_format( '' );
+		add_filter( 'protected_title_format', __NAMESPACE__ . '\\capture_untitled_title_format', PHP_INT_MAX, 2 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core's own filter.
+		add_filter( 'private_title_format', __NAMESPACE__ . '\\capture_untitled_title_format', PHP_INT_MAX, 2 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core's own filter.
 		add_filter( 'the_title', __NAMESPACE__ . '\\untitled_single_title', 10, 2 );
 	}
 	return $parsed_block;
@@ -306,35 +309,45 @@ function untitled_single_title( string $title, int $post_id ): string {
 		return esc_html( untitled_single_label( $post_id ) );
 	}
 	// Core has already wrapped the empty title in its "Protected: %s" or
-	// "Private: %s" format; keep that prefix and fill in the label.
-	$format = visibility_title_format( $post_id );
+	// "Private: %s" format. Reuse the exact format Core applied, as Core
+	// prints it, and escape only the label.
+	$format = untitled_title_format();
 	if ( '' !== $format && trim( $title ) === trim( sprintf( $format, '' ) ) ) {
 		untitled_single_state( $state['post_id'], true );
-		return esc_html( sprintf( $format, untitled_single_label( $post_id ) ) );
+		return sprintf( $format, esc_html( untitled_single_label( $post_id ) ) );
 	}
 	return $title;
 }
 
 /**
- * Core's title format for a password-protected or private post, or ''.
+ * The protected or private title format Core applied to the targeted post.
  *
- * @param int $post_id Post ID.
+ * @param string|null $format Format to store, or null to read.
  * @return string
  */
-function visibility_title_format( int $post_id ): string {
-	$post = get_post( $post_id );
-	if ( ! $post instanceof \WP_Post ) {
-		return '';
+function untitled_title_format( ?string $format = null ): string {
+	static $stored = '';
+	if ( null !== $format ) {
+		$stored = $format;
 	}
-	if ( '' !== (string) ( $post->post_password ?? '' ) ) {
-		/* translators: %s: Protected post title. */
-		return (string) apply_filters( 'protected_title_format', __( 'Protected: %s' ), $post ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound, WordPress.WP.I18n.MissingArgDomain -- Core's own filter and string, matched to get_the_title().
+	return $stored;
+}
+
+/**
+ * Record Core's protected or private title format for the targeted post.
+ *
+ * Runs last on protected_title_format and private_title_format, so the stored
+ * value is the one Core passes to sprintf() in get_the_title().
+ *
+ * @param string   $format Title format.
+ * @param \WP_Post $post   Post.
+ * @return string Unchanged format.
+ */
+function capture_untitled_title_format( $format, $post = null ) {
+	if ( $post instanceof \WP_Post && untitled_single_state()['post_id'] === (int) $post->ID ) {
+		untitled_title_format( (string) $format );
 	}
-	if ( 'private' === ( $post->post_status ?? '' ) ) {
-		/* translators: %s: Private post title. */
-		return (string) apply_filters( 'private_title_format', __( 'Private: %s' ), $post ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound, WordPress.WP.I18n.MissingArgDomain -- Core's own filter and string, matched to get_the_title().
-	}
-	return '';
+	return $format;
 }
 
 /**
@@ -347,7 +360,10 @@ function visibility_title_format( int $post_id ): string {
 function render_untitled_single_title( string $content, array $block ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	$state = untitled_single_state();
 	remove_filter( 'the_title', __NAMESPACE__ . '\\untitled_single_title', 10 );
+	remove_filter( 'protected_title_format', __NAMESPACE__ . '\\capture_untitled_title_format', PHP_INT_MAX );
+	remove_filter( 'private_title_format', __NAMESPACE__ . '\\capture_untitled_title_format', PHP_INT_MAX );
 	untitled_single_state( 0, false );
+	untitled_title_format( '' );
 
 	if ( empty( $state['label_injected'] ) || ! str_contains( $content, 'wp-block-post-title' ) ) {
 		return $content;

@@ -464,6 +464,46 @@ namespace Courtneyr\Child\W2T0MicroformatsTests {
 	$GLOBALS['cr_untitled_override']        = 'Leaked facts name';
 	$html = render_title_pipeline( title_block() );
 	check( false === strpos( $html, 'Leaked facts name' ), 'a locked untitled single never asks PKIW for its name' );
+	// A site filter on the format: the H1 uses exactly what Core applied, markup kept, label escaped.
+	reset_state();
+	post_fixture( 52, 'review', '', true, true );
+	$GLOBALS['cr_posts'][52]->post_password = 'secret';
+	$GLOBALS['cr_dates'][52]                = 'October 52, 2026 & <b>';
+	add_filter(
+		'protected_title_format',
+		static function () {
+			return '<span class="privacy">Members only:</span> %s';
+		}
+	);
+	$html = render_title_pipeline( title_block() );
+	check( false !== strpos( $html, '<span class="privacy">Members only:</span> Entry from October 52, 2026 &amp; &lt;b&gt;</h1>' ), 'a filtered protected format keeps its markup and escapes only the label' );
+	unset( $GLOBALS['cr_hooks']['protected_title_format'] );
+
+	// A call-dependent format filter: only Core's own call counts.
+	reset_state();
+	post_fixture( 53, 'review', '', true, false );
+	$GLOBALS['cr_posts'][53]->post_status = 'private';
+	$GLOBALS['cr_format_calls']           = 0;
+	add_filter(
+		'private_title_format',
+		static function () {
+			++$GLOBALS['cr_format_calls'];
+			return 1 === $GLOBALS['cr_format_calls'] ? 'Hidden: %s' : 'Changed: %s';
+		}
+	);
+	$html = render_title_pipeline( title_block() );
+	$label_53 = $GLOBALS['no_plugin'] ? 'Entry from October 53, 2026' : 'Stub kind label 53';
+	check( false !== strpos( $html, '>Hidden: ' . $label_53 . '</h1>' ), 'a call-dependent private format matches the call Core made' );
+	check( 1 === $GLOBALS['cr_format_calls'], 'the private format filter runs once per render' );
+	unset( $GLOBALS['cr_hooks']['private_title_format'] );
+
+	// A real title that equals the prefix text is a title, not an empty one.
+	reset_state();
+	post_fixture( 54, 'review', 'Protected:' );
+	$html = render_title_pipeline( title_block() );
+	check( false !== strpos( $html, '>Protected:</h1>' ) && false === strpos( $html, 'cr-untitled-title' ), 'a stored title equal to the prefix text stays as written' );
+	check( empty( $GLOBALS['cr_hooks']['protected_title_format'][ PHP_INT_MAX ] ) && empty( $GLOBALS['cr_hooks']['private_title_format'][ PHP_INT_MAX ] ), 'the format capture filters are removed after the render' );
+
 	reset_state();
 	post_fixture( 51, 'review', 'Real title' );
 	$GLOBALS['cr_posts'][51]->post_password = 'secret';
