@@ -63,6 +63,17 @@ const visibilityLeaks = ( text, attributes ) => [
 const normalizeRange = ( text ) => text.replace( /[–—]/g, '-' ).replace( /\s*-\s*/g, '-' ).replace( /\s+/g, ' ' ).trim();
 const isDark = ( testInfo ) => testInfo.project.name.endsWith( 'dark' );
 
+// A missing fixture, a 404 or an unrun `promote` skips on a bare checkout. On the stack run set
+// CR_EXERCISE_REQUIRE_SEED=1: the same condition then fails the test. Only the per-project skips
+// (the dark-project cases and the pre-seed empty archive) stay skips.
+const REQUIRE_SEED = '1' === process.env.CR_EXERCISE_REQUIRE_SEED;
+function skipUnlessSeeded( missing, reason ) {
+	if ( missing && REQUIRE_SEED ) {
+		throw new Error( `CR_EXERCISE_REQUIRE_SEED=1: ${ reason }` );
+	}
+	test.skip( missing, reason );
+}
+
 async function open( page, path, width = 1440 ) {
 	await page.setViewportSize( { width, height: width <= 390 ? 900 : 1000 } );
 	return page.goto( path, { waitUntil: 'load' } );
@@ -70,8 +81,8 @@ async function open( page, path, width = 1440 ) {
 
 async function seeded( page, path = ARCHIVE, width = 1440 ) {
 	const response = await open( page, path, width );
-	test.skip( response?.status() === 404, `no page at ${ path }` );
-	test.skip( 0 === await page.locator( 'a[href*="cr-seed-245-"]' ).count(), 'the issue 245 fixtures are not seeded here (seed-245.php)' );
+	skipUnlessSeeded( response?.status() === 404, `no page at ${ path }` );
+	skipUnlessSeeded( 0 === await page.locator( 'a[href*="cr-seed-245-"]' ).count(), 'the issue 245 fixtures are not seeded here (seed-245.php)' );
 	return response;
 }
 
@@ -90,7 +101,7 @@ async function openSingle( page, key, width = 1440 ) {
 			}
 		}
 	}
-	test.skip( response?.status() === 404 || 0 === await page.locator( 'main' ).count(), `no fixture ${ key }` );
+	skipUnlessSeeded( response?.status() === 404 || 0 === await page.locator( 'main' ).count(), `no fixture ${ key }` );
 	return page.locator( 'main.single-post' ).first();
 }
 
@@ -317,6 +328,7 @@ test.describe( 'exercise archive', () => {
 				expect( exactText.actual, `bib ${ i + 1 } is title plus activity only` ).toBe( exactText.expected );
 				const target = await bib.boundingBox();
 				expect( Math.min( target.width, target.height ), `bib ${ i + 1 } target` ).toBeGreaterThanOrEqual( 44 );
+				await bib.scrollIntoViewIfNeeded();
 				const corners = await bib.evaluate( ( root ) => {
 					const link = root.querySelector( 'a[href]' );
 					const box = root.getBoundingClientRect();
@@ -451,6 +463,14 @@ test.describe( 'exercise archive', () => {
 			ink: getComputedStyle( bib ).color,
 			pin: getComputedStyle( bib, '::before' ).content,
 		} ) ) );
+		// The paper comes from bib_paper_class(); if that filter never runs every bib falls to one default fill.
+		const bibClasses = await page.locator( BIB ).evaluateAll( ( bibs ) => bibs.map( ( bib ) => [ ...bib.classList ].filter( ( name ) => /^cr-bib--/.test( name ) ) ) );
+		expect( bibClasses.length, 'archive page 1 has bibs' ).toBeGreaterThan( 0 );
+		for ( const classes of bibClasses ) {
+			expect( classes, 'each bib carries exactly one paper class' ).toHaveLength( 1 );
+			expect( classes[ 0 ] ).toMatch( /^cr-bib--(?:sky-blue|periwinkle|light-orange|light-gray|printer-ivory)$/ );
+		}
+		expect( new Set( bibClasses.map( ( classes ) => classes[ 0 ] ) ).size, 'at least 3 distinct papers across the bibs' ).toBeGreaterThanOrEqual( 3 );
 		for ( const paint of paints ) {
 			expect( PAPER_COLORS ).toContain( paint.background );
 			expect( paint.ink ).toBe( VIOLET );
@@ -519,7 +539,7 @@ test.describe( 'exercise archive', () => {
 			} else {
 				expect( [ style.color, style.background ] ).toEqual( [ IVORY, VIOLET ] );
 			}
-			const hoverTarget = nav.locator( 'a, [aria-current="page"]' ).first();
+			const hoverTarget = nav.locator( 'a' ).first(); // the current chip is not a link and has no hover lift
 			await hoverTarget.hover();
 			expect( await hoverTarget.evaluate( ( node ) => getComputedStyle( node ).transform ) ).not.toBe( 'none' );
 		}
@@ -620,7 +640,7 @@ test.describe( 'exercise single', () => {
 		const table = card.locator( 'table.pkiw-exercise__splits' );
 		expect( await table.getAttribute( 'aria-labelledby' ) ).toBe( await card.locator( 'h2.pkiw-exercise__splits-heading' ).getAttribute( 'id' ) );
 		expect( await table.locator( 'th[scope="col"]' ).allTextContents() ).toEqual( [ 'km', 'Time' ] );
-		expect( ( await table.locator( 'tbody tr' ).allTextContents() ).map( ( text ) => text.replace( /\s+/g, ' ' ).trim() ) ).toEqual( [ '1 5:58', '2 5:51', '3 5:49', '4 5:47', '5 5:47' ] );
+		expect( await table.locator( 'tbody tr' ).evaluateAll( ( rows ) => rows.map( ( row ) => [ ...row.cells ].map( ( cell ) => cell.textContent.trim() ).join( ' ' ) ) ) ).toEqual( [ '1 5:58', '2 5:51', '3 5:49', '4 5:47', '5 5:47' ] );
 		expect( await table.evaluate( ( node ) => getComputedStyle( node ).transform ) ).toBe( 'none' );
 	} );
 
@@ -629,7 +649,8 @@ test.describe( 'exercise single', () => {
 		const a02 = page.locator( '.pkiw-exercise' );
 		expect( await a02.locator( '.pkiw-exercise__distance, .pkiw-exercise__duration, .pkiw-exercise__splits, .pkiw-exercise__best' ).count() ).toBe( 0 );
 		expect( await page.locator( 'main' ).innerText() ).not.toMatch( /7\.77|Route hidden|Public workout details enabled|\bPublic\b|\bWhere\b/i );
-		expect( await page.locator( 'main :is(.map, [class*="route"], [class*="lock"], [class*="globe"])' ).count() ).toBe( 0 );
+		expect( await page.locator( 'main .map' ).count() ).toBe( 0 );
+		expect( await page.locator( 'main *' ).evaluateAll( ( nodes ) => nodes.flatMap( ( node ) => [ ...node.classList ] ).filter( ( token ) => /(?:^|[-_])(?:route|lock|globe)(?:[-_]|$)/i.test( token ) ) ), 'no route, lock or globe class tokens' ).toEqual( [] );
 		await openSingle( page, 'A04' );
 		await expect( page.locator( '.pkiw-exercise__duration' ) ).not.toBeEmpty();
 		expect( await page.locator( '.pkiw-exercise__distance, .pkiw-exercise__splits' ).count() ).toBe( 0 );
@@ -643,16 +664,18 @@ test.describe( 'exercise single', () => {
 		await expect( h1 ).toHaveCount( 1 );
 		await expect( h1 ).toHaveText( 'Exercise, August 27, 2026' );
 		expect( await h1.evaluate( ( node ) => node.classList.contains( 'p-name' ) ) ).toBe( false );
-		await openSingle( page, 'A04' );
+		// S02's neighbours are S01 and the untitled S03. A05 is a neighbour of A04 only while it is unpromoted
+		// (a promoted post leaves the exercise surface), so the untitled-neighbour check uses S03 in both states.
+		await openSingle( page, 'S02' );
 		const nav = page.locator( 'nav.cr-post-nav' );
 		await expect( nav ).toHaveCount( 1 );
 		const navLinks = nav.locator( 'a[href]' );
 		await expect( navLinks ).toHaveCount( 2 );
 		expect( ( await navLinks.evaluateAll( ( links ) => links.map( ( link ) => link.href ) ) ).every( ( href ) => href.includes( 'cr-seed-245-' ) ), 'both neighbours remain exercise fixtures' ).toBe( true );
 		expect( ( await navLinks.evaluateAll( ( links ) => links.map( ( link ) => link.getBoundingClientRect().height ) ) ).every( ( height ) => height >= 44 ), 'both post-nav chips are 44px high' ).toBe( true );
-		const a05 = nav.locator( `a[href*="${ slugOf( 'A05' ) }"]` );
-		await expect( a05 ).toHaveCount( 1 );
-		await expect( a05 ).not.toContainText( ' at ' );
+		const untitledNeighbour = nav.locator( `a[href*="${ slugOf( 'S03' ) }"]` );
+		await expect( untitledNeighbour ).toHaveCount( 1 );
+		await expect( untitledNeighbour ).not.toContainText( ' at ' );
 		const placement = await nav.evaluate( ( node ) => {
 			const comments = document.querySelector( '.single-post__comments-wrapper' );
 			return ! comments || !! ( comments.compareDocumentPosition( node ) & Node.DOCUMENT_POSITION_FOLLOWING );
@@ -788,7 +811,7 @@ test.describe( 'exercise Stream', () => {
 		test( `${ streamPath } shows S01-S03 as one-link exercise bib corners with tiered content`, async ( { page } ) => {
 			await open( page, streamPath, 1440 );
 			const found = await page.locator( `a[href*="cr-seed-245-s0"]` ).count();
-			test.skip( 0 === found, `S01-S03 do not appear on ${ streamPath }` );
+			skipUnlessSeeded( 0 === found, `S01-S03 do not appear on ${ streamPath }` );
 			for ( const key of [ 'S01', 'S02', 'S03' ] ) {
 				const item = itemFor( page, key );
 				const card = item.locator( 'article.pk-card.pk-card--stream.k-exercise.cr-bib-corner.h-entry' );
@@ -822,7 +845,7 @@ test.describe( 'exercise Stream', () => {
 				copy.querySelectorAll( '.screen-reader-text' ).forEach( ( node ) => node.remove() );
 				return copy.textContent.trim();
 			} );
-			expect( visibleLinkText ).toMatch( /^[A-Z][a-z]+ \d{1,2}, 2026$/ );
+			expect( visibleLinkText ).toMatch( /^[A-Z][a-z]+ \d{1,2}, \d{4}$/ );
 			expect( await s03.locator( '.cr-bib-corner__title.p-name, .cr-bib-corner__link.p-name' ).count() ).toBe( 0 );
 		} );
 	}
@@ -830,7 +853,7 @@ test.describe( 'exercise Stream', () => {
 	test( 'Stream shadow is on the li, torn clip is on the article, and pin plus two pseudo grommets sit inside', async ( { page } ) => {
 		await open( page, STREAM_PATHS[ 0 ], 1440 );
 		const item = itemFor( page, 'S01' );
-		test.skip( 0 === await item.count(), 'S01 is not on this Stream page' );
+		skipUnlessSeeded( 0 === await item.count(), 'S01 is not on this Stream page' );
 		const card = item.locator( '.cr-bib-corner' );
 		const paint = await Promise.all( [
 			item.evaluate( ( node ) => ( { filter: getComputedStyle( node ).filter } ) ),
@@ -855,7 +878,7 @@ test.describe( 'exercise Stream', () => {
 	test( 'Stream card uses one rotation token, 80-92 percent width and stays shorter than the single record', async ( { page } ) => {
 		await open( page, STREAM_PATHS[ 0 ], 1440 );
 		const card = itemFor( page, 'S01' ).locator( '.cr-bib-corner' );
-		test.skip( 0 === await card.count(), 'S01 is not on this Stream page' );
+		skipUnlessSeeded( 0 === await card.count(), 'S01 is not on this Stream page' );
 		const geometry = await card.evaluate( ( node ) => {
 			const parent = node.parentElement;
 			const style = getComputedStyle( parent );
@@ -875,7 +898,8 @@ test.describe( 'exercise Stream', () => {
 	test( 'whole Stream card is the hit area and focus rings it once', async ( { page } ) => {
 		await open( page, STREAM_PATHS[ 0 ], 1440 );
 		const card = itemFor( page, 'S01' ).locator( '.cr-bib-corner' );
-		test.skip( 0 === await card.count(), 'S01 is not on this Stream page' );
+		skipUnlessSeeded( 0 === await card.count(), 'S01 is not on this Stream page' );
+		await card.scrollIntoViewIfNeeded();
 		const corners = await card.evaluate( ( root ) => {
 			const link = root.querySelector( 'a[href]' );
 			const box = root.getBoundingClientRect();
@@ -897,7 +921,7 @@ test.describe( 'exercise Stream', () => {
 	test( 'Stream hides privacy state and connector UI while craft control keeps its own card', async ( { page } ) => {
 		await open( page, STREAM_PATHS[ 0 ], 1440 );
 		const s02 = itemFor( page, 'S02' );
-		test.skip( 0 === await s02.count(), 'S02 is not on this Stream page' );
+		skipUnlessSeeded( 0 === await s02.count(), 'S02 is not on this Stream page' );
 		const scan = await s02.evaluate( ( root ) => ( {
 			text: root.innerText,
 			attributes: [ ...root.querySelectorAll( '*' ) ].flatMap( ( node ) => [ node.className || '', node.getAttribute( 'title' ) || '' ] ).join( ' ' ),
@@ -915,7 +939,7 @@ test.describe( 'exercise Stream', () => {
 		await open( page, STREAM_PATHS[ 0 ], 1440 );
 		const item = itemFor( page, 'S01' );
 		const card = item.locator( '.cr-bib-corner' );
-		test.skip( 0 === await card.count(), 'S01 is not on this Stream page' );
+		skipUnlessSeeded( 0 === await card.count(), 'S01 is not on this Stream page' );
 		const paint = await card.evaluate( ( node ) => {
 			const label = node.querySelector( '.cr-bib-corner__kind' );
 			return {
@@ -938,7 +962,7 @@ test.describe( 'exercise Stream', () => {
 		await open( page, STREAM_PATHS[ 0 ], 1440 );
 		const item = itemFor( page, 'S01' );
 		const card = item.locator( '.cr-bib-corner' );
-		test.skip( 0 === await card.count(), 'S01 is not on this Stream page' );
+		skipUnlessSeeded( 0 === await card.count(), 'S01 is not on this Stream page' );
 		await page.emulateMedia( { forcedColors: 'active' } );
 		const report = await card.evaluate( ( node ) => ( {
 			border: `${ getComputedStyle( node ).borderTopWidth } ${ getComputedStyle( node ).borderTopStyle }`,
@@ -957,10 +981,77 @@ test.describe( 'exercise Stream', () => {
 	test( 'Stream cards wrap in one 320px column without page overflow', async ( { page } ) => {
 		await open( page, STREAM_PATHS[ 0 ], 320 );
 		const cards = page.locator( 'article.cr-bib-corner' );
-		test.skip( 0 === await cards.count(), 'no exercise cards on this Stream page' );
+		skipUnlessSeeded( 0 === await cards.count(), 'no exercise cards on this Stream page' );
 		expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBeLessThanOrEqual( 0 );
 		const failures = await cards.evaluateAll( ( nodes ) => nodes.filter( ( node ) => node.getBoundingClientRect().right > innerWidth + 1 || node.scrollWidth > node.clientWidth + 1 ).length );
 		expect( failures ).toBe( 0 );
+	} );
+} );
+
+// --- Protected, private and draft controls -----------------------------------------------------
+
+// B06 (password-protected), B07 (private) and B08 (draft) are never exercise bibs. Logged out, B07 and B08 are
+// absent everywhere; B06 is the plugin's protected card on the Stream and prints none of its record.
+test.describe( 'exercise protected, private and draft controls', () => {
+	const HIDDEN_RECORD = /20\.0|55 ?min|10 ?k\b|personal best|Cycle/i;
+	const STREAM_PAGES = Number( process.env.CR_EXERCISE_STREAM_PAGES || 10 );
+
+	// Walks a paged listing, handing each served page to visit(). The Stream skips from page 1 to 3 here, so an
+	// empty page does not end the walk; a 404 does.
+	async function walk( page, urlFor, pages, visit ) {
+		for ( let at = 1; at <= pages; at++ ) {
+			const response = await open( page, urlFor( at ), 1440 );
+			if ( response?.status() === 404 ) {
+				break;
+			}
+			await visit( at );
+		}
+	}
+
+	test( '/stream shows B06 only as the protected card and never B07 or B08', async ( { page } ) => {
+		let protectedCard = null;
+		let corners = 0;
+		await walk( page, ( at ) => `/stream/?query-1-page=${ at }`, STREAM_PAGES, async ( at ) => {
+			for ( const key of [ 'B07', 'B08' ] ) {
+				expect( await page.locator( `a[href*="${ slugOf( key ) }"]` ).count(), `${ key } is absent from /stream page ${ at }` ).toBe( 0 );
+			}
+			const item = await listingItem( page, 'B06' );
+			if ( item ) {
+				expect( protectedCard, 'B06 appears once on /stream' ).toBeNull();
+				protectedCard = item;
+				corners = await item.locator( '.cr-bib-corner, .cr-bib-corner__kind' ).count();
+				expect( await item.locator( 'article.pk-card--protected' ).count(), 'B06 is the plugin protected card' ).toBe( 1 );
+				expect( await item.locator( 'img' ).count(), 'B06 has no image' ).toBe( 0 );
+				expect( await item.innerText(), 'B06 prints none of its record' ).not.toMatch( HIDDEN_RECORD );
+			}
+		} );
+		skipUnlessSeeded( null === protectedCard, `B06 was not found on /stream (${ STREAM_PAGES } pages)` );
+		expect( corners, 'B06 has no bib corner' ).toBe( 0 );
+	} );
+
+	test( 'logged-out search for their titles shows no exercise detail', async ( { page } ) => {
+		await seeded( page );
+		for ( const [ key, title ] of [ [ 'B06', 'Members Only Ride' ], [ 'B07', 'Quiet Recovery Walk' ], [ 'B08', 'Draft Intervals' ] ] ) {
+			await open( page, `/?s=${ encodeURIComponent( title ).replace( /%20/g, '+' ) }`, 1440 );
+			const item = await listingItem( page, key );
+			if ( 'B06' !== key ) {
+				expect( item, `${ key } is not in search` ).toBeNull();
+			} else if ( item ) {
+				expect( await item.locator( '.cr-bib-corner, img' ).count(), 'B06 in search has no bib corner or image' ).toBe( 0 );
+				expect( await item.innerText(), 'B06 in search prints none of its record' ).not.toMatch( HIDDEN_RECORD );
+			}
+			expect( await page.locator( 'main .cr-bib-corner, main .pkiw-exercise-bib, main .pkiw-exercise-day' ).count(), `${ title }: no exercise bib or bib corner in search` ).toBe( 0 );
+		}
+	} );
+
+	test( 'the Blog lists none of them', async ( { page } ) => {
+		const base = BLOG.replace( /\/?$/, '/' );
+		await seeded( page );
+		await walk( page, ( at ) => ( 1 === at ? base : `${ base }page/${ at }/` ), Number( process.env.CR_EXERCISE_BLOG_PAGES || 20 ), async ( at ) => {
+			for ( const key of [ 'B06', 'B07', 'B08' ] ) {
+				expect( await page.locator( `a[href*="${ slugOf( key ) }"]` ).count(), `${ key } is absent from the Blog (page ${ at })` ).toBe( 0 );
+			}
+		} );
 	} );
 } );
 
@@ -991,7 +1082,7 @@ test.describe( 'promoted exercise Blog and search surfaces', () => {
 		const surfaces = [ [ 'Blog', await findOnBlog( page, 'A02' ) ] ];
 		await open( page, '/?s=Evening+Walk', 1440 );
 		surfaces.push( [ 'search', await listingItem( page, 'A02' ) ] );
-		test.skip( surfaces.every( ( [ , item ] ) => null === item ), 'seed-245.php promote has not been run: A02 was not found on the Blog or in search' );
+		skipUnlessSeeded( null === surfaces[ 0 ][ 1 ], 'seed-245.php promote has not been run: A02 was not found on the Blog' );
 		for ( const [ name, item ] of surfaces ) {
 			expect( item, `A02 appears on the ${ name }` ).not.toBeNull();
 			const text = await item.innerText();
@@ -999,9 +1090,13 @@ test.describe( 'promoted exercise Blog and search surfaces', () => {
 			expect( text, `${ name } no place` ).not.toMatch( /Maplewood Track|Fernvale|Example Lane/ );
 			expect( await item.locator( 'img' ).count(), `${ name } no image` ).toBe( 0 );
 		}
-		// The never-promoted twin stays on the Stream, out of search.
+		// Search lists every post, promoted or not, so the never-promoted twin A03 also appears there with the same
+		// Blog card; it carries no hidden value, place or image either, and it never reaches the Blog (findOnBlog).
 		await open( page, '/?s=Evening+Walk', 1440 );
-		expect( await page.locator( `a[href*="${ slugOf( 'A03' ) }"]` ).count(), 'A03 is not in search' ).toBe( 0 );
+		const twin = await listingItem( page, 'A03' );
+		expect( twin, 'A03 appears in search' ).not.toBeNull();
+		expect( await twin.innerText(), 'A03 in search prints no hidden distance' ).not.toContain( '7.77' );
+		expect( await twin.locator( 'img' ).count(), 'A03 in search has no image' ).toBe( 0 );
 	} );
 
 	test( 'A05 untitled promotion shows Entry from <date> with u-url and no p-name on the Blog and in search', async ( { page } ) => {
@@ -1010,7 +1105,7 @@ test.describe( 'promoted exercise Blog and search surfaces', () => {
 		const surfaces = [ [ 'Blog', await findOnBlog( page, 'A05' ) ] ];
 		await open( page, '/?s=Bike+ride', 1440 );
 		surfaces.push( [ 'search', await listingItem( page, 'A05' ) ] );
-		test.skip( surfaces.every( ( [ , item ] ) => null === item ), 'seed-245.php promote has not been run: A05 was not found on the Blog or in search' );
+		skipUnlessSeeded( null === surfaces[ 0 ][ 1 ], 'seed-245.php promote has not been run: A05 was not found on the Blog' );
 		for ( const [ name, item ] of surfaces ) {
 			expect( item, `A05 appears on the ${ name }` ).not.toBeNull();
 			const link = item.locator( `a.u-url[href*="${ slugOf( 'A05' ) }"]` ).first();

@@ -721,6 +721,7 @@ body.cr-single--exercise main.single-post .pkiw-exercise__splits th {
 }
 
 .pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__kind {
+	display: block;
 	margin: calc(-1 * var(--cr-space-md)) calc(-1 * var(--cr-space-lg)) var(--cr-space-md);
 	padding: var(--cr-space-lg) var(--cr-space-xl) var(--cr-space-sm);
 	background: var(--cr-cerulean);
@@ -733,7 +734,9 @@ body.cr-single--exercise main.single-post .pkiw-exercise__splits th {
 	text-transform: uppercase;
 }
 
+/* The plugin sets `.pk-card > * { position: relative }`; static lets the link's ::after overlay reach the card. */
 .pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__title {
+	position: static;
 	margin: 0;
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-accent);

@@ -87,7 +87,7 @@ function bib_corner( string $html, array $block = array(), $instance = null ): s
 
 	$level = heading_level( $block );
 	$out   = '<article class="pk-card pk-card--stream k-exercise cr-bib-corner h-entry">';
-	$out  .= '<p class="cr-bib-corner__kind pk-kindlabel">' . esc_html( kind_label() ) . '</p>';
+	$out  .= '<span class="cr-bib-corner__kind pk-kindlabel">' . esc_html( kind_label() ) . '</span>';
 	$out  .= '<h' . $level . ' class="' . esc_attr( $title_class ) . '"><a class="u-url cr-bib-corner__link" href="' . esc_url( (string) get_permalink( $post ) ) . '">' . $link_text . '</a></h' . $level . '>';
 
 	$activity = trim( (string) ( $facts['activity'] ?? '' ) );
