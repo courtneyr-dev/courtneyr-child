@@ -43,7 +43,8 @@ const EXPECTED_SVGS = [
 	'cloud-dark.svg', 'cloud-halftone.svg', 'cloud.svg', 'fog-dark.svg', 'fog.svg', 'leaves.svg',
 	'mast.svg', 'rain-dark.svg', 'rain.svg', 'snow-dark.svg', 'snow.svg', 'storm-dark.svg',
 	'storm.svg', 'sun-dark.svg', 'sun-wheel.svg', 'sun.svg', 'thermometer-dark.svg',
-	'thermometer.svg', 'torn-paper.svg', 'wind-dark.svg', 'wind.svg',
+	'thermometer.svg', 'torn-edge-dark.svg', 'torn-edge.svg', 'torn-paper.svg', 'wind-dark.svg',
+	'wind.svg',
 ];
 
 const isDark = ( testInfo ) => testInfo.project.name.endsWith( 'dark' );
@@ -969,7 +970,8 @@ test.describe( 'stream', () => {
 					column: li.getBoundingClientRect().width,
 					heightFits: node.scrollHeight <= node.clientHeight + 1,
 					background: style.backgroundColor,
-					border: [ style.borderTopWidth, style.borderTopColor ],
+					backgroundClip: style.backgroundClip,
+					border: [ style.borderTopWidth, style.borderImageSource ],
 					shadow: style.boxShadow,
 					cardTransform: style.transform,
 					tapeTransform: tape.transform,
@@ -982,8 +984,10 @@ test.describe( 'stream', () => {
 			expect( state.width, `card ${ index } fits its li` ).toBeLessThanOrEqual( state.column + 1 );
 			expect( state.heightFits, `card ${ index } fits content` ).toBe( true );
 			expect( state.background, `card ${ index } paper` ).toBe( IVORY );
-			expect( state.border, `card ${ index } violet border` ).toEqual( [ '2px', INK ] );
-			expect( state.shadow, `card ${ index } scheme shadow` ).toBe( `${ isDark( testInfo ) ? SELECTIVE_YELLOW : INK } 4px 4px 0px 0px` );
+			expect( state.backgroundClip, `card ${ index } paper stops inside the torn band` ).toBe( 'padding-box' );
+			expect( state.border[ 0 ], `card ${ index } torn band width` ).toBe( '12px' );
+			expect( state.border[ 1 ], `card ${ index } torn edge draws the scheme's hard shadow` ).toMatch( isDark( testInfo ) ? /torn-edge-dark\.svg/ : /torn-edge\.svg/ );
+			expect( state.shadow, `card ${ index } has no rectangular shadow under the torn edge` ).toBe( 'none' );
 			expect( allowedRotation( rotation( state.tapeTransform ) ), `card ${ index } tape rotation` ).toBe( true );
 			expect( allowedRotation( rotation( state.cardTransform ), true ), `card ${ index } collage rotation` ).toBe( true );
 			expect( state.rotatedChildren, `card ${ index } has no third rotated layer` ).toBe( 0 );
@@ -1004,9 +1008,11 @@ test.describe( 'stream', () => {
 		await page.emulateMedia( { forcedColors: 'active' } );
 		const forced = await card.evaluate( ( node ) => ( {
 			border: [ getComputedStyle( node ).borderTopWidth, getComputedStyle( node ).borderTopStyle ],
+			edge: getComputedStyle( node ).borderImageSource,
 			tape: getComputedStyle( node, '::before' ).display,
 		} ) );
 		expect( forced.border, 'forced card border' ).toEqual( [ '2px', 'solid' ] );
+		expect( forced.edge, 'forced colors drops the torn edge image' ).toBe( 'none' );
 		expect( forced.tape, 'tape drops' ).toBe( 'none' );
 		for ( const selector of [ '.cr-thermo__glass', '.pk-weather-mark' ] ) {
 			const item = card.locator( selector );

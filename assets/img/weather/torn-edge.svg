@@ -1,0 +1,5 @@
+<!-- Torn paper perimeter for the issue 246 Stream card (light page); a 9-slice border-image, slice 12. The seams at 12 and 84 sit on flat runs so round tiling joins cleanly. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+	<path d="M4 4 16 4 28 5.5 40 3.5 54 6 66 3.5 76 4 88 4 88 16 86.5 28 89 42 86 56 88.5 68 88 76 88 88 76 88 68 86 54 89 40 86.5 26 89 16 88 4 88 4 76 6.5 68 3 54 6 40 3.5 28 4 16Z" fill="#241c4a" transform="translate(4 4)"/>
+	<path d="M4 4 16 4 28 5.5 40 3.5 54 6 66 3.5 76 4 88 4 88 16 86.5 28 89 42 86 56 88.5 68 88 76 88 88 76 88 68 86 54 89 40 86.5 26 89 16 88 4 88 4 76 6.5 68 3 54 6 40 3.5 28 4 16Z" fill="#fbfaf5" stroke="#241c4a" stroke-width="2" stroke-linejoin="round"/>
+</svg>

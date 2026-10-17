@@ -439,23 +439,39 @@
 	min-width: 0;
 	height: auto;
 	margin: 0;
-	padding: var(--cr-space-xl) var(--cr-space-lg) var(--cr-space-lg);
-	border: 2px solid var(--cr-russian-violet);
-	background: var(--cr-printer-ivory);
-	box-shadow: var(--cr-shadow-hard);
+	--cr-thermo-edge: 0.625rem;
+	padding: calc(var(--cr-space-xl) - var(--cr-thermo-edge)) calc(var(--cr-space-lg) - var(--cr-thermo-edge)) calc(var(--cr-space-lg) - var(--cr-thermo-edge));
+	border: 0.75rem solid transparent;
+	border-image: url(../img/weather/torn-edge.svg) 12 / 0.75rem round;
+	background: padding-box var(--cr-printer-ivory);
+	box-shadow: none;
 	color: var(--cr-russian-violet);
 	overflow-wrap: anywhere;
 }
 
+/* --cr-thermo-edge is the extra border band the torn edge needs (12px against the old 2px); padding, tape and glass give it back so content keeps its place.
+   The torn perimeter draws its own hard shadow, so dark mode swaps in the selective-yellow copy. The article stays the focus target, so the ring is unbroken. */
+:root[data-theme="dark"] .pk-card.pk-card--stream.cr-thermo {
+	border-image-source: url(../img/weather/torn-edge-dark.svg);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme]) .pk-card.pk-card--stream.cr-thermo,
+	:root[data-theme="system"] .pk-card.pk-card--stream.cr-thermo {
+		border-image-source: url(../img/weather/torn-edge-dark.svg);
+	}
+}
+
 .pk-card.pk-card--stream.cr-thermo:has(.cr-thermo__glass) {
-	padding-inline-end: var(--cr-space-4xl);
+	padding-inline-end: calc(var(--cr-space-4xl) - var(--cr-thermo-edge));
 }
 
 .pk-card.pk-card--stream.cr-thermo::before {
 	content: "";
 	position: absolute;
 	z-index: 1;
-	inset-block-start: calc(-1 * var(--cr-space-xs));
+	inset-block-start: calc(-1 * var(--cr-space-xs) - var(--cr-thermo-edge));
 	inset-inline-start: 50%;
 	width: 5rem;
 	height: 1.25rem;
@@ -549,7 +565,7 @@
 .cr-thermo .cr-thermo__glass {
 	position: absolute;
 	inset-block-start: 50%;
-	inset-inline-end: var(--cr-space-md);
+	inset-inline-end: calc(var(--cr-space-md) - var(--cr-thermo-edge));
 	width: 1.75rem;
 	height: 5.5rem;
 	background: url(../img/weather/thermometer.svg) center / contain no-repeat;
@@ -790,8 +806,9 @@
 	}
 
 	.pk-card.pk-card--stream.cr-thermo {
-		padding-inline-end: var(--cr-space-lg);
+		padding: var(--cr-space-xl) var(--cr-space-lg) var(--cr-space-lg);
 		border: 2px solid CanvasText !important;
+		border-image: none;
 		background: Canvas;
 		box-shadow: none;
 		color: CanvasText;
