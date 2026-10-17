@@ -1,0 +1,8 @@
+<!-- Decorative static thermometer for issue 246, dark page variant; CSS background only. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 120" width="40" height="120">
+	<path d="M12 76V18a8 8 0 0 1 16 0v58a17 17 0 1 1-16 0Z" fill="#fbfaf5" stroke="#241c4a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+	<path d="M17 84V39h6v45a10 10 0 1 1-6 0Z" fill="#fb8500" stroke="#241c4a" stroke-width="3" stroke-linejoin="round"/>
+	<g stroke="#fbfaf5" stroke-width="3" stroke-linecap="round">
+		<path d="M29 28h6M29 41h4M29 54h6M29 67h4"/>
+	</g>
+</svg>

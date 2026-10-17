@@ -1,0 +1,8 @@
+<!-- Decorative sun wheel for issue 246; CSS background only. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+	<g fill="none" stroke="#ffb703" stroke-width="7" stroke-linecap="round">
+		<path d="M80-8v35M80 133v35M-8 80h35M133 80h35M18 18l25 25M117 117l25 25M142 18l-25 25M43 117l-25 25M48 2l13 32M99 126l13 32M2 48l32 13M126 99l32 13M112 2 99 34M61 126l-13 32M158 48l-32 13M34 99 2 112"/>
+	</g>
+	<circle cx="80" cy="80" r="44" fill="#ffb703" stroke="#241c4a" stroke-width="4"/>
+	<circle cx="80" cy="80" r="17" fill="#fb8500" stroke="#241c4a" stroke-width="3"/>
+</svg>
