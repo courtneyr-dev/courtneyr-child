@@ -527,7 +527,7 @@ function ink_defs(): string {
  * emoji with no catalog entry prints as a text glyph, exposed only when
  * there is no word to name the mood.
  *
- * @param array<string, mixed> $spec From resolve().
+ * @param array<string, mixed> $spec From resolve(), optionally with family_label and intensity_text.
  * @param string               $size 'single' (12rem) or 'stream' (7.5rem).
  * @return string
  */
@@ -540,6 +540,10 @@ function render( array $spec, string $size ): string {
 	$size  = 'single' === $size ? 'single' : 'stream';
 	$p     = $spec['palette'];
 	$r     = $spec['rim'];
+
+	$has_facts      = isset( $spec['family_label'] );
+	$family_text    = $has_facts ? (string) $spec['family_label'] : (string) $spec['family'];
+	$intensity_text = $has_facts ? (string) ( $spec['intensity_text'] ?? '' ) : '';
 
 	// A custom mood longer than the face can hold prints its word under the
 	// pin, as real text, instead of inside the artwork.
@@ -582,8 +586,11 @@ function render( array $spec, string $size ): string {
 	if ( $spec['word_below'] ) {
 		$html .= '<span class="cr-pin__name cr-pin__word-below">' . esc_html( $name ) . '</span>';
 	}
-	if ( 'single' === $size && '' !== $spec['family'] ) {
-		$html .= '<span class="cr-pin__family"><span class="cr-sr-only">' . esc_html__( 'Mood family:', 'courtneyr-child' ) . ' </span>' . esc_html( $spec['family'] ) . '</span>';
+	if ( 'single' === $size && '' !== $family_text ) {
+		$html .= '<span class="cr-pin__family"><span class="cr-sr-only">' . esc_html__( 'Mood family:', 'courtneyr-child' ) . ' </span>' . esc_html( $family_text ) . '</span>';
+	}
+	if ( 'single' === $size && '' !== $intensity_text ) {
+		$html .= '<span class="cr-pin__intensity">' . esc_html( $intensity_text ) . '</span>';
 	}
 	$html .= '</span>';
 	return $html;
@@ -651,6 +658,22 @@ function find_mood_block( \WP_Post $post ): ?array {
 }
 
 /**
+ * The mood reader's public facts for a post.
+ *
+ * @param int $post_id Post ID.
+ * @return array<string, mixed>|null Mood facts, or null when the mood reader did not answer.
+ */
+function mood_facts( int $post_id ): ?array {
+	if ( $post_id <= 0 || ! function_exists( '\\PKIW\\kind_facts' ) ) {
+		return null;
+	}
+
+	$facts = \PKIW\kind_facts( $post_id );
+
+	return array_key_exists( 'family_label', $facts ) ? $facts : null;
+}
+
+/**
  * The mood-card block itself: the single, and a card-only micro-post on
  * /stream. A note that only repeats the mood word is flagged so the
  * stream, where the word is on the pin, can hide it; the single keeps it as
@@ -667,7 +690,14 @@ function mood_card( string $html, array $block ): string {
 	$attrs = (array) ( $block['attrs'] ?? array() );
 	$mood  = (string) ( $attrs['mood'] ?? '' );
 	$spec  = resolve( $mood, (string) ( $attrs['emoji'] ?? '' ), (string) ( $attrs['moodKey'] ?? '' ) );
-	$html  = replace_emoji_span( $html, render( $spec, is_singular( 'post' ) ? 'single' : 'stream' ) );
+	if ( is_singular( 'post' ) ) {
+		$facts = mood_facts( (int) get_the_ID() );
+		if ( null !== $facts ) {
+			$spec['family_label']   = (string) $facts['family_label'];
+			$spec['intensity_text'] = (string) ( $facts['intensity_text'] ?? '' );
+		}
+	}
+	$html = replace_emoji_span( $html, render( $spec, is_singular( 'post' ) ? 'single' : 'stream' ) );
 
 	// A card-only micro-post on /stream with no moodAt has no date of its
 	// own; the post's date joins it, in the plugin's own meta markup.
@@ -766,7 +796,7 @@ function enqueue_editor(): void {
 	wp_enqueue_script(
 		'courtneyr-mood-pin-editor',
 		COURTNEYR_CHILD_URI . '/assets/js/cr-mood-pin-editor.js',
-		array( 'wp-hooks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-api-fetch', 'wp-i18n' ),
+		array( 'wp-hooks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-api-fetch', 'wp-i18n', 'wp-data' ),
 		COURTNEYR_CHILD_VERSION,
 		true
 	);
@@ -783,7 +813,7 @@ function enqueue_editor(): void {
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\enqueue_editor' );
 
 /**
- * GET /courtneyr/v1/mood-pin?mood=&emoji=&moodKey= → { html } for the editor preview.
+ * GET /courtneyr/v1/mood-pin?mood=&emoji=&moodKey=&intensity= → { html } for the editor preview.
  */
 function register_rest_route(): void {
 	\register_rest_route(
@@ -795,24 +825,39 @@ function register_rest_route(): void {
 				return current_user_can( 'edit_posts' );
 			},
 			'args'                => array(
-				'mood'    => array(
+				'mood'      => array(
 					'type'              => 'string',
 					'default'           => '',
 					'sanitize_callback' => 'sanitize_text_field',
 				),
-				'emoji'   => array(
+				'emoji'     => array(
 					'type'              => 'string',
 					'default'           => '',
 					'sanitize_callback' => 'sanitize_text_field',
 				),
-				'moodKey' => array(
+				'moodKey'   => array(
 					'type'              => 'string',
 					'default'           => '',
 					'sanitize_callback' => 'sanitize_key',
 				),
+				'intensity' => array(
+					'type'              => 'integer',
+					'default'           => 0,
+					'sanitize_callback' => 'absint',
+				),
 			),
 			'callback'            => static function ( \WP_REST_Request $request ): array {
 				$spec = resolve( (string) $request['mood'], (string) $request['emoji'], (string) $request['moodKey'] );
+				if (
+					class_exists( '\\PKIW\\Mood_Vocabulary' )
+					&& method_exists( '\\PKIW\\Mood_Vocabulary', 'family_of' )
+					&& method_exists( '\\PKIW\\Mood_Vocabulary', 'family' )
+					&& method_exists( '\\PKIW\\Mood_Vocabulary', 'intensity_text' )
+				) {
+					$n                      = (int) $request['intensity'];
+					$spec['family_label']   = (string) \PKIW\Mood_Vocabulary::family( \PKIW\Mood_Vocabulary::family_of( (string) $request['mood'], (string) $request['moodKey'] ) )['label'];
+					$spec['intensity_text'] = \PKIW\Mood_Vocabulary::intensity_text( $n >= 1 && $n <= 5 ? $n : null );
+				}
 				return array(
 					'html'   => render( $spec, 'single' ),
 					'custom' => (bool) $spec['custom'],

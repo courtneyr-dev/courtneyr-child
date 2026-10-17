@@ -1,0 +1,390 @@
+/* ============================================================
+	Mood year archive for issue 248: family fills, calendar frame,
+	legend and multi-entry day cards.
+
+	Relies on the plugin's mood-year structure, courtneyr-calendar
+	for 44px cell geometry and focus raising, and courtneyr-paper
+	for the shared torn-sheet API. Family fills map as follows:
+	joy/yellow, calm/sky, energy/orange, thoughtful/periwinkle,
+	physical/blue-green, social/light-orange, other/light-gray,
+	sad/cerulean, work/glaucous-dark, anxious/violet-soft,
+	playful/prussian-blue, uncertain/violet and angry/coral.
+	Raw palette tokens keep every family pairing fixed in dark mode.
+	============================================================ */
+
+.pkiw-mood-year {
+	--pkiw-mood-cell-edge: transparent;
+	--pkiw-mood-segment-divider: var(--cr-rule);
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-xl);
+	min-width: 0;
+	max-width: 100%;
+}
+
+.pkiw-mood-year [data-family="joy"] {
+	--pkiw-mood-family-fill: var(--cr-selective-yellow);
+	--pkiw-mood-family-code: var(--cr-russian-violet);
+}
+
+.pkiw-mood-year [data-family="calm"] {
+	--pkiw-mood-family-fill: var(--cr-sky-blue);
+	--pkiw-mood-family-code: var(--cr-russian-violet);
+}
+
+.pkiw-mood-year [data-family="energy"] {
+	--pkiw-mood-family-fill: var(--cr-ut-orange);
+	--pkiw-mood-family-code: var(--cr-russian-violet);
+}
+
+.pkiw-mood-year [data-family="thoughtful"] {
+	--pkiw-mood-family-fill: var(--cr-periwinkle);
+	--pkiw-mood-family-code: var(--cr-russian-violet);
+}
+
+.pkiw-mood-year [data-family="physical"] {
+	--pkiw-mood-family-fill: var(--cr-blue-green);
+	--pkiw-mood-family-code: var(--cr-russian-violet);
+}
+
+.pkiw-mood-year [data-family="social"] {
+	--pkiw-mood-family-fill: var(--cr-light-orange);
+	--pkiw-mood-family-code: var(--cr-russian-violet);
+}
+
+.pkiw-mood-year [data-family="other"] {
+	--pkiw-mood-family-fill: var(--cr-light-gray);
+	--pkiw-mood-family-code: var(--cr-russian-violet);
+}
+
+.pkiw-mood-year [data-family="sad"] {
+	--pkiw-mood-family-fill: var(--cr-cerulean);
+	--pkiw-mood-family-code: var(--cr-printer-ivory);
+}
+
+.pkiw-mood-year [data-family="work"] {
+	--pkiw-mood-family-fill: var(--cr-glaucous-dark);
+	--pkiw-mood-family-code: var(--cr-printer-ivory);
+}
+
+.pkiw-mood-year [data-family="anxious"] {
+	--pkiw-mood-family-fill: var(--cr-russian-violet-soft);
+	--pkiw-mood-family-code: var(--cr-printer-ivory);
+}
+
+.pkiw-mood-year [data-family="playful"] {
+	--pkiw-mood-family-fill: var(--cr-prussian-blue);
+	--pkiw-mood-family-code: var(--cr-printer-ivory);
+}
+
+.pkiw-mood-year [data-family="uncertain"] {
+	--pkiw-mood-family-fill: var(--cr-russian-violet);
+	--pkiw-mood-family-code: var(--cr-printer-ivory);
+}
+
+.pkiw-mood-year [data-family="angry"] {
+	--pkiw-mood-family-fill: var(--cr-coral);
+	--pkiw-mood-family-code: var(--cr-printer-ivory);
+}
+
+.pkiw-mood-year .pkiw-mood-year__year {
+	display: inline-block;
+	justify-self: start;
+	margin: 0;
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	background-color: var(--cr-light-gray);
+	box-shadow: var(--cr-shadow-hard-sm);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-style: normal;
+	font-weight: var(--cr-weight-bold);
+	transform: none;
+}
+
+.pkiw-mood-year .pkiw-mood-legend,
+.pkiw-mood-year .pkiw-mood-daycard {
+	padding: var(--cr-space-md);
+	background-image: none;
+	transform: none;
+}
+
+.pkiw-mood-year .pkiw-mood-legend {
+	min-width: 0;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+}
+
+.pkiw-mood-year .pkiw-mood-legend__families,
+.pkiw-mood-year .pkiw-mood-daycard__entries {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pkiw-mood-year .pkiw-mood-legend__code {
+	font-weight: var(--cr-weight-bold);
+}
+
+.pkiw-mood-year .pkiw-mood-legend p {
+	font-size: var(--cr-text-sm);
+}
+
+.pkiw-mood-year .pkiw-mood-legend li[data-family] .pkiw-mood-legend__swatch {
+	inline-size: 1rem;
+	block-size: 1rem;
+	border: 1px solid var(--cr-ink);
+	background-color: var(--pkiw-mood-family-fill);
+	outline: 0;
+}
+
+.pkiw-mood-year .pkiw-mood-year__grid {
+	min-width: 0;
+	max-width: 100%;
+	transform: none;
+}
+
+.pkiw-mood-year .pkiw-mood-year__months {
+	box-sizing: border-box;
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+	border: 2px solid var(--cr-ink);
+	background-color: var(--cr-surface-elevated);
+}
+
+.pkiw-mood-year .pkiw-mood-month {
+	min-width: 0;
+}
+
+.pkiw-mood-year .pkiw-mood-month__name {
+	box-sizing: border-box;
+	width: 100%;
+	margin: 0;
+	padding-inline: var(--cr-space-sm);
+	background-color: var(--cr-periwinkle);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-style: normal;
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: normal;
+	text-align: start;
+	transform: none;
+}
+
+.pkiw-mood-year .pkiw-mood-year__gutter {
+	color: var(--cr-ink-muted);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+}
+
+.pkiw-mood-year .pkiw-mood-day {
+	border: 0;
+	background-color: var(--cr-surface-elevated);
+	transform: none;
+}
+
+.pkiw-mood-year .pkiw-mood-day::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	box-shadow: inset -1px -1px 0 var(--cr-rule);
+	pointer-events: none;
+}
+
+.pkiw-mood-year .pkiw-mood-day[data-family],
+.pkiw-mood-year .pkiw-mood-day__seg[data-family] {
+	background-color: var(--pkiw-mood-family-fill);
+	color: var(--pkiw-mood-family-code);
+}
+
+.pkiw-mood-year .pkiw-mood-day__code {
+	font-family: var(--cr-font-mono);
+	font-weight: var(--cr-weight-bold);
+}
+
+.pkiw-mood-day[data-family] .pkiw-mood-day__code {
+	font-size: var(--cr-text-sm);
+}
+
+.pkiw-mood-year .pkiw-mood-day__link:is(:link, :visited, :hover, :focus) {
+	color: inherit;
+	text-decoration: none;
+}
+
+.pkiw-mood-year .pkiw-mood-day__link:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.pkiw-mood-year .pkiw-mood-daycards {
+	display: grid;
+	gap: var(--cr-space-md);
+	min-width: 0;
+}
+
+.pkiw-mood-year .pkiw-mood-daycard {
+	margin: 0;
+	scroll-margin-block-start: var(--cr-space-4xl);
+}
+
+.pkiw-mood-year .pkiw-mood-daycard__date {
+	margin: 0 0 var(--cr-space-xs);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-style: normal;
+	font-weight: var(--cr-weight-bold);
+}
+
+.pkiw-mood-year .pkiw-mood-daycard__entries {
+	display: grid;
+	gap: var(--cr-space-xs);
+}
+
+.pkiw-mood-year .pkiw-mood-daycard__link {
+	display: inline-flex;
+	align-items: center;
+	min-block-size: 2.75rem;
+	font-family: var(--cr-font-body);
+	line-height: var(--cr-leading-snug);
+}
+
+.pkiw-mood-year .pkiw-mood-daycard:target {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
+}
+
+@media (min-width: 48rem) {
+
+	.pkiw-mood-year .pkiw-mood-year__grid,
+	.pkiw-mood-year .pkiw-mood-year__months {
+		width: max-content;
+	}
+
+	.pkiw-mood-year .pkiw-mood-month__name {
+		padding-inline: 0;
+		text-align: center;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.pkiw-mood-year {
+		grid-template-columns: max-content minmax(0, 1fr);
+		grid-template-rows: auto auto 1fr;
+		column-gap: var(--cr-space-xl);
+	}
+
+	.pkiw-mood-year .pkiw-mood-year__year {
+		grid-column: 1 / -1;
+		grid-row: 1;
+	}
+
+	.pkiw-mood-year .pkiw-mood-year__grid {
+		grid-column: 1;
+		grid-row: 2 / 4;
+		align-self: start;
+	}
+
+	.pkiw-mood-year .pkiw-mood-legend {
+		grid-column: 2;
+		grid-row: 2;
+		align-self: start;
+	}
+
+	.pkiw-mood-year .pkiw-mood-daycards {
+		grid-column: 2;
+		grid-row: 3;
+		align-self: start;
+	}
+}
+
+:root[data-theme="dark"] .pkiw-mood-year .cr-paper-sheet {
+	--cr-paper: var(--cr-surface-elevated);
+	--cr-paper-ink: var(--cr-ink);
+}
+
+:root[data-theme="dark"] .pkiw-mood-year .pkiw-mood-day:is([data-family="sad"], [data-family="work"], [data-family="anxious"], [data-family="playful"], [data-family="uncertain"], [data-family="angry"], [data-count]) {
+	--pkiw-mood-cell-edge: var(--cr-periwinkle);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .pkiw-mood-year .cr-paper-sheet {
+		--cr-paper: var(--cr-surface-elevated);
+		--cr-paper-ink: var(--cr-ink);
+	}
+
+	:root:not([data-theme="light"]) .pkiw-mood-year .pkiw-mood-day:is([data-family="sad"], [data-family="work"], [data-family="anxious"], [data-family="playful"], [data-family="uncertain"], [data-family="angry"], [data-count]) {
+		--pkiw-mood-cell-edge: var(--cr-periwinkle);
+	}
+}
+
+@media (forced-colors: active) {
+
+	.pkiw-mood-year .pkiw-mood-day {
+		border: 0;
+		background: Canvas;
+		color: CanvasText;
+		outline: 1px solid CanvasText;
+		outline-offset: -1px;
+	}
+
+	.pkiw-mood-year .pkiw-mood-day::after {
+		box-shadow: none;
+	}
+
+	.pkiw-mood-year .pkiw-mood-day[data-family],
+	.pkiw-mood-year .pkiw-mood-day[data-count] {
+		background: Canvas;
+		outline: 2px solid CanvasText;
+		outline-offset: -2px;
+	}
+
+	.pkiw-mood-year .pkiw-mood-day__seg[data-family] {
+		background: Canvas;
+		color: LinkText;
+	}
+
+	.pkiw-mood-year .pkiw-mood-day__link:focus-visible,
+	.pkiw-mood-year .pkiw-mood-daycard:target {
+		outline-color: Highlight;
+		box-shadow: none;
+	}
+
+	.pkiw-mood-year .pkiw-mood-legend {
+		border: 0;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.pkiw-mood-year .pkiw-mood-legend__swatch {
+		display: none;
+	}
+
+	.pkiw-mood-year .pkiw-mood-daycard:is(.cr-paper-sheet) {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.pkiw-mood-year .pkiw-mood-daycard::after {
+		display: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.pkiw-mood-year .pkiw-mood-day,
+	.pkiw-mood-year .pkiw-mood-day__link,
+	.pkiw-mood-year .pkiw-mood-day__seg,
+	.pkiw-mood-year .pkiw-mood-daycard,
+	.pkiw-mood-year .pkiw-mood-daycard__link {
+		transition: none;
+		transform: none;
+	}
+}

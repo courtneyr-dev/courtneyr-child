@@ -12,6 +12,8 @@
  * instead of by literal text, matching #207. A request failure, or a picked
  * mood with no vocabulary match, falls back to today's behavior and leaves
  * `moodKey` cleared.
+ * For issue 248, the preview reads intensity from editor meta, then from the
+ * block attribute, under W4-G29.
  */
 ( function ( wp ) {
 	'use strict';
@@ -111,6 +113,32 @@
 		var state = useState( '' );
 		var html = state[ 0 ];
 		var setHtml = state[ 1 ];
+		var useSelect = wp.data && typeof wp.data.useSelect === 'function' ? wp.data.useSelect : null;
+		var editedMeta = useSelect
+			? useSelect( function ( select ) {
+				try {
+					var editor = select( 'core/editor' );
+					if ( ! editor || typeof editor.getEditedPostAttribute !== 'function' ) {
+						return {};
+					}
+					var meta = editor.getEditedPostAttribute( 'meta' );
+					return meta && typeof meta === 'object' ? meta : {};
+				} catch ( error ) {
+					return {};
+				}
+			}, [] )
+			: {};
+		var metaIntensity = Number( editedMeta._pkiw_mood_rating );
+		var blockIntensity = Number( props.intensity );
+		var intensity =
+			metaIntensity >= 1 && metaIntensity <= 5 && metaIntensity === Math.floor( metaIntensity )
+				? metaIntensity
+				: blockIntensity >= 1 &&
+				  blockIntensity <= 5 &&
+				  blockIntensity === Math.floor( blockIntensity ) &&
+				  blockIntensity !== 3
+				? blockIntensity
+				: 0;
 
 		useEffect(
 			function () {
@@ -122,7 +150,9 @@
 						'&emoji=' +
 						encodeURIComponent( props.emoji || '' ) +
 						'&moodKey=' +
-						encodeURIComponent( props.moodKey || '' ),
+						encodeURIComponent( props.moodKey || '' ) +
+						'&intensity=' +
+						intensity,
 				} )
 					.then( function ( response ) {
 						if ( live && response && response.html ) {
@@ -134,7 +164,7 @@
 					live = false;
 				};
 			},
-			[ props.mood, props.emoji, props.moodKey ]
+			[ props.mood, props.emoji, props.moodKey, intensity ]
 		);
 
 		if ( ! html ) {
@@ -155,6 +185,7 @@
 			var mood = props.attributes.mood;
 			var emoji = props.attributes.emoji;
 			var moodKey = props.attributes.moodKey;
+			var intensity = props.attributes.intensity;
 			var match = findMood( mood, moodKey );
 
 			return el(
@@ -206,7 +237,7 @@
 										'courtneyr-child'
 								  )
 						),
-						el( Preview, { mood: mood, emoji: emoji, moodKey: moodKey } )
+						el( Preview, { mood: mood, emoji: emoji, moodKey: moodKey, intensity: intensity } )
 					)
 				)
 			);
