@@ -43,8 +43,7 @@ const EXPECTED_SVGS = [
 	'cloud-dark.svg', 'cloud-halftone.svg', 'cloud.svg', 'fog-dark.svg', 'fog.svg', 'leaves.svg',
 	'mast.svg', 'rain-dark.svg', 'rain.svg', 'snow-dark.svg', 'snow.svg', 'storm-dark.svg',
 	'storm.svg', 'sun-dark.svg', 'sun-wheel.svg', 'sun.svg', 'thermometer-dark.svg',
-	'thermometer.svg', 'torn-edge-dark.svg', 'torn-edge.svg', 'torn-paper.svg', 'wind-dark.svg',
-	'wind.svg',
+	'thermometer.svg', 'torn-edge.svg', 'torn-paper.svg', 'wind-dark.svg', 'wind.svg',
 ];
 
 const isDark = ( testInfo ) => testInfo.project.name.endsWith( 'dark' );
@@ -280,6 +279,8 @@ export function checkWeatherSvgs( root = THEME_ROOT ) {
 		const source = readFileSync( resolve( directory, name ), 'utf8' );
 		if ( /<text\b/i.test( source ) ) failures.push( `${ name }: text element` );
 		if ( /gradient|filter|opacity/i.test( source ) ) failures.push( `${ name }: forbidden effect` );
+		// A double hyphen inside an XML comment makes the browser reject the whole image.
+		if ( [ ...source.matchAll( /<!--([\s\S]*?)-->/g ) ].some( ( comment ) => comment[ 1 ].includes( '--' ) ) ) failures.push( `${ name }: -- inside a comment` );
 		for ( const hex of source.match( /#[0-9a-fA-F]{3,8}\b/g ) || [] ) {
 			if ( hex !== hex.toLowerCase() ) failures.push( `${ name }: uppercase ${ hex }` );
 			if ( ! palette.has( hex.toLowerCase() ) ) failures.push( `${ name }: off-palette ${ hex }` );
@@ -985,9 +986,8 @@ test.describe( 'stream', () => {
 			expect( state.heightFits, `card ${ index } fits content` ).toBe( true );
 			expect( state.background, `card ${ index } paper` ).toBe( IVORY );
 			expect( state.backgroundClip, `card ${ index } paper stops inside the torn band` ).toBe( 'padding-box' );
-			expect( state.border[ 0 ], `card ${ index } torn band width` ).toBe( '12px' );
-			expect( state.border[ 1 ], `card ${ index } torn edge draws the scheme's hard shadow` ).toMatch( isDark( testInfo ) ? /torn-edge-dark\.svg/ : /torn-edge\.svg/ );
-			expect( state.shadow, `card ${ index } has no rectangular shadow under the torn edge` ).toBe( 'none' );
+			expect( state.border, `card ${ index } torn paper band` ).toEqual( [ '8px', expect.stringMatching( /torn-edge\.svg/ ) ] );
+			expect( state.shadow, `card ${ index } scheme shadow` ).toBe( `${ isDark( testInfo ) ? SELECTIVE_YELLOW : INK } 4px 4px 0px 0px` );
 			expect( allowedRotation( rotation( state.tapeTransform ) ), `card ${ index } tape rotation` ).toBe( true );
 			expect( allowedRotation( rotation( state.cardTransform ), true ), `card ${ index } collage rotation` ).toBe( true );
 			expect( state.rotatedChildren, `card ${ index } has no third rotated layer` ).toBe( 0 );

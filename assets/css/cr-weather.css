@@ -439,29 +439,18 @@
 	min-width: 0;
 	height: auto;
 	margin: 0;
-	--cr-thermo-edge: 0.625rem;
+	--cr-thermo-edge: 0.375rem;
 	padding: calc(var(--cr-space-xl) - var(--cr-thermo-edge)) calc(var(--cr-space-lg) - var(--cr-thermo-edge)) calc(var(--cr-space-lg) - var(--cr-thermo-edge));
-	border: 0.75rem solid transparent;
-	border-image: url(../img/weather/torn-edge.svg) 12 / 0.75rem round;
+	border: 0.5rem solid transparent;
+	border-image: url(../img/weather/torn-edge.svg) 8 / 0.5rem round;
 	background: padding-box var(--cr-printer-ivory);
-	box-shadow: none;
+	box-shadow: var(--cr-shadow-hard);
 	color: var(--cr-russian-violet);
 	overflow-wrap: anywhere;
 }
 
-/* --cr-thermo-edge is the extra border band the torn edge needs (12px against the old 2px); padding, tape and glass give it back so content keeps its place.
-   The torn perimeter draws its own hard shadow, so dark mode swaps in the selective-yellow copy. The article stays the focus target, so the ring is unbroken. */
-:root[data-theme="dark"] .pk-card.pk-card--stream.cr-thermo {
-	border-image-source: url(../img/weather/torn-edge-dark.svg);
-}
-
-@media (prefers-color-scheme: dark) {
-
-	:root:not([data-theme]) .pk-card.pk-card--stream.cr-thermo,
-	:root[data-theme="system"] .pk-card.pk-card--stream.cr-thermo {
-		border-image-source: url(../img/weather/torn-edge-dark.svg);
-	}
-}
+/* --cr-thermo-edge is the extra border band the torn edge needs (8px against the old 2px); padding, tape and glass give it back so content keeps its place.
+   The article stays the focus target, so the ring is unbroken, and the hard shadow stays the scheme-aware --cr-shadow-hard token. */
 
 .pk-card.pk-card--stream.cr-thermo:has(.cr-thermo__glass) {
 	padding-inline-end: calc(var(--cr-space-4xl) - var(--cr-thermo-edge));
