@@ -1,12 +1,12 @@
-<!-- Decorative leafy sprig for issue 246; CSS background only. -->
+<!-- Decorative leafy sprig for issue 246; CSS background only. Glaucous stem and blue fills read on ivory and on the dark page. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240" width="180" height="240">
-	<path d="M89 225C91 169 89 112 101 26" fill="none" stroke="#023047" stroke-width="5" stroke-linecap="round"/>
+	<path d="M89 225C91 169 89 112 101 26" fill="none" stroke="#647baf" stroke-width="5" stroke-linecap="round"/>
 	<g stroke="#241c4a" stroke-width="3" stroke-linejoin="round">
 		<path d="M98 55C69 51 52 35 52 14c26-2 44 12 46 41Z" fill="#219ebc"/>
-		<path d="M95 82c28-5 48-22 52-45-26-5-47 11-52 45Z" fill="#126782"/>
-		<path d="M92 112c-29-1-50-14-57-37 25-9 49 5 57 37Z" fill="#023047"/>
+		<path d="M95 82c28-5 48-22 52-45-26-5-47 11-52 45Z" fill="#647baf"/>
+		<path d="M92 112c-29-1-50-14-57-37 25-9 49 5 57 37Z" fill="#8ecae6"/>
 		<path d="M91 139c27-2 49-16 56-39-25-8-48 6-56 39Z" fill="#219ebc"/>
-		<path d="M89 169c-26 1-48-10-58-31 22-11 48 1 58 31Z" fill="#126782"/>
-		<path d="M88 195c24 2 45-8 56-28-21-12-45-2-56 28Z" fill="#023047"/>
+		<path d="M89 169c-26 1-48-10-58-31 22-11 48 1 58 31Z" fill="#647baf"/>
+		<path d="M88 195c24 2 45-8 56-28-21-12-45-2-56 28Z" fill="#8ecae6"/>
 	</g>
 </svg>
