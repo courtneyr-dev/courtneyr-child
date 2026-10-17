@@ -32,7 +32,6 @@
 	font-weight: var(--cr-weight-bold);
 	line-height: var(--cr-leading-snug);
 	overflow-wrap: anywhere;
-	transform: rotate(var(--cr-rotate-1));
 }
 
 :is(.cr-sleep, body.cr-sleep-archive) ol.pkiw-sleep-sheet {
@@ -72,6 +71,20 @@
 
 :is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night:last-child {
 	border-block-end: 0;
+}
+
+/* The shared archive list gives every post a lift and an orange marker bar. Night cells are chart cells, so they reset both. */
+.cr-archive .cr-sleep .wp-block-post.pkiw-sleep-night {
+	transition: none;
+}
+
+.cr-archive .cr-sleep .wp-block-post.pkiw-sleep-night:hover {
+	transform: none;
+}
+
+.cr-archive .cr-sleep .wp-block-post.pkiw-sleep-night::after {
+	content: none;
+	display: none;
 }
 
 :is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night__title {
@@ -270,6 +283,7 @@
 	:is(.cr-sleep, body.cr-sleep-archive) .pkiw-sleep-night {
 		display: grid;
 		grid-row: span 6;
+		grid-template-columns: minmax(0, 1fr);
 		grid-template-rows: subgrid;
 		gap: 0;
 		min-block-size: 0;
@@ -315,6 +329,7 @@
 		grid-column: 1;
 		grid-row: 4;
 		align-self: end;
+		justify-self: center;
 		inline-size: 3rem;
 		block-size: calc(var(--pkiw-sleep-ratio, 0) * var(--cr-sleep-track));
 		margin-block-start: 0;
