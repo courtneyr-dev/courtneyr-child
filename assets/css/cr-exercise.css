@@ -1,0 +1,893 @@
+/**
+ * Exercise kind surfaces for issue 245: training-log archive, single bib and Stream bib corner.
+ * Paper objects keep their light palette in dark mode; page panels follow the active scheme.
+ */
+/* stylelint-disable no-descending-specificity -- archive, single and Stream selectors target separate surfaces. */
+
+/* ============================================================
+   Archive
+   ============================================================ */
+
+.cr-exercise {
+	--cr-focus-halo: var(--cr-russian-violet);
+
+	position: relative;
+	min-width: 0;
+}
+
+.cr-exercise::before,
+.cr-exercise::after {
+	pointer-events: none;
+}
+
+/* The shared archive list adds spacing, a lift and a marker divider to every
+   post. Exercise posts are the bibs inside each day, so they reset all four. */
+.cr-archive .cr-exercise .wp-block-post {
+	position: relative;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	transition: none;
+}
+
+.cr-archive .cr-exercise .wp-block-post:not(:last-child)::after {
+	content: none;
+}
+
+.cr-archive .cr-exercise .wp-block-post:hover {
+	transform: none;
+}
+
+.cr-exercise .pkiw-medal-row {
+	position: relative;
+	z-index: 1;
+	margin-block-end: var(--cr-space-2xl);
+}
+
+.cr-exercise .pkiw-medal-row__heading,
+.cr-exercise .pkiw-exercise-week__heading {
+	margin: 0 0 var(--cr-space-md);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-xl), var(--cr-text-floor));
+	font-weight: var(--cr-weight-extrabold);
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+}
+
+.cr-exercise .pkiw-medal-row__heading {
+	display: inline-block;
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-periwinkle);
+}
+
+.cr-exercise .pkiw-medal-row__list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cr-space-md);
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-exercise .pkiw-medal {
+	position: relative;
+	min-width: 0;
+	margin: 0;
+}
+
+.cr-exercise .pkiw-medal__link {
+	display: inline-flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	min-width: 5.5rem;
+	min-height: 5.5rem;
+	gap: var(--cr-space-3xs);
+	padding: var(--cr-space-sm);
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: var(--cr-radius-full);
+	background: var(--cr-selective-yellow);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+	text-align: center;
+	text-decoration: none;
+}
+
+.cr-exercise .pkiw-medal__category {
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-md), var(--cr-text-floor));
+	font-weight: var(--cr-weight-extrabold);
+	line-height: var(--cr-leading-tight);
+}
+
+.cr-exercise .pkiw-medal__time {
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	font-variant-numeric: tabular-nums;
+	font-weight: var(--cr-weight-bold);
+}
+
+.cr-exercise .pkiw-medal:focus-within {
+	z-index: 2;
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+	border-radius: var(--cr-radius-full);
+}
+
+.cr-exercise .pkiw-medal__link:focus-visible {
+	outline: 0;
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-exercise .pkiw-exercise-week {
+	position: relative;
+	z-index: 1;
+	box-sizing: border-box;
+	min-width: 0;
+	margin: 0 0 var(--cr-space-2xl);
+	padding: var(--cr-space-md);
+	border: 2px solid var(--cr-ink);
+	background: var(--cr-light-gray);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-ink);
+}
+
+.cr-exercise .pkiw-exercise-week__heading {
+	display: table;
+	padding: var(--cr-space-2xs) var(--cr-space-sm);
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	font-family: var(--cr-font-mono);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	letter-spacing: var(--cr-tracking-wide);
+}
+
+/* These two-class rules beat both the plugin sheet and cr-calendar.css at
+   every width, so empty days never appear at the shared 48rem breakpoint. */
+.cr-exercise .pkiw-exercise-week__days {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-sm);
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-exercise .pkiw-exercise-day {
+	display: grid;
+	grid-template-rows: auto 1fr;
+	align-content: start;
+	gap: 0;
+	min-width: 0;
+	min-height: 2.75rem;
+	margin: 0;
+	padding: 0;
+	border: 1px solid var(--cr-rule);
+	background: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+}
+
+.cr-exercise .pkiw-exercise-day.pkiw-exercise-day--empty {
+	display: none;
+}
+
+.cr-exercise .pkiw-exercise-day > time {
+	display: block;
+	box-sizing: border-box;
+	min-height: 2.75rem;
+	padding: var(--cr-space-xs);
+	background: var(--cr-russian-violet);
+	color: var(--cr-printer-ivory);
+	font-family: var(--cr-font-mono);
+	font-size: max(var(--cr-text-xs), var(--cr-text-floor));
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-snug);
+}
+
+.cr-exercise .pkiw-exercise-day__bibs {
+	display: grid;
+	align-content: start;
+	gap: var(--cr-space-sm);
+	max-width: none;
+	margin: 0;
+	padding: var(--cr-space-sm);
+	list-style: none;
+}
+
+.cr-exercise .pkiw-exercise-day__bibs > .wp-block-post {
+	display: grid;
+	gap: var(--cr-space-2xs);
+	box-sizing: border-box;
+	min-width: 0;
+	min-height: 2.75rem;
+	padding: var(--cr-space-lg) var(--cr-space-sm) var(--cr-space-sm);
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+}
+
+.cr-exercise .pkiw-exercise-day__bibs > .wp-block-post.cr-bib--sky-blue {
+	background: var(--cr-sky-blue);
+}
+
+.cr-exercise .pkiw-exercise-day__bibs > .wp-block-post.cr-bib--periwinkle {
+	background: var(--cr-periwinkle);
+}
+
+.cr-exercise .pkiw-exercise-day__bibs > .wp-block-post.cr-bib--light-orange {
+	background: var(--cr-light-orange);
+}
+
+.cr-exercise .pkiw-exercise-day__bibs > .wp-block-post.cr-bib--light-gray {
+	background: var(--cr-light-gray);
+}
+
+.cr-exercise .pkiw-exercise-day__bibs > .wp-block-post.cr-bib--printer-ivory {
+	background: var(--cr-printer-ivory);
+}
+
+/* One flat pin. The pseudo-element never enters the accessibility tree. */
+.cr-exercise .pkiw-exercise-day__bibs > .wp-block-post::before {
+	content: "";
+	position: absolute;
+	inset-block-start: var(--cr-space-xs);
+	inset-inline-start: 50%;
+	z-index: 2;
+	inline-size: var(--cr-space-sm);
+	block-size: var(--cr-space-sm);
+	margin-inline-start: calc(-0.5 * var(--cr-space-sm));
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: var(--cr-radius-full);
+	background: var(--cr-ut-orange);
+	pointer-events: none;
+}
+
+.cr-exercise .pkiw-exercise-bib__title {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-md), var(--cr-text-floor));
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.cr-exercise .pkiw-exercise-bib__link,
+.cr-exercise .pkiw-exercise-bib__link:visited {
+	color: var(--cr-russian-violet);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.2em;
+}
+
+.cr-exercise .pkiw-exercise-bib__link:hover {
+	color: var(--cr-russian-violet);
+	text-decoration-thickness: 2px;
+}
+
+/* The only visible link covers the bib and guarantees a 44px target. */
+.cr-exercise .pkiw-exercise-bib__link::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+.cr-exercise .pkiw-exercise-bib__activity {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	font-weight: var(--cr-weight-semibold);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.cr-exercise .pkiw-exercise-day__bibs > .wp-block-post:focus-within {
+	z-index: 2;
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-exercise .pkiw-exercise-bib__link:focus-visible {
+	outline: 0;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+.cr-exercise .pkiw-exercise-week__summary {
+	margin: var(--cr-space-md) 0 0;
+	color: var(--cr-ink);
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	font-variant-numeric: tabular-nums;
+	font-weight: var(--cr-weight-semibold);
+	line-height: var(--cr-leading-snug);
+}
+
+@media (min-width: 40rem) {
+
+	.cr-exercise::before {
+		content: "";
+		display: block;
+		height: 8rem;
+		background-image: url(../img/exercise-shoes.svg);
+		background-position: left bottom;
+		background-repeat: no-repeat;
+		background-size: auto 88%;
+	}
+
+	.cr-exercise::after {
+		content: "";
+		position: absolute;
+		inset-block-start: 0;
+		inset-inline-end: 0;
+		display: block;
+		inline-size: 40%;
+		block-size: 8rem;
+		background-image: url(../img/exercise-fern.svg);
+		background-position: right bottom;
+		background-repeat: no-repeat;
+		background-size: auto 92%;
+	}
+
+	.cr-exercise .pkiw-exercise-week__days {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 48rem) {
+
+	.cr-exercise .pkiw-exercise-week__days {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-exercise::before {
+		height: 11rem;
+		background-image: url(../img/exercise-shoes.svg), url(../img/exercise-towel.svg);
+		background-position: left bottom, 31% bottom;
+		background-size: auto 92%, auto 62%;
+	}
+
+	.cr-exercise::after {
+		inline-size: 48%;
+		block-size: 11rem;
+		background-image: url(../img/exercise-bottle.svg), url(../img/exercise-fern.svg);
+		background-position: 44% bottom, right bottom;
+		background-size: auto 72%, auto 96%;
+	}
+
+	.cr-exercise .pkiw-exercise-week__days {
+		grid-template-columns: repeat(7, minmax(0, 1fr));
+	}
+
+	.cr-exercise .pkiw-exercise-day.pkiw-exercise-day--empty {
+		display: block;
+		border-style: dashed;
+		background: var(--cr-surface-elevated);
+		opacity: 0.4;
+	}
+}
+
+/* Paper bibs and medals stay light; only panels follow the night surface. */
+:root[data-theme="dark"] .cr-exercise .pkiw-exercise-week,
+:root[data-theme="dark"] .cr-exercise .pkiw-exercise-day {
+	border-color: var(--cr-rule);
+	background: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-exercise .pkiw-exercise-week,
+	:root:not([data-theme="light"]) .cr-exercise .pkiw-exercise-day {
+		border-color: var(--cr-rule);
+		background: var(--cr-surface-elevated);
+		color: var(--cr-ink);
+	}
+}
+
+/* ============================================================
+   Single
+   ============================================================ */
+
+body.cr-single--exercise main.single-post {
+	position: relative;
+}
+
+body.cr-single--exercise main.single-post .single-post__title {
+	display: block;
+	width: fit-content;
+	max-width: 100%;
+	padding-block-end: var(--cr-space-xs);
+	border-block-end: 0.35rem solid var(--cr-marker);
+	font-family: var(--cr-font-accent);
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows: repeat(5, auto) auto auto;
+	row-gap: 0;
+	isolation: isolate;
+	box-sizing: border-box;
+	min-width: 0;
+	max-width: 70rem;
+	margin: var(--cr-space-xl) auto;
+	color: var(--cr-russian-violet);
+}
+
+/* The card's fields are siblings. This grid item supplies one continuous
+   paper bib behind rows 1-5 without inventing a wrapper in plugin markup. */
+body.cr-single--exercise main.single-post .pkiw-exercise::before {
+	content: "";
+	grid-column: 1;
+	grid-row: 1 / 6;
+	z-index: -1;
+	box-sizing: border-box;
+	min-width: 0;
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+/* The bottom pair of grommets; the band draws the top pair. */
+body.cr-single--exercise main.single-post .pkiw-exercise::after {
+	content: "";
+	grid-column: 1;
+	grid-row: 5;
+	z-index: 2;
+	align-self: end;
+	justify-self: center;
+	box-sizing: border-box;
+	inline-size: calc(100% - 2 * var(--cr-space-lg));
+	block-size: var(--cr-space-sm);
+	margin-block: var(--cr-space-md) var(--cr-space-xs);
+	border-inline: var(--cr-space-sm) solid var(--cr-light-gray);
+	border-radius: var(--cr-radius-full);
+	pointer-events: none;
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__band {
+	position: relative;
+	grid-column: 1;
+	grid-row: 1;
+	z-index: 1;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cr-space-xs) var(--cr-space-md);
+	box-sizing: border-box;
+	min-width: 0;
+	margin: 0;
+	padding: var(--cr-space-lg) var(--cr-space-xl) var(--cr-space-md);
+	background: var(--cr-cerulean);
+	color: var(--cr-printer-ivory);
+}
+
+/* Two flat discs made from the inline borders keep the grommets CSS-only. */
+body.cr-single--exercise main.single-post .pkiw-exercise__band::before {
+	content: "";
+	position: absolute;
+	inset-block-start: var(--cr-space-xs);
+	inset-inline-start: var(--cr-space-lg);
+	box-sizing: border-box;
+	inline-size: calc(100% - 2 * var(--cr-space-lg));
+	block-size: var(--cr-space-sm);
+	border-inline: var(--cr-space-sm) solid var(--cr-light-gray);
+	border-radius: var(--cr-radius-full);
+	pointer-events: none;
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__activity,
+body.cr-single--exercise main.single-post .pkiw-exercise__date {
+	margin: 0;
+	color: var(--cr-printer-ivory);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	line-height: var(--cr-leading-snug);
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__activity {
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-xl), var(--cr-text-floor));
+	font-weight: var(--cr-weight-extrabold);
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__date {
+	font-family: var(--cr-font-mono);
+	letter-spacing: var(--cr-tracking-wide);
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__distance,
+body.cr-single--exercise main.single-post .pkiw-exercise__duration,
+body.cr-single--exercise main.single-post .pkiw-exercise__best,
+body.cr-single--exercise main.single-post .pkiw-exercise__place {
+	z-index: 1;
+	grid-column: 1;
+	box-sizing: border-box;
+	min-width: 0;
+	margin: 0;
+	padding-block-start: var(--cr-space-sm);
+	padding-inline: var(--cr-space-lg);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-md), var(--cr-text-floor));
+	font-variant-numeric: tabular-nums;
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__distance {
+	grid-row: 2;
+	font-size: max(var(--cr-text-3xl), var(--cr-text-floor));
+	font-weight: var(--cr-weight-extrabold);
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__duration {
+	grid-row: 3;
+	font-size: max(var(--cr-text-2xl), var(--cr-text-floor));
+	font-weight: var(--cr-weight-bold);
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__best {
+	grid-row: 4;
+	font-weight: var(--cr-weight-bold);
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__place {
+	grid-row: 5;
+	padding-block-end: var(--cr-space-xl);
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__splits-heading {
+	grid-column: 1;
+	grid-row: 6;
+	min-width: 0;
+	margin: var(--cr-space-lg) 0 0;
+	color: var(--cr-ink);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-2xl), var(--cr-text-floor));
+	font-weight: var(--cr-weight-extrabold);
+	line-height: var(--cr-leading-tight);
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__splits {
+	grid-column: 1;
+	grid-row: 7;
+	box-sizing: border-box;
+	min-width: 0;
+	width: 100%;
+	margin: 0;
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	font-variant-numeric: tabular-nums;
+	table-layout: fixed;
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__splits thead {
+	border-block-end: 2px solid var(--cr-russian-violet);
+	background: var(--cr-cerulean);
+	color: var(--cr-printer-ivory);
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__splits th,
+body.cr-single--exercise main.single-post .pkiw-exercise__splits td {
+	padding: var(--cr-space-xs);
+	border: 1px solid var(--cr-russian-violet);
+	text-align: center;
+	overflow-wrap: anywhere;
+}
+
+body.cr-single--exercise main.single-post .pkiw-exercise__splits th {
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold);
+}
+
+@media (min-width: 40rem) {
+
+	body.cr-single--exercise main.single-post::after {
+		content: "";
+		position: absolute;
+		inset-block-start: 8rem;
+		inset-inline-end: var(--cr-space-lg);
+		z-index: 0;
+		inline-size: min(12rem, 20vw);
+		aspect-ratio: 3 / 4;
+		background: url(../img/exercise-sprig.svg) center / contain no-repeat;
+		pointer-events: none;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	body.cr-single--exercise main.single-post .pkiw-exercise {
+		grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+		column-gap: var(--cr-space-2xl);
+		align-items: start;
+	}
+
+	body.cr-single--exercise main.single-post .pkiw-exercise__splits-heading {
+		grid-column: 2;
+		grid-row: 1;
+		margin: 0;
+	}
+
+	body.cr-single--exercise main.single-post .pkiw-exercise__splits {
+		grid-column: 2;
+		grid-row: 2 / span 5;
+		align-self: start;
+	}
+}
+
+:root[data-theme="dark"] body.cr-single--exercise main.single-post .pkiw-exercise__splits {
+	border-color: var(--cr-rule);
+	background: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+}
+
+:root[data-theme="dark"] body.cr-single--exercise main.single-post .pkiw-exercise__splits th,
+:root[data-theme="dark"] body.cr-single--exercise main.single-post .pkiw-exercise__splits td {
+	border-color: var(--cr-rule);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) body.cr-single--exercise main.single-post .pkiw-exercise__splits {
+		border-color: var(--cr-rule);
+		background: var(--cr-surface-elevated);
+		color: var(--cr-ink);
+	}
+
+	:root:not([data-theme="light"]) body.cr-single--exercise main.single-post .pkiw-exercise__splits th,
+	:root:not([data-theme="light"]) body.cr-single--exercise main.single-post .pkiw-exercise__splits td {
+		border-color: var(--cr-rule);
+	}
+}
+
+/* ============================================================
+   Stream
+   ============================================================ */
+
+.pk-card.pk-card--stream.cr-bib-corner {
+	--cr-focus-halo: var(--cr-russian-violet);
+
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	inline-size: 86%;
+	max-inline-size: 100%;
+	min-width: 0;
+	min-height: 2.75rem;
+	margin-inline: auto;
+	padding: var(--cr-space-md) var(--cr-space-lg) var(--cr-space-xl);
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: 0;
+	background: var(--cr-printer-ivory);
+	box-shadow: none;
+	color: var(--cr-russian-violet);
+	clip-path: polygon(0 0, 100% 0, 100% 91%, 96% 96%, 90% 93%, 84% 100%, 76% 95%, 68% 99%, 59% 94%, 50% 100%, 41% 95%, 32% 99%, 23% 94%, 14% 100%, 7% 95%, 0 98%);
+}
+
+/* clip-path runs after filter, so a drop-shadow on the torn card itself would be cut off with its edge.
+   The hard shadow sits on the Stream item that holds the card, which has no stored image. */
+:is(.cr-stream-page, .cr-home-stream) li.wp-block-post:has(.pk-card.pk-card--stream.cr-bib-corner) {
+	filter: drop-shadow(var(--cr-shadow-hard));
+}
+
+:is(.cr-stream-page, .cr-home-stream) li.wp-block-post .pk-card.pk-card--stream.cr-bib-corner {
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+/* Two flat grommets. */
+.pk-card.pk-card--stream.cr-bib-corner::before,
+.pk-card.pk-card--stream.cr-bib-corner::after {
+	content: "";
+	position: absolute;
+	inset-block-start: var(--cr-space-xs);
+	z-index: 2;
+	inline-size: var(--cr-space-sm);
+	block-size: var(--cr-space-sm);
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: var(--cr-radius-full);
+	background: var(--cr-light-gray);
+	pointer-events: none;
+}
+
+.pk-card.pk-card--stream.cr-bib-corner::before {
+	inset-inline-start: var(--cr-space-md);
+}
+
+.pk-card.pk-card--stream.cr-bib-corner::after {
+	inset-inline-end: var(--cr-space-md);
+}
+
+.pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__kind {
+	margin: calc(-1 * var(--cr-space-md)) calc(-1 * var(--cr-space-lg)) var(--cr-space-md);
+	padding: var(--cr-space-lg) var(--cr-space-xl) var(--cr-space-sm);
+	background: var(--cr-cerulean);
+	color: var(--cr-printer-ivory);
+	font-family: var(--cr-font-mono);
+	font-size: max(var(--cr-text-xs), var(--cr-text-floor));
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	line-height: var(--cr-leading-tight);
+	text-transform: uppercase;
+}
+
+.pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__title {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-xl), var(--cr-text-floor));
+	font-weight: var(--cr-weight-extrabold);
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+}
+
+.pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__link,
+.pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__link:visited {
+	color: var(--cr-russian-violet);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.2em;
+}
+
+.pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__link:hover {
+	color: var(--cr-russian-violet);
+	text-decoration-thickness: 2px;
+}
+
+.pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__link::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+}
+
+.pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__activity,
+.pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__distance {
+	margin: var(--cr-space-xs) 0 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-md), var(--cr-text-floor));
+	font-variant-numeric: tabular-nums;
+	font-weight: var(--cr-weight-semibold);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__pin {
+	position: absolute;
+	inset-block-start: var(--cr-space-xs);
+	inset-inline-start: 50%;
+	z-index: 4;
+	inline-size: var(--cr-space-md);
+	block-size: var(--cr-space-md);
+	margin-inline-start: calc(-0.5 * var(--cr-space-md));
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: var(--cr-radius-full);
+	background: var(--cr-selective-yellow);
+	pointer-events: none;
+}
+
+.pk-card.pk-card--stream.cr-bib-corner:focus-within {
+	z-index: 2;
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+	clip-path: none;
+}
+
+.pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__link:focus-visible {
+	outline: 0;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.cr-exercise .pkiw-exercise-day__bibs > .wp-block-post,
+	.cr-exercise .pkiw-medal,
+	.cr-exercise .pkiw-medal__link {
+		transition: none;
+	}
+
+	.cr-exercise .pkiw-exercise-day__bibs > .wp-block-post:hover,
+	.cr-exercise .pkiw-medal:hover,
+	.cr-exercise .pkiw-medal__link:hover {
+		transform: none;
+	}
+}
+
+@media (forced-colors: active) {
+
+	:is(.cr-stream-page, .cr-home-stream) li.wp-block-post:has(.pk-card.pk-card--stream.cr-bib-corner) {
+		filter: none;
+	}
+
+	.cr-exercise::before,
+	.cr-exercise::after,
+	body.cr-single--exercise main.single-post::after,
+	.cr-exercise .pkiw-exercise-day__bibs > .wp-block-post::before,
+	body.cr-single--exercise main.single-post .pkiw-exercise::after,
+	body.cr-single--exercise main.single-post .pkiw-exercise__band::before,
+	.pk-card.pk-card--stream.cr-bib-corner::before,
+	.pk-card.pk-card--stream.cr-bib-corner::after,
+	.pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__pin {
+		display: none !important;
+	}
+
+	.cr-exercise .pkiw-exercise-day.pkiw-exercise-day--empty {
+		display: none !important;
+	}
+
+	.cr-exercise .pkiw-exercise-day:not(.pkiw-exercise-day--empty),
+	.cr-exercise .pkiw-exercise-day__bibs > .wp-block-post,
+	.cr-exercise .pkiw-medal__link,
+	body.cr-single--exercise main.single-post .pkiw-exercise::before,
+	body.cr-single--exercise main.single-post .pkiw-exercise__splits {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-exercise .pkiw-exercise-day > time,
+	.cr-exercise .pkiw-exercise-week__heading,
+	.cr-exercise .pkiw-medal-row__heading,
+	body.cr-single--exercise main.single-post .pkiw-exercise__band,
+	body.cr-single--exercise main.single-post .pkiw-exercise__splits thead,
+	.pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__kind {
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	body.cr-single--exercise main.single-post .pkiw-exercise__splits th,
+	body.cr-single--exercise main.single-post .pkiw-exercise__splits td {
+		border: 1px solid CanvasText;
+	}
+
+	.cr-exercise .pkiw-exercise-bib__link,
+	.cr-exercise .pkiw-medal__link,
+	.pk-card.pk-card--stream.cr-bib-corner .cr-bib-corner__link {
+		color: LinkText;
+	}
+
+	.pk-card.pk-card--stream.cr-bib-corner {
+		border: 2px solid CanvasText !important;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+		clip-path: none;
+	}
+
+	body.cr-single--exercise main.single-post .single-post__title {
+		border-color: CanvasText;
+	}
+
+	.cr-exercise .pkiw-exercise-day__bibs > .wp-block-post:focus-within,
+	.cr-exercise .pkiw-medal:focus-within,
+	.pk-card.pk-card--stream.cr-bib-corner:focus-within {
+		outline-color: Highlight;
+		box-shadow: none;
+	}
+}
