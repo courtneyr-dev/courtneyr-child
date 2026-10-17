@@ -109,25 +109,6 @@ function register_blocks(): void {
 add_action( 'init', __NAMESPACE__ . '\\register_blocks' );
 
 /**
- * Register the weather board with editor parity.
- *
- * @param array<string, array{classes?: array<int, string>}> $kinds Registry so far.
- * @return array<string, array{classes?: array<int, string>}>
- */
-function register_editor_parity( array $kinds ): array {
-	$classes = isset( $kinds[ KIND ]['classes'] ) && is_array( $kinds[ KIND ]['classes'] )
-		? $kinds[ KIND ]['classes']
-		: array( 'single-post', 'kind-' . KIND );
-	if ( ! in_array( 'cr-weather-board', $classes, true ) ) {
-		$classes[] = 'cr-weather-board';
-	}
-	$kinds[ KIND ]['classes'] = $classes;
-
-	return $kinds;
-}
-add_filter( 'courtneyr_child_editor_parity_kinds', __NAMESPACE__ . '\\register_editor_parity' );
-
-/**
  * Add the locale weekday row and every empty day to an almanac month.
  *
  * Existing day cells stay intact except day 1, whose opening tag receives the

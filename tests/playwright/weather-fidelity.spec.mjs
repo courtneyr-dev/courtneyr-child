@@ -1,12 +1,15 @@
-// `CR_SPEC=weather-fidelity.spec.mjs npx playwright test --config tests/playwright/playwright.config.mjs`:
+// `CR_WEATHER_REQUIRE_SEED=1 CR_WEATHER_START_OF_WEEK=$(wp option get start_of_week) CR_SPEC=weather-fidelity.spec.mjs npx playwright test --config tests/playwright/playwright.config.mjs`:
 // weather surfaces for issue 246. Read-only GETs; needs the local stack with `_cr_seed_246`
 // fixtures from the vault seed-246.php, cr-local-sloc-weather-stub.php, and
-// cr-local-stream-weather.php. Set start_of_week 0, sloc_measurements imperial, and geo_public
-// private. Optional inputs: CR_WEATHER_ARCHIVE_PATH (default /kind/weather/),
-// CR_WEATHER_STREAM_PATH (default /stream/), CR_WEATHER_START_OF_WEEK (default 0), and
-// CR_WEATHER_STORAGE_STATE (an administrator Playwright storageState path; logged-in checks skip
-// when unset). Simple Location head, feed, and REST gate proofs stay dev-only in
-// privacy-check-246.php. This file has not been run against a stack.
+// cr-local-stream-weather.php (both in the vault 246-weather folder, mapped as local-only mu-plugins).
+// Set start_of_week 0, sloc_measurements imperial, and geo_public private. Optional inputs:
+// CR_WEATHER_ARCHIVE_PATH (default /kind/weather/), CR_WEATHER_STREAM_PATH (default /stream/),
+// CR_WEATHER_REQUIRE_SEED (1 fails a missing fixture, an absent weather card, and the logged-in
+// block instead of skipping them), CR_WEATHER_START_OF_WEEK (pass `wp option get start_of_week`; when
+// unset, the weekday order the archive serves decides it), and CR_WEATHER_STORAGE_STATE (an
+// administrator Playwright storageState path; logged-in checks skip when unset, fail under
+// CR_WEATHER_REQUIRE_SEED). Simple Location head, feed, and REST gate proofs stay dev-only in
+// privacy-check-246.php.
 import { createRequire } from 'node:module';
 import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -17,7 +20,8 @@ const require = createRequire( import.meta.url );
 const THEME_ROOT = resolve( dirname( fileURLToPath( import.meta.url ) ), '../..' );
 const ARCHIVE = process.env.CR_WEATHER_ARCHIVE_PATH || '/kind/weather/';
 const STREAM = process.env.CR_WEATHER_STREAM_PATH || '/stream/';
-const START_OF_WEEK = Number.parseInt( process.env.CR_WEATHER_START_OF_WEEK || '0', 10 );
+const REQUIRE_SEED = '1' === process.env.CR_WEATHER_REQUIRE_SEED;
+const WEEKDAYS = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
 const STORAGE_STATE = process.env.CR_WEATHER_STORAGE_STATE;
 const single = ( key ) => '/?name=cr-seed-' + '246-' + key.toLowerCase();
 const archivePage = ( number ) => number === 1 ? ARCHIVE : `${ ARCHIVE }page/${ number }/`;
@@ -45,8 +49,50 @@ const isDark = ( testInfo ) => testInfo.project.name.endsWith( 'dark' );
 
 async function openSeeded( page, path, label = path ) {
 	const response = await page.goto( path, { waitUntil: 'load' } );
-	test.skip( response?.status() === 404, `${ label } returned 404; seed issue 246 fixtures first` );
+	const missing = response?.status() === 404;
+	if ( REQUIRE_SEED ) {
+		expect( missing, `${ label } returned 404; seed issue 246 fixtures first` ).toBe( false );
+	} else {
+		test.skip( missing, `${ label } returned 404; seed issue 246 fixtures first` );
+	}
 	return response;
+}
+
+// An absent fixture is a skip on an unseeded site and a failure when CR_WEATHER_REQUIRE_SEED is set.
+function requireFixture( absent, reason ) {
+	if ( REQUIRE_SEED ) {
+		expect( absent, reason ).toBe( false );
+	} else {
+		test.skip( absent, reason );
+	}
+}
+
+// The site's start_of_week: the env value the harness read with WP-CLI, else the first weekday
+// the archive header serves (paint_almanac() prints it from the same option).
+async function startOfWeek( page ) {
+	const given = process.env.CR_WEATHER_START_OF_WEEK;
+	if ( given !== undefined && given !== '' ) {
+		return ( ( Number.parseInt( given, 10 ) % 7 ) + 7 ) % 7;
+	}
+	const first = ( await page.locator( '.pkiw-almanac__weekdays span' ).first().textContent() ).trim();
+	const index = WEEKDAYS.indexOf( first );
+	expect( index, `weekday header starts with a known abbreviation (got "${ first }")` ).toBeGreaterThanOrEqual( 0 );
+	return index;
+}
+
+const streamPath = ( number ) => number === 1 ? STREAM : `${ STREAM }${ STREAM.includes( '?' ) ? '&' : '?' }query-1-page=${ number }`;
+
+// Finds the Stream card for a fixture by walking the Stream query's pages.
+async function openStreamCard( page, key ) {
+	for ( let number = 1; number <= 12; number++ ) {
+		await openSeeded( page, streamPath( number ), `Stream page ${ number }` );
+		const card = streamCard( page, key );
+		if ( await card.count() ) {
+			return card;
+		}
+	}
+	requireFixture( true, `${ key } Stream card is not on Stream pages 1-12` );
+	return streamCard( page, key );
 }
 
 async function visibleText( locator ) {
@@ -140,6 +186,9 @@ async function axeGatingViolations( page ) {
 function pageEntry( page, key ) {
 	return page.locator( `li.pkiw-almanac__entry:has(a[href*="cr-seed-246-${ key.toLowerCase() }"])` );
 }
+
+// The plugin's protected Stream card (pk-card--protected) is a different object: no reading, no thermometer.
+const UNPROTECTED_CARD = 'article.pk-card.k-weather:not(.pk-card--protected)';
 
 function streamCard( page, key ) {
 	return page.locator( `article.pk-card.k-weather:has(a[href*="cr-seed-246-${ key.toLowerCase() }"])` );
@@ -362,9 +411,9 @@ test.describe( 'archive', () => {
 			expect( await days.evaluate( ( node ) => getComputedStyle( node ).gridTemplateColumns.split( ' ' ).length ), 'seven grid tracks' ).toBe( 7 );
 			const header = page.locator( '.pkiw-almanac__weekdays' );
 			await expect( header, 'weekday row is decorative' ).toHaveAttribute( 'aria-hidden', 'true' );
-			const weekdays = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
-			const start = ( ( START_OF_WEEK % 7 ) + 7 ) % 7;
-			await expect( header.locator( 'span' ).first(), 'first weekday follows start_of_week' ).toHaveText( weekdays[ start ] );
+			const start = await startOfWeek( page );
+			await expect( header.locator( 'span' ).first(), 'first weekday follows start_of_week' ).toHaveText( WEEKDAYS[ start ] );
+			await expect( header.locator( 'span' ), 'seven weekday labels in site order' ).toHaveText( [ ...Array( 7 ) ].map( ( _, index ) => WEEKDAYS[ ( start + index ) % 7 ] ) );
 			await expect( days.locator( '> li.pkiw-almanac__day' ), 'all August days' ).toHaveCount( 31 );
 			const first = days.locator( '> li.pkiw-almanac__day' ).first();
 			const expectedColumn = ( ( 6 - start + 7 ) % 7 ) + 1;
@@ -399,7 +448,7 @@ test.describe( 'archive', () => {
 	test( 'June 1 uses the configured Monday column relative to start_of_week', async ( { page } ) => {
 		await page.setViewportSize( { width: 800, height: 900 } );
 		await openSeeded( page, archivePage( 3 ) );
-		const start = ( ( START_OF_WEEK % 7 ) + 7 ) % 7;
+		const start = await startOfWeek( page );
 		const expectedColumn = ( ( 1 - start + 7 ) % 7 ) + 1;
 		const measured = await page.locator( 'li[data-pkiw-date="2026-06-01"]' ).evaluate( ( node ) => Number.parseInt( getComputedStyle( node ).gridColumnStart, 10 ) || Math.round( ( node.getBoundingClientRect().left - node.parentElement.getBoundingClientRect().left ) / ( node.parentElement.getBoundingClientRect().width / 7 ) ) + 1 );
 		expect( measured, 'June 1 column' ).toBe( expectedColumn );
@@ -757,7 +806,13 @@ test.describe( 'single', () => {
 	}
 
 	test.describe( 'logged in', () => {
-		test.skip( ! STORAGE_STATE, 'CR_WEATHER_STORAGE_STATE is not set' );
+		if ( REQUIRE_SEED ) {
+			test( 'CR_WEATHER_STORAGE_STATE is set', () => {
+				expect( STORAGE_STATE, 'CR_WEATHER_STORAGE_STATE is not set' ).toBeTruthy();
+			} );
+		} else {
+			test.skip( ! STORAGE_STATE, 'CR_WEATHER_STORAGE_STATE is not set' );
+		}
 		test.use( { storageState: STORAGE_STATE || undefined } );
 
 		test( 'administrator sees A08 and A09 observations while A09 keeps Place private, and can read private A19', async ( { page } ) => {
@@ -780,8 +835,8 @@ test.describe( 'single', () => {
 test.describe( 'stream', () => {
 	test( 'weather cards use one-link compact content, correct readings, matching private skeletons, and no media or detail leaks', async ( { page } ) => {
 		await openSeeded( page, STREAM );
-		const cards = page.locator( 'article.pk-card.k-weather' );
-		test.skip( await cards.count() === 0, 'no weather card is on this Stream page; load the stand-in or enable weather routing' );
+		const cards = page.locator( UNPROTECTED_CARD );
+		requireFixture( await cards.count() === 0, 'no weather card is on this Stream page; load the stand-in or enable weather routing' );
 		for ( let index = 0; index < await cards.count(); index++ ) {
 			const card = cards.nth( index );
 			expect( await renderedLinks( card ), `card ${ index } rendered links` ).toMatchObject( { count: 1, stray: 0 } );
@@ -804,11 +859,21 @@ test.describe( 'stream', () => {
 		for ( const key of [ 'S2', 'S5' ] ) await expect( streamCard( page, key ).locator( '.cr-thermo__glass' ), `${ key } has no glass` ).toHaveCount( 0 );
 	} );
 
+	test( 'the plugin\'s protected A13 card gets no thermometer, no glass, and exactly one rendered link', async ( { page } ) => {
+		const card = await openStreamCard( page, 'A13' );
+		await expect( card, 'A13 is the plugin protected card' ).toHaveClass( /\bpk-card--protected\b/ );
+		await expect( card, 'protected card has no cr-thermo class' ).not.toHaveClass( /(?:^|\s)cr-thermo(?:\s|$)/ );
+		await expect( card.locator( '.cr-thermo__glass' ), 'protected card has no glass' ).toHaveCount( 0 );
+		expect( await renderedLinks( card ), 'protected card rendered links' ).toMatchObject( { count: 1, stray: 0 } );
+		const text = await visibleText( card );
+		expect( text, 'protected card prints no reading or place' ).not.toMatch( /Partly Cloudy|°F|Sampletown|Example Hall|Example Avenue/ );
+	} );
+
 	test( 'cards fit collage columns and content, keep paper paint and two rotated layers, and the collage has no timeline', async ( { page }, testInfo ) => {
 		await page.setViewportSize( { width: 1280, height: 900 } );
 		await openSeeded( page, STREAM );
-		const cards = page.locator( 'article.pk-card.k-weather' );
-		test.skip( await cards.count() === 0, 'no weather card is on this Stream page' );
+		const cards = page.locator( UNPROTECTED_CARD );
+		requireFixture( await cards.count() === 0, 'no weather card is on this Stream page' );
 		for ( let index = 0; index < await cards.count(); index++ ) {
 			const card = cards.nth( index );
 			const state = await card.evaluate( ( node ) => {
@@ -847,8 +912,8 @@ test.describe( 'stream', () => {
 
 	test( 'card focus rings the article, and forced colors keeps a two-pixel border while dropping glass, marks, and tape', async ( { page } ) => {
 		await openSeeded( page, STREAM );
-		const card = page.locator( 'article.pk-card.k-weather' ).first();
-		test.skip( await card.count() === 0, 'no weather card is on this Stream page' );
+		const card = page.locator( UNPROTECTED_CARD ).first();
+		requireFixture( await card.count() === 0, 'no weather card is on this Stream page' );
 		await card.locator( 'a[href]' ).focus();
 		const ring = await card.evaluate( ( node ) => ( { width: getComputedStyle( node ).outlineWidth, color: getComputedStyle( node ).outlineColor, shadow: getComputedStyle( node ).boxShadow } ) );
 		expect( ring.width, 'card focus outline' ).toBe( '3px' );
@@ -871,8 +936,8 @@ test.describe( 'stream', () => {
 	test( 'weather cards and their collage columns do not overflow at 320px', async ( { page } ) => {
 		await page.setViewportSize( { width: 320, height: 900 } );
 		await openSeeded( page, STREAM );
-		const cards = page.locator( 'article.pk-card.k-weather' );
-		test.skip( await cards.count() === 0, 'no weather card is on this Stream page' );
+		const cards = page.locator( UNPROTECTED_CARD );
+		requireFixture( await cards.count() === 0, 'no weather card is on this Stream page' );
 		expect( await page.evaluate( () => document.documentElement.scrollWidth <= document.documentElement.clientWidth ), 'page does not overflow' ).toBe( true );
 		expect( await cards.evaluateAll( ( nodes ) => nodes.every( ( node ) => {
 			const li = node.closest( 'li' );
