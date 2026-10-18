@@ -149,7 +149,8 @@ add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_board_styles' );
  * The thought is the excerpt when the post has one, else the title; the
  * heading hides visually (it stays the card's link for assistive tech) when
  * it is the plugin's synthetic kind-label title or when the excerpt already
- * opens with it, so nothing prints twice.
+ * opens with it, so nothing prints twice. The heading's link is the card's
+ * only link, so the plugin's Read more strip, which repeats it, is cut.
  *
  * @param string    $html     Rendered stream card.
  * @param array     $block    Parsed block (unused).
@@ -180,6 +181,8 @@ function stream_card( string $html, array $block, $instance ): string {
 	} elseif ( '' !== $excerpt && '' !== $title && str_starts_with( $excerpt, $title ) ) {
 		$classes[] = 'cr-sticky--dup-title';
 	}
+
+	$html = (string) preg_replace( '/<div class="pk-meta"><a class="pk-link" href="[^"]*">.*?<\/a><\/div>/s', '', $html, 1 );
 
 	$tags = new \WP_HTML_Tag_Processor( $html );
 	if ( $tags->next_tag( array( 'tag_name' => 'article', 'class_name' => 'pk-card' ) ) ) {
