@@ -163,6 +163,8 @@ namespace {
 
 	/** Stub: return one queried object ID. */
 	function get_queried_object_id() { return 1; }
+	/** The podcast sheet is not part of this test: its file never exists here. */
+	function get_theme_file_path( $file = '' ) { return COURTNEYR_CHILD_DIR . '/' . ltrim( (string) $file, '/' ); }
 
 	/** Stub: return the test theme URI. */
 	function get_stylesheet_directory_uri() { return COURTNEYR_CHILD_URI; }

@@ -422,6 +422,8 @@ add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_shelf_boards' );
  *
  * Those are the only three surfaces that render podcast objects; every other
  * archive, single, page and editor request keeps the stylesheet unloaded.
+ * The sheet belongs to the podcast lane, so nothing is enqueued while the file
+ * is missing (a link to it would 404).
  *
  * @return void
  */
@@ -438,6 +440,9 @@ function enqueue_podcast_styles(): void {
 	}
 	$is_stream = function_exists( '\\Courtneyr\\Child\\HomeSections\\is_stream_surface' ) && \Courtneyr\Child\HomeSections\is_stream_surface();
 	if ( ! $is_podcast_view && ! $is_podcast_post && ! $is_stream ) {
+		return;
+	}
+	if ( ! is_readable( get_theme_file_path( 'assets/css/cr-podcast.css' ) ) ) {
 		return;
 	}
 

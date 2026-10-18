@@ -13,6 +13,7 @@ namespace {
 	define( 'COURTNEYR_CHILD_URI', 'https://example.test/wp-content/themes/courtneyr-child' );
 	define( 'COURTNEYR_CHILD_VERSION', 'test-version' );
 	define( 'CR_W5_T0_THEME_DIR', dirname( __DIR__, 2 ) );
+	$GLOBALS['cr_theme_dir'] = CR_W5_T0_THEME_DIR;
 
 	$GLOBALS['cr_hooks']   = array();
 	$GLOBALS['cr_request'] = array();
@@ -43,6 +44,10 @@ namespace {
 
 	function is_singular( $post_type = '' ) {
 		return ! empty( $GLOBALS['cr_request']['single'] ) && ( '' === $post_type || 'post' === $post_type );
+	}
+
+	function get_theme_file_path( $file = '' ) {
+		return $GLOBALS['cr_theme_dir'] . '/' . ltrim( (string) $file, '/' );
 	}
 
 	function get_query_var( $name ) {
@@ -130,6 +135,11 @@ namespace Courtneyr\Child\HomeSections {
 
 namespace Courtneyr\Child\W5T0EnqueueTests {
 
+	$theme_dir = sys_get_temp_dir() . '/w5-t0-theme-' . getmypid();
+	mkdir( $theme_dir . '/assets/css', 0777, true );
+	touch( $theme_dir . '/assets/css/cr-podcast.css' );
+	$GLOBALS['cr_theme_dir'] = $theme_dir;
+
 	$skip = array(
 		'plain listen archive' => array( 'kind' => 'listen' ),
 		'watch archive'        => array( 'kind' => 'watch' ),
@@ -167,6 +177,17 @@ namespace Courtneyr\Child\W5T0EnqueueTests {
 	$old_view            = styles_for( array( 'kind' => 'listen' ), 'Courtneyr\\Child\\Enqueue\\enqueue_podcast_styles' );
 	$old_single          = styles_for( array( 'single' => true, 'post_id' => 9 ), 'Courtneyr\\Child\\Enqueue\\enqueue_podcast_styles' );
 	check( ! isset( $old_view['courtneyr-podcast'] ) && ! isset( $old_single['courtneyr-podcast'] ), 'old plugin without query var or fact loads no podcast CSS' );
+
+	// The sheet belongs to the podcast lane: while the file is missing, nothing is enqueued on any of the three surfaces.
+	unlink( $theme_dir . '/assets/css/cr-podcast.css' );
+	$GLOBALS['cr_facts'] = array( 8 => array( 'is_podcast' => true ) );
+	foreach ( array( array( 'kind' => 'listen', 'pkiw_listen_type' => 'podcast' ), array( 'single' => true, 'post_id' => 8 ), array( 'stream' => true ) ) as $request ) {
+		$styles = styles_for( $request, 'Courtneyr\\Child\\Enqueue\\enqueue_podcast_styles' );
+		check( ! isset( $styles['courtneyr-podcast'] ), 'missing cr-podcast.css enqueues nothing' );
+	}
+	rmdir( $theme_dir . '/assets/css' );
+	rmdir( $theme_dir . '/assets' );
+	rmdir( $theme_dir );
 
 	echo "\n", count( $GLOBALS['cr_failures'] ) ? count( $GLOBALS['cr_failures'] ) . ' failed' : 'all passed', "\n";
 	exit( count( $GLOBALS['cr_failures'] ) ? 1 : 0 );
