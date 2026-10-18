@@ -20,7 +20,6 @@
 	box-sizing: border-box;
 	min-width: 0;
 	margin: 0;
-	padding: var(--cr-space-xl) var(--cr-space-md);
 	border: 2px solid var(--cr-russian-violet);
 	border-radius: 0;
 	background:
@@ -29,6 +28,13 @@
 		var(--cr-sky-blue);
 	color: var(--cr-russian-violet);
 	list-style: none;
+}
+
+/* The gutters reserve the tool art's strips. components.css zeroes the
+   archive Post Template's left padding at 0,2,0, so this selector carries
+   the post-template class to win at 0,3,0. */
+.cr-pegboard > .cr-pegboard__board.wp-block-post-template {
+	padding: var(--cr-space-xl) var(--cr-space-md);
 }
 
 .cr-pegboard .pkiw-group {
@@ -212,6 +218,9 @@
 
 	.cr-pegboard__board {
 		--peg-cols: 2;
+	}
+
+	.cr-pegboard > .cr-pegboard__board.wp-block-post-template {
 		padding-inline: 3.5rem;
 	}
 
@@ -245,6 +254,9 @@
 
 	.cr-pegboard__board {
 		--peg-cols: 3;
+	}
+
+	.cr-pegboard > .cr-pegboard__board.wp-block-post-template {
 		padding-inline: 7rem;
 	}
 
@@ -330,9 +342,10 @@ body.cr-craft-single.single main.single-post > .single-post__header::after {
 
 .cr-craft-single .pkiw-craft-facts,
 .cr-craft-single .pkiw-craft-section--steps {
+	--craft-hole: var(--cr-rule);
 	padding-inline-start: calc(var(--cr-space-xl) + var(--cr-space-xs));
 	background:
-		radial-gradient(circle, var(--cr-surface) 0 0.22rem, transparent 0.22rem) left 0.55rem top 1.4rem / 1.25rem 2rem repeat-y,
+		radial-gradient(circle, var(--craft-hole) 0 0.22rem, transparent 0.22rem) left 0.55rem top 1.4rem / 1.25rem 2rem repeat-y,
 		var(--cr-fiber),
 		var(--cr-printer-ivory);
 }
@@ -352,8 +365,25 @@ body.cr-craft-single.single main.single-post > .single-post__header::after {
 	translate: -50% 0;
 }
 
+/* Light mode punches the holes in the rule tone so they read on ivory;
+   dark mode shows the dark page through them. */
+@media (prefers-color-scheme: dark) {
+
+	:root:is(:not([data-theme]), [data-theme="system"]) .cr-craft-single :is(.pkiw-craft-facts, .pkiw-craft-section--steps) {
+		--craft-hole: var(--cr-surface);
+	}
+}
+
+:root[data-theme="dark"] .cr-craft-single :is(.pkiw-craft-facts, .pkiw-craft-section--steps) {
+	--craft-hole: var(--cr-surface);
+}
+
 .cr-craft-single .pkiw-craft-section--materials {
 	background: var(--cr-fiber), var(--cr-sky-blue);
+}
+
+.cr-craft-single .pkiw-craft-section--materials + .pkiw-craft-section--tools {
+	margin-block-start: var(--cr-space-lg);
 }
 
 .cr-craft-single .pkiw-craft-section--tools {
@@ -497,6 +527,11 @@ body.cr-craft-single.single main.single-post > .single-post__header::after {
 			var(--cr-space-xl)
 			[craft-right-start] minmax(0, var(--craft-column)) [craft-right-end]
 			minmax(0, 1fr);
+
+		/* The middle column owns the rows: H1, Materials, then Tools in the
+		   flexible row. Cover, Facts and Steps span into that flexible row,
+		   so their heights land there and never stretch the H1 or Materials
+		   rows. */
 		grid-template-rows: auto auto minmax(0, 1fr);
 		grid-auto-flow: row dense;
 		grid-auto-rows: auto;
@@ -523,6 +558,7 @@ body.cr-craft-single.single main.single-post > .single-post__header::after {
 
 	body.cr-craft-single main.single-post > .single-post__header {
 		grid-column: craft-middle;
+		grid-row: 1;
 		align-self: start;
 		width: 100%;
 		max-width: none;
@@ -530,18 +566,59 @@ body.cr-craft-single.single main.single-post > .single-post__header::after {
 
 	body.cr-craft-single main.single-post > .single-post__featured {
 		grid-column: craft-left;
+		grid-row: 1 / span 3;
+		align-self: start;
 		width: 100%;
 		max-width: none;
 		margin: 0;
 	}
 
+	/* Facts share the cover's area and start below it. A percentage margin
+	   resolves against the grid area's width, which is the cover's width, and
+	   inc/single-craft.php prints the cover's height-to-width ratio. */
 	body.cr-craft-single .pkiw-craft-facts {
 		grid-column: craft-left;
+		grid-row: 1 / span 3;
+		align-self: start;
+	}
+
+	body.cr-craft-single:has(main.single-post > .single-post__featured) .pkiw-craft-facts {
+		margin-block-start: calc(100% * var(--craft-cover-ratio, 0.75) + var(--cr-space-lg));
 	}
 
 	body.cr-craft-single .pkiw-craft-section--materials,
 	body.cr-craft-single .pkiw-craft-section--tools {
 		grid-column: craft-middle;
+		align-self: start;
+	}
+
+	body.cr-craft-single .pkiw-craft-section--materials {
+		grid-row: 2;
+		margin-block-start: var(--cr-space-lg);
+	}
+
+	body.cr-craft-single .pkiw-craft-section--tools {
+		grid-row: 3;
+	}
+
+	/* Each step reads as one row: number, picture, caption. */
+	.cr-craft-single .pkiw-craft-step {
+		grid-template-columns: 2rem minmax(0, 1.25fr) minmax(0, 1fr);
+		align-items: center;
+	}
+
+	.cr-craft-single .pkiw-craft-step::before {
+		grid-row: 1;
+		align-self: start;
+	}
+
+	.cr-craft-single .pkiw-craft-step > figure {
+		grid-column: 2;
+		grid-row: 1;
+	}
+
+	.cr-craft-single .pkiw-craft-step > :not(figure) {
+		grid-column: 3;
 	}
 
 	body.cr-craft-single .pkiw-craft-section--steps {

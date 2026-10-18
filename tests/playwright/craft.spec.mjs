@@ -248,14 +248,13 @@ test.describe( 'archive', () => {
 		for ( const titled of await page.locator( '.cr-peg-card__title a:not(:has-text("Craft,"))' ).all() ) {
 			expect( await titled.getAttribute( 'class' ), 'Archive items: titled archive links carry p-name' ).toContain( 'p-name' );
 		}
-		const images = page.locator( '.cr-peg-card__cover img' );
-		const loading = await images.evaluateAll( ( nodes ) => nodes.map( ( node ) => ( { loading: node.getAttribute( 'loading' ), priority: node.getAttribute( 'fetchpriority' ) } ) ) );
-		expect( loading.slice( 0, 3 ), 'Archive items: first three stored images are eager and high priority' ).toEqual( [
-			{ loading: 'eager', priority: 'high' },
-			{ loading: 'eager', priority: 'high' },
-			{ loading: 'eager', priority: 'high' },
-		] );
-		expect( loading.slice( 3 ).every( ( image ) => image.loading === 'lazy' ), 'Archive items: images after the first three load lazily' ).toBe( true );
+		// Positions count archive items, so an item with no cover still uses one of the three eager places.
+		const loading = await page.locator( '.cr-pegboard .pkiw-group__items > li' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => {
+			const image = node.querySelector( '.cr-peg-card__cover img' );
+			return image ? { loading: image.getAttribute( 'loading' ), priority: image.getAttribute( 'fetchpriority' ) } : null;
+		} ) );
+		expect( loading.slice( 0, 3 ).filter( Boolean ).every( ( image ) => image.loading === 'eager' && image.priority === 'high' ), 'Archive items: covers on the first three items are eager and high priority' ).toBe( true );
+		expect( loading.slice( 3 ).filter( Boolean ).every( ( image ) => image.loading === 'lazy' && image.priority !== 'high' ), 'Archive items: covers after the first three items load lazily' ).toBe( true );
 		await expect( page.locator( '.cr-peg-card', { hasText: 'Zine Binding Jig' } ).locator( 'figure' ), 'Archive items: B02 has no figure' ).toHaveCount( 0 );
 
 		const firstCard = page.locator( '.cr-peg-card' ).first();
@@ -419,6 +418,39 @@ test.describe( 'tools and empty state', () => {
 		} );
 	}
 
+	for ( const [ width, number ] of [ [ 1440, 1 ], [ 1440, 2 ], [ 800, 1 ], [ 800, 2 ] ] ) {
+		test( `Tools — gutter strips clear every group heading and card on page ${ number } at ${ width }px`, async ( { page } ) => {
+			test.skip( 'empty' === STATE, 'tool strips need a non-empty board' );
+			test.skip( 2 === number && 'full' !== STATE, 'page 2 exists only in the full fixture map' );
+			await page.setViewportSize( { width, height: 900 } );
+			await openArchive( page, number );
+			const report = await page.locator( '.cr-pegboard' ).evaluate( ( board ) => {
+				const box = board.getBoundingClientRect();
+				const strips = [ '::before', '::after' ].map( ( pseudo ) => {
+					const style = getComputedStyle( board, pseudo );
+					if ( 'none' === style.content ) {
+						return null;
+					}
+					const stripWidth = parseFloat( style.width );
+					const left = '::before' === pseudo ? box.left : box.right - stripWidth;
+					return { left, right: left + stripWidth, top: box.top, bottom: box.bottom };
+				} ).filter( Boolean );
+				const crossings = [];
+				for ( const element of board.querySelectorAll( '.pkiw-group__heading, .cr-peg-card' ) ) {
+					const rect = element.getBoundingClientRect();
+					for ( const strip of strips ) {
+						if ( rect.left < strip.right && rect.right > strip.left && rect.top < strip.bottom && rect.bottom > strip.top ) {
+							crossings.push( element.textContent.trim().slice( 0, 40 ) );
+						}
+					}
+				}
+				return { strips: strips.length, crossings };
+			} );
+			expect( report.strips, `Tools ${ width } page ${ number }: both gutter strips paint` ).toBe( 2 );
+			expect( report.crossings, `Tools ${ width } page ${ number }: no group heading or card enters a tool strip` ).toEqual( [] );
+		} );
+	}
+
 	test( 'Tools — five static SVG assets respond as SVG', async ( { request } ) => {
 		for ( const name of [ 'needles', 'saw', 'ruler', 'bone-folder', 'scissors' ] ) {
 			const response = await request.get( `/wp-content/themes/courtneyr-child/assets/img/cr-tool-${ name }.svg` );
@@ -561,6 +593,8 @@ test.describe( 'single', () => {
 		} ).map( ( [ key, selector ] ) => { const box = document.querySelector( selector ).getBoundingClientRect(); return [ key, { left: Math.round( box.left ), top: Math.round( box.top ), bottom: Math.round( box.bottom ) } ]; } ) ) );
 		expect( boxes.facts.left, 'Single grid: facts share the cover left edge' ).toBe( boxes.cover.left );
 		expect( boxes.facts.top, 'Single grid: facts sit below the cover' ).toBeGreaterThanOrEqual( boxes.cover.bottom );
+		expect( boxes.facts.top - boxes.cover.bottom, 'Single grid: facts follow the cover within one spacing step' ).toBeLessThanOrEqual( 32 );
+		expect( boxes.materials.top - boxes.header.bottom, 'Single grid: Materials follow the H1 within one spacing step, not after the cover' ).toBeLessThanOrEqual( 32 );
 		expect( boxes.materials.left, 'Single grid: Materials share the header left edge' ).toBe( boxes.header.left );
 		expect( boxes.tools.left, 'Single grid: Tools share the header left edge' ).toBe( boxes.header.left );
 		expect( boxes.header.left, 'Single grid: middle column is right of facts' ).toBeGreaterThan( boxes.facts.left );

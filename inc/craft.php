@@ -135,6 +135,10 @@ function peg_card( string $html, array $block, $instance ): string {
 	$permalink     = esc_url( (string) get_permalink( $post ) );
 	$picture       = '';
 	$name_class    = 'u-url';
+	$first_row     = $position < 3;
+
+	// Every rebuilt item takes a place, with or without a cover, so only the first three items load eagerly.
+	++$position;
 
 	if ( array() === $facts ) {
 		$stored_title = trim( (string) $post->post_title );
@@ -157,7 +161,7 @@ function peg_card( string $html, array $block, $instance ): string {
 				'alt'   => '',
 				'class' => 'cr-peg-card__img',
 			);
-			if ( $position < 3 ) {
+			if ( $first_row ) {
 				$image_attributes['loading']       = 'eager';
 				$image_attributes['fetchpriority'] = 'high';
 			} else {
@@ -167,7 +171,6 @@ function peg_card( string $html, array $block, $instance ): string {
 			$image = wp_get_attachment_image( $attachment_id, 'medium', false, $image_attributes );
 			if ( '' !== $image ) {
 				$picture = '<figure class="cr-peg-card__cover">' . $image . '</figure>';
-				++$position;
 			}
 		}
 	}

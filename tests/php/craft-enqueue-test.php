@@ -133,8 +133,21 @@ namespace {
 	/** Stub: scripts aren't inspected by this test. */
 	function wp_enqueue_script() {}
 
-	/** Stub: inline styles aren't inspected by this test. */
-	function wp_add_inline_style() {}
+	/** Record an inline style by handle. */
+	function wp_add_inline_style( $handle = '', $css = '' ) {
+		$GLOBALS['cr_inline'][ $handle ][] = (string) $css;
+		return true;
+	}
+
+	/** Return the scenario's featured attachment ID. */
+	function get_post_thumbnail_id( $post = null ) {
+		return (int) ( $GLOBALS['cr_request']['thumbnail'] ?? 0 );
+	}
+
+	/** Return the scenario's featured image source, as url, width and height. */
+	function wp_get_attachment_image_src( $attachment_id, $size = 'thumbnail' ) {
+		return $GLOBALS['cr_request']['thumbnail_src'] ?? false;
+	}
 
 	/** Stub: per-block styles aren't inspected by this test. */
 	function wp_enqueue_block_style() {}
@@ -290,6 +303,17 @@ namespace Courtneyr\Child\CraftEnqueueTests {
 	}
 
 	check( in_array( 'cr-craft.css', perfmatters_rucss_exclusions( array() ), true ), 'Remove Unused CSS keeps cr-craft.css whole' );
+
+	$ratio_cases = array(
+		'a craft single with a 640x480 cover' => array( array( 'single_kind' => 'craft', 'thumbnail' => 7, 'thumbnail_src' => array( 'cover.png', 640, 480 ) ), array( 'body.cr-craft-single{--craft-cover-ratio:0.7500;}' ) ),
+		'a craft single with no cover'        => array( array( 'single_kind' => 'craft' ), array() ),
+		'a non-craft single with a cover'     => array( array( 'single_kind' => 'note', 'thumbnail' => 7, 'thumbnail_src' => array( 'cover.png', 640, 480 ) ), array() ),
+	);
+	foreach ( $ratio_cases as $label => list( $request, $expected ) ) {
+		$GLOBALS['cr_inline'] = array();
+		styles_for( $request );
+		check( $expected === ( $GLOBALS['cr_inline']['courtneyr-craft'] ?? array() ), "$label prints the expected cover ratio" );
+	}
 
 	$GLOBALS['cr_request'] = array( 'kind' => 'craft' );
 	check( is_peg_card( array() ), 'is_peg_card is true on the craft archive' );
