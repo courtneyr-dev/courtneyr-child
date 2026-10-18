@@ -1530,25 +1530,6 @@ body .pk-card {
 .cr-stream-page .k-rsvp .pk-title { padding: 0; font-size: 1rem; }
 .cr-stream-page .k-rsvp .pk-meta time { display: inline; }
 
-/* 5. Video: image-led thumb with a hand-drawn play sticker. */
-.cr-stream-page .pk-card.k-video {
-	width: 94%;
-	background: var(--cr-surface-elevated, #fff);
-	border: 2px solid var(--cr-ink, #241c4a);
-	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
-	padding: 0.8rem 0.9rem 0.9rem;
-}
-.cr-stream-page .k-video .pk-embed,
-.cr-stream-page .k-video figure.wp-block-embed,
-.cr-stream-page .k-video .pk-media {
-	order: -1;
-	margin: 0 0 0.6rem;
-	border: 2px solid var(--cr-ink, #241c4a);
-	border-radius: 0;
-}
-.cr-stream-page .k-video .pk-title { padding: 0; font-size: 1rem; color: var(--cr-ink, #241c4a); }
-.cr-stream-page .k-video .pk-kindlabel { position: static; display: block; margin: 0 0 0.3rem; background: none; border: 0; box-shadow: none; transform: none; width: auto; height: auto; padding: 0; font-size: max(0.58rem, var(--cr-text-floor, 0.75rem)); letter-spacing: 0.14em; color: var(--cr-ink-muted, #126782); }
-
 /* ---- v0.5.238: no icons over words ----
    Paper-family cards lose their badge circles entirely — the
    small-caps kind label names the kind; pushpins/tape do the holding. */
@@ -1556,8 +1537,7 @@ body .pk-card {
 .cr-stream-page .pk-card.k-recipe .pk-badge,
 .cr-stream-page .pk-card.k-rsvp .pk-badge,
 .cr-stream-page .pk-card.k-trip .pk-badge,
-.cr-stream-page .pk-card.k-itinerary .pk-badge,
-.cr-stream-page .pk-card.k-video .pk-badge { display: none; }
+.cr-stream-page .pk-card.k-itinerary .pk-badge { display: none; }
 
 /* ---- v0.5.239: restore the no-touching gutter ----
    The 0.5.237 padding fix trimmed vertical margins too far; round
