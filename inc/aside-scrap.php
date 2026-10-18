@@ -147,17 +147,24 @@ function stream_card( string $html, array $block, $instance ): string {
 	$label = esc_html__( 'Aside', 'courtneyr-child' );
 	// Post Kinds prints the label as a <span> since 1.8.6 (a <p> before).
 	$html = (string) preg_replace( '/<(span|p) class="pk-kindlabel">[^<]*<\/\1>/', '<p class="pk-kindlabel">' . $label . '</p>', $html, 1 );
-	// One link per card (W3-G2): the scrap's Read more chip is its link, so
-	// the heading keeps its text and drops the anchor, and the chip carries
-	// u-url. An untitled scrap's heading reads "Aside".
-	$html = (string) preg_replace_callback(
-		'#(<h[1-6] class="pk-title[^"]*">)\s*<a\b[^>]*>(.*?)</a>#s',
-		static function ( array $m ) use ( $state, $label ): string {
-			return $m[1] . ( 'none' === $state ? $label : $m[2] );
+	// One link to the post per card (W3-G2). When the plugin prints the Read
+	// more chip, the chip is the scrap's link: the heading keeps its text and
+	// drops the anchor, and the chip carries u-url. A headline-only card (an
+	// article) has no chip, so its heading keeps the link. An untitled scrap's
+	// heading reads "Aside" either way.
+	$has_chip = false !== strpos( $html, '<a class="pk-link"' );
+	$html     = (string) preg_replace_callback(
+		'#(<h[1-6] class="pk-title[^"]*">)\s*(<a\b[^>]*>)(.*?)</a>#s',
+		static function ( array $m ) use ( $state, $label, $has_chip ): string {
+			$text = 'none' === $state ? $label : $m[3];
+			return $m[1] . ( $has_chip ? $text : $m[2] . $text . '</a>' );
 		},
 		$html,
 		1
 	);
+	// A note with more images than the card shows ends its thumbnails with a
+	// "+N" link to the same post; keep the count as text.
+	$html = (string) preg_replace( '#<a class="pk-media__thumb-more-link" href="[^"]*">(.*?)</a>#s', '<span class="pk-media__thumb-more-link">$1</span>', $html, 1 );
 
 	$tags = new \WP_HTML_Tag_Processor( $html );
 	if ( $tags->next_tag( array( 'tag_name' => 'article', 'class_name' => 'pk-card' ) ) ) {

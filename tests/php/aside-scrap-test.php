@@ -154,6 +154,21 @@ namespace Courtneyr\Child\AsideScrapTests {
 		check( false !== strpos( $out, 'tabindex="-1">Site</a>' ), "$state scrap keeps the hidden author h-card" );
 	}
 
+	// Headline-only article scrap: no chip, so the heading keeps the only link.
+	$GLOBALS['cr_posts'][14] = new \WP_Post( 14, 'Longer piece', 'Body of the longer piece.' );
+	$article = '<article class="pk-card pk-card--stream k-article h-entry"><h3 class="pk-title p-name"><a class="u-url" href="https://example.test/p/14">Longer piece</a></h3></article>';
+	$out     = \Courtneyr\Child\AsideScrap\stream_card( $article, array(), new \WP_Block( array( 'postId' => 14 ) ) );
+	check( 1 === rendered_links( $out ) && false !== strpos( $out, '<a class="u-url" href="https://example.test/p/14">Longer piece</a>' ), 'a headline-only article scrap keeps its heading link' );
+
+	// Image-heavy scrap: the +N overflow link becomes text, the chip stays the link to the post.
+	$GLOBALS['cr_posts'][15] = new \WP_Post( 15, 'Garden', 'Garden photos.' );
+	$images = '<article class="pk-card pk-card--stream k-note h-entry"><h2 class="pk-title p-name"><a class="u-url" href="https://example.test/p/15">Garden</a></h2>'
+		. '<ul class="pk-media__thumbs"><li class="pk-media__thumb pk-media__thumb--more"><a class="pk-media__thumb-more-link" href="https://example.test/p/15">+4<span class="pk-sr-only"> more images</span></a></li></ul>'
+		. '<div class="pk-meta"><a class="pk-link" href="https://example.test/p/15">Read more</a></div></article>';
+	$out    = \Courtneyr\Child\AsideScrap\stream_card( $images, array(), new \WP_Block( array( 'postId' => 15 ) ) );
+	check( 1 === rendered_links( $out ), 'an image-heavy scrap renders one link to the post' );
+	check( false !== strpos( $out, '<span class="pk-media__thumb-more-link">+4<span class="pk-sr-only"> more images</span></span>' ), 'an image-heavy scrap keeps the +N count as text' );
+
 	$other = '<article class="pk-card pk-card--stream k-photo h-entry"><h2 class="pk-title p-name"><a class="u-url" href="https://example.test/p/20">Photo</a></h2></article>';
 	check( $other === \Courtneyr\Child\AsideScrap\stream_card( $other, array(), new \WP_Block( array( 'postId' => 20 ) ) ), 'a non-text kind card is unchanged' );
 
