@@ -111,7 +111,6 @@ body .pk-card {
    too bright for white text. In dark mode every badge sits on a bright accent,
    so the dark swap forces a dark badge ink globally. */
 .pk-card.k-listen      { --pk-kind: #241c4a; --pk-kind-dark: #9a8fe0; --pk-badge-ink: #fff; --pk-tint: #bcb5e3; }
-.pk-card.k-jam         { --pk-kind: #3f2f7a; --pk-kind-dark: #b0a0f0; --pk-badge-ink: #fff; --pk-tint: #cbc3ec; }
 .pk-card.k-watch       { --pk-kind: #126782; --pk-kind-dark: #6fc4dd; --pk-badge-ink: #fff; --pk-tint: #cfe8f0; }
 .pk-card.k-read        { --pk-kind: #7a5c2e; --pk-kind-dark: #d8b483; --pk-badge-ink: #fff; --pk-tint: #ecdcc2; }
 .pk-card.k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) { --pk-kind: #5d72a3; --pk-kind-dark: #9fb0d8; --pk-badge-ink: #fff; --pk-tint: #dde3f0; }
@@ -206,7 +205,6 @@ body .pk-card {
 .cr-stream-page .pk-card.k-watch,
 .cr-stream-page .pk-card.k-listen,
 .cr-stream-page .pk-card.k-read,
-.cr-stream-page .pk-card.k-jam,
 .cr-stream-page .pk-card.k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)),
 .cr-stream-page .pk-card.k-wish {
 	background: #241c4a;
@@ -233,15 +231,13 @@ body .pk-card {
 .cr-stream-page .k-watch .pk-media img,
 .cr-stream-page .k-read .pk-media img,
 .cr-stream-page .k-wish .pk-media img { aspect-ratio: 2 / 3; }
-.cr-stream-page .k-listen .pk-media img,
-.cr-stream-page .k-jam .pk-media img { aspect-ratio: 1 / 1; }
+.cr-stream-page .k-listen .pk-media img { aspect-ratio: 1 / 1; }
 .cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-media img { aspect-ratio: 4 / 3; }
 
 /* Caption band on the box. */
 .cr-stream-page .k-watch .pk-title,
 .cr-stream-page .k-listen .pk-title,
 .cr-stream-page .k-read .pk-title,
-.cr-stream-page .k-jam .pk-title,
 .cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-title,
 .cr-stream-page .k-wish .pk-title {
 	color: #fbfaf5;
@@ -259,7 +255,6 @@ body .pk-card {
 .cr-stream-page .k-watch .pk-sub,
 .cr-stream-page .k-listen .pk-sub,
 .cr-stream-page .k-read .pk-sub,
-.cr-stream-page .k-jam .pk-sub,
 .cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-sub,
 .cr-stream-page .k-wish .pk-sub { color: rgba(251, 250, 245, 0.85); }
 .cr-stream-page .pk-card .pk-stream-date time {
@@ -312,7 +307,6 @@ body .pk-card {
 .cr-stream-page .k-watch .pk-kindlabel,
 .cr-stream-page .k-listen .pk-kindlabel,
 .cr-stream-page .k-read .pk-kindlabel,
-.cr-stream-page .k-jam .pk-kindlabel,
 .cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-kindlabel,
 .cr-stream-page .k-wish .pk-kindlabel {
 	position: absolute;
@@ -346,7 +340,6 @@ body .pk-card {
 .cr-stream-page .wp-block-post-template > li.kind-watch::after,
 .cr-stream-page .wp-block-post-template > li.kind-listen::after,
 .cr-stream-page .wp-block-post-template > li.kind-read::after,
-.cr-stream-page .wp-block-post-template > li.kind-jam::after,
 .cr-stream-page .wp-block-post-template > li.kind-play::after,
 .cr-stream-page .wp-block-post-template > li.kind-wish::after {
 	content: "";
@@ -524,13 +517,11 @@ body .pk-card {
 .cr-stream-page .pk-card.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
 .cr-stream-page .pk-card.k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
 .cr-stream-page .pk-card.k-read:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
-.cr-stream-page .pk-card.k-jam:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
 .cr-stream-page .pk-card.k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)):not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge,
 .cr-stream-page .pk-card.k-wish:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-badge { display: none; }
 
 /* Artless boxes also give the title room where the sticker sits. */
 .cr-stream-page .pk-card.k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
-.cr-stream-page .pk-card.k-jam:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title,
 .cr-stream-page .pk-card.k-listen:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-title { padding: 0.9rem 4.4rem 0 0.65rem; }
 
 /* Sticker: long kind names (review) must fit the circle. */
@@ -550,7 +541,6 @@ body .pk-card {
 .cr-stream-page .k-watch .pk-excerpt,
 .cr-stream-page .k-listen .pk-excerpt,
 .cr-stream-page .k-read .pk-excerpt,
-.cr-stream-page .k-jam .pk-excerpt,
 .cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-excerpt,
 .cr-stream-page .k-wish .pk-excerpt,
 .cr-stream-page .k-event .pk-excerpt { color: rgba(251, 250, 245, 0.88); }
@@ -574,7 +564,6 @@ body .pk-card {
 .cr-stream-page .k-watch .pk-kindlabel,
 .cr-stream-page .k-listen .pk-kindlabel,
 .cr-stream-page .k-read .pk-kindlabel,
-.cr-stream-page .k-jam .pk-kindlabel,
 .cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-kindlabel,
 .cr-stream-page .k-wish .pk-kindlabel { display: none; }
 .cr-stream-page .k-watch:not(:has(.pk-media)):not(:has(.pk-embed)) .pk-kindlabel,
@@ -665,7 +654,6 @@ body .pk-card {
 .cr-stream-page .k-watch .pk-badge,
 .cr-stream-page .k-listen .pk-badge,
 .cr-stream-page .k-read .pk-badge,
-.cr-stream-page .k-jam .pk-badge,
 .cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-badge,
 .cr-stream-page .k-wish .pk-badge {
 	top: auto;
@@ -682,7 +670,6 @@ body .pk-card {
 .cr-stream-page .k-watch .pk-body,
 .cr-stream-page .k-listen .pk-body,
 .cr-stream-page .k-read .pk-body,
-.cr-stream-page .k-jam .pk-body,
 .cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-body,
 .cr-stream-page .k-wish .pk-body {
 	background-image: repeating-linear-gradient(0deg, transparent 0 2px, rgba(251, 250, 245, 0.05) 2px 3px);
@@ -691,7 +678,6 @@ body .pk-card {
 .cr-stream-page .k-watch .pk-stream-date,
 .cr-stream-page .k-listen .pk-stream-date,
 .cr-stream-page .k-read .pk-stream-date,
-.cr-stream-page .k-jam .pk-stream-date,
 .cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-stream-date,
 .cr-stream-page .k-wish .pk-stream-date { margin-left: 3rem; min-height: 1.9rem; display: flex; align-items: center; }
 
@@ -775,7 +761,6 @@ body .pk-card {
 .cr-stream-page .k-watch .pk-badge,
 .cr-stream-page .k-listen .pk-badge,
 .cr-stream-page .k-read .pk-badge,
-.cr-stream-page .k-jam .pk-badge,
 .cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-badge,
 .cr-stream-page .k-wish .pk-badge {
 	top: 0.55rem;
@@ -792,7 +777,6 @@ body .pk-card {
 .cr-stream-page .k-watch .pk-stream-date,
 .cr-stream-page .k-listen .pk-stream-date,
 .cr-stream-page .k-read .pk-stream-date,
-.cr-stream-page .k-jam .pk-stream-date,
 .cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-stream-date,
 .cr-stream-page .k-wish .pk-stream-date {
 	margin-left: 0;
@@ -996,7 +980,6 @@ body .pk-card {
 .cr-stream-page .k-watch .pk-body,
 .cr-stream-page .k-listen .pk-body,
 .cr-stream-page .k-read .pk-body,
-.cr-stream-page .k-jam .pk-body,
 .cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-body,
 .cr-stream-page .k-wish .pk-body { background-image: none; }
 
@@ -1030,7 +1013,6 @@ body .pk-card {
 .cr-stream-page .wp-block-post-template > li.kind-watch::after,
 .cr-stream-page .wp-block-post-template > li.kind-listen::after,
 .cr-stream-page .wp-block-post-template > li.kind-read::after,
-.cr-stream-page .wp-block-post-template > li.kind-jam::after,
 .cr-stream-page .wp-block-post-template > li.kind-play::after,
 .cr-stream-page .wp-block-post-template > li.kind-wish::after { content: none; }
 
@@ -1197,15 +1179,6 @@ body .pk-card {
 .cr-stream-page .pk-card:has(.pk-stream-date) .pk-meta > .dt-published { display: none; }
 
 /* ---- v0.5.234: washi tape, marker, highlighter ---- */
-
-/* Highlighter: the jam title gets its selective-yellow swipe. */
-.cr-stream-page .k-jam .pk-title a {
-	background: linear-gradient(100deg, rgba(255, 183, 3, 0.15) 0%, rgba(255, 183, 3, 0.92) 4%, rgba(255, 183, 3, 0.92) 96%, rgba(255, 183, 3, 0.15) 100%);
-	color: var(--cr-prussian-blue, #023047);
-	padding: 0.05em 0.35em;
-	-webkit-box-decoration-break: clone;
-	box-decoration-break: clone;
-}
 
 /* Washi tape holding the collectibles down. Plain tape on the eat
    polaroid + recipe card; striped washi on read boxes. */
@@ -2214,7 +2187,6 @@ body .pk-card {
 .cr-stream-page .pk-card.k-tag,
 .cr-stream-page .pk-card.k-question,
 .cr-stream-page .pk-card.k-eat,
-.cr-stream-page .pk-card.k-jam,
 .cr-stream-page .pk-card.k-audio {
 	--cr-ink: #241c4a;
 	--cr-ink-muted: #126782;
@@ -2397,7 +2369,7 @@ body.kind-checkin.single .pk-embed--map iframe {
    edge-to-edge, ivory caption band, price-sticker kind label),
    hero-sized and centered in the post content.
    ============================================================ */
-body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish).single .single-post__content .pk-card:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) {
+body:is(.kind-watch, .kind-listen, .kind-read, .kind-play, .kind-wish).single .single-post__content .pk-card:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) {
 	display: flex;
 	flex-direction: column;
 	max-width: 24rem;
@@ -2416,13 +2388,13 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish
 }
 
 /* Art big, on top, edge to edge. */
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-media {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-media {
 	order: -1;
 	display: block;
 	margin: 0;
 }
 
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-media img {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-media img {
 	display: block;
 	width: 100%;
 	height: auto;
@@ -2434,11 +2406,11 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish
 }
 
 .single .single-post__content .pk-card:is(.k-watch, .k-read, .k-wish) .pk-media img { aspect-ratio: 2 / 3; }
-.single .single-post__content .pk-card:is(.k-listen, .k-jam) .pk-media img { aspect-ratio: 1 / 1; }
+.single .single-post__content .pk-card:is(.k-listen) .pk-media img { aspect-ratio: 1 / 1; }
 .single .single-post__content .pk-card:is(.k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop))) .pk-media img { aspect-ratio: 4 / 3; }
 
 /* Caption band. */
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-title {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-title {
 	color: #fbfaf5;
 	font-family: var(--cr-font-accent, serif);
 	font-weight: 700;
@@ -2447,24 +2419,24 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish
 	padding: 0.6rem 0.75rem 0;
 }
 
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-title a { color: inherit; text-decoration: none; }
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-title a { color: inherit; text-decoration: none; }
 
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-sub {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-sub {
 	padding: 0.2rem 0.75rem 0;
 	font-size: 0.85rem;
 	color: rgba(251, 250, 245, 0.85);
 }
 
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-stars {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-stars {
 	color: var(--cr-selective-yellow, #ffb703);
 	padding: 0.35rem 0.75rem 0;
 }
 
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-excerpt { padding: 0.3rem 0.75rem 0; }
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-excerpt { padding: 0.3rem 0.75rem 0; }
 
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-meta { padding: 0.45rem 0.75rem 0.8rem; }
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-meta { padding: 0.45rem 0.75rem 0.8rem; }
 
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-link {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-link {
 	font-family: var(--cr-font-accent, serif);
 	font-size: 0.7rem;
 	font-weight: 700;
@@ -2474,7 +2446,7 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish
 }
 
 /* Kind badge pinned to the art, ivory ring. */
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-badge {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-badge {
 	position: absolute;
 	top: 0.55rem;
 	left: 0.55rem;
@@ -2483,7 +2455,7 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish
 }
 
 /* Kind label → price sticker. */
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-kindlabel {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-kindlabel {
 	position: absolute;
 	top: 0.55rem;
 	right: 0.55rem;
@@ -2512,7 +2484,7 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish
 .single .single-post__content .pk-card.k-wish { outline: 2px dashed rgba(251, 250, 245, 0.6); outline-offset: -6px; }
 
 /* Shelf shadow under the hero box. */
-body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish).single .single-post__content .pk-card:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop))::after {
+body:is(.kind-watch, .kind-listen, .kind-read, .kind-play, .kind-wish).single .single-post__content .pk-card:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop))::after {
 	content: none;
 }
 
@@ -2520,7 +2492,7 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish
    The cover box's price sticker already announces the kind; the
    header chip doubled it (and read as a stray outline). Card-less
    kinds keep the chip — it's their only kind signal. */
-body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish).single .single-post__kind {
+body:is(.kind-watch, .kind-listen, .kind-read, .kind-play, .kind-wish).single .single-post__kind {
 	/* !important: something in the 70-sheet cascade outranks the plain
 	   declaration (verified empirically); this is a binary decorative
 	   toggle, so the sledgehammer is safe. */
@@ -2531,7 +2503,7 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish
    (unlike the stream's generic card) — make the body the flex
    column, kill its tint wash so the deep violet shows, and put
    the art first so the badge/sticker land on it. */
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-body {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-body {
 	display: flex;
 	flex-direction: column;
 	background: none;
@@ -2539,7 +2511,7 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish
 	margin: 0;
 }
 
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-body .pk-media {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-body .pk-media {
 	order: -1;
 	margin: 0;
 }
@@ -2547,7 +2519,7 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish
 /* ---- v0.6.7: the base card's --pk-tint wash is an inset ::before
    overlay — over the violet box it rendered as slate. Off for the
    cover singles; the box IS the paint. ---- */
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish)::before {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish)::before {
 	content: none !important;
 }
 
@@ -2604,19 +2576,19 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish
    2. The plugin sizes book/poster art as a 48x70 thumbnail and lays
       .pk-media out as a row. Inside the cover box the art is the hero:
       neutralize the row and let the image fill the box. */
-body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish).single .single-post__featured {
+body:is(.kind-watch, .kind-listen, .kind-read, .kind-play, .kind-wish).single .single-post__featured {
 	display: none !important;
 }
 
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-media {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-media {
 	display: block !important;
 	gap: 0 !important;
 	margin-top: 0 !important;
 }
 
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-media img,
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-thumb--poster,
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-thumb {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-media img,
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-thumb--poster,
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-thumb {
 	width: 100% !important;
 	height: auto !important;
 	max-width: none !important;
@@ -2628,11 +2600,11 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-jam, .kind-play, .kind-wish
    once the card is a column flex, that made .pk-body shrink to its
    content (352px inside a 384px card) so the art stopped short of
    the edge. Stretch it and the cover fills the box edge to edge. */
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) {
 	align-items: stretch !important;
 }
 
-.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-jam, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-body {
+.single .single-post__content .pk-card:is(.k-watch, .k-listen, .k-read, .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)), .k-wish) .pk-body {
 	width: 100% !important;
 	align-self: stretch !important;
 }
