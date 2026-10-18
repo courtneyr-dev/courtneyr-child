@@ -150,7 +150,8 @@ add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_board_styles' );
  * heading hides visually (it stays the card's link for assistive tech) when
  * it is the plugin's synthetic kind-label title or when the excerpt already
  * opens with it, so nothing prints twice. The heading's link is the card's
- * only link, so the plugin's Read more strip, which repeats it, is cut.
+ * only link, so the plugin's Read more strip, which repeats it, is cut and an
+ * image overflow "+N" link becomes text.
  *
  * @param string    $html     Rendered stream card.
  * @param array     $block    Parsed block (unused).
@@ -183,6 +184,10 @@ function stream_card( string $html, array $block, $instance ): string {
 	}
 
 	$html = (string) preg_replace( '/<div class="pk-meta"><a class="pk-link" href="[^"]*">.*?<\/a><\/div>/s', '', $html, 1 );
+	// A note with more images than the card shows ends its thumbnails with a
+	// "+N" link to the same post; keep the count as text so the heading stays
+	// the only link.
+	$html = (string) preg_replace( '/<a class="pk-media__thumb-more-link" href="[^"]*">(.*?)<\/a>/s', '<span class="pk-media__thumb-more-link">$1</span>', $html, 1 );
 
 	$tags = new \WP_HTML_Tag_Processor( $html );
 	if ( $tags->next_tag( array( 'tag_name' => 'article', 'class_name' => 'pk-card' ) ) ) {

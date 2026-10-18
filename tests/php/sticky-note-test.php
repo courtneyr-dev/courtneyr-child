@@ -60,6 +60,10 @@ namespace {
 	}
 
 	/** Translate a string. */
+	function apply_filters( $hook, $value, ...$args ) {
+		return $value;
+	}
+
 	function __( $text, $domain = null ): string {
 		return (string) $text;
 	}
@@ -113,6 +117,18 @@ namespace {
 
 	require CR_NOTE_THEME_DIR . '/inc/stamps.php';
 	require CR_NOTE_THEME_DIR . '/inc/sticky-note.php';
+}
+
+namespace Courtneyr\Child\HomeSections {
+	function is_stream_surface(): bool {
+		return true;
+	}
+}
+
+namespace Courtneyr\Child\AsideScrap {
+	function applies( \WP_Post $post ): bool {
+		return 'aside' === ( $GLOBALS['cr_note_format'] ?? '' );
+	}
 }
 
 namespace Courtneyr\Child\StickyNote\Tests {
@@ -718,6 +734,24 @@ TSV;
 		check( $expected === board_item( $html, array(), $instance ), 'an Aside-format note is still wrapped on the archive board' );
 		$GLOBALS['cr_note_posts'] = array();
 		check( $html === board_item( $html, array(), $instance ), 'board_item() returns the input unchanged when no post exists' );
+
+		// Stream sticky: one rendered link, even with the plugin's Read more strip and an image overflow link.
+		$GLOBALS['cr_note_format']           = '';
+		$note                                = new \WP_Post( 74, 'Rooftop garden' );
+		$GLOBALS['cr_note_posts'][ $note->ID ] = $note;
+		$card = '<article class="pk-card pk-card--stream k-note h-entry"><h2 class="pk-title p-name"><a class="u-url" href="https://example.test/p/74">Rooftop garden</a></h2>'
+			. '<p class="pk-excerpt">Tomatoes are in.</p>'
+			. '<ul class="pk-media__thumbs"><li class="pk-media__thumb"><img src="a.jpg" alt=""></li><li class="pk-media__thumb pk-media__thumb--more"><a class="pk-media__thumb-more-link" href="https://example.test/p/74">+3<span class="pk-sr-only"> more images</span></a></li></ul>'
+			. '<div class="pk-meta"><a class="pk-link" href="https://example.test/p/74">Read more</a></div></article>';
+		$sticky  = \Courtneyr\Child\StickyNote\stream_card( $card, array(), new \WP_Block( array( 'postId' => $note->ID ) ) );
+		$visible = (string) preg_replace( '#<(\w+)[^>]*\shidden[^>]*>.*?</\1>#s', '', $sticky );
+		check( 1 === preg_match_all( '#<a\b[^>]*\shref=#', $visible ), 'stream_card() leaves one rendered link on an image-heavy note' );
+		check( false !== strpos( $sticky, '<a class="u-url" href="https://example.test/p/74">' ), 'stream_card() keeps the heading u-url link' );
+		check( false !== strpos( $sticky, '<span class="pk-media__thumb-more-link">+3<span class="pk-sr-only"> more images</span></span>' ), 'stream_card() keeps the +N count as text' );
+		check( false === strpos( $sticky, 'pk-meta' ), 'stream_card() cuts the Read more strip' );
+		$GLOBALS['cr_note_format'] = 'aside';
+		check( $card === \Courtneyr\Child\StickyNote\stream_card( $card, array(), new \WP_Block( array( 'postId' => $note->ID ) ) ), 'stream_card() leaves an Aside note to the scrap' );
+		$GLOBALS['cr_note_format'] = '';
 	}
 
 	$source = (string) file_get_contents( CR_NOTE_THEME_DIR . '/inc/sticky-note.php' );
