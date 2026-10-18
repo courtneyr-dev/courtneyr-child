@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 220" width="80" height="220">
+<!-- Decorative pair of needles. Palette only; a CSS background, never content. -->
+<g stroke-linecap="round"><path d="M24 198 52 24" stroke="#241c4a" stroke-width="9"/><path d="M24 198 52 24" stroke="#fbfaf5" stroke-width="4"/><path d="M53 199 29 26" stroke="#241c4a" stroke-width="9"/><path d="M53 199 29 26" stroke="#bcb5e3" stroke-width="4"/></g><g fill="#fb8500" stroke="#241c4a" stroke-width="4"><circle cx="53" cy="20" r="10"/><circle cx="28" cy="21" r="10"/></g><path d="m21 207 3-9 6 7zm35 0-3-9-6 7z" fill="#241c4a"/>
+</svg>
