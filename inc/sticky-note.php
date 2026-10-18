@@ -10,8 +10,9 @@
  * that curls up, and the thought handwritten. The plugin's kind label and
  * a heading that only repeats the thought stay in the DOM for assistive
  * technology and hide visually. cr-post-kinds.css paints it. A Note whose
- * format is Aside is a margin scrap instead (inc/aside-scrap.php) and is
- * left alone here.
+ * format is Aside is a margin scrap on its single and on /stream
+ * (inc/aside-scrap.php); on the /kind/note/ board it gets the board sticky
+ * like every other note (board_item()).
  *
  * @package CourtneyrChild
  */
@@ -50,12 +51,36 @@ function is_note_single(): bool {
  * The artifact's inline custom properties: paper tint and tilt, fixed per
  * post.
  *
- * @param int $seed Stable seed.
+ * @param int         $seed Stable seed.
+ * @param string|null $tilt Optional fixed tilt; null keeps the seeded tilt.
  * @return string A style attribute.
  */
-function sticky_style( int $seed ): string {
-	return 'style="--cr-sticky-paper:' . PAPERS[ pick( $seed, 3, count( PAPERS ) ) ] . ';--cr-sticky-tilt:' . TILTS[ pick( $seed, 5, count( TILTS ) ) ] . '"';
+function sticky_style( int $seed, ?string $tilt = null ): string {
+	return 'style="--cr-sticky-paper:' . PAPERS[ pick( $seed, 3, count( PAPERS ) ) ] . ';--cr-sticky-tilt:' . ( $tilt ?? TILTS[ pick( $seed, 5, count( TILTS ) ) ] ) . '"';
 }
+
+/**
+ * Register the Note archive's board and sticky block styles.
+ *
+ * @return void
+ */
+function register_board_styles(): void {
+	register_block_style(
+		'core/post-template',
+		array(
+			'name'  => 'cr-note-board',
+			'label' => __( 'Note board', 'courtneyr-child' ),
+		)
+	);
+	register_block_style(
+		'post-kinds-indieweb/note-entry',
+		array(
+			'name'  => 'cr-sticky',
+			'label' => __( 'Sticky', 'courtneyr-child' ),
+		)
+	);
+}
+add_action( 'init', __NAMESPACE__ . '\\register_board_styles' );
 
 /**
  * The lifted corner, a decorative layer over the paper's cut corner.
@@ -78,12 +103,55 @@ function plain( string $html ): string {
 }
 
 /**
+ * Note archive: wrap a styled note entry in the shared sticky primitive.
+ *
+ * @param string    $html     Rendered note entry.
+ * @param array     $block    Parsed block (unused).
+ * @param \WP_Block $instance Block instance.
+ * @return string
+ */
+function board_item( string $html, array $block, $instance ): string {
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	if ( ! $tags->next_tag( array( 'class_name' => 'pkiw-note-entry' ) ) || ! $tags->has_class( 'is-style-cr-sticky' ) ) {
+		return $html;
+	}
+	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
+		? (int) $instance->context['postId']
+		: (int) get_the_ID();
+	$post    = $post_id ? get_post( $post_id ) : null;
+	if ( ! $post instanceof \WP_Post ) {
+		return $html;
+	}
+	$s = seed( (string) $post->ID, $post->post_title );
+
+	return '<div class="cr-sticky-artifact cr-sticky-artifact--board" ' . sticky_style( $s, '0deg' ) . '><div class="cr-sticky cr-sticky--board">' . $html . '</div>' . curl() . '</div>';
+}
+add_filter( 'render_block_post-kinds-indieweb/note-entry', __NAMESPACE__ . '\\board_item', 10, 3 );
+
+/**
+ * Load the Note board paint on its archive and in the editor.
+ *
+ * @return void
+ */
+function enqueue_board_styles(): void {
+	// Editor parity already lists every kind term; this board needs no body class.
+	if ( ! is_admin() && ! is_tax( 'kind', 'note' ) ) {
+		return;
+	}
+	wp_enqueue_style( 'courtneyr-post-kinds', COURTNEYR_CHILD_URI . '/assets/css/cr-post-kinds.css', array(), COURTNEYR_CHILD_VERSION );
+	wp_enqueue_style( 'courtneyr-note-board', COURTNEYR_CHILD_URI . '/assets/css/cr-note-board.css', array( 'courtneyr-post-kinds' ), COURTNEYR_CHILD_VERSION );
+}
+add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_board_styles' );
+
+/**
  * /stream: the plugin's generic note card becomes the sticky.
  *
  * The thought is the excerpt when the post has one, else the title; the
  * heading hides visually (it stays the card's link for assistive tech) when
  * it is the plugin's synthetic kind-label title or when the excerpt already
- * opens with it, so nothing prints twice.
+ * opens with it, so nothing prints twice. The heading's link is the card's
+ * only link, so the plugin's Read more strip, which repeats it, is cut and an
+ * image overflow "+N" link becomes text.
  *
  * @param string    $html     Rendered stream card.
  * @param array     $block    Parsed block (unused).
@@ -114,6 +182,12 @@ function stream_card( string $html, array $block, $instance ): string {
 	} elseif ( '' !== $excerpt && '' !== $title && str_starts_with( $excerpt, $title ) ) {
 		$classes[] = 'cr-sticky--dup-title';
 	}
+
+	$html = (string) preg_replace( '/<div class="pk-meta"><a class="pk-link" href="[^"]*">.*?<\/a><\/div>/s', '', $html, 1 );
+	// A note with more images than the card shows ends its thumbnails with a
+	// "+N" link to the same post; keep the count as text so the heading stays
+	// the only link.
+	$html = (string) preg_replace( '/<a class="pk-media__thumb-more-link" href="[^"]*">(.*?)<\/a>/s', '<span class="pk-media__thumb-more-link">$1</span>', $html, 1 );
 
 	$tags = new \WP_HTML_Tag_Processor( $html );
 	if ( $tags->next_tag( array( 'tag_name' => 'article', 'class_name' => 'pk-card' ) ) ) {
