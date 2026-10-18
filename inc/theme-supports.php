@@ -234,10 +234,20 @@ function kind_archive_page_sizes(): array {
 /**
  * The registered size of the kind archive a query is for.
  *
+ * The podcast view is paged by the plugin block's 12-item attribute, so
+ * size_kind_archive() at priority 11 must not replace it with the listen
+ * shelf's 5. The literal query var keeps the theme safe without the plugin,
+ * and without the var (every plugin before W5) the result is unchanged.
+ * Returning 0 lets fill_card_grid_post_count() run at priority 10, where the
+ * plugin's own callback, registered later, sets 12 after it.
+ *
  * @param \WP_Query $query Query.
  * @return int Posts per page, or 0 when the query isn't for a kind archive with a size.
  */
 function kind_archive_page_size( $query ): int {
+	if ( $query->is_tax( 'kind', 'listen' ) && 'podcast' === $query->get( 'pkiw_listen_type' ) ) {
+		return 0;
+	}
 	foreach ( kind_archive_page_sizes() as $kind => $size ) {
 		if ( $query->is_tax( 'kind', $kind ) ) {
 			return $size;

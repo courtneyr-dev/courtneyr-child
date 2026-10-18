@@ -403,19 +403,47 @@ function enqueue_card_paint_for_quote_single(): void {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_card_paint_for_quote_single' );
 
 /**
- * Load the shelf boards (cr-shelf-boards.css, PKIW W1) on the play and read
+ * Load the shelf boards (cr-shelf-boards.css, PKIW W1) on the play, read and video
  * archives, and in the editor where their templates are edited. Those
  * templates wrap their sectioned Query in .cr-shelf-boards.
  *
  * @return void
  */
 function enqueue_shelf_boards(): void {
-	if ( ! is_admin() && ! is_tax( 'kind', array( 'play', 'read' ) ) ) {
+	if ( ! is_admin() && ! is_tax( 'kind', array( 'play', 'read', 'video' ) ) ) {
 		return;
 	}
 	wp_enqueue_style( 'courtneyr-shelf-boards', COURTNEYR_CHILD_URI . '/assets/css/cr-shelf-boards.css', array(), COURTNEYR_CHILD_VERSION );
 }
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_shelf_boards' );
+
+/**
+ * Load podcast paint on the podcast archive view, podcast singles and Stream.
+ *
+ * Those are the only three surfaces that render podcast objects; every other
+ * archive, single, page and editor request keeps the stylesheet unloaded.
+ *
+ * @return void
+ */
+function enqueue_podcast_styles(): void {
+	if ( is_admin() ) {
+		return;
+	}
+
+	$is_podcast_view = is_tax( 'kind', 'listen' ) && function_exists( 'get_query_var' ) && 'podcast' === get_query_var( 'pkiw_listen_type' );
+	$is_podcast_post = false;
+	if ( is_singular( 'post' ) && function_exists( '\\PKIW\\kind_facts' ) ) {
+		$facts           = \PKIW\kind_facts( (int) get_queried_object_id() );
+		$is_podcast_post = is_array( $facts ) && ! empty( $facts['is_podcast'] );
+	}
+	$is_stream = function_exists( '\\Courtneyr\\Child\\HomeSections\\is_stream_surface' ) && \Courtneyr\Child\HomeSections\is_stream_surface();
+	if ( ! $is_podcast_view && ! $is_podcast_post && ! $is_stream ) {
+		return;
+	}
+
+	wp_enqueue_style( 'courtneyr-podcast', COURTNEYR_CHILD_URI . '/assets/css/cr-podcast.css', array(), COURTNEYR_CHILD_VERSION );
+}
+add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_podcast_styles' );
 
 /**
  * Register the shared paper sheet for kind modules and load it in the editor.
@@ -964,13 +992,17 @@ add_filter( 'perfmatters_minify_js_exclusions', __NAMESPACE__ . '\\perfmatters_e
  * exercise-entry.css, medal-row.css and sleep-night.css. The plugin's
  * note-entry.css stays off the list: every rule in it sits under the note
  * board block style, which paints nothing on this site.
+ * The W5 sheets are the six theme sheets cr-video.css, cr-audio.css,
+ * cr-jam.css, cr-podcast.css, cr-wish.css and cr-question.css, plus the
+ * plugin's podcast-lineup.css and question-answers.css. Several are listed
+ * before their files exist, so the kind lanes don't edit this list.
  *
  * @param array<int, string> $exclusions URL fragments Remove Unused CSS skips.
  * @return array<int, string>
  */
 function perfmatters_rucss_exclusions( $exclusions ): array {
 	$exclusions = is_array( $exclusions ) ? $exclusions : array();
-	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css', 'cr-checkin-archive.css', 'cr-shelf-boards.css', 'cr-play.css', 'cr-play-board.css', 'cr-play-video.css', 'cr-read-shelf.css', 'cr-review.css', 'cr-letters.css', 'cr-like.css', 'cr-bookmark.css', 'cr-paper.css', 'cr-chicken.css', 'chicken-entry.css', 'cr-photo.css', 'photo-projector.css', 'cr-favorite.css', 'cr-sticker.css', 'cr-acquisition.css', 'cr-ticket.css', 'cr-repost.css', 'article-stream-card.css', 'cr-calendar.css', 'cr-mood-year.css', 'mood-year-grid.css', 'cr-weather.css', 'cr-exercise.css', 'exercise-entry.css', 'medal-row.css', 'cr-sleep.css', 'sleep-night.css', 'cr-craft.css', 'cr-note-board.css', 'leaflet.css', 'MarkerCluster.css', 'checkins-feed/style.css' ) as $file ) {
+	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css', 'cr-checkin-archive.css', 'cr-shelf-boards.css', 'cr-play.css', 'cr-play-board.css', 'cr-play-video.css', 'cr-read-shelf.css', 'cr-review.css', 'cr-letters.css', 'cr-like.css', 'cr-bookmark.css', 'cr-paper.css', 'cr-chicken.css', 'chicken-entry.css', 'cr-photo.css', 'photo-projector.css', 'cr-favorite.css', 'cr-sticker.css', 'cr-acquisition.css', 'cr-ticket.css', 'cr-repost.css', 'article-stream-card.css', 'cr-calendar.css', 'cr-mood-year.css', 'mood-year-grid.css', 'cr-weather.css', 'cr-exercise.css', 'exercise-entry.css', 'medal-row.css', 'cr-sleep.css', 'sleep-night.css', 'cr-craft.css', 'cr-note-board.css', 'cr-video.css', 'cr-audio.css', 'cr-jam.css', 'cr-podcast.css', 'cr-wish.css', 'cr-question.css', 'podcast-lineup.css', 'question-answers.css', 'leaflet.css', 'MarkerCluster.css', 'checkins-feed/style.css' ) as $file ) {
 		$exclusions[] = $file;
 	}
 	return array_values( array_unique( $exclusions ) );

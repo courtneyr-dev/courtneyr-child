@@ -54,6 +54,22 @@ function ableplayer_youtube( string $youtube_id, string $captions = '' ): string
 }
 
 /**
+ * Build an Able Player for an audio attachment.
+ *
+ * URL-only audio stays with Core because Able Player needs an attachment ID.
+ *
+ * @param int $attachment_id Audio attachment ID.
+ * @return string Rendered Able Player markup, or an empty string.
+ */
+function ableplayer_audio( int $attachment_id ): string {
+	if ( $attachment_id <= 0 || ! shortcode_exists( 'ableplayer' ) || ! wp_attachment_is( 'audio', $attachment_id ) ) {
+		return '';
+	}
+
+	return do_shortcode( sprintf( '[ableplayer media-id=%d preload=metadata autoplay=false]', $attachment_id ) );
+}
+
+/**
  * Find the site's WebVTT caption file for a YouTube video.
  *
  * Looks up a `text/vtt` attachment whose `_cr_youtube_id` meta equals the video
@@ -151,6 +167,128 @@ function card_embed( $pre, $url, $kind, $context = array() ) {
 	return ableplayer_youtube( $youtube_id, $captions );
 }
 add_filter( 'pkiw_card_embed_html', __NAMESPACE__ . '\\card_embed', 10, 4 );
+
+/**
+ * Whether the request is a REST block-renderer editor preview.
+ *
+ * @return bool
+ */
+function is_block_renderer_request(): bool {
+	if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
+		return false;
+	}
+	$uri   = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- compared, never output.
+	$route = isset( $_GET['rest_route'] ) ? (string) wp_unslash( $_GET['rest_route'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Recommended -- read-only routing check.
+	return str_contains( $uri, '/block-renderer/' ) || str_contains( $route, '/block-renderer/' );
+}
+
+/**
+ * Remove every autoplay query argument without normalizing the URL.
+ *
+ * @param string $url Embed URL.
+ * @return string URL without autoplay, or the original URL when absent.
+ */
+function strip_autoplay_query_arg( string $url ): string {
+	$fragment_at = strpos( $url, '#' );
+	$fragment    = false === $fragment_at ? '' : substr( $url, $fragment_at );
+	$before_hash = false === $fragment_at ? $url : substr( $url, 0, $fragment_at );
+	$query_at    = strpos( $before_hash, '?' );
+	if ( false === $query_at ) {
+		return $url;
+	}
+
+	$base    = substr( $before_hash, 0, $query_at );
+	$query   = substr( $before_hash, $query_at + 1 );
+	$parts   = explode( '&', $query );
+	$kept    = array();
+	$removed = false;
+	foreach ( $parts as $part ) {
+		$name = explode( '=', $part, 2 )[0];
+		if ( 0 === strcasecmp( $name, 'autoplay' ) ) {
+			$removed = true;
+			continue;
+		}
+		$kept[] = $part;
+	}
+	if ( ! $removed ) {
+		return $url;
+	}
+
+	return $base . ( empty( $kept ) ? '' : '?' . implode( '&', $kept ) ) . $fragment;
+}
+
+/**
+ * Disable saved autoplay on video, audio and embed blocks for media kinds.
+ *
+ * Priority 9 matters because Core runs every generic `render_block` callback
+ * before any `render_block_{name}` callback. This runs before embed_block()
+ * (generic priority 10), before every named-hook callback, and covers Able
+ * Player output produced when a player is lifted into another render path.
+ *
+ * @param string               $html  Rendered block HTML.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function strip_media_autoplay( string $html, array $block ): string {
+	$block_name = (string) ( $block['blockName'] ?? '' );
+	if ( ! in_array( $block_name, array( 'core/video', 'core/audio', 'core/embed' ), true ) ) {
+		return $html;
+	}
+	if ( is_admin() || is_block_renderer_request() ) {
+		return $html;
+	}
+
+	$post_id = (int) get_the_ID();
+	if ( 0 === $post_id ) {
+		$post_id = (int) get_queried_object_id();
+	}
+	if ( 0 === $post_id ) {
+		return $html;
+	}
+
+	$kinds = apply_filters( 'courtneyr_child_strip_autoplay_kinds', array( 'video', 'audio' ) );
+	$kinds = array_values(
+		array_unique(
+			array_filter(
+				array_map(
+					static fn( $kind ): string => is_string( $kind ) ? trim( $kind ) : '',
+					(array) $kinds
+				),
+				static fn( string $kind ): bool => '' !== $kind
+			)
+		)
+	);
+	if ( empty( $kinds ) || ! has_term( $kinds, 'kind', $post_id ) ) {
+		return $html;
+	}
+
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	if ( 'core/video' === $block_name || 'core/audio' === $block_name ) {
+		$tag = 'core/video' === $block_name ? 'VIDEO' : 'AUDIO';
+		if ( $tags->next_tag( $tag ) ) {
+			$tags->remove_attribute( 'autoplay' );
+			$tags->set_attribute( 'controls', true );
+			$tags->set_attribute( 'preload', 'metadata' );
+			return $tags->get_updated_html();
+		}
+		return $html;
+	}
+
+	$changed = false;
+	while ( $tags->next_tag( 'IFRAME' ) ) {
+		$src = $tags->get_attribute( 'src' );
+		if ( ! is_string( $src ) ) {
+			continue;
+		}
+		$clean = strip_autoplay_query_arg( $src );
+		if ( $clean !== $src ) {
+			$tags->set_attribute( 'src', $clean );
+			$changed = true;
+		}
+	}
+	return $changed ? $tags->get_updated_html() : $html;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\strip_media_autoplay', 9, 2 );
 
 /**
  * Render core Embed blocks (wp:embed) that point at YouTube through Able Player.
