@@ -1323,41 +1323,6 @@ body .pk-card {
 .cr-stream-page .k-itinerary .pk-title { font-family: var(--cr-font-mono, monospace); letter-spacing: 0.06em; }
 .cr-stream-page .k-itinerary .pk-excerpt { border-top: 2px dashed var(--cr-border-strong, rgba(36, 28, 74, 0.24)); padding-top: 0.5rem; margin-top: 0.4rem; }
 
-/* question → sticky note with the pushpin, classic sticky-note yellow (v0.5.267, was sky tint). */
-.cr-stream-page .pk-card.k-question {
-	width: 80%;
-	background: #fcf1c5;
-	border: 0;
-	box-shadow: var(--cr-shadow-hard, 4px 4px 0 rgba(36, 28, 74, 0.35));
-	padding: 0.9rem 1rem 1rem;
-	transform: rotate(var(--cr-rotate-1, -1.2deg));
-	position: relative;
-}
-.cr-stream-page .pk-card.k-question::before {
-	content: "";
-	position: absolute;
-	top: 0.35rem;
-	left: 50%;
-	margin-left: -0.45rem;
-	width: 0.9rem;
-	height: 0.9rem;
-	border-radius: 50%;
-	background: radial-gradient(circle at 35% 30%, #f0a04b, var(--cr-ut-orange-dark, #b85f00) 75%);
-	box-shadow: 0 2px 3px rgba(36, 28, 74, 0.45);
-	z-index: 4;
-}
-.cr-stream-page .pk-card.k-question::after {
-	content: "?";
-	position: absolute;
-	top: 0.45rem;
-	right: 0.9rem;
-	font-family: var(--cr-font-display, cursive);
-	font-size: 1.6rem;
-	color: var(--cr-cerulean, #126782);
-	transform: rotate(8deg);
-}
-.cr-stream-page .k-question .pk-badge { display: none; }
-
 /* ============================================================
    v0.5.237 — consistency audit fixes:
    column clipping, scrap label clipping, cassette unification,
@@ -1381,8 +1346,7 @@ body .pk-card {
 .cr-stream-page .pk-card.k-issue .pk-kindlabel,
 .cr-stream-page .pk-card.k-tag .pk-kindlabel,
 .cr-stream-page .pk-card.k-trip .pk-kindlabel,
-.cr-stream-page .pk-card.k-itinerary .pk-kindlabel,
-.cr-stream-page .pk-card.k-question .pk-kindlabel {
+.cr-stream-page .pk-card.k-itinerary .pk-kindlabel {
 	position: static;
 	display: block;
 	margin: 0 0 0.35rem;
@@ -1649,12 +1613,6 @@ body .pk-card {
 	background: radial-gradient(circle at 32% 28%, #d9eef5 0%, #4da3bd 32%, #126782 68%, #0b3f50 100%);
 	box-shadow: 0 2px 4px rgba(36, 28, 74, 0.55);
 }
-.cr-stream-page .pk-card.k-question::before {
-	width: 1rem;
-	height: 1rem;
-	background: radial-gradient(circle at 32% 28%, #ffd9a8 0%, #f0952f 35%, #b85f00 72%, #8a4700 100%);
-	box-shadow: 0 2px 4px rgba(36, 28, 74, 0.55);
-}
 /* Quote glyph: a typeface with full-bodied quotes, sized and seated
    so the whole mark shows. */
 .cr-stream-page .pk-card.k-quote::after {
@@ -1675,8 +1633,7 @@ body .pk-card {
 .cr-stream-page .pk-card.k-quote::before,
 .cr-stream-page .pk-card.k-follow::before,
 .cr-stream-page .pk-card.k-issue::before,
-.cr-stream-page .pk-card.k-tag::before,
-.cr-stream-page .pk-card.k-question::before {
+.cr-stream-page .pk-card.k-tag::before {
 	width: 1rem;
 	height: 1rem;
 	box-shadow: 0 2px 4px rgba(36, 28, 74, 0.55);
@@ -1690,9 +1647,8 @@ body .pk-card {
 .cr-stream-page .pk-card.k-article::before {
 	background: radial-gradient(circle at 32% 28%, #d9d3ee 0%, #6a5fa8 32%, #3d2f6e 68%, #241c4a 100%);
 }
-/* ut orange: issue, question */
-.cr-stream-page .pk-card.k-issue::before,
-.cr-stream-page .pk-card.k-question::before {
+/* ut orange: issue */
+.cr-stream-page .pk-card.k-issue::before {
 	background: radial-gradient(circle at 32% 28%, #ffd9a8 0%, #f0952f 35%, #b85f00 72%, #8a4700 100%);
 }
 /* selective yellow: follow */
@@ -2011,7 +1967,6 @@ body .pk-card {
 
 /* ---- v0.5.270: ink border returns on six clippings ----
    (like, issue, follow stay borderless.) */
-.cr-stream-page .pk-card.k-question,
 .cr-stream-page .pk-card.k-tag,
 .cr-stream-page .pk-card.k-quote,
 .cr-stream-page .pk-card.k-article {
@@ -2164,7 +2119,6 @@ body .pk-card {
 .cr-stream-page .pk-card.k-issue,
 .cr-stream-page .pk-card.k-follow,
 .cr-stream-page .pk-card.k-tag,
-.cr-stream-page .pk-card.k-question,
 .cr-stream-page .pk-card.k-eat,
 .cr-stream-page .pk-card.k-audio {
 	--cr-ink: #241c4a;
