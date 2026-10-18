@@ -4967,7 +4967,9 @@ for ( const archive of [ ...W3_ARCHIVES, ...W4_ARCHIVES ] ) {
 		await requireKindCount( page, archive.kind, archive.min );
 		await page.goto( archive.path, { waitUntil: 'load' } );
 		const pager = page.locator( 'nav.wp-block-query-pagination[aria-label="Pagination"]' );
-		if ( archive.calendar ) {
+		// On a seeded stack (CR_SEEDED_STACK=1) every calendar kind spans more than one page, so a
+		// missing pager fails; on a site where the posts fill one calendar unit there's no page 2.
+		if ( archive.calendar && '1' !== process.env.CR_SEEDED_STACK ) {
 			test.skip( 0 === await page.locator( 'nav.wp-block-query-pagination a.wp-block-query-pagination-next' ).count(), `${ archive.kind } posts fill one ${ archive.calendar } on this site, so there's no page 2` );
 		}
 		await expect( pager ).toHaveCount( 1 );

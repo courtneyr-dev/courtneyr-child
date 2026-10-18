@@ -12,22 +12,27 @@ export function assertLocalTarget( base = BASE_URL ) {
 }
 
 // Seeded singles (W4 fixtures), found by slug through the public REST API, the way the kind specs find
-// them. CR_<NAME>_PATH (for example CR_MOOD_SINGLE_PATH) names the path instead.
+// them, and named by fixture key. CR_<NAME>_PATH (for example CR_MOOD_SINGLE_F01_PATH) names the path
+// instead, which also covers a reseed that suffixed a slug with -2.
 const seeded = {
-	'mood-single': 'cr-seed-248-f01',
-	'mood-single-untitled': 'cr-seed-248-f17',
-	'weather-single': 'cr-seed-246-a15',
-	'weather-single-untitled': 'cr-seed-246-s1',
-	'exercise-single': 'cr-seed-245-a01',
-	'exercise-single-untitled': 'cr-seed-245-a05',
-	'sleep-single': 'cr-seed-247-t01',
-	'sleep-single-untitled': 'cr-seed-247-h01',
-	'craft-single': 'seed-249-k01',
-	'craft-single-featured': 'seed-249-w01',
-	'note-single': 'cr-seed-265-n19',
-	'note-single-long': 'cr-seed-265-n18',
-	'note-single-aside': 'cr-seed-265-n10',
-	'note-single-image': 'cr-seed-265-n17',
+	'mood-single-f01': 'cr-seed-248-f01',
+	'mood-single-f17': 'cr-seed-248-f17',
+	'weather-single-a15': 'cr-seed-246-a15',
+	'weather-single-s1': 'cr-seed-246-s1',
+	'weather-single-a12': 'cr-seed-246-a12',
+	'weather-single-m01': 'cr-seed-246-m01',
+	'exercise-single-a01': 'cr-seed-245-a01',
+	'exercise-single-a05': 'cr-seed-245-a05',
+	'sleep-single-t01': 'cr-seed-247-t01',
+	'sleep-single-h01': 'cr-seed-247-h01',
+	'craft-single-k01': 'seed-249-k01',
+	'craft-single-w01': 'seed-249-w01',
+	'craft-single-l01': 'seed-249-l01',
+	'craft-single-e02': 'seed-249-e02',
+	'note-single-n19': 'cr-seed-265-n19',
+	'note-single-n18': 'cr-seed-265-n18',
+	'note-single-n10': 'cr-seed-265-n10',
+	'note-single-n17': 'cr-seed-265-n17',
 };
 
 export const ROUTE_NAMES = [ 'home', 'stream', 'single-post', 'kind-archive', 'story-archive', 'play-archive', 'read-archive', 'review-archive', 'reply-archive', 'like-archive', 'bookmark-archive', 'chicken-archive', 'photo-archive', 'photo-archive-page-2', 'favorite-archive', 'favorite-archive-page-2', 'acquisition-archive', 'acquisition-archive-page-2', 'repost-archive', 'repost-archive-page-2', 'article-archive', 'mood-archive', 'weather-archive', 'weather-archive-page-2', 'exercise-archive', 'exercise-archive-page-2', 'sleep-archive', 'sleep-archive-page-2', 'craft-archive', 'craft-archive-page-2', 'note-archive', 'note-archive-page-2', ...Object.keys( seeded ) ];
