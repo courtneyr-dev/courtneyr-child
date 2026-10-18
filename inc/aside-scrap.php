@@ -164,7 +164,11 @@ function stream_card( string $html, array $block, $instance ): string {
 		$tags->add_class( 'cr-scrap' );
 		$tags->add_class( 'cr-scrap--stream' );
 		$tags->add_class( 'cr-scrap--' . $state );
-		if ( $tags->next_tag( array( 'tag_name' => 'a', 'class_name' => 'pk-link' ) ) ) {
+		$chip = array(
+			'tag_name'   => 'a',
+			'class_name' => 'pk-link',
+		);
+		if ( $tags->next_tag( $chip ) ) {
 			$tags->add_class( 'u-url' );
 		}
 		$html = $tags->get_updated_html();
