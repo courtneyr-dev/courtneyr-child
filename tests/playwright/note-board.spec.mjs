@@ -112,7 +112,7 @@ test.describe( 'served Note archive', () => {
 		await expect( header.getByRole( 'heading', { level: 1, name: 'Note', exact: true } ) ).toHaveCount( 1 );
 		await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
 
-		const tiles = header.locator( 'h1 .cr-cutout__tiles[aria-hidden="true"] > .cr-cutout__tile' );
+		const tiles = header.locator( 'h1 .cr-cutout__tiles[aria-hidden="true"] .cr-cutout__tile' );
 		await expect( tiles ).toHaveCount( 4 );
 		expect( ( await tiles.allTextContents() ).join( '' ).replace( /\s/g, '' ) ).toBe( 'Note' );
 		const rotations = await tiles.evaluateAll( ( els ) => els.map( ( el ) => [ ...el.classList ].find( ( name ) => /^is-r\d+$/.test( name ) ) || '' ) );
@@ -250,9 +250,9 @@ test.describe( 'served Note archive', () => {
 			const link = item.locator( 'a.u-url' );
 			const ids = ( await link.getAttribute( 'aria-labelledby' ) || '' ).split( /\s+/ ).filter( Boolean );
 			expect( ids.length ).toBeGreaterThanOrEqual( 2 );
-			const classes = await item.evaluate( ( el, references ) => references.map( ( id ) => document.getElementById( id )?.className || '' ), ids );
-			expect( classes.some( ( value ) => /title|thought/.test( value ) ) ).toBe( true );
-			expect( classes.some( ( value ) => /date/.test( value ) ) ).toBe( true );
+			const classes = await item.evaluate( ( el, references ) => references.map( ( id ) => `${ id } ${ document.getElementById( id )?.className || '' }` ), ids );
+			expect( classes.some( ( value ) => /name|title|thought/.test( value ) ) ).toBe( true );
+			expect( classes.some( ( value ) => /date|-d-\d+/.test( value ) ) ).toBe( true );
 		}
 	} );
 
