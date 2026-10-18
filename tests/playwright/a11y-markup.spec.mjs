@@ -5039,8 +5039,12 @@ for ( const archive of W4_ARCHIVES.filter( ( { kind } ) => 'craft' === kind || '
 		const items = page.locator( 'main li.wp-block-post' );
 		const total = await items.count();
 		test.skip( 0 === total, `no ${ archive.kind } item on ${ archive.path }` );
+		// A note whose title repeats its thought keeps the title as screen-reader text inside a
+		// stretched link (its ::after covers the sticky), so the anchor itself has no box. Count
+		// keyboard-reachable links here, not visible boxes.
 		for ( let i = 0; i < total; i++ ) {
-			expect( await focusableLinks( items.nth( i ) ), `${ archive.kind } item ${ i + 1 } has one focusable link` ).toHaveLength( 1 );
+			const reachable = await items.nth( i ).locator( 'a[href]' ).evaluateAll( ( links ) => links.filter( ( link ) => ! link.closest( '[hidden]' ) && '-1' !== link.getAttribute( 'tabindex' ) && 'none' !== getComputedStyle( link ).display && 'hidden' !== getComputedStyle( link ).visibility ).length );
+			expect( reachable, `${ archive.kind } item ${ i + 1 } has one keyboard-reachable link` ).toBe( 1 );
 		}
 	} );
 }
