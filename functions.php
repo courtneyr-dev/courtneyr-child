@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.112' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.113' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -55,6 +55,16 @@ require_once __DIR__ . '/inc/single-acquisition.php';
 require_once __DIR__ . '/inc/stream-acquisition.php';
 require_once __DIR__ . '/inc/repost.php';
 require_once __DIR__ . '/inc/stream-repost.php';
+require_once __DIR__ . '/inc/mood-year.php';
+require_once __DIR__ . '/inc/weather.php';
+require_once __DIR__ . '/inc/exercise.php';
+require_once __DIR__ . '/inc/single-exercise.php';
+require_once __DIR__ . '/inc/stream-exercise.php';
+require_once __DIR__ . '/inc/sleep.php';
+require_once __DIR__ . '/inc/stream-sleep.php';
+require_once __DIR__ . '/inc/craft.php';
+require_once __DIR__ . '/inc/single-craft.php';
+require_once __DIR__ . '/inc/stream-craft.php';
 require_once __DIR__ . '/inc/stream-checkin.php';
 require_once __DIR__ . '/inc/single-checkin.php';
 require_once __DIR__ . '/inc/kind-parts.php';
