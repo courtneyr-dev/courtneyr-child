@@ -147,15 +147,26 @@ function stream_card( string $html, array $block, $instance ): string {
 	$label = esc_html__( 'Aside', 'courtneyr-child' );
 	// Post Kinds prints the label as a <span> since 1.8.6 (a <p> before).
 	$html = (string) preg_replace( '/<(span|p) class="pk-kindlabel">[^<]*<\/\1>/', '<p class="pk-kindlabel">' . $label . '</p>', $html, 1 );
-	if ( 'none' === $state ) {
-		$html = (string) preg_replace( '/(<h2 class="pk-title"><a href="[^"]*">)[^<]*(<\/a><\/h2>)/', '${1}' . $label . '${2}', $html, 1 );
-	}
+	// One link per card (W3-G2): the scrap's Read more chip is its link, so
+	// the heading keeps its text and drops the anchor, and the chip carries
+	// u-url. An untitled scrap's heading reads "Aside".
+	$html = (string) preg_replace_callback(
+		'#(<h[1-6] class="pk-title[^"]*">)\s*<a\b[^>]*>(.*?)</a>#s',
+		static function ( array $m ) use ( $state, $label ): string {
+			return $m[1] . ( 'none' === $state ? $label : $m[2] );
+		},
+		$html,
+		1
+	);
 
 	$tags = new \WP_HTML_Tag_Processor( $html );
 	if ( $tags->next_tag( array( 'tag_name' => 'article', 'class_name' => 'pk-card' ) ) ) {
 		$tags->add_class( 'cr-scrap' );
 		$tags->add_class( 'cr-scrap--stream' );
 		$tags->add_class( 'cr-scrap--' . $state );
+		if ( $tags->next_tag( array( 'tag_name' => 'a', 'class_name' => 'pk-link' ) ) ) {
+			$tags->add_class( 'u-url' );
+		}
 		$html = $tags->get_updated_html();
 	}
 	return '<div class="cr-scrap-artifact cr-scrap-artifact--stream" ' . scrap_style( seed( (string) $post->ID, $post->post_title ) ) . '>' . $html . '</div>';
