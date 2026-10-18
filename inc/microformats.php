@@ -10,7 +10,7 @@
  *
  *   core/post-title  className "cr-u-url"        -> <a class="u-url">
  *   core/post-date   className "cr-dt-published" -> <time class="dt-published">
- *   untitled review/reply/like/bookmark/photo/acquisition/weather/craft/exercise/sleep/mood singles -> visible H1, no p-name
+ *   untitled review/reply/like/bookmark/photo/acquisition/weather/craft/exercise/sleep/mood/audio/jam/wish/question singles -> visible H1, no p-name
  *   repost singles whose card title is the H1 -> suppress Core template title
  *   review posts                              -> h-review is the entry root
  *
@@ -29,16 +29,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Kinds whose untitled singles need a visible, non-mf2-name H1.
  */
-const UNTITLED_SINGLE_KINDS = array( 'review', 'reply', 'like', 'bookmark', 'photo', 'acquisition', 'weather', 'craft', 'exercise', 'sleep', 'mood' );
+const UNTITLED_SINGLE_KINDS = array( 'review', 'reply', 'like', 'bookmark', 'photo', 'acquisition', 'weather', 'craft', 'exercise', 'sleep', 'mood', 'audio', 'jam', 'wish', 'question' );
 
 /**
  * Untitled kinds whose single H1 is the kind and date name from Nav\kind_date_name().
  *
  * The time follows unless courtneyr_child_untitled_name_shows_time says no:
  * weather and craft print "Craft, August 20, 2026 at 3:05 pm", exercise and
- * sleep print "Sleep, August 19, 2026".
+ * sleep print "Sleep, August 19, 2026". Audio, jam and question keep the time.
  */
-const KIND_DATE_NAME_KINDS = array( 'reply', 'weather', 'craft', 'exercise', 'sleep' );
+const KIND_DATE_NAME_KINDS = array( 'reply', 'weather', 'craft', 'exercise', 'sleep', 'audio', 'jam', 'question' );
 
 /**
  * Add a class to the first tag of a kind inside the rendered block.
@@ -174,6 +174,14 @@ function untitled_single_label( int $post_id ): string {
 	// Weather, craft, exercise and sleep use the same name; exercise and sleep drop the time.
 	if ( $post instanceof \WP_Post && function_exists( '\Courtneyr\Child\Nav\kind_date_name' ) && has_term( KIND_DATE_NAME_KINDS, 'kind', $post ) ) {
 		return \Courtneyr\Child\Nav\kind_date_name( $post );
+	}
+	// Wish cards can carry a real title in the plugin's public facts.
+	if ( $post instanceof \WP_Post && has_term( 'wish', 'kind', $post ) && function_exists( '\PKIW\kind_facts' ) ) {
+		$facts = \PKIW\kind_facts( $post_id );
+		$name  = is_array( $facts ) && is_string( $facts['name'] ?? null ) ? trim( $facts['name'] ) : '';
+		if ( '' !== $name ) {
+			return $name;
+		}
 	}
 	// An untitled like with no real cited title names its host in the clipping, so the H1 is its kind and date.
 	if ( $post instanceof \WP_Post && function_exists( '\PKIW\untitled_fallback_name' ) && function_exists( '\Courtneyr\Child\Like\like_facts' ) && has_term( 'like', 'kind', $post ) ) {

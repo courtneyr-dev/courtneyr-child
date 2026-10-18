@@ -43,3 +43,39 @@ footer.wp-block-template-part,
 .pkiw-craft-step {
 	break-inside: avoid;
 }
+
+/* ============================================================
+   Audio (PKIW W5)
+   ============================================================ */
+.cr-audio-machine,
+.kind-audio .wp-block-audio,
+.kind-audio audio,
+.kind-audio .ableplayer,
+.kind-audio .wp-block-embed,
+.cr-archive--audio .cr-archive__header::before,
+.cr-archive--audio .cr-archive__header::after,
+.cr-audio-log .pk-card.k-audio::before,
+.cr-audio-log .pk-card.k-audio::after,
+.cr-audio-log li::after {
+	display: none !important;
+}
+
+.cr-audio-log .pk-card.k-audio {
+	background: none !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	aspect-ratio: auto !important;
+	width: auto !important;
+	color: inherit !important;
+}
+
+.cr-audio-log li {
+	break-inside: avoid;
+}
+
+.cr-audio-sheet {
+	overflow: visible !important;
+	max-height: none !important;
+	transform: none !important;
+	break-inside: auto;
+}

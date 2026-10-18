@@ -106,6 +106,20 @@ function part_slug_for( int $post_id ): string {
 }
 
 /**
+ * Whether a post is a podcast according to the plugin's public facts.
+ *
+ * @param int $post_id Post ID.
+ * @return bool
+ */
+function is_podcast_post( int $post_id ): bool {
+	if ( ! function_exists( '\\PKIW\\kind_facts' ) ) {
+		return false;
+	}
+	$facts = \PKIW\kind_facts( $post_id );
+	return is_array( $facts ) && ! empty( $facts['is_podcast'] );
+}
+
+/**
  * Route the `kind` template part to the post's kind part, or render nothing.
  *
  * @param string|null          $pre          Short-circuit output from earlier filters.
@@ -116,7 +130,11 @@ function route( ?string $pre, array $parsed_block ): ?string {
 	if ( null !== $pre || 'core/template-part' !== ( $parsed_block['blockName'] ?? '' ) || ROUTER_SLUG !== ( $parsed_block['attrs']['slug'] ?? '' ) ) {
 		return $pre;
 	}
-	$slug = is_singular( 'post' ) ? part_slug_for( (int) get_queried_object_id() ) : '';
+	$post_id = (int) get_queried_object_id();
+	$slug    = is_singular( 'post' ) ? part_slug_for( $post_id ) : '';
+	if ( '' !== $slug && is_podcast_post( $post_id ) ) {
+		$slug = '';
+	}
 	if ( '' === $slug ) {
 		return '';
 	}

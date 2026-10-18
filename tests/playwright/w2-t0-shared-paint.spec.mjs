@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
 
 const css = ( file ) => fs.readFileSync( new URL( `../../assets/css/${ file }`, import.meta.url ), 'utf8' );
 const TOKEN_RE = /(^|[^A-Za-z0-9_-])(k|kind)-(review|reply|like|bookmark)([^A-Za-z0-9_-]|$)/;
-const CONTROL_KINDS = [ 'article', 'note', 'quote', 'repost', 'favorite', 'listen', 'jam', 'watch', 'read', 'play', 'checkin', 'eat', 'drink', 'mood', 'acquisition', 'rsvp', 'wish' ];
+const CONTROL_KINDS = [ 'article', 'note', 'quote', 'repost', 'favorite', 'listen', 'watch', 'read', 'play', 'checkin', 'eat', 'drink', 'mood', 'acquisition', 'rsvp' ];
 const PALETTE = [ 'sky-blue', 'periwinkle', 'light-orange', 'selective-yellow', 'ut-orange', 'printer-ivory', 'prussian-blue', 'cerulean', 'russian-violet' ];
 
 async function pageWith( page, bodyClass, html, styles ) {

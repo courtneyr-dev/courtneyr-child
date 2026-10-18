@@ -1,7 +1,7 @@
 <?php
 /**
  * `php tests/php/shelf-boards-enqueue-test.php`: checks that the W1 shelf-board
- * paint (.cr-shelf-boards, X13) reaches the play and read archives and the
+ * paint (.cr-shelf-boards, X13) reaches the play, read and video archives and the
  * editor, without WordPress.
  *
  * Loads inc/enqueue.php with stubbed WordPress calls, fires the asset hooks
@@ -291,6 +291,7 @@ namespace Courtneyr\Child\ShelfBoards\Tests {
 	$want = array(
 		'/kind/play/'    => array( 'kind' => 'play' ),
 		'/kind/read/'    => array( 'kind' => 'read' ),
+		'/kind/video/'   => array( 'kind' => 'video' ),
 		'editor (admin)' => array( 'admin' => true ),
 	);
 	foreach ( $want as $label => $request ) {

@@ -23,6 +23,11 @@ namespace {
 		4 => 'craft',
 		5 => 'note',
 		6 => 'reply',
+		7 => 'audio',
+		8 => 'jam',
+		9 => 'question',
+		10 => 'wish',
+		11 => 'video',
 	);
 
 	/** Stand-in post. */
@@ -211,6 +216,22 @@ namespace Courtneyr\Child\W4T0NavTests {
 	foreach ( array( 1, 2, 3, 4, 6 ) as $id ) {
 		check( untitled_single_label( $id ) === ( $no_time + $with_time )[ $id ], "single H1 label for post $id matches its post-nav name" );
 	}
+	foreach ( array( 'audio', 'jam', 'wish', 'question' ) as $kind ) {
+		check( in_array( $kind, \Courtneyr\Child\Microformats\UNTITLED_SINGLE_KINDS, true ), "$kind joins the untitled single H1 kinds" );
+	}
+	foreach ( array( 'audio', 'jam', 'question' ) as $kind ) {
+		check( in_array( $kind, \Courtneyr\Child\Microformats\KIND_DATE_NAME_KINDS, true ), "$kind uses the kind, date and time name" );
+	}
+	check( false === in_array( 'wish', \Courtneyr\Child\Microformats\KIND_DATE_NAME_KINDS, true ), 'wish does not use the kind-date name' );
+	check( false === in_array( 'video', \Courtneyr\Child\Microformats\KIND_DATE_NAME_KINDS, true ), 'video does not use the kind-date name' );
+	check( untitled_single_label( 7 ) === 'Audio, August 7, 2026 at 3:05 pm', 'audio single H1 uses kind, date and time' );
+	check( untitled_single_label( 8 ) === 'Jam, August 8, 2026 at 3:05 pm', 'jam single H1 uses kind, date and time' );
+	check( untitled_single_label( 9 ) === 'Question, August 9, 2026 at 3:05 pm', 'question single H1 uses kind, date and time' );
+	$GLOBALS['cr_facts'][10] = array( 'name' => 'Fictional Lantern' );
+	check( untitled_single_label( 10 ) === 'Fictional Lantern', 'wish single H1 uses its facts name' );
+	$GLOBALS['cr_facts'] = array();
+	check( untitled_single_label( 10 ) === 'Entry from August 10, 2026', 'wish without facts falls through to Entry from date' );
+	check( false === in_array( 'video', \Courtneyr\Child\Microformats\UNTITLED_SINGLE_KINDS, true ), 'video stays out of the untitled single H1 kinds' );
 
 	// The Blog-card label.
 	$GLOBALS['cr_facts'] = array( 2 => array( 'name' => 'Sleep, August 2, 2026' ) );
