@@ -256,14 +256,40 @@ function dispatch( string $html, array $block, $instance ): string {
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\dispatch', 10, 3 );
 
+/** Whether wish paint should load on this request. */
+function should_load_styles(): bool {
+	return is_admin() || is_wish_archive() || is_wish_single() || on_stream_surface();
+}
+
+/**
+ * Register the pager sheet the wish sheet depends on, on wish views only.
+ *
+ * A missing dependency would stop the wish sheet from printing. The handle,
+ * file and path data match the nav module's block-style registration, and a
+ * handle that already exists is kept.
+ */
+function register_nav_dependency(): void {
+	if ( function_exists( 'wp_style_is' ) && wp_style_is( 'courtneyr-nav', 'registered' ) ) {
+		return;
+	}
+	if ( ! defined( 'COURTNEYR_CHILD_URI' ) || ! defined( 'COURTNEYR_CHILD_VERSION' ) || ! defined( 'COURTNEYR_CHILD_DIR' ) || ! function_exists( 'wp_register_style' ) ) {
+		return;
+	}
+	wp_register_style( 'courtneyr-nav', COURTNEYR_CHILD_URI . '/assets/css/cr-nav.css', array(), COURTNEYR_CHILD_VERSION );
+	if ( function_exists( 'wp_style_add_data' ) ) {
+		wp_style_add_data( 'courtneyr-nav', 'path', COURTNEYR_CHILD_DIR . '/assets/css/cr-nav.css' );
+	}
+}
+
 /** Load wish paint wherever wish markup can render. */
 function enqueue_styles(): void {
-	if ( ! is_admin() && ! is_wish_archive() && ! is_wish_single() && ! on_stream_surface() ) {
+	if ( ! should_load_styles() ) {
 		return;
 	}
 	if ( ! defined( 'COURTNEYR_CHILD_URI' ) || ! defined( 'COURTNEYR_CHILD_VERSION' ) ) {
 		return;
 	}
+	register_nav_dependency();
 	wp_enqueue_style(
 		STYLE_HANDLE,
 		COURTNEYR_CHILD_URI . '/assets/css/cr-wish.css',
@@ -272,20 +298,3 @@ function enqueue_styles(): void {
 	);
 }
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_styles' );
-
-/**
- * Make sure the pager sheet is registered before the wish sheet depends on it.
- *
- * The nav module registers it as a block-style handle during enqueue_block_assets.
- * A missing dependency would stop the wish sheet from printing, so the same
- * handle and file are registered first. A handle that already exists is kept.
- */
-function register_nav_dependency(): void {
-	if ( function_exists( 'wp_style_is' ) && wp_style_is( 'courtneyr-nav', 'registered' ) ) {
-		return;
-	}
-	if ( defined( 'COURTNEYR_CHILD_URI' ) && defined( 'COURTNEYR_CHILD_VERSION' ) && function_exists( 'wp_register_style' ) ) {
-		wp_register_style( 'courtneyr-nav', COURTNEYR_CHILD_URI . '/assets/css/cr-nav.css', array(), COURTNEYR_CHILD_VERSION );
-	}
-}
-add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\register_nav_dependency', 1 );

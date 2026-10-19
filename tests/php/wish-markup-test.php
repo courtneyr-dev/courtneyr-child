@@ -71,6 +71,17 @@ namespace {
 	function wp_enqueue_block_style( $block, $style ) {
 		$GLOBALS['cr_block_styles'][] = array( $block, $style );
 	}
+	function wp_style_is( $handle, $status = 'enqueued' ) {
+		return 'registered' === $status && isset( $GLOBALS['cr_registered_styles'][ $handle ] );
+	}
+	function wp_register_style( $handle, $src = '', $deps = array(), $version = false ) {
+		$GLOBALS['cr_registered_styles'][ $handle ] = array( $src, $deps, $version );
+		return true;
+	}
+	function wp_style_add_data( $handle, $key, $value ) {
+		$GLOBALS['cr_style_data'][ $handle ][ $key ] = $value;
+		return true;
+	}
 	function wp_enqueue_style( $handle, $src = '', $deps = array(), $version = false ) {
 		$GLOBALS['cr_enqueued'][ $handle ] = array( $src, $deps, $version );
 	}
@@ -206,6 +217,24 @@ namespace {
 				&& 'courtneyr-wish' === ( $card[1]['handle'] ?? '' )
 				&& array( 'courtneyr-paper', 'courtneyr-nav' ) === ( $card[1]['deps'] ?? null )
 				&& array( 'courtneyr-paper', 'courtneyr-nav' ) === ( $GLOBALS['cr_enqueued']['courtneyr-wish'][1] ?? null )
+				&& isset( $GLOBALS['cr_enqueued']['courtneyr-wish'] );
+		}
+	);
+
+	cr_wish_markup_check(
+		'the nav dependency registers only on wish views and carries the nav module path data',
+		static function (): bool {
+			$GLOBALS['cr_registered_styles'] = array();
+			$GLOBALS['cr_style_data']        = array();
+			$GLOBALS['cr_enqueued']          = array();
+			$GLOBALS['cr_request']           = array( 'kind' => 'other' );
+			do_action( 'enqueue_block_assets' );
+			$untouched = ! isset( $GLOBALS['cr_registered_styles']['courtneyr-nav'] ) && ! isset( $GLOBALS['cr_enqueued']['courtneyr-wish'] );
+			$GLOBALS['cr_request'] = array( 'kind' => 'wish' );
+			do_action( 'enqueue_block_assets' );
+			return $untouched
+				&& isset( $GLOBALS['cr_registered_styles']['courtneyr-nav'] )
+				&& str_ends_with( (string) ( $GLOBALS['cr_style_data']['courtneyr-nav']['path'] ?? '' ), '/assets/css/cr-nav.css' )
 				&& isset( $GLOBALS['cr_enqueued']['courtneyr-wish'] );
 		}
 	);
