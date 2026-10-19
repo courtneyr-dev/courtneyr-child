@@ -7122,7 +7122,8 @@ body.tax-kind.term-quote .cr-archive-stream .cr-note--single .pk-title {
 }
 body.tax-kind.term-quote .cr-archive-stream .cr-note--single .pk-title a { color: inherit; text-decoration: none; }
 body.tax-kind.term-quote .cr-archive-stream .cr-note--single .pk-title a:hover { text-decoration: underline; text-decoration-color: var(--cr-cerulean, #126782); text-decoration-thickness: 2px; }
-body.tax-kind.term-quote .cr-archive-stream .cr-note--single .pk-title a:focus-visible { outline: 3px solid var(--cr-focus-ring); outline-offset: 3px; }
+/* Ink ring: selective yellow on this paper is 1.67:1. */
+body.tax-kind.term-quote .cr-archive-stream .cr-note--single .pk-title a:focus-visible { outline: 3px solid var(--cr-russian-violet); outline-offset: 3px; }
 body.tax-kind.term-quote .cr-archive-stream .cr-note--single .cr-note__date time { border: 0; padding: 0; background: none; color: inherit; font: inherit; letter-spacing: inherit; }
 /* The header's own date hides (the sheet has it); the tag row stays as is. */
 body.single-post.kind-quote .single-post__lede-meta .single-post__date { display: none; }

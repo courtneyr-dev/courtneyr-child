@@ -245,7 +245,19 @@ namespace {
 		static function (): bool {
 			$css = (string) file_get_contents( dirname( __DIR__, 2 ) . '/assets/css/cr-post-kinds.css' );
 			$both = ':is(body.single-post.kind-quote .single-post__content, body.tax-kind.term-quote .cr-archive-stream)';
-			return str_contains( $css, $both . ' .cr-note.cr-note--single::before {' )
+			$main = (string) shell_exec( 'git -C ' . escapeshellarg( dirname( __DIR__, 2 ) ) . ' show origin/main:assets/css/cr-post-kinds.css 2>/dev/null' );
+			$old  = 'body.single-post.kind-quote .single-post__content ';
+			// Every single-sheet rule on main is widened to the archive, line for line.
+			foreach ( explode( "\n", $main ) as $line ) {
+				if ( str_contains( $line, $old ) && ( str_contains( $line, '.cr-note--single' ) || str_contains( $line, '.cr-note-artifact--single' ) ) && ! str_contains( $line, 'cr-journal' ) ) {
+					if ( ! str_contains( $css, str_replace( $old, $both . ' ', $line ) ) ) {
+						return false;
+					}
+				}
+			}
+			return '' !== $main
+				&& str_contains( $css, 'body.tax-kind.term-quote .cr-archive-stream .cr-note--single .pk-title a:focus-visible { outline: 3px solid var(--cr-russian-violet);' )
+				&& str_contains( $css, $both . ' .cr-note.cr-note--single::before {' )
 				&& str_contains( $css, $both . ' .cr-note--single blockquote,' )
 				&& str_contains( $css, $both . ' .cr-note-artifact--single {' )
 				&& str_contains( $css, 'body.tax-kind.term-quote .cr-archive-stream .wp-block-post-template { columns: auto; max-width: 46rem; }' )
