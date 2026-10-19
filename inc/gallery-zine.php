@@ -35,10 +35,10 @@ const HAND_LIMIT = 60;
  */
 const SIZES = array(
 	'featured' => array(
-		'landscape' => '(max-width: 40rem) 100vw, (max-width: 64rem) 100vw, 46rem',
+		'landscape' => '(max-width: 40rem) 100vw, (max-width: 64rem) 100vw, 52rem',
 		'panorama'  => '(max-width: 40rem) 100vw, (max-width: 64rem) 100vw, 69rem',
 		'square'    => '(max-width: 40rem) 100vw, (max-width: 64rem) 100vw, 40rem',
-		'portrait'  => '(max-width: 40rem) 100vw, (max-width: 64rem) 66vw, 29rem',
+		'portrait'  => '(max-width: 40rem) 100vw, (max-width: 64rem) 66vw, 34rem',
 	),
 	'panel'    => array(
 		'landscape' => '(max-width: 40rem) 100vw, (max-width: 64rem) 66vw, 34rem',
@@ -58,9 +58,9 @@ const SPANS = array(
 	12 => array(
 		'featured' => array(
 			'panorama'  => 12,
-			'landscape' => 8,
-			'square'    => 6,
-			'portrait'  => 5,
+			'landscape' => 9,
+			'square'    => 7,
+			'portrait'  => 6,
 		),
 		'pref'     => array(
 			'panorama'  => 8,
@@ -76,9 +76,9 @@ const SPANS = array(
 		),
 		'fmin'     => array(
 			'panorama'  => 12,
-			'landscape' => 7,
-			'square'    => 5,
-			'portrait'  => 4,
+			'landscape' => 8,
+			'square'    => 6,
+			'portrait'  => 5,
 		),
 		'lone'     => array(
 			'panorama'  => 12,
@@ -120,6 +120,59 @@ const SPANS = array(
 		),
 	),
 );
+
+/**
+ * How each panel after the anchor is presented, in a fixed rhythm: mostly
+ * bare photographs, with an occasional narrow-edged print, contact-sheet
+ * panel or taped print, so no device repeats on every image.
+ */
+const TREATMENTS = array( 'bare', 'print', 'bare', 'contact', 'bare', 'print', 'taped' );
+
+/** A caption up to this many characters is handwritten on a print's edge. */
+const HAND_CAPTION_LIMIT = 40;
+
+/**
+ * Each panel's presentation classes from its place in the packed rows.
+ *
+ * The first panel is the anchor (bare, on a spot-colour plate). The second
+ * panel of the anchor's row, and of every third shared row after it, laps
+ * over its neighbour's edge; one panel in each other shared row drops below
+ * the row line, at alternate ends. A short real caption on a print or taped
+ * print is handwritten. Every eighth panel from the fourth gets a plate.
+ *
+ * @param array<int, array{span: int, start: int, row: int}> $cells    Desktop cells from layout().
+ * @param string[]                                           $captions Each panel's caption text ('' for none).
+ * @return array<int, string[]> Class suffixes per panel.
+ */
+function dressing( array $cells, array $captions ): array {
+	$rows = array();
+	foreach ( $cells as $n => $cell ) {
+		$rows[ $cell['row'] ][] = $n;
+	}
+	$out = array();
+	foreach ( $cells as $n => $cell ) {
+		$classes = array( 0 === $n ? 'anchor' : TREATMENTS[ ( $n - 1 ) % count( TREATMENTS ) ] );
+		$row     = $rows[ $cell['row'] ];
+		$pos     = (int) array_search( $n, $row, true );
+		if ( count( $row ) > 1 && 0 !== $n ) {
+			if ( 1 === $pos && 0 === $cell['row'] % 3 ) {
+				$classes[] = 'lap';
+			} elseif ( ( 0 === $cell['row'] % 2 ? count( $row ) - 1 : 0 ) === $pos ) {
+				$classes[] = 'drop';
+			}
+		}
+		$caption = (string) ( $captions[ $n ] ?? '' );
+		$length  = function_exists( 'mb_strlen' ) ? mb_strlen( $caption ) : strlen( $caption );
+		if ( in_array( $classes[0], array( 'print', 'taped' ), true ) && '' !== $caption && $length <= HAND_CAPTION_LIMIT ) {
+			$classes[] = 'hand';
+		}
+		if ( 0 === $n || 3 === $n % 8 ) {
+			$classes[] = 'plate';
+		}
+		$out[ $n ] = $classes;
+	}
+	return $out;
+}
 
 /** Which panels take a row's spare columns first. */
 const GROW_ORDER = array( 'landscape', 'panorama', 'square', 'portrait' );
@@ -477,7 +530,8 @@ add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\\capture', 9, 3 );
  * @return string
  */
 function zine( string $html, array $block, $instance = null ): string {
-	if ( null === zine_gallery_post( $block, $instance ) ) {
+	$post = zine_gallery_post( $block, $instance );
+	if ( null === $post ) {
 		return $html;
 	}
 	$state  = &state();
@@ -491,9 +545,10 @@ function zine( string $html, array $block, $instance = null ): string {
 	}
 	$state['done'] = true;
 
-	$width   = max( 2, strlen( (string) $total ) );
-	$figures = array();
-	$shapes  = array();
+	$width    = max( 2, strlen( (string) $total ) );
+	$figures  = array();
+	$shapes   = array();
+	$captions = array();
 	foreach ( $found[0] as $n => $figure ) {
 		$shape = shape_of( $images[ $n ], $figure );
 		$tags  = new \WP_HTML_Tag_Processor( $figure );
@@ -502,20 +557,28 @@ function zine( string $html, array $block, $instance = null ): string {
 			$tags->set_attribute( 'sizes', SIZES[ 0 === $n ? 'featured' : 'panel' ][ $shape ] );
 			$figure = $tags->get_updated_html();
 		}
-		$figures[] = $figure;
-		$shapes[]  = $shape;
+		$figures[]  = $figure;
+		$shapes[]   = $shape;
+		$captions[] = preg_match( '/<figcaption\b[^>]*>(.*?)<\/figcaption>/s', $figure, $m ) ? trim( html_entity_decode( wp_strip_all_tags( $m[1] ), ENT_QUOTES ) ) : '';
 	}
 
 	$desktop = layout( $shapes, 12 );
 	$tablet  = layout( $shapes, 6 );
+	$dress   = dressing( $desktop, $captions );
 	$of      = str_pad( (string) $total, $width, '0', STR_PAD_LEFT );
 	$panels  = '';
 	foreach ( $figures as $n => $figure ) {
 		$num     = str_pad( (string) ( $n + 1 ), $width, '0', STR_PAD_LEFT );
 		$style   = '--cr-col:' . grid_column( $desktop[ $n ] ) . ';--cr-col-t:' . grid_column( $tablet[ $n ] );
-		$panels .= '<li class="cr-zine__frame cr-zine__frame--' . $shapes[ $n ] . '" style="' . esc_attr( $style ) . '">'
+		$classes = 'cr-zine__frame cr-zine__frame--' . $shapes[ $n ];
+		foreach ( $dress[ $n ] as $suffix ) {
+			$classes .= ' cr-zine__frame--' . $suffix;
+		}
+		// The anchor carries a camera-style date imprint: the post's own date, nothing more.
+		$imprint = 0 === $n ? '<span class="cr-zine__imprint" aria-hidden="true">' . esc_html( get_the_date( "'y m d", $post ) ) . '</span>' : '';
+		$panels .= '<li class="' . $classes . '" style="' . esc_attr( $style ) . '">'
 			. '<span class="cr-zine__num" aria-hidden="true">' . $num . '<span class="cr-zine__of">/' . $of . '</span></span>'
-			. $figure . '</li>';
+			. $figure . $imprint . '</li>';
 	}
 
 	$caption = gallery_caption( $core );

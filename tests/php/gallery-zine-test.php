@@ -90,6 +90,7 @@ namespace {
 
 namespace {
 	use function Courtneyr\Child\GalleryZine\capture;
+	use function Courtneyr\Child\GalleryZine\dressing;
 	use function Courtneyr\Child\GalleryZine\enable_lightbox;
 	use function Courtneyr\Child\GalleryZine\holds_h1;
 	use function Courtneyr\Child\GalleryZine\start_pass;
@@ -178,9 +179,9 @@ namespace {
 			$html = cr_zine_render( $gallery, 'A short gallery caption.' );
 			cr_photo_assert( 1 === preg_match( '/^<section class="cr-zine alignwide" aria-label="Photos" data-wp-interactive="core\/gallery" data-wp-context="\{&quot;galleryId&quot;:&quot;g1&quot;\}">/', $html ), 'a region named Photos that carries core\'s gallery lightbox wiring' );
 			cr_photo_assert( 1 === preg_match( '/<ol class="cr-zine__frames" role="list">/', $html ), 'an ordered list of panels' );
-			cr_photo_same( 6, preg_match_all( '/<li class="cr-zine__frame cr-zine__frame--[a-z]+" style="--cr-col:[^"]+;--cr-col-t:[^"]+">/', $html ), 'six panels, each placed on both grids' );
+			cr_photo_same( 6, preg_match_all( '/<li class="cr-zine__frame cr-zine__frame--[a-z]+[^"]*" style="--cr-col:[^"]+;--cr-col-t:[^"]+">/', $html ), 'six panels, each placed on both grids' );
 			foreach ( array( 'landscape' => 2, 'portrait' => 2, 'square' => 1, 'panorama' => 1 ) as $shape => $n ) {
-				cr_photo_same( $n, substr_count( $html, 'cr-zine__frame--' . $shape . '" style' ), $shape . ' from the attachment size' );
+				cr_photo_same( $n, preg_match_all( '/class="cr-zine__frame cr-zine__frame--' . $shape . '[ "]/', $html ), $shape . ' from the attachment size' );
 			}
 			cr_photo_contains( '<span class="cr-zine__num" aria-hidden="true">01<span class="cr-zine__of">/06</span></span>', $html, 'numbered 01/06' );
 			cr_photo_contains( '<span class="cr-zine__num" aria-hidden="true">06<span class="cr-zine__of">/06</span></span>', $html, 'numbered 06/06' );
@@ -189,7 +190,7 @@ namespace {
 			cr_photo_same( 3, substr_count( $html, '<figcaption class="wp-element-caption">Caption ' ), 'captions kept, none invented' );
 			cr_photo_same( 6, substr_count( $html, 'data-wp-interactive="core/image"' ), 'core lightbox on unlinked images' );
 			cr_photo_same( 6, preg_match_all( '/<img\b[^>]*\bclass="[^"]*\bu-photo\b/', $html ), 'u-photo on every image' );
-			cr_photo_assert( 1 === preg_match( '/<li class="cr-zine__frame cr-zine__frame--landscape"[^>]*>.*?sizes="\(max-width: 40rem\) 100vw, \(max-width: 64rem\) 100vw, 46rem"/s', $html ), 'the featured panel is sized for its span' );
+			cr_photo_assert( 1 === preg_match( '/<li class="cr-zine__frame cr-zine__frame--landscape[^"]*"[^>]*>.*?sizes="\(max-width: 40rem\) 100vw, \(max-width: 64rem\) 100vw, 52rem"/s', $html ), 'the featured panel is sized for its span' );
 			cr_photo_contains( '<p class="cr-zine__note cr-zine__note--hand">A short gallery caption.</p>', $html, 'a short gallery caption is the handwritten note' );
 			cr_photo_not_contains( 'wp-block-gallery', $html, 'the gallery wrapper is replaced' );
 		}
@@ -330,6 +331,41 @@ namespace {
 			cr_photo_same( '<div class="cr-coop">board</div>', masthead( '<div class="cr-coop">board</div>', $block ), 'the lane keeps the page H1' );
 			cr_photo_same( true, holds_h1( false, $GLOBALS['cr_photo_posts'][42] ), 'the template header still steps aside' );
 			array_pop( $GLOBALS['cr_photo_hooks'] );
+		}
+	);
+
+	cr_photo_group(
+		'dressing: one anchor, mostly bare photographs, devices that never repeat on every panel, restrained laps, handwriting only for short real captions',
+		static function (): void {
+			foreach ( array( 2, 3, 4, 6, 10, 20 ) as $count ) {
+				$shapes = array();
+				$caps   = array();
+				for ( $n = 0; $n < $count; $n++ ) {
+					$shapes[] = array( 'landscape', 'portrait', 'square', 'panorama' )[ $n % 4 ];
+					$caps[]   = 0 === $n % 2 ? 'Caption ' . ( $n + 1 ) : '';
+				}
+				$cells = layout( $shapes, 12 );
+				$dress = dressing( $cells, $caps );
+				cr_photo_same( 'anchor', $dress[0][0], $count . ': the first panel anchors' );
+				$first = array_count_values( array_map( static fn( array $d ): string => $d[0], $dress ) );
+				cr_photo_assert( 1 === ( $first['anchor'] ?? 0 ), $count . ': one anchor' );
+				if ( $count >= 4 ) {
+					cr_photo_assert( ( $first['bare'] ?? 0 ) >= ( $count - 1 ) / 2 - 1, $count . ': most panels are bare photographs' );
+				}
+				$laps = count( array_filter( $dress, static fn( array $d ): bool => in_array( 'lap', $d, true ) ) );
+				$rows = count( array_unique( array_column( $cells, 'row' ) ) );
+				cr_photo_assert( $laps <= intdiv( $rows + 2, 3 ), $count . ': laps stay rare (' . $laps . ' in ' . $rows . ' rows)' );
+				foreach ( $dress as $n => $d ) {
+					if ( in_array( 'hand', $d, true ) ) {
+						cr_photo_assert( '' !== $caps[ $n ] && in_array( $d[0], array( 'print', 'taped' ), true ), $count . ': handwriting only on a short real caption on a print' );
+					}
+					cr_photo_assert( ! ( in_array( 'lap', $d, true ) && in_array( 'drop', $d, true ) ), $count . ': a panel laps or drops, not both' );
+				}
+			}
+			$long = dressing( layout( array( 'landscape', 'square' ), 12 ), array( '', str_repeat( 'x', 41 ) ) );
+			cr_photo_assert( ! in_array( 'hand', $long[1], true ), 'a caption over 40 characters stays typeset' );
+			$html = cr_zine_render( cr_zine_request( 6 ) );
+			cr_photo_same( 1, substr_count( $html, 'class="cr-zine__imprint"' ), 'one date imprint, on the anchor' );
 		}
 	);
 
