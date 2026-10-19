@@ -262,14 +262,14 @@ function scrapbook( string $html, array $block, $instance = null ): string {
 		if ( 'core/image' !== ( $image['blockName'] ?? '' ) ) {
 			continue;
 		}
-		$image['attrs'] = (array) ( $image['attrs'] ?? array() );
-		$classes        = (string) ( $image['attrs']['className'] ?? '' );
-		if ( '' === picked_frame( $classes ) ) {
-			$image['attrs']['className'] = trim( $classes . ' is-style-cr-photo-' . seeded_frame( $post_id, $count ) );
-		}
+		$image['attrs']             = (array) ( $image['attrs'] ?? array() );
 		$image['attrs']['lightbox'] = array( 'enabled' => true );
 		$figure                     = render_block( $image );
-		$tags                       = new \WP_HTML_Tag_Processor( $figure );
+		// The Image block is static (core prints its saved markup), so the frame goes on the rendered figure.
+		$tags = new \WP_HTML_Tag_Processor( $figure );
+		if ( $tags->next_tag( 'figure' ) && '' === picked_frame( (string) $tags->get_attribute( 'class' ) ) ) {
+			$tags->add_class( 'is-style-cr-photo-' . seeded_frame( $post_id, $count ) );
+		}
 		if ( $tags->next_tag( 'img' ) ) {
 			$tags->add_class( 'u-photo' );
 			$tags->set_attribute( 'sizes', '(max-width: 40rem) 90vw, 32rem' );

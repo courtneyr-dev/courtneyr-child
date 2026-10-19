@@ -38,7 +38,8 @@ if ( ! function_exists( 'render_block' ) ) {
 		$id      = (int) ( $block['attrs']['id'] ?? 0 );
 		$caption = preg_match( '/<figcaption[^>]*>(.*?)<\/figcaption>/s', (string) ( $block['innerHTML'] ?? '' ), $m ) ? '<figcaption class="wp-element-caption">' . $m[1] . '</figcaption>' : '';
 		$lightbox = ! empty( $block['attrs']['lightbox']['enabled'] ) ? ' data-wp-interactive="core/image"' : '';
-		$extra = '' !== (string) ( $block['attrs']['className'] ?? '' ) ? ' ' . $block['attrs']['className'] : '';
+		// The Image block is static: core prints the saved markup, so a className set on attrs at render time never reaches it.
+		$extra = preg_match( '/<figure class="[^"]*?( is-style-[^" ]+)/', (string) ( $block['innerHTML'] ?? '' ), $saved ) ? $saved[1] : '';
 		return '<figure class="wp-block-image size-large' . $extra . '"' . $lightbox . '><img src="https://example.test/uploads/' . $id . '.jpg" alt="Photo ' . $id . '" class="wp-image-' . $id . '" sizes="(max-width: 1024px) 100vw, 1024px" />' . $caption . '</figure>';
 	}
 }
@@ -235,12 +236,13 @@ cr_photo_group(
 		$GLOBALS['cr_photo_dequeued'] = array();
 		$gallery = cr_photo_gallery_block( 5 );
 		$gallery['innerBlocks'][1]['attrs']['className'] = 'is-style-cr-photo-postcard';
+		$gallery['innerBlocks'][1]['innerHTML']          = str_replace( 'wp-block-image size-large', 'wp-block-image size-large is-style-cr-photo-postcard', $gallery['innerBlocks'][1]['innerHTML'] );
 		$html = scrapbook( CR_PHOTO_PROJECTOR, $gallery, new WP_Block( array( 'postId' => 42 ) ) );
 		cr_photo_assert( 1 === preg_match( '/^<div class="cr-scrapbook"><ul class="cr-scrapbook__photos" role="list" aria-labelledby="cr-photo-title">/', $html ), 'a page holding one list, labelled by the H1' );
 		cr_photo_same( 5, substr_count( $html, '<li class="cr-scrapbook__print">' ), 'every picture is on the page' );
 		cr_photo_same( 5, preg_match_all( '/<figure class="wp-block-image size-large is-style-cr-photo-(polaroid|taped|corners|postcard|film)"/', $html ), 'every picture in a frame' );
 		cr_photo_assert( preg_match_all( '/is-style-cr-photo-([a-z]+)/', $html, $m ) && count( array_unique( $m[1] ) ) >= 3, 'frames are mixed on one page' );
-		cr_photo_same( 'is-style-cr-photo-postcard', $GLOBALS['cr_photo_rendered'][1]['attrs']['className'] ?? '', 'a picked frame on an image wins' );
+		cr_photo_assert( 1 === preg_match( '/<li class="cr-scrapbook__print"><figure class="wp-block-image size-large is-style-cr-photo-[a-z]+"[^>]*>.*?<\/li><li class="cr-scrapbook__print"><figure class="wp-block-image size-large is-style-cr-photo-postcard"/s', $html ), 'the second print keeps its picked postcard frame, alone' );
 		cr_photo_same( 5, preg_match_all( '/<img\b[^>]*\bclass="[^"]*\bu-photo\b/', $html ), 'every picture keeps u-photo' );
 		cr_photo_same( 5, substr_count( $html, 'data-wp-interactive="core/image"' ), 'every print opens in the core lightbox' );
 		cr_photo_same( 5, substr_count( $html, 'sizes="(max-width: 40rem) 90vw, 32rem"' ), 'images sized for the print, not 1024px' );
