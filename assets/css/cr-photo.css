@@ -673,13 +673,14 @@ body.cr-photo-single .pkiw-photo-place {
 /* The booth print: four frames on white stock, the title centered under them as
    the print's caption, the date small beneath it. */
 .cr-stream-page .wp-block-post-template > li.format-gallery .pk-card.k-photo.pk-card--gallery {
-	padding: 0.85rem 0.85rem 1.2rem;
+	padding: 1.25rem 1.25rem 1.75rem;
 	background: var(--cr-white);
 	box-shadow: var(--cr-shadow-hard);
 }
 
+/* Block margins only: the homepage lane centres a narrower strip with margin-inline. */
 :is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .cr-booth {
-	margin: 0;
+	margin-block: 0;
 }
 
 :is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .cr-booth__frames {
@@ -698,17 +699,17 @@ body.cr-photo-single .pkiw-photo-place {
 }
 
 :is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .pk-caption {
-	padding: 1rem 0.2rem 0;
+	padding: 1.1rem 0.75rem 0;
 	text-align: center;
 }
 
 :is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .pk-title {
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-body);
-	font-size: 0.95rem;
+	font-size: 0.8rem;
 	font-weight: var(--cr-weight-regular);
-	line-height: 1.35;
-	letter-spacing: var(--cr-tracking-wide);
+	line-height: 1.55;
+	letter-spacing: var(--cr-tracking-widest);
 	text-align: center;
 	text-transform: uppercase;
 }
@@ -724,6 +725,7 @@ body.cr-photo-single .pkiw-photo-place {
 	color: var(--cr-russian-violet-soft);
 	font-family: var(--cr-font-mono);
 	font-size: 0.75rem;
+	font-weight: var(--cr-weight-regular);
 	letter-spacing: var(--cr-tracking-eyebrow);
 }
 
