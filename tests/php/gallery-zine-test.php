@@ -369,6 +369,7 @@ namespace {
 			cr_photo_assert( ! in_array( 'hand', $long[1], true ), 'a caption over 40 characters stays typeset' );
 			$html = cr_zine_render( cr_zine_request( 6 ) );
 			cr_photo_same( 1, substr_count( $html, 'class="cr-zine__imprint"' ), 'one date imprint, on the anchor' );
+			cr_photo_assert( 1 === preg_match( '/<span class="cr-zine__imprint" aria-hidden="true">[^<]*<\/span><\/figure>/', $html ), 'the imprint sits inside the anchor\'s figure' );
 		}
 	);
 

@@ -585,9 +585,14 @@ function zine( string $html, array $block, $instance = null ): string {
 		}
 		// The anchor carries a camera-style date imprint: the post's own date, nothing more.
 		$imprint = 0 === $n ? '<span class="cr-zine__imprint" aria-hidden="true">' . esc_html( get_the_date( "'y m d", $post ) ) . '</span>' : '';
+		if ( '' !== $imprint ) {
+			// Inside the figure, so the imprint sits on the photograph however the cell is sized.
+			$at     = strrpos( $figure, '</figure>' );
+			$figure = false === $at ? $figure . $imprint : substr( $figure, 0, $at ) . $imprint . substr( $figure, $at );
+		}
 		$panels .= '<li class="' . $classes . '" style="' . esc_attr( $style ) . '">'
 			. '<span class="cr-zine__num" aria-hidden="true">' . $num . '<span class="cr-zine__of">/' . $of . '</span></span>'
-			. $figure . $imprint . '</li>';
+			. $figure . '</li>';
 	}
 
 	$caption = gallery_caption( $core );
