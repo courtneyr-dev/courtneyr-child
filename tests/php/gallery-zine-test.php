@@ -150,7 +150,11 @@ namespace {
 		'every image becomes a numbered panel that keeps core markup, alt, srcset, caption and lightbox, sized by its real orientation',
 		static function (): void {
 			$gallery = cr_zine_request( 6 );
-			$html    = cr_zine_render( $gallery, cr_zine_core_html( 'A short gallery caption.' ) );
+			// Core's gallery adds data-id to each image's attrs before the render filter runs.
+			foreach ( $gallery['innerBlocks'] as $k => $inner ) {
+				$gallery['innerBlocks'][ $k ]['attrs']['data-id'] = (string) $inner['attrs']['id'];
+			}
+			$html = cr_zine_render( $gallery, cr_zine_core_html( 'A short gallery caption.' ) );
 			cr_photo_assert( 1 === preg_match( '/^<section class="cr-zine alignwide" aria-labelledby="cr-zine-title">/', $html ), 'a section labelled by the masthead H1' );
 			cr_photo_assert( 1 === preg_match( '/<ol class="cr-zine__frames" role="list">/', $html ), 'an ordered list of panels' );
 			cr_photo_same( 6, preg_match_all( '/<li class="cr-zine__frame cr-zine__frame--[a-z]+" style="--cr-col:[^"]+;--cr-col-t:[^"]+">/', $html ), 'six panels, each placed on both grids' );

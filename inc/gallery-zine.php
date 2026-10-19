@@ -311,7 +311,8 @@ function zine_post( int $post_id = 0 ): ?\WP_Post {
  * @return bool
  */
 function same_gallery( array $block, array $gallery ): bool {
-	$sign = static fn( array $g ): string => md5( serialize( array_map( static fn( $i ) => array( $i['attrs'] ?? array(), $i['innerHTML'] ?? '' ), images_of( $g ) ) ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- A hash input, never stored.
+	// Core's gallery adds a data-id attr to each image before render, so sign on the attachment and saved markup only.
+	$sign = static fn( array $g ): string => md5( serialize( array_map( static fn( $i ) => array( (int) ( $i['attrs']['id'] ?? 0 ), $i['innerHTML'] ?? '' ), images_of( $g ) ) ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- A hash input, never stored.
 	return $sign( $block ) === $sign( $gallery );
 }
 
