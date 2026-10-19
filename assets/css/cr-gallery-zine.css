@@ -564,7 +564,12 @@
 	.cr-zine-single .cr-zine__frame--lap {
 		z-index: 2;
 		margin-block-start: var(--cr-space-4xl);
-		margin-inline-start: calc(var(--cr-space-2xl) * -1);
+		margin-inline-start: calc(var(--cr-space-lg) * -1);
+	}
+
+	/* Its index sits on its open side, clear of the picture it laps. */
+	.cr-zine-single .cr-zine__frame--lap .cr-zine__num {
+		align-self: flex-end;
 	}
 }
 

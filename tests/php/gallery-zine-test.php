@@ -407,7 +407,7 @@ namespace {
 				}
 			}
 			$one = layout( array( 'landscape' ), 12 );
-			cr_photo_same( array( 'span' => 8, 'start' => 3, 'row' => 0 ), $one[0], 'one landscape sits centred' );
+			cr_photo_same( array( 'span' => 10, 'start' => 2, 'row' => 0 ), $one[0], 'one landscape sits centred' );
 			$two = layout( array( 'landscape', 'portrait' ), 12 );
 			cr_photo_same( 12, $two[0]['span'] + $two[1]['span'], 'a featured landscape and a portrait share the top row' );
 			cr_photo_assert( $two[0]['span'] > $two[1]['span'], 'the featured panel stays the larger' );

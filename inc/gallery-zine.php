@@ -82,9 +82,9 @@ const SPANS = array(
 		),
 		'lone'     => array(
 			'panorama'  => 12,
-			'landscape' => 8,
-			'square'    => 6,
-			'portrait'  => 5,
+			'landscape' => 9,
+			'square'    => 7,
+			'portrait'  => 6,
 		),
 	),
 	6  => array(
@@ -221,9 +221,13 @@ function layout( array $shapes, int $cols ): array {
 		if ( 1 === count( $row ) ) {
 			$span = $table['lone'][ $row[0]['shape'] ];
 			if ( 1 === count( $rows ) ) {
+				// The only panel sits centred; a span that cannot centre grows by one column.
+				$span += ( $cols - $span ) % 2;
 				$start = intdiv( $cols - $span, 2 ) + 1;
 			} else {
-				$start = 1 === $r % 2 ? $cols - $span + 1 : 1;
+				// Inset one column from alternate edges, so the open paper beside it reads as a margin.
+				$inset = $cols - $span >= 2 ? 1 : 0;
+				$start = 1 === $r % 2 ? $cols - $span + 1 - $inset : 1 + $inset;
 			}
 			$out[ $row[0]['i'] ] = array(
 				'span'  => $span,
