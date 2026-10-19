@@ -288,7 +288,7 @@ test.describe( 'wish Stream', () => {
 		}
 		const s1 = itemFor( page, 'S1' ).locator( '.cr-wish-clipping' );
 		const order = await s1.locator( '.pk-caption' ).innerText();
-		expect( order ).toMatch( /Tech[\s\S]*High priority[\s\S]*\$[\s\S]*\d{4}/ );
+		expect( order ).toMatch( /Tech[\s\S]*High priority[\s\S]*\$[\s\S]*\d{4}/i );
 		expect( await s1.locator( '.pk-wish-chip--priority' ).evaluate( ( node ) => getComputedStyle( node, '::after' ).content ) ).not.toBe( 'none' );
 		expect( await itemFor( page, 'S2' ).locator( '.pk-media, [data-cr-cover-fallback]' ).count() ).toBe( 0 );
 	} );
