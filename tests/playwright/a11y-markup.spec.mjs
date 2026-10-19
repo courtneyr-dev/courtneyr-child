@@ -3,6 +3,7 @@
 // (CR_BASE_URL, CR_ALLOW_REMOTE=1 and CR_USER_AGENT for a Pantheon sandbox). Post paths
 // default to dev fixtures and can be pointed elsewhere with the CR_*_PATH variables.
 import { test as base, expect } from '@playwright/test';
+import { ROUTE_NAMES, resolveRoute } from '../routes.mjs';
 
 // courtneyr-child#95: a site running Complianz opens its consent dialog
 // (.cmplz-cookiebanner, role="dialog", aria-modal="true") in every fresh
@@ -84,7 +85,7 @@ const QUOTE_POST = process.env.CR_QUOTE_POST_PATH || '/?p=38049'; // Syndication
 const BROWSE_PAGE = process.env.CR_BROWSE_ALL_PATH || '/stream/'; // cr-browse-all pattern (post_format list)
 const TABLE_POST = process.env.CR_TABLE_POST_PATH || '/?p=551'; // legacy comparison table with headings and links in <th>
 const TERM_ARCHIVE = process.env.CR_TERM_ARCHIVE_PATH || '/type/aside/'; // term archive with a description
-const CUTOUT_ARCHIVES = ( process.env.CR_CUTOUT_ARCHIVE_PATHS || '/kind/mood/,/type/aside/,/?s=wordpress,/stream/,/kind/chicken/,/kind/photo/,/kind/favorite/,/kind/acquisition/,/kind/repost/,/kind/article/,/kind/weather/,/kind/exercise/,/kind/sleep/,/kind/craft/,/kind/note/' ).split( ',' ); // cut-paper archive titles
+const CUTOUT_ARCHIVES = ( process.env.CR_CUTOUT_ARCHIVE_PATHS || '/kind/mood/,/type/aside/,/?s=wordpress,/stream/,/kind/chicken/,/kind/photo/,/kind/favorite/,/kind/acquisition/,/kind/repost/,/kind/article/,/kind/weather/,/kind/exercise/,/kind/sleep/,/kind/craft/,/kind/note/,/kind/video/,/kind/audio/,/kind/jam/,/kind/listen/?pkiw_listen_type=podcast,/kind/wish/,/kind/question/' ).split( ',' ); // cut-paper archive titles
 const PAGED_KIND_ARCHIVE = process.env.CR_PAGED_KIND_ARCHIVE_PATH || '/kind/article/page/2/'; // a /kind/* archive on the generic taxonomy-kind.html (every other kind with posts has its own template since W4), with a page 2
 const POST_NAV_POST = process.env.CR_POST_NAV_POST_PATH || '/?p=8660'; // a post with a titled post on each side (dev and test 8660; 38071 lost its Next neighbour)
 const STREAM = process.env.CR_STREAM_PATH || '/stream/'; // the Stream page whose query order a kind's only post follows (PKIW #233)
@@ -104,7 +105,7 @@ const COMIC_SINGLE = process.env.CR_COMIC_SINGLE_PATH || '/2026/09/06/anzuelo/';
 const RECIPE_ARCHIVE = process.env.CR_RECIPE_ARCHIVE_PATH || '/kind/recipe/'; // recipe archive (PKIW #229); its tests skip on a site with no recipe posts
 const EAT_ARCHIVE = process.env.CR_EAT_ARCHIVE_PATH || '/kind/eat/'; // eat archive (PKIW #230); its test skips on a site with fewer than three eat posts
 const DRINK_ARCHIVE = process.env.CR_DRINK_ARCHIVE_PATH || '/kind/drink/'; // drink archive (PKIW #230); its test skips on a site with fewer than three drink posts
-const KIND_ARCHIVE_HEADERS = ( process.env.CR_KIND_ARCHIVE_HEADER_PATHS || '/kind/comics/,/kind/watch/,/kind/listen/,/kind/recipe/,/kind/eat/,/kind/drink/,/kind/note/,/kind/play/,/kind/read/,/kind/review/,/kind/reply/,/kind/like/,/kind/bookmark/,/kind/chicken/,/kind/photo/,/kind/favorite/,/kind/acquisition/,/kind/repost/,/kind/article/,/kind/mood/,/kind/weather/,/kind/exercise/,/kind/sleep/,/kind/craft/' ).split( ',' ); // every dressed kind archive, and /kind/article/ on the generic template (the only kind left on taxonomy-kind.html after W4); a path with no posts is skipped
+const KIND_ARCHIVE_HEADERS = ( process.env.CR_KIND_ARCHIVE_HEADER_PATHS || '/kind/comics/,/kind/watch/,/kind/listen/,/kind/recipe/,/kind/eat/,/kind/drink/,/kind/note/,/kind/play/,/kind/read/,/kind/review/,/kind/reply/,/kind/like/,/kind/bookmark/,/kind/chicken/,/kind/photo/,/kind/favorite/,/kind/acquisition/,/kind/repost/,/kind/article/,/kind/mood/,/kind/weather/,/kind/exercise/,/kind/sleep/,/kind/craft/,/kind/video/,/kind/audio/,/kind/jam/,/kind/listen/?pkiw_listen_type=podcast,/kind/wish/,/kind/question/' ).split( ',' ); // every dressed kind archive, and /kind/article/ on the generic template (the only kind left on taxonomy-kind.html after W5); a path with no posts is skipped
 const EAT_SINGLE = process.env.CR_EAT_SINGLE_PATH || '/2026/09/25/mushroom-tacos/'; // an eat post with the eat card, a photo and public coordinates (local fixture)
 const DRINK_SINGLE = process.env.CR_DRINK_SINGLE_PATH || '/2026/09/24/honey-lavender-latte/'; // a drink post with the drink card, a photo and public coordinates (local fixture)
 const ORDER_HIDDEN = ( process.env.CR_ORDER_HIDDEN_PATHS || '/2026/08/05/salmon-sashimi/,/2026/08/07/spicy-margarita/' ).split( ',' ); // eat and drink posts whose location privacy is private (local fixtures)
@@ -144,6 +145,12 @@ const EXERCISE_ARCHIVE = process.env.CR_EXERCISE_ARCHIVE_PATH || '/kind/exercise
 const SLEEP_ARCHIVE = process.env.CR_SLEEP_ARCHIVE_PATH || '/kind/sleep/'; // sleep chart sheets (PKIW #247)
 const CRAFT_ARCHIVE = process.env.CR_CRAFT_ARCHIVE_PATH || '/kind/craft/'; // craft pegboard (PKIW #249)
 const NOTE_ARCHIVE = process.env.CR_NOTE_ARCHIVE_PATH || '/kind/note/'; // note week boards (PKIW #265)
+const VIDEO_ARCHIVE = process.env.CR_VIDEO_ARCHIVE_PATH || '/kind/video/'; // video year shelves of tapes (PKIW #242)
+const AUDIO_ARCHIVE = process.env.CR_AUDIO_ARCHIVE_PATH || '/kind/audio/'; // audio cassette log (PKIW #243)
+const JAM_ARCHIVE = process.env.CR_JAM_ARCHIVE_PATH || '/kind/jam/'; // jam jukebox (PKIW #235)
+const PODCAST_ARCHIVE = process.env.CR_PODCAST_ARCHIVE_PATH || '/kind/listen/?pkiw_listen_type=podcast'; // podcast lineup, a view of the listen archive (PKIW #236)
+const WISH_ARCHIVE = process.env.CR_WISH_ARCHIVE_PATH || '/kind/wish/'; // wish catalog (PKIW #238)
+const QUESTION_ARCHIVE = process.env.CR_QUESTION_ARCHIVE_PATH || '/kind/question/'; // question slips (PKIW #256)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
 const DARK_FIXTURES = [
 	[ process.env.CR_RESUME_PAGE_PATH || '/?page_id=37840', 'code', 'beta-rc' ], // inline code inside page content
@@ -358,6 +365,18 @@ const W4_ARCHIVES = [
 	{ kind: 'sleep', label: 'Sleep', path: SLEEP_ARCHIVE, issue: 247, min: 32 },
 	{ kind: 'craft', label: 'Craft', path: CRAFT_ARCHIVE, issue: 249, min: 13 },
 	{ kind: 'note', label: 'Note', path: NOTE_ARCHIVE, issue: 265, min: 13 },
+];
+
+// W5. All six page 12 at a time (video and audio by year and month headings, the podcast view by show), so min is one more than a
+// page and page 1 has a Next link. The podcast view is a view of the listen archive: its count is the listen kind's, which also
+// holds music, so on a site with few podcast lines the test skips when page 1 has no Next link.
+const W5_ARCHIVES = [
+	{ kind: 'video', label: 'Video', path: VIDEO_ARCHIVE, issue: 242, min: 13 },
+	{ kind: 'audio', label: 'Audio', path: AUDIO_ARCHIVE, issue: 243, min: 13 },
+	{ kind: 'jam', label: 'Jam', path: JAM_ARCHIVE, issue: 235, min: 13 },
+	{ kind: 'listen', name: 'podcast', label: 'Listen', path: PODCAST_ARCHIVE, issue: 236, min: 13, fits: 'the podcast view fits one page on this site, so there is no page 2' },
+	{ kind: 'wish', label: 'Wish', path: WISH_ARCHIVE, issue: 238, min: 13 },
+	{ kind: 'question', label: 'Question', path: QUESTION_ARCHIVE, issue: 256, min: 13 },
 ];
 
 function pagedPath( path, n ) {
@@ -4962,18 +4981,18 @@ test( 'the Stream shows a bookmark as label, title, host and date with an inert 
 	}
 } );
 
-for ( const archive of [ ...W3_ARCHIVES, ...W4_ARCHIVES ] ) {
-	test( `the ${ archive.kind } archive has one h1 and a centered 44px pager (PKIW #${ archive.issue })`, async ( { page } ) => {
+for ( const archive of [ ...W3_ARCHIVES, ...W4_ARCHIVES, ...W5_ARCHIVES ] ) {
+	test( `the ${ archive.name ?? archive.kind } archive has one h1 and a centered 44px pager (PKIW #${ archive.issue })`, async ( { page } ) => {
 		await requireKindCount( page, archive.kind, archive.min );
 		await page.goto( archive.path, { waitUntil: 'load' } );
 		const pager = page.locator( 'nav.wp-block-query-pagination[aria-label="Pagination"]' );
 		// On a seeded stack (CR_SEEDED_STACK=1) every calendar kind spans more than one page, so a
 		// missing pager fails; on a site where the posts fill one calendar unit there's no page 2.
-		if ( archive.calendar && '1' !== process.env.CR_SEEDED_STACK ) {
-			test.skip( 0 === await page.locator( 'nav.wp-block-query-pagination a.wp-block-query-pagination-next' ).count(), `${ archive.kind } posts fill one ${ archive.calendar } on this site, so there's no page 2` );
+		if ( ( archive.calendar || archive.fits ) && '1' !== process.env.CR_SEEDED_STACK ) {
+			test.skip( 0 === await page.locator( 'nav.wp-block-query-pagination a.wp-block-query-pagination-next' ).count(), archive.fits ?? `${ archive.kind } posts fill one ${ archive.calendar } on this site, so there's no page 2` );
 		}
 		await expect( pager ).toHaveCount( 1 );
-		await expect( pager.locator( 'a.wp-block-query-pagination-next' ), `${ archive.kind } archive has a Next link` ).toHaveCount( 1 );
+		await expect( pager.locator( 'a.wp-block-query-pagination-next' ), `${ archive.name ?? archive.kind } archive has a Next link` ).toHaveCount( 1 );
 		await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
 		await expect( page.locator( 'main h1 .cr-cutout__text' ) ).toHaveText( archive.label );
 		// Mood and weather print their body through a plugin block with no post template; the pager is still the query's last child.
@@ -5031,9 +5050,11 @@ test( 'every article card has one focusable link, no meta strip, and a focus rin
 
 // PKIW #249 and #265: a craft peg card and a note on the board each have one
 // focusable link, the title or the note, which opens the single (W3-G2). The
-// plugin's hidden author anchors carry tabindex -1 and don't count.
-for ( const archive of W4_ARCHIVES.filter( ( { kind } ) => 'craft' === kind || 'note' === kind ) ) {
-	test( `every ${ archive.kind } archive item has one focusable link (PKIW #${ archive.issue })`, async ( { page } ) => {
+// plugin's hidden author anchors carry tabindex -1 and don't count. The W5 kinds
+// follow the same rule: a video tape, an audio cassette, a jukebox strip, a podcast
+// line, a wish listing and a question slip each have one link to their permalink.
+for ( const archive of [ ...W4_ARCHIVES.filter( ( { kind } ) => 'craft' === kind || 'note' === kind ), ...W5_ARCHIVES ] ) {
+	test( `every ${ archive.name ?? archive.kind } archive item has one focusable link (PKIW #${ archive.issue })`, async ( { page } ) => {
 		await requireKindCount( page, archive.kind, 1 );
 		await page.goto( archive.path, { waitUntil: 'load' } );
 		const items = page.locator( 'main li.wp-block-post' );
@@ -5044,7 +5065,21 @@ for ( const archive of W4_ARCHIVES.filter( ( { kind } ) => 'craft' === kind || '
 		// keyboard-reachable links here, not visible boxes.
 		for ( let i = 0; i < total; i++ ) {
 			const reachable = await items.nth( i ).locator( 'a[href]' ).evaluateAll( ( links ) => links.filter( ( link ) => ! link.closest( '[hidden]' ) && '-1' !== link.getAttribute( 'tabindex' ) && 'none' !== getComputedStyle( link ).display && 'hidden' !== getComputedStyle( link ).visibility ).length );
-			expect( reachable, `${ archive.kind } item ${ i + 1 } has one keyboard-reachable link` ).toBe( 1 );
+			expect( reachable, `${ archive.name ?? archive.kind } item ${ i + 1 } has one keyboard-reachable link` ).toBe( 1 );
 		}
+	} );
+}
+
+// W5 singles: the seeded video, audio, jam, podcast, wish and question singles that tests/routes.mjs names by fixture key
+// (CR_<NAME>_PATH overrides). Each prints exactly one h1 in main: inside the tape-label strip for video, the stored title
+// for audio, jam, wish and podcast, and the kind, date and time name for an untitled post (PKIW #242, #243, #235, #236,
+// #238, #256). A fixture that isn't seeded skips.
+for ( const name of ROUTE_NAMES.filter( ( route ) => /^(video|audio|jam|podcast|wish|question)-single-/.test( route ) ) ) {
+	test( `the ${ name } single has one h1`, async ( { page } ) => {
+		const route = await resolveRoute( name );
+		test.skip( ! route, `no ${ name } fixture on this site` );
+		const response = await page.goto( route, { waitUntil: 'load' } );
+		test.skip( 404 === response?.status(), `${ name } resolves to a 404 at ${ route }` );
+		await expect( page.locator( 'main h1' ), name ).toHaveCount( 1 );
 	} );
 }
