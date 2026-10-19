@@ -76,13 +76,8 @@ require_once __DIR__ . '/inc/single-podcast.php';
 require_once __DIR__ . '/inc/wish.php';
 require_once __DIR__ . '/inc/single-wish.php';
 require_once __DIR__ . '/inc/stream-wish.php';
-// inc/question.php and inc/stream-question.php arrive with W5-T256 (#256); load them once they exist.
-if ( is_readable( __DIR__ . '/inc/question.php' ) ) {
-	require_once __DIR__ . '/inc/question.php';
-}
-if ( is_readable( __DIR__ . '/inc/stream-question.php' ) ) {
-	require_once __DIR__ . '/inc/stream-question.php';
-}
+require_once __DIR__ . '/inc/question.php';
+require_once __DIR__ . '/inc/stream-question.php';
 require_once __DIR__ . '/inc/stream-checkin.php';
 require_once __DIR__ . '/inc/single-checkin.php';
 require_once __DIR__ . '/inc/kind-parts.php';
