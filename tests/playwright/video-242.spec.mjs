@@ -555,7 +555,7 @@ test.describe( 'cross-surface and source policy', () => {
 	test( 'Template source — one inherited query keeps the editable 12-line marker and data-driven years', () => {
 		const template = readFileSync( join( THEME, 'templates/taxonomy-kind-video.html' ), 'utf8' );
 		const pattern = readFileSync( join( THEME, 'patterns/cr-video-shelf-loop.php' ), 'utf8' );
-		expect( ( pattern.match( /<!-- wp:query\b/g ) || [] ).length, 'A1 and A19 pattern has one core Query block' ).toBe( 1 );
+		expect( ( pattern.match( /<!-- wp:query(?![\w-])/g ) || [] ).length, 'A1 and A19 pattern has one core Query block' ).toBe( 1 );
 		expect( pattern, 'A1 query inherits the archive query' ).toMatch( /"inherit"\s*:\s*true/ );
 		expect( pattern, 'A19 archive marker keeps linesPerPage 12' ).toMatch( /"linesPerPage"\s*:\s*12/ );
 		expect( pattern, 'A3 years come from data' ).not.toMatch( /\b(?:19|20)[0-9]{2}\b/ );
