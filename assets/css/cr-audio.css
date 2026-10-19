@@ -131,6 +131,7 @@
 }
 
 .cr-audio-log .pk-card.k-audio.pk-card--protected .pk-title {
+	position: static;
 	margin: 0;
 	color: var(--cr-russian-violet);
 	font-size: max(var(--cr-text-floor), 1rem);

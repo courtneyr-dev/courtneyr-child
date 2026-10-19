@@ -136,7 +136,7 @@ test.describe( 'audio archive', () => {
 			await openArchive( page, 1, width );
 			for ( const list of await page.locator( '.cr-audio-log .pkiw-group__items' ).all() ) {
 				expect( await list.evaluate( ( node ) => getComputedStyle( node ).gridTemplateColumns.split( ' ' ).filter( Boolean ).length ), `${ width }px column count` ).toBe( columns );
-				expect( await list.locator( ':scope > li' ).count(), 'the odd month ends after its last real item' ).toBe( await list.locator( ':scope > li .cr-cassette--log' ).count() );
+				expect( await list.locator( ':scope > li' ).count(), 'the odd month ends after its last real item' ).toBe( await list.locator( ':scope > li' ).filter( { has: page.locator( '.cr-cassette--log, .pk-card--protected' ) } ).count() );
 			}
 		}
 	} );
@@ -148,8 +148,9 @@ test.describe( 'audio archive', () => {
 			expect( links.hrefs ).toHaveLength( 1 );
 			expect( links.stray ).toBe( 0 );
 			if ( await item.locator( '.pk-card--protected' ).count() ) {
-				// A protected post prints its title link and nothing else: no hidden author, date or audio data.
-				await expect( item.locator( '.pk-entry-props, .u-audio, .p-author, time' ) ).toHaveCount( 0 );
+				// A protected post prints its title link and nothing else visible. The plugin's protected card keeps u-url and a
+				// hidden dt-published datum (StreamCardTest), and no author, audio data or time element.
+				await expect( item.locator( '.u-audio, .p-author, time, .pk-entry-props > :not(data.dt-published)' ) ).toHaveCount( 0 );
 				continue;
 			}
 			expect( await item.locator( '[hidden] a[tabindex="-1"]' ).count() ).toBe( await item.locator( 'a[tabindex="-1"]' ).count() );
@@ -161,7 +162,13 @@ test.describe( 'audio archive', () => {
 			expect( mf2.url.length ).toBeGreaterThan( 0 );
 			expect( mf2.published.length ).toBeGreaterThan( 0 );
 			expect( mf2.author ).toBeGreaterThan( 0 );
-			expect( mf2.audio.length ).toBeGreaterThan( 0 );
+			// u-audio is data for an attachment or URL player only: an embed (A04) and a post with no player (C01) print none.
+			const noAudioData = /seed-243-(a04|c01)\//.test( mf2.url[ 0 ] || '' );
+			if ( noAudioData ) {
+				expect( mf2.audio, 'an embed or player-less item prints no u-audio' ).toHaveLength( 0 );
+			} else {
+				expect( mf2.audio.length ).toBeGreaterThan( 0 );
+			}
 			expect( mf2.published[ 0 ] ).toMatch( /^\d{4}-\d{2}-\d{2}$/ );
 			const titled = await item.locator( '.pk-title' ).evaluate( ( node ) => node.classList.contains( 'p-name' ) );
 			expect( mf2.name.length, 'p-name exists only for a real title' ).toBe( titled ? 1 : 0 );
@@ -266,7 +273,7 @@ test.describe( 'audio archive', () => {
 test.describe( 'audio single', () => {
 	test( 'A01 order, entry wrappers, transcript and one player match the single contract', async ( { page, request } ) => {
 		await openFixture( page, request, 'A01' );
-		const ordered = [ 'main h1', '.single-post__lede-meta time, .single-post__date time', '.cr-audio-machine', '.cr-audio-sheet', '.e-content > :not(.cr-audio-single):not([hidden])', '.single-post__comments-wrapper' ];
+		const ordered = [ '.single-post__lede-meta time, .single-post__date time', 'main h1', '.cr-audio-machine', '.cr-audio-sheet', '.e-content > :not(.cr-audio-single):not([hidden])', '.single-post__comments-wrapper' ];
 		expect( await page.evaluate( ( selectors ) => {
 			const nodes = selectors.map( ( selector ) => document.querySelector( selector ) );
 			return nodes.every( Boolean ) && nodes.every( ( node, index ) => 0 === index || Boolean( nodes[ index - 1 ].compareDocumentPosition( node ) & Node.DOCUMENT_POSITION_FOLLOWING ) || nodes[ index - 1 ].contains( node ) );
@@ -287,7 +294,7 @@ test.describe( 'audio single', () => {
 		}
 	} );
 
-	test( 'A01 uses Able Player when mapped, A03 is native, A04 is an iframe and D02 keeps its link', async ( { page, request } ) => {
+	test( 'A01 uses Able Player when mapped, A03 is native and D02 keeps its link', async ( { page, request } ) => {
 		await openFixture( page, request, 'A01' );
 		const able = page.locator( '.cr-audio-machine__player .able, .cr-audio-machine__player .able-player, .cr-audio-machine__player .able-wrapper' );
 		if ( await able.count() ) {
@@ -301,20 +308,24 @@ test.describe( 'audio single', () => {
 		await expect( page.locator( '.cr-audio-machine__player audio' ) ).toHaveCount( 1 );
 		await expect( page.locator( '.cr-audio-machine__player .able, .cr-audio-machine__player iframe' ) ).toHaveCount( 0 );
 
-		await openFixture( page, request, 'A04' );
-		await expect( page.locator( '.cr-audio-machine__player iframe' ) ).toHaveCount( 1 );
-
 		await openFixture( page, request, 'D02' );
 		const authored = page.locator( '.e-content p a.u-audio[href="https://audio.example.org/clip-two.mp3"]' );
 		await expect( authored ).toHaveCount( 1 );
 		await expect( page.locator( '.cr-audio-machine__player audio[src="https://audio.example.org/clip-two.mp3"]' ) ).toHaveCount( 1 );
 	} );
 
+	test( 'A04 prints the resolved embed as an iframe inside the machine', async ( { page, request } ) => {
+		await openFixture( page, request, 'A04' );
+		await expect( page.locator( '.cr-audio-machine__player iframe' ) ).toHaveCount( 1 );
+		await expect( page.locator( '.e-content iframe' ), 'the embed prints once' ).toHaveCount( 1 );
+	} );
+
 	test( 'all native audio drops autoplay and preloads metadata', async ( { page, request } ) => {
 		for ( const key of [ 'A03', 'A06', 'D02', 'X04' ] ) {
 			await openFixture( page, request, key );
 			for ( const audio of await page.locator( 'audio' ).all() ) {
-				expect( await audio.getAttribute( 'controls' ), `${ key } audio has controls` ).not.toBeNull();
+				// Able Player removes the native controls attribute and builds its own bar from data-able-player.
+				expect( null !== await audio.getAttribute( 'controls' ) || null !== await audio.getAttribute( 'data-able-player' ), `${ key } audio has controls or Able Player` ).toBe( true );
 				await expect( audio, `${ key } audio preloads metadata` ).toHaveAttribute( 'preload', 'metadata' );
 				expect( await audio.getAttribute( 'autoplay' ), `${ key } audio has no autoplay` ).toBeNull();
 			}
@@ -341,6 +352,11 @@ test.describe( 'audio Stream and front page', () => {
 		await openStream( page );
 		for ( const key of [ 'S1', 'S2', 'S3', 'S4', 'S5' ] ) {
 			const item = streamItemFor( page, key );
+			if ( 'S4' === key && 0 === await item.count() ) {
+				// W5-G29 default: the site's long-form rule moves S4 (a transcript over CR_LONGFORM_CHARS) to the Blog.
+				test.info().annotations.push( { type: 'skipped-iteration', description: 'S4 lands on the Blog under the site long-form rule (W5-G29); the next test proves it there' } );
+				continue;
+			}
 			if ( 'S5' === key && 0 === await item.count() ) {
 				// S5 is local-only: skip this iteration, not the test, so S1-S4 still record.
 				test.info().annotations.push( { type: 'skipped-iteration', description: 'S5 is local-only and absent from this stack' } );
@@ -363,6 +379,43 @@ test.describe( 'audio Stream and front page', () => {
 			} );
 			expect( ratio ).toBeGreaterThanOrEqual( 0.8 );
 			expect( ratio ).toBeLessThanOrEqual( 0.84 );
+		}
+	} );
+
+	test( 'S4 with a long transcript leaves the Stream and lists on the Blog landing', async ( { page } ) => {
+		await openStream( page );
+		test.skip( 0 === await streamItemFor( page, 'S1' ).count(), 'Stream fixture set is absent; run seed-243.php --set=stream' );
+		test.skip( 0 < await streamItemFor( page, 'S4' ).count(), 'S4 stays on the Stream here, so the W5-G29 exemption is live' );
+		await page.goto( process.env.CR_BLOG_PATH || '/blog/', { waitUntil: 'load' } );
+		await expect( page.locator( `a[href*="${ slugOf( 'S4' ) }"]` ).first() ).toBeVisible();
+	} );
+
+	test( 'a k-audio card with a 140-character title keeps the label above the window with no overlap', async ( { page } ) => {
+		// S2 carries the 140-character title. The window is the card's in-flow ::after item after .pk-body (W5-T0), so its
+		// top is the body's bottom plus the pseudo's margin-top and its height is the pseudo's computed height.
+		for ( const width of REQUIRED_WIDTHS ) {
+			await openStream( page, width );
+			const item = streamItemFor( page, 'S2' );
+			skipMissing( 0 === await item.count(), 'Stream fixture S2 is absent; run seed-243.php --set=stream' );
+			const geometry = await item.locator( 'article.k-audio' ).evaluate( ( card ) => {
+				const box = ( node ) => node.getBoundingClientRect();
+				const after = getComputedStyle( card, '::after' );
+				const body = box( card.querySelector( '.pk-body' ) );
+				const windowTop = body.bottom + parseFloat( after.marginTop );
+				return {
+					card: box( card ),
+					label: box( card.querySelector( '.pk-kindlabel' ) ),
+					title: box( card.querySelector( '.pk-title' ) ),
+					body,
+					windowTop,
+					windowBottom: windowTop + parseFloat( after.height ),
+				};
+			} );
+			expect( geometry.label.bottom, `${ width }px label sits above the window` ).toBeLessThanOrEqual( geometry.windowTop );
+			expect( geometry.title.bottom, `${ width }px title ends above the window` ).toBeLessThanOrEqual( geometry.windowTop );
+			expect( geometry.title.bottom, `${ width }px title stays inside the card body` ).toBeLessThanOrEqual( geometry.body.bottom + 1 );
+			expect( geometry.windowBottom, `${ width }px window stays inside the card` ).toBeLessThanOrEqual( geometry.card.bottom + 1 );
+			await expectNoHorizontalScroll( page, `${ width }px Stream has no horizontal scroll` );
 		}
 	} );
 
