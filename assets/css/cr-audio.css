@@ -94,16 +94,36 @@
 	padding: 0;
 }
 
+/* Each log line is one flat paper panel: the compact cassette, then the date and duration beside it (stacked under it below 40rem). */
 .cr-audio-log .pkiw-group__items > li {
-	--cr-audio-meta-h: 2.75rem;
 	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	align-items: center;
+	gap: var(--cr-space-sm) var(--cr-space-md);
 	justify-self: center;
 	box-sizing: border-box;
 	width: 100%;
-	max-width: 32rem;
+	max-width: 40rem;
 	min-width: 0;
 	margin: 0;
-	padding: 0;
+	padding: var(--cr-space-sm);
+	overflow: clip;
+	background-color: var(--cr-printer-ivory);
+	border: 2px solid var(--cr-ink);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+/* cr-archives.css zeroes the block padding on .wp-block-post; the panel needs it on all four sides. */
+.cr-audio-log .pkiw-group__items > li.wp-block-post {
+	padding: var(--cr-space-sm);
+}
+
+@media (min-width: 40rem) {
+
+	.cr-audio-log .pkiw-group__items > li {
+		grid-template-columns: minmax(0, 17.5rem) minmax(7rem, 1fr);
+	}
 }
 
 /* A protected post prints its title link and nothing else, so it is a flat paper slip, not a cassette: no label, no window, no screws. */
@@ -147,19 +167,15 @@
 	color: var(--cr-russian-violet);
 }
 
-.cr-audio-log .pk-card.k-audio.pk-card--protected .pk-title a::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-	z-index: 2;
-}
 
 .cr-audio-log .pk-card.k-audio.cr-cassette--log {
-	position: static;
+	position: relative;
 	box-sizing: border-box;
 	width: 100%;
 	max-width: none;
+	min-height: 11rem;
 	margin: 0;
+	aspect-ratio: auto;
 	background-color: var(--cr-photocopier-blk);
 	border: 2px solid var(--cr-ink);
 	box-shadow: var(--cr-shadow-hard);
@@ -172,13 +188,11 @@
 	position: static;
 }
 
+/* The label grows with the title only (no 62% reserve), so the window sits right under it. */
 .cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-body {
+	min-height: 0;
 	background-color: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
-}
-
-.cr-audio-log .pk-card.k-audio.cr-cassette--log::before {
-	inset: 0 0 var(--cr-audio-meta-h);
 }
 
 .cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title {
@@ -196,25 +210,38 @@
 	background-color: var(--cr-selective-yellow);
 }
 
-.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title a::after {
+/* The cassette is the link's containing block, so its ::after runs past every edge of the panel, and the panel's overflow: clip trims it to the whole line. */
+.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title a::after,
+.cr-audio-log .pk-card.k-audio.pk-card--protected .pk-title a::after {
 	content: "";
 	position: absolute;
-	inset: 0;
+	inset: -100vmax;
 	z-index: 2;
 }
 
 .cr-audio-log .cr-audio-log__meta {
 	display: flex;
-	align-items: center;
+	flex-wrap: wrap;
+	align-items: baseline;
 	justify-content: space-between;
-	gap: var(--cr-space-sm);
-	box-sizing: border-box;
-	height: var(--cr-audio-meta-h);
-	padding: var(--cr-space-xs) var(--cr-space-sm) 0;
+	gap: var(--cr-space-2xs) var(--cr-space-sm);
+	min-width: 0;
 	color: var(--cr-ink-soft);
 	font-family: var(--cr-font-body);
-	font-size: var(--cr-text-floor);
+	font-size: var(--cr-text-sm);
 	line-height: var(--cr-leading-snug);
+}
+
+.cr-audio-log .cr-audio-log__meta p.pk-stream-date {
+	color: var(--cr-ink);
+}
+
+@media (min-width: 40rem) {
+
+	.cr-audio-log .cr-audio-log__meta {
+		flex-direction: column;
+		align-items: flex-start;
+	}
 }
 
 .cr-audio-log .cr-audio-log__meta :is(.pk-stream-date, .pk-audio-duration) {
@@ -276,13 +303,19 @@ body.cr-single--audio main.single-post {
 	overflow-x: clip;
 }
 
+/* The strip hugs the title. Core's constrained layout centers children with !important, so the title keeps the content column's start edge the same way. */
 body.cr-single--audio h1.single-post__title {
 	position: relative;
 	isolation: isolate;
+	width: fit-content;
+	max-width: min(100%, var(--wp--style--global--content-size));
+	margin-inline-start: max(0px, (100% - var(--wp--style--global--content-size)) / 2) !important;
+	margin-inline-end: auto !important;
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-accent);
 }
 
+/* The strip's edge is the shipped torn edge .cr-cutout__tile.is-e2 (cr-cutout.css). */
 body.cr-single--audio h1.single-post__title::before {
 	content: "";
 	position: absolute;
@@ -290,6 +323,7 @@ body.cr-single--audio h1.single-post__title::before {
 	z-index: -1;
 	background: var(--cr-periwinkle);
 	transform: rotate(var(--cr-rotate-1));
+	clip-path: polygon(0 0, 35% 3%, 64% 0, 100% 4%, 96% 26%, 100% 50%, 97% 78%, 100% 100%, 76% 96%, 50% 100%, 22% 95%, 2% 100%, 0 72%, 4% 44%, 0 18%);
 }
 
 body.cr-single--audio h1.single-post__title::after {
@@ -298,7 +332,6 @@ body.cr-single--audio h1.single-post__title::after {
 }
 
 .cr-audio-sheet .pkiw-transcript time {
-	color: var(--cr-cerulean);
 	font-family: var(--cr-font-mono);
 }
 
@@ -354,7 +387,7 @@ body.cr-single--audio .single-post__date time {
 .cr-audio-machine__window {
 	display: block;
 	width: 100%;
-	max-width: 20rem;
+	max-width: 30rem;
 	aspect-ratio: 16 / 9;
 	justify-self: end;
 	background-color: var(--cr-prussian-blue);
@@ -431,7 +464,7 @@ body.cr-single--audio .single-post__date time {
 	margin-block-end: 0;
 }
 
-@media (min-width: 40rem) {
+@media (min-width: 40rem) and (max-width: 63.99rem) {
 
 	.cr-audio-single {
 		padding-block-end: 8rem;
@@ -452,11 +485,37 @@ body.cr-single--audio .single-post__date time {
 	}
 }
 
+/* The machine is the hero; the sheet is the narrower companion. One plant stands behind each outer bottom corner, so no empty band is reserved under the pair. */
 @media (min-width: 64rem) {
 
 	.cr-audio-single {
-		grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+		isolation: isolate;
+		grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
 		align-items: start;
+	}
+
+	.cr-audio-single::before,
+	.cr-audio-single::after {
+		content: "";
+		position: absolute;
+		inset-block-end: calc(var(--cr-space-lg) * -1);
+		z-index: -1;
+		width: 7.5rem;
+		height: 8rem;
+		background-image: url(../img/cr-audio-plants.svg);
+		background-repeat: no-repeat;
+		background-size: 15rem 8rem;
+		pointer-events: none;
+	}
+
+	.cr-audio-single::before {
+		inset-inline-start: -6.5rem;
+		background-position: left bottom;
+	}
+
+	.cr-audio-single::after {
+		inset-inline-end: -5rem;
+		background-position: right bottom;
 	}
 }
 
@@ -486,8 +545,21 @@ body.cr-single--audio .single-post__date time {
 		box-shadow: var(--cr-shadow-hard);
 	}
 
+	:root:not([data-theme="light"]) .cr-audio-log .pkiw-group__items > li.wp-block-post {
+		background-color: var(--cr-night-elevated);
+		border-color: var(--cr-periwinkle);
+	}
+
 	:root:not([data-theme="light"]) .cr-audio-log .cr-audio-log__meta {
 		color: var(--cr-periwinkle);
+	}
+
+	:root:not([data-theme="light"]) .cr-audio-log .cr-audio-log__meta p.pk-stream-date {
+		color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .cr-audio-sheet .pkiw-transcript time {
+		color: var(--cr-cerulean);
 	}
 
 	:root:not([data-theme="light"]) .cr-audio-machine {
@@ -517,8 +589,21 @@ body.cr-single--audio .single-post__date time {
 	box-shadow: var(--cr-shadow-hard);
 }
 
+:root[data-theme="dark"] .cr-audio-log .pkiw-group__items > li.wp-block-post {
+	background-color: var(--cr-night-elevated);
+	border-color: var(--cr-periwinkle);
+}
+
 :root[data-theme="dark"] .cr-audio-log .cr-audio-log__meta {
 	color: var(--cr-periwinkle);
+}
+
+:root[data-theme="dark"] .cr-audio-log .cr-audio-log__meta p.pk-stream-date {
+	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-audio-sheet .pkiw-transcript time {
+	color: var(--cr-cerulean);
 }
 
 :root[data-theme="dark"] .cr-audio-machine {
@@ -547,6 +632,7 @@ body.cr-single--audio .single-post__date time {
 	.cr-audio-log .pkiw-group__items > li,
 	.cr-audio-machine,
 	.cr-audio-machine__window,
+	.cr-audio-single::before,
 	.cr-audio-single::after {
 		animation: none;
 		transition: none;
@@ -557,6 +643,7 @@ body.cr-single--audio .single-post__date time {
 @media (forced-colors: active) {
 
 	.cr-archive--audio .cr-archive__header::after,
+	.cr-audio-single::before,
 	.cr-audio-single::after,
 	.cr-audio-log .pkiw-group__heading::before,
 	body.cr-single--audio h1.single-post__title::before,

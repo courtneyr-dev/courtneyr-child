@@ -233,12 +233,46 @@ function lift_transcript( string $html, array $block ): string {
 		return $html;
 	}
 
-	$current['transcript']        = $html;
+	$current['transcript']        = mark_timestamps( $html );
 	$current['transcript_lifted'] = true;
 
 	return '';
 }
 add_filter( 'render_block_core/group', __NAMESPACE__ . '\\lift_transcript', 250, 2 );
+
+/**
+ * Wrap an author-typed [m:ss] or [h:mm:ss] at the start of a transcript paragraph in a <time>.
+ *
+ * Render time only, inside the lifted sheet; the stored transcript is untouched.
+ *
+ * @param string $html Lifted transcript markup.
+ * @return string
+ */
+function mark_timestamps( string $html ): string {
+	return (string) preg_replace_callback(
+		'/(<p\b[^>]*>)\[(?:(\d{1,2}):)?(\d{1,2}):([0-5]\d)\]/',
+		static function ( array $m ): string {
+			$parts = array(
+				'H' => (int) $m[2],
+				'M' => (int) $m[3],
+				'S' => (int) $m[4],
+			);
+			$iso   = 'PT';
+			foreach ( $parts as $unit => $value ) {
+				if ( $value > 0 ) {
+					$iso .= $value . $unit;
+				}
+			}
+			if ( 'PT' === $iso ) {
+				$iso = 'PT0S';
+			}
+			$label = '' === $m[2] ? $m[3] . ':' . $m[4] : $m[2] . ':' . $m[3] . ':' . $m[4];
+
+			return $m[1] . '<time class="cr-audio-sheet__stamp" datetime="' . esc_attr( $iso ) . '">[' . esc_html( $label ) . ']</time>';
+		},
+		$html
+	);
+}
 
 /**
  * Render the audio machine around an optional player.
