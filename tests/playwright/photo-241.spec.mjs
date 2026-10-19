@@ -453,76 +453,84 @@ test.describe( 'stream', () => {
 		test.skip( response.status() === 404, 'no /stream/' );
 	}
 
-	test( 'S1, S2 and S3 are slide mounts with no booth strip, one link and no excerpt or Read more', async ( { page } ) => {
+	test( 'single-picture photo cards are polaroids with one link, no excerpt and no caption links', async ( { page } ) => {
 		await openStream( page );
-		const mounts = page.locator( '.pk-card.cr-slide-mount' );
-		test.skip( 0 === await mounts.count(), 'no photo cards on page 1 of /stream/' );
-		await expect( page.locator( '.pk-card.cr-slide-mount .cr-booth, .cr-slide-mount .pk-excerpt' ) ).toHaveCount( 0 );
-		for ( const card of await mounts.all() ) {
+		await expect( page.locator( '.cr-slide-mount' ) ).toHaveCount( 0 );
+		const prints = page.locator( '.pk-card.cr-polaroid' );
+		test.skip( 0 === await prints.count(), 'no single-picture photo cards on page 1 of /stream/' );
+		await expect( page.locator( '.pk-card.cr-polaroid .cr-booth, .cr-polaroid .pk-excerpt' ) ).toHaveCount( 0 );
+		for ( const card of await prints.all() ) {
 			expect( await renderedAnchors( card ) ).toBe( 1 );
 			expect( await visibleNegativeTabindex( card ) ).toBe( 0 );
-			expect( await card.evaluate( ( el ) => el.innerText ) ).not.toMatch( /Read more|→|\+\d+/ );
+			expect( await card.evaluate( ( el ) => el.innerText ) ).not.toMatch( /Read more|\+\d+/ );
 			expect( await card.locator( '.pk-media__caption a' ).count(), 'caption links are stripped' ).toBe( 0 );
 		}
 	} );
 
-	test( 'a mount has the collage column width, one rotation token, the four voices and an unfiltered medium image', async ( { page } ) => {
+	test( 'a polaroid is white stock with a hard shadow, a 4:5 dashed picture, a Rock Salt title and an unfiltered image', async ( { page } ) => {
 		await page.setViewportSize( { width: 1440, height: 900 } );
 		await openStream( page );
-		const mount = page.locator( '.pk-card.cr-slide-mount' ).first();
-		test.skip( 0 === await mount.count(), 'no photo cards on /stream/' );
-		const info = await mount.evaluate( ( el ) => {
-			const li = el.closest( 'li' );
-			// Note stickies are 82% of the column by design (.cr-sticky-artifact--stream), so they are not a width reference.
-			const isReference = ( card ) => ! card.classList.contains( 'cr-slide-mount' ) && ! card.closest( '.cr-sticky-artifact' ) && ! card.querySelector( '.cr-sticky-artifact' );
-			const neighbour = [ ...li.parentElement.children ].find( ( other ) => other !== li && [ ...other.querySelectorAll( '.pk-card' ) ].some( isReference ) && ! other.querySelector( '.cr-sticky-artifact, .cr-slide-mount' ) );
+		const print = page.locator( '.pk-card.cr-polaroid' ).first();
+		test.skip( 0 === await print.count(), 'no single-picture photo cards on /stream/' );
+		const info = await print.evaluate( ( el ) => {
+			const img = el.querySelector( '.pk-media img' );
 			const fam = ( node ) => getComputedStyle( node ).fontFamily.split( ',' )[0].replace( /"/g, '' ).trim();
-			return { width: el.offsetWidth, neighbour: neighbour ? neighbour.querySelector( '.pk-card' ).offsetWidth : null, transform: getComputedStyle( el ).transform, title: fam( el.querySelector( '.pk-title' ) ), caption: el.querySelector( '.pk-media__caption' ) ? fam( el.querySelector( '.pk-media__caption' ) ) : null, filter: getComputedStyle( el.querySelector( 'img' ) ).filter, shadow: getComputedStyle( el ).boxShadow };
+			return { bg: getComputedStyle( el ).backgroundColor, ratio: getComputedStyle( img ).aspectRatio, border: getComputedStyle( img ).borderTopStyle, title: fam( el.querySelector( '.pk-title' ) ), filter: getComputedStyle( img ).filter, shadow: getComputedStyle( el ).boxShadow, first: el.querySelector( '.pk-body' ).firstElementChild && getComputedStyle( el.querySelector( '.pk-media' ) ).order };
 		} );
-		if ( info.neighbour ) {
-			expect( Math.abs( info.width - info.neighbour ) ).toBeLessThanOrEqual( 1 );
-		}
-		expect( info.transform ).not.toBe( 'none' );
-		expect( info.title ).toBe( 'Roboto Slab' );
-		if ( info.caption ) {
-			expect( info.caption ).toBe( 'Barlow' );
-		}
+		expect( info.bg ).toBe( 'rgb(255, 255, 255)' );
+		expect( info.ratio ).toMatch( /^4\s*\/\s*5/ );
+		expect( info.border ).toBe( 'dashed' );
+		expect( info.title ).toBe( 'Rock Salt' );
 		expect( info.filter ).toBe( 'none' );
 		expect( info.shadow ).toMatch( /\s4px 4px 0px 0px$/ );
+		expect( info.first ).toBe( '-1' );
 	} );
 
-	test( 'the whole mount takes the focus ring and no stream request reaches a foreign host', async ( { page } ) => {
+	test( 'the whole print takes the focus ring and no stream request reaches a foreign host', async ( { page } ) => {
 		const requested = [];
 		page.on( 'request', ( r ) => requested.push( new URL( r.url() ).hostname ) );
 		await openStream( page );
-		const link = page.locator( '.pk-card.cr-slide-mount .pk-title a' ).first();
-		test.skip( 0 === await link.count(), 'no photo cards on /stream/' );
+		const link = page.locator( '.pk-card.cr-polaroid .pk-title a' ).first();
+		test.skip( 0 === await link.count(), 'no single-picture photo cards on /stream/' );
 		await link.focus();
 		await page.keyboard.press( 'Shift+Tab' );
 		await page.keyboard.press( 'Tab' );
-		const ring = await page.evaluate( () => ( { width: getComputedStyle( document.activeElement, '::after' ).outlineWidth, color: getComputedStyle( document.activeElement, '::after' ).outlineColor } ) );
+		const ring = await page.evaluate( () => {
+			const card = document.activeElement.closest( '.pk-card' );
+			return { width: getComputedStyle( card ).outlineWidth, color: getComputedStyle( card ).outlineColor };
+		} );
 		expect( ring ).toEqual( { width: '3px', color: 'rgb(255, 183, 3)' } );
 		for ( const host of FOREIGN ) {
 			expect( requested ).not.toContain( host );
 		}
 	} );
 
+	test( 'a gallery-format photo card is a booth strip with frames and one link', async ( { page } ) => {
+		await openStream( page );
+		const strip = page.locator( '.pk-card.k-photo.pk-card--gallery' ).first();
+		test.skip( 0 === await strip.count(), 'no gallery-format photo card on page 1 of /stream/' );
+		expect( await strip.locator( '.cr-booth__frame' ).count() ).toBeGreaterThan( 0 );
+		expect( await strip.locator( '.cr-booth__frame' ).count() ).toBeLessThanOrEqual( 4 );
+		expect( await renderedAnchors( strip ) ).toBe( 1 );
+		expect( await strip.evaluate( ( el ) => el.classList.contains( 'cr-polaroid' ) ) ).toBe( false );
+	} );
+
 	for ( const width of [ 375, 320 ] ) {
-		test( `a mount fits one column at ${ width }`, async ( { page } ) => {
+		test( `photo cards fit one column at ${ width }`, async ( { page } ) => {
 			await page.setViewportSize( { width, height: 900 } );
 			await openStream( page );
-			test.skip( 0 === await page.locator( '.pk-card.cr-slide-mount' ).count(), 'no photo cards on /stream/' );
+			test.skip( 0 === await page.locator( '.pk-card.k-photo' ).count(), 'no photo cards on /stream/' );
 			expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBeLessThanOrEqual( 0 );
 		} );
 	}
 
-	test( 'the front page lane prints the mount with no polaroid rule left', async ( { page } ) => {
+	test( 'the front page lane prints the polaroid', async ( { page } ) => {
 		await page.goto( '/', { waitUntil: 'load' } );
-		const mount = page.locator( '.cr-fieldnotes .pk-card.cr-slide-mount' ).first();
-		test.skip( 0 === await mount.count(), 'no photo card in the front page lane' );
-		const style = await mount.locator( 'img' ).evaluate( ( el ) => ( { ratio: getComputedStyle( el ).aspectRatio, border: getComputedStyle( el ).borderTopStyle } ) );
-		expect( style.ratio ).not.toMatch( /^4\s*\/\s*5/ );
-		expect( style.border ).not.toBe( 'dashed' );
+		const print = page.locator( '.cr-fieldnotes .pk-card.cr-polaroid' ).first();
+		test.skip( 0 === await print.count(), 'no single-picture photo card in the front page lane' );
+		const style = await print.locator( '.pk-media img' ).evaluate( ( el ) => ( { ratio: getComputedStyle( el ).aspectRatio, border: getComputedStyle( el ).borderTopStyle } ) );
+		expect( style.ratio ).toMatch( /^4\s*\/\s*5/ );
+		expect( style.border ).toBe( 'dashed' );
 	} );
 
 	test( 'C01 keeps its booth strip and its stamps print no address (dev fixture, logged out)', async ( { page } ) => {

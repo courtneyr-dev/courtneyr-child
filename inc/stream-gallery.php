@@ -14,10 +14,12 @@
  * The plugin exposes no filter around its media markup, so the card HTML is
  * spliced at two fixed anchors it always emits in this order —
  * `<div class="pk-media pk-media--stream">` and `<div class="pk-meta">`.
- * When either anchor is missing the card is returned untouched and keeps
- * the polaroid treatment, so a plugin markup change degrades to the old
- * look rather than a broken card. Nothing here runs outside the stream
- * page, and single-image photo posts never enter this code path.
+ * The photo kind's own card has no meta row, so for it the splice ends where
+ * the media block closes. When an anchor is missing the card is returned
+ * untouched and keeps the polaroid treatment, so a plugin markup change
+ * degrades to the old look rather than a broken card. Nothing here runs
+ * outside the stream page, and single-image photo posts never enter this
+ * code path.
  *
  * @package CourtneyrChild
  */
@@ -220,11 +222,15 @@ function render_stamps( \WP_Post $post, int $total ): string {
  * any image WordPress prints. Only the first frame loads eagerly; the rest
  * are lazy like the thumbnails they replace.
  *
- * @param \WP_Post $post Post being rendered.
- * @param int[]    $ids  Attachment IDs in source order.
+ * A photo card's only link is its title, stretched over the card, so there
+ * the more line is plain text; other kinds keep it as a link.
+ *
+ * @param \WP_Post $post      Post being rendered.
+ * @param int[]    $ids       Attachment IDs in source order.
+ * @param bool     $more_link Whether the more line is a link.
  * @return string Strip markup, or '' when no image resolves to markup.
  */
-function render_strip( \WP_Post $post, array $ids ): string {
+function render_strip( \WP_Post $post, array $ids, bool $more_link = true ): string {
 	$total   = count( $ids );
 	$visible = array_slice( $ids, 0, FRAME_LIMIT );
 	$frames  = '';
@@ -288,7 +294,18 @@ function render_strip( \WP_Post $post, array $ids ): string {
 		. '<span class="cr-booth__frames-count">' . esc_html( $count ) . '</span>'
 		. '</p>';
 
-	if ( $remaining > 0 ) {
+	if ( $remaining > 0 && ! $more_link ) {
+		$out .= '<p class="cr-booth__more"><span class="cr-booth__more-link">'
+			. esc_html(
+				sprintf(
+					/* translators: %d: number of frames not shown on the stream. */
+					_n( '+ %d more frame', '+ %d more frames', $remaining, 'courtneyr-child' ),
+					$remaining
+				)
+			)
+			. '<span class="cr-booth__arrow" aria-hidden="true"> →</span>'
+			. '</span></p>';
+	} elseif ( $remaining > 0 ) {
 		$out .= '<p class="cr-booth__more"><a class="cr-booth__more-link" href="' . esc_url( $permalink ) . '">'
 			. esc_html(
 				sprintf(
@@ -305,6 +322,27 @@ function render_strip( \WP_Post $post, array $ids ): string {
 	$out .= '</div>';
 
 	return $out;
+}
+
+/**
+ * Offset just past the div that opens at $start, counting nested divs.
+ *
+ * @param string $html  Card HTML.
+ * @param int    $start Offset of the opening div.
+ * @return int|false Offset after its closing tag, or false when unbalanced.
+ */
+function block_end( string $html, int $start ) {
+	if ( ! preg_match_all( '/<(\/?)div\b[^>]*>/i', $html, $tags, PREG_OFFSET_CAPTURE, $start ) ) {
+		return false;
+	}
+	$depth = 0;
+	foreach ( $tags[0] as $i => $tag ) {
+		$depth += '' === $tags[1][ $i ][0] ? 1 : -1;
+		if ( 0 === $depth ) {
+			return $tag[1] + strlen( $tag[0] );
+		}
+	}
+	return false;
 }
 
 /**
@@ -326,26 +364,24 @@ function booth_strip_card( string $html, array $block, $instance ): string {
 		: (int) get_the_ID();
 	$post    = $post_id ? get_post( $post_id ) : null;
 
-	if ( ! $post instanceof \WP_Post || 'gallery' !== get_post_format( $post ) ) {
+	if ( ! $post instanceof \WP_Post || 'gallery' !== get_post_format( $post ) || post_password_required( $post ) ) {
 		return $html;
 	}
 
-	// A photo post is a slide mount on the Stream (inc/stream-photo.php),
-	// whatever its format: no strip, no stamps, no place.
-	if ( has_term( 'photo', 'kind', $post ) ) {
-		return $html;
-	}
-
+	$is_photo   = has_term( 'photo', 'kind', $post );
 	$media_open = '<div class="pk-media pk-media--stream">';
 	$meta_open  = '<div class="pk-meta">';
 
 	$start = strpos( $html, $media_open );
-	$end   = false !== $start ? strpos( $html, $meta_open, $start ) : false;
-	if ( false === $start || false === $end ) {
+	if ( false === $start ) {
+		return $html;
+	}
+	$end = $is_photo ? block_end( $html, $start ) : strpos( $html, $meta_open, $start );
+	if ( false === $end ) {
 		return $html;
 	}
 
-	$strip = render_strip( $post, gallery_image_ids( $post ) );
+	$strip = render_strip( $post, gallery_image_ids( $post ), ! $is_photo );
 	if ( '' === $strip ) {
 		return $html;
 	}
