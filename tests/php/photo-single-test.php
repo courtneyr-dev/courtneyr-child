@@ -12,6 +12,23 @@ require __DIR__ . '/photo-bootstrap.php';
 
 use function Courtneyr\Child\SinglePhoto\projector_labelledby;
 use function Courtneyr\Child\SinglePhoto\scrapbook;
+use function Courtneyr\Child\SinglePhoto\framed_print;
+use const Courtneyr\Child\SinglePhoto\FRAMES;
+
+if ( ! function_exists( 'wp_dequeue_script' ) ) {
+	function wp_dequeue_script( $handle ): void {
+		$GLOBALS['cr_photo_dequeued'][] = 'script:' . $handle;
+	}
+	function wp_dequeue_style( $handle ): void {
+		$GLOBALS['cr_photo_dequeued'][] = 'style:' . $handle;
+	}
+}
+if ( ! function_exists( 'wp_enqueue_block_style' ) ) {
+	function wp_enqueue_block_style( $block, $args ): void {
+		$GLOBALS['cr_photo_block_styles'][] = array( $block, $args );
+	}
+}
+
 use function Courtneyr\Child\SinglePhoto\title_id;
 
 /** Core render_block stand-in for image blocks: records attrs, prints a figure with its caption. */
@@ -21,7 +38,8 @@ if ( ! function_exists( 'render_block' ) ) {
 		$id      = (int) ( $block['attrs']['id'] ?? 0 );
 		$caption = preg_match( '/<figcaption[^>]*>(.*?)<\/figcaption>/s', (string) ( $block['innerHTML'] ?? '' ), $m ) ? '<figcaption class="wp-element-caption">' . $m[1] . '</figcaption>' : '';
 		$lightbox = ! empty( $block['attrs']['lightbox']['enabled'] ) ? ' data-wp-interactive="core/image"' : '';
-		return '<figure class="wp-block-image size-large"' . $lightbox . '><img src="https://example.test/uploads/' . $id . '.jpg" alt="Photo ' . $id . '" class="wp-image-' . $id . '" />' . $caption . '</figure>';
+		$extra = '' !== (string) ( $block['attrs']['className'] ?? '' ) ? ' ' . $block['attrs']['className'] : '';
+		return '<figure class="wp-block-image size-large' . $extra . '"' . $lightbox . '><img src="https://example.test/uploads/' . $id . '.jpg" alt="Photo ' . $id . '" class="wp-image-' . $id . '" sizes="(max-width: 1024px) 100vw, 1024px" />' . $caption . '</figure>';
 	}
 }
 
@@ -37,7 +55,12 @@ function cr_photo_gallery_block( int $count = 3 ): array {
 }
 
 /** What the plugin's projector hands the theme for that gallery. */
-const CR_PHOTO_PROJECTOR = '<div class="wp-block-gallery pkiw-projector" role="region" aria-labelledby="cr-photo-title"><div class="pkiw-projector__mount">slides</div><button class="pkiw-projector__button">Next image</button></div>';
+const CR_PHOTO_PROJECTOR = '<div class="wp-block-gallery pkiw-projector" role="region" aria-labelledby="cr-photo-title"><div class="pkiw-projector__mount">slides</div><button class="pkiw-projector__button">Next image</button><p class="pkiw-projector__note wp-element-caption">A day at the <em>lake</em>.</p></div>';
+
+/** The plugin's mount for one loose image: core's figure with the mount class added. */
+function cr_photo_loose_mount( string $classes = 'wp-block-image size-large' ): string {
+	return '<figure class="' . $classes . ' pkiw-projector__mount"><img src="https://example.test/uploads/901.jpg" alt="A dock" class="wp-image-901 u-photo" loading="eager" /><figcaption class="wp-element-caption">The dock.</figcaption></figure>';
+}
 
 /** A photo single request for $id with the template's H1 block. */
 function cr_photo_single_request( int $id = 42, string $title = 'Blue Hour at Example Lake' ): WP_Post {
@@ -144,28 +167,91 @@ cr_photo_group(
 );
 
 cr_photo_group(
-	'a gallery photo single is a scrapbook spread of every picture, each with core lightbox, u-photo and its caption',
+	'five photo frames are block styles on the core Image block, painted from their own sheet wherever an image renders',
+	static function (): void {
+		cr_photo_assert( cr_photo_hooked( 'init', 'Courtneyr\\Child\\SinglePhoto\\register_frame_styles' ), 'registered on init' );
+		$GLOBALS['cr_photo_styles']            = array();
+		$GLOBALS['cr_photo_block_styles']      = array();
+		\Courtneyr\Child\SinglePhoto\register_frame_styles();
+		$names = array_map( static fn( array $s ): string => $s[0] . ' ' . $s[1]['name'], $GLOBALS['cr_photo_styles'] );
+		cr_photo_same( array( 'polaroid', 'taped', 'corners', 'postcard', 'film' ), array_keys( FRAMES ), 'the five frames' );
+		cr_photo_same( array_map( static fn( string $k ): string => 'core/image cr-photo-' . $k, array_keys( FRAMES ) ), $names, 'one block style each' );
+		cr_photo_same( 'core/image', $GLOBALS['cr_photo_block_styles'][0][0] ?? '', 'the frame sheet loads with the Image block' );
+		cr_photo_contains( 'assets/css/cr-photo-frames.css', (string) ( $GLOBALS['cr_photo_block_styles'][0][1]['src'] ?? '' ), 'from cr-photo-frames.css' );
+	}
+);
+
+cr_photo_group(
+	'a single-image photo post prints its picture in a frame: the picked style, or one seeded by the post',
+	static function (): void {
+		cr_photo_assert( cr_photo_hooked( 'render_block_core/image', 'Courtneyr\\Child\\SinglePhoto\\framed_print', 11, 3 ), 'after the plugin mount (10)' );
+		cr_photo_single_request();
+		$GLOBALS['cr_photo_dequeued'] = array();
+		$html = framed_print( cr_photo_loose_mount(), array( 'blockName' => 'core/image', 'attrs' => array( 'id' => 901 ) ), new WP_Block( array( 'postId' => 42 ) ) );
+		cr_photo_not_contains( 'pkiw-projector__mount', $html, 'no mount' );
+		cr_photo_assert( 1 === preg_match( '/^<figure class="wp-block-image size-large is-style-cr-photo-(polaroid|taped|corners|postcard|film)"/', $html ), 'one frame style on the figure' );
+		cr_photo_contains( 'u-photo', $html, 'u-photo kept' );
+		cr_photo_contains( 'The dock.', $html, 'caption kept' );
+		cr_photo_same( $html, framed_print( cr_photo_loose_mount(), array( 'blockName' => 'core/image', 'attrs' => array( 'id' => 901 ) ), new WP_Block( array( 'postId' => 42 ) ) ), 'stable per post' );
+		cr_photo_assert( in_array( 'style:pkiw-photo-projector', $GLOBALS['cr_photo_dequeued'], true ), 'the mount styles are dequeued' );
+
+		$picked = framed_print( cr_photo_loose_mount( 'wp-block-image size-large is-style-cr-photo-film' ), array( 'blockName' => 'core/image', 'attrs' => array( 'id' => 901, 'className' => 'is-style-cr-photo-film' ) ), new WP_Block( array( 'postId' => 42 ) ) );
+		cr_photo_same( 1, substr_count( $picked, 'is-style-cr-photo-' ), 'a picked frame is kept, not doubled' );
+		cr_photo_contains( 'is-style-cr-photo-film', $picked, 'the picked frame wins' );
+
+		$seen = array();
+		for ( $id = 300; $id < 340; $id++ ) {
+			cr_photo_single_request( $id );
+			preg_match( '/is-style-cr-photo-([a-z]+)/', framed_print( cr_photo_loose_mount(), array( 'blockName' => 'core/image', 'attrs' => array( 'id' => 901 ) ), new WP_Block( array( 'postId' => $id ) ) ), $m );
+			$seen[ $m[1] ?? '' ] = true;
+		}
+		cr_photo_assert( count( $seen ) >= 4 && ! isset( $seen[''] ), 'the seed spreads over the frames' );
+	}
+);
+
+cr_photo_group(
+	'the framed print leaves everything else alone',
+	static function (): void {
+		$block = array( 'blockName' => 'core/image', 'attrs' => array( 'id' => 901 ) );
+		cr_photo_single_request();
+		$plain = '<figure class="wp-block-image"><img src="x" alt="" /></figure>';
+		cr_photo_same( $plain, framed_print( $plain, $block, new WP_Block( array( 'postId' => 42 ) ) ), 'an image the plugin did not mount' );
+		cr_photo_reset();
+		cr_photo_same( cr_photo_loose_mount(), framed_print( cr_photo_loose_mount(), $block, new WP_Block( array( 'postId' => 42 ) ) ), 'not a single' );
+		cr_photo_single_request();
+		cr_photo_same( cr_photo_loose_mount(), framed_print( cr_photo_loose_mount(), $block, new WP_Block( array( 'postId' => 77 ) ) ), 'not the queried post' );
+		cr_photo_single_request();
+		$GLOBALS['cr_photo_request']['protected'][42] = true;
+		cr_photo_same( cr_photo_loose_mount(), framed_print( cr_photo_loose_mount(), $block, new WP_Block( array( 'postId' => 42 ) ) ), 'password protected' );
+	}
+);
+
+cr_photo_group(
+	'a gallery photo single is a scrapbook page: mixed frames, the gallery caption as a note, right-sized images, core lightbox',
 	static function (): void {
 		cr_photo_assert( cr_photo_hooked( 'render_block_core/gallery', 'Courtneyr\\Child\\SinglePhoto\\scrapbook', 11, 3 ), 'scrapbook runs after the projector (10)' );
 		cr_photo_single_request();
 		$GLOBALS['cr_photo_rendered'] = array();
-		$html = scrapbook( CR_PHOTO_PROJECTOR, cr_photo_gallery_block( 3 ), new WP_Block( array( 'postId' => 42 ) ) );
-		cr_photo_assert( 1 === preg_match( '/^<ul class="cr-scrapbook" role="list" aria-labelledby="cr-photo-title">/', $html ), 'one list, labelled by the H1' );
-		cr_photo_same( 3, substr_count( $html, '<li class="cr-scrapbook__print cr-scrapbook__print--tilt-' ), 'every picture is a print' );
-		cr_photo_same( 3, preg_match_all( '/<img\b[^>]*\bclass="[^"]*\bu-photo\b/', $html ), 'every picture keeps u-photo' );
-		cr_photo_same( 3, substr_count( $html, 'data-wp-interactive="core/image"' ), 'every print opens in the core lightbox' );
-		foreach ( $GLOBALS['cr_photo_rendered'] as $block ) {
-			cr_photo_assert( true === ( $block['attrs']['lightbox']['enabled'] ?? null ), 'lightbox asked of core for image ' . ( $block['attrs']['id'] ?? '?' ) );
-		}
-		cr_photo_contains( 'Frame 701', $html, 'captions kept' );
-		cr_photo_contains( 'Frame 703', $html, 'captions kept' );
+		$GLOBALS['cr_photo_dequeued'] = array();
+		$gallery = cr_photo_gallery_block( 5 );
+		$gallery['innerBlocks'][1]['attrs']['className'] = 'is-style-cr-photo-postcard';
+		$html = scrapbook( CR_PHOTO_PROJECTOR, $gallery, new WP_Block( array( 'postId' => 42 ) ) );
+		cr_photo_assert( 1 === preg_match( '/^<div class="cr-scrapbook"><ul class="cr-scrapbook__photos" role="list" aria-labelledby="cr-photo-title">/', $html ), 'a page holding one list, labelled by the H1' );
+		cr_photo_same( 5, substr_count( $html, '<li class="cr-scrapbook__print">' ), 'every picture is on the page' );
+		cr_photo_same( 5, preg_match_all( '/<figure class="wp-block-image size-large is-style-cr-photo-(polaroid|taped|corners|postcard|film)"/', $html ), 'every picture in a frame' );
+		cr_photo_assert( preg_match_all( '/is-style-cr-photo-([a-z]+)/', $html, $m ) && count( array_unique( $m[1] ) ) >= 3, 'frames are mixed on one page' );
+		cr_photo_same( 'is-style-cr-photo-postcard', $GLOBALS['cr_photo_rendered'][1]['attrs']['className'] ?? '', 'a picked frame on an image wins' );
+		cr_photo_same( 5, preg_match_all( '/<img\b[^>]*\bclass="[^"]*\bu-photo\b/', $html ), 'every picture keeps u-photo' );
+		cr_photo_same( 5, substr_count( $html, 'data-wp-interactive="core/image"' ), 'every print opens in the core lightbox' );
+		cr_photo_same( 5, substr_count( $html, 'sizes="(max-width: 40rem) 90vw, 32rem"' ), 'images sized for the print, not 1024px' );
+		cr_photo_contains( '<p class="cr-scrapbook__note">A day at the <em>lake</em>.</p>', $html, 'the gallery caption is a note on the page' );
 		cr_photo_not_contains( 'pkiw-projector', $html, 'no projector, no buttons' );
-		cr_photo_not_contains( '<button', $html, 'no carousel controls' );
-		cr_photo_same( $html, scrapbook( CR_PHOTO_PROJECTOR, cr_photo_gallery_block( 3 ), new WP_Block( array( 'postId' => 42 ) ) ), 'tilts are stable per post' );
+		cr_photo_assert( in_array( 'script:pkiw-photo-projector', $GLOBALS['cr_photo_dequeued'], true ) && in_array( 'style:pkiw-photo-projector', $GLOBALS['cr_photo_dequeued'], true ), 'projector script and style dequeued' );
+		cr_photo_same( $html, scrapbook( CR_PHOTO_PROJECTOR, $gallery, new WP_Block( array( 'postId' => 42 ) ) ), 'stable per post' );
 
 		cr_photo_single_request( 43, '' );
 		$untitled = scrapbook( CR_PHOTO_PROJECTOR, cr_photo_gallery_block( 2 ), new WP_Block( array( 'postId' => 43 ) ) );
-		cr_photo_assert( 1 === preg_match( '/^<ul class="cr-scrapbook" role="list" aria-label="Photos">/', $untitled ), 'an untitled post names the list' );
+		cr_photo_assert( 1 === preg_match( '/<ul class="cr-scrapbook__photos" role="list" aria-label="Photos">/', $untitled ), 'an untitled post names the list' );
 	}
 );
 
@@ -175,7 +261,10 @@ cr_photo_group(
 		$gallery = cr_photo_gallery_block( 3 );
 		cr_photo_single_request();
 		$plain = '<figure class="wp-block-gallery">plain</figure>';
+		$GLOBALS['cr_photo_dequeued'] = array();
 		cr_photo_same( $plain, scrapbook( $plain, $gallery, new WP_Block( array( 'postId' => 42 ) ) ), 'a gallery the projector did not take' );
+		cr_photo_same( CR_PHOTO_PROJECTOR, scrapbook( CR_PHOTO_PROJECTOR, $gallery, new WP_Block( array( 'postId' => 77 ) ) ), 'a gallery of a post that is not the queried one' );
+		cr_photo_same( array(), $GLOBALS['cr_photo_dequeued'], 'nothing dequeued when nothing was replaced' );
 		cr_photo_reset();
 		cr_photo_same( CR_PHOTO_PROJECTOR, scrapbook( CR_PHOTO_PROJECTOR, $gallery, new WP_Block( array( 'postId' => 42 ) ) ), 'not a single' );
 		cr_photo_single_request();

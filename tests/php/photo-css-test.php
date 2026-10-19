@@ -263,24 +263,47 @@ check_case(
 );
 
 check_case(
-	'the gallery single is a scrapbook: white taped prints, four tilt tokens, Rock Salt captions, one column on phones',
-	static function () use ( $code, $css ): bool {
-		$list  = rule_body( $code, 'body.cr-photo-single .cr-scrapbook ' );
-		$print = rule_body( $code, 'body.cr-photo-single .cr-scrapbook__print ' );
-		$tape  = rule_body( $code, 'body.cr-photo-single .cr-scrapbook__print::before' );
-		$cap   = rule_body( $code, 'body.cr-photo-single .cr-scrapbook__print figcaption' );
-		foreach ( array( '0' => '--cr-rotate-1', '1' => '--cr-rotate-2', '2' => '--cr-rotate-neg', '3' => '--cr-rotate-neg2' ) as $key => $token ) {
-			if ( 1 !== preg_match( '/\.cr-scrapbook__print--tilt-' . $key . '\s*\{[^{}]*rotate\(var\(' . preg_quote( $token, '/' ) . '\)\)/', $code ) ) {
+	'the gallery single is a scrapbook page: punched album paper, overlapping prints in a 12-column rhythm, washi, stickers, a note, one column on phones',
+	static function () use ( $code ): bool {
+		$page  = rule_body( $code, 'body.cr-photo-single .cr-scrapbook ' );
+		$grid  = rule_body( $code, 'body.cr-photo-single .cr-scrapbook__photos ' );
+		$third = rule_body( $code, '.cr-scrapbook__print:nth-child(5n + 3)' );
+		$note  = rule_body( $code, 'body.cr-photo-single .cr-scrapbook__note ' );
+		return false !== strpos( $page, 'background-color: var(--cr-light-orange)' )
+			&& false !== strpos( $page, 'var(--cr-fiber)' )
+			&& false !== strpos( $page, 'box-shadow: var(--cr-shadow-hard-2)' )
+			&& false !== strpos( $grid, 'grid-template-columns: repeat(12, minmax(0, 1fr))' )
+			&& false !== strpos( $third, 'margin-block-start: calc(var(--cr-space-xl) * -1)' )
+			&& 1 === preg_match( '/\.cr-scrapbook::after\s*\{[^{}]*background-image:/', $code )
+			&& 1 === preg_match( '/\.cr-scrapbook__print:nth-child\(3n \+ 2\)[^{]*::before\s*\{[^{}]*var\(--cr-sky-blue\)/', $code )
+			&& false !== strpos( $note, 'font-family: var(--cr-font-display)' )
+			&& 1 === preg_match( '/@media \(max-width: 39\.99rem\)\s*\{[^@]*\.cr-scrapbook__photos\s*\{[^{}]*grid-template-columns:\s*1fr;/s', $code );
+	}
+);
+
+check_case(
+	'the five photo frames live in their own sheet, in tokens, with hard shadows only and a forced-colors fallback',
+	static function (): bool {
+		$frames = (string) preg_replace( '#/\*.*?\*/#s', '', (string) file_get_contents( dirname( __DIR__, 2 ) . '/assets/css/cr-photo-frames.css' ) );
+		foreach ( array( 'polaroid', 'taped', 'corners', 'postcard', 'film' ) as $frame ) {
+			if ( false === strpos( $frames, '.wp-block-image.is-style-cr-photo-' . $frame . ' {' ) ) {
 				return false;
 			}
 		}
-		return false !== strpos( $list, 'grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr))' )
-			&& false !== strpos( $list, 'list-style: none' )
-			&& false !== strpos( $print, 'background-color: var(--cr-white)' )
-			&& false !== strpos( $print, 'box-shadow: var(--cr-shadow-hard)' )
-			&& false !== strpos( $tape, 'background-color: var(--cr-tape)' )
-			&& false !== strpos( $cap, 'font-family: var(--cr-font-display)' )
-			&& 1 === preg_match( '/@media \(max-width: 39\.99rem\)\s*\{[^@]*\.cr-scrapbook\s*\{[^{}]*grid-template-columns:\s*1fr;/s', $code );
+		preg_match_all( '/(?<![\w-])box-shadow\s*:\s*([^;{}]+);/', $frames, $shadows );
+		foreach ( $shadows[1] as $value ) {
+			if ( 'none' !== trim( $value ) && 1 !== preg_match( '/^var\(--cr-shadow-hard(-sm|-2)?\)$/', trim( $value ) ) ) {
+				return false;
+			}
+		}
+		preg_match_all( '/(?<![\w-])transform\s*:\s*([^;{}]+);/', $frames, $turns );
+		foreach ( $turns[1] as $value ) {
+			if ( 1 !== preg_match( '/^rotate\(var\(--cr-rotate-(1|2|neg|neg2)\)\)$/', trim( $value ) ) ) {
+				return false;
+			}
+		}
+		return ! preg_match( '/#[0-9a-fA-F]{3,8}\b|\b(rgb|rgba|hsl|hsla)\(|filter\s*:|blur\(/i', $frames )
+			&& false !== strpos( $frames, '@media (forced-colors: active)' );
 	}
 );
 

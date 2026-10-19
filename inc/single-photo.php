@@ -28,10 +28,16 @@ const TITLE_ID   = 'cr-photo-title';
 const BODY_CLASS = 'cr-photo-single';
 
 /**
- * Tilt keys a scrapbook print may take; cr-photo.css maps 0 to 3 to the
- * four rotation tokens.
+ * Photo frames: block styles on the core Image block (slug => label),
+ * painted by assets/css/cr-photo-frames.css wherever an image renders.
  */
-const PRINT_TILTS = 4;
+const FRAMES = array(
+	'polaroid' => 'Polaroid',
+	'taped'    => 'Taped print',
+	'corners'  => 'Photo corners',
+	'postcard' => 'Postcard',
+	'film'     => 'Film frame',
+);
 
 /**
  * Whether this is the queried photo single and it has a title of its own.
@@ -123,15 +129,118 @@ function editor_parity_kinds( $kinds ) {
 add_filter( 'courtneyr_child_editor_parity_kinds', __NAMESPACE__ . '\\editor_parity_kinds' );
 
 /**
- * A gallery photo single as a scrapbook spread (Courtney, 2026-10-19).
+ * The photo frames as block styles on the core Image block, with their sheet
+ * loaded wherever an Image block renders.
+ */
+function register_frame_styles(): void {
+	if ( function_exists( 'register_block_style' ) ) {
+		foreach ( FRAMES as $slug => $label ) {
+			register_block_style(
+				'core/image',
+				array(
+					'name'  => 'cr-photo-' . $slug,
+					'label' => __( $label, 'courtneyr-child' ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- Labels come from the FRAMES table.
+				)
+			);
+		}
+	}
+	if ( function_exists( 'wp_enqueue_block_style' ) ) {
+		wp_enqueue_block_style(
+			'core/image',
+			array(
+				'handle' => 'courtneyr-photo-frames',
+				'src'    => COURTNEYR_CHILD_URI . '/assets/css/cr-photo-frames.css',
+				'path'   => dirname( __DIR__ ) . '/assets/css/cr-photo-frames.css',
+				'ver'    => COURTNEYR_CHILD_VERSION,
+			)
+		);
+	}
+}
+add_action( 'init', __NAMESPACE__ . '\\register_frame_styles' );
+
+/**
+ * The frame picked as an image's block style, or ''.
+ *
+ * @param string $classes Class list.
+ * @return string Frame slug, or ''.
+ */
+function picked_frame( string $classes ): string {
+	return preg_match( '/(?<![\w-])is-style-cr-photo-([a-z]+)(?![\w-])/', $classes, $m ) && isset( FRAMES[ $m[1] ] ) ? $m[1] : '';
+}
+
+/**
+ * A frame seeded by the post and the picture's place on the page.
+ *
+ * @param int $post_id  Post ID.
+ * @param int $position Picture's place, 0 for a single image.
+ * @return string Frame slug.
+ */
+function seeded_frame( int $post_id, int $position = 0 ): string {
+	$keys = array_keys( FRAMES );
+	return $keys[ ( pick( seed( 'photo-frame', (string) $post_id ), 3, count( $keys ) ) + $position ) % count( $keys ) ];
+}
+
+/**
+ * The queried, unprotected photo single this block belongs to, or 0.
+ *
+ * @param mixed $instance Block instance.
+ * @return int Post ID, or 0.
+ */
+function photo_single_id( $instance ): int {
+	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
+		? (int) $instance->context['postId']
+		: (int) get_the_ID();
+	if ( ! is_singular( 'post' ) || $post_id <= 0 || get_queried_object_id() !== $post_id || ! has_term( KIND, 'kind', $post_id ) || post_password_required( $post_id ) ) {
+		return 0;
+	}
+	return $post_id;
+}
+
+/**
+ * A single-image photo post prints its picture in a frame (Courtney,
+ * 2026-10-19): the plugin's mount (priority 10) becomes the picked frame,
+ * or one seeded by the post.
+ *
+ * @param string    $html     Rendered image (the plugin's mount).
+ * @param array     $block    Parsed core/image block.
+ * @param \WP_Block $instance Block instance.
+ * @return string
+ */
+function framed_print( string $html, array $block, $instance = null ): string {
+	if ( false === strpos( $html, 'pkiw-projector__mount' ) ) {
+		return $html;
+	}
+	$post_id = photo_single_id( $instance );
+	if ( 0 === $post_id ) {
+		return $html;
+	}
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	if ( ! $tags->next_tag( 'figure' ) ) {
+		return $html;
+	}
+	$tags->remove_class( 'pkiw-projector__mount' );
+	if ( '' === picked_frame( (string) $tags->get_attribute( 'class' ) ) ) {
+		$tags->add_class( 'is-style-cr-photo-' . seeded_frame( $post_id ) );
+	}
+	if ( function_exists( 'wp_dequeue_style' ) ) {
+		wp_dequeue_style( 'pkiw-photo-projector' );
+	}
+	return $tags->get_updated_html();
+}
+add_filter( 'render_block_core/image', __NAMESPACE__ . '\\framed_print', 11, 3 );
+
+/**
+ * A gallery photo single as a scrapbook page (Courtney, 2026-10-19).
  *
  * The plugin turns the first gallery of a photo post into a projector (one
  * slide at a time, buttons and a rail). On the single the theme lays every
- * picture out at once instead: each of the gallery's own image blocks is
- * rendered by core with its "expand on click" lightbox (the Interactivity
- * API, no theme script), keeps its caption and its u-photo class, and
- * becomes a loose print with a seeded tilt; cr-photo.css adds the paper and
- * tape. Runs after the projector (priority 10) and only where it ran.
+ * picture out on a scrapbook page instead: each of the gallery's own image
+ * blocks is rendered by core in a photo frame (its picked frame, or a mix
+ * seeded by the post) with core's "expand on click" lightbox (the
+ * Interactivity API, no theme script), keeps its caption and its u-photo
+ * class, and is sized for the print; the gallery caption becomes a note on
+ * the page. cr-photo.css lays out the page. Runs after the projector
+ * (priority 10) and only where it ran.
  *
  * @param string    $html     Rendered gallery (the projector).
  * @param array     $block    Parsed core/gallery block.
@@ -142,10 +251,8 @@ function scrapbook( string $html, array $block, $instance = null ): string {
 	if ( false === strpos( $html, 'pkiw-projector' ) ) {
 		return $html;
 	}
-	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
-		? (int) $instance->context['postId']
-		: (int) get_the_ID();
-	if ( ! is_singular( 'post' ) || $post_id <= 0 || get_queried_object_id() !== $post_id || ! has_term( KIND, 'kind', $post_id ) || post_password_required( $post_id ) ) {
+	$post_id = photo_single_id( $instance );
+	if ( 0 === $post_id ) {
 		return $html;
 	}
 
@@ -155,21 +262,28 @@ function scrapbook( string $html, array $block, $instance = null ): string {
 		if ( 'core/image' !== ( $image['blockName'] ?? '' ) ) {
 			continue;
 		}
-		$image['attrs']             = (array) ( $image['attrs'] ?? array() );
+		$image['attrs'] = (array) ( $image['attrs'] ?? array() );
+		$classes        = (string) ( $image['attrs']['className'] ?? '' );
+		if ( '' === picked_frame( $classes ) ) {
+			$image['attrs']['className'] = trim( $classes . ' is-style-cr-photo-' . seeded_frame( $post_id, $count ) );
+		}
 		$image['attrs']['lightbox'] = array( 'enabled' => true );
 		$figure                     = render_block( $image );
 		$tags                       = new \WP_HTML_Tag_Processor( $figure );
 		if ( $tags->next_tag( 'img' ) ) {
 			$tags->add_class( 'u-photo' );
+			$tags->set_attribute( 'sizes', '(max-width: 40rem) 90vw, 32rem' );
 			$figure = $tags->get_updated_html();
 		}
-		$tilt    = pick( seed( 'scrapbook', (string) $post_id, (string) $count ), 3, PRINT_TILTS );
-		$prints .= '<li class="cr-scrapbook__print cr-scrapbook__print--tilt-' . $tilt . '">' . $figure . '</li>';
+		$prints .= '<li class="cr-scrapbook__print">' . $figure . '</li>';
 		++$count;
 	}
 	if ( 0 === $count ) {
 		return $html;
 	}
+
+	// The gallery caption the projector carried over becomes a note on the page.
+	$note = preg_match( '/<p class="pkiw-projector__note[^"]*">(.*?)<\/p>/s', $html, $m ) ? '<p class="cr-scrapbook__note">' . $m[1] . '</p>' : '';
 
 	// The projector's own script and styles have nothing left to drive.
 	if ( function_exists( 'wp_dequeue_script' ) ) {
@@ -180,6 +294,6 @@ function scrapbook( string $html, array $block, $instance = null ): string {
 	$label = is_titled_photo_single( $post_id )
 		? ' aria-labelledby="' . TITLE_ID . '"'
 		: ' aria-label="' . esc_attr( __( 'Photos', 'courtneyr-child' ) ) . '"';
-	return '<ul class="cr-scrapbook" role="list"' . $label . '>' . $prints . '</ul>';
+	return '<div class="cr-scrapbook"><ul class="cr-scrapbook__photos" role="list"' . $label . '>' . $prints . '</ul>' . $note . '</div>';
 }
 add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\\scrapbook', 11, 3 );

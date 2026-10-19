@@ -542,98 +542,138 @@ body.cr-photo-single .pkiw-photo-place {
 }
 
 /* ============================================================
-   Gallery single: a scrapbook spread (inc/single-photo.php). Every
-   picture at once as a loose white print, taped and turned by a
-   seeded token; core's lightbox opens a print full size.
+   Gallery single: a scrapbook page (inc/single-photo.php). Kraft-orange
+   album paper punched for the binding, the pictures overlapping in
+   mixed frames (cr-photo-frames.css), washi tape, stickers, and the
+   gallery caption as a handwritten note; core's lightbox opens a print.
    ============================================================ */
 body.cr-photo-single .cr-scrapbook {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-	gap: var(--cr-space-2xl) var(--cr-space-xl);
-	align-items: start;
+	position: relative;
 	margin: var(--cr-space-xl) 0;
-	padding: var(--cr-space-md) var(--cr-space-sm) 0;
+	padding: var(--cr-space-3xl) var(--cr-space-2xl) var(--cr-space-2xl) calc(var(--cr-space-2xl) + 2rem);
+	background-color: var(--cr-light-orange);
+	background-image:
+		radial-gradient(circle at 1.4rem 50%, var(--cr-surface) 0 0.45rem, transparent 0.5rem),
+		var(--cr-fiber);
+	background-size: 2.8rem 2.8rem, auto;
+	background-repeat: repeat-y, repeat;
+	box-shadow: var(--cr-shadow-hard-2);
+	color: var(--cr-russian-violet);
+}
+
+/* Stickers on the page: a star, a heart, a squiggle and a sparkle. */
+body.cr-photo-single .cr-scrapbook::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	background-image:
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fb8500' d='M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60' fill='none'%3E%3Cpath d='M30 46 C 12 34, 8 20, 16 14 C 22 9, 29 13, 30 19 C 31 13, 38 9, 44 14 C 52 20, 48 34, 30 46 Z' stroke='%23fb8500' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 34' fill='none'%3E%3Cpath d='M4 26 c 10 -14, 16 -14, 20 -2 c 3 9, 12 9, 16 -2 c 4 -11, 12 -11, 16 0 c 3 9, 12 9, 18 -4' stroke='%23126782' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%238ecae6' d='M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-size: 2rem 2rem, 2.6rem 2.6rem, 4.5rem 1.8rem, 1.3rem 1.3rem;
+	background-position: right 1.4rem top 1.2rem, left 3.2rem bottom 1.4rem, right 2.4rem bottom 1.6rem, left 46% top 1rem;
+	pointer-events: none;
+}
+
+body.cr-photo-single .cr-scrapbook__photos {
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	gap: var(--cr-space-xl) var(--cr-space-md);
+	align-items: start;
+	margin: 0;
+	padding: 0;
 	list-style: none;
 }
 
 body.cr-photo-single .cr-scrapbook__print {
 	position: relative;
 	margin: 0;
-	padding: 0.75rem 0.75rem 1rem;
-	background-color: var(--cr-white);
-	box-shadow: var(--cr-shadow-hard);
-	color: var(--cr-russian-violet);
 }
 
-/* Every other print sits a little lower, so the spread reads as laid down by hand. */
-body.cr-photo-single .cr-scrapbook__print:nth-child(even) {
-	margin-block-start: var(--cr-space-lg);
+body.cr-photo-single .cr-scrapbook__print .wp-block-image {
+	margin: 0;
 }
 
-body.cr-photo-single .cr-scrapbook__print--tilt-0 {
-	transform: rotate(var(--cr-rotate-1));
+/* A five-print rhythm: big and small, staggered, the third and fifth laid over the row above. */
+body.cr-photo-single .cr-scrapbook__print:nth-child(5n + 1) {
+	grid-column: 1 / span 7;
 }
 
-body.cr-photo-single .cr-scrapbook__print--tilt-1 {
-	transform: rotate(var(--cr-rotate-2));
+body.cr-photo-single .cr-scrapbook__print:nth-child(5n + 2) {
+	grid-column: 8 / span 5;
+	margin-block-start: var(--cr-space-2xl);
 }
 
-body.cr-photo-single .cr-scrapbook__print--tilt-2 {
-	transform: rotate(var(--cr-rotate-neg));
+body.cr-photo-single .cr-scrapbook__print:nth-child(5n + 3) {
+	z-index: 1;
+	grid-column: 2 / span 5;
+	margin-block-start: calc(var(--cr-space-xl) * -1);
 }
 
-body.cr-photo-single .cr-scrapbook__print--tilt-3 {
-	transform: rotate(var(--cr-rotate-neg2));
+body.cr-photo-single .cr-scrapbook__print:nth-child(5n + 4) {
+	grid-column: 7 / span 6;
 }
 
-/* A strip of tape across each print's top edge. */
-body.cr-photo-single .cr-scrapbook__print::before {
+body.cr-photo-single .cr-scrapbook__print:nth-child(5n) {
+	z-index: 1;
+	grid-column: 3 / span 7;
+	margin-block-start: calc(var(--cr-space-lg) * -1);
+}
+
+/* Washi tape on every third print that is not already taped. */
+body.cr-photo-single .cr-scrapbook__print:nth-child(3n + 2):not(:has(.is-style-cr-photo-taped))::before {
 	content: "";
 	position: absolute;
-	inset-block-start: -0.6rem;
-	inset-inline-start: calc(50% - 2rem);
-	z-index: 1;
-	width: 4rem;
-	height: 1.2rem;
-	background-color: var(--cr-tape);
+	inset-block-start: -0.7rem;
+	inset-inline-start: calc(50% - 2.5rem);
+	z-index: 2;
+	width: 5rem;
+	height: 1.3rem;
+	background-color: color-mix(in srgb, var(--cr-sky-blue) 75%, transparent);
 	transform: rotate(var(--cr-rotate-neg));
 	pointer-events: none;
 }
 
-body.cr-photo-single .cr-scrapbook__print figure {
-	margin: 0;
-}
-
-body.cr-photo-single .cr-scrapbook__print img {
-	display: block;
-	width: 100%;
-	height: auto;
-	border: 0;
-	border-radius: 0;
-	box-shadow: none;
-}
-
-body.cr-photo-single .cr-scrapbook__print figcaption {
-	margin: 0.7rem 0 0;
-	padding: 0;
+/* The gallery caption, handwritten on a slip of white paper. */
+body.cr-photo-single .cr-scrapbook__note {
+	position: relative;
+	z-index: 2;
+	width: fit-content;
+	max-width: 24rem;
+	margin: var(--cr-space-2xl) auto 0;
+	padding: var(--cr-space-sm) var(--cr-space-md);
+	background-color: var(--cr-white);
+	box-shadow: var(--cr-shadow-hard-sm);
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-display);
-	font-size: 0.9rem;
-	line-height: 1.45;
-	text-align: center;
+	font-size: 1rem;
+	line-height: 1.5;
+	transform: rotate(var(--cr-rotate-2));
 }
 
 @media (max-width: 39.99rem) {
 
 	body.cr-photo-single .cr-scrapbook {
-		grid-template-columns: 1fr;
-		gap: var(--cr-space-xl);
-		padding-inline: var(--cr-space-md);
+		padding: var(--cr-space-2xl) var(--cr-space-md) var(--cr-space-xl) calc(var(--cr-space-md) + 2rem);
 	}
 
-	body.cr-photo-single .cr-scrapbook__print:nth-child(even) {
+	body.cr-photo-single .cr-scrapbook__photos {
+		grid-template-columns: 1fr;
+	}
+
+	body.cr-photo-single .cr-scrapbook__print:nth-child(n) {
+		grid-column: 1;
 		margin-block-start: 0;
 	}
+}
+
+/* A single-image photo post: its framed print sits centred on the page. */
+body.cr-photo-single .wp-block-image[class*="is-style-cr-photo-"]:not(.cr-scrapbook *) {
+	max-width: 40rem;
+	margin: var(--cr-space-xl) auto;
 }
 
 /* ============================================================
@@ -859,13 +899,15 @@ body.cr-photo-single .cr-scrapbook__print figcaption {
 
 	.cr-photo-sheets .pkiw-group__heading::before,
 	body.cr-photo-single .pkiw-projector::before,
+	body.cr-photo-single .cr-scrapbook::after,
 	body.cr-photo-single .cr-scrapbook__print::before {
 		display: none;
 	}
 
-	body.cr-photo-single .cr-scrapbook__print {
+	body.cr-photo-single :is(.cr-scrapbook, .cr-scrapbook__note) {
 		border: 2px solid CanvasText;
 		background-color: Canvas;
+		background-image: none;
 		box-shadow: none;
 		color: CanvasText;
 	}
