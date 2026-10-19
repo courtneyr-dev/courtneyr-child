@@ -133,31 +133,44 @@ function groups( array $shapes, array $captions ): array {
 }
 
 /**
- * Spans for pictures that share a row and a height: each takes columns in
- * proportion to its width over height, at least $min, summing to $cols.
+ * Spans for pictures that share a row and a height.
+ *
+ * Solves the shared height that fills the row (each picture as wide as its
+ * ratio times that height, plus any print edge, with the gutters between),
+ * turns each width into columns, and rounds by largest remainder, so the
+ * pictures fill their cells instead of leaving paper at the row's end.
  *
  * @param float[] $ratios Width over height of each picture in the row.
- * @param int     $cols   Columns to fill.
+ * @param float[] $pads   Each picture's print edge (rem, both sides).
+ * @param string  $bp     'd' or 't' (EVEN_GRID).
  * @param int     $min    Fewest columns per picture.
  * @return int[]
  */
-function justify( array $ratios, int $cols, int $min ): array {
+function justify( array $ratios, array $pads, string $bp, int $min ): array {
+	list( $cols, $gap, $width ) = EVEN_GRID[ $bp ];
+
 	$ratios = array_values( $ratios );
-	$total  = array_sum( $ratios );
-	$spans  = array_map( static fn( float $r ): int => max( $min, (int) floor( $cols * $r / $total ) ), $ratios );
-	$order  = array_keys( $ratios );
-	// Widest first; equal ratios keep source order.
-	usort( $order, static fn( int $a, int $b ): int => array( $ratios[ $b ], $a ) <=> array( $ratios[ $a ], $b ) );
-	$size  = count( $order );
+	$count  = count( $ratios );
+	$height = ( $width - ( $count - 1 ) * $gap - array_sum( $pads ) ) / array_sum( $ratios );
+	$exact  = array();
+	foreach ( $ratios as $k => $ratio ) {
+		$exact[ $k ] = max( $min, ( $height * $ratio + ( $pads[ $k ] ?? 0 ) + $gap ) * $cols / ( $width + $gap ) );
+	}
+	$spans = array_map( static fn( float $e ): int => (int) floor( $e ), $exact );
+	$order = array_keys( $exact );
+	usort( $order, static fn( int $a, int $b ): int => array( $exact[ $b ] - $spans[ $b ], $a ) <=> array( $exact[ $a ] - $spans[ $a ], $b ) );
 	$spare = $cols - array_sum( $spans );
 	for ( $k = 0; $k < $spare; ++$k ) {
-		++$spans[ $order[ $k % $size ] ];
+		++$spans[ $order[ $k % $count ] ];
 	}
-	// Over: take columns back from the narrowest that can give them.
-	$over = array_sum( $spans ) - $cols;
-	for ( $k = $size - 1, $guard = 0; $over > 0 && $guard < $cols * $size; $k = ( $k + $size - 1 ) % $size, ++$guard ) {
-		if ( $spans[ $order[ $k ] ] > $min ) {
-			--$spans[ $order[ $k ] ];
+	// Over: take columns back from the widest that can give them.
+	$over  = array_sum( $spans ) - $cols;
+	$order = array_keys( $spans );
+	usort( $order, static fn( int $a, int $b ): int => array( $spans[ $b ], $a ) <=> array( $spans[ $a ], $b ) );
+	for ( $guard = 0; $over > 0 && $guard < $cols * $count; ++$guard ) {
+		$k = $order[ $guard % $count ];
+		if ( $spans[ $k ] > $min ) {
+			--$spans[ $k ];
 			--$over;
 		}
 	}
@@ -246,8 +259,8 @@ function compose( array $shapes, array $captions, array $ratios = array() ): arr
 					);
 					$off[1]   = 'square' === $s[0] ? DROP : 0;
 				} else {
-					$d     = row_cells( justify( $r, COLS_D, 8 ) );
-					$t     = row_cells( justify( $r, COLS_T, 4 ) );
+					$d     = row_cells( justify( $r, array( 0, 0 ), 'd', 8 ) );
+					$t     = row_cells( justify( $r, array( 0, 0 ), 't', 4 ) );
 					$cells = array(
 						array( $d[0], $t[0], cell( 1, 2 ) ),
 						array( $d[1], $t[1], cell( 1, 2 ) ),
@@ -269,8 +282,9 @@ function compose( array $shapes, array $captions, array $ratios = array() ): arr
 					$off = 0 === $rhythm % 2 ? array( DROP, 0, DROP ) : array( 0, DROP, 0 );
 					++$rhythm;
 				} else {
-					$d = row_cells( justify( $r, COLS_D, 5 ) );
-					$t = row_cells( justify( $r, COLS_T, 3 ) );
+					// The middle picture is a print, with a narrow edge.
+					$d = row_cells( justify( $r, array( 0, 1.0, 0 ), 'd', 4 ) );
+					$t = row_cells( justify( $r, array( 0, 1.0, 0 ), 't', 2 ) );
 					foreach ( $s as $k => $shape ) {
 						$cells[ $k ] = array( $d[ $k ], $t[ $k ], cell( 1, 2 ) );
 						$flags[ $k ] = array( 'baseline' );
