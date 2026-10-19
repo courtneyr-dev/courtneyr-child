@@ -314,6 +314,22 @@ namespace {
 	);
 
 	cr_video_group(
+		'titles with replacement tokens stay literal',
+		static function (): void {
+			foreach ( array( 'Budget $0 review', 'Tape $1 and ${1}', 'Path \\1 and \\0' ) as $index => $title ) {
+				cr_video_reset();
+				$id = 40 + $index;
+				cr_video_post( $id, $title, cr_video_facts( array( 'name' => $title ) ) );
+				$out   = cr_video_render( $id, cr_video_fixture( $title ) );
+				$xpath = cr_video_xpath( $out );
+				cr_video_assert( 1 === $xpath->query( '//a[@href and not(ancestor-or-self::*[@hidden])]' )->length, 'one rendered link for ' . $title );
+				cr_video_assert( 1 === substr_count( $out, esc_html( $title ) ), 'title prints once literally: ' . $title );
+				cr_video_assert( 1 === $xpath->query( '//h3//a[@class="u-url" and normalize-space(.)=' . "'" . str_replace( "'", '', $title ) . "'" . ']' )->length, 'heading anchor holds the literal title: ' . $title );
+			}
+		}
+	);
+
+	cr_video_group(
 		'picture loading counts every tape',
 		static function (): void {
 			cr_video_reset();

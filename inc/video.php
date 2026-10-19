@@ -294,7 +294,12 @@ function tape_card( string $html, array $block, $instance ): string {
 			$level   = (int) $heading[1];
 			$rebuilt = '<h' . $level . ' class="' . $class . '"><a class="u-url" href="' . esc_url( (string) get_permalink( $post_id ) ) . '">'
 				. esc_html( $name ) . $date . '</a></h' . $level . '>';
-			$html    = (string) preg_replace( '/<h[1-6]\b[^>]*\bclass="[^"]*(?<![\w-])pk-title(?![\w-])[^"]*"[^>]*>.*?<\/h[1-6]>/is', $rebuilt, $html, 1 );
+			$html    = (string) preg_replace_callback(
+				'/<h[1-6]\b[^>]*\bclass="[^"]*(?<![\w-])pk-title(?![\w-])[^"]*"[^>]*>.*?<\/h[1-6]>/is',
+				static fn(): string => $rebuilt,
+				$html,
+				1
+			);
 		}
 		$picture = tape_picture( $facts, $count <= FIRST_ROW );
 		$runtime = runtime_time( $facts );
