@@ -429,6 +429,12 @@
 	text-decoration: underline;
 }
 
+.wp-block-post-template > li > .pk-card.cr-tape-spine :is(.pk-stream-date, .pk-stream-date time) {
+	margin-inline: 0;
+	padding-inline: 0;
+	border: 0;
+}
+
 .wp-block-post-template > li > .pk-card.cr-tape-spine :is(.pk-kindlabel, .pk-stream-date, .cr-tape-spine__runtime) {
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-mono);
