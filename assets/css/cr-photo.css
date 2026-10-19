@@ -664,6 +664,12 @@ body.cr-photo-single .cr-scrapbook__note {
 
 	body.cr-photo-single .cr-scrapbook__photos {
 		grid-template-columns: 1fr;
+		gap: var(--cr-space-2xl);
+	}
+
+	/* Only the top stickers on a phone: the lower ones would sit on the last caption. */
+	body.cr-photo-single .cr-scrapbook::after {
+		background-size: 2rem 2rem, 0 0, 0 0, 1.3rem 1.3rem;
 	}
 
 	body.cr-photo-single .cr-scrapbook__print:nth-child(n) {
