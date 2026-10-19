@@ -591,6 +591,12 @@
 	.cr-zine-single .cr-zine__frame--anchor {
 		margin-inline-start: calc(var(--cr-space-2xl) * -1 - var(--cr-space-lg));
 	}
+
+	/* Its index and caption stay on the paper: off the sheet, violet type would sit on the page's dark ground. */
+	.cr-zine-single .cr-zine__frame--anchor .cr-zine__num,
+	.cr-zine-single .cr-zine__frame--anchor figcaption {
+		margin-inline-start: calc(var(--cr-space-lg) + var(--cr-space-xs));
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
