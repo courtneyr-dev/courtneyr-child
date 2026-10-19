@@ -175,6 +175,9 @@
 	max-width: none;
 	min-height: 11rem;
 	margin: 0;
+
+	/* Reserve the stripe (bottom 1.1rem + 0.55rem tall) plus a 0.6rem gap, so a long label pushes the shell, not the window, past the stripe. */
+	padding-bottom: 2.25rem;
 	aspect-ratio: auto;
 	background-color: var(--cr-photocopier-blk);
 	border: 2px solid var(--cr-ink);
@@ -516,6 +519,11 @@ body.cr-single--audio .single-post__date time {
 	.cr-audio-single::after {
 		inset-inline-end: -5rem;
 		background-position: right bottom;
+	}
+
+	/* No sheet: the right plant stands at the machine column's lower-right corner (that column ends about 40% in from the grid's end). */
+	.cr-audio-single:not(:has(.cr-audio-sheet))::after {
+		inset-inline-end: calc(40% - 5rem);
 	}
 }
 
