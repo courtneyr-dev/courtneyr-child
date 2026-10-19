@@ -6,21 +6,22 @@
    ============================================================ */
 
 .cr-wish {
+	--cr-wish-edges: 0.375rem;
 	position: relative;
 	min-width: 0;
 }
 
 .cr-wish-catalog {
+	position: relative;
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
-	row-gap: var(--cr-space-lg);
+	gap: 1px;
 	box-sizing: border-box;
 	min-width: 0;
 	margin: 0;
-	padding: var(--cr-space-sm);
-	border: 1px solid var(--cr-prussian-blue);
-	border-inline: var(--cr-space-sm) solid var(--cr-prussian-blue);
-	background: var(--cr-printer-ivory);
+	padding: 0 0 var(--cr-wish-edges);
+	border: var(--cr-space-sm) solid var(--cr-prussian-blue);
+	background: var(--cr-rule);
 	box-shadow: var(--cr-shadow-hard-2);
 	color: var(--cr-russian-violet);
 	list-style: none;
@@ -34,22 +35,50 @@
 /* components.css zeroes the archive Post Template's padding and margin at 0,2,0; this selector wins at 0,3,0. */
 .cr-archive .cr-wish-catalog.wp-block-post-template {
 	margin: 0;
-	padding: var(--cr-space-sm);
+	padding: 0 0 var(--cr-wish-edges);
+}
+
+/* Open-catalog construction: the Prussian cover runs round every edge, the pages meet
+   at 1px rule seams (the catalog's rule fill showing through the 1px grid gap), and a
+   stack of page edges sits on the bottom cover. */
+
+.cr-wish-catalog::after {
+	content: "";
+	position: absolute;
+	inset-inline: 0;
+	inset-block-end: 0;
+	box-sizing: border-box;
+	block-size: var(--cr-wish-edges);
+	border-block-start: 1px solid var(--cr-rule);
+	background: var(--cr-printer-ivory);
+	box-shadow: inset 0 2px 0 var(--cr-printer-ivory), inset 0 3px 0 var(--cr-rule);
+	pointer-events: none;
 }
 
 .cr-wish-catalog > section.pkiw-group {
+	position: relative;
 	box-sizing: border-box;
 	min-width: 0;
 	margin: 0;
 	padding: var(--cr-space-lg);
-	border: 1px solid var(--cr-rule);
+	border: 0;
 	background: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
 	break-inside: avoid;
 }
 
+/* Section names sit on flat torn-paper bands (the house zigzag tear from components.css);
+   the fill rotates through three palette papers. */
 .cr-wish-catalog .pkiw-group__heading {
-	margin: 0 0 var(--cr-space-md);
+	--cr-paper: var(--cr-sky-blue);
+	--cr-paper-tear: 0.5rem;
+	position: relative;
+	box-sizing: border-box;
+	width: fit-content;
+	max-width: 100%;
+	margin: 0 0 calc(var(--cr-space-md) + var(--cr-paper-tear));
+	padding: var(--cr-space-2xs) var(--cr-space-md);
+	background: var(--cr-paper);
 	color: var(--cr-russian-violet);
 	font-family: var(--wp--preset--font-family--accent, var(--cr-font-accent));
 	font-size: max(var(--cr-text-floor), var(--cr-text-lg));
@@ -60,11 +89,35 @@
 	overflow-wrap: anywhere;
 }
 
+.cr-wish-catalog > section.pkiw-group:nth-child(3n + 2) .pkiw-group__heading {
+	--cr-paper: var(--cr-periwinkle);
+}
+
+.cr-wish-catalog > section.pkiw-group:nth-child(3n) .pkiw-group__heading {
+	--cr-paper: var(--cr-light-orange);
+}
+
+.cr-wish-catalog .pkiw-group__heading::after {
+	content: "";
+	position: absolute;
+	inset-inline: 0;
+	inset-block-start: 100%;
+	block-size: var(--cr-paper-tear);
+	background-color: var(--cr-paper);
+	pointer-events: none;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='15' preserveAspectRatio='none'%3E%3Cpath d='M0 0H160V6L150 10L139 5L128 11L116 6L105 10L93 5L82 11L70 6L59 10L47 5L36 11L24 6L13 10L0 5Z' fill='%23000'/%3E%3C/svg%3E") left top / 10rem 100% repeat-x;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='15' preserveAspectRatio='none'%3E%3Cpath d='M0 0H160V6L150 10L139 5L128 11L116 6L105 10L93 5L82 11L70 6L59 10L47 5L36 11L24 6L13 10L0 5Z' fill='%23000'/%3E%3C/svg%3E") left top / 10rem 100% repeat-x;
+}
+
+/* A section that spans a wider row slot flows its list into up to --cr-wish-cols columns;
+   auto-fit collapses unused tracks, so one or two listings fill the slot. */
 .cr-wish-catalog .pkiw-group__items {
+	--cr-wish-cols: 1;
 	display: grid;
-	grid-template-columns: minmax(0, 1fr);
+	grid-template-columns: repeat(auto-fit, minmax(calc((100% - (var(--cr-wish-cols) - 1) * var(--cr-space-md)) / var(--cr-wish-cols) - 1px), 1fr));
 	gap: var(--cr-space-md);
 	min-width: 0;
+	max-width: none;
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -200,9 +253,43 @@
 	box-shadow: var(--cr-shadow-hard-2), 0 0 0 7px var(--cr-focus-halo);
 }
 
+/* From tablet up a listing is a compact catalog row: the 4:3 picture (about 40%) beside the text stack. */
+@media (min-width: 48rem) {
+
+	.cr-wish-listing {
+		display: grid;
+		grid-template-columns: minmax(6rem, 2fr) minmax(0, 3fr);
+		grid-template-rows: auto 1fr;
+		column-gap: var(--cr-space-md);
+		align-items: start;
+	}
+
+	.cr-wish-listing__media {
+		grid-row: 1 / -1;
+	}
+
+	.cr-wish-listing__tile {
+		padding: var(--cr-space-xs);
+		font-size: max(var(--cr-text-floor), var(--cr-text-sm));
+	}
+
+	.cr-wish-listing__title {
+		grid-column: 2;
+		margin-block-start: 0;
+	}
+
+	.cr-wish-listing__priority {
+		grid-column: 2;
+		justify-self: start;
+	}
+}
+
 /* ============================================================
    Archive sparse margin marks and responsive columns
    ============================================================ */
+
+/* .cr-wish is full-bleed with a gutter too narrow for marks beside the catalog, so the
+   star and the tape scrap sit on the cover's top corners (its top edge is the catalog's). */
 
 .cr-wish::before,
 .cr-wish::after {
@@ -223,6 +310,10 @@
 
 	.cr-wish-catalog > section.pkiw-group:nth-child(odd):last-child {
 		grid-column: 1 / -1;
+	}
+
+	.cr-wish-catalog > section.pkiw-group:nth-child(odd):last-child .pkiw-group__items {
+		--cr-wish-cols: 2;
 	}
 }
 
@@ -245,9 +336,19 @@
 		grid-column: 1 / -1;
 	}
 
+	.cr-wish-catalog > section.pkiw-group:nth-child(3n + 1):nth-last-child(2) .pkiw-group__items,
+	.cr-wish-catalog > section.pkiw-group:nth-child(3n + 2):last-child .pkiw-group__items {
+		--cr-wish-cols: 2;
+	}
+
+	.cr-wish-catalog > section.pkiw-group:nth-child(3n + 1):last-child .pkiw-group__items {
+		--cr-wish-cols: 3;
+	}
+
 	.cr-wish::before {
-		inset-block-start: var(--cr-space-xl);
-		inset-inline-start: calc(var(--cr-space-xl) * -1);
+		content: "";
+		inset-block-start: calc(var(--cr-space-md) * -1);
+		inset-inline-start: 0;
 		display: block;
 		width: 2.5rem;
 		height: 2.5rem;
@@ -256,8 +357,9 @@
 	}
 
 	.cr-wish::after {
-		inset-block-end: var(--cr-space-xl);
-		inset-inline-end: calc(var(--cr-space-lg) * -1);
+		content: "";
+		inset-block-start: calc(var(--cr-space-xs) * -1);
+		inset-inline-end: var(--cr-space-lg);
 		display: block;
 		width: 4rem;
 		height: 1.25rem;
@@ -276,6 +378,17 @@ body.cr-wish-single .pk-wish {
 	color: var(--cr-russian-violet);
 }
 
+/* The shared single card frame (0,4,1) keeps the badge column; the wish card has none. */
+body.cr-wish-single.single .single-post__content .pk-card.pk-wish {
+	display: block;
+	max-width: none;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+}
+
 body.cr-wish-single .pk-wish > .pk-badge {
 	display: none;
 }
@@ -286,7 +399,6 @@ body.cr-wish-single .pk-wish > .pk-body {
 	grid-template-areas:
 		"photo"
 		"listing"
-		"original"
 		"reason";
 	gap: var(--cr-space-lg);
 	min-width: 0;
@@ -331,9 +443,18 @@ body.cr-wish-single .pk-wish-listing {
 	grid-area: listing;
 }
 
+/* View item sits inside the listing panel: same grid area, pinned to its foot. */
 body.cr-wish-single .pk-original {
-	grid-area: original;
-	margin: 0;
+	position: relative;
+	z-index: 1;
+	grid-area: listing;
+	align-self: end;
+	justify-self: start;
+	margin: 0 var(--cr-space-lg) var(--cr-space-lg);
+}
+
+body.cr-wish-single .pk-wish:has(.pk-original) .pk-wish-listing {
+	padding-block-end: calc(44px + var(--cr-space-lg) * 3);
 }
 
 body.cr-wish-single .pk-wish-reason {
@@ -345,23 +466,32 @@ body.cr-wish-single .pk-wish-reason::before {
 	content: "";
 	position: absolute;
 	inset-block-start: -0.65rem;
-	inset-inline-start: 50%;
+	inset-inline-end: -0.5rem;
 	z-index: 2;
 	width: 4rem;
 	height: 1.2rem;
 	background: var(--cr-tape);
 	pointer-events: none;
-	rotate: var(--cr-rotate-neg);
-	translate: -50% 0;
+	rotate: var(--cr-rotate-neg2);
 }
 
 body.cr-wish-single .pk-wish-photo img {
 	display: block;
 	width: 100%;
 	max-width: 100%;
-	height: auto;
+	height: 100%;
+	object-fit: cover;
+	border: 0;
+	border-radius: 0;
+	background: none;
 	opacity: 1;
 	aspect-ratio: auto;
+}
+
+body.cr-wish-single .pk-wish-photo.cr-cover--failed .cr-wish-listing__tile {
+	display: grid;
+	height: auto;
+	aspect-ratio: 4 / 3;
 }
 
 body.cr-wish-single .pk-wish-rows {
@@ -370,13 +500,13 @@ body.cr-wish-single .pk-wish-rows {
 
 body.cr-wish-single .pk-wish-row {
 	display: grid;
-	grid-template-columns: minmax(5.5rem, 0.4fr) minmax(0, 1fr);
-	gap: var(--cr-space-sm);
-	align-items: baseline;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-2xs);
+	justify-items: start;
 }
 
 body.cr-wish-single .pk-wish-row + .pk-wish-row {
-	margin-block-start: var(--cr-space-sm);
+	margin-block-start: var(--cr-space-md);
 }
 
 body.cr-wish-single .pk-wish-row :is(dt, dd) {
@@ -431,6 +561,7 @@ body.cr-wish-single .pk-wish[data-priority='high'] :is(.pk-wish-price, .pk-wish-
 body.cr-wish-single .pk-original a.u-url {
 	display: inline-flex;
 	align-items: center;
+	gap: var(--cr-space-xs);
 	box-sizing: border-box;
 	min-height: 44px;
 	padding: var(--cr-space-sm) var(--cr-space-md);
@@ -456,27 +587,21 @@ body.cr-wish-single .pk-original a.u-url:focus-visible {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		grid-template-areas:
 			"photo listing"
-			"photo original"
 			"reason reason";
 	}
 
 	body.cr-wish-single .pk-wish:not(.pk-wish--has-photo) > .pk-body {
 		grid-template-areas:
 			"listing listing"
-			"original original"
 			"reason reason";
 	}
 
 	body.cr-wish-single .pk-wish:not(.pk-wish--has-reason) > .pk-body {
-		grid-template-areas:
-			"photo listing"
-			"photo original";
+		grid-template-areas: "photo listing";
 	}
 
 	body.cr-wish-single .pk-wish:not(.pk-wish--has-photo):not(.pk-wish--has-reason) > .pk-body {
-		grid-template-areas:
-			"listing listing"
-			"original original";
+		grid-template-areas: "listing listing";
 	}
 }
 
@@ -484,28 +609,20 @@ body.cr-wish-single .pk-original a.u-url:focus-visible {
 
 	body.cr-wish-single .pk-wish > .pk-body {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
-		grid-template-areas:
-			"photo listing reason"
-			"photo original reason";
-		align-items: start;
+		grid-template-areas: "photo listing reason";
+		align-items: stretch;
 	}
 
 	body.cr-wish-single .pk-wish:not(.pk-wish--has-photo) > .pk-body {
-		grid-template-areas:
-			"listing listing reason"
-			"original original reason";
+		grid-template-areas: "listing listing reason";
 	}
 
 	body.cr-wish-single .pk-wish:not(.pk-wish--has-reason) > .pk-body {
-		grid-template-areas:
-			"photo listing listing"
-			"photo original original";
+		grid-template-areas: "photo listing listing";
 	}
 
 	body.cr-wish-single .pk-wish:not(.pk-wish--has-photo):not(.pk-wish--has-reason) > .pk-body {
-		grid-template-areas:
-			"listing listing listing"
-			"original original original";
+		grid-template-areas: "listing listing listing";
 	}
 }
 
@@ -779,6 +896,8 @@ body.cr-wish-single .pk-original a.u-url:focus-visible {
 
 	.cr-wish::before,
 	.cr-wish::after,
+	.cr-wish-catalog::after,
+	.cr-wish-catalog .pkiw-group__heading::after,
 	body.cr-wish-single .pk-wish-photo::before,
 	body.cr-wish-single .pk-wish-reason::before,
 	body.cr-wish-single .pk-wish[data-priority='high'] :is(.pk-wish-price, .pk-wish-priority)::after,

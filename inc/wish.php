@@ -145,19 +145,24 @@ function eager_state( bool $reset = false ): array {
 }
 
 /**
- * Whether this type's first picture should load eagerly.
+ * Whether a listing's picture loads eagerly.
+ *
+ * Call once per listing, in DOM order, whether or not it has a picture: the
+ * state records each section's ordinal on the current page, so a first-row
+ * section whose first listing has no picture still holds its slot. Only the
+ * first listing in each of the first EAGER_SECTIONS sections (the catalog's
+ * first desktop row) is eager, on every archive page.
  *
  * @param string $type_key Normalized wish type key.
  */
 function archive_picture_loading( string $type_key ): bool {
-	if ( (int) get_query_var( 'paged', 1 ) >= 2 ) {
-		return false;
-	}
 	$state = eager_state();
-	if ( in_array( $type_key, $state, true ) ) {
+	if ( array_key_exists( $type_key, $state ) ) {
+		++$state[ $type_key ];
+		$GLOBALS['courtneyr_child_wish_eager'] = $state;
 		return false;
 	}
-	$state[] = $type_key;
+	$state[ $type_key ] = 1;
 
 	$GLOBALS['courtneyr_child_wish_eager'] = $state;
 	return count( $state ) <= EAGER_SECTIONS;
@@ -202,8 +207,8 @@ function archive_item( \WP_Post $post, array $facts, int $level ): string {
 	if ( $has_facts ) {
 		$picture = is_array( $facts['picture'] ?? null ) ? $facts['picture'] : array();
 		$url     = (string) ( $picture['url'] ?? '' );
+		$eager   = archive_picture_loading( (string) ( $facts['type_key'] ?? '' ) );
 		if ( '' !== $url ) {
-			$eager      = archive_picture_loading( (string) ( $facts['type_key'] ?? '' ) );
 			$dimensions = '';
 			$attachment = (int) ( $picture['attachment_id'] ?? 0 );
 			if ( $attachment > 0 && function_exists( 'wp_get_attachment_image_src' ) ) {

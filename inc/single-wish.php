@@ -27,6 +27,37 @@ function body_class( array $classes ): array {
 add_filter( 'body_class', __NAMESPACE__ . '\\body_class' );
 
 /**
+ * Give the single's photo panel the shared failed-image swap (site-ux.js).
+ *
+ * The tile repeats the H1, so it stays aria-hidden.
+ *
+ * @param string $html     Rendered wish card.
+ * @param array  $block    Parsed block.
+ * @param mixed  $instance Block instance.
+ */
+function photo_fallback( string $html, array $block, $instance ): string {
+	unset( $block );
+	if ( '' === $html || false === strpos( $html, 'pk-wish-photo' ) || false !== strpos( $html, 'data-cr-cover-fallback' ) ) {
+		return $html;
+	}
+	if ( ! function_exists( '\\Courtneyr\\Child\\Wish\\is_wish_single' ) || ! \Courtneyr\Child\Wish\is_wish_single() ) {
+		return $html;
+	}
+	$title = trim( wp_strip_all_tags( (string) get_the_title( \Courtneyr\Child\Wish\block_post_id( $instance ) ) ) );
+	$tile  = \Courtneyr\Child\Wish\typographic_tile( '' !== $title ? $title : __( 'Wish', 'courtneyr-child' ) );
+	$out   = preg_replace_callback(
+		'#(<div class="pk-media pk-wish-photo")(>.*?)(</div>)#s',
+		static function ( array $m ) use ( $tile ): string {
+			return $m[1] . ' data-cr-cover-fallback' . $m[2] . $tile . $m[3];
+		},
+		$html,
+		1
+	);
+	return is_string( $out ) ? $out : $html;
+}
+add_filter( 'render_block_post-kinds-indieweb/wish-card', __NAMESPACE__ . '\\photo_fallback', 10, 3 );
+
+/**
  * Register wish with the shared featured-repeat filter.
  *
  * @param mixed $kinds Kind slugs.

@@ -275,22 +275,24 @@ namespace {
 	);
 
 	cr_wish_markup_check(
-		'eager loading selects one picture from each of the first three sections on page one',
+		'eager loading marks the first listing of each first-row section on every page',
 		static function (): bool {
-			Wish\eager_state( true );
-			$GLOBALS['cr_request'] = array( 'paged' => 1 );
-			$loads = array();
-			foreach ( array( 'book', 'book', 'food', 'game', 'tech' ) as $at => $type ) {
-				$post = cr_wish_post( 120 + $at );
-				$html = Wish\archive_item( $post, cr_wish_facts( 'Fictional Lantern', 'high', $type ), 3 );
-				$loads[] = str_contains( $html, 'loading="eager"' );
+			$runs = array();
+			foreach ( array( 1, 2 ) as $paged ) {
+				Wish\eager_state( true );
+				$GLOBALS['cr_request'] = array( 'paged' => $paged );
+				$loads = array();
+				foreach ( array( 'book', 'book', 'food', 'game', 'tech' ) as $at => $type ) {
+					$facts = cr_wish_facts( 'Fictional Lantern', 'high', $type );
+					if ( 'food' === $type ) {
+						$facts['picture'] = array();
+					}
+					$html    = Wish\archive_item( cr_wish_post( 120 + $at ), $facts, 3 );
+					$loads[] = str_contains( $html, 'loading="eager"' ) && str_contains( $html, 'fetchpriority="high"' );
+				}
+				$runs[] = $loads;
 			}
-			Wish\eager_state( true );
-			$GLOBALS['cr_request'] = array( 'paged' => 2 );
-			$paged = Wish\archive_item( cr_wish_post( 130 ), cr_wish_facts(), 3 );
-			return array( true, false, true, true, false ) === $loads
-				&& str_contains( $paged, 'loading="lazy"' )
-				&& ! str_contains( $paged, 'fetchpriority=');
+			return array( array( true, false, false, true, false ), array( true, false, false, true, false ) ) === $runs;
 		}
 	);
 
