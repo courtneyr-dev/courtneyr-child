@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40" width="60" height="40"><!-- Decorative tuner-dial tick marks for the podcast lineup chassis (PKIW #236). Palette only (Prussian blue), no characters; painted as a repeating CSS background, never content. -->
+<rect x="0" y="4" width="3" height="32" fill="#023047"/>
+<rect x="12" y="13" width="2" height="14" fill="#023047"/>
+<rect x="24" y="13" width="2" height="14" fill="#023047"/>
+<rect x="36" y="13" width="2" height="14" fill="#023047"/>
+<rect x="48" y="13" width="2" height="14" fill="#023047"/>
+</svg>

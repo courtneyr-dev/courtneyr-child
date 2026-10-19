@@ -65,6 +65,33 @@
 	box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 
+/* The #226 boombox closes the Listen header on the podcast view, as on the shelf. */
+.cr-archive--podcast .cr-archive__header {
+	position: relative;
+}
+
+.cr-archive--podcast .cr-archive__header::after {
+	display: block;
+	inline-size: min(11rem, 60%);
+	aspect-ratio: 480 / 262;
+	margin: var(--cr-space-sm) auto 0;
+	background: url(../img/cr-boombox.svg) center bottom / contain no-repeat;
+	content: "";
+	pointer-events: none;
+}
+
+/* Wide pages stand it in the header's inline-end gutter, clear of the text column. */
+@media ( min-width: 80rem ) {
+
+	.cr-archive--podcast .cr-archive__header::after {
+		position: absolute;
+		inset-block-start: var(--cr-space-xl);
+		inset-inline-end: 0;
+		inline-size: 11.5rem;
+		margin: 0;
+	}
+}
+
 /* Archive chassis. */
 .cr-archive--podcast .pkiw-lineup {
 	min-width: 0;
@@ -80,6 +107,11 @@
 	color: var(--cr-printer-ivory);
 }
 
+/* cr-archives.css zeroes every archive post template's inline-start padding. */
+.cr-archive--podcast .wp-block-post-template.pkiw-lineup {
+	padding-inline-start: var(--cr-space-lg);
+}
+
 .cr-archive--podcast .cr-podcast-dial {
 	display: flex;
 	align-items: center;
@@ -92,21 +124,23 @@
 }
 
 .cr-archive--podcast .cr-podcast-dial__grille {
-	inline-size: 5rem;
-	block-size: 2.35rem;
+	flex: 0 1 7rem;
+	min-inline-size: 3rem;
+	block-size: 0.35rem;
 	background: var(--cr-cerulean);
 	box-shadow:
-		0 0.45rem 0 var(--cr-cerulean),
-		0 0.9rem 0 var(--cr-cerulean),
-		0 1.35rem 0 var(--cr-cerulean),
-		0 1.8rem 0 var(--cr-cerulean);
+		0 0.7rem 0 var(--cr-cerulean),
+		0 1.4rem 0 var(--cr-cerulean),
+		0 2.1rem 0 var(--cr-cerulean),
+		0 2.8rem 0 var(--cr-cerulean);
+	translate: 0 -1.4rem;
 }
 
 .cr-archive--podcast .cr-podcast-dial__knob {
 	position: relative;
-	flex: 0 0 2.75rem;
-	inline-size: 2.75rem;
-	block-size: 2.75rem;
+	flex: 0 0 3.5rem;
+	inline-size: 3.5rem;
+	block-size: 3.5rem;
 	border: 2px solid var(--cr-prussian-blue);
 	border-radius: 50%;
 	background: var(--cr-sky-blue);
@@ -115,10 +149,10 @@
 
 .cr-archive--podcast .cr-podcast-dial__knob::after {
 	position: absolute;
-	inset-block-start: 0.35rem;
+	inset-block-start: 0.4rem;
 	inset-inline-start: 50%;
-	inline-size: 0.2rem;
-	block-size: 0.7rem;
+	inline-size: 0.25rem;
+	block-size: 1rem;
 	background: var(--cr-prussian-blue);
 	content: "";
 	translate: -50% 0;
@@ -127,12 +161,11 @@
 .cr-archive--podcast .cr-podcast-dial__window {
 	position: relative;
 	flex: 1 1 18rem;
-	max-inline-size: 32rem;
 	min-inline-size: 4rem;
-	block-size: 3rem;
+	block-size: 3.5rem;
 	border: 2px solid var(--cr-cerulean);
 	border-radius: var(--cr-radius-md);
-	background: var(--cr-printer-ivory);
+	background: var(--cr-printer-ivory) url(../img/cr-dial-ticks.svg) 0.75rem 50% / auto 2.5rem repeat-x;
 }
 
 .cr-archive--podcast .cr-podcast-dial__needle {
@@ -147,12 +180,14 @@
 .cr-archive--podcast .pkiw-lineup__station {
 	position: relative;
 	display: grid;
-	grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+	grid-template-columns: minmax(0, 9rem) minmax(0, 14rem) minmax(0, 1fr);
+	grid-template-rows: auto 1fr;
 	grid-template-areas:
-		"cover list"
-		"heading list";
+		"cover heading list"
+		"cover knob list";
 	gap: var(--cr-space-sm) var(--cr-space-lg);
 	min-width: 0;
+	margin-block: 0;
 	padding-block: var(--cr-space-lg);
 	border-block-start: 2px solid var(--cr-cerulean);
 }
@@ -173,7 +208,7 @@
 	grid-area: heading;
 	align-self: start;
 	margin: 0;
-	padding: var(--cr-space-xs) 3.5rem var(--cr-space-xs) var(--cr-space-sm);
+	padding: var(--cr-space-xs) var(--cr-space-sm);
 	border-radius: 0;
 	background: var(--cr-accent-2-bg);
 	color: var(--cr-accent-2-ink);
@@ -186,20 +221,35 @@
 	rotate: none;
 }
 
-/* The station knob sits inside the label's reserved end padding, so it never covers text. */
-.cr-archive--podcast .pkiw-lineup__heading::after {
-	position: absolute;
-	inset-block-start: 50%;
-	inset-inline-end: var(--cr-space-xs);
-	inline-size: 2rem;
-	block-size: 2rem;
+/* Per-station grille and knob sit on the chassis under the label, never on it. */
+.cr-archive--podcast .pkiw-lineup__station::before {
+	grid-area: knob;
+	align-self: start;
+	block-size: 0.35rem;
+	margin-block-start: 0.2rem;
+	margin-inline-end: 3rem;
+	background: var(--cr-cerulean);
+	box-shadow:
+		0 0.7rem 0 var(--cr-cerulean),
+		0 1.4rem 0 var(--cr-cerulean),
+		0 2.1rem 0 var(--cr-cerulean);
+	content: "";
+	pointer-events: none;
+}
+
+.cr-archive--podcast .pkiw-lineup__station::after {
+	grid-area: knob;
+	align-self: start;
+	justify-self: end;
+	box-sizing: border-box;
+	inline-size: 2.5rem;
+	block-size: 2.5rem;
 	border: 2px solid var(--cr-ink);
 	border-radius: 50%;
 	background: var(--cr-sky-blue);
 	box-shadow: inset 0 0 0 0.35rem var(--cr-prussian-blue);
 	content: "";
 	pointer-events: none;
-	translate: 0 -50%;
 }
 
 .cr-archive--podcast .pkiw-lineup__cover {
@@ -224,14 +274,15 @@
 }
 
 .cr-archive--podcast :is(.pkiw-lineup__cover--none, .pkiw-lineup__cover.cr-cover--failed) {
+	overflow: hidden;
 	border: 2px solid var(--cr-printer-ivory);
 	background: var(--cr-prussian-blue);
 }
 
 .cr-archive--podcast :is(.pkiw-lineup__cover--none, .pkiw-lineup__cover.cr-cover--failed)::before {
 	position: absolute;
-	inset-block-start: 25%;
-	inset-inline: 18%;
+	inset-block-start: 12%;
+	inset-inline: 12%;
 	block-size: 0.35rem;
 	background: var(--cr-cerulean);
 	box-shadow:
@@ -239,7 +290,11 @@
 		0 1.4rem 0 var(--cr-cerulean),
 		0 2.1rem 0 var(--cr-cerulean),
 		0 2.8rem 0 var(--cr-cerulean),
-		0 3.5rem 0 var(--cr-cerulean);
+		0 3.5rem 0 var(--cr-cerulean),
+		0 4.2rem 0 var(--cr-cerulean),
+		0 4.9rem 0 var(--cr-cerulean),
+		0 5.6rem 0 var(--cr-cerulean),
+		0 6.3rem 0 var(--cr-cerulean);
 	content: "";
 }
 
@@ -282,18 +337,17 @@
 
 .cr-archive--podcast .pkiw-episode {
 	position: relative;
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: space-between;
-	gap: var(--cr-space-xs) var(--cr-space-sm);
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	align-content: center;
+	justify-items: start;
+	gap: var(--cr-space-2xs);
 	min-width: 0;
 	min-height: 2.75rem;
 	padding: var(--cr-space-xs) var(--cr-space-sm);
 }
 
 .cr-archive--podcast .pkiw-episode__title {
-	flex: 1 1 14rem;
 	min-width: 0;
 	margin: 0;
 	color: var(--cr-ink);
@@ -316,7 +370,6 @@
 }
 
 .cr-archive--podcast .pkiw-episode__date {
-	flex: 0 1 auto;
 	max-inline-size: 100%;
 	padding: var(--cr-space-2xs) var(--cr-space-xs);
 	border-radius: 0;
@@ -454,7 +507,6 @@ body.cr-single--podcast .cr-podcast-tuner {
 	box-sizing: border-box;
 	inline-size: 3rem;
 	min-block-size: 11rem;
-	max-block-size: 16rem;
 	border: 2px solid var(--cr-ink);
 	border-radius: var(--cr-radius-md);
 	background: var(--cr-prussian-blue);
@@ -463,25 +515,9 @@ body.cr-single--podcast .cr-podcast-tuner {
 
 body.cr-single--podcast .cr-podcast-tuner::before {
 	position: absolute;
-	inset-block-start: 1rem;
-	inset-inline-start: 0.4rem;
-	inline-size: 0.8rem;
-	block-size: 0.18rem;
-	background: var(--cr-sky-blue);
-	box-shadow:
-		1.4rem 0 0 var(--cr-sky-blue),
-		0 1.35rem 0 var(--cr-sky-blue),
-		1.4rem 1.35rem 0 var(--cr-sky-blue),
-		0 2.7rem 0 var(--cr-sky-blue),
-		1.4rem 2.7rem 0 var(--cr-sky-blue),
-		0 4.05rem 0 var(--cr-sky-blue),
-		1.4rem 4.05rem 0 var(--cr-sky-blue),
-		0 5.4rem 0 var(--cr-sky-blue),
-		1.4rem 5.4rem 0 var(--cr-sky-blue),
-		0 6.75rem 0 var(--cr-sky-blue),
-		1.4rem 6.75rem 0 var(--cr-sky-blue),
-		0 8.1rem 0 var(--cr-sky-blue),
-		1.4rem 8.1rem 0 var(--cr-sky-blue);
+	inset-block: 1rem;
+	inset-inline: 0.4rem;
+	background: url(../img/cr-tuner-ticks.svg) 50% 0 / 100% 1.35rem repeat-y;
 	content: "";
 }
 
@@ -640,21 +676,21 @@ body.cr-single--podcast .cr-podcast-sources .cr-listen-sources__link a:focus-vis
 
 .cr-stream-page .wp-block-post-template > li .cr-podcast-card .pk-kindlabel {
 	position: static;
-	display: block;
+	display: inline-block;
 	inline-size: auto;
 	block-size: auto;
 	margin: 0 0 var(--cr-space-xs);
-	padding: 0;
-	border: 0;
-	border-radius: 0;
+	padding: 0 0.3rem;
+	border: 1.5px solid var(--cr-ink);
+	border-radius: 2px;
 	background: none;
 	box-shadow: none;
-	color: var(--cr-russian-violet-soft);
+	color: var(--cr-ink);
 	font-family: var(--cr-font-mono);
 	font-size: var(--cr-text-xs);
 	font-style: normal;
 	font-weight: var(--cr-weight-bold);
-	letter-spacing: var(--cr-tracking-eyebrow);
+	letter-spacing: 0.14em;
 	line-height: var(--cr-leading-snug);
 	text-transform: uppercase;
 }
@@ -663,10 +699,11 @@ body.cr-single--podcast .cr-podcast-sources .cr-listen-sources__link a:focus-vis
 	margin: 0;
 	color: var(--cr-ink);
 	font-family: var(--cr-font-accent);
-	font-size: var(--cr-text-md);
+	font-size: var(--cr-text-lg);
 	font-weight: var(--cr-weight-bold);
 	line-height: var(--cr-leading-snug);
 	overflow-wrap: anywhere;
+	text-transform: uppercase;
 }
 
 .cr-stream-page .wp-block-post-template > li .cr-podcast-card .cr-podcast-card__title {
@@ -676,7 +713,7 @@ body.cr-single--podcast .cr-podcast-sources .cr-listen-sources__link a:focus-vis
 	padding: 0;
 	color: var(--cr-ink);
 	font-family: var(--cr-font-body);
-	font-size: var(--cr-text-md);
+	font-size: var(--cr-text-sm);
 	font-weight: var(--cr-weight-semibold);
 	line-height: var(--cr-leading-snug);
 	overflow-wrap: anywhere;
@@ -753,38 +790,39 @@ body.cr-single--podcast .cr-podcast-sources .cr-listen-sources__link a:focus-vis
 .cr-podcast-card__art--knob,
 .cr-podcast-card__art.cr-cover--failed {
 	border: 2px solid var(--cr-ink);
-	background-color: var(--cr-prussian-blue);
-	background-image: var(--cr-halftone);
-	background-size: var(--cr-halftone-size);
+	background-color: var(--cr-surface-elevated);
+	background-image: var(--cr-halftone-strong);
+	background-size: var(--cr-halftone-strong-size);
 }
 
 .cr-podcast-card__art--knob::before,
 .cr-podcast-card__art.cr-cover--failed::before {
 	position: absolute;
-	inset: 0.65rem;
-	border: 0.35rem solid var(--cr-sky-blue);
+	inset: 1.1rem 0.85rem 0.6rem;
+	border: 0.3rem solid var(--cr-sky-blue);
 	border-radius: 50%;
 	background: var(--cr-prussian-blue);
-	box-shadow: inset 0 0 0 0.35rem var(--cr-cerulean);
+	box-shadow: inset 0 0 0 0.3rem var(--cr-cerulean);
 	content: "";
 }
 
 .cr-podcast-card__art--knob::after,
 .cr-podcast-card__art.cr-cover--failed::after {
 	position: absolute;
-	inset-block-start: 0.25rem;
+	inset-block-start: 0.2rem;
 	inset-inline-start: 50%;
-	inline-size: 0.18rem;
-	block-size: 0.45rem;
-	background: var(--cr-sky-blue);
+	inline-size: 0.2rem;
+	block-size: 0.55rem;
+	background: var(--cr-ut-orange);
 	box-shadow:
-		-1.4rem 0.55rem 0 var(--cr-sky-blue),
-		1.4rem 0.55rem 0 var(--cr-sky-blue),
-		-1.75rem 2rem 0 var(--cr-sky-blue),
-		1.75rem 2rem 0 var(--cr-sky-blue),
-		-1.4rem 3.35rem 0 var(--cr-sky-blue),
-		1.4rem 3.35rem 0 var(--cr-sky-blue),
-		0 3.8rem 0 var(--cr-sky-blue);
+		-0.7rem 0.1rem 0 var(--cr-ut-orange),
+		0.7rem 0.1rem 0 var(--cr-ut-orange),
+		-1.35rem 0.35rem 0 var(--cr-ut-orange),
+		1.35rem 0.35rem 0 var(--cr-ut-orange),
+		-1.95rem 0.75rem 0 var(--cr-ut-orange),
+		1.95rem 0.75rem 0 var(--cr-ut-orange),
+		0 1.75rem 0 var(--cr-sky-blue),
+		0 2.1rem 0 var(--cr-sky-blue);
 	content: "";
 	translate: -50% 0;
 }
@@ -843,7 +881,14 @@ body.cr-single--podcast .cr-podcast-sources .cr-listen-sources__link a:focus-vis
 }
 
 :root[data-theme="dark"] .cr-stream-page .wp-block-post-template > li .cr-podcast-card .pk-kindlabel {
+	border-color: var(--cr-ink-muted);
 	color: var(--cr-ink-muted);
+}
+
+:root[data-theme="dark"] :is(.cr-podcast-card__art--knob, .cr-podcast-card__art.cr-cover--failed) {
+	background-color: var(--cr-prussian-blue);
+	background-image: var(--cr-halftone);
+	background-size: var(--cr-halftone-size);
 }
 
 :root[data-theme="dark"] .cr-stream-page .wp-block-post-template > li .cr-podcast-card .pk-stream-date time {
@@ -890,7 +935,14 @@ body.cr-single--podcast .cr-podcast-sources .cr-listen-sources__link a:focus-vis
 	}
 
 	:root:not( [data-theme="light"] ) .cr-stream-page .wp-block-post-template > li .cr-podcast-card .pk-kindlabel {
+		border-color: var(--cr-ink-muted);
 		color: var(--cr-ink-muted);
+	}
+
+	:root:not( [data-theme="light"] ) :is(.cr-podcast-card__art--knob, .cr-podcast-card__art.cr-cover--failed) {
+		background-color: var(--cr-prussian-blue);
+		background-image: var(--cr-halftone);
+		background-size: var(--cr-halftone-size);
 	}
 
 	:root:not( [data-theme="light"] ) .cr-stream-page .wp-block-post-template > li .cr-podcast-card .pk-stream-date time {
@@ -905,20 +957,19 @@ body.cr-single--podcast .cr-podcast-sources .cr-listen-sources__link a:focus-vis
 		display: none;
 	}
 
-	.cr-archive--podcast .pkiw-lineup__heading {
-		padding-inline-end: var(--cr-space-sm);
-	}
-
-	.cr-archive--podcast .pkiw-lineup__heading::after {
+	.cr-archive--podcast .pkiw-lineup__station::before,
+	.cr-archive--podcast .pkiw-lineup__station::after {
 		display: none;
 	}
 
-	.cr-archive--podcast .pkiw-lineup {
+	.cr-archive--podcast .pkiw-lineup,
+	.cr-archive--podcast .wp-block-post-template.pkiw-lineup {
 		padding: var(--cr-space-md);
 	}
 
 	.cr-archive--podcast .pkiw-lineup__station {
 		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: none;
 		grid-template-areas:
 			"heading"
 			"cover"
@@ -937,7 +988,7 @@ body.cr-single--podcast .cr-podcast-sources .cr-listen-sources__link a:focus-vis
 @media ( min-width: 40.01rem ) and ( max-width: 50rem ) {
 
 	.cr-archive--podcast .pkiw-lineup__station {
-		grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
+		grid-template-columns: minmax(0, 6rem) minmax(0, 9rem) minmax(0, 1fr);
 	}
 }
 
@@ -978,14 +1029,12 @@ body.cr-single--podcast .cr-podcast-sources .cr-listen-sources__link a:focus-vis
 		color: CanvasText;
 	}
 
+	.cr-archive--podcast .cr-archive__header::after,
 	.cr-archive--podcast .cr-podcast-dial,
-	.cr-archive--podcast .pkiw-lineup__heading::after,
+	.cr-archive--podcast .pkiw-lineup__station::before,
+	.cr-archive--podcast .pkiw-lineup__station::after,
 	.cr-archive--podcast :is(.pkiw-lineup__cover--none, .pkiw-lineup__cover.cr-cover--failed) {
 		display: none;
-	}
-
-	.cr-archive--podcast .pkiw-lineup__heading {
-		padding-inline-end: var(--cr-space-sm);
 	}
 
 	.cr-archive--podcast .pkiw-lineup__station {

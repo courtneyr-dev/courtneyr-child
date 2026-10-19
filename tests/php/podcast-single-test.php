@@ -108,6 +108,18 @@ cr_podcast_contains( '<div class="cr-podcast-embed"><iframe', $embed, 'provider 
 cr_podcast_not_contains( 'cr-podcast-picture', $embed, 'picture is absent when an embed prints' );
 cr_podcast_check( 0 === substr_count( $embed, '<img' ), 'embed path prints no image' );
 
+$no_media = SinglePodcast\record_html(
+	$post,
+	cr_podcast_single_facts(
+		array(
+			'url'     => '',
+			'picture' => array( 'url' => '' ),
+		)
+	)
+);
+cr_podcast_not_contains( 'cr-podcast-single__media', $no_media, 'no media wrapper prints without a picture, embed or URL' );
+cr_podcast_contains( 'cr-podcast-tuner', $no_media, 'record and tuner still print without media' );
+
 $picture = SinglePodcast\record_html( $post, $facts );
 cr_podcast_contains( '<figure class="cr-podcast-picture" data-cr-cover-fallback="true">', $picture, 'picture wrapper carries the failed-cover marker' );
 cr_podcast_check( 1 === substr_count( $picture, '<img' ) && str_contains( $picture, 'class="u-photo"' ), 'picture path prints one u-photo image' );

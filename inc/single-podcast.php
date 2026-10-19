@@ -209,7 +209,7 @@ function record_html( \WP_Post $post, array $post_facts ): string {
 	return '<section class="cr-podcast-single">'
 		. '<div class="cr-podcast-single__record"><p class="cr-podcast-single__kind">' . esc_html( (string) ( $post_facts['kind_label'] ?? '' ) ) . '</p><dl class="cr-podcast-record">' . $rows . '</dl></div>'
 		. '<span class="cr-podcast-tuner cr-podcast-tuner--pos-' . esc_attr( (string) $position ) . '" aria-hidden="true"></span>'
-		. '<div class="cr-podcast-single__media">' . $media . '</div>'
+		. ( '' !== $media ? '<div class="cr-podcast-single__media">' . $media . '</div>' : '' )
 		. '</section>';
 }
 

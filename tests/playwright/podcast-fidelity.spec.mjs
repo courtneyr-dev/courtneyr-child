@@ -383,10 +383,11 @@ test.describe( 'podcast full-state surfaces', () => {
 		expect( paint ).toEqual( { background: PRUSSIAN, border: VIOLET, line: 'rgb(255, 255, 255)' } );
 		expect( await axe( page ) ).toEqual( [] );
 		await page.emulateMedia( { forcedColors: 'active' } );
-		for ( const selector of [ '.cr-podcast-dial', '.pkiw-lineup__cover--none', '.pkiw-lineup__heading' ] ) {
-			const target = page.locator( selector ).first();
-			if ( selector === '.pkiw-lineup__heading' ) expect( await target.evaluate( ( node ) => getComputedStyle( node, '::after' ).display ) ).toBe( 'none' ); else await expect( target ).toBeHidden();
+		for ( const selector of [ '.cr-podcast-dial', '.pkiw-lineup__cover--none' ] ) {
+			await expect( page.locator( selector ).first() ).toBeHidden();
 		}
+		expect( await page.locator( '.pkiw-lineup__station' ).first().evaluate( ( node ) => [ getComputedStyle( node, '::before' ).display, getComputedStyle( node, '::after' ).display ] ) ).toEqual( [ 'none', 'none' ] );
+		expect( await page.locator( '.cr-archive__header' ).evaluate( ( node ) => getComputedStyle( node, '::after' ).display ) ).toBe( 'none' );
 		expect( await page.locator( '.pkiw-lineup__station' ).first().evaluate( ( node ) => getComputedStyle( node ).outlineWidth ) ).toBe( '2px' );
 		await page.emulateMedia( { forcedColors: 'none', reducedMotion: 'reduce' } );
 		const motion = await page.locator( '.cr-archive--podcast *' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => ( { animation: getComputedStyle( node ).animationName, transition: getComputedStyle( node ).transitionDuration } ) ) );
@@ -451,7 +452,10 @@ test.describe( 'podcast full-state surfaces', () => {
 			await openFixture( page, request, key );
 			await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
 			const structure = await page.locator( '.cr-podcast-single' ).evaluate( ( section ) => [ ...section.children ].map( ( child ) => child.className ) );
-			expect( structure ).toEqual( [ 'cr-podcast-single__record', expect.stringMatching( /^cr-podcast-tuner/ ), 'cr-podcast-single__media' ] );
+			// The media panel prints only when a picture, embed or Listen URL fills it (no empty frame).
+			const hasMedia = structure.length === 3;
+			expect( structure ).toEqual( [ 'cr-podcast-single__record', expect.stringMatching( /^cr-podcast-tuner/ ), ...( hasMedia ? [ 'cr-podcast-single__media' ] : [] ) ] );
+			if ( [ 'Q04', 'Q07', 'Q08' ].includes( key ) ) expect( hasMedia, `${ key } stores no picture, embed or URL` ).toBe( false );
 			// The plugin wraps the post content in .pkiw-singular-entry, so the record is that wrapper's first child.
 			expect( await page.locator( '.wp-block-post-content' ).evaluate( ( root ) => ( root.querySelector( ':scope > .pkiw-singular-entry' ) || root ).firstElementChild?.matches( 'section.cr-podcast-single' ) ) ).toBe( true );
 		}
