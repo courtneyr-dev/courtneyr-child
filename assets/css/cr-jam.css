@@ -1,0 +1,1025 @@
+/* Jam surfaces for issue 235: jukebox archive, Stream strip and single J-card. */
+/* stylelint-disable no-descending-specificity -- archive, Stream and single selectors share plugin classes but never match the same surface. */
+
+/* Archive */
+.cr-jukebox {
+	position: relative;
+	max-width: min(100%, 96rem);
+}
+
+.cr-jukebox [hidden] {
+	display: none;
+}
+
+.cr-jukebox .pkiw-grouped {
+	counter-reset: cr-jam-sec;
+	position: relative;
+	box-sizing: border-box;
+	padding: var(--cr-space-md);
+	border: 2px solid var(--cr-ink);
+	background-color: var(--cr-prussian-blue);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-jukebox .pkiw-lead,
+.cr-jukebox .pkiw-group {
+	position: relative;
+	box-sizing: border-box;
+	min-width: 0;
+	margin: 0;
+	padding: var(--cr-space-md) 0;
+	border: 2px solid transparent;
+}
+
+.cr-jukebox .pkiw-group {
+	counter-increment: cr-jam-sec;
+	counter-reset: cr-jam-item;
+	border-block-start-color: var(--cr-rule);
+}
+
+.cr-jukebox :is(.pkiw-lead__heading, .pkiw-group__heading) {
+	position: relative;
+	z-index: 1;
+	display: table;
+	margin: 0 0 var(--cr-space-sm);
+	padding: var(--cr-space-2xs) var(--cr-space-sm);
+	background-color: var(--cr-periwinkle);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	font-weight: var(--cr-weight-extrabold);
+	line-height: var(--cr-leading-tight);
+	transform: none;
+}
+
+.cr-jukebox .pkiw-lead__heading {
+	isolation: isolate;
+	background-color: transparent;
+}
+
+.cr-jukebox .pkiw-lead__heading::before {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	inset: 0;
+	background-color: var(--cr-sky-blue);
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-jukebox :is(.pkiw-lead__items, .pkiw-group__items) {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-md);
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-jukebox :is(.pkiw-lead__items, .pkiw-group__items) > li {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+}
+
+.cr-archive .cr-jukebox .wp-block-post:not(:last-child)::after {
+	content: none;
+}
+
+.cr-archive .cr-jukebox .wp-block-post,
+.cr-archive .cr-jukebox .wp-block-post:hover {
+	transform: none;
+	transition: none;
+}
+
+@media (min-width: 40rem) {
+
+	.cr-jukebox .pkiw-group__items {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-jukebox .pkiw-group__items {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+/* Now Playing */
+.cr-jukebox .pkiw-lead .cr-jam-strip--listing {
+	min-height: 10rem;
+	padding: var(--cr-space-lg);
+	box-shadow: var(--cr-shadow-hard-2);
+}
+
+.cr-jukebox .pkiw-lead .cr-jam-strip--listing:has(> .pk-media) {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+/* Below 40rem the cover sits above the text in one column. */
+.cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-media {
+	grid-row: auto;
+	width: 100%;
+	max-width: 15rem;
+	height: auto;
+}
+
+.cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-cover {
+	width: 100%;
+	height: auto;
+	aspect-ratio: 1;
+}
+
+.cr-jukebox .pkiw-lead .cr-jam-strip--listing :is(.pk-title, .pk-sub) {
+	grid-column: 1;
+}
+
+.cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-title {
+	font-size: var(--cr-text-2xl);
+}
+
+.cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-sub {
+	font-size: var(--cr-text-lg);
+}
+
+@media (min-width: 40rem) {
+
+	.cr-jukebox .pkiw-lead .cr-jam-strip--listing:has(> .pk-media) {
+		grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr);
+	}
+
+	.cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-media {
+		grid-column: 1;
+		grid-row: 1 / span 2;
+	}
+
+	.cr-jukebox .pkiw-lead .cr-jam-strip--listing :is(.pk-title, .pk-sub) {
+		grid-column: 2;
+	}
+
+	/* Title and artist meet at the cover's middle instead of splitting its two rows. */
+	.cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-title {
+		align-self: end;
+	}
+
+	.cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-sub {
+		align-self: start;
+	}
+}
+
+/* Strip */
+.cr-jam-strip--listing,
+.cr-jukebox .pk-card--protected.k-jam {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	align-content: center;
+	gap: var(--cr-space-2xs) var(--cr-space-sm);
+	box-sizing: border-box;
+	min-width: 0;
+	min-height: 6.5rem;
+	margin: 0;
+	padding: var(--cr-space-sm);
+	border: 2px solid var(--cr-ink);
+	border-radius: 0;
+	background-color: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-ink);
+	transform: none;
+}
+
+.cr-jam-strip--listing:has(> .pk-media) {
+	grid-template-columns: 4.5rem minmax(0, 1fr);
+}
+
+.cr-jam-strip--listing .pk-media {
+	grid-column: 1;
+	grid-row: 1 / span 2;
+	width: 4.5rem;
+	height: 4.5rem;
+	margin: 0;
+	transform: none;
+}
+
+.cr-jam-strip--listing .pk-media.cr-cover--failed {
+	display: none;
+}
+
+.cr-jam-strip--listing .pk-cover {
+	display: block;
+	width: 4.5rem;
+	height: 4.5rem;
+	border-radius: 0;
+	opacity: 1;
+	object-fit: cover;
+	transform: none;
+}
+
+.cr-jam-strip--listing :is(.pk-title, .pk-sub),
+.cr-jukebox .pk-card--protected.k-jam .pk-title {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	overflow-wrap: anywhere;
+	transform: none;
+}
+
+.cr-jam-strip--listing:has(> .pk-media) :is(.pk-title, .pk-sub) {
+	grid-column: 2;
+}
+
+/*
+ * No stored cover, or one site-ux.js marked failed: one full-width text column. The jukebox scope
+ * outranks the plugin's `.pk-card` badge column, which ties with the bare strip class and loads later.
+ */
+.cr-jukebox .cr-jam-strip--listing:not(:has(> .pk-media:not(.cr-cover--failed))) {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.cr-jukebox .cr-jam-strip--listing:not(:has(> .pk-media:not(.cr-cover--failed))) :is(.pk-title, .pk-sub) {
+	grid-column: 1;
+}
+
+.cr-jam-strip--listing .pk-title,
+.cr-jukebox .pk-card--protected.k-jam .pk-title {
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+}
+
+.cr-jam-strip--listing .pk-sub {
+	color: var(--cr-ink-soft);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	line-height: var(--cr-leading-snug);
+}
+
+/* The plugin's `.pk-card > *` makes the heading a containing block; the title link's ::after must reach the strip. */
+.cr-jam-strip--listing > .pk-title,
+.cr-jukebox .pk-card--protected.k-jam > .pk-title {
+	position: static;
+}
+
+.cr-jam-strip--listing .pk-title a,
+.cr-jukebox .pk-card--protected.k-jam .pk-title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.cr-jam-strip--listing .pk-title a::after,
+.cr-jukebox .pk-card--protected.k-jam .pk-title a::after {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset: 0;
+}
+
+.cr-jam-strip--listing:has(a:focus-visible),
+.cr-jukebox .pk-card--protected.k-jam:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-jam-strip--listing .pk-title a:focus-visible,
+.cr-jukebox .pk-card--protected.k-jam .pk-title a:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.cr-jam-strip--listing,
+	.cr-jukebox .pk-card--protected.k-jam {
+		transition: transform var(--cr-motion-fast) var(--cr-ease-out);
+	}
+
+	.cr-jam-strip--listing:is(:hover, :has(a:focus-visible)),
+	.cr-jukebox .pk-card--protected.k-jam:is(:hover, :has(a:focus-visible)) {
+		transform: translateY(-1px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.cr-jam-strip--listing,
+	.cr-jukebox .pk-card--protected.k-jam {
+		transition: none;
+	}
+}
+
+/* Selection codes */
+.cr-jukebox .pkiw-group__items > li {
+	counter-increment: cr-jam-item;
+}
+
+.cr-jukebox .pkiw-group__items .cr-jam-strip--listing {
+	padding-inline-start: 4.25rem;
+}
+
+.cr-jukebox .pkiw-group__items .cr-jam-strip--listing::before {
+	content: counter(cr-jam-sec, upper-alpha) counter(cr-jam-item) / "";
+	position: absolute;
+	inset-block-start: var(--cr-space-sm);
+	inset-inline-start: var(--cr-space-sm);
+	display: grid;
+	place-items: center;
+	width: 2.75rem;
+	height: 2.75rem;
+	background-color: var(--cr-russian-violet);
+	color: var(--cr-printer-ivory);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1;
+	opacity: 1;
+}
+
+.cr-jukebox .pkiw-group__items > li:nth-child(3n+2) .cr-jam-strip--listing::before {
+	background-color: var(--cr-cerulean);
+}
+
+.cr-jukebox .pkiw-group__items > li:nth-child(3n) .cr-jam-strip--listing::before {
+	background-color: var(--cr-prussian-blue);
+}
+
+/* Doodles */
+.cr-archive--jam {
+	position: relative;
+}
+
+.cr-archive--jam::before,
+.cr-archive--jam::after {
+	content: "";
+	position: absolute;
+	z-index: 0;
+	inset-block-start: 18rem;
+	width: 10rem;
+	height: 28rem;
+	pointer-events: none;
+}
+
+.cr-archive--jam::before {
+	inset-inline-start: 0;
+	background: url(../img/cr-jam-note.svg) center top / contain no-repeat, url(../img/cr-jam-stars.svg) center bottom / contain no-repeat;
+}
+
+.cr-archive--jam::after {
+	inset-inline-end: 0;
+	background: url(../img/cr-jam-headphones.svg) center top / contain no-repeat, url(../img/cr-jam-cassette.svg) center bottom / contain no-repeat;
+}
+
+.cr-archive--jam > * {
+	position: relative;
+	z-index: 1;
+}
+
+@media (max-width: 63.99rem) {
+
+	.cr-archive--jam::after {
+		display: none;
+	}
+}
+
+@media (max-width: 39.99rem) {
+
+	.cr-archive--jam::before {
+		display: none;
+	}
+}
+
+/* Stream strip */
+:is(body, .cr-stream-page) .pk-card.pk-card--stream.cr-jam-strip--stream {
+	--cr-paper: var(--cr-sky-blue);
+	--cr-paper-ink: var(--cr-russian-violet);
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	min-width: 0;
+	max-width: none;
+	margin: 0 0 var(--cr-paper-tear);
+	padding: var(--cr-space-lg) var(--cr-space-md) var(--cr-space-md);
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: 0;
+	background-color: var(--cr-paper);
+	color: var(--cr-paper-ink);
+	box-shadow: var(--cr-shadow-hard);
+	overflow-wrap: anywhere;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream::before {
+	content: "";
+	position: absolute;
+	z-index: 1;
+	inset-block-start: calc(var(--cr-space-sm) * -1);
+	inset-inline-start: 32%;
+	width: 36%;
+	height: 1.25rem;
+	background-color: var(--cr-tape);
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.pk-card.cr-jam-strip--stream[data-cr-rotate="0"],
+.cr-stream-page .wp-block-post-template > li .pk-card.cr-jam-strip--stream[data-cr-rotate="0"] {
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.pk-card.cr-jam-strip--stream[data-cr-rotate="1"],
+.cr-stream-page .wp-block-post-template > li .pk-card.cr-jam-strip--stream[data-cr-rotate="1"] {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.pk-card.cr-jam-strip--stream[data-cr-rotate="2"],
+.cr-stream-page .wp-block-post-template > li .pk-card.cr-jam-strip--stream[data-cr-rotate="2"] {
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.pk-card.cr-jam-strip--stream[data-cr-rotate="3"],
+.cr-stream-page .wp-block-post-template > li .pk-card.cr-jam-strip--stream[data-cr-rotate="3"] {
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream :is(.pk-kindlabel, .pk-title, .pk-sub) {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	overflow-wrap: anywhere;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-kindlabel {
+	display: inline-block;
+	margin-block-end: var(--cr-space-xs);
+	padding: var(--cr-space-3xs) var(--cr-space-2xs);
+	background-color: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	text-transform: uppercase;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-title {
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-sub {
+	margin-block-start: var(--cr-space-2xs);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	line-height: var(--cr-leading-snug);
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-stream-date time {
+	padding: 0;
+	border: 0;
+	color: inherit;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	letter-spacing: var(--cr-tracking-wide);
+}
+
+/* The plugin's `.pk-card > *` makes the heading a containing block; the title link's ::after must reach the card. */
+:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream > .pk-title {
+	position: static;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-title a::after {
+	content: "";
+	position: absolute;
+	z-index: 3;
+	inset: 0;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-title a:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream {
+		transition: transform var(--cr-motion-fast) var(--cr-ease-out);
+	}
+
+	.pk-card.cr-jam-strip--stream[data-cr-rotate="0"]:is(:hover, :has(a:focus-visible)),
+	.cr-stream-page .wp-block-post-template > li .pk-card.cr-jam-strip--stream[data-cr-rotate="0"]:is(:hover, :has(a:focus-visible)) {
+		transform: rotate(var(--cr-rotate-1)) translateY(-1px);
+	}
+
+	.pk-card.cr-jam-strip--stream[data-cr-rotate="1"]:is(:hover, :has(a:focus-visible)),
+	.cr-stream-page .wp-block-post-template > li .pk-card.cr-jam-strip--stream[data-cr-rotate="1"]:is(:hover, :has(a:focus-visible)) {
+		transform: rotate(var(--cr-rotate-2)) translateY(-1px);
+	}
+
+	.pk-card.cr-jam-strip--stream[data-cr-rotate="2"]:is(:hover, :has(a:focus-visible)),
+	.cr-stream-page .wp-block-post-template > li .pk-card.cr-jam-strip--stream[data-cr-rotate="2"]:is(:hover, :has(a:focus-visible)) {
+		transform: rotate(var(--cr-rotate-neg)) translateY(-1px);
+	}
+
+	.pk-card.cr-jam-strip--stream[data-cr-rotate="3"]:is(:hover, :has(a:focus-visible)),
+	.cr-stream-page .wp-block-post-template > li .pk-card.cr-jam-strip--stream[data-cr-rotate="3"]:is(:hover, :has(a:focus-visible)) {
+		transform: rotate(var(--cr-rotate-neg2)) translateY(-1px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream {
+		transition: none;
+	}
+}
+
+/* Single J-card */
+.cr-jcard {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-lg);
+	box-sizing: border-box;
+	max-width: var(--wp--style--global--wide-size, 72rem);
+	margin: var(--cr-space-xl) auto;
+}
+
+/* The fold-out is the card: no outer frame. These beat the plugin's `.pk-card` paint and the theme's single-post `.pk-card` frame in cr-post-kinds.css. */
+body .pk-card.cr-jcard,
+body[class*="kind-"].single .single-post__content .pk-card.cr-jcard {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+}
+
+body .pk-card.cr-jcard::before,
+body[class*="kind-"].single .single-post__content .pk-card.cr-jcard::before {
+	content: none;
+}
+
+/* One tape strip on the cover's lower-left corner, or on the note's upper-right corner when no cover prints. */
+.cr-jcard > .cr-jcard__insert::before,
+.cr-jcard:not(:has(> .cr-jcard__insert)) > .cr-jcard__note::before {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	width: 5rem;
+	height: 1.5rem;
+	background-color: var(--cr-tape);
+	pointer-events: none;
+}
+
+.cr-jcard > .cr-jcard__insert::before {
+	inset-block-end: calc(var(--cr-space-sm) * -1);
+	inset-inline-start: calc(var(--cr-space-md) * -1);
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.cr-jcard:not(:has(> .cr-jcard__insert)) > .cr-jcard__note::before {
+	inset-block-start: calc(var(--cr-space-sm) * -1);
+	inset-inline-end: calc(var(--cr-space-md) * -1);
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-jcard :is(.cr-jcard__insert, .cr-jcard__details, .cr-jcard__note) {
+	--cr-paper: var(--cr-printer-ivory);
+	--cr-paper-ink: var(--cr-ink);
+	min-width: 0;
+	padding: var(--cr-space-lg);
+	border: 2px solid var(--cr-ink);
+	transform: none;
+}
+
+.cr-jcard__insert {
+	grid-area: insert;
+	display: grid;
+	place-items: center;
+}
+
+.cr-jcard .cr-jcard__insert {
+	padding: var(--cr-space-sm);
+}
+
+.cr-jcard__insert.cr-cover--failed {
+	display: none;
+}
+
+.cr-jcard__insert .u-photo {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-height: 36rem;
+	object-fit: cover;
+	transform: none;
+}
+
+.cr-jcard__details {
+	grid-area: details;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: var(--cr-space-md);
+}
+
+.cr-jcard__rows {
+	display: grid;
+	gap: var(--cr-space-md);
+	margin: 0;
+}
+
+.cr-jcard__row {
+	display: grid;
+	gap: var(--cr-space-2xs);
+	min-width: 0;
+}
+
+.cr-jcard__row dt,
+.cr-jcard__label {
+	display: table;
+	margin: 0;
+	padding: var(--cr-space-3xs) var(--cr-space-2xs);
+	background-color: var(--cr-periwinkle);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-tight);
+	text-transform: uppercase;
+}
+
+.cr-jcard__row dd {
+	min-width: 0;
+	margin: 0;
+	color: var(--cr-ink);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-base);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-normal);
+	overflow-wrap: anywhere;
+}
+
+.cr-jcard__row--track .pk-title {
+	margin: 0;
+	color: var(--cr-ink);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	transform: none;
+}
+
+.cr-jcard__details a {
+	color: var(--cr-link);
+}
+
+.cr-jcard__details a:hover {
+	color: var(--cr-link-hover);
+}
+
+.cr-jcard__details .pk-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cr-space-sm);
+	min-height: 2.75rem;
+	padding: var(--cr-space-xs) var(--cr-space-sm);
+	border: 2px solid var(--cr-ink);
+	background-color: var(--cr-surface-elevated);
+	box-shadow: var(--cr-shadow-hard-sm);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
+	text-decoration: none;
+}
+
+.cr-jcard__details .pk-link svg {
+	width: 1.5rem;
+	height: 1.5rem;
+}
+
+.cr-jcard__details:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-jcard__details a:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+.cr-jcard__spine {
+	grid-area: spine;
+	display: none;
+	min-width: 4rem;
+	border: 2px solid var(--cr-ink);
+	background: var(--cr-sky-blue) url(../img/cr-jam-cassette.svg) center / 100% auto no-repeat;
+	box-shadow: var(--cr-shadow-hard);
+	transform: none;
+}
+
+.cr-jcard__note {
+	grid-area: note;
+	background-color: var(--cr-paper);
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='32' viewBox='0 0 40 32'%3E%3Cpath d='M0 31.5H40' stroke='%23126782' stroke-width='1'/%3E%3C/svg%3E");
+	background-repeat: repeat;
+	color: var(--cr-ink);
+	font-family: var(--cr-font-body);
+}
+
+.cr-jcard__note .pk-note {
+	margin: var(--cr-space-md) 0 0;
+	color: var(--cr-ink);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-base);
+	line-height: 2;
+	overflow-wrap: anywhere;
+}
+
+.cr-jcard + .pk-embed--audio {
+	box-sizing: border-box;
+	max-width: var(--wp--style--global--wide-size, 72rem);
+	margin: var(--cr-space-xl) auto;
+	padding: var(--cr-space-sm);
+	border: 2px solid var(--cr-ink);
+	background-color: var(--cr-surface-elevated);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-jcard + .pk-embed--audio iframe {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+}
+
+/*
+ * Each panel takes its own named area, so an absent insert (no cover) or note never shifts the
+ * panels that are there into the wrong track. The spine is always printed but hidden under 64rem.
+ */
+@media (max-width: 39.99rem) {
+
+	.cr-jcard :is(.cr-jcard__insert, .cr-jcard__details, .cr-jcard__note) {
+		grid-area: auto;
+	}
+}
+
+@media (min-width: 40rem) {
+
+	.cr-jcard {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-areas: "insert details" "note note";
+	}
+
+	.cr-jcard:not(:has(> .cr-jcard__insert)) {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas: "details" "note";
+	}
+
+	.cr-jcard:not(:has(> .cr-jcard__note)) {
+		grid-template-areas: "insert details";
+	}
+
+	.cr-jcard:not(:has(> .cr-jcard__insert)):not(:has(> .cr-jcard__note)) {
+		grid-template-areas: "details";
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-jcard {
+		grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr) 5rem minmax(0, 1fr);
+		grid-template-areas: "insert details spine note";
+		align-items: stretch;
+	}
+
+	.cr-jcard:not(:has(> .cr-jcard__insert)) {
+		grid-template-columns: minmax(0, 1fr) 5rem minmax(0, 1fr);
+		grid-template-areas: "details spine note";
+	}
+
+	.cr-jcard:not(:has(> .cr-jcard__note)) {
+		grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr) 5rem;
+		grid-template-areas: "insert details spine";
+	}
+
+	.cr-jcard:not(:has(> .cr-jcard__insert)):not(:has(> .cr-jcard__note)) {
+		grid-template-columns: minmax(0, 1fr) 5rem;
+		grid-template-areas: "details spine";
+	}
+
+	.cr-jcard__spine {
+		display: block;
+	}
+}
+
+/* Protected card */
+.cr-jukebox .pk-card--protected.k-jam {
+	min-height: 5rem;
+}
+
+/* Dark */
+:root[data-theme="dark"] .cr-jukebox :is(.cr-jam-strip--listing, .pk-card--protected.k-jam),
+:root[data-theme="dark"] .cr-jcard :is(.cr-jcard__insert, .cr-jcard__details, .cr-jcard__note),
+:root[data-theme="dark"] .cr-jcard__spine,
+:root[data-theme="dark"] :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream {
+	--cr-paper: var(--cr-night-elevated);
+	--cr-paper-ink: var(--cr-printer-ivory);
+	border-color: var(--cr-ink);
+	background-color: var(--cr-night-elevated);
+	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-jukebox :is(.pkiw-lead__heading, .pkiw-group__heading) {
+	background-color: var(--cr-tape);
+	color: var(--cr-tape-ink);
+}
+
+:root[data-theme="dark"] .cr-jcard :is(.cr-jcard__row dt, .cr-jcard__label) {
+	background-color: var(--cr-periwinkle);
+	color: var(--cr-russian-violet);
+}
+
+:root[data-theme="dark"] .cr-jukebox .pkiw-lead__heading {
+	background-color: transparent;
+}
+
+:root[data-theme="dark"] .cr-jukebox .pkiw-lead__heading::before,
+:root[data-theme="dark"] :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream::before,
+:root[data-theme="dark"] :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-kindlabel,
+:root[data-theme="dark"] .cr-jcard > .cr-jcard__insert::before,
+:root[data-theme="dark"] .cr-jcard:not(:has(> .cr-jcard__insert)) > .cr-jcard__note::before {
+	background-color: var(--cr-tape);
+	color: var(--cr-tape-ink);
+}
+
+:root[data-theme="dark"] .cr-jukebox :is(.cr-jam-strip--listing, .pk-card--protected.k-jam) .pk-title,
+:root[data-theme="dark"] .cr-jcard :is(.cr-jcard__row dd, .cr-jcard__row--track .pk-title, .cr-jcard__note .pk-note),
+:root[data-theme="dark"] :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-title {
+	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-jukebox .cr-jam-strip--listing .pk-sub,
+:root[data-theme="dark"] :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-sub {
+	color: var(--cr-periwinkle);
+}
+
+:root[data-theme="dark"] .cr-jcard__details a {
+	color: var(--cr-sky-blue);
+}
+
+:root[data-theme="dark"] .cr-jcard__details a:hover {
+	color: var(--cr-selective-yellow);
+}
+
+:root[data-theme="dark"] .cr-jcard__note {
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='32' viewBox='0 0 40 32'%3E%3Cpath d='M0 31.5H40' stroke='%23bcb5e3' stroke-width='1'/%3E%3C/svg%3E");
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-jukebox :is(.cr-jam-strip--listing, .pk-card--protected.k-jam),
+	:root:not([data-theme="light"]) .cr-jcard :is(.cr-jcard__insert, .cr-jcard__details, .cr-jcard__note),
+	:root:not([data-theme="light"]) .cr-jcard__spine,
+	:root:not([data-theme="light"]) :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream {
+		--cr-paper: var(--cr-night-elevated);
+		--cr-paper-ink: var(--cr-printer-ivory);
+		border-color: var(--cr-ink);
+		background-color: var(--cr-night-elevated);
+		color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .cr-jukebox :is(.pkiw-lead__heading, .pkiw-group__heading) {
+		background-color: var(--cr-tape);
+		color: var(--cr-tape-ink);
+	}
+
+	:root:not([data-theme="light"]) .cr-jcard :is(.cr-jcard__row dt, .cr-jcard__label) {
+		background-color: var(--cr-periwinkle);
+		color: var(--cr-russian-violet);
+	}
+
+	:root:not([data-theme="light"]) .cr-jukebox .pkiw-lead__heading {
+		background-color: transparent;
+	}
+
+	:root:not([data-theme="light"]) .cr-jukebox .pkiw-lead__heading::before,
+	:root:not([data-theme="light"]) :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream::before,
+	:root:not([data-theme="light"]) :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-kindlabel,
+	:root:not([data-theme="light"]) .cr-jcard > .cr-jcard__insert::before,
+	:root:not([data-theme="light"]) .cr-jcard:not(:has(> .cr-jcard__insert)) > .cr-jcard__note::before {
+		background-color: var(--cr-tape);
+		color: var(--cr-tape-ink);
+	}
+
+	:root:not([data-theme="light"]) .cr-jukebox :is(.cr-jam-strip--listing, .pk-card--protected.k-jam) .pk-title,
+	:root:not([data-theme="light"]) .cr-jcard :is(.cr-jcard__row dd, .cr-jcard__row--track .pk-title, .cr-jcard__note .pk-note),
+	:root:not([data-theme="light"]) :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-title {
+		color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .cr-jukebox .cr-jam-strip--listing .pk-sub,
+	:root:not([data-theme="light"]) :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-sub {
+		color: var(--cr-periwinkle);
+	}
+
+	:root:not([data-theme="light"]) .cr-jcard__details a {
+		color: var(--cr-sky-blue);
+	}
+
+	:root:not([data-theme="light"]) .cr-jcard__details a:hover {
+		color: var(--cr-selective-yellow);
+	}
+
+	:root:not([data-theme="light"]) .cr-jcard__note {
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='32' viewBox='0 0 40 32'%3E%3Cpath d='M0 31.5H40' stroke='%23bcb5e3' stroke-width='1'/%3E%3C/svg%3E");
+	}
+}
+
+/* Forced colors */
+@media (forced-colors: active) {
+
+	.cr-jukebox .pkiw-grouped,
+	.cr-jukebox :is(.pkiw-lead, .pkiw-group),
+	.cr-jukebox :is(.cr-jam-strip--listing, .pk-card--protected.k-jam),
+	:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream,
+	.cr-jcard :is(.cr-jcard__insert, .cr-jcard__details, .cr-jcard__note) {
+		border: 2px solid CanvasText !important;
+		background: Canvas;
+		color: CanvasText;
+		box-shadow: none;
+	}
+
+	.cr-jukebox :is(.pkiw-lead__heading, .pkiw-group__heading),
+	.cr-jcard :is(.cr-jcard__row dt, .cr-jcard__label),
+	:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-kindlabel {
+		border: 1px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.cr-jukebox .pkiw-lead__heading::before,
+	.cr-archive--jam::before,
+	.cr-archive--jam::after,
+	:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream::before,
+	.cr-jcard > .cr-jcard__insert::before,
+	.cr-jcard:not(:has(> .cr-jcard__insert)) > .cr-jcard__note::before,
+	.cr-jcard__spine {
+		display: none;
+	}
+
+	.cr-jukebox .pkiw-group__items .cr-jam-strip--listing::before {
+		border: 1px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.cr-jam-strip--listing:has(a:focus-visible),
+	.cr-jukebox .pk-card--protected.k-jam:has(a:focus-visible),
+	:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream:has(a:focus-visible),
+	.cr-jcard__details:has(a:focus-visible) {
+		outline-color: Highlight;
+		box-shadow: none;
+	}
+
+	.cr-jcard__details a,
+	.cr-jcard__details a:hover {
+		color: LinkText;
+	}
+}
+
+/* Print */
+@media print {
+
+	.cr-archive--jam::before,
+	.cr-archive--jam::after,
+	.cr-jcard > .cr-jcard__insert::before,
+	.cr-jcard:not(:has(> .cr-jcard__insert)) > .cr-jcard__note::before,
+	.cr-jcard__spine,
+	:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream::before {
+		display: none;
+	}
+
+	.cr-jukebox .pkiw-grouped,
+	.cr-jam-strip--listing,
+	:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream,
+	.cr-jcard :is(.cr-jcard__insert, .cr-jcard__details, .cr-jcard__note) {
+		box-shadow: none;
+	}
+}
