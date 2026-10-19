@@ -373,6 +373,40 @@ namespace {
 		}
 	);
 
+	function cr_wish_css_rule( string $css, string $selector ): string {
+		$at = strpos( $css, "\n" . $selector . " {\n" );
+		if ( false === $at ) {
+			return '';
+		}
+		$open = strpos( $css, '{', $at );
+		return substr( $css, $open + 1, strpos( $css, '}', $open ) - $open - 1 );
+	}
+
+	cr_wish_markup_check(
+		'Stream clipping chips and date share the title edge and the light top tear has an ink edge',
+		static function (): bool {
+			$css   = (string) file_get_contents( dirname( __DIR__, 2 ) . '/assets/css/cr-wish.css' );
+			$clip  = '.wp-block-post-template > li > .pk-card.cr-wish-clipping';
+			$sub   = cr_wish_css_rule( $css, $clip . ' .pk-sub' );
+			$date  = cr_wish_css_rule( $css, $clip . ' .pk-stream-date time' );
+			$sheet = cr_wish_css_rule( $css, $clip );
+			$edge  = cr_wish_css_rule( $css, $clip . ' > .pk-body::before' );
+			$tear  = array( 'linear-gradient(45deg, var(--cr-black) 25%, transparent 25%)', 'linear-gradient(315deg, var(--cr-black) 25%, transparent 25%)' );
+			$dark  = substr_count( $css, $clip . ' > .pk-body::before' );
+			return str_contains( $sub, 'padding: 0;' )
+				&& str_contains( $date, 'padding: 0;' )
+				&& str_contains( $date, 'border: 0;' )
+				&& str_contains( $sheet, 'isolation: isolate;' )
+				&& str_contains( $edge, 'z-index: -1;' )
+				&& str_contains( $edge, 'background-color: var(--cr-russian-violet);' )
+				&& str_contains( $edge, 'inset-block: auto calc(100% + 1px);' )
+				&& str_contains( $edge, $tear[0] )
+				&& str_contains( $edge, $tear[1] )
+				// The rule itself, both dark-scheme hides and the forced-colors hide.
+				&& 4 === $dark;
+		}
+	);
+
 	echo "\n", count( $failures ) ? count( $failures ) . ' failed' : ( $GLOBALS['cr_case_count'] ?? 0 ) . ' passed', "\n";
 	exit( count( $failures ) ? 1 : 0 );
 }

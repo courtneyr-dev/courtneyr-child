@@ -137,7 +137,7 @@ check_case(
 check_case(
 	'month heading text is upright and only its tape pseudo-element rotates, by token',
 	static function () use ( $code ): bool {
-		$heading = rule_body( $code, '.pkiw-group__heading {' );
+		$heading = rule_body( $code, '.pkiw-group__heading' );
 		if ( '' === $heading ) {
 			preg_match( '/\.cr-photo-sheets \.pkiw-group__heading\s*\{([^{}]*)\}/', $code, $m );
 			$heading = $m[1] ?? '';
@@ -158,11 +158,6 @@ check_case(
 				continue;
 			}
 			if ( ! preg_match( '/^rotate\(var\(--cr-rotate-(1|2|neg|neg2)\)\)$/', $value ) ) {
-				return false;
-			}
-		}
-		foreach ( array( '0' => '--cr-rotate-1', '1' => '--cr-rotate-2', '2' => '--cr-rotate-neg', '3' => '--cr-rotate-neg2' ) as $key => $token ) {
-			if ( 1 !== preg_match( '/\[data-cr-rotate="' . $key . '"\][^{}]*\{[^{}]*rotate\(var\(' . preg_quote( $token, '/' ) . '\)\)/', $code ) ) {
 				return false;
 			}
 		}
@@ -228,29 +223,42 @@ check_case(
 );
 
 check_case(
-	'the Stream mount sits at the collage column width with one rotation token, a hard shadow and rounded corners',
+	'the Stream polaroid: white stock, violet anchor corners, hard shadow, 4:5 dashed picture, Rock Salt title',
 	static function () use ( $code ): bool {
-		$mount = rule_body( $code, '.pk-card.cr-slide-mount {' );
-		if ( '' === $mount ) {
-			preg_match( '/\.pk-card\.cr-slide-mount\s*\{([^{}]*)\}/', $code, $m );
-			$mount = $m[1] ?? '';
-		}
-		return false !== strpos( $mount, 'background-color: var(--cr-printer-ivory)' )
-			&& false !== strpos( $mount, 'box-shadow: var(--cr-shadow-hard)' )
-			&& false !== strpos( $mount, 'border-radius: var(--cr-radius-md)' )
-			&& ! preg_match( '/(?<![\w-])width\s*:/', $mount )
-			&& 1 === preg_match( '/\.cr-slide-mount \.pk-title\b[^{}]*\{[^{}]*font-family:\s*var\(--cr-font-accent\)/', $code )
-			&& 1 === preg_match( '/\.cr-slide-mount \.pk-media__caption\b[^{}]*\{[^{}]*font-family:\s*var\(--cr-font-body\)/', $code );
+		$card = rule_body( $code, '.pk-card.cr-polaroid ' );
+		$img  = rule_body( $code, '.pk-card.cr-polaroid .pk-media img' );
+		$name = rule_body( $code, ':is(.cr-polaroid, .pk-card--gallery) .pk-title' );
+		return false !== strpos( $card, 'var(--cr-white);' )
+			&& 4 === substr_count( $card, 'var(--cr-russian-violet) 12px, transparent 12px)' )
+			&& false !== strpos( $card, 'box-shadow: var(--cr-shadow-hard)' )
+			&& false !== strpos( $card, 'width: 94%' )
+			&& false !== strpos( $img, 'aspect-ratio: 4 / 5' )
+			&& false !== strpos( $img, 'border: 2px dashed color-mix(in srgb, var(--cr-russian-violet) 45%, transparent)' )
+			&& false !== strpos( $name, 'font-family: var(--cr-font-display)' );
 	}
 );
 
 check_case(
-	'the polaroid is gone: no 4:5 crop, dashed border, Rock Salt title or white stock for k-photo',
+	'the photo booth strip: 4:3 frames, a stamped date turned by a token, one title link stretched over the whole print',
 	static function () use ( $code ): bool {
-		return ! preg_match( '/aspect-ratio:\s*4\s*\/\s*5/', $code )
-			&& ! preg_match( '/dashed/', $code )
-			&& ! preg_match( '/--cr-font-display/', $code )
-			&& ! preg_match( '/--cr-white\b/', $code );
+		$frame = rule_body( $code, '.pk-card.k-photo.pk-card--gallery .cr-booth__img' );
+		$date  = rule_body( $code, '.pk-card.k-photo.pk-card--gallery .pk-stream-date time' );
+		$link  = rule_body( $code, ':is(.cr-polaroid, .pk-card--gallery) .pk-title a::after' );
+		$root  = rule_body( $code, '.pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery) ' );
+		$body  = rule_body( $code, ':is(.cr-polaroid, .pk-card--gallery) > .pk-body' );
+		return false !== strpos( $root, 'position: relative' )
+			&& false !== strpos( $body, 'position: static' )
+			&& false !== strpos( $frame, 'aspect-ratio: 4 / 3' )
+			&& false !== strpos( $date, 'font-family: var(--cr-font-mono)' )
+			&& false !== strpos( $date, 'transform: rotate(var(--cr-rotate-1))' )
+			&& false !== strpos( $link, 'inset: 0' );
+	}
+);
+
+check_case(
+	'the slide mount is gone from the Stream',
+	static function () use ( $code ): bool {
+		return false === strpos( $code, 'cr-slide-mount' ) && false === strpos( $code, 'data-cr-rotate' );
 	}
 );
 

@@ -16,7 +16,7 @@
  * Frames are built from the facts and keep the plugin's article root (the
  * pk-card and h-entry classes in their order), so the plugin's own filter
  * adds the hidden published date, permalink and author. assets/css/cr-photo.css
- * paints the strips, the frames, the single and the Stream slide mount.
+ * paints the strips, the frames, the single, and the Stream polaroid and booth strip.
  *
  * @package CourtneyrChild
  */
