@@ -2194,6 +2194,41 @@ body .pk-card {
 	background-size: auto, auto, auto, auto, auto, calc(100% - 1.1rem) 0.55rem;
 	background-position: 0 0, 0 0, 0 0, 0 0, 0 0, left 0.55rem bottom 1.1rem;
 }
+/* Duration shares the date's accent voice, so it outranks the thin body face. */
+.cr-stream-page .k-audio .pk-audio-duration time {
+	font-family: var(--cr-font-accent, serif);
+	font-weight: 700;
+}
+/* The card, not the label, is the title link's containing block, so the link's ::after covers the whole cassette (comics precedent, cr-comic.css). The chip keeps its spot: shell padding plus label padding. */
+.cr-stream-page .k-audio .pk-body {
+	position: static;
+}
+.cr-stream-page .k-audio .pk-kindlabel {
+	top: calc(0.6rem + 0.35rem);
+	left: calc(0.9rem + 0.55rem);
+}
+.cr-stream-page .k-audio .pk-title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+}
+.cr-stream-page .k-audio .pk-title a:focus-visible {
+	outline: none;
+}
+/* The card clips its overflow, so the ring sits on the card itself rather than on the cover. */
+.cr-stream-page .pk-card.k-audio:has(.pk-title a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: var(--cr-shadow-hard, 4px 4px 0 #241c4a), 0 0 0 7px var(--cr-focus-halo);
+}
+@supports not selector(:has(*)) {
+
+	.cr-stream-page .k-audio .pk-title a:focus-visible::after {
+		outline: 3px solid var(--cr-focus-ring);
+		outline-offset: -3px;
+	}
+}
 
 /* rsvp GOING stamp: burnt orange reads 3.6:1 on the dark ticket —
    flip to selective yellow in dark mode only (~9:1). */
