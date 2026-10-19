@@ -44,6 +44,16 @@ const RATIO = array(
 const COLS_D = 24;
 const COLS_T = 12;
 
+/**
+ * Per grid, for rows that share a picture height: columns, gutter (rem,
+ * cr-gallery-zine.css --cr-zine-gap) and the sheet's typical inner width
+ * (rem), which picks the picture that limits the row.
+ */
+const EVEN_GRID = array(
+	'd' => array( COLS_D, 2.0, 66.0 ),
+	't' => array( COLS_T, 1.5, 36.5 ),
+);
+
 /** A panel alone on its row, by shape, in twelfths and sixths of the row (doubled onto the fine grids). */
 const SOLO_SPAN = array(
 	12 => array(
@@ -126,13 +136,13 @@ function groups( array $shapes, array $captions ): array {
  * Spans for pictures that share a row and a height: each takes columns in
  * proportion to its width over height, at least $min, summing to $cols.
  *
- * @param string[] $shapes Shapes in the row.
- * @param int      $cols   Columns to fill.
- * @param int      $min    Fewest columns per picture.
+ * @param float[] $ratios Width over height of each picture in the row.
+ * @param int     $cols   Columns to fill.
+ * @param int     $min    Fewest columns per picture.
  * @return int[]
  */
-function justify( array $shapes, int $cols, int $min ): array {
-	$ratios = array_map( static fn( string $s ): float => RATIO[ $s ], $shapes );
+function justify( array $ratios, int $cols, int $min ): array {
+	$ratios = array_values( $ratios );
 	$total  = array_sum( $ratios );
 	$spans  = array_map( static fn( float $r ): int => max( $min, (int) floor( $cols * $r / $total ) ), $ratios );
 	$order  = array_keys( $ratios );
@@ -192,14 +202,17 @@ function row_cells( array $spans ): array {
  *
  * @param string[] $shapes   Panel shapes, in source order.
  * @param string[] $captions Panel caption text ('' for none).
- * @return array<int, array{pattern: string, group: int, treat: string, flags: string[], d: array, t: array, p: array, mt: array{d: int, t: int, p: int}}>
+ * @param float[]  $ratios   Each picture's width over height; a shape's typical ratio when missing.
+ * @return array<int, array{pattern: string, group: int, treat: string, flags: string[], d: array, t: array, p: array, mt: array{d: int, t: int, p: int}, h: array{d: string, t: string}}>
  */
-function compose( array $shapes, array $captions ): array {
+function compose( array $shapes, array $captions, array $ratios = array() ): array {
+	$ratio  = static fn( int $k ): float => (float) ( $ratios[ $k ] ?? RATIO[ $shapes[ $k ] ] );
 	$plan   = array();
 	$taped  = false;
 	$rhythm = 0;
 	foreach ( groups( $shapes, $captions ) as $g => list( $pattern, $members ) ) {
 		$s     = array_map( static fn( int $k ): string => $shapes[ $k ], $members );
+		$r     = array_map( $ratio, $members );
 		$cells = array();
 		$flags = array_fill( 0, count( $members ), array() );
 		$off   = array_fill( 0, count( $members ), 0 );
@@ -233,8 +246,8 @@ function compose( array $shapes, array $captions ): array {
 					);
 					$off[1]   = 'square' === $s[0] ? DROP : 0;
 				} else {
-					$d     = row_cells( justify( $s, COLS_D, 8 ) );
-					$t     = row_cells( justify( $s, COLS_T, 4 ) );
+					$d     = row_cells( justify( $r, COLS_D, 8 ) );
+					$t     = row_cells( justify( $r, COLS_T, 4 ) );
 					$cells = array(
 						array( $d[0], $t[0], cell( 1, 2 ) ),
 						array( $d[1], $t[1], cell( 1, 2 ) ),
@@ -256,8 +269,8 @@ function compose( array $shapes, array $captions ): array {
 					$off = 0 === $rhythm % 2 ? array( DROP, 0, DROP ) : array( 0, DROP, 0 );
 					++$rhythm;
 				} else {
-					$d = row_cells( justify( $s, COLS_D, 5 ) );
-					$t = row_cells( justify( $s, COLS_T, 3 ) );
+					$d = row_cells( justify( $r, COLS_D, 5 ) );
+					$t = row_cells( justify( $r, COLS_T, 3 ) );
 					foreach ( $s as $k => $shape ) {
 						$cells[ $k ] = array( $d[ $k ], $t[ $k ], cell( 1, 2 ) );
 						$flags[ $k ] = array( 'baseline' );
@@ -266,8 +279,8 @@ function compose( array $shapes, array $captions ): array {
 				break;
 			case 'hero':
 				// The hero takes the columns that make it as tall as its two stacked satellites.
-				$k_sat    = 1 / RATIO[ $s[1] ] + 1 / RATIO[ $s[2] ];
-				$h        = (int) max( 12, min( 18, round( COLS_D * $k_sat / ( 1 / RATIO[ $s[0] ] + $k_sat ) ) ) );
+				$k_sat    = 1 / $r[1] + 1 / $r[2];
+				$h        = (int) max( 12, min( 18, round( COLS_D * $k_sat / ( 1 / $r[0] + $k_sat ) ) ) );
 				$sat_p    = 'square' === $s[1] && 'square' === $s[2];
 				$cells    = array(
 					array( cell( 1, $h, 2 ), cell( 1, COLS_T ), cell( 1, 2 ) ),
@@ -332,7 +345,34 @@ function compose( array $shapes, array $captions ): array {
 				't'       => $cells[ $k ][1],
 				'p'       => $cells[ $k ][2],
 				'off'     => $off[ $k ],
+				'h'       => array(
+					'd' => '',
+					't' => '',
+				),
 			);
+		}
+
+		// A justified row shares one picture height: the tallest every picture's cell can hold at its own ratio.
+		if ( in_array( $pattern, array( 'diptych', 'triptych' ), true ) && in_array( 'baseline', $flags[0], true ) ) {
+			foreach ( EVEN_GRID as $bp => list( $cols, $gap, $width ) ) {
+				$best = null;
+				foreach ( $members as $k => $n ) {
+					$pad = in_array( $plan[ $n ]['treat'], array( 'print', 'taped' ), true ) ? 1.0 : 0.0;
+					$a   = $plan[ $n ][ $bp ]['span'] / ( $cols * $r[ $k ] );
+					$b   = ( $gap + $pad ) / $r[ $k ];
+					$h   = $a * ( $width + $gap ) - $b;
+					if ( null === $best || $h < $best[0] ) {
+						$best = array( $h, $a, $b );
+					}
+				}
+				$formula = 'calc(' . round( $best[1], 4 ) . ' * (100cqi + ' . $gap . 'rem) - ' . round( $best[2], 3 ) . 'rem)';
+				foreach ( $members as $n ) {
+					$plan[ $n ]['h'][ $bp ] = $formula;
+					if ( ! in_array( 'even', $plan[ $n ]['flags'], true ) ) {
+						$plan[ $n ]['flags'][] = 'even';
+					}
+				}
+			}
 		}
 	}
 	ksort( $plan );
@@ -549,6 +589,27 @@ function shape_of( array $image, string $figure ): string {
 }
 
 /**
+ * An image's width over height from its attachment size, else its width and
+ * height attributes, else 0.
+ *
+ * @param array<string, mixed> $image  Parsed core/image block.
+ * @param string               $figure Rendered image.
+ * @return float
+ */
+function ratio_of( array $image, string $figure ): float {
+	$id   = (int) ( $image['attrs']['id'] ?? 0 );
+	$meta = $id > 0 ? wp_get_attachment_metadata( $id ) : false;
+	if ( is_array( $meta ) && (int) ( $meta['width'] ?? 0 ) > 0 && (int) ( $meta['height'] ?? 0 ) > 0 ) {
+		return (int) $meta['width'] / (int) $meta['height'];
+	}
+	$tags = new \WP_HTML_Tag_Processor( $figure );
+	if ( $tags->next_tag( 'img' ) && (int) $tags->get_attribute( 'width' ) > 0 && (int) $tags->get_attribute( 'height' ) > 0 ) {
+		return (int) $tags->get_attribute( 'width' ) / (int) $tags->get_attribute( 'height' );
+	}
+	return 0.0;
+}
+
+/**
  * The gallery caption, from core's figcaption or the projector's note.
  *
  * @param string $html Rendered gallery.
@@ -668,14 +729,17 @@ function zine( string $html, array $block, $instance = null ): string {
 	$width    = max( 2, strlen( (string) $total ) );
 	$figures  = array();
 	$shapes   = array();
+	$ratios   = array();
 	$captions = array();
 	foreach ( $found[0] as $n => $figure ) {
 		$figures[]  = $figure;
 		$shapes[]   = shape_of( $images[ $n ], $figure );
+		$measured   = ratio_of( $images[ $n ], $figure );
+		$ratios[]   = $measured > 0 ? $measured : RATIO[ $shapes[ $n ] ];
 		$captions[] = preg_match( '/<figcaption\b[^>]*>(.*?)<\/figcaption>/s', $figure, $m ) ? trim( html_entity_decode( wp_strip_all_tags( $m[1] ), ENT_QUOTES ) ) : '';
 	}
 
-	$plan   = compose( $shapes, $captions );
+	$plan   = compose( $shapes, $captions, $ratios );
 	$of     = str_pad( (string) $total, $width, '0', STR_PAD_LEFT );
 	$panels = '';
 	foreach ( $figures as $n => $figure ) {
@@ -691,6 +755,9 @@ function zine( string $html, array $block, $instance = null ): string {
 			. ';--cr-mt:' . $item['mt']['d'] . ';--cr-mt-t:' . $item['mt']['t'] . ';--cr-mt-p:' . $item['mt']['p'];
 		if ( $item['d']['rows'] > 1 ) {
 			$style .= ';--cr-rows:span ' . $item['d']['rows'];
+		}
+		if ( '' !== $item['h']['d'] ) {
+			$style .= ';--cr-h:' . $item['h']['d'] . ';--cr-h-t:' . $item['h']['t'];
 		}
 		$classes = 'cr-zine__frame cr-zine__frame--' . $shapes[ $n ] . ' cr-zine__frame--' . $item['pattern'] . ' cr-zine__frame--' . $item['treat'];
 		// An image block whose attachment is gone keeps its place as a missing frame, its alt text and caption shown.

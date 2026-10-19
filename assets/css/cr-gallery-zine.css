@@ -197,6 +197,7 @@
    --cr-zine-step. Rows carry no gap of their own. */
 .cr-zine-single .cr-zine__frames {
 	--cr-zine-gap: var(--cr-space-md);
+	container-type: inline-size;
 	--cr-zine-step: 1rem;
 	display: grid;
 	column-gap: var(--cr-zine-gap);
@@ -327,26 +328,17 @@
 /* The anchor: borderless and largest, a spot-colour plate printed off
    register behind it, crop marks at its corners, the post date imprinted
    like a camera's. */
-.cr-zine-single .cr-zine__frame--plate > .wp-block-image::before {
-	content: "";
-	position: absolute;
-	inset: 0.9rem -0.9rem -0.9rem 0.9rem;
-	z-index: -1;
-	background-color: var(--cr-ut-orange);
-	background-image: var(--cr-halftone-strong);
-	background-size: var(--cr-halftone-strong-size);
-	pointer-events: none;
+.cr-zine-single .cr-zine__frame--plate {
+	--cr-shadow-hard-2: 0.9rem 0.9rem 0 var(--cr-ut-orange);
 }
 
-.cr-zine-single .cr-zine__frame--plate:not(.cr-zine__frame--anchor) > .wp-block-image::before {
-	inset: -0.7rem 0.7rem 0.7rem -0.7rem;
-	background-color: var(--cr-sky-blue);
+.cr-zine-single .cr-zine__frame--plate:not(.cr-zine__frame--anchor) {
+	--cr-shadow-hard-2: -0.7rem -0.7rem 0 var(--cr-sky-blue);
 }
 
-/* The plate sits behind the picture only, not its caption. */
-.cr-zine-single .cr-zine__frame.cr-zine__frame--plate > .wp-block-image:has(figcaption)::before {
-	inset-block-end: auto;
-	height: calc(100% - 2.5rem);
+/* The plate is printed on the photograph itself, so it never runs under a caption. */
+.cr-zine-single .cr-zine__frame.cr-zine__frame--plate img {
+	box-shadow: var(--cr-shadow-hard-2);
 }
 
 .cr-zine-single .cr-zine__frame--anchor > .wp-block-image::after {
@@ -542,8 +534,9 @@
 		margin-block-start: calc(var(--cr-mt-p, 0) * var(--cr-zine-step));
 	}
 
-	/* A full-width anchor runs edge to edge. */
+	/* A full-width anchor runs edge to edge, its plate printed below it. */
 	.cr-zine-single .cr-zine__frame--bleed {
+		--cr-shadow-hard-2: 0 0.6rem 0 var(--cr-ut-orange);
 		margin-inline: calc(var(--cr-space-md) * -1);
 	}
 
@@ -552,17 +545,13 @@
 		margin-inline: var(--cr-space-md);
 	}
 
-	.cr-zine-single .cr-zine__frame--anchor > .wp-block-image::before {
-		inset: 0.6rem 0 -0.6rem 0.6rem;
-	}
-
 	.cr-zine-single .cr-zine__frame--anchor > .wp-block-image::after {
 		display: none;
 	}
 
 	/* Plates stay inside the screen edge. */
-	.cr-zine-single .cr-zine__frame--plate:not(.cr-zine__frame--anchor) > .wp-block-image::before {
-		inset: 0.5rem -0.5rem -0.5rem 0.5rem;
+	.cr-zine-single .cr-zine__frame--plate:not(.cr-zine__frame--anchor) {
+		--cr-shadow-hard-2: 0.5rem 0.5rem 0 var(--cr-sky-blue);
 	}
 
 	.cr-zine-single .cr-zine__frame img {
@@ -583,6 +572,13 @@
 		grid-column: var(--cr-col-t, 1 / -1);
 		margin-block-start: calc(var(--cr-mt-t, 0) * var(--cr-zine-step));
 	}
+
+	/* A justified row's pictures share one height at their own ratios. */
+	.cr-zine-single .cr-zine__frame--even img {
+		width: auto;
+		height: min(var(--cr-h-t), 38rem);
+		max-height: none;
+	}
 }
 
 /* ---- Desktop: twelve columns ---- */
@@ -602,6 +598,12 @@
 		grid-column: var(--cr-col, 1 / -1);
 		grid-row: var(--cr-rows, auto);
 		margin-block-start: calc(var(--cr-mt, 0) * var(--cr-zine-step));
+	}
+
+	.cr-zine-single .cr-zine__frame--even img {
+		width: auto;
+		height: min(var(--cr-h), 38rem);
+		max-height: none;
 	}
 }
 

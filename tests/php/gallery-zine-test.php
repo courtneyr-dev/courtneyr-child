@@ -439,6 +439,12 @@ namespace {
 			$sq = compose( cr_zine_shapes( 'SSS' ), array( '', '', '' ) );
 			$pl = compose( cr_zine_shapes( 'PLL' ), array( '', '', '' ) );
 			cr_photo_assert( $sq[0]['d']['span'] > $pl[0]['d']['span'], 'a portrait hero takes fewer columns than a square one beside the same stack height' );
+			$even = compose( cr_zine_shapes( 'LPS' ), array( '', '', '' ) );
+			cr_photo_assert( '' !== $even[0]['h']['d'] && $even[0]['h']['d'] === $even[1]['h']['d'] && $even[1]['h']['d'] === $even[2]['h']['d'], 'a justified row shares one picture height' );
+			cr_photo_assert( 1 === preg_match( '/^calc\([\d.]+ \* \(100cqi \+ 2rem\) - [\d.]+rem\)$/', $even[0]['h']['d'] ), 'the height follows the grid width: ' . $even[0]['h']['d'] );
+			cr_photo_same( '', $hero[0]['h']['d'], 'a hero sizes by its columns, not a shared height' );
+			$wide = compose( array( 'landscape', 'landscape' ), array( '', '' ), array( 1.5, 1.2 ) );
+			cr_photo_assert( $wide[0]['d']['span'] > $wide[1]['d']['span'] || 'essay' === $wide[0]['pattern'], 'measured ratios steer the spans' );
 			$ppl = compose( cr_zine_shapes( 'PPL' ), array( '', '', '' ) );
 			cr_photo_same( 'anchor', $ppl[2]['treat'], 'the anchor is the opening group\'s largest picture, not always the first' );
 			$six = compose( cr_zine_shapes( 'PPPPPP' ), array_fill( 0, 6, '' ) );
@@ -485,7 +491,7 @@ namespace {
 			$html2 = cr_zine_render( $gone );
 			cr_photo_same( 1, substr_count( $html2, 'cr-zine__frame--missing' ), 'an image whose attachment is gone is marked as a missing frame' );
 			cr_photo_contains( 'alt="Alt 2"', $html2, 'its alt text stays' );
-			cr_photo_same( 6, preg_match_all( '/style="--cr-col:[^;"]+;--cr-col-t:[^;"]+;--cr-col-p:[^;"]+;--cr-mt:\d+;--cr-mt-t:\d+;--cr-mt-p:\d+"/', $html ), 'each panel carries its place on three grids and its row spacing' );
+			cr_photo_same( 6, preg_match_all( '/style="--cr-col:[^;"]+;--cr-col-t:[^;"]+;--cr-col-p:[^;"]+;--cr-mt:\d+;--cr-mt-t:\d+;--cr-mt-p:\d+(;[^"]*)?"/', $html ), 'each panel carries its place on three grids and its row spacing' );
 		}
 	);
 
