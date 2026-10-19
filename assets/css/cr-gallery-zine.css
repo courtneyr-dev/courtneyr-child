@@ -189,10 +189,18 @@
 	inset-inline-start: var(--cr-space-xs);
 }
 
-/* ---- Panels: photographs first, set on the sheet at their own ratios ---- */
+/* ---- Panels: photographs first, set on the sheet at their own ratios ----
+   inc/gallery-zine.php composes the gallery from a vocabulary of patterns
+   (solo, field-journal page, banner, diptych, essay steps, triptych, hero
+   with satellites, contact sheet) and hands each panel its column on the
+   desktop, tablet and phone grids and the space above its row, in steps of
+   --cr-zine-step. Rows carry no gap of their own. */
 .cr-zine-single .cr-zine__frames {
+	--cr-zine-gap: var(--cr-space-md);
+	--cr-zine-step: 1rem;
 	display: grid;
-	gap: var(--cr-space-2xl) var(--cr-space-lg);
+	column-gap: var(--cr-zine-gap);
+	row-gap: 0;
 	align-items: start;
 	margin: 0;
 	padding: 0;
@@ -240,6 +248,11 @@
 
 /* The anchor sits centred in its cell when the height cap narrows it. */
 .cr-zine-single .cr-zine__frame--anchor > .wp-block-image {
+	margin-inline: auto;
+}
+
+/* Contact frames centre on their strip of film. */
+.cr-zine-single .cr-zine__frame.cr-zine__frame--contact > .wp-block-image {
 	margin-inline: auto;
 }
 
@@ -402,8 +415,16 @@
 /* A contact-sheet panel: the frame on a strip of black film stock, its
    number and caption printed in the rebate. */
 .cr-zine-single .cr-zine__frame--contact {
-	padding: var(--cr-space-lg) var(--cr-space-xs) var(--cr-space-xs);
+	align-self: stretch;
+
+	/* Frames meet across the gutters, so the run reads as one sheet of film. */
+	margin-inline: calc(var(--cr-zine-gap) / -2);
+	padding: var(--cr-space-lg) calc(var(--cr-zine-gap) / 2 + var(--cr-space-xs)) var(--cr-space-xs);
 	background-color: var(--cr-photocopier-blk);
+}
+
+.cr-zine-single .cr-zine__frame--contact img {
+	max-height: 14rem;
 }
 
 .cr-zine-single .cr-zine__frame.cr-zine__frame--contact .cr-zine__num {
@@ -470,7 +491,7 @@
 	box-shadow: 0 0 0 6px var(--cr-focus-halo);
 }
 
-/* ---- Phones: one column, panels stepping in from alternate edges ---- */
+/* ---- Phones: two columns; portraits pair up, contact frames sit two to a row ---- */
 @media (max-width: 39.99rem) {
 
 	.cr-zine-single .cr-zine__masthead {
@@ -495,17 +516,21 @@
 	}
 
 	.cr-zine-single .cr-zine__frames {
-		grid-template-columns: 1fr;
-		gap: var(--cr-space-xl);
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
-	/* The anchor runs edge to edge; the rest step in from alternate sides. */
-	.cr-zine-single .cr-zine__frame--anchor {
+	.cr-zine-single .cr-zine__frame {
+		grid-column: var(--cr-col-p, 1 / -1);
+		margin-block-start: calc(var(--cr-mt-p, 0) * var(--cr-zine-step));
+	}
+
+	/* A full-width anchor runs edge to edge. */
+	.cr-zine-single .cr-zine__frame--bleed {
 		margin-inline: calc(var(--cr-space-md) * -1);
 	}
 
-	.cr-zine-single .cr-zine__frame--anchor .cr-zine__num,
-	.cr-zine-single .cr-zine__frame--anchor figcaption {
+	.cr-zine-single .cr-zine__frame--bleed .cr-zine__num,
+	.cr-zine-single .cr-zine__frame--bleed figcaption {
 		margin-inline: var(--cr-space-md);
 	}
 
@@ -522,14 +547,6 @@
 		inset: 0.5rem -0.5rem -0.5rem 0.5rem;
 	}
 
-	.cr-zine-single .cr-zine__frame:nth-child(odd):not(.cr-zine__frame--panorama, .cr-zine__frame--anchor) {
-		margin-inline-end: var(--cr-space-xl);
-	}
-
-	.cr-zine-single .cr-zine__frame:nth-child(even):not(.cr-zine__frame--panorama) {
-		margin-inline-start: var(--cr-space-xl);
-	}
-
 	.cr-zine-single .cr-zine__frame img {
 		max-height: 75vh;
 	}
@@ -539,15 +556,14 @@
 @media (min-width: 40rem) and (max-width: 63.99rem) {
 
 	.cr-zine-single .cr-zine__frames {
+		--cr-zine-gap: var(--cr-space-lg);
+		--cr-zine-step: 1.25rem;
 		grid-template-columns: repeat(6, minmax(0, 1fr));
 	}
 
 	.cr-zine-single .cr-zine__frame {
 		grid-column: var(--cr-col-t, 1 / -1);
-	}
-
-	.cr-zine-single .cr-zine__frame--drop {
-		margin-block-start: var(--cr-space-xl);
+		margin-block-start: calc(var(--cr-mt-t, 0) * var(--cr-zine-step));
 	}
 }
 
@@ -559,42 +575,78 @@
 	}
 
 	.cr-zine-single .cr-zine__frames {
+		--cr-zine-gap: var(--cr-space-xl);
+		--cr-zine-step: 1.5rem;
 		grid-template-columns: repeat(12, minmax(0, 1fr));
-		gap: var(--cr-space-3xl) var(--cr-space-xl);
 	}
 
 	.cr-zine-single .cr-zine__frame {
 		grid-column: var(--cr-col, 1 / -1);
+		grid-row: var(--cr-rows, auto);
+		margin-block-start: calc(var(--cr-mt, 0) * var(--cr-zine-step));
+	}
+}
+
+/* ---- Relationships between panels (tablet and desktop) ---- */
+@media (min-width: 40rem) {
+
+	/* Pictures in a diptych, triptych or beside a hero share a bottom line. */
+	.cr-zine-single .cr-zine__frame--baseline {
+		align-self: end;
 	}
 
-	/* Rhythm: one panel per shared row sits lower; a rare panel laps over its
-	   neighbour's edge, lower down so the anchor's picture stays clear. */
-	.cr-zine-single .cr-zine__frame--drop {
-		margin-block-start: var(--cr-space-3xl);
+	/* A lone picture sits centred; a pair leans toward the gutter between them. */
+	.cr-zine-single .cr-zine__frame--center {
+		justify-self: center;
+		width: fit-content;
+		max-width: 100%;
 	}
 
-	.cr-zine-single .cr-zine__frame--lap {
-		z-index: 2;
-		margin-block-start: var(--cr-space-4xl);
-		margin-inline-start: calc(var(--cr-space-lg) * -1);
+	.cr-zine-single .cr-zine__frame--toward-end {
+		justify-self: end;
+		width: fit-content;
+		max-width: 100%;
 	}
 
-	/* Its index sits on its open side, clear of the picture it laps. */
-	.cr-zine-single .cr-zine__frame--lap .cr-zine__num {
-		align-self: flex-end;
+	/* A field-journal page: the caption sits beside the picture as a margin note. */
+	.cr-zine-single .cr-zine__frame--journal > .wp-block-image {
+		display: grid;
+		grid-template-columns: minmax(0, 3fr) minmax(9rem, 1fr);
+		column-gap: var(--cr-space-lg);
+		align-items: end;
+		width: 100%;
+	}
+
+	.cr-zine-single .cr-zine__frame--journal > .wp-block-image > :not(figcaption, .cr-zine__imprint) {
+		grid-column: 1;
+		justify-self: end;
+	}
+
+	.cr-zine-single .cr-zine__frame.cr-zine__frame--journal figcaption {
+		flex-direction: column;
+		grid-row: 1;
+		grid-column: 2;
+		max-width: 16rem;
+		margin: 0 0 var(--cr-space-sm);
+		contain: none;
+	}
+
+	.cr-zine-single .cr-zine__frame--journal .cr-zine__imprint {
+		inset-inline-start: var(--cr-space-sm);
+		inset-inline-end: auto;
 	}
 }
 
 /* Wide screens: the anchor runs off the sheet's edge into the page margin. */
 @media (min-width: 80rem) {
 
-	.cr-zine-single .cr-zine__frame--anchor {
+	.cr-zine-single .cr-zine__frame--edge {
 		margin-inline-start: calc(var(--cr-space-2xl) * -1 - var(--cr-space-lg));
 	}
 
 	/* Its index and caption stay on the paper: off the sheet, violet type would sit on the page's dark ground. */
-	.cr-zine-single .cr-zine__frame--anchor .cr-zine__num,
-	.cr-zine-single .cr-zine__frame--anchor figcaption {
+	.cr-zine-single .cr-zine__frame--edge .cr-zine__num,
+	.cr-zine-single .cr-zine__frame--edge figcaption {
 		margin-inline-start: calc(var(--cr-space-lg) + var(--cr-space-xs));
 	}
 }

@@ -90,11 +90,10 @@ namespace {
 
 namespace {
 	use function Courtneyr\Child\GalleryZine\capture;
-	use function Courtneyr\Child\GalleryZine\dressing;
+	use function Courtneyr\Child\GalleryZine\compose;
 	use function Courtneyr\Child\GalleryZine\enable_lightbox;
 	use function Courtneyr\Child\GalleryZine\holds_h1;
 	use function Courtneyr\Child\GalleryZine\start_pass;
-	use function Courtneyr\Child\GalleryZine\layout;
 	use function Courtneyr\Child\GalleryZine\masthead;
 	use function Courtneyr\Child\GalleryZine\reset_state;
 	use function Courtneyr\Child\GalleryZine\zine;
@@ -179,7 +178,7 @@ namespace {
 			$html = cr_zine_render( $gallery, 'A short gallery caption.' );
 			cr_photo_assert( 1 === preg_match( '/^<section class="cr-zine alignwide" aria-label="Photos" data-wp-interactive="core\/gallery" data-wp-context="\{&quot;galleryId&quot;:&quot;g1&quot;\}">/', $html ), 'a region named Photos that carries core\'s gallery lightbox wiring' );
 			cr_photo_assert( 1 === preg_match( '/<ol class="cr-zine__frames" role="list">/', $html ), 'an ordered list of panels' );
-			cr_photo_same( 6, preg_match_all( '/<li class="cr-zine__frame cr-zine__frame--[a-z]+[^"]*" style="--cr-col:[^"]+;--cr-col-t:[^"]+">/', $html ), 'six panels, each placed on both grids' );
+			cr_photo_same( 6, preg_match_all( '/<li class="cr-zine__frame cr-zine__frame--[a-z]+[^"]*" style="--cr-col:[^"]+">/', $html ), 'six panels, each placed' );
 			foreach ( array( 'landscape' => 2, 'portrait' => 2, 'square' => 1, 'panorama' => 1 ) as $shape => $n ) {
 				cr_photo_same( $n, preg_match_all( '/class="cr-zine__frame cr-zine__frame--' . $shape . '[ "]/', $html ), $shape . ' from the attachment size' );
 			}
@@ -190,7 +189,7 @@ namespace {
 			cr_photo_same( 3, substr_count( $html, '<figcaption class="wp-element-caption">Caption ' ), 'captions kept, none invented' );
 			cr_photo_same( 6, substr_count( $html, 'data-wp-interactive="core/image"' ), 'core lightbox on unlinked images' );
 			cr_photo_same( 6, preg_match_all( '/<img\b[^>]*\bclass="[^"]*\bu-photo\b/', $html ), 'u-photo on every image' );
-			cr_photo_assert( 1 === preg_match( '/<li class="cr-zine__frame cr-zine__frame--landscape[^"]*"[^>]*>.*?sizes="\(max-width: 40rem\) 100vw, \(max-width: 64rem\) 100vw, 52rem"/s', $html ), 'the featured panel is sized for its span' );
+			cr_photo_same( 6, preg_match_all( '/sizes="\(max-width: 40rem\) (100|50)vw, \(max-width: 64rem\) \d+vw, \d+(\.\d+)?rem"/', $html ), 'every image is sized for its spans on phone, tablet and desktop' );
 			cr_photo_contains( '<p class="cr-zine__note cr-zine__note--hand">A short gallery caption.</p>', $html, 'a short gallery caption is the handwritten note' );
 			cr_photo_not_contains( 'wp-block-gallery', $html, 'the gallery wrapper is replaced' );
 		}
@@ -334,91 +333,151 @@ namespace {
 		}
 	);
 
+	/** Shapes from letters: L landscape, P portrait, S square, A panorama. */
+	function cr_zine_shapes( string $letters ): array {
+		$map = array( 'L' => 'landscape', 'P' => 'portrait', 'S' => 'square', 'A' => 'panorama' );
+		return array_map( static fn( string $c ): string => $map[ $c ], str_split( $letters ) );
+	}
+
+	/** The pattern of each group, in order: "hero,triptych". */
+	function cr_zine_signature( array $plan ): string {
+		$out  = array();
+		$last = -1;
+		foreach ( $plan as $item ) {
+			if ( $item['group'] !== $last ) {
+				$out[] = $item['pattern'];
+				$last  = $item['group'];
+			}
+		}
+		return implode( ',', $out );
+	}
+
+	/** Rows as CSS auto-placement forms them: a panel whose start is at or before the last panel's end opens a row. */
+	function cr_zine_rows( array $plan, string $bp, int $cols ): array {
+		$rows = array();
+		$end  = PHP_INT_MAX;
+		foreach ( $plan as $n => $item ) {
+			$cell = $item[ $bp ];
+			if ( $cell['start'] <= $end ) {
+				$rows[] = array();
+			}
+			$rows[ count( $rows ) - 1 ][] = $n;
+			$end                          = $cell['start'] + $cell['span'] - 1;
+		}
+		return $rows;
+	}
+
 	cr_photo_group(
-		'dressing: one anchor, mostly bare photographs, devices that never repeat on every panel, restrained laps, handwriting only for short real captions',
+		'vocabulary: the collection, not the count, picks the pattern, in source order',
 		static function (): void {
-			foreach ( array( 2, 3, 4, 6, 10, 20 ) as $count ) {
-				$shapes = array();
-				$caps   = array();
-				for ( $n = 0; $n < $count; $n++ ) {
-					$shapes[] = array( 'landscape', 'portrait', 'square', 'panorama' )[ $n % 4 ];
-					$caps[]   = 0 === $n % 2 ? 'Caption ' . ( $n + 1 ) : '';
-				}
-				$cells = layout( $shapes, 12 );
-				$dress = dressing( $cells, $caps );
-				cr_photo_same( 'anchor', $dress[0][0], $count . ': the first panel anchors' );
-				$first = array_count_values( array_map( static fn( array $d ): string => $d[0], $dress ) );
-				cr_photo_assert( 1 === ( $first['anchor'] ?? 0 ), $count . ': one anchor' );
-				if ( $count >= 4 ) {
-					cr_photo_assert( ( $first['bare'] ?? 0 ) >= ( $count - 1 ) / 2 - 1, $count . ': most panels are bare photographs' );
-				}
-				$laps = count( array_filter( $dress, static fn( array $d ): bool => in_array( 'lap', $d, true ) ) );
-				$rows = count( array_unique( array_column( $cells, 'row' ) ) );
-				cr_photo_assert( $laps <= intdiv( $rows + 2, 3 ), $count . ': laps stay rare (' . $laps . ' in ' . $rows . ' rows)' );
-				foreach ( $dress as $n => $d ) {
-					if ( in_array( 'hand', $d, true ) ) {
-						cr_photo_assert( '' !== $caps[ $n ] && in_array( $d[0], array( 'print', 'taped' ), true ), $count . ': handwriting only on a short real caption on a print' );
+			$expect = array(
+				'L'      => 'solo',
+				'P'      => 'solo',
+				'A'      => 'banner',
+				'LP'     => 'diptych',
+				'PP'     => 'diptych',
+				'LL'     => 'essay',
+				'AL'     => 'stack',
+				'LSL'    => 'hero',
+				'PPP'    => 'triptych',
+				'LPS'    => 'triptych',
+				'LLLLLL' => 'hero,triptych',
+				'PPPPPP' => 'triptych,triptych',
+				'SSSSSS' => 'hero,triptych',
+				'LPSALP' => 'triptych,banner,diptych',
+				'PPLSLL' => 'triptych,hero',
+				'LSSPLL' => 'hero,triptych',
+			);
+			foreach ( $expect as $letters => $signature ) {
+				cr_photo_same( $signature, cr_zine_signature( compose( cr_zine_shapes( $letters ), array_fill( 0, strlen( $letters ), '' ) ) ), $letters );
+			}
+			cr_photo_same( 'journal', cr_zine_signature( compose( cr_zine_shapes( 'L' ), array( 'A dock at dusk.' ) ) ), 'a captioned single is a field-journal page' );
+			$twenty = compose( cr_zine_shapes( 'LPSALPSALPSALPSALPSA' ), array_fill( 0, 20, '' ) );
+			cr_photo_assert( str_ends_with( cr_zine_signature( $twenty ), ',contact' ), 'a long gallery closes on a contact sheet' );
+			cr_photo_same( 'contact', $twenty[19]['pattern'], 'the tail is the contact sheet' );
+			$six = array( 'LLLLLL', 'PPPPPP', 'SSSSSS', 'LPSALP', 'PPLSLL', 'LSSPLL' );
+			$signatures = array_map( static fn( string $l ): string => md5( serialize( array_map( static fn( array $i ): array => array( $i['pattern'], $i['d'], $i['t'] ), compose( cr_zine_shapes( $l ), array_fill( 0, 6, '' ) ) ) ) ), $six );
+			cr_photo_same( 6, count( array_unique( $signatures ) ), 'six six-image collections, six different compositions' );
+			cr_photo_same( compose( cr_zine_shapes( 'LPSALP' ), array_fill( 0, 6, '' ) ), compose( cr_zine_shapes( 'LPSALP' ), array_fill( 0, 6, '' ) ), 'deterministic' );
+		}
+	);
+
+	cr_photo_group(
+		'placement: every panel in order, inside its grid, never overlapping, rows full or balanced, on desktop, tablet and phone',
+		static function (): void {
+			$mixes = array( 'L', 'P', 'S', 'A', 'LPSA', 'PPLS', 'SSL', 'LLA', 'APPL', 'LSSPLL', 'PSLPSA' );
+			foreach ( $mixes as $mix ) {
+				foreach ( array( 1, 2, 3, 4, 5, 6, 7, 10, 13, 20, 23 ) as $count ) {
+					$letters = substr( str_repeat( $mix, 30 ), 0, $count );
+					$plan    = compose( cr_zine_shapes( $letters ), array_fill( 0, $count, '' ) );
+					cr_photo_same( range( 0, $count - 1 ), array_keys( $plan ), $letters . ': every panel, in source order' );
+					foreach ( array( 'd' => 12, 't' => 6, 'p' => 2 ) as $bp => $cols ) {
+						foreach ( $plan as $n => $item ) {
+							$c = $item[ $bp ];
+							cr_photo_assert( $c['start'] >= 1 && $c['span'] >= 1 && $c['start'] + $c['span'] - 1 <= $cols, "$letters $bp #$n inside the grid" );
+						}
+						foreach ( cr_zine_rows( $plan, $bp, $cols ) as $r => $row ) {
+							$first = $plan[ $row[0] ][ $bp ];
+							$last  = $plan[ end( $row ) ][ $bp ];
+							if ( 1 === count( $row ) && 'p' !== $bp && $first['span'] < $cols && 1 === ( $first['rows'] ?? 1 ) ) {
+								// A panel alone on its row is centred, or is the field-journal page whose note fills the rest.
+								$left  = $first['start'] - 1;
+								$right = $cols - ( $first['start'] + $first['span'] - 1 );
+								$solo  = in_array( $plan[ $row[0] ]['pattern'], array( 'solo', 'journal', 'stack', 'essay' ), true ) || in_array( 'hero-sat', $plan[ $row[0] ]['flags'], true ) || 'contact' === $plan[ $row[0] ]['pattern'] || 'triptych' === $plan[ $row[0] ]['pattern'];
+								cr_photo_assert( $solo || abs( $left - $right ) <= 1, "$letters $bp row $r: a lone panel is centred or part of a composed group" );
+							}
+						}
 					}
-					cr_photo_assert( ! ( in_array( 'lap', $d, true ) && in_array( 'drop', $d, true ) ), $count . ': a panel laps or drops, not both' );
 				}
 			}
-			$seven = array_fill( 0, 8, 'panorama' );
-			$flat  = dressing( layout( $seven, 12 ), array_fill( 0, 8, '' ), $seven );
-			cr_photo_same( 'print', $flat[7][0], 'a panorama in the taped slot lies flat as a print' );
-			$long = dressing( layout( array( 'landscape', 'square' ), 12 ), array( '', str_repeat( 'x', 41 ) ) );
-			cr_photo_assert( ! in_array( 'hand', $long[1], true ), 'a caption over 40 characters stays typeset' );
+			$hero = compose( cr_zine_shapes( 'LSL' ), array( '', '', '' ) );
+			cr_photo_same( array( 'start' => 1, 'span' => 8, 'rows' => 2 ), $hero[0]['d'], 'the hero spans two rows on desktop' );
+			cr_photo_same( 9, $hero[1]['d']['start'], 'satellites stack beside the hero' );
+			cr_photo_same( 9, $hero[2]['d']['start'], 'the second satellite under the first' );
+			$pp = compose( cr_zine_shapes( 'PP' ), array( '', '' ) );
+			cr_photo_same( array( 1, 2 ), array( $pp[0]['p']['start'], $pp[1]['p']['start'] ), 'two portraits sit side by side on a phone' );
+			$end = compose( cr_zine_shapes( 'LSLPP' ), array_fill( 0, 5, '' ) );
+			$rows = cr_zine_rows( $end, 'd', 12 );
+			cr_photo_assert( count( end( $rows ) ) > 1, 'a five-image gallery does not end on a lone panel' );
+		}
+	);
+
+	cr_photo_group(
+		'presentation: one anchor, prints and contact frames by role, at most one taped print, handwriting only for short real captions, row spacing by group',
+		static function (): void {
+			foreach ( array( 'LPSALP', 'PPLSLL', 'LLLLLL', 'SSSSSS', 'LPSALPSALPSALPSALPSA' ) as $letters ) {
+				$count = strlen( $letters );
+				$caps  = array();
+				for ( $n = 0; $n < $count; $n++ ) {
+					$caps[] = 0 === $n % 2 ? 'Caption ' . ( $n + 1 ) : '';
+				}
+				$plan  = compose( cr_zine_shapes( $letters ), $caps );
+				$treat = array_count_values( array_column( $plan, 'treat' ) );
+				cr_photo_same( 'anchor', $plan[0]['treat'], $letters . ': the first panel anchors' );
+				cr_photo_same( 1, $treat['anchor'], $letters . ': one anchor' );
+				cr_photo_assert( ( $treat['taped'] ?? 0 ) <= 1, $letters . ': at most one taped print' );
+				foreach ( $plan as $n => $item ) {
+					cr_photo_assert( ( 'contact' === $item['pattern'] ) === ( 'contact' === $item['treat'] ), "$letters #$n: contact frames only on the contact sheet" );
+					if ( in_array( 'hand', $item['flags'], true ) ) {
+						cr_photo_assert( '' !== $caps[ $n ] && in_array( $item['treat'], array( 'print', 'taped', 'bare', 'anchor' ), true ), "$letters #$n: handwriting only on a real caption" );
+					}
+					cr_photo_assert( 'taped' !== $item['treat'] || 'panorama' !== cr_zine_shapes( $letters )[ $n ], "$letters #$n: a panorama is never tilted" );
+				}
+				cr_photo_same( 0, $plan[0]['mt']['d'], $letters . ': no space above the first row' );
+			}
+			$two = compose( cr_zine_shapes( 'LSLPP' ), array_fill( 0, 5, '' ) );
+			cr_photo_assert( $two[3]['mt']['d'] > $two[2]['mt']['d'], 'a new group opens with more space than a row inside a group' );
+			$long = compose( cr_zine_shapes( 'LS' ), array( '', str_repeat( 'x', 41 ) ) );
+			cr_photo_assert( ! in_array( 'hand', $long[1]['flags'], true ), 'a caption over 40 characters stays typeset' );
 			$html = cr_zine_render( cr_zine_request( 6 ) );
 			cr_photo_same( 1, substr_count( $html, 'class="cr-zine__imprint"' ), 'one date imprint, on the anchor' );
 			cr_photo_assert( 1 === preg_match( '/<span class="cr-zine__imprint" aria-hidden="true">[^<]*<\/span><\/figure>/', $html ), 'the imprint sits inside the anchor\'s figure' );
+			cr_photo_same( 6, preg_match_all( '/style="--cr-col:[^;"]+;--cr-col-t:[^;"]+;--cr-col-p:[^;"]+;--cr-mt:\d+;--cr-mt-t:\d+;--cr-mt-p:\d+"/', $html ), 'each panel carries its place on three grids and its row spacing' );
 		}
 	);
 
 	cr_photo_group(
-		'packing: every row of the 12- and 6-column grids is full or holds one placed panel, for every count and shape mix',
-		static function (): void {
-			$mixes = array(
-				array( 'landscape', 'portrait', 'square', 'panorama' ),
-				array( 'portrait' ),
-				array( 'landscape' ),
-				array( 'panorama', 'landscape' ),
-				array( 'square', 'square', 'portrait' ),
-				array( 'portrait', 'landscape', 'landscape', 'panorama', 'square' ),
-			);
-			foreach ( $mixes as $mix ) {
-				foreach ( array( 1, 2, 3, 4, 5, 6, 10, 20, 23 ) as $count ) {
-					$shapes = array();
-					for ( $n = 0; $n < $count; $n++ ) {
-						$shapes[] = $mix[ $n % count( $mix ) ];
-					}
-					foreach ( array( 12, 6 ) as $cols ) {
-						$cells = layout( $shapes, $cols );
-						$tag   = $cols . ' cols, ' . $count . ' of ' . implode( '/', $mix );
-						cr_photo_same( $count, count( $cells ), $tag . ': every panel placed' );
-						$rows = array();
-						foreach ( $cells as $cell ) {
-							cr_photo_assert( $cell['span'] >= 2 && $cell['span'] <= $cols, $tag . ': span in range' );
-							cr_photo_assert( 0 === $cell['start'] || ( $cell['start'] >= 1 && $cell['start'] + $cell['span'] - 1 <= $cols ), $tag . ': start in range' );
-							$rows[ $cell['row'] ][] = $cell;
-						}
-						foreach ( $rows as $row ) {
-							$sum = array_sum( array_column( $row, 'span' ) );
-							cr_photo_assert( 1 === count( $row ) ? $sum <= $cols : $sum === $cols, $tag . ': a shared row is full (' . $sum . ')' );
-						}
-					}
-				}
-			}
-			$one = layout( array( 'landscape' ), 12 );
-			cr_photo_same( array( 'span' => 10, 'start' => 2, 'row' => 0 ), $one[0], 'one landscape sits centred' );
-			$two = layout( array( 'landscape', 'portrait' ), 12 );
-			cr_photo_same( 12, $two[0]['span'] + $two[1]['span'], 'a featured landscape and a portrait share the top row' );
-			cr_photo_assert( $two[0]['span'] > $two[1]['span'], 'the featured panel stays the larger' );
-			$three = layout( array( 'landscape', 'portrait', 'square' ), 12 );
-			cr_photo_assert( $three[0]['span'] >= 7, 'the featured landscape keeps at least 7 of 12 columns (got ' . $three[0]['span'] . ')' );
-		}
-	);
-
-	cr_photo_group(
-		'the zine sheet: tokens, hard shadows, a 12-column desktop grid, 6 on tablets, 1 on phones, focus ring, reduced motion, forced colors',
+		'the zine sheet: tokens, hard shadows, a 12-column desktop grid, 6 on tablets, 2 on phones, focus ring, reduced motion, forced colors',
 		static function (): void {
 			$css = (string) preg_replace( '#/\*.*?\*/#s', '', (string) file_get_contents( CR_PHOTO_THEME_DIR . '/assets/css/cr-gallery-zine.css' ) );
 			cr_photo_assert( 0 === preg_match( '/#[0-9a-fA-F]{3,8}\b|\b(rgb|rgba|hsl|hsla)\(|filter\s*:|blur\(/i', $css ), 'no raw colour, filter or blur' );
@@ -438,7 +497,7 @@ namespace {
 			}
 			cr_photo_contains( 'grid-template-columns: repeat(12, minmax(0, 1fr))', $css, 'desktop 12 columns' );
 			cr_photo_contains( 'grid-template-columns: repeat(6, minmax(0, 1fr))', $css, 'tablet 6 columns' );
-			cr_photo_assert( 1 === preg_match( '/@media \(max-width: 39\.99rem\)\s*\{[^@]*\.cr-zine__frames\s*\{[^{}]*grid-template-columns:\s*1fr;/s', $css ), 'phones one column' );
+			cr_photo_assert( 1 === preg_match( '/@media \(max-width: 39\.99rem\)\s*\{[^@]*\.cr-zine__frames\s*\{[^{}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\);/s', $css ), 'phones two columns' );
 			cr_photo_contains( 'object-fit: contain', $css, 'no cropping' );
 			cr_photo_contains( 'var(--cr-focus-ring)', $css, 'visible focus' );
 			cr_photo_contains( '@media (prefers-reduced-motion: reduce)', $css, 'reduced motion' );

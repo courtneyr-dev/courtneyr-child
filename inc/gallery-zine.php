@@ -29,252 +29,349 @@ const BODY_CLASS = 'cr-zine-single';
 /** A gallery caption up to this many characters is handwritten; longer ones stay typeset. */
 const HAND_LIMIT = 60;
 
-/**
- * Image sizes per panel: the featured first panel, then the rest, by shape.
- * Desktop widths follow the 12-column grid in a 1100px wide column.
- */
-const SIZES = array(
-	'featured' => array(
-		'landscape' => '(max-width: 40rem) 100vw, (max-width: 64rem) 100vw, 52rem',
-		'panorama'  => '(max-width: 40rem) 100vw, (max-width: 64rem) 100vw, 69rem',
-		'square'    => '(max-width: 40rem) 100vw, (max-width: 64rem) 100vw, 40rem',
-		'portrait'  => '(max-width: 40rem) 100vw, (max-width: 64rem) 66vw, 34rem',
-	),
-	'panel'    => array(
-		'landscape' => '(max-width: 40rem) 100vw, (max-width: 64rem) 66vw, 34rem',
-		'panorama'  => '(max-width: 40rem) 100vw, (max-width: 64rem) 100vw, 46rem',
-		'square'    => '(max-width: 40rem) 100vw, (max-width: 64rem) 50vw, 23rem',
-		'portrait'  => '(max-width: 40rem) 100vw, (max-width: 64rem) 50vw, 23rem',
-	),
+/** Shapes wide enough to stack as a hero's satellites. */
+const WIDE = array( 'landscape', 'square' );
+
+/** Width over height, by shape, for rows whose pictures share a height. */
+const RATIO = array(
+	'landscape' => 1.33,
+	'square'    => 1.0,
+	'portrait'  => 0.75,
+	'panorama'  => 2.5,
 );
 
-/**
- * Column spans per shape on the 12-column desktop grid and the 6-column
- * tablet grid: what a panel prefers, the least it takes when a row squeezes,
- * and what it takes alone on a row. The featured first panel prefers more
- * and gives up less (fmin).
- */
-const SPANS = array(
+/** A panel alone on its row, by shape, on the 12- and 6-column grids. */
+const SOLO_SPAN = array(
 	12 => array(
-		'featured' => array(
-			'panorama'  => 12,
-			'landscape' => 9,
-			'square'    => 7,
-			'portrait'  => 6,
-		),
-		'pref'     => array(
-			'panorama'  => 8,
-			'landscape' => 6,
-			'square'    => 4,
-			'portrait'  => 4,
-		),
-		'min'      => array(
-			'panorama'  => 8,
-			'landscape' => 5,
-			'square'    => 4,
-			'portrait'  => 3,
-		),
-		'fmin'     => array(
-			'panorama'  => 12,
-			'landscape' => 8,
-			'square'    => 6,
-			'portrait'  => 5,
-		),
-		'lone'     => array(
-			'panorama'  => 12,
-			'landscape' => 9,
-			'square'    => 7,
-			'portrait'  => 6,
-		),
+		'panorama'  => 12,
+		'landscape' => 9,
+		'square'    => 7,
+		'portrait'  => 5,
 	),
 	6  => array(
-		'featured' => array(
-			'panorama'  => 6,
-			'landscape' => 6,
-			'square'    => 4,
-			'portrait'  => 4,
-		),
-		'pref'     => array(
-			'panorama'  => 6,
-			'landscape' => 4,
-			'square'    => 3,
-			'portrait'  => 3,
-		),
-		'min'      => array(
-			'panorama'  => 6,
-			'landscape' => 3,
-			'square'    => 3,
-			'portrait'  => 2,
-		),
-		'fmin'     => array(
-			'panorama'  => 6,
-			'landscape' => 4,
-			'square'    => 3,
-			'portrait'  => 3,
-		),
-		'lone'     => array(
-			'panorama'  => 6,
-			'landscape' => 6,
-			'square'    => 4,
-			'portrait'  => 4,
-		),
+		'panorama'  => 6,
+		'landscape' => 6,
+		'square'    => 5,
+		'portrait'  => 4,
 	),
 );
 
-/**
- * How each panel after the anchor is presented, in a fixed rhythm: mostly
- * bare photographs, with an occasional narrow-edged print, contact-sheet
- * panel or taped print, so no device repeats on every image.
- */
-const TREATMENTS = array( 'bare', 'print', 'bare', 'contact', 'bare', 'print', 'taped' );
+/** The hero's columns beside its two satellites. */
+const HERO_SPAN = array(
+	'landscape' => 8,
+	'square'    => 7,
+	'portrait'  => 6,
+);
 
 /** A caption up to this many characters is handwritten on a print's edge. */
 const HAND_CAPTION_LIMIT = 40;
 
-/**
- * Each panel's presentation classes from its place in the packed rows.
- *
- * The first panel is the anchor (bare, on a spot-colour plate). The second
- * panel of the anchor's row, and of every third shared row after it, laps
- * over its neighbour's edge; one panel in each other shared row drops below
- * the row line, at alternate ends. A short real caption on a print or taped
- * print is handwritten. Every eighth panel from the fourth gets a plate. A
- * panorama is never the tilted, taped print: it lies flat as a print.
- *
- * @param array<int, array{span: int, start: int, row: int}> $cells    Desktop cells from layout().
- * @param string[]                                           $captions Each panel's caption text ('' for none).
- * @param string[]                                           $shapes   Each panel's shape.
- * @return array<int, string[]> Class suffixes per panel.
- */
-function dressing( array $cells, array $captions, array $shapes = array() ): array {
-	$rows = array();
-	foreach ( $cells as $n => $cell ) {
-		$rows[ $cell['row'] ][] = $n;
-	}
-	$out = array();
-	foreach ( $cells as $n => $cell ) {
-		$classes = array( 0 === $n ? 'anchor' : TREATMENTS[ ( $n - 1 ) % count( TREATMENTS ) ] );
-		if ( 'taped' === $classes[0] && 'panorama' === ( $shapes[ $n ] ?? '' ) ) {
-			$classes[0] = 'print';
-		}
-		$row = $rows[ $cell['row'] ];
-		$pos = (int) array_search( $n, $row, true );
-		if ( count( $row ) > 1 && 0 !== $n ) {
-			if ( 1 === $pos && 0 === $cell['row'] % 3 ) {
-				$classes[] = 'lap';
-			} elseif ( ( 0 === $cell['row'] % 2 ? count( $row ) - 1 : 0 ) === $pos ) {
-				$classes[] = 'drop';
-			}
-		}
-		$caption = (string) ( $captions[ $n ] ?? '' );
-		$length  = function_exists( 'mb_strlen' ) ? mb_strlen( $caption ) : strlen( $caption );
-		if ( in_array( $classes[0], array( 'print', 'taped' ), true ) && '' !== $caption && $length <= HAND_CAPTION_LIMIT ) {
-			$classes[] = 'hand';
-		}
-		if ( 0 === $n || 3 === $n % 8 ) {
-			$classes[] = 'plate';
-		}
-		$out[ $n ] = $classes;
-	}
-	return $out;
-}
-
-/** Which panels take a row's spare columns first. */
-const GROW_ORDER = array( 'landscape', 'panorama', 'square', 'portrait' );
+/** Row spacing, in steps of the sheet's rhythm: a new group, a row inside a group, a dropped panel. */
+const LEAD = 3;
+const STEP = 1;
+const DROP = 2;
 
 /**
- * Pack panels into full rows, deterministically, for any count.
+ * The gallery as composed groups, in source order.
  *
- * Panels fill a row at their preferred spans; when the next one does not
- * fit, the row squeezes to its least spans if that makes room, else the row
- * closes. A full row's spare columns go to its landscapes first, so no row
- * leaves a hole. A panel alone on a row keeps its lone span and sits centred
- * when it is the only row, else at alternate ends of the page.
+ * Patterns: solo (one picture), journal (one captioned picture with its
+ * caption as a margin note), banner (a panorama), stack (a panorama and its
+ * neighbour), diptych (two), essay (two landscapes stepping down the page),
+ * triptych (three), hero (one picture with two wide satellites) and contact
+ * (the tail of a long gallery as a contact sheet). The walk reads each
+ * picture's shape and what remains, never reorders, and never leaves a lone
+ * picture at the end unless it is the only one or a full-width banner.
  *
- * @param string[] $shapes Panel shapes in order.
- * @param int      $cols   12 (desktop) or 6 (tablet).
- * @return array<int, array{span: int, start: int, row: int}> Start 0 means "after the previous panel".
+ * @param string[] $shapes   Panel shapes.
+ * @param string[] $captions Panel caption text ('' for none).
+ * @return array<int, array{0: string, 1: int[]}> Pattern and the panels it holds.
  */
-function layout( array $shapes, int $cols ): array {
-	$table = SPANS[ $cols ];
-	$rows  = array();
-	$row   = array();
-	foreach ( array_values( $shapes ) as $i => $shape ) {
-		$item = array(
-			'i'     => $i,
-			'shape' => $shape,
-			'pref'  => $table[ 0 === $i ? 'featured' : 'pref' ][ $shape ],
-			'min'   => $table[ 0 === $i ? 'fmin' : 'min' ][ $shape ],
-		);
-		if ( $row && array_sum( array_column( $row, 'pref' ) ) + $item['pref'] > $cols && array_sum( array_column( $row, 'min' ) ) + $item['min'] > $cols ) {
-			$rows[] = $row;
-			$row    = array();
+function groups( array $shapes, array $captions ): array {
+	$n    = count( $shapes );
+	$out  = array();
+	$i    = 0;
+	$wide = static fn( int $k ): bool => in_array( $shapes[ $k ] ?? '', WIDE, true );
+	$pano = static fn( int $k ): bool => 'panorama' === ( $shapes[ $k ] ?? '' );
+	while ( $i < $n ) {
+		$left = $n - $i;
+		$prev = $out ? $out[ count( $out ) - 1 ][0] : '';
+		if ( $n >= 12 && $i >= 8 && $left >= 4 ) {
+			$out[] = array( 'contact', range( $i, $n - 1 ) );
+			break;
 		}
-		$row[] = $item;
-	}
-	if ( $row ) {
-		$rows[] = $row;
-	}
-
-	$out = array();
-	foreach ( $rows as $r => $row ) {
-		if ( 1 === count( $row ) ) {
-			$span = $table['lone'][ $row[0]['shape'] ];
-			if ( 1 === count( $rows ) ) {
-				// The only panel sits centred; a span that cannot centre grows by one column.
-				$span += ( $cols - $span ) % 2;
-				$start = intdiv( $cols - $span, 2 ) + 1;
-			} else {
-				// Inset one column from alternate edges, so the open paper beside it reads as a margin.
-				$inset = $cols - $span >= 2 ? 1 : 0;
-				$start = 1 === $r % 2 ? $cols - $span + 1 - $inset : 1 + $inset;
+		if ( 1 === $left ) {
+			$single = '' !== ( $captions[ $i ] ?? '' ) ? 'journal' : 'solo';
+			$out[]  = array( $pano( $i ) ? 'banner' : $single, array( $i ) );
+			break;
+		}
+		if ( $pano( $i ) || $pano( $i + 1 ) ) {
+			if ( $pano( $i ) && 2 !== $left ) {
+				$out[] = array( 'banner', array( $i ) );
+				++$i;
+				continue;
 			}
-			$out[ $row[0]['i'] ] = array(
-				'span'  => $span,
-				'start' => $span >= $cols ? 0 : $start,
-				'row'   => $r,
-			);
+			$out[] = array( 'stack', array( $i, $i + 1 ) );
+			$i    += 2;
 			continue;
 		}
-		$spans = array_column( $row, 'pref' );
-		// Squeeze: take a column from whichever panel sits furthest above its least span.
-		while ( array_sum( $spans ) > $cols ) {
-			$best = 0;
-			foreach ( $spans as $k => $span ) {
-				if ( $span - $row[ $k ]['min'] > $spans[ $best ] - $row[ $best ]['min'] ) {
-					$best = $k;
-				}
-			}
-			--$spans[ $best ];
+		if ( $left >= 3 && 4 !== $left && ! $pano( $i + 2 ) ) {
+			$out[] = array( 'hero' !== $prev && $wide( $i + 1 ) && $wide( $i + 2 ) ? 'hero' : 'triptych', array( $i, $i + 1, $i + 2 ) );
+			$i    += 3;
+			continue;
 		}
-		// Grow: hand spare columns round the panels, landscapes first.
-		$order = array_keys( $row );
-		$rank  = static fn( int $k ): int => (int) array_search( $row[ $k ]['shape'], GROW_ORDER, true ) * 100 + $k;
-		usort( $order, static fn( int $a, int $b ): int => $rank( $a ) <=> $rank( $b ) );
-		$spare = $cols - array_sum( $spans );
-		for ( $k = 0; $k < $spare; ++$k ) {
-			++$spans[ $order[ $k % count( $order ) ] ];
-		}
-		foreach ( $row as $k => $item ) {
-			$out[ $item['i'] ] = array(
-				'span'  => $spans[ $k ],
-				'start' => 0,
-				'row'   => $r,
-			);
-		}
+		$out[] = array( 'landscape' === $shapes[ $i ] && 'landscape' === $shapes[ $i + 1 ] ? 'essay' : 'diptych', array( $i, $i + 1 ) );
+		$i    += 2;
 	}
-	ksort( $out );
 	return $out;
 }
 
 /**
- * A panel's grid-column value.
+ * Spans for pictures that share a row and a height: each takes columns in
+ * proportion to its width over height, at least $min, summing to $cols.
  *
- * @param array{span: int, start: int, row: int} $cell Cell from layout().
+ * @param string[] $shapes Shapes in the row.
+ * @param int      $cols   Columns to fill.
+ * @param int      $min    Fewest columns per picture.
+ * @return int[]
+ */
+function justify( array $shapes, int $cols, int $min ): array {
+	$ratios = array_map( static fn( string $s ): float => RATIO[ $s ], $shapes );
+	$total  = array_sum( $ratios );
+	$spans  = array_map( static fn( float $r ): int => max( $min, (int) floor( $cols * $r / $total ) ), $ratios );
+	$order  = array_keys( $ratios );
+	// Widest first; equal ratios keep source order.
+	usort( $order, static fn( int $a, int $b ): int => array( $ratios[ $b ], $a ) <=> array( $ratios[ $a ], $b ) );
+	$size  = count( $order );
+	$spare = $cols - array_sum( $spans );
+	for ( $k = 0; $k < $spare; ++$k ) {
+		++$spans[ $order[ $k % $size ] ];
+	}
+	// Over: take columns back from the narrowest that can give them.
+	$over = array_sum( $spans ) - $cols;
+	for ( $k = $size - 1, $guard = 0; $over > 0 && $guard < $cols * $size; $k = ( $k + $size - 1 ) % $size, ++$guard ) {
+		if ( $spans[ $order[ $k ] ] > $min ) {
+			--$spans[ $order[ $k ] ];
+			--$over;
+		}
+	}
+	return $spans;
+}
+
+/**
+ * A cell: start column, span, rows.
+ *
+ * @param int $start Start column.
+ * @param int $span  Columns.
+ * @param int $rows  Rows.
+ * @return array{start: int, span: int, rows: int}
+ */
+function cell( int $start, int $span, int $rows = 1 ): array {
+	return array(
+		'start' => $start,
+		'span'  => $span,
+		'rows'  => $rows,
+	);
+}
+
+/**
+ * Cells for a run of pictures that share a row: consecutive starts from 1.
+ *
+ * @param int[] $spans Spans.
+ * @return array<int, array{start: int, span: int, rows: int}>
+ */
+function row_cells( array $spans ): array {
+	$out   = array();
+	$start = 1;
+	foreach ( $spans as $span ) {
+		$out[]  = cell( $start, $span );
+		$start += $span;
+	}
+	return $out;
+}
+
+/**
+ * Where each panel sits on the 12-column desktop, 6-column tablet and
+ * 2-column phone grids, how it is presented, and the space above its row.
+ *
+ * @param string[] $shapes   Panel shapes, in source order.
+ * @param string[] $captions Panel caption text ('' for none).
+ * @return array<int, array{pattern: string, group: int, treat: string, flags: string[], d: array, t: array, p: array, mt: array{d: int, t: int, p: int}}>
+ */
+function compose( array $shapes, array $captions ): array {
+	$plan  = array();
+	$taped = false;
+	foreach ( groups( $shapes, $captions ) as $g => list( $pattern, $members ) ) {
+		$s     = array_map( static fn( int $k ): string => $shapes[ $k ], $members );
+		$cells = array();
+		$flags = array_fill( 0, count( $members ), array() );
+		$off   = array_fill( 0, count( $members ), 0 );
+		switch ( $pattern ) {
+			case 'solo':
+			case 'banner':
+			case 'stack':
+				foreach ( $s as $k => $shape ) {
+					$d           = SOLO_SPAN[12][ $shape ];
+					$t           = SOLO_SPAN[6][ $shape ];
+					$cells[ $k ] = array( cell( intdiv( 12 - $d, 2 ) + 1, $d ), cell( intdiv( 6 - $t, 2 ) + 1, $t ), cell( 1, 2 ) );
+					$flags[ $k ] = array( 'center' );
+				}
+				break;
+			case 'journal':
+				$d        = 'portrait' === $s[0] ? 8 : ( 'square' === $s[0] ? 9 : 10 );
+				$cells[0] = array( cell( intdiv( 12 - $d, 2 ) + 1, $d ), cell( 1, 6 ), cell( 1, 2 ) );
+				break;
+			case 'essay':
+				$cells    = array(
+					array( cell( 1, 8 ), cell( 1, 5 ), cell( 1, 2 ) ),
+					array( cell( 5, 8 ), cell( 2, 5 ), cell( 1, 2 ) ),
+				);
+				$flags[1] = array( 'step' );
+				break;
+			case 'diptych':
+				if ( $s[0] === $s[1] ) {
+					$cells  = array(
+						array( cell( 2, 5 ), cell( 1, 3 ), cell( 1, 'portrait' === $s[0] ? 1 : 2 ) ),
+						array( cell( 7, 5 ), cell( 4, 3 ), cell( 'portrait' === $s[0] ? 2 : 1, 'portrait' === $s[0] ? 1 : 2 ) ),
+					);
+					$off[1] = 'square' === $s[0] ? DROP : 0;
+				} else {
+					$d     = row_cells( justify( $s, 12, 4 ) );
+					$cells = array(
+						array( $d[0], cell( 1, 3 ), cell( 1, 2 ) ),
+						array( $d[1], cell( 4, 3 ), cell( 1, 2 ) ),
+					);
+					$flags = array( array( 'baseline' ), array( 'baseline' ) );
+				}
+				$flags[0][] = 'toward-end';
+				$flags[1][] = 'toward-start';
+				break;
+			case 'triptych':
+				if ( array( 'portrait', 'portrait', 'portrait' ) === $s ) {
+					$d     = row_cells( array( 4, 4, 4 ) );
+					$t     = row_cells( array( 2, 2, 2 ) );
+					$cells = array(
+						array( $d[0], $t[0], cell( 1, 1 ) ),
+						array( $d[1], $t[1], cell( 2, 1 ) ),
+						array( $d[2], $t[2], cell( 1, 2 ) ),
+					);
+					$off   = array( DROP, 0, DROP );
+				} else {
+					$d = row_cells( justify( $s, 12, 3 ) );
+					$t = row_cells( justify( $s, 6, 2 ) );
+					foreach ( $s as $k => $shape ) {
+						$cells[ $k ] = array( $d[ $k ], $t[ $k ], cell( 1, 2 ) );
+						$flags[ $k ] = array( 'baseline' );
+					}
+				}
+				break;
+			case 'hero':
+				$h        = HERO_SPAN[ $s[0] ];
+				$sat_p    = 'square' === $s[1] && 'square' === $s[2];
+				$cells    = array(
+					array( cell( 1, $h, 2 ), cell( 1, 6 ), cell( 1, 2 ) ),
+					array( cell( $h + 1, 12 - $h ), cell( 1, 3 ), $sat_p ? cell( 1, 1 ) : cell( 1, 2 ) ),
+					array( cell( $h + 1, 12 - $h ), cell( 4, 3 ), $sat_p ? cell( 2, 1 ) : cell( 1, 2 ) ),
+				);
+				$flags[1] = array( 'hero-sat' );
+				$flags[2] = array( 'hero-sat', 'baseline' );
+				break;
+			case 'contact':
+				foreach ( $members as $k => $unused ) {
+					$cells[ $k ] = array( cell( 1 + ( $k % 4 ) * 3, 3 ), cell( 1 + ( $k % 3 ) * 2, 2 ), cell( 1 + $k % 2, 1 ) );
+				}
+				break;
+		}
+
+		foreach ( $members as $k => $n ) {
+			$treat = 'bare';
+			if ( 'contact' === $pattern ) {
+				$treat = 'contact';
+			} elseif ( 0 === $n ) {
+				$treat = 'anchor';
+			} elseif ( ( 'hero' === $pattern && $k > 0 ) || ( 'triptych' === $pattern && 1 === $k ) ) {
+				$treat = 'print';
+			}
+			if ( 'print' === $treat && ! $taped && $n >= 3 && 'panorama' !== $shapes[ $n ] ) {
+				$treat = 'taped';
+				$taped = true;
+			}
+			$item_flags = $flags[ $k ];
+			if ( 'anchor' === $treat && 1 === $cells[ $k ][0]['start'] && $cells[ $k ][0]['span'] < 12 ) {
+				$item_flags[] = 'edge';
+			}
+			if ( 'anchor' === $treat && 2 === $cells[ $k ][2]['span'] ) {
+				$item_flags[] = 'bleed';
+			}
+			if ( ( 'anchor' === $treat && 'journal' !== $pattern ) || ( 0 === $k && 2 === $g % 3 && 'bare' === $treat ) ) {
+				$item_flags[] = 'plate';
+			}
+			$caption = (string) ( $captions[ $n ] ?? '' );
+			$length  = function_exists( 'mb_strlen' ) ? mb_strlen( $caption ) : strlen( $caption );
+			if ( '' !== $caption && ( ( in_array( $treat, array( 'print', 'taped' ), true ) && $length <= HAND_CAPTION_LIMIT ) || ( 'journal' === $pattern && $length <= HAND_LIMIT ) ) ) {
+				$item_flags[] = 'hand';
+			}
+			$plan[ $n ] = array(
+				'pattern' => $pattern,
+				'group'   => $g,
+				'treat'   => $treat,
+				'flags'   => $item_flags,
+				'd'       => $cells[ $k ][0],
+				't'       => $cells[ $k ][1],
+				'p'       => $cells[ $k ][2],
+				'off'     => $off[ $k ],
+			);
+		}
+	}
+	ksort( $plan );
+
+	// Space above each row, per grid: none above the first, a lead above a new group, a step inside one.
+	foreach ( array( 'd', 't', 'p' ) as $bp ) {
+		$end   = PHP_INT_MAX;
+		$group = -1;
+		$space = 0;
+		foreach ( $plan as $n => $item ) {
+			if ( $item[ $bp ]['start'] <= $end ) {
+				if ( 0 === $n ) {
+					$space = 0;
+				} elseif ( $item['group'] !== $group ) {
+					$space = LEAD;
+				} else {
+					$space = 'contact' === $item['pattern'] ? 0 : STEP;
+				}
+			}
+			$group                   = $item['group'];
+			$end                     = $item[ $bp ]['start'] + $item[ $bp ]['span'] - 1;
+			$drop                    = 'd' === $bp ? $item['off'] : ( 't' === $bp ? intdiv( $item['off'], 2 ) : 0 );
+			$plan[ $n ]['mt'][ $bp ] = $space + $drop;
+		}
+	}
+	foreach ( $plan as $n => $item ) {
+		unset( $plan[ $n ]['off'] );
+	}
+	return $plan;
+}
+
+/**
+ * A panel's grid-column (and grid-row) value.
+ *
+ * @param array{start: int, span: int, rows: int} $cell Cell.
  * @return string
  */
-function grid_column( array $cell ): string {
-	return ( $cell['start'] > 0 ? $cell['start'] . ' / ' : '' ) . 'span ' . $cell['span'];
+function grid_area( array $cell ): string {
+	return $cell['start'] . ' / span ' . $cell['span'];
+}
+
+/**
+ * The image sizes a panel's spans need on phone, tablet and desktop.
+ *
+ * @param array $item Panel from compose().
+ * @return string
+ */
+function sizes_for( array $item ): string {
+	$phone  = 1 === $item['p']['span'] ? '50vw' : '100vw';
+	$tablet = (int) round( $item['t']['span'] / 6 * 100 ) . 'vw';
+	$desk   = rtrim( rtrim( number_format( $item['d']['span'] * 5.25, 2, '.', '' ), '0' ), '.' ) . 'rem';
+	return '(max-width: 40rem) ' . $phone . ', (max-width: 64rem) ' . $tablet . ', ' . $desk;
 }
 
 /**
@@ -559,36 +656,38 @@ function zine( string $html, array $block, $instance = null ): string {
 	$shapes   = array();
 	$captions = array();
 	foreach ( $found[0] as $n => $figure ) {
-		$shape = shape_of( $images[ $n ], $figure );
-		$tags  = new \WP_HTML_Tag_Processor( $figure );
-		if ( $tags->next_tag( 'img' ) ) {
-			$tags->add_class( 'u-photo' );
-			$tags->set_attribute( 'sizes', SIZES[ 0 === $n ? 'featured' : 'panel' ][ $shape ] );
-			$figure = $tags->get_updated_html();
-		}
 		$figures[]  = $figure;
-		$shapes[]   = $shape;
+		$shapes[]   = shape_of( $images[ $n ], $figure );
 		$captions[] = preg_match( '/<figcaption\b[^>]*>(.*?)<\/figcaption>/s', $figure, $m ) ? trim( html_entity_decode( wp_strip_all_tags( $m[1] ), ENT_QUOTES ) ) : '';
 	}
 
-	$desktop = layout( $shapes, 12 );
-	$tablet  = layout( $shapes, 6 );
-	$dress   = dressing( $desktop, $captions, $shapes );
-	$of      = str_pad( (string) $total, $width, '0', STR_PAD_LEFT );
-	$panels  = '';
+	$plan   = compose( $shapes, $captions );
+	$of     = str_pad( (string) $total, $width, '0', STR_PAD_LEFT );
+	$panels = '';
 	foreach ( $figures as $n => $figure ) {
-		$num     = str_pad( (string) ( $n + 1 ), $width, '0', STR_PAD_LEFT );
-		$style   = '--cr-col:' . grid_column( $desktop[ $n ] ) . ';--cr-col-t:' . grid_column( $tablet[ $n ] );
-		$classes = 'cr-zine__frame cr-zine__frame--' . $shapes[ $n ];
-		foreach ( $dress[ $n ] as $suffix ) {
-			$classes .= ' cr-zine__frame--' . $suffix;
+		$item = $plan[ $n ];
+		$tags = new \WP_HTML_Tag_Processor( $figure );
+		if ( $tags->next_tag( 'img' ) ) {
+			$tags->add_class( 'u-photo' );
+			$tags->set_attribute( 'sizes', sizes_for( $item ) );
+			$figure = $tags->get_updated_html();
+		}
+		$num   = str_pad( (string) ( $n + 1 ), $width, '0', STR_PAD_LEFT );
+		$style = '--cr-col:' . grid_area( $item['d'] ) . ';--cr-col-t:' . grid_area( $item['t'] ) . ';--cr-col-p:' . grid_area( $item['p'] )
+			. ';--cr-mt:' . $item['mt']['d'] . ';--cr-mt-t:' . $item['mt']['t'] . ';--cr-mt-p:' . $item['mt']['p'];
+		if ( $item['d']['rows'] > 1 ) {
+			$style .= ';--cr-rows:span ' . $item['d']['rows'];
+		}
+		$classes = 'cr-zine__frame cr-zine__frame--' . $shapes[ $n ] . ' cr-zine__frame--' . $item['pattern'] . ' cr-zine__frame--' . $item['treat'];
+		foreach ( $item['flags'] as $flag ) {
+			$classes .= ' cr-zine__frame--' . $flag;
 		}
 		// The anchor carries a camera-style date imprint: the post's own date, nothing more.
-		$imprint = 0 === $n ? '<span class="cr-zine__imprint" aria-hidden="true">' . esc_html( get_the_date( "'y m d", $post ) ) . '</span>' : '';
-		if ( '' !== $imprint ) {
+		if ( 'anchor' === $item['treat'] ) {
 			// Inside the figure, so the imprint sits on the photograph however the cell is sized.
-			$at     = strrpos( $figure, '</figure>' );
-			$figure = false === $at ? $figure . $imprint : substr( $figure, 0, $at ) . $imprint . substr( $figure, $at );
+			$imprint = '<span class="cr-zine__imprint" aria-hidden="true">' . esc_html( get_the_date( "'y m d", $post ) ) . '</span>';
+			$at      = strrpos( $figure, '</figure>' );
+			$figure  = false === $at ? $figure . $imprint : substr( $figure, 0, $at ) . $imprint . substr( $figure, $at );
 		}
 		$panels .= '<li class="' . $classes . '" style="' . esc_attr( $style ) . '">'
 			. '<span class="cr-zine__num" aria-hidden="true">' . $num . '<span class="cr-zine__of">/' . $of . '</span></span>'
