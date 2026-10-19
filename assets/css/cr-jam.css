@@ -117,7 +117,9 @@
 	grid-template-columns: minmax(0, 1fr);
 }
 
+/* Below 40rem the cover sits above the text in one column. */
 .cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-media {
+	grid-row: auto;
 	width: 100%;
 	max-width: 15rem;
 	height: auto;
@@ -127,6 +129,18 @@
 	width: 100%;
 	height: auto;
 	aspect-ratio: 1;
+}
+
+.cr-jukebox .pkiw-lead .cr-jam-strip--listing :is(.pk-title, .pk-sub) {
+	grid-column: 1;
+}
+
+.cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-title {
+	font-size: var(--cr-text-2xl);
+}
+
+.cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-sub {
+	font-size: var(--cr-text-lg);
 }
 
 @media (min-width: 40rem) {
@@ -142,6 +156,15 @@
 
 	.cr-jukebox .pkiw-lead .cr-jam-strip--listing :is(.pk-title, .pk-sub) {
 		grid-column: 2;
+	}
+
+	/* Title and artist meet at the cover's middle instead of splitting its two rows. */
+	.cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-title {
+		align-self: end;
+	}
+
+	.cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-sub {
+		align-self: start;
 	}
 }
 
@@ -204,6 +227,18 @@
 
 .cr-jam-strip--listing:has(> .pk-media) :is(.pk-title, .pk-sub) {
 	grid-column: 2;
+}
+
+/*
+ * No stored cover, or one site-ux.js marked failed: one full-width text column. The jukebox scope
+ * outranks the plugin's `.pk-card` badge column, which ties with the bare strip class and loads later.
+ */
+.cr-jukebox .cr-jam-strip--listing:not(:has(> .pk-media:not(.cr-cover--failed))) {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.cr-jukebox .cr-jam-strip--listing:not(:has(> .pk-media:not(.cr-cover--failed))) :is(.pk-title, .pk-sub) {
+	grid-column: 1;
 }
 
 .cr-jam-strip--listing .pk-title,
@@ -299,6 +334,7 @@
 	font-size: var(--cr-text-sm);
 	font-weight: var(--cr-weight-bold);
 	line-height: 1;
+	opacity: 1;
 }
 
 .cr-jukebox .pkiw-group__items > li:nth-child(3n+2) .cr-jam-strip--listing::before {
@@ -521,22 +557,44 @@
 	box-sizing: border-box;
 	max-width: var(--wp--style--global--wide-size, 72rem);
 	margin: var(--cr-space-xl) auto;
-	padding-block-start: var(--cr-space-sm);
+}
+
+/* The fold-out is the card: no outer frame. These beat the plugin's `.pk-card` paint and the theme's single-post `.pk-card` frame in cr-post-kinds.css. */
+body .pk-card.cr-jcard,
+body[class*="kind-"].single .single-post__content .pk-card.cr-jcard {
+	padding: 0;
 	border: 0;
 	background: transparent;
 	box-shadow: none;
 }
 
-.cr-jcard::before {
+body .pk-card.cr-jcard::before,
+body[class*="kind-"].single .single-post__content .pk-card.cr-jcard::before {
+	content: none;
+}
+
+/* One tape strip on the cover's lower-left corner, or on the note's upper-right corner when no cover prints. */
+.cr-jcard > .cr-jcard__insert::before,
+.cr-jcard:not(:has(> .cr-jcard__insert)) > .cr-jcard__note::before {
 	content: "";
 	position: absolute;
 	z-index: 2;
-	inset-block-start: 0;
-	inset-inline-start: 42%;
-	width: 16%;
+	width: 5rem;
 	height: 1.5rem;
 	background-color: var(--cr-tape);
-	transform: rotate(var(--cr-rotate-1));
+	pointer-events: none;
+}
+
+.cr-jcard > .cr-jcard__insert::before {
+	inset-block-end: calc(var(--cr-space-sm) * -1);
+	inset-inline-start: calc(var(--cr-space-md) * -1);
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.cr-jcard:not(:has(> .cr-jcard__insert)) > .cr-jcard__note::before {
+	inset-block-start: calc(var(--cr-space-sm) * -1);
+	inset-inline-end: calc(var(--cr-space-md) * -1);
+	transform: rotate(var(--cr-rotate-2));
 }
 
 .cr-jcard :is(.cr-jcard__insert, .cr-jcard__details, .cr-jcard__note) {
@@ -552,6 +610,10 @@
 	grid-area: insert;
 	display: grid;
 	place-items: center;
+}
+
+.cr-jcard .cr-jcard__insert {
+	padding: var(--cr-space-sm);
 }
 
 .cr-jcard__insert.cr-cover--failed {
@@ -608,6 +670,7 @@
 	color: var(--cr-ink);
 	font-family: var(--cr-font-body);
 	font-size: var(--cr-text-base);
+	font-weight: var(--cr-weight-bold);
 	line-height: var(--cr-leading-normal);
 	overflow-wrap: anywhere;
 }
@@ -636,7 +699,6 @@
 	justify-content: space-between;
 	gap: var(--cr-space-sm);
 	min-height: 2.75rem;
-	margin-block-start: auto;
 	padding: var(--cr-space-xs) var(--cr-space-sm);
 	border: 2px solid var(--cr-ink);
 	background-color: var(--cr-surface-elevated);
@@ -668,7 +730,7 @@
 	display: none;
 	min-width: 4rem;
 	border: 2px solid var(--cr-ink);
-	background: var(--cr-printer-ivory) url(../img/cr-jam-cassette.svg) center / contain no-repeat;
+	background: var(--cr-sky-blue) url(../img/cr-jam-cassette.svg) center / 100% auto no-repeat;
 	box-shadow: var(--cr-shadow-hard);
 	transform: none;
 }
@@ -779,6 +841,7 @@
 :root[data-theme="dark"] :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream {
 	--cr-paper: var(--cr-night-elevated);
 	--cr-paper-ink: var(--cr-printer-ivory);
+	border-color: var(--cr-ink);
 	background-color: var(--cr-night-elevated);
 	color: var(--cr-printer-ivory);
 }
@@ -800,7 +863,8 @@
 :root[data-theme="dark"] .cr-jukebox .pkiw-lead__heading::before,
 :root[data-theme="dark"] :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream::before,
 :root[data-theme="dark"] :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-kindlabel,
-:root[data-theme="dark"] .cr-jcard::before {
+:root[data-theme="dark"] .cr-jcard > .cr-jcard__insert::before,
+:root[data-theme="dark"] .cr-jcard:not(:has(> .cr-jcard__insert)) > .cr-jcard__note::before {
 	background-color: var(--cr-tape);
 	color: var(--cr-tape-ink);
 }
@@ -836,6 +900,7 @@
 	:root:not([data-theme="light"]) :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream {
 		--cr-paper: var(--cr-night-elevated);
 		--cr-paper-ink: var(--cr-printer-ivory);
+		border-color: var(--cr-ink);
 		background-color: var(--cr-night-elevated);
 		color: var(--cr-printer-ivory);
 	}
@@ -857,7 +922,8 @@
 	:root:not([data-theme="light"]) .cr-jukebox .pkiw-lead__heading::before,
 	:root:not([data-theme="light"]) :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream::before,
 	:root:not([data-theme="light"]) :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-kindlabel,
-	:root:not([data-theme="light"]) .cr-jcard::before {
+	:root:not([data-theme="light"]) .cr-jcard > .cr-jcard__insert::before,
+	:root:not([data-theme="light"]) .cr-jcard:not(:has(> .cr-jcard__insert)) > .cr-jcard__note::before {
 		background-color: var(--cr-tape);
 		color: var(--cr-tape-ink);
 	}
@@ -912,7 +978,8 @@
 	.cr-archive--jam::before,
 	.cr-archive--jam::after,
 	:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream::before,
-	.cr-jcard::before,
+	.cr-jcard > .cr-jcard__insert::before,
+	.cr-jcard:not(:has(> .cr-jcard__insert)) > .cr-jcard__note::before,
 	.cr-jcard__spine {
 		display: none;
 	}
@@ -942,7 +1009,8 @@
 
 	.cr-archive--jam::before,
 	.cr-archive--jam::after,
-	.cr-jcard::before,
+	.cr-jcard > .cr-jcard__insert::before,
+	.cr-jcard:not(:has(> .cr-jcard__insert)) > .cr-jcard__note::before,
 	.cr-jcard__spine,
 	:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream::before {
 		display: none;
