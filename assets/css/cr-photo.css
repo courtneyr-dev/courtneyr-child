@@ -729,6 +729,12 @@ body.cr-photo-single .pkiw-photo-place {
 	letter-spacing: var(--cr-tracking-eyebrow);
 }
 
+/* Homepage Field Notes lane: the strip's 10rem frames sit centred on the print
+   (cr-home-sections.css sets the width; the print rules above reset margins). */
+.cr-fieldnotes .cr-home-stream .pk-card.k-photo.pk-card--gallery .cr-booth {
+	margin-inline: auto;
+}
+
 /* Homepage Field Notes lane: the polaroid matches the strip's width. */
 .cr-fieldnotes .cr-home-stream .pk-card.cr-polaroid {
 	max-width: 13.75rem;
