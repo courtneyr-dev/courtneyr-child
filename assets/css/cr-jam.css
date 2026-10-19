@@ -70,6 +70,7 @@
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
 	gap: var(--cr-space-md);
+	max-width: none;
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -119,6 +120,7 @@
 .cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-media {
 	width: 100%;
 	max-width: 15rem;
+	height: auto;
 }
 
 .cr-jukebox .pkiw-lead .cr-jam-strip--listing .pk-cover {
@@ -217,6 +219,12 @@
 	font-family: var(--cr-font-body);
 	font-size: var(--cr-text-sm);
 	line-height: var(--cr-leading-snug);
+}
+
+/* The plugin's `.pk-card > *` makes the heading a containing block; the title link's ::after must reach the strip. */
+.cr-jam-strip--listing > .pk-title,
+.cr-jukebox .pk-card--protected.k-jam > .pk-title {
+	position: static;
 }
 
 .cr-jam-strip--listing .pk-title a,
@@ -440,6 +448,11 @@
 	font-family: var(--cr-font-mono);
 	font-size: var(--cr-text-xs);
 	letter-spacing: var(--cr-tracking-wide);
+}
+
+/* The plugin's `.pk-card > *` makes the heading a containing block; the title link's ::after must reach the card. */
+:is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream > .pk-title {
+	position: static;
 }
 
 :is(body, .cr-stream-page) .pk-card.cr-jam-strip--stream .pk-title a {

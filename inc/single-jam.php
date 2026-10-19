@@ -147,6 +147,10 @@ function article_opening( string $html ): string {
 		return '';
 	}
 	$tags->add_class( 'cr-jcard' );
+	// The post h-entry's jam-of property is this h-cite (plan-235 TT3), not a bare URL.
+	if ( str_contains( $html, 'u-jam-of' ) ) { // A jam with no URL prints no u-jam-of, so the h-cite has nothing to be the property of.
+		$tags->add_class( 'u-jam-of' );
+	}
 	$updated = $tags->get_updated_html();
 
 	return 1 === preg_match( '/^\s*(<article\b[^>]*>)/i', $updated, $opening ) ? $opening[1] : '';
