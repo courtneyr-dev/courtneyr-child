@@ -261,7 +261,7 @@ namespace {
 				&& str_contains( $css, $both . ' .cr-note--single blockquote,' )
 				&& str_contains( $css, $both . ' .cr-note-artifact--single {' )
 				&& str_contains( $css, 'body.tax-kind.term-quote .cr-archive-stream .wp-block-post-template { columns: auto; max-width: 46rem; }' )
-				&& str_contains( $css, 'body.tax-kind.term-quote .cr-archive-stream .cr-note.cr-note--single::before { width: auto; height: auto; margin: 0; border-radius: 0; opacity: 1; transform: none; }' )
+				&& str_contains( $css, 'body.tax-kind.term-quote .cr-archive-stream .cr-note.cr-note--single::before { width: auto; height: auto; margin: 0; border-radius: 0; opacity: 1; transform: none; background-color: #f0eef8; }' )
 				&& str_contains( $css, "body.tax-kind.term-quote .cr-archive-stream .wp-block-post-template::after { content: none; }" )
 				&& str_contains( $css, 'body.tax-kind.term-quote .cr-archive-stream .cr-note-artifact--archive.cr-hand-short .cr-note--single blockquote p {' )
 				&& ! str_contains( $css, "\nbody.single-post.kind-quote .single-post__content .cr-note--single blockquote {" );

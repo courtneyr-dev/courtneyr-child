@@ -7108,7 +7108,8 @@ body.tax-kind.term-quote .cr-archive-stream .wp-block-post-template::before,
 body.tax-kind.term-quote .cr-archive-stream .wp-block-post-template::after { content: none; }
 body.tax-kind.term-quote .cr-archive-stream .cr-note-artifact--archive { margin: 0; }
 /* The paper layer outranks the older Stream pseudo pin on .k-quote::before. */
-body.tax-kind.term-quote .cr-archive-stream .cr-note.cr-note--single::before { width: auto; height: auto; margin: 0; border-radius: 0; opacity: 1; transform: none; }
+body.tax-kind.term-quote .cr-archive-stream .cr-note.cr-note--single::before { width: auto; height: auto; margin: 0; border-radius: 0; opacity: 1; transform: none; background-color: #f0eef8; }
+/* Archive paper: the Stream quote card's pale periwinkle (see the .k-quote paper above), not the single's ivory. */
 body.tax-kind.term-quote .cr-archive-stream .cr-note.cr-note--single::after { content: none; }
 /* The title is the sheet's h2 and its only link. */
 body.tax-kind.term-quote .cr-archive-stream .cr-note--single .pk-title {
