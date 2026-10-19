@@ -256,6 +256,24 @@
 	margin-inline: auto;
 }
 
+/* A missing frame: the image block's attachment is gone. The box keeps the
+   panel's place and the browser prints the real alt text inside it. */
+.cr-zine-single .cr-zine__frame.cr-zine__frame--missing > .wp-block-image {
+	width: 100%;
+}
+
+.cr-zine-single .cr-zine__frame.cr-zine__frame--missing img {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 8rem;
+	aspect-ratio: 4 / 3;
+	padding: var(--cr-space-md);
+	border: 2px dashed var(--cr-russian-violet);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+}
+
 /* Captions are annotations: the image block's own caption, set small under
    the picture after a rule, like a contact-sheet note. */
 .cr-zine-single .cr-zine__frame figcaption {
@@ -423,7 +441,7 @@
 	background-color: var(--cr-photocopier-blk);
 }
 
-.cr-zine-single .cr-zine__frame--contact img {
+.cr-zine-single .cr-zine__frame.cr-zine__frame--contact img {
 	max-height: 14rem;
 }
 

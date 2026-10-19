@@ -693,6 +693,11 @@ function zine( string $html, array $block, $instance = null ): string {
 			$style .= ';--cr-rows:span ' . $item['d']['rows'];
 		}
 		$classes = 'cr-zine__frame cr-zine__frame--' . $shapes[ $n ] . ' cr-zine__frame--' . $item['pattern'] . ' cr-zine__frame--' . $item['treat'];
+		// An image block whose attachment is gone keeps its place as a missing frame, its alt text and caption shown.
+		$attachment = (int) ( $images[ $n ]['attrs']['id'] ?? 0 );
+		if ( $attachment > 0 && false === wp_get_attachment_metadata( $attachment ) ) {
+			$classes .= ' cr-zine__frame--missing';
+		}
 		foreach ( $item['flags'] as $flag ) {
 			$classes .= ' cr-zine__frame--' . $flag;
 		}

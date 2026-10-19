@@ -480,6 +480,11 @@ namespace {
 			$html = cr_zine_render( cr_zine_request( 6 ) );
 			cr_photo_same( 1, substr_count( $html, 'class="cr-zine__imprint"' ), 'one date imprint, on the anchor' );
 			cr_photo_assert( 1 === preg_match( '/<span class="cr-zine__imprint" aria-hidden="true">[^<]*<\/span><\/figure>/', $html ), 'the imprint sits inside the anchor\'s figure' );
+			$gone = cr_zine_request( 3 );
+			unset( $GLOBALS['cr_zine_meta'][702] );
+			$html2 = cr_zine_render( $gone );
+			cr_photo_same( 1, substr_count( $html2, 'cr-zine__frame--missing' ), 'an image whose attachment is gone is marked as a missing frame' );
+			cr_photo_contains( 'alt="Alt 2"', $html2, 'its alt text stays' );
 			cr_photo_same( 6, preg_match_all( '/style="--cr-col:[^;"]+;--cr-col-t:[^;"]+;--cr-col-p:[^;"]+;--cr-mt:\d+;--cr-mt-t:\d+;--cr-mt-p:\d+"/', $html ), 'each panel carries its place on three grids and its row spacing' );
 		}
 	);
