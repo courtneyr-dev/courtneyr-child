@@ -51,17 +51,26 @@ namespace {
 		return 'kind' === $taxonomy && 'quote' === $term && ! empty( $GLOBALS['cr_q_request']['archive'] );
 	}
 	function is_singular( $type = '' ): bool {
-		return false;
+		return ! empty( $GLOBALS['cr_q_request']['single'] );
 	}
 	function get_queried_object_id(): int {
-		return 0;
+		return ! empty( $GLOBALS['cr_q_request']['single'] ) ? 30 : 0;
+	}
+	function get_post_time( $format = 'U', $gmt = false, $post = null ) {
+		return 1789215600;
+	}
+	function wp_date( $format, $timestamp = null ): string {
+		return gmdate( 'c' === $format ? 'c' : 'F j, Y', (int) $timestamp );
+	}
+	function get_option( $name, $default = false ) {
+		return 'date_format' === $name ? 'F j, Y' : $default;
 	}
 	function has_term( $term, $taxonomy, $post = null ): bool {
 		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
 		return 'kind' === $taxonomy && ( $GLOBALS['cr_q_request']['kinds'][ $id ] ?? '' ) === $term;
 	}
 	function get_post( $post = null ) {
-		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
+		$id = $post instanceof WP_Post ? $post->ID : ( null === $post && ! empty( $GLOBALS['cr_q_request']['single'] ) ? 30 : (int) $post );
 		return $GLOBALS['cr_q_request']['posts'][ $id ] ?? null;
 	}
 	function get_the_ID(): int {
@@ -73,6 +82,9 @@ namespace {
 	}
 	/** The quote block of a post body: a core/quote with its inner HTML. */
 	function parse_blocks( string $content ): array {
+		if ( isset( $GLOBALS['cr_q_request']['blocks'] ) ) {
+			return $GLOBALS['cr_q_request']['blocks'];
+		}
 		if ( ! preg_match( '/<!-- wp:quote( (\{.*?\}))? -->(.*?)<!-- \/wp:quote -->/s', $content, $m ) ) {
 			return array( array( 'blockName' => 'core/paragraph', 'attrs' => array(), 'innerBlocks' => array(), 'innerHTML' => $content ) );
 		}
@@ -124,6 +136,15 @@ namespace {
 	}
 }
 
+namespace Courtneyr\Child\Journal {
+	function margin_lines( int $seed, string $kind ): array {
+		return array( 'Words worth keeping.', 'Say it plainly.' );
+	}
+	function aside( string $line, int $n, string $class ): string {
+		return '';
+	}
+}
+
 namespace Courtneyr\Child\HomeSections {
 	function is_stream_surface(): bool {
 		return ! empty( $GLOBALS['cr_q_request']['stream'] );
@@ -137,6 +158,8 @@ namespace {
 	use function Courtneyr\Child\QuoteNote\archive_sheet;
 	use function Courtneyr\Child\QuoteNote\stream_card;
 	use const Courtneyr\Child\QuoteNote\PAPERS;
+	use function Courtneyr\Child\QuoteNote\note_page;
+	use function Courtneyr\Child\QuoteNote\paper_for;
 
 	const CR_Q_QUOTE = '<blockquote class="wp-block-quote is-style-side-rule-editorial"><p>When the risk to remain tight in a bud was more painful than the risk it took to blossom.</p><p>Well, I know which risk I would rather take.</p><cite>Ted Lasso</cite></blockquote>';
 
@@ -350,6 +373,59 @@ namespace {
 			$css = (string) file_get_contents( dirname( __DIR__, 2 ) . '/assets/css/cr-post-kinds.css' );
 			return 2 === substr_count( $css, 'var(--cr-quote-paper, var(--cr-printer-ivory));' )
 				&& ! str_contains( $css, 'transform: none; background-color: #f0eef8; }' );
+		}
+	);
+
+	cr_q_check(
+		'the single sheet carries the same paper as the archive and the Stream',
+		static function (): bool {
+			cr_q_reset( '<!-- wp:quote {"className":"is-style-cr-quote-paper-butter"} -->' . CR_Q_QUOTE . '<!-- /wp:quote -->' );
+			$archive = cr_q_paper( cr_q_sheet() );
+			$GLOBALS['cr_q_request']['archive'] = false;
+			$GLOBALS['cr_q_request']['single']  = true;
+			$single = note_page( '<div class="entry-content">' . CR_Q_QUOTE . '</div>', array( 'blockName' => 'core/post-content' ) );
+			$GLOBALS['cr_q_request']['single'] = false;
+			cr_q_reset();
+			$GLOBALS['cr_q_request']['archive'] = false;
+			$GLOBALS['cr_q_request']['single']  = true;
+			$seeded_single = cr_q_paper( note_page( '<div>' . CR_Q_QUOTE . '</div>', array( 'blockName' => 'core/post-content' ) ) );
+			$GLOBALS['cr_q_request']['single'] = false;
+			$GLOBALS['cr_q_request']['archive'] = true;
+			return PAPERS['butter'][1] === $archive && $archive === cr_q_paper( $single ) && str_contains( $single, 'cr-note-artifact--single' )
+				&& cr_q_paper( cr_q_sheet() ) === $seeded_single;
+		}
+	);
+
+	cr_q_check(
+		'a styled quote nested in a group still sets the paper',
+		static function (): bool {
+			cr_q_reset();
+			$GLOBALS['cr_q_request']['blocks'] = array(
+				array(
+					'blockName'   => 'core/group',
+					'attrs'       => array(),
+					'innerBlocks' => array( array( 'blockName' => 'core/quote', 'attrs' => array( 'className' => 'extra is-style-cr-quote-paper-sky' ), 'innerBlocks' => array(), 'innerHTML' => CR_Q_QUOTE ) ),
+					'innerHTML'   => '',
+				),
+			);
+			$paper = paper_for( $GLOBALS['cr_q_request']['posts'][30] );
+			unset( $GLOBALS['cr_q_request']['blocks'] );
+			return PAPERS['sky'][1] === $paper;
+		}
+	);
+
+	cr_q_check(
+		'the paper block style sets its own ink and cite colours, so it reads in dark mode outside the sheet',
+		static function (): bool {
+			$GLOBALS['cr_q_styles'] = array();
+			\Courtneyr\Child\QuoteNote\register_paper_styles();
+			foreach ( $GLOBALS['cr_q_styles'] as $style ) {
+				$css = (string) ( $style[1]['inline_style'] ?? '' );
+				if ( ! str_contains( $css, 'color:var(--cr-russian-violet)' ) || ! str_contains( $css, ' cite{color:var(--cr-cerulean)}' ) ) {
+					return false;
+				}
+			}
+			return 5 === count( $GLOBALS['cr_q_styles'] );
 		}
 	);
 

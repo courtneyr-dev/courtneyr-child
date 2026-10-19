@@ -138,7 +138,9 @@ function register_paper_styles(): void {
 				'name'         => 'cr-quote-paper-' . $slug,
 				/* translators: %s: paper colour name, such as Lavender. */
 				'label'        => sprintf( __( 'Paper: %s', 'courtneyr-child' ), __( $paper[0], 'courtneyr-child' ) ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- Labels come from the PAPERS table.
-				'inline_style' => '.wp-block-quote.is-style-cr-quote-paper-' . $slug . '{background-color:' . $paper[1] . ';padding:1rem 1.25rem}',
+				// Ink and cite colours are the raw palette tokens, which do not flip in dark mode: paper stays paper.
+				'inline_style' => '.wp-block-quote.is-style-cr-quote-paper-' . $slug . '{background-color:' . $paper[1] . ';color:var(--cr-russian-violet);padding:1rem 1.25rem}'
+					. '.wp-block-quote.is-style-cr-quote-paper-' . $slug . ' cite{color:var(--cr-cerulean)}',
 			)
 		);
 	}
