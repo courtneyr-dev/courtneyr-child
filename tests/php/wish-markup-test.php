@@ -361,8 +361,10 @@ namespace {
 					return false;
 				}
 			}
+			// The house paper tear (cr-favorite.css, the wish heading bands) is two hard-stop mask gradients, not a colour blend: allow those two strings and nothing else.
+			$tearless = str_replace( array( 'linear-gradient(45deg, var(--cr-black) 25%, transparent 25%)', 'linear-gradient(315deg, var(--cr-black) 25%, transparent 25%)' ), '', $css );
 			return 0 === preg_match( '/#[0-9a-f]{3,8}\b|rgba?\s*\(/i', $css )
-				&& 0 === preg_match( '/\b(?:filter|gradient|blur)\b|opacity\s*:\s*0\.75/i', $css )
+				&& 0 === preg_match( '/\b(?:filter|gradient|blur)\b|opacity\s*:\s*0\.75/i', $tearless )
 				&& ! str_contains( $css, 'rotate(8deg)' )
 				&& 0 === preg_match( '/font-size\s*:\s*(?:0\.[0-9]+|[0-9]+px)/i', $css )
 				&& str_contains( $wish, "const STYLE_HANDLE   = 'courtneyr-wish'" )

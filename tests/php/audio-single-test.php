@@ -315,7 +315,7 @@ namespace Courtneyr\Child\AudioSingleTests {
 	check( '' === lift_transcript( $filled_transcript, array( 'blockName' => 'core/group' ) ), 'B08 lifts its first filled transcript group' );
 	check( $later_transcript === lift_transcript( $later_transcript, array( 'blockName' => 'core/group' ) ), 'a later transcript group remains in the flow' );
 	$out = insert( $empty_transcript . $later_transcript );
-	check( 1 === substr_count( $out, '<h2 id="cr-audio-sheet-title"' ) && false !== strpos( $out, '[00:00] Welcome.' ), 'the lifted transcript prints once under one Transcript H2' );
+	check( 1 === substr_count( $out, '<h2 id="cr-audio-sheet-title"' ) && false !== strpos( $out, '<time class="cr-audio-sheet__stamp" datetime="PT0S">[00:00]</time> Welcome.' ), 'the lifted transcript prints once under one Transcript H2, its leading timestamp wrapped in a time element' );
 	check( false !== strpos( $out, '<section class="cr-audio-sheet" aria-labelledby="cr-audio-sheet-title">' ), 'the transcript heading ID matches aria-labelledby' );
 
 	setup( default_facts( array( 'has_transcript' => false ) ) );
