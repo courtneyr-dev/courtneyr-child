@@ -448,6 +448,7 @@ body.kind-question.single main.single-post .pkiw-answers__respond a {
 
 .cr-stream-page .pk-card.cr-question-slip .pk-kindlabel {
 	padding: 0;
+	transform: none;
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-mono);
 	letter-spacing: 0.08em;
@@ -559,7 +560,7 @@ body.kind-question.single main.single-post .pkiw-answers__respond a {
 		box-shadow: none;
 	}
 
-	.pkiw-question--sectioned .pkiw-question-section__heading {
+	.pkiw-question--sectioned .pkiw-question-section[data-pkiw-group] .pkiw-question-section__heading {
 		background: none;
 		clip-path: none;
 	}
@@ -590,8 +591,10 @@ body.kind-question.single main.single-post .pkiw-answers__respond a {
 		display: none;
 	}
 
-	.cr-stream-page .wp-block-post-template > li .pk-card.pk-card--stream.cr-question-slip {
-		border: 2px solid CanvasText;
+	.cr-stream-page .wp-block-post-template > li .pk-card.pk-card--stream.cr-question-slip:is(.cr-question-tilt-0, .cr-question-tilt-1, .cr-question-tilt-2, .cr-question-tilt-3) {
+
+		/* components.css forces 1px CanvasText on every .pk-card with !important; only !important restores the slip's 2px. */
+		border: 2px solid CanvasText !important;
 		background-image: none;
 		box-shadow: none;
 		transform: none;

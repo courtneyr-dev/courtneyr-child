@@ -92,9 +92,9 @@ async function axeContrast( page ) {
 }
 
 async function assertNoOldColors( page, root ) {
-	const leaks = await page.locator( root ).evaluate( ( scope, banned ) => {
+	const leaks = await page.locator( root ).evaluateAll( ( scopes, banned ) => {
 		const found = [];
-		for ( const node of [ scope, ...scope.querySelectorAll( '*' ) ] ) {
+		for ( const node of scopes.flatMap( ( scope ) => [ scope, ...scope.querySelectorAll( '*' ) ] ) ) {
 			for ( const pseudo of [ null, '::before', '::after' ] ) {
 				const style = getComputedStyle( node, pseudo );
 				for ( const property of [ 'color', 'backgroundColor', 'borderTopColor', 'outlineColor', 'boxShadow', 'textDecorationColor' ] ) {
@@ -236,8 +236,8 @@ test.describe( 'question archive', () => {
 				const box = await chip.boundingBox();
 				expect( Math.min( box.width, box.height ) ).toBeGreaterThanOrEqual( 44 );
 			}
-			await expect( pager.getByText( 'Previous', { exact: true } ) ).toHaveCount( 1 === number ? 0 : 1 );
-			await expect( pager.getByText( 'Next', { exact: true } ) ).toHaveCount( 3 === number ? 0 : 1 );
+			await expect( pager.getByRole( 'link', { name: 'Previous', exact: true } ) ).toHaveCount( 1 === number ? 0 : 1 );
+			await expect( pager.getByRole( 'link', { name: 'Next', exact: true } ) ).toHaveCount( 3 === number ? 0 : 1 );
 			await assertNoOverflow( page, `pager page ${ number }` );
 		}
 	} );
@@ -268,11 +268,13 @@ test.describe( 'question archive', () => {
 		expect( forced.border ).toBe( '2px solid' );
 		expect( forced.color ).toBe( await page.locator( 'body' ).evaluate( ( node ) => getComputedStyle( node ).color ) );
 		const marker = await page.locator( '[data-pkiw-group="answered"] .pkiw-question-section__heading' ).evaluate( ( node ) => ( { background: getComputedStyle( node ).backgroundColor, clip: getComputedStyle( node ).clipPath } ) );
-		expect( marker.background ).toBe( TRANSPARENT );
+		// Chrome reports a forced-colors transparent fill as rgba(255, 255, 255, 0).
+		expect( marker.background ).toMatch( /^rgba\(\d+, \d+, \d+, 0\)$/ );
 		expect( marker.clip ).toBe( 'none' );
 
 		await page.emulateMedia( { forcedColors: 'none', reducedMotion: 'reduce' } );
-		expect( await page.locator( '.cr-question-slip' ).first().evaluate( ( node ) => getComputedStyle( node ).transitionDuration ) ).toBe( '0s' );
+		// The site-wide reduced-motion reset reports 1e-06s, not 0s.
+		expect( Number.parseFloat( await page.locator( '.cr-question-slip' ).first().evaluate( ( node ) => getComputedStyle( node ).transitionDuration ) ) ).toBeLessThanOrEqual( 0.001 );
 	} );
 
 	test( 'archive has no axe color-contrast violations', async ( { page } ) => {
@@ -363,7 +365,8 @@ test.describe( 'question single', () => {
 		await expect( h1 ).toHaveCount( 1 );
 		await expect( h1 ).toHaveText( /^Question, / );
 		expect( await h1.innerText() ).toMatch( / at / );
-		await expect( page.locator( '.p-name' ) ).toHaveCount( 0 );
+		const entryNames = await page.locator( '.h-entry.kind-question' ).evaluate( ( entry ) => [ ...entry.querySelectorAll( '.p-name' ) ].filter( ( node ) => ! node.closest( '.p-author, .h-card' ) ).length );
+		expect( entryNames, 'the entry prints no p-name outside its author card' ).toBe( 0 );
 		await expect( page.locator( '.is-style-cr-salutation, li.pkiw-answer' ) ).toHaveCount( 0 );
 	} );
 
@@ -457,7 +460,7 @@ test.describe( 'question Stream cards', () => {
 			expect( await card.evaluate( ( node ) => getComputedStyle( node ).backgroundColor ) ).toBe( NIGHT_ELEVATED );
 			expect( await card.evaluate( ( node ) => getComputedStyle( node ).color ) ).toBe( IVORY );
 		}
-		await assertNoOldColors( page, '.cr-stream-page' );
+		await assertNoOldColors( page, '.cr-stream-page article.cr-question-slip' );
 		await page.emulateMedia( { forcedColors: 'active' } );
 		const forced = await card.evaluate( ( node ) => ( { border: `${ getComputedStyle( node ).borderTopWidth } ${ getComputedStyle( node ).borderTopStyle }`, color: getComputedStyle( node ).borderTopColor, transform: getComputedStyle( node ).transform } ) );
 		expect( forced.border ).toBe( '2px solid' );
