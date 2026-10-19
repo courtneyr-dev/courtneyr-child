@@ -252,7 +252,11 @@ namespace {
 			cr_photo_assert( str_starts_with( cr_zine_render( $gallery ), '<section class="cr-zine' ), 'a photo post the projector would take gets the zine in any format' );
 
 			$gallery = cr_zine_request( 1, 42, 'Blue Hour at Example Lake', false, 'photo' );
-			cr_photo_same( cr_zine_core_html( $gallery ), cr_zine_render( $gallery ), 'a one-image gallery on a photo post stays core, as the projector leaves it' );
+			$GLOBALS['cr_zine_formats'] = array();
+			cr_photo_same( cr_zine_core_html( $gallery ), cr_zine_render( $gallery ), 'a one-image gallery on a photo post outside the gallery format stays core, as the projector leaves it' );
+
+			$gallery = cr_zine_request( 1, 42, 'Blue Hour at Example Lake', false, 'photo' );
+			cr_photo_assert( str_starts_with( cr_zine_render( $gallery ), '<section class="cr-zine' ), 'a gallery-format photo post with only a one-image gallery still gets the zine' );
 
 			// A gallery-format photo post: one image, then three. The projector takes the second, so the zine does too.
 			$one   = cr_zine_request( 1, 42, 'Blue Hour at Example Lake', false, 'photo' );

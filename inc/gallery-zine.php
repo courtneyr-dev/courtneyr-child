@@ -285,8 +285,8 @@ function first_gallery( array $blocks, int $min ): ?array {
  * The gallery this post prints as a zine, or null.
  *
  * A photo post (any format): the first gallery the plugin's projector takes
- * (two or more images). Any other gallery-format post: its first gallery
- * with an image.
+ * (two or more images). Otherwise, on a gallery-format post: its first
+ * gallery with an image.
  *
  * @param \WP_Post $post Post.
  * @return array<string, mixed>|null
@@ -294,9 +294,16 @@ function first_gallery( array $blocks, int $min ): ?array {
 function gallery_for( \WP_Post $post ): ?array {
 	$state = &state();
 	if ( ! array_key_exists( $post->ID, $state['galleries'] ) ) {
-		// A photo post's zine is the gallery the plugin's projector takes (two or more images).
-		$min                             = has_term( 'photo', 'kind', $post ) ? 2 : ( has_post_format( 'gallery', $post ) ? 1 : 0 );
-		$state['galleries'][ $post->ID ] = 0 === $min ? null : first_gallery( parse_blocks( (string) $post->post_content ), $min );
+		$blocks  = parse_blocks( (string) $post->post_content );
+		$gallery = null;
+		// A photo post's zine is the gallery the plugin's projector takes (two or more images), when it has one.
+		if ( has_term( 'photo', 'kind', $post ) ) {
+			$gallery = first_gallery( $blocks, 2 );
+		}
+		if ( null === $gallery && has_post_format( 'gallery', $post ) ) {
+			$gallery = first_gallery( $blocks, 1 );
+		}
+		$state['galleries'][ $post->ID ] = $gallery;
 	}
 	return $state['galleries'][ $post->ID ];
 }
