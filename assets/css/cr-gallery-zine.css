@@ -210,10 +210,13 @@
 	padding: 0;
 }
 
+/* The figure hugs its photograph, so plates and print edges follow the
+   picture when a tall one is held to the height cap. */
 .cr-zine-single .cr-zine__frame > .wp-block-image {
 	position: relative;
 	box-sizing: border-box;
-	width: 100%;
+	width: fit-content;
+	max-width: 100%;
 	margin: 0;
 	padding: 0;
 	border: 0;
@@ -226,7 +229,8 @@
 
 .cr-zine-single .cr-zine__frame img {
 	display: block;
-	width: 100%;
+	width: auto;
+	max-width: 100%;
 	height: auto;
 	max-height: min(38rem, 85vh);
 	margin-inline: auto;
@@ -234,10 +238,18 @@
 	object-fit: contain;
 }
 
+/* The anchor sits centred in its cell when the height cap narrows it. */
+.cr-zine-single .cr-zine__frame--anchor > .wp-block-image {
+	margin-inline: auto;
+}
+
 /* Captions are annotations: the image block's own caption, set small under
    the picture after a rule, like a contact-sheet note. */
 .cr-zine-single .cr-zine__frame figcaption {
 	display: flex;
+
+	/* A long caption wraps to the picture's width instead of widening it. */
+	contain: inline-size;
 	gap: var(--cr-space-xs);
 	max-width: 36rem;
 	margin: var(--cr-space-xs) 0 0;
