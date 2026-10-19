@@ -159,7 +159,7 @@
 	box-sizing: border-box;
 	width: auto;
 	max-width: none;
-	margin: var(--cr-space-xl) 0 var(--cr-space-lg);
+	margin: var(--cr-space-xl) 0 0;
 	padding: var(--cr-space-2xl) var(--cr-space-xl);
 	background-color: color-mix(in srgb, var(--cr-light-orange) 38%, var(--cr-printer-ivory));
 	background-image: var(--cr-fiber);
@@ -503,6 +503,11 @@
 
 	.cr-zine-single .cr-zine__frame--anchor::after {
 		display: none;
+	}
+
+	/* Plates stay inside the screen edge. */
+	.cr-zine-single .cr-zine__frame--plate:not(.cr-zine__frame--anchor) > .wp-block-image::before {
+		inset: 0.5rem -0.5rem -0.5rem 0.5rem;
 	}
 
 	.cr-zine-single .cr-zine__frame:nth-child(odd):not(.cr-zine__frame--panorama, .cr-zine__frame--anchor) {

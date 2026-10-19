@@ -362,6 +362,9 @@ namespace {
 					cr_photo_assert( ! ( in_array( 'lap', $d, true ) && in_array( 'drop', $d, true ) ), $count . ': a panel laps or drops, not both' );
 				}
 			}
+			$seven = array_fill( 0, 8, 'panorama' );
+			$flat  = dressing( layout( $seven, 12 ), array_fill( 0, 8, '' ), $seven );
+			cr_photo_same( 'print', $flat[7][0], 'a panorama in the taped slot lies flat as a print' );
 			$long = dressing( layout( array( 'landscape', 'square' ), 12 ), array( '', str_repeat( 'x', 41 ) ) );
 			cr_photo_assert( ! in_array( 'hand', $long[1], true ), 'a caption over 40 characters stays typeset' );
 			$html = cr_zine_render( cr_zine_request( 6 ) );

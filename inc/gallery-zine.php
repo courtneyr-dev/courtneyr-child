@@ -138,13 +138,15 @@ const HAND_CAPTION_LIMIT = 40;
  * panel of the anchor's row, and of every third shared row after it, laps
  * over its neighbour's edge; one panel in each other shared row drops below
  * the row line, at alternate ends. A short real caption on a print or taped
- * print is handwritten. Every eighth panel from the fourth gets a plate.
+ * print is handwritten. Every eighth panel from the fourth gets a plate. A
+ * panorama is never the tilted, taped print: it lies flat as a print.
  *
  * @param array<int, array{span: int, start: int, row: int}> $cells    Desktop cells from layout().
  * @param string[]                                           $captions Each panel's caption text ('' for none).
+ * @param string[]                                           $shapes   Each panel's shape.
  * @return array<int, string[]> Class suffixes per panel.
  */
-function dressing( array $cells, array $captions ): array {
+function dressing( array $cells, array $captions, array $shapes = array() ): array {
 	$rows = array();
 	foreach ( $cells as $n => $cell ) {
 		$rows[ $cell['row'] ][] = $n;
@@ -152,8 +154,11 @@ function dressing( array $cells, array $captions ): array {
 	$out = array();
 	foreach ( $cells as $n => $cell ) {
 		$classes = array( 0 === $n ? 'anchor' : TREATMENTS[ ( $n - 1 ) % count( TREATMENTS ) ] );
-		$row     = $rows[ $cell['row'] ];
-		$pos     = (int) array_search( $n, $row, true );
+		if ( 'taped' === $classes[0] && 'panorama' === ( $shapes[ $n ] ?? '' ) ) {
+			$classes[0] = 'print';
+		}
+		$row = $rows[ $cell['row'] ];
+		$pos = (int) array_search( $n, $row, true );
 		if ( count( $row ) > 1 && 0 !== $n ) {
 			if ( 1 === $pos && 0 === $cell['row'] % 3 ) {
 				$classes[] = 'lap';
@@ -564,7 +569,7 @@ function zine( string $html, array $block, $instance = null ): string {
 
 	$desktop = layout( $shapes, 12 );
 	$tablet  = layout( $shapes, 6 );
-	$dress   = dressing( $desktop, $captions );
+	$dress   = dressing( $desktop, $captions, $shapes );
 	$of      = str_pad( (string) $total, $width, '0', STR_PAD_LEFT );
 	$panels  = '';
 	foreach ( $figures as $n => $figure ) {
