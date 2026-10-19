@@ -28,6 +28,9 @@ function is_audio_single(): bool {
 		&& is_main_query()
 		&& in_the_loop()
 		&& ! is_feed()
+		// Core's automatic excerpt runs the_content with do_blocks removed, so nothing lifts and an empty machine would leak its counter into the excerpt.
+		&& ! doing_filter( 'get_the_excerpt' )
+		&& ! doing_filter( 'wp_trim_excerpt' )
 		&& ( ! function_exists( 'wp_is_rest_endpoint' ) || ! wp_is_rest_endpoint() )
 		&& 0 < $id
 		&& (int) get_the_ID() === $id

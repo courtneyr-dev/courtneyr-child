@@ -234,7 +234,7 @@
 	box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 
-/* Where :has() works the whole line wears the ring, so the link drops its own. Where it doesn't, the link keeps one. */
+/* Where :has() works the whole line wears the ring, so the link drops its own. Where it doesn't, the link's ::after carries the ring. */
 @supports selector(:has(*)) {
 
 	.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title a:focus-visible {
@@ -243,13 +243,21 @@
 	}
 }
 
+/* Without :has() the ring goes on the link's ::after, which covers the whole line, so the whole item still wears it. A [data-focus] flag on the li gets the same ring. */
 @supports not selector(:has(*)) {
 
-	.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title a:focus-visible {
+	.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title a:focus-visible::after,
+	.cr-audio-log .pk-card.k-audio.pk-card--protected .pk-title a:focus-visible::after {
 		outline: 3px solid var(--cr-focus-ring);
 		outline-offset: 4px;
 		box-shadow: 0 0 0 7px var(--cr-focus-halo);
 	}
+}
+
+.cr-audio-log .pkiw-group__items > li[data-focus] {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 
 @media (min-width: 64rem) {

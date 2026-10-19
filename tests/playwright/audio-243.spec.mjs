@@ -290,8 +290,12 @@ test.describe( 'audio single', () => {
 	test( 'A01 uses Able Player when mapped, A03 is native, A04 is an iframe and D02 keeps its link', async ( { page, request } ) => {
 		await openFixture( page, request, 'A01' );
 		const able = page.locator( '.cr-audio-machine__player .able, .cr-audio-machine__player .able-player, .cr-audio-machine__player .able-wrapper' );
-		test.skip( 0 === await able.count(), 'Able Player is not mapped in this stack; A01 enhancement cannot be checked' );
-		await expect( able.first() ).toBeVisible();
+		if ( await able.count() ) {
+			await expect( able.first() ).toBeVisible();
+		} else {
+			// Able Player is not mapped here: record it, and still check A03, A04 and D02 below.
+			test.info().annotations.push( { type: 'skipped-iteration', description: 'Able Player is not mapped in this stack; A01 enhancement not checked' } );
+		}
 
 		await openFixture( page, request, 'A03' );
 		await expect( page.locator( '.cr-audio-machine__player audio' ) ).toHaveCount( 1 );
@@ -338,7 +342,9 @@ test.describe( 'audio Stream and front page', () => {
 		for ( const key of [ 'S1', 'S2', 'S3', 'S4', 'S5' ] ) {
 			const item = streamItemFor( page, key );
 			if ( 'S5' === key && 0 === await item.count() ) {
-				test.skip( true, 'S5 is local-only and is absent from this stack' );
+				// S5 is local-only: skip this iteration, not the test, so S1-S4 still record.
+				test.info().annotations.push( { type: 'skipped-iteration', description: 'S5 is local-only and absent from this stack' } );
+				continue;
 			}
 			skipMissing( 0 === await item.count(), `Stream fixture ${ key } is absent; run seed-243.php --set=stream` );
 			const card = item.locator( 'article.k-audio' ).first();
@@ -408,7 +414,9 @@ test.describe( 'audio privacy', () => {
 		for ( const key of [ 'A07', 'B05', 'X05' ] ) {
 			const path = await fixturePath( request, key );
 			if ( 'X05' === key && ! path ) {
-				test.skip( true, 'X05 is dev-only and is absent from this stack' );
+				// X05 is dev-only: skip this iteration, not the test, so A07 and B05 still record.
+				test.info().annotations.push( { type: 'skipped-iteration', description: 'X05 is dev-only and absent from this stack' } );
+				continue;
 			}
 			skipMissing( ! path, `fixture ${ key } is absent` );
 			const response = await page.goto( path, { waitUntil: 'load' } );

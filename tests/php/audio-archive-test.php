@@ -107,6 +107,105 @@ namespace {
 	require CR_AUDIO_THEME_DIR . '/inc/audio.php';
 }
 
+namespace {
+	/** Minimal post stand-in for the plugin's entry-property code. */
+	class WP_Post {
+		public int $ID          = 42;
+		public int $post_author = 1;
+	}
+
+	/** Minimal term stand-in. */
+	class WP_Term {
+		public string $slug = 'audio';
+	}
+
+	/** Filters pass the value through. */
+	function apply_filters( $hook, $value, ...$args ) {
+		return $value;
+	}
+
+	/** The post in the loop. */
+	function get_the_ID(): int {
+		return 42;
+	}
+
+	/** The one fixture post. */
+	function get_post( $post = null ): WP_Post {
+		return new WP_Post();
+	}
+
+	/** Fixture permalink, equal to the card's title link. */
+	function get_permalink( $post = 0 ): string {
+		return 'https://example.test/a01/';
+	}
+
+	/** Not protected. */
+	function post_password_required( $post = null ): bool {
+		return false;
+	}
+
+	/** Every fixture is kind audio. */
+	function get_the_terms( $post, $taxonomy ) {
+		return array( new WP_Term() );
+	}
+
+	/** Author fixtures for the hidden h-card. */
+	function get_the_author_meta( $field, $user_id = 0 ): string {
+		return 'Fixture Author';
+	}
+
+	/** Author archive URL fixture. */
+	function get_author_posts_url( $author_id ): string {
+		return 'https://example.test/author/fixture/';
+	}
+
+	/** Avatar URL fixture. */
+	function get_avatar_url( $author_id, $args = array() ): string {
+		return 'https://example.test/avatar.jpg';
+	}
+
+	/** Strip trailing slashes. */
+	function untrailingslashit( $value ): string {
+		return rtrim( (string) $value, '/\\' );
+	}
+
+	/** Escape a URL. */
+	function esc_url( $url ): string {
+		return htmlspecialchars( (string) $url, ENT_QUOTES, 'UTF-8' );
+	}
+
+	/** Escape text. */
+	function esc_html( $text ): string {
+		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+	}
+
+	/** Escape an attribute. */
+	function esc_attr( $text ): string {
+		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
+
+namespace PKIW {
+	/** Visible and readable. */
+	class Kind_Facts {
+		/** Always shown. */
+		public static function can_show( $post ): bool {
+			return true;
+		}
+	}
+
+	/** The first player is an upload, as for A01. */
+	function first_media_block( $post, string $media ): array {
+		return array(
+			'type'          => 'attachment',
+			'block'         => 'core/audio',
+			'attachment_id' => 7,
+			'url'           => 'https://example.test/uploads/seed-243/field-recording.mp3',
+			'provider'      => '',
+		);
+	}
+}
+
 namespace Courtneyr\Child\AudioArchiveTests {
 
 	use const Courtneyr\Child\Audio\CARD_CLASS;
@@ -226,6 +325,42 @@ namespace Courtneyr\Child\AudioArchiveTests {
 	check( $without_duration !== adapt( $without_duration, array( 'attrs' => array( 'className' => 'other ' . CARD_CLASS ) ) ), 'the pattern class enables the adapter off the archive' );
 	$GLOBALS['cr_audio_request'] = array( 'stream' => true );
 	check( $without_duration === adapt( $without_duration ), 'the Stream card stays unchanged' );
+
+	// Integration-style case: the card goes through this adapter at priority 10, then through the plugin's real
+	// ensure_entry_properties_filter at 99, loaded from origin/develop. The card markup is the plugin's generic
+	// audio card as a fixture, because the full renderer needs a WordPress install.
+	$plugin_dir = (string) ( getenv( 'PKIW_DIR' ) ?: getenv( 'HOME' ) . '/Developer/post-kinds-for-indieweb' );
+	$plugin_src = (string) shell_exec( 'git -C ' . escapeshellarg( $plugin_dir ) . ' show origin/develop:includes/functions-stream-card.php 2>/dev/null' );
+	if ( '' === $plugin_src ) {
+		echo "SKIP integration case: plugin source at origin/develop is not readable from " . $plugin_dir . "\n";
+	} else {
+		$plugin_file = tempnam( sys_get_temp_dir(), 'pkiw-fsc' );
+		file_put_contents( $plugin_file, $plugin_src );
+		require $plugin_file;
+		unlink( $plugin_file );
+
+		$chain = array_values( array_filter( $GLOBALS['cr_audio_hooks'], static fn( array $entry ): bool => 'render_block_post-kinds-indieweb/stream-card' === $entry[0] ) );
+		usort( $chain, static fn( array $a, array $b ): int => $a[2] <=> $b[2] );
+		check( array( 10, 99 ) === array_column( $chain, 2 ), 'the chain holds the theme adapter at 10 and the plugin filter at 99' );
+
+		$html = $titled;
+		$GLOBALS['pkiw_stream_card_root_seen'] = array( 42 => true );
+		foreach ( $chain as $entry ) {
+			$html = call_user_func_array( $entry[1], array_slice( array( $html, array( 'attrs' => array( 'className' => CARD_CLASS ) ), null ), 0, $entry[3] ) );
+		}
+		list( $document, $xpath ) = array( new \DOMDocument(), null );
+		@$document->loadHTML( '<?xml encoding="utf-8"?><body>' . $html . '</body>' );
+		$xpath = new \DOMXPath( $document );
+		check( 1 === visible_anchor_count( $html ), 'the full chain leaves exactly one rendered link' );
+		check( 0 === $xpath->query( '//*[contains(concat(" ", normalize-space(@class), " "), " h-entry ")]' )->length, 'the chain output holds no h-entry root, so the loop li takes it' );
+		check( empty( $GLOBALS['pkiw_stream_card_root_seen'][42] ), 'the plugin clears the card-rooted flag for the post' );
+		$props = $xpath->query( '//span[contains(concat(" ", normalize-space(@class), " "), " pk-entry-props ") and @hidden]' );
+		check( 1 === $props->length && str_ends_with( $html, '</span>' ), 'one hidden pk-entry-props span follows the meta row' );
+		check( 1 === $xpath->query( '//span[@hidden]//*[contains(@class,"p-author") and contains(@class,"h-card")]' )->length, 'the hidden props carry the p-author h-card' );
+		check( 1 === $xpath->query( '//span[@hidden]//data[@class="u-audio" and @value="https://example.test/uploads/seed-243/field-recording.mp3"]' )->length, 'the hidden props carry u-audio as data' );
+		check( 0 === $xpath->query( '//span[@hidden]//a' )->length, 'the hidden props hold no anchor' );
+		check( 1 === $xpath->query( '//time[contains(@class,"dt-published")]' )->length, 'the meta date is the one dt-published, so the plugin adds no second' );
+	}
 
 	echo "\n", count( $failures ) ? count( $failures ) . ' failed' : 'all passed', "\n";
 	exit( count( $failures ) ? 1 : 0 );

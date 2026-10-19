@@ -44,6 +44,11 @@ namespace {
 		return ! empty( $GLOBALS['cr_audio_single_request']['in_loop'] );
 	}
 
+	/** Filters running now, for the automatic excerpt cases. */
+	function doing_filter( $hook = null ): bool {
+		return in_array( $hook, $GLOBALS['cr_audio_single_request']['doing'] ?? array(), true );
+	}
+
 	/** Current feed flag. */
 	function is_feed(): bool {
 		return ! empty( $GLOBALS['cr_audio_single_request']['feed'] );
@@ -349,6 +354,15 @@ namespace Courtneyr\Child\AudioSingleTests {
 		$GLOBALS['cr_audio_single_request']['query'] = $query;
 		check( $audio === lift_player( $audio, array( 'blockName' => 'core/audio' ) ), $label . ' leaves the player in place' );
 		check( '<p>Stored.</p>' === insert( '<p>Stored.</p>' ), $label . ' leaves content unchanged' );
+	}
+
+	foreach ( array( 'get_the_excerpt', 'wp_trim_excerpt' ) as $running ) {
+		setup();
+		$GLOBALS['cr_audio_single_request']['doing'] = array( $running );
+		check( $audio === lift_player( $audio, array( 'blockName' => 'core/audio' ) ), 'inside ' . $running . ' the player stays in the flow' );
+		$excerpt = insert( '<p>Stored words.</p>' );
+		check( '<p>Stored words.</p>' === $excerpt, 'inside ' . $running . ' the content passes unchanged' );
+		check( 'Stored words.' === trim( strip_tags( $excerpt ) ), 'an automatic excerpt of an audio single holds no machine counter or text' );
 	}
 
 	setup();
