@@ -591,8 +591,10 @@ body.cr-photo-single .pkiw-photo-place {
 	box-shadow: var(--cr-shadow-hard);
 }
 
-/* The picture comes first; the hand-written title and the date sit under it. */
+/* The picture comes first; the hand-written title and the date sit under it.
+   A static body lets the title link's overlay cover the whole print. */
 :is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery) > .pk-body {
+	position: static;
 	display: flex;
 	flex-direction: column;
 }
@@ -651,14 +653,7 @@ body.cr-photo-single .pkiw-photo-place {
 	padding: 0;
 	border: 0;
 	color: var(--cr-cerulean);
-	letter-spacing: 0.14em;
-}
-
-:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery):has(.pk-title a:hover) .pk-title a,
-:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery):has(.pk-title a:focus-visible) .pk-title a {
-	text-decoration: underline;
-	text-decoration-thickness: 2px;
-	text-underline-offset: 0.15em;
+	letter-spacing: var(--cr-tracking-eyebrow);
 }
 
 :is(body, .cr-stream-page) .pk-card.cr-polaroid:has(.pk-title a:hover) .pk-media img {
@@ -718,7 +713,7 @@ body.cr-photo-single .pkiw-photo-place {
 	font-family: var(--cr-font-mono);
 	font-size: 0.75rem;
 	font-weight: var(--cr-weight-bold);
-	letter-spacing: 0.12em;
+	letter-spacing: var(--cr-tracking-eyebrow);
 	transform: rotate(var(--cr-rotate-1));
 }
 

@@ -239,12 +239,16 @@ check_case(
 );
 
 check_case(
-	'the photo booth strip: 4:3 frames, a stamped date turned by a token, one stretched title link',
+	'the photo booth strip: 4:3 frames, a stamped date turned by a token, one title link stretched over the whole print',
 	static function () use ( $code ): bool {
 		$frame = rule_body( $code, '.pk-card.k-photo.pk-card--gallery .cr-booth__img' );
 		$date  = rule_body( $code, '.pk-card.k-photo.pk-card--gallery .pk-stream-date time' );
 		$link  = rule_body( $code, ':is(.cr-polaroid, .pk-card--gallery) .pk-title a::after' );
-		return false !== strpos( $frame, 'aspect-ratio: 4 / 3' )
+		$root  = rule_body( $code, '.pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery) ' );
+		$body  = rule_body( $code, ':is(.cr-polaroid, .pk-card--gallery) > .pk-body' );
+		return false !== strpos( $root, 'position: relative' )
+			&& false !== strpos( $body, 'position: static' )
+			&& false !== strpos( $frame, 'aspect-ratio: 4 / 3' )
 			&& false !== strpos( $date, 'font-family: var(--cr-font-mono)' )
 			&& false !== strpos( $date, 'transform: rotate(var(--cr-rotate-1))' )
 			&& false !== strpos( $link, 'inset: 0' );
