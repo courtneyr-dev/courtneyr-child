@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.7.114
+
+What you see change on courtneyr.dev:
+
+- Video posts leave the generic archive template. /kind/video/ prints year shelves of camcorder tapes, 12 a page, with one link on each tape and a year heading that repeats when a year runs onto the next page. The video single puts its title in a tape-label strip above the player, as the page's one H1, with the date and run time beside it. On the Stream a video is a compact tape spine.
+- The listen shelf at /kind/listen/ gains a type nav, All and Podcasts. Podcasts at /kind/listen/?pkiw_listen_type=podcast print as a lineup with a station for each show, 12 lines a page. A podcast single opens with a record (kind label, Show, Episode, Tuned in, rating and a listen or find-it link) ahead of the post, and a podcast on the Stream is a call-sign card with one link. Music listens keep their cassette.
+- Audio posts print as a cassette log at /kind/audio/, grouped by month, with the answering machine in the header. The audio single lifts its player into an answering machine and opens the transcript as a sheet beside it when a transcript is stored. An audio cassette on the Stream grows with a long title instead of cutting it off.
+- Jams print as a jukebox at /kind/jam/, with a Now Playing lead on page 1, month shelves and three, two or one columns. The jam single is a J-card with insert, details, spine and note panels, and the embedded player follows the card once. A jam on the Stream is a strip.
+- Wishes print as a catalog at /kind/wish/, grouped by type in three, two or one columns, with the priority as text and a circle on high-priority items. The wish single drops its repeated picture. A clipping for the Stream is in the theme and appears once the site repo adds wish to the Stream kinds at release.
+- Questions print as slips at /kind/question/, grouped by answer status, with the answers listed on each question. A question slip for the Stream is in the theme and appears once the site repo adds question to the Stream kinds at release.
+- Video and audio players on video and audio posts no longer autoplay. They show controls and load metadata only.
+- An untitled audio, jam or question post prints a real H1 that reads "<Kind>, <date> at <time>". An untitled wish prints its item name.
+
+Under the hood: cr-post-kinds.css no longer paints the video, jam, wish and question Stream cards, since each kind's own stylesheet does. functions.php requires the 13 new kind files (inc/video.php, single-video.php, stream-video.php, audio.php, single-audio.php, jam.php, single-jam.php, single-podcast.php, wish.php, single-wish.php, stream-wish.php, question.php and stream-question.php). tests/routes.mjs adds the video, audio, jam, podcast, wish and question archives, page 2 for video, audio and question, and 26 seeded singles named by fixture key. a11y-markup.spec.mjs puts the six archives through the cut-paper title, header, pager and one-link tests, and checks that each seeded single prints one H1.
+
 ## 0.7.113
 
 What you see change on courtneyr.dev:

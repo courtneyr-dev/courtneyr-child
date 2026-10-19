@@ -11,7 +11,7 @@ export function assertLocalTarget( base = BASE_URL ) {
 	}
 }
 
-// Seeded singles (W4 fixtures), found by slug through the public REST API, the way the kind specs find
+// Seeded singles (W4 and W5 fixtures), found by slug through the public REST API, the way the kind specs find
 // them, and named by fixture key. CR_<NAME>_PATH (for example CR_MOOD_SINGLE_F01_PATH) names the path
 // instead, which also covers a reseed that suffixed a slug with -2.
 const seeded = {
@@ -33,9 +33,37 @@ const seeded = {
 	'note-single-n18': 'cr-seed-265-n18',
 	'note-single-n10': 'cr-seed-265-n10',
 	'note-single-n17': 'cr-seed-265-n17',
+	// W5. Each plan's slug pattern: video seed-242-<key>, audio seed-243-<key>, jam seed-235-<key>,
+	// podcast seed-236-<key>, wish cr-seed-238-<key> (the pattern wish-238.spec.mjs reads), question seed-256-<key>.
+	'video-single-v01': 'seed-242-v01',
+	'video-single-v08': 'seed-242-v08',
+	'video-single-v11': 'seed-242-v11',
+	'video-single-v12': 'seed-242-v12',
+	'audio-single-a01': 'seed-243-a01',
+	'audio-single-a02': 'seed-243-a02',
+	'audio-single-a05': 'seed-243-a05',
+	'audio-single-b05': 'seed-243-b05',
+	'audio-single-d02': 'seed-243-d02',
+	'jam-single-j09': 'seed-235-j09',
+	'jam-single-j05': 'seed-235-j05',
+	'jam-single-j10': 'seed-235-j10',
+	'jam-single-j22': 'seed-235-j22',
+	'podcast-single-q01': 'seed-236-q01',
+	'podcast-single-q02': 'seed-236-q02',
+	'podcast-single-q03': 'seed-236-q03',
+	'podcast-single-q07': 'seed-236-q07',
+	'wish-single-w01': 'cr-seed-238-w01',
+	'wish-single-w03': 'cr-seed-238-w03',
+	'wish-single-w17': 'cr-seed-238-w17',
+	'wish-single-w27': 'cr-seed-238-w27',
+	'wish-single-c07': 'cr-seed-238-c07',
+	'question-single-s01': 'seed-256-s01',
+	'question-single-s02': 'seed-256-s02',
+	'question-single-s03': 'seed-256-s03',
+	'question-single-l01': 'seed-256-l01',
 };
 
-export const ROUTE_NAMES = [ 'home', 'stream', 'single-post', 'kind-archive', 'story-archive', 'play-archive', 'read-archive', 'review-archive', 'reply-archive', 'like-archive', 'bookmark-archive', 'chicken-archive', 'photo-archive', 'photo-archive-page-2', 'favorite-archive', 'favorite-archive-page-2', 'acquisition-archive', 'acquisition-archive-page-2', 'repost-archive', 'repost-archive-page-2', 'article-archive', 'mood-archive', 'weather-archive', 'weather-archive-page-2', 'exercise-archive', 'exercise-archive-page-2', 'sleep-archive', 'sleep-archive-page-2', 'craft-archive', 'craft-archive-page-2', 'note-archive', 'note-archive-page-2', ...Object.keys( seeded ) ];
+export const ROUTE_NAMES = [ 'home', 'stream', 'single-post', 'kind-archive', 'story-archive', 'play-archive', 'read-archive', 'review-archive', 'reply-archive', 'like-archive', 'bookmark-archive', 'chicken-archive', 'photo-archive', 'photo-archive-page-2', 'favorite-archive', 'favorite-archive-page-2', 'acquisition-archive', 'acquisition-archive-page-2', 'repost-archive', 'repost-archive-page-2', 'article-archive', 'mood-archive', 'weather-archive', 'weather-archive-page-2', 'exercise-archive', 'exercise-archive-page-2', 'sleep-archive', 'sleep-archive-page-2', 'craft-archive', 'craft-archive-page-2', 'note-archive', 'note-archive-page-2', 'video-archive', 'video-archive-page-2', 'audio-archive', 'audio-archive-page-2', 'jam-archive', 'podcast-archive', 'wish-archive', 'question-archive', 'question-archive-page-2', ...Object.keys( seeded ) ];
 
 const fixed = {
 	home: '/',
@@ -69,6 +97,15 @@ const fixed = {
 	'craft-archive-page-2': process.env.CR_CRAFT_ARCHIVE_PAGE_2_PATH || '/kind/craft/page/2/',
 	'note-archive': process.env.CR_NOTE_ARCHIVE_PATH || '/kind/note/',
 	'note-archive-page-2': process.env.CR_NOTE_ARCHIVE_PAGE_2_PATH || '/kind/note/page/2/',
+	'video-archive': process.env.CR_VIDEO_ARCHIVE_PATH || '/kind/video/',
+	'video-archive-page-2': process.env.CR_VIDEO_ARCHIVE_PAGE_2_PATH || '/kind/video/page/2/',
+	'audio-archive': process.env.CR_AUDIO_ARCHIVE_PATH || '/kind/audio/',
+	'audio-archive-page-2': process.env.CR_AUDIO_ARCHIVE_PAGE_2_PATH || '/kind/audio/page/2/',
+	'jam-archive': process.env.CR_JAM_ARCHIVE_PATH || '/kind/jam/',
+	'podcast-archive': process.env.CR_PODCAST_ARCHIVE_PATH || '/kind/listen/?pkiw_listen_type=podcast',
+	'wish-archive': process.env.CR_WISH_ARCHIVE_PATH || '/kind/wish/',
+	'question-archive': process.env.CR_QUESTION_ARCHIVE_PATH || '/kind/question/',
+	'question-archive-page-2': process.env.CR_QUESTION_ARCHIVE_PAGE_2_PATH || '/kind/question/page/2/',
 };
 
 // Newest published post from the public REST API, unless CR_SINGLE_POST_PATH is set.

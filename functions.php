@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.113' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.114' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -65,6 +65,19 @@ require_once __DIR__ . '/inc/stream-sleep.php';
 require_once __DIR__ . '/inc/craft.php';
 require_once __DIR__ . '/inc/single-craft.php';
 require_once __DIR__ . '/inc/stream-craft.php';
+require_once __DIR__ . '/inc/video.php';
+require_once __DIR__ . '/inc/single-video.php';
+require_once __DIR__ . '/inc/stream-video.php';
+require_once __DIR__ . '/inc/audio.php';
+require_once __DIR__ . '/inc/single-audio.php';
+require_once __DIR__ . '/inc/jam.php';
+require_once __DIR__ . '/inc/single-jam.php';
+require_once __DIR__ . '/inc/single-podcast.php';
+require_once __DIR__ . '/inc/wish.php';
+require_once __DIR__ . '/inc/single-wish.php';
+require_once __DIR__ . '/inc/stream-wish.php';
+require_once __DIR__ . '/inc/question.php';
+require_once __DIR__ . '/inc/stream-question.php';
 require_once __DIR__ . '/inc/stream-checkin.php';
 require_once __DIR__ . '/inc/single-checkin.php';
 require_once __DIR__ . '/inc/kind-parts.php';
