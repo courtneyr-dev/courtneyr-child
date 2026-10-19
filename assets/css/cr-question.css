@@ -487,6 +487,7 @@ body.kind-question.single main.single-post .pkiw-answers__respond a {
 .cr-stream-page .pk-card.cr-question-slip .pk-answer-count {
 	margin: 0;
 	padding: 0;
+	color: var(--cr-paper-ink);
 	font-family: var(--cr-font-mono);
 }
 
@@ -589,7 +590,7 @@ body.kind-question.single main.single-post .pkiw-answers__respond a {
 		display: none;
 	}
 
-	.cr-stream-page .pk-card.cr-question-slip.pk-card--stream {
+	.cr-stream-page .wp-block-post-template > li .pk-card.pk-card--stream.cr-question-slip {
 		border: 2px solid CanvasText;
 		background-image: none;
 		box-shadow: none;
