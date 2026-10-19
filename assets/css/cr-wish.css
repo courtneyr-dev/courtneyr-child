@@ -13,6 +13,7 @@
 .cr-wish-catalog {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
+	row-gap: var(--cr-space-lg);
 	box-sizing: border-box;
 	min-width: 0;
 	margin: 0;
@@ -39,6 +40,7 @@
 .cr-wish-catalog > section.pkiw-group {
 	box-sizing: border-box;
 	min-width: 0;
+	margin: 0;
 	padding: var(--cr-space-lg);
 	border: 1px solid var(--cr-rule);
 	background: var(--cr-printer-ivory);
@@ -762,8 +764,9 @@ body.cr-wish-single .pk-original a.u-url:focus-visible {
 		color: CanvasText;
 	}
 
+	/* components.css forces .pk-card--stream to a 1px border with !important; the two-class listing selector wins at 0,2,0. */
 	.cr-wish-catalog > section.pkiw-group,
-	.cr-wish-listing,
+	.cr-wish-catalog .cr-wish-listing,
 	body.cr-wish-single .pk-wish-photo,
 	body.cr-wish-single .pk-wish-listing,
 	body.cr-wish-single .pk-wish-reason,

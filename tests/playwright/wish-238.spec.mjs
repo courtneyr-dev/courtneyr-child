@@ -86,7 +86,7 @@ async function computedBanReport( page, selector ) {
 			for ( const pseudo of [ null, '::before', '::after' ] ) {
 				const style = getComputedStyle( node, pseudo );
 				const values = [ style.color, style.backgroundColor, style.borderColor, style.boxShadow, style.opacity, style.rotate, style.transform ];
-				if ( values.some( ( value ) => [ 'rgb(138, 74, 106)', 'rgb(208, 137, 163)', 'rgb(236, 214, 224)' ].includes( value ) ) || '0.75' === style.opacity || /8deg/.test( `${ style.rotate } ${ style.transform }` ) ) {
+				if ( values.some( ( value ) => [ 'rgb(138, 74, 106)', 'rgb(208, 137, 163)', 'rgb(236, 214, 224)' ].includes( value ) ) || '0.75' === style.opacity || /(^|[^0-9.])8deg/.test( `${ style.rotate } ${ style.transform }` ) ) {
 					found.push( `${ node.tagName }${ pseudo || '' }: ${ values.join( ' | ' ) }` );
 				}
 			}
@@ -200,9 +200,9 @@ test.describe( 'wish archive', () => {
 		expect( title.scroll ).toBeLessThanOrEqual( title.client + 1 );
 		expect( title.overflow ).toBe( 'anywhere' );
 		await w16.locator( 'a' ).focus();
-		const ring = await w16.evaluate( ( node ) => ( { width: getComputedStyle( node ).outlineWidth, shadow: getComputedStyle( node ).boxShadow } ) );
-		expect( ring.width ).toBe( '3px' );
-		expect( ring.shadow ).toMatch( /7px/ );
+		expect( await w16.evaluate( ( node ) => getComputedStyle( node ).outlineWidth ) ).toBe( '3px' );
+		// box-shadow transitions for 0.15s under no-preference motion, so poll for the settled halo.
+		await expect.poll( () => w16.evaluate( ( node ) => getComputedStyle( node ).boxShadow ) ).toMatch( /7px/ );
 	} );
 
 	test( 'archive has no banned computed paint in light or dark and forced colors outlines content', async ( { page }, testInfo ) => {
@@ -327,6 +327,8 @@ test.describe( 'wish controls', () => {
 		const main = await openSingle( page, 'C07' );
 		await expect( main.locator( 'h1' ) ).toHaveCount( 1 );
 		await expect( main.locator( 'h1' ) ).toHaveText( 'Fictional Lantern' );
-		expect( await main.locator( '.h-entry .p-name' ).count() ).toBeLessThanOrEqual( 1 );
+		// Count visible p-name nodes that belong to the primary entry: the related-post list item is its own h-entry, and PKIW's hidden data and author h-card names are not printed titles.
+		const names = await main.locator( '.h-entry.pkiw-singular-entry' ).evaluate( ( entry ) => [ ...entry.querySelectorAll( '.p-name' ) ].filter( ( node ) => ! node.closest( '[hidden]' ) && node.closest( '.h-entry' ) === entry ).length );
+		expect( names ).toBeLessThanOrEqual( 1 );
 	} );
 } );
