@@ -199,7 +199,7 @@ function photo_single_id( $instance ): int {
 /**
  * A single-image photo post prints its picture in a frame (Courtney,
  * 2026-10-19): the plugin's mount (priority 10) becomes the picked frame,
- * or one seeded by the post.
+ * or one seeded by the post. A gallery single is a zine (inc/gallery-zine.php).
  *
  * @param string    $html     Rendered image (the plugin's mount).
  * @param array     $block    Parsed core/image block.
@@ -228,72 +228,3 @@ function framed_print( string $html, array $block, $instance = null ): string {
 	return $tags->get_updated_html();
 }
 add_filter( 'render_block_core/image', __NAMESPACE__ . '\\framed_print', 11, 3 );
-
-/**
- * A gallery photo single as a scrapbook page (Courtney, 2026-10-19).
- *
- * The plugin turns the first gallery of a photo post into a projector (one
- * slide at a time, buttons and a rail). On the single the theme lays every
- * picture out on a scrapbook page instead: each of the gallery's own image
- * blocks is rendered by core in a photo frame (its picked frame, or a mix
- * seeded by the post) with core's "expand on click" lightbox (the
- * Interactivity API, no theme script), keeps its caption and its u-photo
- * class, and is sized for the print; the gallery caption becomes a note on
- * the page. cr-photo.css lays out the page. Runs after the projector
- * (priority 10) and only where it ran.
- *
- * @param string    $html     Rendered gallery (the projector).
- * @param array     $block    Parsed core/gallery block.
- * @param \WP_Block $instance Block instance.
- * @return string
- */
-function scrapbook( string $html, array $block, $instance = null ): string {
-	if ( false === strpos( $html, 'pkiw-projector' ) ) {
-		return $html;
-	}
-	$post_id = photo_single_id( $instance );
-	if ( 0 === $post_id ) {
-		return $html;
-	}
-
-	$prints = '';
-	$count  = 0;
-	foreach ( (array) ( $block['innerBlocks'] ?? array() ) as $image ) {
-		if ( 'core/image' !== ( $image['blockName'] ?? '' ) ) {
-			continue;
-		}
-		$image['attrs']             = (array) ( $image['attrs'] ?? array() );
-		$image['attrs']['lightbox'] = array( 'enabled' => true );
-		$figure                     = render_block( $image );
-		// The Image block is static (core prints its saved markup), so the frame goes on the rendered figure.
-		$tags = new \WP_HTML_Tag_Processor( $figure );
-		if ( $tags->next_tag( 'figure' ) && '' === picked_frame( (string) $tags->get_attribute( 'class' ) ) ) {
-			$tags->add_class( 'is-style-cr-photo-' . seeded_frame( $post_id, $count ) );
-		}
-		if ( $tags->next_tag( 'img' ) ) {
-			$tags->add_class( 'u-photo' );
-			$tags->set_attribute( 'sizes', '(max-width: 40rem) 90vw, 32rem' );
-			$figure = $tags->get_updated_html();
-		}
-		$prints .= '<li class="cr-scrapbook__print">' . $figure . '</li>';
-		++$count;
-	}
-	if ( 0 === $count ) {
-		return $html;
-	}
-
-	// The gallery caption the projector carried over becomes a note on the page.
-	$note = preg_match( '/<p class="pkiw-projector__note[^"]*">(.*?)<\/p>/s', $html, $m ) ? '<p class="cr-scrapbook__note">' . $m[1] . '</p>' : '';
-
-	// The projector's own script and styles have nothing left to drive.
-	if ( function_exists( 'wp_dequeue_script' ) ) {
-		wp_dequeue_script( 'pkiw-photo-projector' );
-		wp_dequeue_style( 'pkiw-photo-projector' );
-	}
-
-	$label = is_titled_photo_single( $post_id )
-		? ' aria-labelledby="' . TITLE_ID . '"'
-		: ' aria-label="' . esc_attr( __( 'Photos', 'courtneyr-child' ) ) . '"';
-	return '<div class="cr-scrapbook"><ul class="cr-scrapbook__photos" role="list"' . $label . '>' . $prints . '</ul>' . $note . '</div>';
-}
-add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\\scrapbook', 11, 3 );

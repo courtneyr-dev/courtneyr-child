@@ -263,21 +263,9 @@ check_case(
 );
 
 check_case(
-	'the gallery single is a scrapbook page: punched album paper, overlapping prints in a 12-column rhythm, washi, stickers, a note, one column on phones',
+	'the gallery single is the zine (cr-gallery-zine.css): the scrapbook page is gone from the photo sheet',
 	static function () use ( $code ): bool {
-		$page  = rule_body( $code, 'body.cr-photo-single .cr-scrapbook ' );
-		$grid  = rule_body( $code, 'body.cr-photo-single .cr-scrapbook__photos ' );
-		$third = rule_body( $code, '.cr-scrapbook__print:nth-child(5n + 3)' );
-		$note  = rule_body( $code, 'body.cr-photo-single .cr-scrapbook__note ' );
-		return false !== strpos( $page, 'background-color: var(--cr-light-orange)' )
-			&& false !== strpos( $page, 'var(--cr-fiber)' )
-			&& false !== strpos( $page, 'box-shadow: var(--cr-shadow-hard-2)' )
-			&& false !== strpos( $grid, 'grid-template-columns: repeat(12, minmax(0, 1fr))' )
-			&& false !== strpos( $third, 'margin-block-start: calc(var(--cr-space-xl) * -1)' )
-			&& 1 === preg_match( '/\.cr-scrapbook::after\s*\{[^{}]*background-image:/', $code )
-			&& 1 === preg_match( '/\.cr-scrapbook__print:nth-child\(3n \+ 2\)[^{]*::before\s*\{[^{}]*var\(--cr-sky-blue\)/', $code )
-			&& false !== strpos( $note, 'font-family: var(--cr-font-display)' )
-			&& 1 === preg_match( '/@media \(max-width: 39\.99rem\)\s*\{[^@]*\.cr-scrapbook__photos\s*\{[^{}]*grid-template-columns:\s*1fr;/s', $code );
+		return false === strpos( $code, 'cr-scrapbook' );
 	}
 );
 
