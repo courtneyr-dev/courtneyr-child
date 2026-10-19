@@ -613,7 +613,9 @@ body.cr-photo-single .cr-scrapbook__print:nth-child(5n + 3) {
 	margin-block-start: calc(var(--cr-space-xl) * -1);
 }
 
+/* Above the print laid over it next, so its caption stays readable. */
 body.cr-photo-single .cr-scrapbook__print:nth-child(5n + 4) {
+	z-index: 2;
 	grid-column: 7 / span 6;
 }
 
