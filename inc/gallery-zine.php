@@ -216,19 +216,20 @@ function grid_column( array $cell ): string {
 }
 
 /**
- * Per-request state: whether the zine printed, and each post's gallery.
+ * Per-request state: whether the zine printed in this content pass, core's
+ * render of the zine gallery, whether the H1 filter is being asked on the
+ * masthead's behalf, and each post's gallery.
  *
  * @param bool $reset Clear the state.
- * @return array{done: bool, galleries: array<int, array|null>}
+ * @return array{done: bool, core: string, asking: bool, galleries: array<int, array|null>}
  */
 function &state( bool $reset = false ): array {
-	static $state = array(
-		'done'      => false,
-		'galleries' => array(),
-	);
-	if ( $reset ) {
+	static $state = array();
+	if ( $reset || array() === $state ) {
 		$state = array(
 			'done'      => false,
+			'core'      => '',
+			'asking'    => false,
 			'galleries' => array(),
 		);
 	}
@@ -283,8 +284,9 @@ function first_gallery( array $blocks, int $min ): ?array {
 /**
  * The gallery this post prints as a zine, or null.
  *
- * A gallery-format post: its first gallery with an image. A photo post: the
- * first gallery the plugin's projector takes (two or more images).
+ * A photo post (any format): the first gallery the plugin's projector takes
+ * (two or more images). Any other gallery-format post: its first gallery
+ * with an image.
  *
  * @param \WP_Post $post Post.
  * @return array<string, mixed>|null
@@ -292,7 +294,8 @@ function first_gallery( array $blocks, int $min ): ?array {
 function gallery_for( \WP_Post $post ): ?array {
 	$state = &state();
 	if ( ! array_key_exists( $post->ID, $state['galleries'] ) ) {
-		$min                             = has_post_format( 'gallery', $post ) ? 1 : ( has_term( 'photo', 'kind', $post ) ? 2 : 0 );
+		// A photo post's zine is the gallery the plugin's projector takes (two or more images).
+		$min                             = has_term( 'photo', 'kind', $post ) ? 2 : ( has_post_format( 'gallery', $post ) ? 1 : 0 );
 		$state['galleries'][ $post->ID ] = 0 === $min ? null : first_gallery( parse_blocks( (string) $post->post_content ), $min );
 	}
 	return $state['galleries'][ $post->ID ];
@@ -382,7 +385,84 @@ function gallery_caption( string $html ): string {
 }
 
 /**
- * The post's first gallery as a zine of numbered panels.
+ * The zine gallery being rendered in this content pass, or null.
+ *
+ * @param array<string, mixed> $block Parsed core/gallery block.
+ * @param mixed                $instance Block instance.
+ * @return \WP_Post|null
+ */
+function zine_gallery_post( array $block, $instance = null ): ?\WP_Post {
+	if ( state()['done'] || 'core/gallery' !== ( $block['blockName'] ?? '' ) ) {
+		return null;
+	}
+	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) ) ? (int) $instance->context['postId'] : (int) get_the_ID();
+	$post    = zine_post( $post_id );
+	$gallery = null === $post ? null : gallery_for( $post );
+	return null !== $gallery && same_gallery( $block, $gallery ) ? $post : null;
+}
+
+/**
+ * A fresh content pass may print the zine again (the plugin's projector
+ * resets the same way).
+ *
+ * @param mixed $content Post content.
+ * @return mixed
+ */
+function start_pass( $content ) {
+	$state         = &state();
+	$state['done'] = false;
+	$state['core'] = '';
+	return $content;
+}
+add_filter( 'the_content', __NAMESPACE__ . '\\start_pass', 1 );
+
+/**
+ * Before core renders the zine gallery, turn on core's lightbox for every
+ * image the author did not link or opt out of, so core's own gallery render
+ * wires the lightbox's previous and next across the panels.
+ *
+ * @param array<string, mixed> $parsed Parsed block.
+ * @return array<string, mixed>
+ */
+function enable_lightbox( array $parsed ): array {
+	if ( null === zine_gallery_post( $parsed ) ) {
+		return $parsed;
+	}
+	foreach ( (array) ( $parsed['innerBlocks'] ?? array() ) as $k => $image ) {
+		if ( ! is_array( $image ) || 'core/image' !== ( $image['blockName'] ?? '' ) ) {
+			continue;
+		}
+		$attrs = (array) ( $image['attrs'] ?? array() );
+		if ( ! isset( $attrs['lightbox'] ) && in_array( (string) ( $attrs['linkDestination'] ?? 'none' ), array( '', 'none' ), true ) ) {
+			$attrs['lightbox']                    = array( 'enabled' => true );
+			$parsed['innerBlocks'][ $k ]['attrs'] = $attrs;
+		}
+	}
+	return $parsed;
+}
+add_filter( 'render_block_data', __NAMESPACE__ . '\\enable_lightbox', 20 );
+
+/**
+ * Keep core's render of the zine gallery before the plugin's projector
+ * (priority 10) replaces it.
+ *
+ * @param string    $html     Core's rendered gallery.
+ * @param array     $block    Parsed core/gallery block.
+ * @param \WP_Block $instance Block instance.
+ * @return string Unchanged.
+ */
+function capture( string $html, array $block, $instance = null ): string {
+	if ( null !== zine_gallery_post( $block, $instance ) ) {
+		$state         = &state();
+		$state['core'] = $html;
+	}
+	return $html;
+}
+add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\\capture', 9, 3 );
+
+/**
+ * The post's first gallery as a zine of numbered panels: core's own image
+ * figures (alt, caption, srcset, link, lightbox) re-laid in order.
  *
  * @param string    $html     Rendered gallery (core's, or the plugin's projector).
  * @param array     $block    Parsed core/gallery block.
@@ -390,37 +470,26 @@ function gallery_caption( string $html ): string {
  * @return string
  */
 function zine( string $html, array $block, $instance = null ): string {
-	$state = &state();
-	if ( $state['done'] ) {
+	if ( null === zine_gallery_post( $block, $instance ) ) {
 		return $html;
 	}
-	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) ) ? (int) $instance->context['postId'] : (int) get_the_ID();
-	$post    = zine_post( $post_id );
-	if ( null === $post ) {
-		return $html;
-	}
-	$gallery = gallery_for( $post );
-	if ( null === $gallery || ! same_gallery( $block, $gallery ) ) {
-		return $html;
-	}
+	$state  = &state();
+	$core   = '' !== $state['core'] ? $state['core'] : $html;
 	$images = images_of( $block );
 	$total  = count( $images );
-	if ( 0 === $total ) {
+	// Core prints one figure per image block; anything else is not a gallery this can re-lay.
+	$count = preg_match_all( '/<figure\b(?=[^>]*\bwp-block-image\b)[^>]*>.*?<\/figure>/s', $core, $found );
+	if ( 0 === $total || $count !== $total ) {
 		return $html;
 	}
+	$state['done'] = true;
 
 	$width   = max( 2, strlen( (string) $total ) );
 	$figures = array();
 	$shapes  = array();
-	foreach ( $images as $n => $image ) {
-		$image['attrs'] = (array) ( $image['attrs'] ?? array() );
-		// Core's lightbox for every panel the author did not link or opt out of.
-		if ( ! isset( $image['attrs']['lightbox'] ) && in_array( (string) ( $image['attrs']['linkDestination'] ?? 'none' ), array( '', 'none' ), true ) ) {
-			$image['attrs']['lightbox'] = array( 'enabled' => true );
-		}
-		$figure = render_block( $image );
-		$shape  = shape_of( $image, $figure );
-		$tags   = new \WP_HTML_Tag_Processor( $figure );
+	foreach ( $found[0] as $n => $figure ) {
+		$shape = shape_of( $images[ $n ], $figure );
+		$tags  = new \WP_HTML_Tag_Processor( $figure );
 		if ( $tags->next_tag( 'img' ) ) {
 			$tags->add_class( 'u-photo' );
 			$tags->set_attribute( 'sizes', SIZES[ 0 === $n ? 'featured' : 'panel' ][ $shape ] );
@@ -429,7 +498,6 @@ function zine( string $html, array $block, $instance = null ): string {
 		$figures[] = $figure;
 		$shapes[]  = $shape;
 	}
-	$state['done'] = true;
 
 	$desktop = layout( $shapes, 12 );
 	$tablet  = layout( $shapes, 6 );
@@ -443,7 +511,8 @@ function zine( string $html, array $block, $instance = null ): string {
 			. $figure . '</li>';
 	}
 
-	$caption = gallery_caption( $html );
+	$caption = gallery_caption( $core );
+	$caption = '' !== $caption ? $caption : gallery_caption( $html );
 	$note    = '';
 	if ( '' !== $caption ) {
 		$hand = function_exists( 'mb_strlen' ) ? mb_strlen( wp_strip_all_tags( $caption ) ) : strlen( wp_strip_all_tags( $caption ) );
@@ -455,7 +524,14 @@ function zine( string $html, array $block, $instance = null ): string {
 		wp_dequeue_style( 'pkiw-photo-projector' );
 	}
 
-	return '<section class="cr-zine alignwide" aria-label="' . esc_attr__( 'Photos', 'courtneyr-child' ) . '">'
+	// The section takes over the gallery wrapper's lightbox wiring (core/gallery namespace and its galleryId).
+	$wiring  = '';
+	$wrapper = new \WP_HTML_Tag_Processor( $core );
+	if ( $wrapper->next_tag() && 'core/gallery' === $wrapper->get_attribute( 'data-wp-interactive' ) ) {
+		$wiring = ' data-wp-interactive="core/gallery" data-wp-context="' . esc_attr( (string) $wrapper->get_attribute( 'data-wp-context' ) ) . '"';
+	}
+
+	return '<section class="cr-zine alignwide" aria-label="' . esc_attr__( 'Photos', 'courtneyr-child' ) . '"' . $wiring . '>'
 		. '<ol class="cr-zine__frames" role="list">' . $panels . '</ol>' . $note . '</section>';
 }
 add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\\zine', 11, 3 );
@@ -468,7 +544,25 @@ add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\\zine', 11, 3 );
  * @return bool
  */
 function holds_h1( $holds, $post = null ): bool {
+	if ( state()['asking'] ) {
+		return true === $holds;
+	}
 	return true === $holds || ( $post instanceof \WP_Post && null !== zine_post( $post->ID ) );
+}
+
+/**
+ * Whether another kind lane (favorite sheet, chicken board, video label and
+ * the rest) already prints this page's H1; the masthead then steps aside.
+ *
+ * @param \WP_Post $post Post.
+ * @return bool
+ */
+function other_lane_holds( \WP_Post $post ): bool {
+	$state           = &state();
+	$state['asking'] = true;
+	$holds           = true === apply_filters( 'courtneyr_child_single_object_holds_h1', false, $post );
+	$state['asking'] = false;
+	return $holds;
 }
 add_filter( 'courtneyr_child_single_object_holds_h1', __NAMESPACE__ . '\\holds_h1', 10, 2 );
 
@@ -506,7 +600,7 @@ function masthead( string $html, array $block ): string {
 		return $html;
 	}
 	$post = zine_post();
-	if ( null === $post ) {
+	if ( null === $post || other_lane_holds( $post ) ) {
 		return $html;
 	}
 	$count = count( images_of( (array) gallery_for( $post ) ) );

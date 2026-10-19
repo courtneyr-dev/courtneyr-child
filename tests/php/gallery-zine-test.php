@@ -89,7 +89,10 @@ namespace {
 }
 
 namespace {
+	use function Courtneyr\Child\GalleryZine\capture;
+	use function Courtneyr\Child\GalleryZine\enable_lightbox;
 	use function Courtneyr\Child\GalleryZine\holds_h1;
+	use function Courtneyr\Child\GalleryZine\start_pass;
 	use function Courtneyr\Child\GalleryZine\layout;
 	use function Courtneyr\Child\GalleryZine\masthead;
 	use function Courtneyr\Child\GalleryZine\reset_state;
@@ -103,8 +106,9 @@ namespace {
 	);
 
 	/** A gallery-format single request for post $id with $count images (701-704 cycling). */
-	function cr_zine_request( int $count, int $id = 42, string $title = 'Blue Hour at Example Lake', bool $linked_third = false ): array {
+	function cr_zine_request( int $count, int $id = 42, string $title = 'Blue Hour at Example Lake', bool $linked_third = false, string $kind = 'note' ): array {
 		cr_photo_reset( $id, $title );
+		$GLOBALS['cr_photo_request']['post_kinds'][ $id ] = array( $kind );
 		$GLOBALS['cr_photo_request']['single'] = true;
 		$GLOBALS['cr_zine_formats']            = array( $id => 'gallery' );
 		$GLOBALS['cr_zine_dequeued']           = array();
@@ -131,19 +135,31 @@ namespace {
 		return $GLOBALS['cr_zine_blocks'][0];
 	}
 
-	/** Core's rendered gallery, with an optional gallery caption. */
-	function cr_zine_core_html( string $caption = '' ): string {
-		return '<figure class="wp-block-gallery has-nested-images">images' . ( '' !== $caption ? '<figcaption class="blocks-gallery-caption wp-element-caption">' . $caption . '</figcaption>' : '' ) . '</figure>';
+	/** Core's render of a gallery block: its image figures (lightbox where the attrs ask) and an optional gallery caption. */
+	function cr_zine_core_html( array $gallery, string $caption = '' ): string {
+		$figures = '';
+		foreach ( $gallery['innerBlocks'] as $image ) {
+			$figures .= render_block( $image );
+		}
+		return '<figure class="wp-block-gallery has-nested-images" data-wp-interactive="core/gallery" data-wp-context="{&quot;galleryId&quot;:&quot;g1&quot;}">' . $figures
+			. ( '' !== $caption ? '<figcaption class="blocks-gallery-caption wp-element-caption">' . $caption . '</figcaption>' : '' ) . '</figure>';
 	}
 
-	function cr_zine_render( array $gallery, string $html = '', int $id = 42 ): string {
-		return zine( '' !== $html ? $html : cr_zine_core_html(), $gallery, new WP_Block( array( 'postId' => $id ) ) );
+	/** One gallery through the render pipeline: render_block_data, core's render, capture (9), the projector's output if any (10), the zine (11). */
+	function cr_zine_render( array $gallery, string $caption = '', int $id = 42, ?string $projector = null ): string {
+		$instance = new WP_Block( array( 'postId' => $id ) );
+		$parsed   = enable_lightbox( $gallery );
+		$html     = capture( cr_zine_core_html( $parsed, $caption ), $parsed, $instance );
+		return zine( $projector ?? $html, $parsed, $instance );
 	}
 
 	cr_photo_group(
 		'hooks: the zine replaces the first gallery after the plugin projector, holds the H1, prints the masthead, loads its sheet',
 		static function (): void {
 			cr_photo_assert( cr_photo_hooked( 'render_block_core/gallery', 'Courtneyr\\Child\\GalleryZine\\zine', 11, 3 ), 'zine at 11' );
+			cr_photo_assert( cr_photo_hooked( 'render_block_core/gallery', 'Courtneyr\\Child\\GalleryZine\\capture', 9, 3 ), 'core render kept before the projector (10)' );
+			cr_photo_assert( cr_photo_hooked( 'render_block_data', 'Courtneyr\\Child\\GalleryZine\\enable_lightbox', 20 ), 'lightbox on before core renders, after core adds data-id' );
+			cr_photo_assert( cr_photo_hooked( 'the_content', 'Courtneyr\\Child\\GalleryZine\\start_pass', 1 ), 'each content pass starts fresh' );
 			cr_photo_assert( cr_photo_hooked( 'courtneyr_child_single_object_holds_h1', 'Courtneyr\\Child\\GalleryZine\\holds_h1', 10, 2 ), 'holds the H1' );
 			cr_photo_assert( cr_photo_hooked( 'render_block_core/post-content', 'Courtneyr\\Child\\GalleryZine\\masthead', 20, 2 ), 'masthead on the post content' );
 			cr_photo_assert( cr_photo_hooked( 'wp_enqueue_scripts', 'Courtneyr\\Child\\GalleryZine\\enqueue_styles' ), 'sheet' );
@@ -159,8 +175,8 @@ namespace {
 			foreach ( $gallery['innerBlocks'] as $k => $inner ) {
 				$gallery['innerBlocks'][ $k ]['attrs']['data-id'] = (string) $inner['attrs']['id'];
 			}
-			$html = cr_zine_render( $gallery, cr_zine_core_html( 'A short gallery caption.' ) );
-			cr_photo_assert( 1 === preg_match( '/^<section class="cr-zine alignwide" aria-label="Photos">/', $html ), 'a region named Photos, not a second copy of the H1' );
+			$html = cr_zine_render( $gallery, 'A short gallery caption.' );
+			cr_photo_assert( 1 === preg_match( '/^<section class="cr-zine alignwide" aria-label="Photos" data-wp-interactive="core\/gallery" data-wp-context="\{&quot;galleryId&quot;:&quot;g1&quot;\}">/', $html ), 'a region named Photos that carries core\'s gallery lightbox wiring' );
 			cr_photo_assert( 1 === preg_match( '/<ol class="cr-zine__frames" role="list">/', $html ), 'an ordered list of panels' );
 			cr_photo_same( 6, preg_match_all( '/<li class="cr-zine__frame cr-zine__frame--[a-z]+" style="--cr-col:[^"]+;--cr-col-t:[^"]+">/', $html ), 'six panels, each placed on both grids' );
 			foreach ( array( 'landscape' => 2, 'portrait' => 2, 'square' => 1, 'panorama' => 1 ) as $shape => $n ) {
@@ -184,7 +200,7 @@ namespace {
 		static function (): void {
 			$gallery = cr_zine_request( 4, 42, 'Blue Hour at Example Lake', true );
 			$long    = 'A longer gallery caption that runs past the handwriting limit so it stays typeset in the body face, the way notes read.';
-			$html    = cr_zine_render( $gallery, cr_zine_core_html( $long ) );
+			$html    = cr_zine_render( $gallery, $long );
 			cr_photo_contains( '<p class="cr-zine__note">' . $long . '</p>', $html, 'typeset note' );
 			cr_photo_contains( '<a href="https://example.test/703.jpg">', $html, 'the media link stays' );
 			cr_photo_same( 3, substr_count( $html, 'data-wp-interactive="core/image"' ), 'no lightbox on the linked image' );
@@ -194,9 +210,10 @@ namespace {
 	cr_photo_group(
 		'the plugin projector output is replaced too, with its caption kept and its assets dequeued',
 		static function (): void {
-			$gallery   = cr_zine_request( 5 );
+			$gallery   = cr_zine_request( 5, 42, 'Blue Hour at Example Lake', false, 'photo' );
 			$projector = '<div class="wp-block-gallery pkiw-projector" role="region"><div class="pkiw-projector__mount">slides</div><p class="pkiw-projector__note wp-element-caption">From the projector.</p></div>';
-			$html      = cr_zine_render( $gallery, $projector );
+			$html      = cr_zine_render( $gallery, '', 42, $projector );
+			cr_photo_same( 5, substr_count( $html, 'data-wp-interactive="core/image"' ), 'panels are core\'s figures from before the projector' );
 			cr_photo_same( 5, substr_count( $html, '<li class="cr-zine__frame' ), 'five panels' );
 			cr_photo_contains( 'From the projector.', $html, 'caption kept' );
 			cr_photo_not_contains( 'pkiw-projector', $html, 'no projector' );
@@ -222,34 +239,47 @@ namespace {
 		static function (): void {
 			$gallery = cr_zine_request( 3 );
 			cr_zine_render( $gallery );
-			cr_photo_same( cr_zine_core_html(), cr_zine_render( $gallery ), 'a second gallery stays core' );
+			cr_photo_same( cr_zine_core_html( $gallery ), cr_zine_render( $gallery ), 'a second gallery stays core' );
+			start_pass( '' );
+			cr_photo_assert( str_starts_with( cr_zine_render( $gallery ), '<section class="cr-zine' ), 'a fresh content pass prints the zine again' );
 
 			$gallery = cr_zine_request( 3 );
-			$GLOBALS['cr_zine_formats']                   = array( 42 => 'image' );
-			$GLOBALS['cr_photo_request']['post_kinds'][42] = array( 'note' );
-			cr_photo_same( cr_zine_core_html(), cr_zine_render( $gallery ), 'another post format' );
+			$GLOBALS['cr_zine_formats'] = array( 42 => 'image' );
+			cr_photo_same( cr_zine_core_html( $gallery ), cr_zine_render( $gallery ), 'another post format' );
 
-			$gallery = cr_zine_request( 3 );
+			$gallery = cr_zine_request( 3, 42, 'Blue Hour at Example Lake', false, 'photo' );
 			$GLOBALS['cr_zine_formats'] = array();
 			cr_photo_assert( str_starts_with( cr_zine_render( $gallery ), '<section class="cr-zine' ), 'a photo post the projector would take gets the zine in any format' );
 
-			$gallery = cr_zine_request( 1 );
-			$GLOBALS['cr_zine_formats'] = array();
-			cr_photo_same( cr_zine_core_html(), cr_zine_render( $gallery ), 'a one-image photo gallery outside the gallery format stays core' );
+			$gallery = cr_zine_request( 1, 42, 'Blue Hour at Example Lake', false, 'photo' );
+			cr_photo_same( cr_zine_core_html( $gallery ), cr_zine_render( $gallery ), 'a one-image gallery on a photo post stays core, as the projector leaves it' );
+
+			// A gallery-format photo post: one image, then three. The projector takes the second, so the zine does too.
+			$one   = cr_zine_request( 1, 42, 'Blue Hour at Example Lake', false, 'photo' );
+			$three = cr_zine_request( 3, 42, 'Blue Hour at Example Lake', false, 'photo' );
+			$GLOBALS['cr_zine_blocks'] = array( $one, $three );
+			cr_photo_same( cr_zine_core_html( $one ), cr_zine_render( $one ), 'the one-image gallery stays core' );
+			cr_photo_same( 3, substr_count( cr_zine_render( $three ), '<li class="cr-zine__frame' ), 'the projector\'s gallery is the zine' );
 
 			$gallery = cr_zine_request( 3 );
 			$GLOBALS['cr_photo_request']['protected'][42] = true;
-			cr_photo_same( cr_zine_core_html(), cr_zine_render( $gallery ), 'password protected' );
+			cr_photo_same( cr_zine_core_html( $gallery ), cr_zine_render( $gallery ), 'password protected' );
 
 			$gallery = cr_zine_request( 3 );
-			cr_photo_same( cr_zine_core_html(), cr_zine_render( $gallery, '', 77 ), 'not the queried post' );
+			$GLOBALS['cr_photo_request']['the_id'] = 77;
+			cr_photo_same( cr_zine_core_html( $gallery ), cr_zine_render( $gallery, '', 77 ), 'not the queried post' );
 
 			$gallery = cr_zine_request( 3 );
 			$GLOBALS['cr_photo_request']['single'] = false;
-			cr_photo_same( cr_zine_core_html(), cr_zine_render( $gallery ), 'not a single' );
+			cr_photo_same( cr_zine_core_html( $gallery ), cr_zine_render( $gallery ), 'not a single' );
+
+			$gallery = cr_zine_request( 3 );
+			$short   = '<figure class="wp-block-gallery has-nested-images"><figure class="wp-block-image"><img src="x" alt=""/></figure></figure>';
+			cr_photo_same( $short, zine( $short, $gallery, new WP_Block( array( 'postId' => 42 ) ) ), 'a render that lost figures is left alone' );
 
 			cr_zine_request( 0 );
-			cr_photo_same( cr_zine_core_html(), cr_zine_render( array( 'blockName' => 'core/gallery', 'attrs' => array(), 'innerBlocks' => array(), 'innerHTML' => '' ) ), 'no images' );
+			$empty = array( 'blockName' => 'core/gallery', 'attrs' => array(), 'innerBlocks' => array(), 'innerHTML' => '' );
+			cr_photo_same( cr_zine_core_html( $empty ), cr_zine_render( $empty ), 'no images' );
 		}
 	);
 
@@ -282,6 +312,20 @@ namespace {
 			cr_zine_request( 6 );
 			$GLOBALS['cr_zine_blocks'] = array();
 			cr_photo_same( false, holds_h1( false, $GLOBALS['cr_photo_posts'][42] ), 'a gallery-format post with no gallery keeps the template H1' );
+		}
+	);
+
+	cr_photo_group(
+		'another kind lane that prints its own H1 (chicken board, favorite sheet, video label) keeps it: no masthead, one H1',
+		static function (): void {
+			cr_zine_request( 6 );
+			$block = array( 'blockName' => 'core/post-content', 'attrs' => array( 'className' => 'single-post__content' ) );
+			cr_photo_assert( str_contains( masthead( '<div class="cr-coop">board</div>', $block ), 'cr-zine__masthead' ), 'alone, the zine prints its masthead' );
+			$lane = static fn( $holds ): bool => true;
+			add_filter( 'courtneyr_child_single_object_holds_h1', $lane, 10, 2 );
+			cr_photo_same( '<div class="cr-coop">board</div>', masthead( '<div class="cr-coop">board</div>', $block ), 'the lane keeps the page H1' );
+			cr_photo_same( true, holds_h1( false, $GLOBALS['cr_photo_posts'][42] ), 'the template header still steps aside' );
+			array_pop( $GLOBALS['cr_photo_hooks'] );
 		}
 	);
 
