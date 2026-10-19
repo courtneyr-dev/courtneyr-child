@@ -19,7 +19,7 @@
 	max-width: none;
 	margin: 0 0 var(--cr-space-2xl);
 	padding: var(--cr-space-xl) var(--cr-space-xl) var(--cr-space-lg);
-	padding-inline-end: calc(var(--cr-space-xl) + 8.5rem);
+	padding-inline-end: calc(var(--cr-space-xl) + 10rem);
 	background-color: var(--cr-photocopier-blk);
 	background-image: radial-gradient(var(--cr-russian-violet-soft) 1.2px, transparent 1.5px);
 	background-size: 7px 7px;
@@ -80,6 +80,7 @@
 	font-size: clamp(2rem, 1.1rem + 3.4vw, 3.75rem);
 	font-weight: 800;
 	line-height: 1.3;
+	overflow-wrap: anywhere;
 	transform: rotate(var(--cr-rotate-1));
 }
 
@@ -100,7 +101,7 @@
 }
 
 .cr-zine-single .cr-zine__count::before {
-	content: "/ ";
+	content: "/ " / "";
 	color: var(--cr-selective-yellow);
 }
 
@@ -156,6 +157,9 @@
 	background-color: var(--cr-light-gray);
 	background-image: var(--cr-fiber);
 	color: var(--cr-russian-violet);
+
+	/* The halo follows --cr-ink, which turns ivory in dark mode; paper keeps violet. */
+	--cr-focus-halo: var(--cr-russian-violet);
 }
 
 .cr-zine-single .cr-zine::before,
@@ -464,7 +468,6 @@
 		background-image: none;
 		box-shadow: none;
 		color: CanvasText;
-		forced-color-adjust: none;
 	}
 
 	.cr-zine-single .cr-zine__title-paper {

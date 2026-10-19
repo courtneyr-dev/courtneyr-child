@@ -58,6 +58,11 @@ namespace {
 			$GLOBALS['cr_zine_dequeued'][] = 'style:' . $handle;
 		}
 	}
+	if ( ! function_exists( 'esc_attr__' ) ) {
+		function esc_attr__( $text, $domain = null ): string {
+			return esc_attr( $text );
+		}
+	}
 	if ( ! function_exists( '_n' ) ) {
 		function _n( $single, $plural, $number, $domain = null ): string {
 			return 1 === (int) $number ? (string) $single : (string) $plural;
@@ -155,7 +160,7 @@ namespace {
 				$gallery['innerBlocks'][ $k ]['attrs']['data-id'] = (string) $inner['attrs']['id'];
 			}
 			$html = cr_zine_render( $gallery, cr_zine_core_html( 'A short gallery caption.' ) );
-			cr_photo_assert( 1 === preg_match( '/^<section class="cr-zine alignwide" aria-labelledby="cr-zine-title">/', $html ), 'a section labelled by the masthead H1' );
+			cr_photo_assert( 1 === preg_match( '/^<section class="cr-zine alignwide" aria-label="Photos">/', $html ), 'a region named Photos, not a second copy of the H1' );
 			cr_photo_assert( 1 === preg_match( '/<ol class="cr-zine__frames" role="list">/', $html ), 'an ordered list of panels' );
 			cr_photo_same( 6, preg_match_all( '/<li class="cr-zine__frame cr-zine__frame--[a-z]+" style="--cr-col:[^"]+;--cr-col-t:[^"]+">/', $html ), 'six panels, each placed on both grids' );
 			foreach ( array( 'landscape' => 2, 'portrait' => 2, 'square' => 1, 'panorama' => 1 ) as $shape => $n ) {

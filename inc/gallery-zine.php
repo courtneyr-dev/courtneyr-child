@@ -455,7 +455,7 @@ function zine( string $html, array $block, $instance = null ): string {
 		wp_dequeue_style( 'pkiw-photo-projector' );
 	}
 
-	return '<section class="cr-zine alignwide" aria-labelledby="' . TITLE_ID . '">'
+	return '<section class="cr-zine alignwide" aria-label="' . esc_attr__( 'Photos', 'courtneyr-child' ) . '">'
 		. '<ol class="cr-zine__frames" role="list">' . $panels . '</ol>' . $note . '</section>';
 }
 add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\\zine', 11, 3 );
