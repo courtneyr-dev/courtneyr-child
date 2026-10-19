@@ -358,7 +358,8 @@ namespace {
 			$xpath = cr_video_xpath( $out );
 			cr_video_assert( 0 === $xpath->query( '//img' )->length, 'no picture prints no image' );
 			cr_video_assert( 0 === $xpath->query( '//*[contains(concat(" ", normalize-space(@class), " "), " cr-shelf-tape__strip ")]' )->length, 'no picture prints no strip' );
-			cr_video_assert( 1 === $xpath->query( '//*[contains(concat(" ", normalize-space(@class), " "), " cr-shelf-tape__window ") and not(*) and normalize-space(.)=""]' )->length, 'empty window has no placeholder' );
+			cr_video_assert( 0 === $xpath->query( '//*[contains(concat(" ", normalize-space(@class), " "), " cr-shelf-tape__window ")]' )->length, 'no picture prints no empty window' );
+			cr_video_assert( 2 === $xpath->query( '//*[contains(concat(" ", normalize-space(@class), " "), " cr-shelf-tape__shell--reels ")]/*[contains(concat(" ", normalize-space(@class), " "), " cr-shelf-tape__reel ")]' )->length, 'no picture keeps both reels on a reels-only shell' );
 
 			foreach ( array( 4, 5, 6 ) as $id ) {
 				cr_video_reset();

@@ -238,7 +238,10 @@ test.describe( 'archive', () => {
 		await expect( image, 'A8 V01 has a local picture' ).toHaveAttribute( 'alt', '' );
 		expect( await image.evaluate( ( element ) => getComputedStyle( element ).filter ), 'A8 picture has no computed filter' ).toBe( 'none' );
 		for ( const key of [ 'V03', 'V06' ] ) {
-			await expect( ( await fixtureCard( page, key, 'article.cr-shelf-tape' ) ).locator( 'img' ), `A8 ${ key} has no picture` ).toHaveCount( 0 );
+			const card = await fixtureCard( page, key, 'article.cr-shelf-tape' );
+			await expect( card.locator( 'img' ), `A8 ${ key} has no picture` ).toHaveCount( 0 );
+			await expect( card.locator( '.cr-shelf-tape__window' ), `A8 ${ key} shows reels only, with no empty window` ).toHaveCount( 0 );
+			await expect( card.locator( '.cr-shelf-tape__reel' ), `A8 ${ key} keeps both reels` ).toHaveCount( 2 );
 		}
 		const v09 = await fixtureCard( page, 'V09', 'article.cr-shelf-tape' );
 		const v10 = await fixtureCard( page, 'V10', 'article.cr-shelf-tape' );

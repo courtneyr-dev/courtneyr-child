@@ -324,10 +324,10 @@ function tape_card( string $html, array $block, $instance ): string {
 		$classes[] = 'cr-shelf-tape--protected';
 	}
 	$html  = add_article_classes( $html, $classes );
-	$shell = '<div class="cr-shelf-tape__shell" aria-hidden="true"><span class="cr-shelf-tape__reel"></span><span class="cr-shelf-tape__reel"></span>'
-		. '<span class="cr-shelf-tape__window">' . $picture . '</span>'
-		. ( '' !== $picture ? '<span class="cr-shelf-tape__strip"></span>' : '' )
-		. '</div>';
+	$shell = '' !== $picture
+		? '<div class="cr-shelf-tape__shell" aria-hidden="true"><span class="cr-shelf-tape__reel"></span><span class="cr-shelf-tape__reel"></span>'
+			. '<span class="cr-shelf-tape__window">' . $picture . '</span><span class="cr-shelf-tape__strip"></span></div>'
+		: '<div class="cr-shelf-tape__shell cr-shelf-tape__shell--reels" aria-hidden="true"><span class="cr-shelf-tape__reel"></span><span class="cr-shelf-tape__reel"></span></div>';
 	return prepend_article_child( $html, $shell );
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\tape_card', 10, 3 );
