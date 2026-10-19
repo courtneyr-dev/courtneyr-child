@@ -73,10 +73,11 @@ namespace {
 	}
 	/** The quote block of a post body: a core/quote with its inner HTML. */
 	function parse_blocks( string $content ): array {
-		if ( ! preg_match( '/<!-- wp:quote -->(.*?)<!-- \/wp:quote -->/s', $content, $m ) ) {
+		if ( ! preg_match( '/<!-- wp:quote( (\{.*?\}))? -->(.*?)<!-- \/wp:quote -->/s', $content, $m ) ) {
 			return array( array( 'blockName' => 'core/paragraph', 'attrs' => array(), 'innerBlocks' => array(), 'innerHTML' => $content ) );
 		}
-		return array( array( 'blockName' => 'core/quote', 'attrs' => array(), 'innerBlocks' => array(), 'innerHTML' => trim( $m[1] ) ) );
+		$attrs = '' !== $m[2] ? (array) json_decode( $m[2], true ) : array();
+		return array( array( 'blockName' => 'core/quote', 'attrs' => $attrs, 'innerBlocks' => array(), 'innerHTML' => trim( $m[3] ) ) );
 	}
 	function render_block( array $block ): string {
 		return (string) ( $block['innerHTML'] ?? '' );
@@ -85,6 +86,15 @@ namespace {
 		return trim( strip_tags( (string) $text ) );
 	}
 	function strip_shortcodes( $text ): string {
+		return (string) $text;
+	}
+	function wp_allowed_protocols(): array {
+		return array( 'http', 'https' );
+	}
+	function register_block_style( $block, $style ): void {
+		$GLOBALS['cr_q_styles'][] = array( $block, $style );
+	}
+	function __( $text, $domain = null ): string {
 		return (string) $text;
 	}
 	function apply_filters( $hook, $value, ...$args ) {
@@ -125,6 +135,8 @@ namespace {
 	require dirname( __DIR__, 2 ) . '/inc/quote-note.php';
 
 	use function Courtneyr\Child\QuoteNote\archive_sheet;
+	use function Courtneyr\Child\QuoteNote\stream_card;
+	use const Courtneyr\Child\QuoteNote\PAPERS;
 
 	const CR_Q_QUOTE = '<blockquote class="wp-block-quote is-style-side-rule-editorial"><p>When the risk to remain tight in a bud was more painful than the risk it took to blossom.</p><p>Well, I know which risk I would rather take.</p><cite>Ted Lasso</cite></blockquote>';
 
@@ -261,10 +273,83 @@ namespace {
 				&& str_contains( $css, $both . ' .cr-note--single blockquote,' )
 				&& str_contains( $css, $both . ' .cr-note-artifact--single {' )
 				&& str_contains( $css, 'body.tax-kind.term-quote .cr-archive-stream .wp-block-post-template { columns: auto; max-width: 46rem; }' )
-				&& str_contains( $css, 'body.tax-kind.term-quote .cr-archive-stream .cr-note.cr-note--single::before { width: auto; height: auto; margin: 0; border-radius: 0; opacity: 1; transform: none; background-color: #f0eef8; }' )
+				&& str_contains( $css, 'body.tax-kind.term-quote .cr-archive-stream .cr-note.cr-note--single::before { width: auto; height: auto; margin: 0; border-radius: 0; opacity: 1; transform: none; }' )
 				&& str_contains( $css, "body.tax-kind.term-quote .cr-archive-stream .wp-block-post-template::after { content: none; }" )
 				&& str_contains( $css, 'body.tax-kind.term-quote .cr-archive-stream .cr-note-artifact--archive.cr-hand-short .cr-note--single blockquote p {' )
 				&& ! str_contains( $css, "\nbody.single-post.kind-quote .single-post__content .cr-note--single blockquote {" );
+		}
+	);
+
+	/** The --cr-quote-paper value an artifact carries, or ''. */
+	function cr_q_paper( string $html ): string {
+		return preg_match( '/--cr-quote-paper:([^;"]+)/', $html, $m ) ? $m[1] : '';
+	}
+
+	function cr_q_preview(): string {
+		$GLOBALS['cr_q_request']['stream']  = true;
+		$GLOBALS['cr_q_request']['archive'] = false;
+		$out = stream_card( cr_q_card(), array(), new WP_Block( array( 'postId' => 30 ) ) );
+		$GLOBALS['cr_q_request']['stream']  = false;
+		$GLOBALS['cr_q_request']['archive'] = true;
+		return $out;
+	}
+
+	cr_q_check(
+		'five quote papers are block styles on core/quote, each a light palette paper',
+		static function (): bool {
+			$GLOBALS['cr_q_styles'] = array();
+			foreach ( $GLOBALS['cr_q_hooks'] as $hook ) {
+				if ( 'init' === $hook[0] && 'Courtneyr\\Child\\QuoteNote\\register_paper_styles' === $hook[1] ) {
+					( $hook[1] )();
+				}
+			}
+			$names = array_map( static fn( array $s ): string => $s[0] . ' ' . $s[1]['name'], $GLOBALS['cr_q_styles'] );
+			$want  = array_map( static fn( string $k ): string => 'core/quote cr-quote-paper-' . $k, array_keys( PAPERS ) );
+			return array( 'lavender', 'ivory', 'peach', 'sky', 'butter' ) === array_keys( PAPERS ) && $want === $names
+				&& 0 === count( array_filter( PAPERS, static fn( array $p ): bool => ! str_starts_with( $p[1], 'var(--cr-' ) && ! str_starts_with( $p[1], 'color-mix(in srgb, var(--cr-' ) ) );
+		}
+	);
+
+	cr_q_check(
+		'one quote, one paper: the archive sheet and the Stream preview carry the same seeded paper',
+		static function (): bool {
+			$seen = array();
+			foreach ( array( 30, 31, 32, 33, 34, 35, 36, 37, 38, 39 ) as $id ) {
+				cr_q_reset();
+				$GLOBALS['cr_q_request']['posts'][ $id ] = new WP_Post( $id, 'Quote ' . $id, $GLOBALS['cr_q_request']['posts'][30]->post_content );
+				$GLOBALS['cr_q_request']['kinds'][ $id ] = 'quote';
+				$sheet   = archive_sheet( cr_q_card( $id ), array(), new WP_Block( array( 'postId' => $id ) ) );
+				$GLOBALS['cr_q_request']['stream']  = true;
+				$GLOBALS['cr_q_request']['archive'] = false;
+				$preview = stream_card( cr_q_card( $id ), array(), new WP_Block( array( 'postId' => $id ) ) );
+				$paper   = cr_q_paper( $sheet );
+				if ( '' === $paper || $paper !== cr_q_paper( $preview ) || ! in_array( $paper, array_column( PAPERS, 1 ), true ) ) {
+					return false;
+				}
+				$seen[ $paper ] = true;
+			}
+			return count( $seen ) >= 3;
+		}
+	);
+
+	cr_q_check(
+		'a paper picked as the quote block style wins on every surface',
+		static function (): bool {
+			cr_q_reset( '<!-- wp:quote {"className":"is-style-cr-quote-paper-sky"} -->' . CR_Q_QUOTE . '<!-- /wp:quote -->' );
+			$sheet = cr_q_sheet();
+			$preview = cr_q_preview();
+			cr_q_reset( '<!-- wp:quote {"className":"is-style-cr-quote-paper-nope"} -->' . CR_Q_QUOTE . '<!-- /wp:quote -->' );
+			$unknown = cr_q_paper( cr_q_sheet() );
+			return PAPERS['sky'][1] === cr_q_paper( $sheet ) && PAPERS['sky'][1] === cr_q_paper( $preview ) && in_array( $unknown, array_column( PAPERS, 1 ), true );
+		}
+	);
+
+	cr_q_check(
+		'every quote paper surface reads the one custom property',
+		static function (): bool {
+			$css = (string) file_get_contents( dirname( __DIR__, 2 ) . '/assets/css/cr-post-kinds.css' );
+			return 2 === substr_count( $css, 'var(--cr-quote-paper, var(--cr-printer-ivory));' )
+				&& ! str_contains( $css, 'transform: none; background-color: #f0eef8; }' );
 		}
 	);
 
