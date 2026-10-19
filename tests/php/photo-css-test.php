@@ -256,6 +256,13 @@ check_case(
 );
 
 check_case(
+	'the single mount has no side slots (Courtney 2026-10-19: no lines in the left and right margins)',
+	static function () use ( $code ): bool {
+		return 0 === preg_match( '/\.pkiw-projector__mount::(before|after)/', $code );
+	}
+);
+
+check_case(
 	'the slide mount is gone from the Stream',
 	static function () use ( $code ): bool {
 		return false === strpos( $code, 'cr-slide-mount' ) && false === strpos( $code, 'data-cr-rotate' );
