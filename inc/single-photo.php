@@ -16,6 +16,9 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\SinglePhoto;
 
+use function Courtneyr\Child\Stamps\pick;
+use function Courtneyr\Child\Stamps\seed;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -23,6 +26,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 const KIND       = 'photo';
 const TITLE_ID   = 'cr-photo-title';
 const BODY_CLASS = 'cr-photo-single';
+
+/**
+ * Tilt keys a scrapbook print may take; cr-photo.css maps 0 to 3 to the
+ * four rotation tokens.
+ */
+const PRINT_TILTS = 4;
 
 /**
  * Whether this is the queried photo single and it has a title of its own.
@@ -112,3 +121,65 @@ function editor_parity_kinds( $kinds ) {
 	return $kinds;
 }
 add_filter( 'courtneyr_child_editor_parity_kinds', __NAMESPACE__ . '\\editor_parity_kinds' );
+
+/**
+ * A gallery photo single as a scrapbook spread (Courtney, 2026-10-19).
+ *
+ * The plugin turns the first gallery of a photo post into a projector (one
+ * slide at a time, buttons and a rail). On the single the theme lays every
+ * picture out at once instead: each of the gallery's own image blocks is
+ * rendered by core with its "expand on click" lightbox (the Interactivity
+ * API, no theme script), keeps its caption and its u-photo class, and
+ * becomes a loose print with a seeded tilt; cr-photo.css adds the paper and
+ * tape. Runs after the projector (priority 10) and only where it ran.
+ *
+ * @param string    $html     Rendered gallery (the projector).
+ * @param array     $block    Parsed core/gallery block.
+ * @param \WP_Block $instance Block instance.
+ * @return string
+ */
+function scrapbook( string $html, array $block, $instance = null ): string {
+	if ( false === strpos( $html, 'pkiw-projector' ) ) {
+		return $html;
+	}
+	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
+		? (int) $instance->context['postId']
+		: (int) get_the_ID();
+	if ( ! is_singular( 'post' ) || $post_id <= 0 || get_queried_object_id() !== $post_id || ! has_term( KIND, 'kind', $post_id ) || post_password_required( $post_id ) ) {
+		return $html;
+	}
+
+	$prints = '';
+	$count  = 0;
+	foreach ( (array) ( $block['innerBlocks'] ?? array() ) as $image ) {
+		if ( 'core/image' !== ( $image['blockName'] ?? '' ) ) {
+			continue;
+		}
+		$image['attrs']             = (array) ( $image['attrs'] ?? array() );
+		$image['attrs']['lightbox'] = array( 'enabled' => true );
+		$figure                     = render_block( $image );
+		$tags                       = new \WP_HTML_Tag_Processor( $figure );
+		if ( $tags->next_tag( 'img' ) ) {
+			$tags->add_class( 'u-photo' );
+			$figure = $tags->get_updated_html();
+		}
+		$tilt    = pick( seed( 'scrapbook', (string) $post_id, (string) $count ), 3, PRINT_TILTS );
+		$prints .= '<li class="cr-scrapbook__print cr-scrapbook__print--tilt-' . $tilt . '">' . $figure . '</li>';
+		++$count;
+	}
+	if ( 0 === $count ) {
+		return $html;
+	}
+
+	// The projector's own script and styles have nothing left to drive.
+	if ( function_exists( 'wp_dequeue_script' ) ) {
+		wp_dequeue_script( 'pkiw-photo-projector' );
+		wp_dequeue_style( 'pkiw-photo-projector' );
+	}
+
+	$label = is_titled_photo_single( $post_id )
+		? ' aria-labelledby="' . TITLE_ID . '"'
+		: ' aria-label="' . esc_attr( __( 'Photos', 'courtneyr-child' ) ) . '"';
+	return '<ul class="cr-scrapbook" role="list"' . $label . '>' . $prints . '</ul>';
+}
+add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\\scrapbook', 11, 3 );

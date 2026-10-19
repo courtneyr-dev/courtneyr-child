@@ -542,6 +542,101 @@ body.cr-photo-single .pkiw-photo-place {
 }
 
 /* ============================================================
+   Gallery single: a scrapbook spread (inc/single-photo.php). Every
+   picture at once as a loose white print, taped and turned by a
+   seeded token; core's lightbox opens a print full size.
+   ============================================================ */
+body.cr-photo-single .cr-scrapbook {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+	gap: var(--cr-space-2xl) var(--cr-space-xl);
+	align-items: start;
+	margin: var(--cr-space-xl) 0;
+	padding: var(--cr-space-md) var(--cr-space-sm) 0;
+	list-style: none;
+}
+
+body.cr-photo-single .cr-scrapbook__print {
+	position: relative;
+	margin: 0;
+	padding: 0.75rem 0.75rem 1rem;
+	background-color: var(--cr-white);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+}
+
+/* Every other print sits a little lower, so the spread reads as laid down by hand. */
+body.cr-photo-single .cr-scrapbook__print:nth-child(even) {
+	margin-block-start: var(--cr-space-lg);
+}
+
+body.cr-photo-single .cr-scrapbook__print--tilt-0 {
+	transform: rotate(var(--cr-rotate-1));
+}
+
+body.cr-photo-single .cr-scrapbook__print--tilt-1 {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+body.cr-photo-single .cr-scrapbook__print--tilt-2 {
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+body.cr-photo-single .cr-scrapbook__print--tilt-3 {
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+/* A strip of tape across each print's top edge. */
+body.cr-photo-single .cr-scrapbook__print::before {
+	content: "";
+	position: absolute;
+	inset-block-start: -0.6rem;
+	inset-inline-start: calc(50% - 2rem);
+	z-index: 1;
+	width: 4rem;
+	height: 1.2rem;
+	background-color: var(--cr-tape);
+	transform: rotate(var(--cr-rotate-neg));
+	pointer-events: none;
+}
+
+body.cr-photo-single .cr-scrapbook__print figure {
+	margin: 0;
+}
+
+body.cr-photo-single .cr-scrapbook__print img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+body.cr-photo-single .cr-scrapbook__print figcaption {
+	margin: 0.7rem 0 0;
+	padding: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-display);
+	font-size: 0.9rem;
+	line-height: 1.45;
+	text-align: center;
+}
+
+@media (max-width: 39.99rem) {
+
+	body.cr-photo-single .cr-scrapbook {
+		grid-template-columns: 1fr;
+		gap: var(--cr-space-xl);
+		padding-inline: var(--cr-space-md);
+	}
+
+	body.cr-photo-single .cr-scrapbook__print:nth-child(even) {
+		margin-block-start: 0;
+	}
+}
+
+/* ============================================================
    Stream: a single picture is a polaroid, a gallery-format post a
    photo booth strip (inc/stream-gallery.php paints the strip's paper
    from cr-post-kinds.css). Restored from the shared Stream sheet as
@@ -752,8 +847,16 @@ body.cr-photo-single .pkiw-photo-place {
 	}
 
 	.cr-photo-sheets .pkiw-group__heading::before,
-	body.cr-photo-single .pkiw-projector::before {
+	body.cr-photo-single .pkiw-projector::before,
+	body.cr-photo-single .cr-scrapbook__print::before {
 		display: none;
+	}
+
+	body.cr-photo-single .cr-scrapbook__print {
+		border: 2px solid CanvasText;
+		background-color: Canvas;
+		box-shadow: none;
+		color: CanvasText;
 	}
 
 	.cr-photo-frame__label,

@@ -263,6 +263,28 @@ check_case(
 );
 
 check_case(
+	'the gallery single is a scrapbook: white taped prints, four tilt tokens, Rock Salt captions, one column on phones',
+	static function () use ( $code, $css ): bool {
+		$list  = rule_body( $code, 'body.cr-photo-single .cr-scrapbook ' );
+		$print = rule_body( $code, 'body.cr-photo-single .cr-scrapbook__print ' );
+		$tape  = rule_body( $code, 'body.cr-photo-single .cr-scrapbook__print::before' );
+		$cap   = rule_body( $code, 'body.cr-photo-single .cr-scrapbook__print figcaption' );
+		foreach ( array( '0' => '--cr-rotate-1', '1' => '--cr-rotate-2', '2' => '--cr-rotate-neg', '3' => '--cr-rotate-neg2' ) as $key => $token ) {
+			if ( 1 !== preg_match( '/\.cr-scrapbook__print--tilt-' . $key . '\s*\{[^{}]*rotate\(var\(' . preg_quote( $token, '/' ) . '\)\)/', $code ) ) {
+				return false;
+			}
+		}
+		return false !== strpos( $list, 'grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr))' )
+			&& false !== strpos( $list, 'list-style: none' )
+			&& false !== strpos( $print, 'background-color: var(--cr-white)' )
+			&& false !== strpos( $print, 'box-shadow: var(--cr-shadow-hard)' )
+			&& false !== strpos( $tape, 'background-color: var(--cr-tape)' )
+			&& false !== strpos( $cap, 'font-family: var(--cr-font-display)' )
+			&& 1 === preg_match( '/@media \(max-width: 39\.99rem\)\s*\{[^@]*\.cr-scrapbook\s*\{[^{}]*grid-template-columns:\s*1fr;/s', $code );
+	}
+);
+
+check_case(
 	'the slide mount is gone from the Stream',
 	static function () use ( $code ): bool {
 		return false === strpos( $code, 'cr-slide-mount' ) && false === strpos( $code, 'data-cr-rotate' );
