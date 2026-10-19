@@ -1,0 +1,797 @@
+/* Wish surfaces for issue 238: the catalog archive, wish single and Stream clipping. */
+/* stylelint-disable no-descending-specificity -- archive, single and Stream markup share plugin class names. */
+
+/* ============================================================
+   Archive catalog and grouped sections
+   ============================================================ */
+
+.cr-wish {
+	position: relative;
+	min-width: 0;
+}
+
+.cr-wish-catalog {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	box-sizing: border-box;
+	min-width: 0;
+	margin: 0;
+	padding: var(--cr-space-sm);
+	border: 1px solid var(--cr-prussian-blue);
+	border-inline: var(--cr-space-sm) solid var(--cr-prussian-blue);
+	background: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard-2);
+	color: var(--cr-russian-violet);
+	list-style: none;
+}
+
+/* components.css zeroes the archive Post Template's padding and margin at 0,2,0; this selector wins at 0,3,0. */
+.cr-archive .cr-wish-catalog.wp-block-post-template {
+	margin: 0;
+	padding: var(--cr-space-sm);
+}
+
+.cr-wish-catalog > section.pkiw-group {
+	box-sizing: border-box;
+	min-width: 0;
+	padding: var(--cr-space-lg);
+	border: 1px solid var(--cr-rule);
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	break-inside: avoid;
+}
+
+.cr-wish-catalog .pkiw-group__heading {
+	margin: 0 0 var(--cr-space-md);
+	color: var(--cr-russian-violet);
+	font-family: var(--wp--preset--font-family--accent, var(--cr-font-accent));
+	font-size: max(var(--cr-text-floor), var(--cr-text-lg));
+	font-style: normal;
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+	text-transform: none;
+	overflow-wrap: anywhere;
+}
+
+.cr-wish-catalog .pkiw-group__items {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-md);
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-wish-catalog .pkiw-group__items > li {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-wish-catalog .pkiw-group__items > li::before,
+.cr-wish-catalog .pkiw-group__items > li::after,
+.cr-wish-catalog .pkiw-group__items > li::marker {
+	content: none;
+}
+
+.cr-wish__query > nav.wp-block-query-pagination {
+	justify-content: center;
+}
+
+/* ============================================================
+   Archive listing and picture fallback
+   ============================================================ */
+
+.cr-wish-listing {
+	position: relative;
+	box-sizing: border-box;
+	min-width: 0;
+	padding: var(--cr-space-sm);
+	border: 1px solid var(--cr-rule);
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+}
+
+.cr-wish-listing__media {
+	position: relative;
+	width: 100%;
+	min-width: 0;
+	overflow: hidden;
+	background: var(--cr-sky-blue);
+	aspect-ratio: 4 / 3;
+}
+
+.cr-wish-listing__image {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: 100%;
+	object-fit: cover;
+	opacity: 1;
+}
+
+.cr-wish-listing__tile {
+	display: none;
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	place-items: center;
+	padding: var(--cr-space-md);
+	background: var(--cr-sky-blue);
+	color: var(--cr-russian-violet);
+	font-family: var(--wp--preset--font-family--accent, var(--cr-font-accent));
+	font-size: max(var(--cr-text-floor), var(--cr-text-md));
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	text-align: center;
+	overflow-wrap: anywhere;
+}
+
+.cr-wish-listing__media--tile .cr-wish-listing__tile,
+.cr-wish-listing__media.cr-cover--failed .cr-wish-listing__tile {
+	display: grid;
+}
+
+.cr-wish-listing__media.cr-cover--failed .cr-wish-listing__image {
+	display: none;
+}
+
+.cr-wish-listing__title {
+	min-width: 0;
+	margin: var(--cr-space-sm) 0 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--wp--preset--font-family--accent, var(--cr-font-accent));
+	font-size: max(var(--cr-text-floor), var(--cr-text-md));
+	font-style: normal;
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	text-transform: none;
+	overflow-wrap: anywhere;
+}
+
+.cr-wish-listing__title a:any-link {
+	color: var(--cr-russian-violet);
+	text-decoration: none;
+}
+
+.cr-wish-listing__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+}
+
+.cr-wish-listing__title a:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+.cr-wish-listing__priority {
+	position: relative;
+	display: inline-block;
+	margin: var(--cr-space-xs) 0 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-floor), var(--cr-text-sm));
+	line-height: var(--cr-leading-snug);
+}
+
+.cr-wish-listing[data-priority='high'] .cr-wish-listing__priority::after {
+	content: "";
+	position: absolute;
+	inset: -0.3em -0.55em;
+	border: 2px solid var(--cr-marker);
+	border-radius: 50%;
+	pointer-events: none;
+}
+
+.cr-wish-listing:focus-within {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: var(--cr-shadow-hard-2), 0 0 0 7px var(--cr-focus-halo);
+}
+
+/* ============================================================
+   Archive sparse margin marks and responsive columns
+   ============================================================ */
+
+.cr-wish::before,
+.cr-wish::after {
+	content: none;
+	position: absolute;
+	z-index: 2;
+	pointer-events: none;
+}
+
+@media (min-width: 48rem) {
+
+	.cr-wish-catalog {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 48rem) and (max-width: 63.999rem) {
+
+	.cr-wish-catalog > section.pkiw-group:nth-child(odd):last-child {
+		grid-column: 1 / -1;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-wish-catalog {
+		grid-template-columns: repeat(6, minmax(0, 1fr));
+	}
+
+	.cr-wish-catalog > section.pkiw-group {
+		grid-column: span 2;
+	}
+
+	.cr-wish-catalog > section.pkiw-group:nth-child(3n + 1):nth-last-child(2),
+	.cr-wish-catalog > section.pkiw-group:nth-child(3n + 2):last-child {
+		grid-column: span 3;
+	}
+
+	.cr-wish-catalog > section.pkiw-group:nth-child(3n + 1):last-child {
+		grid-column: 1 / -1;
+	}
+
+	.cr-wish::before {
+		inset-block-start: var(--cr-space-xl);
+		inset-inline-start: calc(var(--cr-space-xl) * -1);
+		display: block;
+		width: 2.5rem;
+		height: 2.5rem;
+		background: var(--cr-ut-orange);
+		clip-path: polygon(50% 0, 61% 36%, 100% 36%, 68% 58%, 80% 100%, 50% 73%, 20% 100%, 32% 58%, 0 36%, 39% 36%);
+	}
+
+	.cr-wish::after {
+		inset-block-end: var(--cr-space-xl);
+		inset-inline-end: calc(var(--cr-space-lg) * -1);
+		display: block;
+		width: 4rem;
+		height: 1.25rem;
+		background: var(--cr-tape);
+		rotate: var(--cr-rotate-2);
+	}
+}
+
+/* ============================================================
+   Single wish panels
+   ============================================================ */
+
+body.cr-wish-single .pk-wish {
+	min-width: 0;
+	background: none;
+	color: var(--cr-russian-violet);
+}
+
+body.cr-wish-single .pk-wish > .pk-badge {
+	display: none;
+}
+
+body.cr-wish-single .pk-wish > .pk-body {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-areas:
+		"photo"
+		"listing"
+		"original"
+		"reason";
+	gap: var(--cr-space-lg);
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	background: none;
+}
+
+body.cr-wish-single .pk-wish .pk-kindlabel {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+body.cr-wish-single .pk-wish .pk-caption {
+	display: none;
+}
+
+body.cr-wish-single .pk-wish-photo,
+body.cr-wish-single .pk-wish-listing,
+body.cr-wish-single .pk-wish-reason {
+	position: relative;
+	box-sizing: border-box;
+	min-width: 0;
+	margin: 0;
+	padding: var(--cr-space-lg);
+	border: 1px solid var(--cr-rule);
+	background: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+}
+
+body.cr-wish-single .pk-wish-photo {
+	grid-area: photo;
+}
+
+body.cr-wish-single .pk-wish-listing {
+	grid-area: listing;
+}
+
+body.cr-wish-single .pk-original {
+	grid-area: original;
+	margin: 0;
+}
+
+body.cr-wish-single .pk-wish-reason {
+	grid-area: reason;
+}
+
+body.cr-wish-single .pk-wish-photo::before,
+body.cr-wish-single .pk-wish-reason::before {
+	content: "";
+	position: absolute;
+	inset-block-start: -0.65rem;
+	inset-inline-start: 50%;
+	z-index: 2;
+	width: 4rem;
+	height: 1.2rem;
+	background: var(--cr-tape);
+	pointer-events: none;
+	rotate: var(--cr-rotate-neg);
+	translate: -50% 0;
+}
+
+body.cr-wish-single .pk-wish-photo img {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	height: auto;
+	opacity: 1;
+	aspect-ratio: auto;
+}
+
+body.cr-wish-single .pk-wish-rows {
+	margin: 0;
+}
+
+body.cr-wish-single .pk-wish-row {
+	display: grid;
+	grid-template-columns: minmax(5.5rem, 0.4fr) minmax(0, 1fr);
+	gap: var(--cr-space-sm);
+	align-items: baseline;
+}
+
+body.cr-wish-single .pk-wish-row + .pk-wish-row {
+	margin-block-start: var(--cr-space-sm);
+}
+
+body.cr-wish-single .pk-wish-row :is(dt, dd) {
+	min-width: 0;
+	margin: 0;
+	color: var(--cr-russian-violet);
+	overflow-wrap: anywhere;
+}
+
+body.cr-wish-single .pk-wish-row dt,
+body.cr-wish-single .pk-wish-reason__label {
+	display: inline-block;
+	width: fit-content;
+	padding: var(--cr-space-2xs) var(--cr-space-xs);
+	background: var(--cr-sky-blue);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-style: normal;
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	line-height: var(--cr-leading-tight);
+	text-transform: none;
+}
+
+body.cr-wish-single .pk-wish-row dd,
+body.cr-wish-single .pk-wish-reason p {
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-floor), var(--cr-text-md));
+	line-height: var(--cr-leading-normal);
+}
+
+body.cr-wish-single .pk-wish-reason p {
+	margin: var(--cr-space-sm) 0 0;
+	color: var(--cr-russian-violet);
+}
+
+body.cr-wish-single .pk-wish[data-priority='high'] :is(.pk-wish-price, .pk-wish-priority) {
+	position: relative;
+	display: inline-block;
+}
+
+body.cr-wish-single .pk-wish[data-priority='high'] :is(.pk-wish-price, .pk-wish-priority)::after {
+	content: "";
+	position: absolute;
+	inset: -0.3em -0.55em;
+	border: 2px solid var(--cr-marker);
+	border-radius: 50%;
+	pointer-events: none;
+}
+
+body.cr-wish-single .pk-original a.u-url {
+	display: inline-flex;
+	align-items: center;
+	box-sizing: border-box;
+	min-height: 44px;
+	padding: var(--cr-space-sm) var(--cr-space-md);
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard-sm);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-floor), var(--cr-text-md));
+	font-weight: var(--cr-weight-bold);
+	text-decoration: none;
+}
+
+body.cr-wish-single .pk-original a.u-url:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: var(--cr-shadow-hard-sm), 0 0 0 7px var(--cr-focus-halo);
+}
+
+@media (min-width: 48rem) and (max-width: 63.999rem) {
+
+	body.cr-wish-single .pk-wish > .pk-body {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-areas:
+			"photo listing"
+			"photo original"
+			"reason reason";
+	}
+
+	body.cr-wish-single .pk-wish:not(.pk-wish--has-photo) > .pk-body {
+		grid-template-areas:
+			"listing listing"
+			"original original"
+			"reason reason";
+	}
+
+	body.cr-wish-single .pk-wish:not(.pk-wish--has-reason) > .pk-body {
+		grid-template-areas:
+			"photo listing"
+			"photo original";
+	}
+
+	body.cr-wish-single .pk-wish:not(.pk-wish--has-photo):not(.pk-wish--has-reason) > .pk-body {
+		grid-template-areas:
+			"listing listing"
+			"original original";
+	}
+}
+
+@media (min-width: 64rem) {
+
+	body.cr-wish-single .pk-wish > .pk-body {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-areas:
+			"photo listing reason"
+			"photo original reason";
+		align-items: start;
+	}
+
+	body.cr-wish-single .pk-wish:not(.pk-wish--has-photo) > .pk-body {
+		grid-template-areas:
+			"listing listing reason"
+			"original original reason";
+	}
+
+	body.cr-wish-single .pk-wish:not(.pk-wish--has-reason) > .pk-body {
+		grid-template-areas:
+			"photo listing listing"
+			"photo original original";
+	}
+
+	body.cr-wish-single .pk-wish:not(.pk-wish--has-photo):not(.pk-wish--has-reason) > .pk-body {
+		grid-template-areas:
+			"listing listing listing"
+			"original original original";
+	}
+}
+
+/* ============================================================
+   Stream torn clipping
+   ============================================================ */
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping {
+	position: relative;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	margin: 0;
+	padding: var(--cr-space-lg);
+	color: var(--cr-russian-violet);
+}
+
+.cr-wish-clipping--tilt-0 {
+	rotate: var(--cr-rotate-1);
+}
+
+.cr-wish-clipping--tilt-1 {
+	rotate: var(--cr-rotate-2);
+}
+
+.cr-wish-clipping--tilt-2 {
+	rotate: var(--cr-rotate-neg);
+}
+
+.cr-wish-clipping--tilt-3 {
+	rotate: var(--cr-rotate-neg2);
+}
+
+.cr-wish-clipping__tape {
+	position: absolute;
+	inset-block-start: -0.65rem;
+	inset-inline-start: 50%;
+	z-index: 3;
+	width: 4rem;
+	height: 1.2rem;
+	background: var(--cr-tape);
+	pointer-events: none;
+	rotate: var(--cr-rotate-neg2);
+	translate: -50% 0;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-badge {
+	display: none;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping > .pk-body {
+	position: static;
+	display: block;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	background: none;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping > .pk-body:has(> .pk-media) {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(5rem, 0.42fr);
+	grid-template-rows: auto auto;
+	gap: var(--cr-space-sm) var(--cr-space-md);
+	align-items: start;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping > .pk-body:has(> .pk-media) > .pk-kindlabel,
+.wp-block-post-template > li > .pk-card.cr-wish-clipping > .pk-body:has(> .pk-media) > .pk-caption {
+	grid-column: 1;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping > .pk-body:has(> .pk-media) > .pk-media {
+	grid-column: 2;
+	grid-row: 1 / span 2;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-kindlabel {
+	position: static;
+	display: block;
+	margin: 0 0 var(--cr-space-xs);
+	padding: 0;
+	background: none;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	line-height: var(--cr-leading-tight);
+	text-transform: none;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-caption {
+	position: static;
+	min-width: 0;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-title {
+	position: static;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-floor), var(--cr-text-md));
+	font-style: normal;
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	text-transform: none;
+	overflow-wrap: anywhere;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-title a:any-link {
+	color: var(--cr-russian-violet);
+	text-decoration: none;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-title a:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-sub {
+	margin: var(--cr-space-xs) 0 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-floor), var(--cr-text-sm));
+	line-height: var(--cr-leading-snug);
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-wish-chip {
+	position: relative;
+	display: block;
+	width: fit-content;
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--cr-russian-violet);
+	font: inherit;
+	overflow-wrap: anywhere;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping[data-priority='high'] :is(.pk-wish-chip--priority, .pk-wish-chip--price)::after {
+	content: "";
+	position: absolute;
+	inset: -0.25em -0.5em;
+	border: 2px solid var(--cr-marker);
+	border-radius: 50%;
+	pointer-events: none;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-media {
+	position: static;
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-media img {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	height: auto;
+	border: 1px solid var(--cr-rule);
+	object-fit: cover;
+	opacity: 1;
+	aspect-ratio: auto;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-media.cr-cover--failed {
+	display: none;
+}
+
+.wp-block-post-template > li > .pk-card.cr-wish-clipping:focus-within {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 0;
+	box-shadow: var(--cr-shadow-hard-2), 0 0 0 7px var(--cr-focus-halo);
+}
+
+/* ============================================================
+   Motion preferences
+   ============================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.cr-wish-listing,
+	body.cr-wish-single .pk-original a.u-url,
+	.wp-block-post-template > li > .pk-card.cr-wish-clipping {
+		transition: translate 0.15s ease, box-shadow 0.15s ease;
+	}
+
+	.cr-wish-listing:hover,
+	.cr-wish-listing:focus-within,
+	body.cr-wish-single .pk-original a.u-url:hover,
+	body.cr-wish-single .pk-original a.u-url:focus-visible,
+	.wp-block-post-template > li > .pk-card.cr-wish-clipping:hover,
+	.wp-block-post-template > li > .pk-card.cr-wish-clipping:focus-within {
+		translate: 0 -1px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.cr-wish-listing,
+	body.cr-wish-single .pk-original a.u-url,
+	.wp-block-post-template > li > .pk-card.cr-wish-clipping {
+		transition: none;
+		translate: none;
+	}
+}
+
+/* ============================================================
+   Dark theme keeps catalog paper and ink fixed
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+
+	:root:is(:not([data-theme]), [data-theme="system"]) body.cr-wish-archive {
+		background: var(--cr-photocopier-blk);
+	}
+
+	:root:is(:not([data-theme]), [data-theme="system"]) :is(.cr-wish-catalog, .cr-wish-listing, body.cr-wish-single .pk-wish-photo, body.cr-wish-single .pk-wish-listing, body.cr-wish-single .pk-wish-reason, .wp-block-post-template > li > .pk-card.cr-wish-clipping) {
+		color: var(--cr-russian-violet);
+	}
+}
+
+:root[data-theme="dark"] body.cr-wish-archive {
+	background: var(--cr-photocopier-blk);
+}
+
+:root[data-theme="dark"] :is(.cr-wish-catalog, .cr-wish-listing, body.cr-wish-single .pk-wish-photo, body.cr-wish-single .pk-wish-listing, body.cr-wish-single .pk-wish-reason, .wp-block-post-template > li > .pk-card.cr-wish-clipping) {
+	color: var(--cr-russian-violet);
+}
+
+/* ============================================================
+   Forced colors
+   ============================================================ */
+
+@media (forced-colors: active) {
+
+	.cr-wish-catalog {
+		border: 0;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-wish-catalog > section.pkiw-group,
+	.cr-wish-listing,
+	body.cr-wish-single .pk-wish-photo,
+	body.cr-wish-single .pk-wish-listing,
+	body.cr-wish-single .pk-wish-reason,
+	.wp-block-post-template > li > .pk-card.cr-wish-clipping {
+		border: 2px solid CanvasText !important;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-wish::before,
+	.cr-wish::after,
+	body.cr-wish-single .pk-wish-photo::before,
+	body.cr-wish-single .pk-wish-reason::before,
+	body.cr-wish-single .pk-wish[data-priority='high'] :is(.pk-wish-price, .pk-wish-priority)::after,
+	.cr-wish-listing[data-priority='high'] .cr-wish-listing__priority::after,
+	.cr-wish-clipping__tape,
+	.wp-block-post-template > li > .pk-card.cr-wish-clipping[data-priority='high'] :is(.pk-wish-chip--priority, .pk-wish-chip--price)::after,
+	.cr-wish-listing__media--tile,
+	.cr-wish-listing__media.cr-cover--failed {
+		display: none;
+		content: none;
+	}
+
+	.cr-wish-catalog :is(.pkiw-group__heading, .cr-wish-listing__title, .cr-wish-listing__priority),
+	body.cr-wish-single .pk-wish :is(dt, dd, .pk-wish-reason__label, .pk-wish-reason p),
+	.wp-block-post-template > li > .pk-card.cr-wish-clipping :is(.pk-kindlabel, .pk-title, .pk-sub, .pk-wish-chip) {
+		color: CanvasText;
+	}
+
+	.cr-wish-catalog a:any-link,
+	body.cr-wish-single a:any-link,
+	.wp-block-post-template > li > .pk-card.cr-wish-clipping a:any-link {
+		color: LinkText;
+	}
+}
