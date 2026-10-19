@@ -1,0 +1,619 @@
+/* ============================================================
+   Audio archive header
+   ============================================================ */
+
+.cr-archive--audio .cr-archive__header {
+	position: relative;
+	isolation: isolate;
+}
+
+.cr-archive--audio .cr-archive__header::after {
+	content: "";
+	position: absolute;
+	inset-block-start: var(--cr-space-md);
+	inset-inline-end: 0;
+	z-index: 0;
+	display: none;
+	width: clamp(10rem, 24vw, 18rem);
+	aspect-ratio: 520 / 320;
+	background-image: url(../img/cr-answering-machine.svg);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	pointer-events: none;
+}
+
+.cr-archive--audio .cr-archive__header > * {
+	position: relative;
+	z-index: 1;
+}
+
+@media (min-width: 40rem) {
+
+	.cr-archive--audio .cr-archive__header {
+		min-height: 12rem;
+		box-sizing: border-box;
+		padding-inline-end: clamp(12rem, 30vw, 22rem);
+	}
+
+	.cr-archive--audio .cr-archive__header::after {
+		display: block;
+	}
+}
+
+/* ============================================================
+   Audio log
+   ============================================================ */
+
+/* The Stream collage (cr-post-kinds.css) makes every .wp-block-post-template inside .cr-stream-page a masonry of columns with a doodle field. The engine's wrapper carries that class, so the log gives both back. */
+.cr-stream-page.cr-audio-log .wp-block-post-template {
+	columns: auto;
+	column-gap: normal;
+	max-width: none;
+	margin-inline: 0;
+}
+
+.cr-stream-page.cr-audio-log .wp-block-post-template::before,
+.cr-stream-page.cr-audio-log .wp-block-post-template::after {
+	content: none;
+}
+
+/* Each month is a plain upright heading over a periwinkle strip; only the strip tilts. */
+.cr-audio-log .pkiw-group__heading {
+	position: relative;
+	isolation: isolate;
+	width: fit-content;
+	max-width: 100%;
+	margin-block: var(--cr-space-xl) var(--cr-space-md);
+	margin-inline: var(--cr-space-sm) 0;
+	padding: var(--cr-space-2xs) var(--cr-space-md);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-tight);
+	text-transform: uppercase;
+}
+
+.cr-audio-log .pkiw-group__heading::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background-color: var(--cr-periwinkle);
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-audio-log .pkiw-group__items {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-xl);
+	max-width: none;
+	margin: 0;
+	padding: 0;
+}
+
+.cr-audio-log .pkiw-group__items > li {
+	--cr-audio-meta-h: 2.75rem;
+	position: relative;
+	justify-self: center;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 32rem;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+}
+
+/* A protected post prints its title link and nothing else, so it is a flat paper slip, not a cassette: no label, no window, no screws. */
+.cr-audio-log .pk-card.k-audio.pk-card--protected {
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 0;
+	margin: 0;
+	padding: var(--cr-space-md);
+	aspect-ratio: auto;
+	background: var(--cr-printer-ivory);
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: 0;
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+	overflow: visible;
+}
+
+.cr-audio-log .pk-card.k-audio.pk-card--protected::before,
+.cr-audio-log .pk-card.k-audio.pk-card--protected::after {
+	content: none;
+	display: none;
+}
+
+.cr-audio-log .pk-card.k-audio.pk-card--protected .pk-title {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-size: max(var(--cr-text-floor), 1rem);
+	white-space: normal;
+	overflow: visible;
+	text-overflow: clip;
+	overflow-wrap: anywhere;
+	border: 0;
+	padding: 0;
+}
+
+.cr-audio-log .pk-card.k-audio.pk-card--protected .pk-title a {
+	color: var(--cr-russian-violet);
+}
+
+.cr-audio-log .pk-card.k-audio.pk-card--protected .pk-title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+}
+
+.cr-audio-log .pk-card.k-audio.cr-cassette--log {
+	position: static;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	background-color: var(--cr-photocopier-blk);
+	border: 2px solid var(--cr-ink);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+}
+
+.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-body,
+.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-caption,
+.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title {
+	position: static;
+}
+
+.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-body {
+	background-color: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+}
+
+.cr-audio-log .pk-card.k-audio.cr-cassette--log::before {
+	inset: 0 0 var(--cr-audio-meta-h);
+}
+
+.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title {
+	max-width: 100%;
+	margin: var(--cr-space-3xs) var(--cr-space-2xs) 0;
+	color: var(--cr-russian-violet);
+}
+
+.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title a {
+	color: var(--cr-russian-violet);
+}
+
+.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title a:hover {
+	color: var(--cr-russian-violet);
+	background-color: var(--cr-selective-yellow);
+}
+
+.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+}
+
+.cr-audio-log .cr-audio-log__meta {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cr-space-sm);
+	box-sizing: border-box;
+	height: var(--cr-audio-meta-h);
+	padding: var(--cr-space-xs) var(--cr-space-sm) 0;
+	color: var(--cr-ink-soft);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-floor);
+	line-height: var(--cr-leading-snug);
+}
+
+.cr-audio-log .cr-audio-log__meta :is(.pk-stream-date, .pk-audio-duration) {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	font: inherit;
+	color: inherit;
+}
+
+.cr-audio-log .cr-audio-log__meta time {
+	color: inherit;
+}
+
+.cr-audio-log .pkiw-group__items > li:has(a.u-url:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+/* Where :has() works the whole line wears the ring, so the link drops its own. Where it doesn't, the link keeps one. */
+@supports selector(:has(*)) {
+
+	.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title a:focus-visible {
+		outline: none;
+		box-shadow: none;
+	}
+}
+
+@supports not selector(:has(*)) {
+
+	.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title a:focus-visible {
+		outline: 3px solid var(--cr-focus-ring);
+		outline-offset: 4px;
+		box-shadow: 0 0 0 7px var(--cr-focus-halo);
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-audio-log .pkiw-group__items {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+/* ============================================================
+   Audio single
+   ============================================================ */
+
+body.cr-single--audio main.single-post {
+	overflow-x: clip;
+}
+
+body.cr-single--audio h1.single-post__title {
+	position: relative;
+	isolation: isolate;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+}
+
+body.cr-single--audio h1.single-post__title::before {
+	content: "";
+	position: absolute;
+	inset: calc(var(--cr-space-2xs) * -1) calc(var(--cr-space-sm) * -1);
+	z-index: -1;
+	background: var(--cr-periwinkle);
+	transform: rotate(var(--cr-rotate-1));
+}
+
+body.cr-single--audio h1.single-post__title::after {
+	display: none;
+	content: none;
+}
+
+.cr-audio-sheet .pkiw-transcript time {
+	color: var(--cr-cerulean);
+	font-family: var(--cr-font-mono);
+}
+
+body.cr-single--audio .single-post__date,
+body.cr-single--audio .single-post__date time {
+	transform: none;
+	rotate: none;
+}
+
+.cr-audio-single {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-xl);
+	position: relative;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 72rem;
+	margin: 0 auto var(--cr-space-2xl);
+}
+
+.cr-audio-machine,
+.cr-audio-sheet {
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+.cr-audio-machine {
+	display: grid;
+	grid-template-columns: minmax(4rem, 1fr) minmax(0, 3fr);
+	align-content: start;
+	gap: var(--cr-space-md);
+	padding: var(--cr-space-lg);
+	background: var(--cr-glaucous);
+	border: 2px solid var(--cr-ink);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-audio-machine__counter {
+	display: grid;
+	place-items: center;
+	align-self: start;
+	min-height: 3.5rem;
+	padding: var(--cr-space-xs);
+	background: var(--cr-prussian-blue);
+	color: var(--cr-selective-yellow);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-2xl);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+}
+
+.cr-audio-machine__window {
+	display: block;
+	width: 100%;
+	max-width: 20rem;
+	aspect-ratio: 16 / 9;
+	justify-self: end;
+	background-color: var(--cr-prussian-blue);
+	background-image: url(../img/cr-audio-cassette.svg);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 88% auto;
+	border: 2px solid var(--cr-ink);
+}
+
+.cr-audio-machine__player {
+	grid-column: 1 / -1;
+	min-width: 0;
+	padding: var(--cr-space-sm);
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	border: 2px solid var(--cr-ink);
+}
+
+.cr-audio-machine__player :is(figure, .able, .able-wrapper, .able-player, .able-media-container) {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 100%;
+	margin: 0;
+}
+
+.cr-audio-machine__player :is(audio, iframe) {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+}
+
+.cr-audio-machine__player .able-controller :is(button, [role="button"]),
+.cr-audio-machine__player .able-prefs-form :is(button, [role="button"]) {
+	min-width: 2.75rem;
+	min-height: 2.75rem;
+}
+
+.cr-audio-machine__player :is(button, [role="button"], a):focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-audio-sheet,
+.cr-audio-machine__player {
+	--cr-ink: var(--cr-russian-violet);
+	--cr-ink-soft: var(--cr-russian-violet-soft);
+	--cr-link: var(--cr-cerulean);
+	--cr-link-hover: var(--cr-russian-violet);
+}
+
+.cr-audio-sheet {
+	padding: var(--cr-space-xl);
+	overflow-wrap: anywhere;
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	border: 2px solid var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-audio-sheet__title {
+	margin-block-start: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+}
+
+.cr-audio-sheet .pkiw-transcript {
+	min-width: 0;
+	color: var(--cr-russian-violet);
+}
+
+.cr-audio-sheet .pkiw-transcript > :last-child {
+	margin-block-end: 0;
+}
+
+@media (min-width: 40rem) {
+
+	.cr-audio-single {
+		padding-block-end: 8rem;
+	}
+
+	.cr-audio-single::after {
+		content: "";
+		position: absolute;
+		inset-inline-end: 0;
+		inset-block-end: 0;
+		width: min(15rem, 36vw);
+		height: 8rem;
+		background-image: url(../img/cr-audio-plants.svg);
+		background-position: right bottom;
+		background-repeat: no-repeat;
+		background-size: contain;
+		pointer-events: none;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-audio-single {
+		grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+		align-items: start;
+	}
+}
+
+/* ============================================================
+   Dark mode
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-archive--audio,
+	:root:not([data-theme="light"]) body.cr-single--audio main.single-post {
+		background: var(--cr-photocopier-blk);
+		color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .cr-audio-log .pkiw-group__heading {
+		color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .cr-audio-log .pkiw-group__heading::before {
+		background-color: transparent;
+	}
+
+	:root:not([data-theme="light"]) .cr-audio-log .pk-card.k-audio.cr-cassette--log {
+		background-color: var(--cr-photocopier-blk);
+		border-color: var(--cr-periwinkle);
+		box-shadow: var(--cr-shadow-hard);
+	}
+
+	:root:not([data-theme="light"]) .cr-audio-log .cr-audio-log__meta {
+		color: var(--cr-periwinkle);
+	}
+
+	:root:not([data-theme="light"]) .cr-audio-machine {
+		background: var(--cr-night-elevated);
+		border-color: var(--cr-periwinkle);
+		box-shadow: var(--cr-shadow-hard);
+	}
+}
+
+:root[data-theme="dark"] .cr-archive--audio,
+:root[data-theme="dark"] body.cr-single--audio main.single-post {
+	background: var(--cr-photocopier-blk);
+	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-audio-log .pkiw-group__heading {
+	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-audio-log .pkiw-group__heading::before {
+	background-color: transparent;
+}
+
+:root[data-theme="dark"] .cr-audio-log .pk-card.k-audio.cr-cassette--log {
+	background-color: var(--cr-photocopier-blk);
+	border-color: var(--cr-periwinkle);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+:root[data-theme="dark"] .cr-audio-log .cr-audio-log__meta {
+	color: var(--cr-periwinkle);
+}
+
+:root[data-theme="dark"] .cr-audio-machine {
+	background: var(--cr-night-elevated);
+	border-color: var(--cr-periwinkle);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+/* ============================================================
+   Motion and system colors
+   ============================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.cr-audio-log .pkiw-group__items > li {
+		transition: translate var(--cr-motion-fast) var(--cr-ease-out);
+	}
+
+	.cr-audio-log .pkiw-group__items > li:hover {
+		translate: 0 -1px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.cr-audio-log .pkiw-group__items > li,
+	.cr-audio-machine,
+	.cr-audio-machine__window,
+	.cr-audio-single::after {
+		animation: none;
+		transition: none;
+		translate: none;
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-archive--audio .cr-archive__header::after,
+	.cr-audio-single::after,
+	.cr-audio-log .pkiw-group__heading::before,
+	body.cr-single--audio h1.single-post__title::before,
+	.cr-audio-log .pk-card.k-audio.cr-cassette--log::before,
+	.cr-audio-log .pk-card.k-audio.cr-cassette--log::after,
+	.cr-audio-machine__window {
+		display: none;
+	}
+
+	.cr-audio-log .pkiw-group__items > li,
+	.cr-audio-machine,
+	.cr-audio-sheet {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+		box-shadow: none;
+	}
+
+	.cr-audio-log .pk-card.k-audio.cr-cassette--log,
+	.cr-audio-machine__player,
+	.cr-audio-machine__counter {
+		background: Canvas;
+		color: CanvasText;
+		border-color: CanvasText;
+		box-shadow: none;
+	}
+
+	.cr-audio-log .pk-card.k-audio.cr-cassette--log,
+	.cr-audio-log .pk-card.k-audio.pk-card--protected {
+		display: block;
+		width: 100%;
+		min-height: 0;
+		padding: 0;
+		aspect-ratio: auto;
+		background: none;
+		border: 0 !important;
+		border-radius: 0;
+		color: CanvasText;
+	}
+
+	.cr-audio-log .pk-card.k-audio.pk-card--protected .pk-title,
+	.cr-audio-log .pk-card.k-audio.pk-card--protected .pk-title a {
+		color: CanvasText;
+	}
+
+	.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-body {
+		min-height: 0;
+		padding: 0;
+		background: none;
+	}
+
+	.cr-audio-log .pk-card.k-audio.cr-cassette--log .pk-title a,
+	.cr-audio-log .cr-audio-log__meta,
+	.cr-audio-sheet .pkiw-transcript,
+	.cr-audio-sheet .pkiw-transcript time {
+		color: CanvasText;
+	}
+
+	.cr-audio-log .pkiw-group__items > li:has(a.u-url:focus-visible),
+	.cr-audio-log a.u-url:focus-visible,
+	.cr-audio-machine__player :is(button, [role="button"], a):focus-visible {
+		outline-color: Highlight;
+		box-shadow: none;
+	}
+
+	.cr-audio-machine:not(:has(.cr-audio-machine__player)) {
+		display: none;
+	}
+}
