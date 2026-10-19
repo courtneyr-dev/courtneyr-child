@@ -405,8 +405,11 @@ test.describe( 'podcast full-state surfaces', () => {
 		expectFull();
 		await visit( page, ARCHIVE );
 		const nav = page.locator( 'nav.wp-block-post-kinds-indieweb-listen-types' );
-		await expect( nav ).toHaveCount( 1 );
-		expect( await page.locator( '.cr-archive__header' ).evaluate( ( header ) => header.nextElementSibling?.matches( 'nav.wp-block-post-kinds-indieweb-listen-types' ) ) ).toBe( true );
+		// Write mode runs on the base theme, where the shelf has no type nav yet.
+		if ( ! WRITE_BASELINE ) {
+			await expect( nav ).toHaveCount( 1 );
+			expect( await page.locator( '.cr-archive__header' ).evaluate( ( header ) => header.nextElementSibling?.matches( 'nav.wp-block-post-kinds-indieweb-listen-types' ) ) ).toBe( true );
+		}
 		if ( SHELF_BASELINE ) {
 			await writeOrCompare( page.locator( 'main' ), SHELF_BASELINE, 'nav.wp-block-post-kinds-indieweb-listen-types' );
 		}
