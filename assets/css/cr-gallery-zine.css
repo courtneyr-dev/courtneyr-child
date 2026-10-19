@@ -16,7 +16,8 @@
 	display: grid;
 	gap: var(--cr-space-sm);
 	justify-items: start;
-	margin-block: 0 var(--cr-space-2xl);
+	max-width: none;
+	margin: 0 0 var(--cr-space-2xl);
 	padding: var(--cr-space-xl) var(--cr-space-xl) var(--cr-space-lg);
 	padding-inline-end: calc(var(--cr-space-xl) + 8.5rem);
 	background-color: var(--cr-photocopier-blk);
@@ -148,7 +149,9 @@
 .cr-zine-single .cr-zine {
 	position: relative;
 	box-sizing: border-box;
-	margin-block: var(--cr-space-xl);
+	width: auto;
+	max-width: none;
+	margin: var(--cr-space-xl) 0;
 	padding: var(--cr-space-2xl) var(--cr-space-xl);
 	background-color: var(--cr-light-gray);
 	background-image: var(--cr-fiber);
@@ -389,7 +392,10 @@
 		inset: auto;
 		justify-self: end;
 		width: 5.75rem;
-		margin-block-start: calc(var(--cr-space-lg) * -1);
+	}
+
+	.cr-zine-single .cr-zine__postmark::before {
+		display: none;
 	}
 
 	.cr-zine-single .cr-zine {
