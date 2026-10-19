@@ -223,19 +223,24 @@ function compose( array $shapes, array $captions, array $ratios = array() ): arr
 	$plan   = array();
 	$taped  = false;
 	$rhythm = 0;
+	$trio   = 0;
 	foreach ( groups( $shapes, $captions ) as $g => list( $pattern, $members ) ) {
-		$s     = array_map( static fn( int $k ): string => $shapes[ $k ], $members );
-		$r     = array_map( $ratio, $members );
-		$cells = array();
-		$flags = array_fill( 0, count( $members ), array() );
-		$off   = array_fill( 0, count( $members ), 0 );
+		$s         = array_map( static fn( int $k ): string => $shapes[ $k ], $members );
+		$r         = array_map( $ratio, $members );
+		$cells     = array();
+		$flags     = array_fill( 0, count( $members ), array() );
+		$off       = array_fill( 0, count( $members ), 0 );
+		$even_rows = array(
+			'd' => array(),
+			't' => array(),
+		);
 		switch ( $pattern ) {
 			case 'solo':
 			case 'banner':
 			case 'stack':
 				foreach ( $s as $k => $shape ) {
 					$d           = 2 * SOLO_SPAN[12][ $shape ];
-					$t           = 2 * SOLO_SPAN[6][ $shape ];
+					$t           = 'landscape' === $shape ? 10 : 2 * SOLO_SPAN[6][ $shape ];
 					$cells[ $k ] = array( cell( intdiv( COLS_D - $d, 2 ) + 1, $d ), cell( intdiv( COLS_T - $t, 2 ) + 1, $t ), cell( 1, 2 ) );
 					$flags[ $k ] = array( 'center' );
 				}
@@ -259,47 +264,61 @@ function compose( array $shapes, array $captions, array $ratios = array() ): arr
 					);
 					$off[1]   = 'square' === $s[0] ? DROP : 0;
 				} else {
-					$d     = row_cells( justify( $r, array( 0, 0 ), 'd', 8 ) );
-					$t     = row_cells( justify( $r, array( 0, 0 ), 't', 4 ) );
-					$cells = array(
+					$d         = row_cells( justify( $r, array( 0, 0 ), 'd', 8 ) );
+					$t         = row_cells( justify( $r, array( 0, 0 ), 't', 4 ) );
+					$cells     = array(
 						array( $d[0], $t[0], cell( 1, 2 ) ),
 						array( $d[1], $t[1], cell( 1, 2 ) ),
 					);
-					$flags = array( array( 'baseline' ), array( 'baseline' ) );
+					$flags     = array( array( 'baseline' ), array( 'baseline' ) );
+					$even_rows = array(
+						'd' => array( array( 0, 1 ) ),
+						't' => array( array( 0, 1 ) ),
+					);
 				}
 				$flags[0][] = 'toward-end';
 				break;
 			case 'triptych':
-				if ( array( 'portrait', 'portrait', 'portrait' ) === $s ) {
-					$d     = row_cells( array( 8, 8, 8 ) );
-					$t     = row_cells( array( 4, 4, 4 ) );
-					$cells = array(
-						array( $d[0], $t[0], cell( 1, 1 ) ),
-						array( $d[1], $t[1], cell( 2, 1 ) ),
-						array( $d[2], $t[2], cell( 1, 2 ) ),
-					);
+				$portraits = array( 'portrait', 'portrait', 'portrait' ) === $s;
+				// Tablets: three portraits pair up, then the third sits inset; any other trio opens on a full-width picture with the other two as a pair.
+				if ( $portraits ) {
+					$t = array( cell( 1, 6 ), cell( 7, 6 ), cell( 0 === $trio % 2 ? 6 : 1, 7 ) );
+				} else {
+					$t = array( cell( 1, COLS_T ), ...row_cells( justify( array( $r[1], $r[2] ), array( 1.0, 0 ), 't', 4 ) ) );
+				}
+				$p = $portraits ? array( cell( 1, 1 ), cell( 2, 1 ), cell( 1, 2 ) ) : array( cell( 1, 2 ), cell( 1, 2 ), cell( 1, 2 ) );
+				if ( 1 === $trio % 2 ) {
+					// Desktop, every second trio: a loose spread that breaks the row line, after a tight one.
+					$d              = array( cell( 1, $portraits ? 9 : 12 ), cell( $portraits ? 12 : 15, $portraits ? 7 : 9 ), cell( $portraits ? 6 : 5, $portraits ? 9 : 12 ) );
+					$off            = array( 0, DROP + 1, 0 );
+					$flags          = array( array( 'loose' ), array( 'loose' ), array( 'loose' ) );
+					$even_rows['t'] = $portraits ? array( array( 0, 1 ) ) : array( array( 1, 2 ) );
+				} elseif ( $portraits ) {
+					$d = row_cells( array( 8, 8, 8 ) );
 					// Consecutive portrait rows answer each other: ends drop, then the middle.
-					$off = 0 === $rhythm % 2 ? array( DROP, 0, DROP ) : array( 0, DROP, 0 );
+					$off            = 0 === $rhythm % 2 ? array( DROP, 0, DROP ) : array( 0, DROP, 0 );
+					$even_rows['t'] = array( array( 0, 1 ) );
 					++$rhythm;
 				} else {
 					// The middle picture is a print, with a narrow edge.
-					$d = row_cells( justify( $r, array( 0, 1.0, 0 ), 'd', 4 ) );
-					$t = row_cells( justify( $r, array( 0, 1.0, 0 ), 't', 2 ) );
-					foreach ( $s as $k => $shape ) {
-						$cells[ $k ] = array( $d[ $k ], $t[ $k ], cell( 1, 2 ) );
-						$flags[ $k ] = array( 'baseline' );
-					}
+					$d              = row_cells( justify( $r, array( 0, 1.0, 0 ), 'd', 4 ) );
+					$flags          = array( array( 'baseline' ), array( 'baseline' ), array( 'baseline' ) );
+					$even_rows['d'] = array( array( 0, 1, 2 ) );
+					$even_rows['t'] = array( array( 1, 2 ) );
 				}
+				foreach ( $s as $k => $shape ) {
+					$cells[ $k ] = array( $d[ $k ], $t[ $k ], $p[ $k ] );
+				}
+				++$trio;
 				break;
 			case 'hero':
 				// The hero takes the columns that make it as tall as its two stacked satellites.
 				$k_sat    = 1 / $r[1] + 1 / $r[2];
 				$h        = (int) max( 12, min( 18, round( COLS_D * $k_sat / ( 1 / $r[0] + $k_sat ) ) ) );
-				$sat_p    = 'square' === $s[1] && 'square' === $s[2];
 				$cells    = array(
 					array( cell( 1, $h, 2 ), cell( 1, COLS_T ), cell( 1, 2 ) ),
-					array( cell( $h + 1, COLS_D - $h ), cell( 1, 6 ), $sat_p ? cell( 1, 1 ) : cell( 1, 2 ) ),
-					array( cell( $h + 1, COLS_D - $h ), cell( 7, 6 ), $sat_p ? cell( 2, 1 ) : cell( 1, 2 ) ),
+					array( cell( $h + 1, COLS_D - $h ), cell( 1, 6 ), cell( 1, 2 ) ),
+					array( cell( $h + 1, COLS_D - $h ), cell( 7, 6 ), cell( 1, 2 ) ),
 				);
 				$flags[1] = array( 'hero-sat' );
 				$flags[2] = array( 'hero-sat', 'baseline' );
@@ -366,25 +385,21 @@ function compose( array $shapes, array $captions, array $ratios = array() ): arr
 			);
 		}
 
-		// A justified row shares one picture height: the tallest every picture's cell can hold at its own ratio.
-		if ( in_array( $pattern, array( 'diptych', 'triptych' ), true ) && in_array( 'baseline', $flags[0], true ) ) {
-			foreach ( EVEN_GRID as $bp => list( $cols, $gap, $width ) ) {
-				$best = null;
-				foreach ( $members as $k => $n ) {
-					$pad = in_array( $plan[ $n ]['treat'], array( 'print', 'taped' ), true ) ? 1.0 : 0.0;
-					$a   = $plan[ $n ][ $bp ]['span'] / ( $cols * $r[ $k ] );
-					$b   = ( $gap + $pad ) / $r[ $k ];
-					$h   = $a * ( $width + $gap ) - $b;
-					if ( null === $best || $h < $best[0] ) {
-						$best = array( $h, $a, $b );
-					}
+		// A justified row shares one picture height: the smallest any of its pictures' cells allows at the real grid width.
+		foreach ( $even_rows as $bp => $rows ) {
+			list( $cols, $gap ) = EVEN_GRID[ $bp ];
+			foreach ( $rows as $row ) {
+				$terms = array();
+				foreach ( $row as $k ) {
+					$n       = $members[ $k ];
+					$pad     = in_array( $plan[ $n ]['treat'], array( 'print', 'taped' ), true ) ? 1.0 : 0.0;
+					$a       = $plan[ $n ][ $bp ]['span'] / ( $cols * $r[ $k ] );
+					$terms[] = 'calc(' . round( $a, 4 ) . ' * (100cqi + ' . $gap . 'rem) - ' . round( ( $gap + $pad ) / $r[ $k ], 3 ) . 'rem)';
 				}
-				$formula = 'calc(' . round( $best[1], 4 ) . ' * (100cqi + ' . $gap . 'rem) - ' . round( $best[2], 3 ) . 'rem)';
-				foreach ( $members as $n ) {
-					$plan[ $n ]['h'][ $bp ] = $formula;
-					if ( ! in_array( 'even', $plan[ $n ]['flags'], true ) ) {
-						$plan[ $n ]['flags'][] = 'even';
-					}
+				foreach ( $row as $k ) {
+					$n                      = $members[ $k ];
+					$plan[ $n ]['h'][ $bp ] = 'min(' . implode( ', ', $terms ) . ')';
+					$plan[ $n ]['flags'][]  = 'even-' . $bp;
 				}
 			}
 		}
@@ -439,7 +454,7 @@ function sizes_for( array $item ): string {
 	$share  = 'journal' === $item['pattern'] ? 0.8 : 1;
 	$tablet = (int) round( $item['t']['span'] / COLS_T * 100 * $share ) . 'vw';
 	$desk   = rtrim( rtrim( number_format( $item['d']['span'] * 2.625 * $share, 2, '.', '' ), '0' ), '.' ) . 'rem';
-	return '(max-width: 40rem) ' . $phone . ', (max-width: 64rem) ' . $tablet . ', ' . $desk;
+	return '(max-width: 37.49rem) ' . $phone . ', (max-width: 64rem) ' . $tablet . ', ' . $desk;
 }
 
 /**
@@ -771,7 +786,10 @@ function zine( string $html, array $block, $instance = null ): string {
 			$style .= ';--cr-rows:span ' . $item['d']['rows'];
 		}
 		if ( '' !== $item['h']['d'] ) {
-			$style .= ';--cr-h:' . $item['h']['d'] . ';--cr-h-t:' . $item['h']['t'];
+			$style .= ';--cr-h:' . $item['h']['d'];
+		}
+		if ( '' !== $item['h']['t'] ) {
+			$style .= ';--cr-h-t:' . $item['h']['t'];
 		}
 		$classes = 'cr-zine__frame cr-zine__frame--' . $shapes[ $n ] . ' cr-zine__frame--' . $item['pattern'] . ' cr-zine__frame--' . $item['treat'];
 		// An image block whose attachment is gone keeps its place as a missing frame, its alt text and caption shown.

@@ -501,8 +501,8 @@
 	box-shadow: 0 0 0 6px var(--cr-focus-halo);
 }
 
-/* ---- Phones: two columns; portraits pair up, contact frames sit two to a row ---- */
-@media (max-width: 39.99rem) {
+/* ---- Phones (to 599px): one column of photographs; only portraits pair up, and contact frames sit two to a row ---- */
+@media (max-width: 37.49rem) {
 
 	.cr-zine-single .cr-zine__masthead {
 		padding: var(--cr-space-lg) var(--cr-space-md) var(--cr-space-md);
@@ -559,8 +559,8 @@
 	}
 }
 
-/* ---- Tablets: six columns ---- */
-@media (min-width: 40rem) and (max-width: 63.99rem) {
+/* ---- Tablets (600 to 1023px): twelve fine columns; trios open on a full-width picture ---- */
+@media (min-width: 37.5rem) and (max-width: 63.99rem) {
 
 	.cr-zine-single .cr-zine__frames {
 		--cr-zine-gap: var(--cr-space-lg);
@@ -574,14 +574,14 @@
 	}
 
 	/* A justified row's pictures share one height at their own ratios. */
-	.cr-zine-single .cr-zine__frame--even img {
+	.cr-zine-single .cr-zine__frame--even-t img {
 		width: auto;
 		height: min(var(--cr-h-t), 38rem);
 		max-height: none;
 	}
 }
 
-/* ---- Desktop: twelve columns ---- */
+/* ---- Desktop (1024px up): twenty-four fine columns; tight and loose spreads alternate ---- */
 @media (min-width: 64rem) {
 
 	.cr-zine-single .cr-zine {
@@ -600,7 +600,7 @@
 		margin-block-start: calc(var(--cr-mt, 0) * var(--cr-zine-step));
 	}
 
-	.cr-zine-single .cr-zine__frame--even img {
+	.cr-zine-single .cr-zine__frame--even-d img {
 		width: auto;
 		height: min(var(--cr-h), 38rem);
 		max-height: none;
@@ -608,7 +608,7 @@
 }
 
 /* ---- Relationships between panels (tablet and desktop) ---- */
-@media (min-width: 40rem) {
+@media (min-width: 37.5rem) {
 
 	/* Pictures in a diptych, triptych or beside a hero share a bottom line. */
 	.cr-zine-single .cr-zine__frame--baseline {

@@ -189,7 +189,7 @@ namespace {
 			cr_photo_same( 3, substr_count( $html, '<figcaption class="wp-element-caption">Caption ' ), 'captions kept, none invented' );
 			cr_photo_same( 6, substr_count( $html, 'data-wp-interactive="core/image"' ), 'core lightbox on unlinked images' );
 			cr_photo_same( 6, preg_match_all( '/<img\b[^>]*\bclass="[^"]*\bu-photo\b/', $html ), 'u-photo on every image' );
-			cr_photo_same( 6, preg_match_all( '/sizes="\(max-width: 40rem\) (100|50)vw, \(max-width: 64rem\) \d+vw, \d+(\.\d+)?rem"/', $html ), 'every image is sized for its spans on phone, tablet and desktop' );
+			cr_photo_same( 6, preg_match_all( '/sizes="\(max-width: 37\.49rem\) (100|50)vw, \(max-width: 64rem\) \d+vw, \d+(\.\d+)?rem"/', $html ), 'every image is sized for its spans on phone, tablet and desktop' );
 			cr_photo_contains( '<p class="cr-zine__note cr-zine__note--hand">A short gallery caption.</p>', $html, 'a short gallery caption is the handwritten note' );
 			cr_photo_not_contains( 'wp-block-gallery', $html, 'the gallery wrapper is replaced' );
 		}
@@ -441,7 +441,7 @@ namespace {
 			cr_photo_assert( $sq[0]['d']['span'] > $pl[0]['d']['span'], 'a portrait hero takes fewer columns than a square one beside the same stack height' );
 			$even = compose( cr_zine_shapes( 'LPS' ), array( '', '', '' ) );
 			cr_photo_assert( '' !== $even[0]['h']['d'] && $even[0]['h']['d'] === $even[1]['h']['d'] && $even[1]['h']['d'] === $even[2]['h']['d'], 'a justified row shares one picture height' );
-			cr_photo_assert( 1 === preg_match( '/^calc\([\d.]+ \* \(100cqi \+ 2rem\) - [\d.]+rem\)$/', $even[0]['h']['d'] ), 'the height follows the grid width: ' . $even[0]['h']['d'] );
+			cr_photo_assert( 1 === preg_match( '/^min\((calc\([\d.]+ \* \(100cqi \+ 2rem\) - [\d.]+rem\)(, )?){3}\)$/', $even[0]['h']['d'] ), 'the height follows the grid width: ' . $even[0]['h']['d'] );
 			cr_photo_same( '', $hero[0]['h']['d'], 'a hero sizes by its columns, not a shared height' );
 			$wide = compose( array( 'landscape', 'landscape' ), array( '', '' ), array( 1.5, 1.2 ) );
 			cr_photo_assert( $wide[0]['d']['span'] > $wide[1]['d']['span'] || 'essay' === $wide[0]['pattern'], 'measured ratios steer the spans' );
@@ -454,6 +454,42 @@ namespace {
 			$end = compose( cr_zine_shapes( 'LSLPP' ), array_fill( 0, 5, '' ) );
 			$rows = cr_zine_rows( $end, 'd', 12 );
 			cr_photo_assert( count( end( $rows ) ) > 1, 'a five-image gallery does not end on a lone panel' );
+		}
+	);
+
+	cr_photo_group(
+		'per breakpoint: phones tell a single-column story, tablets open trios on a hero, desktops alternate tight and loose spreads',
+		static function (): void {
+			// Phones pair only pictures that stay comfortably viewable side by side: two portraits, or contact frames.
+			foreach ( array( 'LPSALP', 'PPLSLL', 'SSSSSS', 'PPPPPP', 'LSSPLL', 'LPSALPSALPSALPSALPSA' ) as $letters ) {
+				$shapes = cr_zine_shapes( $letters );
+				$plan   = compose( $shapes, array_fill( 0, strlen( $letters ), '' ) );
+				foreach ( cr_zine_rows( $plan, 'p', 2 ) as $row ) {
+					if ( 2 === count( $row ) ) {
+						$ok = ( 'portrait' === $shapes[ $row[0] ] && 'portrait' === $shapes[ $row[1] ] ) || 'contact' === $plan[ $row[0] ]['pattern'];
+						cr_photo_assert( $ok, "$letters: a phone pair is two portraits or contact frames" );
+					}
+				}
+			}
+			// Tablets: a mixed trio opens on a full-width picture, the other two share a row and a height.
+			$trio = compose( cr_zine_shapes( 'LPS' ), array( '', '', '' ) );
+			cr_photo_same( 12, $trio[0]['t']['span'], 'the trio\'s first picture spans the tablet row' );
+			cr_photo_same( 12, $trio[1]['t']['span'] + $trio[2]['t']['span'], 'the other two share the next tablet row' );
+			cr_photo_assert( '' === $trio[0]['h']['t'] && '' !== $trio[1]['h']['t'] && $trio[1]['h']['t'] === $trio[2]['h']['t'], 'the tablet pair shares a height; the hero does not' );
+			cr_photo_assert( in_array( 'even-d', $trio[0]['flags'], true ) && ! in_array( 'even-t', $trio[0]['flags'], true ), 'the trio is a justified row on desktop only' );
+			cr_photo_assert( str_starts_with( $trio[1]['h']['t'], 'min(' ), 'a shared height takes the smallest any picture allows at the real width' );
+			$ppp = compose( cr_zine_shapes( 'PPP' ), array( '', '', '' ) );
+			cr_photo_same( array( 6, 6 ), array( $ppp[0]['t']['span'], $ppp[1]['t']['span'] ), 'three portraits on a tablet: a pair' );
+			cr_photo_assert( $ppp[2]['t']['span'] < 12 && $ppp[2]['t']['span'] >= 6, 'then an inset portrait' );
+			// Desktop: the second trio in a gallery is the loose spread, breaking the row line.
+			$six = compose( cr_zine_shapes( 'PPPPPP' ), array_fill( 0, 6, '' ) );
+			cr_photo_assert( ! in_array( 'loose', $six[0]['flags'], true ) && in_array( 'loose', $six[3]['flags'], true ), 'trios alternate tight and loose' );
+			cr_photo_assert( $six[4]['mt']['d'] > $six[3]['mt']['d'] - 3, 'the loose spread\'s second picture drops below the row line' );
+			cr_photo_assert( $six[5]['d']['start'] <= $six[4]['d']['start'] + $six[4]['d']['span'] - 1, 'and its third opens a new row' );
+			cr_photo_same( '', $six[3]['h']['d'], 'a loose spread does not force a shared height' );
+			$lps = compose( cr_zine_shapes( 'LPSLPS' ), array_fill( 0, 6, '' ) );
+			cr_photo_same( 'triptych,triptych', cr_zine_signature( $lps ), 'two trios' );
+			cr_photo_assert( in_array( 'loose', $lps[3]['flags'], true ), 'the second mixed trio is loose too' );
 		}
 	);
 
@@ -516,7 +552,7 @@ namespace {
 			}
 			cr_photo_contains( 'grid-template-columns: repeat(24, minmax(0, 1fr))', $css, 'desktop 24 fine columns' );
 			cr_photo_contains( 'grid-template-columns: repeat(12, minmax(0, 1fr))', $css, 'tablet 12 fine columns' );
-			cr_photo_assert( 1 === preg_match( '/@media \(max-width: 39\.99rem\)\s*\{[^@]*\.cr-zine__frames\s*\{[^{}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\);/s', $css ), 'phones two columns' );
+			cr_photo_assert( 1 === preg_match( '/@media \(max-width: 37\.49rem\)\s*\{[^@]*\.cr-zine__frames\s*\{[^{}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\);/s', $css ), 'phones two columns' );
 			cr_photo_contains( 'object-fit: contain', $css, 'no cropping' );
 			cr_photo_contains( 'var(--cr-focus-ring)', $css, 'visible focus' );
 			cr_photo_contains( '@media (prefers-reduced-motion: reduce)', $css, 'reduced motion' );
