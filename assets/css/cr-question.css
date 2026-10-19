@@ -44,6 +44,7 @@
 	grid-template-columns: minmax(0, 1fr);
 	align-items: start;
 	gap: var(--cr-space-lg);
+	max-width: none;
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -88,8 +89,10 @@
 	padding: 0.15em 0.6em;
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-2xl);
 	font-weight: var(--cr-weight-bold);
 	font-style: normal;
+	line-height: 1.15;
 	overflow-wrap: anywhere;
 }
 
@@ -194,9 +197,11 @@ body.kind-question .single-post__kind {
 	border: 0;
 	background: none;
 	color: var(--cr-cerulean);
+	box-shadow: none;
 	font-family: var(--cr-font-mono);
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
+	transform: none;
 }
 
 body.kind-question.single main.single-post .single-post__kind a {
@@ -216,13 +221,14 @@ body.kind-question .single-post__date {
 	font-family: var(--cr-font-mono);
 }
 
-body.kind-question .single-post__category {
-	display: none;
-}
-
 body.kind-question .single-post__title {
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-accent);
+}
+
+/* components.css sets the flank glyph with !important; only !important removes it. */
+body.kind-question main.single-post .single-post__title.cr-flank::after {
+	content: none !important;
 }
 
 body.kind-question .is-style-cr-salutation {
@@ -234,6 +240,7 @@ body.kind-question .is-style-cr-salutation {
 	font-family: var(--cr-font-display);
 	font-size: 1rem;
 	font-style: normal;
+	clip-path: polygon(0 8%, 3% 0, 97% 4%, 100% 0, 100% 92%, 97% 100%, 4% 96%, 0 100%);
 	-webkit-box-decoration-break: clone;
 	box-decoration-break: clone;
 }
@@ -295,6 +302,7 @@ body.kind-question .pkiw-answer__replies {
 body.kind-question.single main.single-post .pkiw-answers__respond a {
 	display: inline-flex;
 	align-items: center;
+	column-gap: 0.3em;
 	min-inline-size: 44px;
 	min-block-size: 44px;
 	color: var(--cr-link);
@@ -308,6 +316,11 @@ body.kind-question.single main.single-post .pkiw-answers__respond a {
 		display: grid;
 		grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
 		column-gap: var(--cr-space-lg);
+	}
+
+	body.kind-question .pkiw-answer > .p-author,
+	body.kind-question .pkiw-answer > a.u-url {
+		border-inline-end: 1px solid var(--cr-rule);
 	}
 
 	body.kind-question .pkiw-answer > .p-author {
@@ -582,6 +595,7 @@ body.kind-question.single main.single-post .pkiw-answers__respond a {
 
 	body.kind-question .is-style-cr-salutation {
 		background: none;
+		clip-path: none;
 	}
 
 	body.kind-question .pkiw-question-body::after,

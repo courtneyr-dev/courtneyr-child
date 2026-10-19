@@ -100,6 +100,22 @@ function paint_entry( string $html, array $block, $instance ): string {
 }
 add_filter( 'render_block_post-kinds-indieweb/question-entry', __NAMESPACE__ . '\\paint_entry', 10, 3 );
 
+/**
+ * Drop the category chip from the question slip, which prints only the kind label, date, title and content.
+ *
+ * @param string               $html  Rendered post-terms block.
+ * @param array<string, mixed> $block Parsed post-terms block.
+ * @return string
+ */
+function lede_category( string $html, array $block ): string {
+	$class_name = (string) ( $block['attrs']['className'] ?? '' );
+	if ( 1 !== preg_match( '/(?:^|\\s)single-post__category(?:\\s|$)/', $class_name ) || ! is_question_single() ) {
+		return $html;
+	}
+	return '';
+}
+add_filter( 'render_block_core/post-terms', __NAMESPACE__ . '\\lede_category', 20, 2 );
+
 /** Load question paint on every surface that can render it. */
 function enqueue_styles(): void {
 	if (
