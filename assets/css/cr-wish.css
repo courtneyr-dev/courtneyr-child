@@ -25,6 +25,11 @@
 	list-style: none;
 }
 
+/* The title's tracking comes from the token, not a block-attribute pixel value. */
+.cr-archive--wish .cr-archive__title {
+	letter-spacing: var(--cr-tracking-tight);
+}
+
 /* components.css zeroes the archive Post Template's padding and margin at 0,2,0; this selector wins at 0,3,0. */
 .cr-archive .cr-wish-catalog.wp-block-post-template {
 	margin: 0;

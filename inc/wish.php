@@ -56,7 +56,7 @@ function register_card_style(): void {
 			'src'    => COURTNEYR_CHILD_URI . '/assets/css/cr-wish.css',
 			'path'   => $file_path,
 			'ver'    => COURTNEYR_CHILD_VERSION,
-			'deps'   => array( 'courtneyr-paper' ),
+			'deps'   => array( 'courtneyr-paper', 'courtneyr-nav' ),
 		)
 	);
 }
@@ -224,13 +224,14 @@ function archive_item( \WP_Post $post, array $facts, int $level ): string {
 
 	$priority = $has_facts ? (string) ( $facts['priority'] ?? '' ) : '';
 	$attrs    = '' !== $priority ? ' data-priority="' . esc_attr( $priority ) . '"' : '';
-	$out      = '<article class="cr-wish-listing"' . $attrs . '>' . $media
+	$out      = '<article class="cr-wish-listing pk-card--stream"' . $attrs . '>' . $media
 		. '<h' . $level . ' class="cr-wish-listing__title"><a class="' . esc_attr( $classes ) . '" href="' . $permalink . '">' . esc_html( $name ) . '</a></h' . $level . '>';
 	if ( $has_facts && '' !== (string) ( $facts['priority_text'] ?? '' ) ) {
 		$out .= '<p class="cr-wish-listing__priority">' . esc_html( (string) $facts['priority_text'] ) . '</p>';
 	}
-	if ( $has_facts && '' !== (string) ( $facts['url'] ?? '' ) ) {
-		$out .= '<data class="u-wish-of" value="' . esc_url( (string) $facts['url'] ) . '" hidden></data>';
+	$item_url = $has_facts ? esc_url( (string) ( $facts['url'] ?? '' ) ) : '';
+	if ( '' !== $item_url ) {
+		$out .= '<data class="u-wish-of" value="' . $item_url . '" hidden></data>';
 	}
 	return $out . '</article>';
 }
@@ -266,8 +267,25 @@ function enqueue_styles(): void {
 	wp_enqueue_style(
 		STYLE_HANDLE,
 		COURTNEYR_CHILD_URI . '/assets/css/cr-wish.css',
-		array( 'courtneyr-paper' ),
+		array( 'courtneyr-paper', 'courtneyr-nav' ),
 		COURTNEYR_CHILD_VERSION
 	);
 }
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_styles' );
+
+/**
+ * Make sure the pager sheet is registered before the wish sheet depends on it.
+ *
+ * The nav module registers it as a block-style handle during enqueue_block_assets.
+ * A missing dependency would stop the wish sheet from printing, so the same
+ * handle and file are registered first. A handle that already exists is kept.
+ */
+function register_nav_dependency(): void {
+	if ( function_exists( 'wp_style_is' ) && wp_style_is( 'courtneyr-nav', 'registered' ) ) {
+		return;
+	}
+	if ( defined( 'COURTNEYR_CHILD_URI' ) && defined( 'COURTNEYR_CHILD_VERSION' ) && function_exists( 'wp_register_style' ) ) {
+		wp_register_style( 'courtneyr-nav', COURTNEYR_CHILD_URI . '/assets/css/cr-nav.css', array(), COURTNEYR_CHILD_VERSION );
+	}
+}
+add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\register_nav_dependency', 1 );

@@ -188,6 +188,8 @@ function clipping( string $html, array $block, $instance ): string {
 	if ( $generic ) {
 		$edited = \Courtneyr\Child\MediaShelf\cut_elements( $edited, 'div', 'pk-meta' );
 		$edited = \Courtneyr\Child\MediaShelf\cut_elements( $edited, 'p', 'pk-excerpt' );
+		// The generic card's thumbnail can print a visible '+N' link, so a card-less wish keeps title and date only.
+		$edited = \Courtneyr\Child\MediaShelf\cut_elements( $edited, 'div', 'pk-media' );
 	}
 	if ( $card_only ) {
 		$edited = mark_chips( $edited );

@@ -204,7 +204,8 @@ namespace {
 			$card = array_values( array_filter( $GLOBALS['cr_block_styles'], static fn( array $row ): bool => 'post-kinds-indieweb/wish-card' === $row[0] ) )[0] ?? array();
 			return 'cr-wish-listing' === ( $item[1]['name'] ?? '' )
 				&& 'courtneyr-wish' === ( $card[1]['handle'] ?? '' )
-				&& array( 'courtneyr-paper' ) === ( $card[1]['deps'] ?? null )
+				&& array( 'courtneyr-paper', 'courtneyr-nav' ) === ( $card[1]['deps'] ?? null )
+				&& array( 'courtneyr-paper', 'courtneyr-nav' ) === ( $GLOBALS['cr_enqueued']['courtneyr-wish'][1] ?? null )
 				&& isset( $GLOBALS['cr_enqueued']['courtneyr-wish'] );
 		}
 	);
@@ -219,6 +220,7 @@ namespace {
 				if ( 1 !== preg_match_all( '/<a\b[^>]*\bhref=/i', $html )
 					|| ! str_contains( $html, 'alt=""' )
 					|| ! str_contains( $html, 'data-priority="' . $priority . '"' )
+					|| ! preg_match( '/^<article class="cr-wish-listing pk-card--stream"/', $html )
 					|| ! str_contains( $text, ucfirst( $priority ) . ' priority' )
 					|| preg_match( '/\b(?:Reason|Price|January|February|March|April|May|June|July|August|September|October|November|December)\b|\d/', $text )
 				) {
@@ -238,7 +240,8 @@ namespace {
 			$unsafe = Wish\archive_item( $post, cr_wish_facts( 'Fictional Lantern', 'high', 'book', 'javascript:alert(1)' ), 3 );
 			return 1 === substr_count( $yes, 'class="u-wish-of"' )
 				&& ! str_contains( $no, 'u-wish-of' )
-				&& ! str_contains( $unsafe, 'javascript:' );
+				&& ! str_contains( $unsafe, 'javascript:' )
+				&& ! str_contains( $unsafe, '<data' );
 		}
 	);
 

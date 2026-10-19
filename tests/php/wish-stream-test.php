@@ -185,7 +185,7 @@ namespace {
 	function cr_wish_generic_fixture( bool $media = true ): string {
 		return '<article class="pk-card pk-card--stream k-wish h-entry"><div class="pk-badge"><svg aria-hidden="true"></svg></div><div class="pk-body"><span class="pk-kindlabel">Wish</span>'
 			. '<div class="pk-caption"><h3 class="pk-title p-name"><a class="u-url" href="https://example.test/wish-two/">Train journey</a></h3><p class="pk-sub pk-stream-date"><time datetime="2026-10-18">October 18, 2026</time></p></div>'
-			. ( $media ? '<div class="pk-media pk-media--stream"><img class="u-photo" src="https://example.test/item.png" alt=""></div>' : '' )
+			. ( $media ? '<div class="pk-media pk-media--stream"><img class="u-photo" src="https://example.test/item.png" alt=""><a class="pk-media__thumb-more-link" href="https://example.test/wish-two/#more">+2</a></div>' : '' )
 			. '<p class="pk-excerpt">Excerpt</p><span class="u-wish-of" hidden><data class="u-url" value="https://tickets.example.net/train"></data></span>'
 			. '<div class="pk-meta"><a href="https://example.test/wish-two/">Read more</a></div></div></article>';
 	}
@@ -223,6 +223,8 @@ namespace {
 				&& str_contains( $out, 'data-priority="medium"' )
 				&& ! str_contains( $out, 'pk-meta' )
 				&& ! str_contains( $out, 'pk-excerpt' )
+				&& ! str_contains( $out, 'pk-media' )
+				&& ! str_contains( $out, 'pk-media__thumb-more-link' )
 				&& 1 === preg_match_all( '/<a\b[^>]*href=/i', $out )
 				&& str_contains( $out, '<span class="u-wish-of" hidden>');
 		}
