@@ -161,14 +161,26 @@ cr_podcast_same( '', SinglePodcast\drop_repeated_featured_image( '<figure>Featur
 $GLOBALS['cr_podcast_facts'][ $post->ID ] = cr_podcast_single_facts( array( 'picture' => array( 'suppress_featured' => false ) ) );
 cr_podcast_same( '<figure>Featured</figure>', SinglePodcast\drop_repeated_featured_image( '<figure>Featured</figure>', $featured_block ), 'featured image remains when suppression is false' );
 
-$kind_block = array( 'blockName' => 'core/post-terms', 'attrs' => array( 'term' => 'kind', 'className' => 'single-post__kind extra' ) );
+$kind_block = array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'single-post__kind extra' ) );
 $GLOBALS['cr_podcast_facts'][ $post->ID ] = cr_podcast_single_facts();
 cr_podcast_same( '', SinglePodcast\drop_kind_chip( '<div>Listen</div>', $kind_block ), 'podcast single kind chip is dropped' );
 $GLOBALS['cr_podcast_facts'][ $post->ID ] = array( 'is_podcast' => false );
 cr_podcast_same( '<div>Listen</div>', SinglePodcast\drop_kind_chip( '<div>Listen</div>', $kind_block ), 'music single kind chip remains' );
 $GLOBALS['cr_podcast_facts'][ $post->ID ] = cr_podcast_single_facts();
-$other_terms = array( 'blockName' => 'core/post-terms', 'attrs' => array( 'term' => 'category', 'className' => 'single-post__kind' ) );
+$other_terms = array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'single-post__category' ) );
 cr_podcast_same( '<div>Category</div>', SinglePodcast\drop_kind_chip( '<div>Category</div>', $other_terms ), 'another post-terms block remains' );
+
+// The authored listen card prints its own kind label; the record's is the one that stays.
+$card_block = array( 'blockName' => 'post-kinds-indieweb/listen-card', 'attrs' => array() );
+$card_html  = '<article class="pk-card k-listen"><span class="pk-kindlabel">Listen</span><h2 class="pk-title">Card</h2></article>';
+$GLOBALS['cr_podcast_facts'][ $post->ID ] = cr_podcast_single_facts();
+$stripped = SinglePodcast\strip_card_kind_label( $card_html, $card_block );
+cr_podcast_not_contains( 'pk-kindlabel', $stripped, 'authored card loses its kind label on a podcast single' );
+cr_podcast_contains( '<h2 class="pk-title">Card</h2>', $stripped, 'authored card keeps its title' );
+$GLOBALS['cr_podcast_facts'][ $post->ID ] = array( 'is_podcast' => false );
+cr_podcast_same( $card_html, SinglePodcast\strip_card_kind_label( $card_html, $card_block ), 'music card keeps its kind label' );
+$GLOBALS['cr_podcast_facts'][ $post->ID ] = cr_podcast_single_facts();
+cr_podcast_same( $card_html, SinglePodcast\strip_card_kind_label( $card_html, array( 'blockName' => 'post-kinds-indieweb/watch-card', 'attrs' => array() ) ), 'other cards are untouched' );
 
 $classes = SinglePodcast\body_class( array( 'cr-single--podcast' ) );
 cr_podcast_same( 1, count( array_keys( $classes, 'cr-single--podcast', true ) ), 'podcast body class is added once' );

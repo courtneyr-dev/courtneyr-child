@@ -154,7 +154,7 @@ function record_html( \WP_Post $post, array $post_facts ): string {
 		if ( ! empty( $post_facts['listened_has_time'] ) && '' !== $time ) {
 			$date = sprintf(
 				/* translators: 1: displayed listen day, 2: displayed listen time. */
-				__( '%1$s at %2$s', 'courtneyr-child' ),
+				esc_html__( '%1$s at %2$s', 'courtneyr-child' ),
 				$date,
 				esc_html( $time )
 			);
@@ -244,14 +244,36 @@ function drop_kind_chip( string $html, array $block ): string {
 		return $html;
 	}
 
-	$attrs = is_array( $block['attrs'] ?? null ) ? $block['attrs'] : array();
-	if ( 'kind' !== ( $attrs['term'] ?? '' ) || ! str_contains( (string) ( $attrs['className'] ?? '' ), 'single-post__kind' ) ) {
+	// The template's className marks the kind chip; the term attribute is not read.
+	$class_name = is_array( $block['attrs'] ?? null ) ? (string) ( $block['attrs']['className'] ?? '' ) : '';
+	if ( ! str_contains( $class_name, 'single-post__kind' ) ) {
 		return $html;
 	}
 
 	return is_podcast_single() ? '' : $html;
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\drop_kind_chip', 10, 2 );
+
+/**
+ * Drop the authored listen card's kind label on a podcast single.
+ *
+ * Card-authored podcasts print the stored card beside the record, and both
+ * would say 'Listen'. The record's label stays, so the page shows it once.
+ *
+ * @param string               $html  Rendered card HTML.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function strip_card_kind_label( string $html, array $block ): string {
+	if ( 'post-kinds-indieweb/listen-card' !== ( $block['blockName'] ?? '' ) || ! str_contains( $html, 'pk-kindlabel' ) || ! is_podcast_single() ) {
+		return $html;
+	}
+
+	$stripped = preg_replace( '#<(span|p)\s+class="pk-kindlabel"[^>]*>.*?</\1>#s', '', $html );
+
+	return is_string( $stripped ) ? $stripped : $html;
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\strip_card_kind_label', 10, 2 );
 
 /**
  * Mark every lineup cover for the theme's failed-image fallback script.

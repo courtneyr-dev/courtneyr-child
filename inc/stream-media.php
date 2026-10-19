@@ -172,13 +172,14 @@ function podcast_cite( array $facts ): string {
 /**
  * Render a podcast listen as a one-link Stream card.
  *
- * @param array<string, mixed> $block Parsed stream-card block.
+ * @param string               $html  Card the plugin rendered; its heading tag sets the level.
  * @param \WP_Post             $post  Podcast post.
  * @param array<string, mixed> $facts Public podcast facts.
  * @return string
  */
-function podcast_card( array $block, \WP_Post $post, array $facts ): string {
-	$level        = max( 2, min( 4, (int) ( $block['attrs']['headingLevel'] ?? 2 ) ) );
+function podcast_card( string $html, \WP_Post $post, array $facts ): string {
+	// The plugin already applied the Stream's heading level to its title tag; read it back from the markup.
+	$level        = 1 === preg_match( '/<h([1-6])\b[^>]*\bclass="[^"]*\bpk-title\b/', $html, $heading ) ? max( 2, min( 4, (int) $heading[1] ) ) : 2;
 	$episode      = (string) ( $facts['episode_text'] ?? '' );
 	$name         = (string) ( $facts['name'] ?? '' );
 	$title_class  = 'pk-title cr-podcast-card__title';
@@ -429,7 +430,7 @@ function media_card( string $html, array $block, $instance ): string {
 	if ( '' === $shelf && ! $shelf_card && has_term( 'listen', 'kind', $post ) ) {
 		$podcast = podcast_facts( $post );
 		if ( array() !== $podcast ) {
-			return podcast_card( $block, $post, $podcast );
+			return podcast_card( $html, $post, $podcast );
 		}
 	}
 

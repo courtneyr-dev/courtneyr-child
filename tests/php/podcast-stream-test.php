@@ -40,7 +40,8 @@ function cr_podcast_stream_facts( array $overrides = array() ): array {
 
 $post = cr_podcast_reset( 401 );
 $facts = cr_podcast_stream_facts();
-$html = StreamMedia\podcast_card( array( 'attrs' => array( 'headingLevel' => 3 ) ), $post, $facts );
+$incoming = static fn( int $level ): string => '<article class="pk-card pk-card--stream k-listen h-entry"><h' . $level . ' class="pk-title p-name"><a class="u-url" href="https://example.test/x">Plugin title</a></h' . $level . '></article>';
+$html = StreamMedia\podcast_card( $incoming( 3 ), $post, $facts );
 
 preg_match( '/^<article class="([^"]+)">/', $html, $root );
 cr_podcast_same( 'pk-card pk-card--stream k-podcast cr-podcast-card h-entry', $root[1] ?? '', 'card has the exact root class list' );
@@ -58,15 +59,17 @@ foreach ( array( '<iframe', '<button', 'tabindex', '<audio', '<script' ) as $ban
 	cr_podcast_check( ! str_contains( $html, $banned ), 'card omits element or attribute ' . $banned );
 }
 
-$low = StreamMedia\podcast_card( array( 'attrs' => array( 'headingLevel' => 1 ) ), $post, $facts );
-$high = StreamMedia\podcast_card( array( 'attrs' => array( 'headingLevel' => 9 ) ), $post, $facts );
-$default = StreamMedia\podcast_card( array(), $post, $facts );
+$low = StreamMedia\podcast_card( '<article><h1 class="pk-title">x</h1></article>', $post, $facts );
+$high = StreamMedia\podcast_card( '<article><h6 class="pk-title">x</h6></article>', $post, $facts );
+$default = StreamMedia\podcast_card( '<article>Plugin card</article>', $post, $facts );
+$ignores_attrs = StreamMedia\media_card( $incoming( 4 ), array( 'attrs' => array( 'headingLevel' => 2 ) ), new WP_Block( array( 'postId' => $post->ID ) ) );
+cr_podcast_contains( '<h4 class=', $ignores_attrs, 'heading level comes from the rendered card, not block attributes' );
 cr_podcast_contains( '<h2 class=', $low, 'heading level one clamps to h2' );
 cr_podcast_contains( '<h4 class=', $high, 'heading level nine clamps to h4' );
 cr_podcast_contains( '<h2 class=', $default, 'missing heading level defaults to h2' );
 
 cr_podcast_contains( 'class="pk-title cr-podcast-card__title p-name"', $html, 'heading has p-name when displayed text is the real title' );
-$synthetic = StreamMedia\podcast_card( array(), $post, cr_podcast_stream_facts( array( 'name' => 'Listened to Harbor Signals' ) ) );
+$synthetic = StreamMedia\podcast_card( '<article></article>', $post, cr_podcast_stream_facts( array( 'name' => 'Listened to Harbor Signals' ) ) );
 cr_podcast_contains( 'class="pk-title cr-podcast-card__title"', $synthetic, 'synthetic title heading keeps the base classes' );
 cr_podcast_not_contains( 'cr-podcast-card__title p-name', $synthetic, 'synthetic title heading omits p-name' );
 
@@ -74,12 +77,12 @@ cr_podcast_check( 1 === substr_count( $html, '<img' ), 'remote picture art has o
 cr_podcast_contains( 'class="u-photo"', $html, 'picture image has u-photo' );
 cr_podcast_contains( 'alt="" loading="lazy" decoding="async"', $html, 'picture image is decorative, lazy and async' );
 $attachment = StreamMedia\podcast_card(
-	array(),
+	'<article></article>',
 	$post,
 	cr_podcast_stream_facts( array( 'picture' => array( 'attachment_id' => 88, 'url' => 'https://example.test/media/88.jpg' ) ) )
 );
 cr_podcast_check( 1 === substr_count( $attachment, '<img' ) && str_contains( $attachment, '/media/88.jpg' ), 'attachment picture uses one core image' );
-$knob = StreamMedia\podcast_card( array(), $post, cr_podcast_stream_facts( array( 'picture' => array( 'attachment_id' => 0, 'url' => '' ) ) ) );
+$knob = StreamMedia\podcast_card( '<article></article>', $post, cr_podcast_stream_facts( array( 'picture' => array( 'attachment_id' => 0, 'url' => '' ) ) ) );
 cr_podcast_contains( 'class="cr-podcast-card__art cr-podcast-card__art--knob" aria-hidden="true" data-cr-cover-fallback="true"></div>', $knob, 'missing picture prints the empty aria-hidden knob art' );
 cr_podcast_not_contains( '<img', $knob, 'knob fallback has no image' );
 

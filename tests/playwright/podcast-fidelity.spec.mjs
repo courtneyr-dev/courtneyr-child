@@ -465,7 +465,11 @@ test.describe( 'podcast full-state surfaces', () => {
 		await expect( streamLink.locator( 'xpath=ancestor::article[1]' ).locator( 'time' ) ).toHaveAttribute( 'datetime', '2026-09-27' );
 		await openFixture( page, request, 'Q01' );
 		await expect( page.locator( '.cr-podcast-record__row', { hasText: 'Rated 4 of 5' } ).locator( 'dd' ) ).toHaveText( 'Rated 4 of 5' );
-		expect( await page.locator( '.cr-podcast-single__kind, .single-post__kind' ).count() ).toBe( 1 );
+		// Q01 is card-authored: the stored listen card's own .pk-kindlabel must not add a second 'Listen'.
+		expect( await page.locator( '.cr-podcast-single__kind, .single-post__kind, .pk-kindlabel' ).count() ).toBe( 1 );
+		await openFixture( page, request, 'Q04' );
+		expect( await page.locator( '.cr-podcast-single__kind, .single-post__kind, .pk-kindlabel' ).count() ).toBe( 1 );
+		await openFixture( page, request, 'Q01' );
 		await openFixture( page, request, 'Q07' );
 		await expect( page.getByRole( 'heading', { name: 'Highlights from this episode' } ) ).toBeVisible();
 		await expect( page.getByText( 'A fictional signal becomes clearer after one careful test.' ) ).toBeVisible();
