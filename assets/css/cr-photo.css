@@ -575,6 +575,7 @@ body.cr-photo-single .pkiw-photo-place {
 :is(body, .cr-stream-page) .pk-card.cr-polaroid {
 	box-sizing: border-box;
 	width: 94%;
+
 	/* The thick lower edge of a polaroid print. */
 	padding: 1.1rem 1.1rem 2rem;
 	border: 0;
