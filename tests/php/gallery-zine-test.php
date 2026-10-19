@@ -395,9 +395,10 @@ namespace {
 			$twenty = compose( cr_zine_shapes( 'LPSALPSALPSALPSALPSA' ), array_fill( 0, 20, '' ) );
 			cr_photo_assert( str_ends_with( cr_zine_signature( $twenty ), ',contact' ), 'a long gallery closes on a contact sheet' );
 			cr_photo_same( 'contact', $twenty[19]['pattern'], 'the tail is the contact sheet' );
-			$six = array( 'LLLLLL', 'PPPPPP', 'SSSSSS', 'LPSALP', 'PPLSLL', 'LSSPLL' );
+			// Uniform landscapes and uniform squares share a skeleton by design (heights follow each picture's ratio); every other family differs.
+			$six = array( 'LLLLLL', 'PPPPPP', 'LPSALP', 'PPLSLL', 'LSSPLL' );
 			$signatures = array_map( static fn( string $l ): string => md5( serialize( array_map( static fn( array $i ): array => array( $i['pattern'], $i['d'], $i['t'] ), compose( cr_zine_shapes( $l ), array_fill( 0, 6, '' ) ) ) ) ), $six );
-			cr_photo_same( 6, count( array_unique( $signatures ) ), 'six six-image collections, six different compositions' );
+			cr_photo_same( 5, count( array_unique( $signatures ) ), 'five six-image shape families, five different compositions' );
 			cr_photo_same( compose( cr_zine_shapes( 'LPSALP' ), array_fill( 0, 6, '' ) ), compose( cr_zine_shapes( 'LPSALP' ), array_fill( 0, 6, '' ) ), 'deterministic' );
 		}
 	);
@@ -411,7 +412,7 @@ namespace {
 					$letters = substr( str_repeat( $mix, 30 ), 0, $count );
 					$plan    = compose( cr_zine_shapes( $letters ), array_fill( 0, $count, '' ) );
 					cr_photo_same( range( 0, $count - 1 ), array_keys( $plan ), $letters . ': every panel, in source order' );
-					foreach ( array( 'd' => 12, 't' => 6, 'p' => 2 ) as $bp => $cols ) {
+					foreach ( array( 'd' => 24, 't' => 12, 'p' => 2 ) as $bp => $cols ) {
 						foreach ( $plan as $n => $item ) {
 							$c = $item[ $bp ];
 							cr_photo_assert( $c['start'] >= 1 && $c['span'] >= 1 && $c['start'] + $c['span'] - 1 <= $cols, "$letters $bp #$n inside the grid" );
@@ -431,9 +432,17 @@ namespace {
 				}
 			}
 			$hero = compose( cr_zine_shapes( 'LSL' ), array( '', '', '' ) );
-			cr_photo_same( array( 'start' => 1, 'span' => 8, 'rows' => 2 ), $hero[0]['d'], 'the hero spans two rows on desktop' );
-			cr_photo_same( 9, $hero[1]['d']['start'], 'satellites stack beside the hero' );
-			cr_photo_same( 9, $hero[2]['d']['start'], 'the second satellite under the first' );
+			cr_photo_same( 2, $hero[0]['d']['rows'], 'the hero spans two rows on desktop' );
+			cr_photo_assert( $hero[0]['d']['span'] >= 12 && $hero[0]['d']['span'] <= 18, 'the hero takes half to three quarters of the row' );
+			cr_photo_same( $hero[0]['d']['span'] + 1, $hero[1]['d']['start'], 'satellites stack beside the hero' );
+			cr_photo_same( $hero[0]['d']['span'] + 1, $hero[2]['d']['start'], 'the second satellite under the first' );
+			$sq = compose( cr_zine_shapes( 'SSS' ), array( '', '', '' ) );
+			$pl = compose( cr_zine_shapes( 'PLL' ), array( '', '', '' ) );
+			cr_photo_assert( $sq[0]['d']['span'] > $pl[0]['d']['span'], 'a portrait hero takes fewer columns than a square one beside the same stack height' );
+			$ppl = compose( cr_zine_shapes( 'PPL' ), array( '', '', '' ) );
+			cr_photo_same( 'anchor', $ppl[2]['treat'], 'the anchor is the opening group\'s largest picture, not always the first' );
+			$six = compose( cr_zine_shapes( 'PPPPPP' ), array_fill( 0, 6, '' ) );
+			cr_photo_assert( $six[0]['mt']['d'] !== $six[3]['mt']['d'] - 3 || $six[1]['mt']['d'] !== $six[4]['mt']['d'] - 3, 'a second portrait row answers the first instead of repeating it' );
 			$pp = compose( cr_zine_shapes( 'PP' ), array( '', '' ) );
 			cr_photo_same( array( 1, 2 ), array( $pp[0]['p']['start'], $pp[1]['p']['start'] ), 'two portraits sit side by side on a phone' );
 			$end = compose( cr_zine_shapes( 'LSLPP' ), array_fill( 0, 5, '' ) );
@@ -453,7 +462,6 @@ namespace {
 				}
 				$plan  = compose( cr_zine_shapes( $letters ), $caps );
 				$treat = array_count_values( array_column( $plan, 'treat' ) );
-				cr_photo_same( 'anchor', $plan[0]['treat'], $letters . ': the first panel anchors' );
 				cr_photo_same( 1, $treat['anchor'], $letters . ': one anchor' );
 				cr_photo_assert( ( $treat['taped'] ?? 0 ) <= 1, $letters . ': at most one taped print' );
 				foreach ( $plan as $n => $item ) {
@@ -495,8 +503,8 @@ namespace {
 				$ok    = 1 === preg_match( '/^var\(--cr-text-[a-z0-9]+\)$/', $value ) || ( 1 === preg_match( '/^(\d*\.?\d+)rem$/', $value, $m ) && (float) $m[1] >= 0.75 ) || str_starts_with( $value, 'clamp(' );
 				cr_photo_assert( $ok, 'type at or above the floor: ' . $value );
 			}
-			cr_photo_contains( 'grid-template-columns: repeat(12, minmax(0, 1fr))', $css, 'desktop 12 columns' );
-			cr_photo_contains( 'grid-template-columns: repeat(6, minmax(0, 1fr))', $css, 'tablet 6 columns' );
+			cr_photo_contains( 'grid-template-columns: repeat(24, minmax(0, 1fr))', $css, 'desktop 24 fine columns' );
+			cr_photo_contains( 'grid-template-columns: repeat(12, minmax(0, 1fr))', $css, 'tablet 12 fine columns' );
 			cr_photo_assert( 1 === preg_match( '/@media \(max-width: 39\.99rem\)\s*\{[^@]*\.cr-zine__frames\s*\{[^{}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\);/s', $css ), 'phones two columns' );
 			cr_photo_contains( 'object-fit: contain', $css, 'no cropping' );
 			cr_photo_contains( 'var(--cr-focus-ring)', $css, 'visible focus' );

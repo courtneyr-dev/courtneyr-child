@@ -558,7 +558,7 @@
 	.cr-zine-single .cr-zine__frames {
 		--cr-zine-gap: var(--cr-space-lg);
 		--cr-zine-step: 1.25rem;
-		grid-template-columns: repeat(6, minmax(0, 1fr));
+		grid-template-columns: repeat(12, minmax(0, 1fr));
 	}
 
 	.cr-zine-single .cr-zine__frame {
@@ -577,7 +577,7 @@
 	.cr-zine-single .cr-zine__frames {
 		--cr-zine-gap: var(--cr-space-xl);
 		--cr-zine-step: 1.5rem;
-		grid-template-columns: repeat(12, minmax(0, 1fr));
+		grid-template-columns: repeat(24, minmax(0, 1fr));
 	}
 
 	.cr-zine-single .cr-zine__frame {
@@ -611,7 +611,7 @@
 	/* A field-journal page: the caption sits beside the picture as a margin note. */
 	.cr-zine-single .cr-zine__frame--journal > .wp-block-image {
 		display: grid;
-		grid-template-columns: minmax(0, 3fr) minmax(9rem, 1fr);
+		grid-template-columns: minmax(0, 4fr) minmax(9rem, 1fr);
 		column-gap: var(--cr-space-lg);
 		align-items: end;
 		width: 100%;
@@ -629,6 +629,11 @@
 		max-width: 16rem;
 		margin: 0 0 var(--cr-space-sm);
 		contain: none;
+	}
+
+	/* Crop marks belong to the picture, not the page with its note. */
+	.cr-zine-single .cr-zine__frame--journal > .wp-block-image::after {
+		display: none;
 	}
 
 	.cr-zine-single .cr-zine__frame--journal .cr-zine__imprint {

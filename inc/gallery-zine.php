@@ -40,7 +40,11 @@ const RATIO = array(
 	'panorama'  => 2.5,
 );
 
-/** A panel alone on its row, by shape, on the 12- and 6-column grids. */
+/** The desktop and tablet grids: fine columns, so rows of mixed shapes can share a height. */
+const COLS_D = 24;
+const COLS_T = 12;
+
+/** A panel alone on its row, by shape, in twelfths and sixths of the row (doubled onto the fine grids). */
 const SOLO_SPAN = array(
 	12 => array(
 		'panorama'  => 12,
@@ -54,13 +58,6 @@ const SOLO_SPAN = array(
 		'square'    => 5,
 		'portrait'  => 4,
 	),
-);
-
-/** The hero's columns beside its two satellites. */
-const HERO_SPAN = array(
-	'landscape' => 8,
-	'square'    => 7,
-	'portrait'  => 6,
 );
 
 /** A caption up to this many characters is handwritten on a print's edge. */
@@ -198,8 +195,9 @@ function row_cells( array $spans ): array {
  * @return array<int, array{pattern: string, group: int, treat: string, flags: string[], d: array, t: array, p: array, mt: array{d: int, t: int, p: int}}>
  */
 function compose( array $shapes, array $captions ): array {
-	$plan  = array();
-	$taped = false;
+	$plan   = array();
+	$taped  = false;
+	$rhythm = 0;
 	foreach ( groups( $shapes, $captions ) as $g => list( $pattern, $members ) ) {
 		$s     = array_map( static fn( int $k ): string => $shapes[ $k ], $members );
 		$cells = array();
@@ -210,54 +208,56 @@ function compose( array $shapes, array $captions ): array {
 			case 'banner':
 			case 'stack':
 				foreach ( $s as $k => $shape ) {
-					$d           = SOLO_SPAN[12][ $shape ];
-					$t           = SOLO_SPAN[6][ $shape ];
-					$cells[ $k ] = array( cell( intdiv( 12 - $d, 2 ) + 1, $d ), cell( intdiv( 6 - $t, 2 ) + 1, $t ), cell( 1, 2 ) );
+					$d           = 2 * SOLO_SPAN[12][ $shape ];
+					$t           = 2 * SOLO_SPAN[6][ $shape ];
+					$cells[ $k ] = array( cell( intdiv( COLS_D - $d, 2 ) + 1, $d ), cell( intdiv( COLS_T - $t, 2 ) + 1, $t ), cell( 1, 2 ) );
 					$flags[ $k ] = array( 'center' );
 				}
 				break;
 			case 'journal':
-				$d        = 'portrait' === $s[0] ? 8 : ( 'square' === $s[0] ? 9 : 10 );
-				$cells[0] = array( cell( intdiv( 12 - $d, 2 ) + 1, $d ), cell( 1, 6 ), cell( 1, 2 ) );
+				$cells[0] = array( cell( 1, COLS_D ), cell( 1, COLS_T ), cell( 1, 2 ) );
 				break;
 			case 'essay':
 				$cells    = array(
-					array( cell( 1, 8 ), cell( 1, 5 ), cell( 1, 2 ) ),
-					array( cell( 5, 8 ), cell( 2, 5 ), cell( 1, 2 ) ),
+					array( cell( 1, 16 ), cell( 1, 10 ), cell( 1, 2 ) ),
+					array( cell( 9, 16 ), cell( 3, 10 ), cell( 1, 2 ) ),
 				);
 				$flags[1] = array( 'step' );
 				break;
 			case 'diptych':
 				if ( $s[0] === $s[1] ) {
-					$cells  = array(
-						array( cell( 2, 5 ), cell( 1, 3 ), cell( 1, 'portrait' === $s[0] ? 1 : 2 ) ),
-						array( cell( 7, 5 ), cell( 4, 3 ), cell( 'portrait' === $s[0] ? 2 : 1, 'portrait' === $s[0] ? 1 : 2 ) ),
+					$portrait = 'portrait' === $s[0];
+					$cells    = array(
+						array( cell( 3, 10 ), cell( 1, 6 ), cell( 1, $portrait ? 1 : 2 ) ),
+						array( cell( 13, 10 ), cell( 7, 6 ), cell( $portrait ? 2 : 1, $portrait ? 1 : 2 ) ),
 					);
-					$off[1] = 'square' === $s[0] ? DROP : 0;
+					$off[1]   = 'square' === $s[0] ? DROP : 0;
 				} else {
-					$d     = row_cells( justify( $s, 12, 4 ) );
+					$d     = row_cells( justify( $s, COLS_D, 8 ) );
+					$t     = row_cells( justify( $s, COLS_T, 4 ) );
 					$cells = array(
-						array( $d[0], cell( 1, 3 ), cell( 1, 2 ) ),
-						array( $d[1], cell( 4, 3 ), cell( 1, 2 ) ),
+						array( $d[0], $t[0], cell( 1, 2 ) ),
+						array( $d[1], $t[1], cell( 1, 2 ) ),
 					);
 					$flags = array( array( 'baseline' ), array( 'baseline' ) );
 				}
 				$flags[0][] = 'toward-end';
-				$flags[1][] = 'toward-start';
 				break;
 			case 'triptych':
 				if ( array( 'portrait', 'portrait', 'portrait' ) === $s ) {
-					$d     = row_cells( array( 4, 4, 4 ) );
-					$t     = row_cells( array( 2, 2, 2 ) );
+					$d     = row_cells( array( 8, 8, 8 ) );
+					$t     = row_cells( array( 4, 4, 4 ) );
 					$cells = array(
 						array( $d[0], $t[0], cell( 1, 1 ) ),
 						array( $d[1], $t[1], cell( 2, 1 ) ),
 						array( $d[2], $t[2], cell( 1, 2 ) ),
 					);
-					$off   = array( DROP, 0, DROP );
+					// Consecutive portrait rows answer each other: ends drop, then the middle.
+					$off = 0 === $rhythm % 2 ? array( DROP, 0, DROP ) : array( 0, DROP, 0 );
+					++$rhythm;
 				} else {
-					$d = row_cells( justify( $s, 12, 3 ) );
-					$t = row_cells( justify( $s, 6, 2 ) );
+					$d = row_cells( justify( $s, COLS_D, 5 ) );
+					$t = row_cells( justify( $s, COLS_T, 3 ) );
 					foreach ( $s as $k => $shape ) {
 						$cells[ $k ] = array( $d[ $k ], $t[ $k ], cell( 1, 2 ) );
 						$flags[ $k ] = array( 'baseline' );
@@ -265,28 +265,41 @@ function compose( array $shapes, array $captions ): array {
 				}
 				break;
 			case 'hero':
-				$h        = HERO_SPAN[ $s[0] ];
+				// The hero takes the columns that make it as tall as its two stacked satellites.
+				$k_sat    = 1 / RATIO[ $s[1] ] + 1 / RATIO[ $s[2] ];
+				$h        = (int) max( 12, min( 18, round( COLS_D * $k_sat / ( 1 / RATIO[ $s[0] ] + $k_sat ) ) ) );
 				$sat_p    = 'square' === $s[1] && 'square' === $s[2];
 				$cells    = array(
-					array( cell( 1, $h, 2 ), cell( 1, 6 ), cell( 1, 2 ) ),
-					array( cell( $h + 1, 12 - $h ), cell( 1, 3 ), $sat_p ? cell( 1, 1 ) : cell( 1, 2 ) ),
-					array( cell( $h + 1, 12 - $h ), cell( 4, 3 ), $sat_p ? cell( 2, 1 ) : cell( 1, 2 ) ),
+					array( cell( 1, $h, 2 ), cell( 1, COLS_T ), cell( 1, 2 ) ),
+					array( cell( $h + 1, COLS_D - $h ), cell( 1, 6 ), $sat_p ? cell( 1, 1 ) : cell( 1, 2 ) ),
+					array( cell( $h + 1, COLS_D - $h ), cell( 7, 6 ), $sat_p ? cell( 2, 1 ) : cell( 1, 2 ) ),
 				);
 				$flags[1] = array( 'hero-sat' );
 				$flags[2] = array( 'hero-sat', 'baseline' );
 				break;
 			case 'contact':
 				foreach ( $members as $k => $unused ) {
-					$cells[ $k ] = array( cell( 1 + ( $k % 4 ) * 3, 3 ), cell( 1 + ( $k % 3 ) * 2, 2 ), cell( 1 + $k % 2, 1 ) );
+					$cells[ $k ] = array( cell( 1 + ( $k % 4 ) * 6, 6 ), cell( 1 + ( $k % 3 ) * 4, 4 ), cell( 1 + $k % 2, 1 ) );
 				}
 				break;
+		}
+
+		// The anchor is the opening group's largest picture.
+		$anchor = -1;
+		if ( 0 === $g && 'contact' !== $pattern ) {
+			$anchor = 0;
+			foreach ( $cells as $k => $c ) {
+				if ( $c[0]['span'] * ( $c[0]['rows'] ?? 1 ) > $cells[ $anchor ][0]['span'] * ( $cells[ $anchor ][0]['rows'] ?? 1 ) ) {
+					$anchor = $k;
+				}
+			}
 		}
 
 		foreach ( $members as $k => $n ) {
 			$treat = 'bare';
 			if ( 'contact' === $pattern ) {
 				$treat = 'contact';
-			} elseif ( 0 === $n ) {
+			} elseif ( $anchor === $k ) {
 				$treat = 'anchor';
 			} elseif ( ( 'hero' === $pattern && $k > 0 ) || ( 'triptych' === $pattern && 1 === $k ) ) {
 				$treat = 'print';
@@ -296,7 +309,7 @@ function compose( array $shapes, array $captions ): array {
 				$taped = true;
 			}
 			$item_flags = $flags[ $k ];
-			if ( 'anchor' === $treat && 1 === $cells[ $k ][0]['start'] && $cells[ $k ][0]['span'] < 12 ) {
+			if ( 'anchor' === $treat && 1 === $cells[ $k ][0]['start'] && $cells[ $k ][0]['span'] < COLS_D ) {
 				$item_flags[] = 'edge';
 			}
 			if ( 'anchor' === $treat && 2 === $cells[ $k ][2]['span'] ) {
@@ -369,8 +382,9 @@ function grid_area( array $cell ): string {
  */
 function sizes_for( array $item ): string {
 	$phone  = 1 === $item['p']['span'] ? '50vw' : '100vw';
-	$tablet = (int) round( $item['t']['span'] / 6 * 100 ) . 'vw';
-	$desk   = rtrim( rtrim( number_format( $item['d']['span'] * 5.25, 2, '.', '' ), '0' ), '.' ) . 'rem';
+	$share  = 'journal' === $item['pattern'] ? 0.8 : 1;
+	$tablet = (int) round( $item['t']['span'] / COLS_T * 100 * $share ) . 'vw';
+	$desk   = rtrim( rtrim( number_format( $item['d']['span'] * 2.625 * $share, 2, '.', '' ), '0' ), '.' ) . 'rem';
 	return '(max-width: 40rem) ' . $phone . ', (max-width: 64rem) ' . $tablet . ', ' . $desk;
 }
 
