@@ -182,6 +182,20 @@ cr_podcast_same( $card_html, SinglePodcast\strip_card_kind_label( $card_html, $c
 $GLOBALS['cr_podcast_facts'][ $post->ID ] = cr_podcast_single_facts();
 cr_podcast_same( $card_html, SinglePodcast\strip_card_kind_label( $card_html, array( 'blockName' => 'post-kinds-indieweb/watch-card', 'attrs' => array() ) ), 'other cards are untouched' );
 
+// An untitled podcast single gets one plain H1 from the facts name; titled posts and music are untouched.
+$untitled = cr_podcast_reset( 340 );
+$untitled->post_title = '';
+$GLOBALS['cr_podcast_facts'][ $untitled->ID ] = cr_podcast_single_facts( array( 'name' => 'Listen, September 18, 2026', 'name_is_title' => false ) );
+$title_block = array( 'blockName' => 'core/post-title', 'attrs' => array( 'level' => 1, 'className' => 'cr-flank single-post__title' ) );
+$h1 = SinglePodcast\untitled_h1( '', $title_block );
+cr_podcast_contains( '>Listen, September 18, 2026</h1>', $h1, 'untitled podcast single prints the facts name as its H1' );
+cr_podcast_not_contains( 'p-name', $h1, 'untitled podcast H1 carries no p-name' );
+cr_podcast_not_contains( '<a', $h1, 'untitled podcast H1 is not a link' );
+cr_podcast_same( '<h1>Kept</h1>', SinglePodcast\untitled_h1( '<h1>Kept</h1>', $title_block ), 'a rendered title is left alone' );
+cr_podcast_same( '', SinglePodcast\untitled_h1( '', array( 'blockName' => 'core/post-title', 'attrs' => array( 'level' => 2 ) ) ), 'only the level 1 title is filled' );
+$GLOBALS['cr_podcast_facts'][ $untitled->ID ] = array( 'is_podcast' => false );
+cr_podcast_same( '', SinglePodcast\untitled_h1( '', $title_block ), 'an untitled music single gets no podcast H1' );
+
 $classes = SinglePodcast\body_class( array( 'cr-single--podcast' ) );
 cr_podcast_same( 1, count( array_keys( $classes, 'cr-single--podcast', true ) ), 'podcast body class is added once' );
 

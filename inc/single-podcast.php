@@ -233,6 +233,43 @@ function drop_repeated_featured_image( string $html, array $block ): string {
 add_filter( 'render_block', __NAMESPACE__ . '\\drop_repeated_featured_image', 10, 2 );
 
 /**
+ * Print the facts name as the H1 of an untitled podcast single.
+ *
+ * Core's Post Title renders nothing for an empty title, and 'listen' is not in
+ * the shared untitled-single kind list, so an untitled podcast would have no H1.
+ * The name is the plugin's untitled name, so it carries no p-name and no link.
+ *
+ * @param string               $html  Rendered block HTML.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function untitled_h1( string $html, array $block ): string {
+	if ( '' !== trim( $html ) || 1 !== (int) ( $block['attrs']['level'] ?? 0 ) || ! is_podcast_single() ) {
+		return $html;
+	}
+
+	$post_id = (int) get_queried_object_id();
+	if ( '' !== trim( (string) get_post_field( 'post_title', $post_id, 'raw' ) ) ) {
+		return $html;
+	}
+
+	$post_facts = facts( $post_id );
+	$name       = is_string( $post_facts['name'] ?? null ) ? trim( $post_facts['name'] ) : '';
+	if ( '' === $name ) {
+		return $html;
+	}
+
+	$class_name = is_array( $block['attrs'] ?? null ) ? trim( (string) ( $block['attrs']['className'] ?? '' ) ) : '';
+
+	return sprintf(
+		'<h1 class="wp-block-post-title %1$s has-accent-font-family">%2$s</h1>',
+		esc_attr( $class_name ),
+		esc_html( $name )
+	);
+}
+add_filter( 'render_block_core/post-title', __NAMESPACE__ . '\\untitled_h1', 25, 2 );
+
+/**
  * Drop the single kind chip so the podcast label prints once.
  *
  * @param string               $html  Rendered block HTML.

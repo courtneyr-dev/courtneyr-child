@@ -116,6 +116,12 @@ namespace {
 		return $GLOBALS['cr_podcast_post'];
 	}
 
+	function get_post_field( $field, $post = null, $context = 'display' ): string {
+		$found = get_post( $post );
+
+		return $found instanceof WP_Post && 'post_title' === $field ? $found->post_title : '';
+	}
+
 	function get_the_ID(): int {
 		return $GLOBALS['cr_podcast_post'] instanceof WP_Post ? $GLOBALS['cr_podcast_post']->ID : 0;
 	}

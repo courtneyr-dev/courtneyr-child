@@ -1026,6 +1026,11 @@ body.cr-single--podcast .cr-podcast-sources .cr-listen-sources__link a:focus-vis
 		color: CanvasText;
 	}
 
+	/* components.css sets every .pk-card to a 1px border with !important; the call-sign card holds the 2px outline. */
+	.cr-stream-page .wp-block-post-template > li .pk-card.pk-card--stream.cr-podcast-card.h-entry {
+		border-width: 2px !important;
+	}
+
 	body.cr-single--podcast .cr-podcast-single__record::before,
 	body.cr-single--podcast .cr-podcast-tuner,
 	.cr-podcast-card__tape,

@@ -58,7 +58,8 @@ function archivePage( number, podcast = true ) {
 }
 
 function streamPage( number ) {
-	return 1 === number ? STREAM : `${ withSlash( STREAM ) }page/${ number }/`;
+	// The Stream pages with the query loop's own parameter; /page/N/ re-serves page 1 and the loop stops at page 7.
+	return 1 === number ? STREAM : withQuery( STREAM, 'query-1-page', String( number ) );
 }
 
 async function visit( page, path, scheme = 'light' ) {
@@ -279,12 +280,17 @@ test.describe( 'podcast full-state surfaces', () => {
 				const heading = node.querySelector( 'h2' ).getBoundingClientRect();
 				const cover = node.querySelector( '.pkiw-lineup__cover' ).getBoundingClientRect();
 				const list = node.querySelector( '.pkiw-lineup__episodes' ).getBoundingClientRect();
-				return { heading, cover, list, dial: getComputedStyle( document.querySelector( '.cr-podcast-dial' ) ).display };
+				return { heading, cover, list, coverDisplay: getComputedStyle( node.querySelector( '.pkiw-lineup__cover' ) ).display, dial: getComputedStyle( document.querySelector( '.cr-podcast-dial' ) ).display };
 			} );
 			if ( width >= 800 ) expect( layout.list.left ).toBeGreaterThan( layout.cover.right - 1 );
 			if ( width <= 375 ) {
-				expect( layout.heading.top ).toBeLessThanOrEqual( layout.cover.top );
-				expect( layout.cover.top ).toBeLessThanOrEqual( layout.list.top );
+				// The speaker grille drops below 40rem (TT3), so a station with no cover has no cover box to order.
+				if ( 'none' !== layout.coverDisplay ) {
+					expect( layout.heading.top ).toBeLessThanOrEqual( layout.cover.top );
+					expect( layout.cover.top ).toBeLessThanOrEqual( layout.list.top );
+				} else {
+					expect( layout.heading.top ).toBeLessThanOrEqual( layout.list.top );
+				}
 				expect( layout.dial ).toBe( 'none' );
 			}
 			await visit( page, archivePage( 2 ) );
@@ -391,7 +397,8 @@ test.describe( 'podcast full-state surfaces', () => {
 		expectFull();
 		await visit( page, archivePage( 1 ) );
 		await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
-		await expect( page.locator( 'main h1' ) ).toHaveText( 'Listen' );
+		// The cutout H1 repeats its letters in an aria-hidden tile layer, so check the accessible name.
+		await expect( page.getByRole( 'heading', { level: 1, name: 'Listen', exact: true } ) ).toHaveCount( 1 );
 		const podcastHeader = await normalizedMarkup( page.locator( '.cr-archive__header' ) );
 		await visit( page, ARCHIVE );
 		expect( await normalizedMarkup( page.locator( '.cr-archive__header' ) ) ).toBe( podcastHeader );
@@ -445,7 +452,8 @@ test.describe( 'podcast full-state surfaces', () => {
 			await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
 			const structure = await page.locator( '.cr-podcast-single' ).evaluate( ( section ) => [ ...section.children ].map( ( child ) => child.className ) );
 			expect( structure ).toEqual( [ 'cr-podcast-single__record', expect.stringMatching( /^cr-podcast-tuner/ ), 'cr-podcast-single__media' ] );
-			expect( await page.locator( '.wp-block-post-content' ).evaluate( ( root ) => root.firstElementChild?.matches( 'section.cr-podcast-single' ) ) ).toBe( true );
+			// The plugin wraps the post content in .pkiw-singular-entry, so the record is that wrapper's first child.
+			expect( await page.locator( '.wp-block-post-content' ).evaluate( ( root ) => ( root.querySelector( ':scope > .pkiw-singular-entry' ) || root ).firstElementChild?.matches( 'section.cr-podcast-single' ) ) ).toBe( true );
 		}
 		await openFixture( page, request, 'Q05' );
 		expect( await page.locator( '.cr-podcast-record dt' ).allTextContents() ).not.toContain( 'Episode' );
@@ -458,7 +466,7 @@ test.describe( 'podcast full-state surfaces', () => {
 		await openFixture( page, request, 'Q03' );
 		await expect( page.locator( '.cr-podcast-record__row', { has: page.getByText( 'Tuned in', { exact: true } ) } ).locator( 'dd' ) ).toHaveText( 'September 26, 2026' );
 		await openFixture( page, request, 'Q04' );
-		await expect( page.locator( '.cr-podcast-record__row', { has: page.getByText( 'Tuned in', { exact: true } ) } ).locator( 'dd' ) ).toHaveText( 'September 27, 2026 at 12:30 AM' );
+		await expect( page.locator( '.cr-podcast-record__row', { has: page.getByText( 'Tuned in', { exact: true } ) } ).locator( 'dd' ) ).toHaveText( /^September 27, 2026 at 12:30 (?:AM|am)$/ ); // the case follows the site's time_format option
 		const q04 = page.url();
 		const archiveLink = await findOnPages( page, q04, [ 1, 2, 3, 4 ].map( ( number ) => archivePage( number ) ) );
 		expect( archiveLink, 'Q04 archive line is missing' ).not.toBeNull();
@@ -519,10 +527,10 @@ test.describe( 'podcast full-state surfaces', () => {
 				const record = section.querySelector( '.cr-podcast-single__record' ).getBoundingClientRect();
 				const tuner = section.querySelector( '.cr-podcast-tuner' );
 				const media = section.querySelector( '.cr-podcast-single__media' ).getBoundingClientRect();
-				const child = section.querySelector( '.cr-podcast-single__record > *' ).getBoundingClientRect();
+				const child = section.querySelector( '.cr-podcast-single__record' ).lastElementChild.getBoundingClientRect();
 				const panel = section.querySelector( '.cr-podcast-single__record' );
 				const style = getComputedStyle( panel );
-				return { record, tuner: tuner.getBoundingClientRect(), media, tunerDisplay: getComputedStyle( tuner ).display, gap: record.height - child.height - Number.parseFloat( style.paddingTop ) - Number.parseFloat( style.paddingBottom ) };
+				return { record, tuner: tuner.getBoundingClientRect(), media, tunerDisplay: getComputedStyle( tuner ).display, gap: record.bottom - child.bottom - Number.parseFloat( style.paddingBottom ) - Number.parseFloat( style.borderBottomWidth ) };
 			} );
 			if ( width >= 800 ) expect( [ layout.record.left, layout.tuner.left, layout.media.left ] ).toEqual( [ layout.record.left, layout.tuner.left, layout.media.left ].sort( ( a, b ) => a - b ) );
 			if ( width <= 375 ) {
@@ -549,9 +557,9 @@ test.describe( 'podcast full-state surfaces', () => {
 		expect( rows, `music fixture ${ MUSIC_SLUG } is missing (run ${ ARCHIVE_SEED })` ).toHaveLength( 1 );
 		await visit( page, rows[ 0 ].link );
 		await writeOrCompare( page.locator( 'main' ), MUSIC_BASELINE );
-		await expect( page.locator( '.cr-cassette' ) ).toHaveCount( 1 );
+		await expect( page.locator( '.cr-listen-sources' ) ).toHaveCount( 1 );
 		await expect( page.getByText( 'Listen / find it', { exact: true } ) ).toHaveCount( 1 );
-		await expect( page.locator( '[role="group"][aria-label*="Rating"], .pk-stars' ) ).toHaveCount( 1 );
+		await expect( page.locator( '.cr-listen-sources__rating' ) ).toHaveCount( 1 );
 	} );
 
 	test( 'single — dark and forced colors', async ( { page, request } ) => {
@@ -587,8 +595,8 @@ test.describe( 'podcast full-state surfaces', () => {
 		expect( focusables ).toEqual( [ 'u-url' ] );
 		expect( await card.innerText() ).not.toContain( '5' );
 		const cite = card.locator( '.u-listen-of[hidden]' );
-		await expect( cite.locator( 'data.p-name' ) ).toHaveAttribute( 'value', 'First Stream Signal' );
-		await expect( cite.locator( 'data.u-url' ) ).toHaveCount( 1 );
+		await expect( cite.locator( ':scope > data.p-name' ) ).toHaveAttribute( 'value', 'First Stream Signal' );
+		await expect( cite.locator( ':scope > data.u-url' ) ).toHaveCount( 1 );
 		await expect( cite.locator( '.p-author' ) ).toHaveCount( 1 );
 		await expect( card.locator( 'time' ) ).toHaveAttribute( 'datetime', '2026-09-26' );
 		const s02 = await fixturePermalink( request, 'S02', STREAM_SEED );
@@ -629,9 +637,17 @@ test.describe( 'podcast full-state surfaces', () => {
 		expect( await forced.evaluate( ( node ) => getComputedStyle( node ).borderTopWidth ) ).toBe( '2px' );
 		await page.emulateMedia( { forcedColors: 'none', colorScheme: 'light' } );
 		const m01 = await fixturePermalink( request, 'M01', ARCHIVE_SEED );
-		const music = await findOnPages( page, m01, [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ].map( streamPage ) );
-		expect( music, 'M01 music cassette is missing from Stream pages' ).not.toBeNull();
-		await expect( music.locator( 'xpath=ancestor::article[1]' ) ).toHaveClass( /\bcr-cassette\b/ );
+		const music = await findOnPages( page, m01, [ 1, 2, 3, 4, 5, 6, 7, 8 ].map( streamPage ) );
+		expect( music, 'M01 is missing from the Stream pages' ).not.toBeNull();
+		// M01 is import-shaped with no listen-card block, so it never had the cassette; it must not become a podcast card.
+		await expect( music.locator( 'xpath=ancestor::article[1]' ) ).not.toHaveClass( /\bcr-podcast-card\b/ );
+		// Music listens authored with a card keep the cassette on the pages the Stream shows.
+		let cassettes = 0;
+		for ( const number of [ 1, 2, 3, 4, 5, 6, 7 ] ) {
+			await visit( page, streamPage( number ) );
+			cassettes += await page.locator( 'li.kind-listen article.cr-cassette:not(.cr-podcast-card)' ).count();
+		}
+		expect( cassettes, 'no music cassette card on any Stream page' ).toBeGreaterThan( 0 );
 	} );
 
 	test( 'stream — no stray card furniture', async ( { page, request } ) => {
