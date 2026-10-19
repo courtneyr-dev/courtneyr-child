@@ -301,6 +301,12 @@
 	--able-focus-outline: var(--cr-focus-ring);
 }
 
+/* Able Player drops its controls to 32px below 480px; keep the 44px target there too. */
+.cr-tape-deck .able-wrapper .able-control-row div[role="button"] {
+	min-width: 2.75rem;
+	height: 2.75rem;
+}
+
 .cr-tape-deck__frame video:focus-visible {
 	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 4px;

@@ -137,6 +137,28 @@ function label_html( array $facts, \WP_Post $post ): string {
 }
 
 /**
+ * Give each video element an explicit Able Player heading level.
+ *
+ * Able Player reads only headings that are direct children of an ancestor, so it
+ * never sees the label's H1 inside its header and prints a second, offscreen H1.
+ * Level 2 puts its "Media player" heading under the label's H1. An authored
+ * data-heading-level stays.
+ *
+ * @param string $html Rendered player block.
+ * @return string
+ */
+function with_heading_level( string $html ): string {
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	while ( $tags->next_tag( 'video' ) ) {
+		if ( null === $tags->get_attribute( 'data-heading-level' ) ) {
+			$tags->set_attribute( 'data-heading-level', '2' );
+		}
+	}
+
+	return $tags->get_updated_html();
+}
+
+/**
  * Wrap the one marked player in the single-page tape deck.
  *
  * @param string $html  Rendered video or embed block.
@@ -167,7 +189,7 @@ function deck( string $html, array $block ): string { // phpcs:ignore Generic.Co
 
 	$wrapped[ $post_id ] = true;
 	return '<div class="cr-tape-deck">' . label_html( $facts, $post )
-		. '<div class="cr-tape-deck__frame">' . $html . '</div></div>';
+		. '<div class="cr-tape-deck__frame">' . with_heading_level( $html ) . '</div></div>';
 }
 add_filter( 'render_block_core/video', __NAMESPACE__ . '\\deck', 250, 2 );
 add_filter( 'render_block_core/embed', __NAMESPACE__ . '\\deck', 250, 2 );

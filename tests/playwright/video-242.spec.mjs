@@ -385,7 +385,12 @@ test.describe( 'single', () => {
 		await openFixture( page, request, 'V12' );
 		const video = page.locator( '.cr-tape-deck__frame video' );
 		await expect( video, 'S3 V12 has one video' ).toHaveCount( 1 );
-		await expect( video, 'S3 V12 has controls' ).toHaveAttribute( 'controls', '' );
+		if ( 'false' === REPLACE ) {
+			await expect( video, 'S3 V12 has controls' ).toHaveAttribute( 'controls', '' );
+		} else {
+			// Able Player removes the native attribute and draws its own control bar.
+			await expect( page.locator( '.cr-tape-deck .able-controller' ), 'S3 V12 has the Able control bar' ).toHaveCount( 1 );
+		}
 		await expect( video, 'S3 V12 preloads metadata' ).toHaveAttribute( 'preload', 'metadata' );
 		await expect( video, 'S3 V12 has no autoplay attribute' ).not.toHaveAttribute( 'autoplay', /.*/ );
 		await expect( video.locator( 'track' ), 'S3 V12 keeps two authored tracks' ).toHaveCount( 2 );
@@ -423,7 +428,7 @@ test.describe( 'single', () => {
 		await openFixture( page, request, 'V05' );
 		await expect( page.getByRole( 'button', { name: /transcript/i } ), 'S4 and S5 V05 exposes Transcript' ).toHaveCount( 1 );
 		expect( await page.content(), 'S4 V05 uses the privacy-enhanced YouTube host' ).toContain( 'youtube-nocookie' );
-		expect( await page.content(), 'S4 V05 does not autoplay' ).not.toMatch( /autoplay(?:=|\s)/i );
+		expect( await page.content(), 'S4 V05 does not autoplay' ).not.toMatch( /autoplay(?:\s|=["']?(?!0))/i );
 		await expect( page.locator( '.cr-tape-deck > button, .cr-tape-deck > [role="button"], .cr-tape-label button' ), 'S5 theme adds no controls outside the player frame' ).toHaveCount( 0 );
 		await openFixture( page, request, 'V06' );
 		await expect( page.getByRole( 'button', { name: /transcript/i } ), 'S5 V06 has no Transcript control' ).toHaveCount( 0 );

@@ -84,6 +84,10 @@ namespace {
 		return 'kind' === $taxonomy && 'video' === (string) $term && ! empty( $GLOBALS['cr_single_kinds'][ $id ] );
 	}
 
+	function apply_filters( $hook, $value, ...$args ) {
+		return $value;
+	}
+
 	function post_password_required( $post = null ): bool {
 		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
 		return ! empty( $GLOBALS['cr_single_protected'][ $id ] );
@@ -219,12 +223,27 @@ namespace {
 			cr_single_assert( str_contains( $out, 'class="dt-published cr-tape-label__date" datetime="2026-09-18">September 18, 2026</time>' ), 'stored day prints with its ISO date' );
 			cr_single_assert( str_contains( $out, 'class="cr-tape-label__runtime" datetime="PT2M14S">2:14<span class="screen-reader-text"> (2 minutes, 14 seconds)</span>' ), 'runtime has ISO, clock and human text' );
 			cr_single_assert( strpos( $out, 'cr-tape-label' ) < strpos( $out, 'cr-tape-deck__frame' ), 'label precedes the player frame' );
-			cr_single_assert( str_contains( $out, '<div class="cr-tape-deck__frame">' . $player . '</div>' ), 'player stays byte-identical inside the frame' );
+			cr_single_assert( str_contains( $out, '<div class="cr-tape-deck__frame">' . str_replace( '<video controls>', '<video data-heading-level="2" controls>', $player ) . '</div>' ), 'player stays inside the frame with only the heading level added' );
+			cr_single_assert( 1 === substr_count( $out, 'data-heading-level="2"' ), 'one video gets one heading level' );
 			cr_single_assert( $player === Single\deck( $player, array() ), 'a second render for the post stays unwrapped' );
 
 			cr_single_post( 11, cr_single_facts() );
 			$plain = '<figure class="wp-block-video"><video controls></video></figure>';
 			cr_single_assert( $plain === Single\deck( $plain, array() ), 'unmarked media stays unchanged' );
+		}
+	);
+
+	cr_single_group(
+		'Able Player heading level comes from the deck',
+		static function (): void {
+			cr_single_post( 17, cr_single_facts() );
+			$authored = Single\deck( cr_single_player( '<video data-able-player data-heading-level="3"></video>' ), array() );
+			cr_single_assert( str_contains( $authored, 'data-heading-level="3"' ) && ! str_contains( $authored, 'data-heading-level="2"' ), 'an authored heading level stays' );
+			cr_single_post( 18, cr_single_facts() );
+			$embed = cr_single_player( '<iframe src="https://example.test/embed"></iframe>' );
+			cr_single_assert( str_contains( Single\deck( $embed, array() ), '<div class="cr-tape-deck__frame">' . $embed . '</div>' ), 'a player with no video element stays byte-identical' );
+			cr_single_post( 19, cr_single_facts() );
+			cr_single_assert( str_contains( Single\deck( cr_single_player( '<video data-able-player><track></video>' ), array() ), '<video data-heading-level="2" data-able-player><track>' ), 'an Able Player video gets level 2' );
 		}
 	);
 
