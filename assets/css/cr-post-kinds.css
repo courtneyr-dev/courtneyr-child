@@ -2136,7 +2136,7 @@ body .pk-card {
    its 1.58:1 ratio as a minimum, and the shell paint above is untouched. */
 .cr-stream-page .pk-card.k-audio {
 	overflow: visible;
-	min-height: min-content;
+	min-height: auto;
 }
 .cr-stream-page .k-audio .pk-body {
 	height: auto;
