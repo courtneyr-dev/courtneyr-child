@@ -642,6 +642,7 @@ body.cr-wish-single .pk-original a.u-url:focus-visible {
 	background-image: var(--cr-fiber);
 	box-shadow: var(--cr-shadow-hard);
 	color: var(--cr-russian-violet);
+	isolation: isolate;
 }
 
 /* The torn top edge; cr-paper.css draws the lower tear on ::after. */
@@ -654,6 +655,26 @@ body.cr-wish-single .pk-original a.u-url:focus-visible {
 	border-radius: 0;
 	background-color: var(--cr-paper);
 	opacity: 1;
+	pointer-events: none;
+	-webkit-mask:
+		linear-gradient(45deg, var(--cr-black) 25%, transparent 25%) top left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x,
+		linear-gradient(315deg, var(--cr-black) 25%, transparent 25%) top left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x;
+	mask:
+		linear-gradient(45deg, var(--cr-black) 25%, transparent 25%) top left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x,
+		linear-gradient(315deg, var(--cr-black) 25%, transparent 25%) top left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x;
+}
+
+/* Light mode: ivory teeth on the ivory Stream page vanish, so an ink copy of the
+   tear sits 1px higher behind them and outlines the torn top. The body is static,
+   so this resolves against the clipping; the sheet's isolation keeps -1 inside it. */
+.wp-block-post-template > li > .pk-card.cr-wish-clipping > .pk-body::before {
+	content: "";
+	position: absolute;
+	inset-inline: 0;
+	inset-block: auto calc(100% + 1px);
+	z-index: -1;
+	block-size: var(--cr-paper-tear);
+	background-color: var(--cr-russian-violet);
 	pointer-events: none;
 	-webkit-mask:
 		linear-gradient(45deg, var(--cr-black) 25%, transparent 25%) top left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x,
@@ -778,10 +799,17 @@ body.cr-wish-single .pk-original a.u-url:focus-visible {
 
 .wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-sub {
 	margin: var(--cr-space-xs) 0 0;
+	padding: 0;
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-body);
 	font-size: max(var(--cr-text-floor), var(--cr-text-sm));
 	line-height: var(--cr-leading-snug);
+}
+
+/* The shared Stream date chip's padding and border would indent the date past the title. */
+.wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-stream-date time {
+	padding: 0;
+	border: 0;
 }
 
 .wp-block-post-template > li > .pk-card.cr-wish-clipping .pk-wish-chip {
@@ -888,6 +916,11 @@ body.cr-wish-single .pk-original a.u-url:focus-visible {
 	:root:is(:not([data-theme]), [data-theme="system"]) :is(.cr-wish-catalog, .cr-wish-listing, body.cr-wish-single .pk-wish-photo, body.cr-wish-single .pk-wish-listing, body.cr-wish-single .pk-wish-reason, .wp-block-post-template > li > .pk-card.cr-wish-clipping) {
 		color: var(--cr-russian-violet);
 	}
+
+	/* The ivory teeth already read on the dark surround. */
+	:root:is(:not([data-theme]), [data-theme="system"]) .wp-block-post-template > li > .pk-card.cr-wish-clipping > .pk-body::before {
+		display: none;
+	}
 }
 
 :root[data-theme="dark"] body.cr-wish-archive {
@@ -896,6 +929,10 @@ body.cr-wish-single .pk-original a.u-url:focus-visible {
 
 :root[data-theme="dark"] :is(.cr-wish-catalog, .cr-wish-listing, body.cr-wish-single .pk-wish-photo, body.cr-wish-single .pk-wish-listing, body.cr-wish-single .pk-wish-reason, .wp-block-post-template > li > .pk-card.cr-wish-clipping) {
 	color: var(--cr-russian-violet);
+}
+
+:root[data-theme="dark"] .wp-block-post-template > li > .pk-card.cr-wish-clipping > .pk-body::before {
+	display: none;
 }
 
 /* ============================================================
@@ -934,6 +971,7 @@ body.cr-wish-single .pk-original a.u-url:focus-visible {
 	.cr-wish-listing[data-priority='high'] .cr-wish-listing__priority::after,
 	.cr-wish-clipping__tape,
 	.wp-block-post-template > li > .pk-card.cr-wish-clipping::before,
+	.wp-block-post-template > li > .pk-card.cr-wish-clipping > .pk-body::before,
 	.wp-block-post-template > li > .pk-card.cr-wish-clipping[data-priority='high'] :is(.pk-wish-chip--priority, .pk-wish-chip--price)::after,
 	.cr-wish-listing__media--tile,
 	.cr-wish-listing__media.cr-cover--failed {
