@@ -461,8 +461,9 @@ test.describe( 'single', () => {
 	} );
 
 	test( 'Markdown and Simple Location surfaces stay outside the video treatment', async ( { page, request } ) => {
-		const v01 = await fixtureLink( request, 'V01' );
-		skipUnlessRequired( ! v01, 'no V01 fixture for markdown checks' );
+		// The archive and edge sets can't coexist, so the edge set's E03 (one kind, one player) stands in for V01.
+		const v01 = await fixtureLink( request, 'V01' ) || await fixtureLink( request, 'E03' );
+		skipUnlessRequired( ! v01, 'no V01 or E03 fixture for markdown checks' );
 		for ( const path of [ `${ v01 }?format=markdown`, `${ v01.replace( /\/$/, '' ) }.md` ] ) {
 			const response = await request.get( path );
 			skipUnlessRequired( response.status() === 404, `markdown route is absent: ${ path }` );
@@ -479,7 +480,8 @@ test.describe( 'single', () => {
 		for ( const path of [ ARCHIVE, STREAM, `${ ARCHIVE }feed/`, '/wp-json/wp/v2/posts?slug=seed-242-e05&_fields=content' ] ) {
 			const response = await request.get( path );
 			if ( response.status() !== 404 ) {
-				expect( await response.text(), `Simple Location coordinates stay out of ${ path}` ).not.toMatch( coordinateLeak );
+				// Inline SVG path and stroke data is full of 0.5 and -0.5, so drop it before looking for the fixture coordinates.
+				expect( ( await response.text() ).replace( /<svg\b[\s\S]*?<\/svg>/gi, '' ), `Simple Location coordinates stay out of ${ path}` ).not.toMatch( coordinateLeak );
 			}
 		}
 	} );
