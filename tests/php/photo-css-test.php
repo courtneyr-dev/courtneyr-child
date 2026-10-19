@@ -239,7 +239,7 @@ check_case(
 );
 
 check_case(
-	'the photo booth strip: 4:3 frames, a stamped date turned by a token, one title link stretched over the whole print',
+	'the photo booth strip: 4:3 frames, a plain mono date, one title link stretched over the whole print',
 	static function () use ( $code ): bool {
 		$frame = rule_body( $code, '.pk-card.k-photo.pk-card--gallery .cr-booth__img' );
 		$date  = rule_body( $code, '.pk-card.k-photo.pk-card--gallery .pk-stream-date time' );
@@ -250,7 +250,7 @@ check_case(
 			&& false !== strpos( $body, 'position: static' )
 			&& false !== strpos( $frame, 'aspect-ratio: 4 / 3' )
 			&& false !== strpos( $date, 'font-family: var(--cr-font-mono)' )
-			&& false !== strpos( $date, 'transform: rotate(var(--cr-rotate-1))' )
+			&& false === strpos( $date, 'transform' )
 			&& false !== strpos( $link, 'inset: 0' );
 	}
 );
@@ -281,6 +281,15 @@ check_case(
 			&& false !== strpos( $tape, 'background-color: var(--cr-tape)' )
 			&& false !== strpos( $cap, 'font-family: var(--cr-font-display)' )
 			&& 1 === preg_match( '/@media \(max-width: 39\.99rem\)\s*\{[^@]*\.cr-scrapbook\s*\{[^{}]*grid-template-columns:\s*1fr;/s', $code );
+	'the photo booth print: white stock with a hard shadow, the title as a centered caption in the body face',
+	static function () use ( $code ): bool {
+		$paper   = rule_body( $code, 'li.format-gallery .pk-card.k-photo.pk-card--gallery' );
+		$caption = rule_body( $code, '.pk-card.k-photo.pk-card--gallery .pk-title' );
+		return false !== strpos( $paper, 'background: var(--cr-white)' )
+			&& false !== strpos( $paper, 'box-shadow: var(--cr-shadow-hard)' )
+			&& false !== strpos( $caption, 'text-align: center' )
+			&& false !== strpos( $caption, 'text-transform: uppercase' )
+			&& false !== strpos( $caption, 'font-family: var(--cr-font-body)' );
 	}
 );
 

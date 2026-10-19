@@ -178,7 +178,7 @@ function cr_photo_stream_pipeline( string $html, int $id ): string {
 }
 
 cr_photo_group(
-	'a gallery-format photo post becomes a booth strip with one link',
+	'a gallery-format photo post becomes a photo booth print: frames only, the title as its caption, one link',
 	static function (): void {
 		cr_photo_gallery_post( 42, 5 );
 		$html = cr_photo_stream_pipeline( cr_photo_stream_card(), 42 );
@@ -188,11 +188,12 @@ cr_photo_group(
 		cr_photo_not_contains( 'cr-polaroid', $html, 'the strip is not also a polaroid' );
 		cr_photo_not_contains( 'https://example.test/m.jpg', $html, 'the lead image is gone' );
 		cr_photo_contains( '<h2 class="pk-title p-name"><a class="u-url" href="https://example.test/photo/42/">Blue Hour at Example Lake</a></h2>', $html, 'title link kept' );
-		cr_photo_contains( '+ 1 more frame', $html, 'the rest of the roll is named' );
-		cr_photo_not_contains( 'cr-booth__more-link" href', $html, 'that line is not a second link' );
+		foreach ( array( 'cr-booth__footer', 'cr-booth__stamps', 'cr-booth__count', 'cr-booth__more', 'cr-booth__note', 'more frame' ) as $gone ) {
+			cr_photo_not_contains( $gone, $html, 'a print carries no ' . $gone );
+		}
 		cr_photo_same( 1, cr_photo_rendered_anchors( $html ), 'one link per Stream item (W3-G2)' );
 		cr_photo_same( 1, substr_count( $html, 'dt-published' ), 'one dt-published' );
-		cr_photo_assert( strpos( $html, '</ol>' ) < strpos( $html, 'cr-booth__footer' ) && strpos( $html, 'cr-booth__footer' ) < strpos( $html, '</article>' ), 'the footer follows the frames inside the card' );
+		cr_photo_assert( 1 === preg_match( '/<div class="pk-caption">.*<\/div><div class="pk-media pk-media--stream cr-booth"><ol class="cr-booth__frames">/s', $html ), 'the caption (title and date) stays in the card beside the frames' );
 	}
 );
 
