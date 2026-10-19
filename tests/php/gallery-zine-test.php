@@ -319,6 +319,8 @@ namespace {
 			$two = layout( array( 'landscape', 'portrait' ), 12 );
 			cr_photo_same( 12, $two[0]['span'] + $two[1]['span'], 'a featured landscape and a portrait share the top row' );
 			cr_photo_assert( $two[0]['span'] > $two[1]['span'], 'the featured panel stays the larger' );
+			$three = layout( array( 'landscape', 'portrait', 'square' ), 12 );
+			cr_photo_assert( $three[0]['span'] >= 7, 'the featured landscape keeps at least 7 of 12 columns (got ' . $three[0]['span'] . ')' );
 		}
 	);
 

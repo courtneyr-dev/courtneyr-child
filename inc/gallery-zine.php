@@ -51,7 +51,8 @@ const SIZES = array(
 /**
  * Column spans per shape on the 12-column desktop grid and the 6-column
  * tablet grid: what a panel prefers, the least it takes when a row squeezes,
- * and what it takes alone on a row. The featured first panel prefers more.
+ * and what it takes alone on a row. The featured first panel prefers more
+ * and gives up less (fmin).
  */
 const SPANS = array(
 	12 => array(
@@ -72,6 +73,12 @@ const SPANS = array(
 			'landscape' => 5,
 			'square'    => 4,
 			'portrait'  => 3,
+		),
+		'fmin'     => array(
+			'panorama'  => 12,
+			'landscape' => 7,
+			'square'    => 5,
+			'portrait'  => 4,
 		),
 		'lone'     => array(
 			'panorama'  => 12,
@@ -98,6 +105,12 @@ const SPANS = array(
 			'landscape' => 3,
 			'square'    => 3,
 			'portrait'  => 2,
+		),
+		'fmin'     => array(
+			'panorama'  => 6,
+			'landscape' => 4,
+			'square'    => 3,
+			'portrait'  => 3,
 		),
 		'lone'     => array(
 			'panorama'  => 6,
@@ -133,7 +146,7 @@ function layout( array $shapes, int $cols ): array {
 			'i'     => $i,
 			'shape' => $shape,
 			'pref'  => $table[ 0 === $i ? 'featured' : 'pref' ][ $shape ],
-			'min'   => min( $table['min'][ $shape ], $table[ 0 === $i ? 'featured' : 'pref' ][ $shape ] ),
+			'min'   => $table[ 0 === $i ? 'fmin' : 'min' ][ $shape ],
 		);
 		if ( $row && array_sum( array_column( $row, 'pref' ) ) + $item['pref'] > $cols && array_sum( array_column( $row, 'min' ) ) + $item['min'] > $cols ) {
 			$rows[] = $row;
