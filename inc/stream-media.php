@@ -125,6 +125,112 @@ function provider_label( string $url ): string {
 }
 
 /**
+ * Read public podcast facts for an unlocked post.
+ *
+ * @param \WP_Post $post Post.
+ * @return array<string, mixed>
+ */
+function podcast_facts( \WP_Post $post ): array {
+	if ( post_password_required( $post ) || ! function_exists( '\\PKIW\\kind_facts' ) ) {
+		return array();
+	}
+
+	$facts = \PKIW\kind_facts( $post->ID );
+	if ( ! is_array( $facts ) || empty( $facts['is_podcast'] ) ) {
+		return array();
+	}
+
+	return $facts;
+}
+
+/**
+ * Build the hidden podcast citation for the Stream entry.
+ *
+ * @param array<string, mixed> $facts Public podcast facts.
+ * @return string
+ */
+function podcast_cite( array $facts ): string {
+	$inner   = '';
+	$episode = trim( (string) ( $facts['episode_text'] ?? '' ) );
+	if ( '' !== $episode ) {
+		$inner .= '<data class="p-name" value="' . esc_attr( $episode ) . '"></data>';
+	}
+
+	$url = esc_url( trim( (string) ( $facts['url'] ?? '' ) ) );
+	if ( '' !== $url ) {
+		$inner .= '<data class="u-url" value="' . $url . '"></data>';
+	}
+
+	$show = trim( (string) ( $facts['show'] ?? '' ) );
+	if ( '' !== $show ) {
+		$inner .= '<span class="p-author h-card"><data class="p-name" value="' . esc_attr( $show ) . '"></data></span>';
+	}
+
+	return '' === $inner ? '' : '<span class="pk-kind-cite h-cite u-listen-of" hidden>' . $inner . '</span>';
+}
+
+/**
+ * Render a podcast listen as a one-link Stream card.
+ *
+ * @param string               $html  Card the plugin rendered; its heading tag sets the level.
+ * @param \WP_Post             $post  Podcast post.
+ * @param array<string, mixed> $facts Public podcast facts.
+ * @return string
+ */
+function podcast_card( string $html, \WP_Post $post, array $facts ): string {
+	// The plugin already applied the Stream's heading level to its title tag; read it back from the markup.
+	$level        = 1 === preg_match( '/<h([1-6])\b[^>]*\bclass="[^"]*\bpk-title\b/', $html, $heading ) ? max( 2, min( 4, (int) $heading[1] ) ) : 2;
+	$episode      = (string) ( $facts['episode_text'] ?? '' );
+	$name         = (string) ( $facts['name'] ?? '' );
+	$title_class  = 'pk-title cr-podcast-card__title';
+	$title_class .= ! empty( $facts['name_is_title'] ) && trim( $episode ) === trim( $name ) ? ' p-name' : '';
+	$picture      = is_array( $facts['picture'] ?? null ) ? $facts['picture'] : array();
+	$picture_url  = trim( (string) ( $picture['url'] ?? '' ) );
+	$art_class    = 'cr-podcast-card__art';
+	$art_attrs    = '';
+	$image        = '';
+
+	if ( '' !== $picture_url ) {
+		$attachment_id = (int) ( $picture['attachment_id'] ?? 0 );
+		if ( $attachment_id > 0 ) {
+			$image = wp_get_attachment_image(
+				$attachment_id,
+				'medium',
+				false,
+				array(
+					'class'    => 'u-photo',
+					'alt'      => '',
+					'loading'  => 'lazy',
+					'decoding' => 'async',
+				)
+			);
+		} else {
+			$image = '<img class="u-photo" src="' . esc_url( $picture_url ) . '" alt="" loading="lazy" decoding="async">';
+		}
+	} else {
+		$art_class .= ' cr-podcast-card__art--knob';
+		$art_attrs .= ' aria-hidden="true"';
+	}
+	$art_attrs .= ' data-cr-cover-fallback="true"';
+
+	$out  = '<article class="pk-card pk-card--stream k-podcast cr-podcast-card h-entry">';
+	$out .= '<span class="cr-podcast-card__tape" aria-hidden="true"></span>';
+	$out .= '<div class="cr-podcast-card__text">';
+	$out .= '<span class="pk-kindlabel">' . esc_html( (string) ( $facts['kind_label'] ?? '' ) ) . '</span>';
+	$show = trim( (string) ( $facts['show'] ?? '' ) );
+	if ( '' !== $show ) {
+		$out .= '<p class="cr-podcast-card__show">' . esc_html( $show ) . '</p>';
+	}
+	$out .= '<h' . $level . ' class="' . esc_attr( $title_class ) . '"><a class="u-url" href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( $episode ) . '</a></h' . $level . '>';
+	$out .= '<p class="pk-sub pk-stream-date"><time class="dt-published" datetime="' . esc_attr( (string) ( $facts['day_iso'] ?? '' ) ) . '">' . esc_html( (string) ( $facts['day_display'] ?? '' ) ) . '</time></p>';
+	$out .= '</div>';
+	$out .= '<div class="' . esc_attr( $art_class ) . '"' . $art_attrs . '>' . $image . '</div>';
+	$out .= podcast_cite( $facts );
+
+	return $out . '</article>';
+}
+
+/**
  * Links for a listen: the listen URL labelled by provider, MusicBrainz.
  *
  * @param array<string, mixed> $attrs Listen-card attributes.
@@ -320,6 +426,12 @@ function media_card( string $html, array $block, $instance ): string {
 	$post    = $post_id ? get_post( $post_id ) : null;
 	if ( ! $post instanceof \WP_Post ) {
 		return $html;
+	}
+	if ( '' === $shelf && ! $shelf_card && has_term( 'listen', 'kind', $post ) ) {
+		$podcast = podcast_facts( $post );
+		if ( array() !== $podcast ) {
+			return podcast_card( $html, $post, $podcast );
+		}
 	}
 
 	$kind = has_term( 'watch', 'kind', $post ) ? 'watch' : ( has_term( 'listen', 'kind', $post ) ? 'listen' : '' );
