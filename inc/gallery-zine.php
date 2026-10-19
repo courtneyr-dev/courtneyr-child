@@ -299,6 +299,13 @@ function compose( array $shapes, array $captions, array $ratios = array() ): arr
 					$off            = 0 === $rhythm % 2 ? array( DROP, 0, DROP ) : array( 0, DROP, 0 );
 					$even_rows['t'] = array( array( 0, 1 ) );
 					++$rhythm;
+				} elseif ( 0 === $g ) {
+					// An opening trio is a spread: the first picture dominant, the other two sharing the last third on its baseline.
+					$second         = (int) max( 3, min( 5, round( 8 * $r[1] / ( $r[1] + $r[2] ) ) ) );
+					$d              = array( cell( 1, 16 ), cell( 17, $second ), cell( 17 + $second, 8 - $second ) );
+					$flags          = array( array( 'spread' ), array( 'spread', 'baseline' ), array( 'spread', 'baseline' ) );
+					$even_rows['d'] = array( array( 1, 2 ) );
+					$even_rows['t'] = array( array( 1, 2 ) );
 				} else {
 					// The middle picture is a print, with a narrow edge.
 					$d              = row_cells( justify( $r, array( 0, 1.0, 0 ), 'd', 4 ) );
