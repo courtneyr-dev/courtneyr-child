@@ -56,7 +56,9 @@ footer.wp-block-template-part,
 .cr-archive--audio .cr-archive__header::after,
 .cr-audio-log .pk-card.k-audio::before,
 .cr-audio-log .pk-card.k-audio::after,
-.cr-audio-log li::after {
+.cr-audio-log li::after,
+.cr-audio-single::before,
+.cr-audio-single::after {
 	display: none !important;
 }
 
@@ -66,10 +68,14 @@ footer.wp-block-template-part,
 	box-shadow: none !important;
 	aspect-ratio: auto !important;
 	width: auto !important;
+	min-height: 0 !important;
 	color: inherit !important;
 }
 
 .cr-audio-log li {
+	background: none !important;
+	border: 0 !important;
+	box-shadow: none !important;
 	break-inside: avoid;
 }
 
