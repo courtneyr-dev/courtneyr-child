@@ -5,15 +5,17 @@
 //     npx playwright test --config tests/playwright/playwright.config.mjs
 //
 // CR_JAM_REQUIRE_SEED=1 turns missing-fixture skips into failures. Paths use
-// CR_JAM_ARCHIVE_PATH and CR_JAM_STREAM_PATHS. CR_JAM_EDITOR_COOKIE may point
-// to a WP-CLI-minted Playwright storage-state cookie file for the editor check.
+// CR_JAM_ARCHIVE_PATH and CR_JAM_STREAM_PATHS. CR_STORAGE_STATE may point
+// to a logged-in Playwright storage-state file for the Site Editor check. Without it
+// that check is skipped, which the PR records as an orchestrator-ruled deferral:
+// the stack can't mint a login state (a WP-CLI auth cookie was refused in W4).
 import { test, expect } from '@playwright/test';
 
 const ARCHIVE = ( process.env.CR_JAM_ARCHIVE_PATH || '/kind/jam/' ).replace( /\/?$/, '/' );
 const STREAM_PATHS = ( process.env.CR_JAM_STREAM_PATHS || '/stream/,/' ).split( ',' ).map( ( value ) => value.trim() ).filter( Boolean );
 const STATE = process.env.CR_JAM_STATE || 'full';
 const REQUIRE_SEED = '1' === process.env.CR_JAM_REQUIRE_SEED;
-const EDITOR_COOKIE = process.env.CR_JAM_EDITOR_COOKIE || '';
+const EDITOR_COOKIE = process.env.CR_STORAGE_STATE || '';
 const BASE_ORIGIN = new URL( process.env.CR_BASE_URL || 'http://localhost:8892' ).origin;
 const slugOf = ( key ) => `seed-235-${ key.toLowerCase() }`;
 const archivePath = ( pageNumber ) => 1 === pageNumber ? ARCHIVE : `${ ARCHIVE }page/${ pageNumber }/`;
@@ -388,12 +390,45 @@ test.describe( 'archive cards and interaction', () => {
 test.describe( 'archive Site Editor preview', () => {
 	test.use( EDITOR_COOKIE ? { storageState: EDITOR_COOKIE } : {} );
 	test( 'archive editor preview renders Now Playing and month headings with twelve lines', async ( { page } ) => {
-		test.skip( ! EDITOR_COOKIE, 'CR_JAM_EDITOR_COOKIE is not set' );
+		test.skip( ! EDITOR_COOKIE, 'CR_STORAGE_STATE is not set' );
 		await page.goto( '/wp-admin/site-editor.php?postType=wp_template&postId=courtneyr-child%2F%2Ftaxonomy-kind-jam&canvas=edit', { waitUntil: 'load' } );
 		const frame = page.frameLocator( 'iframe[name="editor-canvas"]' );
 		await expect( frame.locator( '.pkiw-lead__heading' ) ).toHaveText( 'Now Playing' );
 		await expect( frame.locator( '.pkiw-group__heading' ).first() ).toBeVisible();
 		await expect( frame.locator( 'li.wp-block-post' ) ).toHaveCount( 12 );
+	} );
+
+	// The lead label and the page size are editor-editable (decision line 65). The edits stay in the
+	// unsaved editor state: the test never saves the template, and a reload discards them.
+	test( 'archive editor lets the lead label and page size change and the preview follows', async ( { page } ) => {
+		test.skip( ! EDITOR_COOKIE, 'CR_STORAGE_STATE is not set' );
+		await page.goto( '/wp-admin/site-editor.php?postType=wp_template&postId=courtneyr-child%2F%2Ftaxonomy-kind-jam&canvas=edit', { waitUntil: 'load' } );
+		await page.waitForFunction( () => {
+			const store = window.wp?.data?.select( 'core/block-editor' );
+			return Boolean( store && store.getBlocks().length > 0 );
+		} );
+		const edited = await page.evaluate( () => {
+			const flat = ( blocks ) => blocks.flatMap( ( block ) => [ block, ...flat( block.innerBlocks ) ] );
+			const all = flat( window.wp.data.select( 'core/block-editor' ).getBlocks() );
+			const marker = all.find( ( block ) => 'post-kinds-indieweb/archive-sections' === block.name );
+			const query = all.find( ( block ) => 'core/query' === block.name );
+			if ( ! marker || ! query ) {
+				return null;
+			}
+			const dispatch = window.wp.data.dispatch( 'core/block-editor' );
+			dispatch.updateBlockAttributes( marker.clientId, { leadLabel: 'Playing Now', linesPerPage: 6 } );
+			dispatch.updateBlockAttributes( query.clientId, { query: { ...query.attributes.query, perPage: 6 } } );
+			const after = flat( window.wp.data.select( 'core/block-editor' ).getBlocks() );
+			return {
+				leadLabel: after.find( ( block ) => block.clientId === marker.clientId ).attributes.leadLabel,
+				linesPerPage: after.find( ( block ) => block.clientId === marker.clientId ).attributes.linesPerPage,
+				perPage: after.find( ( block ) => block.clientId === query.clientId ).attributes.query.perPage,
+			};
+		} );
+		expect( edited ).toEqual( { leadLabel: 'Playing Now', linesPerPage: 6, perPage: 6 } );
+		const frame = page.frameLocator( 'iframe[name="editor-canvas"]' );
+		await expect( frame.locator( '.pkiw-lead__heading' ) ).toHaveText( 'Playing Now' );
+		await expect( frame.locator( 'li.wp-block-post' ) ).toHaveCount( 6 );
 	} );
 } );
 
@@ -567,6 +602,40 @@ test.describe( 'single J-card', () => {
 				expect( visible[ 2 ].box.top ).toBeGreaterThanOrEqual( visible[ 1 ].box.bottom );
 			}
 			expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBeLessThanOrEqual( 0 );
+		}
+	} );
+
+	// Absent panels must not shift the rest: J16 has no cover and no note, J26 has no cover but a note.
+	test( 'single without a cover keeps every panel in its own track (J16 and J26)', async ( { page, request } ) => {
+		for ( const [ key, expected ] of [
+			[ 'J16', [ 'cr-jcard__details', 'cr-jcard__spine' ] ],
+			[ 'J26', [ 'cr-jcard__details', 'cr-jcard__spine', 'cr-jcard__note' ] ],
+		] ) {
+			for ( const width of [ 1280, 800, 375, 320 ] ) {
+				await openSingle( page, request, key, width );
+				await expect( page.locator( '.cr-jcard__insert' ) ).toHaveCount( 0 );
+				const boxes = await page.locator( '.cr-jcard > [class*="cr-jcard__"]' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => ( { name: [ ...node.classList ].find( ( value ) => value.startsWith( 'cr-jcard__' ) ), box: node.getBoundingClientRect().toJSON(), display: getComputedStyle( node ).display } ) ) );
+				const visible = boxes.filter( ( item ) => 'none' !== item.display );
+				const card = await page.locator( '.cr-jcard' ).evaluate( ( node ) => node.getBoundingClientRect().toJSON() );
+				if ( width >= 1024 ) {
+					expect( visible.map( ( item ) => item.name ) ).toEqual( expected );
+					expect( new Set( visible.map( ( item ) => Math.round( item.box.top ) ) ).size ).toBe( 1 );
+					const spine = visible.find( ( item ) => 'cr-jcard__spine' === item.name );
+					expect( Math.round( spine.box.width ) ).toBeLessThanOrEqual( 84 );
+					const details = visible.find( ( item ) => 'cr-jcard__details' === item.name );
+					expect( details.box.width ).toBeGreaterThan( spine.box.width * 2 );
+					const note = visible.find( ( item ) => 'cr-jcard__note' === item.name );
+					if ( note ) {
+						expect( note.box.width ).toBeGreaterThan( spine.box.width * 2 );
+					}
+				} else {
+					expect( visible.map( ( item ) => item.name ) ).toEqual( expected.filter( ( name ) => 'cr-jcard__spine' !== name ) );
+					for ( const item of visible ) {
+						expect( item.box.width ).toBeGreaterThan( card.width * 0.9 );
+					}
+				}
+				expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBeLessThanOrEqual( 0 );
+			}
 		}
 	} );
 

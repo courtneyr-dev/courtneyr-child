@@ -95,6 +95,25 @@ cr_jam_group(
 );
 
 cr_jam_group(
+	'a protected Now Playing card takes its listing position without exposing facts',
+	static function (): void {
+		$protected = '<article class="pk-card pk-card--stream pk-card--protected k-jam h-entry"><h3 class="pk-title"><a class="u-url" href="https://example.test/jam/9/">Protected: Jam</a></h3></article>';
+		cr_jam_reset();
+		cr_jam_same( $protected, Jam\jukebox_strip( $protected, array(), new WP_Block( array( 'postId' => 9 ) ) ), 'protected card unchanged' );
+		$public = array();
+		for ( $n = 1; $n <= 4; $n++ ) {
+			$public[] = Jam\jukebox_strip( cr_jam_listing_fixture( 70 + $n ), array(), new WP_Block( array( 'postId' => 70 + $n ) ) );
+		}
+		cr_jam_not_contains( 'fetchpriority', $public[0], 'the strip after a protected lead is not high priority' );
+		foreach ( array( 0, 1, 2 ) as $at ) {
+			cr_jam_contains( 'loading="eager"', $public[ $at ], 'first row after the protected lead eager ' . $at );
+		}
+		cr_jam_contains( 'loading="lazy"', $public[3], 'the eager window stays at the lead plus three cards' );
+		cr_jam_not_contains( 'fetchpriority', $public[3], 'later cover has no priority' );
+	}
+);
+
+cr_jam_group(
 	'Stream strip receives stable bounded rotation and preserves markup',
 	static function (): void {
 		cr_jam_reset();

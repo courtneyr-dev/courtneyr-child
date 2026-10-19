@@ -165,12 +165,13 @@ function cover_panel( array $facts ): string {
 		return '';
 	}
 
-	$alt = is_scalar( $picture['alt'] ?? null ) ? trim( (string) $picture['alt'] ) : '';
-	if ( '' === $alt ) {
-		$alt = is_scalar( $facts['cover_alt'] ?? null ) ? trim( (string) $facts['cover_alt'] ) : '';
-	}
+	// Card alt first, then the "Title by Artist" fallback, and the picture's own alt only after both.
+	$alt = is_scalar( $facts['cover_alt'] ?? null ) ? trim( (string) $facts['cover_alt'] ) : '';
 	if ( '' === $alt ) {
 		$alt = is_scalar( $facts['cover_alt_fallback'] ?? null ) ? trim( (string) $facts['cover_alt_fallback'] ) : '';
+	}
+	if ( '' === $alt ) {
+		$alt = is_scalar( $picture['alt'] ?? null ) ? trim( (string) $picture['alt'] ) : '';
 	}
 
 	$image         = '';
@@ -284,9 +285,12 @@ function jcard( string $html, array $block = array(), $instance = null ): string
 
 	$hidden = '';
 	if ( '' === $track || ! empty( $facts['track_is_h1'] ) ) {
+		// The cite's name is the stored track, or the post's real title when no track is stored.
+		// A synthetic "Jam, <date>" name is never a p-name.
 		$name_source = is_scalar( $facts['name_source'] ?? null ) ? (string) $facts['name_source'] : '';
-		if ( '' !== $track && 'untitled' !== $name_source ) {
-			$hidden .= '<data class="p-name" value="' . esc_attr( $track ) . '" hidden></data>';
+		$cite_name   = '' !== $track ? $track : ( is_scalar( $facts['name'] ?? null ) ? trim( (string) $facts['name'] ) : '' );
+		if ( '' !== $cite_name && 'untitled' !== $name_source ) {
+			$hidden .= '<data class="p-name" value="' . esc_attr( $cite_name ) . '" hidden></data>';
 		}
 		$url = is_scalar( $facts['url'] ?? null ) ? trim( (string) $facts['url'] ) : '';
 		if ( '' !== $url ) {

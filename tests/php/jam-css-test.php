@@ -92,6 +92,34 @@ cr_jam_css_group(
 );
 
 cr_jam_css_group(
+	'the J-card places each panel by name, so an absent insert or note never shifts the others',
+	static function () use ( $css ): void {
+		foreach ( array( 'insert', 'details', 'spine', 'note' ) as $panel ) {
+			cr_jam_css_assert( 1 === preg_match( '/\.cr-jcard__' . $panel . '\s*\{[^{}]*grid-area:\s*' . $panel . ';/s', $css ), 'panel placed by name: ' . $panel );
+		}
+		// Desktop: one template for each presence of the optional insert and note.
+		foreach ( array( '"insert details spine note"', '"details spine note"', '"insert details spine"', '"details spine"' ) as $areas ) {
+			cr_jam_css_assert( str_contains( $css, 'grid-template-areas: ' . $areas . ';' ), 'desktop areas ' . $areas );
+		}
+		// 40rem to 64rem: the spine is hidden and the note runs below.
+		foreach ( array( '"insert details" "note note"', '"details" "note"', '"insert details";', '"details";' ) as $areas ) {
+			cr_jam_css_assert( str_contains( $css, 'grid-template-areas: ' . $areas ) || str_contains( $css, 'grid-template-areas: ' . rtrim( $areas, ';' ) . ';' ), 'tablet areas ' . $areas );
+		}
+		cr_jam_css_assert( 4 <= substr_count( $css, ':not(:has(> .cr-jcard__insert))' ) + substr_count( $css, ':not(:has(> .cr-jcard__note))' ), 'templates switch on the presence of the optional panels' );
+		cr_jam_css_assert( 1 !== preg_match( '/\.cr-jcard__note\s*\{[^{}]*grid-column:/s', $css ), 'the note no longer relies on a column span' );
+		cr_jam_css_assert( 1 !== preg_match( '/grid-template-columns:\s*minmax\(0, 1\.2fr\) minmax\(0, 0\.9fr\) 5rem minmax\(0, 1fr\);\s*align-items/s', $css ) || str_contains( $css, 'grid-template-areas: "insert details spine note";' ), 'the four-track template is paired with its areas' );
+	}
+);
+
+cr_jam_css_group(
+	'the Stream strip prints artist and date in Russian violet ink on the sky-blue paper',
+	static function () use ( $css ): void {
+		cr_jam_css_assert( 1 === preg_match( '/\.pk-card\.cr-jam-strip--stream \.pk-sub\s*\{[^{}]*color:\s*var\(--cr-russian-violet\);/s', $css ), 'artist and date ink is Russian violet' );
+		cr_jam_css_assert( 1 !== preg_match( '/\.pk-card\.cr-jam-strip--stream \.pk-sub\s*\{[^{}]*--cr-ink-soft/s', $css ), 'no soft ink on the Stream strip' );
+	}
+);
+
+cr_jam_css_group(
 	'template and pattern preserve the Query Loop contract',
 	static function () use ( $template, $pattern ): void {
 		foreach ( array( 'cr-archive--jam', 'courtneyr/archive-identity', 'courtneyr-child/cr-jukebox-loop', 'courtneyr-child/cr-browse-all', 'Jam archive' ) as $required ) {

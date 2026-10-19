@@ -107,6 +107,19 @@ function reset_page_state(): void {
 }
 
 /**
+ * Take the next place in the request's run of jam cards.
+ *
+ * @return int The card's 1-based position.
+ */
+function next_listing_position(): int {
+	$position = (int) ( $GLOBALS['courtneyr_child_jam_listing_position'] ?? 0 ) + 1;
+
+	$GLOBALS['courtneyr_child_jam_listing_position'] = $position;
+
+	return $position;
+}
+
+/**
  * Class tokens on the first article root.
  *
  * @param string $html Rendered card HTML.
@@ -139,11 +152,18 @@ function jukebox_strip( string $html, array $block = array(), $instance = null )
 	}
 
 	$classes = root_classes( $html );
-	if (
-		! in_array( 'k-jam', $classes, true )
-		|| in_array( 'pk-card--protected', $classes, true )
-		|| ( ! in_array( LISTING_CLASS, $classes, true ) && ! in_array( STREAM_CLASS, $classes, true ) )
-	) {
+	if ( ! in_array( 'k-jam', $classes, true ) ) {
+		return $html;
+	}
+
+	// A protected card is a title link and nothing else, so it stays as printed. It still holds its
+	// place in the archive, so the strip after a protected Now Playing card isn't promoted to the lead.
+	if ( in_array( 'pk-card--protected', $classes, true ) ) {
+		next_listing_position();
+		return $html;
+	}
+
+	if ( ! in_array( LISTING_CLASS, $classes, true ) && ! in_array( STREAM_CLASS, $classes, true ) ) {
 		return $html;
 	}
 
@@ -155,8 +175,7 @@ function jukebox_strip( string $html, array $block = array(), $instance = null )
 
 	if ( in_array( LISTING_CLASS, $classes, true ) ) {
 		$tags->add_class( 'cr-jam-strip--listing' );
-		$position                                        = (int) ( $GLOBALS['courtneyr_child_jam_listing_position'] ?? 0 ) + 1;
-		$GLOBALS['courtneyr_child_jam_listing_position'] = $position;
+		$position = next_listing_position();
 
 		if (
 			$tags->next_tag(

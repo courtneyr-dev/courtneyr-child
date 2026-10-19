@@ -138,6 +138,28 @@ cr_jam_group(
 );
 
 cr_jam_group(
+	'an empty track with a real post title keeps hidden p-name and URL, but an untitled name gets no p-name',
+	static function (): void {
+		$facts = array(
+			'title'       => '',
+			'name'        => 'Hollow Light by Marlowe Kite',
+			'name_source' => 'title',
+			'track_is_h1' => false,
+		);
+		$out = SingleJam\jcard( cr_jam_single_case( $facts, array( 'title' => '' ) ), array(), new WP_Block( array( 'postId' => 42 ) ) );
+		cr_jam_not_contains( '<dt>Track</dt>', $out, 'no stored track, so no Track row' );
+		cr_jam_contains( '<data class="p-name" value="Hollow Light by Marlowe Kite" hidden></data>', $out, 'hidden p-name from the real post title' );
+		cr_jam_contains( '<data class="u-url u-jam-of" value="https://music.example/track" hidden></data>', $out, 'hidden jam-of URL' );
+
+		$facts['name']        = 'Jam, September 27, 2026 at 8:00 am';
+		$facts['name_source'] = 'untitled';
+		$out                  = SingleJam\jcard( cr_jam_single_case( $facts, array( 'title' => '' ) ), array(), new WP_Block( array( 'postId' => 42 ) ) );
+		cr_jam_not_contains( 'class="p-name" value=', $out, 'a synthetic name never becomes p-name' );
+		cr_jam_contains( '<data class="u-url u-jam-of" value="https://music.example/track" hidden></data>', $out, 'URL still kept' );
+	}
+);
+
+cr_jam_group(
 	'optional rows, note, link and cover are omitted whole',
 	static function (): void {
 		$facts = array(
@@ -184,7 +206,17 @@ cr_jam_group(
 		);
 		$out = SingleJam\jcard( cr_jam_single_case( $facts ), array(), new WP_Block( array( 'postId' => 42 ) ) );
 		cr_jam_contains( 'attachment-777-large.jpg', $out, 'featured attachment image' );
-		cr_jam_contains( 'alt="Featured sunset"', $out, 'featured alt' );
+		cr_jam_contains( 'alt="Electric Morning by The Paper Satellites"', $out, 'no card alt: the Title by Artist fallback wins over the picture alt' );
+
+		$facts['cover_alt'] = 'Card cover alt';
+		$out                = SingleJam\jcard( cr_jam_single_case( $facts ), array(), new WP_Block( array( 'postId' => 42 ) ) );
+		cr_jam_contains( 'alt="Card cover alt"', $out, 'card cover alt beats a featured picture alt' );
+		cr_jam_not_contains( 'alt="Featured sunset"', $out, 'featured picture alt not used while a card alt exists' );
+
+		$facts['cover_alt']          = '';
+		$facts['cover_alt_fallback'] = '';
+		$out                         = SingleJam\jcard( cr_jam_single_case( $facts ), array(), new WP_Block( array( 'postId' => 42 ) ) );
+		cr_jam_contains( 'alt="Featured sunset"', $out, 'picture alt only when both card alts are empty' );
 
 		cr_jam_reset();
 		$GLOBALS['cr_jam_request']['single']                 = true;
