@@ -1,4 +1,4 @@
-/* Photo surfaces for issue 241: the archive's month strips, the single's projector mount and the Stream slide mount. */
+/* Photo surfaces for issue 241: the archive's month strips, the single's projector mount, and the Stream polaroid and booth strip. */
 /* stylelint-disable no-descending-specificity -- the archive, the single and the Stream are separate surfaces; their selectors never match one element. */
 
 /* ============================================================
@@ -561,141 +561,177 @@ body.cr-photo-single .pkiw-photo-place {
 }
 
 /* ============================================================
-   Stream: a compact slide mount in the collage's own column
+   Stream: a single picture is a polaroid, a gallery-format post a
+   photo booth strip (inc/stream-gallery.php paints the strip's paper
+   from cr-post-kinds.css). Restored from the shared Stream sheet as
+   it stood before W3, in palette tokens. The collage rotates both.
    ============================================================ */
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount {
+:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery) {
+	--cr-ink: var(--cr-russian-violet);
+	--cr-link: var(--cr-cerulean);
 	position: relative;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-polaroid {
 	box-sizing: border-box;
-	padding: var(--cr-space-sm) var(--cr-space-md) var(--cr-space-md);
-	border: 2px solid var(--cr-russian-violet);
-	border-radius: var(--cr-radius-md);
-	background-color: var(--cr-printer-ivory);
+	width: 94%;
+	/* The thick lower edge of a polaroid print. */
+	padding: 1.1rem 1.1rem 2rem;
+	border: 0;
+	border-radius: 0;
+	background:
+		linear-gradient(135deg, var(--cr-russian-violet) 12px, transparent 12px) top left,
+		linear-gradient(225deg, var(--cr-russian-violet) 12px, transparent 12px) top right,
+		linear-gradient(45deg, var(--cr-russian-violet) 12px, transparent 12px) bottom left,
+		linear-gradient(315deg, var(--cr-russian-violet) 12px, transparent 12px) bottom right,
+		var(--cr-white);
+	background-repeat: no-repeat;
 	color: var(--cr-russian-violet);
 	box-shadow: var(--cr-shadow-hard);
 }
 
-.pk-card.cr-slide-mount[data-cr-rotate="0"],
-.cr-stream-page .wp-block-post-template > li .pk-card.cr-slide-mount[data-cr-rotate="0"] {
-	transform: rotate(var(--cr-rotate-1));
+/* The picture comes first; the hand-written title and the date sit under it. */
+:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery) > .pk-body {
+	display: flex;
+	flex-direction: column;
 }
 
-.pk-card.cr-slide-mount[data-cr-rotate="1"],
-.cr-stream-page .wp-block-post-template > li .pk-card.cr-slide-mount[data-cr-rotate="1"] {
-	transform: rotate(var(--cr-rotate-2));
+:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery) .pk-media {
+	order: -1;
+	margin: 0 0 0.6rem;
 }
 
-.pk-card.cr-slide-mount[data-cr-rotate="2"],
-.cr-stream-page .wp-block-post-template > li .pk-card.cr-slide-mount[data-cr-rotate="2"] {
-	transform: rotate(var(--cr-rotate-neg));
+:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery) :is(.pk-kindlabel, .pk-media__caption) {
+	display: none;
 }
 
-.pk-card.cr-slide-mount[data-cr-rotate="3"],
-.cr-stream-page .wp-block-post-template > li .pk-card.cr-slide-mount[data-cr-rotate="3"] {
-	transform: rotate(var(--cr-rotate-neg2));
-}
-
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media {
-	position: relative;
-	margin: 0;
-}
-
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media img {
+:is(body, .cr-stream-page) .pk-card.cr-polaroid .pk-media img {
 	display: block;
 	width: 100%;
 	height: auto;
-	aspect-ratio: 3 / 2;
-	border: 0;
-	border-radius: var(--cr-radius-sm);
+	aspect-ratio: 4 / 5;
+	border: 2px dashed color-mix(in srgb, var(--cr-russian-violet) 45%, transparent);
+	border-radius: 0;
+	box-shadow: none;
 	object-fit: cover;
 }
 
-/* Mount slots: two decorative notches either side of the slide. */
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media::before,
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media::after {
-	content: "";
-	position: absolute;
-	inset-block: 38%;
-	width: 0.4rem;
-	border-radius: var(--cr-radius-full);
-	background-color: var(--cr-russian-violet);
+:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery) .pk-caption {
+	padding: 0.15rem 0.15rem 0;
 }
 
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media::before {
-	inset-inline-start: calc(var(--cr-space-sm) * -1);
-}
-
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media::after {
-	inset-inline-end: calc(var(--cr-space-sm) * -1);
-}
-
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media__caption {
-	margin: var(--cr-space-xs) 0 0;
-	color: var(--cr-russian-violet);
-	font-family: var(--cr-font-body);
-	font-size: var(--cr-text-sm);
-	line-height: var(--cr-leading-snug);
-}
-
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-kindlabel {
-	margin: var(--cr-space-sm) 0 0;
-	padding: 0;
-	color: var(--cr-russian-violet-soft);
-	font-size: var(--cr-text-xs);
-	font-weight: var(--cr-weight-bold);
-	letter-spacing: var(--cr-tracking-eyebrow);
-	text-transform: uppercase;
-}
-
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-title {
-	margin: var(--cr-space-2xs) 0 0;
+:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery) .pk-title {
+	margin: 0;
 	padding: 0;
 	color: var(--cr-russian-violet);
-	font-family: var(--cr-font-accent);
-	font-size: var(--cr-text-md);
-	font-weight: var(--cr-weight-bold);
-	line-height: var(--cr-leading-snug);
+	font-family: var(--cr-font-display);
+	font-size: 0.95rem;
+	line-height: 1.45;
 }
 
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-sub {
-	margin: var(--cr-space-2xs) 0 0;
-	padding: 0;
-}
-
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-stream-date time {
-	padding: 0;
-	border: 0;
-	color: var(--cr-russian-violet-soft);
-	font-size: var(--cr-text-xs);
-}
-
-/* One link, whose area is the whole mount. */
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-title a {
+/* One link, whose area is the whole print. */
+:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery) .pk-title a {
 	color: inherit;
 	text-decoration: none;
 }
 
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-title a::after {
+:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery) .pk-title a::after {
 	content: "";
 	position: absolute;
-	z-index: 2;
+	z-index: 1;
 	inset: 0;
 }
 
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-title a:focus-visible {
-	outline: none;
-	box-shadow: none;
+:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery) .pk-sub {
+	padding: 0.3rem 0 0;
 }
 
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-title a:focus-visible::after {
+:is(body, .cr-stream-page) .pk-card.cr-polaroid .pk-stream-date time {
+	padding: 0;
+	border: 0;
+	color: var(--cr-cerulean);
+	letter-spacing: 0.14em;
+}
+
+:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery):has(.pk-title a:hover) .pk-title a,
+:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery):has(.pk-title a:focus-visible) .pk-title a {
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.15em;
+}
+
+:is(body, .cr-stream-page) .pk-card.cr-polaroid:has(.pk-title a:hover) .pk-media img {
+	border-style: solid;
+}
+
+:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery):has(.pk-title a:focus-visible) {
 	outline: 3px solid var(--cr-focus-ring);
-	outline-offset: 4px;
-	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+	outline-offset: 3px;
+	box-shadow: 0 0 0 8px var(--cr-focus-halo);
 }
 
-/* An image that failed to load leaves the mount and its caption. */
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media.cr-cover--failed::before,
-:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media.cr-cover--failed::after {
-	content: none;
+:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery) .pk-title a:focus-visible {
+	outline: none;
+}
+
+/* The booth strip: frames on white print stock, a stamped date. */
+:is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .cr-booth {
+	margin: 0;
+}
+
+:is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .cr-booth__footer {
+	margin-block-end: 1rem;
+}
+
+:is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .cr-booth__img {
+	display: block;
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	outline: 1px solid color-mix(in srgb, var(--cr-russian-violet) 30%, transparent);
+	outline-offset: -1px;
+	object-fit: cover;
+}
+
+:is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .pk-caption {
+	padding: 0.65rem 0.1rem 0;
+}
+
+:is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .pk-title {
+	font-size: 1rem;
+	line-height: 1.4;
+}
+
+:is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .pk-sub {
+	padding: 0.4rem 0 0;
+}
+
+:is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .pk-stream-date time {
+	display: inline-block;
+	padding: 0.1rem 0.4rem;
+	border: 1px solid color-mix(in srgb, var(--cr-russian-violet) 70%, transparent);
+	border-radius: 2px;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: 0.75rem;
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: 0.12em;
+	transform: rotate(var(--cr-rotate-1));
+}
+
+/* The more line is text on a photo strip: the title link covers the strip. */
+:is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery span.cr-booth__more-link {
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.18em;
+}
+
+/* Homepage Field Notes lane: the polaroid matches the strip's width. */
+.cr-fieldnotes .cr-home-stream .pk-card.cr-polaroid {
+	max-width: 13.75rem;
+	margin-inline: auto;
 }
 
 /* ============================================================
@@ -741,9 +777,7 @@ body.cr-photo-single .pkiw-photo-place {
 	.cr-photo-sheets .pkiw-group__heading::before,
 	body.cr-photo-single .pkiw-projector::before,
 	body.cr-photo-single .pkiw-projector__mount::before,
-	body.cr-photo-single .pkiw-projector__mount::after,
-	:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media::before,
-	:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-media::after {
+	body.cr-photo-single .pkiw-projector__mount::after {
 		display: none;
 	}
 
@@ -759,7 +793,7 @@ body.cr-photo-single .pkiw-photo-place {
 
 	.cr-photo-frame__title a:focus-visible::after,
 	.cr-photo-frame--protected .pk-title a:focus-visible::after,
-	:is(body, .cr-stream-page) .pk-card.cr-slide-mount .pk-title a:focus-visible::after {
+	:is(body, .cr-stream-page) .pk-card.k-photo:is(.cr-polaroid, .pk-card--gallery):has(.pk-title a:focus-visible) {
 		outline-color: Highlight;
 		box-shadow: none;
 	}
@@ -767,11 +801,15 @@ body.cr-photo-single .pkiw-photo-place {
 	body.cr-photo-single .pkiw-projector__mount,
 	body.cr-photo-single .pkiw-projector__status,
 	body.cr-photo-single .pkiw-projector__rail,
-	:is(body, .cr-stream-page) .pk-card.cr-slide-mount {
+	:is(body, .cr-stream-page) .pk-card.cr-polaroid {
 		border: 2px solid CanvasText;
 		background-color: Canvas;
 		color: CanvasText;
 		box-shadow: none;
+	}
+
+	:is(body, .cr-stream-page) .pk-card.cr-polaroid {
+		background-image: none;
 	}
 
 	body.cr-photo-single .pkiw-projector__button,

@@ -1,14 +1,14 @@
 <?php
 /**
- * Stream photo cards as slide mounts (PKIW issue 241).
+ * Stream photo cards as polaroids.
  *
  * The plugin prints one photo card whatever the post format: kind label,
- * title link, date, the lead image and its caption. This adapter keeps that
- * markup and adds what the paint needs: the mount class, one rotation key
- * from the post's stable seed, the failed-image mark on the media, and a
- * caption with no links, so the card stays one link and one tab stop.
- * inc/stream-gallery.php skips photo posts, so no booth strip replaces the
- * card. assets/css/cr-photo.css paints the mount.
+ * title link, date, the lead image and its caption. A gallery-format post
+ * becomes a booth strip first (inc/stream-gallery.php, priority 10); every
+ * other photo card is dressed here as a polaroid: the class the paint keys
+ * on, the failed-image mark on the media, and a caption with no links, so
+ * the card stays one link and one tab stop. The collage's own column rules
+ * rotate it. assets/css/cr-photo.css paints the polaroid.
  *
  * @package CourtneyrChild
  */
@@ -19,17 +19,10 @@ namespace Courtneyr\Child\StreamPhoto;
 
 use Courtneyr\Child\Photo;
 use function Courtneyr\Child\HomeSections\is_stream_surface;
-use function Courtneyr\Child\Stamps\pick;
-use function Courtneyr\Child\Stamps\seed;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-/**
- * Rotation keys; cr-photo.css maps 0 to 3 to the four rotation tokens.
- */
-const ROTATIONS = 4;
 
 /**
  * Remove link tags from the caption and keep their text.
@@ -46,15 +39,16 @@ function strip_caption_links( string $html ): string {
 }
 
 /**
- * Dress a photo post's stream card as a slide mount.
+ * Dress a photo post's stream card as a polaroid.
  *
  * @param string               $html     Rendered stream card.
  * @param array<string, mixed> $block    Parsed stream-card block.
  * @param mixed                $instance Block instance with the Query Loop's postId.
  * @return string
  */
-function slide_mount_card( string $html, array $block, $instance = null ): string {
-	if ( '' === $html || ! is_stream_surface() ) {
+function polaroid_card( string $html, array $block, $instance = null ): string {
+	// A booth strip already replaced this card's picture.
+	if ( '' === $html || ! is_stream_surface() || false !== strpos( $html, 'cr-booth' ) ) {
 		return $html;
 	}
 	if ( false !== strpos( (string) ( $block['attrs']['className'] ?? '' ), Photo\FRAME_STYLE ) ) {
@@ -81,8 +75,7 @@ function slide_mount_card( string $html, array $block, $instance = null ): strin
 	if ( ! $tags->next_tag( 'article' ) ) {
 		return $html;
 	}
-	$tags->add_class( 'cr-slide-mount' );
-	$tags->set_attribute( 'data-cr-rotate', (string) pick( seed( 'photo-mount', (string) $post->ID ), 3, ROTATIONS ) );
+	$tags->add_class( 'cr-polaroid' );
 	if ( $tags->next_tag(
 		array(
 			'tag_name'   => 'div',
@@ -94,4 +87,4 @@ function slide_mount_card( string $html, array $block, $instance = null ): strin
 
 	return strip_caption_links( $tags->get_updated_html() );
 }
-add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\slide_mount_card', 10, 3 );
+add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\polaroid_card', 11, 3 );
