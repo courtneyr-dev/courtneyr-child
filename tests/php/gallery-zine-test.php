@@ -476,8 +476,11 @@ namespace {
 			cr_photo_same( 12, $trio[0]['t']['span'], 'the trio\'s first picture spans the tablet row' );
 			cr_photo_same( 12, $trio[1]['t']['span'] + $trio[2]['t']['span'], 'the other two share the next tablet row' );
 			cr_photo_assert( '' === $trio[0]['h']['t'] && '' !== $trio[1]['h']['t'] && $trio[1]['h']['t'] === $trio[2]['h']['t'], 'the tablet pair shares a height; the hero does not' );
-			cr_photo_assert( in_array( 'spread', $trio[0]['flags'], true ) && 16 === $trio[0]['d']['span'], 'an opening mixed trio is a spread: the first picture takes two thirds' );
-			cr_photo_same( 8, $trio[1]['d']['span'] + $trio[2]['d']['span'], 'the other two share the last third' );
+			cr_photo_assert( in_array( 'spread', $trio[0]['flags'], true ) && $trio[0]['d']['span'] >= 9, 'an opening mixed trio is a spread led by its first picture' );
+			cr_photo_same( 24, $trio[0]['d']['span'] + $trio[1]['d']['span'] + $trio[2]['d']['span'], 'the other two share the rest of the row' );
+			cr_photo_same( 'anchor', $trio[0]['treat'], 'the spread anchors on its first picture' );
+			$tall = compose( cr_zine_shapes( 'PPL' ), array( '', '', '' ) );
+			cr_photo_assert( $tall[0]['d']['span'] < $trio[0]['d']['span'], 'a portrait hero, held to the height cap, takes fewer columns than a landscape one' );
 			cr_photo_assert( '' === $trio[0]['h']['d'] && '' !== $trio[1]['h']['d'] && $trio[1]['h']['d'] === $trio[2]['h']['d'], 'and one height' );
 			$later = compose( cr_zine_shapes( 'LSLLPS' ), array_fill( 0, 6, '' ) );
 			cr_photo_assert( ! in_array( 'spread', $later[3]['flags'], true ), 'only the opening trio is a spread' );

@@ -178,6 +178,32 @@ function justify( array $ratios, array $pads, string $bp, int $min ): array {
 }
 
 /**
+ * The opening spread's columns: the hero's span (9 to 16 of 24) that stands
+ * it about 1.6 times as tall as the pair beside it, the hero held to the
+ * 38rem height cap, and the first of the pair's share of the rest.
+ *
+ * @param float $hero  The hero's width over height.
+ * @param float $one   The first supporting picture's width over height.
+ * @param float $two   The second's.
+ * @return int[] Hero span and first supporting span.
+ */
+function spread_split( float $hero, float $one, float $two ): array {
+	list( $cols, $gap, $width ) = EVEN_GRID['d'];
+
+	$best = array( PHP_FLOAT_MAX, 16 );
+	for ( $span = 16; $span >= 9; --$span ) {
+		$hero_h = min( ( $span / $cols * ( $width + $gap ) - $gap ) / $hero, 38.0 );
+		$pair_h = ( ( $cols - $span ) / $cols * ( $width + $gap ) - 2 * $gap ) / ( $one + $two );
+		$score  = abs( $hero_h / $pair_h - 1.6 );
+		if ( $score < $best[0] ) {
+			$best = array( $score, $span );
+		}
+	}
+	$rest = $cols - $best[1];
+	return array( $best[1], (int) max( 3, min( $rest - 3, round( $rest * $one / ( $one + $two ) ) ) ) );
+}
+
+/**
  * A cell: start column, span, rows.
  *
  * @param int $start Start column.
@@ -300,12 +326,12 @@ function compose( array $shapes, array $captions, array $ratios = array() ): arr
 					$even_rows['t'] = array( array( 0, 1 ) );
 					++$rhythm;
 				} elseif ( 0 === $g ) {
-					// An opening trio is a spread: the first picture dominant, the other two sharing the last third on its baseline.
-					$second         = (int) max( 3, min( 5, round( 8 * $r[1] / ( $r[1] + $r[2] ) ) ) );
-					$d              = array( cell( 1, 16 ), cell( 17, $second ), cell( 17 + $second, 8 - $second ) );
-					$flags          = array( array( 'spread' ), array( 'spread', 'baseline' ), array( 'spread', 'baseline' ) );
-					$even_rows['d'] = array( array( 1, 2 ) );
-					$even_rows['t'] = array( array( 1, 2 ) );
+					// An opening trio is a spread: the first picture dominant, the other two as a pair on its baseline.
+					list( $hero, $second ) = spread_split( $r[0], $r[1], $r[2] );
+					$d                     = array( cell( 1, $hero ), cell( $hero + 1, $second ), cell( $hero + 1 + $second, COLS_D - $hero - $second ) );
+					$flags                 = array( array( 'spread' ), array( 'spread', 'baseline' ), array( 'spread', 'baseline' ) );
+					$even_rows['d']        = array( array( 1, 2 ) );
+					$even_rows['t']        = array( array( 1, 2 ) );
 				} else {
 					// The middle picture is a print, with a narrow edge.
 					$d              = row_cells( justify( $r, array( 0, 1.0, 0 ), 'd', 4 ) );
@@ -337,11 +363,11 @@ function compose( array $shapes, array $captions, array $ratios = array() ): arr
 				break;
 		}
 
-		// The anchor is the opening group's largest picture.
+		// The anchor is the opening group's largest picture (a spread's is its first).
 		$anchor = -1;
 		if ( 0 === $g && 'contact' !== $pattern ) {
 			$anchor = 0;
-			foreach ( $cells as $k => $c ) {
+			foreach ( in_array( 'spread', $flags[0], true ) ? array() : $cells as $k => $c ) {
 				if ( $c[0]['span'] * ( $c[0]['rows'] ?? 1 ) > $cells[ $anchor ][0]['span'] * ( $cells[ $anchor ][0]['rows'] ?? 1 ) ) {
 					$anchor = $k;
 				}
