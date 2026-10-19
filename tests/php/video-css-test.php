@@ -32,6 +32,8 @@ $css     = cr_video_css_read( 'assets/css/cr-video.css' );
 $tokens  = cr_video_css_read( 'assets/css/tokens.css' );
 $sources = array(
 	'inc/video.php',
+	'inc/single-video.php',
+	'inc/stream-video.php',
 	'patterns/cr-video-shelf-loop.php',
 	'templates/taxonomy-kind-video.html',
 	'assets/css/cr-video.css',
