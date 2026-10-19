@@ -281,6 +281,10 @@ check_case(
 			&& false !== strpos( $tape, 'background-color: var(--cr-tape)' )
 			&& false !== strpos( $cap, 'font-family: var(--cr-font-display)' )
 			&& 1 === preg_match( '/@media \(max-width: 39\.99rem\)\s*\{[^@]*\.cr-scrapbook\s*\{[^{}]*grid-template-columns:\s*1fr;/s', $code );
+	}
+);
+
+check_case(
 	'the photo booth print: white stock with a hard shadow, the title as a centered caption in the body face',
 	static function () use ( $code ): bool {
 		$paper   = rule_body( $code, 'li.format-gallery .pk-card.k-photo.pk-card--gallery' );
