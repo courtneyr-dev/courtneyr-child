@@ -222,8 +222,10 @@ namespace Courtneyr\Child\QuestionTests {
 	check( false !== strpos( (string) $template, 'courtneyr-child/cr-question-slips-loop' ) && false === strpos( (string) $template, 'cr-browse-all' ), 'template uses the question pattern and omits browse-all' );
 	check( false !== strpos( (string) $pattern, "is_registered( 'post-kinds-indieweb/question-entry' )" ), 'pattern guards the plugin entry block' );
 	check( false === strpos( (string) $pattern, 'query-no-results' ) && false === strpos( (string) $pattern, 'templateLock' ), 'pattern has no empty-state block or template lock' );
+	// X16 allows one block-attribute read: a className gate.
+	$question_no_gate = str_replace( "\$block['attrs']['className']", '', (string) $question );
 	foreach ( array( 'attrs', 'get_post_meta', 'parse_blocks', 'untitled_name', 'kind_picture' ) as $forbidden ) {
-		check( false === strpos( (string) $question, $forbidden ) && false === strpos( (string) $stream_php, $forbidden ), "PHP adapters omit $forbidden" );
+		check( false === strpos( $question_no_gate, $forbidden ) && false === strpos( (string) $stream_php, $forbidden ), "PHP adapters omit $forbidden" );
 	}
 
 	check( 0 === preg_match( '/#[0-9a-fA-F]{3,8}\b/', (string) $css ), 'question CSS contains no hex literal' );
