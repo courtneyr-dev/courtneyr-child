@@ -136,6 +136,30 @@ async function openStreamWith( page, key ) {
 	skipUnlessRequired( true, `no Stream card for ${ key } on pages 1 through 12` );
 }
 
+async function titlePaint( page ) {
+	await page.evaluate( () => document.fonts.ready );
+	return page.locator( 'h1.cr-tape-label__title' ).evaluate( ( element ) => {
+		const luminance = ( value ) => {
+			const [ r, g, b ] = value.match( /\d+/g ).slice( 0, 3 ).map( ( channel ) => {
+				const c = Number( channel ) / 255;
+				return c <= 0.03928 ? c / 12.92 : ( ( c + 0.055 ) / 1.055 ) ** 2.4;
+			} );
+			return ( 0.2126 * r ) + ( 0.7152 * g ) + ( 0.0722 * b );
+		};
+		const css = getComputedStyle( element );
+		const box = element.getBoundingClientRect();
+		const ink = luminance( css.color );
+		const paper = luminance( getComputedStyle( element.closest( '.cr-tape-label' ) ).backgroundColor );
+		return {
+			color: css.color,
+			visibility: css.visibility,
+			opacity: css.opacity,
+			painted: box.width > 0 && box.height > 0,
+			contrast: ( Math.max( ink, paper ) + 0.05 ) / ( Math.min( ink, paper ) + 0.05 ) >= 7,
+		};
+	} );
+}
+
 async function useStoredTheme( page, theme ) {
 	await page.addInitScript( ( value ) => localStorage.setItem( 'courtneyr-theme', value ), theme );
 }
@@ -453,11 +477,13 @@ test.describe( 'single', () => {
 		await openFixture( page, request, 'V01' );
 		let paint = await page.locator( '.cr-tape-label' ).evaluate( ( element ) => { const css = getComputedStyle( element ); return [ css.backgroundColor, css.color ]; } );
 		expect( paint, 'S11 stored dark label stays ivory with violet ink' ).toEqual( [ PRINTER_IVORY, RUSSIAN_VIOLET ] );
+		expect( await titlePaint( page ), 'S11 stored dark H1 paints violet, visible, with AAA contrast on the label' ).toEqual( { color: RUSSIAN_VIOLET, visibility: 'visible', opacity: '1', painted: true, contrast: true } );
 		expect( await axeContrast( page ), 'S11 dark single has zero contrast violations' ).toEqual( [] );
 		await page.emulateMedia( { colorScheme: 'dark' } );
 		await page.evaluate( () => { localStorage.setItem( 'courtneyr-theme', 'system' ); document.documentElement.dataset.theme = 'system'; } );
 		paint = await page.locator( '.cr-tape-label' ).evaluate( ( element ) => { const css = getComputedStyle( element ); return [ css.backgroundColor, css.color ]; } );
 		expect( paint, 'S11 OS dark label stays ivory with violet ink' ).toEqual( [ PRINTER_IVORY, RUSSIAN_VIOLET ] );
+		expect( await titlePaint( page ), 'S11 OS dark H1 paints violet, visible, with AAA contrast on the label' ).toEqual( { color: RUSSIAN_VIOLET, visibility: 'visible', opacity: '1', painted: true, contrast: true } );
 		await page.emulateMedia( { forcedColors: 'active', colorScheme: 'light' } );
 		expect( await page.locator( '.cr-tape-label, .cr-tape-deck__frame' ).evaluateAll( ( nodes ) => nodes.every( ( node ) => getComputedStyle( node ).borderTopWidth === '2px' ) ), 'S12 forced colors gives label and frame 2px outlines' ).toBe( true );
 		expect( await page.locator( '.cr-tape-label' ).evaluate( ( element ) => getComputedStyle( element, '::before' ).display ), 'S12 decorative strip disappears' ).toBe( 'none' );

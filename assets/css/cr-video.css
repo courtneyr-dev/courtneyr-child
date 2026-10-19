@@ -264,7 +264,8 @@
 	rotate: var(--cr-rotate-2);
 }
 
-.cr-tape-label__title {
+/* Two classes beat components.css `.has-main-accent-background-color h1`, whose --cr-ink turns ivory in dark. */
+.cr-tape-label .cr-tape-label__title {
 	margin: 0;
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-accent);
