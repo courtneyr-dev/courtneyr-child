@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.118
+
+What you see change on courtneyr.dev:
+
+- A photo post with a single image prints it in a photo-frame block style: Polaroid, Taped print, Photo corners, Postcard or Film frame. The author picks one on the Image block, or the post's seed picks one. The projector bars are gone from these singles (#190).
+- A gallery-format single, and a photo post whose gallery the projector would take, prints as a zine photo essay. The H1 sits in a photocopier-black masthead with the kind patch, category stickers and a postmark of the post's date and frame count. The panels are numbered and laid out by each picture's real shape without cropping, and core's lightbox steps through all of them (#190).
+- Gallery singles carry zine and field-journal pieces in the page margins on wide screens: halftone, a taped legal-pad scrap, ink spatter, a postmark, a sewn patch, index ticks and a fold. The post ID picks one of three arrangements. The gallery sits on a second sheet of graph paper held with washi tape, and related posts open on a torn, taped edge. Phones keep the paper and tape and drop the margin pieces (#192).
+- On a gallery single with likes, bookmarks or reposts, the reactions sit on a taped scrap beside the newsletter band, which turns to graph paper. The scrap shows a count for each kind ("3 likes" to a screen reader) above the avatar pile, which keeps each response's link (#192).
+- A single with no likes, bookmarks or reposts no longer leaves an empty band between the post and the newsletter (#191).
+
+Under the hood: the empty-reactions drop moved from inc/like.php to the shared single filters in inc/post-kinds.php. inc/gallery-zine.php and assets/css/cr-gallery-zine.css are new, and assets/css/cr-photo-frames.css adds the frame styles. On gallery singles, IndieBlocks' facepile gets three count-only blocks ahead of its avatar block through render_block_data.
+
 ## 0.7.114
 
 What you see change on courtneyr.dev:
