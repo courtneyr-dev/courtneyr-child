@@ -239,7 +239,7 @@ check_case(
 );
 
 check_case(
-	'the photo booth strip: 4:3 frames, a stamped date turned by a token, one title link stretched over the whole print',
+	'the photo booth strip: 4:3 frames, a plain mono date, one title link stretched over the whole print',
 	static function () use ( $code ): bool {
 		$frame = rule_body( $code, '.pk-card.k-photo.pk-card--gallery .cr-booth__img' );
 		$date  = rule_body( $code, '.pk-card.k-photo.pk-card--gallery .pk-stream-date time' );
@@ -250,8 +250,61 @@ check_case(
 			&& false !== strpos( $body, 'position: static' )
 			&& false !== strpos( $frame, 'aspect-ratio: 4 / 3' )
 			&& false !== strpos( $date, 'font-family: var(--cr-font-mono)' )
-			&& false !== strpos( $date, 'transform: rotate(var(--cr-rotate-1))' )
+			&& false === strpos( $date, 'transform' )
 			&& false !== strpos( $link, 'inset: 0' );
+	}
+);
+
+check_case(
+	'the single mount has no side slots (Courtney 2026-10-19: no lines in the left and right margins)',
+	static function () use ( $code ): bool {
+		return 0 === preg_match( '/\.pkiw-projector__mount::(before|after)/', $code );
+	}
+);
+
+check_case(
+	'the gallery single is the zine (cr-gallery-zine.css): the scrapbook page is gone from the photo sheet',
+	static function () use ( $code ): bool {
+		return false === strpos( $code, 'cr-scrapbook' );
+	}
+);
+
+check_case(
+	'the five photo frames live in their own sheet, in tokens, with hard shadows only and a forced-colors fallback',
+	static function (): bool {
+		$frames = (string) preg_replace( '#/\*.*?\*/#s', '', (string) file_get_contents( dirname( __DIR__, 2 ) . '/assets/css/cr-photo-frames.css' ) );
+		foreach ( array( 'polaroid', 'taped', 'corners', 'postcard', 'film' ) as $frame ) {
+			if ( false === strpos( $frames, '.wp-block-image.is-style-cr-photo-' . $frame . ' {' ) ) {
+				return false;
+			}
+		}
+		preg_match_all( '/(?<![\w-])box-shadow\s*:\s*([^;{}]+);/', $frames, $shadows );
+		foreach ( $shadows[1] as $value ) {
+			if ( 'none' !== trim( $value ) && 1 !== preg_match( '/^var\(--cr-shadow-hard(-sm|-2)?\)$/', trim( $value ) ) ) {
+				return false;
+			}
+		}
+		preg_match_all( '/(?<![\w-])transform\s*:\s*([^;{}]+);/', $frames, $turns );
+		foreach ( $turns[1] as $value ) {
+			if ( 1 !== preg_match( '/^rotate\(var\(--cr-rotate-(1|2|neg|neg2)\)\)$/', trim( $value ) ) ) {
+				return false;
+			}
+		}
+		return ! preg_match( '/#[0-9a-fA-F]{3,8}\b|\b(rgb|rgba|hsl|hsla)\(|filter\s*:|blur\(/i', $frames )
+			&& false !== strpos( $frames, '@media (forced-colors: active)' );
+	}
+);
+
+check_case(
+	'the photo booth print: white stock with a hard shadow, the title as a centered caption in the body face',
+	static function () use ( $code ): bool {
+		$paper   = rule_body( $code, 'li.format-gallery .pk-card.k-photo.pk-card--gallery' );
+		$caption = rule_body( $code, '.pk-card.k-photo.pk-card--gallery .pk-title' );
+		return false !== strpos( $paper, 'background: var(--cr-white)' )
+			&& false !== strpos( $paper, 'box-shadow: var(--cr-shadow-hard)' )
+			&& false !== strpos( $caption, 'text-align: center' )
+			&& false !== strpos( $caption, 'text-transform: uppercase' )
+			&& false !== strpos( $caption, 'font-family: var(--cr-font-body)' );
 	}
 );
 

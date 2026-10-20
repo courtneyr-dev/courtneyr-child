@@ -47,6 +47,7 @@ require_once __DIR__ . '/inc/single-chicken.php';
 require_once __DIR__ . '/inc/stream-chicken.php';
 require_once __DIR__ . '/inc/photo.php';
 require_once __DIR__ . '/inc/single-photo.php';
+require_once __DIR__ . '/inc/gallery-zine.php';
 require_once __DIR__ . '/inc/stream-photo.php';
 require_once __DIR__ . '/inc/favorite.php';
 require_once __DIR__ . '/inc/single-favorite.php';

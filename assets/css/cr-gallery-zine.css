@@ -1,0 +1,715 @@
+/* Gallery single: a zine photo essay (inc/gallery-zine.php).
+   Courtney's brief (2026-10-19) sets the mix: zine 40 (photocopier-black
+   masthead, cut-paper title, halftone, misregistered spot-colour layers,
+   registration and crop marks), comic 20 (inked panels, gutters, numbered
+   frames, caption boxes), scrapbook and field journal 15 (paper stock, tape
+   on the featured print, the handwritten note), stamps 10 (the postmark),
+   stickers 8 (category labels), patches 7 (the kind label).
+   inc/gallery-zine.php packs the panels into full rows and hands each one
+   its column (--cr-col on 12 columns, --cr-col-t on 6); phones take one
+   column. Images are contained, never cropped. Paper stays paper in dark
+   mode, so the zine sets its own ink. */
+
+/* ---- Masthead: the H1 on photocopier black ---- */
+.cr-zine-single .cr-zine__masthead {
+	position: relative;
+	display: grid;
+	gap: var(--cr-space-sm);
+	justify-items: start;
+	max-width: none;
+	margin: 0 0 var(--cr-space-2xl);
+	padding: var(--cr-space-xl) var(--cr-space-xl) var(--cr-space-lg);
+	padding-inline-end: calc(var(--cr-space-xl) + 10rem);
+	background-color: var(--cr-photocopier-blk);
+	background-image: radial-gradient(var(--cr-russian-violet-soft) 1.2px, transparent 1.5px);
+	background-size: 7px 7px;
+	box-shadow: var(--cr-shadow-hard-2);
+	color: var(--cr-printer-ivory);
+}
+
+.cr-zine-single .cr-zine__labels {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cr-space-xs) var(--cr-space-sm);
+	margin: 0;
+}
+
+/* Category labels are stickers: yellow stock with a white die-cut edge. */
+.cr-zine-single .cr-zine__label {
+	display: inline-block;
+	padding: var(--cr-space-2xs) var(--cr-space-sm);
+	border: 3px solid var(--cr-white);
+	border-radius: var(--cr-radius-full);
+	background-color: var(--cr-selective-yellow);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	font-weight: 700;
+	line-height: 1.3;
+	text-decoration: none;
+	transform: rotate(var(--cr-rotate-2));
+	transition: background-color 120ms ease;
+}
+
+.cr-zine-single .cr-zine__label:nth-child(even) {
+	transform: rotate(var(--cr-rotate-1));
+}
+
+/* The kind label is a sewn patch: twill blue, a stitched edge. */
+.cr-zine-single .cr-zine__label.cr-zine__label--kind {
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	border: 3px solid var(--cr-cerulean);
+	border-radius: var(--cr-radius-sm);
+	background-color: var(--cr-sky-blue);
+	outline: 2px dashed var(--cr-russian-violet);
+	outline-offset: -7px;
+	font-family: var(--cr-font-accent);
+	letter-spacing: var(--cr-tracking-wide);
+	text-transform: uppercase;
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-zine-single .cr-zine__label:hover {
+	background-color: var(--cr-light-orange);
+}
+
+/* Cut-paper title: each line its own strip of gray stock. */
+.cr-zine-single .cr-zine__title {
+	margin: var(--cr-space-xs) 0 0;
+	font-family: var(--cr-font-accent);
+	font-size: clamp(2rem, 1.1rem + 3.4vw, 3.75rem);
+	font-weight: 800;
+	line-height: 1.3;
+	overflow-wrap: anywhere;
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-zine-single .cr-zine__title-paper {
+	padding: 0.02em 0.28em;
+	background-color: var(--cr-light-gray);
+	color: var(--cr-russian-violet);
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+}
+
+.cr-zine-single .cr-zine__facts {
+	margin: 0;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+}
+
+.cr-zine-single .cr-zine__count::before {
+	content: "/ " / "";
+	color: var(--cr-selective-yellow);
+}
+
+/* The postmark: an ink stamp of the post's own date and frame count. */
+.cr-zine-single .cr-zine__postmark {
+	position: absolute;
+	inset-block-start: var(--cr-space-lg);
+	inset-inline-end: var(--cr-space-lg);
+	display: grid;
+	place-content: center;
+	gap: var(--cr-space-2xs);
+	width: 7.5rem;
+	aspect-ratio: 1;
+	border: 4px double var(--cr-ut-orange);
+	border-radius: var(--cr-radius-full);
+	color: var(--cr-ut-orange);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-weight: 700;
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: 1.2;
+	text-align: center;
+	text-transform: uppercase;
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+/* Cancellation lines run off the stamp's left edge. */
+.cr-zine-single .cr-zine__postmark::before {
+	content: "";
+	position: absolute;
+	inset-block-start: 50%;
+	inset-inline-end: 85%;
+	width: 3.5rem;
+	height: 1.6rem;
+	margin-block-start: -0.8rem;
+	background: repeating-linear-gradient(180deg, var(--cr-ut-orange) 0 3px, transparent 3px 0.55rem);
+	pointer-events: none;
+}
+
+.cr-zine-single .cr-zine__postmark-date {
+	padding-block-end: var(--cr-space-2xs);
+	border-block-end: 2px solid var(--cr-ut-orange);
+}
+
+/* ---- The page: a warm newsprint sheet with registration marks ----
+   Paper stays paper in both schemes, so the sheet sets its own ink, and the
+   shadow and focus tokens follow it. */
+.cr-zine-single .cr-zine {
+	--cr-ink: var(--cr-russian-violet);
+	--cr-focus-halo: var(--cr-russian-violet);
+	--cr-shadow-hard-sm: 3px 3px 0 var(--cr-russian-violet);
+	--cr-shadow-hard: 4px 4px 0 var(--cr-russian-violet);
+	--cr-zine-note: var(--cr-russian-violet-soft);
+	position: relative;
+	box-sizing: border-box;
+	width: auto;
+	max-width: none;
+	margin: var(--cr-space-xl) 0 0;
+	padding: var(--cr-space-2xl) var(--cr-space-xl);
+	background-color: color-mix(in srgb, var(--cr-light-orange) 38%, var(--cr-printer-ivory));
+	background-image: var(--cr-fiber);
+	color: var(--cr-russian-violet);
+}
+
+.cr-zine-single .cr-zine::before,
+.cr-zine-single .cr-zine::after {
+	content: "";
+	position: absolute;
+	width: 1.5rem;
+	height: 1.5rem;
+	background:
+		radial-gradient(circle, transparent 0.36rem, var(--cr-russian-violet) 0.36rem 0.44rem, transparent 0.48rem),
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) center / 1px 100% no-repeat,
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) center / 100% 1px no-repeat;
+	pointer-events: none;
+}
+
+.cr-zine-single .cr-zine::before {
+	inset-block-start: var(--cr-space-xs);
+	inset-inline-end: var(--cr-space-xs);
+}
+
+.cr-zine-single .cr-zine::after {
+	inset-block-end: var(--cr-space-xs);
+	inset-inline-start: var(--cr-space-xs);
+}
+
+/* ---- Panels: photographs first, set on the sheet at their own ratios ----
+   inc/gallery-zine.php composes the gallery from a vocabulary of patterns
+   (solo, field-journal page, banner, diptych, essay steps, triptych, hero
+   with satellites, contact sheet) and hands each panel its column on the
+   desktop, tablet and phone grids and the space above its row, in steps of
+   --cr-zine-step. Rows carry no gap of their own. */
+.cr-zine-single .cr-zine__frames {
+	--cr-zine-gap: var(--cr-space-md);
+	container-type: inline-size;
+	--cr-zine-step: 1rem;
+	display: grid;
+	column-gap: var(--cr-zine-gap);
+	row-gap: 0;
+	align-items: start;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-zine-single .cr-zine__frame {
+	position: relative;
+	isolation: isolate;
+	display: flex;
+	flex-direction: column;
+	gap: var(--cr-space-2xs);
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+}
+
+/* The figure hugs its photograph, so plates and print edges follow the
+   picture when a tall one is held to the height cap. */
+.cr-zine-single .cr-zine__frame > .wp-block-image {
+	position: relative;
+	box-sizing: border-box;
+	width: fit-content;
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+}
+
+.cr-zine-single .cr-zine__frame > .wp-block-image :is(a, .wp-lightbox-container) {
+	display: block;
+}
+
+.cr-zine-single .cr-zine__frame img {
+	display: block;
+	width: auto;
+	max-width: 100%;
+	height: auto;
+	max-height: min(38rem, 85vh);
+	margin-inline: auto;
+	border-radius: 0;
+	object-fit: contain;
+}
+
+/* The anchor sits centred in its cell when the height cap narrows it. */
+.cr-zine-single .cr-zine__frame--anchor > .wp-block-image {
+	margin-inline: auto;
+}
+
+/* Contact frames centre on their strip of film. */
+.cr-zine-single .cr-zine__frame.cr-zine__frame--contact > .wp-block-image {
+	margin-inline: auto;
+}
+
+/* A missing frame: the image block's attachment is gone. The box keeps the
+   panel's place and the browser prints the real alt text inside it. */
+.cr-zine-single .cr-zine__frame.cr-zine__frame--missing > .wp-block-image {
+	width: 100%;
+}
+
+.cr-zine-single .cr-zine__frame.cr-zine__frame--missing img {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 8rem;
+	aspect-ratio: 4 / 3;
+	padding: var(--cr-space-md);
+	border: 2px dashed var(--cr-russian-violet);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+}
+
+/* Captions are annotations: the image block's own caption, set small under
+   the picture after a rule, like a contact-sheet note. */
+.cr-zine-single .cr-zine__frame figcaption {
+	display: flex;
+
+	/* A long caption wraps to the picture's width instead of widening it. */
+	contain: inline-size;
+	gap: var(--cr-space-xs);
+	max-width: 36rem;
+	margin: var(--cr-space-xs) 0 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--cr-zine-note);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+	font-style: italic;
+	line-height: 1.45;
+	text-align: start;
+}
+
+.cr-zine-single .cr-zine__frame figcaption::before {
+	content: "";
+	flex: none;
+	width: 1.25rem;
+	height: 1px;
+	margin-block-start: 0.7em;
+	background-color: currentcolor;
+}
+
+/* The sequence index: quiet type in the margin above each picture. */
+.cr-zine-single .cr-zine__num {
+	order: -1;
+	align-self: flex-start;
+	color: var(--cr-zine-note);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-weight: 700;
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: 1.4;
+}
+
+.cr-zine-single .cr-zine__of {
+	font-weight: 400;
+}
+
+.cr-zine-single .cr-zine__frame:only-child .cr-zine__num {
+	display: none;
+}
+
+/* The anchor: borderless and largest, a spot-colour plate printed off
+   register behind it, crop marks at its corners, the post date imprinted
+   like a camera's. */
+.cr-zine-single .cr-zine__frame--plate {
+	--cr-shadow-hard-2: 0.9rem 0.9rem 0 var(--cr-ut-orange);
+}
+
+.cr-zine-single .cr-zine__frame--plate:not(.cr-zine__frame--anchor) {
+	--cr-shadow-hard-2: -0.7rem -0.7rem 0 var(--cr-sky-blue);
+}
+
+/* The plate is printed on the photograph itself, so it never runs under a caption. */
+.cr-zine-single .cr-zine__frame.cr-zine__frame--plate img {
+	box-shadow: var(--cr-shadow-hard-2);
+}
+
+.cr-zine-single .cr-zine__frame--anchor > .wp-block-image::after {
+	content: "";
+	position: absolute;
+	inset: -1.2rem;
+	z-index: -2;
+	background:
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) top left / 0.8rem 1px,
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) top left / 1px 0.8rem,
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) top right / 0.8rem 1px,
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) top right / 1px 0.8rem,
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) bottom left / 0.8rem 1px,
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) bottom left / 1px 0.8rem,
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) bottom right / 0.8rem 1px,
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) bottom right / 1px 0.8rem;
+	background-repeat: no-repeat;
+	pointer-events: none;
+}
+
+.cr-zine-single .cr-zine__imprint {
+	position: absolute;
+	inset-block-start: var(--cr-space-sm);
+	inset-inline-end: var(--cr-space-sm);
+	z-index: 2;
+	padding: 0 var(--cr-space-2xs);
+	background-color: var(--cr-photocopier-blk);
+	color: var(--cr-ut-orange);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-weight: 700;
+	letter-spacing: var(--cr-tracking-wide);
+	pointer-events: none;
+}
+
+/* A print: a narrow white edge and a hard shadow. */
+.cr-zine-single .cr-zine__frame:is(.cr-zine__frame--print, .cr-zine__frame--taped) > .wp-block-image {
+	padding: var(--cr-space-xs) var(--cr-space-xs) 0;
+	background-color: var(--cr-white);
+	box-shadow: var(--cr-shadow-hard-sm);
+}
+
+.cr-zine-single .cr-zine__frame:is(.cr-zine__frame--print, .cr-zine__frame--taped) figcaption {
+	margin: 0;
+	padding: var(--cr-space-xs) 0;
+}
+
+.cr-zine-single .cr-zine__frame:is(.cr-zine__frame--print, .cr-zine__frame--taped) > .wp-block-image:not(:has(figcaption)) {
+	padding-block-end: var(--cr-space-xs);
+}
+
+/* A short caption on a print is written on its edge by hand. */
+.cr-zine-single .cr-zine__frame.cr-zine__frame--hand figcaption {
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-display);
+	font-size: var(--cr-text-base);
+	font-style: normal;
+	line-height: 1.7;
+}
+
+.cr-zine-single .cr-zine__frame.cr-zine__frame--hand figcaption::before {
+	display: none;
+}
+
+/* A taped print: the one panel in seven that tilts, held by a strip of tape. */
+.cr-zine-single .cr-zine__frame--taped {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-zine-single .cr-zine__frame--taped > .wp-block-image::after {
+	content: "";
+	position: absolute;
+	inset-block-start: -0.7rem;
+	inset-inline-start: 50%;
+	z-index: 3;
+	width: 5rem;
+	height: 1.3rem;
+	margin-inline-start: -2.5rem;
+	background-color: color-mix(in srgb, var(--cr-selective-yellow) 30%, var(--cr-printer-ivory));
+	transform: rotate(var(--cr-rotate-neg));
+	pointer-events: none;
+}
+
+/* A contact-sheet panel: the frame on a strip of black film stock, its
+   number and caption printed in the rebate. */
+.cr-zine-single .cr-zine__frame--contact {
+	align-self: stretch;
+
+	/* Frames meet across the gutters, so the run reads as one sheet of film. */
+	margin-inline: calc(var(--cr-zine-gap) / -2);
+	padding: var(--cr-space-lg) calc(var(--cr-zine-gap) / 2 + var(--cr-space-xs)) var(--cr-space-xs);
+	background-color: var(--cr-photocopier-blk);
+}
+
+.cr-zine-single .cr-zine__frame.cr-zine__frame--contact img {
+	max-height: 14rem;
+}
+
+.cr-zine-single .cr-zine__frame.cr-zine__frame--contact .cr-zine__num {
+	position: absolute;
+	inset-block-start: var(--cr-space-2xs);
+	inset-inline-start: var(--cr-space-xs);
+	color: var(--cr-selective-yellow);
+}
+
+.cr-zine-single .cr-zine__frame.cr-zine__frame--contact figcaption {
+	color: var(--cr-printer-ivory);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-style: normal;
+	letter-spacing: var(--cr-tracking-wide);
+	text-transform: uppercase;
+}
+
+/* ---- The gallery caption: a note under a rule, an arrow back up the page ---- */
+.cr-zine-single .cr-zine__note {
+	position: relative;
+	max-width: 40rem;
+	margin: var(--cr-space-2xl) 0 0;
+	padding: var(--cr-space-md) 0 0 3.5rem;
+	border-block-start: 2px dashed var(--cr-russian-violet);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-md);
+	line-height: 1.55;
+}
+
+.cr-zine-single .cr-zine__note::before {
+	content: "";
+	position: absolute;
+	inset-block-start: var(--cr-space-sm);
+	inset-inline-start: 0;
+	width: 2.6rem;
+	height: 2.6rem;
+	background-color: var(--cr-russian-violet);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M30 36C14 34 8 24 12 6'/%3E%3Cpath d='M5 12l7-7 6 8'/%3E%3C/svg%3E") center / contain no-repeat;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M30 36C14 34 8 24 12 6'/%3E%3Cpath d='M5 12l7-7 6 8'/%3E%3C/svg%3E") center / contain no-repeat;
+	pointer-events: none;
+}
+
+.cr-zine-single .cr-zine__note--hand {
+	font-family: var(--cr-font-display);
+	font-size: var(--cr-text-lg);
+	line-height: 1.8;
+}
+
+.cr-zine-single .cr-zine__note a {
+	color: var(--cr-russian-violet);
+}
+
+/* Links in a contact-sheet rebate print light on the film. */
+.cr-zine-single .cr-zine__frame.cr-zine__frame--contact figcaption a {
+	color: var(--cr-printer-ivory);
+}
+
+/* ---- Focus: the two-tone ring on the paper ---- */
+.cr-zine-single :is(.cr-zine, .cr-zine__masthead) :is(a, button):focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 6px var(--cr-focus-halo);
+}
+
+/* ---- Phones (to 599px): one column of photographs; only portraits pair up, and contact frames sit two to a row ---- */
+@media (max-width: 37.49rem) {
+
+	.cr-zine-single .cr-zine__masthead {
+		padding: var(--cr-space-lg) var(--cr-space-md) var(--cr-space-md);
+		padding-inline-end: var(--cr-space-md);
+	}
+
+	.cr-zine-single .cr-zine__postmark {
+		position: relative;
+		inset: auto;
+		justify-self: end;
+		width: 5.75rem;
+	}
+
+	.cr-zine-single .cr-zine__postmark::before {
+		display: none;
+	}
+
+	.cr-zine-single .cr-zine {
+		margin-inline: calc(var(--cr-space-md) * -1);
+		padding: var(--cr-space-xl) var(--cr-space-md);
+	}
+
+	.cr-zine-single .cr-zine__frames {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.cr-zine-single .cr-zine__frame {
+		grid-column: var(--cr-col-p, 1 / -1);
+		margin-block-start: calc(var(--cr-mt-p, 0) * var(--cr-zine-step));
+	}
+
+	/* A full-width anchor runs edge to edge, its plate printed below it. */
+	.cr-zine-single .cr-zine__frame--bleed {
+		--cr-shadow-hard-2: 0 0.6rem 0 var(--cr-ut-orange);
+		margin-inline: calc(var(--cr-space-md) * -1);
+	}
+
+	.cr-zine-single .cr-zine__frame--bleed .cr-zine__num,
+	.cr-zine-single .cr-zine__frame--bleed figcaption {
+		margin-inline: var(--cr-space-md);
+	}
+
+	.cr-zine-single .cr-zine__frame--anchor > .wp-block-image::after {
+		display: none;
+	}
+
+	/* Plates stay inside the screen edge. */
+	.cr-zine-single .cr-zine__frame--plate:not(.cr-zine__frame--anchor) {
+		--cr-shadow-hard-2: 0.5rem 0.5rem 0 var(--cr-sky-blue);
+	}
+
+	.cr-zine-single .cr-zine__frame img {
+		max-height: 75vh;
+	}
+}
+
+/* ---- Tablets (600 to 1023px): twelve fine columns; trios open on a full-width picture ---- */
+@media (min-width: 37.5rem) and (max-width: 63.99rem) {
+
+	.cr-zine-single .cr-zine__frames {
+		--cr-zine-gap: var(--cr-space-lg);
+		--cr-zine-step: 1.25rem;
+		grid-template-columns: repeat(12, minmax(0, 1fr));
+	}
+
+	.cr-zine-single .cr-zine__frame {
+		grid-column: var(--cr-col-t, 1 / -1);
+		margin-block-start: calc(var(--cr-mt-t, 0) * var(--cr-zine-step));
+	}
+
+	/* A justified row's pictures share one height at their own ratios. */
+	.cr-zine-single .cr-zine__frame--even-t img {
+		width: auto;
+		height: min(var(--cr-h-t), 38rem);
+		max-height: none;
+	}
+}
+
+/* ---- Desktop (1024px up): twenty-four fine columns; tight and loose spreads alternate ---- */
+@media (min-width: 64rem) {
+
+	.cr-zine-single .cr-zine {
+		padding: var(--cr-space-3xl) var(--cr-space-2xl) var(--cr-space-2xl);
+	}
+
+	.cr-zine-single .cr-zine__frames {
+		--cr-zine-gap: var(--cr-space-xl);
+		--cr-zine-step: 1.5rem;
+		grid-template-columns: repeat(24, minmax(0, 1fr));
+	}
+
+	.cr-zine-single .cr-zine__frame {
+		grid-column: var(--cr-col, 1 / -1);
+		grid-row: var(--cr-rows, auto);
+		margin-block-start: calc(var(--cr-mt, 0) * var(--cr-zine-step));
+	}
+
+	.cr-zine-single .cr-zine__frame--even-d img {
+		width: auto;
+		height: min(var(--cr-h), 38rem);
+		max-height: none;
+	}
+}
+
+/* ---- Relationships between panels (tablet and desktop) ---- */
+@media (min-width: 37.5rem) {
+
+	/* Pictures in a diptych, triptych or beside a hero share a bottom line. */
+	.cr-zine-single .cr-zine__frame--baseline {
+		align-self: end;
+	}
+
+	/* A lone picture sits centred; a pair leans toward the gutter between them. */
+	.cr-zine-single .cr-zine__frame--center {
+		justify-self: center;
+		width: fit-content;
+		max-width: 100%;
+	}
+
+	.cr-zine-single .cr-zine__frame--toward-end {
+		justify-self: end;
+		width: fit-content;
+		max-width: 100%;
+	}
+
+	/* A field-journal page: the caption sits beside the picture as a margin note. */
+	.cr-zine-single .cr-zine__frame--journal > .wp-block-image {
+		display: grid;
+		grid-template-columns: minmax(0, 4fr) minmax(9rem, 1fr);
+		column-gap: var(--cr-space-lg);
+		align-items: end;
+		width: 100%;
+	}
+
+	.cr-zine-single .cr-zine__frame--journal > .wp-block-image > :not(figcaption, .cr-zine__imprint) {
+		grid-column: 1;
+		justify-self: end;
+	}
+
+	.cr-zine-single .cr-zine__frame.cr-zine__frame--journal figcaption {
+		flex-direction: column;
+		grid-row: 1;
+		grid-column: 2;
+		max-width: 16rem;
+		margin: 0 0 var(--cr-space-sm);
+		contain: none;
+	}
+
+	/* Crop marks belong to the picture, not the page with its note. */
+	.cr-zine-single .cr-zine__frame--journal > .wp-block-image::after {
+		display: none;
+	}
+
+	.cr-zine-single .cr-zine__frame--journal .cr-zine__imprint {
+		inset-inline-start: var(--cr-space-sm);
+		inset-inline-end: auto;
+	}
+}
+
+/* Wide screens: the anchor runs off the sheet's edge into the page margin. */
+@media (min-width: 80rem) {
+
+	.cr-zine-single .cr-zine__frame--edge {
+		margin-inline-start: calc(var(--cr-space-2xl) * -1 - var(--cr-space-lg));
+	}
+
+	/* Its index and caption stay on the paper: off the sheet, violet type would sit on the page's dark ground. */
+	.cr-zine-single .cr-zine__frame--edge .cr-zine__num,
+	.cr-zine-single .cr-zine__frame--edge figcaption {
+		margin-inline-start: calc(var(--cr-space-lg) + var(--cr-space-xs));
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.cr-zine-single .cr-zine__label {
+		transition: none;
+	}
+}
+
+/* ---- Forced colors: bordered panels, no decoration ---- */
+@media (forced-colors: active) {
+
+	.cr-zine-single :is(.cr-zine, .cr-zine__masthead, .cr-zine__frame--print > .wp-block-image, .cr-zine__frame--taped > .wp-block-image, .cr-zine__frame--contact, .cr-zine__label, .cr-zine__imprint) {
+		border: 2px solid CanvasText;
+		background-color: Canvas;
+		background-image: none;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-zine-single .cr-zine__title-paper {
+		background-color: Canvas;
+		color: CanvasText;
+	}
+
+	.cr-zine-single :is(.cr-zine, .cr-zine__frame > .wp-block-image, .cr-zine__note, .cr-zine__postmark)::before,
+	.cr-zine-single :is(.cr-zine, .cr-zine__frame > .wp-block-image)::after {
+		display: none;
+	}
+
+	.cr-zine-single .cr-zine__postmark {
+		border-color: CanvasText;
+		color: CanvasText;
+	}
+
+	.cr-zine-single :is(.cr-zine__num, .cr-zine__frame figcaption) {
+		color: CanvasText;
+	}
+}

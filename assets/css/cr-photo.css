@@ -314,25 +314,6 @@ body.cr-photo-single :not(.pkiw-projector) > .pkiw-projector__mount {
 	margin-block: var(--cr-space-lg);
 }
 
-/* Mount slots: two decorative notches at the mount's sides. */
-body.cr-photo-single .pkiw-projector__mount::before,
-body.cr-photo-single .pkiw-projector__mount::after {
-	content: "";
-	position: absolute;
-	inset-block: 38%;
-	width: 0.45rem;
-	border-radius: var(--cr-radius-full);
-	background-color: var(--cr-russian-violet);
-}
-
-body.cr-photo-single .pkiw-projector__mount::before {
-	inset-inline-start: var(--cr-space-xs);
-}
-
-body.cr-photo-single .pkiw-projector__mount::after {
-	inset-inline-end: var(--cr-space-xs);
-}
-
 body.cr-photo-single .pkiw-projector__mount img {
 	display: block;
 	width: 100%;
@@ -560,6 +541,12 @@ body.cr-photo-single .pkiw-photo-place {
 	}
 }
 
+/* A single-image photo post: its framed print sits centred on the page. */
+body.cr-photo-single .wp-block-image[class*="is-style-cr-photo-"]:not(.cr-zine *) {
+	max-width: 40rem;
+	margin: var(--cr-space-xl) auto;
+}
+
 /* ============================================================
    Stream: a single picture is a polaroid, a gallery-format post a
    photo booth strip (inc/stream-gallery.php paints the strip's paper
@@ -670,13 +657,22 @@ body.cr-photo-single .pkiw-photo-place {
 	outline: none;
 }
 
-/* The booth strip: frames on white print stock, a stamped date. */
-:is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .cr-booth {
-	margin: 0;
+/* The booth print: four frames on white stock, the title centered under them as
+   the print's caption, the date small beneath it. */
+.cr-stream-page .wp-block-post-template > li.format-gallery .pk-card.k-photo.pk-card--gallery {
+	padding: 1.25rem 1.25rem 1.75rem;
+	background: var(--cr-white);
+	box-shadow: var(--cr-shadow-hard);
 }
 
-:is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .cr-booth__footer {
-	margin-block-end: 1rem;
+/* Block margins only: the homepage lane centres a narrower strip with margin-inline. */
+:is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .cr-booth {
+	margin-block: 0;
+}
+
+:is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .cr-booth__frames {
+	padding: 0;
+	gap: 0.55rem;
 }
 
 :is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .cr-booth__img {
@@ -686,42 +682,44 @@ body.cr-photo-single .pkiw-photo-place {
 	border: 0;
 	border-radius: 0;
 	box-shadow: none;
-	outline: 1px solid color-mix(in srgb, var(--cr-russian-violet) 30%, transparent);
-	outline-offset: -1px;
 	object-fit: cover;
 }
 
 :is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .pk-caption {
-	padding: 0.65rem 0.1rem 0;
+	padding: 1.1rem 0.75rem 0;
+	text-align: center;
 }
 
 :is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .pk-title {
-	font-size: 1rem;
-	line-height: 1.4;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: 0.8rem;
+	font-weight: var(--cr-weight-regular);
+	line-height: 1.55;
+	letter-spacing: var(--cr-tracking-widest);
+	text-align: center;
+	text-transform: uppercase;
 }
 
 :is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .pk-sub {
-	padding: 0.4rem 0 0;
+	padding: 0.45rem 0 0;
+	text-align: center;
 }
 
 :is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery .pk-stream-date time {
-	display: inline-block;
-	padding: 0.1rem 0.4rem;
-	border: 1px solid color-mix(in srgb, var(--cr-russian-violet) 70%, transparent);
-	border-radius: 2px;
-	color: var(--cr-russian-violet);
+	padding: 0;
+	border: 0;
+	color: var(--cr-russian-violet-soft);
 	font-family: var(--cr-font-mono);
 	font-size: 0.75rem;
-	font-weight: var(--cr-weight-bold);
+	font-weight: var(--cr-weight-regular);
 	letter-spacing: var(--cr-tracking-eyebrow);
-	transform: rotate(var(--cr-rotate-1));
 }
 
-/* The more line is text on a photo strip: the title link covers the strip. */
-:is(body, .cr-stream-page) .pk-card.k-photo.pk-card--gallery span.cr-booth__more-link {
-	text-decoration: underline;
-	text-decoration-thickness: 2px;
-	text-underline-offset: 0.18em;
+/* Homepage Field Notes lane: the strip's 10rem frames sit centred on the print
+   (cr-home-sections.css sets the width; the print rules above reset margins). */
+.cr-fieldnotes .cr-home-stream .pk-card.k-photo.pk-card--gallery .cr-booth {
+	margin-inline: auto;
 }
 
 /* Homepage Field Notes lane: the polaroid matches the strip's width. */
@@ -771,9 +769,7 @@ body.cr-photo-single .pkiw-photo-place {
 	}
 
 	.cr-photo-sheets .pkiw-group__heading::before,
-	body.cr-photo-single .pkiw-projector::before,
-	body.cr-photo-single .pkiw-projector__mount::before,
-	body.cr-photo-single .pkiw-projector__mount::after {
+	body.cr-photo-single .pkiw-projector::before {
 		display: none;
 	}
 

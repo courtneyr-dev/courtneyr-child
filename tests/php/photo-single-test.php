@@ -11,7 +11,29 @@ declare( strict_types = 1 );
 require __DIR__ . '/photo-bootstrap.php';
 
 use function Courtneyr\Child\SinglePhoto\projector_labelledby;
+use function Courtneyr\Child\SinglePhoto\framed_print;
+use const Courtneyr\Child\SinglePhoto\FRAMES;
+
+if ( ! function_exists( 'wp_dequeue_script' ) ) {
+	function wp_dequeue_script( $handle ): void {
+		$GLOBALS['cr_photo_dequeued'][] = 'script:' . $handle;
+	}
+	function wp_dequeue_style( $handle ): void {
+		$GLOBALS['cr_photo_dequeued'][] = 'style:' . $handle;
+	}
+}
+if ( ! function_exists( 'wp_enqueue_block_style' ) ) {
+	function wp_enqueue_block_style( $block, $args ): void {
+		$GLOBALS['cr_photo_block_styles'][] = array( $block, $args );
+	}
+}
+
 use function Courtneyr\Child\SinglePhoto\title_id;
+
+/** The plugin's mount for one loose image: core's figure with the mount class added. */
+function cr_photo_loose_mount( string $classes = 'wp-block-image size-large' ): string {
+	return '<figure class="' . $classes . ' pkiw-projector__mount"><img src="https://example.test/uploads/901.jpg" alt="A dock" class="wp-image-901 u-photo" loading="eager" /><figcaption class="wp-element-caption">The dock.</figcaption></figure>';
+}
 
 /** A photo single request for $id with the template's H1 block. */
 function cr_photo_single_request( int $id = 42, string $title = 'Blue Hour at Example Lake' ): WP_Post {
@@ -114,6 +136,66 @@ cr_photo_group(
 		cr_photo_same( array( 'note' ), array_keys( \Courtneyr\Child\SinglePhoto\editor_parity_kinds( array( 'note' => array( 'classes' => array() ) ) ) ), 'no photo entry is invented' );
 		$again = \Courtneyr\Child\SinglePhoto\editor_parity_kinds( $kinds );
 		cr_photo_same( $kinds['photo']['classes'], $again['photo']['classes'], 'idempotent' );
+	}
+);
+
+cr_photo_group(
+	'five photo frames are block styles on the core Image block, painted from their own sheet wherever an image renders',
+	static function (): void {
+		cr_photo_assert( cr_photo_hooked( 'init', 'Courtneyr\\Child\\SinglePhoto\\register_frame_styles' ), 'registered on init' );
+		$GLOBALS['cr_photo_styles']            = array();
+		$GLOBALS['cr_photo_block_styles']      = array();
+		\Courtneyr\Child\SinglePhoto\register_frame_styles();
+		$names = array_map( static fn( array $s ): string => $s[0] . ' ' . $s[1]['name'], $GLOBALS['cr_photo_styles'] );
+		cr_photo_same( array( 'polaroid', 'taped', 'corners', 'postcard', 'film' ), array_keys( FRAMES ), 'the five frames' );
+		cr_photo_same( array_map( static fn( string $k ): string => 'core/image cr-photo-' . $k, array_keys( FRAMES ) ), $names, 'one block style each' );
+		cr_photo_same( 'core/image', $GLOBALS['cr_photo_block_styles'][0][0] ?? '', 'the frame sheet loads with the Image block' );
+		cr_photo_contains( 'assets/css/cr-photo-frames.css', (string) ( $GLOBALS['cr_photo_block_styles'][0][1]['src'] ?? '' ), 'from cr-photo-frames.css' );
+	}
+);
+
+cr_photo_group(
+	'a single-image photo post prints its picture in a frame: the picked style, or one seeded by the post',
+	static function (): void {
+		cr_photo_assert( cr_photo_hooked( 'render_block_core/image', 'Courtneyr\\Child\\SinglePhoto\\framed_print', 11, 3 ), 'after the plugin mount (10)' );
+		cr_photo_single_request();
+		$GLOBALS['cr_photo_dequeued'] = array();
+		$html = framed_print( cr_photo_loose_mount(), array( 'blockName' => 'core/image', 'attrs' => array( 'id' => 901 ) ), new WP_Block( array( 'postId' => 42 ) ) );
+		cr_photo_not_contains( 'pkiw-projector__mount', $html, 'no mount' );
+		cr_photo_assert( 1 === preg_match( '/^<figure class="wp-block-image size-large is-style-cr-photo-(polaroid|taped|corners|postcard|film)"/', $html ), 'one frame style on the figure' );
+		cr_photo_contains( 'u-photo', $html, 'u-photo kept' );
+		cr_photo_contains( 'The dock.', $html, 'caption kept' );
+		cr_photo_same( $html, framed_print( cr_photo_loose_mount(), array( 'blockName' => 'core/image', 'attrs' => array( 'id' => 901 ) ), new WP_Block( array( 'postId' => 42 ) ) ), 'stable per post' );
+		cr_photo_assert( in_array( 'style:pkiw-photo-projector', $GLOBALS['cr_photo_dequeued'], true ), 'the mount styles are dequeued' );
+
+		$picked = framed_print( cr_photo_loose_mount( 'wp-block-image size-large is-style-cr-photo-film' ), array( 'blockName' => 'core/image', 'attrs' => array( 'id' => 901, 'className' => 'is-style-cr-photo-film' ) ), new WP_Block( array( 'postId' => 42 ) ) );
+		cr_photo_same( 1, substr_count( $picked, 'is-style-cr-photo-' ), 'a picked frame is kept, not doubled' );
+		cr_photo_contains( 'is-style-cr-photo-film', $picked, 'the picked frame wins' );
+
+		$seen = array();
+		for ( $id = 300; $id < 340; $id++ ) {
+			cr_photo_single_request( $id );
+			preg_match( '/is-style-cr-photo-([a-z]+)/', framed_print( cr_photo_loose_mount(), array( 'blockName' => 'core/image', 'attrs' => array( 'id' => 901 ) ), new WP_Block( array( 'postId' => $id ) ) ), $m );
+			$seen[ $m[1] ?? '' ] = true;
+		}
+		cr_photo_assert( count( $seen ) >= 4 && ! isset( $seen[''] ), 'the seed spreads over the frames' );
+	}
+);
+
+cr_photo_group(
+	'the framed print leaves everything else alone',
+	static function (): void {
+		$block = array( 'blockName' => 'core/image', 'attrs' => array( 'id' => 901 ) );
+		cr_photo_single_request();
+		$plain = '<figure class="wp-block-image"><img src="x" alt="" /></figure>';
+		cr_photo_same( $plain, framed_print( $plain, $block, new WP_Block( array( 'postId' => 42 ) ) ), 'an image the plugin did not mount' );
+		cr_photo_reset();
+		cr_photo_same( cr_photo_loose_mount(), framed_print( cr_photo_loose_mount(), $block, new WP_Block( array( 'postId' => 42 ) ) ), 'not a single' );
+		cr_photo_single_request();
+		cr_photo_same( cr_photo_loose_mount(), framed_print( cr_photo_loose_mount(), $block, new WP_Block( array( 'postId' => 77 ) ) ), 'not the queried post' );
+		cr_photo_single_request();
+		$GLOBALS['cr_photo_request']['protected'][42] = true;
+		cr_photo_same( cr_photo_loose_mount(), framed_print( cr_photo_loose_mount(), $block, new WP_Block( array( 'postId' => 42 ) ) ), 'password protected' );
 	}
 );
 

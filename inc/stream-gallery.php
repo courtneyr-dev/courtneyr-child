@@ -222,15 +222,16 @@ function render_stamps( \WP_Post $post, int $total ): string {
  * any image WordPress prints. Only the first frame loads eagerly; the rest
  * are lazy like the thumbnails they replace.
  *
- * A photo card's only link is its title, stretched over the card, so there
- * the more line is plain text; other kinds keep it as a link.
+ * A photo post prints as a plain booth print: the frames only, with the
+ * card's own title and date as its caption, and no footer, count, stamps
+ * or more line. Other kinds keep the full footer.
  *
- * @param \WP_Post $post      Post being rendered.
- * @param int[]    $ids       Attachment IDs in source order.
- * @param bool     $more_link Whether the more line is a link.
+ * @param \WP_Post $post  Post being rendered.
+ * @param int[]    $ids   Attachment IDs in source order.
+ * @param bool     $photo_print Whether this is a photo post's plain print.
  * @return string Strip markup, or '' when no image resolves to markup.
  */
-function render_strip( \WP_Post $post, array $ids, bool $more_link = true ): string {
+function render_strip( \WP_Post $post, array $ids, bool $photo_print = false ): string {
 	$total   = count( $ids );
 	$visible = array_slice( $ids, 0, FRAME_LIMIT );
 	$frames  = '';
@@ -268,6 +269,9 @@ function render_strip( \WP_Post $post, array $ids, bool $more_link = true ): str
 	$out  = '<div class="pk-media pk-media--stream cr-booth">';
 	$out .= '<ol class="cr-booth__frames">' . $frames . '</ol>';
 	$out .= '</div>';
+	if ( $photo_print ) {
+		return $out;
+	}
 
 	$out .= '<div class="cr-booth__footer">';
 	if ( '' !== $note ) {
@@ -294,18 +298,7 @@ function render_strip( \WP_Post $post, array $ids, bool $more_link = true ): str
 		. '<span class="cr-booth__frames-count">' . esc_html( $count ) . '</span>'
 		. '</p>';
 
-	if ( $remaining > 0 && ! $more_link ) {
-		$out .= '<p class="cr-booth__more"><span class="cr-booth__more-link">'
-			. esc_html(
-				sprintf(
-					/* translators: %d: number of frames not shown on the stream. */
-					_n( '+ %d more frame', '+ %d more frames', $remaining, 'courtneyr-child' ),
-					$remaining
-				)
-			)
-			. '<span class="cr-booth__arrow" aria-hidden="true"> →</span>'
-			. '</span></p>';
-	} elseif ( $remaining > 0 ) {
+	if ( $remaining > 0 ) {
 		$out .= '<p class="cr-booth__more"><a class="cr-booth__more-link" href="' . esc_url( $permalink ) . '">'
 			. esc_html(
 				sprintf(
@@ -381,7 +374,7 @@ function booth_strip_card( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
-	$strip = render_strip( $post, gallery_image_ids( $post ), ! $is_photo );
+	$strip = render_strip( $post, gallery_image_ids( $post ), $is_photo );
 	if ( '' === $strip ) {
 		return $html;
 	}

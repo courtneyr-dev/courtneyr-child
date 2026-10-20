@@ -1,0 +1,197 @@
+/* Photo frames: block styles on the core Image block (inc/single-photo.php FRAMES).
+   Each frame is a real print: Polaroid, Taped print, Photo corners, Postcard and Film frame.
+   Loaded with the Image block wherever it renders; the scrapbook page and the photo single
+   pick one per picture when the author has not. Paper stays paper in dark mode. */
+
+/* ---- Shared: every frame is a print with its own ink ---- */
+.wp-block-image:is(.is-style-cr-photo-polaroid, .is-style-cr-photo-taped, .is-style-cr-photo-corners, .is-style-cr-photo-postcard, .is-style-cr-photo-film) {
+	position: relative;
+	box-sizing: border-box;
+	max-width: 100%;
+	color: var(--cr-russian-violet);
+}
+
+.wp-block-image:is(.is-style-cr-photo-polaroid, .is-style-cr-photo-taped, .is-style-cr-photo-corners, .is-style-cr-photo-postcard, .is-style-cr-photo-film) img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+.wp-block-image:is(.is-style-cr-photo-polaroid, .is-style-cr-photo-taped, .is-style-cr-photo-corners, .is-style-cr-photo-postcard) figcaption {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-display);
+	font-size: 0.95rem;
+	line-height: 1.45;
+}
+
+/* ---- Polaroid: white stock, the thick lower edge holds the handwriting ---- */
+.wp-block-image.is-style-cr-photo-polaroid {
+	padding: 0.9rem 0.9rem 0;
+	background-color: var(--cr-white);
+	box-shadow: var(--cr-shadow-hard);
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.wp-block-image.is-style-cr-photo-polaroid figcaption {
+	min-height: 2rem;
+	padding: 0.9rem 0.5rem 1.3rem;
+	text-align: center;
+}
+
+.wp-block-image.is-style-cr-photo-polaroid:not(:has(figcaption)) {
+	padding-block-end: 3.4rem;
+}
+
+/* ---- Taped print: a white border, two strips of tape across the top corners ---- */
+.wp-block-image.is-style-cr-photo-taped {
+	padding: 0.55rem;
+	background-color: var(--cr-white);
+	box-shadow: var(--cr-shadow-hard);
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.wp-block-image.is-style-cr-photo-taped::before,
+.wp-block-image.is-style-cr-photo-taped::after {
+	content: "";
+	position: absolute;
+	inset-block-start: -0.55rem;
+	z-index: 2;
+	width: 3.6rem;
+	height: 1.15rem;
+	background-color: var(--cr-tape);
+	pointer-events: none;
+}
+
+.wp-block-image.is-style-cr-photo-taped::before {
+	inset-inline-start: -0.9rem;
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.wp-block-image.is-style-cr-photo-taped::after {
+	inset-inline-end: -0.9rem;
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.wp-block-image.is-style-cr-photo-taped figcaption {
+	padding: 0.6rem 0.2rem 0.2rem;
+	text-align: center;
+}
+
+/* ---- Photo corners: the print held to the page by four ink corner tabs ---- */
+.wp-block-image.is-style-cr-photo-corners {
+	margin-block-end: 2.4rem;
+	padding: 0.3rem;
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.wp-block-image.is-style-cr-photo-corners::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background:
+		linear-gradient(135deg, var(--cr-russian-violet) 1.1rem, transparent 1.1rem) top left / 2.2rem 2.2rem,
+		linear-gradient(225deg, var(--cr-russian-violet) 1.1rem, transparent 1.1rem) top right / 2.2rem 2.2rem,
+		linear-gradient(45deg, var(--cr-russian-violet) 1.1rem, transparent 1.1rem) bottom left / 2.2rem 2.2rem,
+		linear-gradient(315deg, var(--cr-russian-violet) 1.1rem, transparent 1.1rem) bottom right / 2.2rem 2.2rem;
+	background-repeat: no-repeat;
+	pointer-events: none;
+}
+
+.wp-block-image.is-style-cr-photo-corners figcaption {
+	position: absolute;
+	inset-block-start: 100%;
+	inset-inline: 0;
+	padding-block-start: 0.5rem;
+	text-align: center;
+}
+
+/* ---- Postcard: an ivory card with a stamp in its corner ---- */
+.wp-block-image.is-style-cr-photo-postcard {
+	padding: 0.8rem 0.8rem 0.6rem;
+	background-color: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.wp-block-image.is-style-cr-photo-postcard::after {
+	content: "";
+	position: absolute;
+	inset-block-start: 1.4rem;
+	inset-inline-end: 1.4rem;
+	z-index: 2;
+	width: 2.6rem;
+	height: 3rem;
+	border: 0.3rem dotted var(--cr-white);
+	background-color: var(--cr-sky-blue);
+	box-shadow: var(--cr-shadow-hard-sm);
+	transform: rotate(var(--cr-rotate-2));
+	pointer-events: none;
+}
+
+.wp-block-image.is-style-cr-photo-postcard figcaption {
+	padding: 0.6rem 0.2rem 0.1rem;
+	text-align: start;
+}
+
+/* ---- Film frame: one frame of 35mm stock, sprockets above and below ---- */
+.wp-block-image.is-style-cr-photo-film {
+	padding: 1.5rem 0.8rem;
+	background-color: var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-printer-ivory);
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.wp-block-image.is-style-cr-photo-film::before,
+.wp-block-image.is-style-cr-photo-film::after {
+	content: "";
+	position: absolute;
+	inset-inline: 0.5rem;
+	height: 0.55rem;
+	background: repeating-linear-gradient(90deg, var(--cr-printer-ivory) 0 0.55rem, transparent 0.55rem 1.15rem);
+	pointer-events: none;
+}
+
+.wp-block-image.is-style-cr-photo-film::before {
+	inset-block-start: 0.45rem;
+}
+
+.wp-block-image.is-style-cr-photo-film::after {
+	inset-block-end: 0.45rem;
+}
+
+.wp-block-image.is-style-cr-photo-film figcaption {
+	margin: 0;
+	padding: 0.5rem 0.2rem 0;
+	color: var(--cr-printer-ivory);
+	font-family: var(--cr-font-mono);
+	font-size: 0.75rem;
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-align: center;
+	text-transform: uppercase;
+}
+
+/* ---- Forced colors: a bordered print, no decoration ---- */
+@media (forced-colors: active) {
+
+	.wp-block-image:is(.is-style-cr-photo-polaroid, .is-style-cr-photo-taped, .is-style-cr-photo-corners, .is-style-cr-photo-postcard, .is-style-cr-photo-film) {
+		border: 2px solid CanvasText;
+		background-color: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.wp-block-image:is(.is-style-cr-photo-taped, .is-style-cr-photo-corners, .is-style-cr-photo-postcard, .is-style-cr-photo-film)::before,
+	.wp-block-image:is(.is-style-cr-photo-taped, .is-style-cr-photo-corners, .is-style-cr-photo-postcard, .is-style-cr-photo-film)::after {
+		display: none;
+	}
+
+	.wp-block-image:is(.is-style-cr-photo-polaroid, .is-style-cr-photo-taped, .is-style-cr-photo-corners, .is-style-cr-photo-postcard, .is-style-cr-photo-film) figcaption {
+		color: CanvasText;
+	}
+}
