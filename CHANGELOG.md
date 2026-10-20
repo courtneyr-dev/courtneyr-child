@@ -9,8 +9,31 @@ What you see change on courtneyr.dev:
 - Gallery singles carry zine and field-journal pieces in the page margins on wide screens: halftone, a taped legal-pad scrap, ink spatter, a postmark, a sewn patch, index ticks and a fold. The post ID picks one of three arrangements. The gallery sits on a second sheet of graph paper held with washi tape, and related posts open on a torn, taped edge. Phones keep the paper and tape and drop the margin pieces (#192).
 - On a gallery single with likes, bookmarks or reposts, the reactions sit on a taped scrap beside the newsletter band, which turns to graph paper. The scrap shows a count for each kind ("3 likes" to a screen reader) above the avatar pile, which keeps each response's link (#192).
 - A single with no likes, bookmarks or reposts no longer leaves an empty band between the post and the newsletter (#191).
+- A wish clipping on the Stream shows its torn top edge in light mode, and its chips and date line up with the title (#185).
+- On the Stream, a single photo prints as a polaroid again and a gallery photo post as a photo booth strip, as before W3. "+N more frames" on a strip is text, so each Stream item keeps one link (#186).
+- /kind/quote/ prints each quote as the single's pinned sheet: pin, the full quote with its citation, handwritten at 120 words or fewer, and the date. The Stream keeps its preview note (#187).
 
 Under the hood: the empty-reactions drop moved from inc/like.php to the shared single filters in inc/post-kinds.php. inc/gallery-zine.php and assets/css/cr-gallery-zine.css are new, and assets/css/cr-photo-frames.css adds the frame styles. On gallery singles, IndieBlocks' facepile gets three count-only blocks ahead of its avatar block through render_block_data.
+
+## 0.7.117
+
+What you see change on courtneyr.dev:
+
+- The front page also loads cr-home-sections.css, cr-paper.css and the kind sheets that survive pruning without blocking the first paint. Measured on Pantheon test, the front page went from 30 cr-* stylesheets to 7, none render-blocking, and throttled LCP from 4.26 s to about 2.5 s (#193).
+
+## 0.7.116
+
+What you see change on courtneyr.dev:
+
+- The front page loads cr-post-kinds.css without blocking the first paint: the stylesheet swaps in from print media, with a `<noscript>` copy. With the sheet blocked outright, the first viewport at 412 and 1440 px stayed pixel-identical, so nothing on screen waits for it. /stream/ keeps it render-blocking (#193).
+
+## 0.7.115
+
+What you see change on courtneyr.dev:
+
+- The front page and /stream/ load only the kind stylesheets their cards use, not all of them. On 2026-10-19 that was 26 render-blocking cr-*.css files on the front page for cards of five kinds (#193).
+
+Under the hood: inc/stream-style-pruning.php records the classes of every rendered block and dequeues a kind sheet when none of its distinctive classes rendered. Shared sheets, generic classes and sheets with no distinctive class are never pruned. tests/playwright/stream-style-pruning.spec.mjs is the contract.
 
 ## 0.7.114
 
