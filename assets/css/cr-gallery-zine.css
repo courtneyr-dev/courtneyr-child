@@ -1240,7 +1240,7 @@
 
 /* A handwritten note in the band above the sheet, with a heart. */
 .cr-zine-single .cr-zine__hand {
-	inset-block-end: calc(100% + var(--cr-space-sm));
+	inset-block-end: calc(100% + var(--cr-space-lg));
 	inset-inline-end: var(--cr-space-xl);
 	max-width: 16rem;
 	padding-inline-end: 1.75rem;
