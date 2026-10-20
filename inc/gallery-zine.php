@@ -1008,3 +1008,187 @@ function enqueue_styles(): void {
 	);
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_styles' );
+
+/**
+ * Which arrangement of page ephemera a post gets, fixed by its ID so a post
+ * keeps its page and neighbouring posts differ.
+ *
+ * @param int $post_id Post ID.
+ * @return string a, b or c.
+ */
+function variant( int $post_id ): string {
+	return array( 'a', 'b', 'c' )[ $post_id % 3 ];
+}
+
+/**
+ * The page around the zine: one decorative layer of empty spans at the end of
+ * the post content (halftone, a torn field-note scrap, ink speckle, a
+ * postmark, a sewn patch, contact-sheet ticks, a fold). The CSS draws and
+ * places each one, in the margins only where the screen has margins. Out of
+ * the accessibility tree and never focusable.
+ *
+ * @param string               $html  Rendered post content.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function ephemera( string $html, array $block ): string {
+	if ( ! str_contains( (string) ( $block['attrs']['className'] ?? '' ), 'single-post__content' ) ) {
+		return $html;
+	}
+	$post = zine_post();
+	if ( null === $post || other_lane_holds( $post ) ) {
+		return $html;
+	}
+	$layer = '<div class="cr-zine-ephemera cr-zine-ephemera--' . variant( $post->ID ) . '" aria-hidden="true">';
+	foreach ( array( 'halftone', 'scrap', 'speckle', 'postmark', 'patch', 'ticks', 'fold' ) as $piece ) {
+		$layer .= '<span class="cr-zine-ephemera__' . $piece . '"></span>';
+	}
+	$layer .= '</div>';
+	$close  = strrpos( $html, '</' );
+	return false === $close ? $html . $layer : substr( $html, 0, $close ) . $layer . substr( $html, $close );
+}
+add_filter( 'render_block_core/post-content', __NAMESPACE__ . '\\ephemera', 21, 2 );
+
+/**
+ * On a zine single, IndieBlocks' facepile opens on a count row: one
+ * count-only facepile-content block per kind (like, bookmark, repost),
+ * IndieBlocks' own block and query, ahead of the avatar pile, which stays so
+ * each response keeps its h-cite link. A kind with no responses prints
+ * nothing, so no count is invented.
+ *
+ * @param array<string, mixed> $parsed Parsed block.
+ * @return array<string, mixed>
+ */
+function count_reactions( array $parsed ): array {
+	if ( 'indieblocks/facepile' !== ( $parsed['blockName'] ?? '' ) || null === zine_post() ) {
+		return $parsed;
+	}
+	foreach ( (array) ( $parsed['innerBlocks'] ?? array() ) as $inner ) {
+		if ( ! empty( $inner['attrs']['countOnly'] ) ) {
+			return $parsed;
+		}
+	}
+	$blocks  = array();
+	$content = array();
+	$index   = 0;
+	foreach ( (array) ( $parsed['innerContent'] ?? array() ) as $chunk ) {
+		if ( null !== $chunk ) {
+			$content[] = $chunk;
+			continue;
+		}
+		$inner = $parsed['innerBlocks'][ $index++ ] ?? null;
+		if ( null === $inner ) {
+			continue;
+		}
+		if ( 'indieblocks/facepile-content' !== ( $inner['blockName'] ?? '' ) ) {
+			$blocks[]  = $inner;
+			$content[] = null;
+			continue;
+		}
+		foreach ( array( 'like', 'bookmark', 'repost' ) as $kind ) {
+			$attrs                = array(
+				'countOnly' => true,
+				'icons'     => true,
+				'type'      => array( $kind ),
+			);
+			$count                = $inner;
+			$count['attrs']       = array_merge( (array) ( $inner['attrs'] ?? array() ), $attrs );
+			$count['innerBlocks'] = array();
+			$blocks[]             = $count;
+			$content[]            = null;
+		}
+		$blocks[]  = $inner;
+		$content[] = null;
+	}
+	$parsed['innerBlocks']  = $blocks;
+	$parsed['innerContent'] = $content;
+	return $parsed;
+}
+add_filter( 'render_block_data', __NAMESPACE__ . '\\count_reactions' );
+
+/**
+ * Name what each IndieBlocks count counts: its icon is aria-hidden, so a
+ * screen reader would otherwise hear only "24".
+ *
+ * @param string $html Rendered facepile-content block.
+ * @return string
+ */
+function label_counts( string $html ): string {
+	if ( ! str_contains( $html, 'indieblocks-count' ) ) {
+		return $html;
+	}
+	return (string) preg_replace_callback(
+		'#(<div class="indieblocks-count"><svg class="icon indieblocks-icon-(like|bookmark|repost)".*?</svg>\s*(\d+))</div>#s',
+		static function ( array $m ): string {
+			$n      = (int) $m[3];
+			$labels = array(
+				/* translators: Screen-reader label after a count of likes. */
+				'like'     => _n( 'like', 'likes', $n, 'courtneyr-child' ),
+				/* translators: Screen-reader label after a count of bookmarks. */
+				'bookmark' => _n( 'bookmark', 'bookmarks', $n, 'courtneyr-child' ),
+				/* translators: Screen-reader label after a count of reposts. */
+				'repost'   => _n( 'repost', 'reposts', $n, 'courtneyr-child' ),
+			);
+			return $m[1] . '<span class="screen-reader-text"> ' . esc_html( $labels[ $m[2] ] ) . '</span></div>';
+		},
+		$html
+	);
+}
+add_filter( 'render_block_indieblocks/facepile-content', __NAMESPACE__ . '\\label_counts' );
+
+/**
+ * The reactions group held for the send-off, kept outside state() so a
+ * content pass cannot clear it.
+ *
+ * @param bool $reset Clear it.
+ * @return string
+ */
+function &held( bool $reset = false ): string {
+	static $held = '';
+	if ( $reset ) {
+		$held = '';
+	}
+	return $held;
+}
+
+/**
+ * On a zine single with reactions, hold the template's reactions group back
+ * so the send-off can print it beside the newsletter band. Runs after the
+ * shared empty-group drop, and leaves a group without reactions to it.
+ *
+ * @param string               $html  Rendered group.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function hold_reactions( string $html, array $block ): string {
+	if ( '' === $html || ! str_contains( (string) ( $block['attrs']['className'] ?? '' ), 'single-post__syndication' ) || null === zine_post() ) {
+		return $html;
+	}
+	if ( false === stripos( $html, '<li' ) && ! str_contains( $html, 'indieblocks-count' ) ) {
+		return $html;
+	}
+	$held = &held();
+	$held = $html;
+	return '';
+}
+add_filter( 'render_block_core/group', __NAMESPACE__ . '\\hold_reactions', 20, 2 );
+
+/**
+ * The send-off: the held reactions and the newsletter band side by side.
+ * templates/single.html prints the newsletter part right after the
+ * reactions group.
+ *
+ * @param string               $html  Rendered template part.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function sendoff( string $html, array $block ): string {
+	$held = &held();
+	if ( '' === $held || 'newsletter-cta' !== ( $block['attrs']['slug'] ?? '' ) || null === zine_post() ) {
+		return $html;
+	}
+	$out  = '<div class="cr-zine-sendoff alignwide">' . $held . $html . '</div>';
+	$held = '';
+	return $out;
+}
+add_filter( 'render_block_core/template-part', __NAMESPACE__ . '\\sendoff', 10, 2 );
