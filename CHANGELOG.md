@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.121
+
+What you see change on courtneyr.dev:
+
+- Gallery singles carry more of the zine page at every width, not only in wide margins. A contour-map fragment peeks past the masthead on wide screens and as a torn tab under its corner on narrower ones. A short torn violet scrap sits at the start edge and a gridded blue strip at the end edge. Beside the sheet: a handwritten note with a heart above it, a stamp sticker on its bottom corner, a one-line word strip from 1024 px, and a doodle (star, ring, film strip or arrow) chosen per post. The margin postmark is gone, so the masthead postmark and the sticker are the page's two stamps (#197, #199).
+- Quotes come on five papers: Lavender, Ivory, Peach, Sky and Butter, each a block style on the Quote block. A quote with no paper picked gets one seeded by its post ID, and the same quote shows the same paper on its single, /kind/quote/ and the Stream (#189).
+- The new keepsakes block beside the gallery sheet carries role="presentation" with aria-hidden, like the other zine ornaments since 0.7.120, so Accessibility Checker accepts it (#198).
+
+Under the hood: the note, sticker, word strip and doodle text lives in data-text attributes and CSS draws it, so none of it joins the post content, its microformats or the accessibility tree. The release bump gives the served stylesheets a new ?ver= on test and live, which ran an earlier 0.7.120 build.
+
 ## 0.7.118
 
 What you see change on courtneyr.dev:
