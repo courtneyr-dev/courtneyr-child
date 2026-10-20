@@ -874,6 +874,51 @@
 	color: inherit;
 }
 
+/* The avatar pile under the counts: each face links its response (h-cite).
+   Sized here whether or not IndieBlocks' block stylesheet loads. */
+.cr-zine-single .cr-zine-sendoff .wp-block-indieblocks-facepile-content:has(> ul) {
+	flex-basis: 100%;
+}
+
+.cr-zine-single .cr-zine-sendoff .wp-block-indieblocks-facepile-content > ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cr-space-2xs) var(--cr-space-xs);
+	margin: 0;
+	padding: 0 0 0 var(--cr-space-2xs);
+	list-style: none;
+}
+
+.cr-zine-single .cr-zine-sendoff .wp-block-indieblocks-facepile-content li {
+	position: relative;
+	margin: 0 0 0 calc(var(--cr-space-2xs) * -1);
+}
+
+.cr-zine-single .cr-zine-sendoff .wp-block-indieblocks-facepile-content li a {
+	display: block;
+	border-radius: var(--cr-radius-full);
+}
+
+.cr-zine-single .cr-zine-sendoff .wp-block-indieblocks-facepile-content .avatar {
+	display: block;
+	width: 2.5rem;
+	height: 2.5rem;
+	border: 2px solid var(--cr-printer-ivory);
+	border-radius: var(--cr-radius-full);
+}
+
+.cr-zine-single .cr-zine-sendoff .wp-block-indieblocks-facepile-content li .icon {
+	position: absolute;
+	inset-block-end: -2px;
+	inset-inline-end: -2px;
+	width: 1.1rem;
+	height: 1.1rem;
+	padding: 2px;
+	border-radius: var(--cr-radius-full);
+	background-color: var(--cr-printer-ivory);
+	fill: var(--cr-russian-violet);
+}
+
 /* The newsletter on a zine single is a sheet of graph paper. */
 .cr-zine-single .cr-newsletter-banner {
 	background-image:

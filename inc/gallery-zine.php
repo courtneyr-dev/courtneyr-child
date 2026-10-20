@@ -1050,9 +1050,10 @@ function ephemera( string $html, array $block ): string {
 add_filter( 'render_block_core/post-content', __NAMESPACE__ . '\\ephemera', 21, 2 );
 
 /**
- * On a zine single, IndieBlocks' facepile prints a count row: its avatar pile
- * becomes one count-only facepile-content block per kind (like, bookmark,
- * repost), IndieBlocks' own block and query. A kind with no responses prints
+ * On a zine single, IndieBlocks' facepile opens on a count row: one
+ * count-only facepile-content block per kind (like, bookmark, repost),
+ * IndieBlocks' own block and query, ahead of the avatar pile, which stays so
+ * each response keeps its h-cite link. A kind with no responses prints
  * nothing, so no count is invented.
  *
  * @param array<string, mixed> $parsed Parsed block.
@@ -1061,6 +1062,11 @@ add_filter( 'render_block_core/post-content', __NAMESPACE__ . '\\ephemera', 21, 
 function count_reactions( array $parsed ): array {
 	if ( 'indieblocks/facepile' !== ( $parsed['blockName'] ?? '' ) || null === zine_post() ) {
 		return $parsed;
+	}
+	foreach ( (array) ( $parsed['innerBlocks'] ?? array() ) as $inner ) {
+		if ( ! empty( $inner['attrs']['countOnly'] ) ) {
+			return $parsed;
+		}
 	}
 	$blocks  = array();
 	$content = array();
@@ -1074,7 +1080,7 @@ function count_reactions( array $parsed ): array {
 		if ( null === $inner ) {
 			continue;
 		}
-		if ( 'indieblocks/facepile-content' !== ( $inner['blockName'] ?? '' ) || ! empty( $inner['attrs']['countOnly'] ) ) {
+		if ( 'indieblocks/facepile-content' !== ( $inner['blockName'] ?? '' ) ) {
 			$blocks[]  = $inner;
 			$content[] = null;
 			continue;
@@ -1091,6 +1097,8 @@ function count_reactions( array $parsed ): array {
 			$blocks[]             = $count;
 			$content[]            = null;
 		}
+		$blocks[]  = $inner;
+		$content[] = null;
 	}
 	$parsed['innerBlocks']  = $blocks;
 	$parsed['innerContent'] = $content;

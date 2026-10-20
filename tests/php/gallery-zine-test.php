@@ -635,8 +635,10 @@ namespace {
 			$parsed = count_reactions( cr_zine_facepile() );
 			$inner  = $parsed['innerBlocks'];
 			cr_photo_same( 'core/heading', $inner[0]['blockName'], 'the heading stays first' );
-			cr_photo_same( array( 'like', 'bookmark', 'repost' ), array_map( static fn( array $b ): string => $b['attrs']['type'][0] ?? '', array_slice( $inner, 1 ) ), 'like, bookmark and repost, in that order' );
-			foreach ( array_slice( $inner, 1 ) as $count ) {
+			cr_photo_same( array( 'like', 'bookmark', 'repost' ), array_map( static fn( array $b ): string => $b['attrs']['type'][0] ?? '', array_slice( $inner, 1, 3 ) ), 'like, bookmark and repost, in that order' );
+			cr_photo_same( cr_zine_facepile()['innerBlocks'][1], $inner[4], 'the avatar pile follows the counts unchanged, so each response keeps its h-cite link' );
+			cr_photo_same( 5, count( $inner ), 'heading, three counts, avatar pile' );
+			foreach ( array_slice( $inner, 1, 3 ) as $count ) {
 				cr_photo_same( 'indieblocks/facepile-content', $count['blockName'], 'each is IndieBlocks\' own block' );
 				cr_photo_same( true, $count['attrs']['countOnly'] && $count['attrs']['icons'], 'count only, with its icon' );
 				cr_photo_same( 1, count( $count['attrs']['type'] ), 'one kind per count' );
