@@ -146,86 +146,47 @@
 	border-block-end: 2px solid var(--cr-ut-orange);
 }
 
-/* ---- The page: a warm newsprint sheet, a scrapbook spread behind the photographs ----
+/* ---- The page: a warm newsprint sheet with registration marks ----
    Paper stays paper in both schemes, so the sheet sets its own ink, and the
-   shadow and focus tokens follow it. Behind the panels, all decorative and
-   drawn from the palette: washi tape across two corners, registration marks
-   at the other two, a faint rubber-stamp ring and a coffee ring in the
-   background layers, and two torn scraps (a graph-paper field-journal page
-   and a halftone kraft offcut) as the sheet's pseudo-elements. */
+   shadow and focus tokens follow it. */
 .cr-zine-single .cr-zine {
 	--cr-ink: var(--cr-russian-violet);
 	--cr-focus-halo: var(--cr-russian-violet);
 	--cr-shadow-hard-sm: 3px 3px 0 var(--cr-russian-violet);
 	--cr-shadow-hard: 4px 4px 0 var(--cr-russian-violet);
 	--cr-zine-note: var(--cr-russian-violet-soft);
-	--cr-zine-tape: color-mix(in srgb, var(--cr-selective-yellow) 45%, var(--cr-printer-ivory));
-	--cr-zine-tape-2: color-mix(in srgb, var(--cr-sky-blue) 70%, var(--cr-printer-ivory));
-	--cr-zine-stamp: color-mix(in srgb, var(--cr-ut-orange) 32%, transparent);
-	--cr-zine-ring: color-mix(in srgb, var(--cr-light-orange-dark) 30%, transparent);
-	--cr-zine-grid: color-mix(in srgb, var(--cr-sky-blue) 65%, transparent);
-	--cr-zine-tapes:
-		linear-gradient(135deg, transparent 0 32%, var(--cr-zine-tape) 32% 56%, transparent 56%) left top / 7.5rem 7.5rem no-repeat,
-		linear-gradient(135deg, transparent 0 44%, var(--cr-zine-tape-2) 44% 66%, transparent 66%) right bottom / 7.5rem 7.5rem no-repeat;
-	--cr-zine-marks:
-		radial-gradient(circle, transparent 0.36rem, var(--cr-russian-violet) 0.36rem 0.44rem, transparent 0.48rem) right 0.5rem top 0.5rem / 1.5rem 1.5rem no-repeat,
-		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) right 1.25rem top 0.5rem / 1px 1.5rem no-repeat,
-		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) right 0.5rem top 1.25rem / 1.5rem 1px no-repeat,
-		radial-gradient(circle, transparent 0.36rem, var(--cr-russian-violet) 0.36rem 0.44rem, transparent 0.48rem) left 0.5rem bottom 0.5rem / 1.5rem 1.5rem no-repeat,
-		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) left 1.25rem bottom 0.5rem / 1px 1.5rem no-repeat,
-		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) left 0.5rem bottom 1.25rem / 1.5rem 1px no-repeat;
 	position: relative;
-	isolation: isolate;
 	box-sizing: border-box;
 	width: auto;
 	max-width: none;
 	margin: var(--cr-space-xl) 0 0;
 	padding: var(--cr-space-2xl) var(--cr-space-xl);
-	background:
-		var(--cr-zine-tapes),
-		var(--cr-zine-marks),
-		radial-gradient(circle closest-side, transparent 80%, var(--cr-zine-stamp) 80% 86%, transparent 86% 90%, var(--cr-zine-stamp) 90% 94%, transparent 94%) right 9% top 46% / 9rem 9rem no-repeat,
-		radial-gradient(circle closest-side, transparent 74%, var(--cr-zine-ring) 77% 88%, transparent 93%) left 7% bottom 16% / 7.5rem 7.5rem no-repeat,
-		var(--cr-fiber),
-		color-mix(in srgb, var(--cr-light-orange) 38%, var(--cr-printer-ivory));
+	background-color: color-mix(in srgb, var(--cr-light-orange) 38%, var(--cr-printer-ivory));
+	background-image: var(--cr-fiber);
 	color: var(--cr-russian-violet);
 }
 
-/* The torn scraps: behind every panel, tilted, with a torn edge. */
 .cr-zine-single .cr-zine::before,
 .cr-zine-single .cr-zine::after {
 	content: "";
 	position: absolute;
-	z-index: -1;
+	width: 1.5rem;
+	height: 1.5rem;
+	background:
+		radial-gradient(circle, transparent 0.36rem, var(--cr-russian-violet) 0.36rem 0.44rem, transparent 0.48rem),
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) center / 1px 100% no-repeat,
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) center / 100% 1px no-repeat;
 	pointer-events: none;
 }
 
-/* A torn-out page of graph paper, high on the sheet's end side. */
 .cr-zine-single .cr-zine::before {
-	inset-block-start: 18%;
-	inset-inline-end: var(--cr-space-md);
-	width: min(16rem, 36%);
-	aspect-ratio: 4 / 3;
-	background-color: var(--cr-printer-ivory);
-	background-image:
-		linear-gradient(var(--cr-zine-grid) 1px, transparent 1px),
-		linear-gradient(90deg, var(--cr-zine-grid) 1px, transparent 1px);
-	background-size: 0.9rem 0.9rem;
-	clip-path: polygon(0 0, 100% 0, 100% 88%, 94% 93%, 88% 87%, 81% 94%, 74% 88%, 66% 95%, 58% 89%, 50% 95%, 42% 88%, 34% 94%, 26% 87%, 18% 94%, 10% 88%, 0 93%);
-	transform: rotate(var(--cr-rotate-2));
+	inset-block-start: var(--cr-space-xs);
+	inset-inline-end: var(--cr-space-xs);
 }
 
-/* A halftone kraft offcut, low on the start side. */
 .cr-zine-single .cr-zine::after {
-	inset-block-end: 12%;
-	inset-inline-start: var(--cr-space-md);
-	width: min(13rem, 30%);
-	aspect-ratio: 3 / 4;
-	background-color: color-mix(in srgb, var(--cr-light-orange-dark) 40%, var(--cr-light-orange));
-	background-image: var(--cr-halftone-strong);
-	background-size: var(--cr-halftone-strong-size);
-	clip-path: polygon(4% 0, 96% 2%, 100% 12%, 95% 24%, 100% 37%, 96% 50%, 100% 63%, 95% 76%, 100% 88%, 96% 100%, 3% 98%, 0 86%, 5% 73%, 0 60%, 4% 47%, 0 34%, 5% 21%, 0 9%);
-	transform: rotate(var(--cr-rotate-neg));
+	inset-block-end: var(--cr-space-xs);
+	inset-inline-start: var(--cr-space-xs);
 }
 
 /* ---- Panels: photographs first, set on the sheet at their own ratios ----
@@ -562,22 +523,6 @@
 	.cr-zine-single .cr-zine {
 		margin-inline: calc(var(--cr-space-md) * -1);
 		padding: var(--cr-space-xl) var(--cr-space-md);
-
-		/* Phones keep the tape and marks; the rings and the kraft scrap step back so the photographs lead. */
-		background:
-			var(--cr-zine-tapes),
-			var(--cr-zine-marks),
-			var(--cr-fiber),
-			color-mix(in srgb, var(--cr-light-orange) 38%, var(--cr-printer-ivory));
-	}
-
-	.cr-zine-single .cr-zine::before {
-		inset-block-start: 6rem;
-		width: 9rem;
-	}
-
-	.cr-zine-single .cr-zine::after {
-		display: none;
 	}
 
 	.cr-zine-single .cr-zine__frames {
@@ -722,15 +667,6 @@
 
 	.cr-zine-single .cr-zine__frame--edge {
 		margin-inline-start: calc(var(--cr-space-2xl) * -1 - var(--cr-space-lg));
-	}
-
-	/* The scraps poke past the sheet into the page margin, as pasted-in paper does. */
-	.cr-zine-single .cr-zine::before {
-		inset-inline-end: calc(var(--cr-space-lg) * -1);
-	}
-
-	.cr-zine-single .cr-zine::after {
-		inset-inline-start: calc(var(--cr-space-lg) * -1);
 	}
 
 	/* Its index and caption stay on the paper: off the sheet, violet type would sit on the page's dark ground. */
