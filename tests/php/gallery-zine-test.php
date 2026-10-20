@@ -188,8 +188,8 @@ namespace {
 			foreach ( array( 'landscape' => 2, 'portrait' => 2, 'square' => 1, 'panorama' => 1 ) as $shape => $n ) {
 				cr_photo_same( $n, preg_match_all( '/class="cr-zine__frame cr-zine__frame--' . $shape . '[ "]/', $html ), $shape . ' from the attachment size' );
 			}
-			cr_photo_contains( '<span class="cr-zine__num" aria-hidden="true">01<span class="cr-zine__of">/06</span></span>', $html, 'numbered 01/06' );
-			cr_photo_contains( '<span class="cr-zine__num" aria-hidden="true">06<span class="cr-zine__of">/06</span></span>', $html, 'numbered 06/06' );
+			cr_photo_contains( '<span class="cr-zine__num" aria-hidden="true" role="presentation">01<span class="cr-zine__of">/06</span></span>', $html, 'numbered 01/06' );
+			cr_photo_contains( '<span class="cr-zine__num" aria-hidden="true" role="presentation">06<span class="cr-zine__of">/06</span></span>', $html, 'numbered 06/06' );
 			cr_photo_same( 6, substr_count( $html, 'srcset="https://example.test/' ), 'srcset kept' );
 			cr_photo_same( 6, preg_match_all( '/alt="Alt \d"/', $html ), 'alt kept' );
 			cr_photo_same( 3, substr_count( $html, '<figcaption class="wp-element-caption">Caption ' ), 'captions kept, none invented' );
@@ -306,7 +306,7 @@ namespace {
 			cr_photo_contains( '<a class="cr-zine__label" href="https://example.test/category/travel/">Travel</a>', $html, 'category label links its archive' );
 			cr_photo_contains( '<time class="dt-published" datetime="2026-10-10T12:00:00+00:00">October 10, 2026</time>', $html, 'the dt-published date' );
 			cr_photo_contains( '6 photos', $html, 'the real count' );
-			cr_photo_assert( 1 === preg_match( '/<span class="cr-zine__postmark" aria-hidden="true">.*Oct 10 2026.*<\/span>/s', $html ), 'decorative postmark repeats only the date' );
+			cr_photo_assert( 1 === preg_match( '/<span class="cr-zine__postmark" aria-hidden="true" role="presentation">.*Oct 10 2026.*<\/span>/s', $html ), 'decorative postmark repeats only the date' );
 			cr_photo_assert( str_ends_with( $html, '</header>body</div>' ), 'the content follows' );
 
 			cr_zine_request( 6, 43, '' );
@@ -534,7 +534,7 @@ namespace {
 			cr_photo_assert( ! in_array( 'hand', $long[1]['flags'], true ), 'a caption over 40 characters stays typeset' );
 			$html = cr_zine_render( cr_zine_request( 6 ) );
 			cr_photo_same( 1, substr_count( $html, 'class="cr-zine__imprint"' ), 'one date imprint, on the anchor' );
-			cr_photo_assert( 1 === preg_match( '/<span class="cr-zine__imprint" aria-hidden="true">[^<]*<\/span><\/figure>/', $html ), 'the imprint sits inside the anchor\'s figure' );
+			cr_photo_assert( 1 === preg_match( '/<span class="cr-zine__imprint" aria-hidden="true" role="presentation">[^<]*<\/span><\/figure>/', $html ), 'the imprint sits inside the anchor\'s figure' );
 			$gone = cr_zine_request( 3 );
 			unset( $GLOBALS['cr_zine_meta'][702] );
 			$html2 = cr_zine_render( $gone );
@@ -582,7 +582,7 @@ namespace {
 
 			cr_zine_request( 6, 42 );
 			$html = ephemera( '<div class="entry-content">body</div>', $block );
-			cr_photo_assert( 1 === preg_match( '/^<div class="entry-content">body<div class="cr-zine-ephemera cr-zine-ephemera--[abc]" aria-hidden="true">(<span class="cr-zine-ephemera__[a-z]+"><\/span>)+<\/div><\/div>$/', $html ), 'one aria-hidden layer of empty spans at the end of the content' );
+			cr_photo_assert( 1 === preg_match( '/^<div class="entry-content">body<div class="cr-zine-ephemera cr-zine-ephemera--[abc]" aria-hidden="true" role="presentation">(<span class="cr-zine-ephemera__[a-z]+"><\/span>)+<\/div><\/div>$/', $html ), 'one aria-hidden layer of empty spans at the end of the content' );
 			cr_photo_assert( substr_count( $html, '<span class="cr-zine-ephemera__' ) >= 6, 'at least six artifacts' );
 			cr_photo_not_contains( 'tabindex', $html, 'nothing focusable' );
 

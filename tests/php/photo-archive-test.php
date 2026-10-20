@@ -52,14 +52,15 @@ cr_photo_group(
 );
 
 cr_photo_group(
-	'a titled frame has one link, an h3 p-name, a decorative image and the counter span',
+	'a titled frame has one link, an h3 p-name, the image with its alt and the counter span',
 	static function (): void {
 		cr_photo_reset();
 		$html = cr_photo_frame();
 		cr_photo_same( 1, cr_photo_rendered_anchors( $html ), 'one rendered link' );
 		cr_photo_same( 0, cr_photo_visible_negative_tabindex( $html ), 'no visible tabindex -1 link' );
 		cr_photo_assert( 1 === preg_match( '/<h3\b[^>]*class="[^"]*\bp-name\b[^"]*"[^>]*><a class="u-url" href="https:\/\/example\.test\/photo\/42\/">Blue Hour at Example Lake<\/a><\/h3>/', $html ), 'h3.p-name > a.u-url with the title' );
-		cr_photo_contains( 'alt=""', $html, 'titled image is decorative' );
+		cr_photo_contains( 'alt="A dock at dusk"', $html, 'titled image keeps its alt (decision 2026-10-20)' );
+		cr_photo_not_contains( 'cr-photo-frame__media" aria-hidden', $html, 'the media with an alt is not hidden' );
 		cr_photo_contains( 'class="u-photo"', $html, 'u-photo on the image' );
 		cr_photo_contains( '<span class="cr-photo-frame__number" aria-hidden="true"></span>', $html, 'number span is aria-hidden and empty (CSS counter fills it)' );
 		cr_photo_assert( 1 === preg_match( '/^<article class="pk-card [^"]*\bk-photo\b[^"]*\bh-entry\b[^"]*\bcr-photo-frame\b[^"]*">/', $html ), 'root keeps pk-card before h-entry and gains cr-photo-frame' );
@@ -143,7 +144,7 @@ cr_photo_group(
 		$GLOBALS['cr_photo_facts'][43]['lead']['alt'] = '';
 		$html = cr_photo_frame( 43, array( 'headingLevel' => 3 ), str_replace( 'Blue Hour at Example Lake', 'Photo, September 8, 2026', cr_photo_plugin_card() ) );
 		cr_photo_contains( '<span class="cr-photo-frame__sr">Photo, September 8, 2026</span>', $html, 'empty alt: visually hidden Photo, <date> names the link' );
-		cr_photo_contains( 'aria-hidden="true"><span class="cr-photo-frame__sleeve-text">Photo, September 8, 2026', $html, 'empty alt: the sleeve is aria-hidden so the name is not doubled' );
+		cr_photo_contains( 'aria-hidden="true" role="presentation"><span class="cr-photo-frame__sleeve-text">Photo, September 8, 2026', $html, 'empty alt: the sleeve is aria-hidden so the name is not doubled' );
 		cr_photo_same( 1, cr_photo_rendered_anchors( $html ), 'still one rendered link' );
 	}
 );
