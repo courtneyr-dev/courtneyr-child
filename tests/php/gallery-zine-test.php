@@ -99,6 +99,7 @@ namespace {
 	use function Courtneyr\Child\GalleryZine\zine;
 	use function Courtneyr\Child\GalleryZine\count_reactions;
 	use function Courtneyr\Child\GalleryZine\ephemera;
+	use function Courtneyr\Child\GalleryZine\flavor;
 	use function Courtneyr\Child\GalleryZine\held;
 	use function Courtneyr\Child\GalleryZine\hold_reactions;
 	use function Courtneyr\Child\GalleryZine\label_counts;
@@ -541,6 +542,33 @@ namespace {
 			cr_photo_same( 1, substr_count( $html2, 'cr-zine__frame--missing' ), 'an image whose attachment is gone is marked as a missing frame' );
 			cr_photo_contains( 'alt="Alt 2"', $html2, 'its alt text stays' );
 			cr_photo_same( 6, preg_match_all( '/style="--cr-col:[^;"]+;--cr-col-t:[^;"]+;--cr-col-p:[^;"]+;--cr-mt:\d+;--cr-mt-t:\d+;--cr-mt-p:\d+(;[^"]*)?"/', $html ), 'each panel carries its place on three grids and its row spacing' );
+		}
+	);
+
+	cr_photo_group(
+		'keepsakes: handwritten flavor beside the sheet, drawn from attributes so no text joins the post, its microformats or the accessibility tree',
+		static function (): void {
+			$a = flavor( 41 );
+			$b = flavor( 42 );
+			cr_photo_same( $a, flavor( 41 ), 'a post keeps its flavor' );
+			cr_photo_assert( $a !== $b, 'neighbouring posts differ' );
+			cr_photo_assert( '' !== $a['note'] && '' !== $a['sticker'] && count( $a['words'] ) >= 4, 'a note, a sticker and a word list' );
+			$html = cr_zine_render( cr_zine_request( 6 ) );
+			cr_photo_assert( 1 === preg_match( '/<div class="cr-zine__keepsakes" aria-hidden="true">(.*?)<\/div><\/section>$/s', $html, $m ), 'one aria-hidden keepsakes block closes the section' );
+			$block = $m[1] ?? '';
+			cr_photo_same( '', trim( strip_tags( $block ) ), 'no text nodes: the flavor lives in data-text only' );
+			foreach ( array( 'hand', 'sticker', 'list', 'trees' ) as $piece ) {
+				cr_photo_contains( 'class="cr-zine__' . $piece . '"', $block, $piece );
+			}
+			cr_photo_assert( 1 === preg_match( '/class="cr-zine__list" data-text="[^"]+&#10;[^"]+"/', $block ), 'the word list is one attribute, a word per line' );
+			$layer = ephemera( '<div class="entry-content">body</div>', array( 'blockName' => 'core/post-content', 'attrs' => array( 'className' => 'single-post__content' ) ) );
+			foreach ( array( 'map', 'torn', 'band' ) as $piece ) {
+				cr_photo_contains( '<span class="cr-zine-ephemera__' . $piece . '"></span>', $layer, 'the page layer has the ' . $piece );
+			}
+			$css = (string) file_get_contents( CR_PHOTO_THEME_DIR . '/assets/css/cr-gallery-zine.css' );
+			cr_photo_assert( substr_count( $css, 'content: attr(data-text)' ) >= 3, 'CSS draws the flavor from its attribute' );
+			cr_photo_assert( 1 === preg_match( '/@media \(max-width: 37\.49rem\)\s*\{[^@]*\.cr-zine__keepsakes[^{]*:is\([^)]*cr-zine__list[^)]*\)[^{]*\{[^{}]*display:\s*none;/s', $css ), 'phones drop the list and the doodle' );
+			cr_photo_assert( 1 === preg_match( '/@media \(forced-colors: active\)\s*\{[^@]*\.cr-zine__keepsakes[^{]*\{[^{}]*display:\s*none;/s', $css ), 'forced colors drop the keepsakes' );
 		}
 	);
 
