@@ -1205,8 +1205,8 @@
 .cr-zine-single .cr-zine-ephemera__torn {
 	inset-block-start: 9%;
 	inset-inline-start: 0;
-	height: 36%;
-	background-color: var(--cr-glaucous);
+	height: 30%;
+	background-color: var(--cr-periwinkle);
 	background-image: var(--cr-halftone-strong);
 	background-size: var(--cr-halftone-strong-size);
 	-webkit-mask: linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) left / calc(100% - 0.6rem) 100% no-repeat, var(--cr-zine-tear-v) right / 0.6rem 1rem repeat-y;
