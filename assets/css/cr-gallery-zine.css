@@ -735,7 +735,7 @@
 	--cr-zine-heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 20C6 15 3 12 4.5 8S11 4.5 12 8.5C13 4.5 18 4 19.5 8S18 15 12 20Z' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E");
 	--cr-zine-map: repeating-radial-gradient(ellipse at 72% 38%, transparent 0 0.85rem, color-mix(in srgb, var(--cr-cerulean) 26%, transparent) 0.85rem 0.95rem), linear-gradient(118deg, transparent 47%, color-mix(in srgb, var(--cr-coral) 45%, transparent) 47% 47.6%, transparent 47.6%), linear-gradient(150deg, transparent 60%, color-mix(in srgb, var(--cr-cerulean) 50%, transparent) 60% 60.5%, transparent 60.5%), color-mix(in srgb, var(--cr-light-orange) 55%, var(--cr-printer-ivory));
 	--cr-zine-doodle-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cpath d='M30 5L36 23L56 22L40 35L47 55L30 43L13 54L20 35L4 23L24 24Z' fill='none' stroke='black' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E");
-	--cr-zine-doodle-circle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cpath d='M33 7C49 8 57 21 54 34S37 55 23 52S4 36 8 22S25 4 40 9' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+	--cr-zine-doodle-circle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cpath d='M22 12C36 3 55 12 53 30S37 54 23 50S5 35 11 21S31 5 45 11L53 5' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
 	--cr-zine-doodle-film: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 44'%3E%3Cg fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12C34 4 62 18 116 8V34C62 44 34 30 4 38Z'/%3E%3Cpath d='M16 12V14M30 10V12M44 11V13M58 13V15M72 13V15M86 11V13M100 9V11M16 34V36M30 32V34M44 31V33M58 33V35M72 35V37M86 34V36M100 32V34'/%3E%3C/g%3E%3C/svg%3E");
 	--cr-zine-doodle-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 112 48'%3E%3Cg fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 36C24 8 52 6 62 26C70 42 88 42 104 18'/%3E%3Cpath d='M92 17L105 17L103 30'/%3E%3C/g%3E%3C/svg%3E");
 	--cr-zine-eph-ink: color-mix(in srgb, var(--cr-ink) 55%, transparent);
@@ -1340,7 +1340,7 @@
 
 /* A doodle inked above the sheet: one of four, none about a place. */
 .cr-zine-single .cr-zine__doodle {
-	inset-block-end: calc(100% + var(--cr-space-xs));
+	inset-block-end: calc(100% + var(--cr-space-md));
 	inset-inline-start: var(--cr-space-xl);
 	width: 5rem;
 	height: 3.5rem;
