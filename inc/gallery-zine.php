@@ -866,7 +866,7 @@ function zine( string $html, array $block, $instance = null ): string {
 	}
 
 	return '<section class="cr-zine alignwide" aria-label="' . esc_attr__( 'Photos', 'courtneyr-child' ) . '"' . $wiring . '>'
-		. '<ol class="cr-zine__frames" role="list">' . $panels . '</ol>' . $note . '</section>';
+		. '<ol class="cr-zine__frames" role="list">' . $panels . '</ol>' . $note . keepsakes( $post->ID ) . '</section>';
 }
 add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\\zine', 11, 3 );
 
@@ -1021,6 +1021,60 @@ function variant( int $post_id ): string {
 }
 
 /**
+ * Decorative flavor for a zine single, fixed by the post ID so a post keeps
+ * its page and neighbours differ (Courtney, 2026-10-20: invented flavor text
+ * is fine as decoration). Generic to any photo essay: no places, dates or
+ * claims about the pictures.
+ *
+ * @param int $post_id Post ID.
+ * @return array{note: string, sticker: string, words: string[]}
+ */
+function flavor( int $post_id ): array {
+	$notes    = array(
+		__( 'Different light, same magic.', 'courtneyr-child' ),
+		__( 'Look closer.', 'courtneyr-child' ),
+		__( 'Keep this one.', 'courtneyr-child' ),
+		__( 'Worth the detour.', 'courtneyr-child' ),
+		__( 'Little moments, big view.', 'courtneyr-child' ),
+	);
+	$stickers = array(
+		__( 'Same roads, different days', 'courtneyr-child' ),
+		__( 'Field notes, kept', 'courtneyr-child' ),
+		__( 'Shot on the way', 'courtneyr-child' ),
+		__( 'Look again', 'courtneyr-child' ),
+	);
+	$lists    = array(
+		array( __( 'Light', 'courtneyr-child' ), __( 'Lines', 'courtneyr-child' ), __( 'Color', 'courtneyr-child' ), __( 'Weather', 'courtneyr-child' ), __( 'Moments', 'courtneyr-child' ) ),
+		array( __( 'Roads', 'courtneyr-child' ), __( 'Edges', 'courtneyr-child' ), __( 'Light', 'courtneyr-child' ), __( 'Little', 'courtneyr-child' ), __( 'Moments', 'courtneyr-child' ) ),
+		array( __( 'Morning', 'courtneyr-child' ), __( 'Shadows', 'courtneyr-child' ), __( 'Texture', 'courtneyr-child' ), __( 'Distance', 'courtneyr-child' ) ),
+	);
+	return array(
+		'note'    => $notes[ $post_id % count( $notes ) ],
+		'sticker' => $stickers[ intdiv( $post_id, 2 ) % count( $stickers ) ],
+		'words'   => $lists[ intdiv( $post_id, 3 ) % count( $lists ) ],
+	);
+}
+
+/**
+ * The keepsakes beside the sheet: a handwritten note above its corner, a
+ * stamp sticker on its edge, a pinned word list and a pine doodle. Their
+ * words live in data-text and CSS draws them, so no text joins the post's
+ * content, its microformats or the accessibility tree.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function keepsakes( int $post_id ): string {
+	$flavor = flavor( $post_id );
+	return '<div class="cr-zine__keepsakes" aria-hidden="true">'
+		. '<span class="cr-zine__hand" data-text="' . esc_attr( $flavor['note'] ) . '"></span>'
+		. '<span class="cr-zine__sticker" data-text="' . esc_attr( $flavor['sticker'] ) . '"></span>'
+		. '<span class="cr-zine__list" data-text="' . implode( '&#10;', array_map( 'esc_attr', $flavor['words'] ) ) . '"></span>'
+		. '<span class="cr-zine__trees"></span>'
+		. '</div>';
+}
+
+/**
  * The page around the zine: one decorative layer of empty spans at the end of
  * the post content (halftone, a torn field-note scrap, ink speckle, a
  * postmark, a sewn patch, contact-sheet ticks, a fold). The CSS draws and
@@ -1040,7 +1094,7 @@ function ephemera( string $html, array $block ): string {
 		return $html;
 	}
 	$layer = '<div class="cr-zine-ephemera cr-zine-ephemera--' . variant( $post->ID ) . '" aria-hidden="true">';
-	foreach ( array( 'halftone', 'scrap', 'speckle', 'postmark', 'patch', 'ticks', 'fold' ) as $piece ) {
+	foreach ( array( 'halftone', 'scrap', 'speckle', 'postmark', 'patch', 'ticks', 'fold', 'map', 'torn', 'band' ) as $piece ) {
 		$layer .= '<span class="cr-zine-ephemera__' . $piece . '"></span>';
 	}
 	$layer .= '</div>';

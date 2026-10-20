@@ -159,7 +159,7 @@
 	box-sizing: border-box;
 	width: auto;
 	max-width: none;
-	margin: var(--cr-space-xl) 0 0;
+	margin: var(--cr-space-3xl) 0 0;
 	padding: var(--cr-space-2xl) var(--cr-space-xl);
 	background-color: color-mix(in srgb, var(--cr-light-orange) 38%, var(--cr-printer-ivory));
 
@@ -729,6 +729,11 @@
    edge carry the look on smaller screens. The layer's modifier (a, b, c,
    from the post ID) picks the arrangement. */
 .cr-zine-single {
+	--cr-zine-page-ink: var(--cr-ink);
+	--cr-zine-edge: max(0.5rem, min(3.25rem, calc((100vw - 72rem) / 2 - 1.25rem)));
+	--cr-zine-tear-v: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 16' preserveAspectRatio='none'%3E%3Cpath d='M0 0H5L10 4L4 8L9 12L5 16H0Z' fill='black'/%3E%3C/svg%3E");
+	--cr-zine-heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 20C6 15 3 12 4.5 8S11 4.5 12 8.5C13 4.5 18 4 19.5 8S18 15 12 20Z' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E");
+	--cr-zine-trees: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 80'%3E%3Cg fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 78V14M22 14L12 34H32ZM22 28L8 52H36ZM22 46L5 72H39Z'/%3E%3Cpath d='M60 78V26M60 26L52 42H68ZM60 38L48 58H72ZM60 52L45 74H75Z'/%3E%3Cpath d='M96 78V8M96 8L86 30H106ZM96 24L82 48H110ZM96 42L79 70H113Z'/%3E%3Cpath d='M2 78H118'/%3E%3C/g%3E%3C/svg%3E");
 	--cr-zine-eph-ink: color-mix(in srgb, var(--cr-ink) 55%, transparent);
 	--cr-zine-tape-edge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 28' preserveAspectRatio='none'%3E%3Cpath d='M3 0H117L120 4L117 8L120 12L117 16L120 20L117 24L120 28H3L0 24L3 20L0 16L3 12L0 8L3 4Z' fill='black'/%3E%3C/svg%3E");
 	--cr-zine-tear: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10' preserveAspectRatio='none'%3E%3Cpath d='M0 0H16V4L12 9L8 5L4 10L0 5Z' fill='black'/%3E%3C/svg%3E");
@@ -1161,6 +1166,217 @@
 
 	.cr-zine-single .cr-zine__label {
 		transition: none;
+	}
+}
+
+/* ---- More of the page (Courtney, 2026-10-20: richer zine and scrapbook
+   atmosphere around the gallery, invented flavor text allowed) ----
+   The page layer gains a contour-map fragment behind the masthead and torn
+   paper strips at the screen edges, at every width. Beside the sheet,
+   inc/gallery-zine.php prints aria-hidden keepsakes whose words live in
+   data-text: a handwritten note in a reserved band above the sheet, a
+   stamp sticker on its corner, a pinned word list and a pine doodle.
+   --cr-zine-page-ink is the page's own ink, taken on the body before the
+   sheet sets violet, for marks that sit on the page. */
+
+/* A contour-map fragment behind the masthead, peeking past its end. */
+.cr-zine-single .cr-zine-ephemera__map {
+	display: block;
+	inset-block-start: 0;
+	inset-inline-end: 0;
+	width: min(34rem, 60vw);
+	height: 15rem;
+	background:
+		repeating-radial-gradient(ellipse at 72% 38%, transparent 0 0.85rem, color-mix(in srgb, var(--cr-cerulean) 26%, transparent) 0.85rem 0.95rem),
+		linear-gradient(118deg, transparent 47%, color-mix(in srgb, var(--cr-coral) 45%, transparent) 47% 47.6%, transparent 47.6%),
+		linear-gradient(150deg, transparent 60%, color-mix(in srgb, var(--cr-cerulean) 50%, transparent) 60% 60.5%, transparent 60.5%),
+		color-mix(in srgb, var(--cr-light-orange) 55%, var(--cr-printer-ivory));
+	-webkit-mask: linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) top / 100% calc(100% - 0.7rem) no-repeat, var(--cr-zine-tear) bottom / 1.1rem 0.7rem repeat-x;
+	mask: linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) top / 100% calc(100% - 0.7rem) no-repeat, var(--cr-zine-tear) bottom / 1.1rem 0.7rem repeat-x;
+}
+
+/* Torn paper at the screen edges: a halftone violet strip high on the start side, a gridded blue band low on the end side. */
+.cr-zine-single .cr-zine-ephemera__torn,
+.cr-zine-single .cr-zine-ephemera__band {
+	display: block;
+	width: var(--cr-zine-edge);
+}
+
+.cr-zine-single .cr-zine-ephemera__torn {
+	inset-block-start: 9%;
+	inset-inline-start: 0;
+	height: 36%;
+	background-color: var(--cr-glaucous);
+	background-image: var(--cr-halftone-strong);
+	background-size: var(--cr-halftone-strong-size);
+	-webkit-mask: linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) left / calc(100% - 0.6rem) 100% no-repeat, var(--cr-zine-tear-v) right / 0.6rem 1rem repeat-y;
+	mask: linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) left / calc(100% - 0.6rem) 100% no-repeat, var(--cr-zine-tear-v) right / 0.6rem 1rem repeat-y;
+}
+
+.cr-zine-single .cr-zine-ephemera__band {
+	inset-block-end: 6%;
+	inset-inline-end: 0;
+	height: 40%;
+	background-color: var(--cr-sky-blue);
+	background-image:
+		repeating-linear-gradient(90deg, color-mix(in srgb, var(--cr-cerulean) 30%, transparent) 0 1px, transparent 1px 0.9rem),
+		repeating-linear-gradient(180deg, color-mix(in srgb, var(--cr-cerulean) 30%, transparent) 0 1px, transparent 1px 0.9rem);
+	scale: -1 1;
+	-webkit-mask: linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) left / calc(100% - 0.6rem) 100% no-repeat, var(--cr-zine-tear-v) right / 0.6rem 1rem repeat-y;
+	mask: linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) left / calc(100% - 0.6rem) 100% no-repeat, var(--cr-zine-tear-v) right / 0.6rem 1rem repeat-y;
+}
+
+/* The keepsakes ride on the sheet's box and never take a click. */
+.cr-zine-single .cr-zine__keepsakes {
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	pointer-events: none;
+}
+
+.cr-zine-single .cr-zine__keepsakes > span {
+	position: absolute;
+}
+
+/* A handwritten note in the band above the sheet, with a heart. */
+.cr-zine-single .cr-zine__hand {
+	inset-block-end: calc(100% + var(--cr-space-sm));
+	inset-inline-end: var(--cr-space-xl);
+	max-width: 16rem;
+	padding-inline-end: 1.75rem;
+	color: var(--cr-zine-page-ink);
+	font-family: var(--cr-font-display);
+	font-size: var(--cr-text-base);
+	line-height: 1.5;
+	text-align: end;
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-zine-single .cr-zine__hand::before {
+	content: attr(data-text);
+}
+
+.cr-zine-single .cr-zine__hand::after {
+	content: "";
+	position: absolute;
+	inset-block-end: 0.1rem;
+	inset-inline-end: 0;
+	width: 1.4rem;
+	height: 1.4rem;
+	background-color: var(--cr-coral);
+	-webkit-mask: var(--cr-zine-heart) center / contain no-repeat;
+	mask: var(--cr-zine-heart) center / contain no-repeat;
+}
+
+/* A rubber-stamped sticker on the sheet's bottom corner. */
+.cr-zine-single .cr-zine__sticker {
+	inset-block-end: calc(var(--cr-space-md) * -1);
+	inset-inline-end: var(--cr-space-lg);
+	max-width: 11rem;
+	padding: var(--cr-space-xs) var(--cr-space-sm);
+	border: 2px dashed var(--cr-russian-violet);
+	background-color: color-mix(in srgb, var(--cr-selective-yellow) 30%, var(--cr-white));
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-weight: 700;
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: 1.4;
+	text-align: center;
+	text-transform: uppercase;
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-zine-single .cr-zine__sticker::before {
+	content: attr(data-text);
+}
+
+/* A pinned word list in the start margin, and pine trees inked above the sheet. */
+.cr-zine-single .cr-zine__list {
+	display: none;
+	inset-block-start: 18%;
+	inset-inline-end: calc(100% + var(--cr-space-xl));
+	width: 8.5rem;
+	padding: var(--cr-space-md) var(--cr-space-sm) var(--cr-space-sm) var(--cr-space-lg);
+	background-color: var(--cr-printer-ivory);
+	background-image: repeating-linear-gradient(180deg, transparent 0 1.55rem, color-mix(in srgb, var(--cr-cerulean) 30%, transparent) 1.55rem 1.6rem);
+	box-shadow: var(--cr-shadow-hard-sm);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-display);
+	font-size: var(--cr-text-sm);
+	line-height: 1.83;
+	white-space: pre-line;
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-zine-single .cr-zine__list::before {
+	content: attr(data-text);
+}
+
+.cr-zine-single .cr-zine__list::after {
+	content: "";
+	position: absolute;
+	inset-block-start: calc(var(--cr-space-xs) * -1);
+	inset-inline-start: calc(50% - 0.5rem);
+	width: 1rem;
+	height: 1rem;
+	border-radius: var(--cr-radius-full);
+	background-color: var(--cr-coral);
+	box-shadow: var(--cr-shadow-hard-sm);
+}
+
+.cr-zine-single .cr-zine__trees {
+	inset-block-end: calc(100% + var(--cr-space-xs));
+	inset-inline-start: var(--cr-space-xl);
+	width: 7rem;
+	height: 4.5rem;
+	background-color: var(--cr-zine-page-ink);
+	-webkit-mask: var(--cr-zine-trees) center / contain no-repeat;
+	mask: var(--cr-zine-trees) center / contain no-repeat;
+}
+
+/* Tablets up: a taller band above the sheet for the note and the trees. */
+@media (min-width: 37.5rem) {
+
+	.cr-zine-single .cr-zine {
+		margin-block-start: var(--cr-space-4xl);
+	}
+
+	.cr-zine-single .cr-zine__hand {
+		font-size: var(--cr-text-lg);
+	}
+}
+
+/* Wide margins (from 92rem): the word list pins into the start margin. */
+@media (min-width: 92rem) {
+
+	.cr-zine-single .cr-zine__list {
+		display: block;
+	}
+}
+
+/* Phones: fewer artifacts; the note and sticker stay, the list and doodle step back. */
+@media (max-width: 37.49rem) {
+
+	.cr-zine-single .cr-zine__keepsakes :is(.cr-zine__list, .cr-zine__trees) {
+		display: none;
+	}
+
+	.cr-zine-single .cr-zine__hand {
+		inset-inline-end: var(--cr-space-md);
+		max-width: 14rem;
+	}
+
+	.cr-zine-single .cr-zine-ephemera__map {
+		width: 11rem;
+		height: 8rem;
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-zine-single .cr-zine__keepsakes {
+		display: none;
 	}
 }
 
