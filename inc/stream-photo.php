@@ -88,3 +88,53 @@ function polaroid_card( string $html, array $block, $instance = null ): string {
 	return strip_caption_links( $tags->get_updated_html() );
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\polaroid_card', 11, 3 );
+
+/**
+ * Give a titled Photo card's image its alt text.
+ *
+ * The plugin's photo card prints the lead image with an empty alt when a
+ * title names the link. On a Photo post the image is the content, so the
+ * card now carries the alt the plugin already resolves (the image block's,
+ * else the attachment's) beside the title link (decision 2026-10-20). An image
+ * without alt text keeps the empty alt. Runs on every surface: the Stream,
+ * the front page and the format archives print the same card.
+ *
+ * @param string               $html     Rendered stream card.
+ * @param array<string, mixed> $block    Parsed stream-card block.
+ * @param mixed                $instance Block instance with the Query Loop's postId.
+ * @return string
+ */
+function restore_photo_alt( string $html, array $block, $instance = null ): string {
+	unset( $block );
+	if ( '' === $html || ! function_exists( '\PKIW\lead_image' ) || false === strpos( $html, 'pk-media--stream' ) ) {
+		return $html;
+	}
+	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
+		? (int) $instance->context['postId']
+		: (int) get_the_ID();
+	$post    = $post_id ? get_post( $post_id ) : null;
+	if ( ! $post instanceof \WP_Post || ! has_term( Photo\KIND, 'kind', $post ) || post_password_required( $post ) ) {
+		return $html;
+	}
+	$lead = \PKIW\lead_image( $post->ID );
+	$alt  = trim( (string) ( $lead['alt'] ?? '' ) );
+	if ( '' === $alt ) {
+		return $html;
+	}
+
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	if ( ! $tags->next_tag( array( 'class_name' => 'pk-media--stream' ) ) ) {
+		return $html;
+	}
+	while ( $tags->next_tag( 'img' ) ) {
+		if ( ! $tags->has_class( 'u-photo' ) ) {
+			continue;
+		}
+		if ( '' === trim( (string) $tags->get_attribute( 'alt' ) ) ) {
+			$tags->set_attribute( 'alt', $alt );
+		}
+		break;
+	}
+	return $tags->get_updated_html();
+}
+add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\restore_photo_alt', 20, 3 );

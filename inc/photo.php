@@ -190,12 +190,12 @@ function has_class_token( string $html, string $class_name ): bool {
  * priority, and the next three carry skip-lazy, because Perfmatters leaves
  * an image whose tag names either alone.
  *
- * @param array<string, mixed> $lead     Lead image facts.
- * @param bool                 $titled   Whether a title names the link.
- * @param int                  $position Frame position on the page, from 1.
+ * @param array<string, mixed> $lead       Lead image facts.
+ * @param bool                 $decorative Whether the image prints with an empty alt.
+ * @param int                  $position   Frame position on the page, from 1.
  * @return string Image markup, or '' when no image prints.
  */
-function frame_image( array $lead, bool $titled, int $position ): string {
+function frame_image( array $lead, bool $decorative, int $position ): string {
 	$id = (int) ( $lead['attachment_id'] ?? 0 );
 	if ( $id <= 0 || '' === (string) ( $lead['source'] ?? '' ) ) {
 		return '';
@@ -203,7 +203,7 @@ function frame_image( array $lead, bool $titled, int $position ): string {
 
 	$attrs = array(
 		'class'    => 'u-photo',
-		'alt'      => $titled ? '' : (string) ( $lead['alt'] ?? '' ),
+		'alt'      => $decorative ? '' : (string) ( $lead['alt'] ?? '' ),
 		'sizes'    => SIZES,
 		'decoding' => 'async',
 		'loading'  => $position <= EAGER_FRAMES ? 'eager' : 'lazy',
@@ -276,17 +276,23 @@ function frame_card( string $html, array $block, $instance = null ): string {
 	$name      = trim( (string) ( $facts['name'] ?? '' ) );
 	$name      = '' !== $name ? $name : __( 'Photo', 'courtneyr-child' );
 	$lead      = is_array( $facts['lead'] ?? null ) ? $facts['lead'] : array();
-	$image     = frame_image( $lead, $titled, $count );
-	$paper     = paper_class( $post->ID );
+	$has_alt   = '' !== trim( (string) ( $lead['alt'] ?? '' ) );
+	// Titled: the title names the link and the photo speaks for itself next
+	// to it with its alt (decision 2026-10-20: on a Photo post the image is
+	// the content). A photo with no alt text stays decoration. Untitled: the
+	// image names the link; the sleeve only speaks when it replaces a missing
+	// or failed image, or when an empty alt leaves the link unnamed.
+	$media_hidden = $titled && ! $has_alt;
+	$image        = frame_image( $lead, $media_hidden, $count );
+	$paper        = paper_class( $post->ID );
 
-	// Titled: a title names the link, so the media is decoration. Untitled:
-	// the image names the link; the sleeve only speaks when it replaces a
-	// missing or failed image, or when an empty alt leaves the link unnamed.
-	$alt_names_link = ! $titled && '' !== $image && '' !== trim( (string) ( $lead['alt'] ?? '' ) );
+	$alt_names_link = ! $titled && '' !== $image && $has_alt;
 	$sleeve_hidden  = $titled || ( ! $titled && '' !== $image && ! $alt_names_link );
-	$sleeve         = '<span class="cr-photo-frame__sleeve' . ( '' !== $paper ? ' ' . esc_attr( $paper ) : '' ) . '"' . ( $sleeve_hidden ? ' aria-hidden="true"' : '' ) . '><span class="cr-photo-frame__sleeve-text">' . esc_html( $name ) . '</span></span>';
-	$media          = '<span class="cr-photo-frame__media' . ( '' === $image ? ' cr-photo-frame__media--paper' : '' ) . '"' . ( $titled ? ' aria-hidden="true"' : '' ) . ' data-cr-cover-fallback>' . $image . $sleeve . '</span>';
-	$number         = '<span class="cr-photo-frame__number" aria-hidden="true"></span>';
+	// role="presentation" beside aria-hidden records that the sleeve is
+	// ornament; Accessibility Checker passes aria-hidden elements that carry it.
+	$sleeve = '<span class="cr-photo-frame__sleeve' . ( '' !== $paper ? ' ' . esc_attr( $paper ) : '' ) . '"' . ( $sleeve_hidden ? ' aria-hidden="true" role="presentation"' : '' ) . '><span class="cr-photo-frame__sleeve-text">' . esc_html( $name ) . '</span></span>';
+	$media  = '<span class="cr-photo-frame__media' . ( '' === $image ? ' cr-photo-frame__media--paper' : '' ) . '"' . ( $media_hidden ? ' aria-hidden="true"' : '' ) . ' data-cr-cover-fallback>' . $image . $sleeve . '</span>';
+	$number = '<span class="cr-photo-frame__number" aria-hidden="true"></span>';
 
 	if ( $titled ) {
 		$inner = $media
