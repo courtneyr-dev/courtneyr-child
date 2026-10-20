@@ -200,11 +200,11 @@
 	pointer-events: none;
 }
 
-/* A torn-out page of graph paper, pasted in so it peeks over the sheet's top edge. */
+/* A torn-out page of graph paper, high on the sheet's end side. */
 .cr-zine-single .cr-zine::before {
-	inset-block-start: calc(var(--cr-space-lg) * -1);
-	inset-inline-end: var(--cr-space-3xl);
-	width: min(14rem, 34%);
+	inset-block-start: 18%;
+	inset-inline-end: var(--cr-space-md);
+	width: min(16rem, 36%);
 	aspect-ratio: 4 / 3;
 	background-color: var(--cr-printer-ivory);
 	background-image:
@@ -572,9 +572,8 @@
 	}
 
 	.cr-zine-single .cr-zine::before {
-		inset-block-start: calc(var(--cr-space-md) * -1);
-		inset-inline-end: var(--cr-space-xl);
-		width: 7rem;
+		inset-block-start: 6rem;
+		width: 9rem;
 	}
 
 	.cr-zine-single .cr-zine::after {
@@ -656,10 +655,6 @@
 		margin-block-start: calc(var(--cr-mt, 0) * var(--cr-zine-step));
 	}
 
-	.cr-zine-single .cr-zine::after {
-		inset-inline-start: calc(var(--cr-space-sm) * -1);
-	}
-
 	.cr-zine-single .cr-zine__frame--even-d img {
 		width: auto;
 		height: min(var(--cr-h), 38rem);
@@ -729,9 +724,13 @@
 		margin-inline-start: calc(var(--cr-space-2xl) * -1 - var(--cr-space-lg));
 	}
 
-	/* The kraft offcut pokes further past the sheet into the page margin, as pasted-in paper does. */
+	/* The scraps poke past the sheet into the page margin, as pasted-in paper does. */
+	.cr-zine-single .cr-zine::before {
+		inset-inline-end: calc(var(--cr-space-lg) * -1);
+	}
+
 	.cr-zine-single .cr-zine::after {
-		inset-inline-start: calc(var(--cr-space-xl) * -1);
+		inset-inline-start: calc(var(--cr-space-lg) * -1);
 	}
 
 	/* Its index and caption stay on the paper: off the sheet, violet type would sit on the page's dark ground. */
