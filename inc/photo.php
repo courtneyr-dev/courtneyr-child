@@ -288,10 +288,11 @@ function frame_card( string $html, array $block, $instance = null ): string {
 
 	$alt_names_link = ! $titled && '' !== $image && $has_alt;
 	$sleeve_hidden  = $titled || ( ! $titled && '' !== $image && ! $alt_names_link );
-	// role="presentation" beside aria-hidden records that the sleeve is
+	// role="presentation" beside aria-hidden records that the sleeve (and a
+	// media span left decorative: no image, or an image without alt text) is
 	// ornament; Accessibility Checker passes aria-hidden elements that carry it.
 	$sleeve = '<span class="cr-photo-frame__sleeve' . ( '' !== $paper ? ' ' . esc_attr( $paper ) : '' ) . '"' . ( $sleeve_hidden ? ' aria-hidden="true" role="presentation"' : '' ) . '><span class="cr-photo-frame__sleeve-text">' . esc_html( $name ) . '</span></span>';
-	$media  = '<span class="cr-photo-frame__media' . ( '' === $image ? ' cr-photo-frame__media--paper' : '' ) . '"' . ( $media_hidden ? ' aria-hidden="true"' : '' ) . ' data-cr-cover-fallback>' . $image . $sleeve . '</span>';
+	$media  = '<span class="cr-photo-frame__media' . ( '' === $image ? ' cr-photo-frame__media--paper' : '' ) . '"' . ( $media_hidden ? ' aria-hidden="true" role="presentation"' : '' ) . ' data-cr-cover-fallback>' . $image . $sleeve . '</span>';
 	$number = '<span class="cr-photo-frame__number" aria-hidden="true"></span>';
 
 	if ( $titled ) {
