@@ -1027,7 +1027,7 @@ function variant( int $post_id ): string {
  * claims about the pictures.
  *
  * @param int $post_id Post ID.
- * @return array{note: string, sticker: string, words: string[]}
+ * @return array{note: string, sticker: string, words: string[], doodle: string}
  */
 function flavor( int $post_id ): array {
 	$notes    = array(
@@ -1052,12 +1052,14 @@ function flavor( int $post_id ): array {
 		'note'    => $notes[ $post_id % count( $notes ) ],
 		'sticker' => $stickers[ intdiv( $post_id, 2 ) % count( $stickers ) ],
 		'words'   => $lists[ intdiv( $post_id, 3 ) % count( $lists ) ],
+		'doodle'  => array( 'star', 'circle', 'film', 'arrow' )[ ( $post_id + 1 ) % 4 ],
 	);
 }
 
 /**
  * The keepsakes beside the sheet: a handwritten note above its corner, a
- * stamp sticker on its edge, a pinned word list and a pine doodle. Their
+ * stamp sticker on its edge, a word strip and a doodle with no subject in
+ * it (a star, a ring, a film strip or an arrow), so it suits any gallery. Their
  * words live in data-text and CSS draws them, so no text joins the post's
  * content, its microformats or the accessibility tree.
  *
@@ -1069,15 +1071,17 @@ function keepsakes( int $post_id ): string {
 	return '<div class="cr-zine__keepsakes" aria-hidden="true">'
 		. '<span class="cr-zine__hand" data-text="' . esc_attr( $flavor['note'] ) . '"></span>'
 		. '<span class="cr-zine__sticker" data-text="' . esc_attr( $flavor['sticker'] ) . '"></span>'
-		. '<span class="cr-zine__list" data-text="' . implode( '&#10;', array_map( 'esc_attr', $flavor['words'] ) ) . '"></span>'
-		. '<span class="cr-zine__trees"></span>'
+		. '<span class="cr-zine__list" data-text="' . esc_attr( implode( ' · ', $flavor['words'] ) ) . '"></span>'
+		. '<span class="cr-zine__doodle cr-zine__doodle--' . $flavor['doodle'] . '"></span>'
 		. '</div>';
 }
 
 /**
  * The page around the zine: one decorative layer of empty spans at the end of
  * the post content (halftone, a torn field-note scrap, ink speckle, a
- * postmark, a sewn patch, contact-sheet ticks, a fold). The CSS draws and
+ * sewn patch, contact-sheet ticks, a fold, a map, torn edge strips). The
+ * masthead already carries a postmark and the sheet a stamp sticker, so the
+ * layer adds no third stamp. The CSS draws and
  * places each one, in the margins only where the screen has margins. Out of
  * the accessibility tree and never focusable.
  *
@@ -1094,7 +1098,7 @@ function ephemera( string $html, array $block ): string {
 		return $html;
 	}
 	$layer = '<div class="cr-zine-ephemera cr-zine-ephemera--' . variant( $post->ID ) . '" aria-hidden="true">';
-	foreach ( array( 'halftone', 'scrap', 'speckle', 'postmark', 'patch', 'ticks', 'fold', 'map', 'torn', 'band' ) as $piece ) {
+	foreach ( array( 'halftone', 'scrap', 'speckle', 'patch', 'ticks', 'fold', 'map', 'torn', 'band' ) as $piece ) {
 		$layer .= '<span class="cr-zine-ephemera__' . $piece . '"></span>';
 	}
 	$layer .= '</div>';
