@@ -241,7 +241,10 @@ function cutout_tiles( string $title ): array {
 /**
  * Rebuild a rendered heading as a cut-paper title. The heading keeps its tag
  * and every attribute; its text becomes one screen-reader-only copy of the
- * exact title plus an aria-hidden tile layer. Anything that is not a heading
+ * exact title plus an aria-hidden tile layer. The copy also carries
+ * screen-reader-text: Accessibility Checker passes an aria-hidden element only
+ * when a sibling's class names it as screen-reader text (its
+ * aria_hidden_valid_usage check), and the theme's own class isn't on its list. Anything that is not a heading
  * with text comes back unchanged.
  *
  * @param string $html Rendered heading markup.
@@ -281,7 +284,7 @@ function cutout_heading( string $html ): string {
 		$open .= true === $value ? ' ' . esc_attr( $name ) : sprintf( ' %s="%s"', esc_attr( $name ), esc_attr( (string) $value ) );
 	}
 	return sprintf(
-		'<%1$s%2$s><span class="cr-cutout__text">%3$s</span><span class="cr-cutout__tiles" aria-hidden="true">%4$s</span></%1$s>',
+		'<%1$s%2$s><span class="cr-cutout__text screen-reader-text">%3$s</span><span class="cr-cutout__tiles" aria-hidden="true">%4$s</span></%1$s>',
 		$tag,
 		$open,
 		esc_html( $title ),
