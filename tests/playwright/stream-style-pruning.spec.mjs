@@ -41,6 +41,7 @@ test( 'a kind archive keeps its own sheet', async ( { page } ) => {
 
 test( 'the front page loads the card sheet without blocking; /stream/ keeps it blocking', async ( { request } ) => {
 	const front = await ( await request.get( '/' ) ).text();
+	expect( front ).toMatch( /id=['"]courtneyr-home-sections-css['"][^>]*media=['"]print['"][^>]*onload=/ );
 	expect( front ).toMatch( /id=['"]courtneyr-post-kinds-css['"][^>]*media=['"]print['"][^>]*onload=/ );
 	expect( front ).toMatch( /<noscript><link[^>]*id=['"]courtneyr-post-kinds-css['"]/ );
 	const stream = await ( await request.get( '/stream/' ) ).text();

@@ -166,27 +166,46 @@ function prune(): void {
 	}
 	$sheets = prunable_sheets();
 	foreach ( distinctive_classes( $sheets ) as $handle => $classes ) {
-		if ( array() === $classes ) {
-			continue;
-		}
+		$used = array() === $classes;
 		foreach ( $classes as $class ) {
 			if ( isset( $seen[ $class ] ) ) {
-				continue 2;
+				$used = true;
+				break;
 			}
 		}
-		wp_dequeue_style( $handle );
+		if ( $used ) {
+			kept_kind_sheets( $handle );
+		} else {
+			wp_dequeue_style( $handle );
+		}
 	}
+}
+
+/**
+ * Kind sheet handles that survived pruning on this request.
+ *
+ * @param string|null $handle Handle to add, or null to read the list.
+ * @return array<int, string>
+ */
+function kept_kind_sheets( ?string $handle = null ): array {
+	static $kept = array();
+	if ( null !== $handle ) {
+		$kept[] = $handle;
+	}
+	return $kept;
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\prune', 9999 );
 
 /**
- * Front page: load the shared card sheet without blocking first paint.
+ * Front page: load the card, home-section and kind sheets without blocking first paint.
  *
- * On the front page cr-post-kinds.css only paints the cards below the hero
- * and the newsletter block. With it blocked outright, the first viewport is
- * pixel-identical at 412 and 1440 px (2026-10-19), yet as the last
- * render-blocking file (88 KB) it held first paint and LCP until about 4 s on
- * a throttled phone. The link keeps its place in the document and swaps from
+ * On the front page the card sheet (cr-post-kinds.css), the home sections
+ * sheet and the kind sheets that survive pruning paint only what sits below
+ * the hero and the newsletter block. With each blocked outright, the first
+ * viewport is pixel-identical at 412 and 1440 px (2026-10-19; the same test on
+ * /stream/ changes 20-29% of it, so the check is real), yet as the last
+ * render-blocking files they held first paint and LCP until 3.6-4.3 s on a
+ * throttled phone. The link keeps its place in the document and swaps from
  * print to all on load, so the cascade is unchanged; <noscript> keeps it for
  * visitors without JavaScript. /stream/ keeps it render-blocking because cards
  * are its first viewport.
@@ -196,7 +215,8 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\prune', 9999 );
  * @return string
  */
 function defer_card_sheet_on_front_page( $tag, $handle ) {
-	if ( 'courtneyr-post-kinds' !== $handle || ! is_front_page() || is_admin() || ! is_string( $tag ) || str_contains( $tag, 'onload=' ) ) {
+	$deferrable = array_merge( array( 'courtneyr-post-kinds', 'courtneyr-home-sections', 'courtneyr-paper' ), kept_kind_sheets() );
+	if ( ! in_array( $handle, $deferrable, true ) || ! is_front_page() || is_admin() || ! is_string( $tag ) || str_contains( $tag, 'onload=' ) ) {
 		return $tag;
 	}
 	$deferred = preg_replace( "/media=(['\"])all\\1/", "media='print' onload=\"this.media='all';this.onload=null\"", $tag, 1 );
