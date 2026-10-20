@@ -178,3 +178,31 @@ function prune(): void {
 	}
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\prune', 9999 );
+
+/**
+ * Front page: load the shared card sheet without blocking first paint.
+ *
+ * On the front page cr-post-kinds.css only paints the cards below the hero
+ * and the newsletter block. With it blocked outright, the first viewport is
+ * pixel-identical at 412 and 1440 px (2026-10-19), yet as the last
+ * render-blocking file (88 KB) it held first paint and LCP until about 4 s on
+ * a throttled phone. The link keeps its place in the document and swaps from
+ * print to all on load, so the cascade is unchanged; <noscript> keeps it for
+ * visitors without JavaScript. /stream/ keeps it render-blocking because cards
+ * are its first viewport.
+ *
+ * @param string $tag    The link tag.
+ * @param string $handle Style handle.
+ * @return string
+ */
+function defer_card_sheet_on_front_page( $tag, $handle ) {
+	if ( 'courtneyr-post-kinds' !== $handle || ! is_front_page() || is_admin() || ! is_string( $tag ) || str_contains( $tag, 'onload=' ) ) {
+		return $tag;
+	}
+	$deferred = preg_replace( "/media=(['\"])all\\1/", "media='print' onload=\"this.media='all';this.onload=null\"", $tag, 1 );
+	if ( ! is_string( $deferred ) || $deferred === $tag ) {
+		return $tag;
+	}
+	return $deferred . '<noscript>' . trim( $tag ) . "</noscript>\n";
+}
+add_filter( 'style_loader_tag', __NAMESPACE__ . '\\defer_card_sheet_on_front_page', 10, 2 );
