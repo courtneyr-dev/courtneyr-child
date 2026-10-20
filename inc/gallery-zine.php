@@ -834,14 +834,16 @@ function zine( string $html, array $block, $instance = null ): string {
 			$classes .= ' cr-zine__frame--' . $flag;
 		}
 		// The anchor carries a camera-style date imprint: the post's own date, nothing more.
+		// Every zine ornament pairs aria-hidden with role="presentation", which is how
+		// Accessibility Checker tells ornament from hidden content (see inc/photo.php).
 		if ( 'anchor' === $item['treat'] ) {
 			// Inside the figure, so the imprint sits on the photograph however the cell is sized.
-			$imprint = '<span class="cr-zine__imprint" aria-hidden="true">' . esc_html( get_the_date( "'y m d", $post ) ) . '</span>';
+			$imprint = '<span class="cr-zine__imprint" aria-hidden="true" role="presentation">' . esc_html( get_the_date( "'y m d", $post ) ) . '</span>';
 			$at      = strrpos( $figure, '</figure>' );
 			$figure  = false === $at ? $figure . $imprint : substr( $figure, 0, $at ) . $imprint . substr( $figure, $at );
 		}
 		$panels .= '<li class="' . $classes . '" style="' . esc_attr( $style ) . '">'
-			. '<span class="cr-zine__num" aria-hidden="true">' . $num . '<span class="cr-zine__of">/' . $of . '</span></span>'
+			. '<span class="cr-zine__num" aria-hidden="true" role="presentation">' . $num . '<span class="cr-zine__of">/' . $of . '</span></span>'
 			. $figure . '</li>';
 	}
 
@@ -962,7 +964,7 @@ function masthead( string $html, array $block ): string {
 		. '<h1 id="' . TITLE_ID . '" class="cr-zine__title' . ( $titled ? ' p-name' : '' ) . '"><span class="cr-zine__title-paper">' . $name . '</span></h1>'
 		. '<p class="cr-zine__facts"><time class="dt-published" datetime="' . esc_attr( get_the_date( 'c', $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time>'
 		. ' <span class="cr-zine__count">' . esc_html( $photos ) . '</span></p>'
-		. '<span class="cr-zine__postmark" aria-hidden="true"><span class="cr-zine__postmark-date">' . esc_html( get_the_date( 'M j Y', $post ) ) . '</span>'
+		. '<span class="cr-zine__postmark" aria-hidden="true" role="presentation"><span class="cr-zine__postmark-date">' . esc_html( get_the_date( 'M j Y', $post ) ) . '</span>'
 		. '<span class="cr-zine__postmark-count">' . esc_html( $frames ) . '</span></span>'
 		. '</header>';
 
@@ -1068,7 +1070,7 @@ function flavor( int $post_id ): array {
  */
 function keepsakes( int $post_id ): string {
 	$flavor = flavor( $post_id );
-	return '<div class="cr-zine__keepsakes" aria-hidden="true">'
+	return '<div class="cr-zine__keepsakes" aria-hidden="true" role="presentation">'
 		. '<span class="cr-zine__hand" data-text="' . esc_attr( $flavor['note'] ) . '"></span>'
 		. '<span class="cr-zine__sticker" data-text="' . esc_attr( $flavor['sticker'] ) . '"></span>'
 		. '<span class="cr-zine__list" data-text="' . esc_attr( implode( ' · ', $flavor['words'] ) ) . '"></span>'
@@ -1097,7 +1099,7 @@ function ephemera( string $html, array $block ): string {
 	if ( null === $post || other_lane_holds( $post ) ) {
 		return $html;
 	}
-	$layer = '<div class="cr-zine-ephemera cr-zine-ephemera--' . variant( $post->ID ) . '" aria-hidden="true">';
+	$layer = '<div class="cr-zine-ephemera cr-zine-ephemera--' . variant( $post->ID ) . '" aria-hidden="true" role="presentation">';
 	foreach ( array( 'halftone', 'scrap', 'speckle', 'patch', 'ticks', 'fold', 'map', 'torn', 'band' ) as $piece ) {
 		$layer .= '<span class="cr-zine-ephemera__' . $piece . '"></span>';
 	}

@@ -97,3 +97,17 @@ test( 'titled Photo cards on the Stream carry their photo alt', async ( { page }
 	// Every photo on the site has alt text (September 2026 remediation), so no titled card should print an empty one.
 	expect( alts.filter( ( a ) => ! a || ! a.trim() ) ).toEqual( [] );
 } );
+
+test( 'gallery zine ornaments pass the checker', async ( { page } ) => {
+	const res = await page.goto( '/2026/09/09/wild-turkeys-strutting-through-the-neighborhood/', { waitUntil: 'domcontentloaded' } );
+	test.skip( 404 === res.status(), 'the gallery zine post is not on this environment' );
+	const ornaments = await page.locator( '.cr-zine__num, .cr-zine__postmark, .cr-zine__imprint, .cr-zine-ephemera' ).evaluateAll( ( nodes ) => {
+		const passes = window.__acPasses;
+		return nodes.map( ( n ) => ( { cls: n.className, hidden: n.getAttribute( 'aria-hidden' ), passes: passes( n ) } ) );
+	} );
+	expect( ornaments.length ).toBeGreaterThan( 0 );
+	for ( const o of ornaments ) {
+		expect( o.hidden, o.cls ).toBe( 'true' );
+		expect( o.passes, o.cls ).toBe( true );
+	}
+} );
