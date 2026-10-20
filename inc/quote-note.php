@@ -30,6 +30,7 @@ use function Courtneyr\Child\Journal\aside;
 use function Courtneyr\Child\Journal\margin_lines;
 use function Courtneyr\Child\Stamps\pick;
 use function Courtneyr\Child\Stamps\seed;
+use function Courtneyr\Child\Stamps\seeded_paper;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -58,6 +59,20 @@ const PALETTE = array(
 const TILTS = array( '-0.8deg', '-0.35deg', '0.35deg', '0.8deg' );
 
 /**
+ * Quote papers: block style slug => label, colour. Light papers from the
+ * palette only, so the violet ink and the cerulean cite stay above 4.5:1.
+ * A quote takes the paper picked as its quote block's style, or else one
+ * seeded by its post ID, so the single, the archive and the Stream agree.
+ */
+const PAPERS = array(
+	'lavender' => array( 'Lavender', 'color-mix(in srgb, var(--cr-periwinkle) 22%, var(--cr-white))' ),
+	'ivory'    => array( 'Ivory', 'var(--cr-printer-ivory)' ),
+	'peach'    => array( 'Peach', 'var(--cr-light-orange)' ),
+	'sky'      => array( 'Sky', 'color-mix(in srgb, var(--cr-sky-blue) 30%, var(--cr-white))' ),
+	'butter'   => array( 'Butter', 'color-mix(in srgb, var(--cr-selective-yellow) 18%, var(--cr-white))' ),
+);
+
+/**
  * Is this the single view of a Quote?
  *
  * @return bool
@@ -70,15 +85,67 @@ function is_quote_single(): bool {
  * The artifact's inline custom properties: pin colours and tilt, fixed per
  * post; the paper inherits them.
  *
- * @param int $seed Stable seed.
+ * @param int    $seed  Stable seed.
+ * @param string $paper The quote's paper colour (paper_for()), or '' for none.
  * @return string A style attribute.
  */
-function note_style( int $seed ): string {
+function note_style( int $seed, string $paper = '' ): string {
 	$keys  = array_keys( PALETTE );
 	$key   = $keys[ pick( $seed, 8, count( $keys ) ) ];
 	$shade = PALETTE[ $key ];
-	return 'style="--cr-pin:' . $shade[0] . ';--cr-pin-hi:' . $shade[1] . ';--cr-pin-lo:' . $shade[2] . ';--cr-note-tilt:' . TILTS[ pick( $seed, 9, count( TILTS ) ) ] . '"';
+	$paper = '' !== $paper ? ';--cr-quote-paper:' . esc_attr( $paper ) : '';
+	return 'style="--cr-pin:' . $shade[0] . ';--cr-pin-hi:' . $shade[1] . ';--cr-pin-lo:' . $shade[2] . ';--cr-note-tilt:' . TILTS[ pick( $seed, 9, count( TILTS ) ) ] . $paper . '"';
 }
+
+/**
+ * The paper a quote is written on: the paper picked as its first quote
+ * block's style, or else a seeded one.
+ *
+ * @param \WP_Post $post Post.
+ * @return string A CSS colour from PAPERS.
+ */
+function paper_for( \WP_Post $post ): string {
+	$picked = '';
+	$walk   = static function ( array $blocks ) use ( &$walk, &$picked ): void {
+		foreach ( $blocks as $block ) {
+			if ( '' !== $picked ) {
+				return;
+			}
+			if ( 'core/quote' === ( $block['blockName'] ?? '' ) ) {
+				$picked = preg_match( '/(?<![\w-])is-style-cr-quote-paper-([a-z]+)(?![\w-])/', (string) ( $block['attrs']['className'] ?? '' ), $m ) ? $m[1] : '-';
+				return;
+			}
+			$walk( $block['innerBlocks'] ?? array() );
+		}
+	};
+	$walk( parse_blocks( (string) $post->post_content ) );
+	$slug = isset( PAPERS[ $picked ] ) ? $picked : seeded_paper( $post->ID, array_keys( PAPERS ) );
+	return PAPERS[ $slug ][1];
+}
+
+/**
+ * The quote papers as block styles on the core Quote block, so a paper can
+ * be picked in the editor; the editor preview shows the paper behind the quote.
+ */
+function register_paper_styles(): void {
+	if ( ! function_exists( 'register_block_style' ) ) {
+		return;
+	}
+	foreach ( PAPERS as $slug => $paper ) {
+		register_block_style(
+			'core/quote',
+			array(
+				'name'         => 'cr-quote-paper-' . $slug,
+				/* translators: %s: paper colour name, such as Lavender. */
+				'label'        => sprintf( __( 'Paper: %s', 'courtneyr-child' ), __( $paper[0], 'courtneyr-child' ) ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- Labels come from the PAPERS table.
+				// Ink and cite colours are the raw palette tokens, which do not flip in dark mode: paper stays paper.
+				'inline_style' => '.wp-block-quote.is-style-cr-quote-paper-' . $slug . '{background-color:' . $paper[1] . ';color:var(--cr-russian-violet);padding:1rem 1.25rem}'
+					. '.wp-block-quote.is-style-cr-quote-paper-' . $slug . ' cite{color:var(--cr-cerulean)}',
+			)
+		);
+	}
+}
+add_action( 'init', __NAMESPACE__ . '\\register_paper_styles' );
 
 /**
  * The push pin: a thumbtack seen from slightly above, coloured by the
@@ -206,7 +273,7 @@ function stream_card( string $html, array $block, $instance ): string {
 	}
 	// The artifact: pin colours and tilt on the wrapper (custom properties
 	// inherit into the paper), the pin above the paper, overflow visible.
-	return '<div class="cr-note-artifact cr-note-artifact--stream" ' . note_style( $s ) . '>' . pin_svg() . $html . '</div>';
+	return '<div class="cr-note-artifact cr-note-artifact--stream" ' . note_style( $s, paper_for( $post ) ) . '>' . pin_svg() . $html . '</div>';
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\stream_card', 10, 3 );
 
@@ -284,7 +351,7 @@ function archive_sheet( string $html, array $block, $instance ): string {
 	$words = str_word_count( wp_strip_all_tags( strip_shortcodes( (string) $post->post_content ), true ) );
 	$hand  = $words > $limit ? '' : ' cr-hand-short';
 
-	$sheet  = '<div class="cr-note-artifact cr-note-artifact--single cr-note-artifact--archive' . $hand . '" ' . note_style( seed( (string) $post->ID, $post->post_title ) ) . '>' . pin_svg();
+	$sheet  = '<div class="cr-note-artifact cr-note-artifact--single cr-note-artifact--archive' . $hand . '" ' . note_style( seed( (string) $post->ID, $post->post_title ), paper_for( $post ) ) . '>' . pin_svg();
 	$sheet .= '<article class="pk-card k-quote h-entry cr-note cr-note--single">' . mark();
 	$sheet .= '<p class="cr-note__label cr-sr-only">' . esc_html__( 'Quote', 'courtneyr-child' ) . '</p>';
 	$sheet .= $title[0] . $quote;
@@ -357,7 +424,7 @@ function note_page( string $html, array $block ): string {
 	$s      = seed( (string) $post->ID, $post->post_title );
 	$ts     = (int) get_post_time( 'U', true, $post );
 
-	$sheet  = '<div class="cr-note-artifact cr-note-artifact--single" ' . note_style( $s ) . '>' . pin_svg();
+	$sheet  = '<div class="cr-note-artifact cr-note-artifact--single" ' . note_style( $s, paper_for( $post ) ) . '>' . pin_svg();
 	$sheet .= '<div class="cr-note cr-note--single">' . mark();
 	$sheet .= '<p class="cr-note__label cr-sr-only">' . esc_html__( 'Quote', 'courtneyr-child' ) . '</p>';
 	$sheet .= $courtneyr_quote_title;

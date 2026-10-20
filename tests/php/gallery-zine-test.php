@@ -99,6 +99,7 @@ namespace {
 	use function Courtneyr\Child\GalleryZine\zine;
 	use function Courtneyr\Child\GalleryZine\count_reactions;
 	use function Courtneyr\Child\GalleryZine\ephemera;
+	use function Courtneyr\Child\GalleryZine\flavor;
 	use function Courtneyr\Child\GalleryZine\held;
 	use function Courtneyr\Child\GalleryZine\hold_reactions;
 	use function Courtneyr\Child\GalleryZine\label_counts;
@@ -541,6 +542,43 @@ namespace {
 			cr_photo_same( 1, substr_count( $html2, 'cr-zine__frame--missing' ), 'an image whose attachment is gone is marked as a missing frame' );
 			cr_photo_contains( 'alt="Alt 2"', $html2, 'its alt text stays' );
 			cr_photo_same( 6, preg_match_all( '/style="--cr-col:[^;"]+;--cr-col-t:[^;"]+;--cr-col-p:[^;"]+;--cr-mt:\d+;--cr-mt-t:\d+;--cr-mt-p:\d+(;[^"]*)?"/', $html ), 'each panel carries its place on three grids and its row spacing' );
+		}
+	);
+
+	cr_photo_group(
+		'keepsakes: handwritten flavor beside the sheet, drawn from attributes so no text joins the post, its microformats or the accessibility tree',
+		static function (): void {
+			$a = flavor( 41 );
+			$b = flavor( 42 );
+			cr_photo_same( $a, flavor( 41 ), 'a post keeps its flavor' );
+			cr_photo_assert( $a !== $b, 'neighbouring posts differ' );
+			cr_photo_assert( '' !== $a['note'] && '' !== $a['sticker'] && count( $a['words'] ) >= 4, 'a note, a sticker and a word list' );
+			$doodles = array_unique( array_map( static fn( int $id ): string => flavor( $id )['doodle'], range( 1, 12 ) ) );
+			cr_photo_same( array(), array_diff( $doodles, array( 'star', 'circle', 'film', 'arrow' ) ), 'doodles come from a pool with no subject in it' );
+			cr_photo_assert( count( $doodles ) >= 3, 'posts get different doodles' );
+			$html = cr_zine_render( cr_zine_request( 6 ) );
+			cr_photo_assert( 1 === preg_match( '/<div class="cr-zine__keepsakes" aria-hidden="true" role="presentation">(.*?)<\/div><\/section>$/s', $html, $m ), 'one aria-hidden keepsakes block, role=presentation like every zine ornament, closes the section' );
+			$block = $m[1] ?? '';
+			cr_photo_same( '', trim( strip_tags( $block ) ), 'no text nodes: the flavor lives in data-text only' );
+			foreach ( array( 'hand', 'sticker', 'list' ) as $piece ) {
+				cr_photo_contains( 'class="cr-zine__' . $piece . '"', $block, $piece );
+			}
+			cr_photo_contains( 'class="cr-zine__doodle cr-zine__doodle--' . flavor( 6 )['doodle'] . '"', $block, 'the post\'s doodle' );
+			cr_photo_assert( ! str_contains( $block, 'cr-zine__trees' ), 'no pines on every gallery' );
+			cr_photo_assert( 1 === preg_match( '/class="cr-zine__list" data-text="[^"&]+ · [^"&]+"/', $block ), 'the word list is one attribute, words on one line' );
+			$layer = ephemera( '<div class="entry-content">body</div>', array( 'blockName' => 'core/post-content', 'attrs' => array( 'className' => 'single-post__content' ) ) );
+			foreach ( array( 'map', 'torn', 'band' ) as $piece ) {
+				cr_photo_contains( '<span class="cr-zine-ephemera__' . $piece . '"></span>', $layer, 'the page layer has the ' . $piece );
+			}
+			cr_photo_assert( ! str_contains( $layer, 'cr-zine-ephemera__postmark' ), 'the sticker is the page\'s second stamp, so the margin postmark goes' );
+			$css = (string) file_get_contents( CR_PHOTO_THEME_DIR . '/assets/css/cr-gallery-zine.css' );
+			cr_photo_assert( substr_count( $css, 'content: attr(data-text)' ) >= 3, 'CSS draws the flavor from its attribute' );
+			cr_photo_assert( 1 === preg_match( '/@media \(max-width: 37\.49rem\)\s*\{[^@]*\.cr-zine__keepsakes[^{]*:is\([^)]*cr-zine__doodle[^)]*\)[^{]*\{[^{}]*display:\s*none;/s', $css ), 'phones drop the doodle' );
+			cr_photo_assert( 1 === preg_match( '/@media \(min-width: 64rem\)\s*\{[^@]*\.cr-zine__list\s*\{[^{}]*display:\s*block;/s', $css ), 'the word list shows on every desktop, in the band above the sheet' );
+			cr_photo_assert( ! str_contains( $css, '92rem' ) && ! str_contains( $css, 'cr-zine-trees' ), 'no wide-only list, no pine mask' );
+			cr_photo_assert( 1 === preg_match( '/@media \(max-width: 74\.99rem\)\s*\{[^@]*\.cr-zine__masthead::after\s*\{[^{}]*content:\s*"";/s', $css ), 'below the wide margins the map peeks out under the masthead' );
+			cr_photo_assert( 1 === preg_match( '/\.cr-zine-ephemera__torn\s*\{[^{}]*height:\s*clamp\([^{}]*clip-path:\s*polygon\(/s', $css ), 'the start-edge strip is a short scrap with a torn top' );
+			cr_photo_assert( 1 === preg_match( '/@media \(forced-colors: active\)\s*\{[^@]*\.cr-zine__keepsakes[^{]*\{[^{}]*display:\s*none;/s', $css ), 'forced colors drop the keepsakes' );
 		}
 	);
 
