@@ -624,31 +624,6 @@ function drop_featured_image( string $html, array $block ): string {
 add_filter( 'render_block_core/post-featured-image', __NAMESPACE__ . '\\drop_featured_image', 10, 2 );
 
 /**
- * Drop the like single's reactions group when the facepile rendered no reactions.
- *
- * IndieBlocks prints each reaction as a list item, or a count in count-only
- * mode; without either the group holds only its heading.
- *
- * @param string $html  Rendered group block.
- * @param array  $block Parsed block.
- * @return string
- */
-function drop_empty_reactions( string $html, array $block ): string {
-	if ( '' === $html || ! is_like_single() ) {
-		return $html;
-	}
-	$class_name = (string) ( $block['attrs']['className'] ?? '' );
-	if ( false === strpos( $class_name, 'single-post__syndication' ) ) {
-		return $html;
-	}
-	if ( false !== stripos( $html, '<li' ) || false !== strpos( $html, 'indieblocks-count' ) ) {
-		return $html;
-	}
-	return '';
-}
-add_filter( 'render_block_core/group', __NAMESPACE__ . '\\drop_empty_reactions', 10, 2 );
-
-/**
  * Load the like stylesheet where a like card can appear.
  *
  * @return void

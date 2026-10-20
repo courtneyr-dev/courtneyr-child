@@ -211,6 +211,89 @@ function stream_card( string $html, array $block, $instance ): string {
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\stream_card', 10, 3 );
 
 /**
+ * Is this the Quote kind archive?
+ *
+ * @return bool
+ */
+function is_quote_archive(): bool {
+	return \is_tax( 'kind', 'quote' );
+}
+
+/**
+ * The post's first quote or pullquote block, rendered.
+ *
+ * @param \WP_Post $post Post.
+ * @return string Block HTML, or '' when the post has none.
+ */
+function quote_block_html( \WP_Post $post ): string {
+	$found = null;
+	$walk  = static function ( array $blocks ) use ( &$walk, &$found ): void {
+		foreach ( $blocks as $block ) {
+			if ( null !== $found ) {
+				return;
+			}
+			if ( in_array( $block['blockName'] ?? '', array( 'core/quote', 'core/pullquote' ), true ) ) {
+				$found = $block;
+				return;
+			}
+			$walk( $block['innerBlocks'] ?? array() );
+		}
+	};
+	$walk( parse_blocks( (string) $post->post_content ) );
+	return null === $found ? '' : trim( render_block( $found ) );
+}
+
+/**
+ * Archive: each Quote is the single's pinned sheet, the whole quote and its
+ * cite, linked by its title. The plugin card's title link and date are kept,
+ * and the sheet stays a rooted pk-card h-entry, so the plugin's names and
+ * entry properties hold. A protected post, or one with no quote block, keeps
+ * the plugin card.
+ *
+ * @param string    $html     Rendered stream card.
+ * @param array     $block    Parsed block (unused).
+ * @param \WP_Block $instance Block instance.
+ * @return string
+ */
+function archive_sheet( string $html, array $block, $instance ): string {
+	if ( '' === $html || ! is_quote_archive() || false === strpos( $html, 'k-quote' ) || false !== strpos( $html, 'pk-card--protected' ) ) {
+		return $html;
+	}
+	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
+		? (int) $instance->context['postId']
+		: (int) get_the_ID();
+	$post    = $post_id ? get_post( $post_id ) : null;
+	if ( ! $post instanceof \WP_Post || ! has_term( 'quote', 'kind', $post ) || post_password_required( $post ) ) {
+		return $html;
+	}
+	$quote = quote_block_html( $post );
+	if ( '' === $quote
+		|| ! preg_match( '/<h([2-6])\b[^>]*\bclass="[^"]*(?<![\w-])pk-title(?![\w-])[^"]*"[^>]*>.*?<\/h\1>/s', $html, $title )
+		|| ! preg_match( '/<p class="pk-sub pk-stream-date">(.*?)<\/p>/s', $html, $date )
+	) {
+		return $html;
+	}
+
+	$tags = new \WP_HTML_Tag_Processor( $quote );
+	if ( $tags->next_tag( 'blockquote' ) ) {
+		$tags->add_class( 'e-content' );
+		$quote = $tags->get_updated_html();
+	}
+
+	$limit = defined( 'Courtneyr\\Child\\Enqueue\\HAND_MAX_WORDS' ) ? (int) constant( 'Courtneyr\\Child\\Enqueue\\HAND_MAX_WORDS' ) : 120;
+	$words = str_word_count( wp_strip_all_tags( strip_shortcodes( (string) $post->post_content ), true ) );
+	$hand  = $words > $limit ? '' : ' cr-hand-short';
+
+	$sheet  = '<div class="cr-note-artifact cr-note-artifact--single cr-note-artifact--archive' . $hand . '" ' . note_style( seed( (string) $post->ID, $post->post_title ) ) . '>' . pin_svg();
+	$sheet .= '<article class="pk-card k-quote h-entry cr-note cr-note--single">' . mark();
+	$sheet .= '<p class="cr-note__label cr-sr-only">' . esc_html__( 'Quote', 'courtneyr-child' ) . '</p>';
+	$sheet .= $title[0] . $quote;
+	$sheet .= '<p class="cr-note__date">' . $date[1] . '</p>';
+	return $sheet . '</article></div>';
+}
+add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\archive_sheet', 10, 3 );
+
+/**
  * The template's title, held back so the sheet can carry it.
  *
  * @var string

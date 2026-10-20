@@ -1,0 +1,1248 @@
+<?php
+/**
+ * Gallery-format single as a zine photo essay (Courtney, 2026-10-19).
+ *
+ * The post's first gallery prints as one numbered sequence of panels: every
+ * image block is rendered by core (its alt, caption, srcset, link and, when
+ * unlinked, core's "expand on click" lightbox), sized by its real
+ * orientation, and laid on the zine grid by assets/css/cr-gallery-zine.css.
+ * The page H1 moves into a masthead at the head of the post content with the
+ * post's own date, kind and categories and a postmark of the same date and
+ * the frame count. Nothing is invented: no caption, place or credit the post
+ * does not carry. Photo posts whose gallery the plugin turns into a projector
+ * (priority 10) get the zine too, so the projector's assets are dequeued.
+ *
+ * @package CourtneyrChild
+ */
+
+declare( strict_types = 1 );
+
+namespace Courtneyr\Child\GalleryZine;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+const TITLE_ID   = 'cr-zine-title';
+const BODY_CLASS = 'cr-zine-single';
+
+/** A gallery caption up to this many characters is handwritten; longer ones stay typeset. */
+const HAND_LIMIT = 60;
+
+/** Shapes wide enough to stack as a hero's satellites. */
+const WIDE = array( 'landscape', 'square' );
+
+/** Width over height, by shape, for rows whose pictures share a height. */
+const RATIO = array(
+	'landscape' => 1.33,
+	'square'    => 1.0,
+	'portrait'  => 0.75,
+	'panorama'  => 2.5,
+);
+
+/** The desktop and tablet grids: fine columns, so rows of mixed shapes can share a height. */
+const COLS_D = 24;
+const COLS_T = 12;
+
+/**
+ * Per grid, for rows that share a picture height: columns, gutter (rem,
+ * cr-gallery-zine.css --cr-zine-gap) and the sheet's typical inner width
+ * (rem), which picks the picture that limits the row.
+ */
+const EVEN_GRID = array(
+	'd' => array( COLS_D, 2.0, 66.0 ),
+	't' => array( COLS_T, 1.5, 36.5 ),
+);
+
+/** A panel alone on its row, by shape, in twelfths and sixths of the row (doubled onto the fine grids). */
+const SOLO_SPAN = array(
+	12 => array(
+		'panorama'  => 12,
+		'landscape' => 9,
+		'square'    => 7,
+		'portrait'  => 5,
+	),
+	6  => array(
+		'panorama'  => 6,
+		'landscape' => 6,
+		'square'    => 5,
+		'portrait'  => 4,
+	),
+);
+
+/** A caption up to this many characters is handwritten on a print's edge. */
+const HAND_CAPTION_LIMIT = 40;
+
+/** Row spacing, in steps of the sheet's rhythm: a new group, a row inside a group, a dropped panel. */
+const LEAD = 3;
+const STEP = 1;
+const DROP = 2;
+
+/**
+ * The gallery as composed groups, in source order.
+ *
+ * Patterns: solo (one picture), journal (one captioned picture with its
+ * caption as a margin note), banner (a panorama), stack (a panorama and its
+ * neighbour), diptych (two), essay (two landscapes stepping down the page),
+ * triptych (three), hero (one picture with two wide satellites) and contact
+ * (the tail of a long gallery as a contact sheet). The walk reads each
+ * picture's shape and what remains, never reorders, and never leaves a lone
+ * picture at the end unless it is the only one or a full-width banner.
+ *
+ * @param string[] $shapes   Panel shapes.
+ * @param string[] $captions Panel caption text ('' for none).
+ * @return array<int, array{0: string, 1: int[]}> Pattern and the panels it holds.
+ */
+function groups( array $shapes, array $captions ): array {
+	$n    = count( $shapes );
+	$out  = array();
+	$i    = 0;
+	$wide = static fn( int $k ): bool => in_array( $shapes[ $k ] ?? '', WIDE, true );
+	$pano = static fn( int $k ): bool => 'panorama' === ( $shapes[ $k ] ?? '' );
+	while ( $i < $n ) {
+		$left = $n - $i;
+		$prev = $out ? $out[ count( $out ) - 1 ][0] : '';
+		if ( $n >= 12 && $i >= 8 && $left >= 4 ) {
+			$out[] = array( 'contact', range( $i, $n - 1 ) );
+			break;
+		}
+		if ( 1 === $left ) {
+			$single = '' !== ( $captions[ $i ] ?? '' ) ? 'journal' : 'solo';
+			$out[]  = array( $pano( $i ) ? 'banner' : $single, array( $i ) );
+			break;
+		}
+		if ( $pano( $i ) || $pano( $i + 1 ) ) {
+			if ( $pano( $i ) && 2 !== $left ) {
+				$out[] = array( 'banner', array( $i ) );
+				++$i;
+				continue;
+			}
+			$out[] = array( 'stack', array( $i, $i + 1 ) );
+			$i    += 2;
+			continue;
+		}
+		if ( $left >= 3 && 4 !== $left && ! $pano( $i + 2 ) ) {
+			$out[] = array( 'hero' !== $prev && $wide( $i + 1 ) && $wide( $i + 2 ) ? 'hero' : 'triptych', array( $i, $i + 1, $i + 2 ) );
+			$i    += 3;
+			continue;
+		}
+		$out[] = array( 'landscape' === $shapes[ $i ] && 'landscape' === $shapes[ $i + 1 ] ? 'essay' : 'diptych', array( $i, $i + 1 ) );
+		$i    += 2;
+	}
+	return $out;
+}
+
+/**
+ * Spans for pictures that share a row and a height.
+ *
+ * Solves the shared height that fills the row (each picture as wide as its
+ * ratio times that height, plus any print edge, with the gutters between),
+ * turns each width into columns, and rounds by largest remainder, so the
+ * pictures fill their cells instead of leaving paper at the row's end.
+ *
+ * @param float[] $ratios Width over height of each picture in the row.
+ * @param float[] $pads   Each picture's print edge (rem, both sides).
+ * @param string  $bp     'd' or 't' (EVEN_GRID).
+ * @param int     $min    Fewest columns per picture.
+ * @return int[]
+ */
+function justify( array $ratios, array $pads, string $bp, int $min ): array {
+	list( $cols, $gap, $width ) = EVEN_GRID[ $bp ];
+
+	$ratios = array_values( $ratios );
+	$count  = count( $ratios );
+	$height = ( $width - ( $count - 1 ) * $gap - array_sum( $pads ) ) / array_sum( $ratios );
+	$exact  = array();
+	foreach ( $ratios as $k => $ratio ) {
+		$exact[ $k ] = max( $min, ( $height * $ratio + ( $pads[ $k ] ?? 0 ) + $gap ) * $cols / ( $width + $gap ) );
+	}
+	$spans = array_map( static fn( float $e ): int => (int) floor( $e ), $exact );
+	$order = array_keys( $exact );
+	usort( $order, static fn( int $a, int $b ): int => array( $exact[ $b ] - $spans[ $b ], $a ) <=> array( $exact[ $a ] - $spans[ $a ], $b ) );
+	$spare = $cols - array_sum( $spans );
+	for ( $k = 0; $k < $spare; ++$k ) {
+		++$spans[ $order[ $k % $count ] ];
+	}
+	// Over: take columns back from the widest that can give them.
+	$over  = array_sum( $spans ) - $cols;
+	$order = array_keys( $spans );
+	usort( $order, static fn( int $a, int $b ): int => array( $spans[ $b ], $a ) <=> array( $spans[ $a ], $b ) );
+	for ( $guard = 0; $over > 0 && $guard < $cols * $count; ++$guard ) {
+		$k = $order[ $guard % $count ];
+		if ( $spans[ $k ] > $min ) {
+			--$spans[ $k ];
+			--$over;
+		}
+	}
+	return $spans;
+}
+
+/**
+ * The opening spread's columns: the hero's span (9 to 16 of 24) that stands
+ * it about 1.6 times as tall as the pair beside it, the hero held to the
+ * 38rem height cap, and the first of the pair's share of the rest.
+ *
+ * @param float $hero  The hero's width over height.
+ * @param float $one   The first supporting picture's width over height.
+ * @param float $two   The second's.
+ * @return int[] Hero span and first supporting span.
+ */
+function spread_split( float $hero, float $one, float $two ): array {
+	list( $cols, $gap, $width ) = EVEN_GRID['d'];
+
+	$best = array( PHP_FLOAT_MAX, 16 );
+	for ( $span = 16; $span >= 9; --$span ) {
+		$hero_h = min( ( $span / $cols * ( $width + $gap ) - $gap ) / $hero, 38.0 );
+		$pair_h = ( ( $cols - $span ) / $cols * ( $width + $gap ) - 2 * $gap ) / ( $one + $two );
+		$score  = abs( $hero_h / $pair_h - 1.6 );
+		if ( $score < $best[0] ) {
+			$best = array( $score, $span );
+		}
+	}
+	$rest = $cols - $best[1];
+	return array( $best[1], (int) max( 3, min( $rest - 3, round( $rest * $one / ( $one + $two ) ) ) ) );
+}
+
+/**
+ * A cell: start column, span, rows.
+ *
+ * @param int $start Start column.
+ * @param int $span  Columns.
+ * @param int $rows  Rows.
+ * @return array{start: int, span: int, rows: int}
+ */
+function cell( int $start, int $span, int $rows = 1 ): array {
+	return array(
+		'start' => $start,
+		'span'  => $span,
+		'rows'  => $rows,
+	);
+}
+
+/**
+ * Cells for a run of pictures that share a row: consecutive starts from 1.
+ *
+ * @param int[] $spans Spans.
+ * @return array<int, array{start: int, span: int, rows: int}>
+ */
+function row_cells( array $spans ): array {
+	$out   = array();
+	$start = 1;
+	foreach ( $spans as $span ) {
+		$out[]  = cell( $start, $span );
+		$start += $span;
+	}
+	return $out;
+}
+
+/**
+ * Where each panel sits on the 12-column desktop, 6-column tablet and
+ * 2-column phone grids, how it is presented, and the space above its row.
+ *
+ * @param string[] $shapes   Panel shapes, in source order.
+ * @param string[] $captions Panel caption text ('' for none).
+ * @param float[]  $ratios   Each picture's width over height; a shape's typical ratio when missing.
+ * @return array<int, array{pattern: string, group: int, treat: string, flags: string[], d: array, t: array, p: array, mt: array{d: int, t: int, p: int}, h: array{d: string, t: string}}>
+ */
+function compose( array $shapes, array $captions, array $ratios = array() ): array {
+	$ratio  = static fn( int $k ): float => (float) ( $ratios[ $k ] ?? RATIO[ $shapes[ $k ] ] );
+	$plan   = array();
+	$taped  = false;
+	$rhythm = 0;
+	$trio   = 0;
+	foreach ( groups( $shapes, $captions ) as $g => list( $pattern, $members ) ) {
+		$s         = array_map( static fn( int $k ): string => $shapes[ $k ], $members );
+		$r         = array_map( $ratio, $members );
+		$cells     = array();
+		$flags     = array_fill( 0, count( $members ), array() );
+		$off       = array_fill( 0, count( $members ), 0 );
+		$even_rows = array(
+			'd' => array(),
+			't' => array(),
+		);
+		switch ( $pattern ) {
+			case 'solo':
+			case 'banner':
+			case 'stack':
+				foreach ( $s as $k => $shape ) {
+					$d           = 2 * SOLO_SPAN[12][ $shape ];
+					$t           = 'landscape' === $shape ? 10 : 2 * SOLO_SPAN[6][ $shape ];
+					$cells[ $k ] = array( cell( intdiv( COLS_D - $d, 2 ) + 1, $d ), cell( intdiv( COLS_T - $t, 2 ) + 1, $t ), cell( 1, 2 ) );
+					$flags[ $k ] = array( 'center' );
+				}
+				break;
+			case 'journal':
+				$cells[0] = array( cell( 1, COLS_D ), cell( 1, COLS_T ), cell( 1, 2 ) );
+				break;
+			case 'essay':
+				$cells    = array(
+					array( cell( 1, 16 ), cell( 1, 10 ), cell( 1, 2 ) ),
+					array( cell( 9, 16 ), cell( 3, 10 ), cell( 1, 2 ) ),
+				);
+				$flags[1] = array( 'step' );
+				break;
+			case 'diptych':
+				if ( $s[0] === $s[1] ) {
+					$portrait = 'portrait' === $s[0];
+					$cells    = array(
+						array( cell( 3, 10 ), cell( 1, 6 ), cell( 1, $portrait ? 1 : 2 ) ),
+						array( cell( 13, 10 ), cell( 7, 6 ), cell( $portrait ? 2 : 1, $portrait ? 1 : 2 ) ),
+					);
+					$off[1]   = 'square' === $s[0] ? DROP : 0;
+				} else {
+					$d         = row_cells( justify( $r, array( 0, 0 ), 'd', 8 ) );
+					$t         = row_cells( justify( $r, array( 0, 0 ), 't', 4 ) );
+					$cells     = array(
+						array( $d[0], $t[0], cell( 1, 2 ) ),
+						array( $d[1], $t[1], cell( 1, 2 ) ),
+					);
+					$flags     = array( array( 'baseline' ), array( 'baseline' ) );
+					$even_rows = array(
+						'd' => array( array( 0, 1 ) ),
+						't' => array( array( 0, 1 ) ),
+					);
+				}
+				$flags[0][] = 'toward-end';
+				break;
+			case 'triptych':
+				$portraits = array( 'portrait', 'portrait', 'portrait' ) === $s;
+				// Tablets: three portraits pair up, then the third sits inset; any other trio opens on a full-width picture with the other two as a pair.
+				if ( $portraits ) {
+					$t = array( cell( 1, 6 ), cell( 7, 6 ), cell( 0 === $trio % 2 ? 6 : 1, 7 ) );
+				} else {
+					$t = array( cell( 1, COLS_T ), ...row_cells( justify( array( $r[1], $r[2] ), array( 1.0, 0 ), 't', 4 ) ) );
+				}
+				$p = $portraits ? array( cell( 1, 1 ), cell( 2, 1 ), cell( 1, 2 ) ) : array( cell( 1, 2 ), cell( 1, 2 ), cell( 1, 2 ) );
+				if ( 1 === $trio % 2 ) {
+					// Desktop, every second trio: a loose spread that breaks the row line, after a tight one.
+					$d              = array( cell( 1, $portraits ? 9 : 12 ), cell( $portraits ? 12 : 15, $portraits ? 7 : 9 ), cell( $portraits ? 6 : 5, $portraits ? 9 : 12 ) );
+					$off            = array( 0, DROP + 1, 0 );
+					$flags          = array( array( 'loose' ), array( 'loose' ), array( 'loose' ) );
+					$even_rows['t'] = $portraits ? array( array( 0, 1 ) ) : array( array( 1, 2 ) );
+				} elseif ( $portraits ) {
+					$d = row_cells( array( 8, 8, 8 ) );
+					// Consecutive portrait rows answer each other: ends drop, then the middle.
+					$off            = 0 === $rhythm % 2 ? array( DROP, 0, DROP ) : array( 0, DROP, 0 );
+					$even_rows['t'] = array( array( 0, 1 ) );
+					++$rhythm;
+				} elseif ( 0 === $g ) {
+					// An opening trio is a spread: the first picture dominant, the other two as a pair on its baseline.
+					list( $hero, $second ) = spread_split( $r[0], $r[1], $r[2] );
+					$d                     = array( cell( 1, $hero ), cell( $hero + 1, $second ), cell( $hero + 1 + $second, COLS_D - $hero - $second ) );
+					$flags                 = array( array( 'spread' ), array( 'spread', 'baseline' ), array( 'spread', 'baseline' ) );
+					$even_rows['d']        = array( array( 1, 2 ) );
+					$even_rows['t']        = array( array( 1, 2 ) );
+				} else {
+					// The middle picture is a print, with a narrow edge.
+					$d              = row_cells( justify( $r, array( 0, 1.0, 0 ), 'd', 4 ) );
+					$flags          = array( array( 'baseline' ), array( 'baseline' ), array( 'baseline' ) );
+					$even_rows['d'] = array( array( 0, 1, 2 ) );
+					$even_rows['t'] = array( array( 1, 2 ) );
+				}
+				foreach ( $s as $k => $shape ) {
+					$cells[ $k ] = array( $d[ $k ], $t[ $k ], $p[ $k ] );
+				}
+				++$trio;
+				break;
+			case 'hero':
+				// The hero takes the columns that make it as tall as its two stacked satellites.
+				$k_sat    = 1 / $r[1] + 1 / $r[2];
+				$h        = (int) max( 12, min( 18, round( COLS_D * $k_sat / ( 1 / $r[0] + $k_sat ) ) ) );
+				$cells    = array(
+					array( cell( 1, $h, 2 ), cell( 1, COLS_T ), cell( 1, 2 ) ),
+					array( cell( $h + 1, COLS_D - $h ), cell( 1, 6 ), cell( 1, 2 ) ),
+					array( cell( $h + 1, COLS_D - $h ), cell( 7, 6 ), cell( 1, 2 ) ),
+				);
+				$flags[1] = array( 'hero-sat' );
+				$flags[2] = array( 'hero-sat', 'baseline' );
+				break;
+			case 'contact':
+				foreach ( $members as $k => $unused ) {
+					$cells[ $k ] = array( cell( 1 + ( $k % 4 ) * 6, 6 ), cell( 1 + ( $k % 3 ) * 4, 4 ), cell( 1 + $k % 2, 1 ) );
+				}
+				break;
+		}
+
+		// The anchor is the opening group's largest picture (a spread's is its first).
+		$anchor = -1;
+		if ( 0 === $g && 'contact' !== $pattern ) {
+			$anchor = 0;
+			foreach ( in_array( 'spread', $flags[0], true ) ? array() : $cells as $k => $c ) {
+				if ( $c[0]['span'] * ( $c[0]['rows'] ?? 1 ) > $cells[ $anchor ][0]['span'] * ( $cells[ $anchor ][0]['rows'] ?? 1 ) ) {
+					$anchor = $k;
+				}
+			}
+		}
+
+		foreach ( $members as $k => $n ) {
+			$treat = 'bare';
+			if ( 'contact' === $pattern ) {
+				$treat = 'contact';
+			} elseif ( $anchor === $k ) {
+				$treat = 'anchor';
+			} elseif ( ( 'hero' === $pattern && $k > 0 ) || ( 'triptych' === $pattern && 1 === $k ) ) {
+				$treat = 'print';
+			}
+			if ( 'print' === $treat && ! $taped && $n >= 3 && 'panorama' !== $shapes[ $n ] ) {
+				$treat = 'taped';
+				$taped = true;
+			}
+			$item_flags = $flags[ $k ];
+			if ( 'anchor' === $treat && 1 === $cells[ $k ][0]['start'] && $cells[ $k ][0]['span'] < COLS_D ) {
+				$item_flags[] = 'edge';
+			}
+			if ( 'anchor' === $treat && 2 === $cells[ $k ][2]['span'] ) {
+				$item_flags[] = 'bleed';
+			}
+			if ( ( 'anchor' === $treat && 'journal' !== $pattern ) || ( 0 === $k && 2 === $g % 3 && 'bare' === $treat ) ) {
+				$item_flags[] = 'plate';
+			}
+			$caption = (string) ( $captions[ $n ] ?? '' );
+			$length  = function_exists( 'mb_strlen' ) ? mb_strlen( $caption ) : strlen( $caption );
+			if ( '' !== $caption && ( ( in_array( $treat, array( 'print', 'taped' ), true ) && $length <= HAND_CAPTION_LIMIT ) || ( 'journal' === $pattern && $length <= HAND_LIMIT ) ) ) {
+				$item_flags[] = 'hand';
+			}
+			$plan[ $n ] = array(
+				'pattern' => $pattern,
+				'group'   => $g,
+				'treat'   => $treat,
+				'flags'   => $item_flags,
+				'd'       => $cells[ $k ][0],
+				't'       => $cells[ $k ][1],
+				'p'       => $cells[ $k ][2],
+				'off'     => $off[ $k ],
+				'h'       => array(
+					'd' => '',
+					't' => '',
+				),
+			);
+		}
+
+		// A justified row shares one picture height: the smallest any of its pictures' cells allows at the real grid width.
+		foreach ( $even_rows as $bp => $rows ) {
+			list( $cols, $gap ) = EVEN_GRID[ $bp ];
+			foreach ( $rows as $row ) {
+				$terms = array();
+				foreach ( $row as $k ) {
+					$n       = $members[ $k ];
+					$pad     = in_array( $plan[ $n ]['treat'], array( 'print', 'taped' ), true ) ? 1.0 : 0.0;
+					$a       = $plan[ $n ][ $bp ]['span'] / ( $cols * $r[ $k ] );
+					$terms[] = 'calc(' . round( $a, 4 ) . ' * (100cqi + ' . $gap . 'rem) - ' . round( ( $gap + $pad ) / $r[ $k ], 3 ) . 'rem)';
+				}
+				foreach ( $row as $k ) {
+					$n                      = $members[ $k ];
+					$plan[ $n ]['h'][ $bp ] = 'min(' . implode( ', ', $terms ) . ')';
+					$plan[ $n ]['flags'][]  = 'even-' . $bp;
+				}
+			}
+		}
+	}
+	ksort( $plan );
+
+	// Space above each row, per grid: none above the first, a lead above a new group, a step inside one.
+	foreach ( array( 'd', 't', 'p' ) as $bp ) {
+		$end   = PHP_INT_MAX;
+		$group = -1;
+		$space = 0;
+		foreach ( $plan as $n => $item ) {
+			if ( $item[ $bp ]['start'] <= $end ) {
+				if ( 0 === $n ) {
+					$space = 0;
+				} elseif ( $item['group'] !== $group ) {
+					$space = LEAD;
+				} else {
+					$space = 'contact' === $item['pattern'] ? 0 : STEP;
+				}
+			}
+			$group                   = $item['group'];
+			$end                     = $item[ $bp ]['start'] + $item[ $bp ]['span'] - 1;
+			$drop                    = 'd' === $bp ? $item['off'] : ( 't' === $bp ? intdiv( $item['off'], 2 ) : 0 );
+			$plan[ $n ]['mt'][ $bp ] = $space + $drop;
+		}
+	}
+	foreach ( $plan as $n => $item ) {
+		unset( $plan[ $n ]['off'] );
+	}
+	return $plan;
+}
+
+/**
+ * A panel's grid-column (and grid-row) value.
+ *
+ * @param array{start: int, span: int, rows: int} $cell Cell.
+ * @return string
+ */
+function grid_area( array $cell ): string {
+	return $cell['start'] . ' / span ' . $cell['span'];
+}
+
+/**
+ * The image sizes a panel's spans need on phone, tablet and desktop.
+ *
+ * @param array $item Panel from compose().
+ * @return string
+ */
+function sizes_for( array $item ): string {
+	$phone  = 1 === $item['p']['span'] ? '50vw' : '100vw';
+	$share  = 'journal' === $item['pattern'] ? 0.8 : 1;
+	$tablet = (int) round( $item['t']['span'] / COLS_T * 100 * $share ) . 'vw';
+	$desk   = rtrim( rtrim( number_format( $item['d']['span'] * 2.625 * $share, 2, '.', '' ), '0' ), '.' ) . 'rem';
+	return '(max-width: 37.49rem) ' . $phone . ', (max-width: 64rem) ' . $tablet . ', ' . $desk;
+}
+
+/**
+ * Per-request state: whether the zine printed in this content pass, core's
+ * render of the zine gallery, whether the H1 filter is being asked on the
+ * masthead's behalf, and each post's gallery.
+ *
+ * @param bool $reset Clear the state.
+ * @return array{done: bool, core: string, asking: bool, galleries: array<int, array|null>}
+ */
+function &state( bool $reset = false ): array {
+	static $state = array();
+	if ( $reset || array() === $state ) {
+		$state = array(
+			'done'      => false,
+			'core'      => '',
+			'asking'    => false,
+			'galleries' => array(),
+		);
+	}
+	return $state;
+}
+
+/** Clear the per-request state (tests). */
+function reset_state(): void {
+	state( true );
+}
+
+/**
+ * The image blocks directly inside a gallery block.
+ *
+ * @param array<string, mixed> $gallery Parsed core/gallery block.
+ * @return array<int, array<string, mixed>>
+ */
+function images_of( array $gallery ): array {
+	return array_values(
+		array_filter(
+			(array) ( $gallery['innerBlocks'] ?? array() ),
+			static fn( $inner ): bool => is_array( $inner ) && 'core/image' === ( $inner['blockName'] ?? '' )
+		)
+	);
+}
+
+/**
+ * The first gallery, at any depth, with at least $min images.
+ *
+ * @param array<int, array<string, mixed>> $blocks Parsed blocks.
+ * @param int                              $min    Fewest images.
+ * @return array<string, mixed>|null
+ */
+function first_gallery( array $blocks, int $min ): ?array {
+	foreach ( $blocks as $block ) {
+		if ( ! is_array( $block ) ) {
+			continue;
+		}
+		if ( 'core/gallery' === ( $block['blockName'] ?? '' ) && count( images_of( $block ) ) >= $min ) {
+			return $block;
+		}
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			$found = first_gallery( (array) $block['innerBlocks'], $min );
+			if ( null !== $found ) {
+				return $found;
+			}
+		}
+	}
+	return null;
+}
+
+/**
+ * The gallery this post prints as a zine, or null.
+ *
+ * A photo post (any format): the first gallery the plugin's projector takes
+ * (two or more images). Otherwise, on a gallery-format post: its first
+ * gallery with an image.
+ *
+ * @param \WP_Post $post Post.
+ * @return array<string, mixed>|null
+ */
+function gallery_for( \WP_Post $post ): ?array {
+	$state = &state();
+	if ( ! array_key_exists( $post->ID, $state['galleries'] ) ) {
+		$blocks  = parse_blocks( (string) $post->post_content );
+		$gallery = null;
+		// A photo post's zine is the gallery the plugin's projector takes (two or more images), when it has one.
+		if ( has_term( 'photo', 'kind', $post ) ) {
+			$gallery = first_gallery( $blocks, 2 );
+		}
+		if ( null === $gallery && has_post_format( 'gallery', $post ) ) {
+			$gallery = first_gallery( $blocks, 1 );
+		}
+		$state['galleries'][ $post->ID ] = $gallery;
+	}
+	return $state['galleries'][ $post->ID ];
+}
+
+/**
+ * The queried, unprotected single post that prints a zine, or null.
+ *
+ * @param int $post_id Post being rendered, 0 for the queried post.
+ * @return \WP_Post|null
+ */
+function zine_post( int $post_id = 0 ): ?\WP_Post {
+	$queried = (int) get_queried_object_id();
+	if ( 0 === $post_id ) {
+		$post_id = $queried;
+	}
+	if ( ! is_singular( 'post' ) || $post_id <= 0 || $queried !== $post_id || post_password_required( $post_id ) ) {
+		return null;
+	}
+	$post = get_post( $post_id );
+	return $post instanceof \WP_Post && null !== gallery_for( $post ) ? $post : null;
+}
+
+/**
+ * Whether a parsed gallery is the post's zine gallery.
+ *
+ * @param array<string, mixed> $block   Gallery being rendered.
+ * @param array<string, mixed> $gallery The post's zine gallery.
+ * @return bool
+ */
+function same_gallery( array $block, array $gallery ): bool {
+	// Core's gallery adds a data-id attr to each image before render, so sign on the attachment and saved markup only.
+	$sign = static fn( array $g ): string => md5( serialize( array_map( static fn( $i ) => array( (int) ( $i['attrs']['id'] ?? 0 ), $i['innerHTML'] ?? '' ), images_of( $g ) ) ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- A hash input, never stored.
+	return $sign( $block ) === $sign( $gallery );
+}
+
+/**
+ * An image's shape from its attachment size, else its width and height.
+ *
+ * @param array<string, mixed> $image  Parsed core/image block.
+ * @param string               $figure Rendered image.
+ * @return string landscape, portrait, square or panorama.
+ */
+function shape_of( array $image, string $figure ): string {
+	$width  = 0;
+	$height = 0;
+	$id     = (int) ( $image['attrs']['id'] ?? 0 );
+	$meta   = $id > 0 ? wp_get_attachment_metadata( $id ) : false;
+	if ( is_array( $meta ) ) {
+		$width  = (int) ( $meta['width'] ?? 0 );
+		$height = (int) ( $meta['height'] ?? 0 );
+	}
+	if ( $width <= 0 || $height <= 0 ) {
+		$tags = new \WP_HTML_Tag_Processor( $figure );
+		if ( $tags->next_tag( 'img' ) ) {
+			$width  = (int) $tags->get_attribute( 'width' );
+			$height = (int) $tags->get_attribute( 'height' );
+		}
+	}
+	if ( $width <= 0 || $height <= 0 ) {
+		return 'landscape';
+	}
+	$ratio = $width / $height;
+	if ( $ratio >= 2.0 ) {
+		return 'panorama';
+	}
+	if ( $ratio > 1.15 ) {
+		return 'landscape';
+	}
+	return $ratio < 0.87 ? 'portrait' : 'square';
+}
+
+/**
+ * An image's width over height from its attachment size, else its width and
+ * height attributes, else 0.
+ *
+ * @param array<string, mixed> $image  Parsed core/image block.
+ * @param string               $figure Rendered image.
+ * @return float
+ */
+function ratio_of( array $image, string $figure ): float {
+	$id   = (int) ( $image['attrs']['id'] ?? 0 );
+	$meta = $id > 0 ? wp_get_attachment_metadata( $id ) : false;
+	if ( is_array( $meta ) && (int) ( $meta['width'] ?? 0 ) > 0 && (int) ( $meta['height'] ?? 0 ) > 0 ) {
+		return (int) $meta['width'] / (int) $meta['height'];
+	}
+	$tags = new \WP_HTML_Tag_Processor( $figure );
+	if ( $tags->next_tag( 'img' ) && (int) $tags->get_attribute( 'width' ) > 0 && (int) $tags->get_attribute( 'height' ) > 0 ) {
+		return (int) $tags->get_attribute( 'width' ) / (int) $tags->get_attribute( 'height' );
+	}
+	return 0.0;
+}
+
+/**
+ * The gallery caption, from core's figcaption or the projector's note.
+ *
+ * @param string $html Rendered gallery.
+ * @return string Caption HTML, or ''.
+ */
+function gallery_caption( string $html ): string {
+	if ( preg_match( '/<p class="pkiw-projector__note[^"]*">(.*?)<\/p>/s', $html, $m ) ) {
+		return trim( $m[1] );
+	}
+	if ( preg_match( '/<figcaption class="[^"]*\bblocks-gallery-caption\b[^"]*">(.*?)<\/figcaption>\s*<\/figure>\s*$/s', $html, $m ) ) {
+		return trim( $m[1] );
+	}
+	return '';
+}
+
+/**
+ * The zine gallery being rendered in this content pass, or null.
+ *
+ * @param array<string, mixed> $block Parsed core/gallery block.
+ * @param mixed                $instance Block instance.
+ * @return \WP_Post|null
+ */
+function zine_gallery_post( array $block, $instance = null ): ?\WP_Post {
+	if ( state()['done'] || 'core/gallery' !== ( $block['blockName'] ?? '' ) ) {
+		return null;
+	}
+	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) ) ? (int) $instance->context['postId'] : (int) get_the_ID();
+	$post    = zine_post( $post_id );
+	$gallery = null === $post ? null : gallery_for( $post );
+	return null !== $gallery && same_gallery( $block, $gallery ) ? $post : null;
+}
+
+/**
+ * A fresh content pass may print the zine again (the plugin's projector
+ * resets the same way).
+ *
+ * @param mixed $content Post content.
+ * @return mixed
+ */
+function start_pass( $content ) {
+	$state         = &state();
+	$state['done'] = false;
+	$state['core'] = '';
+	return $content;
+}
+add_filter( 'the_content', __NAMESPACE__ . '\\start_pass', 1 );
+
+/**
+ * Before core renders the zine gallery, turn on core's lightbox for every
+ * image the author did not link or opt out of, so core's own gallery render
+ * wires the lightbox's previous and next across the panels.
+ *
+ * @param array<string, mixed> $parsed Parsed block.
+ * @return array<string, mixed>
+ */
+function enable_lightbox( array $parsed ): array {
+	if ( null === zine_gallery_post( $parsed ) ) {
+		return $parsed;
+	}
+	foreach ( (array) ( $parsed['innerBlocks'] ?? array() ) as $k => $image ) {
+		if ( ! is_array( $image ) || 'core/image' !== ( $image['blockName'] ?? '' ) ) {
+			continue;
+		}
+		$attrs = (array) ( $image['attrs'] ?? array() );
+		if ( ! isset( $attrs['lightbox'] ) && in_array( (string) ( $attrs['linkDestination'] ?? 'none' ), array( '', 'none' ), true ) ) {
+			$attrs['lightbox']                    = array( 'enabled' => true );
+			$parsed['innerBlocks'][ $k ]['attrs'] = $attrs;
+		}
+	}
+	return $parsed;
+}
+add_filter( 'render_block_data', __NAMESPACE__ . '\\enable_lightbox', 20 );
+
+/**
+ * Keep core's render of the zine gallery before the plugin's projector
+ * (priority 10) replaces it.
+ *
+ * @param string    $html     Core's rendered gallery.
+ * @param array     $block    Parsed core/gallery block.
+ * @param \WP_Block $instance Block instance.
+ * @return string Unchanged.
+ */
+function capture( string $html, array $block, $instance = null ): string {
+	if ( null !== zine_gallery_post( $block, $instance ) ) {
+		$state         = &state();
+		$state['core'] = $html;
+	}
+	return $html;
+}
+add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\\capture', 9, 3 );
+
+/**
+ * The post's first gallery as a zine of numbered panels: core's own image
+ * figures (alt, caption, srcset, link, lightbox) re-laid in order.
+ *
+ * @param string    $html     Rendered gallery (core's, or the plugin's projector).
+ * @param array     $block    Parsed core/gallery block.
+ * @param \WP_Block $instance Block instance.
+ * @return string
+ */
+function zine( string $html, array $block, $instance = null ): string {
+	$post = zine_gallery_post( $block, $instance );
+	if ( null === $post ) {
+		return $html;
+	}
+	$state  = &state();
+	$core   = '' !== $state['core'] ? $state['core'] : $html;
+	$images = images_of( $block );
+	$total  = count( $images );
+	// Core prints one figure per image block; anything else is not a gallery this can re-lay.
+	$count = preg_match_all( '/<figure\b(?=[^>]*\bwp-block-image\b)[^>]*>.*?<\/figure>/s', $core, $found );
+	if ( 0 === $total || $count !== $total ) {
+		return $html;
+	}
+	$state['done'] = true;
+
+	$width    = max( 2, strlen( (string) $total ) );
+	$figures  = array();
+	$shapes   = array();
+	$ratios   = array();
+	$captions = array();
+	foreach ( $found[0] as $n => $figure ) {
+		$figures[]  = $figure;
+		$shapes[]   = shape_of( $images[ $n ], $figure );
+		$measured   = ratio_of( $images[ $n ], $figure );
+		$ratios[]   = $measured > 0 ? $measured : RATIO[ $shapes[ $n ] ];
+		$captions[] = preg_match( '/<figcaption\b[^>]*>(.*?)<\/figcaption>/s', $figure, $m ) ? trim( html_entity_decode( wp_strip_all_tags( $m[1] ), ENT_QUOTES ) ) : '';
+	}
+
+	$plan   = compose( $shapes, $captions, $ratios );
+	$of     = str_pad( (string) $total, $width, '0', STR_PAD_LEFT );
+	$panels = '';
+	foreach ( $figures as $n => $figure ) {
+		$item = $plan[ $n ];
+		$tags = new \WP_HTML_Tag_Processor( $figure );
+		if ( $tags->next_tag( 'img' ) ) {
+			$tags->add_class( 'u-photo' );
+			$tags->set_attribute( 'sizes', sizes_for( $item ) );
+			$figure = $tags->get_updated_html();
+		}
+		$num   = str_pad( (string) ( $n + 1 ), $width, '0', STR_PAD_LEFT );
+		$style = '--cr-col:' . grid_area( $item['d'] ) . ';--cr-col-t:' . grid_area( $item['t'] ) . ';--cr-col-p:' . grid_area( $item['p'] )
+			. ';--cr-mt:' . $item['mt']['d'] . ';--cr-mt-t:' . $item['mt']['t'] . ';--cr-mt-p:' . $item['mt']['p'];
+		if ( $item['d']['rows'] > 1 ) {
+			$style .= ';--cr-rows:span ' . $item['d']['rows'];
+		}
+		if ( '' !== $item['h']['d'] ) {
+			$style .= ';--cr-h:' . $item['h']['d'];
+		}
+		if ( '' !== $item['h']['t'] ) {
+			$style .= ';--cr-h-t:' . $item['h']['t'];
+		}
+		$classes = 'cr-zine__frame cr-zine__frame--' . $shapes[ $n ] . ' cr-zine__frame--' . $item['pattern'] . ' cr-zine__frame--' . $item['treat'];
+		// An image block whose attachment is gone keeps its place as a missing frame, its alt text and caption shown.
+		$attachment = (int) ( $images[ $n ]['attrs']['id'] ?? 0 );
+		if ( $attachment > 0 && false === wp_get_attachment_metadata( $attachment ) ) {
+			$classes .= ' cr-zine__frame--missing';
+		}
+		foreach ( $item['flags'] as $flag ) {
+			$classes .= ' cr-zine__frame--' . $flag;
+		}
+		// The anchor carries a camera-style date imprint: the post's own date, nothing more.
+		if ( 'anchor' === $item['treat'] ) {
+			// Inside the figure, so the imprint sits on the photograph however the cell is sized.
+			$imprint = '<span class="cr-zine__imprint" aria-hidden="true">' . esc_html( get_the_date( "'y m d", $post ) ) . '</span>';
+			$at      = strrpos( $figure, '</figure>' );
+			$figure  = false === $at ? $figure . $imprint : substr( $figure, 0, $at ) . $imprint . substr( $figure, $at );
+		}
+		$panels .= '<li class="' . $classes . '" style="' . esc_attr( $style ) . '">'
+			. '<span class="cr-zine__num" aria-hidden="true">' . $num . '<span class="cr-zine__of">/' . $of . '</span></span>'
+			. $figure . '</li>';
+	}
+
+	$caption = gallery_caption( $core );
+	$caption = '' !== $caption ? $caption : gallery_caption( $html );
+	$note    = '';
+	if ( '' !== $caption ) {
+		$hand = function_exists( 'mb_strlen' ) ? mb_strlen( wp_strip_all_tags( $caption ) ) : strlen( wp_strip_all_tags( $caption ) );
+		$note = '<p class="cr-zine__note' . ( $hand <= HAND_LIMIT ? ' cr-zine__note--hand' : '' ) . '">' . $caption . '</p>';
+	}
+
+	if ( false !== strpos( $html, 'pkiw-projector' ) && function_exists( 'wp_dequeue_script' ) ) {
+		wp_dequeue_script( 'pkiw-photo-projector' );
+		wp_dequeue_style( 'pkiw-photo-projector' );
+	}
+
+	// The section takes over the gallery wrapper's lightbox wiring (core/gallery namespace and its galleryId).
+	$wiring  = '';
+	$wrapper = new \WP_HTML_Tag_Processor( $core );
+	if ( $wrapper->next_tag() && 'core/gallery' === $wrapper->get_attribute( 'data-wp-interactive' ) ) {
+		$wiring = ' data-wp-interactive="core/gallery" data-wp-context="' . esc_attr( (string) $wrapper->get_attribute( 'data-wp-context' ) ) . '"';
+	}
+
+	return '<section class="cr-zine alignwide" aria-label="' . esc_attr__( 'Photos', 'courtneyr-child' ) . '"' . $wiring . '>'
+		. '<ol class="cr-zine__frames" role="list">' . $panels . '</ol>' . $note . keepsakes( $post->ID ) . '</section>';
+}
+add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\\zine', 11, 3 );
+
+/**
+ * The zine's masthead owns the page H1, so the template header steps aside.
+ *
+ * @param mixed    $holds Whether another lane already owns the H1.
+ * @param \WP_Post $post  Post being rendered.
+ * @return bool
+ */
+function holds_h1( $holds, $post = null ): bool {
+	if ( state()['asking'] ) {
+		return true === $holds;
+	}
+	return true === $holds || ( $post instanceof \WP_Post && null !== zine_post( $post->ID ) );
+}
+
+/**
+ * Whether another kind lane (favorite sheet, chicken board, video label and
+ * the rest) already prints this page's H1; the masthead then steps aside.
+ *
+ * @param \WP_Post $post Post.
+ * @return bool
+ */
+function other_lane_holds( \WP_Post $post ): bool {
+	$state           = &state();
+	$state['asking'] = true;
+	$holds           = true === apply_filters( 'courtneyr_child_single_object_holds_h1', false, $post );
+	$state['asking'] = false;
+	return $holds;
+}
+add_filter( 'courtneyr_child_single_object_holds_h1', __NAMESPACE__ . '\\holds_h1', 10, 2 );
+
+/**
+ * Linked term labels for one taxonomy.
+ *
+ * @param \WP_Post $post     Post.
+ * @param string   $taxonomy Taxonomy.
+ * @param string   $extra    Extra class.
+ * @return string
+ */
+function term_labels( \WP_Post $post, string $taxonomy, string $extra ): string {
+	$terms = get_the_terms( $post, $taxonomy );
+	$out   = '';
+	foreach ( is_array( $terms ) ? $terms : array() as $term ) {
+		$link = get_term_link( $term, $taxonomy );
+		if ( is_wp_error( $link ) ) {
+			continue;
+		}
+		$out .= '<a class="' . esc_attr( trim( 'cr-zine__label ' . $extra ) ) . '" href="' . esc_url( (string) $link ) . '">' . esc_html( $term->name ) . '</a>';
+	}
+	return $out;
+}
+
+/**
+ * The masthead at the head of the post content: kind and category labels,
+ * the H1, the date and the frame count, and a postmark of the same date.
+ *
+ * @param string               $html  Rendered post-content block.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function masthead( string $html, array $block ): string {
+	if ( ! str_contains( (string) ( $block['attrs']['className'] ?? '' ), 'single-post__content' ) ) {
+		return $html;
+	}
+	$post = zine_post();
+	if ( null === $post || other_lane_holds( $post ) ) {
+		return $html;
+	}
+	$count = count( images_of( (array) gallery_for( $post ) ) );
+
+	$titled = '' !== trim( $post->post_title );
+	if ( $titled ) {
+		$name = esc_html( $post->post_title );
+		$name = function_exists( 'wptexturize' ) ? wptexturize( $name ) : $name;
+	} elseif ( function_exists( '\\Courtneyr\\Child\\Nav\\kind_date_name' ) ) {
+		$name = esc_html( \Courtneyr\Child\Nav\kind_date_name( $post ) );
+	} else {
+		$terms = get_the_terms( $post, 'kind' );
+		/* translators: 1: post kind name, 2: post date. */
+		$name = esc_html( sprintf( __( '%1$s, %2$s', 'courtneyr-child' ), is_array( $terms ) && $terms ? $terms[0]->name : __( 'Gallery', 'courtneyr-child' ), get_the_date( '', $post ) ) );
+	}
+
+	/* translators: %s: number of photos in the gallery. */
+	$photos = sprintf( _n( '%s photo', '%s photos', $count, 'courtneyr-child' ), number_format_i18n_safe( $count ) );
+	/* translators: %s: number of frames, zero-padded. */
+	$frames = sprintf( _n( '%s frame', '%s frames', $count, 'courtneyr-child' ), str_pad( (string) $count, 2, '0', STR_PAD_LEFT ) );
+
+	$labels = term_labels( $post, 'kind', 'cr-zine__label--kind' ) . term_labels( $post, 'category', '' );
+	$header = '<header class="cr-zine__masthead alignwide">'
+		. ( '' !== $labels ? '<p class="cr-zine__labels">' . $labels . '</p>' : '' )
+		. '<h1 id="' . TITLE_ID . '" class="cr-zine__title' . ( $titled ? ' p-name' : '' ) . '"><span class="cr-zine__title-paper">' . $name . '</span></h1>'
+		. '<p class="cr-zine__facts"><time class="dt-published" datetime="' . esc_attr( get_the_date( 'c', $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time>'
+		. ' <span class="cr-zine__count">' . esc_html( $photos ) . '</span></p>'
+		. '<span class="cr-zine__postmark" aria-hidden="true"><span class="cr-zine__postmark-date">' . esc_html( get_the_date( 'M j Y', $post ) ) . '</span>'
+		. '<span class="cr-zine__postmark-count">' . esc_html( $frames ) . '</span></span>'
+		. '</header>';
+
+	$open = strpos( $html, '>' );
+	return false === $open ? $header . $html : substr( $html, 0, $open + 1 ) . $header . substr( $html, $open + 1 );
+}
+add_filter( 'render_block_core/post-content', __NAMESPACE__ . '\\masthead', 20, 2 );
+
+/**
+ * A number for display.
+ *
+ * @param int $number Number.
+ * @return string
+ */
+function number_format_i18n_safe( int $number ): string {
+	return function_exists( 'number_format_i18n' ) ? (string) number_format_i18n( $number ) : (string) $number;
+}
+
+/**
+ * Add the zine single's body class.
+ *
+ * @param string[] $classes Body classes.
+ * @return string[]
+ */
+function body_class( array $classes ): array {
+	if ( null !== zine_post() && ! in_array( BODY_CLASS, $classes, true ) ) {
+		$classes[] = BODY_CLASS;
+	}
+	return $classes;
+}
+add_filter( 'body_class', __NAMESPACE__ . '\\body_class' );
+
+/** Load the zine sheet on a zine single only. */
+function enqueue_styles(): void {
+	if ( null === zine_post() ) {
+		return;
+	}
+	wp_enqueue_style(
+		'courtneyr-gallery-zine',
+		COURTNEYR_CHILD_URI . '/assets/css/cr-gallery-zine.css',
+		array(),
+		COURTNEYR_CHILD_VERSION
+	);
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_styles' );
+
+/**
+ * Which arrangement of page ephemera a post gets, fixed by its ID so a post
+ * keeps its page and neighbouring posts differ.
+ *
+ * @param int $post_id Post ID.
+ * @return string a, b or c.
+ */
+function variant( int $post_id ): string {
+	return array( 'a', 'b', 'c' )[ $post_id % 3 ];
+}
+
+/**
+ * Decorative flavor for a zine single, fixed by the post ID so a post keeps
+ * its page and neighbours differ (Courtney, 2026-10-20: invented flavor text
+ * is fine as decoration). Generic to any photo essay: no places, dates or
+ * claims about the pictures.
+ *
+ * @param int $post_id Post ID.
+ * @return array{note: string, sticker: string, words: string[]}
+ */
+function flavor( int $post_id ): array {
+	$notes    = array(
+		__( 'Different light, same magic.', 'courtneyr-child' ),
+		__( 'Look closer.', 'courtneyr-child' ),
+		__( 'Keep this one.', 'courtneyr-child' ),
+		__( 'Worth the detour.', 'courtneyr-child' ),
+		__( 'Little moments, big view.', 'courtneyr-child' ),
+	);
+	$stickers = array(
+		__( 'Same roads, different days', 'courtneyr-child' ),
+		__( 'Field notes, kept', 'courtneyr-child' ),
+		__( 'Shot on the way', 'courtneyr-child' ),
+		__( 'Look again', 'courtneyr-child' ),
+	);
+	$lists    = array(
+		array( __( 'Light', 'courtneyr-child' ), __( 'Lines', 'courtneyr-child' ), __( 'Color', 'courtneyr-child' ), __( 'Weather', 'courtneyr-child' ), __( 'Moments', 'courtneyr-child' ) ),
+		array( __( 'Roads', 'courtneyr-child' ), __( 'Edges', 'courtneyr-child' ), __( 'Light', 'courtneyr-child' ), __( 'Little', 'courtneyr-child' ), __( 'Moments', 'courtneyr-child' ) ),
+		array( __( 'Morning', 'courtneyr-child' ), __( 'Shadows', 'courtneyr-child' ), __( 'Texture', 'courtneyr-child' ), __( 'Distance', 'courtneyr-child' ) ),
+	);
+	return array(
+		'note'    => $notes[ $post_id % count( $notes ) ],
+		'sticker' => $stickers[ intdiv( $post_id, 2 ) % count( $stickers ) ],
+		'words'   => $lists[ intdiv( $post_id, 3 ) % count( $lists ) ],
+	);
+}
+
+/**
+ * The keepsakes beside the sheet: a handwritten note above its corner, a
+ * stamp sticker on its edge, a pinned word list and a pine doodle. Their
+ * words live in data-text and CSS draws them, so no text joins the post's
+ * content, its microformats or the accessibility tree.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function keepsakes( int $post_id ): string {
+	$flavor = flavor( $post_id );
+	return '<div class="cr-zine__keepsakes" aria-hidden="true">'
+		. '<span class="cr-zine__hand" data-text="' . esc_attr( $flavor['note'] ) . '"></span>'
+		. '<span class="cr-zine__sticker" data-text="' . esc_attr( $flavor['sticker'] ) . '"></span>'
+		. '<span class="cr-zine__list" data-text="' . implode( '&#10;', array_map( 'esc_attr', $flavor['words'] ) ) . '"></span>'
+		. '<span class="cr-zine__trees"></span>'
+		. '</div>';
+}
+
+/**
+ * The page around the zine: one decorative layer of empty spans at the end of
+ * the post content (halftone, a torn field-note scrap, ink speckle, a
+ * postmark, a sewn patch, contact-sheet ticks, a fold). The CSS draws and
+ * places each one, in the margins only where the screen has margins. Out of
+ * the accessibility tree and never focusable.
+ *
+ * @param string               $html  Rendered post content.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function ephemera( string $html, array $block ): string {
+	if ( ! str_contains( (string) ( $block['attrs']['className'] ?? '' ), 'single-post__content' ) ) {
+		return $html;
+	}
+	$post = zine_post();
+	if ( null === $post || other_lane_holds( $post ) ) {
+		return $html;
+	}
+	$layer = '<div class="cr-zine-ephemera cr-zine-ephemera--' . variant( $post->ID ) . '" aria-hidden="true">';
+	foreach ( array( 'halftone', 'scrap', 'speckle', 'postmark', 'patch', 'ticks', 'fold', 'map', 'torn', 'band' ) as $piece ) {
+		$layer .= '<span class="cr-zine-ephemera__' . $piece . '"></span>';
+	}
+	$layer .= '</div>';
+	$close  = strrpos( $html, '</' );
+	return false === $close ? $html . $layer : substr( $html, 0, $close ) . $layer . substr( $html, $close );
+}
+add_filter( 'render_block_core/post-content', __NAMESPACE__ . '\\ephemera', 21, 2 );
+
+/**
+ * On a zine single, IndieBlocks' facepile opens on a count row: one
+ * count-only facepile-content block per kind (like, bookmark, repost),
+ * IndieBlocks' own block and query, ahead of the avatar pile, which stays so
+ * each response keeps its h-cite link. A kind with no responses prints
+ * nothing, so no count is invented.
+ *
+ * @param array<string, mixed> $parsed Parsed block.
+ * @return array<string, mixed>
+ */
+function count_reactions( array $parsed ): array {
+	if ( 'indieblocks/facepile' !== ( $parsed['blockName'] ?? '' ) || null === zine_post() ) {
+		return $parsed;
+	}
+	foreach ( (array) ( $parsed['innerBlocks'] ?? array() ) as $inner ) {
+		if ( ! empty( $inner['attrs']['countOnly'] ) ) {
+			return $parsed;
+		}
+	}
+	$blocks  = array();
+	$content = array();
+	$index   = 0;
+	foreach ( (array) ( $parsed['innerContent'] ?? array() ) as $chunk ) {
+		if ( null !== $chunk ) {
+			$content[] = $chunk;
+			continue;
+		}
+		$inner = $parsed['innerBlocks'][ $index++ ] ?? null;
+		if ( null === $inner ) {
+			continue;
+		}
+		if ( 'indieblocks/facepile-content' !== ( $inner['blockName'] ?? '' ) ) {
+			$blocks[]  = $inner;
+			$content[] = null;
+			continue;
+		}
+		foreach ( array( 'like', 'bookmark', 'repost' ) as $kind ) {
+			$attrs                = array(
+				'countOnly' => true,
+				'icons'     => true,
+				'type'      => array( $kind ),
+			);
+			$count                = $inner;
+			$count['attrs']       = array_merge( (array) ( $inner['attrs'] ?? array() ), $attrs );
+			$count['innerBlocks'] = array();
+			$blocks[]             = $count;
+			$content[]            = null;
+		}
+		$blocks[]  = $inner;
+		$content[] = null;
+	}
+	$parsed['innerBlocks']  = $blocks;
+	$parsed['innerContent'] = $content;
+	return $parsed;
+}
+add_filter( 'render_block_data', __NAMESPACE__ . '\\count_reactions' );
+
+/**
+ * Name what each IndieBlocks count counts: its icon is aria-hidden, so a
+ * screen reader would otherwise hear only "24".
+ *
+ * @param string $html Rendered facepile-content block.
+ * @return string
+ */
+function label_counts( string $html ): string {
+	if ( ! str_contains( $html, 'indieblocks-count' ) ) {
+		return $html;
+	}
+	return (string) preg_replace_callback(
+		'#(<div class="indieblocks-count"><svg class="icon indieblocks-icon-(like|bookmark|repost)".*?</svg>\s*(\d+))</div>#s',
+		static function ( array $m ): string {
+			$n      = (int) $m[3];
+			$labels = array(
+				/* translators: Screen-reader label after a count of likes. */
+				'like'     => _n( 'like', 'likes', $n, 'courtneyr-child' ),
+				/* translators: Screen-reader label after a count of bookmarks. */
+				'bookmark' => _n( 'bookmark', 'bookmarks', $n, 'courtneyr-child' ),
+				/* translators: Screen-reader label after a count of reposts. */
+				'repost'   => _n( 'repost', 'reposts', $n, 'courtneyr-child' ),
+			);
+			return $m[1] . '<span class="screen-reader-text"> ' . esc_html( $labels[ $m[2] ] ) . '</span></div>';
+		},
+		$html
+	);
+}
+add_filter( 'render_block_indieblocks/facepile-content', __NAMESPACE__ . '\\label_counts' );
+
+/**
+ * The reactions group held for the send-off, kept outside state() so a
+ * content pass cannot clear it.
+ *
+ * @param bool $reset Clear it.
+ * @return string
+ */
+function &held( bool $reset = false ): string {
+	static $held = '';
+	if ( $reset ) {
+		$held = '';
+	}
+	return $held;
+}
+
+/**
+ * On a zine single with reactions, hold the template's reactions group back
+ * so the send-off can print it beside the newsletter band. Runs after the
+ * shared empty-group drop, and leaves a group without reactions to it.
+ *
+ * @param string               $html  Rendered group.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function hold_reactions( string $html, array $block ): string {
+	if ( '' === $html || ! str_contains( (string) ( $block['attrs']['className'] ?? '' ), 'single-post__syndication' ) || null === zine_post() ) {
+		return $html;
+	}
+	if ( false === stripos( $html, '<li' ) && ! str_contains( $html, 'indieblocks-count' ) ) {
+		return $html;
+	}
+	$held = &held();
+	$held = $html;
+	return '';
+}
+add_filter( 'render_block_core/group', __NAMESPACE__ . '\\hold_reactions', 20, 2 );
+
+/**
+ * The send-off: the held reactions and the newsletter band side by side.
+ * templates/single.html prints the newsletter part right after the
+ * reactions group.
+ *
+ * @param string               $html  Rendered template part.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function sendoff( string $html, array $block ): string {
+	$held = &held();
+	if ( '' === $held || 'newsletter-cta' !== ( $block['attrs']['slug'] ?? '' ) || null === zine_post() ) {
+		return $html;
+	}
+	$out  = '<div class="cr-zine-sendoff alignwide">' . $held . $html . '</div>';
+	$held = '';
+	return $out;
+}
+add_filter( 'render_block_core/template-part', __NAMESPACE__ . '\\sendoff', 10, 2 );

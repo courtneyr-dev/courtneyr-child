@@ -314,25 +314,6 @@ body.cr-photo-single :not(.pkiw-projector) > .pkiw-projector__mount {
 	margin-block: var(--cr-space-lg);
 }
 
-/* Mount slots: two decorative notches at the mount's sides. */
-body.cr-photo-single .pkiw-projector__mount::before,
-body.cr-photo-single .pkiw-projector__mount::after {
-	content: "";
-	position: absolute;
-	inset-block: 38%;
-	width: 0.45rem;
-	border-radius: var(--cr-radius-full);
-	background-color: var(--cr-russian-violet);
-}
-
-body.cr-photo-single .pkiw-projector__mount::before {
-	inset-inline-start: var(--cr-space-xs);
-}
-
-body.cr-photo-single .pkiw-projector__mount::after {
-	inset-inline-end: var(--cr-space-xs);
-}
-
 body.cr-photo-single .pkiw-projector__mount img {
 	display: block;
 	width: 100%;
@@ -560,6 +541,12 @@ body.cr-photo-single .pkiw-photo-place {
 	}
 }
 
+/* A single-image photo post: its framed print sits centred on the page. */
+body.cr-photo-single .wp-block-image[class*="is-style-cr-photo-"]:not(.cr-zine *) {
+	max-width: 40rem;
+	margin: var(--cr-space-xl) auto;
+}
+
 /* ============================================================
    Stream: a single picture is a polaroid, a gallery-format post a
    photo booth strip (inc/stream-gallery.php paints the strip's paper
@@ -782,9 +769,7 @@ body.cr-photo-single .pkiw-photo-place {
 	}
 
 	.cr-photo-sheets .pkiw-group__heading::before,
-	body.cr-photo-single .pkiw-projector::before,
-	body.cr-photo-single .pkiw-projector__mount::before,
-	body.cr-photo-single .pkiw-projector__mount::after {
+	body.cr-photo-single .pkiw-projector::before {
 		display: none;
 	}
 

@@ -16,6 +16,9 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\SinglePhoto;
 
+use function Courtneyr\Child\Stamps\pick;
+use function Courtneyr\Child\Stamps\seed;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -23,6 +26,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 const KIND       = 'photo';
 const TITLE_ID   = 'cr-photo-title';
 const BODY_CLASS = 'cr-photo-single';
+
+/**
+ * Photo frames: block styles on the core Image block (slug => label),
+ * painted by assets/css/cr-photo-frames.css wherever an image renders.
+ */
+const FRAMES = array(
+	'polaroid' => 'Polaroid',
+	'taped'    => 'Taped print',
+	'corners'  => 'Photo corners',
+	'postcard' => 'Postcard',
+	'film'     => 'Film frame',
+);
 
 /**
  * Whether this is the queried photo single and it has a title of its own.
@@ -112,3 +127,104 @@ function editor_parity_kinds( $kinds ) {
 	return $kinds;
 }
 add_filter( 'courtneyr_child_editor_parity_kinds', __NAMESPACE__ . '\\editor_parity_kinds' );
+
+/**
+ * The photo frames as block styles on the core Image block, with their sheet
+ * loaded wherever an Image block renders.
+ */
+function register_frame_styles(): void {
+	if ( function_exists( 'register_block_style' ) ) {
+		foreach ( FRAMES as $slug => $label ) {
+			register_block_style(
+				'core/image',
+				array(
+					'name'  => 'cr-photo-' . $slug,
+					'label' => __( $label, 'courtneyr-child' ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- Labels come from the FRAMES table.
+				)
+			);
+		}
+	}
+	if ( function_exists( 'wp_enqueue_block_style' ) ) {
+		wp_enqueue_block_style(
+			'core/image',
+			array(
+				'handle' => 'courtneyr-photo-frames',
+				'src'    => COURTNEYR_CHILD_URI . '/assets/css/cr-photo-frames.css',
+				'path'   => dirname( __DIR__ ) . '/assets/css/cr-photo-frames.css',
+				'ver'    => COURTNEYR_CHILD_VERSION,
+			)
+		);
+	}
+}
+add_action( 'init', __NAMESPACE__ . '\\register_frame_styles' );
+
+/**
+ * The frame picked as an image's block style, or ''.
+ *
+ * @param string $classes Class list.
+ * @return string Frame slug, or ''.
+ */
+function picked_frame( string $classes ): string {
+	return preg_match( '/(?<![\w-])is-style-cr-photo-([a-z]+)(?![\w-])/', $classes, $m ) && isset( FRAMES[ $m[1] ] ) ? $m[1] : '';
+}
+
+/**
+ * A frame seeded by the post and the picture's place on the page.
+ *
+ * @param int $post_id  Post ID.
+ * @param int $position Picture's place, 0 for a single image.
+ * @return string Frame slug.
+ */
+function seeded_frame( int $post_id, int $position = 0 ): string {
+	$keys = array_keys( FRAMES );
+	return $keys[ ( pick( seed( 'photo-frame', (string) $post_id ), 3, count( $keys ) ) + $position ) % count( $keys ) ];
+}
+
+/**
+ * The queried, unprotected photo single this block belongs to, or 0.
+ *
+ * @param mixed $instance Block instance.
+ * @return int Post ID, or 0.
+ */
+function photo_single_id( $instance ): int {
+	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
+		? (int) $instance->context['postId']
+		: (int) get_the_ID();
+	if ( ! is_singular( 'post' ) || $post_id <= 0 || get_queried_object_id() !== $post_id || ! has_term( KIND, 'kind', $post_id ) || post_password_required( $post_id ) ) {
+		return 0;
+	}
+	return $post_id;
+}
+
+/**
+ * A single-image photo post prints its picture in a frame (Courtney,
+ * 2026-10-19): the plugin's mount (priority 10) becomes the picked frame,
+ * or one seeded by the post. A gallery single is a zine (inc/gallery-zine.php).
+ *
+ * @param string    $html     Rendered image (the plugin's mount).
+ * @param array     $block    Parsed core/image block.
+ * @param \WP_Block $instance Block instance.
+ * @return string
+ */
+function framed_print( string $html, array $block, $instance = null ): string {
+	if ( false === strpos( $html, 'pkiw-projector__mount' ) ) {
+		return $html;
+	}
+	$post_id = photo_single_id( $instance );
+	if ( 0 === $post_id ) {
+		return $html;
+	}
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	if ( ! $tags->next_tag( 'figure' ) ) {
+		return $html;
+	}
+	$tags->remove_class( 'pkiw-projector__mount' );
+	if ( '' === picked_frame( (string) $tags->get_attribute( 'class' ) ) ) {
+		$tags->add_class( 'is-style-cr-photo-' . seeded_frame( $post_id ) );
+	}
+	if ( function_exists( 'wp_dequeue_style' ) ) {
+		wp_dequeue_style( 'pkiw-photo-projector' );
+	}
+	return $tags->get_updated_html();
+}
+add_filter( 'render_block_core/image', __NAMESPACE__ . '\\framed_print', 11, 3 );

@@ -350,6 +350,8 @@ namespace {
 	require_once $core . '/wp-includes/compat.php';
 	require_once $core . '/wp-includes/utf8.php';
 	require_once $core . '/wp-includes/kses.php';
+	require_once $core . '/wp-includes/class-wp-token-map.php';
+	require_once $api . '/html5-named-character-references.php';
 	foreach ( array( 'class-wp-html-span.php', 'class-wp-html-text-replacement.php', 'class-wp-html-decoder.php', 'class-wp-html-attribute-token.php', 'class-wp-html-tag-processor.php' ) as $file ) {
 		require_once $api . '/' . $file;
 	}

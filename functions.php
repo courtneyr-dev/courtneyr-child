@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.114' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.119' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -29,6 +29,7 @@ require_once __DIR__ . '/inc/block-styles.php';
 require_once __DIR__ . '/inc/block-patterns.php';
 require_once __DIR__ . '/inc/interactivity.php';
 require_once __DIR__ . '/inc/home-sections.php';
+require_once __DIR__ . '/inc/stream-style-pruning.php';
 require_once __DIR__ . '/inc/microformats.php';
 require_once __DIR__ . '/inc/archives.php';
 require_once __DIR__ . '/inc/outpost-appearance.php';
@@ -46,6 +47,7 @@ require_once __DIR__ . '/inc/single-chicken.php';
 require_once __DIR__ . '/inc/stream-chicken.php';
 require_once __DIR__ . '/inc/photo.php';
 require_once __DIR__ . '/inc/single-photo.php';
+require_once __DIR__ . '/inc/gallery-zine.php';
 require_once __DIR__ . '/inc/stream-photo.php';
 require_once __DIR__ . '/inc/favorite.php';
 require_once __DIR__ . '/inc/single-favorite.php';
