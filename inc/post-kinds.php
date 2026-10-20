@@ -457,3 +457,30 @@ function suppress_featured_image_on_read_single( string $html, array $block ): s
 	return '';
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\suppress_featured_image_on_read_single', 10, 2 );
+
+/**
+ * Drop the single template's reactions group when it holds no reactions.
+ *
+ * IndieBlocks prints each like, bookmark or repost as a list item, or a count
+ * in count-only mode. Without reactions its facepile renders nothing, which
+ * leaves the group's padding and margin as blank space above the newsletter
+ * band; where IndieBlocks is inactive the group holds only the saved heading.
+ *
+ * @param string               $html  Rendered group block.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function drop_empty_reactions( string $html, array $block ): string {
+	if ( '' === $html || ! is_singular() ) {
+		return $html;
+	}
+	$class_name = (string) ( $block['attrs']['className'] ?? '' );
+	if ( ! str_contains( $class_name, 'single-post__syndication' ) ) {
+		return $html;
+	}
+	if ( false !== stripos( $html, '<li' ) || str_contains( $html, 'indieblocks-count' ) ) {
+		return $html;
+	}
+	return '';
+}
+add_filter( 'render_block_core/group', __NAMESPACE__ . '\\drop_empty_reactions', 10, 2 );
