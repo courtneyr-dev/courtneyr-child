@@ -97,6 +97,12 @@ namespace {
 	use function Courtneyr\Child\GalleryZine\masthead;
 	use function Courtneyr\Child\GalleryZine\reset_state;
 	use function Courtneyr\Child\GalleryZine\zine;
+	use function Courtneyr\Child\GalleryZine\count_reactions;
+	use function Courtneyr\Child\GalleryZine\ephemera;
+	use function Courtneyr\Child\GalleryZine\held;
+	use function Courtneyr\Child\GalleryZine\hold_reactions;
+	use function Courtneyr\Child\GalleryZine\label_counts;
+	use function Courtneyr\Child\GalleryZine\sendoff;
 
 	const CR_ZINE_SHAPES = array(
 		701 => array( 1600, 1200 ),
@@ -565,6 +571,154 @@ namespace {
 			cr_photo_contains( '@media (prefers-reduced-motion: reduce)', $css, 'reduced motion' );
 			cr_photo_contains( '@media (forced-colors: active)', $css, 'forced colors' );
 			cr_photo_assert( 0 === preg_match( '/\.cr-zine__frame--(landscape|portrait|square|panorama)[^{]*:nth-child\(\d+\)\s*\{/', $css ), 'no layout keyed to a fixed image position' );
+		}
+	);
+
+	cr_photo_group(
+		'page ephemera: one decorative layer per zine single, varied by post, out of the accessibility tree',
+		static function (): void {
+			cr_photo_assert( cr_photo_hooked( 'render_block_core/post-content', 'Courtneyr\\Child\\GalleryZine\\ephemera', 21, 2 ), 'ephemera after the masthead on the post content' );
+			$block = array( 'blockName' => 'core/post-content', 'attrs' => array( 'className' => 'single-post__content wp-block-post-content' ) );
+
+			cr_zine_request( 6, 42 );
+			$html = ephemera( '<div class="entry-content">body</div>', $block );
+			cr_photo_assert( 1 === preg_match( '/^<div class="entry-content">body<div class="cr-zine-ephemera cr-zine-ephemera--[abc]" aria-hidden="true">(<span class="cr-zine-ephemera__[a-z]+"><\/span>)+<\/div><\/div>$/', $html ), 'one aria-hidden layer of empty spans at the end of the content' );
+			cr_photo_assert( substr_count( $html, '<span class="cr-zine-ephemera__' ) >= 6, 'at least six artifacts' );
+			cr_photo_not_contains( 'tabindex', $html, 'nothing focusable' );
+
+			$variants = array();
+			foreach ( array( 42, 43, 44 ) as $id ) {
+				cr_zine_request( 6, $id );
+				preg_match( '/cr-zine-ephemera--([abc])/', ephemera( '<div>body</div>', $block ), $m );
+				$variants[] = $m[1] ?? '';
+			}
+			cr_photo_same( 3, count( array_unique( $variants ) ), 'three neighbouring posts get three different arrangements' );
+			cr_zine_request( 6, 42 );
+			cr_photo_same( $html, ephemera( '<div class="entry-content">body</div>', $block ), 'the same post always gets the same arrangement' );
+
+			cr_photo_same( '<div>x</div>', ephemera( '<div>x</div>', array( 'blockName' => 'core/post-content', 'attrs' => array() ) ), 'only the single template content' );
+
+			cr_zine_request( 6 );
+			$GLOBALS['cr_zine_formats']                   = array( 42 => 'image' );
+			$GLOBALS['cr_photo_request']['post_kinds'][42] = array( 'note' );
+			cr_photo_same( '<div>body</div>', ephemera( '<div>body</div>', $block ), 'no zine, no ephemera' );
+
+			cr_zine_request( 6 );
+			$lane = static fn( $holds ): bool => true;
+			add_filter( 'courtneyr_child_single_object_holds_h1', $lane, 10, 2 );
+			cr_photo_same( '<div>body</div>', ephemera( '<div>body</div>', $block ), 'another kind lane keeps its own page' );
+			array_pop( $GLOBALS['cr_photo_hooks'] );
+		}
+	);
+
+	/** IndieBlocks' facepile as the single template saves it: a heading and one avatar pile. */
+	function cr_zine_facepile(): array {
+		return array(
+			'blockName'    => 'indieblocks/facepile',
+			'attrs'        => array( 'className' => 'single-post__facepile' ),
+			'innerBlocks'  => array(
+				array( 'blockName' => 'core/heading', 'attrs' => array( 'level' => 2 ), 'innerBlocks' => array(), 'innerHTML' => '<h2 class="wp-block-heading">Likes, Bookmarks, and Reposts</h2>', 'innerContent' => array( '<h2 class="wp-block-heading">Likes, Bookmarks, and Reposts</h2>' ) ),
+				array( 'blockName' => 'indieblocks/facepile-content', 'attrs' => array( 'avatarSize' => 3 ), 'innerBlocks' => array(), 'innerHTML' => '', 'innerContent' => array() ),
+			),
+			'innerHTML'    => "\n<div class=\"wp-block-indieblocks-facepile single-post__facepile\">\n\t\n\t\n</div>\n",
+			'innerContent' => array( "\n<div class=\"wp-block-indieblocks-facepile single-post__facepile\">\n\t", null, "\n\t", null, "\n</div>\n" ),
+		);
+	}
+
+	cr_photo_group(
+		'reactions on a zine single are a count row: one count-only IndieBlocks block per kind, each labelled for screen readers',
+		static function (): void {
+			cr_photo_assert( cr_photo_hooked( 'render_block_data', 'Courtneyr\\Child\\GalleryZine\\count_reactions' ), 'count row before IndieBlocks renders' );
+			cr_photo_assert( cr_photo_hooked( 'render_block_indieblocks/facepile-content', 'Courtneyr\\Child\\GalleryZine\\label_counts' ), 'count labels' );
+
+			cr_zine_request( 6 );
+			$parsed = count_reactions( cr_zine_facepile() );
+			$inner  = $parsed['innerBlocks'];
+			cr_photo_same( 'core/heading', $inner[0]['blockName'], 'the heading stays first' );
+			cr_photo_same( array( 'like', 'bookmark', 'repost' ), array_map( static fn( array $b ): string => $b['attrs']['type'][0] ?? '', array_slice( $inner, 1 ) ), 'like, bookmark and repost, in that order' );
+			foreach ( array_slice( $inner, 1 ) as $count ) {
+				cr_photo_same( 'indieblocks/facepile-content', $count['blockName'], 'each is IndieBlocks\' own block' );
+				cr_photo_same( true, $count['attrs']['countOnly'] && $count['attrs']['icons'], 'count only, with its icon' );
+				cr_photo_same( 1, count( $count['attrs']['type'] ), 'one kind per count' );
+			}
+			cr_photo_same( count( $inner ), count( array_filter( $parsed['innerContent'], 'is_null' ) ), 'one placeholder per inner block' );
+			cr_photo_same( "\n<div class=\"wp-block-indieblocks-facepile single-post__facepile\">\n\t", $parsed['innerContent'][0], 'the wrapper markup is kept' );
+			cr_photo_same( "\n</div>\n", end( $parsed['innerContent'] ), 'and closed' );
+			cr_photo_same( $parsed, count_reactions( $parsed ), 'a count row is left as it is' );
+
+			$GLOBALS['cr_photo_request']['single'] = false;
+			cr_photo_same( cr_zine_facepile(), count_reactions( cr_zine_facepile() ), 'other pages keep the avatar pile' );
+			cr_zine_request( 6 );
+			$GLOBALS['cr_zine_formats']                   = array( 42 => 'image' );
+			$GLOBALS['cr_photo_request']['post_kinds'][42] = array( 'note' );
+			cr_photo_same( cr_zine_facepile(), count_reactions( cr_zine_facepile() ), 'other singles keep the avatar pile' );
+			$heading = cr_zine_facepile()['innerBlocks'][0];
+			cr_zine_request( 6 );
+			cr_photo_same( $heading, count_reactions( $heading ), 'other blocks untouched' );
+
+			$svg = '<svg class="icon indieblocks-icon-%1$s" aria-hidden="true" role="img"><use href="#indieblocks-icon-%1$s" xlink:href="#indieblocks-icon-%1$s"></use></svg>';
+			$out = label_counts( '<div class="wp-block-indieblocks-facepile-content"><div class="indieblocks-count">' . sprintf( $svg, 'like' ) . ' 24</div></div>' );
+			cr_photo_contains( sprintf( $svg, 'like' ) . ' 24<span class="screen-reader-text"> likes</span></div>', $out, 'the number says what it counts' );
+			cr_photo_contains( '<span class="screen-reader-text"> bookmark</span>', label_counts( '<div class="indieblocks-count">' . sprintf( $svg, 'bookmark' ) . ' 1</div>' ), 'singular' );
+			cr_photo_contains( '<span class="screen-reader-text"> reposts</span>', label_counts( '<div class="indieblocks-count">' . sprintf( $svg, 'repost' ) . ' 3</div>' ), 'reposts' );
+			$avatars = '<ul class="indieblocks-avatar-size-3"><li class="h-cite p-like"></li></ul>';
+			cr_photo_same( $avatars, label_counts( $avatars ), 'the avatar pile is untouched' );
+		}
+	);
+
+	cr_photo_group(
+		'the send-off: reactions sit beside the newsletter band on a zine single, only when there are reactions',
+		static function (): void {
+			cr_photo_assert( cr_photo_hooked( 'render_block_core/group', 'Courtneyr\\Child\\GalleryZine\\hold_reactions', 20, 2 ), 'reactions held after the empty-group drop (10)' );
+			cr_photo_assert( cr_photo_hooked( 'render_block_core/template-part', 'Courtneyr\\Child\\GalleryZine\\sendoff', 10, 2 ), 'send-off on the newsletter part' );
+			$group      = array( 'blockName' => 'core/group', 'attrs' => array( 'className' => 'single-post__syndication' ) );
+			$part       = array( 'blockName' => 'core/template-part', 'attrs' => array( 'slug' => 'newsletter-cta' ) );
+			$reactions  = '<div class="wp-block-group single-post__syndication"><div class="wp-block-indieblocks-facepile single-post__facepile"><h2>Likes</h2><div class="wp-block-indieblocks-facepile-content"><div class="indieblocks-count">24</div></div></div></div>';
+			$newsletter = '<div class="wp-block-template-part"><div class="cr-newsletter-banner">Field notes</div></div>';
+
+			cr_zine_request( 6 );
+			held( true );
+			cr_photo_same( '', hold_reactions( $reactions, $group ), 'held back from its own spot' );
+			cr_photo_same( '<div class="cr-zine-sendoff alignwide">' . $reactions . $newsletter . '</div>', sendoff( $newsletter, $part ), 'printed beside the newsletter, reactions first' );
+			cr_photo_same( $newsletter, sendoff( $newsletter, $part ), 'printed once' );
+
+			held( true );
+			$avatars = str_replace( '<div class="indieblocks-count">24</div>', '<ul><li class="h-cite p-like"></li></ul>', $reactions );
+			cr_photo_same( '', hold_reactions( $avatars, $group ), 'an avatar pile counts as reactions too' );
+			sendoff( $newsletter, $part );
+
+			held( true );
+			$empty = '<div class="wp-block-group single-post__syndication"><div class="wp-block-indieblocks-facepile single-post__facepile"><h2>Likes</h2></div></div>';
+			cr_photo_same( $empty, hold_reactions( $empty, $group ), 'no reactions: left to the template' );
+			cr_photo_same( '', hold_reactions( '', $group ), 'nothing to hold' );
+			cr_photo_same( $newsletter, sendoff( $newsletter, $part ), 'and the newsletter stands alone' );
+
+			held( true );
+			cr_photo_same( $reactions, hold_reactions( $reactions, array( 'blockName' => 'core/group', 'attrs' => array( 'className' => 'single-post__meta' ) ) ), 'other groups untouched' );
+			hold_reactions( $reactions, $group );
+			cr_photo_same( '<div>footer</div>', sendoff( '<div>footer</div>', array( 'blockName' => 'core/template-part', 'attrs' => array( 'slug' => 'footer' ) ) ), 'other parts untouched' );
+			cr_photo_contains( 'cr-zine-sendoff', sendoff( $newsletter, $part ), 'still waiting for the newsletter' );
+
+			held( true );
+			$GLOBALS['cr_photo_request']['single'] = false;
+			cr_photo_same( $reactions, hold_reactions( $reactions, $group ), 'other pages untouched' );
+			cr_photo_same( $newsletter, sendoff( $newsletter, $part ), 'their newsletter too' );
+
+			$template = (string) file_get_contents( CR_PHOTO_THEME_DIR . '/templates/single.html' );
+			cr_photo_assert( 1 === preg_match( '/<!-- wp:group \{[^\n]*"className":"single-post__syndication".*?<!-- \/wp:indieblocks\/facepile -->\s*<\/div>\s*<!-- \/wp:group -->\s*<!-- wp:template-part \{"slug":"newsletter-cta"\} \/-->/s', $template ), 'the single template prints the newsletter part right after the reactions group, so nothing held is lost' );
+		}
+	);
+
+	cr_photo_group(
+		'page ephemera CSS: margins only on wide screens, fewer on phones, hidden in forced colors, never in the way',
+		static function (): void {
+			$css = (string) preg_replace( '#/\*.*?\*/#s', '', (string) file_get_contents( CR_PHOTO_THEME_DIR . '/assets/css/cr-gallery-zine.css' ) );
+			cr_photo_assert( 1 === preg_match( '/\.cr-zine-ephemera\s*\{[^{}]*pointer-events:\s*none;/', $css ), 'the layer never takes a click' );
+			cr_photo_assert( 1 === preg_match( '/\.cr-zine-ephemera\s*\{[^{}]*z-index:\s*-1;/', $css ), 'the layer sits behind the content' );
+			cr_photo_assert( 1 === preg_match( '/@media \(min-width: 75rem\)\s*\{[^@]*\.cr-zine-ephemera__scrap/s', $css ), 'margin artifacts wait for real margins' );
+			cr_photo_assert( 1 === preg_match( '/@media \(forced-colors: active\)\s*\{[^@]*\.cr-zine-ephemera[^{]*\{[^{}]*display:\s*none;/s', $css ), 'forced colors drop the ephemera' );
+			cr_photo_assert( 1 === preg_match( '/@media \(min-width: 48rem\)\s*\{[^@]*\.cr-zine-sendoff\s*\{[^{}]*grid-template-columns:/s', $css ), 'the send-off sits side by side from tablets up' );
+			cr_photo_assert( 0 === preg_match( '/url\([^)]*%23[0-9a-fA-F]{3,8}/', $css ), 'no colour hidden in an SVG: masks take token colours' );
 		}
 	);
 

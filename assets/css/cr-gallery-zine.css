@@ -162,31 +162,74 @@
 	margin: var(--cr-space-xl) 0 0;
 	padding: var(--cr-space-2xl) var(--cr-space-xl);
 	background-color: color-mix(in srgb, var(--cr-light-orange) 38%, var(--cr-printer-ivory));
-	background-image: var(--cr-fiber);
+
+	/* Registration marks at two corners (ring, then its cross), over the fiber. */
+	background-image:
+		radial-gradient(circle, transparent 0.36rem, var(--cr-russian-violet) 0.36rem 0.44rem, transparent 0.48rem),
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)),
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)),
+		radial-gradient(circle, transparent 0.36rem, var(--cr-russian-violet) 0.36rem 0.44rem, transparent 0.48rem),
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)),
+		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)),
+		var(--cr-fiber);
+	background-position:
+		right var(--cr-space-xs) top var(--cr-space-xs),
+		right calc(var(--cr-space-xs) + 0.75rem) top var(--cr-space-xs),
+		right var(--cr-space-xs) top calc(var(--cr-space-xs) + 0.75rem),
+		left var(--cr-space-xs) bottom var(--cr-space-xs),
+		left calc(var(--cr-space-xs) + 0.75rem) bottom var(--cr-space-xs),
+		left var(--cr-space-xs) bottom calc(var(--cr-space-xs) + 0.75rem),
+		0 0;
+	background-size: 1.5rem 1.5rem, 1px 1.5rem, 1.5rem 1px, 1.5rem 1.5rem, 1px 1.5rem, 1.5rem 1px, auto;
+	background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
 	color: var(--cr-russian-violet);
 }
 
-.cr-zine-single .cr-zine::before,
-.cr-zine-single .cr-zine::after {
+/* A second sheet of graph paper under the zine, a turn off square, so the
+   gallery reads as one print laid on another. */
+.cr-zine-single .cr-zine::before {
 	content: "";
 	position: absolute;
-	width: 1.5rem;
-	height: 1.5rem;
-	background:
-		radial-gradient(circle, transparent 0.36rem, var(--cr-russian-violet) 0.36rem 0.44rem, transparent 0.48rem),
-		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) center / 1px 100% no-repeat,
-		linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) center / 100% 1px no-repeat;
+	inset: calc(var(--cr-space-md) * -1) calc(var(--cr-space-sm) * -1) calc(var(--cr-space-md) * -1) calc(var(--cr-space-lg) * -1);
+	z-index: -1;
+	background-color: color-mix(in srgb, var(--cr-sky-blue) 45%, var(--cr-printer-ivory));
+	background-image:
+		repeating-linear-gradient(90deg, color-mix(in srgb, var(--cr-cerulean) 22%, transparent) 0 1px, transparent 1px 1.25rem),
+		repeating-linear-gradient(180deg, color-mix(in srgb, var(--cr-cerulean) 22%, transparent) 0 1px, transparent 1px 1.25rem);
+	transform: rotate(var(--cr-rotate-neg));
 	pointer-events: none;
 }
 
-.cr-zine-single .cr-zine::before {
-	inset-block-start: var(--cr-space-xs);
-	inset-inline-end: var(--cr-space-xs);
+/* Room for that paper when the post goes on after the gallery, so the next
+   paragraph never sits on it (dark-mode ink on light paper). */
+.cr-zine-single .cr-zine:has(~ :not([hidden])) {
+	margin-block-end: var(--cr-space-xl);
 }
 
+/* Washi tape holding the sheet down by its top edge, clear of the panels. */
 .cr-zine-single .cr-zine::after {
-	inset-block-end: var(--cr-space-xs);
-	inset-inline-start: var(--cr-space-xs);
+	content: "";
+	position: absolute;
+	inset-block-start: calc(var(--cr-space-sm) * -1);
+	inset-inline-start: 12%;
+	width: 7rem;
+	height: 1.6rem;
+	background-color: color-mix(in srgb, var(--cr-tape) 82%, transparent);
+	background-image: repeating-linear-gradient(45deg, color-mix(in srgb, var(--cr-selective-yellow) 40%, transparent) 0 0.4rem, transparent 0.4rem 0.8rem);
+	-webkit-mask: var(--cr-zine-tape-edge) 0 0 / 100% 100% no-repeat;
+	mask: var(--cr-zine-tape-edge) 0 0 / 100% 100% no-repeat;
+	transform: rotate(var(--cr-rotate-neg2));
+	pointer-events: none;
+}
+
+.cr-zine-single .single-post__content:has(> .cr-zine-ephemera--b) .cr-zine::after {
+	inset-inline: auto 14%;
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-zine-single .single-post__content:has(> .cr-zine-ephemera--c) .cr-zine::after {
+	inset-inline-start: calc(50% - 3.5rem);
+	transform: rotate(var(--cr-rotate-neg));
 }
 
 /* ---- Panels: photographs first, set on the sheet at their own ratios ----
@@ -676,6 +719,399 @@
 	}
 }
 
+/* ---- The page around the sheet (Courtney, 2026-10-19: more zine and
+   scrapbook in the page, not on the photographs) ----
+   inc/gallery-zine.php ends the post content with one aria-hidden layer of
+   empty spans; each piece below is drawn here from tokens, with SVG shapes
+   only as masks so their ink is a token too. Pieces live in the page
+   margins, so they show only where the screen has margins (75rem up); the
+   graph-paper sheet, the tape, the crop marks, the send-off and the torn
+   edge carry the look on smaller screens. The layer's modifier (a, b, c,
+   from the post ID) picks the arrangement. */
+.cr-zine-single {
+	--cr-zine-eph-ink: color-mix(in srgb, var(--cr-ink) 55%, transparent);
+	--cr-zine-tape-edge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 28' preserveAspectRatio='none'%3E%3Cpath d='M3 0H117L120 4L117 8L120 12L117 16L120 20L117 24L120 28H3L0 24L3 20L0 16L3 12L0 8L3 4Z' fill='black'/%3E%3C/svg%3E");
+	--cr-zine-tear: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10' preserveAspectRatio='none'%3E%3Cpath d='M0 0H16V4L12 9L8 5L4 10L0 5Z' fill='black'/%3E%3C/svg%3E");
+	--cr-zine-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 90'%3E%3Cg fill='none' stroke='black' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M112 6C98 26 74 14 66 32S46 66 26 78'/%3E%3Cpath d='M26 78L43 77M26 78L31 62'/%3E%3C/g%3E%3C/svg%3E");
+	--cr-zine-cancel: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 120'%3E%3Cg fill='none' stroke='black'%3E%3Ccircle cx='128' cy='60' r='42' stroke-width='4'/%3E%3Ccircle cx='128' cy='60' r='34' stroke-width='2'/%3E%3Cpath stroke-width='4' stroke-linecap='round' d='M4 38q11-8 22 0t22 0t22 0t22 0M4 60q11-8 22 0t22 0t22 0t22 0M4 82q11-8 22 0t22 0t22 0t22 0'/%3E%3C/g%3E%3C/svg%3E");
+	--cr-zine-camera: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' fill-rule='evenodd' d='M4 7h3l2-2h6l2 2h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zm8 2.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z'/%3E%3C/svg%3E");
+}
+
+.cr-zine-single .single-post__content {
+	position: relative;
+	isolation: isolate;
+}
+
+/* The layer spans the viewport behind the content; html and body clip x. */
+.cr-zine-single .cr-zine-ephemera {
+	position: absolute;
+	inset-block: 0;
+	inset-inline: calc(50% - 50vw);
+	z-index: -1;
+	max-width: none;
+	overflow: clip;
+	pointer-events: none;
+}
+
+.cr-zine-single .cr-zine-ephemera > :where(span) {
+	display: none;
+	position: absolute;
+}
+
+/* Crop marks at the masthead's four corners, as a printer trims a plate. */
+.cr-zine-single .cr-zine__masthead::before {
+	content: "";
+	position: absolute;
+	inset: -1rem;
+	background-image:
+		linear-gradient(var(--cr-zine-eph-ink), var(--cr-zine-eph-ink)),
+		linear-gradient(var(--cr-zine-eph-ink), var(--cr-zine-eph-ink)),
+		linear-gradient(var(--cr-zine-eph-ink), var(--cr-zine-eph-ink)),
+		linear-gradient(var(--cr-zine-eph-ink), var(--cr-zine-eph-ink)),
+		linear-gradient(var(--cr-zine-eph-ink), var(--cr-zine-eph-ink)),
+		linear-gradient(var(--cr-zine-eph-ink), var(--cr-zine-eph-ink)),
+		linear-gradient(var(--cr-zine-eph-ink), var(--cr-zine-eph-ink)),
+		linear-gradient(var(--cr-zine-eph-ink), var(--cr-zine-eph-ink));
+	background-position:
+		left 0 top 1rem, left 1rem top 0,
+		right 0 top 1rem, right 1rem top 0,
+		left 0 bottom 1rem, left 1rem bottom 0,
+		right 0 bottom 1rem, right 1rem bottom 0;
+	background-size: 0.7rem 1px, 1px 0.7rem, 0.7rem 1px, 1px 0.7rem, 0.7rem 1px, 1px 0.7rem, 0.7rem 1px, 1px 0.7rem;
+	background-repeat: no-repeat;
+	pointer-events: none;
+}
+
+/* The send-off: reactions on a torn scrap of the zine's paper beside the
+   newsletter band (inc/gallery-zine.php prints both in .cr-zine-sendoff). */
+.cr-zine-single .cr-zine-sendoff {
+	display: grid;
+	gap: var(--cr-space-xl);
+	align-items: center;
+	margin-block: var(--cr-space-2xl);
+}
+
+.cr-zine-single .cr-zine-sendoff .single-post__syndication {
+	position: relative;
+	max-width: none;
+	margin: 0 !important;
+	padding: var(--cr-space-xl) var(--cr-space-lg) !important;
+	background-color: color-mix(in srgb, var(--cr-light-orange) 38%, var(--cr-printer-ivory));
+	background-image: var(--cr-fiber);
+	color: var(--cr-russian-violet);
+	transform: rotate(var(--cr-rotate-1));
+}
+
+/* Tape at the top, and the page tearing into the bottom edge. */
+.cr-zine-single .cr-zine-sendoff .single-post__syndication::before {
+	content: "";
+	position: absolute;
+	inset-block-start: calc(var(--cr-space-sm) * -1);
+	inset-inline-start: calc(50% - 3rem);
+	width: 6rem;
+	height: 1.4rem;
+	background-color: color-mix(in srgb, var(--cr-sky-blue) 70%, transparent);
+	-webkit-mask: var(--cr-zine-tape-edge) 0 0 / 100% 100% no-repeat;
+	mask: var(--cr-zine-tape-edge) 0 0 / 100% 100% no-repeat;
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.cr-zine-single .cr-zine-sendoff .single-post__syndication::after {
+	content: "";
+	position: absolute;
+	inset-inline: 0;
+	inset-block-end: -1px;
+	height: 0.7rem;
+	background-color: var(--cr-surface);
+	-webkit-mask: var(--cr-zine-tear) 0 0 / 1rem 100% repeat-x;
+	mask: var(--cr-zine-tear) 0 0 / 1rem 100% repeat-x;
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.cr-zine-single .cr-zine-sendoff .single-post__facepile {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--cr-space-sm) var(--cr-space-lg);
+	max-width: none;
+}
+
+/* The heading carries core's large preset, which is !important; scale the preset here instead. */
+.cr-zine-single .cr-zine-sendoff .single-post__facepile > .wp-block-heading {
+	--wp--preset--font-size--large: var(--cr-text-lg);
+	flex-basis: 100%;
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	line-height: 1.2;
+}
+
+.cr-zine-single .cr-zine-sendoff .wp-block-indieblocks-facepile-content {
+	margin: 0;
+	background: none !important;
+}
+
+.cr-zine-single .cr-zine-sendoff .indieblocks-count {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--cr-space-xs);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-weight: 700;
+}
+
+/* Sized here whether or not IndieBlocks' block stylesheet loads. */
+.cr-zine-single .cr-zine-sendoff .indieblocks-count .icon {
+	display: inline-block;
+	position: static;
+	flex: none;
+	width: 1.4em;
+	height: 1.4em;
+	border-radius: 0;
+	fill: currentcolor;
+	color: inherit;
+}
+
+/* The newsletter on a zine single is a sheet of graph paper. */
+.cr-zine-single .cr-newsletter-banner {
+	background-image:
+		repeating-linear-gradient(90deg, color-mix(in srgb, var(--cr-cerulean) 18%, transparent) 0 1px, transparent 1px 1.25rem),
+		repeating-linear-gradient(180deg, color-mix(in srgb, var(--cr-cerulean) 18%, transparent) 0 1px, transparent 1px 1.25rem),
+		var(--cr-fiber) !important;
+	background-size: auto !important;
+	background-blend-mode: normal !important;
+}
+
+/* Related posts: the page tears into the band, and a scrap of tape mends it. */
+.cr-zine-single .related-posts {
+	position: relative;
+}
+
+.cr-zine-single .related-posts::before {
+	content: "";
+	position: absolute;
+	inset-inline: 0;
+	inset-block-start: -1px;
+	height: 0.8rem;
+	background-color: var(--cr-surface);
+	-webkit-mask: var(--cr-zine-tear) 0 0 / 1.25rem 100% repeat-x;
+	mask: var(--cr-zine-tear) 0 0 / 1.25rem 100% repeat-x;
+	pointer-events: none;
+}
+
+.cr-zine-single .related-posts::after {
+	content: "";
+	position: absolute;
+	inset-block-start: calc(var(--cr-space-xs) * -1);
+	inset-inline-end: 18%;
+	width: 6.5rem;
+	height: 1.5rem;
+	background-color: color-mix(in srgb, var(--cr-tape) 82%, transparent);
+	-webkit-mask: var(--cr-zine-tape-edge) 0 0 / 100% 100% no-repeat;
+	mask: var(--cr-zine-tape-edge) 0 0 / 100% 100% no-repeat;
+	transform: rotate(var(--cr-rotate-2));
+	pointer-events: none;
+}
+
+/* Tablets up: reactions and newsletter side by side; the band gives up its bleed. */
+@media (min-width: 48rem) {
+
+	.cr-zine-single .cr-zine-sendoff {
+		grid-template-columns: minmax(15rem, 1fr) 2fr;
+	}
+
+	.cr-zine-single .cr-zine-sendoff .wp-block-template-part {
+		min-width: 0;
+		margin: 0;
+	}
+
+	.cr-zine-single .cr-zine-sendoff .cr-newsletter-banner {
+		width: auto !important;
+		max-width: none !important;
+		margin: 0 !important;
+	}
+}
+
+/* Wide screens have margins: the ephemera come out. --cr-zine-m is one
+   margin's width; pieces stay inside it. */
+@media (min-width: 75rem) {
+
+	.cr-zine-single .cr-zine-ephemera {
+		--cr-zine-m: calc((100% - 64rem) / 2);
+		--cr-zine-piece: min(calc(var(--cr-zine-m) - var(--cr-space-xl)), 11rem);
+	}
+
+	/* A scribbled arrow in the margin beside the masthead, down to the gallery. */
+	.cr-zine-single .cr-zine__masthead::after {
+		content: "";
+		position: absolute;
+		inset-block-start: 55%;
+		inset-inline-start: calc(100% + var(--cr-space-xs));
+		width: min(calc((100vw - 100%) / 2 - var(--cr-space-lg)), 6.5rem);
+		height: 5.5rem;
+		background-color: var(--cr-zine-eph-ink);
+		-webkit-mask: var(--cr-zine-arrow) center / contain no-repeat;
+		mask: var(--cr-zine-arrow) center / contain no-repeat;
+		pointer-events: none;
+	}
+
+	/* A halftone field fading out of the top corner, under the masthead. */
+	.cr-zine-single .cr-zine-ephemera__halftone {
+		display: block;
+		inset-block-start: calc(var(--cr-space-lg) * -1);
+		inset-inline-start: 0;
+		width: calc(var(--cr-zine-m) + 8rem);
+		height: 24rem;
+		background-image: var(--cr-halftone-strong);
+		background-size: var(--cr-halftone-strong-size);
+		-webkit-mask-image: radial-gradient(closest-side, var(--cr-russian-violet) 30%, transparent);
+		mask-image: radial-gradient(closest-side, var(--cr-russian-violet) 30%, transparent);
+	}
+
+	/* A torn, ruled field-note scrap, taped into the margin. */
+	.cr-zine-single .cr-zine-ephemera__scrap {
+		display: block;
+		inset-block-start: 34rem;
+		inset-inline-end: var(--cr-space-md);
+		width: var(--cr-zine-piece);
+		height: 13rem;
+		transform: rotate(var(--cr-rotate-2));
+	}
+
+	.cr-zine-single .cr-zine-ephemera__scrap::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background-color: color-mix(in srgb, var(--cr-selective-yellow) 24%, var(--cr-white));
+		background-image:
+			linear-gradient(90deg, transparent 1.25rem, color-mix(in srgb, var(--cr-coral) 55%, transparent) 1.25rem 1.35rem, transparent 1.35rem),
+			repeating-linear-gradient(180deg, transparent 0 1.3rem, color-mix(in srgb, var(--cr-cerulean) 35%, transparent) 1.3rem 1.36rem);
+		-webkit-mask: linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) top / 100% calc(100% - 0.6rem) no-repeat, var(--cr-zine-tear) bottom / 1rem 0.6rem repeat-x;
+		mask: linear-gradient(var(--cr-russian-violet), var(--cr-russian-violet)) top / 100% calc(100% - 0.6rem) no-repeat, var(--cr-zine-tear) bottom / 1rem 0.6rem repeat-x;
+	}
+
+	.cr-zine-single .cr-zine-ephemera__scrap::after {
+		content: "";
+		position: absolute;
+		inset-block-start: calc(var(--cr-space-xs) * -1);
+		inset-inline-start: calc(50% - 2.5rem);
+		width: 5rem;
+		height: 1.3rem;
+		background-color: color-mix(in srgb, var(--cr-tape) 85%, transparent);
+		-webkit-mask: var(--cr-zine-tape-edge) 0 0 / 100% 100% no-repeat;
+		mask: var(--cr-zine-tape-edge) 0 0 / 100% 100% no-repeat;
+		transform: rotate(var(--cr-rotate-neg2));
+	}
+
+	/* Ink spatter where the press splashed. */
+	.cr-zine-single .cr-zine-ephemera__speckle {
+		display: block;
+		inset-block-start: 40%;
+		inset-inline-start: var(--cr-space-md);
+		width: var(--cr-zine-piece);
+		height: 9rem;
+		background:
+			radial-gradient(circle at 18% 22%, var(--cr-zine-eph-ink) 0 0.3rem, transparent 0.34rem),
+			radial-gradient(circle at 42% 14%, var(--cr-zine-eph-ink) 0 0.12rem, transparent 0.16rem),
+			radial-gradient(circle at 30% 46%, var(--cr-zine-eph-ink) 0 0.18rem, transparent 0.22rem),
+			radial-gradient(circle at 64% 38%, var(--cr-zine-eph-ink) 0 0.42rem, transparent 0.46rem),
+			radial-gradient(circle at 76% 64%, var(--cr-zine-eph-ink) 0 0.1rem, transparent 0.14rem),
+			radial-gradient(circle at 52% 72%, var(--cr-zine-eph-ink) 0 0.22rem, transparent 0.26rem),
+			radial-gradient(circle at 22% 84%, var(--cr-zine-eph-ink) 0 0.14rem, transparent 0.18rem),
+			radial-gradient(circle at 86% 20%, color-mix(in srgb, var(--cr-ut-orange) 70%, transparent) 0 0.2rem, transparent 0.24rem),
+			radial-gradient(circle at 38% 60%, color-mix(in srgb, var(--cr-ut-orange) 70%, transparent) 0 0.12rem, transparent 0.16rem);
+	}
+
+	/* A postmark cancelling nothing in particular. */
+	.cr-zine-single .cr-zine-ephemera__postmark {
+		display: block;
+		inset-block-start: 66%;
+		inset-inline-end: var(--cr-space-md);
+		width: var(--cr-zine-piece);
+		aspect-ratio: 3 / 2;
+		background-color: color-mix(in srgb, var(--cr-cerulean) 70%, transparent);
+		-webkit-mask: var(--cr-zine-cancel) center / contain no-repeat;
+		mask: var(--cr-zine-cancel) center / contain no-repeat;
+		transform: rotate(var(--cr-rotate-neg));
+	}
+
+	/* A sewn patch: twill blue, a stitched ring, a camera. */
+	.cr-zine-single .cr-zine-ephemera__patch {
+		display: block;
+		inset-block-start: 82%;
+		inset-inline-start: calc((var(--cr-zine-m) - min(var(--cr-zine-piece), 6.5rem)) / 2);
+		width: min(var(--cr-zine-piece), 6.5rem);
+		aspect-ratio: 1;
+		border: 3px solid var(--cr-cerulean);
+		border-radius: var(--cr-radius-full);
+		background-color: var(--cr-sky-blue);
+		background-image: var(--cr-halftone);
+		background-size: var(--cr-halftone-size);
+		outline: 2px dashed var(--cr-russian-violet);
+		outline-offset: -8px;
+		transform: rotate(var(--cr-rotate-1));
+	}
+
+	.cr-zine-single .cr-zine-ephemera__patch::before {
+		content: "";
+		position: absolute;
+		inset: 28%;
+		background-color: var(--cr-russian-violet);
+		-webkit-mask: var(--cr-zine-camera) center / contain no-repeat;
+		mask: var(--cr-zine-camera) center / contain no-repeat;
+	}
+
+	/* Contact-sheet index ticks down the margin. */
+	.cr-zine-single .cr-zine-ephemera__ticks {
+		inset-block-start: 30%;
+		inset-inline-start: var(--cr-space-lg);
+		width: 1.25rem;
+		height: 32%;
+		background:
+			repeating-linear-gradient(180deg, var(--cr-zine-eph-ink) 0 2px, transparent 2px 3rem) 0 0 / 1.25rem 100% no-repeat,
+			repeating-linear-gradient(180deg, var(--cr-zine-eph-ink) 0 1px, transparent 1px 0.75rem) 0 0 / 0.6rem 100% no-repeat;
+	}
+
+	/* A fold crease across the page, where the spread was folded to post. */
+	.cr-zine-single .cr-zine-ephemera__fold {
+		display: block;
+		inset-block-start: 36%;
+		inset-inline: 0;
+		height: 0.5rem;
+		background:
+			linear-gradient(90deg, transparent, color-mix(in srgb, var(--cr-ink) 10%, transparent) 15% 85%, transparent) 0 0 / 100% 1px no-repeat,
+			linear-gradient(90deg, transparent, color-mix(in srgb, var(--cr-white) 50%, transparent) 15% 85%, transparent) 0 1px / 100% 1px no-repeat;
+	}
+
+	/* b: the same page, mirrored; ticks in place of the spatter. */
+	.cr-zine-single .cr-zine-ephemera--b {
+		scale: -1 1;
+	}
+
+	.cr-zine-single .cr-zine-ephemera--b .cr-zine-ephemera__speckle {
+		display: none;
+	}
+
+	.cr-zine-single .cr-zine-ephemera--b .cr-zine-ephemera__ticks {
+		display: block;
+	}
+
+	/* c: a sparer page: no scrap or patch, ticks and spatter on one side. */
+	.cr-zine-single .cr-zine-ephemera--c :is(.cr-zine-ephemera__scrap, .cr-zine-ephemera__patch) {
+		display: none;
+	}
+
+	.cr-zine-single .cr-zine-ephemera--c .cr-zine-ephemera__ticks {
+		display: block;
+	}
+
+	.cr-zine-single .cr-zine-ephemera--c .cr-zine-ephemera__speckle {
+		inset-block-start: 72%;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 
 	.cr-zine-single .cr-zine__label {
@@ -710,6 +1146,24 @@
 	}
 
 	.cr-zine-single :is(.cr-zine__num, .cr-zine__frame figcaption) {
+		color: CanvasText;
+	}
+}
+
+/* Forced colors: the page ephemera, the crop marks, the tape and the paper
+   under the sheet are decoration; drop them. */
+@media (forced-colors: active) {
+
+	.cr-zine-single .cr-zine-ephemera,
+	.cr-zine-single :is(.cr-zine__masthead, .cr-zine-sendoff .single-post__syndication, .related-posts)::before,
+	.cr-zine-single :is(.cr-zine__masthead, .cr-zine-sendoff .single-post__syndication, .related-posts)::after {
+		display: none;
+	}
+
+	.cr-zine-single .cr-zine-sendoff .single-post__syndication {
+		border: 2px solid CanvasText;
+		background-color: Canvas;
+		background-image: none;
 		color: CanvasText;
 	}
 }
