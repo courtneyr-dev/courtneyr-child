@@ -1,0 +1,50 @@
+/* Photo booth print: the Gallery block as one narrow strip on white stock.
+   Paper stays paper in dark mode, so this sheet has no dark override. */
+.wp-block-gallery.has-nested-images.is-style-cr-booth-print,
+.wp-block-gallery.is-style-cr-booth-print {
+	flex-direction: column;
+	flex-wrap: nowrap;
+	gap: 0.55rem;
+	max-width: 15rem;
+	margin-inline: auto;
+	padding: 1.25rem 1.25rem 1.75rem;
+	background: var(--cr-white);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.wp-block-gallery.is-style-cr-booth-print > figure.wp-block-image,
+.wp-block-gallery.has-nested-images.is-style-cr-booth-print > figure.wp-block-image {
+	flex: 0 0 auto;
+	width: 100%;
+}
+
+.wp-block-gallery.is-style-cr-booth-print > figure.wp-block-image img,
+.wp-block-gallery.has-nested-images.is-style-cr-booth-print > figure.wp-block-image img {
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+.wp-block-gallery.is-style-cr-booth-print > figcaption.blocks-gallery-caption,
+.wp-block-gallery.has-nested-images.is-style-cr-booth-print > figcaption.blocks-gallery-caption {
+	padding-top: 1.1rem;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	font-size: 0.8rem;
+	font-weight: var(--cr-weight-regular);
+	line-height: 1.55;
+	letter-spacing: var(--cr-tracking-widest);
+	text-align: center;
+	text-transform: uppercase;
+}
+
+@media (forced-colors: active) {
+
+	.wp-block-gallery.has-nested-images.is-style-cr-booth-print,
+	.wp-block-gallery.is-style-cr-booth-print {
+		border: 1px solid CanvasText;
+	}
+}

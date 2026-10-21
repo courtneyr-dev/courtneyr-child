@@ -45,6 +45,91 @@ if ( ! defined( 'ABSPATH' ) ) {
 const FRAME_LIMIT = 4;
 
 /**
+ * Register the author-chosen photo booth print style for Gallery blocks and
+ * load its sheet wherever the block renders, including the editor canvas.
+ */
+function register_booth_print_style(): void {
+	if ( function_exists( 'register_block_style' ) ) {
+		register_block_style(
+			'core/gallery',
+			array(
+				'name'  => 'cr-booth-print',
+				'label' => __( 'Photo booth print', 'courtneyr-child' ),
+			)
+		);
+	}
+	if ( function_exists( 'wp_enqueue_block_style' ) ) {
+		wp_enqueue_block_style(
+			'core/gallery',
+			array(
+				'handle' => 'courtneyr-booth-print',
+				'src'    => COURTNEYR_CHILD_URI . '/assets/css/cr-booth-print.css',
+				'path'   => dirname( __DIR__ ) . '/assets/css/cr-booth-print.css',
+				'ver'    => COURTNEYR_CHILD_VERSION,
+			)
+		);
+	}
+}
+add_action( 'init', __NAMESPACE__ . '\\register_booth_print_style' );
+
+/**
+ * How a gallery-format Stream card should present its media.
+ *
+ * @param string $gallery_style First Gallery block's classified style.
+ * @param bool   $is_photo      Whether the post has the photo kind.
+ * @return string One of print, strip or none.
+ */
+function booth_print_mode( string $gallery_style, bool $is_photo ): string {
+	if ( ! $is_photo ) {
+		return 'strip';
+	}
+	if ( 'booth-print' === $gallery_style || '' === $gallery_style ) {
+		return 'print';
+	}
+	return 'none';
+}
+
+/**
+ * Classify the first Gallery block's author-chosen style.
+ *
+ * @param \WP_Post $post Post being rendered.
+ * @return string One of booth-print, other or '' when no style is chosen.
+ */
+function gallery_block_style( \WP_Post $post ): string {
+	$found = false;
+	$style = '';
+	$walk  = static function ( array $blocks ) use ( &$walk, &$found, &$style ): void {
+		foreach ( $blocks as $block ) {
+			if ( $found ) {
+				return;
+			}
+			if ( 'core/gallery' === ( $block['blockName'] ?? '' ) ) {
+				$found      = true;
+				$class_name = trim( (string) ( $block['attrs']['className'] ?? '' ) );
+				$class_name = str_replace( array( "\t", "\n", "\r", "\f", "\v" ), ' ', $class_name );
+				$tokens     = array_values( array_filter( explode( ' ', $class_name ), static fn( string $token ): bool => '' !== $token ) );
+				if ( in_array( 'is-style-cr-booth-print', $tokens, true ) ) {
+					$style = 'booth-print';
+					return;
+				}
+				foreach ( $tokens as $token ) {
+					if ( str_starts_with( $token, 'is-style-' ) ) {
+						$style = 'other';
+						return;
+					}
+				}
+				return;
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$walk( $block['innerBlocks'] );
+			}
+		}
+	};
+	$walk( parse_blocks( (string) $post->post_content ) );
+	return $style;
+}
+
+/**
  * Attachment IDs of every image in the post body, in source order.
  *
  * Walks the parsed block tree and collects `core/image` blocks wherever they
@@ -342,6 +427,12 @@ function block_end( string $html, int $start ) {
  * Replace the stream card's media block with the booth strip for gallery
  * posts on /stream/.
  *
+ * Issue 188 seeded photo-kind galleries as plain booth prints. The author may
+ * now keep that default, choose the booth-print style explicitly, or choose a
+ * different Gallery style and leave the plugin card untouched. This follows
+ * the #189 papers rule in inc/quote-note.php paper_for(): an author-chosen
+ * block style wins over a seeded presentation.
+ *
  * @param string    $html     Rendered card HTML.
  * @param array     $block    Parsed block (unused; the instance carries context).
  * @param \WP_Block $instance Block instance with the Query Loop's postId.
@@ -361,7 +452,13 @@ function booth_strip_card( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
-	$is_photo   = has_term( 'photo', 'kind', $post );
+	$is_photo = has_term( 'photo', 'kind', $post );
+	$mode     = booth_print_mode( gallery_block_style( $post ), $is_photo );
+	if ( 'none' === $mode ) {
+		return $html;
+	}
+	$photo_print = 'print' === $mode;
+
 	$media_open = '<div class="pk-media pk-media--stream">';
 	$meta_open  = '<div class="pk-meta">';
 
@@ -369,12 +466,12 @@ function booth_strip_card( string $html, array $block, $instance ): string {
 	if ( false === $start ) {
 		return $html;
 	}
-	$end = $is_photo ? block_end( $html, $start ) : strpos( $html, $meta_open, $start );
+	$end = $photo_print ? block_end( $html, $start ) : strpos( $html, $meta_open, $start );
 	if ( false === $end ) {
 		return $html;
 	}
 
-	$strip = render_strip( $post, gallery_image_ids( $post ), $is_photo );
+	$strip = render_strip( $post, gallery_image_ids( $post ), $photo_print );
 	if ( '' === $strip ) {
 		return $html;
 	}
