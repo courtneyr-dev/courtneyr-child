@@ -49,3 +49,15 @@ test( 'the front page loads the card sheet without blocking; /stream/ keeps it b
 	const stream = await ( await request.get( '/stream/' ) ).text();
 	expect( stream ).toMatch( /id=['"]courtneyr-post-kinds-css['"][^>]*media=['"]all['"]/ );
 } );
+
+test( 'Perfmatters delays the full sheets on the front page only', async ( { request } ) => {
+	const front = await ( await request.get( '/' ) ).text();
+	test.skip( ! front.includes( 'perfmatters' ) || ! /\.used\.css/.test( front ), 'Perfmatters used CSS is not active here' );
+	// Front page: held until interaction (its used CSS is built from this page alone).
+	expect( front ).toMatch( /<link[^>]*data-pmdelayedstyle=/ );
+	// A single post shares post.used.css with every other post, so its full sheets
+	// must still arrive on their own (async), never wait for interaction.
+	const single = await ( await request.get( '/2026/07/06/american-obituary/' ) ).text();
+	expect( single ).not.toMatch( /data-pmdelayedstyle=/ );
+	expect( single ).toMatch( /<link[^>]*media=['"]print['"][^>]*onload=/ );
+} );
