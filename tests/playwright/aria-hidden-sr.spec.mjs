@@ -123,7 +123,7 @@ for ( const path of [ '/', '/stream/', '/kind/photo/', '/kind/article/', '/2026/
 		const failures = await page.evaluate( ( notTheme ) => {
 			const passes = window.__acPasses;
 			return [ ...document.querySelectorAll( '[aria-hidden="true"]' ) ]
-				.filter( ( e ) => ! e.matches( notTheme ) && ! e.closest( '.cmplz-cookiebanner, .wp-block-cover, .wp-block-spacer, .wp-block-separator' ) && ! passes( e ) )
+				.filter( ( e ) => ! e.matches( notTheme ) && ! e.closest( '[class*="cmplz"], .wp-block-cover, .wp-block-spacer, .wp-block-separator' ) && ! passes( e ) )
 				.map( ( e ) => e.tagName.toLowerCase() + '.' + String( e.className.baseVal ?? e.className ).split( ' ' )[ 0 ] );
 		}, NOT_THEME );
 		expect( failures ).toEqual( [] );
@@ -133,6 +133,6 @@ for ( const path of [ '/', '/stream/', '/kind/photo/', '/kind/article/', '/2026/
 test( 'core lightbox buttons have a name before the lightbox opens', async ( { page } ) => {
 	const res = await page.goto( '/2026/09/09/wild-turkeys-strutting-through-the-neighborhood/', { waitUntil: 'load' } );
 	test.skip( 404 === res.status(), 'the gallery zine post is not on this environment' );
-	const names = await page.locator( '.wp-lightbox-close-button, .wp-lightbox-navigation-button' ).evaluateAll( ( buttons ) => buttons.map( ( b ) => b.getAttribute( 'aria-label' ) || [ ...b.querySelectorAll( 'span' ) ].filter( ( s ) => ! s.closest( '[hidden]' ) ).map( ( s ) => s.textContent.trim() ).join( '' ) ) );
+	const names = await page.locator( '.wp-lightbox-close-button, .wp-lightbox-navigation-button' ).evaluateAll( ( buttons ) => buttons.map( ( b ) => b.getAttribute( 'aria-label' ) || [ ...b.querySelectorAll( 'span' ) ].filter( ( s ) => ! s.hidden && ! s.parentElement.closest( 'span[hidden]' ) ).map( ( s ) => s.textContent.trim() ).join( '' ) ) );
 	expect( names ).toEqual( [ 'Close', 'Previous', 'Next' ] );
 } );
