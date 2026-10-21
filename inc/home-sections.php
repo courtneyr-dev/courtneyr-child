@@ -396,7 +396,7 @@ function lane_title_glyph( string $content, array $block ): string {
 		$open .= true === $value ? ' ' . esc_attr( $name ) : sprintf( ' %s="%s"', esc_attr( $name ), esc_attr( (string) $value ) );
 	}
 	return sprintf(
-		'<%1$s%2$s><span class="cr-fieldnotes__lane-glyph" aria-hidden="true">%3$s</span>%4$s</%1$s>',
+		'<%1$s%2$s><span class="cr-fieldnotes__lane-glyph" aria-hidden="true" role="presentation">%3$s</span>%4$s</%1$s>',
 		$tag,
 		$open,
 		esc_html( $glyph ),

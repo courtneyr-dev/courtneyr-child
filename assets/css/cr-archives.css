@@ -116,7 +116,10 @@
 .cr-archive--stream .cr-archive__header { max-width: 72rem; }
 .cr-archive-stream__empty {
 	font-family: var(--cr-font-accent, serif);
-	font-size: var(--wp--preset--font-size--medium, 1.125rem);
+
+	/* md (18px max), not medium (20px): Accessibility Checker reads a short
+	   paragraph at 20px or more as a heading styled as a paragraph. */
+	font-size: var(--wp--preset--font-size--md, 1.125rem);
 	max-width: var(--cr-measure, 65ch);
 }
 

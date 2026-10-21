@@ -3259,8 +3259,9 @@ test( 'a public check-in on the Stream shows a still map thumbnail and one stamp
 
 	const card = cards.first();
 	await expect( card.locator( 'iframe' ) ).toHaveCount( 0 );
-	await expect( card.locator( '.cr-passport__thumb-map' ) ).toHaveAttribute( 'role', 'img' );
-	await expect( card.locator( '.cr-passport__thumb-map' ) ).toHaveAttribute( 'aria-label', /^Map showing / );
+	// A figure named by its visually hidden figcaption (Accessibility Checker passes alt="" tiles only there).
+	await expect( card.locator( 'figure.cr-passport__thumb-map' ) ).not.toHaveAttribute( 'role', /./ );
+	await expect( card.locator( 'figure.cr-passport__thumb-map > figcaption.screen-reader-text' ) ).toHaveText( /^Map showing / );
 	await expect( card.locator( '.cr-passport__thumb-tiles img' ) ).toHaveCount( 4 );
 	await expect( card.locator( '.cr-passport__thumb-credit' ) ).toContainText( 'OpenStreetMap' );
 	await expect( card.locator( '.cr-passport__thumb-credit' ) ).toBeVisible();
