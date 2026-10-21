@@ -117,3 +117,4 @@ require_once __DIR__ . '/inc/like.php';
 require_once __DIR__ . '/inc/bookmark.php';
 require_once __DIR__ . '/inc/single-bookmark.php';
 require_once __DIR__ . '/inc/security-headers.php';
+require_once __DIR__ . '/inc/contact-form.php';
