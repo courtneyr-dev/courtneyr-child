@@ -137,3 +137,14 @@ test( 'core lightbox buttons have a name before the lightbox opens', async ( { p
 	const names = await page.locator( '.wp-lightbox-close-button, .wp-lightbox-navigation-button' ).evaluateAll( ( buttons ) => buttons.map( ( b ) => document.getElementById( b.getAttribute( 'aria-labelledby' ) || '' )?.textContent.trim() ) );
 	expect( names ).toEqual( [ 'Close', 'Previous', 'Next' ] );
 } );
+
+test( 'lightbox triggers carry a name in the server markup', async ( { request } ) => {
+	const res = await request.get( '/2026/09/09/wild-turkeys-strutting-through-the-neighborhood/' );
+	test.skip( 404 === res.status(), 'the gallery zine post is not on this environment' );
+	// Before Perfmatters releases the Interactivity scripts, the server label is the only name.
+	const triggers = ( await res.text() ).match( /<button[^>]*class="lightbox-trigger"[^>]*>/g ) || [];
+	expect( triggers.length ).toBeGreaterThan( 0 );
+	for ( const t of triggers ) {
+		expect( t ).toMatch( /aria-label="Enlarge"/ );
+	}
+} );

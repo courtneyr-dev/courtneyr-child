@@ -68,6 +68,11 @@ namespace {
 			return 1 === (int) $number ? (string) $single : (string) $plural;
 		}
 	}
+	if ( ! function_exists( 'wp_parse_list' ) ) {
+		function wp_parse_list( $input_list ): array {
+			return array_values( array_filter( explode( ' ', str_replace( ',', ' ', (string) $input_list ) ), 'strlen' ) );
+		}
+	}
 	if ( ! function_exists( 'parse_blocks' ) ) {
 		function parse_blocks( string $content ): array {
 			return $GLOBALS['cr_zine_blocks'] ?? array();
@@ -93,6 +98,7 @@ namespace {
 	use function Courtneyr\Child\GalleryZine\compose;
 	use function Courtneyr\Child\GalleryZine\enable_lightbox;
 	use function Courtneyr\Child\GalleryZine\holds_h1;
+	use function Courtneyr\Child\GalleryZine\interactive_styles;
 	use function Courtneyr\Child\GalleryZine\start_pass;
 	use function Courtneyr\Child\GalleryZine\masthead;
 	use function Courtneyr\Child\GalleryZine\reset_state;
@@ -110,6 +116,16 @@ namespace {
 		702 => array( 1200, 1600 ),
 		703 => array( 1600, 1600 ),
 		704 => array( 1600, 640 ),
+	);
+
+	const CR_ZINE_INTERACTIVE_STYLES = array(
+		'lightbox-slideshow',
+		'before-after-pairs',
+		'filter-tags',
+		'lookbook-hotspots',
+		'card-deck-swipe',
+		'photo-essay-scroll',
+		'comparison-pairs',
 	);
 
 	/** A gallery-format single request for post $id with $count images (701-704 cycling). */
@@ -148,8 +164,16 @@ namespace {
 		foreach ( $gallery['innerBlocks'] as $image ) {
 			$figures .= render_block( $image );
 		}
-		return '<figure class="wp-block-gallery has-nested-images" data-wp-interactive="core/gallery" data-wp-context="{&quot;galleryId&quot;:&quot;g1&quot;}">' . $figures
+		$class_name = $gallery['attrs']['className'] ?? '';
+		$classes    = 'wp-block-gallery has-nested-images' . ( is_string( $class_name ) && '' !== $class_name ? ' ' . esc_attr( $class_name ) : '' );
+		return '<figure class="' . $classes . '" data-wp-interactive="core/gallery" data-wp-context="{&quot;galleryId&quot;:&quot;g1&quot;}">' . $figures
 			. ( '' !== $caption ? '<figcaption class="blocks-gallery-caption wp-element-caption">' . $caption . '</figcaption>' : '' ) . '</figure>';
+	}
+
+	/** Set the gallery's block style class. */
+	function cr_zine_styled( array $gallery, string $class ): array {
+		$gallery['attrs']['className'] = $class;
+		return $gallery;
 	}
 
 	/** One gallery through the render pipeline: render_block_data, core's render, capture (9), the projector's output if any (10), the zine (11). */
@@ -171,6 +195,123 @@ namespace {
 			cr_photo_assert( cr_photo_hooked( 'render_block_core/post-content', 'Courtneyr\\Child\\GalleryZine\\masthead', 20, 2 ), 'masthead on the post content' );
 			cr_photo_assert( cr_photo_hooked( 'wp_enqueue_scripts', 'Courtneyr\\Child\\GalleryZine\\enqueue_styles' ), 'sheet' );
 			cr_photo_assert( cr_photo_hooked( 'body_class', 'Courtneyr\\Child\\GalleryZine\\body_class' ), 'body class' );
+		}
+	);
+
+	cr_photo_group(
+		'interactive gallery styles mirror PFBT\'s className gate and keep the constant\'s order',
+		static function (): void {
+			foreach ( CR_ZINE_INTERACTIVE_STYLES as $slug ) {
+				$block = array( 'attrs' => array( 'className' => 'foo is-style-' . $slug . ' bar' ) );
+				cr_photo_same( array( $slug ), interactive_styles( $block ), $slug );
+			}
+			cr_photo_same( array(), interactive_styles( array( 'attrs' => array() ) ), 'no className' );
+			cr_photo_same( array(), interactive_styles( array( 'attrs' => array( 'className' => 'is-style-masonry-cascade' ) ) ), 'a non-interactive PFBT style' );
+			cr_photo_same( array(), interactive_styles( array( 'attrs' => array( 'className' => 'is-style-lightbox-slideshow-x my-is-style-filter-tags' ) ) ), 'substrings are not classes' );
+			cr_photo_same(
+				array( 'lightbox-slideshow', 'filter-tags' ),
+				interactive_styles( array( 'attrs' => array( 'className' => 'is-style-filter-tags is-style-lightbox-slideshow' ) ) ),
+				'two classes return in constant order'
+			);
+		}
+	);
+
+	cr_photo_group(
+		'each interactive gallery style stays on a wrapper around the zine panels only',
+		static function (): void {
+			foreach ( CR_ZINE_INTERACTIVE_STYLES as $slug ) {
+				$gallery = cr_zine_styled( cr_zine_request( 4 ), 'is-style-' . $slug );
+				$html    = cr_zine_render( $gallery, 'A short gallery caption.' );
+				$opening = '<div class="wp-block-gallery cr-zine__gallery is-style-' . $slug . '"><ol class="cr-zine__frames" role="list">';
+				cr_photo_contains( $opening, $html, $slug . ' wrapper' );
+				cr_photo_assert( str_starts_with( $html, '<section class="cr-zine alignwide" aria-label="Photos"' ), $slug . ' section' );
+				$open_at    = strpos( $html, $opening );
+				$close_at   = strpos( $html, '</ol></div>' );
+				$last_panel = false !== $close_at ? strrpos( substr( $html, 0, $close_at ), '</li>' ) : false;
+				cr_photo_assert( false !== $open_at && false !== $close_at && false !== $last_panel && $last_panel < $close_at, $slug . ' wrapper closes after the panels' );
+				$wrapped = substr( $html, (int) $open_at, (int) $close_at - (int) $open_at );
+				cr_photo_same( 4, substr_count( $wrapped, '<figure class="wp-block-image' ), $slug . ' has four figures inside the wrapper' );
+				cr_photo_assert( strpos( $html, '<p class="cr-zine__note' ) > $close_at, $slug . ' note follows the wrapper' );
+				cr_photo_assert( strpos( $html, '<div class="cr-zine__keepsakes"' ) > $close_at, $slug . ' keepsakes follow the wrapper' );
+			}
+		}
+	);
+
+	cr_photo_group(
+		'the lightbox-slideshow module owns styled images while author and unstyled lightbox choices stay intact',
+		static function (): void {
+			$gallery = cr_zine_styled( cr_zine_request( 4 ), 'is-style-lightbox-slideshow' );
+			$html    = cr_zine_render( $gallery );
+			cr_photo_not_contains( 'lightbox-trigger', $html, 'no core lightbox trigger' );
+			cr_photo_not_contains( 'data-wp-interactive="core/image"', $html, 'no core image interactivity' );
+			cr_photo_not_contains( 'pfbt-lightbox', $html, 'no browser-built PFBT markup from PHP' );
+			foreach ( range( 1, 4 ) as $number ) {
+				cr_photo_assert( 1 === preg_match( '/<img\b[^>]*alt="Alt ' . $number . '"[^>]*class="[^"]*\bu-photo\b/', $html ), 'image ' . $number . ' keeps its alt and u-photo class' );
+			}
+
+			$explicit                                      = cr_zine_styled( cr_zine_request( 1 ), 'is-style-lightbox-slideshow' );
+			$explicit['innerBlocks'][0]['attrs']['lightbox'] = array( 'enabled' => false );
+			$parsed                                        = enable_lightbox( $explicit );
+			cr_photo_same( array( 'enabled' => false ), $parsed['innerBlocks'][0]['attrs']['lightbox'], 'the author\'s explicit lightbox attr is preserved' );
+
+			foreach ( CR_ZINE_INTERACTIVE_STYLES as $slug ) {
+				$styled = cr_zine_styled( cr_zine_request( 1 ), 'is-style-' . $slug );
+				$parsed = enable_lightbox( $styled );
+				cr_photo_assert( ! isset( $parsed['innerBlocks'][0]['attrs']['lightbox'] ), $slug . ' does not get core lightbox attrs' );
+			}
+
+			$plain  = cr_zine_request( 1 );
+			$parsed = enable_lightbox( $plain );
+			cr_photo_same( array( 'enabled' => true ), $parsed['innerBlocks'][0]['attrs']['lightbox'], 'an unstyled unlinked image still gets core lightbox' );
+		}
+	);
+
+	cr_photo_group(
+		'two interactive classes stay together on the wrapper in constant order',
+		static function (): void {
+			$gallery = cr_zine_styled( cr_zine_request( 4 ), 'is-style-filter-tags is-style-lightbox-slideshow' );
+			$html    = cr_zine_render( $gallery );
+			cr_photo_contains( '<div class="wp-block-gallery cr-zine__gallery is-style-lightbox-slideshow is-style-filter-tags"><ol', $html, 'both wrapper classes in constant order' );
+		}
+	);
+
+	cr_photo_group(
+		'unstyled zine markup stays byte-identical',
+		static function (): void {
+			// These hashes pin the markup and must be regenerated when the zine's markup changes on purpose.
+			$plain = cr_zine_request( 6 );
+			foreach ( $plain['innerBlocks'] as $k => $inner ) {
+				$plain['innerBlocks'][ $k ]['attrs']['data-id'] = (string) $inner['attrs']['id'];
+			}
+			$plain_html = cr_zine_render( $plain, 'A short gallery caption.' );
+			cr_photo_same( '37a1a29f34e20c36b6fef4ef85f5697a5fe00c9f61dc747aaf028bcf8d44c4f2', hash( 'sha256', $plain_html ), 'plain6 hash' );
+
+			$linked      = cr_zine_request( 4, 42, 'Blue Hour at Example Lake', true );
+			$linked_html = cr_zine_render( $linked, 'A longer gallery caption that runs past the handwriting limit so it stays typeset in the body face, the way notes read.' );
+			cr_photo_same( 'f86e567ef0466810fbeb51302a52676080e78fec992a1ac115b55fd950804b13', hash( 'sha256', $linked_html ), 'linked4 hash' );
+
+			$photo      = cr_zine_request( 5, 42, 'Blue Hour at Example Lake', false, 'photo' );
+			$photo_html = cr_zine_render( $photo );
+			cr_photo_same( '080323d583f4f93ef6ebd75540ad11597a472096549c85ebd24b285fa4457071', hash( 'sha256', $photo_html ), 'photo5 hash' );
+
+			$masonry = cr_zine_styled( cr_zine_request( 6 ), 'is-style-masonry-cascade' );
+			foreach ( $masonry['innerBlocks'] as $k => $inner ) {
+				$masonry['innerBlocks'][ $k ]['attrs']['data-id'] = (string) $inner['attrs']['id'];
+			}
+			$masonry_html = cr_zine_render( $masonry, 'A short gallery caption.' );
+			cr_photo_same( '37a1a29f34e20c36b6fef4ef85f5697a5fe00c9f61dc747aaf028bcf8d44c4f2', hash( 'sha256', $masonry_html ), 'a non-interactive style keeps the plain6 hash' );
+			foreach ( array( $plain_html, $linked_html, $photo_html ) as $html ) {
+				cr_photo_not_contains( 'cr-zine__gallery', $html, 'no wrapper on an unstyled scenario' );
+			}
+		}
+	);
+
+	cr_photo_group(
+		'the interactive wrapper is layout-neutral and gives the PFBT trigger the zine focus colour',
+		static function (): void {
+			$css = (string) preg_replace( '#/\*.*?\*/#s', '', (string) file_get_contents( CR_PHOTO_THEME_DIR . '/assets/css/cr-gallery-zine.css' ) );
+			cr_photo_assert( 1 === preg_match( '/\.cr-zine-single \.cr-zine \.cr-zine__gallery\s*\{[^{}]*display:\s*block;[^{}]*margin:\s*0;[^{}]*padding:\s*0;/s', $css ), 'the wrapper is a zero-spacing block' );
+			cr_photo_assert( 1 === preg_match( '/\.cr-zine__gallery\.is-style-lightbox-slideshow\s*\{[^{}]*--pfbt-lightbox-focus:\s*var\(--cr-focus-halo\);/s', $css ), 'the PFBT trigger uses the zine focus halo' );
 		}
 	);
 

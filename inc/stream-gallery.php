@@ -430,7 +430,7 @@ function block_end( string $html, int $start ) {
  * Issue 188 seeded photo-kind galleries as plain booth prints. The author may
  * now keep that default, choose the booth-print style explicitly, or choose a
  * different Gallery style and leave the plugin card untouched. This follows
- * the #189 papers rule in inc/quote-note.php paper_for(): an author-chosen
+ * the issue 189 papers rule in inc/quote-note.php paper_for(): an author-chosen
  * block style wins over a seeded presentation.
  *
  * @param string    $html     Rendered card HTML.
