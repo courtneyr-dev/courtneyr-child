@@ -985,8 +985,14 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
    Site header — zine-ready hooks
    ============================================================ */
 
-.site-header__inner {
-	gap: var(--wp--preset--spacing--medium);
+/* gap: 0 is what the header always rendered with: the old value,
+   var(--wp--preset--spacing--medium), names a preset this theme doesn't
+   define, so it fell back to normal once this sheet loaded. Before it
+   loaded, core's :where(.is-layout-flex) gap (24px) applied instead and the
+   whole page jumped 24px up (CLS up to 0.95 on desktop PageSpeed). The
+   parent class outranks core's rule from the first paint. */
+.site-header > .site-header__inner {
+	gap: 0;
 	align-items: center;
 	/* v0.7.46: wrap instead of nowrap so the controls row drops under the
 	   brand when it no longer fits (WCAG 1.4.12 text spacing, 200% zoom)
@@ -1002,7 +1008,10 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
    v0.5.11: keep these tight so the nav has room to lay out in one
    row. The brand padding alone is enough breathing room — the search
    button already carries 0.4rem of internal padding. */
-.site-header__brand {
+/* The parent class outranks core's has-global-padding reset, which loads
+   after the inlined used-CSS and zeroed this padding until this sheet
+   arrived (a 16px jump at first paint). */
+.site-header > .site-header__inner > .site-header__brand {
 	padding-left: var(--cr-space-md, 1rem);
 }
 
