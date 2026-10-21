@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "courtneyr/contact-form",
+	"version": "0.7.121",
+	"title": "Contact form",
+	"category": "theme",
+	"icon": "email",
+	"description": "The Field Notes postcard contact form. Server-rendered; the site's contact-form plugin handles the submission.",
+	"keywords": [
+		"contact",
+		"form",
+		"message"
+	],
+	"textdomain": "courtneyr-child",
+	"supports": {
+		"html": false,
+		"reusable": false,
+		"customClassName": true,
+		"anchor": true
+	},
+	"editorScript": "file:./editor.js",
+	"render": "file:./render.php"
+}
