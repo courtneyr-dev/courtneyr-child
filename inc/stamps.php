@@ -185,7 +185,7 @@ function render( array $spec ): string {
 	$data    = ' data-stamp-family="' . esc_attr( $family ) . '"';
 
 	if ( 'rect' === $shape ) {
-		$svg = '<svg class="' . esc_attr( $classes ) . '" viewBox="0 0 184 100" aria-hidden="true" focusable="false"' . $style . $data . '>'
+		$svg = '<svg class="' . esc_attr( $classes ) . '" viewBox="0 0 184 100" aria-hidden="true" role="presentation" focusable="false"' . $style . $data . '>'
 			. '<rect x="4" y="4" width="176" height="92" rx="5" stroke-width="3" stroke-dasharray="62 3 38 2 118 4 40 3 200" />'
 			. '<rect x="11" y="11" width="162" height="78" rx="3" stroke-width="1.5" stroke-dasharray="30 2 70 3 44 2 300" />';
 		if ( '' !== $glyph ) {
@@ -197,7 +197,7 @@ function render( array $spec ): string {
 			. '<text x="' . $tx . '" y="81" class="cr-stamp__small">' . esc_html( $small ) . '</text>'
 			. '</svg>';
 	} elseif ( 'octagon' === $shape ) {
-		$svg = '<svg class="' . esc_attr( $classes ) . '" viewBox="0 0 124 124" aria-hidden="true" focusable="false"' . $style . $data . '>'
+		$svg = '<svg class="' . esc_attr( $classes ) . '" viewBox="0 0 124 124" aria-hidden="true" role="presentation" focusable="false"' . $style . $data . '>'
 			. '<path d="M38 4h48l34 34v48l-34 34h-48l-34-34v-48z" stroke-width="3" stroke-dasharray="70 3 50 2 90 4 300" />'
 			. '<path d="M42 13h40l29 29v40l-29 29h-40l-29-29v-40z" stroke-width="1.5" stroke-dasharray="36 2 60 3 300" />';
 		if ( '' !== $glyph ) {
@@ -211,7 +211,7 @@ function render( array $spec ): string {
 	} else {
 		$uid = (string) ( $spec['uid'] ?? 'cr-seal' );
 		$w   = $postmark ? 214 : 124;
-		$svg = '<svg class="' . esc_attr( $classes ) . '" viewBox="0 0 ' . $w . ' 124" aria-hidden="true" focusable="false"' . $style . $data . '>'
+		$svg = '<svg class="' . esc_attr( $classes ) . '" viewBox="0 0 ' . $w . ' 124" aria-hidden="true" role="presentation" focusable="false"' . $style . $data . '>'
 			// Ring path starts at the left and sweeps over the top: 25% is top centre.
 			. '<defs><path id="' . esc_attr( $uid ) . '" d="M 13 62 a 49 49 0 1 1 98 0 a 49 49 0 1 1 -98 0" /></defs>'
 			. '<circle cx="62" cy="62" r="58" stroke-width="3" stroke-dasharray="90 3 120 2 60 4 400" />'

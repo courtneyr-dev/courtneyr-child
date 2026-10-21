@@ -154,7 +154,7 @@ add_action( 'init', __NAMESPACE__ . '\\register_paper_styles' );
  * @return string
  */
 function pin_svg(): string {
-	return '<svg class="cr-note__pin" viewBox="0 0 44 60" aria-hidden="true" focusable="false">'
+	return '<svg class="cr-note__pin" viewBox="0 0 44 60" aria-hidden="true" role="presentation" focusable="false">'
 		. '<ellipse cx="24" cy="55.5" rx="10" ry="3" fill="#241c4a" opacity="0.22"/>'
 		. '<path d="M21.3 37.5h1.9l-.55 17.5h-.8z" fill="#8f96a3"/>'
 		. '<path d="M21.6 37.5h.6l-.4 17h-.35z" fill="#e3e7ec"/>'
@@ -175,7 +175,7 @@ function pin_svg(): string {
  * @return string
  */
 function mark(): string {
-	return '<span class="cr-note__mark" aria-hidden="true">&#8220;</span>';
+	return '<span class="cr-note__mark" aria-hidden="true" role="presentation">&#8220;</span>';
 }
 
 /**
@@ -258,7 +258,7 @@ function stream_card( string $html, array $block, $instance ): string {
 		$html = substr( $html, 0, (int) $dm[0][1] ) . substr( $html, (int) $dm[0][1] + strlen( $date ) );
 	}
 	$cite = citation( $post );
-	$tail = ( '' !== $cite ? '<p class="cr-note__cite"><span class="cr-note__dash" aria-hidden="true">&mdash; </span>' . $cite . '</p>' : '' ) . $date;
+	$tail = ( '' !== $cite ? '<p class="cr-note__cite"><span class="cr-note__dash" aria-hidden="true" role="presentation">&mdash; </span>' . $cite . '</p>' : '' ) . $date;
 	$meta = strpos( $html, '<div class="pk-meta">' );
 	$html = false !== $meta ? substr( $html, 0, $meta ) . $tail . substr( $html, $meta ) : $html . $tail;
 

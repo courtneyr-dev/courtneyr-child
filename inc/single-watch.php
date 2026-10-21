@@ -187,7 +187,7 @@ function add_title_lede( string $html, array $block ): string {
 	$lede .= '<time class="cr-journal__lede-date" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( get_the_date( '', $post ) ) . '</time>';
 	$facts = film_facts( $attrs );
 	if ( ! empty( $facts ) ) {
-		$lede .= '<span class="cr-journal__lede-sep" aria-hidden="true"> · </span><span class="cr-journal__lede-place">' . esc_html( implode( ' · ', $facts ) ) . '</span>';
+		$lede .= '<span class="cr-journal__lede-sep" aria-hidden="true" role="presentation"> · </span><span class="cr-journal__lede-place">' . esc_html( implode( ' · ', $facts ) ) . '</span>';
 	}
 	$lede .= '</p>';
 
@@ -247,8 +247,8 @@ function heavy_left( \WP_Post $post ): bool {
  */
 function vhs_label( array $facts = array() ): string {
 	$out  = '<div class="cr-vhs__label">';
-	$out .= '<span class="cr-vhs__marks" aria-hidden="true"><span>T-120</span><span>SP</span></span>';
-	$out .= '<span class="cr-vhs__note cr-hand" aria-hidden="true">' . esc_html__( 'Be kind & rewind', 'courtneyr-child' ) . '</span>';
+	$out .= '<span class="cr-vhs__marks" aria-hidden="true" role="presentation"><span>T-120</span><span>SP</span></span>';
+	$out .= '<span class="cr-vhs__note cr-hand" aria-hidden="true" role="presentation">' . esc_html__( 'Be kind & rewind', 'courtneyr-child' ) . '</span>';
 	$out .= '<span class="cr-vhs__stripe"></span>';
 	if ( ! empty( $facts ) ) {
 		$out .= '<ul class="cr-vhs__facts">';

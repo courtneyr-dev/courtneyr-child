@@ -300,7 +300,7 @@ function mech_svg( int $seed = 0 ): string {
 	};
 	$lm         = $heavy_left ? 7.2 : 4.1;
 	$rm         = $heavy_left ? 4.1 : 7.2;
-	return '<svg class="cr-media__mech" viewBox="0 0 100 18" aria-hidden="true" focusable="false">'
+	return '<svg class="cr-media__mech" viewBox="0 0 100 18" aria-hidden="true" role="presentation" focusable="false">'
 		. '<rect class="cr-mech__window" x="21" y="1.2" width="58" height="15.6" rx="1.6" stroke-width="0.6"/>'
 		. '<rect class="cr-mech__dark" x="34" y="7.6" width="32" height="2.8"/>'
 		. '<path class="cr-mech__tape" d="M' . ( 34 + $lm ) . ' ' . ( 9 - $lm + 1.2 ) . 'L' . ( 66 - $rm ) . ' ' . ( 9 - $rm + 1.2 ) . '" stroke-width="1.1" fill="none"/>'

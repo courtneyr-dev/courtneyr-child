@@ -229,7 +229,7 @@ function frame_image( array $lead, bool $decorative, int $position ): string {
  */
 function dress_protected( string $html, int $post_id ): string {
 	$html = add_root_classes( $html, array( 'cr-photo-frame', 'cr-photo-frame--protected', 'cr-photo-frame--paper', paper_class( $post_id ) ) );
-	return (string) preg_replace( '/^(\s*<article\b[^>]*>)/i', '$1<span class="cr-photo-frame__number" aria-hidden="true"></span>', $html, 1 );
+	return (string) preg_replace( '/^(\s*<article\b[^>]*>)/i', '$1<span class="cr-photo-frame__number" aria-hidden="true" role="presentation"></span>', $html, 1 );
 }
 
 /**
@@ -293,7 +293,7 @@ function frame_card( string $html, array $block, $instance = null ): string {
 	// ornament; Accessibility Checker passes aria-hidden elements that carry it.
 	$sleeve = '<span class="cr-photo-frame__sleeve' . ( '' !== $paper ? ' ' . esc_attr( $paper ) : '' ) . '"' . ( $sleeve_hidden ? ' aria-hidden="true" role="presentation"' : '' ) . '><span class="cr-photo-frame__sleeve-text">' . esc_html( $name ) . '</span></span>';
 	$media  = '<span class="cr-photo-frame__media' . ( '' === $image ? ' cr-photo-frame__media--paper' : '' ) . '"' . ( $media_hidden ? ' aria-hidden="true" role="presentation"' : '' ) . ' data-cr-cover-fallback>' . $image . $sleeve . '</span>';
-	$number = '<span class="cr-photo-frame__number" aria-hidden="true"></span>';
+	$number = '<span class="cr-photo-frame__number" aria-hidden="true" role="presentation"></span>';
 
 	if ( $titled ) {
 		$inner = $media

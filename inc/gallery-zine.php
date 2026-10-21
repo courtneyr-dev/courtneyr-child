@@ -746,6 +746,39 @@ function enable_lightbox( array $parsed ): array {
 add_filter( 'render_block_data', __NAMESPACE__ . '\\enable_lightbox', 20 );
 
 /**
+ * Give core's lightbox buttons a name before the lightbox opens.
+ *
+ * Until an image opens, core's Interactivity state hides both the icon and
+ * the text span in each button and binds aria-label to undefined, so the
+ * Close, Previous and Next buttons have no name (Accessibility Checker:
+ * empty_button). A visually hidden span with no directive survives
+ * hydration; once open, core's aria-label names the button and wins. The
+ * span hides itself when core shows its own text label, so the name is
+ * never doubled. Core prints the overlay on wp_footer at 10; this runs
+ * just before, prints it instead, and leaves it untouched if core changes.
+ */
+function lightbox_overlay(): void {
+	if ( ! function_exists( 'block_core_image_print_lightbox_overlay' ) || false === has_action( 'wp_footer', 'block_core_image_print_lightbox_overlay' ) ) {
+		return;
+	}
+	remove_action( 'wp_footer', 'block_core_image_print_lightbox_overlay' );
+	ob_start();
+	block_core_image_print_lightbox_overlay();
+	$html   = (string) ob_get_clean();
+	$labels = array(
+		'wp-lightbox-close-button'           => __( 'Close', 'courtneyr-child' ),
+		'wp-lightbox-navigation-button-prev' => _x( 'Previous', 'previous image in lightbox', 'courtneyr-child' ),
+		'wp-lightbox-navigation-button-next' => _x( 'Next', 'next image in lightbox', 'courtneyr-child' ),
+	);
+	foreach ( $labels as $class => $label ) {
+		$span = '<span class="screen-reader-text" data-wp-bind--hidden="state.hasNavigationText">' . esc_html( $label ) . '</span>';
+		$html = (string) preg_replace( '/(<button\b[^>]*\bclass="[^"]*\b' . preg_quote( $class, '/' ) . '\b[^"]*"[^>]*>)/', '$1' . str_replace( '$', '\\$', $span ), $html, 1 );
+	}
+	echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core's own overlay markup plus escaped labels.
+}
+add_action( 'wp_footer', __NAMESPACE__ . '\\lightbox_overlay', 9 );
+
+/**
  * Keep core's render of the zine gallery before the plugin's projector
  * (priority 10) replaces it.
  *

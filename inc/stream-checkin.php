@@ -301,8 +301,11 @@ function map_thumbnail( array $attrs ): string {
 		? sprintf( __( 'Map showing %s', 'courtneyr-child' ), $venue )
 		: __( 'Map showing this check-in', 'courtneyr-child' );
 
-	$out  = '<div class="cr-passport__thumb">';
-	$out .= '<div class="cr-passport__thumb-map" role="img" aria-label="' . esc_attr( $label ) . '">';
+	$out = '<div class="cr-passport__thumb">';
+	// A figure named by a visually hidden figcaption: Accessibility Checker Pro
+	// passes the alt="" tiles only inside a <figure> with a <figcaption>, and a
+	// figure with a figcaption takes no role.
+	$out .= '<figure class="cr-passport__thumb-map"><figcaption class="cr-passport__thumb-caption screen-reader-text">' . esc_html( $label ) . '</figcaption>';
 	$out .= sprintf(
 		'<div class="cr-passport__thumb-tiles" style="--cr-thumb-x:%dpx;--cr-thumb-y:%dpx">',
 		(int) round( ( $x - $x0 ) * 256 ),
@@ -314,7 +317,7 @@ function map_thumbnail( array $attrs ): string {
 			$out .= '<img src="' . esc_url( $src ) . '" alt="" width="256" height="256" loading="lazy" decoding="async">';
 		}
 	}
-	$out .= '</div><span class="cr-passport__thumb-dot" aria-hidden="true"></span></div>';
+	$out .= '</div><span class="cr-passport__thumb-dot" aria-hidden="true" role="presentation"></span></figure>';
 	$out .= '<p class="cr-passport__thumb-credit">' . wp_kses(
 		(string) $tiles['attribution'],
 		array(
