@@ -603,6 +603,11 @@ function first_gallery( array $blocks, int $min ): ?array {
 function gallery_for( \WP_Post $post ): ?array {
 	$state = &state();
 	if ( ! array_key_exists( $post->ID, $state['galleries'] ) ) {
+		// A drawn comic strip prints as the comic strip page, not a zine, whatever its post format (issue 266).
+		if ( function_exists( '\\Courtneyr\\Child\\ComicStrip\\facts' ) && array() !== \Courtneyr\Child\ComicStrip\facts( $post ) ) {
+			$state['galleries'][ $post->ID ] = null;
+			return null;
+		}
 		$blocks  = parse_blocks( (string) $post->post_content );
 		$gallery = null;
 		// A photo post's zine is the gallery the plugin's projector takes (two or more images), when it has one.
