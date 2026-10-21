@@ -29,6 +29,22 @@ const BODY_CLASS = 'cr-zine-single';
 /** A gallery caption up to this many characters is handwritten; longer ones stay typeset. */
 const HAND_LIMIT = 60;
 
+/**
+ * The gallery styles Post Formats for Block Themes ships with an Interactivity
+ * view module (blocks/gallery-variations/<slug>/view.js, 1.1.9). Each module
+ * finds its gallery by `.wp-block-gallery.is-style-<slug>`, so the zine keeps
+ * that wrapper when the post's gallery carries one of these classes.
+ */
+const INTERACTIVE_STYLES = array(
+	'lightbox-slideshow',
+	'before-after-pairs',
+	'filter-tags',
+	'lookbook-hotspots',
+	'card-deck-swipe',
+	'photo-essay-scroll',
+	'comparison-pairs',
+);
+
 /** Shapes wide enough to stack as a hero's satellites. */
 const WIDE = array( 'landscape', 'square' );
 
@@ -532,6 +548,24 @@ function images_of( array $gallery ): array {
 }
 
 /**
+ * The interactive style slugs on a gallery, mirroring PFBT's own gate on the
+ * block's className attr.
+ *
+ * @param array<string, mixed> $block Parsed gallery block.
+ * @return string[]
+ */
+function interactive_styles( array $block ): array {
+	$class_name = $block['attrs']['className'] ?? '';
+	$classes    = wp_parse_list( is_string( $class_name ) ? $class_name : '' );
+	return array_values(
+		array_filter(
+			INTERACTIVE_STYLES,
+			static fn( string $slug ): bool => in_array( 'is-style-' . $slug, $classes, true )
+		)
+	);
+}
+
+/**
  * The first gallery, at any depth, with at least $min images.
  *
  * @param array<int, array<string, mixed>> $blocks Parsed blocks.
@@ -723,12 +757,17 @@ add_filter( 'the_content', __NAMESPACE__ . '\\start_pass', 1 );
  * Before core renders the zine gallery, turn on core's lightbox for every
  * image the author did not link or opt out of, so core's own gallery render
  * wires the lightbox's previous and next across the panels.
+ * An interactive gallery style owns the images' click behaviour, and core's
+ * lightbox button would stack a second trigger and dialog on each figure.
  *
  * @param array<string, mixed> $parsed Parsed block.
  * @return array<string, mixed>
  */
 function enable_lightbox( array $parsed ): array {
 	if ( null === zine_gallery_post( $parsed ) ) {
+		return $parsed;
+	}
+	if ( array() !== interactive_styles( $parsed ) ) {
 		return $parsed;
 	}
 	foreach ( (array) ( $parsed['innerBlocks'] ?? array() ) as $k => $image ) {
@@ -935,6 +974,12 @@ function zine( string $html, array $block, $instance = null ): string {
 	$wrapper = new \WP_HTML_Tag_Processor( $core );
 	if ( $wrapper->next_tag() && 'core/gallery' === $wrapper->get_attribute( 'data-wp-interactive' ) ) {
 		$wiring = ' data-wp-interactive="core/gallery" data-wp-context="' . esc_attr( (string) $wrapper->get_attribute( 'data-wp-context' ) ) . '"';
+	}
+	$styles = interactive_styles( $block );
+	if ( array() !== $styles ) {
+		$gallery_classes = 'wp-block-gallery cr-zine__gallery is-style-' . implode( ' is-style-', $styles );
+		return '<section class="cr-zine alignwide" aria-label="' . esc_attr__( 'Photos', 'courtneyr-child' ) . '"' . $wiring . '>'
+			. '<div class="' . $gallery_classes . '"><ol class="cr-zine__frames" role="list">' . $panels . '</ol></div>' . $note . keepsakes( $post->ID ) . '</section>';
 	}
 
 	return '<section class="cr-zine alignwide" aria-label="' . esc_attr__( 'Photos', 'courtneyr-child' ) . '"' . $wiring . '>'
