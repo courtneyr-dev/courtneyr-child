@@ -516,7 +516,7 @@ function ink_defs(): string {
 		return '';
 	}
 	$printed = true;
-	return '<svg class="cr-pin-defs" width="0" height="0" aria-hidden="true" role="presentation" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden"><filter id="cr-ink-rough" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.4" xChannelSelector="R" yChannelSelector="G"/></filter></svg>';
+	return '<svg class="cr-pin-defs" width="0" height="0" aria-hidden="true" role="presentation" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden"><filter id="cr-ink-rough" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.4" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="cr-pin-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 0.14 0 0 0 0 0.11 0 0 0 0 0.29 0 0 0 7 -3.6"/></filter><filter id="cr-pin-abrasion" x="0" y="0" width="100%" height="100%"><feTurbulence type="turbulence" baseFrequency="0.7" numOctaves="2" seed="3"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 9 -5.2"/></filter></svg>';
 }
 
 /**
@@ -585,7 +585,9 @@ function render( array $spec, string $size ): string {
 		$html .= '<span class="cr-pin__glyph"' . ( '' !== $label ? ' aria-hidden="true"' : '' ) . '>' . esc_html( (string) $spec['glyph'] ) . '</span>';
 	}
 	$html .= '<span class="cr-pin__gloss" aria-hidden="true" role="presentation"></span></span>';
-	$html .= '<span class="cr-pin__wear" aria-hidden="true" role="presentation"></span>';
+	// Inline SVG, not a CSS image: Chrome counts url() backgrounds and masks
+	// as LCP candidates, and the grain rasterises late on a slow phone.
+	$html .= '<span class="cr-pin__wear" aria-hidden="true" role="presentation"><svg focusable="false"><rect width="100%" height="100%" filter="url(#cr-pin-grain)"/><rect class="cr-pin__abrasion" width="100%" height="100%" filter="url(#cr-pin-abrasion)"/></svg></span>';
 	$html .= '</span>';
 	if ( $spec['word_below'] ) {
 		$html .= '<span class="cr-pin__name cr-pin__word-below"' . ( $as_image ? ' aria-hidden="true"' : '' ) . '>' . esc_html( $name ) . '</span>';
