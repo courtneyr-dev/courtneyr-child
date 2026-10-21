@@ -133,6 +133,11 @@ namespace {
 		cr_collection_privacy_check( false === strpos( $source, $forbidden ), 'owned source excludes ' . $forbidden );
 	}
 
+	// The only block attribute the theme may read is className: never an item's postId, mediaId, title, url or addedAt.
+	preg_match_all( "/\\['attrs'\\]\\['([A-Za-z]+)'\\]/", $source, $attr_reads );
+	cr_collection_privacy_check( array() === array_diff( array_unique( $attr_reads[1] ), array( 'className' ) ), 'owned source reads only attrs.className from a block' );
+	cr_collection_privacy_check( 0 === preg_match( '/\\battrs\\b[^;]*\\b(postId|mediaId|addedAt)\\b/', $source ), 'owned source never pairs attrs with an item attribute' );
+
 	$secrets = array( 'Private secret title', 'Draft secret title', 'Password secret title', 'Pending secret title', 'Trashed secret title', 'Check-in secret venue' );
 	$block = array(
 		'blockName' => 'core/group',
