@@ -784,6 +784,38 @@ function lightbox_overlay(): void {
 add_action( 'wp_footer', __NAMESPACE__ . '\\lightbox_overlay', 9 );
 
 /**
+ * Name each image's lightbox trigger in the server markup.
+ *
+ * Core binds the trigger's aria-label to state ("Enlarge 1 of 2") once the
+ * Interactivity scripts run. Perfmatters delays those scripts until the first
+ * interaction, so until then (a keyboard user's first Tab, a scanner) the
+ * button has no name (Accessibility Checker: empty_button). Core's own word is
+ * printed here; hydration replaces it with the numbered label.
+ *
+ * @param string $html Rendered image block.
+ * @return string
+ */
+function lightbox_trigger_label( string $html ): string {
+	if ( ! str_contains( $html, 'lightbox-trigger' ) ) {
+		return $html;
+	}
+	$tags  = new \WP_HTML_Tag_Processor( $html );
+	$query = array(
+		'tag_name'   => 'BUTTON',
+		'class_name' => 'lightbox-trigger',
+	);
+	while ( $tags->next_tag( $query ) ) {
+		if ( null === $tags->get_attribute( 'aria-label' ) ) {
+			$tags->set_attribute( 'aria-label', __( 'Enlarge', 'courtneyr-child' ) );
+		}
+	}
+	return $tags->get_updated_html();
+}
+add_filter( 'render_block_core/image', __NAMESPACE__ . '\\lightbox_trigger_label', 30 );
+// The zine re-lays the gallery at 11; label whatever triggers its final markup holds.
+add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\\lightbox_trigger_label', 30 );
+
+/**
  * Keep core's render of the zine gallery before the plugin's projector
  * (priority 10) replaces it.
  *
