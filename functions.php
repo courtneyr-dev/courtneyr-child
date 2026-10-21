@@ -80,6 +80,8 @@ require_once __DIR__ . '/inc/single-wish.php';
 require_once __DIR__ . '/inc/stream-wish.php';
 require_once __DIR__ . '/inc/question.php';
 require_once __DIR__ . '/inc/stream-question.php';
+require_once __DIR__ . '/inc/collection.php';
+require_once __DIR__ . '/inc/stream-collection.php';
 require_once __DIR__ . '/inc/stream-checkin.php';
 require_once __DIR__ . '/inc/single-checkin.php';
 require_once __DIR__ . '/inc/kind-parts.php';
