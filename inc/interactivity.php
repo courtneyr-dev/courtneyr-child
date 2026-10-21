@@ -374,12 +374,12 @@ function transform_stream_item_avatar( string $block_content, array $block ): st
 	if ( in_array( $type, STREAM_AVATAR_OUTLINE, true ) ) {
 		// Outline variant — replace solid class + add type-color custom prop.
 		$replacement = sprintf(
-			'<span class="cr-icon-avatar cr-icon-avatar--outline cr-stream-item__avatar" aria-hidden="true" data-cr-stream-avatar="%1$s" style="--type-color: var(--cr-type-%1$s);">',
+			'<span class="cr-icon-avatar cr-icon-avatar--outline cr-stream-item__avatar" aria-hidden="true" role="presentation" data-cr-stream-avatar="%1$s" style="--type-color: var(--cr-type-%1$s);">',
 			\esc_attr( $type )
 		);
 	} else {
 		$replacement = sprintf(
-			'<span class="cr-icon-avatar cr-icon-avatar--%1$s cr-stream-item__avatar" aria-hidden="true" data-cr-stream-avatar="%1$s">',
+			'<span class="cr-icon-avatar cr-icon-avatar--%1$s cr-stream-item__avatar" aria-hidden="true" role="presentation" data-cr-stream-avatar="%1$s">',
 			\esc_attr( $type )
 		);
 	}
@@ -517,7 +517,7 @@ function render_single_post_avatar( int $post_id ): string {
 	}
 
 	return sprintf(
-		'<span class="%1$s" aria-hidden="true"%2$s><svg viewBox="0 0 24 24" width="1.5em" height="1.5em" focusable="false"><use href="%3$s/assets/svg/icons.svg#post-icon-%4$s"></use></svg></span>',
+		'<span class="%1$s" aria-hidden="true" role="presentation"%2$s><svg viewBox="0 0 24 24" width="1.5em" height="1.5em" focusable="false"><use href="%3$s/assets/svg/icons.svg#post-icon-%4$s"></use></svg></span>',
 		\esc_attr( $class ),
 		$style,
 		\esc_url( \get_stylesheet_directory_uri() ),
@@ -670,12 +670,12 @@ function transform_related_post_avatar( string $block_content, array $block, $wp
 
 	if ( in_array( $type, STREAM_AVATAR_OUTLINE, true ) ) {
 		$replacement_open = sprintf(
-			'<span class="cr-icon-avatar cr-icon-avatar--outline related-post__avatar" aria-hidden="true" data-cr-related-avatar="%1$s" style="--type-color: var(--cr-type-%1$s);">',
+			'<span class="cr-icon-avatar cr-icon-avatar--outline related-post__avatar" aria-hidden="true" role="presentation" data-cr-related-avatar="%1$s" style="--type-color: var(--cr-type-%1$s);">',
 			\esc_attr( $type )
 		);
 	} else {
 		$replacement_open = sprintf(
-			'<span class="cr-icon-avatar cr-icon-avatar--%1$s related-post__avatar" aria-hidden="true" data-cr-related-avatar="%1$s">',
+			'<span class="cr-icon-avatar cr-icon-avatar--%1$s related-post__avatar" aria-hidden="true" role="presentation" data-cr-related-avatar="%1$s">',
 			\esc_attr( $type )
 		);
 	}

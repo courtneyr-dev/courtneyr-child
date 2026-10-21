@@ -8446,3 +8446,10 @@ html {
 	border-radius: 2px;
 }
 /* stylelint-enable no-descending-specificity */
+
+/* The newsletter hero's "passionate" keeps its bold and highlight but not
+   the italic: Roboto Slab has no italic face, so the browser synthesizes
+   one and the word shifts when the web font swaps in (CLS 0.058 on mobile). */
+body.home #h-are-you-passionate-about em {
+	font-style: normal;
+}

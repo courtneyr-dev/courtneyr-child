@@ -414,7 +414,7 @@ function face_svg( array $spec, int $uid ): string {
 			$rot   = 0;
 	}
 
-	$svg  = '<svg class="cr-pin__art" viewBox="0 0 100 100" aria-hidden="true" focusable="false">';
+	$svg  = '<svg class="cr-pin__art" viewBox="0 0 100 100" aria-hidden="true" role="presentation" focusable="false">';
 	$svg .= '<defs><pattern id="' . $ht . '" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(' . ( $angle % 45 ) . ')"><circle class="a" cx="3" cy="3" r="' . ( 2 === $defect ? 2 : 1.7 ) . '"/></pattern>';
 	if ( 'icon-arc' === $layout ) {
 		$svg .= '<path id="' . $arc . '" d="M13 60A39 39 0 0 0 87 60"/>';
@@ -516,7 +516,7 @@ function ink_defs(): string {
 		return '';
 	}
 	$printed = true;
-	return '<svg class="cr-pin-defs" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden"><filter id="cr-ink-rough" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.4" xChannelSelector="R" yChannelSelector="G"/></filter></svg>';
+	return '<svg class="cr-pin-defs" width="0" height="0" aria-hidden="true" role="presentation" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden"><filter id="cr-ink-rough" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.4" xChannelSelector="R" yChannelSelector="G"/></filter></svg>';
 }
 
 /**
@@ -579,13 +579,13 @@ function render( array $spec, string $size ): string {
 	if ( '' !== $name && ! $spec['word_below'] && ! $as_image ) {
 		$html .= '<span class="cr-sr-only cr-pin__name">' . esc_html( $name ) . '</span>';
 	}
-	$html .= '<span class="cr-pin__rim" aria-hidden="true"></span>';
+	$html .= '<span class="cr-pin__rim" aria-hidden="true" role="presentation"></span>';
 	$html .= '<span class="cr-pin__face">' . face_svg( $spec, $uid );
 	if ( '' !== $spec['glyph'] ) {
 		$html .= '<span class="cr-pin__glyph"' . ( '' !== $label ? ' aria-hidden="true"' : '' ) . '>' . esc_html( (string) $spec['glyph'] ) . '</span>';
 	}
-	$html .= '<span class="cr-pin__gloss" aria-hidden="true"></span></span>';
-	$html .= '<span class="cr-pin__wear" aria-hidden="true"></span>';
+	$html .= '<span class="cr-pin__gloss" aria-hidden="true" role="presentation"></span></span>';
+	$html .= '<span class="cr-pin__wear" aria-hidden="true" role="presentation"></span>';
 	$html .= '</span>';
 	if ( $spec['word_below'] ) {
 		$html .= '<span class="cr-pin__name cr-pin__word-below"' . ( $as_image ? ' aria-hidden="true"' : '' ) . '>' . esc_html( $name ) . '</span>';

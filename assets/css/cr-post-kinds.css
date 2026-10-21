@@ -2873,6 +2873,22 @@ body:is(.kind-watch, .kind-listen, .kind-read, .kind-play).single .single-post__
 	margin: 0.35rem 0 0.6rem;
 }
 
+.cr-passport__thumb-map {
+	margin: 0;
+}
+
+.cr-passport__thumb-caption {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
 .cr-stream-page .cr-passport .cr-passport__thumb-map {
 	position: relative;
 	block-size: 6.5rem;

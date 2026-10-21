@@ -62,7 +62,7 @@ cr_photo_group(
 		cr_photo_contains( 'alt="A dock at dusk"', $html, 'titled image keeps its stored alt: on a Photo post the image is the content (decision 2026-10-20, PR 196)' );
 		cr_photo_contains( '<span class="cr-photo-frame__media" data-cr-cover-fallback>', $html, 'titled media with alt is exposed' );
 		cr_photo_contains( 'class="u-photo"', $html, 'u-photo on the image' );
-		cr_photo_contains( '<span class="cr-photo-frame__number" aria-hidden="true"></span>', $html, 'number span is aria-hidden and empty (CSS counter fills it)' );
+		cr_photo_contains( '<span class="cr-photo-frame__number" aria-hidden="true" role="presentation"></span>', $html, 'number span is aria-hidden and empty (CSS counter fills it)' );
 		cr_photo_assert( 1 === preg_match( '/^<article class="pk-card [^"]*\bk-photo\b[^"]*\bh-entry\b[^"]*\bcr-photo-frame\b[^"]*">/', $html ), 'root keeps pk-card before h-entry and gains cr-photo-frame' );
 		foreach ( array( 'pk-media__caption', 'pk-stream-date', 'dt-published', 'pk-kindlabel', 'Read more' ) as $cut ) {
 			cr_photo_not_contains( $cut, $html, 'frame prints no ' . $cut );
@@ -199,7 +199,7 @@ cr_photo_group(
 		cr_photo_contains( 'cr-photo-frame--protected', $html, 'protected modifier' );
 		cr_photo_not_contains( '<img', $html, 'no image' );
 		cr_photo_same( 1, cr_photo_rendered_anchors( $html ), 'one link' );
-		cr_photo_contains( '<span class="cr-photo-frame__number" aria-hidden="true"></span>', $html, 'counter span' );
+		cr_photo_contains( '<span class="cr-photo-frame__number" aria-hidden="true" role="presentation"></span>', $html, 'counter span' );
 	}
 );
 
