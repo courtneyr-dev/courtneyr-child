@@ -1401,14 +1401,14 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
 /* ============================================================
    Theme toggle button — 3 states (system / dark / light)
    Driven by data-theme attribute on :root, set by no-flash.js
-   and updated by theme-toggle/view.js on click.
+   and updated by interactivity/theme-toggle/view.js on click.
    ============================================================ */
 
 /* v0.5.15: 3-segment theme toggle (light / dark / system).
    Replaces the v0.5.x cycling single-button control. Each segment is
    a real <button> with data-theme-set; clicking applies that theme.
    The active segment gets a periwinkle pill highlight via .is-active
-   (managed by theme-toggle/view.js). */
+   (managed by interactivity/theme-toggle/view.js). */
 /* v0.5.41: switch-style theme toggle.
    Three flush cells inside a pill container, with a single moving
    indicator that slides between positions on selection. The

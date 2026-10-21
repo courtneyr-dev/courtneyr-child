@@ -716,21 +716,17 @@ function fix_consent_link_labels(): void {
 add_action( 'wp_footer', __NAMESPACE__ . '\\fix_consent_link_labels', 100 );
 
 /**
- * Enqueue the theme-toggle click handler. Loaded in the footer with
- * defer so it does not block the first paint. Pairs with the inline
- * no-flash script above.
+ * Register and enqueue the theme-toggle Interactivity API module.
+ * Pairs with the inline no-flash script above.
  */
 function enqueue_theme_toggle(): void {
-	wp_enqueue_script(
-		'courtneyr-theme-toggle',
-		COURTNEYR_CHILD_URI . '/assets/js/theme-toggle/view.js',
-		array(),
-		COURTNEYR_CHILD_VERSION,
-		array(
-			'in_footer' => true,
-			'strategy'  => 'defer',
-		)
+	wp_register_script_module(
+		'courtneyr/theme-toggle',
+		COURTNEYR_CHILD_URI . '/assets/js/interactivity/theme-toggle/view.js',
+		array( '@wordpress/interactivity' ),
+		COURTNEYR_CHILD_VERSION
 	);
+	wp_enqueue_script_module( 'courtneyr/theme-toggle' );
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_theme_toggle' );
 
