@@ -52,7 +52,7 @@ test( 'the front page loads the card sheet without blocking; /stream/ keeps it b
 
 test( 'Perfmatters delays the full sheets on the front page only', async ( { request } ) => {
 	const front = await ( await request.get( '/' ) ).text();
-	test.skip( ! front.includes( 'perfmatters' ) || ! /\.used\.css/.test( front ), 'Perfmatters used CSS is not active here' );
+	test.skip( ! front.includes( 'id="perfmatters-used-css"' ), 'Perfmatters used CSS is not active here' );
 	// Front page: held until interaction (its used CSS is built from this page alone).
 	expect( front ).toMatch( /<link[^>]*data-pmdelayedstyle=/ );
 	// A single post shares post.used.css with every other post, so its full sheets
