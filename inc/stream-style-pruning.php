@@ -297,6 +297,10 @@ const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-podcast',
 	'courtneyr-note-board',
 	'courtneyr-shelf-boards',
+	// On every archive, but the cut-paper title's tile sizes are per-title
+	// variants the first archive may not use: 36 px tiles grew to 54–91 px
+	// when the full sheet landed (CLS 0.11–0.29). 6.7 KB, so whole.
+	'courtneyr-cutout',
 	'wp-block-image',
 	'wp-block-gallery',
 	'wp-block-cover',
