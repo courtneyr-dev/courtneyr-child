@@ -799,7 +799,7 @@ function lightbox_trigger_label( string $html ): string {
 	if ( ! str_contains( $html, 'lightbox-trigger' ) ) {
 		return $html;
 	}
-	$tags = new \WP_HTML_Tag_Processor( $html );
+	$tags  = new \WP_HTML_Tag_Processor( $html );
 	$query = array(
 		'tag_name'   => 'BUTTON',
 		'class_name' => 'lightbox-trigger',
