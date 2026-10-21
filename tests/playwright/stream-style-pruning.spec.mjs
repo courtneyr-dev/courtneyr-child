@@ -12,9 +12,15 @@ if ( process.env.CR_BYPASS ) {
 async function sheets( page, path ) {
 	const response = await page.goto( path, { waitUntil: 'domcontentloaded' } );
 	expect( response.status() ).toBe( 200 );
-	return page.locator( 'link[rel="stylesheet"]' ).evaluateAll( ( links ) =>
+	const linked = await page.locator( 'link[rel="stylesheet"]' ).evaluateAll( ( links ) =>
 		links.map( ( link ) => ( link.getAttribute( 'href' ) || '' ).split( '?' )[ 0 ].split( '/' ).pop() )
 	);
+	// Since 0.7.129 Perfmatters inlines the kind sheets as <style id="courtneyr-photo-css">;
+	// count those as cr-photo.css so the loaded/skipped checks still hold.
+	const inlined = await page.locator( 'style[id^="courtneyr-"][id$="-css"]' ).evaluateAll( ( styles ) =>
+		styles.map( ( style ) => style.id.replace( /^courtneyr-/, 'cr-' ).replace( /-css$/, '.css' ) )
+	);
+	return [ ...linked, ...inlined ];
 }
 
 for ( const path of [ '/', '/stream/' ] ) {
