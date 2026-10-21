@@ -221,7 +221,9 @@ function hide_duplicate_listen_stars_label( string $html, array $block, $instanc
 		return $html;
 	}
 	$tags->set_attribute( 'aria-hidden', 'true' );
-	$tags->remove_attribute( 'role' );
+	// role="presentation" (not role="img") marks the hidden stars as ornament,
+	// which is how Accessibility Checker Pro tells them from hidden content.
+	$tags->set_attribute( 'role', 'presentation' );
 	$tags->remove_attribute( 'aria-label' );
 	return $tags->get_updated_html();
 }

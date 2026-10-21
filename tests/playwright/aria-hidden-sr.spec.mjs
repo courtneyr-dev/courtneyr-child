@@ -114,9 +114,9 @@ test( 'gallery zine ornaments pass the checker', async ( { page } ) => {
 
 // Third-party markup the theme does not emit: Complianz, Font Awesome, Simple Location, core's avatar and
 // featured images (an <img> takes no role="presentation"), and Post Kinds (its own release).
-const NOT_THEME = '.cmplz-icon, .cmplz-close, .svg-inline--fa, .sloc-location-icon, img, [class*="pkiw-"], [class*="pk-stars"], [class^="leaflet"]';
+const NOT_THEME = '.cmplz-icon, .cmplz-close, .svg-inline--fa, .sloc-location-icon, img, [class*="pkiw-"], [class^="leaflet"]';
 
-for ( const path of [ '/', '/stream/', '/kind/photo/', '/kind/article/', '/2026/08/20/ted-lasso-season-4/', '/2026/09/15/gtm-onsight/' ] ) {
+for ( const path of [ '/', '/stream/', '/kind/photo/', '/kind/article/', '/2026/08/20/ted-lasso-season-4/', '/2026/09/15/gtm-onsight/', '/2026/07/06/american-obituary/' ] ) {
 	test( `every theme aria-hidden ornament on ${ path } passes the checker`, async ( { page } ) => {
 		const res = await page.goto( path, { waitUntil: 'load' } );
 		test.skip( 404 === res.status(), `${ path } is not on this environment` );
@@ -133,6 +133,7 @@ for ( const path of [ '/', '/stream/', '/kind/photo/', '/kind/article/', '/2026/
 test( 'core lightbox buttons have a name before the lightbox opens', async ( { page } ) => {
 	const res = await page.goto( '/2026/09/09/wild-turkeys-strutting-through-the-neighborhood/', { waitUntil: 'load' } );
 	test.skip( 404 === res.status(), 'the gallery zine post is not on this environment' );
-	const names = await page.locator( '.wp-lightbox-close-button, .wp-lightbox-navigation-button' ).evaluateAll( ( buttons ) => buttons.map( ( b ) => b.getAttribute( 'aria-label' ) || [ ...b.querySelectorAll( 'span' ) ].filter( ( s ) => ! s.hidden && ! s.parentElement.closest( 'span[hidden]' ) ).map( ( s ) => s.textContent.trim() ).join( '' ) ) );
+	// aria-labelledby: core binds aria-label to undefined until an image opens, which strips a static one.
+	const names = await page.locator( '.wp-lightbox-close-button, .wp-lightbox-navigation-button' ).evaluateAll( ( buttons ) => buttons.map( ( b ) => document.getElementById( b.getAttribute( 'aria-labelledby' ) || '' )?.textContent.trim() ) );
 	expect( names ).toEqual( [ 'Close', 'Previous', 'Next' ] );
 } );

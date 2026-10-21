@@ -517,7 +517,7 @@ function render_single_post_avatar( int $post_id ): string {
 	}
 
 	return sprintf(
-		'<span class="%1$s" aria-hidden="true"%2$s><svg viewBox="0 0 24 24" width="1.5em" height="1.5em" focusable="false"><use href="%3$s/assets/svg/icons.svg#post-icon-%4$s"></use></svg></span>',
+		'<span class="%1$s" aria-hidden="true" role="presentation"%2$s><svg viewBox="0 0 24 24" width="1.5em" height="1.5em" focusable="false"><use href="%3$s/assets/svg/icons.svg#post-icon-%4$s"></use></svg></span>',
 		\esc_attr( $class ),
 		$style,
 		\esc_url( \get_stylesheet_directory_uri() ),
