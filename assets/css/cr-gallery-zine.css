@@ -251,6 +251,19 @@
 	list-style: none;
 }
 
+/* The wrapper the gallery's is-style-* class rides on (PFBT finds its gallery by it).
+   It lays out as nothing: core's gallery rules and PFBT's layout stay off the panels. */
+.cr-zine-single .cr-zine .cr-zine__gallery {
+	display: block;
+	margin: 0;
+	padding: 0;
+}
+
+/* PFBT's trigger focus ring defaults to a pale blue that vanishes on the ivory sheet. */
+.cr-zine-single .cr-zine .cr-zine__gallery.is-style-lightbox-slideshow {
+	--pfbt-lightbox-focus: var(--cr-focus-halo);
+}
+
 .cr-zine-single .cr-zine__frame {
 	position: relative;
 	isolation: isolate;
