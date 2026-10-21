@@ -202,6 +202,7 @@
 	mix-blend-mode: multiply;
 	transform: rotate(var(--pin-wear));
 }
+
 .cr-pin__wear svg {
 	position: absolute;
 	inset: 0;
@@ -209,6 +210,7 @@
 	height: 100%;
 	clip-path: circle(50%);
 }
+
 .cr-pin__abrasion {
 	opacity: 0.8;
 	mix-blend-mode: screen;
