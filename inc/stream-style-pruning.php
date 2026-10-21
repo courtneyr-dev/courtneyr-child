@@ -394,3 +394,16 @@ function rucss_keep_type_classes( $selectors ) {
 	return $selectors;
 }
 add_filter( 'perfmatters_rucss_excluded_selectors', __NAMESPACE__ . '\\rucss_keep_type_classes' );
+
+/**
+ * Print Perfmatters' used CSS at the end of <head>, not right after <title>.
+ *
+ * After <title> it sits before core's block-support and layout styles, so a
+ * theme rule with the same specificity as core's (for example
+ * .cr-newsletter-banner__inner { max-width: 1200px } against the constrained
+ * layout's content width) lost until the full sheet, printed later, arrived:
+ * the newsletter band rendered 1080 px wide and jumped to 1200 px at desktop
+ * widths (CLS 0.07–0.12 on posts, 2026-10-21). At the end of <head> the used
+ * rules take the place the theme's own stylesheets would.
+ */
+add_filter( 'perfmatters_used_css_below', '__return_true' );
