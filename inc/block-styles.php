@@ -68,35 +68,15 @@ add_action(
 		// extension on the existing .cr-* source rules. No style_handle
 		// required — components.css is enqueued globally by inc/enqueue.php.
 
-		// Buttons — 4 variants matching the kit's primary/secondary/outline/soft.
-		register_block_style(
-			'core/button',
-			array(
-				'name'  => 'cr-cta',
-				'label' => __( 'CTA (primary)', 'courtneyr-child' ),
-			)
-		);
-		register_block_style(
-			'core/button',
-			array(
-				'name'  => 'cr-button-secondary',
-				'label' => __( 'Secondary', 'courtneyr-child' ),
-			)
-		);
-		register_block_style(
-			'core/button',
-			array(
-				'name'  => 'cr-button-outline',
-				'label' => __( 'Outline', 'courtneyr-child' ),
-			)
-		);
-		register_block_style(
-			'core/button',
-			array(
-				'name'  => 'cr-button-soft',
-				'label' => __( 'Soft', 'courtneyr-child' ),
-			)
-		);
+		/*
+		 * Buttons (cr-cta, cr-button-secondary, cr-button-outline, cr-button-soft)
+		 * register from the theme.json partials in styles/blocks/button/, which
+		 * carry the base styles. A partial cannot hold :hover, :active or
+		 * :focus-visible, so those stay in theme.json under
+		 * styles.blocks.core/button.variations, which core merges over the
+		 * partial. A theme.json variation is dropped unless its style is
+		 * registered, so removing a partial removes the button style.
+		 */
 
 		// Separators — UT Orange marker bars at full and short widths.
 		register_block_style(

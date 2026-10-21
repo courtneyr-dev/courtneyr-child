@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"title": "Soft",
+	"slug": "cr-button-soft",
+	"blockTypes": [ "core/button" ],
+	"styles": {
+		"typography": {
+			"fontFamily": "var(--cr-font-accent)",
+			"fontWeight": "700",
+			"fontSize": "var(--cr-text-md)"
+		},
+		"border": {
+			"width": "2px",
+			"style": "solid",
+			"color": "var(--cr-ink)"
+		},
+		"spacing": {
+			"padding": {
+				"top": "var(--cr-space-sm)",
+				"right": "var(--cr-space-lg)",
+				"bottom": "var(--cr-space-sm)",
+				"left": "var(--cr-space-lg)"
+			}
+		},
+		"shadow": "var(--cr-shadow-hard)",
+		"color": {
+			"background": "var(--cr-light-orange)",
+			"text": "var(--cr-russian-violet)"
+		}
+	}
+}
