@@ -41,8 +41,10 @@ test( 'a kind archive keeps its own sheet', async ( { page } ) => {
 
 test( 'the front page loads the card sheet without blocking; /stream/ keeps it blocking', async ( { request } ) => {
 	const front = await ( await request.get( '/' ) ).text();
-	expect( front ).toMatch( /id=['"]courtneyr-home-sections-css['"][^>]*media=['"]print['"][^>]*onload=/ );
-	expect( front ).toMatch( /id=['"]courtneyr-post-kinds-css['"][^>]*media=['"]print['"][^>]*onload=/ );
+	// Starts after the window load event (data-cr-href), not with the HTML.
+	expect( front ).toMatch( /<link[^>]*id=['"]courtneyr-home-sections-css['"][^>]*data-cr-href=/ );
+	expect( front ).toMatch( /<link[^>]*id=['"]courtneyr-post-kinds-css['"][^>]*data-cr-href=/ );
+	expect( front ).toContain( 'id="cr-deferred-sheets"' );
 	expect( front ).toMatch( /<noscript><link[^>]*id=['"]courtneyr-post-kinds-css['"]/ );
 	const stream = await ( await request.get( '/stream/' ) ).text();
 	expect( stream ).toMatch( /id=['"]courtneyr-post-kinds-css['"][^>]*media=['"]all['"]/ );

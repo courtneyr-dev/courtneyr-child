@@ -219,10 +219,28 @@ function defer_card_sheet_on_front_page( $tag, $handle ) {
 	if ( ! in_array( $handle, $deferrable, true ) || ! is_front_page() || is_admin() || ! is_string( $tag ) || str_contains( $tag, 'onload=' ) ) {
 		return $tag;
 	}
-	$deferred = preg_replace( "/media=(['\"])all\\1/", "media='print' onload=\"this.media='all';this.onload=null\"", $tag, 1 );
+	// v0.7.125: the request now starts after the window load event, not with
+	// the HTML. Started early (media="print" swap), these sheets still shared
+	// the slow-4G link with the HTML and fonts before the hero painted, and
+	// PageSpeed's simulation counted all of them as LCP dependencies (mobile
+	// LCP 4.2 s; render delay 3.5 s). load_deferred_sheets() swaps them in.
+	$deferred = preg_replace( '/\shref=([\'"])/', ' data-cr-href=$1', $tag, 1 );
 	if ( ! is_string( $deferred ) || $deferred === $tag ) {
 		return $tag;
 	}
 	return $deferred . '<noscript>' . trim( $tag ) . "</noscript>\n";
 }
 add_filter( 'style_loader_tag', __NAMESPACE__ . '\\defer_card_sheet_on_front_page', 10, 2 );
+
+/**
+ * Front page: start the deferred sheets once the page has loaded.
+ *
+ * Each link keeps its place in the document, so the cascade is unchanged.
+ */
+function load_deferred_sheets(): void {
+	if ( ! is_front_page() || is_admin() ) {
+		return;
+	}
+	echo "<script id=\"cr-deferred-sheets\">addEventListener('load',function(){document.querySelectorAll('link[data-cr-href]').forEach(function(l){l.href=l.getAttribute('data-cr-href');l.removeAttribute('data-cr-href');});});</script>\n";
+}
+add_action( 'wp_footer', __NAMESPACE__ . '\\load_deferred_sheets', 99 );
