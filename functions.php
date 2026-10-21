@@ -104,6 +104,7 @@ require_once __DIR__ . '/inc/checkin-map.php';
 require_once __DIR__ . '/inc/single-eat-drink.php';
 require_once __DIR__ . '/inc/stream-eat-drink.php';
 require_once __DIR__ . '/inc/quote-note.php';
+require_once __DIR__ . '/inc/quote-book.php';
 require_once __DIR__ . '/inc/aside-scrap.php';
 require_once __DIR__ . '/inc/sticky-note.php';
 require_once __DIR__ . '/inc/sloc-map-alt.php';
