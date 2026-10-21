@@ -812,6 +812,8 @@ function lightbox_trigger_label( string $html ): string {
 	return $tags->get_updated_html();
 }
 add_filter( 'render_block_core/image', __NAMESPACE__ . '\\lightbox_trigger_label', 30 );
+// The zine re-lays the gallery at 11; label whatever triggers its final markup holds.
+add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\\lightbox_trigger_label', 30 );
 
 /**
  * Keep core's render of the zine gallery before the plugin's projector
