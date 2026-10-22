@@ -325,7 +325,7 @@ const RUCSS_INLINE_HANDLES = array(
  * archives +10 KB, categories +23 KB, tags +8 KB.
  */
 const RUCSS_KEEP_CLASSES = array(
-	'post'     => 'aligncenter alignleft alignright cmplz-placeholder-parent cr-icon-avatar--audio cr-icon-avatar--link cr-icon-avatar--outline cr-icon-avatar--quote cr-icon-avatar--video cr-media__transcript cr-post-nav cr-pull-quote-wrap cr-pull-quote__copy cr-term-chip--1 cr-term-chip--2 cr-term-chip--3 cr-term-chip--5 fb-xfbml-parse-ignore format-standard has-text-align-right is-style-cr-marker-bar is-style-cr-pull-quote is-style-sme-alert-success pfbt-format-titleless pk-badge pk-body pk-card pk-dot pk-embed pk-embed--audio pk-embed--map pk-kindlabel pk-link pk-map-link pk-media pk-meta pk-mood pk-note pk-sr-only pk-stars pk-sub pk-thumb--poster pk-title reaction-avatar reaction-label single single-format-aside single-format-audio single-format-chat single-format-gallery single-format-image single-format-link single-format-quote single-format-status single-format-video single-post__title skip-link sloc-display sloc-location-icon sloc-map sme-highlighter svg-bluesky svg-linkedin taxonomy-post_tag wp-block-code wp-block-column wp-block-cover__image-background wp-block-gallery wp-block-post-terms wp-block-template-part wp-caption xfn-pill-acquaintance xfn-pill-co-worker xfn-pill-colleague xfn-pill-friend xfn-pill-met',
+	'post'     => 'relsyn aligncenter alignleft alignright cmplz-placeholder-parent cr-icon-avatar--audio cr-icon-avatar--link cr-icon-avatar--outline cr-icon-avatar--quote cr-icon-avatar--video cr-media__transcript cr-post-nav cr-pull-quote-wrap cr-pull-quote__copy cr-term-chip--1 cr-term-chip--2 cr-term-chip--3 cr-term-chip--5 fb-xfbml-parse-ignore format-standard has-text-align-right is-style-cr-marker-bar is-style-cr-pull-quote is-style-sme-alert-success pfbt-format-titleless pk-badge pk-body pk-card pk-dot pk-embed pk-embed--audio pk-embed--map pk-kindlabel pk-link pk-map-link pk-media pk-meta pk-mood pk-note pk-sr-only pk-stars pk-sub pk-thumb--poster pk-title reaction-avatar reaction-label single single-format-aside single-format-audio single-format-chat single-format-gallery single-format-image single-format-link single-format-quote single-format-status single-format-video single-post__title skip-link sloc-display sloc-location-icon sloc-map sme-highlighter svg-bluesky svg-linkedin taxonomy-post_tag wp-block-code wp-block-column wp-block-cover__image-background wp-block-gallery wp-block-post-terms wp-block-template-part wp-caption xfn-pill-acquaintance xfn-pill-co-worker xfn-pill-colleague xfn-pill-friend xfn-pill-met',
 	'tax'      => 'cr-browse-all cr-icon-avatar--audio cr-icon-avatar--blog cr-icon-avatar--quote cr-icon-avatar--video cr-pull-quote-wrap cr-pull-quote__copy format-standard is-p0 is-p10 is-p5 is-r1 is-style-cr-pull-quote pk-badge pk-body pk-card pk-excerpt pk-kindlabel pk-link pk-media pk-media--stream pk-meta pk-sr-only pk-sub pk-thumb--poster pk-title skip-link sme-highlighter wp-block-post wp-block-query-pagination wp-block-template-part',
 	'category' => 'cr-browse-all cr-cutout__gap cr-highlight cr-icon-avatar--outline cr-icon-avatar--quote cr-icon-avatar--video cr-sparkle cr-speaking-hero cr-speaking-hero__accent cr-speaking-hero__cta cr-speaking-hero__lead cr-speaking-hero__sparkles cr-speaking-hero__title cr-term-chip--2 cr-term-chip--3 cr-term-chip--5 format-aside format-gallery format-image format-quote format-standard format-status format-video is-p10 is-r3 is-style-cr-eyebrow pfbt-format-titleless skip-link wp-block-button__link wp-block-query-pagination wp-block-template-part',
 	'tag'      => 'card__media cr-browse-all cr-icon-avatar--link cr-icon-avatar--outline cr-icon-avatar--speaking cr-term-chip--2 cr-term-chip--3 cr-term-chip--4 cr-term-chip--5 format-image format-link format-standard is-punct is-r3 skip-link wp-block-post-featured-image wp-block-query-pagination wp-block-template-part',
@@ -394,3 +394,16 @@ function rucss_keep_type_classes( $selectors ) {
 	return $selectors;
 }
 add_filter( 'perfmatters_rucss_excluded_selectors', __NAMESPACE__ . '\\rucss_keep_type_classes' );
+
+/**
+ * Print Perfmatters' used CSS at the end of <head>, not right after <title>.
+ *
+ * After <title> it sits before core's block-support and layout styles, so a
+ * theme rule with the same specificity as core's (for example
+ * .cr-newsletter-banner__inner { max-width: 1200px } against the constrained
+ * layout's content width) lost until the full sheet, printed later, arrived:
+ * the newsletter band rendered 1080 px wide and jumped to 1200 px at desktop
+ * widths (CLS 0.07–0.12 on posts, 2026-10-21). At the end of <head> the used
+ * rules take the place the theme's own stylesheets would.
+ */
+add_filter( 'perfmatters_used_css_below', '__return_true' );
