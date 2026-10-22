@@ -170,12 +170,12 @@ function is_comic_single(): bool {
 }
 
 /**
- * Is this the comics archive?
+ * Is this the comics archive rack? The drawn view is not the rack.
  *
  * @return bool
  */
 function is_rack(): bool {
-	return \is_tax( 'kind', 'comics' );
+	return \is_tax( 'kind', 'comics' ) && 'drawn' !== \get_query_var( 'pkiw_comic_view' );
 }
 
 /**
