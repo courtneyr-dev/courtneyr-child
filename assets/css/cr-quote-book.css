@@ -1,0 +1,589 @@
+/**
+ * Quote archive commonplace-book frame, index tabs, cards and work strips.
+ */
+
+/* Scope tokens. */
+
+.cr-quote-book {
+	--cr-ink: var(--cr-russian-violet);
+	--cr-link: var(--cr-cerulean);
+	--cr-link-hover: var(--cr-russian-violet);
+	--cr-link-visited: var(--cr-russian-violet-soft);
+	--cr-band-link: var(--cr-russian-violet);
+	--cr-focus-halo: var(--cr-russian-violet);
+	--cr-book-edge: 0.75rem;
+	--cr-book-tabs: 3.25rem;
+	position: relative;
+	isolation: isolate;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	align-items: start;
+	box-sizing: border-box;
+	margin-block: var(--cr-space-lg) var(--cr-space-xl);
+	padding: var(--cr-book-edge);
+	border: 2px solid var(--cr-russian-violet);
+	background-color: var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard-2);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+}
+
+/* Neutralize archive-grid rules. */
+
+.cr-quote-book li.wp-block-post,
+.cr-quote-book li.wp-block-post:hover {
+	margin: 0;
+	padding: 0;
+	transform: none;
+}
+
+.cr-quote-book li.wp-block-post:not(:last-child)::after {
+	content: none;
+}
+
+/* Book frame. */
+
+.cr-quote-book > :is(.pkiw-quote-authors, .cr-quote-book__entries, .pkiw-quote-works) {
+	margin-block: 0;
+}
+
+.cr-quote-book::before {
+	content: "";
+	position: absolute;
+	inset: var(--cr-book-edge);
+	z-index: -1;
+	border: 1px solid var(--cr-rule);
+	background-color: var(--cr-printer-ivory);
+	box-shadow:
+		1px 1px 0 var(--cr-printer-ivory),
+		2px 2px 0 var(--cr-rule),
+		3px 3px 0 var(--cr-printer-ivory),
+		4px 4px 0 var(--cr-rule);
+}
+
+/* Index headings. */
+
+.cr-quote-book .pkiw-quote-authors__heading,
+.cr-quote-book .pkiw-quote-works > :is(h2, h3, h4, h5, h6) {
+	position: relative;
+	isolation: isolate;
+	display: block;
+	box-sizing: border-box;
+	inline-size: fit-content;
+	max-inline-size: 100%;
+	margin: 0 0 var(--cr-space-md);
+	padding: 0.2em 0.7em;
+	color: var(--cr-russian-violet);
+	font: 700 var(--cr-text-2xl) / 1.1 var(--cr-font-accent);
+	overflow-wrap: anywhere;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.cr-quote-book .pkiw-quote-authors__heading::before,
+.cr-quote-book .pkiw-quote-works > :is(h2, h3, h4, h5, h6)::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background-color: var(--cr-periwinkle);
+	clip-path: polygon(0 8%, 3% 0, 97% 4%, 100% 0, 100% 92%, 97% 100%, 4% 96%, 0 100%);
+}
+
+.cr-quote-book .pkiw-quote-works > :is(h2, h3, h4, h5, h6)::before {
+	background-color: var(--cr-sky-blue);
+}
+
+/* Author sections. */
+
+.cr-quote-book .pkiw-quote-section {
+	margin: 0 0 var(--cr-space-lg);
+	break-inside: avoid;
+}
+
+.cr-quote-book h3.pkiw-quote-section__heading {
+	position: relative;
+	isolation: isolate;
+	display: block;
+	box-sizing: border-box;
+	inline-size: fit-content;
+	max-inline-size: 100%;
+	margin: 0 0 var(--cr-space-md);
+	padding: 0.2em 0.7em;
+	color: var(--cr-russian-violet);
+	font: 700 var(--cr-text-xl) / 1.1 var(--cr-font-accent);
+	overflow-wrap: anywhere;
+}
+
+.cr-quote-book h3.pkiw-quote-section__heading::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background-color: var(--cr-strip, var(--cr-light-gray));
+	clip-path: polygon(0 8%, 3% 0, 97% 4%, 100% 0, 100% 92%, 97% 100%, 4% 96%, 0 100%);
+}
+
+.cr-quote-book .pkiw-quote-section__heading a,
+.cr-quote-book .pkiw-quote-section__heading a:visited {
+	color: var(--cr-russian-violet);
+	text-decoration-line: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.2em;
+}
+
+.cr-quote-book .pkiw-quote-section__heading a:hover {
+	color: var(--cr-russian-violet);
+	text-decoration-thickness: 3px;
+}
+
+.cr-quote-book .pkiw-quote-section__heading a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-quote-book .pkiw-quote-section__heading a > span {
+	color: inherit;
+}
+
+/* Quote cards. */
+
+.cr-quote-book ul.pkiw-quote-section__items {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-md);
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-quote-book .pkiw-quote-entry {
+	position: relative;
+	box-sizing: border-box;
+	block-size: 100%;
+	min-block-size: 6.5rem;
+	margin: 0;
+	padding: var(--cr-space-md);
+	border: 1px solid var(--cr-rule);
+	border-radius: 0;
+	background-color: var(--cr-quote-paper, var(--cr-printer-ivory));
+	box-shadow: none;
+	transform: none;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	overflow-wrap: anywhere;
+}
+
+.cr-quote-book blockquote.pkiw-quote-entry__text {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font: 400 var(--cr-text-md) / 1.4 var(--cr-font-accent);
+}
+
+.cr-quote-book blockquote.pkiw-quote-entry__text p {
+	margin: 0;
+	font: inherit;
+}
+
+.cr-quote-book .pkiw-quote-entry__cite {
+	display: block;
+	margin-block-start: var(--cr-space-sm);
+	color: var(--cr-cerulean);
+	font: 600 var(--cr-text-sm) / 1.3 var(--cr-font-body);
+	font-style: normal;
+}
+
+.cr-quote-book .pkiw-quote-entry__cite::before {
+	content: "";
+	display: block;
+	inline-size: 1.25rem;
+	margin-block-end: var(--cr-space-2xs);
+	border-block-start: 1px solid currentcolor;
+}
+
+.cr-quote-book .pkiw-quote-entry__link {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	display: block;
+}
+
+.cr-quote-book .pkiw-quote-entry__link:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-quote-book .pkiw-quote-entry--protected > a.u-url {
+	color: var(--cr-link);
+	font-family: var(--cr-font-accent);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.cr-quote-book .pkiw-quote-entry--protected > a.u-url::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-quote-book .pkiw-quote-entry--protected:has(> a.u-url:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-quote-book .pkiw-quote-entry--protected > a.u-url:focus-visible {
+	outline: 0;
+}
+
+.cr-quote-book .pkiw-quote-entry [hidden] {
+	display: none !important;
+}
+
+/* Source-work index. */
+
+.cr-quote-book .pkiw-quote-works nav ul {
+	display: grid;
+	max-width: none;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-md);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-quote-book li.pkiw-quote-work {
+	position: relative;
+	isolation: isolate;
+	display: grid;
+	gap: var(--cr-space-2xs);
+	margin: 0;
+	padding: var(--cr-space-md) var(--cr-space-lg);
+}
+
+.cr-quote-book li.pkiw-quote-work::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background-color: var(--cr-strip, var(--cr-light-gray));
+	clip-path: polygon(0 8%, 3% 0, 97% 4%, 100% 0, 100% 92%, 97% 100%, 4% 96%, 0 100%);
+}
+
+.cr-quote-book .pkiw-quote-work__title,
+.cr-quote-book .pkiw-quote-work__title:visited {
+	color: var(--cr-russian-violet);
+	font: 700 var(--cr-text-lg) / 1.25 var(--cr-font-accent);
+	overflow-wrap: anywhere;
+	text-decoration-line: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.2em;
+}
+
+.cr-quote-book .pkiw-quote-work__title:hover {
+	color: var(--cr-russian-violet);
+	text-decoration-thickness: 3px;
+}
+
+.cr-quote-book .pkiw-quote-work__title::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-quote-book li.pkiw-quote-work:has(> .pkiw-quote-work__title:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-quote-book .pkiw-quote-work__title:focus-visible {
+	outline: 0;
+}
+
+.cr-quote-book .pkiw-quote-work__author {
+	color: var(--cr-russian-violet);
+	font: var(--cr-text-base) var(--cr-font-body);
+}
+
+.cr-quote-book .pkiw-quote-work__count {
+	color: var(--cr-russian-violet);
+	font: var(--cr-text-xs) var(--cr-font-mono);
+}
+
+.cr-quote-book .pkiw-quote-work__title[aria-current="page"] {
+	text-decoration-thickness: 3px;
+}
+
+.cr-quote-book li.pkiw-quote-work:has(> .pkiw-quote-work__title[aria-current="page"]) {
+	outline: 2px solid var(--cr-russian-violet);
+	outline-offset: 2px;
+}
+
+/* Author tabs. */
+
+/* The section order mirrors the DOM contract; this selector follows the works list on purpose. */
+/* stylelint-disable-next-line no-descending-specificity */
+.cr-quote-book .pkiw-quote-tabs ul {
+	display: flex;
+	max-width: none;
+	flex-wrap: wrap;
+	gap: var(--cr-space-xs);
+	margin: 0 0 var(--cr-space-md);
+	padding: 0;
+	list-style: none;
+}
+
+/* stylelint-disable-next-line no-descending-specificity */
+.cr-quote-book .pkiw-quote-tabs a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	min-inline-size: 2.75rem;
+	min-block-size: 2.75rem;
+	padding: 0 var(--cr-space-sm);
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: 0;
+	background-color: var(--cr-printer-ivory);
+	transform: none;
+	color: var(--cr-russian-violet);
+	font: 700 var(--cr-text-md) / 1 var(--cr-font-accent);
+	font-style: normal;
+	text-decoration: none;
+}
+
+.cr-quote-book .pkiw-quote-tabs a[aria-current="page"] {
+	background-color: var(--cr-russian-violet);
+	color: var(--cr-printer-ivory);
+}
+
+.cr-quote-book .pkiw-quote-tabs a:hover {
+	text-decoration: underline;
+}
+
+.cr-quote-book .pkiw-quote-tabs a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+/* Responsive book layout. */
+
+.cr-quote-book > .pkiw-quote-authors {
+	padding: var(--cr-space-lg) var(--cr-space-lg) 0;
+}
+
+.cr-quote-book > .cr-quote-book__entries {
+	padding: var(--cr-space-md) var(--cr-space-lg) var(--cr-space-lg);
+}
+
+.cr-quote-book > .pkiw-quote-works {
+	margin-inline: var(--cr-space-lg);
+	padding: var(--cr-space-lg) 0;
+	border-block-start: 1px solid var(--cr-rule);
+}
+
+.cr-archive--quote .cr-archive__header {
+	max-width: 72rem;
+}
+
+.cr-quote-book:not(.block-editor-block-list__block):not(:has(.pkiw-quote-section, .pkiw-quote-tabs)) {
+	display: none;
+}
+
+.cr-quote-book:not(.block-editor-block-list__block):not(:has(.pkiw-quote-section)) {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+}
+
+.cr-quote-book:not(.block-editor-block-list__block):not(:has(.pkiw-quote-section))::before,
+.cr-quote-book:not(.block-editor-block-list__block):not(:has(.pkiw-quote-section)) > .pkiw-quote-works {
+	display: none;
+}
+
+@media (min-width: 40rem) {
+
+	.cr-quote-book ul.pkiw-quote-section__items,
+	.cr-quote-book .pkiw-quote-works:not(.is-long) nav ul {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-quote-book:not(:has(> .pkiw-quote-works:not(.is-long))) ul.pkiw-quote-section__items {
+		grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+	}
+
+	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)) {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)) > .pkiw-quote-authors {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)) > .cr-quote-book__entries {
+		grid-column: 1;
+		grid-row: 2;
+	}
+
+	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)) > .pkiw-quote-works {
+		position: relative;
+		grid-column: 2;
+		grid-row: 1 / span 2;
+		align-self: stretch;
+		margin: 0;
+		padding: var(--cr-space-lg);
+		border-block-start: 0;
+		border-inline-start: 1px solid var(--cr-rule);
+	}
+
+	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)) > .pkiw-quote-works::before {
+		content: "";
+		position: absolute;
+		inset-block: var(--cr-space-sm);
+		inset-inline-start: 0.25rem;
+		border-inline-start: 2px dotted var(--cr-rule);
+	}
+
+	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)):has(.pkiw-quote-tabs):not(:has(.pkiw-quote-tabs li:nth-child(n + 13))) {
+		padding-inline-start: calc(var(--cr-book-edge) + var(--cr-book-tabs));
+	}
+
+	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)):has(.pkiw-quote-tabs):not(:has(.pkiw-quote-tabs li:nth-child(n + 13)))::before {
+		inset-inline-start: calc(var(--cr-book-edge) + var(--cr-book-tabs));
+	}
+
+	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)):has(.pkiw-quote-tabs):not(:has(.pkiw-quote-tabs li:nth-child(n + 13))) > .pkiw-quote-authors {
+		position: relative;
+	}
+
+	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)):not(:has(.pkiw-quote-tabs li:nth-child(n + 13))) .pkiw-quote-tabs {
+		position: absolute;
+		inset-block-start: var(--cr-space-md);
+		inset-inline-start: calc(-1 * var(--cr-book-tabs) + 1rem);
+	}
+
+	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)):not(:has(.pkiw-quote-tabs li:nth-child(n + 13))) .pkiw-quote-tabs ul {
+		flex-flow: column nowrap;
+		gap: var(--cr-space-2xs);
+	}
+
+	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)):not(:has(.pkiw-quote-tabs li:nth-child(n + 13))) .pkiw-quote-tabs a[aria-current="page"] {
+		box-shadow: 0 0 0 2px var(--cr-printer-ivory);
+	}
+
+	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)):not(:has(.pkiw-quote-tabs li:nth-child(n + 13))) .pkiw-quote-tabs a[aria-current="page"]:focus-visible {
+		box-shadow: 0 0 0 7px var(--cr-focus-halo);
+	}
+}
+
+/* Light-paper colours stay fixed when the site switches to dark tokens. */
+
+:root[data-theme="dark"] .cr-quote-book {
+	--cr-ink: var(--cr-russian-violet);
+	--cr-link: var(--cr-cerulean);
+	--cr-link-hover: var(--cr-russian-violet);
+	--cr-link-visited: var(--cr-russian-violet-soft);
+	--cr-band-link: var(--cr-russian-violet);
+	--cr-focus-halo: var(--cr-russian-violet);
+	--cr-rule: #d8d3c3;
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-quote-book {
+		--cr-ink: var(--cr-russian-violet);
+		--cr-link: var(--cr-cerulean);
+		--cr-link-hover: var(--cr-russian-violet);
+		--cr-link-visited: var(--cr-russian-violet-soft);
+		--cr-band-link: var(--cr-russian-violet);
+		--cr-focus-halo: var(--cr-russian-violet);
+		--cr-rule: #d8d3c3;
+	}
+}
+
+/* Optional lift for users who allow motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.cr-quote-book li.wp-block-post {
+		transition: none;
+	}
+
+	.cr-quote-book .pkiw-quote-entry,
+	.cr-quote-book .pkiw-quote-tabs a {
+		transition: transform var(--cr-motion-fast) var(--cr-ease-out);
+	}
+
+	.cr-quote-book .pkiw-quote-entry:hover,
+	.cr-quote-book .pkiw-quote-entry:has(.pkiw-quote-entry__link:focus-visible),
+	.cr-quote-book .pkiw-quote-entry--protected:has(> a.u-url:focus-visible),
+	.cr-quote-book .pkiw-quote-tabs a:hover,
+	.cr-quote-book .pkiw-quote-tabs a:focus-visible {
+		transform: translate(-1px, -1px);
+	}
+}
+
+/* Forced colours keep structure and remove decorative fills. */
+
+@media (forced-colors: active) {
+
+	.cr-quote-book {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-quote-book::before,
+	.cr-quote-book .pkiw-quote-authors__heading::before,
+	.cr-quote-book .pkiw-quote-works > :is(h2, h3, h4, h5, h6)::before,
+	.cr-quote-book h3.pkiw-quote-section__heading::before,
+	.cr-quote-book li.pkiw-quote-work::before,
+	.cr-quote-book > .pkiw-quote-works::before {
+		display: none;
+	}
+
+	.cr-quote-book .pkiw-quote-entry,
+	.cr-quote-book .pkiw-quote-tabs a {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	/* The broad forced-colour link rule intentionally follows component link rules. */
+	/* stylelint-disable-next-line no-descending-specificity */
+	.cr-quote-book a,
+	.cr-quote-book a:visited,
+	.cr-quote-book .pkiw-quote-entry__cite {
+		color: LinkText;
+	}
+
+	.cr-quote-book .pkiw-quote-tabs a[aria-current="page"],
+	.cr-quote-book li.pkiw-quote-work:has(> .pkiw-quote-work__title[aria-current="page"]),
+	.cr-quote-book .pkiw-quote-work__title[aria-current="page"] {
+		background: Highlight;
+		color: HighlightText;
+		forced-color-adjust: none;
+	}
+
+	.cr-quote-book .pkiw-quote-entry__link:focus-visible,
+	.cr-quote-book .pkiw-quote-tabs a:focus-visible,
+	.cr-quote-book .pkiw-quote-section__heading a:focus-visible,
+	.cr-quote-book .pkiw-quote-entry--protected:has(> a.u-url:focus-visible),
+	.cr-quote-book li.pkiw-quote-work:has(> .pkiw-quote-work__title:focus-visible) {
+		outline: 3px solid CanvasText;
+		box-shadow: none;
+	}
+}
