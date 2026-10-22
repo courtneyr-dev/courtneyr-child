@@ -22,9 +22,15 @@
  * injected tccl tracker) print inline scripts, one of which (webmcp-bridge)
  * embeds a rotating REST nonce, so its content cannot be hashed. Per the
  * CSP spec, the presence of any hash disables 'unsafe-inline' in modern
- * browsers, so hashes cannot be mixed in as a partial step. The
- * report-only policy below drops 'unsafe-inline'/'unsafe-eval' to collect
- * the violation evidence needed before the enforced policy can follow.
+ * browsers, so hashes cannot be mixed in as a partial step.
+ *
+ * A report-only trial (script-src without 'unsafe-inline'/'unsafe-eval',
+ * worker-src 'self') ran 2026-09 → 2026-10-21 and ended in 0.7.128, because
+ * Chrome logs every report-only violation as an Issue and that alone held
+ * Lighthouse Best Practices at 96. Its finding, the bar for ever enforcing a
+ * strict script-src: per page, 16–17 inline <script> blocks (core, Perfmatters,
+ * Complianz, webmcp-bridge) and 31 inline onload= handlers (Perfmatters'
+ * media="print" stylesheet swaps), plus one inline script Complianz injects.
  *
  * @package CourtneyrChild
  */
@@ -65,7 +71,7 @@ const HSTS_VALUE = 'max-age=31536000; includeSubDomains';
  *   Both are skipped for /embed/ responses, which exist to be framed
  *   cross-origin (oEmbed / IndieWeb embeddability).
  * - worker-src is intentionally not enforced yet (falls back to script-src,
- *   the previously proven behavior); the report-only policy trials 'self'.
+ *   the previously proven behavior).
  */
 const CSP_ENFORCED = array(
 	'default-src'               => "'self'",
@@ -82,19 +88,6 @@ const CSP_ENFORCED = array(
 	'manifest-src'              => "'self'",
 	'frame-ancestors'           => "'self'",
 	'upgrade-insecure-requests' => '',
-);
-
-/**
- * Report-only overrides: the stricter policy being trialed before it can be
- * enforced. script-src drops 'unsafe-inline'/'unsafe-eval'; worker-src
- * trials 'self'. Violations surface in the browser console (Report-Only is
- * never allowed to break the page). Exit criteria: once the third-party
- * inline scripts listed in the file header are externalized or retired,
- * fold these values into CSP_ENFORCED and delete this constant.
- */
-const CSP_REPORT_ONLY_OVERRIDES = array(
-	'script-src' => "'self' www.google-analytics.com www.googletagmanager.com www.youtube.com www.youtube-nocookie.com s.ytimg.com",
-	'worker-src' => "'self'",
 );
 
 /**
@@ -189,22 +182,6 @@ function send_frontend_headers(): void {
 	}
 
 	header( 'Content-Security-Policy: ' . build_policy( $csp ) );
-
-	// upgrade-insecure-requests only exists for enforced policies (W3C
-	// upgrade-insecure-requests spec §3.1): in a Report-Only header the
-	// browser ignores it and Chrome logs a console error on every page
-	// load, so it stays out of the trial policy.
-	$csp_report_only = array_merge( $csp, CSP_REPORT_ONLY_OVERRIDES );
-	// The trial script-src replaces the enforced one wholesale, so the AMP
-	// runtime source added for story singles above has to be re-added here or
-	// every story view logs report-only violations for its own runtime.
-	if ( is_singular( 'web-story' ) ) {
-		$csp_report_only['script-src'] .= ' https://cdn.ampproject.org';
-	}
-	unset( $csp_report_only['upgrade-insecure-requests'] );
-	// report-to routes violation reports to the mu-plugin's Reporting-Endpoints
-	// group named "default", the only way to collect this evidence off-browser.
-	header( 'Content-Security-Policy-Report-Only: ' . build_policy( $csp_report_only ) . '; report-to default' );
 }
 
 /**

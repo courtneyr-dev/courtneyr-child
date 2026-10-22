@@ -265,3 +265,132 @@ function delay_full_sheets_on_front_page(): void {
 	\Perfmatters\Config::$options['assets']['rucss_stylesheet_behavior'] = '';
 }
 add_action( 'template_redirect', __NAMESPACE__ . '\\delay_full_sheets_on_front_page' );
+
+/**
+ * Stylesheets that load only on some posts or archives: Perfmatters inlines them whole.
+ *
+ * Perfmatters builds one used CSS per URL type (every single post shares
+ * post.used.css, every kind archive tax.used.css) from whichever page it saw
+ * first. A sheet that page didn't load can't be in the file, so on a mood post
+ * the pin, on a photo post the frames, painted unstyled and jumped when the
+ * full sheet arrived (throttled phone, 2026-10-21: CLS 0.45 on gtm-onsight,
+ * 0.11–0.29 on archives). Excluded from RUCSS and inlined, each sheet is
+ * whole at first paint on the pages that enqueue it and absent elsewhere.
+ * Handles come from a crawl of every published post and archive on live
+ * (2026-10-21); add a kind sheet here when the theme gains one. Not on the
+ * front page, whose sheets defer_card_sheet_on_front_page() handles.
+ */
+const RUCSS_INLINE_HANDLES = array(
+	'courtneyr-photo-frames',
+	'courtneyr-photo',
+	'courtneyr-paper',
+	'courtneyr-nav',
+	'courtneyr-mood-pin',
+	'courtneyr-comic',
+	'courtneyr-media-shelf',
+	'courtneyr-gallery-zine',
+	'courtneyr-ticket',
+	'courtneyr-sticker',
+	'courtneyr-eat-drink',
+	'courtneyr-checkin-archive',
+	'courtneyr-menu',
+	'courtneyr-podcast',
+	'courtneyr-note-board',
+	'courtneyr-shelf-boards',
+	// On every archive, but the cut-paper title's tile sizes are per-title
+	// variants the first archive may not use: 36 px tiles grew to 54–91 px
+	// when the full sheet landed (CLS 0.11–0.29). 6.7 KB, so whole.
+	'courtneyr-cutout',
+	'wp-block-image',
+	'wp-block-gallery',
+	'wp-block-cover',
+	'wp-block-social-links',
+	'ollie-block-core-navigation',
+	'videoseo-youtube-embed-css',
+	'pkiw-kind-layouts',
+	'pkiw-block-checkins-feed',
+	'leaflet',
+	'leaflet-markercluster',
+	'chatlog-block-style',
+	'chatlog-conversation-style',
+	'blablablocks-formats-styles',
+);
+
+/**
+ * Rules in every-page sheets (components.css, PKIW blocks.css) that some page
+ * of a type needs but the shared used CSS dropped, keyed by one class each.
+ * Perfmatters keeps every rule whose selector names a listed class. Picked per
+ * type from the same crawl as the cheapest class per missing rule, capped at
+ * 4 KB of matched rules each: posts +35 KB of inline CSS (161 → 196 KB), kind
+ * archives +10 KB, categories +23 KB, tags +8 KB.
+ */
+const RUCSS_KEEP_CLASSES = array(
+	'post'     => 'aligncenter alignleft alignright cmplz-placeholder-parent cr-icon-avatar--audio cr-icon-avatar--link cr-icon-avatar--outline cr-icon-avatar--quote cr-icon-avatar--video cr-media__transcript cr-post-nav cr-pull-quote-wrap cr-pull-quote__copy cr-term-chip--1 cr-term-chip--2 cr-term-chip--3 cr-term-chip--5 fb-xfbml-parse-ignore format-standard has-text-align-right is-style-cr-marker-bar is-style-cr-pull-quote is-style-sme-alert-success pfbt-format-titleless pk-badge pk-body pk-card pk-dot pk-embed pk-embed--audio pk-embed--map pk-kindlabel pk-link pk-map-link pk-media pk-meta pk-mood pk-note pk-sr-only pk-stars pk-sub pk-thumb--poster pk-title reaction-avatar reaction-label single single-format-aside single-format-audio single-format-chat single-format-gallery single-format-image single-format-link single-format-quote single-format-status single-format-video single-post__title skip-link sloc-display sloc-location-icon sloc-map sme-highlighter svg-bluesky svg-linkedin taxonomy-post_tag wp-block-code wp-block-column wp-block-cover__image-background wp-block-gallery wp-block-post-terms wp-block-template-part wp-caption xfn-pill-acquaintance xfn-pill-co-worker xfn-pill-colleague xfn-pill-friend xfn-pill-met',
+	'tax'      => 'cr-browse-all cr-icon-avatar--audio cr-icon-avatar--blog cr-icon-avatar--quote cr-icon-avatar--video cr-pull-quote-wrap cr-pull-quote__copy format-standard is-p0 is-p10 is-p5 is-r1 is-style-cr-pull-quote pk-badge pk-body pk-card pk-excerpt pk-kindlabel pk-link pk-media pk-media--stream pk-meta pk-sr-only pk-sub pk-thumb--poster pk-title skip-link sme-highlighter wp-block-post wp-block-query-pagination wp-block-template-part',
+	'category' => 'cr-browse-all cr-cutout__gap cr-highlight cr-icon-avatar--outline cr-icon-avatar--quote cr-icon-avatar--video cr-sparkle cr-speaking-hero cr-speaking-hero__accent cr-speaking-hero__cta cr-speaking-hero__lead cr-speaking-hero__sparkles cr-speaking-hero__title cr-term-chip--2 cr-term-chip--3 cr-term-chip--5 format-aside format-gallery format-image format-quote format-standard format-status format-video is-p10 is-r3 is-style-cr-eyebrow pfbt-format-titleless skip-link wp-block-button__link wp-block-query-pagination wp-block-template-part',
+	'tag'      => 'card__media cr-browse-all cr-icon-avatar--link cr-icon-avatar--outline cr-icon-avatar--speaking cr-term-chip--2 cr-term-chip--3 cr-term-chip--4 cr-term-chip--5 format-image format-link format-standard is-punct is-r3 skip-link wp-block-post-featured-image wp-block-query-pagination wp-block-template-part',
+);
+
+/**
+ * The link-tag fragments Perfmatters matches (stripos on the whole tag). Core
+ * prints id='…' and Perfmatters' minify rewrites it as id="…", so both.
+ *
+ * @return string[]
+ */
+function rucss_inline_ids(): array {
+	$ids = array();
+	foreach ( RUCSS_INLINE_HANDLES as $handle ) {
+		$ids[] = "id='{$handle}-css'";
+		$ids[] = "id=\"{$handle}-css\"";
+	}
+	return $ids;
+}
+
+/**
+ * Excludes the conditional sheets from RUCSS so Perfmatters can inline them.
+ *
+ * @param string[] $exclusions Stylesheet fragments.
+ * @return string[]
+ */
+function rucss_exclude_conditional_sheets( $exclusions ) {
+	if ( is_front_page() || ! is_array( $exclusions ) ) {
+		return $exclusions;
+	}
+	return array_merge( $exclusions, rucss_inline_ids() );
+}
+add_filter( 'perfmatters_rucss_excluded_stylesheets', __NAMESPACE__ . '\\rucss_exclude_conditional_sheets' );
+
+/**
+ * Inlines the excluded conditional sheets instead of leaving them render-blocking.
+ *
+ * @param string[] $inline Stylesheet fragments.
+ * @return string[]
+ */
+function rucss_inline_conditional_sheets( $inline ) {
+	if ( is_front_page() || ! is_array( $inline ) ) {
+		return $inline;
+	}
+	return array_merge( $inline, rucss_inline_ids() );
+}
+add_filter( 'perfmatters_inline_stylesheets', __NAMESPACE__ . '\\rucss_inline_conditional_sheets' );
+
+/**
+ * Keeps the per-type classes in the shared used CSS.
+ *
+ * @param string[] $selectors Excluded selectors.
+ * @return string[]
+ */
+function rucss_keep_type_classes( $selectors ) {
+	if ( ! is_array( $selectors ) || is_front_page() ) {
+		return $selectors;
+	}
+	$type = is_singular( 'post' ) ? 'post' : ( is_category() ? 'category' : ( is_tag() ? 'tag' : ( is_tax() ? 'tax' : '' ) ) );
+	if ( '' === $type ) {
+		return $selectors;
+	}
+	foreach ( explode( ' ', RUCSS_KEEP_CLASSES[ $type ] ) as $class ) {
+		$selectors[] = '.' . $class;
+	}
+	return $selectors;
+}
+add_filter( 'perfmatters_rucss_excluded_selectors', __NAMESPACE__ . '\\rucss_keep_type_classes' );
