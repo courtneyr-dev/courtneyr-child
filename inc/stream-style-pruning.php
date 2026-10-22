@@ -244,3 +244,24 @@ function load_deferred_sheets(): void {
 	echo "<script id=\"cr-deferred-sheets\">addEventListener('load',function(){document.querySelectorAll('link[data-cr-href]').forEach(function(l){l.href=l.getAttribute('data-cr-href');l.removeAttribute('data-cr-href');});});</script>\n";
 }
 add_action( 'wp_footer', __NAMESPACE__ . '\\load_deferred_sheets', 99 );
+
+/**
+ * Front page only: have Perfmatters hold the full stylesheets until interaction.
+ *
+ * Perfmatters keys its used CSS by URL type, so every single post shares one
+ * post.used.css built from whichever post it crawled first (likewise every
+ * taxonomy archive shares tax.used.css). With the stylesheet behavior set to
+ * "delay" site-wide, kind layouts missing from that shared file stayed
+ * unstyled until the first interaction (Live, 2026-10-21 13:25-13:31 UTC).
+ * The front page's used CSS comes from the front page alone, so delaying
+ * there is safe; everywhere else keeps the site-wide setting (async).
+ * Perfmatters reads the option while processing the output buffer, after
+ * template_redirect.
+ */
+function delay_full_sheets_on_front_page(): void {
+	if ( ! is_front_page() || ! class_exists( '\Perfmatters\Config' ) || ! isset( \Perfmatters\Config::$options['assets'] ) || ! is_array( \Perfmatters\Config::$options['assets'] ) ) {
+		return;
+	}
+	\Perfmatters\Config::$options['assets']['rucss_stylesheet_behavior'] = '';
+}
+add_action( 'template_redirect', __NAMESPACE__ . '\\delay_full_sheets_on_front_page' );
