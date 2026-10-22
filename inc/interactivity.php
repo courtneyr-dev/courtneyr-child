@@ -2,17 +2,17 @@
 /**
  * Interactivity API modules for the theme.
  *
- * v0.5.18 cleanup: the original aspirational IA scaffolding for the
- * theme toggle was removed — the working toggle is vanilla JS
- * (assets/js/theme-toggle/view.js, enqueued in inc/enqueue.php). The
- * theme toggle MUST run pre-paint to prevent a dark-mode flash, which
- * IA's hydrate-after-parse model can't satisfy. Keeping it vanilla.
+ * The theme toggle uses the courtneyr/theme-toggle store
+ * (assets/js/interactivity/theme-toggle/view.js, enqueued in
+ * inc/enqueue.php). Its pre-paint step stays in the inline no-flash
+ * script because IA hydrates after parse.
  *
  * Active IA modules:
  *   - courtneyr/callout (v0.5.14) — collapsible callouts
  *   - courtneyr/stream-filter (v0.5.14) — cr-stream-loop format filter
  *   - courtneyr/reading-progress (v0.5.18) — single-post scroll bar
  *   - courtneyr/pull-quote (v0.5.18) — copy-to-clipboard button
+ *   - courtneyr/theme-toggle — appearance controls and cross-tab sync
  *
  * Pre-paint script for theme:
  *   inc/enqueue.php print_no_flash_theme_script() is the single inline
