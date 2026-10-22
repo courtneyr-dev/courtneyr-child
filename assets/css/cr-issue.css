@@ -1,0 +1,665 @@
+/**
+ * Issue archive racks, single claim sheets and Stream claim stubs.
+ */
+
+/* Author links on the sheet keep the paper's ink. */
+
+.cr-claim-body a {
+	color: var(--cr-russian-violet);
+	text-decoration: underline;
+	text-underline-offset: 0.14em;
+}
+
+/* Archive racks. */
+
+.cr-issue-rack {
+	display: grid;
+	gap: var(--cr-space-2xl);
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-issue-rack > section.pkiw-group {
+	box-sizing: border-box;
+	min-width: 0;
+	padding: var(--cr-space-lg);
+	background: var(--cr-prussian-blue);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-issue-rack h2.pkiw-group__heading {
+	width: fit-content;
+	max-width: 100%;
+	margin: calc(-1 * var(--cr-space-xl)) 0 var(--cr-space-lg);
+	padding: var(--cr-space-xs) var(--cr-space-lg);
+	background: var(--cr-sky-blue);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-2xl);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.15;
+	overflow-wrap: anywhere;
+	clip-path: polygon(0 8%, 3% 0, 97% 4%, 100% 0, 100% 92%, 97% 100%, 4% 96%, 0 100%);
+}
+
+.cr-issue-rack > section.pkiw-group:nth-child(3n+2) h2.pkiw-group__heading {
+	background: var(--cr-periwinkle);
+}
+
+.cr-issue-rack > section.pkiw-group:nth-child(3n+3) h2.pkiw-group__heading {
+	background: var(--cr-selective-yellow);
+}
+
+.cr-issue-rack .pkiw-issue-lanes {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-lg);
+	min-width: 0;
+}
+
+.cr-issue-rack .pkiw-issue-lane {
+	min-width: 0;
+}
+
+.cr-issue-rack h3.pkiw-issue-lane__heading {
+	margin: 0 0 var(--cr-space-md);
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	background: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.2;
+	text-align: center;
+	text-transform: uppercase;
+	overflow-wrap: anywhere;
+}
+
+.cr-issue-rack ul.pkiw-issue-lane__items {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	align-items: start;
+	gap: var(--cr-space-md);
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-issue-rack .pkiw-issue-lane__items > li.wp-block-post {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+}
+
+/* Archive claim ticket. */
+
+.cr-claim-ticket {
+	--cr-claim-ticket-paper: var(--cr-light-orange);
+
+	position: relative;
+	box-sizing: border-box;
+	min-width: 0;
+	min-height: 7rem;
+	padding: var(--cr-space-lg);
+	border-inline: 5px dotted var(--cr-russian-violet);
+	background-color: var(--cr-claim-ticket-paper);
+	background-image: var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard-sm);
+	color: var(--cr-russian-violet);
+	overflow-wrap: anywhere;
+}
+
+.cr-claim-ticket--sky {
+	--cr-claim-ticket-paper: var(--cr-sky-blue);
+}
+
+.cr-claim-ticket--ivory {
+	--cr-claim-ticket-paper: var(--cr-printer-ivory);
+}
+
+.cr-claim-ticket__title {
+	margin: 0;
+	padding-block-end: var(--cr-space-sm);
+	border-block-end: 2px dashed var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.25;
+	overflow-wrap: anywhere;
+}
+
+.cr-claim-ticket__title a {
+	color: var(--cr-russian-violet);
+	text-decoration: none;
+}
+
+.cr-claim-ticket__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-claim-ticket__title a:hover {
+	text-decoration: underline;
+	text-decoration-thickness: 0.12em;
+	text-underline-offset: 0.16em;
+}
+
+.cr-claim-ticket__title a:focus-visible {
+	outline: 0;
+}
+
+.cr-claim-ticket__title a:focus-visible::after {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-claim-ticket__number {
+	display: block;
+	margin-block-start: var(--cr-space-sm);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.2;
+}
+
+/* Single ticket and sheet. */
+
+.cr-issue-single .single-post__content:is(.cr-claim-sheet, :has(.cr-claim-sheet)) {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: var(--wp--style--global--wide-size);
+	font-family: var(--cr-font-body);
+}
+
+.cr-claim-ticket-head {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	box-sizing: border-box;
+	width: 100%;
+	max-width: var(--wp--style--global--wide-size);
+	margin-inline: auto;
+	margin-block-end: var(--cr-space-lg);
+	background-color: var(--cr-periwinkle);
+	background-image: var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+}
+
+.cr-claim-ticket-head__main {
+	min-width: 0;
+	padding: var(--cr-space-lg);
+	order: 1;
+}
+
+.cr-claim-ticket-head__kicker {
+	margin: 0 0 var(--cr-space-xs);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: 0.08em;
+	line-height: 1.3;
+	text-transform: uppercase;
+}
+
+.cr-claim-ticket-head__title {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-3xl);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.08;
+	overflow-wrap: anywhere;
+}
+
+.cr-claim-ticket-head__stub {
+	display: grid;
+	place-items: center;
+	min-height: 2.75rem;
+	padding: var(--cr-space-sm) var(--cr-space-lg);
+	border-block-end: 4px dotted var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1;
+	order: -1;
+}
+
+.cr-claim-sheet {
+	position: relative;
+	box-sizing: border-box;
+	min-width: 0;
+	margin-block-end: var(--cr-space-xl);
+	padding: var(--cr-space-lg);
+	background-color: var(--cr-printer-ivory);
+	background-image: var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+}
+
+.cr-claim-sheet::after {
+	content: "";
+	position: absolute;
+	inset-inline: 0;
+	inset-block-start: 100%;
+	height: 0.75rem;
+	background: var(--cr-printer-ivory);
+	clip-path: polygon(0 0, 100% 0, 100% 38%, 96% 100%, 91% 44%, 86% 92%, 80% 40%, 74% 100%, 68% 45%, 61% 94%, 55% 42%, 48% 100%, 42% 43%, 35% 92%, 28% 41%, 21% 100%, 14% 45%, 7% 94%, 0 40%);
+}
+
+.cr-claim-facts,
+.cr-claim-body {
+	font-family: var(--cr-font-body);
+}
+
+.cr-claim-facts dl.pkiw-issue-facts__list {
+	margin: 0;
+	border-block-start: 1px solid var(--cr-russian-violet);
+}
+
+.cr-claim-facts div.pkiw-issue-facts__row {
+	display: grid;
+	grid-template-columns: minmax(6rem, 10rem) minmax(0, 1fr);
+	margin: 0;
+	border-block-end: 1px solid var(--cr-russian-violet);
+}
+
+.cr-claim-facts .pkiw-issue-facts__row dt,
+.cr-claim-facts .pkiw-issue-facts__row dd {
+	min-width: 0;
+	margin: 0;
+	padding: var(--cr-space-sm);
+	font-family: var(--cr-font-body);
+	overflow-wrap: anywhere;
+}
+
+.cr-claim-facts .pkiw-issue-facts__row dt {
+	background: var(--cr-light-gray);
+	font-weight: var(--cr-weight-bold);
+}
+
+.cr-claim-facts .pkiw-issue-facts__row dd {
+	border-inline-start: 1px solid var(--cr-russian-violet);
+}
+
+.cr-claim-sheet .cr-claim-facts a {
+	color: var(--cr-russian-violet);
+	text-decoration: underline;
+	text-underline-offset: 0.14em;
+}
+
+.cr-claim-facts :is(.pkiw-issue-status--open, .pkiw-issue-status--closed) {
+	display: inline-block;
+	padding: var(--cr-space-2xs) var(--cr-space-xs);
+	border: 1px solid var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.2;
+}
+
+.cr-claim-facts .pkiw-issue-status--open {
+	background: var(--cr-selective-yellow);
+	color: var(--cr-russian-violet);
+}
+
+.cr-claim-facts .pkiw-issue-status--closed {
+	background: var(--cr-cerulean);
+	color: var(--cr-printer-ivory);
+}
+
+.cr-claim-body {
+	margin-block-start: var(--cr-space-xl);
+	overflow-wrap: anywhere;
+}
+
+/* Stream claim stub. */
+
+.pk-card.pk-card--stream.cr-claim-stub {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) clamp(2.75rem, 14%, 4.5rem);
+	grid-template-areas:
+		"kind tear"
+		"repo tear"
+		"title tear"
+		"status tear"
+		"date tear";
+	gap: var(--cr-space-xs) var(--cr-space-md);
+	box-sizing: border-box;
+	min-width: 0;
+	padding: var(--cr-space-lg) 0 var(--cr-space-lg) var(--cr-space-lg);
+	background-color: var(--cr-printer-ivory);
+	background-image: var(--cr-fiber);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+	overflow-wrap: anywhere;
+}
+
+.pk-card.pk-card--stream.cr-claim-stub::before {
+	content: "";
+	position: absolute;
+	inset-block-start: -0.45rem;
+	inset-inline-start: 12%;
+	width: 4rem;
+	height: 1rem;
+	background: var(--cr-sky-blue);
+	rotate: var(--cr-rotate-neg);
+}
+
+.cr-claim-stub__kind {
+	grid-area: kind;
+	margin: 0;
+	font-family: var(--cr-font-display);
+	font-size: 1rem;
+	line-height: 1.4;
+}
+
+.cr-claim-stub__repo {
+	grid-area: repo;
+	margin: 0;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	line-height: 1.4;
+	overflow-wrap: anywhere;
+}
+
+.cr-claim-stub__title {
+	grid-area: title;
+	min-width: 0;
+	margin: var(--cr-space-xs) 0;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.15;
+	overflow-wrap: anywhere;
+}
+
+.pk-card.pk-card--stream.cr-claim-stub .cr-claim-stub__title a {
+	color: var(--cr-russian-violet);
+	text-decoration: none;
+}
+
+.pk-card.pk-card--stream.cr-claim-stub .cr-claim-stub__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.pk-card.pk-card--stream.cr-claim-stub .cr-claim-stub__title a:hover {
+	text-decoration: underline;
+	text-decoration-thickness: 0.12em;
+	text-underline-offset: 0.16em;
+}
+
+.pk-card.pk-card--stream.cr-claim-stub .cr-claim-stub__title a:focus-visible {
+	outline: 0;
+}
+
+.pk-card.pk-card--stream.cr-claim-stub .cr-claim-stub__title a:focus-visible::after {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-claim-stub__status {
+	grid-area: status;
+	justify-self: start;
+	padding: var(--cr-space-2xs) var(--cr-space-sm);
+	border: 1px solid var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.2;
+	clip-path: polygon(0 8%, 5% 0, 96% 5%, 100% 0, 100% 90%, 94% 100%, 5% 95%, 0 100%);
+}
+
+.cr-claim-stub__status--open {
+	background: var(--cr-selective-yellow);
+	color: var(--cr-russian-violet);
+}
+
+.cr-claim-stub__status--closed {
+	background: var(--cr-cerulean);
+	color: var(--cr-printer-ivory);
+}
+
+.cr-claim-stub > time.dt-published {
+	grid-area: date;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	line-height: 1.4;
+}
+
+.cr-claim-stub__tear {
+	grid-area: tear;
+	align-self: stretch;
+	min-width: 0;
+	border-inline-start: 4px dotted var(--cr-russian-violet);
+	background: var(--cr-light-orange);
+}
+
+:is(.cr-stream__list, .cr-home-stream__list) > li:nth-child(4n+1) .pk-card.pk-card--stream.cr-claim-stub {
+	rotate: var(--cr-rotate-1);
+}
+
+:is(.cr-stream__list, .cr-home-stream__list) > li:nth-child(4n+2) .pk-card.pk-card--stream.cr-claim-stub {
+	rotate: var(--cr-rotate-2);
+}
+
+:is(.cr-stream__list, .cr-home-stream__list) > li:nth-child(4n+3) .pk-card.pk-card--stream.cr-claim-stub {
+	rotate: var(--cr-rotate-neg);
+}
+
+:is(.cr-stream__list, .cr-home-stream__list) > li:nth-child(4n+4) .pk-card.pk-card--stream.cr-claim-stub {
+	rotate: var(--cr-rotate-neg2);
+}
+
+@media (min-width: 40rem) {
+
+	.cr-issue-rack .pkiw-issue-lanes {
+		position: relative;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.cr-issue-rack .pkiw-issue-lane[data-pkiw-status="open"] {
+		grid-column: 1;
+	}
+
+	.cr-issue-rack .pkiw-issue-lane[data-pkiw-status="closed"] {
+		grid-column: 2;
+	}
+
+	.cr-issue-rack .pkiw-issue-lane[data-pkiw-status="none"] {
+		grid-column: 1 / -1;
+	}
+
+	.cr-issue-rack .pkiw-issue-lanes:not(:has([data-pkiw-status="open"]))::before,
+	.cr-issue-rack .pkiw-issue-lanes:not(:has([data-pkiw-status="closed"]))::after {
+		content: "";
+		align-self: start;
+		justify-self: center;
+		box-sizing: border-box;
+		width: 4rem;
+		height: 0.85rem;
+		margin-block-start: var(--cr-space-xl);
+		border: 3px dotted var(--cr-printer-ivory);
+		border-block-start: 0;
+	}
+
+	.cr-issue-rack .pkiw-issue-lanes:not(:has([data-pkiw-status="open"]))::before {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.cr-issue-rack .pkiw-issue-lanes:not(:has([data-pkiw-status="closed"]))::after {
+		grid-column: 2;
+		grid-row: 1;
+	}
+
+	.cr-claim-ticket-head {
+		grid-template-columns: clamp(4rem, 12%, 7rem) minmax(0, 1fr);
+	}
+
+	.cr-claim-ticket-head__main {
+		grid-column: 2;
+		order: initial;
+	}
+
+	.cr-claim-ticket-head__stub {
+		grid-column: 1;
+		grid-row: 1;
+		min-height: 100%;
+		padding-inline: var(--cr-space-sm);
+		border-block-end: 0;
+		border-inline-end: 4px dotted var(--cr-russian-violet);
+		order: initial;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-issue-rack ul.pkiw-issue-lane__items {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 80rem) {
+
+	.cr-claim-ticket-head::before,
+	.cr-claim-ticket-head::after {
+		content: "";
+		position: absolute;
+		box-sizing: content-box;
+		pointer-events: none;
+	}
+
+	/* Three marker strokes: top border, content-box stripe, bottom border. */
+	.cr-claim-ticket-head::before {
+		inset-block-start: 3rem;
+		inset-inline-start: -4.5rem;
+		width: 2.75rem;
+		height: 3px;
+		padding-block: 3px;
+		border-block: 3px solid var(--cr-russian-violet);
+		background: var(--cr-russian-violet);
+		background-clip: content-box;
+		rotate: var(--cr-rotate-neg);
+	}
+
+	.cr-claim-ticket-head::after {
+		inset-block-end: -1.5rem;
+		inset-inline-end: -4.75rem;
+		width: 3.25rem;
+		aspect-ratio: 1;
+		background: var(--cr-sky-blue);
+		rotate: var(--cr-rotate-2);
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.cr-claim-ticket,
+	.pk-card.pk-card--stream.cr-claim-stub {
+		transition: transform var(--cr-motion-fast) var(--cr-ease-out);
+	}
+
+	.cr-claim-ticket:hover,
+	.pk-card.pk-card--stream.cr-claim-stub:hover {
+		transform: translateY(-2px);
+	}
+}
+
+/* Author content on the sheet keeps the paper's ink in every colour scheme. */
+
+.cr-claim-sheet :is(h2, h3, h4, h5, h6, p, li, blockquote, figcaption, cite, summary, td, th) {
+	color: inherit;
+}
+
+/* Keep physical papers and their ink fixed when the page palette flips. */
+
+:root[data-theme="dark"] :is(.cr-claim-ticket, .cr-claim-ticket-head, .cr-claim-sheet, .pk-card.pk-card--stream.cr-claim-stub) {
+	color: var(--cr-russian-violet);
+}
+
+:root[data-theme="dark"] :is(.cr-claim-ticket__title a, .cr-claim-ticket-head__title, .cr-claim-facts a, .cr-claim-body a, .cr-claim-stub__title a),
+:root[data-theme="dark"] :is(.cr-claim-ticket__title a, .cr-claim-facts a, .cr-claim-body a, .cr-claim-stub__title a):hover {
+	color: var(--cr-russian-violet);
+}
+
+:root[data-theme="dark"] .cr-issue-rack > section.pkiw-group {
+	background: var(--cr-prussian-blue);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) :is(.cr-claim-ticket, .cr-claim-ticket-head, .cr-claim-sheet, .pk-card.pk-card--stream.cr-claim-stub) {
+		color: var(--cr-russian-violet);
+	}
+
+	:root:not([data-theme="light"]) :is(.cr-claim-ticket__title a, .cr-claim-ticket-head__title, .cr-claim-facts a, .cr-claim-body a, .cr-claim-stub__title a),
+	:root:not([data-theme="light"]) :is(.cr-claim-ticket__title a, .cr-claim-facts a, .cr-claim-body a, .cr-claim-stub__title a):hover {
+		color: var(--cr-russian-violet);
+	}
+
+	:root:not([data-theme="light"]) .cr-issue-rack > section.pkiw-group {
+		background: var(--cr-prussian-blue);
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-issue-rack > section.pkiw-group,
+	.cr-claim-ticket,
+	.cr-claim-ticket-head,
+	.cr-claim-sheet,
+	.pk-card.pk-card--stream.cr-claim-stub {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-issue-rack h2.pkiw-group__heading,
+	.cr-issue-rack h3.pkiw-issue-lane__heading,
+	.cr-claim-facts .pkiw-issue-facts__row dt,
+	.cr-claim-stub__tear {
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.cr-claim-ticket,
+	.cr-claim-ticket-head__stub,
+	.cr-claim-stub__tear {
+		border-inline-color: transparent;
+	}
+
+	.cr-claim-stub__status,
+	.cr-claim-facts :is(.pkiw-issue-status--open, .pkiw-issue-status--closed) {
+		border: 1px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+		clip-path: none;
+	}
+
+	.cr-claim-ticket__title a,
+	.cr-claim-facts a,
+	.cr-claim-stub__title a {
+		color: LinkText;
+	}
+
+	.cr-claim-sheet::after,
+	.pk-card.pk-card--stream.cr-claim-stub::before,
+	.cr-issue-rack .pkiw-issue-lanes::before,
+	.cr-issue-rack .pkiw-issue-lanes::after,
+	.cr-claim-ticket-head::before,
+	.cr-claim-ticket-head::after {
+		display: none;
+	}
+}
