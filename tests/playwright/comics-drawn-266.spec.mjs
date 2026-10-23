@@ -206,11 +206,16 @@ test.describe( 'drawn comics archive', () => {
 		await expect( pager.locator( '.wp-block-query-pagination-next' ) ).toHaveCount( 1 );
 		await expect( pager.locator( '[aria-current="page"]' ) ).toHaveCount( 1 );
 		expect( await pager.evaluate( ( node ) => Boolean( document.querySelector( '.cr-sketchbook' )?.compareDocumentPosition( node ) & Node.DOCUMENT_POSITION_FOLLOWING ) ) ).toBe( true );
-		const firstImages = page.locator( '.cr-sketch-item' ).nth( 0 ).locator( 'img' );
-		for ( const image of await firstImages.all() ) {
-			await expect( image ).toHaveAttribute( 'loading', 'eager' );
-			await expect( image ).toHaveAttribute( 'fetchpriority', 'high' );
-		}
+		const expectRowPriority = async () => {
+			const items = await page.locator( '.cr-sketch-item' ).all();
+			for ( const [ index, item ] of items.entries() ) {
+				for ( const image of await item.locator( 'img' ).all() ) {
+					await expect( image ).toHaveAttribute( 'loading', index < 2 ? 'eager' : 'lazy' );
+					expect( await image.getAttribute( 'fetchpriority' ) ).toBe( index < 2 ? 'high' : null );
+				}
+			}
+		};
+		await expectRowPriority();
 		const link = itemFor( page, 'D01' ).locator( 'a' );
 		await link.focus();
 		expect( await itemFor( page, 'D01' ).locator( '.cr-sketch-item' ).evaluate( ( node ) => getComputedStyle( node ).outlineWidth ) ).toBe( '3px' );
@@ -218,6 +223,7 @@ test.describe( 'drawn comics archive', () => {
 		await openSeeded( page, drawnPath( 2 ) );
 		await expect( page.locator( '.wp-block-query-pagination-next' ) ).toHaveCount( 0 );
 		await expect( page.locator( '.wp-block-query-pagination-previous' ) ).toHaveCount( 1 );
+		await expectRowPriority();
 	} );
 } );
 
