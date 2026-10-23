@@ -146,6 +146,8 @@ test.describe( 'drawn comics archive', () => {
 				return [ ...grouped.values() ].map( ( row ) => row.length );
 			} );
 			expect( Math.max( ...rows ) ).toBe( width >= 800 ? 2 : 1 );
+			const fill = await page.locator( '.cr-sketchbook .pkiw-group__items' ).evaluateAll( ( lists ) => lists.map( ( list ) => list.getBoundingClientRect().width / list.parentElement.getBoundingClientRect().width ) );
+			expect( Math.min( ...fill ), 'item grid spans the sketchbook page' ).toBeGreaterThan( 0.99 );
 			const order = await page.locator( '.cr-sketch-item' ).evaluateAll( ( nodes ) => {
 				const dom = nodes.map( ( node ) => node.querySelector( 'a' )?.href );
 				const visual = [ ...nodes ].sort( ( a, b ) => {
@@ -181,6 +183,14 @@ test.describe( 'drawn comics archive', () => {
 		expect( await d09.locator( 'img' ).evaluateAll( ( images ) => images.map( ( image ) => image.getAttribute( 'alt' ) ) ) ).toEqual( [ expect.any( String ), '' ] );
 		await openSeeded( page, drawnPath( 2 ) );
 		await expect( itemFor( page, 'D13' ).locator( 'img' ) ).toHaveCount( 0 );
+		const blank = await itemFor( page, 'D13' ).locator( '.cr-sketch-item' ).evaluate( ( node ) => {
+			const style = getComputedStyle( node );
+			return {
+				title: node.querySelector( '.pk-title' ).getBoundingClientRect().width,
+				content: node.clientWidth - parseFloat( style.paddingLeft ) - parseFloat( style.paddingRight ),
+			};
+		} );
+		expect( Math.abs( blank.title - blank.content ), 'no-panel title spans the item, not a badge column' ).toBeLessThanOrEqual( 1 );
 
 		await openSeeded( page );
 		const d03Name = await accessibleName( itemFor( page, 'D03' ).locator( 'a' ) );
@@ -196,11 +206,16 @@ test.describe( 'drawn comics archive', () => {
 		await expect( pager.locator( '.wp-block-query-pagination-next' ) ).toHaveCount( 1 );
 		await expect( pager.locator( '[aria-current="page"]' ) ).toHaveCount( 1 );
 		expect( await pager.evaluate( ( node ) => Boolean( document.querySelector( '.cr-sketchbook' )?.compareDocumentPosition( node ) & Node.DOCUMENT_POSITION_FOLLOWING ) ) ).toBe( true );
-		const firstImages = page.locator( '.cr-sketch-item' ).nth( 0 ).locator( 'img' );
-		for ( const image of await firstImages.all() ) {
-			await expect( image ).toHaveAttribute( 'loading', 'eager' );
-			await expect( image ).toHaveAttribute( 'fetchpriority', 'high' );
-		}
+		const expectRowPriority = async () => {
+			const items = await page.locator( '.cr-sketch-item' ).all();
+			for ( const [ index, item ] of items.entries() ) {
+				for ( const image of await item.locator( 'img' ).all() ) {
+					await expect( image ).toHaveAttribute( 'loading', index < 2 ? 'eager' : 'lazy' );
+					expect( await image.getAttribute( 'fetchpriority' ) ).toBe( index < 2 ? 'high' : null );
+				}
+			}
+		};
+		await expectRowPriority();
 		const link = itemFor( page, 'D01' ).locator( 'a' );
 		await link.focus();
 		expect( await itemFor( page, 'D01' ).locator( '.cr-sketch-item' ).evaluate( ( node ) => getComputedStyle( node ).outlineWidth ) ).toBe( '3px' );
@@ -208,6 +223,7 @@ test.describe( 'drawn comics archive', () => {
 		await openSeeded( page, drawnPath( 2 ) );
 		await expect( page.locator( '.wp-block-query-pagination-next' ) ).toHaveCount( 0 );
 		await expect( page.locator( '.wp-block-query-pagination-previous' ) ).toHaveCount( 1 );
+		await expectRowPriority();
 	} );
 } );
 
@@ -298,7 +314,26 @@ test.describe( 'drawn comic Stream card', () => {
 			await expect( card.locator( '.pk-kindlabel' ) ).toHaveText( archiveName );
 			expect( ( await card.locator( '.pk-kindlabel' ).innerText() ).trim() ).not.toBe( 'Comic' );
 			await expect( card.locator( '.cr-strip__tab' ) ).toHaveAttribute( 'aria-hidden', 'true' );
-			expect( await card.locator( 'img' ).getAttribute( 'alt' ) ).not.toBeNull();
+			expect( await card.locator( 'img' ).getAttribute( 'alt' ), 'Stream panel alt is empty; the full alt lives on the single' ).toBe( '' );
+			const paper = await card.evaluate( ( node ) => {
+				const style = getComputedStyle( node );
+				const probe = document.createElement( 'span' );
+				probe.style.cssText = 'background: var(--cr-surface-elevated); box-shadow: var(--cr-shadow-hard)';
+				node.appendChild( probe );
+				const expected = { background: getComputedStyle( probe ).backgroundColor, shadow: getComputedStyle( probe ).boxShadow };
+				probe.remove();
+				return {
+					border: `${ style.borderTopWidth } ${ style.borderTopStyle }`,
+					background: style.backgroundColor,
+					shadow: style.boxShadow,
+					perforations: getComputedStyle( node, '::before' ).content,
+					expected,
+				};
+			} );
+			expect( paper.border, 'Stream paper keeps its 2px ink edge' ).toBe( '2px solid' );
+			expect( paper.background, 'Stream paper is the elevated surface' ).toBe( paper.expected.background );
+			expect( paper.shadow, 'Stream paper keeps the hard shadow token' ).toBe( paper.expected.shadow );
+			expect( paper.perforations, 'Stream paper keeps its perforations' ).toBe( '""' );
 			expect( ( await card.innerText() ).includes( 'Read comic' ) ).toBe( false );
 			expect( ( await card.innerText() ).includes( 'Transcript available' ) ).toBe( false );
 			await expect( card.locator( 'details' ) ).toHaveCount( 'S2' === key ? 0 : 1 );

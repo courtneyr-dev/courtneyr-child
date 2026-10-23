@@ -76,6 +76,11 @@
 	box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 
+/* The flow layout's block gap would open a 22px seam under the tabs. */
+.cr-archive--comics-drawn .cr-sketchbook-loop {
+	margin-block-start: 0;
+}
+
 /* One spiral-bound page contains every archive group and item. */
 .cr-sketchbook.wp-block-post-template {
 	position: relative;
@@ -86,6 +91,7 @@
 	margin: 0;
 	padding: var(--cr-space-xl) var(--cr-space-lg) calc(var(--cr-space-xl) + var(--cr-space-xs));
 	border: 2px solid var(--cr-ink);
+	border-block-end: 0;
 	border-radius: 0;
 	background: var(--cr-surface-elevated);
 	box-shadow: var(--cr-shadow-hard);
@@ -103,30 +109,49 @@
 	content: "";
 	position: absolute;
 	inset-block: var(--cr-space-sm);
-	inset-inline-start: 0;
-	width: var(--cr-space-md);
+	inset-inline-start: calc(-1 * var(--cr-space-md));
+	width: var(--cr-space-xl);
 	background-color: var(--cr-ink);
 	pointer-events: none;
-	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='32' viewBox='0 0 18 32'%3E%3Cpath d='M2 7h10a5 5 0 0 1 0 10H7v-3h5a2 2 0 0 0 0-4H2z' fill='%23000'/%3E%3C/svg%3E") center top / 1.125rem 2rem repeat-y;
-	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='32' viewBox='0 0 18 32'%3E%3Cpath d='M2 7h10a5 5 0 0 1 0 10H7v-3h5a2 2 0 0 0 0-4H2z' fill='%23000'/%3E%3C/svg%3E") center top / 1.125rem 2rem repeat-y;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='24' viewBox='0 0 32 24'%3E%3Cpath fill-rule='evenodd' d='M7 7h18a5 5 0 0 1 0 10H7A5 5 0 0 1 7 7zm0 3a2 2 0 0 0 0 4h18a2 2 0 0 0 0-4z' fill='%23000'/%3E%3C/svg%3E") center top / var(--cr-space-xl) var(--cr-space-lg) repeat-y;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='24' viewBox='0 0 32 24'%3E%3Cpath fill-rule='evenodd' d='M7 7h18a5 5 0 0 1 0 10H7A5 5 0 0 1 7 7zm0 3a2 2 0 0 0 0 4h18a2 2 0 0 0 0-4z' fill='%23000'/%3E%3C/svg%3E") center top / var(--cr-space-xl) var(--cr-space-lg) repeat-y;
 }
 
+/* The deckled foot: the house torn lower edge (cr-paper.css), a flat paper mask over the page's
+   own hard shadow, so it never clips the shadow or a focus ring. */
 .cr-sketchbook::after {
 	content: "";
 	position: absolute;
 	inset-inline: 0;
-	inset-block-end: 0;
-	height: var(--cr-space-xs);
-	border-block-start: 1px solid var(--cr-rule);
-	background: var(--cr-surface-elevated);
-	box-shadow: inset 0 2px 0 var(--cr-surface-elevated), inset 0 3px 0 var(--cr-rule), inset 0 5px 0 var(--cr-surface-elevated), inset 0 6px 0 var(--cr-rule);
+	inset-block-start: 100%;
+	block-size: 0.25rem;
+	background-color: var(--cr-surface-elevated);
 	pointer-events: none;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='4' viewBox='0 0 24 4'%3E%3Cpath d='M0 0h24v1l-3 3-4-3-3 2-4-3-4 4-3-3-3 2z' fill='%23000'/%3E%3C/svg%3E") left top / 1.5rem 0.25rem repeat-x;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='4' viewBox='0 0 24 4'%3E%3Cpath d='M0 0h24v1l-3 3-4-3-3 2-4-3-4 4-3-3-3 2z' fill='%23000'/%3E%3C/svg%3E") left top / 1.5rem 0.25rem repeat-x;
 }
 
 .cr-sketchbook > section.pkiw-group {
+	display: grid;
+	grid-template-columns: fit-content(100%) minmax(0, 1fr);
+	gap: var(--cr-space-lg) var(--cr-space-md);
+	align-items: center;
 	min-width: 0;
 	margin: 0;
 	padding: 0;
+}
+
+/* The violet rule runs from the taped heading to the page's right margin. */
+.cr-sketchbook > section.pkiw-group::after {
+	content: "";
+	grid-column: 2;
+	grid-row: 1;
+	border-block-start: 1px solid var(--cr-ink);
+	pointer-events: none;
+}
+
+.cr-sketchbook > section.pkiw-group > :not(.pkiw-group__heading) {
+	grid-column: 1 / -1;
 }
 
 .cr-sketchbook .pkiw-group__heading {
@@ -135,7 +160,7 @@
 	box-sizing: border-box;
 	width: fit-content;
 	max-width: 100%;
-	margin: 0 0 var(--cr-space-lg);
+	margin: 0;
 	padding: var(--cr-space-xs) var(--cr-space-md);
 	background: transparent;
 	color: var(--cr-tape-ink);
@@ -177,13 +202,16 @@
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
 	gap: var(--cr-space-lg);
+	width: 100%;
 	min-width: 0;
+	max-width: none;
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
 .cr-sketchbook .pkiw-group__items > li {
+	display: grid;
 	min-width: 0;
 	margin: 0;
 	padding: 0;
@@ -194,6 +222,12 @@
 .cr-sketchbook .pkiw-group__items > li::after,
 .cr-sketchbook .pkiw-group__items > li::marker {
 	content: none;
+}
+
+.cr-sketchbook .pk-card.cr-sketch-item {
+	display: block;
+	grid-template-columns: none;
+	block-size: 100%;
 }
 
 .cr-sketch-item {
@@ -237,6 +271,16 @@
 	width: 100%;
 	height: auto;
 	border: 2px solid var(--cr-ink);
+}
+
+/* Every archive frame is one 3:2 cell, so a portrait or lone panel can't stretch its row. */
+.cr-sketchbook .cr-sketch-item__panels--1 {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cr-sketchbook .cr-sketch-item__panels img {
+	aspect-ratio: 3 / 2;
+	object-fit: contain;
 }
 
 .cr-sketch-item__body,
@@ -470,8 +514,10 @@
 	font-weight: var(--cr-weight-bold);
 }
 
-/* Stream card: one notebook page, one link, and a native transcript disclosure. */
-.cr-strip-card {
+/* Stream card: one notebook page, one link, and a native transcript disclosure. The doubled
+   selector outranks cr-post-kinds.css `.cr-stream-page .pk-card`, which strips card paper. */
+.cr-strip-card,
+.cr-stream-page .pk-card.cr-strip-card {
 	position: relative;
 	isolation: isolate;
 	box-sizing: border-box;
@@ -485,7 +531,8 @@
 	overflow-wrap: anywhere;
 }
 
-.cr-strip-card::before {
+.cr-strip-card::before,
+.cr-stream-page .pk-card.cr-strip-card::before {
 	content: "";
 	position: absolute;
 	inset-block: var(--cr-space-sm);
@@ -598,10 +645,17 @@
 	outline: none;
 }
 
-.cr-strip__transcript-mini {
+.cr-strip__transcript-mini,
+.cr-strip-card .cr-strip__transcript-mini {
 	position: relative;
 	z-index: 2;
 	margin-block-start: var(--cr-space-md);
+	padding: 0;
+	border: 0;
+	border-block-start: 1px solid var(--cr-rule);
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
 }
 
 .cr-strip__transcript-mini summary {
@@ -630,25 +684,58 @@
 	.cr-sketchbook .pkiw-group__items {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
+
+	.cr-archive--comics-drawn .pk-comic-series__item {
+		flex: 1 1 0;
+	}
+
+	.cr-archive--comics-drawn .pk-comic-series__link {
+		justify-content: center;
+		text-align: center;
+	}
 }
 
 @media (min-width: 64rem) {
 
-	.cr-strip--single {
+	/* The open sketchbook: the spread leaves the text measure for the viewport, and a flat crease
+	   (rule bands either side of an ink seam) folds it into a left page (panels, transcript) and a
+	   right page (title, record). The seam sits mid-gutter: 60% of the padding box less 0.2 of the
+	   padding and 0.1 of the gutter. */
+	.cr-strip.cr-strip--single {
+		--cr-spread-width: min(calc(100vw - 2 * var(--cr-space-xl)), 96rem);
+		--cr-spread-pad: var(--cr-space-xl);
+		--cr-spread-gutter: calc(2 * var(--cr-space-xl));
+		--cr-spread-fold: calc(60% - 0.2 * var(--cr-spread-pad) - 0.1 * var(--cr-spread-gutter));
 		grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
 		grid-template-rows: auto 1fr;
+		column-gap: var(--cr-spread-gutter);
+		width: var(--cr-spread-width);
+		max-width: none;
+		margin-inline: calc(50% - var(--cr-spread-width) / 2);
+		padding: var(--cr-spread-pad);
+	}
+
+	.cr-strip--single .cr-strip__head::before {
+		content: "";
+		position: absolute;
+		inset-block: 0;
+		inset-inline-start: calc(var(--cr-spread-fold) - 1px - var(--cr-space-xs));
+		box-sizing: content-box;
+		inline-size: 2px;
+		border-inline: var(--cr-space-xs) solid var(--cr-rule);
+		background: var(--cr-ink);
+		pointer-events: none;
 	}
 
 	.cr-strip__head {
 		grid-column: 2;
-		grid-row: 1;
-		padding-inline-start: var(--cr-space-xl);
-		border-inline-start: 1px solid var(--cr-rule);
+		grid-row: 1 / span 2;
+		align-self: start;
 	}
 
 	.cr-strip__panels {
 		grid-column: 1;
-		grid-row: 1 / span 2;
+		grid-row: 1;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		align-content: start;
 	}
@@ -658,11 +745,9 @@
 	}
 
 	.cr-strip__transcript {
-		grid-column: 2;
+		grid-column: 1;
 		grid-row: 2;
 		align-self: start;
-		padding-inline-start: var(--cr-space-xl);
-		border-inline-start: 1px solid var(--cr-rule);
 	}
 }
 
@@ -688,12 +773,17 @@
 	}
 
 	.cr-sketchbook.wp-block-post-template,
-	.cr-strip--single,
+	.cr-strip.cr-strip--single,
 	.cr-strip-card {
 		border: 2px solid CanvasText;
 		background: Canvas;
 		box-shadow: none;
 		color: CanvasText;
+	}
+
+	/* components.css forces every .pk-card to a 1px !important outline; the strip card matches the single. */
+	.cr-stream-page .pk-card.cr-strip-card {
+		border: 2px solid CanvasText !important;
 	}
 
 	.cr-sketchbook::before,
@@ -705,7 +795,8 @@
 	.cr-strip-card::before,
 	.cr-strip-card::after,
 	.cr-strip-card__frame::before,
-	.cr-strip-card .pk-title::before {
+	.cr-strip-card .pk-title::before,
+	.cr-strip--single .cr-strip__head::before {
 		display: none;
 		content: none;
 	}
@@ -714,11 +805,6 @@
 		border: 2px solid CanvasText;
 		background: Canvas;
 		color: CanvasText;
-	}
-
-	.cr-strip__head,
-	.cr-strip__transcript {
-		border-inline-start: 0;
 	}
 }
 

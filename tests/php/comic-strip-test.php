@@ -398,7 +398,7 @@ namespace {
 	);
 
 	cr_photo_group(
-		'Stream strip keeps stored alt and one link',
+		'Stream strip empties the panel alt and keeps one link',
 		static function (): void {
 			$post = cr_comic_request();
 			$GLOBALS['cr_photo_request']['stream'] = true;
@@ -409,7 +409,8 @@ namespace {
 			$default = stream_strip( 'plugin card', array( 'attrs' => array() ), new WP_Block( array( 'postId' => $post->ID ) ) );
 			cr_photo_contains( '<h2 class="pk-title p-name">', $default, 'Stream heading defaults to h2 under the page h1' );
 			cr_photo_same( 1, cr_comic_anchor_count( $html ), 'one Stream anchor' );
-			cr_photo_contains( 'alt="Panel one stored alt"', $html, 'Stream stored alt' );
+			cr_photo_contains( 'alt=""', $html, 'Stream panel alt is empty; the full alt lives on the single' );
+			cr_photo_not_contains( 'Panel one stored alt', $html, 'Stream omits the stored alt' );
 			cr_photo_contains( '<span class="cr-strip__tab" aria-hidden="true">1</span>', $html, 'tab hidden from accessibility tree' );
 			cr_photo_contains( '<span class="pk-kindlabel">Comics from plugin</span>', $html, 'plugin kind label' );
 			cr_photo_contains( '<details class="cr-strip__transcript-mini">', $html, 'panel-one transcript disclosure' );

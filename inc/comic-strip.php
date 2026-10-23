@@ -231,24 +231,26 @@ function panel_signature( array $panels ): array {
  *
  * @param array<string, mixed> $panel Panel facts.
  * @param string               $size  WordPress image size.
- * @param bool                 $eager Whether to prioritize this image.
+ * @param bool|null            $eager True prioritizes, false lazy-loads, null leaves it to WordPress.
  */
-function panel_image( array $panel, string $size, bool $eager = false ): string {
+function panel_image( array $panel, string $size, ?bool $eager = null ): string {
 	$id    = (int) ( $panel['attachment_id'] ?? 0 );
 	$alt   = (string) ( $panel['alt'] ?? '' );
 	$attrs = array(
 		'alt'   => $alt,
 		'class' => 'u-photo',
 	);
-	if ( $eager ) {
+	if ( true === $eager ) {
 		$attrs['loading']       = 'eager';
 		$attrs['fetchpriority'] = 'high';
+	} elseif ( false === $eager ) {
+		$attrs['loading'] = 'lazy';
 	}
 	if ( $id > 0 ) {
 		return (string) \wp_get_attachment_image( $id, $size, false, $attrs );
 	}
 
-	$loading = $eager ? ' loading="eager" fetchpriority="high"' : '';
+	$loading = true === $eager ? ' loading="eager" fetchpriority="high"' : ( false === $eager ? ' loading="lazy"' : '' );
 	return '<img class="u-photo" src="' . \esc_url( (string) ( $panel['src'] ?? '' ) ) . '" alt="' . \esc_attr( $alt ) . '"' . $loading . '>';
 }
 
@@ -300,7 +302,7 @@ function strip_page( string $html, array $block, $instance = null ): string {
 	$transcript = '';
 	foreach ( $panels as $index => $panel ) {
 		$position = $index + 1;
-		$out     .= '<li class="cr-strip__panel"><span class="cr-strip__tab"><span class="screen-reader-text">' . \esc_html__( 'Panel ', 'courtneyr-child' ) . '</span>' . $position . '</span><figure class="cr-strip__figure">' . panel_image( $panel, 'large', 0 === $index ) . '</figure></li>';
+		$out     .= '<li class="cr-strip__panel"><span class="cr-strip__tab"><span class="screen-reader-text">' . \esc_html__( 'Panel ', 'courtneyr-child' ) . '</span>' . $position . '</span><figure class="cr-strip__figure">' . panel_image( $panel, 'large', 0 === $index ? true : null ) . '</figure></li>';
 		$text     = trim( (string) ( $panel['transcript'] ?? '' ) );
 		if ( '' !== $text ) {
 			/* translators: %d: panel number. */
@@ -342,7 +344,7 @@ function heading_level( array $block ): int {
  * Whether archive panels in this loop row should load eagerly.
  */
 function archive_eager(): bool {
-	return ! \is_paged() && \in_the_loop() && isset( $GLOBALS['wp_query']->current_post ) && (int) $GLOBALS['wp_query']->current_post < 2;
+	return \in_the_loop() && isset( $GLOBALS['wp_query']->current_post ) && (int) $GLOBALS['wp_query']->current_post < 2;
 }
 
 /**
@@ -408,6 +410,8 @@ function kind_label( \WP_Post $post ): string {
 /**
  * Replace a generic drawn-comic Stream card with the strip card.
  *
+ * Panel 1 prints with alt="" here because its full alt lives on the single.
+ *
  * @param string $html     Rendered card.
  * @param array  $block    Parsed block.
  * @param mixed  $instance Block instance.
@@ -428,7 +432,7 @@ function stream_strip( string $html, array $block, $instance = null ): string {
 
 	$panels = is_array( $comic_facts['panels'] ?? null ) ? $comic_facts['panels'] : array();
 	$frame  = array() !== $panels
-		? '<div class="cr-strip-card__frame"><span class="cr-strip__tab" aria-hidden="true">1</span>' . panel_image( $panels[0], 'medium_large' ) . '</div>'
+		? '<div class="cr-strip-card__frame"><span class="cr-strip__tab" aria-hidden="true">1</span>' . panel_image( array_merge( $panels[0], array( 'alt' => '' ) ), 'medium_large' ) . '</div>'
 		: '';
 	$level  = heading_level( $block );
 	$title  = trim( (string) \get_the_title( $post ) );
