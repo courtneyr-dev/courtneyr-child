@@ -665,42 +665,46 @@ body.cr-issue-single.single .single-post__content::before {
 	color: inherit;
 }
 
-/* Keep physical papers and their ink fixed when the page palette flips. */
+/* Keep physical papers and their ink fixed when the page palette flips. Forced
+   colors own ink and paper, so the dark-mode rules stay out of that mode. */
 
-:root[data-theme="dark"] :is(.cr-claim-ticket, .cr-claim-ticket-head, .cr-claim-sheet, .pk-card.pk-card--stream.cr-claim-stub) {
-	color: var(--cr-russian-violet);
-}
+@media (forced-colors: none) {
 
-:root[data-theme="dark"] :is(.cr-claim-ticket__title a, .cr-claim-ticket-head__title, .cr-claim-facts a, .cr-claim-body a, .cr-claim-stub__title a),
-:root[data-theme="dark"] :is(.cr-claim-ticket__title a, .cr-claim-facts a, .cr-claim-body a, .cr-claim-stub__title a):hover {
-	color: var(--cr-russian-violet);
-}
-
-:root[data-theme="dark"] .cr-issue-rack > section.pkiw-group {
-	background: var(--cr-prussian-blue);
-}
-
-:root[data-theme="dark"] {
-	--cr-claim-stub-shadow: var(--cr-selective-yellow);
-}
-
-@media (prefers-color-scheme: dark) {
-
-	:root:not([data-theme="light"]) :is(.cr-claim-ticket, .cr-claim-ticket-head, .cr-claim-sheet, .pk-card.pk-card--stream.cr-claim-stub) {
+	:root[data-theme="dark"] :is(.cr-claim-ticket, .cr-claim-ticket-head, .cr-claim-sheet, .pk-card.pk-card--stream.cr-claim-stub) {
 		color: var(--cr-russian-violet);
 	}
 
-	:root:not([data-theme="light"]) :is(.cr-claim-ticket__title a, .cr-claim-ticket-head__title, .cr-claim-facts a, .cr-claim-body a, .cr-claim-stub__title a),
-	:root:not([data-theme="light"]) :is(.cr-claim-ticket__title a, .cr-claim-facts a, .cr-claim-body a, .cr-claim-stub__title a):hover {
+	:root[data-theme="dark"] :is(.cr-claim-ticket__title a, .cr-claim-ticket-head__title, .cr-claim-facts a, .cr-claim-body a, .cr-claim-stub__title a),
+	:root[data-theme="dark"] :is(.cr-claim-ticket__title a, .cr-claim-facts a, .cr-claim-body a, .cr-claim-stub__title a):hover {
 		color: var(--cr-russian-violet);
 	}
 
-	:root:not([data-theme="light"]) .cr-issue-rack > section.pkiw-group {
+	:root[data-theme="dark"] .cr-issue-rack > section.pkiw-group {
 		background: var(--cr-prussian-blue);
 	}
 
-	:root:not([data-theme="light"]) {
+	:root[data-theme="dark"] {
 		--cr-claim-stub-shadow: var(--cr-selective-yellow);
+	}
+
+	@media (prefers-color-scheme: dark) {
+
+		:root:not([data-theme="light"]) :is(.cr-claim-ticket, .cr-claim-ticket-head, .cr-claim-sheet, .pk-card.pk-card--stream.cr-claim-stub) {
+			color: var(--cr-russian-violet);
+		}
+
+		:root:not([data-theme="light"]) :is(.cr-claim-ticket__title a, .cr-claim-ticket-head__title, .cr-claim-facts a, .cr-claim-body a, .cr-claim-stub__title a),
+		:root:not([data-theme="light"]) :is(.cr-claim-ticket__title a, .cr-claim-facts a, .cr-claim-body a, .cr-claim-stub__title a):hover {
+			color: var(--cr-russian-violet);
+		}
+
+		:root:not([data-theme="light"]) .cr-issue-rack > section.pkiw-group {
+			background: var(--cr-prussian-blue);
+		}
+
+		:root:not([data-theme="light"]) {
+			--cr-claim-stub-shadow: var(--cr-selective-yellow);
+		}
 	}
 }
 
@@ -738,6 +742,10 @@ body.cr-issue-single.single .single-post__content::before {
 		background: Canvas;
 		color: CanvasText;
 		clip-path: none;
+	}
+
+	:is(.cr-claim-ticket, .cr-claim-ticket-head, .cr-claim-sheet, .pk-card.pk-card--stream.cr-claim-stub) :is(*, a) {
+		color: CanvasText;
 	}
 
 	.cr-claim-ticket__title a,
