@@ -143,7 +143,7 @@
 	display: block;
 	height: min(17rem, (100vw - 2 * (var(--wp--preset--spacing--md) + var(--wp--preset--spacing--xl))) * 272 / 1440);
 	background:
-		url(../img/cr-houseplant.svg) 2.2% bottom / auto 75% no-repeat,
+		url(../img/cr-listen-houseplant.svg) 2.2% bottom / auto 75% no-repeat,
 		url(../img/cr-cassette-stack.svg) 17.8% bottom / auto 50% no-repeat,
 		url(../img/cr-boombox.svg) center bottom / auto 100% no-repeat,
 		url(../img/cr-cassette-spines.svg) 81% bottom / auto 64% no-repeat,
@@ -180,7 +180,7 @@
 	.cr-archive--listen .cr-media-shelf::before {
 		height: min(12rem, (100vw - 2 * (var(--wp--preset--spacing--md) + var(--wp--preset--spacing--xl))) * 200 / 640);
 		background:
-			url(../img/cr-houseplant.svg) 2.6% bottom / auto 70% no-repeat,
+			url(../img/cr-listen-houseplant.svg) 2.6% bottom / auto 70% no-repeat,
 			url(../img/cr-boombox.svg) center bottom / auto 100% no-repeat,
 			url(../img/cr-pen-cup.svg) 95.1% bottom / auto 58% no-repeat;
 	}
