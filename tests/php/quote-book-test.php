@@ -352,7 +352,8 @@ namespace Courtneyr\Child\QuoteBookTests {
 
 	$hexes = array();
 	preg_match_all( '/#[0-9a-fA-F]{3,8}\b/', $css, $hexes );
-	check( array( '#d8d3c3', '#d8d3c3' ) === $hexes[0], 'quote CSS contains only the two allowed dark rule literals' );
+	check( array() === $hexes[0], 'quote CSS contains no raw hex colour' );
+	check( 2 === substr_count( $css, '--cr-rule: var(--cr-paper-rule);' ), 'both dark blocks pin the rule to the light-paper token' );
 	check( 0 === preg_match( '/\b(?:rgb|rgba|hsl|hsla)\(/i', $css ), 'quote CSS contains no literal colour function' );
 	check( 0 === preg_match( '/\bfilter\s*:/i', $css ) && ! str_contains( $css, 'blur(' ) && ! str_contains( $css, 'gradient' ), 'quote CSS contains no filter, blur or gradient' );
 	check( 0 === preg_match( '/font-size\s*:\s*(?:0(?:\.\d+)?|0\.[0-6]\d*)rem\b/', $css ), 'quote CSS has no font size below the text floor' );

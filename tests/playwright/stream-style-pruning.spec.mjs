@@ -12,9 +12,15 @@ if ( process.env.CR_BYPASS ) {
 async function sheets( page, path ) {
 	const response = await page.goto( path, { waitUntil: 'domcontentloaded' } );
 	expect( response.status() ).toBe( 200 );
-	return page.locator( 'link[rel="stylesheet"]' ).evaluateAll( ( links ) =>
+	const linked = await page.locator( 'link[rel="stylesheet"]' ).evaluateAll( ( links ) =>
 		links.map( ( link ) => ( link.getAttribute( 'href' ) || '' ).split( '?' )[ 0 ].split( '/' ).pop() )
 	);
+	// Since 0.7.129 Perfmatters inlines the kind sheets as <style id="courtneyr-photo-css">;
+	// count those as cr-photo.css so the loaded/skipped checks still hold.
+	const inlined = await page.locator( 'style[id^="courtneyr-"][id$="-css"]' ).evaluateAll( ( styles ) =>
+		styles.map( ( style ) => style.id.replace( /^courtneyr-/, 'cr-' ).replace( /-css$/, '.css' ) )
+	);
+	return [ ...linked, ...inlined ];
 }
 
 for ( const path of [ '/', '/stream/' ] ) {
@@ -48,4 +54,16 @@ test( 'the front page loads the card sheet without blocking; /stream/ keeps it b
 	expect( front ).toMatch( /<noscript><link[^>]*id=['"]courtneyr-post-kinds-css['"]/ );
 	const stream = await ( await request.get( '/stream/' ) ).text();
 	expect( stream ).toMatch( /id=['"]courtneyr-post-kinds-css['"][^>]*media=['"]all['"]/ );
+} );
+
+test( 'Perfmatters delays the full sheets on the front page only', async ( { request } ) => {
+	const front = await ( await request.get( '/' ) ).text();
+	test.skip( ! front.includes( 'id="perfmatters-used-css"' ), 'Perfmatters used CSS is not active here' );
+	// Front page: held until interaction (its used CSS is built from this page alone).
+	expect( front ).toMatch( /<link[^>]*data-pmdelayedstyle=/ );
+	// A single post shares post.used.css with every other post, so its full sheets
+	// must still arrive on their own (async), never wait for interaction.
+	const single = await ( await request.get( '/2026/07/06/american-obituary/' ) ).text();
+	expect( single ).not.toMatch( /data-pmdelayedstyle=/ );
+	expect( single ).toMatch( /<link[^>]*media=['"]print['"][^>]*onload=/ );
 } );

@@ -42,6 +42,7 @@
   --cr-light-orange:    #fee2c3;
   --cr-printer-ivory:   #fbfaf5;
   --cr-light-gray:      #ebebeb;  /* locked palette; paper stock (cut-paper titles) */
+  --cr-paper-rule:      #d8d3c3;  /* rule on light paper; stays light in dark mode (quote book) */
   --cr-photocopier-blk: #1a1714;
   --cr-night-elevated:  #251f1c;
   --cr-white:           #ffffff;
@@ -124,7 +125,7 @@
   --cr-link-visited: #5a4a8a;             /* derived violet, AA on ivory */
 
   /* Borders & rules */
-  --cr-rule:          #d8d3c3;            /* horizontal rule, table border */
+  --cr-rule:          var(--cr-paper-rule); /* horizontal rule, table border */
   --cr-border:        rgba(36, 28, 74, 0.12);
   --cr-border-strong: rgba(36, 28, 74, 0.24);
   --cr-border-thick:  2px solid var(--cr-ink);

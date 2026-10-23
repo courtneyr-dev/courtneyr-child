@@ -93,6 +93,8 @@ namespace {
 	function strip_shortcodes( $text ) { return $text; }
 	function wp_strip_all_tags( $text ) { return $text; }
 	function wp_enqueue_script() {}
+	function wp_register_script_module() {}
+	function wp_enqueue_script_module() {}
 	function wp_add_inline_style() {}
 	function wp_enqueue_block_style() {}
 	function add_editor_style() {}
