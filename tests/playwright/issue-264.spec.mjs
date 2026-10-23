@@ -481,8 +481,13 @@ test.describe( 'issue Stream stubs', () => {
 		test.skip( ! isDark( testInfo ), 'dark-project assertion' );
 		await openStream( page );
 		for ( const card of await page.locator( 'article.cr-claim-stub' ).all() ) {
-			const paint = await card.evaluate( ( node ) => ( { background: getComputedStyle( node ).backgroundColor, color: getComputedStyle( node ).color } ) );
-			expect( paint ).toEqual( { background: IVORY, color: VIOLET } );
+			const paint = await card.evaluate( ( node ) => ( {
+				background: getComputedStyle( node, '::after' ).backgroundColor,
+				color: getComputedStyle( node ).color,
+				shadow: getComputedStyle( node, '::before' ).backgroundColor,
+				stub: getComputedStyle( node.querySelector( '.cr-claim-stub__tear' ), '::after' ).backgroundColor,
+			} ) );
+			expect( paint ).toEqual( { background: IVORY, color: VIOLET, shadow: SELECTIVE_YELLOW, stub: LIGHT_ORANGE } );
 		}
 	} );
 } );
