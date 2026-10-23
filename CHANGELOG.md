@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.133
+
+What you see change on courtneyr.dev:
+
+- The listen archive's header sits centered over the boombox, with a short orange marker under its description, and the boombox still life is redrawn as torn-paper collage.
+
+Under the hood: cr-archives.css composes the listen header on the boombox axis and restores the 8rem short marker; the still-life SVGs use the palette's paper-fibre, halftone, torn-edge and hard-shadow vocabulary (#229, PKIW #226, Codex mockup fidelity 98).
+
 ## 0.7.132
 
 What you see change on courtneyr.dev:
