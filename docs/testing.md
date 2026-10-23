@@ -1,6 +1,6 @@
 # Tests and lint
 
-The theme has no build step. Three gates run in CI on every push and pull request: PHPCS, stylelint and a `theme.json` schema check. Two more commands, `npm run evidence` and `npm run captures`, need a running copy of the site, so you run them locally.
+The theme source is unminified and nothing builds it in place: `tools/minify-css.mjs` runs on the deploy repo's export at sync time (see [CSS minify](#css-minify)). Four gates run in CI on every push and pull request: PHPCS, stylelint, a `theme.json` schema check and the CSS minify check. Two more commands, `npm run evidence` and `npm run captures`, need a running copy of the site, so you run them locally.
 
 ## Setup
 
@@ -19,6 +19,7 @@ Versions are pinned exactly in `composer.json` and `package.json`. The repo igno
 | `npm run lint:php` | PHPCS with the `WordPress` ruleset from `phpcs.xml.dist`, compared with `tests/lint/phpcs-baseline.json` | yes |
 | `npm run lint:css` | stylelint on `assets/css/**/*.css` with `stylelint.config.mjs`, compared with `tests/lint/stylelint-baseline.json` | yes |
 | `npm run lint:theme-json` | Validates `theme.json` and `styles/**/*.json` against the pinned schema in `tests/schemas/` | yes |
+| `npm run build:css:check` | Minifies every `assets/css/**/*.css` in memory with the pinned esbuild and fails on a parse error, a larger output, a lost `@font-face`, `@keyframes`, `@supports`, `@container` or `url()`, or a changed class-token set; writes nothing | yes |
 | `npm run lint` | Runs the three above; stops at the first failure | no |
 | `npm run lint:php:baseline` | Rewrites the PHPCS baseline from the current results | no |
 | `npm run lint:css:baseline` | Rewrites the stylelint baseline from the current results | no |
@@ -111,6 +112,15 @@ Runs `tests/playwright/captures.spec.mjs` in four projects, `390-light`, `390-da
 Dark and light mode set both the browser color scheme and the theme's `courtneyr-theme` localStorage value, which the no-flash script reads before first paint.
 
 `tests/output/` is gitignored.
+
+## CSS minify
+
+The sources in `assets/css/` are never minified in this repo. `private/bin/sync-theme.sh` in the deploy repo exports HEAD with `git archive`, runs `tools/minify-css.mjs` on the export's `assets/css/`, then rsyncs it, so deployed stylesheets keep their names and paths. That matters because `prunable_sheets()` in `inc/stream-style-pruning.php` matches on file names, and the sync writes `css-build.txt` (tool, version, source commit, per-file sha256) next to `source-sha.txt`.
+
+- The sync reads the esbuild version from the exported `package.json` and aborts, before copying anything, if the copy in `node_modules` differs. Run `npm install --ignore-scripts` in the checkout you pass to the sync.
+- `CR_MINIFY_CSS=0 private/bin/sync-theme.sh <checkout>` copies the sources unchanged (the rollback switch; revert the sync commit for a full rollback).
+- Perfmatters' own minify skips this theme on purpose (`perfmatters_exclusions()` in `inc/enqueue.php`), so there is one minifier, not two.
+- Bump the theme version in the same release: the sheets keep their URLs, and `?ver=` is what makes browsers and edge caches fetch the new bytes.
 
 ## CI
 

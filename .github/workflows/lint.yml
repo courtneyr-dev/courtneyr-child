@@ -49,3 +49,7 @@ jobs:
       - name: dark/light token parity in tokens.css
         if: ${{ !cancelled() }}
         run: npm run lint:dark-tokens
+
+      - name: every stylesheet still minifies cleanly (tools/minify-css.mjs --check)
+        if: ${{ !cancelled() }}
+        run: npm run build:css:check
