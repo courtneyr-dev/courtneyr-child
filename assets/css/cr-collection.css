@@ -19,10 +19,14 @@
 	grid-template-columns: minmax(0, 1fr);
 	align-items: stretch;
 	gap: var(--cr-space-lg);
-	max-inline-size: 72rem;
+	max-inline-size: 96rem;
 	margin-inline: auto;
 	padding: 0;
 	list-style: none;
+}
+
+.cr-archive .wp-block-post-template.is-style-cr-cabinet-hall {
+	margin-inline: auto;
 }
 
 .wp-block-post-template.is-style-cr-cabinet-hall > li {
@@ -65,6 +69,7 @@
 	box-shadow: 0 0 0 2px var(--cr-cabinet-edge);
 	color: var(--cr-cabinet-ink);
 	transform: none;
+	container-type: inline-size;
 }
 
 .is-style-cr-cabinet-hall .pk-card.pk-card--collection-listing::before {
@@ -77,11 +82,12 @@
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	grid-template-rows: repeat(2, minmax(0, 1fr));
+	align-self: stretch;
 	align-items: center;
 	gap: var(--cr-space-sm);
 	box-sizing: border-box;
 	min-width: 0;
-	aspect-ratio: 4 / 3;
+	min-block-size: calc(100cqi * 3 / 4);
 	padding: var(--cr-space-md);
 	border: 2px solid var(--cr-cabinet-glass);
 	background: var(--cr-cabinet-paper);
@@ -132,9 +138,10 @@
 	grid-column: 1;
 	border-inline-start: 2px solid var(--cr-cabinet-frame);
 	font-family: var(--cr-font-accent);
-	font-size: var(--cr-text-md);
+	font-size: var(--cr-text-lg);
 	font-weight: var(--cr-weight-bold);
 	line-height: var(--cr-leading-snug);
+	text-transform: uppercase;
 	overflow-wrap: anywhere;
 }
 
@@ -149,7 +156,7 @@
 	align-items: center;
 	border-inline-end: 2px solid var(--cr-cabinet-frame);
 	font-family: var(--cr-font-body);
-	font-size: var(--cr-text-floor);
+	font-size: var(--cr-text-sm);
 	white-space: nowrap;
 }
 
@@ -206,7 +213,9 @@
 	padding: 0.375rem 0.375rem 1.5rem;
 	border: 0.375rem solid var(--cr-cabinet-frame);
 	border-radius: 0;
-	background: var(--cr-cabinet-paper);
+	background: var(--cr-cabinet-paper) no-repeat;
+	background-origin: content-box;
+	background-size: 100% 100%;
 	box-shadow: 0 0 0 2px var(--cr-cabinet-edge);
 	color: var(--cr-cabinet-ink);
 	transform: none;
@@ -237,16 +246,21 @@
 	margin: 0;
 	padding: var(--cr-space-md);
 	border: 0;
-	border-block-start: 2px solid var(--cr-cabinet-glass);
+	border-block-end: 2px solid var(--cr-cabinet-glass);
 	border-radius: 0;
-	background: var(--cr-cabinet-paper);
+	background: none;
 	color: var(--cr-cabinet-ink);
 	transform: none;
 }
 
-:is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) > .pkiw-collection-item:first-child,
-.editor-styles-wrapper :is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) .pkiw-collection-item:first-child {
-	border-block-start: 0;
+:is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) > .pkiw-collection-item--has-media,
+.editor-styles-wrapper :is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) .pkiw-collection-item--has-media {
+	grid-template-rows: minmax(0, 1fr) auto;
+}
+
+:is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) > .pkiw-collection-item:not(.pkiw-collection-item--has-media) > .pkiw-collection-item__label,
+.editor-styles-wrapper :is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) .pkiw-collection-item:not(.pkiw-collection-item--has-media) > .pkiw-collection-item__label {
+	align-self: end;
 }
 
 .pkiw-collection-item__media {
@@ -254,16 +268,16 @@
 	display: grid;
 	place-items: end center;
 	min-height: 9rem;
-	padding: var(--cr-space-sm) var(--cr-space-sm) var(--cr-space-md);
+	padding: var(--cr-space-lg) var(--cr-space-lg) calc(var(--cr-space-sm) + var(--cr-space-xl));
 }
 
 .pkiw-collection-item__media::after {
 	content: "";
 	position: absolute;
 	z-index: 0;
-	inset-inline: var(--cr-space-sm);
+	inset-inline: var(--cr-space-md);
 	inset-block-end: var(--cr-space-sm);
-	height: var(--cr-space-md);
+	height: var(--cr-space-xl);
 	border: 2px solid var(--cr-cabinet-frame);
 	background: var(--cr-cabinet-paper);
 }
@@ -272,10 +286,11 @@
 	position: relative;
 	z-index: 1;
 	display: block;
-	width: 100%;
+	width: 70%;
 	height: auto;
-	max-height: 15rem;
+	max-height: 10rem;
 	object-fit: contain;
+	object-position: center bottom;
 }
 
 .pkiw-collection-item__label {
@@ -317,8 +332,10 @@
 	line-height: var(--cr-leading-snug);
 }
 
-.pkiw-collection-item__title a {
-	color: inherit;
+.pkiw-collection-item .pkiw-collection-item__title,
+.pkiw-collection-item__title a,
+.pkiw-collection-item__title a:any-link {
+	color: var(--cr-cabinet-ink);
 	text-decoration: none;
 }
 
@@ -337,22 +354,12 @@
 
 	:is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-
-	:is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) > .pkiw-collection-item:nth-child(n),
-	.editor-styles-wrapper :is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) .pkiw-collection-item:nth-child(n) {
-		border-block-start: 0;
-		border-inline-start: 0;
-	}
-
-	:is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) > .pkiw-collection-item:nth-child(n+3),
-	.editor-styles-wrapper :is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) .pkiw-collection-item:nth-child(n+3) {
-		border-block-start: 2px solid var(--cr-cabinet-glass);
-	}
-
-	:is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) > .pkiw-collection-item:nth-child(even),
-	.editor-styles-wrapper :is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) .pkiw-collection-item:nth-child(even) {
-		border-inline-start: 2px solid var(--cr-cabinet-glass);
+		background-image: linear-gradient(
+			90deg,
+			transparent calc(50% - 1px),
+			var(--cr-cabinet-glass) calc(50% - 1px) calc(50% + 1px),
+			transparent calc(50% + 1px)
+		);
 	}
 }
 
@@ -360,26 +367,16 @@
 
 	:is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) {
 		grid-template-columns: repeat(4, minmax(0, 1fr));
-	}
-
-	:is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) > .pkiw-collection-item:nth-child(n),
-	.editor-styles-wrapper :is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) .pkiw-collection-item:nth-child(n) {
-		border-block-start: 0;
-		border-inline-start: 0;
-	}
-
-	:is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) > .pkiw-collection-item:nth-child(n+5),
-	.editor-styles-wrapper :is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) .pkiw-collection-item:nth-child(n+5) {
-		border-block-start: 2px solid var(--cr-cabinet-glass);
-	}
-
-	:is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) > .pkiw-collection-item:nth-child(4n+2),
-	:is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) > .pkiw-collection-item:nth-child(4n+3),
-	:is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) > .pkiw-collection-item:nth-child(4n+4),
-	.editor-styles-wrapper :is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) .pkiw-collection-item:nth-child(4n+2),
-	.editor-styles-wrapper :is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) .pkiw-collection-item:nth-child(4n+3),
-	.editor-styles-wrapper :is(.wp-block-group.is-style-cr-cabinet, .wp-block-group.pkiw-collection:not([class*="is-style-"])) .pkiw-collection-item:nth-child(4n+4) {
-		border-inline-start: 2px solid var(--cr-cabinet-glass);
+		background-image: linear-gradient(
+			90deg,
+			transparent calc(25% - 1px),
+			var(--cr-cabinet-glass) calc(25% - 1px) calc(25% + 1px),
+			transparent calc(25% + 1px) calc(50% - 1px),
+			var(--cr-cabinet-glass) calc(50% - 1px) calc(50% + 1px),
+			transparent calc(50% + 1px) calc(75% - 1px),
+			var(--cr-cabinet-glass) calc(75% - 1px) calc(75% + 1px),
+			transparent calc(75% + 1px)
+		);
 	}
 }
 
@@ -645,6 +642,7 @@
 	}
 
 	.pkiw-collection-item a,
+	.pkiw-collection-item__title a:any-link,
 	.is-style-cr-cabinet-hall .pk-card--collection-listing a,
 	.cr-collection-card a {
 		color: LinkText;
