@@ -42,7 +42,9 @@
 }
 
 .cr-archive__header > .cr-archive-identity--kind + *,
-.cr-archive__header > .cr-archive-identity-editor:has(.cr-archive-identity--kind) + * {
+.cr-archive__lockup > .cr-archive-identity--kind + *,
+.cr-archive__header > .cr-archive-identity-editor:has(.cr-archive-identity--kind) + *,
+.cr-archive__lockup > .cr-archive-identity-editor:has(.cr-archive-identity--kind) + * {
 	margin-block-start: 0;
 }
 
@@ -110,6 +112,34 @@
 
 /* The h1 keeps its ✺ flank; the accent tints the short marker bar below it. */
 .cr-archive__header hr.is-style-cr-marker-bar-short { background-color: var(--cr-archive-accent, var(--cr-ut-orange)); }
+
+/* A centered header (PKIW #226 listen). The template wraps the badge holder
+   and the h1 in .cr-archive__lockup, which shrinks to the tiles' width and
+   centers, so the title, the description and the short marker share the
+   still life's axis and the badge stays on the first tile's corner. The h1
+   gives up its own inline-size container (a contained box reports no
+   content width, which would collapse the lockup), and the header takes
+   it, so the tiles still size from the column and wrap inside it. */
+.cr-archive__header:has(> .cr-archive__lockup) {
+	container-type: inline-size;
+	text-align: center;
+}
+
+.cr-archive__header > .cr-archive__lockup {
+	inline-size: fit-content;
+	max-inline-size: 100%;
+	margin-inline: auto !important;
+}
+
+.cr-archive__lockup > .cr-cutout {
+	container-type: normal;
+}
+
+/* The short marker keeps its 8rem component width here; the header's
+   generic separator rule (components.css) stretches it to 60%. */
+.cr-archive__header:has(> .cr-archive__lockup) hr.is-style-cr-marker-bar-short {
+	width: 8rem !important;
+}
 
 /* Stream-family archives: the collage owns the wide column, cards keep the
    plugin's own paint (cr-post-kinds.css). */
