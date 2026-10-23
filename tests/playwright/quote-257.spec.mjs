@@ -336,6 +336,37 @@ test.describe( 'quote cards (20, 21)', () => {
 		await expect( q05.locator( '.u-quotation-of.h-cite[hidden] .p-author' ) ).toHaveText( 'Lena Park' );
 		await expect( q05.locator( '.u-quotation-of.h-cite[hidden] data.u-url' ) ).toHaveAttribute( 'value', 'https://example.org/q05' );
 	} );
+
+	test( 'each card ends at its own quote and cite, even beside a taller row partner', async ( { page } ) => {
+		test.skip( '' !== FLIP, 'unflipped archive fixture state' );
+		let unevenRows = 0;
+		for ( const number of [ 1, 2, 3 ] ) {
+			await openSeeded( page, archivePath( number ) );
+			const report = await page.locator( 'ul.pkiw-quote-section__items' ).evaluateAll( ( lists ) => lists.flatMap( ( list ) => {
+				const rows = new Map();
+				for ( const card of list.querySelectorAll( ':scope > li > .pkiw-quote-entry' ) ) {
+					const style = getComputedStyle( card );
+					const box = card.getBoundingClientRect();
+					const content = [ ...card.children ]
+						.filter( ( child ) => ! child.hidden && 'absolute' !== getComputedStyle( child ).position && child.getBoundingClientRect().height > 0 )
+						.reduce( ( bottom, child ) => Math.max( bottom, child.getBoundingClientRect().bottom ), box.top );
+					const fitted = content - box.top + parseFloat( style.paddingBottom ) + parseFloat( style.borderBottomWidth );
+					const top = Math.round( box.top );
+					rows.set( top, [ ...( rows.get( top ) || [] ), box.height ] );
+					card.dataset.fitSlack = String( Math.round( box.height - Math.max( fitted, parseFloat( style.minHeight ) || 0 ) ) );
+				}
+				return [ ...list.querySelectorAll( ':scope > li > .pkiw-quote-entry' ) ].map( ( card ) => ( {
+					slack: Number( card.dataset.fitSlack ),
+					uneven: ( rows.get( Math.round( card.getBoundingClientRect().top ) ) || [] ).some( ( height ) => Math.abs( height - card.getBoundingClientRect().height ) > 24 ),
+				} ) );
+			} ) );
+			for ( const [ index, card ] of report.entries() ) {
+				expect( card.slack, `page ${ number } card ${ index + 1 } blank paper below its content` ).toBeLessThanOrEqual( 2 );
+			}
+			unevenRows += report.filter( ( card ) => card.uneven ).length;
+		}
+		expect( unevenRows, 'the fixtures pair a short card with a long one somewhere on pages 1 to 3' ).toBeGreaterThan( 0 );
+	} );
 } );
 
 // --- Privacy flips (22) -----------------------------------------------------------------------
