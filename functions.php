@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.130' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.131' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -82,6 +82,9 @@ require_once __DIR__ . '/inc/question.php';
 require_once __DIR__ . '/inc/stream-question.php';
 require_once __DIR__ . '/inc/collection.php';
 require_once __DIR__ . '/inc/stream-collection.php';
+require_once __DIR__ . '/inc/issue.php';
+require_once __DIR__ . '/inc/single-issue.php';
+require_once __DIR__ . '/inc/stream-issue.php';
 require_once __DIR__ . '/inc/stream-checkin.php';
 require_once __DIR__ . '/inc/single-checkin.php';
 require_once __DIR__ . '/inc/kind-parts.php';
@@ -99,6 +102,7 @@ require_once __DIR__ . '/inc/play.php';
 require_once __DIR__ . '/inc/play-board.php';
 require_once __DIR__ . '/inc/play-video.php';
 require_once __DIR__ . '/inc/comic.php';
+require_once __DIR__ . '/inc/comic-strip.php';
 require_once __DIR__ . '/inc/recipe.php';
 require_once __DIR__ . '/inc/menu.php';
 require_once __DIR__ . '/inc/checkin-archive.php';

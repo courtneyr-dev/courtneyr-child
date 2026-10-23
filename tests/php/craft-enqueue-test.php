@@ -132,6 +132,8 @@ namespace {
 
 	/** Stub: scripts aren't inspected by this test. */
 	function wp_enqueue_script() {}
+	function wp_register_script_module() {}
+	function wp_enqueue_script_module() {}
 
 	/** Record an inline style by handle. */
 	function wp_add_inline_style( $handle = '', $css = '' ) {

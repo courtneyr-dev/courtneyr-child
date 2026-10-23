@@ -496,7 +496,7 @@
 	--cr-link-visited: var(--cr-russian-violet-soft);
 	--cr-band-link: var(--cr-russian-violet);
 	--cr-focus-halo: var(--cr-russian-violet);
-	--cr-rule: #d8d3c3;
+	--cr-rule: var(--cr-paper-rule);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -508,7 +508,7 @@
 		--cr-link-visited: var(--cr-russian-violet-soft);
 		--cr-band-link: var(--cr-russian-violet);
 		--cr-focus-halo: var(--cr-russian-violet);
-		--cr-rule: #d8d3c3;
+		--cr-rule: var(--cr-paper-rule);
 	}
 }
 

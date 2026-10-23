@@ -287,6 +287,7 @@ const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-nav',
 	'courtneyr-mood-pin',
 	'courtneyr-comic',
+	'courtneyr-comic-strip',
 	'courtneyr-media-shelf',
 	'courtneyr-gallery-zine',
 	'courtneyr-ticket',

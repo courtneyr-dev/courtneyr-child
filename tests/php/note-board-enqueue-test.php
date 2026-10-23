@@ -114,6 +114,8 @@ namespace {
 	}
 	function register_block_style() {}
 	function wp_enqueue_script() {}
+	function wp_register_script_module() {}
+	function wp_enqueue_script_module() {}
 	function wp_add_inline_style() {}
 	function wp_enqueue_block_style() {}
 	function add_editor_style() {}
