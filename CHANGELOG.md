@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.131
+
+What you see change on courtneyr.dev:
+
+- Nothing you can see. Every page looks the same; the theme's stylesheets are smaller on the wire.
+
+Under the hood: `private/bin/sync-theme.sh` in the deploy repo now runs `tools/minify-css.mjs` (esbuild 0.28.2, pinned) on its export of this repo before it copies the theme, so deployed stylesheets are minified with the same names and paths. The sources here stay commented. CI runs the same script with `--check`. `CR_MINIFY_CSS=0` makes a sync copy the sources unchanged.
+
 ## 0.7.121
 
 What you see change on courtneyr.dev:
