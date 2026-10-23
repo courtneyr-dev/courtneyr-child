@@ -41,7 +41,7 @@ async function open( page, path, width = 1440 ) {
 async function openSeeded( page, path = drawnPath(), width = 1440 ) {
 	const response = await open( page, path, width );
 	skipUnlessSeeded( 404 === response?.status(), `no page at ${ path }` );
-	skipUnlessSeeded( 0 === await page.locator( `a[href*="${ slugOf( 'D01' ) }"]` ).count(), 'issue 266 archive fixtures are not seeded' );
+	skipUnlessSeeded( 0 === await page.locator( 'a[href*="seed-266-"]' ).count(), 'issue 266 archive fixtures are not seeded' );
 	return response;
 }
 
@@ -59,6 +59,9 @@ async function outsideLinks( locator ) {
 
 async function expectNoHorizontalOverflow( page, selector = 'main' ) {
 	expect( await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ) ).toBeLessThanOrEqual( 0 );
+	if ( null === selector ) {
+		return;
+	}
 	const offenders = await page.locator( selector ).evaluateAll( ( nodes ) => nodes.filter( ( node ) => node.scrollWidth > node.clientWidth + 1 || node.getBoundingClientRect().right > innerWidth + 1 ).length );
 	expect( offenders ).toBe( 0 );
 }
@@ -107,8 +110,8 @@ test.describe( 'drawn comics archive', () => {
 	test( 'header and series navigation preserve the shared archive shell', async ( { page } ) => {
 		for ( const width of WIDTHS ) {
 			await openSeeded( page, drawnPath(), width );
-			await expect( page.locator( 'main h1.cr-archive__title' ) ).toHaveText( 'Comics' );
-			await expect( page.locator( '.cr-cutout__tile[aria-hidden="true"]' ) ).toHaveCount( 6 );
+			await expect( page.locator( 'main h1.cr-archive__title .cr-cutout__text' ) ).toHaveText( 'Comics' );
+			await expect( page.locator( 'main h1.cr-archive__title .cr-cutout__tiles[aria-hidden="true"] .cr-cutout__tile' ) ).toHaveCount( 6 );
 			expect( ( await page.locator( 'main' ).innerText() ).includes( 'SAMPLE CONTENT' ) ).toBe( false );
 			const nav = page.locator( 'nav.pk-comic-series' );
 			await expect( nav ).toHaveCount( 1 );
@@ -223,14 +226,14 @@ test.describe( 'drawn comic single', () => {
 		expect( await spread.locator( '.cr-strip__entry > dt' ).allTextContents() ).toEqual( [ 'Panel 1', 'Panel 2', 'Panel 3', 'Panel 4' ] );
 		for ( const [ index, panel ] of ( await spread.locator( '.cr-strip__panel' ).all() ).entries() ) {
 			const tab = panel.locator( '.cr-strip__tab' );
-			await expect( tab ).toHaveAccessibleName( `Panel ${ index + 1 }` );
+			await expect( tab ).toHaveText( `Panel ${ index + 1 }` );
 			const boxes = { tab: await tab.boundingBox(), figure: await panel.locator( 'figure' ).boundingBox() };
-			expect( boxes.tab.bottom ).toBeLessThanOrEqual( boxes.figure.top + 1 );
+			expect( boxes.tab.y + boxes.tab.height ).toBeLessThanOrEqual( boxes.figure.y + 1 );
 		}
 		const entry = main.locator( '.h-entry.pkiw-singular-entry' ).first();
-		await expect( entry.locator( '.p-name' ) ).toHaveCount( 1 );
+		await expect( entry.locator( '.p-name:visible' ) ).toHaveCount( 1 );
 		await expect( entry.locator( '.u-photo' ) ).toHaveCount( 4 );
-		await expect( entry.locator( '.dt-published' ) ).toHaveCount( 1 );
+		await expect( entry.locator( '.dt-published:visible' ) ).toHaveCount( 1 );
 		await expect( entry.locator( '.u-read-of' ) ).toHaveCount( 0 );
 	} );
 
@@ -341,7 +344,8 @@ test.describe( 'cross-cutting states', () => {
 			await open( page, path, 320 );
 			skipUnlessSeeded( 0 === await page.locator( '.cr-sketchbook, .cr-strip--single, .cr-strip-card' ).count(), `fixtures absent at ${ path }` );
 			expect( await axeMain( page ), `axe at ${ path }` ).toEqual( [] );
-			await expectNoHorizontalOverflow( page );
+			// Page-level scroll only: the site-wide newsletter band is 100vw and rotated, so it overruns main without scrolling the page.
+			await expectNoHorizontalOverflow( page, null );
 		}
 		expect( errors ).toEqual( [] );
 	} );

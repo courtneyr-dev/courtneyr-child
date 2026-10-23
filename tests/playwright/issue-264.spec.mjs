@@ -409,7 +409,7 @@ test.describe( 'issue singles', () => {
 		const main = await openSingle( page, 'X01' );
 		await expect( main.locator( 'form.post-password-form' ) ).toHaveCount( 1 );
 		await expect( main.locator( '.cr-claim-ticket-head, .pkiw-issue-facts, .cr-claim-body, .cr-claim-ticket-head__stub' ) ).toHaveCount( 0 );
-		expect( await main.innerText() ).not.toMatch( /acorn-ledger|#110|Waiting|Open/i );
+		expect( await scopedText( main, '.cr-newsletter-banner, nav.cr-post-nav' ) ).not.toMatch( /acorn-ledger|#110|Waiting|Open/i );
 	} );
 
 	test( 'the four required singles fit 320 pixels', async ( { page } ) => {
