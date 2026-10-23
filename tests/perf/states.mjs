@@ -16,7 +16,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const port = 9400 + Math.floor(Math.random() * 400);
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'states-profile-'));
 const chrome = spawn('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  [`--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, '--no-first-run', '--disable-extensions', '--disable-sync', '--window-position=-2400,0', '--window-size=500,900', 'about:blank'], { stdio: 'ignore' });
+  [`--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--disable-extensions', '--disable-sync', '--window-position=-2400,0', '--window-size=500,900', 'about:blank'], { stdio: 'ignore' });
 let ver;
 for (let i = 0; i < 50; i++) { try { ver = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json(); break; } catch { await sleep(200); } }
 if (!ver) { chrome.kill(); throw new Error('chrome did not start'); }
