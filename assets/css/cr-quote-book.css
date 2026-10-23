@@ -424,6 +424,7 @@
 
 	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)) {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-rows: max-content minmax(0, 1fr);
 	}
 
 	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)) > .pkiw-quote-authors {

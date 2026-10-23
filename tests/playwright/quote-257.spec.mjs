@@ -547,6 +547,29 @@ test.describe( 'quote states (26)', () => {
 		expect( missing?.status() ).toBe( 404 );
 	} );
 
+	test( 'a sparse last page starts its author group under By author and leaves plain paper after it', async ( { page } ) => {
+		test.skip( 'archive' !== STATE || '' !== FLIP, 'unflipped archive fixture state' );
+		const measure = () => page.locator( '.cr-quote-book' ).evaluate( ( book ) => {
+			const box = ( selector ) => book.querySelector( selector ).getBoundingClientRect();
+			const cardsOnPage = book.querySelectorAll( '.pkiw-quote-entry' );
+			return {
+				gap: box( '.pkiw-quote-section__heading' ).top - box( ':scope > .pkiw-quote-authors' ).bottom,
+				cards: cardsOnPage.length,
+				lastCardBottom: cardsOnPage[ cardsOnPage.length - 1 ].getBoundingClientRect().bottom,
+				worksBottom: box( ':scope > .pkiw-quote-works' ).bottom,
+				bookBottom: book.getBoundingClientRect().bottom,
+			};
+		} );
+		await openSeeded( page, archivePath( 1 ), 1440 );
+		const full = await measure();
+		await openSeeded( page, archivePath( lastPage() ), 1440 );
+		const sparse = await measure();
+		expect( sparse.cards, 'the last page holds the Other tail only' ).toBeLessThan( 8 );
+		expect( Math.abs( sparse.gap - full.gap ), 'By author to first H3 gap matches a full page' ).toBeLessThanOrEqual( 2 );
+		expect( sparse.lastCardBottom, 'plain paper follows the short author content' ).toBeLessThan( sparse.worksBottom );
+		expect( sparse.bookBottom, 'book height follows the taller works page' ).toBeGreaterThanOrEqual( sparse.worksBottom );
+	} );
+
 	test( 'works list contains six author-aware pairs and duplicate titles carry both filters', async ( { page } ) => {
 		test.skip( 'archive' !== STATE || '' !== FLIP, 'unflipped archive fixture state' );
 		await openSeeded( page );
