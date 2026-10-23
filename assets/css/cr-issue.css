@@ -254,21 +254,12 @@
 	min-width: 0;
 	margin-block-end: var(--cr-space-xl);
 	padding: var(--cr-space-lg);
+	border: 2px solid var(--cr-russian-violet);
 	background-color: var(--cr-printer-ivory);
 	background-image: var(--cr-fiber);
 	box-shadow: var(--cr-shadow-hard);
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-body);
-}
-
-.cr-claim-sheet::after {
-	content: "";
-	position: absolute;
-	inset-inline: 0;
-	inset-block-start: 100%;
-	height: 0.75rem;
-	background: var(--cr-printer-ivory);
-	clip-path: polygon(0 0, 100% 0, 100% 38%, 96% 100%, 91% 44%, 86% 92%, 80% 40%, 74% 100%, 68% 45%, 61% 94%, 55% 42%, 48% 100%, 42% 43%, 35% 92%, 28% 41%, 21% 100%, 14% 45%, 7% 94%, 0 40%);
 }
 
 .cr-claim-facts,
@@ -279,6 +270,7 @@
 .cr-claim-facts dl.pkiw-issue-facts__list {
 	margin: 0;
 	border-block-start: 1px solid var(--cr-russian-violet);
+	border-inline: 1px solid var(--cr-russian-violet);
 }
 
 .cr-claim-facts div.pkiw-issue-facts__row {
@@ -537,7 +529,12 @@
 		padding-inline: var(--cr-space-sm);
 		border-block-end: 0;
 		border-inline-end: 4px dotted var(--cr-russian-violet);
+		font-size: var(--cr-text-3xl);
 		order: initial;
+	}
+
+	.cr-claim-ticket-head__title {
+		font-size: var(--cr-text-4xl);
 	}
 }
 
@@ -592,6 +589,13 @@
 	.pk-card.pk-card--stream.cr-claim-stub:hover {
 		transform: translateY(-2px);
 	}
+}
+
+/* The site's single-post bookend glyph and kind-single doodle field would add
+   marks beyond the ticket's three strokes and sticky square. */
+body.cr-issue-single.single main.single-post::before,
+body.cr-issue-single.single .single-post__content::before {
+	content: none;
 }
 
 /* Author content on the sheet keeps the paper's ink in every colour scheme. */
