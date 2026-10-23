@@ -106,7 +106,9 @@ async function resolvedPaper( locator ) {
 
 async function focusPaint( focus, painted = focus ) {
 	await focus.focus();
-	return painted.evaluate( ( node ) => {
+	// cr-nav.css animates the pager's box-shadow into the halo; read the settled value.
+	return painted.evaluate( async ( node ) => {
+		await Promise.all( node.getAnimations().map( ( animation ) => animation.finished ) );
 		const style = getComputedStyle( node );
 		return { outlineColor: style.outlineColor, outlineWidth: style.outlineWidth, shadow: style.boxShadow };
 	} );
@@ -336,6 +338,37 @@ test.describe( 'quote cards (20, 21)', () => {
 		await expect( q05.locator( '.u-quotation-of.h-cite[hidden] .p-author' ) ).toHaveText( 'Lena Park' );
 		await expect( q05.locator( '.u-quotation-of.h-cite[hidden] data.u-url' ) ).toHaveAttribute( 'value', 'https://example.org/q05' );
 	} );
+
+	test( 'each card ends at its own quote and cite, even beside a taller row partner', async ( { page } ) => {
+		test.skip( '' !== FLIP, 'unflipped archive fixture state' );
+		let unevenRows = 0;
+		for ( const number of [ 1, 2, 3 ] ) {
+			await openSeeded( page, archivePath( number ) );
+			const report = await page.locator( 'ul.pkiw-quote-section__items' ).evaluateAll( ( lists ) => lists.flatMap( ( list ) => {
+				const rows = new Map();
+				for ( const card of list.querySelectorAll( ':scope > li > .pkiw-quote-entry' ) ) {
+					const style = getComputedStyle( card );
+					const box = card.getBoundingClientRect();
+					const content = [ ...card.children ]
+						.filter( ( child ) => ! child.hidden && 'absolute' !== getComputedStyle( child ).position && child.getBoundingClientRect().height > 0 )
+						.reduce( ( bottom, child ) => Math.max( bottom, child.getBoundingClientRect().bottom ), box.top );
+					const fitted = content - box.top + parseFloat( style.paddingBottom ) + parseFloat( style.borderBottomWidth );
+					const top = Math.round( box.top );
+					rows.set( top, [ ...( rows.get( top ) || [] ), box.height ] );
+					card.dataset.fitSlack = String( Math.round( box.height - Math.max( fitted, parseFloat( style.minHeight ) || 0 ) ) );
+				}
+				return [ ...list.querySelectorAll( ':scope > li > .pkiw-quote-entry' ) ].map( ( card ) => ( {
+					slack: Number( card.dataset.fitSlack ),
+					uneven: ( rows.get( Math.round( card.getBoundingClientRect().top ) ) || [] ).some( ( height ) => Math.abs( height - card.getBoundingClientRect().height ) > 24 ),
+				} ) );
+			} ) );
+			for ( const [ index, card ] of report.entries() ) {
+				expect( card.slack, `page ${ number } card ${ index + 1 } blank paper below its content` ).toBeLessThanOrEqual( 2 );
+			}
+			unevenRows += report.filter( ( card ) => card.uneven ).length;
+		}
+		expect( unevenRows, 'the fixtures pair a short card with a long one somewhere on pages 1 to 3' ).toBeGreaterThan( 0 );
+	} );
 } );
 
 // --- Privacy flips (22) -----------------------------------------------------------------------
@@ -514,6 +547,29 @@ test.describe( 'quote states (26)', () => {
 		}
 		const missing = await open( page, archivePath( lastPage() + 1 ) );
 		expect( missing?.status() ).toBe( 404 );
+	} );
+
+	test( 'a sparse last page starts its author group under By author and leaves plain paper after it', async ( { page } ) => {
+		test.skip( 'archive' !== STATE || '' !== FLIP, 'unflipped archive fixture state' );
+		const measure = () => page.locator( '.cr-quote-book' ).evaluate( ( book ) => {
+			const box = ( selector ) => book.querySelector( selector ).getBoundingClientRect();
+			const cardsOnPage = book.querySelectorAll( '.pkiw-quote-entry' );
+			return {
+				gap: box( '.pkiw-quote-section__heading' ).top - box( ':scope > .pkiw-quote-authors' ).bottom,
+				cards: cardsOnPage.length,
+				lastCardBottom: cardsOnPage[ cardsOnPage.length - 1 ].getBoundingClientRect().bottom,
+				worksBottom: box( ':scope > .pkiw-quote-works' ).bottom,
+				bookBottom: book.getBoundingClientRect().bottom,
+			};
+		} );
+		await openSeeded( page, archivePath( 1 ), 1440 );
+		const full = await measure();
+		await openSeeded( page, archivePath( lastPage() ), 1440 );
+		const sparse = await measure();
+		expect( sparse.cards, 'the last page holds the Other tail only' ).toBeLessThan( 8 );
+		expect( Math.abs( sparse.gap - full.gap ), 'By author to first H3 gap matches a full page' ).toBeLessThanOrEqual( 2 );
+		expect( sparse.lastCardBottom, 'plain paper follows the short author content' ).toBeLessThan( sparse.worksBottom );
+		expect( sparse.bookBottom, 'book height follows the taller works page' ).toBeGreaterThanOrEqual( sparse.worksBottom );
 	} );
 
 	test( 'works list contains six author-aware pairs and duplicate titles carry both filters', async ( { page } ) => {

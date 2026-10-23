@@ -13,8 +13,8 @@
 
 declare( strict_types = 1 );
 ?>
-<!-- wp:group {"metadata":{"name":"Cabinet hall"},"align":"wide","className":"cr-archive-stream cr-cabinet-hall","layout":{"type":"default"}} -->
-<div class="wp-block-group alignwide cr-archive-stream cr-cabinet-hall">
+<!-- wp:group {"metadata":{"name":"Cabinet hall"},"align":"full","className":"cr-archive-stream cr-cabinet-hall","style":{"spacing":{"padding":{"right":"var:preset|spacing|md","left":"var:preset|spacing|md"}}},"layout":{"type":"default"}} -->
+<div class="wp-block-group alignfull cr-archive-stream cr-cabinet-hall" style="padding-right:var(--wp--preset--spacing--md);padding-left:var(--wp--preset--spacing--md)">
 	<!-- wp:query {"queryId":240,"query":{"perPage":6,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"className":"cr-archive-stream__query cr-cabinet-hall__query"} -->
 	<div class="wp-block-query cr-archive-stream__query cr-cabinet-hall__query">
 		<!-- wp:post-template {"className":"is-style-cr-cabinet-hall"} -->

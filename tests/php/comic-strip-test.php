@@ -406,6 +406,8 @@ namespace {
 			$html  = stream_strip( 'plugin card', $block, new WP_Block( array( 'postId' => $post->ID ) ) );
 			cr_photo_contains( '<article class="pk-card pk-card--stream k-comics h-entry cr-strip-card"', $html, 'exact Stream root classes' );
 			cr_photo_contains( '<h4 class="pk-title p-name">', $html, 'heading level' );
+			$default = stream_strip( 'plugin card', array( 'attrs' => array() ), new WP_Block( array( 'postId' => $post->ID ) ) );
+			cr_photo_contains( '<h2 class="pk-title p-name">', $default, 'Stream heading defaults to h2 under the page h1' );
 			cr_photo_same( 1, cr_comic_anchor_count( $html ), 'one Stream anchor' );
 			cr_photo_contains( 'alt="Panel one stored alt"', $html, 'Stream stored alt' );
 			cr_photo_contains( '<span class="cr-strip__tab" aria-hidden="true">1</span>', $html, 'tab hidden from accessibility tree' );

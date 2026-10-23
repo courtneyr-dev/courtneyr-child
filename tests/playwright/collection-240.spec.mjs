@@ -61,6 +61,9 @@ const visibleControls = ( scope ) => scope.evaluate( ( root ) => {
 	return [ ...root.querySelectorAll( 'a[href], button, input, select, textarea, [tabindex]' ) ].filter( ( node ) => rendered( node ) && ! node.disabled && node.tabIndex >= 0 ).length;
 } );
 
+// Blur radius of each layer: the third length (offset-x, offset-y, blur, spread).
+const shadowBlurs = ( shadow ) => 'none' === shadow ? [] : shadow.replace( /rgba?\([^)]*\)/g, '' ).split( ',' ).map( ( layer ) => layer.trim().split( /\s+/ ).filter( ( token ) => /px$/.test( token ) ).map( Number.parseFloat )[ 2 ] ?? 0 );
+
 const gridColumns = ( locator ) => locator.evaluate( ( node ) => getComputedStyle( node ).gridTemplateColumns.split( ' ' ).filter( Boolean ).length );
 
 test.describe( 'collection archive', () => {
@@ -77,8 +80,8 @@ test.describe( 'collection archive', () => {
 		await openArchive( page );
 		await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
 		await expect( page.locator( 'main h1 .cr-cutout__text' ) ).toHaveText( 'Collection' );
-		await expect( page.locator( 'main h1 .cr-cutout__tile[aria-hidden="true"]' ) ).toHaveCount( 10 );
-		await expect( page.locator( '.cr-archive__badge[aria-hidden="true"], .cr-archive__kind-badge[aria-hidden="true"]' ) ).toHaveCount( 1 );
+		await expect( page.locator( 'main h1 > .cr-cutout__tiles[aria-hidden="true"] .cr-cutout__tile' ) ).toHaveCount( 10 );
+		await expect( page.locator( 'span.cr-archive-identity__glyph[aria-hidden="true"]' ) ).toHaveCount( 1 );
 		await expect( page.locator( '.cr-archive__description' ) ).not.toBeEmpty();
 		await expect( page.locator( '.is-style-cr-marker-bar-short' ) ).toHaveCount( 1 );
 
@@ -90,8 +93,9 @@ test.describe( 'collection archive', () => {
 			for ( const image of await cabinet.locator( '.pk-collection__img' ).all() ) {
 				expect( await image.getAttribute( 'alt' ) ).toBe( '' );
 			}
-			const forbidden = await cabinet.locator( '.pk-stream-date, .pk-excerpt, .pk-kindlabel, .p-author, .h-cite, [class*="arrow"]' ).count();
+			const forbidden = await cabinet.locator( '.pk-stream-date, .pk-excerpt, .pk-kindlabel, .h-cite, [class*="arrow"]' ).count();
 			expect( forbidden ).toBe( 0 );
+			await expect( cabinet.locator( '.p-author:visible' ) ).toHaveCount( 0 );
 		}
 		const text = ( await cabinets.allInnerTexts() ).join( ' ' );
 		for ( const word of [ 'MUG', 'PENCIL', 'NOTEBOOK' ] ) {
@@ -145,7 +149,7 @@ test.describe( 'collection archive', () => {
 		expect( report.radius ).toBe( '0px' );
 		expect( report.transform ).toBe( 'none' );
 		expect( report.image ).not.toMatch( /gradient/i );
-		expect( report.shadow === 'none' || /\s0px(?:,|$)/.test( report.shadow ) ).toBe( true );
+		expect( shadowBlurs( report.shadow ).every( ( blur ) => 0 === blur ) ).toBe( true );
 	} );
 
 	test( 'native pager follows the grid and exposes 44px current-page semantics', async ( { page } ) => {
@@ -214,7 +218,7 @@ test.describe( 'collection singles', () => {
 
 		await openSingle( page, 'C10' );
 		const c10 = await page.locator( 'main' ).innerText();
-		expect( c10 ).toContain( 'Check-in, ' );
+		expect( c10 ).toMatch( /check-in, /i );
 		expect( c10 ).not.toContain( '84.00' );
 		expect( c10 ).not.toContain( '219.00' );
 

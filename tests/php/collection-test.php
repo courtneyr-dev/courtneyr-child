@@ -68,6 +68,12 @@ $php = (string) file_get_contents( $root . '/inc/collection.php' ) . (string) fi
 foreach ( array( '\\PKIW', 'pkiw_', 'Collection_Items' ) as $forbidden ) {
 	cr_collection_check( ! str_contains( $php, $forbidden ), 'theme PHP excludes ' . $forbidden );
 }
+// Acceptance T-6 allows glass dividers drawn with the line technique: 2px glass-token stops on transparent.
+$line_stop = '(?:transparent|var\(--cr-cabinet-glass\))(?:\s+calc\(\d+% [-+] 1px\)){1,2}';
+$line_technique = '/linear-gradient\(\s*90deg(?:\s*,\s*' . $line_stop . ')+\s*\)/';
+$line_count = preg_match_all( $line_technique, $source );
+cr_collection_check( $line_count === substr_count( $source, 'linear-gradient(' ), 'every linear-gradient is a glass-token line technique' );
+$source = (string) preg_replace( $line_technique, '', $source );
 foreach ( array( 'preg_', 'linear-gradient', 'radial-gradient', 'conic-gradient', 'repeating-', 'backdrop-filter', 'blur(', 'Rock Salt', 'content: attr(', 'url(' ) as $forbidden ) {
 	cr_collection_check( false === stripos( $source, $forbidden ), 'owned source excludes ' . $forbidden );
 }

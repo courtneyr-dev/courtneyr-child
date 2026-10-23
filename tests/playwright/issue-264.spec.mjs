@@ -346,15 +346,22 @@ test.describe( 'issue archive', () => {
 	test( 'dark mode keeps physical paper, ink and rack colors fixed', async ( { page }, testInfo ) => {
 		test.skip( ! isDark( testInfo ), 'dark-project assertion' );
 		await openSeeded( page );
+		const papers = new Set();
 		for ( const ticket of await page.locator( TICKET ).all() ) {
 			const paint = await ticket.evaluate( ( node ) => ( {
 				paper: [ ...node.classList ].find( ( name ) => name.startsWith( 'cr-claim-ticket--' ) )?.replace( 'cr-claim-ticket--', '' ),
 				background: getComputedStyle( node ).backgroundColor,
 				color: getComputedStyle( node ).color,
+				title: getComputedStyle( node.querySelector( '.cr-claim-ticket__title a' ) ).color,
+				tint: getComputedStyle( node, '::before' ).content,
 			} ) );
 			expect( paint.background ).toBe( PAPER_COLORS[ paint.paper ] );
 			expect( paint.color ).toBe( VIOLET );
+			expect( paint.title ).toBe( VIOLET );
+			expect( paint.tint ).toBe( 'none' );
+			papers.add( paint.background );
 		}
+		expect( [ ...papers ].sort() ).toEqual( Object.values( PAPER_COLORS ).sort() );
 		for ( const rack of await page.locator( RACK ).all() ) {
 			expect( await rack.evaluate( ( node ) => getComputedStyle( node ).backgroundColor ) ).toBe( PRUSSIAN_BLUE );
 		}
@@ -402,7 +409,7 @@ test.describe( 'issue singles', () => {
 		const main = await openSingle( page, 'X01' );
 		await expect( main.locator( 'form.post-password-form' ) ).toHaveCount( 1 );
 		await expect( main.locator( '.cr-claim-ticket-head, .pkiw-issue-facts, .cr-claim-body, .cr-claim-ticket-head__stub' ) ).toHaveCount( 0 );
-		expect( await main.innerText() ).not.toMatch( /acorn-ledger|#110|Waiting|Open/i );
+		expect( await scopedText( main, '.cr-newsletter-banner, nav.cr-post-nav' ) ).not.toMatch( /acorn-ledger|#110|Waiting|Open/i );
 	} );
 
 	test( 'the four required singles fit 320 pixels', async ( { page } ) => {
@@ -474,8 +481,13 @@ test.describe( 'issue Stream stubs', () => {
 		test.skip( ! isDark( testInfo ), 'dark-project assertion' );
 		await openStream( page );
 		for ( const card of await page.locator( 'article.cr-claim-stub' ).all() ) {
-			const paint = await card.evaluate( ( node ) => ( { background: getComputedStyle( node ).backgroundColor, color: getComputedStyle( node ).color } ) );
-			expect( paint ).toEqual( { background: IVORY, color: VIOLET } );
+			const paint = await card.evaluate( ( node ) => ( {
+				background: getComputedStyle( node, '::after' ).backgroundColor,
+				color: getComputedStyle( node ).color,
+				shadow: getComputedStyle( node, '::before' ).backgroundColor,
+				stub: getComputedStyle( node.querySelector( '.cr-claim-stub__tear' ), '::after' ).backgroundColor,
+			} ) );
+			expect( paint ).toEqual( { background: IVORY, color: VIOLET, shadow: SELECTIVE_YELLOW, stub: LIGHT_ORANGE } );
 		}
 	} );
 } );

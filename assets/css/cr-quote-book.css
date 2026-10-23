@@ -152,6 +152,7 @@
 .cr-quote-book ul.pkiw-quote-section__items {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
+	align-items: start;
 	gap: var(--cr-space-md);
 	max-width: none;
 	margin: 0;
@@ -162,7 +163,6 @@
 .cr-quote-book .pkiw-quote-entry {
 	position: relative;
 	box-sizing: border-box;
-	block-size: 100%;
 	min-block-size: 6.5rem;
 	margin: 0;
 	padding: var(--cr-space-md);
@@ -424,6 +424,7 @@
 
 	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)) {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-rows: max-content minmax(0, 1fr);
 	}
 
 	.cr-quote-book:has(.pkiw-quote-section):has(> .pkiw-quote-works:not(.is-long)) > .pkiw-quote-authors {

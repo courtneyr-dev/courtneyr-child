@@ -95,7 +95,7 @@ function dress_content( string $html ): string {
 		if ( 'DIV' === $tags->get_tag() && $tags->has_class( 'pkiw-issue-facts' ) ) {
 			$tags->add_class( 'cr-claim-facts' );
 		}
-		if ( 'DIV' === $tags->get_tag() && $tags->has_class( 'pkiw-issue-body' ) ) {
+		if ( 'DIV' === $tags->get_tag() && ( $tags->has_class( 'pkiw-issue-body' ) || $tags->has_class( 'e-content' ) ) ) {
 			$tags->add_class( 'cr-claim-body' );
 		}
 		$first = false;
