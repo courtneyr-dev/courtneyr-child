@@ -106,7 +106,9 @@ async function resolvedPaper( locator ) {
 
 async function focusPaint( focus, painted = focus ) {
 	await focus.focus();
-	return painted.evaluate( ( node ) => {
+	// cr-nav.css animates the pager's box-shadow into the halo; read the settled value.
+	return painted.evaluate( async ( node ) => {
+		await Promise.all( node.getAnimations().map( ( animation ) => animation.finished ) );
 		const style = getComputedStyle( node );
 		return { outlineColor: style.outlineColor, outlineWidth: style.outlineWidth, shadow: style.boxShadow };
 	} );
