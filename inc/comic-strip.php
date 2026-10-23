@@ -408,6 +408,8 @@ function kind_label( \WP_Post $post ): string {
 /**
  * Replace a generic drawn-comic Stream card with the strip card.
  *
+ * Panel 1 prints with alt="" here because its full alt lives on the single.
+ *
  * @param string $html     Rendered card.
  * @param array  $block    Parsed block.
  * @param mixed  $instance Block instance.
@@ -428,7 +430,7 @@ function stream_strip( string $html, array $block, $instance = null ): string {
 
 	$panels = is_array( $comic_facts['panels'] ?? null ) ? $comic_facts['panels'] : array();
 	$frame  = array() !== $panels
-		? '<div class="cr-strip-card__frame"><span class="cr-strip__tab" aria-hidden="true">1</span>' . panel_image( $panels[0], 'medium_large' ) . '</div>'
+		? '<div class="cr-strip-card__frame"><span class="cr-strip__tab" aria-hidden="true">1</span>' . panel_image( array_merge( $panels[0], array( 'alt' => '' ) ), 'medium_large' ) . '</div>'
 		: '';
 	$level  = heading_level( $block );
 	$title  = trim( (string) \get_the_title( $post ) );
