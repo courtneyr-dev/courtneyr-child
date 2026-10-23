@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.7.132
+
+What you see change on courtneyr.dev:
+
+- Quote, issue, collection and drawn-comic posts get their own designs: a commonplace book at /kind/quote/, repair-shop claim tickets for issue posts, a museum display cabinet for collections, and a sketchbook with an open spread for comics you drew. Before this release those files were in the theme but never loaded, so the plugin's default layouts showed.
+- Issue posts and collections appear on /stream/, and drawn comics preview there (with the site's cr-content-surfaces 1.6.0).
+
+Under the hood: functions.php requires inc/issue.php, single-issue.php, stream-issue.php and comic-strip.php, and tests/php/functions-requires-test.php fails if an inc/ file isn't required. The quote book's dark-mode rule uses a new --cr-paper-rule token instead of a raw hex. Each kind passed a Codex mockup-fidelity loop on the local stack (#257 99, #264 97, #240 97). Carries 0.7.131's sync-time CSS minify, which dev and test already serve; the version moves past it so caches fetch the new sheets.
+
+## 0.7.131
+
+What you see change on courtneyr.dev:
+
+- Nothing you can see. Every page looks the same; the theme's stylesheets are smaller on the wire.
+
+Under the hood: `private/bin/sync-theme.sh` in the deploy repo now runs `tools/minify-css.mjs` (esbuild 0.28.2, pinned) on its export of this repo before it copies the theme, so deployed stylesheets are minified with the same names and paths. The sources here stay commented. CI runs the same script with `--check`. `CR_MINIFY_CSS=0` makes a sync copy the sources unchanged.
+
 ## 0.7.121
 
 What you see change on courtneyr.dev:
