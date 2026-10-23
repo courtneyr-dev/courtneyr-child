@@ -120,6 +120,24 @@
 	--cr-claim-ticket-paper: var(--cr-printer-ivory);
 }
 
+/* The shared .pk-card shell (badge grid, surface, border and tint) gives way
+   to the ticket in every colour scheme; palette tokens don't flip in dark. */
+.cr-issue-rack article.pk-card.cr-claim-ticket {
+	display: block;
+	grid-template-columns: none;
+	gap: 0;
+	max-width: none;
+	border: 0;
+	border-inline: 5px dotted var(--cr-russian-violet);
+	background-color: var(--cr-claim-ticket-paper);
+	background-image: var(--cr-fiber);
+	color: var(--cr-russian-violet);
+}
+
+.cr-issue-rack article.pk-card.cr-claim-ticket::before {
+	content: none;
+}
+
 .cr-claim-ticket__title {
 	margin: 0;
 	padding-block-end: var(--cr-space-sm);
@@ -619,6 +637,7 @@
 	.cr-claim-ticket,
 	.cr-claim-ticket-head,
 	.cr-claim-sheet,
+	.cr-issue-rack article.pk-card.cr-claim-ticket,
 	.pk-card.pk-card--stream.cr-claim-stub {
 		border: 2px solid CanvasText;
 		background: Canvas;

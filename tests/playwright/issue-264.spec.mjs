@@ -346,15 +346,22 @@ test.describe( 'issue archive', () => {
 	test( 'dark mode keeps physical paper, ink and rack colors fixed', async ( { page }, testInfo ) => {
 		test.skip( ! isDark( testInfo ), 'dark-project assertion' );
 		await openSeeded( page );
+		const papers = new Set();
 		for ( const ticket of await page.locator( TICKET ).all() ) {
 			const paint = await ticket.evaluate( ( node ) => ( {
 				paper: [ ...node.classList ].find( ( name ) => name.startsWith( 'cr-claim-ticket--' ) )?.replace( 'cr-claim-ticket--', '' ),
 				background: getComputedStyle( node ).backgroundColor,
 				color: getComputedStyle( node ).color,
+				title: getComputedStyle( node.querySelector( '.cr-claim-ticket__title a' ) ).color,
+				tint: getComputedStyle( node, '::before' ).content,
 			} ) );
 			expect( paint.background ).toBe( PAPER_COLORS[ paint.paper ] );
 			expect( paint.color ).toBe( VIOLET );
+			expect( paint.title ).toBe( VIOLET );
+			expect( paint.tint ).toBe( 'none' );
+			papers.add( paint.background );
 		}
+		expect( [ ...papers ].sort() ).toEqual( Object.values( PAPER_COLORS ).sort() );
 		for ( const rack of await page.locator( RACK ).all() ) {
 			expect( await rack.evaluate( ( node ) => getComputedStyle( node ).backgroundColor ) ).toBe( PRUSSIAN_BLUE );
 		}
