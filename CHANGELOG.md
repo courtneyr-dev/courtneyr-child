@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+What you see change on courtneyr.dev:
+
+- Nothing. This is a CI check; no stylesheet changed, so there is no version bump and nothing to deploy.
+
+Under the hood: `tools/css-guardrails.mjs` (`npm run lint:css-guardrails`, a new CI step) enforces the 30 KiB sheet budget with a ceiling on today's oversized sheets, no new selector list naming two kinds, `RUCSS_INLINE_HANDLES` entries that resolve to a sheet, and a decision on purpose for every new `cr-*.css`. The baseline is `tools/css-guardrails.baseline.json`. `CLAUDE.md` carries the rules.
+
 ## 0.7.132
 
 What you see change on courtneyr.dev:

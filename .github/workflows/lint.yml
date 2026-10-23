@@ -53,3 +53,7 @@ jobs:
       - name: every stylesheet still minifies cleanly (tools/minify-css.mjs --check)
         if: ${{ !cancelled() }}
         run: npm run build:css:check
+
+      - name: CSS guardrails (sheet budget, grouped kind selectors, RUCSS handles)
+        if: ${{ !cancelled() }}
+        run: npm run lint:css-guardrails

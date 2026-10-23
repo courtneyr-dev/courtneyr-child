@@ -15,6 +15,7 @@
 		"lint:theme-json": "node tests/lint/theme-json-schema.mjs",
 		"lint:dark-tokens": "node tests/lint/dark-tokens-parity.mjs",
 		"build:css:check": "node tools/minify-css.mjs --dir assets/css --check",
+		"lint:css-guardrails": "node tools/css-guardrails.mjs",
 		"evidence": "node tests/evidence/evidence.mjs",
 		"captures": "playwright test --config tests/playwright/playwright.config.mjs",
 		"test:a11y-markup": "CR_SPEC=a11y-markup.spec.mjs playwright test --config tests/playwright/playwright.config.mjs --project=1280-light"

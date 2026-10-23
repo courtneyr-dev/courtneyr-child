@@ -1,0 +1,53 @@
+{
+	"oversized": {
+		"admin.css": 32694,
+		"components.css": 358720,
+		"cr-comic.css": 45093,
+		"cr-gallery-zine.css": 52689,
+		"cr-home-sections.css": 31224,
+		"cr-post-kinds.css": 391929,
+		"cr-recipe.css": 43523,
+		"tokens.css": 43516
+	},
+	"groupedKindRules": {
+		"cr-media-shelf.css": 4,
+		"cr-post-kinds.css": 155
+	},
+	"notInRucssHandles": [
+		"cr-404.css",
+		"cr-acquisition.css",
+		"cr-archives.css",
+		"cr-audio.css",
+		"cr-blog.css",
+		"cr-bookmark.css",
+		"cr-booth-print.css",
+		"cr-calendar.css",
+		"cr-chicken.css",
+		"cr-collection.css",
+		"cr-contact.css",
+		"cr-craft.css",
+		"cr-exercise.css",
+		"cr-favorite.css",
+		"cr-home-sections.css",
+		"cr-issue.css",
+		"cr-jam.css",
+		"cr-letters.css",
+		"cr-like.css",
+		"cr-mood-year.css",
+		"cr-play-board.css",
+		"cr-play-video.css",
+		"cr-play.css",
+		"cr-post-kinds.css",
+		"cr-print.css",
+		"cr-question.css",
+		"cr-quote-book.css",
+		"cr-read-shelf.css",
+		"cr-recipe.css",
+		"cr-repost.css",
+		"cr-review.css",
+		"cr-sleep.css",
+		"cr-video.css",
+		"cr-weather.css",
+		"cr-wish.css"
+	]
+}
