@@ -335,7 +335,7 @@ function block_post( $instance ): ?\WP_Post {
  * @param array<string, mixed> $block Parsed block.
  */
 function heading_level( array $block ): int {
-	return max( 2, min( 4, (int) ( $block['attrs']['headingLevel'] ?? 3 ) ) );
+	return max( 2, min( 4, (int) ( $block['attrs']['headingLevel'] ?? 2 ) ) );
 }
 
 /**
