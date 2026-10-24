@@ -210,12 +210,18 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\prune', 9999 );
  * visitors without JavaScript. /stream/ keeps it render-blocking because cards
  * are its first viewport.
  *
+ * cr-nav.css arrives on the front page only as a dependency of the card sheets
+ * that declare it (cr-issue.css, cr-wish.css, cr-comic-strip.css, cr-collection.css). Every rule in it sits under .wp-block-query-pagination
+ * or .cr-post-nav, and the front page renders neither, yet RUCSS excludes it
+ * and the front page skips the inline list, so it printed as the one
+ * render-blocking theme sheet (live 0.7.135, 2026-10-24).
+ *
  * @param string $tag    The link tag.
  * @param string $handle Style handle.
  * @return string
  */
 function defer_card_sheet_on_front_page( $tag, $handle ) {
-	$deferrable = array_merge( array( 'courtneyr-post-kinds', 'courtneyr-home-sections', 'courtneyr-paper' ), kept_kind_sheets() );
+	$deferrable = array_merge( array( 'courtneyr-post-kinds', 'courtneyr-home-sections', 'courtneyr-paper', 'courtneyr-nav' ), kept_kind_sheets() );
 	if ( ! in_array( $handle, $deferrable, true ) || ! is_front_page() || is_admin() || ! is_string( $tag ) || str_contains( $tag, 'onload=' ) ) {
 		return $tag;
 	}
