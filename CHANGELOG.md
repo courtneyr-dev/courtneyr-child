@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.135
+
+What you see change on courtneyr.dev:
+
+- Dark mode, default setting: the yellow highlighter on the home page, About and the blog intro is a solid yellow block again, so the dark text stays readable (it was dark navy on near-black over the top half of each line, 1.04 to 1.37:1; now 8.98:1).
+- Numbered lists in posts sit inside the text column with the numbers visible, on phones and desktop.
+- Windows High Contrast: highlighted text keeps its highlight.
+- The header keeps its final size while the page loads, so /blog/ no longer jumps when the main stylesheet arrives (it could shift 0.2 when the page type's used CSS lacked the header rules).
+
+Under the hood: the highlight's dark rule matched `:root:not([data-theme])`, but `no-flash.js` writes `data-theme="system"` for every visitor with no stored choice, so it never applied; the dark-mode selector lists in `components.css` and `cr-post-kinds.css` now use `:root:not([data-theme="light"])`, as `tokens.css` does, and the twelve `cr-post-kinds.css` rules that had a separate `[data-theme="system"]` copy lose the copy. Core's `ol:where(.wp-block-list)` padding names a spacing preset this theme doesn't define, so `components.css` adds a scoped rule and `wp-block-list` joins the post keep classes. `inc/enqueue.php` prints the header's first-paint rules inline with `components.css`'s handle (#232, fix/blog-header-first-paint).
+
 ## 0.7.134
 
 What you see change on courtneyr.dev:

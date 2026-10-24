@@ -115,8 +115,12 @@ th a:not(.wp-element-button) {
 @media (prefers-color-scheme: dark) {
   /* In dark mode, the marker-style gradient leaves the top half of each letter
      sitting against photocopier-black (russian-violet on that = 1.6:1, invisible).
-     Switch to a solid yellow block so contrast holds across the whole letter. */
-  :root:not([data-theme]) .cr-highlight {
+     Switch to a solid yellow block so contrast holds across the whole letter.
+     :not([data-theme="light"]) covers an unset attribute AND "system", which
+     no-flash.js writes for every visitor with no stored choice; the old
+     :not([data-theme]) matched neither, so the default visitor on a dark OS
+     got the gradient (1.04-1.37:1 on home, about and blog, measured 2026-10-23). */
+  :root:not([data-theme="light"]) .cr-highlight {
     background: var(--cr-highlight);                /* solid, overrides the gradient */
     color: var(--cr-russian-violet);
   }
@@ -124,6 +128,13 @@ th a:not(.wp-element-button) {
 :root[data-theme="dark"] .cr-highlight {
   background: var(--cr-highlight);
   color: var(--cr-russian-violet);
+}
+
+@media (forced-colors: active) {
+  .cr-highlight {
+    background: Mark;
+    color: MarkText;
+  }
 }
 
 
@@ -595,14 +606,14 @@ hr.is-style-cr-marker-bar-short { width: 8rem; height: 6px; transform: rotate(va
    flips to russian-violet. video + audio keep prussian-blue (their bg stays a
    mid orange/yellow in both modes). Covers OS dark + the manual [data-theme]. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) .cr-chip--blog.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--link.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--bookmark.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--quote.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--speaking.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--like.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--reply.cr-chip--solid,
-  :root:not([data-theme]) .cr-chip--review.cr-chip--solid { color: var(--cr-russian-violet); }
+  :root:not([data-theme="light"]) .cr-chip--blog.cr-chip--solid,
+  :root:not([data-theme="light"]) .cr-chip--link.cr-chip--solid,
+  :root:not([data-theme="light"]) .cr-chip--bookmark.cr-chip--solid,
+  :root:not([data-theme="light"]) .cr-chip--quote.cr-chip--solid,
+  :root:not([data-theme="light"]) .cr-chip--speaking.cr-chip--solid,
+  :root:not([data-theme="light"]) .cr-chip--like.cr-chip--solid,
+  :root:not([data-theme="light"]) .cr-chip--reply.cr-chip--solid,
+  :root:not([data-theme="light"]) .cr-chip--review.cr-chip--solid { color: var(--cr-russian-violet); }
 }
 :root[data-theme="dark"] .cr-chip--blog.cr-chip--solid,
 :root[data-theme="dark"] .cr-chip--link.cr-chip--solid,
@@ -8002,6 +8013,21 @@ body.single-format-video main.single-post   { background-color: var(--cr-type-vi
    z-indexes stay relative to it, so the player still works but no longer covers the nav. */
 .able {
 	z-index: 1 !important;
+}
+
+/* (8b) Numbered lists. WordPress's block-library sheet pads ol.wp-block-list with
+   var(--wp--preset--spacing--medium), a preset this theme does not define (it has
+   3xs to xl), so the declaration is invalid at computed-value time and the padding
+   falls to 0. It also loads after tokens.css, so it beat the theme's own
+   `ul, ol { padding-left }`. With outside markers the numbers then hang left of
+   the text column and touch the screen edge on a phone. The bullet lists avoid
+   this by padding each li. 1.75rem fits "10." as well as "1."; the compound
+   selector wins on specificity, not source order. */
+.wp-block-post-content ol.wp-block-list,
+.entry-content ol.wp-block-list,
+.single-post__content ol.wp-block-list,
+.cr-prose ol.wp-block-list {
+	padding-inline-start: 1.75rem;
 }
 
 /* (9) Bullets — force the canonical ✦ on every Snow Monkey Editor list style in
