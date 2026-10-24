@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.136
+
+What you see change on courtneyr.dev:
+
+- The theme switcher in the header shows which option is on again (Light, Dark or System) and tells screen readers which one is pressed. Since #207 it lost that state as soon as the page finished loading, though clicking still changed the theme.
+- /stream/, the kind archives and the home page start drawing sooner: the collection and pagination stylesheets no longer block first paint on pages that don't use them (indicative throttled Lighthouse on dev: /stream/ LCP 4.6-4.8 s vs 5.2-5.4 s on 0.7.135).
+- Tables, code blocks, separators and figure captions in posts keep their styling when a post is the first of its type that Perfmatters sees.
+
+Under the hood: the theme toggle store read `getElement().ref` in its `pressed` and `isActive` getters, which is null while bindings render; it now reads `getElement().attributes` (#237). `cr-collection.css` loads only where a collection card or group renders, `cr-nav.css` joins the deferred sheets on the front page, and Syndication Links' and IndieWeb's stylesheets are dequeued on the stream, /blog/ and kind archives (#236). `RUCSS_KEEP_SELECTORS` keeps `hr`, `figcaption`, table and code rules in post used CSS and `ol>li` markers in tax used CSS (#236). CI also checks for `:root:not([data-theme])` rules with no system variant (#238).
+
 ## 0.7.135
 
 What you see change on courtneyr.dev:
