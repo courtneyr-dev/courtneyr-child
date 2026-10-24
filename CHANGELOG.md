@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.134
+
+What you see change on courtneyr.dev:
+
+- Each quote on /kind/quote/ is now the single quote's pinned notecard: the same paper color, pin, tilt, quote mark, handwriting and highlights as the quote's own page. Long quotes show their first nine lines.
+
+Under the hood: inc/quote-book.php draws the notecard on each quote-book entry from the single's helpers in inc/quote-note.php and the post's own quote block, and cr-quote-book.css carries the single's notecard rules (#233).
+
 ## Unreleased
 
 What you see change on courtneyr.dev:
