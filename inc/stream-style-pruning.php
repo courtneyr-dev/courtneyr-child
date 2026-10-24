@@ -197,6 +197,43 @@ function kept_kind_sheets( ?string $handle = null ): array {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\prune', 9999 );
 
 /**
+ * Plugin sheets no listing page uses.
+ *
+ * Syndication Links' syn.min.css (135,518 B) paints the ul.relsyn list under
+ * a single post. Neither it nor IndieWeb's indieweb.css (121,783 B) matched one
+ * selector on the front page, /stream/, /blog/ or eight kind archives (live
+ * 0.7.135, 2026-10-24); singles with syndication links match 4-7 syn.min.css
+ * rules.
+ */
+const LISTING_UNUSED_PLUGIN_SHEETS = array( 'syndication-style', 'indieweb' );
+
+/**
+ * Listing surfaces: the Stream surfaces, the /blog/ posts page and kind archives.
+ *
+ * @return bool
+ */
+function is_listing_surface(): bool {
+	return is_stream_surface() || ( is_home() && ! is_front_page() ) || is_tax( 'kind' );
+}
+
+/**
+ * Dequeue the plugin sheets listing surfaces don't use.
+ *
+ * Both plugins enqueue on wp_enqueue_scripts at priority 10.
+ *
+ * @return void
+ */
+function dequeue_listing_plugin_sheets(): void {
+	if ( is_admin() || ! is_listing_surface() ) {
+		return;
+	}
+	foreach ( LISTING_UNUSED_PLUGIN_SHEETS as $handle ) {
+		wp_dequeue_style( $handle );
+	}
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\dequeue_listing_plugin_sheets', 9999 );
+
+/**
  * Front page: load the card, home-section and kind sheets without blocking first paint.
  *
  * On the front page the card sheet (cr-post-kinds.css), the home sections
@@ -210,12 +247,18 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\prune', 9999 );
  * visitors without JavaScript. /stream/ keeps it render-blocking because cards
  * are its first viewport.
  *
+ * cr-nav.css arrives on the front page only as a dependency of the card sheets
+ * that declare it (cr-issue.css, cr-wish.css, cr-comic-strip.css, cr-collection.css). Every rule in it sits under .wp-block-query-pagination
+ * or .cr-post-nav, and the front page renders neither, yet RUCSS excludes it
+ * and the front page skips the inline list, so it printed as the one
+ * render-blocking theme sheet (live 0.7.135, 2026-10-24).
+ *
  * @param string $tag    The link tag.
  * @param string $handle Style handle.
  * @return string
  */
 function defer_card_sheet_on_front_page( $tag, $handle ) {
-	$deferrable = array_merge( array( 'courtneyr-post-kinds', 'courtneyr-home-sections', 'courtneyr-paper' ), kept_kind_sheets() );
+	$deferrable = array_merge( array( 'courtneyr-post-kinds', 'courtneyr-home-sections', 'courtneyr-paper', 'courtneyr-nav' ), kept_kind_sheets() );
 	if ( ! in_array( $handle, $deferrable, true ) || ! is_front_page() || is_admin() || ! is_string( $tag ) || str_contains( $tag, 'onload=' ) ) {
 		return $tag;
 	}
@@ -326,10 +369,29 @@ const RUCSS_INLINE_HANDLES = array(
  * archives +10 KB, categories +23 KB, tags +8 KB.
  */
 const RUCSS_KEEP_CLASSES = array(
-	'post'     => 'relsyn aligncenter alignleft alignright cmplz-placeholder-parent cr-icon-avatar--audio cr-icon-avatar--link cr-icon-avatar--outline cr-icon-avatar--quote cr-icon-avatar--video cr-media__transcript cr-post-nav cr-pull-quote-wrap cr-pull-quote__copy cr-term-chip--1 cr-term-chip--2 cr-term-chip--3 cr-term-chip--5 fb-xfbml-parse-ignore format-standard has-text-align-right is-style-cr-marker-bar is-style-cr-pull-quote is-style-sme-alert-success pfbt-format-titleless pk-badge pk-body pk-card pk-dot pk-embed pk-embed--audio pk-embed--map pk-kindlabel pk-link pk-map-link pk-media pk-meta pk-mood pk-note pk-sr-only pk-stars pk-sub pk-thumb--poster pk-title reaction-avatar reaction-label single single-format-aside single-format-audio single-format-chat single-format-gallery single-format-image single-format-link single-format-quote single-format-status single-format-video single-post__title skip-link sloc-display sloc-location-icon sloc-map sme-highlighter svg-bluesky svg-linkedin taxonomy-post_tag wp-block-code wp-block-column wp-block-cover__image-background wp-block-gallery wp-block-list wp-block-post-terms wp-block-template-part wp-caption xfn-pill-acquaintance xfn-pill-co-worker xfn-pill-colleague xfn-pill-friend xfn-pill-met',
+	'post'     => 'relsyn wp-block-separator wp-block-table aligncenter alignleft alignright cmplz-placeholder-parent cr-icon-avatar--audio cr-icon-avatar--link cr-icon-avatar--outline cr-icon-avatar--quote cr-icon-avatar--video cr-media__transcript cr-post-nav cr-pull-quote-wrap cr-pull-quote__copy cr-term-chip--1 cr-term-chip--2 cr-term-chip--3 cr-term-chip--5 fb-xfbml-parse-ignore format-standard has-text-align-right is-style-cr-marker-bar is-style-cr-pull-quote is-style-sme-alert-success pfbt-format-titleless pk-badge pk-body pk-card pk-dot pk-embed pk-embed--audio pk-embed--map pk-kindlabel pk-link pk-map-link pk-media pk-meta pk-mood pk-note pk-sr-only pk-stars pk-sub pk-thumb--poster pk-title reaction-avatar reaction-label single single-format-aside single-format-audio single-format-chat single-format-gallery single-format-image single-format-link single-format-quote single-format-status single-format-video single-post__title skip-link sloc-display sloc-location-icon sloc-map sme-highlighter svg-bluesky svg-linkedin taxonomy-post_tag wp-block-code wp-block-column wp-block-cover__image-background wp-block-gallery wp-block-list wp-block-post-terms wp-block-template-part wp-caption xfn-pill-acquaintance xfn-pill-co-worker xfn-pill-colleague xfn-pill-friend xfn-pill-met',
 	'tax'      => 'cr-browse-all cr-icon-avatar--audio cr-icon-avatar--blog cr-icon-avatar--quote cr-icon-avatar--video cr-pull-quote-wrap cr-pull-quote__copy format-standard is-p0 is-p10 is-p5 is-r1 is-style-cr-pull-quote pk-badge pk-body pk-card pk-excerpt pk-kindlabel pk-link pk-media pk-media--stream pk-meta pk-sr-only pk-sub pk-thumb--poster pk-title skip-link sme-highlighter wp-block-post wp-block-query-pagination wp-block-template-part',
 	'category' => 'cr-browse-all cr-cutout__gap cr-highlight cr-icon-avatar--outline cr-icon-avatar--quote cr-icon-avatar--video cr-sparkle cr-speaking-hero cr-speaking-hero__accent cr-speaking-hero__cta cr-speaking-hero__lead cr-speaking-hero__sparkles cr-speaking-hero__title cr-term-chip--2 cr-term-chip--3 cr-term-chip--5 format-aside format-gallery format-image format-quote format-standard format-status format-video is-p10 is-r3 is-style-cr-eyebrow pfbt-format-titleless skip-link wp-block-button__link wp-block-query-pagination wp-block-template-part',
 	'tag'      => 'card__media cr-browse-all cr-icon-avatar--link cr-icon-avatar--outline cr-icon-avatar--speaking cr-term-chip--2 cr-term-chip--3 cr-term-chip--4 cr-term-chip--5 format-image format-link format-standard is-punct is-r3 skip-link wp-block-post-featured-image wp-block-query-pagination wp-block-template-part',
+);
+
+/**
+ * Element selectors to keep per type, passed to Perfmatters as they are.
+ *
+ * Perfmatters (2.6.8, CSS.php is_selector_used()) keeps a rule when an
+ * excluded selector is a substring of one of its selectors and is followed by
+ * whitespace, ".", ":", ",", "[" or the end. Nothing anchors the left side, so
+ * "th" also keeps rules ending in "path" or "width"; there is no tighter value
+ * that still keeps a bare "th" rule. Element rules depend on the first page of
+ * a type: the live post used CSS built on 2026-10-23 had the table, pre and
+ * code rules but no hr or figcaption, dev's the reverse, and the tax file lost
+ * "ol > li::marker" when it was built from an archive without an <ol>.
+ * Deploys minify the theme, so the served tokens.css says "ol>li"; both
+ * spellings are listed.
+ */
+const RUCSS_KEEP_SELECTORS = array(
+	'post' => array( 'hr', 'figcaption', 'table', 'thead', 'tbody', 'th', 'td', 'pre', 'code' ),
+	'tax'  => array( 'ol>li', 'ol > li' ),
 );
 
 /**
@@ -376,7 +438,7 @@ function rucss_inline_conditional_sheets( $inline ) {
 add_filter( 'perfmatters_inline_stylesheets', __NAMESPACE__ . '\\rucss_inline_conditional_sheets' );
 
 /**
- * Keeps the per-type classes in the shared used CSS.
+ * Keeps the per-type classes and element selectors in the shared used CSS.
  *
  * @param string[] $selectors Excluded selectors.
  * @return string[]
@@ -392,7 +454,7 @@ function rucss_keep_type_classes( $selectors ) {
 	foreach ( explode( ' ', RUCSS_KEEP_CLASSES[ $type ] ) as $class ) {
 		$selectors[] = '.' . $class;
 	}
-	return $selectors;
+	return array_merge( $selectors, RUCSS_KEEP_SELECTORS[ $type ] ?? array() );
 }
 add_filter( 'perfmatters_rucss_excluded_selectors', __NAMESPACE__ . '\\rucss_keep_type_classes' );
 

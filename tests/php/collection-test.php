@@ -23,6 +23,11 @@ function add_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ) { ad
 function __( $text, $domain = '' ) { return $text; }
 function register_block_style( $block, $properties ) { $GLOBALS['cr_collection_block_styles'][ $block ][] = $properties; }
 function wp_enqueue_block_style( $block, $properties ) { $GLOBALS['cr_collection_styles'][ $block ] = $properties; }
+$GLOBALS['cr_collection_registered'] = array();
+$GLOBALS['cr_collection_enqueued'] = array();
+function wp_register_style( $handle, $src, $deps = array(), $ver = false ) { $GLOBALS['cr_collection_registered'][ $handle ] = array( 'src' => $src, 'deps' => $deps ); }
+function wp_style_add_data( $handle, $key, $value ) { $GLOBALS['cr_collection_registered'][ $handle ][ $key ] = $value; }
+function wp_enqueue_style( $handle ) { $GLOBALS['cr_collection_enqueued'][] = $handle; }
 
 require dirname( __DIR__, 2 ) . '/inc/collection.php';
 
@@ -46,11 +51,24 @@ cr_collection_check( array( 'single-post', 'kind-collection' ) === $parity['coll
 $rucss = \Courtneyr\Child\Collection\rucss( array( 'existing.css', 'cr-collection.css' ) );
 cr_collection_check( array( 'existing.css', 'cr-collection.css', 'collection-item.css' ) === $rucss, 'RUCSS values stay ordered and unique' );
 
-foreach ( array( 'post-kinds-indieweb/collection-item', 'post-kinds-indieweb/stream-card' ) as $block ) {
-	$style = $GLOBALS['cr_collection_styles'][ $block ] ?? array();
-	cr_collection_check( 'cr-collection' === ( $style['handle'] ?? '' ), $block . ' uses the collection style handle' );
-	cr_collection_check( array( 'courtneyr-paper', 'courtneyr-nav' ) === ( $style['deps'] ?? array() ), $block . ' uses the paper and nav dependencies' );
-}
+$style = $GLOBALS['cr_collection_styles']['post-kinds-indieweb/collection-item'] ?? array();
+cr_collection_check( 'cr-collection' === ( $style['handle'] ?? '' ), 'collection-item uses the collection style handle' );
+cr_collection_check( array( 'courtneyr-paper', 'courtneyr-nav' ) === ( $style['deps'] ?? array() ), 'collection-item uses the paper and nav dependencies' );
+cr_collection_check( ! isset( $GLOBALS['cr_collection_styles']['post-kinds-indieweb/stream-card'] ), 'stream-card blocks do not attach the collection sheet' );
+$registered = $GLOBALS['cr_collection_registered']['cr-collection'] ?? array();
+cr_collection_check( array( 'courtneyr-paper', 'courtneyr-nav' ) === ( $registered['deps'] ?? array() ) && str_ends_with( (string) ( $registered['path'] ?? '' ), '/assets/css/cr-collection.css' ), 'the collection sheet is registered with its deps and path' );
+
+$plain = '<article class="pk-card pk-card--stream pk-card--watch k-watch h-entry">Film</article>';
+cr_collection_check( $plain === \Courtneyr\Child\Collection\enqueue_for_collection_card( $plain ) && array() === $GLOBALS['cr_collection_enqueued'], 'a non-collection Stream card leaves the collection sheet unloaded' );
+$card = '<article class="pk-card pk-card--stream pk-card--collection pk-card--collection-stream k-collection h-entry">Cabinet</article>';
+cr_collection_check( $card === \Courtneyr\Child\Collection\enqueue_for_collection_card( $card ) && array( 'cr-collection' ) === $GLOBALS['cr_collection_enqueued'], 'a collection Stream card loads the collection sheet' );
+$GLOBALS['cr_collection_enqueued'] = array();
+$group = '<div class="wp-block-group pkiw-collection is-style-cr-cabinet"></div>';
+\Courtneyr\Child\Collection\cabinet_default( $group, array( 'attrs' => array( 'className' => 'pkiw-collection is-style-cr-cabinet' ) ) );
+cr_collection_check( array( 'cr-collection' ) === $GLOBALS['cr_collection_enqueued'], 'a collection cabinet group loads the collection sheet' );
+$GLOBALS['cr_collection_enqueued'] = array();
+$filters = $GLOBALS['cr_collection_hooks']['render_block_post-kinds-indieweb/stream-card'][10] ?? array();
+cr_collection_check( in_array( 'Courtneyr\\Child\\Collection\\enqueue_for_collection_card', array_column( $filters, 0 ), true ), 'the Stream card render filter is hooked' );
 
 $root = dirname( __DIR__, 2 );
 $owned = array(

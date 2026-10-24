@@ -43,9 +43,17 @@ function register_styles(): void {
 }
 add_action( 'init', __NAMESPACE__ . '\\register_styles' );
 
-/** Attach collection paint to both plugin blocks. */
+/**
+ * Attach collection paint to the collection item block and register it for
+ * collection Stream cards.
+ *
+ * Every Stream, kind archive and home card is a stream-card block, so
+ * attaching the sheet to that block loaded 17 KB of render-blocking CSS on
+ * /stream/ and seven kind archives that render no collection (live 0.7.135,
+ * 2026-10-24). enqueue_for_collection_card() loads it for collection cards only.
+ */
 function register_card_style(): void {
-	if ( ! defined( 'COURTNEYR_CHILD_DIR' ) || ! defined( 'COURTNEYR_CHILD_URI' ) || ! defined( 'COURTNEYR_CHILD_VERSION' ) || ! function_exists( 'wp_enqueue_block_style' ) ) {
+	if ( ! defined( 'COURTNEYR_CHILD_DIR' ) || ! defined( 'COURTNEYR_CHILD_URI' ) || ! defined( 'COURTNEYR_CHILD_VERSION' ) || ! function_exists( 'wp_enqueue_block_style' ) || ! function_exists( 'wp_register_style' ) ) {
 		return;
 	}
 
@@ -61,11 +69,37 @@ function register_card_style(): void {
 		'ver'    => COURTNEYR_CHILD_VERSION,
 		'deps'   => array( 'courtneyr-paper', 'courtneyr-nav' ),
 	);
-	foreach ( array( 'post-kinds-indieweb/collection-item', 'post-kinds-indieweb/stream-card' ) as $block_name ) {
-		wp_enqueue_block_style( $block_name, $style );
+	wp_register_style( $style['handle'], $style['src'], $style['deps'], $style['ver'] );
+	if ( function_exists( 'wp_style_add_data' ) ) {
+		wp_style_add_data( $style['handle'], 'path', $style['path'] );
 	}
+	wp_enqueue_block_style( 'post-kinds-indieweb/collection-item', $style );
 }
 add_action( 'init', __NAMESPACE__ . '\\register_card_style' );
+
+/** Enqueue the collection sheet registered by register_card_style(). */
+function enqueue_style(): void {
+	if ( function_exists( 'wp_enqueue_style' ) ) {
+		wp_enqueue_style( STYLE_HANDLE );
+	}
+}
+
+/**
+ * Enqueue the collection sheet when a Stream card is a collection card.
+ *
+ * Block themes render the template before wp_head, so a sheet enqueued while
+ * a card renders still prints in <head>.
+ *
+ * @param mixed $html Rendered Stream card.
+ * @return mixed Unchanged markup.
+ */
+function enqueue_for_collection_card( $html ) {
+	if ( is_string( $html ) && str_contains( $html, 'pk-card--collection' ) ) {
+		enqueue_style();
+	}
+	return $html;
+}
+add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\enqueue_for_collection_card' );
 
 /**
  * Seed the cabinet style when the author did not choose another group style.
@@ -88,6 +122,7 @@ function cabinet_default( $html, $block ): string {
 	if ( ! in_array( GROUP_CLASS, $tokens, true ) ) {
 		return $html;
 	}
+	enqueue_style();
 	foreach ( $tokens as $token ) {
 		if ( str_starts_with( $token, 'is-style-' ) ) {
 			return $html;
