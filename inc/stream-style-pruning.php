@@ -197,6 +197,43 @@ function kept_kind_sheets( ?string $handle = null ): array {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\prune', 9999 );
 
 /**
+ * Plugin sheets no listing page uses.
+ *
+ * Syndication Links' syn.min.css (135,518 B) paints the ul.relsyn list under
+ * a single post. Neither it nor IndieWeb's indieweb.css (121,783 B) matched one
+ * selector on the front page, /stream/, /blog/ or eight kind archives (live
+ * 0.7.135, 2026-10-24); singles with syndication links match 4-7 syn.min.css
+ * rules.
+ */
+const LISTING_UNUSED_PLUGIN_SHEETS = array( 'syndication-style', 'indieweb' );
+
+/**
+ * Listing surfaces: the Stream surfaces, the /blog/ posts page and kind archives.
+ *
+ * @return bool
+ */
+function is_listing_surface(): bool {
+	return is_stream_surface() || ( is_home() && ! is_front_page() ) || is_tax( 'kind' );
+}
+
+/**
+ * Dequeue the plugin sheets listing surfaces don't use.
+ *
+ * Both plugins enqueue on wp_enqueue_scripts at priority 10.
+ *
+ * @return void
+ */
+function dequeue_listing_plugin_sheets(): void {
+	if ( is_admin() || ! is_listing_surface() ) {
+		return;
+	}
+	foreach ( LISTING_UNUSED_PLUGIN_SHEETS as $handle ) {
+		wp_dequeue_style( $handle );
+	}
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\dequeue_listing_plugin_sheets', 9999 );
+
+/**
  * Front page: load the card, home-section and kind sheets without blocking first paint.
  *
  * On the front page the card sheet (cr-post-kinds.css), the home sections
