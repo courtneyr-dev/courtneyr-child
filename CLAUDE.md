@@ -48,6 +48,17 @@ Baseline first, then change, then compare: frontend at 1440 and 375, dark (`loca
 - The theme's full-bleed rules key off `.alignfull` on the Group (`width: 100vw; margin-left: calc(50% - 50vw)`); wrap such a group in a plain `wp:template-part` (no `align`) and leave the group unchanged.
 - Archived templates and parts live in `_archive/templates` and `_archive/parts`. Core registers every `.html` file under `templates/` and `parts/` recursively, so never move them back.
 
+## CSS performance guardrails
+
+Measured 2026-10-22/23 (full notes: vault, `1. Projects/Post Kinds for IndieWeb/theme-performance-guardrails-2026-10-23.md`). `npm run lint:css-guardrails` enforces the first four.
+
+- A kind gets its own sheet, `assets/css/cr-<kind>.css`, handle `courtneyr-<kind>`. `cr-post-kinds.css` (391,929 B, home page uses 9%) holds only what every kind shares and may not grow.
+- Name a kind's classes with a root nothing else uses. One kind per selector list: `.kind-watch, .kind-read` defeats the pruning engine, which drops a sheet only when its distinctive classes did not render.
+- A sheet is at most 30 KiB. A sheet that loads on some pages only goes in `RUCSS_INLINE_HANDLES` in `inc/stream-style-pruning.php`; Perfmatters builds one used CSS per URL type from the first page it sees.
+- `path` on a registered block style makes WordPress inline it when it fits the shared 40,000 B budget (core and Ollie sheets count too), which flips `<link>` to `<style>` on some pages.
+- Not enforced by code: keep first-paint layout out of Perfmatters-delayed sheets; after any used-CSS clear, load one representative page per type first (a post with a figure, an `hr` and a featured image) or rules drop and CLS moves; PageSpeed's mobile LCP is a simulation, so report applied-throttle numbers beside it.
+- Never turn on Perfmatters' own CSS minify for this theme. Deploys minify with `tools/minify-css.mjs`; rollback is `git revert` of the sync commit in the deploy repo.
+
 ## Conventions
 
 - Commits: Emoji-Log, imperative, version in `style.css` and `functions.php` bumped per release.
