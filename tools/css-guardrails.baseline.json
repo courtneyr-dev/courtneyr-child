@@ -13,6 +13,10 @@
 		"cr-media-shelf.css": 4,
 		"cr-post-kinds.css": 155
 	},
+	"dataThemeGaps": {
+		"components.css": 2,
+		"cr-post-kinds.css": 12
+	},
 	"notInRucssHandles": [
 		"cr-404.css",
 		"cr-acquisition.css",
