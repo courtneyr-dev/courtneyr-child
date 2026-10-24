@@ -160,7 +160,7 @@
 	list-style: none;
 }
 
-.cr-quote-book .pkiw-quote-entry {
+.cr-quote-book .pkiw-quote-entry:not(.cr-note-artifact) {
 	position: relative;
 	box-sizing: border-box;
 	min-block-size: 6.5rem;
@@ -176,19 +176,19 @@
 	overflow-wrap: anywhere;
 }
 
-.cr-quote-book blockquote.pkiw-quote-entry__text {
+.cr-quote-book .pkiw-quote-entry:not(.cr-note-artifact) blockquote.pkiw-quote-entry__text {
 	margin: 0;
 	padding: 0;
 	border: 0;
 	font: 400 var(--cr-text-md) / 1.4 var(--cr-font-accent);
 }
 
-.cr-quote-book blockquote.pkiw-quote-entry__text p {
+.cr-quote-book .pkiw-quote-entry:not(.cr-note-artifact) blockquote.pkiw-quote-entry__text p {
 	margin: 0;
 	font: inherit;
 }
 
-.cr-quote-book .pkiw-quote-entry__cite {
+.cr-quote-book .pkiw-quote-entry:not(.cr-note-artifact) .pkiw-quote-entry__cite {
 	display: block;
 	margin-block-start: var(--cr-space-sm);
 	color: var(--cr-cerulean);
@@ -196,7 +196,7 @@
 	font-style: normal;
 }
 
-.cr-quote-book .pkiw-quote-entry__cite::before {
+.cr-quote-book .pkiw-quote-entry:not(.cr-note-artifact) .pkiw-quote-entry__cite::before {
 	content: "";
 	display: block;
 	inline-size: 1.25rem;
@@ -372,6 +372,147 @@
 	box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 
+/* Notecards. */
+
+/*
+ * inc/quote-book.php entry_notecard() makes each entry the single's pinned
+ * sheet: the entry is the artifact (pin colours, tilt, paper), the paper
+ * holds the post's own quote block. These declarations are the single's
+ * (cr-post-kinds.css, ".cr-note--single") at its phone width, the width an
+ * archive card has; its literal colours are written as the same tokens.
+ * tests/php/quote-book-test.php keeps the two in step.
+ */
+
+.cr-quote-book .pkiw-quote-entry.cr-note-artifact {
+	--pin-h: 2.6rem;
+	--pin-x: 58%;
+	position: relative;
+	isolation: isolate;
+	box-sizing: border-box;
+	padding-top: calc(var(--pin-h) * 0.5);
+	overflow: visible;
+}
+
+.cr-quote-book .cr-note-artifact .cr-note__pin {
+	position: absolute;
+	top: 0;
+	left: var(--pin-x);
+	z-index: 2;
+	width: calc(var(--pin-h) * 44 / 60);
+	height: var(--pin-h);
+	transform: translateX(-50%);
+	filter: drop-shadow(1px 3px 2px color-mix(in srgb, var(--cr-russian-violet) 35%, transparent));
+	pointer-events: none;
+}
+
+.cr-quote-book .cr-note-artifact .cr-note.cr-note--book {
+	position: relative;
+	box-sizing: border-box;
+	width: 100%;
+	margin: 0;
+	padding: 2rem 1.3rem 1.6rem 2.4rem;
+	border: 0;
+	background: none;
+	transform: rotate(var(--cr-note-tilt, 0deg));
+	transform-origin: var(--pin-x) 0;
+	color: var(--cr-russian-violet);
+}
+
+.cr-quote-book .cr-note-artifact .cr-note.cr-note--book::before {
+	content: "";
+	display: block;
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	border: 1px solid color-mix(in srgb, var(--cr-russian-violet) 30%, transparent);
+	pointer-events: none;
+	background:
+		radial-gradient(circle at 1.1rem 1.3rem, var(--cr-surface) 0 0.32rem, color-mix(in srgb, var(--cr-russian-violet) 35%, transparent) 0.38rem 0.45rem, transparent 0.5rem) 0 0 / 100% 2.1rem repeat-y,
+		repeating-linear-gradient(180deg, transparent 0 calc(2.1rem - 1px), color-mix(in srgb, var(--cr-russian-violet) 13%, transparent) calc(2.1rem - 1px) 2.1rem),
+		repeating-linear-gradient(0deg, color-mix(in srgb, var(--cr-russian-violet) 2%, transparent) 0 1px, transparent 1px 5px),
+		var(--cr-quote-paper, var(--cr-printer-ivory));
+	background-position: 0 0.4rem, 0 1.3rem, 0 0, 0 0;
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-quote-book .cr-note--book .cr-note__mark {
+	position: absolute;
+	top: 1rem;
+	left: 1.4rem;
+	z-index: 0;
+	color: var(--cr-periwinkle);
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 4.2rem;
+	line-height: 0.6;
+	pointer-events: none;
+}
+
+/* A long quote previews nine lines; the cite sits outside the clamp. */
+.cr-quote-book .cr-note-artifact .cr-note--book blockquote.pkiw-quote-entry__text {
+	display: -webkit-box;
+	position: relative;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	border: 0;
+	background: none;
+	box-shadow: none;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: 1.15rem;
+	line-height: 1.55;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 9;
+}
+
+.cr-quote-book .cr-note-artifact .cr-note--book blockquote.pkiw-quote-entry__text p {
+	margin: 0 0 0.85rem;
+	padding: 0;
+	color: inherit;
+	font: inherit;
+}
+
+.cr-quote-book .cr-note-artifact .cr-note--book blockquote.pkiw-quote-entry__text p:last-of-type {
+	margin-bottom: 0;
+}
+
+.cr-quote-book .cr-note-artifact.cr-hand-short .cr-note--book blockquote.pkiw-quote-entry__text p {
+	margin: 0 0 2.1rem;
+	font-family: var(--cr-font-display);
+	font-size: 0.98rem;
+
+	/* One line per ruled line: the paper rules are 2.1rem apart, as on the single. */
+	/* stylelint-disable-next-line declaration-property-unit-allowed-list */
+	line-height: 2.1rem;
+	letter-spacing: 0.01em;
+	overflow-wrap: anywhere;
+}
+
+.cr-quote-book .cr-note-artifact.cr-hand-short .cr-note--book blockquote.pkiw-quote-entry__text p:last-of-type {
+	margin-bottom: 0;
+}
+
+.cr-quote-book .cr-note-artifact .cr-note--book .pkiw-quote-entry__cite {
+	display: block;
+	margin: 0.9rem 0 0;
+	color: var(--cr-cerulean);
+	font-family: var(--cr-font-body);
+	font-size: 1.02rem;
+	font-style: normal;
+	font-weight: 700;
+	line-height: 1.4;
+}
+
+.cr-quote-book .cr-note-artifact .cr-note--book .pkiw-quote-entry__cite::before {
+	content: "\2014\00a0";
+}
+
+.cr-quote-book .cr-note-artifact .cr-note--book .pkiw-quote-entry__cite a {
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+
 /* Responsive book layout. */
 
 .cr-quote-book > .pkiw-quote-authors {
@@ -500,6 +641,15 @@
 	--cr-rule: var(--cr-paper-rule);
 }
 
+/* As on the single's sheet: paper and ink stay physical; the citation keeps its cerulean. */
+:root[data-theme="dark"] .cr-quote-book :is(.cr-note--book, .cr-note--book *:not(.cr-note__mark):not(cite):not(cite *)) {
+	color: var(--cr-russian-violet) !important;
+}
+
+:root[data-theme="dark"] .cr-quote-book .cr-note--book :is(cite, cite *) {
+	color: var(--cr-cerulean) !important;
+}
+
 @media (prefers-color-scheme: dark) {
 
 	:root:not([data-theme="light"]) .cr-quote-book {
@@ -510,6 +660,14 @@
 		--cr-band-link: var(--cr-russian-violet);
 		--cr-focus-halo: var(--cr-russian-violet);
 		--cr-rule: var(--cr-paper-rule);
+	}
+
+	:root:not([data-theme="light"]) .cr-quote-book :is(.cr-note--book, .cr-note--book *:not(.cr-note__mark):not(cite):not(cite *)) {
+		color: var(--cr-russian-violet) !important;
+	}
+
+	:root:not([data-theme="light"]) .cr-quote-book .cr-note--book :is(cite, cite *) {
+		color: var(--cr-cerulean) !important;
 	}
 }
 
@@ -551,11 +709,15 @@
 	.cr-quote-book .pkiw-quote-works > :is(h2, h3, h4, h5, h6)::before,
 	.cr-quote-book h3.pkiw-quote-section__heading::before,
 	.cr-quote-book li.pkiw-quote-work::before,
-	.cr-quote-book > .pkiw-quote-works::before {
+	.cr-quote-book > .pkiw-quote-works::before,
+	.cr-quote-book .cr-note-artifact .cr-note.cr-note--book::before,
+	.cr-quote-book .cr-note-artifact .cr-note__pin,
+	.cr-quote-book .cr-note--book .cr-note__mark {
 		display: none;
 	}
 
-	.cr-quote-book .pkiw-quote-entry,
+	.cr-quote-book .pkiw-quote-entry:not(.cr-note-artifact),
+	.cr-quote-book .cr-note-artifact .cr-note.cr-note--book,
 	.cr-quote-book .pkiw-quote-tabs a {
 		border: 2px solid CanvasText;
 		background: Canvas;

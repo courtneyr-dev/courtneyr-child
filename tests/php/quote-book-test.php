@@ -100,20 +100,49 @@ namespace {
 		return ! empty( $GLOBALS['cr_qb_request']['protected'][ $id ] );
 	}
 
-	/** Return one quote block with any saved paper style. */
+	/** Return one quote block with any saved paper style, or one paragraph block. */
 	function parse_blocks( string $content ): array {
 		$class_name = '';
 		if ( preg_match( '/is-style-cr-quote-paper-[a-z]+/', $content, $found ) ) {
 			$class_name = $found[0];
 		}
+		$html = trim( (string) preg_replace( '/<!--\s*\/?wp:[^>]*-->/', '', $content ) );
+		if ( ! str_contains( $html, '<blockquote' ) ) {
+			return array( array( 'blockName' => 'core/paragraph', 'attrs' => array(), 'innerBlocks' => array(), 'innerHTML' => $html ) );
+		}
 		return array(
 			array(
-				'blockName'   => 'core/quote',
+				'blockName'   => str_contains( $content, 'wp:pullquote' ) ? 'core/pullquote' : 'core/quote',
 				'attrs'       => array( 'className' => $class_name ),
 				'innerBlocks' => array(),
-				'innerHTML'   => '<blockquote><p>Quote</p></blockquote>',
+				'innerHTML'   => $html,
 			),
 		);
+	}
+
+	function render_block( array $block ): string {
+		return (string) ( $block['innerHTML'] ?? '' );
+	}
+
+	function is_post_publicly_viewable( $post = null ): bool {
+		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
+		return empty( $GLOBALS['cr_qb_request']['private'][ $id ] );
+	}
+
+	function wp_strip_all_tags( $text, $remove_breaks = false ): string {
+		return trim( strip_tags( (string) $text ) );
+	}
+
+	function strip_shortcodes( $content ): string {
+		return (string) $content;
+	}
+
+	function esc_attr( $text ): string {
+		return htmlspecialchars( (string) $text, ENT_QUOTES );
+	}
+
+	function esc_url( $url ): string {
+		return htmlspecialchars( (string) $url, ENT_QUOTES );
 	}
 
 	function is_admin(): bool {
@@ -158,6 +187,7 @@ namespace Courtneyr\Child\QuoteBookTests {
 	use const Courtneyr\Child\QuoteBook\EMPTY_STRIP;
 	use const Courtneyr\Child\QuoteBook\STRIPS;
 	use function Courtneyr\Child\QuoteBook\enqueue_styles;
+	use function Courtneyr\Child\QuoteBook\entry_notecard;
 	use function Courtneyr\Child\QuoteBook\entry_paper;
 	use function Courtneyr\Child\QuoteBook\register_block_styles;
 	use function Courtneyr\Child\QuoteBook\rucss_exclusions;
@@ -224,6 +254,7 @@ namespace Courtneyr\Child\QuoteBookTests {
 
 	check( hooked( 'init', 'Courtneyr\\Child\\QuoteBook\\register_block_styles', 20, 1 ), 'commonplace style hooks init at 20 with one argument' );
 	check( hooked( 'render_block_post-kinds-indieweb/quote-entry', 'Courtneyr\\Child\\QuoteBook\\entry_paper', 10, 3 ), 'quote entry paper hooks at 10 with three arguments' );
+	check( hooked( 'render_block_post-kinds-indieweb/quote-entry', 'Courtneyr\\Child\\QuoteBook\\entry_notecard', 11, 3 ), 'quote entry notecard hooks at 11, after the paper, with three arguments' );
 	check( hooked( 'render_block_core/post-template', 'Courtneyr\\Child\\QuoteBook\\strip_seeds', 10, 2 ), 'post-template strip seeds hook at 10 with two arguments' );
 	check( hooked( 'render_block_post-kinds-indieweb/quote-works', 'Courtneyr\\Child\\QuoteBook\\strip_seeds', 10, 2 ), 'quote works strip seeds hook at 10 with two arguments' );
 	check( hooked( 'enqueue_block_assets', 'Courtneyr\\Child\\QuoteBook\\enqueue_styles', 10, 1 ), 'book stylesheet hooks enqueue_block_assets' );
@@ -355,9 +386,212 @@ namespace Courtneyr\Child\QuoteBookTests {
 	check( array() === $hexes[0], 'quote CSS contains no raw hex colour' );
 	check( 2 === substr_count( $css, '--cr-rule: var(--cr-paper-rule);' ), 'both dark blocks pin the rule to the light-paper token' );
 	check( 0 === preg_match( '/\b(?:rgb|rgba|hsl|hsla)\(/i', $css ), 'quote CSS contains no literal colour function' );
-	check( 0 === preg_match( '/\bfilter\s*:/i', $css ) && ! str_contains( $css, 'blur(' ) && ! str_contains( $css, 'gradient' ), 'quote CSS contains no filter, blur or gradient' );
-	check( 0 === preg_match( '/font-size\s*:\s*(?:0(?:\.\d+)?|0\.[0-6]\d*)rem\b/', $css ), 'quote CSS has no font size below the text floor' );
-	check( ! str_contains( $css, '--cr-font-display' ), 'quote CSS never uses the display face' );
+	// The notecard section paints the single's sheet (gradient paper, pin shadow, handwriting); the rest of the book keeps hard token paint.
+	$card_start = strpos( $css, '/* Notecards. */' );
+	$card_end   = strpos( $css, '/* Responsive book layout. */' );
+	check( false !== $card_start && false !== $card_end && $card_start < $card_end, 'quote CSS has one notecard section' );
+	$card_css = substr( $css, (int) $card_start, (int) $card_end - (int) $card_start );
+	$book_css = substr( $css, 0, (int) $card_start ) . substr( $css, (int) $card_end );
+	check( 0 === preg_match( '/\bfilter\s*:/i', $book_css ) && ! str_contains( $book_css, 'blur(' ) && ! str_contains( $book_css, 'gradient' ), 'quote CSS outside the notecards contains no filter, blur or gradient' );
+	check( ! str_contains( $book_css, '--cr-font-display' ), 'quote CSS outside the notecards never uses the display face' );
+	check( ! str_contains( $card_css, 'blur(' ) && 1 === preg_match_all( '/\bfilter\s*:/i', $card_css ), 'the notecard uses one filter (the pin shadow) and no blur' );
+	preg_match_all( '/font-size\s*:\s*(\d*\.?\d+)rem\b/', $css, $rem_sizes );
+	check( array() === array_filter( $rem_sizes[1], static fn( $size ) => (float) $size < 0.75 ), 'quote CSS has no font size below the 0.75rem text floor' );
+
+	// --- Notecards: entry_notecard() --------------------------------------------------------
+	$GLOBALS['cr_qb_request'] = array();
+	$highlight = '<span style="background-image: linear-gradient(transparent 60%, rgba(188, 181, 227, 0.5) 60%)" class="sme-highlighter">even if your voice shakes.</span>';
+	$hl_post   = new \WP_Post( 201, 'Even if your voice shakes', '<!-- wp:quote {"className":"is-style-cr-quote-paper-lavender"} --><blockquote class="wp-block-quote is-style-cr-quote-paper-lavender is-layout-flow"><p class="wp-block-paragraph"><em>Speak your mind&#8211;' . $highlight . ' Well-aimed <a href="https://example.org/sling">slingshots</a> topple giants.</em></p><cite><em><a href="https://example.org/kuhn" target="_blank">Maggie Kuhn</a></em></cite></blockquote><!-- /wp:quote -->' );
+	$long_post = new \WP_Post( 202, 'Long', '<!-- wp:quote --><blockquote class="wp-block-quote"><p>' . str_repeat( 'word ', 130 ) . '</p></blockquote><!-- /wp:quote -->' );
+	$pull_post = new \WP_Post( 203, 'Pull', '<!-- wp:pullquote --><figure class="wp-block-pullquote"><blockquote><p>A pullquote thought.</p><cite>Pull Notes</cite></blockquote></figure><!-- /wp:pullquote -->' );
+	$bare_post = new \WP_Post( 204, 'Bare', '<!-- wp:paragraph --><p>No quote block here.</p><!-- /wp:paragraph -->' );
+	$nocite    = new \WP_Post( 205, 'No cite', '<!-- wp:quote --><blockquote class="wp-block-quote"><p>Uncited words.</p></blockquote><!-- /wp:quote -->' );
+	$GLOBALS['cr_qb_posts'] = array( 201 => $hl_post, 202 => $long_post, 203 => $pull_post, 204 => $bare_post, 205 => $nocite );
+	$GLOBALS['cr_qb_posts'][206] = new \WP_Post( 206, $nocite->post_title, $nocite->post_content );
+	$GLOBALS['cr_qb_posts'][207] = new \WP_Post( 207, $hl_post->post_title, $hl_post->post_content );
+
+	/** The plugin's quote-entry markup for one post, after entry_paper(). */
+	function plugin_entry( int $id, string $cite = 'Maggie Kuhn', string $extra_class = '' ): string {
+		$labelled = "pkiw-quote-$id-text" . ( '' !== $cite ? " pkiw-quote-$id-cite" : '' );
+		return '<div style="--cr-quote-paper:var(--cr-printer-ivory)" class="pkiw-quote-entry h-entry is-style-cr-commonplace' . $extra_class . '">'
+			. '<blockquote class="pkiw-quote-entry__text p-summary" id="pkiw-quote-' . $id . '-text"><p>Plain excerpt…</p></blockquote>'
+			. ( '' !== $cite ? '<cite class="pkiw-quote-entry__cite" id="pkiw-quote-' . $id . '-cite">' . $cite . '</cite>' : '' )
+			. '<a class="u-url pkiw-quote-entry__link" href="https://example.test/q' . $id . '/" aria-labelledby="' . $labelled . '"></a>'
+			. '<time class="dt-published" datetime="2026-09-14T01:20:28+00:00" hidden></time>'
+			. '<span hidden><span class="p-author h-card"><span class="p-name">Courtney</span><data class="u-url" value="https://example.test/"></data></span></span>'
+			. '<span class="u-quotation-of h-cite" hidden><span class="p-name">Work</span><span class="p-author">Maggie Kuhn</span></span>'
+			. '</div>';
+	}
+	/** The plugin entry's hidden tail: dt-published, author and h-cite. */
+	function plugin_tail( string $entry ): string {
+		$start = strpos( $entry, '<time' );
+		return substr( $entry, (int) $start, strrpos( $entry, '</div>' ) - (int) $start );
+	}
+	/** Count of tags with one attribute. */
+	function tags_with( string $html, string $attribute, string $tag = '' ): int {
+		$tags = new \WP_HTML_Tag_Processor( $html );
+		$n    = 0;
+		while ( $tags->next_tag( '' !== $tag ? $tag : null ) ) {
+			$n += null !== $tags->get_attribute( $attribute ) ? 1 : 0;
+		}
+		return $n;
+	}
+
+	$styled  = array( 'attrs' => array( 'className' => 'is-style-cr-commonplace' ) );
+	$entry   = plugin_entry( 201 );
+	$card    = entry_notecard( $entry, $styled, new \WP_Block( array( 'postId' => 201 ) ) );
+	$card_class = attribute( $card, 'pkiw-quote-entry', 'class' );
+	$q_open  = strpos( $card, '<blockquote' );
+	$q_close = strpos( $card, '</blockquote>' );
+	$c_open  = strpos( $card, '<cite' );
+	check( $card !== $entry && str_contains( $card_class, 'cr-note-artifact' ) && str_contains( $card_class, 'cr-note-artifact--book' ) && str_contains( $card_class, 'h-entry' ) && str_contains( $card_class, 'is-style-cr-commonplace' ), 'notecard: the entry root becomes the artifact and stays the h-entry' );
+	check( str_contains( $card, $highlight ), 'notecard: the quote block highlight span and its inline background reach the archive byte for byte' );
+	check( str_contains( $card, '<em>Speak your mind' ), 'notecard: the quote keeps its emphasis' );
+	check( 1 === substr_count( $card, 'class="cr-note__pin"' ) && 1 === substr_count( $card, 'class="cr-note__mark"' ) && 1 === substr_count( $card, 'class="cr-note cr-note--book"' ), 'notecard: one pin, one mark, one paper' );
+	check( str_contains( $card, \Courtneyr\Child\QuoteNote\pin_svg() ) && str_contains( $card, \Courtneyr\Child\QuoteNote\mark() ), 'notecard: pin and mark are the single\'s own markup' );
+	$note_props = substr( \Courtneyr\Child\QuoteNote\note_style( \Courtneyr\Child\Stamps\seed( '201', 'Even if your voice shakes' ) ), 7, -1 );
+	check( str_ends_with( attribute( $card, 'pkiw-quote-entry', 'style' ), ';' . $note_props ), 'notecard: pin colours and tilt equal the single\'s note_style()' );
+	check( 'var(--cr-printer-ivory)' === property( $card, 'pkiw-quote-entry', '--cr-quote-paper' ), 'notecard: the paper set by entry_paper() is kept' );
+	$text_class = attribute( $card, 'pkiw-quote-entry__text', 'class' );
+	check( 'pkiw-quote-201-text' === attribute( $card, 'pkiw-quote-entry__text', 'id' ) && str_contains( $text_class, 'wp-block-quote' ) && str_contains( $text_class, 'is-style-cr-quote-paper-lavender' ) && str_contains( $text_class, 'e-content' ) && ! str_contains( $text_class, 'p-summary' ), 'notecard: the block\'s blockquote carries the plugin text id and e-content' );
+	check( ! str_contains( $card, 'Plain excerpt' ), 'notecard: the plain-text excerpt is gone' );
+	check( false !== $q_close && false !== $c_open && $q_close < $c_open, 'notecard: the citation sits after the blockquote, outside the clamp' );
+	check( 'pkiw-quote-201-cite' === attribute( $card, 'pkiw-quote-entry__cite', 'id' ) && 1 === preg_match( '#<cite [^>]*><em><a\s*>Maggie Kuhn</a></em></cite>#', substr( $card, (int) $c_open ) ), 'notecard: the block\'s own citation markup fills the plugin cite slot' );
+	check( 1 === tags_with( $card, 'href' ) && 1 === tags_with( $card, 'href', 'A' ) && 0 === tags_with( $card, 'tabindex' ) && 0 === tags_with( $card, 'target' ), 'notecard: one link, the overlay; quote and cite anchors lose href and target' );
+	check( 'https://example.test/q201/' === attribute( $card, 'pkiw-quote-entry__link', 'href' ) && 'pkiw-quote-201-text pkiw-quote-201-cite' === attribute( $card, 'pkiw-quote-entry__link', 'aria-labelledby' ), 'notecard: the overlay keeps its destination and is named by the visible quote and cite' );
+	foreach ( array( 'pkiw-quote-201-text', 'pkiw-quote-201-cite' ) as $id ) {
+		check( 1 === substr_count( $card, 'id="' . $id . '"' ), "notecard: $id exists exactly once" );
+	}
+	check( str_contains( $card, plugin_tail( $entry ) ), 'notecard: dt-published, the author h-card and the h-cite pass through byte for byte' );
+	check( str_contains( $card_class, 'cr-hand-short' ), 'notecard: a short quote is handwritten, as on its single' );
+	check( 1 === substr_count( $card, '<div class="cr-note cr-note--book">' ) && str_ends_with( $card, '</div></div>' ) && substr_count( $card, '<div' ) === substr_count( $card, '</div>' ), 'notecard: divs balance' );
+	check( $card === entry_notecard( $entry, $styled, new \WP_Block( array( 'postId' => 201 ) ) ), 'notecard: output is stable on repeated calls' );
+
+	$long = entry_notecard( plugin_entry( 202, 'Long' ), $styled, new \WP_Block( array( 'postId' => 202 ) ) );
+	check( str_contains( $long, 'word word' ) && ! str_contains( attribute( $long, 'pkiw-quote-entry', 'class' ), 'cr-hand-short' ), 'notecard: a quote past HAND_MAX_WORDS stays typeset and keeps every word in the DOM' );
+	$pull = entry_notecard( plugin_entry( 203, 'Pull Notes' ), $styled, new \WP_Block( array( 'postId' => 203 ) ) );
+	check( str_contains( $pull, 'A pullquote thought.' ) && ! str_contains( $pull, '<figure' ) && str_contains( $pull, '>Pull Notes</cite>' ), 'notecard: a pullquote prints its blockquote without the figure, as the single does' );
+	$plugin_cite = entry_notecard( plugin_entry( 205, 'Work &amp; Title' ), $styled, new \WP_Block( array( 'postId' => 205 ) ) );
+	check( str_contains( $plugin_cite, '<cite class="pkiw-quote-entry__cite" id="pkiw-quote-205-cite">Work &amp; Title</cite>' ), 'notecard: with no block citation the plugin cite text stays' );
+	$uncited = entry_notecard( plugin_entry( 206, '' ), $styled, new \WP_Block( array( 'postId' => 206 ) ) );
+	check( ! str_contains( $uncited, '<cite' ) && 'pkiw-quote-206-text' === attribute( $uncited, 'pkiw-quote-entry__link', 'aria-labelledby' ), 'notecard: with no citation at all the name points at the quote alone' );
+
+	$bare_entry = plugin_entry( 204 );
+	check( $bare_entry === entry_notecard( $bare_entry, $styled, new \WP_Block( array( 'postId' => 204 ) ) ), 'notecard: a post with no quote block keeps the plugin card' );
+	$protected_entry = '<div class="pkiw-quote-entry pkiw-quote-entry--protected h-entry is-style-cr-commonplace"><a class="u-url" href="https://example.test/q207/">Locked</a><time class="dt-published" hidden></time></div>';
+	check( $protected_entry === entry_notecard( $protected_entry, $styled, new \WP_Block( array( 'postId' => 207 ) ) ), 'notecard: the protected plugin card is byte-identical' );
+	$GLOBALS['cr_qb_request']['protected'][207] = true;
+	check( plugin_entry( 207 ) === entry_notecard( plugin_entry( 207 ), $styled, new \WP_Block( array( 'postId' => 207 ) ) ), 'notecard: a password-protected post never prints its quote' );
+	$GLOBALS['cr_qb_request'] = array( 'private' => array( 207 => true ) );
+	check( plugin_entry( 207 ) === entry_notecard( plugin_entry( 207 ), $styled, new \WP_Block( array( 'postId' => 207 ) ) ), 'notecard: a post the visitor may not view never prints its quote' );
+	$GLOBALS['cr_qb_request'] = array();
+	check( $continued === entry_notecard( $continued, $styled, new \WP_Block( array( 'postId' => 201 ) ) ), 'notecard: the continued placeholder is byte-identical' );
+	check( $entry === entry_notecard( $entry, $plain_block, new \WP_Block( array( 'postId' => 201 ) ) ), 'notecard: an entry without the commonplace style is byte-identical' );
+	check( '' === entry_notecard( '', $styled, null ), 'notecard: empty markup stays empty' );
+
+	// --- Notecard paint equals the single's sheet (cr-post-kinds.css) at phone width --------
+	/** Rules as [ selectors, declarations, media ] from a stylesheet. */
+	function css_rules( string $css ): array {
+		$css   = (string) preg_replace( '#/\*.*?\*/#s', '', $css );
+		$rules = array();
+		$stack = array();
+		$start = 0;
+		$len   = strlen( $css );
+		for ( $i = 0; $i < $len; $i++ ) {
+			if ( '{' === $css[ $i ] ) {
+				$stack[] = trim( substr( $css, $start, $i - $start ) );
+				$start   = $i + 1;
+			} elseif ( '}' === $css[ $i ] ) {
+				$prelude = array_pop( $stack );
+				$body    = substr( $css, $start, $i - $start );
+				if ( null !== $prelude && ! str_starts_with( $prelude, '@' ) && ! str_contains( $body, '{' ) ) {
+					$selectors = array_map( 'trim', preg_split( '/,(?![^()]*\))/', $prelude ) );
+					$decls     = array();
+					foreach ( preg_split( '/;(?![^()]*\))/', $body ) as $decl ) {
+						$at = strpos( $decl, ':' );
+						if ( false !== $at ) {
+							$decls[ trim( substr( $decl, 0, $at ) ) ] = trim( (string) preg_replace( '/\s+/', ' ', substr( $decl, $at + 1 ) ) );
+						}
+					}
+					$rules[] = array( $selectors, $decls, implode( ' ', array_filter( $stack, static fn( $p ) => str_starts_with( (string) $p, '@' ) ) ) );
+				}
+				$start = $i + 1;
+			}
+		}
+		return $rules;
+	}
+	/** Cascaded declarations for selectors ending in $tail, light mode, at a phone or desktop width. */
+	function cascade( array $rules, string $tail, string $scope, bool $phone, string $exclude = '' ): array {
+		$out = array();
+		foreach ( $rules as [ $selectors, $decls, $media ] ) {
+			if ( '' !== $media && ! ( $phone && str_contains( $media, 'max-width: 47.99rem' ) ) ) {
+				continue;
+			}
+			foreach ( $selectors as $selector ) {
+				if ( str_ends_with( $selector, $tail ) && str_contains( $selector, $scope ) && ! str_contains( $selector, 'data-theme' ) && ( '' === $exclude || ! str_contains( $selector, $exclude ) ) ) {
+					$out = array_merge( $out, $decls );
+					break;
+				}
+			}
+		}
+		return $out;
+	}
+	/** The single's literal colours and var() fallbacks, written as the tokens the archive uses. */
+	function tokenized( string $value ): string {
+		$value = (string) preg_replace_callback( '/rgba\(36, 28, 74, (0?\.\d+)\)/', static fn( $m ) => 'color-mix(in srgb, var(--cr-russian-violet) ' . round( 100 * (float) $m[1] ) . '%, transparent)', $value );
+		$value = str_replace( array( '#241c4a', '#126782' ), array( 'var(--cr-russian-violet)', 'var(--cr-cerulean)' ), $value );
+		do {
+			$before = $value;
+			$value  = (string) preg_replace( '/var\((--[a-z0-9-]+),(?:[^()]|\([^()]*\))*\)/', 'var($1)', $value );
+		} while ( $before !== $value );
+		return $value;
+	}
+
+	$single_rules = css_rules( (string) file_get_contents( $root . '/assets/css/cr-post-kinds.css' ) );
+	$book_rules   = css_rules( $css );
+	$scope        = 'body.single-post.kind-quote';
+	$pairs        = array(
+		'pin'        => array( '.cr-note-artifact .cr-note__pin', '.cr-note-artifact .cr-note__pin', array( 'position', 'top', 'left', 'width', 'height', 'transform', 'z-index', 'filter', 'pointer-events' ) ),
+		'artifact'   => array( '.cr-note-artifact', '.pkiw-quote-entry.cr-note-artifact', array( 'position', 'isolation', 'box-sizing', 'padding-top', 'overflow' ) ),
+		'paper'      => array( '.cr-note.cr-note--single', '.cr-note.cr-note--book', array( 'position', 'box-sizing', 'width', 'margin', 'padding', 'border', 'background', 'transform', 'color' ) ),
+		'paper face' => array( '.cr-note.cr-note--single::before', '.cr-note.cr-note--book::before', array( 'content', 'display', 'position', 'inset', 'z-index', 'border', 'pointer-events', 'background', 'background-position', 'box-shadow' ) ),
+		'mark'       => array( '.cr-note__mark', '.cr-note--book .cr-note__mark', array( 'position', 'top', 'left', 'z-index', 'color', 'font-family', 'font-size', 'line-height', 'pointer-events' ) ),
+		'quote'      => array( '.cr-note--single .wp-block-quote', '.cr-note--book blockquote.pkiw-quote-entry__text', array( 'position', 'margin', 'padding', 'border', 'background', 'box-shadow', 'color', 'font-family', 'line-height' ) ),
+		'paragraph'  => array( '.cr-note--single blockquote p', '.cr-note--book blockquote.pkiw-quote-entry__text p', array( 'margin', 'padding', 'color', 'font' ) ),
+		'cite'       => array( '.cr-note--single blockquote cite', '.cr-note--book .pkiw-quote-entry__cite', array( 'display', 'margin', 'color', 'font-family', 'font-size', 'font-style', 'font-weight', 'line-height' ) ),
+		'cite dash'  => array( '.cr-note--single blockquote cite::before', '.cr-note--book .pkiw-quote-entry__cite::before', array( 'content' ) ),
+		'cite link'  => array( '.cr-note--single blockquote cite a', '.cr-note--book .pkiw-quote-entry__cite a', array( 'color', 'text-decoration', 'text-underline-offset' ) ),
+		'hand'       => array( '.cr-note--single blockquote p', '.cr-hand-short .cr-note--book blockquote.pkiw-quote-entry__text p', array( 'margin', 'font-family', 'line-height', 'letter-spacing', 'overflow-wrap' ) ),
+	);
+	foreach ( $pairs as $label => [ $single_tail, $book_tail, $properties ] ) {
+		$single_scope = 'hand' === $label ? 'cr-hand-short' : ( in_array( $label, array( 'pin', 'artifact', 'mark' ), true ) ? 'kind-quote' : $scope );
+		$exclude = 'hand' === $label ? '' : 'cr-hand-short';
+		$single  = cascade( $single_rules, $single_tail, $single_scope, true, $exclude );
+		if ( 'mark' === $label ) {
+			$single = array_merge( $single, cascade( $single_rules, '.cr-note--single .cr-note__mark', $scope, true ) );
+		}
+		if ( 'quote' === $label ) {
+			$single = array_merge( cascade( $single_rules, '.cr-note--single blockquote', $scope, true ), $single );
+		}
+		$book = cascade( $book_rules, $book_tail, '.cr-quote-book', true, $exclude );
+		$diff = array();
+		foreach ( $properties as $property ) {
+			$want = tokenized( (string) ( $single[ $property ] ?? '(unset)' ) );
+			$got  = tokenized( (string) ( $book[ $property ] ?? "(unset)" ) );
+			if ( $want !== $got ) {
+				$diff[] = "$property: single «{$want}» archive «{$got}»";
+			}
+		}
+		check( array() === $diff, "notecard $label paint equals the single's phone-width sheet" . ( $diff ? ' — ' . implode( '; ', $diff ) : '' ) );
+	}
+	// Scaled to the card: the single's clamp() floors, the size it renders on a phone.
+	$floor = static fn( string $value ): string => preg_match( '/^clamp\(\s*([^,]+),/', $value, $m ) ? trim( $m[1] ) : $value;
+	check( $floor( (string) ( cascade( $single_rules, '.cr-note--single .wp-block-quote', $scope, true )['font-size'] ?? '' ) ) === ( cascade( $book_rules, '.cr-note--book blockquote.pkiw-quote-entry__text', '.cr-quote-book', true )['font-size'] ?? '' ), 'notecard quote size is the single\'s clamp floor' );
+	check( $floor( (string) ( cascade( $single_rules, '.cr-note--single blockquote p', 'cr-hand-short', true )['font-size'] ?? '' ) ) === ( cascade( $book_rules, '.cr-hand-short .cr-note--book blockquote.pkiw-quote-entry__text p', '.cr-quote-book', true )['font-size'] ?? '' ), 'notecard handwriting size is the single\'s clamp floor' );
+	check( $floor( (string) ( cascade( $single_rules, '.cr-note-artifact--single', $scope, true )['--pin-h'] ?? '' ) ) === ( cascade( $book_rules, '.pkiw-quote-entry.cr-note-artifact', '.cr-quote-book', true )['--pin-h'] ?? '' ), 'notecard pin height is the single\'s clamp floor' );
+	check( '58%' === ( cascade( $book_rules, '.pkiw-quote-entry.cr-note-artifact', '.cr-quote-book', true )['--pin-x'] ?? '' ) && '58%' === ( cascade( $single_rules, '.cr-note-artifact--single', $scope, true )['--pin-x'] ?? '' ), 'notecard pin sits at the single\'s 58%' );
+	check( str_contains( $card_css, '-webkit-line-clamp: 9;' ) && ! str_contains( (string) file_get_contents( $root . '/inc/quote-book.php' ), 'wp_trim_words' ), 'a long quote is previewed by a nine-line CSS clamp, not by cutting markup' );
+
 	check( str_contains( $css, ':root[data-theme="dark"]' ) && str_contains( $css, ':root:not([data-theme="light"])' ), 'quote CSS contains both dark-mode mechanisms' );
 	foreach ( array( 'forced-colors: active', 'prefers-reduced-motion: no-preference', 'min-width: 64rem', 'min-width: 40rem', ':has(', 'var(--cr-strip', 'var(--cr-quote-paper' ) as $required ) {
 		check( str_contains( $css, $required ), "quote CSS contains $required" );

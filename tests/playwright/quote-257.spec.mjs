@@ -273,36 +273,55 @@ test.describe( 'quote layout and tabs (18, 19)', () => {
 test.describe( 'quote cards (20, 21)', () => {
 	test.skip( 'archive' !== STATE, 'archive fixture state' );
 
-	test( 'cards use their quote paper, sharp rules and the specified quote and cite type', async ( { page } ) => {
+	test( 'cards are the single\'s pinned notecards on their quote paper, with the quote block and its cite', async ( { page } ) => {
 		await openSeeded( page );
 		for ( const card of await cards( page ).all() ) {
+			const notecard = await card.evaluate( ( node ) => node.classList.contains( 'cr-note-artifact' ) );
+			if ( ! notecard ) {
+				// Protected and quote-less posts keep the plugin card.
+				expect( await card.evaluate( ( node ) => node.classList.contains( 'pkiw-quote-entry--protected' ) || ! node.querySelector( '.wp-block-quote, .wp-block-pullquote, blockquote.pkiw-quote-entry__text[class*="wp-block"]' ) ) ).toBe( true );
+				continue;
+			}
 			const paint = await card.evaluate( ( node ) => {
-				const style = getComputedStyle( node );
-				const text = node.querySelector( '.pkiw-quote-entry__text' );
-				const cite = node.querySelector( '.pkiw-quote-entry__cite' );
+				const paper = node.querySelector( ':scope > .cr-note.cr-note--book' );
+				const face = getComputedStyle( paper, '::before' );
+				const text = paper.querySelector( 'blockquote.pkiw-quote-entry__text' );
+				const words = text.querySelector( 'p' ) || text;
+				const cite = paper.querySelector( '.pkiw-quote-entry__cite' );
 				return {
-					background: style.backgroundColor,
-					border: `${ style.borderTopWidth } ${ style.borderTopStyle }`,
-					radius: style.borderRadius,
-					shadow: style.boxShadow,
-					transform: style.transform,
-					textFamily: text ? getComputedStyle( text ).fontFamily : '',
+					pins: node.querySelectorAll( ':scope > svg.cr-note__pin[aria-hidden="true"]' ).length,
+					marks: paper.querySelectorAll( ':scope > .cr-note__mark[aria-hidden="true"]' ).length,
+					face: face.backgroundColor,
+					ruled: face.backgroundImage.includes( 'repeating-linear-gradient' ),
+					border: `${ face.borderTopWidth } ${ face.borderTopStyle }`,
+					shadow: face.boxShadow,
+					tilted: 'none' !== getComputedStyle( paper ).transform,
+					ink: getComputedStyle( paper ).color,
+					block: text.classList.contains( 'wp-block-quote' ) || null !== text.closest( '.wp-block-pullquote' ) || text.matches( '[class*="wp-block"]' ),
+					clamp: getComputedStyle( text ).webkitLineClamp,
+					hand: node.classList.contains( 'cr-hand-short' ),
+					wordsFamily: getComputedStyle( words ).fontFamily,
+					citeInside: cite ? null !== cite.closest( 'blockquote' ) : false,
 					citeFamily: cite ? getComputedStyle( cite ).fontFamily : '',
 					citeWeight: cite ? getComputedStyle( cite ).fontWeight : '',
 					citeColor: cite ? getComputedStyle( cite ).color : '',
 				};
 			} );
-			expect( paint.background ).toBe( await resolvedPaper( card ) );
+			expect( paint.pins ).toBe( 1 );
+			expect( paint.marks ).toBe( 1 );
+			expect( paint.face ).toBe( await resolvedPaper( card ) );
+			expect( paint.ruled ).toBe( true );
 			expect( paint.border ).toBe( '1px solid' );
-			expect( paint.radius ).toBe( '0px' );
-			expect( paint.shadow ).toBe( 'none' );
-			expect( paint.transform ).toBe( 'none' );
-			if ( paint.textFamily ) {
-				expect( paint.textFamily ).toContain( 'Roboto Slab' );
-			}
+			expect( paint.shadow ).toMatch( /\b4px 4px 0px\b/ );
+			expect( paint.tilted ).toBe( true );
+			expect( paint.ink ).toBe( VIOLET );
+			expect( paint.block ).toBe( true );
+			expect( paint.clamp ).toBe( '9' );
+			expect( paint.wordsFamily ).toContain( paint.hand ? 'Rock Salt' : 'Roboto Slab' );
 			if ( paint.citeFamily ) {
+				expect( paint.citeInside ).toBe( false );
 				expect( paint.citeFamily ).toContain( 'Barlow' );
-				expect( paint.citeWeight ).toBe( '600' );
+				expect( paint.citeWeight ).toBe( '700' );
 				expect( paint.citeColor ).toBe( CERULEAN );
 			}
 			expect( await card.locator( ':is(img, .pk-badge, .pk-kindlabel, .pk-stream-date, [class*="location"])' ).count() ).toBe( 0 );
@@ -310,10 +329,18 @@ test.describe( 'quote cards (20, 21)', () => {
 		}
 		const q05 = cardFor( page, 'Q05' );
 		await expect( q05 ).toHaveCount( 1 );
-		expect( await q05.evaluate( ( node ) => getComputedStyle( node ).backgroundColor ) ).toBe( await resolvedPaper( q05 ) );
+		expect( await q05.evaluate( ( node ) => getComputedStyle( node.querySelector( '.cr-note--book' ), '::before' ).backgroundColor ) ).toBe( await resolvedPaper( q05 ) );
+		// Q07 runs 62 words: the whole quote is in the DOM, the card shows nine lines of it.
 		const q07 = cardFor( page, 'Q07' ).locator( 'blockquote.pkiw-quote-entry__text' );
-		await expect( q07 ).toHaveClass( /p-summary/ );
-		expect( ( await q07.innerText() ).trim().endsWith( '…' ) ).toBe( true );
+		await expect( q07 ).toHaveClass( /e-content/ );
+		expect( ( await q07.textContent() ).trim().endsWith( 'beside the window.' ) ).toBe( true );
+		expect( await q07.evaluate( ( node ) => node.scrollHeight > node.clientHeight + 1 ), 'Q07 is clamped' ).toBe( true );
+		const q07Cite = await cardFor( page, 'Q07' ).evaluate( ( node ) => {
+			const paper = node.querySelector( '.cr-note--book' ).getBoundingClientRect();
+			const cite = node.querySelector( '.pkiw-quote-entry__cite' ).getBoundingClientRect();
+			return { visible: 0 < cite.height, inside: cite.bottom <= paper.bottom + 1 };
+		} );
+		expect( q07Cite, 'the clamp never hides the cite' ).toEqual( { visible: true, inside: true } );
 	} );
 
 	test( 'every card has one tab stop and a unique name resolved from visible quote and cite text', async ( { page } ) => {
@@ -409,17 +436,20 @@ test.describe( 'quote privacy flips (22)', () => {
 test.describe( 'quote paint (23)', () => {
 	test.skip( 'archive' !== STATE, 'archive fixture state' );
 
-	test( 'the book has hard token paint, no blur, gradient, filter, tiny text or display font', async ( { page } ) => {
+	test( 'the book has hard token paint, no blur, gradient, filter, tiny text or display font outside the notecards', async ( { page } ) => {
 		await openSeeded( page );
 		const book = page.locator( '.cr-quote-book' );
 		expect( await book.evaluate( ( node ) => getComputedStyle( node ).backgroundColor ) ).toBe( VIOLET );
 		const violations = await book.evaluate( ( root ) => {
 			const output = [];
 			for ( const node of [ root, ...root.querySelectorAll( '*' ) ] ) {
+				// The notecard is the single's sheet: ruled-paper gradients, the pin's drop shadow,
+				// handwriting and the quote's own highlights belong to it (quote notecards (29)).
+				const notecard = null !== node.closest( '.cr-note-artifact' );
 				for ( const pseudo of [ null, '::before', '::after' ] ) {
 					const style = getComputedStyle( node, pseudo );
-					if ( 'none' !== style.backgroundImage && style.backgroundImage.includes( 'gradient' ) ) output.push( `${ node.tagName }${ pseudo || '' } gradient` );
-					if ( 'none' !== style.filter ) output.push( `${ node.tagName }${ pseudo || '' } filter=${ style.filter }` );
+					if ( ! notecard && 'none' !== style.backgroundImage && style.backgroundImage.includes( 'gradient' ) ) output.push( `${ node.tagName }${ pseudo || '' } gradient` );
+					if ( ! notecard && 'none' !== style.filter ) output.push( `${ node.tagName }${ pseudo || '' } filter=${ style.filter }` );
 					if ( 'none' !== style.boxShadow ) {
 						const shadows = style.boxShadow.replace( /rgba?\([^)]*\)/g, '' ).split( /,(?![^()]*\))/ );
 						for ( const shadow of shadows ) {
@@ -430,7 +460,7 @@ test.describe( 'quote paint (23)', () => {
 				}
 				const style = getComputedStyle( node );
 				if ( 0 < node.getClientRects().length && node.textContent.trim() && Number.parseFloat( style.fontSize ) < 12 ) output.push( `${ node.tagName } font-size=${ style.fontSize }` );
-				if ( style.fontFamily.includes( 'Rock Salt' ) ) output.push( `${ node.tagName } font=${ style.fontFamily }` );
+				if ( ! notecard && style.fontFamily.includes( 'Rock Salt' ) ) output.push( `${ node.tagName } font=${ style.fontFamily }` );
 			}
 			return output;
 		} );
@@ -508,7 +538,9 @@ test.describe( 'quote focus, forced colors and reduced motion (25)', () => {
 		await openSeeded( page );
 		await page.emulateMedia( { forcedColors: 'active' } );
 		const forced = await page.locator( '.cr-quote-book' ).evaluate( ( book ) => {
-			const card = book.querySelector( '.pkiw-quote-entry' );
+			const entry = book.querySelector( '.pkiw-quote-entry' );
+			const card = entry.querySelector( ':scope > .cr-note--book' ) || entry;
+			const decor = [ entry.querySelector( ':scope > .cr-note__pin' ), card.querySelector( ':scope > .cr-note__mark' ) ].filter( Boolean );
 			const tab = book.querySelector( '.pkiw-quote-tabs a' );
 			const current = book.querySelector( '.pkiw-quote-tabs a[aria-current="page"]' );
 			const style = ( node ) => `${ getComputedStyle( node ).borderTopWidth } ${ getComputedStyle( node ).borderTopStyle }`;
@@ -517,9 +549,11 @@ test.describe( 'quote focus, forced colors and reduced motion (25)', () => {
 				pageBlock: getComputedStyle( book, '::before' ).display,
 				strip: getComputedStyle( book.querySelector( '.pkiw-quote-section__heading' ), '::before' ).display,
 				currentAdjust: getComputedStyle( current ).forcedColorAdjust,
+				paperFace: card === entry ? 'none' : getComputedStyle( card, '::before' ).display,
+				decor: decor.map( ( node ) => getComputedStyle( node ).display ).filter( ( display ) => 'none' !== display ).length,
 			};
 		} );
-		expect( forced ).toEqual( { book: '2px solid', card: '2px solid', tab: '2px solid', pageBlock: 'none', strip: 'none', currentAdjust: 'none' } );
+		expect( forced ).toEqual( { book: '2px solid', card: '2px solid', tab: '2px solid', pageBlock: 'none', strip: 'none', currentAdjust: 'none', paperFace: 'none', decor: 0 } );
 
 		await page.emulateMedia( { forcedColors: 'none', reducedMotion: 'reduce' } );
 		const card = page.locator( '.pkiw-quote-entry' ).first();
@@ -622,6 +656,98 @@ test.describe( 'quote states (26)', () => {
 		await expect( page.locator( '.pkiw-quote-tabs, .pkiw-quote-works, nav[aria-label="Pagination"], .wp-block-query-pagination' ) ).toHaveCount( 0 );
 		const groups = await page.locator( '.pkiw-quote-section' ).evaluateAll( ( sections ) => sections.map( ( section ) => section.getAttribute( 'data-pkiw-group' ) ) );
 		expect( groups.every( ( group ) => '' === group ) ).toBe( true );
+	} );
+} );
+
+// --- Notecards match the single (29) ----------------------------------------------------------
+
+/**
+ * Computed colours as rgba(r, g, b, a), so color-mix() tokens and the single's rgba() literals compare,
+ * and lengths to 0.1px: at 390px the single's handwriting clamp() gives 15.71px where the card's floor is 15.68px.
+ */
+function rgbaOf( value ) {
+	return String( value )
+		.replace( /(\d+\.\d+)px/g, ( m, n ) => `${ Number( Number( n ).toFixed( 1 ) ) }px` )
+		.replace( /color\(srgb ([\d.e-]+) ([\d.e-]+) ([\d.e-]+)(?: \/ ([\d.e-]+))?\)/g, ( m, r, g, b, a ) => `rgba(${ Math.round( r * 255 ) }, ${ Math.round( g * 255 ) }, ${ Math.round( b * 255 ) }, ${ Number( Number( a ?? 1 ).toFixed( 3 ) ) })` )
+		.replace( /rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?\)/g, ( m, r, g, b, a ) => `rgba(${ r }, ${ g }, ${ b }, ${ Number( Number( a ?? 1 ).toFixed( 3 ) ) })` );
+}
+
+/** The notecard's computed paint, read from one surface's selectors. */
+async function notecardPaint( page, root, parts ) {
+	const raw = await root.evaluate( ( node, sel ) => {
+		const pick = ( el, names, pseudo = null ) => {
+			if ( ! el ) {
+				return null;
+			}
+			const style = getComputedStyle( el, pseudo );
+			return Object.fromEntries( names.map( ( name ) => [ name, style[ name ] ] ) );
+		};
+		const artifact = sel.artifact ? node.querySelector( sel.artifact ) || node : node;
+		const paper = artifact.querySelector( sel.paper );
+		const pin = artifact.querySelector( ':scope > .cr-note__pin' );
+		const quote = paper.querySelector( sel.quote );
+		const box = artifact.getBoundingClientRect();
+		const pinBox = pin.getBoundingClientRect();
+		return {
+			paper: pick( paper, [ 'color', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft' ] ),
+			tilt: getComputedStyle( artifact ).getPropertyValue( '--cr-note-tilt' ).trim(),
+			face: pick( paper, [ 'backgroundColor', 'backgroundImage', 'backgroundPosition', 'borderTopWidth', 'borderTopStyle', 'borderTopColor', 'boxShadow' ], '::before' ),
+			mark: pick( paper.querySelector( ':scope > .cr-note__mark' ), [ 'fontFamily', 'fontSize', 'lineHeight', 'color', 'top', 'left' ] ),
+			pin: { ...pick( pin, [ 'width', 'height', 'filter' ] ), at: Math.round( 100 * ( pinBox.left + pinBox.width / 2 - box.left ) / box.width ) },
+			pinFill: getComputedStyle( artifact ).getPropertyValue( '--cr-pin' ).trim(),
+			quote: pick( quote, [ 'fontFamily', 'fontSize', 'lineHeight', 'color', 'fontStyle', 'fontWeight', 'borderLeftWidth', 'paddingLeft', 'backgroundColor' ] ),
+			words: pick( quote.querySelector( 'p' ), [ 'fontFamily', 'fontSize', 'lineHeight', 'letterSpacing', 'color', 'marginBottom' ] ),
+			highlights: [ ...quote.querySelectorAll( '.sme-highlighter' ) ].map( ( el ) => pick( el, [ 'backgroundImage', 'backgroundColor', 'color', 'paddingLeft' ] ) ),
+			cite: pick( paper.querySelector( sel.cite ), [ 'fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'lineHeight', 'color', 'marginTop' ] ),
+		};
+	}, parts );
+	return JSON.parse( rgbaOf( JSON.stringify( raw ) ) );
+}
+
+const SINGLE_PARTS = { artifact: '.cr-note-artifact--single', paper: '.cr-note.cr-note--single', quote: 'blockquote', cite: 'blockquote cite' };
+const BOOK_PARTS = { artifact: null, paper: ':scope > .cr-note.cr-note--book', quote: 'blockquote.pkiw-quote-entry__text', cite: '.pkiw-quote-entry__cite' };
+
+/** Archive card linking to a permalink, searched across every archive page. */
+async function bookCardFor( page, href, width ) {
+	for ( let number = 1; number <= lastPage(); number++ ) {
+		await open( page, archivePath( number ), width );
+		const card = cards( page ).filter( { has: page.locator( `a.pkiw-quote-entry__link[href="${ href }"]` ) } ).first();
+		if ( await card.count() ) {
+			return card;
+		}
+	}
+	return null;
+}
+
+test.describe( 'quote notecards match the single (29)', () => {
+	test.skip( 'archive' !== STATE || '' !== FLIP, 'unflipped archive fixture state' );
+
+	for ( const [ label, target ] of [ [ 'Q05 (sky paper)', () => singlePath( 'Q05' ) ], [ 'the real highlighted quote', () => REAL_SINGLE ] ] ) {
+		test( `${ label }: the archive notecard paints like its single sheet at phone width`, async ( { page }, testInfo ) => {
+			const width = testInfo.project.use.viewport?.width || 1280;
+			// The single's phone-width sheet is the reference: an archive card is about that wide.
+			const response = await open( page, target(), 390 );
+			test.skip( 404 === response?.status() || 0 === await page.locator( '.cr-note-artifact--single' ).count(), `no quote single at ${ target() }` );
+			const href = await page.evaluate( () => document.querySelector( 'link[rel="canonical"]' )?.href || location.href );
+			const single = await notecardPaint( page, page.locator( 'main.single-post' ).first(), SINGLE_PARTS );
+			const card = await bookCardFor( page, href, width );
+			expect( card, `an archive card links to ${ href }` ).not.toBeNull();
+			const book = await notecardPaint( page, card, BOOK_PARTS );
+			await testInfo.attach( 'notecard-paint.json', { body: JSON.stringify( { width, href, single, book }, null, 2 ), contentType: 'application/json' } );
+			expect( book ).toEqual( single );
+		} );
+	}
+
+	test( 'the real quote keeps every highlight from its single', async ( { page } ) => {
+		const response = await open( page, REAL_SINGLE, 1280 );
+		test.skip( 404 === response?.status() || 0 === await page.locator( '.cr-note-artifact--single .sme-highlighter' ).count(), `no highlighted quote single at ${ REAL_SINGLE }` );
+		const href = await page.evaluate( () => document.querySelector( 'link[rel="canonical"]' )?.href || location.href );
+		const marks = await page.locator( '.cr-note-artifact--single blockquote .sme-highlighter' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => [ node.textContent, node.getAttribute( 'style' ) ] ) );
+		const card = await bookCardFor( page, href, 1280 );
+		expect( card ).not.toBeNull();
+		const archived = await card.locator( 'blockquote.pkiw-quote-entry__text .sme-highlighter' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => [ node.textContent, node.getAttribute( 'style' ) ] ) );
+		expect( archived ).toEqual( marks );
+		expect( await visibleFocusableReport( card ) ).toEqual( { links: 1, tabStops: 1 } );
 	} );
 } );
 

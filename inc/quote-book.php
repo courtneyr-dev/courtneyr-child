@@ -2,9 +2,11 @@
 /**
  * Quote archive commonplace-book presentation.
  *
- * The plugin owns quote grouping and card markup. This file registers the
- * theme's block style, adds deterministic paper and strip colours without
- * changing card content, and loads the book stylesheet where it can render.
+ * The plugin owns quote grouping, card links and entry microformats. This
+ * file registers the theme's block style, adds deterministic paper and strip
+ * colours, turns each visible quote entry into the single's pinned notecard
+ * (the post's own quote block in place of the plugin's plain excerpt), and
+ * loads the book stylesheet where it can render.
  *
  * @package CourtneyrChild
  */
@@ -116,6 +118,199 @@ function entry_paper( string $html, array $block, $instance ): string {
 	return $tags->get_updated_html();
 }
 add_filter( 'render_block_post-kinds-indieweb/quote-entry', __NAMESPACE__ . '\\entry_paper', 10, 3 );
+
+/**
+ * Whether the plugin would show this quote's text to the current visitor.
+ *
+ * @param \WP_Post $post Post.
+ * @return bool
+ */
+function can_show( \WP_Post $post ): bool {
+	if ( post_password_required( $post ) ) {
+		return false;
+	}
+	if ( class_exists( '\\PKIW\\Kind_Facts' ) ) {
+		return \PKIW\Kind_Facts::can_show( $post );
+	}
+	return function_exists( 'is_post_publicly_viewable' ) && is_post_publicly_viewable( $post );
+}
+
+/**
+ * Whether the single sets this quote in handwriting (body.cr-hand-short).
+ *
+ * @param \WP_Post $post Post.
+ * @return bool
+ */
+function hand_short( \WP_Post $post ): bool {
+	if ( function_exists( '\\Courtneyr\\Child\\AsideScrap\\applies' ) && \Courtneyr\Child\AsideScrap\applies( $post ) ) {
+		return false;
+	}
+	$limit = defined( 'Courtneyr\\Child\\Enqueue\\HAND_MAX_WORDS' ) ? (int) constant( 'Courtneyr\\Child\\Enqueue\\HAND_MAX_WORDS' ) : 120;
+	return str_word_count( wp_strip_all_tags( strip_shortcodes( (string) $post->post_content ), true ) ) <= $limit;
+}
+
+/**
+ * Take links and tab stops out of quote markup: the card's one link is its overlay.
+ *
+ * An anchor without href is not a link and takes no tab stop; it keeps the
+ * single's underline, because the selectors still match an a element.
+ *
+ * @param string $html Quote or citation markup.
+ * @return string
+ */
+function without_tab_stops( string $html ): string {
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	while ( $tags->next_tag() ) {
+		$tags->remove_attribute( 'tabindex' );
+		if ( 'A' === $tags->get_tag() ) {
+			foreach ( array( 'href', 'target', 'rel', 'ping', 'download', 'hreflang', 'type', 'referrerpolicy' ) as $name ) {
+				$tags->remove_attribute( $name );
+			}
+		}
+	}
+	return $tags->get_updated_html();
+}
+
+/**
+ * The single's notecard on one quote-book entry.
+ *
+ * The plugin card keeps its root (the h-entry, now the pinned artifact), its
+ * overlay link, its hidden dt-published, author and h-cite. Its plain-text
+ * excerpt gives way to the post's own quote block as the single renders it
+ * (highlights, emphasis, the paper style), and the block's citation moves
+ * out of the blockquote into the plugin's cite slot, so a long quote can be
+ * clamped without hiding the cite. Links inside the quote lose their href.
+ * A protected, private-to-this-visitor, continued or quote-less entry keeps
+ * the plugin card.
+ *
+ * @param string               $html     Rendered quote entry.
+ * @param array<string, mixed> $block    Parsed block.
+ * @param mixed                $instance Block instance with Query Loop context.
+ * @return string
+ */
+function entry_notecard( string $html, array $block, $instance ): string {
+	if ( '' === $html || ! class_exists( '\\WP_HTML_Tag_Processor' ) || ! function_exists( '\\Courtneyr\\Child\\QuoteNote\\quote_block_html' ) ) {
+		return $html;
+	}
+	$class_name = (string) ( $block['attrs']['className'] ?? '' );
+	$tokens     = explode( ' ', str_replace( array( "\t", "\n", "\r", "\f" ), ' ', $class_name ) );
+	if ( ! in_array( 'is-style-' . STYLE_SLUG, $tokens, true ) ) {
+		return $html;
+	}
+
+	$probe = new \WP_HTML_Tag_Processor( $html );
+	if (
+		! $probe->next_tag(
+			array(
+				'tag_name'   => 'div',
+				'class_name' => 'pkiw-quote-entry',
+			)
+		)
+		|| $probe->has_class( 'pkiw-quote-entry--continued' )
+		|| $probe->has_class( 'pkiw-quote-entry--protected' )
+	) {
+		return $html;
+	}
+
+	$post_id = $instance instanceof \WP_Block && ! empty( $instance->context['postId'] )
+		? (int) $instance->context['postId']
+		: (int) get_the_ID();
+	$post    = get_post( $post_id );
+	if ( ! $post instanceof \WP_Post || ! can_show( $post ) ) {
+		return $html;
+	}
+
+	// The plugin's ids and destination.
+	$text_id = 'pkiw-quote-' . $post->ID . '-text';
+	$cite_id = 'pkiw-quote-' . $post->ID . '-cite';
+	$href    = '';
+	$parts   = new \WP_HTML_Tag_Processor( $html );
+	while ( $parts->next_tag() ) {
+		$id = $parts->get_attribute( 'id' );
+		if ( $parts->has_class( 'pkiw-quote-entry__text' ) && is_string( $id ) && '' !== $id ) {
+			$text_id = $id;
+		} elseif ( $parts->has_class( 'pkiw-quote-entry__cite' ) && is_string( $id ) && '' !== $id ) {
+			$cite_id = $id;
+		} elseif ( $parts->has_class( 'pkiw-quote-entry__link' ) ) {
+			$href = (string) $parts->get_attribute( 'href' );
+		}
+	}
+	$first     = strpos( $html, '<blockquote' );
+	$link_at   = strpos( $html, 'pkiw-quote-entry__link' );
+	$link_end  = false !== $link_at ? strpos( $html, '</a>', $link_at ) : false;
+	$entry_end = strrpos( $html, '</div>' );
+	if ( '' === $href || false === $first || false === $link_end || false === $entry_end || $entry_end < $link_end ) {
+		return $html;
+	}
+
+	// The post's quote, as the single prints it: the blockquote, not a pullquote's figure.
+	$rendered = \Courtneyr\Child\QuoteNote\quote_block_html( $post );
+	$open     = stripos( $rendered, '<blockquote' );
+	$close    = strripos( $rendered, '</blockquote>' );
+	if ( false === $open || false === $close || $close < $open ) {
+		return $html;
+	}
+	$quote = substr( $rendered, $open, $close + 13 - $open );
+
+	// The block's citation, when it is the quote's last child, moves to the cite slot.
+	$cite    = '';
+	$c_open  = strripos( $quote, '<cite' );
+	$c_close = strripos( $quote, '</cite>' );
+	$c_gt    = false !== $c_open ? strpos( $quote, '>', $c_open ) : false;
+	if ( false !== $c_gt && false !== $c_close && $c_gt < $c_close && '' === trim( substr( $quote, $c_close + 7, -13 ) ) ) {
+		$cite  = trim( substr( $quote, $c_gt + 1, $c_close - $c_gt - 1 ) );
+		$quote = substr( $quote, 0, (int) $c_open ) . substr( $quote, $c_close + 7 );
+	}
+	if ( '' === trim( wp_strip_all_tags( $cite ) ) ) {
+		// No block citation: the plugin's own (escaped) cite text, if any.
+		$p_cite = strpos( $html, 'pkiw-quote-entry__cite' );
+		$p_gt   = false !== $p_cite ? strpos( $html, '>', $p_cite ) : false;
+		$p_end  = false !== $p_gt ? strpos( $html, '</cite>', $p_gt ) : false;
+		$cite   = false !== $p_end ? trim( substr( $html, $p_gt + 1, $p_end - $p_gt - 1 ) ) : '';
+	}
+	$has_cite = '' !== trim( wp_strip_all_tags( $cite ) );
+
+	$tags = new \WP_HTML_Tag_Processor( without_tab_stops( $quote ) );
+	if ( ! $tags->next_tag( 'blockquote' ) ) {
+		return $html;
+	}
+	$tags->add_class( 'pkiw-quote-entry__text' );
+	$tags->add_class( 'e-content' );
+	$tags->set_attribute( 'id', $text_id );
+	$quote = $tags->get_updated_html();
+
+	// The artifact: the entry root takes the single's pin colours and tilt.
+	$note  = \Courtneyr\Child\QuoteNote\note_style( \Courtneyr\Child\Stamps\seed( (string) $post->ID, $post->post_title ) );
+	$entry = new \WP_HTML_Tag_Processor( substr( $html, 0, $first ) );
+	if (
+		! $entry->next_tag(
+			array(
+				'tag_name'   => 'div',
+				'class_name' => 'pkiw-quote-entry',
+			)
+		)
+	) {
+		return $html;
+	}
+	$entry->add_class( 'cr-note-artifact' );
+	$entry->add_class( 'cr-note-artifact--book' );
+	if ( hand_short( $post ) ) {
+		$entry->add_class( 'cr-hand-short' );
+	}
+	$style = rtrim( trim( (string) $entry->get_attribute( 'style' ) ), ';' );
+	$entry->set_attribute( 'style', ( '' !== $style ? $style . ';' : '' ) . substr( $note, 7, -1 ) );
+
+	$card  = $entry->get_updated_html();
+	$card .= \Courtneyr\Child\QuoteNote\pin_svg();
+	$card .= '<div class="cr-note cr-note--book">' . \Courtneyr\Child\QuoteNote\mark() . $quote;
+	if ( $has_cite ) {
+		$card .= '<cite class="pkiw-quote-entry__cite" id="' . esc_attr( $cite_id ) . '">' . without_tab_stops( $cite ) . '</cite>';
+	}
+	$card .= '<a class="u-url pkiw-quote-entry__link" href="' . esc_url( $href ) . '" aria-labelledby="' . esc_attr( $text_id . ( $has_cite ? ' ' . $cite_id : '' ) ) . '"></a>';
+	$card .= substr( $html, $link_end + 4, $entry_end - $link_end - 4 );
+	return $card . '</div></div>';
+}
+add_filter( 'render_block_post-kinds-indieweb/quote-entry', __NAMESPACE__ . '\\entry_notecard', 11, 3 );
 
 /**
  * Return the decorative strip selected by a stored-value slug.
