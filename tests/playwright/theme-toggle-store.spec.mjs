@@ -26,7 +26,7 @@ async function expectTheme( page, theme ) {
 test( 'The page loads the theme store module and keeps the no-flash initializer first', async ( { page } ) => {
 	await page.goto( '/' );
 
-	await expect( page.locator( 'script[src*="theme-toggle/view.js"]' ) ).toHaveCount( 0 );
+	await expect( page.locator( 'script[src*="/js/theme-toggle/view.js"]' ) ).toHaveCount( 0 );
 	const moduleLoaded = await page.evaluate( () => {
 		const scripts = [ ...document.scripts ];
 		const directModule = scripts.some( ( script ) => script.type === 'module' && (
@@ -57,9 +57,15 @@ test( 'The stored dark theme is the only theme applied before and after hydratio
 	await page.addInitScript( () => {
 		window.localStorage.setItem( 'courtneyr-theme', 'dark' );
 		window.__themes = [];
-		new MutationObserver( () => {
-			window.__themes.push( document.documentElement.getAttribute( 'data-theme' ) );
-		} ).observe( document.documentElement, { attributes: true, attributeFilter: [ 'data-theme' ] } );
+		// <html> doesn't exist yet when an init script runs, so watch the document
+		// subtree and keep only changes on the root element.
+		new MutationObserver( ( records ) => {
+			for ( const record of records ) {
+				if ( record.target === document.documentElement ) {
+					window.__themes.push( record.target.getAttribute( 'data-theme' ) );
+				}
+			}
+		} ).observe( document, { attributes: true, subtree: true, attributeFilter: [ 'data-theme' ] } );
 	} );
 
 	await page.goto( '/' );
