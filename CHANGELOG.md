@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.132.2
+
+What you see change on courtneyr.dev:
+
+- The header no longer jumps on a slow phone. Before, when the page's cached styles missed the header rules, the theme switcher showed as three buttons and the header stood 21-23 px taller until the full stylesheet arrived about 2 s later; then the whole page jumped up (CLS 0.155 on live /blog/ on 2026-10-23).
+
+Under the hood: `header_first_paint_css()` in `inc/enqueue.php` prints 5.6 KB of the `components.css` header rules inline on the components handle, with the wordmark mask URL built from the theme URI. With Perfmatters' used CSS stripped of every `components.css` rule and `components.css` blocked, the header keeps its final height and `main` its top at 390, 768 and 1280 px in light and dark; throttled CLS on that reproduction drops from 0.2074 to 0.0025. With the normal used CSS, or none, the header's geometry and colors are unchanged.
+
 ## 0.7.132.1
 
 What you see change on courtneyr.dev:
