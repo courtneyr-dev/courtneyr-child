@@ -1,0 +1,492 @@
+{
+ "about": "Numbers measured on 2026-10-22/23 with tests/perf harnesses (390 px, 1.6 Mbps, 150 ms RTT, 4x CPU). Compare new runs against these; a CLS change counts from baseline max + 0.005.",
+ "environments": {
+  "live": "pantheon_live_42, deploy 97d72c42e, theme eef5c93 (0.7.131)",
+  "test": "pantheon_test_66, same code",
+  "dev": "deploy master 6a89753ca, theme 0.7.132.1 (source 10eba00) + PKIW ec87b63"
+ },
+ "lighthouse_live_home_pre_deploy_2026-10-22": {
+  "note": "unminified theme CSS; applied (devtools) throttling = observed; simulate = PSI-style",
+  "applied_devtools": [
+   {
+    "fetched": "2026-10-22T23:12",
+    "throttling": "devtools",
+    "score": 96,
+    "fcp_ms": 1268,
+    "lcp_ms": 1268,
+    "cls": 0.0065,
+    "tbt_ms": 211,
+    "benchmarkIndex": 4305,
+    "theme_css_bytes": 115512
+   },
+   {
+    "fetched": "2026-10-22T23:13",
+    "throttling": "devtools",
+    "score": 99,
+    "fcp_ms": 1248,
+    "lcp_ms": 1248,
+    "cls": 0.0065,
+    "tbt_ms": 113,
+    "benchmarkIndex": 4622,
+    "theme_css_bytes": 115475
+   },
+   {
+    "fetched": "2026-10-22T23:13",
+    "throttling": "devtools",
+    "score": 99,
+    "fcp_ms": 1277,
+    "lcp_ms": 1277,
+    "cls": 0.0065,
+    "tbt_ms": 124,
+    "benchmarkIndex": 4542,
+    "theme_css_bytes": 115618
+   }
+  ],
+  "simulated": [
+   {
+    "fetched": "2026-10-22T23:12",
+    "throttling": "simulate",
+    "score": 87,
+    "fcp_ms": 1736,
+    "lcp_ms": 3839,
+    "cls": 0,
+    "tbt_ms": 98,
+    "benchmarkIndex": 4190,
+    "theme_css_bytes": 115617
+   },
+   {
+    "fetched": "2026-10-22T23:12",
+    "throttling": "simulate",
+    "score": 91,
+    "fcp_ms": 1781,
+    "lcp_ms": 3355,
+    "cls": 0.0062,
+    "tbt_ms": 12,
+    "benchmarkIndex": 4557,
+    "theme_css_bytes": 115639
+   },
+   {
+    "fetched": "2026-10-22T23:12",
+    "throttling": "simulate",
+    "score": 92,
+    "fcp_ms": 1745,
+    "lcp_ms": 3257,
+    "cls": 0.0062,
+    "tbt_ms": 0,
+    "benchmarkIndex": 4632,
+    "theme_css_bytes": 115589
+   }
+  ]
+ },
+ "lighthouse_live_home_post_deploy_2026-10-23": {
+  "note": "machine overloaded (benchmarkIndex 1,100 to 2,700 vs 4,200 to 4,600): the applied runs are NOT comparable; simulated runs are indicative",
+  "simulated": [
+   {
+    "fetched": "2026-10-23T21:21",
+    "throttling": "simulate",
+    "score": 90,
+    "fcp_ms": 1625,
+    "lcp_ms": 3128,
+    "cls": 0,
+    "tbt_ms": 197,
+    "benchmarkIndex": 2129,
+    "theme_css_bytes": 69459
+   },
+   {
+    "fetched": "2026-10-23T21:21",
+    "throttling": "simulate",
+    "score": 91,
+    "fcp_ms": 1510,
+    "lcp_ms": 2745,
+    "cls": 0.0062,
+    "tbt_ms": 233,
+    "benchmarkIndex": 2033,
+    "theme_css_bytes": 111063
+   },
+   {
+    "fetched": "2026-10-23T21:21",
+    "throttling": "simulate",
+    "score": 94,
+    "fcp_ms": 1579,
+    "lcp_ms": 2699,
+    "cls": 0,
+    "tbt_ms": 134,
+    "benchmarkIndex": 2202,
+    "theme_css_bytes": 69403
+   }
+  ],
+  "applied_devtools": [
+   {
+    "fetched": "2026-10-23T21:22",
+    "throttling": "devtools",
+    "score": 88,
+    "fcp_ms": 1814,
+    "lcp_ms": 1814,
+    "cls": 0.0062,
+    "tbt_ms": 428,
+    "benchmarkIndex": 1772,
+    "theme_css_bytes": 69258
+   },
+   {
+    "fetched": "2026-10-23T21:24",
+    "throttling": "devtools",
+    "score": 81,
+    "fcp_ms": 2196,
+    "lcp_ms": 2196,
+    "cls": 0.0062,
+    "tbt_ms": 614,
+    "benchmarkIndex": 1102,
+    "theme_css_bytes": 69389
+   }
+  ]
+ },
+ "cls_dev_before_minify": {
+  "home": {
+   "loads": 3,
+   "cls_max_sum": 0.0064,
+   "fcp_median": 1404,
+   "lcp_median": 1620,
+   "theme_sheet_bytes_median": 255831
+  },
+  "stream": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2800,
+   "lcp_median": 2800,
+   "theme_sheet_bytes_median": 223347
+  },
+  "single-article": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 1784,
+   "lcp_median": 3900,
+   "theme_sheet_bytes_median": 121061
+  },
+  "single-checkin": {
+   "loads": 3,
+   "cls_max_sum": 0.0022,
+   "fcp_median": 2572,
+   "lcp_median": 4788,
+   "theme_sheet_bytes_median": 211715
+  },
+  "archive-listen": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2384,
+   "lcp_median": 2516,
+   "theme_sheet_bytes_median": 219333
+  },
+  "single-listen": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2372,
+   "lcp_median": 5112,
+   "theme_sheet_bytes_median": 211706
+  },
+  "archive-mood": {
+   "loads": 3,
+   "cls_max_sum": 0.0066,
+   "fcp_median": 1364,
+   "lcp_median": 3932,
+   "theme_sheet_bytes_median": 128676
+  },
+  "archive-quote": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2332,
+   "lcp_median": 2332,
+   "theme_sheet_bytes_median": 219304
+  },
+  "single-quote": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2688,
+   "lcp_median": 2688,
+   "theme_sheet_bytes_median": 211731
+  },
+  "archive-watch": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2752,
+   "lcp_median": 3504,
+   "theme_sheet_bytes_median": 219319
+  },
+  "single-watch": {
+   "loads": 3,
+   "cls_max_sum": 0.0157,
+   "fcp_median": 2484,
+   "lcp_median": 4852,
+   "theme_sheet_bytes_median": 211749
+  },
+  "blog": {
+   "loads": 3,
+   "cls_max_sum": 0.0089,
+   "fcp_median": 1304,
+   "lcp_median": 3188,
+   "theme_sheet_bytes_median": 128730
+  }
+ },
+ "cls_dev_after_minify": {
+  "home": {
+   "loads": 3,
+   "cls_max_sum": 0.0064,
+   "fcp_median": 1408,
+   "lcp_median": 1408,
+   "theme_sheet_bytes_median": 123485
+  },
+  "stream": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2360,
+   "lcp_median": 2360,
+   "theme_sheet_bytes_median": 103116
+  },
+  "single-article": {
+   "loads": 3,
+   "cls_max_sum": 0.001,
+   "fcp_median": 1744,
+   "lcp_median": 3744,
+   "theme_sheet_bytes_median": 41811
+  },
+  "single-checkin": {
+   "loads": 3,
+   "cls_max_sum": 0.0022,
+   "fcp_median": 1872,
+   "lcp_median": 4092,
+   "theme_sheet_bytes_median": 94502
+  },
+  "archive-listen": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2040,
+   "lcp_median": 2324,
+   "theme_sheet_bytes_median": 98908
+  },
+  "single-listen": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 1884,
+   "lcp_median": 4420,
+   "theme_sheet_bytes_median": 94471
+  },
+  "archive-mood": {
+   "loads": 3,
+   "cls_max_sum": 0.0066,
+   "fcp_median": 916,
+   "lcp_median": 3452,
+   "theme_sheet_bytes_median": 46261
+  },
+  "archive-quote": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 1972,
+   "lcp_median": 1972,
+   "theme_sheet_bytes_median": 98891
+  },
+  "single-quote": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 1888,
+   "lcp_median": 1972,
+   "theme_sheet_bytes_median": 94512
+  },
+  "archive-watch": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2024,
+   "lcp_median": 3192,
+   "theme_sheet_bytes_median": 98823
+  },
+  "single-watch": {
+   "loads": 3,
+   "cls_max_sum": 0.0157,
+   "fcp_median": 1828,
+   "lcp_median": 4108,
+   "theme_sheet_bytes_median": 94491
+  },
+  "blog": {
+   "loads": 3,
+   "cls_max_sum": 0.0089,
+   "fcp_median": 1604,
+   "lcp_median": 3588,
+   "theme_sheet_bytes_median": 46249
+  }
+ },
+ "cls_test_after_minify": {
+  "home": {
+   "loads": 3,
+   "cls_max_sum": 0.0066,
+   "fcp_median": 1588,
+   "lcp_median": 1588,
+   "theme_sheet_bytes_median": 116334
+  },
+  "stream": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2384,
+   "lcp_median": 2384,
+   "theme_sheet_bytes_median": 99315
+  },
+  "single-article": {
+   "loads": 3,
+   "cls_max_sum": 0.001,
+   "fcp_median": 1752,
+   "lcp_median": 3940,
+   "theme_sheet_bytes_median": 41894
+  },
+  "single-checkin": {
+   "loads": 3,
+   "cls_max_sum": 0.0022,
+   "fcp_median": 1936,
+   "lcp_median": 4656,
+   "theme_sheet_bytes_median": 94694
+  },
+  "archive-listen": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2056,
+   "lcp_median": 2256,
+   "theme_sheet_bytes_median": 99024
+  },
+  "single-listen": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 1944,
+   "lcp_median": 4676,
+   "theme_sheet_bytes_median": 94645
+  },
+  "archive-mood": {
+   "loads": 3,
+   "cls_max_sum": 0.0066,
+   "fcp_median": 1152,
+   "lcp_median": 3516,
+   "theme_sheet_bytes_median": 46475
+  },
+  "archive-quote": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2064,
+   "lcp_median": 2064,
+   "theme_sheet_bytes_median": 99033
+  },
+  "single-quote": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 1984,
+   "lcp_median": 2036,
+   "theme_sheet_bytes_median": 94596
+  },
+  "archive-watch": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2248,
+   "lcp_median": 3152,
+   "theme_sheet_bytes_median": 99058
+  },
+  "single-watch": {
+   "loads": 3,
+   "cls_max_sum": 0.0157,
+   "fcp_median": 1868,
+   "lcp_median": 4236,
+   "theme_sheet_bytes_median": 94571
+  },
+  "blog": {
+   "loads": 3,
+   "cls_max_sum": 0.0089,
+   "fcp_median": 1256,
+   "lcp_median": 3356,
+   "theme_sheet_bytes_median": 46475
+  }
+ },
+ "cls_live_after_minify": {
+  "home": {
+   "loads": 3,
+   "cls_max_sum": 0.0066,
+   "fcp_median": 1392,
+   "lcp_median": 1392,
+   "theme_sheet_bytes_median": 111076
+  },
+  "stream": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2728,
+   "lcp_median": 4692,
+   "theme_sheet_bytes_median": 100549
+  },
+  "single-article": {
+   "loads": 3,
+   "cls_max_sum": 0.001,
+   "fcp_median": 1840,
+   "lcp_median": 3748,
+   "theme_sheet_bytes_median": 42532
+  },
+  "single-checkin": {
+   "loads": 3,
+   "cls_max_sum": 0.0022,
+   "fcp_median": 2024,
+   "lcp_median": 2024,
+   "theme_sheet_bytes_median": 95441
+  },
+  "archive-listen": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 1852,
+   "lcp_median": 2204,
+   "theme_sheet_bytes_median": 100325
+  },
+  "single-listen": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2092,
+   "lcp_median": 4608,
+   "theme_sheet_bytes_median": 95422
+  },
+  "archive-mood": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 1844,
+   "lcp_median": 1888,
+   "theme_sheet_bytes_median": 47489
+  },
+  "archive-quote": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 1884,
+   "lcp_median": 1884,
+   "theme_sheet_bytes_median": 100277
+  },
+  "single-quote": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2148,
+   "lcp_median": 2148,
+   "theme_sheet_bytes_median": 95421
+  },
+  "archive-watch": {
+   "loads": 3,
+   "cls_max_sum": 0,
+   "fcp_median": 2344,
+   "lcp_median": 2960,
+   "theme_sheet_bytes_median": 100339
+  },
+  "single-watch": {
+   "loads": 3,
+   "cls_max_sum": 0.0157,
+   "fcp_median": 2192,
+   "lcp_median": 4408,
+   "theme_sheet_bytes_median": 95425
+  },
+  "blog": {
+   "loads": 3,
+   "cls_max_sum": 0.155,
+   "fcp_median": 1052,
+   "lcp_median": 4084,
+   "theme_sheet_bytes_median": 47404
+  }
+ },
+ "known_live_findings": {
+  "/blog/": "CLS 0.155 x3 in Google Chrome (main moves up 21 px when components.css arrives); 0.0003 in one Chrome for Testing run: unresolved",
+  "single-article": "0.001 before the used-CSS rebuild, 0 after (live rebuilt 2026-10-23 22:18 UTC)",
+  "single-watch": "0.0157, equals the dev baseline"
+ }
+}
