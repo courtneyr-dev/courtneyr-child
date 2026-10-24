@@ -7,6 +7,9 @@
 //   4. A new assets/css/cr-*.css sheet is either in RUCSS_INLINE_HANDLES or listed in the baseline
 //      under "notInRucssHandles": a decision made on purpose that Perfmatters' shared used CSS can carry
 //      it (it loads on every page of the types it is on, or another mechanism already covers it).
+//   5. No selector list holds `:root:not([data-theme])` without `[data-theme="system"]` somewhere in the
+//      same list. no-flash.js writes data-theme="system" for every visitor with no stored choice, so a
+//      rule keyed only to a missing attribute never matches. Use `:root:not([data-theme="light"])`.
 //
 //   node tools/css-guardrails.mjs            check
 //   node tools/css-guardrails.mjs --write-baseline   record today's state (review the diff by hand)
@@ -48,6 +51,29 @@ const groupedKindRules = ( css ) => {
 	return n;
 };
 
+// Rule preludes at any nesting depth whose selector list has `:root:not([data-theme])` and no
+// `[data-theme="system"]` anywhere in the list. Counted per prelude.
+const dataThemeGaps = ( css ) => {
+	const text = css.replace( /\/\*[\s\S]*?\*\//g, '' );
+	const noAttr = /:root:not\(\s*\[data-theme\]\s*\)/;
+	const system = /\[data-theme\s*=\s*(["']?)system\1\s*\]/;
+	let n = 0;
+	let start = 0;
+	for ( let i = 0; i < text.length; i++ ) {
+		const c = text[ i ];
+		if ( c === '{' ) {
+			const prelude = text.slice( start, i ).trim();
+			if ( ! prelude.startsWith( '@' ) && noAttr.test( prelude ) && ! system.test( prelude ) ) {
+				n++;
+			}
+			start = i + 1;
+		} else if ( c === '}' || c === ';' ) {
+			start = i + 1;
+		}
+	}
+	return n;
+};
+
 const pruning = fs.readFileSync( path.join( root, 'inc/stream-style-pruning.php' ), 'utf8' );
 const block = pruning.match( /const RUCSS_INLINE_HANDLES = array\(([\s\S]*?)\n\);/ );
 if ( ! block ) {
@@ -61,6 +87,7 @@ const crSheets = sheets.map( ( s ) => s.rel ).filter( ( r ) => /^cr-[a-z0-9-]+\.
 const state = {
 	oversized: Object.fromEntries( sheets.filter( ( s ) => Buffer.byteLength( s.css ) > BUDGET ).map( ( s ) => [ s.rel, Buffer.byteLength( s.css ) ] ).sort() ),
 	groupedKindRules: Object.fromEntries( sheets.map( ( s ) => [ s.rel, groupedKindRules( s.css ) ] ).filter( ( [ , n ] ) => n > 0 ).sort() ),
+	dataThemeGaps: Object.fromEntries( sheets.map( ( s ) => [ s.rel, dataThemeGaps( s.css ) ] ).filter( ( [ , n ] ) => n > 0 ).sort() ),
 	notInRucssHandles: crSheets.filter( ( r ) => ! ownHandles.includes( r.slice( 3, -4 ) ) ).sort(),
 };
 
@@ -82,6 +109,11 @@ for ( const [ rel, size ] of Object.entries( state.oversized ) ) {
 for ( const [ rel, n ] of Object.entries( state.groupedKindRules ) ) {
 	if ( n > ( base.groupedKindRules[ rel ] ?? 0 ) ) {
 		problems.push( `${ rel } has ${ n } selector lists naming two or more kinds (baseline ${ base.groupedKindRules[ rel ] ?? 0 } ). Give each kind its own rule or share the look through a custom property.` );
+	}
+}
+for ( const [ rel, n ] of Object.entries( state.dataThemeGaps ) ) {
+	if ( n > ( base.dataThemeGaps?.[ rel ] ?? 0 ) ) {
+		problems.push( `${ rel } has ${ n } selector lists with :root:not([data-theme]) and no [data-theme="system"] (baseline ${ base.dataThemeGaps?.[ rel ] ?? 0 }). no-flash.js sets data-theme="system" for visitors with no stored choice, so these never match. Use :root:not([data-theme="light"]).` );
 	}
 }
 for ( const name of ownHandles ) {
