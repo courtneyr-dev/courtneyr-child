@@ -8,13 +8,13 @@ Chrome DevTools Protocol scripts used on 2026-10-22/23 to prove the CSS minify r
 | --- | --- | --- |
 | `cls.mjs` | Throttled mobile CLS and paint (1.6 Mbps, 150 ms RTT, 4x CPU) and theme-sheet bytes, per load | `node cls.mjs <urls> <out.ndjson> <loads> [labels]` |
 | `states.mjs` | Source against deployed CSS on the same page: print media, forced hover/focus/active, keyboard focus rings, with a second source load as the noise control | `node states.mjs <urls> <out.ndjson> <repo>/assets/css [labels]` |
-| `handles.py` | Which stylesheet handles each URL loads as `<link>`, delayed or inline | `python3 handles.py <host> <out.json> [urls]` |
+| `handles.py` | Which theme stylesheet handles (`courtneyr-*` and `cr-*`, never plugin sheets) each URL loads as `<link>`, delayed or inline. `python3 -m unittest test_handles` checks the matcher against a fixture | `python3 handles.py <host> <out.json> [urls]` |
 | `clsab.mjs` | Source-against-minified CLS on one page with modeled sheet timing (see its header; a model, calibrate it) | `SRC_DIR=... MIN_DIR=... node clsab.mjs <urls> <out.ndjson> <loads>` |
-| `axe.mjs` | axe-core (the repo's pinned version) WCAG 2.0 to 2.2 A and AA on given URLs | `node axe.mjs <url>...` |
+| `axe.mjs` | axe-core (the repo's pinned version) WCAG 2.0 to 2.2 A and AA on given URLs | `[WIDTH=390] [SCHEME=light\|dark] node axe.mjs <url>...` (SCHEME forces prefers-color-scheme, so a light run stays light when macOS is dark; either one prints a `state` line with what the page saw) |
 | `highlight-contrast.mjs` | Contrast of every highlight element on home, about, blog and stream in five theme states (OS light/dark with no stored choice, stored light, stored dark) | `node highlight-contrast.mjs [origin]` |
 | `header-diag.mjs` | Which header element changes size when a stylesheet (default `components.css`) arrives; can inject a candidate inline CSS (`fixtures/blog-header-critical.css`) | `[WIDTH=390] [CAND=fixtures/blog-header-critical.css] node header-diag.mjs <url>` |
 | `list-diag.mjs` | Padding, position and matched rules of every `ol.wp-block-list` at 390, 980 and 1280 px | `node list-diag.mjs <post-url>` |
-| `lighthouse/run.sh`, `run_dt.sh`, `run_ab.sh` | Local Lighthouse 13.5.0, mobile: simulated (PSI-style), applied (devtools) throttling, and a blocked-URL A/B | `bash lighthouse/run_dt.sh <url> <outbase> <n>` |
+| `lighthouse/run.sh`, `run_dt.sh`, `run_ab.sh` | Local Lighthouse 13.5.0, mobile: simulated (PSI-style), applied (devtools) throttling, and a blocked-URL A/B | `bash lighthouse/run_dt.sh <url> <outbase> [n]` (n defaults to 4). Each call starts a fresh Chrome profile, and run 1 of a fresh profile loads Cloudflare's challenge-platform script (TBT about 1,200 ms): discard `<outbase>_1.json`, so use n >= 2. n=1 prints a warning |
 | `pixview.mjs` | Amplified diff of two screenshots, with pixel count and the largest channel change | `node pixview.mjs <name>...` |
 
 Rules that cost time when ignored:
@@ -37,4 +37,15 @@ Rules that cost time when ignored:
 
 `baselines/2026-10-23.json` holds the numbers to compare against: Lighthouse on live home before the minify (applied and simulated), the post-deploy runs (applied ones are unusable: the machine was overloaded, benchmark index 1,100 to 2,700), and per-page throttled CLS, paint and theme-sheet bytes on dev (before and after), test and live. `baselines/handle-sets-live-2026-10-23.json` is the link/inline handle set of every URL in `urls30.txt` on live. Raw Lighthouse reports are not kept (0.7 MB each); rerun if you need them.
 
-Machine load matters: read `environment.benchmarkIndex` in every Lighthouse report and discard runs below about 3,800 on an Apple-silicon Mac.
+Machine load matters: read `environment.benchmarkIndex` in every Lighthouse report and discard runs below the floor for the machine (next section).
+
+### Lighthouse floor on this Mac (2026-10-24)
+
+On this Mac (Apple M3 Pro, AC power) `environment.benchmarkIndex` tops out around 3,744 even when idle (14 idle applied runs on a local static page: 3,688 to 3,800, SD 29), so the old 3,800 floor rejects almost every run. Use these gates here, all at once:
+
+- benchmarkIndex >= 3,650 (mean minus 3 SD)
+- load average (1 min) < 4
+- document TTFB < 600 ms
+- never count run 1 of a fresh profile (Cloudflare's challenge script)
+
+The 2026-10-22 baseline (FCP = LCP 1,248 to 1,277 ms) came from the other Mac at index 4,200 to 4,600. Translated to this Mac the ratio is 1.34, so the same home page reads about 1,700 ms here, and the 1.5 s gate becomes: home applied LCP <= 2,000 ms in three consecutive valid runs. The ratio also includes the HTML and inlined used CSS that changed since 2026-10-22, so it isn't a pure hardware factor. Source and rows: vault `1. Projects/courtneyr.dev/overnight-report-2026-10-24.md`.
