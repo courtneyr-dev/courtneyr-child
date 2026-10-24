@@ -6,6 +6,7 @@
 // Records FCP, LCP, layout shifts (with sources) before and after one mouse move, and stylesheet/script transfer.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs'; import path from 'node:path'; import os from 'node:os'; import zlib from 'node:zlib';
+const chromeBin = () => process.env.CHROME_BIN || (() => { const base = path.join(os.homedir(), 'Library/Caches/ms-playwright'); try { for (const d of fs.readdirSync(base).filter(x => /^chromium-\d+$/.test(x)).sort().reverse()) { const p = path.join(base, d, 'chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'); if (fs.existsSync(p)) return p; } } catch {} return chromeBin(); })();
 const SRC_DIR = process.env.SRC_DIR, MIN_DIR = process.env.MIN_DIR; const CSS_PREFIX = '/wp-content/themes/courtneyr-child/assets/css/'; let linkFree = 0;
 
 const [urlFile, outFile, loadsArg, only] = process.argv.slice(2);
@@ -15,7 +16,7 @@ const LOADS = Number(loadsArg || 3);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const port = 9400 + Math.floor(Math.random() * 400);
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'cls-profile-'));
-const chrome = spawn('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+const chrome = spawn(chromeBin(),
   [`--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--disable-extensions', '--disable-sync', '--window-position=-2400,0', '--window-size=500,900', 'about:blank'], { stdio: 'ignore' });
 let ver;
 for (let i = 0; i < 50; i++) { try { ver = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json(); break; } catch { await sleep(200); } }

@@ -1,6 +1,6 @@
 # Performance and equivalence harnesses
 
-Chrome DevTools Protocol scripts used on 2026-10-22/23 to prove the CSS minify rollout. They need Node 22+ (global `WebSocket`), Google Chrome at `/Applications/Google Chrome.app`, and a site to read. Each starts its own headed Chrome with the natural user agent and `--no-default-browser-check` (without it, every fresh profile makes macOS ask whether to switch the default browser from Arc or Safari) (headless Chrome's default user agent gets a 403 from the site; do not spoof one).
+Chrome DevTools Protocol scripts used on 2026-10-22/23 to prove the CSS minify rollout. They need Node 22+ (global `WebSocket`), a Chromium to drive, and a site to read. The scripts use Playwright's Chrome for Testing (`~/Library/Caches/ms-playwright/chromium-*/`, installed by `npx playwright install chromium`), or the binary in `CHROME_BIN`, and fall back to Google Chrome only if neither exists. Each starts its own headed browser with the natural user agent. Do not use branded Google Chrome for this: on macOS every fresh profile makes it ask whether to become the default browser, and `--no-default-browser-check` does not stop that dialog. Chrome for Testing does not ask (headless Chrome's default user agent gets a 403 from the site; do not spoof one).
 
 `urls30.txt` is `label url` per line, 30 pages on courtneyr.dev. Swap the host with `sed` to point at dev or test.
 
