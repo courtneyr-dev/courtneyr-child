@@ -39,10 +39,10 @@ const { state } = store( 'courtneyr/theme-toggle', {
 		theme: readTheme(),
 		announcement: '',
 		get isActive() {
-			return getElement().ref.getAttribute( 'data-theme-set' ) === state.theme;
+			return getElement().attributes[ 'data-theme-set' ] === state.theme;
 		},
 		get pressed() {
-			return getElement().ref.getAttribute( 'data-theme-set' ) === state.theme ? 'true' : 'false';
+			return getElement().attributes[ 'data-theme-set' ] === state.theme ? 'true' : 'false';
 		},
 		get cycleLabel() {
 			return 'Appearance: ' + state.theme + ' theme. Activate to change.';
