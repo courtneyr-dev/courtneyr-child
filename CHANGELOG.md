@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.134
+
+What you see change on courtneyr.dev:
+
+- Dark mode, default setting: the yellow highlighter on the home page, About and the blog intro is a solid yellow block again, so the dark text stays readable (it was dark navy on near-black over the top half of each line, 1.04 to 1.37:1; now 8.98:1). Solid chips and the Listen cards get the same fix.
+- Numbered lists in posts sit inside the text column with the numbers visible, on phones and desktop.
+- Windows High Contrast: highlighted text keeps its highlight.
+
+Under the hood: the dark-mode rules matched `:root:not([data-theme])`, but `no-flash.js` writes `data-theme="system"` for every visitor with no stored choice, so they never applied. 21 selectors in `components.css` and `cr-post-kinds.css` now use `:root:not([data-theme="light"])`, as `tokens.css` does. The block-library rule `ol:where(.wp-block-list) { padding-inline-start: var(--wp--preset--spacing--medium) }` names a preset this theme does not define, so ordered lists had no padding; `components.css` adds a scoped rule. The same change is on a branch from 0.7.132 (version 0.7.132.1) so dev, which runs 0.7.132, shows only this delta.
+
 ## 0.7.133
 
 What you see change on courtneyr.dev:
