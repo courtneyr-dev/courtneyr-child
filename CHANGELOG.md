@@ -8,6 +8,14 @@ What you see change on courtneyr.dev:
 
 Under the hood: `tools/css-guardrails.mjs` (`npm run lint:css-guardrails`, a new CI step) enforces the 30 KiB sheet budget with a ceiling on today's oversized sheets, no new selector list naming two kinds, `RUCSS_INLINE_HANDLES` entries that resolve to a sheet, and a decision on purpose for every new `cr-*.css`. The baseline is `tools/css-guardrails.baseline.json`. `CLAUDE.md` carries the rules.
 
+## 0.7.133
+
+What you see change on courtneyr.dev:
+
+- The listen archive's header sits centered over the boombox, with a short orange marker under its description, and the boombox still life is redrawn as torn-paper collage.
+
+Under the hood: cr-archives.css composes the listen header on the boombox axis and restores the 8rem short marker; the still-life SVGs use the palette's paper-fibre, halftone, torn-edge and hard-shadow vocabulary (#229, PKIW #226, Codex mockup fidelity 98).
+
 ## 0.7.132
 
 What you see change on courtneyr.dev:

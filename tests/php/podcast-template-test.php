@@ -55,7 +55,7 @@ $podcast  = (string) file_get_contents( $root . '/templates/taxonomy-kind-listen
 $nav      = '<!-- wp:post-kinds-indieweb/listen-types /-->';
 $baseline = str_replace( "\n\t" . $nav . "\n", '', $shelf );
 
-cr_podcast_template_check( 'eb2b16505d25ec2f7dd77af967dc16a277f3e90e' === sha1( $baseline ), 'shelf minus the nav line and adjacent blank line matches d78302f' );
+cr_podcast_template_check( 'dfd5ee53eece3457a138cf5a1e806ac183f4fc1c' === sha1( $baseline ), 'shelf minus the nav line and adjacent blank line matches a6172cd (#229 title lockup)' );
 cr_podcast_template_check( str_ends_with( $shelf, "\n" ), 'shelf template ends with a newline' );
 cr_podcast_template_check( 1 === substr_count( $shelf, $nav ), 'shelf holds the listen-types block once' );
 $shelf_nav    = strpos( $shelf, $nav );
