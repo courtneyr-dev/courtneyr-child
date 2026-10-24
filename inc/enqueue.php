@@ -53,6 +53,69 @@ const BLOCK_STYLE_MAP = array(
 );
 
 /**
+ * Header rules the first paint needs, printed inline.
+ *
+ * The components.css sheet loads async (media="print", swapped on load), so
+ * the header paints from Perfmatters' used CSS for the page type until the
+ * full sheet arrives, about 2 s after first paint on a throttled phone. When that used
+ * CSS lacked the header rules (live /blog/, 2026-10-23), the theme switcher
+ * painted as the three-button desktop control and the header stood 21-23 px
+ * taller, then main jumped up when components.css landed (CLS 0.155 there;
+ * 0.207 when reproduced with a used CSS built without components.css). These
+ * are copies of the components.css header rules, enough to hold the header
+ * at its final size at 390, 768 and 1280 px with neither sheet (0.0025 in
+ * the same reproduction). They print after core's block styles, where
+ * wp_add_inline_style() puts them, and before the used CSS, which still wins
+ * every tie. The wordmark mask needs an absolute URL because inline CSS has
+ * no stylesheet to resolve a relative one against.
+ *
+ * @return string CSS.
+ */
+function header_first_paint_css(): string {
+	$css = <<<'CSS'
+	.site-header > .site-header__inner > .site-header__brand { padding-left: var(--cr-space-md, 1rem); }
+	.site-header__brand .wp-block-site-title { font-family: var(--wp--preset--font-family--secondary, serif); letter-spacing: 0.01em; }
+	.site-header__controls { flex-wrap: nowrap !important; align-items: center; gap: var(--cr-space-sm, 0.75rem); flex-shrink: 0; min-height: 3.95rem; }
+	.cr-theme-cycle { display: none; }
+	.cr-theme-cycle__icon { display: none; line-height: 0; }
+	.cr-theme-cycle__icon svg { width: 22px; height: 22px; }
+	.cr-theme-cycle__icon[data-theme-icon="light"] svg, .cr-theme-cycle__icon[data-theme-icon="system"] svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+	.cr-theme-cycle__icon[data-theme-icon="dark"] svg { fill: currentColor; stroke: none; }
+	:root[data-theme="light"] .cr-theme-cycle__icon[data-theme-icon="light"], :root[data-theme="dark"] .cr-theme-cycle__icon[data-theme-icon="dark"], :root[data-theme="system"] .cr-theme-cycle__icon[data-theme-icon="system"], :root:not([data-theme]) .cr-theme-cycle__icon[data-theme-icon="system"] { display: inline-block; }
+	@media (max-width: 1024px) {
+		.cr-theme-segments { display: none !important; }
+		.cr-theme-cycle { display: inline-flex; align-items: center; justify-content: center; inline-size: 44px; min-block-size: 44px; padding: 0; background: var(--cr-surface-elevated, #fbfaf5); color: var(--cr-glaucous, #5d72a3); border: none; border-radius: 12px; cursor: pointer; }
+		.site-header__search { display: none !important; }
+		.site-header__nav .wp-block-navigation__responsive-container-open { display: flex !important; }
+		.site-header__nav .wp-block-navigation__responsive-container:not(.is-menu-open) { display: none !important; }
+	}
+	.wp-block-site-title.is-style-cr-wordmark { margin: 0; line-height: 1; }
+	.wp-block-site-title.is-style-cr-wordmark a:any-link { position: relative; display: block; inline-size: 8.6em; padding: 0.1em 0.05em 0.2em; overflow: hidden; font-size: clamp(1.5rem, 1.2rem + 0.8vw, 2rem); line-height: 1; white-space: nowrap; text-indent: 110%; color: var(--cr-ink, #241c4a); text-decoration: none; }
+	.wp-block-site-title.is-style-cr-wordmark a:any-link::before { content: ""; position: absolute; inset: 0; background-color: currentcolor; -webkit-mask: url("{wordmark}") left center / contain no-repeat; mask: url("{wordmark}") left center / contain no-repeat; }
+	.site-header > .site-header__inner { gap: 0; align-items: center; flex-wrap: wrap !important; }
+	.site-header, .wp-block-group:has(> .site-header), .wp-block-group.is-position-sticky, header.is-position-sticky { position: sticky !important; top: calc(0px + var(--wp-admin--admin-bar--position-offset, 0px)) !important; z-index: 50 !important; border-bottom: 1px solid rgba(36, 28, 74, 0.12); box-shadow: 0 4px 12px rgba(36, 28, 74, 0.08); overflow: visible !important; }
+	.wp-block-group.is-position-sticky.has-global-padding { padding-left: 0 !important; padding-right: 0 !important; }
+	.wp-block-group.is-position-sticky > *, .wp-block-group.is-position-sticky .site-header, .wp-block-group.is-position-sticky .site-header__inner { max-width: none !important; width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; box-sizing: border-box !important; }
+	.site-header__appearance { display: contents; }
+	.cr-theme-segments { position: relative !important; display: inline-flex; align-items: center; gap: 2px; padding: 5px; border-radius: 14px; isolation: isolate; }
+	.cr-theme-segments .cr-theme-segment { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 36px; padding: 0; border: 0; border-radius: 10px; background: none; }
+	.cr-theme-segment__icon { width: 19px; height: 19px; }
+	.site-header__search { margin: 0 !important; display: inline-flex; align-items: center; gap: 0.4rem; flex: none; padding: 0.3rem 0.6rem; border: 2px solid var(--cr-ink, #241c4a); }
+	.wp-block-search.is-style-cr-header-search .wp-block-search__inside-wrapper { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0; border: 0; }
+	.wp-block-search.is-style-cr-header-search .wp-block-search__inside-wrapper::before { content: ""; flex: none; inline-size: 18px; block-size: 18px; }
+	.wp-block-search.is-style-cr-header-search .wp-block-search__input { flex: 1 1 auto; min-width: 0; width: 100%; margin: 0; padding: 0.5em 1em !important; border: 0 !important; font-family: var(--cr-font-body); font-size: var(--wp--preset--font-size--small) !important; line-height: 1.4; }
+	.site-header .site-header__nav .wp-block-navigation-item__content { font-family: var(--cr-font-accent, serif); font-weight: 500; font-size: 1.125rem; padding: 0.4rem; min-height: 24px; display: inline-flex; align-items: center; }
+	.site-header__nav, .site-header__nav .wp-block-navigation__container { flex-wrap: nowrap !important; }
+	@media (min-width: 1024px) { .site-header__controls, .site-header__nav .wp-block-navigation__container { gap: var(--cr-space-md, 1.25rem) !important; } }
+	.cr-mobile-search-item { display: none !important; }
+	.site-header__nav .wp-block-navigation-submenu__toggle { display: inline-flex; align-items: center; justify-content: center; min-inline-size: 24px; min-block-size: 24px; padding: 0; }
+	.site-header__nav .wp-block-navigation-submenu__toggle svg { width: 12px; height: 12px; }
+	.site-header__nav .wp-block-navigation-item { flex-shrink: 0; }
+	CSS;
+	return str_replace( '{wordmark}', esc_url( COURTNEYR_CHILD_URI . '/assets/brand/wordmark.svg' ), $css );
+}
+
+/**
  * Enqueue the global tokens + components baseline on the front end.
  *
  * Tokens.css comes first (defines --cr-*); components.css depends on it.
@@ -112,6 +175,9 @@ function enqueue_baseline(): void {
 			COURTNEYR_CHILD_VERSION
 		);
 	}
+
+	// The header's first-paint rules ride on the components handle too.
+	wp_add_inline_style( 'courtneyr-components', header_first_paint_css() );
 
 	/*
 	 * V0.5.76 — emit the per-format tint rules as INLINE CSS attached
