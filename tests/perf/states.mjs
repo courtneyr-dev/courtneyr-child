@@ -4,7 +4,7 @@
 // :hover/:focus/:focus-visible/:active computed styles of up to 30 interactive elements, and (1280 dark) 10 keyboard Tab focus rings.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs'; import path from 'node:path'; import os from 'node:os';
-const chromeBin = () => process.env.CHROME_BIN || (() => { const base = path.join(os.homedir(), 'Library/Caches/ms-playwright'); try { for (const d of fs.readdirSync(base).filter(x => /^chromium-\d+$/.test(x)).sort().reverse()) { const p = path.join(base, d, 'chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'); if (fs.existsSync(p)) return p; } } catch {} return chromeBin(); })();
+const chromeBin = () => process.env.CHROME_BIN || (() => { const base = path.join(os.homedir(), 'Library/Caches/ms-playwright'); try { for (const d of fs.readdirSync(base).filter(x => /^chromium-\d+$/.test(x)).sort().reverse()) { const p = path.join(base, d, 'chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'); if (fs.existsSync(p)) return p; } } catch {} console.error('No browser found. Set CHROME_BIN or install Chrome for Testing (npx playwright install chromium); this script never uses /Applications/Google Chrome.app.'); process.exit(1); })();
 
 const [urlFile, outFile, cssDir, only] = process.argv.slice(2);
 let pages = fs.readFileSync(urlFile, 'utf8').trim().split('\n').map(l => l.split(' '));
