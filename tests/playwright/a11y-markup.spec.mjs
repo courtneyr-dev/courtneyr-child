@@ -2607,40 +2607,143 @@ test( 'a link keeps its 3px focus ring when a script writes a thinner outline in
 	expect( checked, 'at least one link was checked' ).toBeGreaterThan( 0 );
 } );
 
-// courtneyr-child#109: the consent dialog belongs to the consent plugin, so this
-// test keeps it open to keep its effect on record. Complianz traps Tab inside
-// the dialog but leaves the page behind it focusable (no inert), so focus that
-// arrives another way (pointer, script, assistive technology) can sit under it.
-// Website Specification `focus-not-obscured` (recommended): a dialog either
-// makes the rest of the page inert or stays off focusable content. Expected to
-// fail until the plugin or its settings change; a pass means it changed.
+// courtneyr-child#109: Complianz's dialog is fixed to the window edge and
+// covers links the page can still focus. WCAG 2.2 SC 2.4.11 Focus Not
+// Obscured (Minimum): a focused control isn't entirely hidden by author-created
+// content. The theme's fix is W3C technique C43: `scroll-padding-bottom` on
+// the root (components.css) equals the part of the window the dialog covers,
+// which assets/js/site-ux.js measures with a ResizeObserver and publishes as
+// --cr-consent-covered, so focus scrolls a link out from under the dialog.
+//
+// A site with the real dialog (dev) is tested as it is: Complianz traps Tab
+// inside the dialog, so the links are focused from script, the way a pointer
+// or assistive technology moves focus. A site without it (local wp-env) gets
+// an element with the dialog's classes, role and measured size, then every
+// link is reached with Tab. The sizes come from rendering dev's markup and
+// CSS offline on 2026-10-26: 375 px wide, full width at the bottom edge, 295
+// px tall; 390 px wide, 277 px tall; 1280 px wide, 400 x 277 px at right
+// 10px, bottom 10px.
+const CONSENT_DIALOG_SIZES = [ [ 375, 800, 295 ], [ 390, 844, 277 ], [ 1280, 800, 277 ] ];
+
+async function injectConsentDialogFixture( page, height ) {
+	await page.evaluate( ( h ) => {
+		const style = document.createElement( 'style' );
+		style.id = 'cr-consent-fixture-css';
+		style.textContent = `.cmplz-cookiebanner{box-sizing:border-box;position:fixed;z-index:99999;display:grid;align-content:start;gap:10px;right:10px;bottom:10px;width:400px;height:${ h }px;padding:15px 20px;background:#023047;color:#fff}@media (max-width:768px){.cmplz-cookiebanner{right:0;bottom:0;width:100%}}`;
+		document.head.append( style );
+		const dialog = document.createElement( 'div' );
+		dialog.id = 'cmplz-cookiebanner-1-optout';
+		dialog.className = 'cmplz-cookiebanner cmplz-show banner-1 banner-a optout cmplz-bottom-right cmplz-categories-type-view-preferences';
+		dialog.setAttribute( 'role', 'dialog' );
+		dialog.setAttribute( 'aria-modal', 'true' );
+		dialog.setAttribute( 'aria-label', 'Manage Consent' );
+		dialog.innerHTML = '<div class="cmplz-header"><div class="cmplz-title">Manage Consent</div><div class="cmplz-close" tabindex="0" role="button" aria-label="Close dialog">x</div></div>'
+			+ '<div class="cmplz-body"><div class="cmplz-message">To provide the best experiences, we use technologies like cookies to store and/or access device information.</div></div>'
+			+ '<div class="cmplz-buttons"><button class="cmplz-btn cmplz-accept">Accept</button><button class="cmplz-btn cmplz-deny">Deny</button><button class="cmplz-btn cmplz-view-preferences">View preferences</button></div>';
+		document.body.append( dialog );
+		// Complianz fires this after it shows the dialog.
+		document.dispatchEvent( new CustomEvent( 'cmplz_cookie_warning_loaded' ) );
+	}, height );
+	// A ResizeObserver reports on the next frame.
+	await page.evaluate( () => new Promise( ( done ) => requestAnimationFrame( () => requestAnimationFrame( done ) ) ) );
+}
+
 test.describe( 'with the consent dialog open', () => {
 	test.use( { consentDialog: 'keep' } );
 
-	test( 'no focused link in main is entirely hidden under the consent dialog, or the page behind it is inert', async ( { page }, testInfo ) => {
-		// It sets its own window, so one project's run is the whole record:
-		// 1280-light, the one project `npm run test:a11y-markup` runs.
-		test.skip( '1280-light' !== testInfo.project.name, 'runs once, in the 1280-light project' );
-		await page.setViewportSize( { width: 375, height: 800 } );
-		await page.goto( DRINK_ARCHIVE, { waitUntil: 'load' } );
-		const dialog = page.locator( '.cmplz-cookiebanner' ).filter( { visible: true } );
-		await dialog.first().waitFor( { state: 'visible', timeout: 5000 } ).catch( () => {} );
-		test.skip( 0 === await dialog.count(), 'no consent dialog on this site' );
-		test.fail( true, 'Complianz leaves the page focusable under its dialog (courtneyr-child#109)' );
-		const state = await page.evaluate( () => {
-			const box = document.querySelector( '.cmplz-cookiebanner:not(.cmplz-hidden)' ).getBoundingClientRect();
-			const hidden = [];
-			for ( const a of document.querySelectorAll( 'main a[href]' ) ) {
-				a.focus();
-				const r = a.getBoundingClientRect();
-				if ( r.width > 0 && r.height > 0 && r.left >= box.left && r.right <= box.right && r.top >= box.top && r.bottom <= box.bottom ) {
-					hidden.push( a.textContent.trim() );
-				}
+	for ( const [ width, height, fixtureHeight ] of CONSENT_DIALOG_SIZES ) {
+		test( `no focused link in main is entirely under the consent dialog at ${ width } px, and the root's scroll-padding returns when it closes`, async ( { page }, testInfo ) => {
+			// It sets its own window, so one project's run is the whole record:
+			// 1280-light, the one project `npm run test:a11y-markup` runs.
+			test.skip( '1280-light' !== testInfo.project.name, 'runs once, in the 1280-light project' );
+			await page.setViewportSize( { width, height } );
+			// tokens.css sets `scroll-behavior: smooth`, so focus() starts an animated
+			// scroll and a box read right after it is the box before the scroll.
+			// Reduced motion makes the scroll instant; where it ends is the same.
+			await page.emulateMedia( { reducedMotion: 'reduce' } );
+			await page.goto( DRINK_ARCHIVE, { waitUntil: 'load' } );
+			const real = page.locator( '.cmplz-cookiebanner' ).filter( { visible: true } );
+			await real.first().waitFor( { state: 'visible', timeout: 5000 } ).catch( () => {} );
+			const fixture = 0 === await real.count();
+			const padding = () => page.evaluate( () => parseFloat( getComputedStyle( document.documentElement ).scrollPaddingBottom ) );
+			const pageEnd = () => page.evaluate( () => parseFloat( getComputedStyle( document.documentElement ).paddingBottom ) );
+			const closedPadding = fixture ? await padding() : null;
+			if ( fixture ) {
+				await injectConsentDialogFixture( page, fixtureHeight );
 			}
-			return { inert: null !== document.querySelector( 'main' ).closest( '[inert]' ), hidden };
+			const linkCount = await page.locator( 'main a[href]' ).count();
+			expect( linkCount, 'the page has links to focus' ).toBeGreaterThan( 10 );
+
+			// The dialog's box, read from the page when a link takes focus.
+			const covered = ( a ) => {
+				const d = [ ...document.querySelectorAll( '.cmplz-cookiebanner' ) ].find( ( el ) => el.getClientRects().length > 0 );
+				const b = d.getBoundingClientRect();
+				const r = a.getBoundingClientRect();
+				return ! d.contains( a ) && r.width > 0 && r.height > 0 && r.left >= b.left && r.right <= b.right && r.top >= b.top && r.bottom <= b.bottom;
+			};
+
+			// Focus from script, which is all the real dialog allows (it traps Tab).
+			const scripted = await page.evaluate( ( fn ) => {
+				const isCovered = new Function( 'return ' + fn )();
+				const hidden = [];
+				for ( const a of document.querySelectorAll( 'main a[href]' ) ) {
+					a.focus();
+					if ( isCovered( a ) ) {
+						hidden.push( a.textContent.trim() );
+					}
+				}
+				return hidden;
+			}, covered.toString() );
+			expect( scripted, `links focused from script and entirely under the dialog at ${ width } px: ${ scripted.join( ', ' ) }` ).toEqual( [] );
+
+			// With the fixture there is no trap, so walk the page with Tab too.
+			if ( fixture ) {
+				await page.evaluate( () => {
+					window.scrollTo( 0, 0 );
+					document.activeElement?.blur();
+				} );
+				const tabbed = [];
+				let reached = 0;
+				for ( let i = 0; i < linkCount + 40 && reached < linkCount; i++ ) {
+					await page.keyboard.press( 'Tab' );
+					const hit = await page.evaluate( ( fn ) => {
+						const a = document.activeElement;
+						if ( ! a || ! a.matches( 'main a[href]' ) ) {
+							return null;
+						}
+						const isCovered = new Function( 'return ' + fn )();
+						return { text: a.textContent.trim(), covered: isCovered( a ) };
+					}, covered.toString() );
+					if ( hit ) {
+						reached++;
+						if ( hit.covered ) {
+							tabbed.push( hit.text );
+						}
+					}
+				}
+				expect( reached, 'Tab reached the links in main' ).toBeGreaterThan( linkCount / 2 );
+				expect( tabbed, `links reached by Tab and entirely under the dialog at ${ width } px: ${ tabbed.join( ', ' ) }` ).toEqual( [] );
+			}
+
+			// While the dialog is open the root keeps the area it covers clear;
+			// once it closes the padding is the theme's own again.
+			const openPadding = await padding();
+			expect( openPadding, 'scroll-padding-bottom clears the dialog' ).toBeGreaterThanOrEqual( fixture ? fixtureHeight : 200 );
+			expect( await pageEnd(), 'the page end has room to scroll the last links clear' ).toBeGreaterThanOrEqual( fixture ? fixtureHeight : 200 );
+			if ( fixture ) {
+				await page.evaluate( () => document.querySelector( '.cmplz-cookiebanner' ).remove() );
+			} else {
+				await page.locator( '.cmplz-cookiebanner .cmplz-close' ).filter( { visible: true } ).first().click();
+			}
+			await page.evaluate( () => new Promise( ( done ) => requestAnimationFrame( () => requestAnimationFrame( done ) ) ) );
+			const afterPadding = await padding();
+			expect( afterPadding, 'scroll-padding-bottom falls back once the dialog is gone' ).toBeLessThan( openPadding );
+			expect( await pageEnd(), 'and the page end loses its room' ).toBe( 0 );
+			if ( fixture ) {
+				expect( afterPadding, 'and is the value it had before the dialog opened' ).toBe( closedPadding );
+			}
 		} );
-		expect( state.inert || 0 === state.hidden.length, `focused links entirely under the dialog: ${ state.hidden.join( ', ' ) }` ).toBe( true );
-	} );
+	}
 } );
 
 // PKIW #230: an eat single is an order ticket and a drink single is a taped

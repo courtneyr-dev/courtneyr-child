@@ -21,6 +21,14 @@
  * marked cr-cover--failed and loses its image, so the kind's stylesheet
  * draws its own fallback there. Kind adapters add the attribute and style
  * the class; this file stays the same for each new kind.
+ *
+ * Complianz dialog (courtneyr-child#109, WCAG 2.2 SC 2.4.11, W3C C43): the
+ * dialog is fixed to the window edge and its height depends on its text, so
+ * CSS can't know how much of the window it covers. This file measures it and
+ * publishes --cr-consent-covered; components.css puts that into the root's
+ * scroll-padding-bottom, so focus scrolls a link out from under the dialog,
+ * and into its padding-bottom, so the last links on the page have room to
+ * scroll that far.
  */
 ( function () {
 	'use strict';
@@ -75,4 +83,32 @@
 			target.click();
 		}
 	} );
+
+	// Complianz dialog — publish the part of the window it covers. The
+	// observer fires when the dialog shows, changes size or goes away
+	// (dismissed, display: none, removed).
+	const root = document.documentElement;
+	function publishConsentCovered() {
+		let covered = 0;
+		document.querySelectorAll( '.cmplz-cookiebanner' ).forEach( function ( dialog ) {
+			const box = dialog.getBoundingClientRect();
+			if ( box.height > 0 ) covered = Math.max( covered, root.clientHeight - box.top );
+		} );
+		// A dialog covering most of the window can't be scrolled around.
+		if ( covered > 0 ) root.style.setProperty( '--cr-consent-covered', Math.min( covered, root.clientHeight * 0.6 ) + 'px' );
+		else root.style.removeProperty( '--cr-consent-covered' );
+	}
+	if ( 'ResizeObserver' in window ) {
+		const consentObserver = new ResizeObserver( publishConsentCovered );
+		const watchConsent = function () {
+			document.querySelectorAll( '.cmplz-cookiebanner' ).forEach( function ( dialog ) {
+				consentObserver.observe( dialog );
+			} );
+			publishConsentCovered();
+		};
+		watchConsent();
+		// Complianz fires this after it shows the dialog.
+		document.addEventListener( 'cmplz_cookie_warning_loaded', watchConsent );
+		window.addEventListener( 'resize', publishConsentCovered );
+	}
 } )();
