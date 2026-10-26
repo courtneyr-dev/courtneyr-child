@@ -1,0 +1,8 @@
+{
+  "name": "perf-lighthouse",
+  "version": "1.0.0",
+  "dependencies": {
+    "lighthouse": "13.5.0"
+  },
+  "private": true
+}
