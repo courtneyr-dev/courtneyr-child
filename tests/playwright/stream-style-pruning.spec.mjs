@@ -12,8 +12,10 @@ if ( process.env.CR_BYPASS ) {
 async function sheets( page, path ) {
 	const response = await page.goto( path, { waitUntil: 'domcontentloaded' } );
 	expect( response.status() ).toBe( 200 );
+	// A deferred sheet keeps its URL in data-cr-href until the load event (#236), so it is
+	// still loaded at domcontentloaded even though its href is empty.
 	const linked = await page.locator( 'link[rel="stylesheet"]' ).evaluateAll( ( links ) =>
-		links.map( ( link ) => ( link.getAttribute( 'href' ) || '' ).split( '?' )[ 0 ].split( '/' ).pop() )
+		links.map( ( link ) => ( link.getAttribute( 'href' ) || link.getAttribute( 'data-cr-href' ) || '' ).split( '?' )[ 0 ].split( '/' ).pop() )
 	);
 	// Since 0.7.129 Perfmatters inlines the kind sheets as <style id="courtneyr-photo-css">;
 	// count those as cr-photo.css so the loaded/skipped checks still hold.
