@@ -154,10 +154,10 @@ const WISH_ARCHIVE = process.env.CR_WISH_ARCHIVE_PATH || '/kind/wish/'; // wish 
 const QUESTION_ARCHIVE = process.env.CR_QUESTION_ARCHIVE_PATH || '/kind/question/'; // question slips (PKIW #256)
 // Dark-mode contrast fixtures: [ path, selector, text the element must contain ].
 const DARK_FIXTURES = [
-	[ process.env.CR_RESUME_PAGE_PATH || '/?page_id=37840', 'code', 'beta-rc' ], // inline code inside page content
-	[ process.env.CR_ALERT_POST_PATH || '/?p=37492', 'p.is-style-sme-alert-success', 'Disclosure' ], // SME success alert
-	[ process.env.CR_MARK_POST_PATH || '/?p=50', 'mark', 'love the Lord' ], // highlighted verse
-	[ process.env.CR_MARK_POST2_PATH || '/?p=751', 'mark', 'FREE' ], // highlighted word
+	[ process.env.CR_RESUME_PAGE_PATH || '/?page_id=37840', 'code', 'beta-rc', 'CR_RESUME_PAGE_PATH' ], // inline code inside page content
+	[ process.env.CR_ALERT_POST_PATH || '/?p=37492', 'p.is-style-sme-alert-success', 'Disclosure', 'CR_ALERT_POST_PATH' ], // SME success alert
+	[ process.env.CR_MARK_POST_PATH || '/?p=50', 'mark', 'love the Lord', 'CR_MARK_POST_PATH' ], // highlighted verse
+	[ process.env.CR_MARK_POST2_PATH || '/?p=751', 'mark', 'FREE', 'CR_MARK_POST2_PATH' ], // highlighted word
 ];
 
 // The single's Post navigation links, as { label: 'Previous' | 'Next', href }.
@@ -281,16 +281,27 @@ function fixtureSkippedPart( description ) {
 	test.info().annotations.push( { type: 'skipped-part', description } );
 }
 
-// courtneyr-child#99, #108: a fixture is a post or page that dev holds and a fresh
-// local site may not. A path that is a 404, or one that answers with a file instead of
-// a page (locally `/?p=751` redirects to an attachment), is a missing fixture: the test
-// skips and names the variable that repoints it. `has` is an element that belongs to
-// the fixture itself, like the plugin's comic card that a book read at the same path
-// doesn't print. It is never the element under test: a page that loads without that
-// element is a failing test, not a skip.
-function skipMissingFixture( response, path, env ) {
+// courtneyr-child#99, #108, #110: a fixture is a post or page that dev holds and a
+// fresh local site may not. A path that is a 404, or one that answers with a file
+// instead of a page (locally `/?p=751` redirects to an attachment), is a missing
+// fixture: the test skips and names the variable that repoints it. `has` is an
+// element that belongs to the fixture itself, like the plugin's comic card that a
+// book read at the same path doesn't print. It is never the element under test: a
+// page that loads without that element is a failing test, not a skip.
+function isMissingFixture( response ) {
 	const isPage = ( response?.headers()[ 'content-type' ] ?? '' ).includes( 'text/html' );
-	test.skip( ! response || 404 === response.status() || ! isPage, `no fixture at ${ path }: set ${ env }` );
+	return ! response || 404 === response.status() || ! isPage;
+}
+
+function skipMissingFixture( response, path, env ) {
+	test.skip( isMissingFixture( response ), `no fixture at ${ path }: set ${ env }` );
+}
+
+// The site icon the h-card pattern prints as its photo ('' when none is set, null
+// when the REST index doesn't answer). Same getter as the pattern: site_icon_url.
+async function siteIconUrl( page ) {
+	const response = await page.request.get( '/wp-json/' );
+	return response.ok() ? ( await response.json() ).site_icon_url || '' : null;
 }
 
 async function gotoFixture( page, path, env, has ) {
@@ -527,6 +538,8 @@ async function hEntryClassCount( locator ) {
 
 test( 'footer h-card photo is a decorative image inside the named link', async ( { page } ) => {
 	await page.goto( '/', { waitUntil: 'load' } );
+	// courtneyr-child#110: the pattern prints the photo only when the site has an icon. A site with none (local wp-env) prints the name alone.
+	test.skip( '' === await siteIconUrl( page ), 'the site has no icon, so the h-card pattern prints no photo' );
 	const link = page.locator( '.cr-hcard a.u-url' );
 	await expect( link ).toHaveCount( 1 );
 	const img = link.locator( 'img.cr-hcard__photo' );
@@ -538,7 +551,7 @@ test( 'footer h-card photo is a decorative image inside the named link', async (
 } );
 
 test( 'Able Player YouTube players carry the captions/transcript link', async ( { page } ) => {
-	await page.goto( ABLEPLAYER_POST, { waitUntil: 'load' } );
+	await gotoFixture( page, ABLEPLAYER_POST, 'CR_ABLEPLAYER_POST_PATH' );
 	// Able Player swaps its <video data-youtube-id> for an iframe at init; count either form.
 	const players = page.locator( '[data-youtube-id], iframe[id^="able_player_"][id$="_youtube"]' );
 	const count = await players.count();
@@ -556,7 +569,7 @@ test( 'Able Player YouTube players carry the captions/transcript link', async ( 
 } );
 
 test( 'Able Player shortcodes whose youtube-id is a full URL still get the transcript link', async ( { page } ) => {
-	await page.goto( ABLEPLAYER_URL_POST, { waitUntil: 'load' } );
+	await gotoFixture( page, ABLEPLAYER_URL_POST, 'CR_ABLEPLAYER_URL_POST_PATH' );
 	const players = page.locator( '[data-youtube-id], iframe[id^="able_player_"][id$="_youtube"]' );
 	const count = await players.count();
 	expect( count, 'fixture post renders at least one Able Player YouTube player' ).toBeGreaterThan( 0 );
@@ -576,7 +589,7 @@ test( 'Able Player shortcodes whose youtube-id is a full URL still get the trans
 } );
 
 test( 'comment avatars are decorative and never render with an empty src', async ( { page } ) => {
-	await page.goto( COMMENTS_POST, { waitUntil: 'load' } );
+	await gotoFixture( page, COMMENTS_POST, 'CR_COMMENTS_POST_PATH' );
 	const avatars = page.locator( '.wp-block-avatar img' );
 	expect( await avatars.count() ).toBeGreaterThan( 0 );
 	for ( const img of await avatars.all() ) {
@@ -589,7 +602,7 @@ test( 'comment avatars are decorative and never render with an empty src', async
 } );
 
 test( 'syndication links are not smaller than 11px', async ( { page } ) => {
-	await page.goto( QUOTE_POST, { waitUntil: 'load' } );
+	await gotoFixture( page, QUOTE_POST, 'CR_QUOTE_POST_PATH' );
 	const links = page.locator( '.syndication-links .syn-link' );
 	expect( await links.count() ).toBeGreaterThan( 0 );
 	for ( const a of await links.all() ) {
@@ -610,7 +623,7 @@ test( 'post-format list links name what they link to', async ( { page } ) => {
 } );
 
 test( 'headings and links inside table header cells take the cell colour', async ( { page } ) => {
-	await page.goto( TABLE_POST, { waitUntil: 'load' } );
+	await gotoFixture( page, TABLE_POST, 'CR_TABLE_POST_PATH' );
 	// Links transition their colour when the component sheet applies after the token sheet;
 	// read the settled values, not a frame from the 200 ms transition.
 	await page.evaluate( () => Promise.all( document.getAnimations().map( ( a ) => a.finished ) ) );
@@ -640,8 +653,15 @@ test( 'term archive description stays below heading size', async ( { page } ) =>
 test( 'dark mode keeps AA contrast on inline code, the success alert and highlights', async ( { page } ) => {
 	// The theme toggle reads localStorage before paint; force Dark regardless of the project's colour scheme.
 	await page.addInitScript( () => { try { localStorage.setItem( 'courtneyr-theme', 'dark' ); } catch ( e ) {} } );
-	for ( const [ path, selector, text ] of DARK_FIXTURES ) {
-		await page.goto( path, { waitUntil: 'load' } );
+	// courtneyr-child#110: each fixture is a separate post. One that is missing is left out and noted; the test skips when all four are.
+	let checked = 0;
+	for ( const [ path, selector, text, env ] of DARK_FIXTURES ) {
+		const response = await page.goto( path, { waitUntil: 'load' } );
+		if ( isMissingFixture( response ) ) {
+			fixtureSkippedPart( `no fixture at ${ path }: set ${ env }` );
+			continue;
+		}
+		checked++;
 		await page.evaluate( () => Promise.all( document.getAnimations().map( ( a ) => a.finished ) ) );
 		const result = await page.evaluate( ( [ sel, needle ] ) => {
 			const el = [ ...document.querySelectorAll( sel ) ].find( ( e ) => e.textContent.includes( needle ) );
@@ -659,12 +679,15 @@ test( 'dark mode keeps AA contrast on inline code, the success alert and highlig
 		expect( result.theme ).toBe( 'dark' );
 		expect( result.ratio, `${ selector } on ${ path }` ).toBeGreaterThanOrEqual( 4.5 );
 	}
+	test.skip( 0 === checked, 'none of the four dark-mode fixture posts exist on this site' );
 } );
 
 test( 'a YouTube autoembed picks up the site caption file registered for its video', async ( { page } ) => {
 	// Able Player replaces the <video> (and its <track>) with a YouTube iframe at init, so read the
 	// server markup rather than the live DOM.
-	const html = await ( await page.request.get( AUTOEMBED_CAPTIONED_POST ) ).text();
+	const served = await page.request.get( AUTOEMBED_CAPTIONED_POST );
+	skipMissingFixture( served, AUTOEMBED_CAPTIONED_POST, 'CR_AUTOEMBED_CAPTIONED_POST_PATH' );
+	const html = await served.text();
 	const figure = html.match( /<figure class="cr-media cr-media--ableplayer">[\s\S]*?<\/figure>/ );
 	expect( figure, 'fixture post renders an Able Player figure' ).not.toBeNull();
 	const track = figure[ 0 ].match( /<track\b[^>]*\bkind="captions"[^>]*\bsrc="([^"]+)"/ ) || figure[ 0 ].match( /<track\b[^>]*\bsrc="([^"]+)"[^>]*\bkind="captions"/ );
@@ -752,7 +775,7 @@ test( 'kind archive pagination is the shared centered pager with the current pag
 } );
 
 test( 'single posts have a Post navigation landmark whose links name the adjacent post', async ( { page } ) => {
-	await page.goto( POST_NAV_POST, { waitUntil: 'load' } );
+	await gotoFixture( page, POST_NAV_POST, 'CR_POST_NAV_POST_PATH' );
 	const nav = page.getByRole( 'navigation', { name: 'Post navigation', exact: true } );
 	await expect( nav ).toHaveCount( 1 );
 	const links = nav.getByRole( 'link' );
