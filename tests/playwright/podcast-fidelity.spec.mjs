@@ -94,11 +94,14 @@ function nameMatcher( name ) {
 	return new RegExp( `^${ escaped.replace( /\s*,\s*/g, '\\s*,\\s*' ) }$` );
 }
 
-async function normalizedMarkup( locator, removeSelector = '' ) {
-	return locator.evaluate( ( root, selector ) => {
+async function normalizedMarkup( locator, removeSelector = '', unwrapSelector = '' ) {
+	return locator.evaluate( ( root, [ selector, unwrap ] ) => {
 		const clone = root.cloneNode( true );
 		if ( selector ) {
 			for ( const element of clone.querySelectorAll( selector ) ) element.remove();
+		}
+		if ( unwrap ) {
+			for ( const element of clone.querySelectorAll( unwrap ) ) element.replaceWith( ...element.childNodes );
 		}
 		for ( const element of [ clone, ...clone.querySelectorAll( '*' ) ] ) {
 			for ( const attribute of [ ...element.attributes ] ) {
@@ -118,7 +121,7 @@ async function normalizedMarkup( locator, removeSelector = '' ) {
 				.replace( /(?:January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}/g, 'LONG_DATE' );
 		}
 		return clone.outerHTML.replace( /\s+/g, ' ' ).trim();
-	}, removeSelector );
+	}, [ removeSelector, unwrapSelector ] );
 }
 
 async function axe( page ) {
@@ -402,7 +405,9 @@ test.describe( 'podcast full-state surfaces', () => {
 		await expect( page.getByRole( 'heading', { level: 1, name: 'Listen', exact: true } ) ).toHaveCount( 1 );
 		const podcastHeader = await normalizedMarkup( page.locator( '.cr-archive__header' ) );
 		await visit( page, ARCHIVE );
-		expect( await normalizedMarkup( page.locator( '.cr-archive__header' ) ) ).toBe( podcastHeader );
+		// Only the Listen view centers its badge and title in .cr-archive__lockup (5a5cbcc,
+		// PKIW #226); unwrapped, its header is the podcast header.
+		expect( await normalizedMarkup( page.locator( '.cr-archive__header' ), '', '.cr-archive__lockup' ) ).toBe( podcastHeader );
 		await expect( page.locator( 'header.wp-block-template-part' ) ).toHaveCount( 1 );
 		await expect( page.locator( 'footer.wp-block-template-part' ) ).toHaveCount( 1 );
 		await expect( page.locator( '.cr-podcast-tile, [class*="taped-margin"]' ) ).toHaveCount( 0 );
