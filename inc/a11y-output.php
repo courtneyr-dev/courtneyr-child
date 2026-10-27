@@ -212,6 +212,36 @@ add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\kind_label_is_
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\kind_label_is_not_a_paragraph', 999 );
 
 /**
+ * Accessibility Checker Pro's aria_hidden_valid_usage flags every
+ * aria-hidden="true" element that has no role="presentation" and no hidden or
+ * labelled parent, one element at a time: an icon <svg> inside an already
+ * hidden badge fails on its own. The theme marks its ornaments with both
+ * attributes, but the Stream adapters, the read and comic type covers and
+ * Post Kinds' kind icons print aria-hidden alone. Add the role to each such
+ * element on the outer blocks, after every adapter has run. An <img> keeps
+ * no role: alt="" already makes it presentational.
+ *
+ * @param string $content Rendered block.
+ * @return string
+ */
+function hidden_is_presentational( string $content ): string {
+	if ( false === strpos( $content, 'aria-hidden="true"' ) ) {
+		return $content;
+	}
+	$tags = new \WP_HTML_Tag_Processor( $content );
+	while ( $tags->next_tag() ) {
+		if ( 'true' === $tags->get_attribute( 'aria-hidden' ) && null === $tags->get_attribute( 'role' ) && 'IMG' !== $tags->get_tag() ) {
+			$tags->set_attribute( 'role', 'presentation' );
+		}
+	}
+	return $tags->get_updated_html();
+}
+add_filter( 'render_block_core/post-content', __NAMESPACE__ . '\\hidden_is_presentational', 999 );
+add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\hidden_is_presentational', 999 );
+add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\hidden_is_presentational', 999 );
+add_filter( 'render_block_courtneyr/archive-identity', __NAMESPACE__ . '\\hidden_is_presentational', 999 );
+
+/**
  * Embed fallbacks (oEmbed, Instagram in particular) ship an <img> whose alt is the
  * entire caption, hundreds of characters long. Trim any embedded image alt
  * over 300 characters to its first sentence.
