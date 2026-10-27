@@ -3154,7 +3154,9 @@ for ( const path of KIND_ARCHIVE_HEADERS ) {
 				tile: { top: box( tile ).top, left: box( tile ).left },
 				titleBox: { top: box( title ).top, left: box( title ).left },
 				hidden: glyph.getAttribute( 'aria-hidden' ),
-				named: [ glyph.getAttribute( 'aria-label' ), glyph.getAttribute( 'title' ), glyph.getAttribute( 'role' ), svg ? svg.querySelector( 'title' ) : null ].filter( Boolean ).length,
+				// role="presentation" (the theme's ornament markup) strips semantics and
+				// names nothing, so only a role that could carry a name counts.
+				named: [ glyph.getAttribute( 'aria-label' ), glyph.getAttribute( 'aria-labelledby' ), glyph.getAttribute( 'title' ), [ 'presentation', 'none' ].includes( glyph.getAttribute( 'role' ) ) ? null : glyph.getAttribute( 'role' ), svg ? svg.querySelector( 'title' ) : null ].filter( Boolean ).length,
 				linked: null !== glyph.closest( 'a' ) || glyph.querySelectorAll( 'a' ).length > 0,
 				stops: [ glyph, ...glyph.querySelectorAll( '*' ) ].filter( ( n ) => n.tabIndex >= 0 ).length,
 				circle: cs.backgroundColor,
@@ -3283,8 +3285,11 @@ test.describe( 'check-in archive (PKIW #224)', () => {
 		await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
 
 		const map = page.locator( '.pkiw-checkin-archive__map' );
-		await expect( map ).toHaveAttribute( 'role', 'region' );
-		await expect( map ).toHaveAttribute( 'aria-label', /\S/ );
+		// Since PKIW #462 the map is a figure named by its figcaption (Accessibility
+		// Checker passes Leaflet's alt="" tiles only there), not a labelled region.
+		await expect( map ).toHaveJSProperty( 'tagName', 'FIGURE' );
+		await expect( map.locator( ':scope > figcaption' ) ).toHaveText( /\S/ );
+		await expect( map ).toHaveAccessibleName( /\S/ );
 		const summary = page.locator( `#${ await map.getAttribute( 'aria-describedby' ) }` );
 		await expect( summary ).toHaveText( /^\d+ check-ins? · \d+ mapped$/ );
 		await expect( map.locator( '.leaflet-control-attribution' ) ).toBeVisible();
@@ -3979,6 +3984,8 @@ test( 'a video play cover that fails to load shows the glyph on the screen, the 
 		await page.goto( url, { waitUntil: 'load' } );
 		const box = page.locator( selector ).first();
 		test.skip( 0 === await box.count(), `missing ${ surface } for V4` );
+		// A lazy cover below the fold never requests, so it can only fail once scrolled to.
+		await box.scrollIntoViewIfNeeded();
 		await waitForCoverFallback( box );
 		await expect( box.locator( '.cr-cabinet__glyph, .cr-cartridge__glyph' ), `${ surface } glyph visible` ).toBeVisible();
 	}
@@ -4590,10 +4597,15 @@ test( 'a reply single is a torn sheet: the cited host once, the body, then a pla
 	await goToSlug( page, 're-alt-text-is-a-draft', 'Re: Alt text is a draft' );
 	await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
 	const order = await page.evaluate( () => {
+		// PKIW's h-entry wrapper puts the whole post content, citation card included,
+		// in .e-content, so the order is the card, then the first body element after it,
+		// then the signature below the content.
 		const cite = document.querySelector( '.cr-letter-cite' );
 		const content = document.querySelector( '.cr-letter-sheet .e-content' );
+		const body = [ ...content.children ].find( ( el ) => ! el.contains( cite ) && ! cite.contains( el ) && el.textContent.trim() );
 		const signature = document.querySelector( '.cr-letter__signature' );
-		return 0 < ( cite.compareDocumentPosition( content ) & Node.DOCUMENT_POSITION_FOLLOWING ) && 0 < ( content.compareDocumentPosition( signature ) & Node.DOCUMENT_POSITION_FOLLOWING );
+		const follows = ( a, b ) => 0 < ( a.compareDocumentPosition( b ) & Node.DOCUMENT_POSITION_FOLLOWING );
+		return Boolean( body ) && follows( cite, body ) && follows( content, signature ) && ! content.contains( signature );
 	} );
 	expect( order, 'letter sheet order' ).toBe( true );
 	const postResponse = await page.request.get( '/wp-json/wp/v2/posts?slug=re-alt-text-is-a-draft&_fields=author' );
