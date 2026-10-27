@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.137
+
+What you see change on courtneyr.dev:
+
+- While the cookie consent dialog is open, tabbing to a link scrolls it above the dialog instead of leaving it hidden underneath (WCAG 2.4.11, #109). The page also gains room at the end so the last links can scroll clear of the dialog.
+
+Under the hood: `site-ux.js` watches `.cmplz-cookiebanner` with a ResizeObserver and sets `--cr-consent-covered` on `<html>` (the dialog's height, capped at 60% of the viewport) while it shows, rerunning on Complianz's `cmplz_cookie_warning_loaded` event and on resize. The `html` rule uses that variable for `padding-bottom` and `scroll-padding-bottom`, falling back to the Manage consent button's 50px (#241). The Playwright a11y spec skips tests whose dev-only fixture is missing locally instead of failing, and the focus-ring test writes its inline outline after focus (#242, #108, #110, #113).
+
 ## 0.7.136
 
 What you see change on courtneyr.dev:
