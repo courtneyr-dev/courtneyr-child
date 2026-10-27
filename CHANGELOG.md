@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.138
+
+What you see change on courtneyr.dev:
+
+- Nothing visible. Accessibility Checker Pro stops flagging decorative icons and covers on the Stream, singles and kind archives: every `aria-hidden` ornament now also carries `role="presentation"`, as the theme's own ornaments already did.
+
+Under the hood: `hidden_is_presentational()` in `inc/a11y-output.php` adds `role="presentation"` to each `aria-hidden="true"` element that has no role (an `<img>` excepted) on `core/post-content`, `core/post-template`, the stream card and `courtneyr/archive-identity`, at priority 999 after every adapter. The checker's `aria_hidden_valid_usage` rule tests each element on its own, so an icon `<svg>` inside a hidden badge failed too (#245). `stream-style-pruning.spec.mjs` reads a deferred sheet's `data-cr-href`.
+
 ## 0.7.137
 
 What you see change on courtneyr.dev:
