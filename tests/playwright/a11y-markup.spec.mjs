@@ -2625,7 +2625,16 @@ test( 'the check-in map is at least 14rem tall on a phone and keeps its shape on
 
 // A link's focus ring is 3px. Accessibility Checker's link-underline fix writes
 // `outline-width: 2px` inline on focus (its frontendFixes bundle), and an inline
-// style beats a stylesheet rule. This copies that write and expects 3px to hold.
+// style beats a stylesheet rule. This writes the same inline outline once the link
+// has focus and expects 3px to hold.
+//
+// courtneyr-child#113: the write is not a focusin listener. The bundle adds its own
+// focusin listener to every link (inline "2px" becomes "4px", anything else becomes
+// "2px"), and on dev Perfmatters delays the bundle until the first interaction, so
+// the two listeners ran in either order and the inline width read 2px or 4px. Here
+// the write and the read share one evaluate(): no event can run between them, so the
+// inline value is the 2px this test wrote whether the bundle attached before, after
+// or never, and the 3px is the theme's alone.
 test( 'a link keeps its 3px focus ring when a script writes a thinner outline inline', async ( { page } ) => {
 	await page.goto( DRINK_ARCHIVE, { waitUntil: 'load' } );
 	const links = [ '.cr-menu .pkiw-menu-entry__name', '.cr-menu .pkiw-menu-specials__link', 'main a' ];
@@ -2636,19 +2645,21 @@ test( 'a link keeps its 3px focus ring when a script writes a thinner outline in
 			continue;
 		}
 		await link.evaluate( ( el ) => {
-			el.addEventListener( 'focusin', () => {
-				el.style.outlineWidth = '2px';
-				el.style.outlineOffset = '2px';
-			} );
 			const before = document.createElement( 'span' );
 			before.tabIndex = -1;
 			el.before( before );
 			before.focus();
 		} );
 		await page.keyboard.press( 'Tab' );
-		const ring = await link.evaluate( ( el ) => ( { focused: el === document.activeElement, inline: el.style.outlineWidth, width: getComputedStyle( el ).outlineWidth, style: getComputedStyle( el ).outlineStyle } ) );
+		const ring = await link.evaluate( ( el ) => {
+			const focused = el === document.activeElement;
+			el.style.outlineWidth = '2px';
+			el.style.outlineOffset = '2px';
+			const style = getComputedStyle( el );
+			return { focused, inline: el.style.outlineWidth, width: style.outlineWidth, style: style.outlineStyle };
+		} );
 		expect( ring.focused, `${ selector } took focus from the keyboard` ).toBe( true );
-		expect( ring.inline, 'the script wrote its 2px' ).toBe( '2px' );
+		expect( ring.inline, 'the test wrote its 2px' ).toBe( '2px' );
 		expect( ring.style, `${ selector } shows an outline` ).toBe( 'solid' );
 		expect( ring.width, `${ selector } keeps the theme's 3px` ).toBe( '3px' );
 		checked++;
