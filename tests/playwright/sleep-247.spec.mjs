@@ -342,7 +342,9 @@ test.describe( 'archive — full logged-out fixture set', () => {
 			await expect( cell ).toHaveClass( /\bh-entry\b/ );
 			await expect( cell.locator( 'a.u-url' ) ).toHaveCount( 1 );
 			await expect( cell.locator( 'time.dt-published' ) ).toHaveCount( 1 );
-			await expect( cell.locator( '.p-author' ) ).toHaveCount( 1 );
+			// PKIW's entry_author_html() withholds the author of a password-protected post.
+			const isProtected = await cell.evaluate( ( element ) => element.classList.contains( 'post-password-required' ) );
+			await expect( cell.locator( '.p-author' ) ).toHaveCount( isProtected ? 0 : 1 );
 			await expect( cell.locator( '.h-entry .h-entry' ) ).toHaveCount( 0 );
 			const structure = await cell.evaluate( ( element ) => {
 				const selectors = [ '.pkiw-sleep-night__title', '.pkiw-sleep-night__date', '.pkiw-sleep-night__duration', '.pkiw-sleep-night__bar', '.pkiw-sleep-night__moon', '.pkiw-sleep-night__phase' ];
