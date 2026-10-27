@@ -102,6 +102,7 @@ const READ_ARCHIVE = process.env.CR_READ_ARCHIVE_PATH || '/kind/read/'; // read 
 const READ_AZ_ARCHIVE = READ_ARCHIVE + '?pkiw_read_order=author'; // read archive in A-Z order, which stays unsectioned
 const COMICS_ARCHIVE = process.env.CR_COMICS_ARCHIVE_PATH || '/kind/comics/'; // comics archive with at least one comic read (PKIW #228)
 const COMIC_SINGLE = process.env.CR_COMIC_SINGLE_PATH || '/2026/09/06/anzuelo/'; // a comic read (comic-card) still being read, with a cover and a stored start date
+const COMIC_CARD = '.wp-block-post-kinds-indieweb-comic-card'; // the plugin's card, which a book read at the same path doesn't print
 const RECIPE_ARCHIVE = process.env.CR_RECIPE_ARCHIVE_PATH || '/kind/recipe/'; // recipe archive (PKIW #229); its tests skip on a site with no recipe posts
 const EAT_ARCHIVE = process.env.CR_EAT_ARCHIVE_PATH || '/kind/eat/'; // eat archive (PKIW #230); its test skips on a site with fewer than three eat posts
 const DRINK_ARCHIVE = process.env.CR_DRINK_ARCHIVE_PATH || '/kind/drink/'; // drink archive (PKIW #230); its test skips on a site with fewer than three drink posts
@@ -278,6 +279,27 @@ async function archiveDescription( page, slug ) {
 
 function fixtureSkippedPart( description ) {
 	test.info().annotations.push( { type: 'skipped-part', description } );
+}
+
+// courtneyr-child#99, #108: a fixture is a post or page that dev holds and a fresh
+// local site may not. A path that is a 404, or one that answers with a file instead of
+// a page (locally `/?p=751` redirects to an attachment), is a missing fixture: the test
+// skips and names the variable that repoints it. `has` is an element that belongs to
+// the fixture itself, like the plugin's comic card that a book read at the same path
+// doesn't print. It is never the element under test: a page that loads without that
+// element is a failing test, not a skip.
+function skipMissingFixture( response, path, env ) {
+	const isPage = ( response?.headers()[ 'content-type' ] ?? '' ).includes( 'text/html' );
+	test.skip( ! response || 404 === response.status() || ! isPage, `no fixture at ${ path }: set ${ env }` );
+}
+
+async function gotoFixture( page, path, env, has ) {
+	const response = await page.goto( path, { waitUntil: 'load' } );
+	skipMissingFixture( response, path, env );
+	if ( has ) {
+		test.skip( 0 === await page.locator( has ).count(), `the page at ${ path } has no ${ has }: set ${ env }` );
+	}
+	return response;
 }
 
 async function waitForCoverFallback( locator ) {
@@ -1666,12 +1688,11 @@ test( 'a racked comic stands in a loose polybag: pale plastic, folded flap, soft
 // header, notes card and reading record on wide screens. A comic still being
 // read is labelled by its start, never as read or finished.
 test( 'a comic single is a bagged comic beside its header, notes and reading record, with truthful date labels', async ( { page } ) => {
-	const response = await page.goto( COMIC_SINGLE, { waitUntil: 'load' } );
 	// courtneyr-child#94: the default path is the dev fixture. Elsewhere it is
 	// missing (404) or a book read (test serves Anzuelo with a read-card), so
 	// there is no comic read to test. The plugin's own card decides that; the
 	// theme's classes are what the test checks.
-	test.skip( 404 === response.status() || 0 === await page.locator( '.wp-block-post-kinds-indieweb-comic-card' ).count(), `no comic read at ${ COMIC_SINGLE }: set CR_COMIC_SINGLE_PATH` );
+	await gotoFixture( page, COMIC_SINGLE, 'CR_COMIC_SINGLE_PATH', COMIC_CARD );
 	await expect( page.locator( 'body.cr-comic-single' ) ).toHaveCount( 1 );
 	await expect( page.locator( 'h1' ) ).toHaveCount( 1 );
 	const bag = page.locator( '.single-post__content article.pk-card.k-comics.cr-comic--single' );
@@ -2189,9 +2210,14 @@ test( 'a recipe card on the Stream names one course, the recipe\'s first by name
 // Browse all lists, the pager, Previous/Next and the skip link are left out
 // on every template; the page's own heading and content stay. On screen they
 // are all still there.
-for ( const [ label, path ] of [ [ 'a kind archive', LISTEN_ARCHIVE ], [ 'a single post', COMIC_SINGLE ] ] ) {
+// courtneyr-child#108: the single post is the comic fixture, so it skips where there is no comic read.
+for ( const [ label, path, env, has ] of [ [ 'a kind archive', LISTEN_ARCHIVE ], [ 'a single post', COMIC_SINGLE, 'CR_COMIC_SINGLE_PATH', COMIC_CARD ] ] ) {
 	test( `print leaves the site chrome out of ${ label } and keeps its content`, async ( { page } ) => {
-		await page.goto( path, { waitUntil: 'load' } );
+		if ( env ) {
+			await gotoFixture( page, path, env, has );
+		} else {
+			await page.goto( path, { waitUntil: 'load' } );
+		}
 		const chrome = [ 'header.wp-block-template-part', 'footer.wp-block-template-part', '.cr-browse-all', 'nav.wp-block-query-pagination', '.cr-post-nav', '.skip-link' ];
 		const displayed = () => page.evaluate( ( selectors ) => Object.fromEntries( selectors.map( ( selector ) => {
 			const el = document.querySelector( selector );
