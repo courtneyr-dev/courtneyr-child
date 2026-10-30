@@ -9,7 +9,6 @@
  *
  * Active IA modules:
  *   - courtneyr/callout (v0.5.14) — collapsible callouts
- *   - courtneyr/stream-filter (v0.5.14) — cr-stream-loop format filter
  *   - courtneyr/reading-progress (v0.5.18) — single-post scroll bar
  *   - courtneyr/pull-quote (v0.5.18) — copy-to-clipboard button
  *   - courtneyr/theme-toggle — appearance controls and cross-tab sync
@@ -130,52 +129,6 @@ function maybe_enqueue_callout(): void {
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\maybe_enqueue_callout' );
 
-
-/*
-============================================================
- * v0.5.14 — Stream Loop format filter (IA module #2).
- *
- * The cr-stream-loop pattern wraps its query loop in a
- * .cr-stream-filter container with chip buttons. Clicking a chip
- * sets context.format; the wrapper's data-active-format attribute
- * (bound via wp-bind) drives CSS attribute selectors that hide non-
- * matching post-template li's (which carry post_class()-emitted
- * format-X classes).
- *
- * No per-item directives, no DOM mutation — just one bound
- * attribute on the wrapper that CSS reads to control visibility +
- * active-chip styling.
- * ============================================================ */
-
-/**
- * Register the stream-filter IA view module.
- */
-function register_stream_filter_view(): void {
-	wp_register_script_module(
-		'courtneyr/stream-filter',
-		COURTNEYR_CHILD_URI . '/assets/js/interactivity/stream-filter/view.js',
-		array( '@wordpress/interactivity' ),
-		COURTNEYR_CHILD_VERSION
-	);
-}
-add_action( 'init', __NAMESPACE__ . '\\register_stream_filter_view' );
-
-/**
- * Enqueue the stream-filter IA module only when a rendered block carries
- * its `data-wp-interactive="courtneyr/stream-filter"` wrapper (the
- * cr-stream-loop pattern). Block themes render the template before
- * wp_head, so the module still prints with the page's other modules.
- *
- * @param string $block_content Rendered block HTML.
- * @return string Unchanged block HTML.
- */
-function maybe_enqueue_stream_filter( string $block_content ): string {
-	if ( str_contains( $block_content, 'courtneyr/stream-filter' ) ) {
-		wp_enqueue_script_module( 'courtneyr/stream-filter' );
-	}
-	return $block_content;
-}
-add_filter( 'render_block', __NAMESPACE__ . '\\maybe_enqueue_stream_filter' );
 
 
 /*
