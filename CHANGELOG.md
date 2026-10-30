@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.139
+
+What you see change on courtneyr.dev:
+
+- Nothing visible. This release exists to carry the theme's PHP tests into continuous integration and to prove the autopilot's release gates on a real deploy (Wave 0 rehearsal 3).
+
+Under the hood: the new "PHP unit tests" GitHub Actions job runs all 114 `tests/php/*-test.php` files against WordPress 7.1.4 and Post Kinds for IndieWeb's `develop` branch, and fails on any nonzero exit or `SKIP` line; branch protection now requires it (#248). `collection-template-test` checks `functions.php` for its two collection requires directly, instead of a diff against `origin/main` that only held on the PR that added them.
+
 ## 0.7.138
 
 What you see change on courtneyr.dev:
