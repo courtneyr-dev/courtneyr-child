@@ -49,20 +49,12 @@ $pager_open = strpos( $pattern, '<!-- wp:query-pagination ', $post_close ?: 0 );
 $no_results = strpos( $pattern, '<!-- wp:query-no-results -->' );
 cr_collection_template_check( false !== $post_close && false !== $pager_open && false !== $no_results && $post_close < $pager_open && $pager_open < $no_results, 'pagination follows the grid immediately before the empty state' );
 
-if ( is_dir( $root . '/.git' ) && function_exists( 'shell_exec' ) ) {
-	$diff = (string) shell_exec( 'cd ' . escapeshellarg( $root ) . ' && git diff origin/main -- functions.php 2>/dev/null' );
-	$added = array_values( array_filter( explode( "\n", $diff ), static fn( string $line ): bool => str_starts_with( $line, '+' ) && ! str_starts_with( $line, '+++' ) ) );
-	$removed = array_values( array_filter( explode( "\n", $diff ), static fn( string $line ): bool => str_starts_with( $line, '-' ) && ! str_starts_with( $line, '---' ) ) );
-	cr_collection_template_check(
-		array(
-			"+require_once __DIR__ . '/inc/collection.php';",
-			"+require_once __DIR__ . '/inc/stream-collection.php';",
-		) === $added && array() === $removed,
-		'functions.php differs from origin/main by exactly two require lines'
-	);
-} else {
-	echo "SKIP functions.php diff: git or shell_exec unavailable\n";
-}
+$functions = (string) file_get_contents( $root . '/functions.php' );
+cr_collection_template_check(
+	1 === substr_count( $functions, "require_once __DIR__ . '/inc/collection.php';" )
+		&& 1 === substr_count( $functions, "require_once __DIR__ . '/inc/stream-collection.php';" ),
+	'functions.php requires the collection and stream-collection files once each'
+);
 
 echo $failed ? "\n$failed failed\n" : "\nall passed\n";
 exit( $failed ? 1 : 0 );

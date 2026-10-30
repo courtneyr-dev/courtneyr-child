@@ -1,0 +1,81 @@
+# Every tests/php/*-test.php, each a standalone script that exits nonzero on a
+# failed check. They find their dependencies through environment variables
+# that otherwise fall back to paths under $HOME: WordPress core (CR_WP_CORE,
+# WP_CORE_DIR), the php-mf2 parser (MF2_AUTOLOAD, MF2_PARSER_FILE), Post Kinds
+# for IndieWeb's develop branch (PKIW_DIR, CR_PKIW_COLLECTION_ITEMS) and the
+# theme's own origin/main (a full-history checkout). All are provided here, so
+# any SKIP line means a dependency went missing and fails the job.
+
+name: PHP tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  WP_VERSION: '7.1.4'
+  WP_SHA1: b552c39cd95d89895b4e7a55af53a03687aff4f6
+  # The version post-kinds-for-indieweb's composer.lock pins.
+  MF2_VERSION: '0.5.0'
+
+jobs:
+  php-tests:
+    name: PHP unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: theme
+          fetch-depth: 0
+
+      - uses: actions/checkout@v7
+        with:
+          repository: courtneyr-dev/post-kinds-for-indieweb
+          ref: develop
+          path: post-kinds-for-indieweb
+          fetch-depth: 0
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          tools: composer:v2
+
+      - name: php-mf2 ${{ env.MF2_VERSION }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/mf2"
+          composer require --working-dir="$RUNNER_TEMP/mf2" --no-interaction --no-progress "mf2/mf2:$MF2_VERSION"
+
+      - name: WordPress ${{ env.WP_VERSION }} core, checked against its published SHA-1
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/wordpress.zip" "https://wordpress.org/wordpress-$WP_VERSION.zip"
+          echo "$WP_SHA1  $RUNNER_TEMP/wordpress.zip" | sha1sum -c -
+          unzip -q "$RUNNER_TEMP/wordpress.zip" -d "$RUNNER_TEMP"
+
+      - name: tests/php/*-test.php
+        working-directory: theme
+        env:
+          PKIW_DIR: ${{ github.workspace }}/post-kinds-for-indieweb
+          CR_PKIW_COLLECTION_ITEMS: ${{ github.workspace }}/post-kinds-for-indieweb/includes/class-collection-items.php
+        run: |
+          export CR_WP_CORE="$RUNNER_TEMP/wordpress" WP_CORE_DIR="$RUNNER_TEMP/wordpress"
+          export MF2_AUTOLOAD="$RUNNER_TEMP/mf2/vendor/autoload.php" MF2_PARSER_FILE="$RUNNER_TEMP/mf2/vendor/mf2/mf2/Mf2/Parser.php"
+          failed=0
+          total=0
+          for test in tests/php/*-test.php; do
+            total=$((total + 1))
+            if ! output=$(php "$test" 2>&1); then
+              echo "::error file=$test::exited nonzero"
+              printf '%s\n' "$output"
+              failed=$((failed + 1))
+            elif printf '%s\n' "$output" | grep -q '^SKIP'; then
+              echo "::error file=$test::skipped a check"
+              printf '%s\n' "$output" | grep '^SKIP'
+              failed=$((failed + 1))
+            fi
+          done
+          echo "$total test files, $failed failed or skipped"
+          [ "$total" -gt 0 ] && [ "$failed" -eq 0 ]
