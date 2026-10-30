@@ -1,8 +1,10 @@
 # Every tests/php/*-test.php, each a standalone script that exits nonzero on a
-# failed check. 21 of them load the HTML API from a WordPress checkout
-# (CR_WP_CORE), and two run optional passes against Post Kinds for IndieWeb's
-# develop branch (PKIW_DIR, CR_PKIW_COLLECTION_ITEMS). Both are provided here,
-# so any SKIP line means a dependency went missing and fails the job.
+# failed check. They find their dependencies through environment variables
+# that otherwise fall back to paths under $HOME: WordPress core (CR_WP_CORE,
+# WP_CORE_DIR), the php-mf2 parser (MF2_AUTOLOAD, MF2_PARSER_FILE), Post Kinds
+# for IndieWeb's develop branch (PKIW_DIR, CR_PKIW_COLLECTION_ITEMS) and the
+# theme's own origin/main (a full-history checkout). All are provided here, so
+# any SKIP line means a dependency went missing and fails the job.
 
 name: PHP tests
 
@@ -16,6 +18,8 @@ permissions:
 env:
   WP_VERSION: '7.1.4'
   WP_SHA1: b552c39cd95d89895b4e7a55af53a03687aff4f6
+  # The version post-kinds-for-indieweb's composer.lock pins.
+  MF2_VERSION: '0.5.0'
 
 jobs:
   php-tests:
@@ -25,6 +29,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           path: theme
+          fetch-depth: 0
 
       - uses: actions/checkout@v7
         with:
@@ -37,6 +42,12 @@ jobs:
         with:
           php-version: '8.5'
           coverage: none
+          tools: composer:v2
+
+      - name: php-mf2 ${{ env.MF2_VERSION }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/mf2"
+          composer require --working-dir="$RUNNER_TEMP/mf2" --no-interaction --no-progress "mf2/mf2:$MF2_VERSION"
 
       - name: WordPress ${{ env.WP_VERSION }} core, checked against its published SHA-1
         run: |
@@ -50,7 +61,8 @@ jobs:
           PKIW_DIR: ${{ github.workspace }}/post-kinds-for-indieweb
           CR_PKIW_COLLECTION_ITEMS: ${{ github.workspace }}/post-kinds-for-indieweb/includes/class-collection-items.php
         run: |
-          export CR_WP_CORE="$RUNNER_TEMP/wordpress"
+          export CR_WP_CORE="$RUNNER_TEMP/wordpress" WP_CORE_DIR="$RUNNER_TEMP/wordpress"
+          export MF2_AUTOLOAD="$RUNNER_TEMP/mf2/vendor/autoload.php" MF2_PARSER_FILE="$RUNNER_TEMP/mf2/vendor/mf2/mf2/Mf2/Parser.php"
           failed=0
           total=0
           for test in tests/php/*-test.php; do
