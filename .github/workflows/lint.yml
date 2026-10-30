@@ -57,3 +57,7 @@ jobs:
       - name: CSS guardrails (sheet budget, grouped kind selectors, RUCSS handles)
         if: ${{ !cancelled() }}
         run: npm run lint:css-guardrails
+
+      - name: preg_ in inc/ stays at or below tests/lint/preg-baseline.json
+        if: ${{ !cancelled() }}
+        run: npm run lint:preg

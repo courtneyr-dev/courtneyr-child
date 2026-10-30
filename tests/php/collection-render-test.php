@@ -56,7 +56,7 @@ if ( function_exists( 'shell_exec' ) && file_exists( dirname( __DIR__, 2 ) . '/.
 	$command    = 'cd ' . escapeshellarg( dirname( __DIR__, 2 ) ) . ' && git grep -c preg_ -- inc/ 2>/dev/null';
 	$counts     = (string) shell_exec( $command );
 	$preg_count = array_sum( array_map( static fn( string $line ): int => (int) substr( $line, strrpos( $line, ':' ) + 1 ), array_filter( explode( "\n", trim( $counts ) ) ) ) );
-	cr_collection_render_check( 303 === $preg_count, 'inc preg_ count remains 303' );
+	cr_collection_render_check( $preg_count <= 303, 'inc preg_ count stays at or below 303 (tests/lint/preg-ratchet.mjs holds the baseline)' );
 } else {
 	echo "SKIP preg_ count: git or shell_exec unavailable\n";
 }
