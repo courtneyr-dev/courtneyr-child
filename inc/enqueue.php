@@ -662,9 +662,16 @@ add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\enqueue_editor_can
  * the instant Able Player builds them. Able Player sets an inline display:block to
  * OPEN a dialog, which overrides this stylesheet rule, so dialogs still work.
  * Same priority-1 inline-head technique as the no-flash theme script above.
+ *
+ * The second rule collapses the interactive transcript until a reader opens it.
+ * The plugin's "Insert interactive transcript container" setting gives every
+ * player with a captions track an external .ableplayer-transcript div, and Able
+ * Player never hides an external transcript on load. Hidden before the controls
+ * are built, the Transcript button starts as "Show transcript", and its toggle
+ * opens and closes the panel with the same inline display override.
  */
 function print_able_player_dialog_guard(): void {
-	echo '<style id="cr-ableplayer-dialog-guard">.able-prefs-form{display:none;}</style>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo '<style id="cr-ableplayer-dialog-guard">.able-prefs-form,.ableplayer-transcript>.able-transcript-area{display:none;}</style>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 add_action( 'wp_head', __NAMESPACE__ . '\\print_able_player_dialog_guard', 1 );
 

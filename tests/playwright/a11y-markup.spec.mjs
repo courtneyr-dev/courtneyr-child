@@ -80,6 +80,7 @@ const test = base.extend( {
 
 const ABLEPLAYER_POST = process.env.CR_ABLEPLAYER_POST_PATH || '/?p=3010'; // Able Player YouTube shortcode
 const ABLEPLAYER_URL_POST = process.env.CR_ABLEPLAYER_URL_POST_PATH || '/?p=1053'; // youtube-id written as a full watch URL
+const ABLEPLAYER_TRANSCRIPT_POST = process.env.CR_ABLEPLAYER_TRANSCRIPT_POST_PATH || ABLEPLAYER_URL_POST; // Able Player with a captions track
 const COMMENTS_POST = process.env.CR_COMMENTS_POST_PATH || '/?p=38071'; // backfeed comments, incl. two with no avatar
 const QUOTE_POST = process.env.CR_QUOTE_POST_PATH || '/?p=38049'; // Syndication Links plugin output
 const BROWSE_PAGE = process.env.CR_BROWSE_ALL_PATH || '/stream/'; // cr-browse-all pattern (post_format list)
@@ -586,6 +587,28 @@ test( 'Able Player shortcodes whose youtube-id is a full URL still get the trans
 		// An eleven-character id, never the pasted URL nested inside another URL.
 		expect( href ).toMatch( /^https:\/\/www\.youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}$/ );
 	}
+} );
+
+test( 'the Able Player transcript starts collapsed and the Transcript button opens it', async ( { page } ) => {
+	const response = await gotoFixture( page, ABLEPLAYER_TRANSCRIPT_POST, 'CR_ABLEPLAYER_TRANSCRIPT_POST_PATH' );
+	// Read the served HTML: Able Player swaps a YouTube <video> and its <track> for an iframe at init.
+	test.skip( ! ( await response.text() ).includes( '<track kind="captions"' ), `the page at ${ ABLEPLAYER_TRANSCRIPT_POST } has no captions track: set CR_ABLEPLAYER_TRANSCRIPT_POST_PATH` );
+	// The plugin's "Insert interactive transcript container" setting puts the transcript in an
+	// external .ableplayer-transcript div, which Able Player itself never hides on load.
+	const area = page.locator( '.ableplayer-transcript > .able-transcript-area' ).first();
+	const button = page.locator( '[role="button"].able-button-handler-transcript' ).first();
+	await area.waitFor( { state: 'attached', timeout: 30000 } );
+	await button.waitFor( { state: 'attached', timeout: 30000 } );
+	await expect( area ).toBeHidden();
+	await expect( button ).toHaveClass( /buttonOff/ );
+	await button.focus();
+	await page.keyboard.press( 'Enter' );
+	await expect( area ).toBeVisible();
+	await expect( button ).not.toHaveClass( /buttonOff/ );
+	// A caption file Able Player can parse fills the panel; an empty one means the VTT failed.
+	expect( await area.locator( '.able-transcript-seekpoint' ).count() ).toBeGreaterThan( 0 );
+	await page.keyboard.press( 'Enter' );
+	await expect( area ).toBeHidden();
 } );
 
 test( 'comment avatars are decorative and never render with an empty src', async ( { page } ) => {
