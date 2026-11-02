@@ -1,0 +1,23 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "courtneyr/series-guide",
+	"version": "0.7.140",
+	"title": "Series guide",
+	"category": "theme",
+	"icon": "book-alt",
+	"description": "PublishPress Series parts rendered by the theme: the archive status line, season index, launch state and companion series; the series header and previous/next part on a post; the series overview. Lists published parts only.",
+	"keywords": [ "series", "season", "part", "merge conflicts" ],
+	"textdomain": "courtneyr-child",
+	"usesContext": [ "postId", "postType" ],
+	"supports": { "html": false, "reusable": false, "customClassName": false },
+	"attributes": {
+		"view": {
+			"type": "string",
+			"enum": [ "status", "seasons", "launch", "companions", "post-header", "post-nav", "overview", "group" ],
+			"default": "status"
+		}
+	},
+	"editorScript": "file:./editor.js",
+	"render": "file:./render.php"
+}

@@ -1,0 +1,31 @@
+<!-- wp:group {"className":"is-position-sticky","layout":{"type":"constrained"}} -->
+<div class="wp-block-group is-position-sticky">
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"main","metadata":{"name":"Series Category Archive"},"align":"full","className":"cr-archive cr-blog cr-series cr-series--group","style":{"spacing":{"padding":{"top":"var:preset|spacing|x-large","bottom":"var:preset|spacing|xx-large"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
+<main class="wp-block-group alignfull cr-archive cr-blog cr-series cr-series--group" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--x-large);padding-bottom:var(--wp--preset--spacing--xx-large)">
+
+	<!-- wp:group {"metadata":{"name":"Series Category Header"},"align":"wide","className":"cr-archive__header cr-series-header","style":{"spacing":{"blockGap":"var:preset|spacing|small","padding":{"bottom":"var:preset|spacing|medium"}}},"layout":{"type":"constrained"}} -->
+	<div class="wp-block-group alignwide cr-archive__header cr-series-header" style="padding-bottom:var(--wp--preset--spacing--medium)">
+		<!-- wp:courtneyr/archive-identity /-->
+		<!-- wp:query-title {"type":"archive","showPrefix":false,"className":"cr-flank cr-flank--blue cr-archive__title","style":{"typography":{"letterSpacing":"-1px","lineHeight":"1.05"}},"fontSize":"x-large","fontFamily":"accent"} /-->
+		<!-- wp:term-description {"className":"cr-archive__description","style":{"typography":{"lineHeight":"1.5"}},"fontSize":"md"} /-->
+	</div>
+	<!-- /wp:group -->
+
+	<!-- wp:separator {"align":"wide","className":"is-style-cr-marker-bar cr-series-rule"} -->
+	<hr class="wp-block-separator alignwide has-alpha-channel-opacity is-style-cr-marker-bar cr-series-rule"/>
+	<!-- /wp:separator -->
+
+	<!-- wp:group {"align":"wide","className":"cr-series-directory","layout":{"type":"constrained"}} -->
+	<div class="wp-block-group alignwide cr-series-directory">
+		<!-- wp:courtneyr/series-guide {"view":"group"} /-->
+	</div>
+	<!-- /wp:group -->
+
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->
