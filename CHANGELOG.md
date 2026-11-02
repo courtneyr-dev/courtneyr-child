@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.146
+
+What you see change on courtneyr.dev:
+
+- A post in a series loses the dark line between its series header (tape, description, "In this series") and the featured image.
+
 ## 0.7.145
 
 What you see change on courtneyr.dev:

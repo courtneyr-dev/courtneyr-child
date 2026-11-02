@@ -496,11 +496,9 @@ a.cr-series-seasons__link:focus-visible {
 }
 
 /* ---------- Single post: series header (calm, upright, in the measure) ---------- */
-.cr-series-post {
-	margin-block: var(--cr-space-md) var(--cr-space-lg);
-	padding-block-end: var(--cr-space-md);
-	border-block-end: 2px solid var(--cr-ink);
-}
+
+/* No rule under it: the featured image follows directly (Courtney, 2026-11-02). */
+.cr-series-post { margin-block: var(--cr-space-md) var(--cr-space-lg); }
 
 .cr-series-post__tape { margin: 0 0 var(--cr-space-sm); }
 
