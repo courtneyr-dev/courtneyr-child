@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.151
+
+What you see change on courtneyr.dev:
+
+- Able Player transcripts start closed. The Transcript control opens and closes them, and keyboard users can focus and scroll the transcript panel. The open panel follows your light or dark appearance instead of showing a white box.
+- The Merge Conflicts contents list fills with published series posts when no seasons are configured. It updates from WordPress as you publish, using the same reading order as the article list.
+
 ## 0.7.150
 
 What you see change on courtneyr.dev:

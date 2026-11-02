@@ -617,11 +617,42 @@ add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\enqueue_editor_can
  * the instant Able Player builds them. Able Player sets an inline display:block to
  * OPEN a dialog, which overrides this stylesheet rule, so dialogs still work.
  * Same priority-1 inline-head technique as the no-flash theme script above.
+ *
+ * The second rule collapses the interactive transcript until a reader opens it.
+ * The plugin's "Insert interactive transcript container" setting gives every
+ * player with a captions track an external .ableplayer-transcript div, and Able
+ * Player never hides an external transcript on load. Hidden before the controls
+ * are built, the Transcript button starts as "Show transcript", and its toggle
+ * opens and closes the panel with the same inline display override.
  */
 function print_able_player_dialog_guard(): void {
-	echo '<style id="cr-ableplayer-dialog-guard">.able-prefs-form{display:none;}</style>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo '<style id="cr-ableplayer-dialog-guard">.able-prefs-form,.ableplayer-transcript>.able-transcript-area{display:none;}</style>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 add_action( 'wp_head', __NAMESPACE__ . '\\print_able_player_dialog_guard', 1 );
+
+/**
+ * Let a keyboard reach Able Player's transcript scroll box.
+ *
+ * .able-transcript is a 350px scroll box whose cues are only tab stops when a
+ * reader turns on Able Player's "Keyboard-enable transcript" preference (one
+ * stop per cue, 105 on a one-hour talk). Without it the box holds nothing
+ * focusable, so arrow keys cannot scroll it (axe: scrollable-region-focusable).
+ * One tab stop on the box itself, named as a region, fixes that. Able Player
+ * builds the box at runtime, so the script labels any that exist and watches for
+ * new ones; 'before' keeps the plugin's deferred loading strategy intact.
+ */
+function able_player_transcript_scroll_focus(): void {
+	if ( ! wp_script_is( 'ableplayer', 'enqueued' ) ) {
+		return;
+	}
+	$label = wp_json_encode( __( 'Transcript', 'courtneyr-child' ) );
+	wp_add_inline_script(
+		'ableplayer',
+		'(function(){function f(){document.querySelectorAll(".able-transcript:not([tabindex])").forEach(function(el){el.tabIndex=0;el.setAttribute("role","region");el.setAttribute("aria-label",' . $label . ');});}f();new MutationObserver(f).observe(document.body,{childList:true,subtree:true});})();',
+		'before'
+	);
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\able_player_transcript_scroll_focus', 20 );
 
 /**
  * Send a sane Cache-Control header for front-end page HTML.

@@ -748,7 +748,17 @@ function render_cover( \WP_Term $term ): string {
 function render_publication_contents( \WP_Term $term ): string {
 	$c = collection( $term );
 	if ( ! $c['seasons'] ) {
-		return '<p class="cr-mc__unannounced">' . esc_html__( 'Eight seasons are planned. The contents will appear here as the seasons are announced.', 'courtneyr-child' ) . '</p>';
+		$rows = main_track( $term );
+		if ( ! $rows ) {
+			return '<p class="cr-mc__unannounced">' . esc_html__( 'Eight seasons are planned. The contents will appear here as the seasons are announced.', 'courtneyr-child' ) . '</p>';
+		}
+		$html = '<nav class="cr-mc__contents" aria-label="' . esc_attr__( 'Merge Conflicts published parts', 'courtneyr-child' ) . '"><ol class="cr-mc__seasons" role="list">';
+		foreach ( $rows as $i => $row ) {
+			$number = $row['part'] ?? $i + 1;
+			$html  .= '<li class="cr-mc__season"><span class="cr-mc__season-number" aria-hidden="true" role="presentation">' . esc_html( sprintf( '%02d', $number ) ) . '</span><div class="cr-mc__season-copy"><h3>';
+			$html  .= '<span class="screen-reader-text">' . esc_html( track_label( $row, $term, $i ) . ': ' ) . '</span><a href="' . esc_url( (string) get_permalink( $row['id'] ) ) . '">' . esc_html( get_the_title( $row['id'] ) ) . '</a></h3></div></li>';
+		}
+		return $html . '</ol></nav>';
 	}
 	$html = '<nav class="cr-mc__contents" aria-label="' . esc_attr__( 'Merge Conflicts seasons', 'courtneyr-child' ) . '"><ol class="cr-mc__seasons" role="list">';
 	foreach ( $c['seasons'] as $i => $season ) {
