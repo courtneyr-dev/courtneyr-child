@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.139' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.140' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -32,6 +32,8 @@ require_once __DIR__ . '/inc/home-sections.php';
 require_once __DIR__ . '/inc/stream-style-pruning.php';
 require_once __DIR__ . '/inc/microformats.php';
 require_once __DIR__ . '/inc/archives.php';
+require_once __DIR__ . '/inc/series.php';
+require_once __DIR__ . '/inc/series-views.php';
 require_once __DIR__ . '/inc/outpost-appearance.php';
 require_once __DIR__ . '/inc/theme-json-overrides.php';
 require_once __DIR__ . '/inc/social-services.php';

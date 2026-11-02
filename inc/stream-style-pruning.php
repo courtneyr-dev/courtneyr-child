@@ -345,6 +345,8 @@ const RUCSS_INLINE_HANDLES = array(
 	// variants the first archive may not use: 36 px tiles grew to 54–91 px
 	// when the full sheet landed (CLS 0.11–0.29). 6.7 KB, so whole.
 	'courtneyr-cutout',
+	// Series archives, overview and posts in a series only; keeps details[open] and aria-current rules.
+	'courtneyr-series',
 	'wp-block-image',
 	'wp-block-gallery',
 	'wp-block-cover',

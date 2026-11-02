@@ -105,6 +105,10 @@ function resolve_identity(): array {
 			$type   = in_array( $object->slug, $sprites, true ) ? $object->slug : 'blog';
 		} elseif ( 'post_tag' === $object->taxonomy ) {
 			$kicker = __( 'Blog · Tag', 'courtneyr-child' );
+		} elseif ( 'series' === $object->taxonomy ) {
+			$kicker = __( 'Series', 'courtneyr-child' );
+		} elseif ( 'series_group' === $object->taxonomy ) {
+			$kicker = __( 'Series · Collection', 'courtneyr-child' );
 		} else {
 			$kicker = __( 'Blog · Archive', 'courtneyr-child' );
 		}
@@ -116,6 +120,8 @@ function resolve_identity(): array {
 		} else {
 			$kicker = $object->labels->name;
 		}
+	} elseif ( \Courtneyr\Child\Series\is_series_toc() ) {
+		$kicker = __( 'Series', 'courtneyr-child' );
 	} elseif ( is_date() ) {
 		$kicker = __( 'Blog · Date', 'courtneyr-child' );
 	} elseif ( is_author() ) {
@@ -315,7 +321,8 @@ function cutout_archive_title( string $content, array $block ): string {
 	} else {
 		$match = ( 'core/query-title' === $block['blockName'] && in_array( 'cr-archive__title', $classes, true ) )
 			|| ( $is_heading && in_array( 'cr-blog__title', $classes, true ) && is_home() )
-			|| ( $is_heading && in_array( 'cr-stream__title', $classes, true ) && is_page( 'stream' ) );
+			|| ( $is_heading && in_array( 'cr-stream__title', $classes, true ) && is_page( 'stream' ) )
+			|| ( $is_heading && in_array( 'cr-archive__title', $classes, true ) && \Courtneyr\Child\Series\is_series_toc() );
 	}
 	if ( ! $match ) {
 		return $content;
@@ -340,7 +347,7 @@ add_action( 'init', __NAMESPACE__ . '\\register_blocks' );
  */
 function enqueue_styles(): void {
 	$posts_page = is_home() && ! is_front_page();
-	if ( ! is_admin() && ! is_archive() && ! is_search() && ! $posts_page && ! is_page( 'stream' ) ) {
+	if ( ! is_admin() && ! is_archive() && ! is_search() && ! $posts_page && ! is_page( 'stream' ) && ! \Courtneyr\Child\Series\is_series_toc() ) {
 		return;
 	}
 	wp_enqueue_style(
@@ -357,7 +364,7 @@ add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_styles' );
  * (archives, search, posts page, Stream page, front page) and the editor.
  */
 function enqueue_cutout_styles(): void {
-	if ( ! is_admin() && ! is_archive() && ! is_search() && ! is_home() && ! is_front_page() && ! is_page( 'stream' ) ) {
+	if ( ! is_admin() && ! is_archive() && ! is_search() && ! is_home() && ! is_front_page() && ! is_page( 'stream' ) && ! \Courtneyr\Child\Series\is_series_toc() ) {
 		return;
 	}
 	wp_enqueue_style(

@@ -76,6 +76,11 @@
 			"Squiz.Commenting.FileComment.MissingPackageTag": 1,
 			"WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound": 1
 		},
+		"blocks/series-guide/editor.asset.php": {
+			"Squiz.Commenting.FileComment.Missing": 1,
+			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1,
+			"WordPress.Files.FileName.NotHyphenatedLowercase": 1
+		},
 		"blocks/term-chips/editor.asset.php": {
 			"Squiz.Commenting.FileComment.Missing": 1,
 			"WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 1,

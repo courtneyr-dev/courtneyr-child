@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.140
+
+What you see change on courtneyr.dev:
+
+- Series archives (`/series/<slug>/`) get their own page: the cut-paper title and description, a published-parts count, the published parts as numbered cards in part order, ten per page, and a launch note instead of the Stream's "No posts in this stream yet" when nothing is out. The Merge Conflicts landing adds a sky-blue Methods & Sources callout before the parts; its link appears only once the methods page is published.
+- Posts in a series replace PublishPress Series' two boxes with one header (a tape label such as "Merge Conflicts · Part 1 of 1", the series description, and a collapsed "In this series" list of published parts) and add previous/next part cards after the footnotes.
+- `/series-toc/` and the series category pages (`/series-category/<slug>/`) use the theme's archive layout.
+
+Under the hood: `inc/series.php` turns the plugin's `the_content` insertions off through its own `pp_series_add_series_content` filter, dequeues its stylesheets, and orders series archives by `_series_part_{term_id}` in `pre_get_posts`. A series group with the same slug as a series makes that series a collection landing whose other group members are seasons and whose child groups hold companion arcs; groups are read through the plugin's `series_grouping` shadow posts without calling `get_groups_in_series()`, which inserts missing ones. Everything lists published, password-free posts only. New: `courtneyr/series-guide` block, `courtneyr/series-part` bindings source, `cr-series.css` (in `RUCSS_INLINE_HANDLES`), templates `taxonomy-series`, `taxonomy-series-merge-conflicts`, `taxonomy-series_group`, `series-toc`, and `tests/php/series-test.php`.
+
 ## 0.7.139
 
 What you see change on courtneyr.dev:

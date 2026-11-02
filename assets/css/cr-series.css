@@ -1,0 +1,425 @@
+/* =============================================================================
+   Series (PublishPress Series): archive, overview and the post header/footer.
+   Markup: inc/series-views.php, patterns/cr-series-*.php, templates/
+   taxonomy-series*.html and series-toc.html. Replaces the plugin's own sheets,
+   which inc/series.php dequeues. Tokens only (tokens.css); every colour pair
+   flips with the theme's dark tokens.
+
+   "Decoration in margins, calm in measure": the archive gets tape, the orange
+   rule and hard shadows; the post header stays upright and inside the measure.
+   Loaded only where series content renders, and listed in
+   RUCSS_INLINE_HANDLES, so `details[open]` and aria-current rules survive
+   Perfmatters' used-CSS pass whole.
+   ============================================================================= */
+
+/* stylelint-disable no-descending-specificity -- the flagged pairs style different components (methods links, TOC links, index links); none target the same element. */
+
+/* ---------- Archive header status line ---------- */
+.cr-series-status {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cr-space-2xs) var(--cr-space-md);
+	margin: var(--cr-space-xs) 0 0;
+	padding: 0;
+	list-style: none;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+	color: var(--cr-ink);
+}
+
+.cr-series-status li { margin: 0; padding: 0; }
+
+.cr-series-status li::before { content: none; }
+
+.cr-series-status li + li {
+	border-inline-start: 2px solid var(--cr-marker);
+	padding-inline-start: var(--cr-space-md);
+}
+
+.cr-series-status a { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+
+/* ---------- Methods & Sources: sky-blue callout before the parts ---------- */
+.cr-series-methods {
+	position: relative;
+	margin-block: var(--cr-space-xl) var(--cr-space-lg);
+	padding: var(--cr-space-xl) var(--cr-space-lg) var(--cr-space-lg);
+	background: var(--cr-accent-1-bg);
+	color: var(--cr-accent-1-ink);
+	border: var(--cr-border-thick);
+	box-shadow: var(--cr-shadow-hard-2);
+}
+
+/* A strip of masking tape pinning the callout to the page. Decorative. */
+.cr-series-methods::before {
+	content: "";
+	position: absolute;
+	inset-block-start: calc(-1 * var(--cr-space-sm));
+	inset-inline-start: var(--cr-space-xl);
+	inline-size: 6rem;
+	block-size: 1.5rem;
+	background: var(--cr-tape);
+	transform: rotate(var(--cr-rotate-neg));
+	opacity: 0.9;
+}
+
+.cr-series-methods > * { max-inline-size: var(--cr-measure); }
+
+.cr-series-methods__eyebrow { color: inherit; margin: 0 0 var(--cr-space-2xs); }
+
+.cr-series-methods__title {
+	margin: 0 0 var(--cr-space-sm);
+	color: inherit;
+	font-size: var(--cr-text-2xl);
+	line-height: 1.15;
+}
+
+/* Selective-yellow marker under the heading. */
+.cr-series-methods__title::after {
+	content: "";
+	display: block;
+	inline-size: 7rem;
+	block-size: 6px;
+	margin-block-start: var(--cr-space-xs);
+	background: var(--cr-highlight);
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-series-methods__desc { margin: 0 0 var(--cr-space-sm); font-size: var(--cr-text-md); line-height: 1.5; }
+
+.cr-series-methods__link,
+.cr-series-methods__pending { margin: 0; font-weight: var(--cr-weight-bold); }
+
+.cr-series-methods__link a {
+	color: inherit;
+	text-decoration: underline;
+	text-decoration-thickness: 3px;
+	text-decoration-color: var(--cr-marker);
+	text-underline-offset: 4px;
+}
+
+.cr-series-methods__link a::after { content: " →"; content: " →" / ""; }
+
+.cr-series-methods__link a:hover { text-decoration-color: currentcolor; }
+
+.cr-series-methods a:focus-visible {
+	outline: 3px solid currentcolor;
+	outline-offset: 3px;
+}
+
+/* ---------- The orange rule under the methods feature ----------
+   is-style-cr-marker-bar loses to the separator's own 1px border rule here, so
+   the series rule restates the bar. Level, not tilted: 1.5deg over 1100px drops
+   29px and reads as a slip. */
+.cr-series hr.cr-series-rule {
+	block-size: 8px;
+	border: 0;
+	background: var(--cr-marker);
+	margin-block: var(--cr-space-xl);
+	transform: none;
+}
+
+/* ---------- Season index ---------- */
+.cr-series-seasons { margin-block: 0 var(--cr-space-2xl); }
+
+.cr-series-seasons__title {
+	margin: 0 0 var(--cr-space-md);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	color: var(--cr-ink);
+}
+
+.cr-series-seasons__list {
+	display: grid;
+	gap: var(--cr-space-md);
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-series-seasons__item { margin: 0; padding: 0; }
+
+.cr-series-seasons__item::before { content: none; }
+
+.cr-series-seasons__link {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cr-space-2xs);
+	block-size: 100%;
+	padding: var(--cr-space-md);
+	background: var(--cr-surface-elevated);
+	border: var(--cr-border-thick);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-ink);
+	text-decoration: none;
+}
+
+a.cr-series-seasons__link:hover .cr-series-seasons__name { text-decoration: underline; text-decoration-color: var(--cr-marker); text-decoration-thickness: 3px; }
+
+a.cr-series-seasons__link:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo, var(--cr-ink));
+}
+
+.cr-series-seasons__num {
+	align-self: flex-start;
+	padding: var(--cr-space-3xs) var(--cr-space-xs);
+	background: var(--cr-accent-2-bg);
+	color: var(--cr-accent-2-ink);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xs);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-series-seasons__name { font-family: var(--cr-font-accent); font-weight: var(--cr-weight-bold); font-size: var(--cr-text-md); line-height: 1.25; }
+
+.cr-series-seasons__count { font-size: var(--cr-text-sm); color: var(--cr-ink-muted); }
+
+/* No published parts: plain text, dashed edge, no shadow. The count says so in words. */
+.cr-series-seasons__item.is-upcoming .cr-series-seasons__link { border-style: dashed; box-shadow: none; background: transparent; }
+
+.cr-series-seasons__item.is-current .cr-series-seasons__link { border-width: 4px; }
+
+/* ---------- Parts list (cards from cr-blog.css, laid out as a numbered list) ---------- */
+.cr-blog .cr-series-list {
+	display: grid;
+	gap: var(--cr-space-lg);
+	margin: 0 0 var(--cr-space-xl);
+	padding: 0;
+	list-style: none;
+}
+
+.cr-blog .cr-series-list > li { margin: 0; padding: 0; }
+
+.cr-blog .cr-series-list > li::before { content: none; }
+
+/* The archive family's divider between posts; series cards carry their own border. */
+.cr-archive.cr-series .cr-series-list > .wp-block-post::after { content: none; }
+
+.cr-blog .card.cr-series-card {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-sm);
+	padding: var(--cr-space-lg);
+	block-size: auto;
+}
+
+.cr-blog .card.cr-series-card > *,
+.cr-blog .card.cr-series-card .card__body > * { margin-block: 0; }
+
+.cr-blog .card.cr-series-card .card__body { padding: 0; display: flex; flex-direction: column; gap: var(--cr-space-xs); }
+
+.cr-series-query { margin-block-end: var(--cr-space-2xl); }
+
+.cr-series-card__part { justify-self: start; margin: 0; text-transform: uppercase; letter-spacing: var(--cr-tracking-eyebrow); }
+
+.cr-series-card__part:empty,
+.cr-series-card__season:empty { display: none; }
+
+.cr-blog .card.cr-series-card .card__meta-row { gap: var(--cr-space-2xs) var(--cr-space-sm); }
+
+.cr-series-card__season { margin: 0; font-weight: var(--cr-weight-bold); }
+
+.cr-series-card__media { margin: 0; }
+
+.cr-series-card__media img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; border: var(--cr-border-thick); }
+
+@media (min-width: 44rem) {
+
+	.cr-blog .card.cr-series-card { grid-template-columns: 7rem minmax(0, 1fr); align-items: start; column-gap: var(--cr-space-lg); }
+
+	.cr-blog .card.cr-series-card:has(.cr-series-card__media) { grid-template-columns: 7rem minmax(0, 1fr) 11rem; }
+
+	.cr-series-card__media { grid-column: 3; grid-row: 1; }
+}
+
+.cr-blog .card.cr-series-card .card__title a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo, var(--cr-ink));
+}
+
+/* ---------- Launch state: no published parts yet ---------- */
+.cr-series-launch {
+	max-inline-size: var(--cr-measure);
+	margin-block: 0 var(--cr-space-xl);
+	padding: var(--cr-space-lg);
+	background: var(--cr-surface-elevated);
+	border: var(--cr-border-thick);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-ink);
+}
+
+.cr-series-launch__lede {
+	margin: 0 0 var(--cr-space-xs);
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold);
+	font-size: var(--cr-text-lg);
+}
+
+.cr-series-launch__follow { margin: 0; }
+
+.cr-series-launch a { color: var(--cr-link); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+
+/* ---------- Pagination ---------- */
+.cr-series-pagination { gap: var(--cr-space-sm); font-family: var(--cr-font-accent); font-weight: var(--cr-weight-bold); }
+
+.cr-series-pagination a,
+.cr-series-pagination .page-numbers { min-inline-size: 2.75rem; min-block-size: 2.75rem; display: inline-flex; align-items: center; justify-content: center; }
+
+.cr-series-pagination .page-numbers.current { background: var(--cr-accent-3-bg); color: var(--cr-accent-3-ink); border: var(--cr-border-thick); }
+
+/* ---------- Companion series and the overview/category directory ---------- */
+.cr-series-companions {
+	margin-block: var(--cr-space-2xl);
+	padding-block-start: var(--cr-space-lg);
+	border-block-start: var(--cr-border-thick);
+}
+
+.cr-series-companions__title,
+.cr-series-group__child { margin: 0 0 var(--cr-space-xs); font-family: var(--cr-font-accent); font-size: var(--cr-text-xl); color: var(--cr-ink); }
+
+.cr-series-group__child { margin-block-start: var(--cr-space-xl); }
+
+.cr-series-group__child a { color: inherit; }
+
+.cr-series-companions__note,
+.cr-series-companions__desc,
+.cr-series-group__lead { margin: 0 0 var(--cr-space-md); max-inline-size: var(--cr-measure); }
+
+.cr-series-companions__name { margin: var(--cr-space-lg) 0 var(--cr-space-2xs); font-family: var(--cr-font-accent); font-size: var(--cr-text-lg); }
+
+.cr-series-index { margin: 0; padding: 0; list-style: none; max-inline-size: var(--cr-measure); }
+
+.cr-series-index__item { margin: 0; padding: var(--cr-space-md) 0; border-block-end: 2px dashed var(--cr-ink); }
+
+.cr-series-index__item::before { content: none; }
+
+.cr-series-index__title { margin: 0; font-family: var(--cr-font-accent); font-size: var(--cr-text-lg); line-height: 1.25; }
+
+.cr-series-index__title a { color: var(--cr-ink); text-decoration-thickness: 2px; text-decoration-color: var(--cr-marker); text-underline-offset: 3px; }
+
+.cr-series-index__desc { margin: var(--cr-space-2xs) 0 0; }
+
+.cr-series-index__count {
+	margin: var(--cr-space-2xs) 0 0;
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+	color: var(--cr-ink-muted);
+}
+
+/* ---------- Single post: series header (calm, upright, in the measure) ---------- */
+.cr-series-post {
+	margin-block: var(--cr-space-md) var(--cr-space-lg);
+	padding-block-end: var(--cr-space-md);
+	border-block-end: 2px solid var(--cr-ink);
+}
+
+.cr-series-post__tape { margin: 0 0 var(--cr-space-sm); }
+
+.cr-series-post__tape a { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 2px; }
+
+.cr-series-post__desc { margin: 0 0 var(--cr-space-sm); font-size: var(--cr-text-md); line-height: 1.5; color: var(--cr-ink); }
+
+.cr-series-post__toc { margin: 0; }
+
+.cr-series-post__summary {
+	display: list-item;
+	min-block-size: 2.75rem;
+	padding-block: var(--cr-space-xs);
+	cursor: pointer;
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold);
+	color: var(--cr-ink);
+}
+
+.cr-series-post__summary-count { font-family: var(--cr-font-body); font-weight: 400; font-size: var(--cr-text-sm); }
+
+.cr-series-post__summary:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo, var(--cr-ink));
+}
+
+.cr-series-post__list { margin: var(--cr-space-xs) 0 0; padding: 0; list-style: none; }
+
+.cr-series-post__item { margin: 0; padding: var(--cr-space-2xs) var(--cr-space-xs); }
+
+.cr-series-post__item::before { content: none; }
+
+.cr-series-post__item a { color: var(--cr-link); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+.cr-series-post__num { font-weight: var(--cr-weight-bold); }
+
+.cr-series-post__item.is-current { background: var(--cr-accent-3-bg); color: var(--cr-accent-3-ink); }
+
+.cr-series-post__item.is-current a { color: inherit; font-weight: var(--cr-weight-bold); }
+
+.cr-series-post__here { font-size: var(--cr-text-sm); font-style: italic; }
+
+/* ---------- Single post: previous/next part after the footnotes ---------- */
+.cr-series-nav {
+	display: grid;
+	gap: var(--cr-space-lg);
+	grid-template-columns: minmax(0, 1fr);
+	margin-block: var(--cr-space-2xl) var(--cr-space-lg);
+}
+
+@media (min-width: 44rem) {
+
+	.cr-series-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+	.cr-series-nav__link--next { grid-column: 2; text-align: end; }
+}
+
+.cr-series-nav .cr-series-nav__link {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cr-space-2xs);
+	margin: 0;
+	max-inline-size: none;
+	color: var(--cr-ink);
+	text-decoration: none;
+}
+
+.cr-series-nav__link--next { transform: rotate(var(--cr-rotate-2)); }
+
+.cr-series-nav__dir {
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+	color: var(--cr-eyebrow-ink, var(--cr-ink));
+}
+
+.cr-series-nav__part { font-size: var(--cr-text-sm); color: var(--cr-ink-muted); }
+
+.cr-series-nav__title { font-family: var(--cr-font-accent); font-weight: var(--cr-weight-bold); font-size: var(--cr-text-lg); line-height: 1.25; }
+
+.cr-series-nav__link:hover .cr-series-nav__title { text-decoration: underline; text-decoration-color: var(--cr-marker); text-decoration-thickness: 3px; }
+
+.cr-series-nav__link:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo, var(--cr-ink));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.cr-series-nav__link { transition: transform 0.15s ease; }
+
+	.cr-series-nav__link:hover { transform: rotate(0deg); }
+}
+
+/* Editor placeholder from courtneyr/series-guide. */
+.cr-series-placeholder { padding: var(--cr-space-xs) var(--cr-space-sm); border: 2px dashed currentcolor; font-size: var(--cr-text-sm); }
