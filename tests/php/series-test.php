@@ -46,6 +46,10 @@ namespace {
 		return esc_html( $text );
 	}
 
+	function esc_attr( $text ) {
+		return esc_html( $text );
+	}
+
 	function esc_url( $url ) {
 		return esc_html( $url );
 	}
@@ -157,6 +161,10 @@ namespace {
 		return 'https://example.test/series/' . $term->slug . '/';
 	}
 
+	function get_the_terms( $id, $taxonomy ) {
+		return isset( $GLOBALS['cr_post_series'][ $id ] ) ? array( $GLOBALS['cr_post_series'][ $id ] ) : false;
+	}
+
 	function is_tax( $taxonomy = '' ) {
 		return ! empty( $GLOBALS['cr_is_tax'] );
 	}
@@ -190,6 +198,7 @@ namespace Courtneyr\Child\Series\Tests {
 	use function Courtneyr\Child\Series\part_label;
 	use function Courtneyr\Child\Series\published_count_label;
 	use function Courtneyr\Child\Series\reading_minutes;
+	use function Courtneyr\Child\Series\render_post_header;
 	use function Courtneyr\Child\Series\render_publication_contents;
 	use function Courtneyr\Child\Series\series_image;
 	use function Courtneyr\Child\Series\series_share_image;
@@ -336,6 +345,24 @@ namespace Courtneyr\Child\Series\Tests {
 	check( false === strpos( $contents, 'Draft title' ) && false === strpos( $contents, 'Scheduled title' ) && false === strpos( $contents, 'Private title' ) && false === strpos( $contents, 'Protected title' ) && false === strpos( $contents, 'Other series' ), 'contents exclude drafts, scheduled, private, password-protected and unrelated posts' );
 	$query = $GLOBALS['cr_parts_queries'][0] ?? array();
 	check( 'publish' === ( $query['post_status'] ?? '' ) && false === ( $query['has_password'] ?? true ) && 2175 === ( $query['tax_query'][0]['terms'] ?? 0 ) && false === ( $query['tax_query'][0]['include_children'] ?? true ), 'contents query only password-free published posts assigned to the exact series term' );
+
+	$direct->name = 'Merge Conflicts';
+	$GLOBALS['cr_post_series'][202] = $direct;
+	$drawer = render_post_header( 202 );
+	$dom    = new \DOMDocument();
+	@$dom->loadHTML( '<?xml encoding="UTF-8">' . $drawer );
+	$xpath   = new \DOMXPath( $dom );
+	$details = $xpath->query( '//details[@class="cr-series-post__toc"]' );
+	$summary = $xpath->query( '//summary[@class="cr-series-post__summary"]' );
+	check( 1 === $details->length && ! $details->item( 0 )->hasAttribute( 'open' ) && 1 === $summary->length, 'the post series drawer uses a closed native details disclosure' );
+	check( 'In this series 3 parts published' === trim( $summary->item( 0 )->textContent ) && 1 === $xpath->query( '//summary/span[@class="cr-series-post__summary-heading"]/span[@class="cr-series-post__summary-label" and text()="In this series"]' )->length && 1 === $xpath->query( '//summary/span[@class="cr-series-post__summary-heading"]/span[@class="cr-series-post__summary-count" and text()="3 parts published"]' )->length, 'the summary groups its label and published count without parentheses' );
+	check( 1 === $xpath->query( '//summary//svg[@role="presentation" and @aria-hidden="true" and @focusable="false"]' )->length, 'the summary chevron is decorative and unfocusable' );
+	$links = $xpath->query( '//nav[@class="cr-series-post__contents"]//li/div[@class="cr-series-post__entry-copy"]/a' );
+	check( 3 === $links->length && 'https://example.test/post-202/' === $links->item( 0 )->getAttribute( 'href' ) && 'https://example.test/post-201/' === $links->item( 1 )->getAttribute( 'href' ) && 'https://example.test/post-208/' === $links->item( 2 )->getAttribute( 'href' ), 'the post drawer lists only real published links in reading order' );
+	check( 3 === $xpath->query( '//li/span[@class="cr-series-post__num" and @aria-hidden="true" and @role="presentation"]' )->length && 3 === $xpath->query( '//nav//a/span[@class="screen-reader-text"]' )->length && 'Part 1: Who decides?' === $links->item( 0 )->textContent, 'decorative two-digit numbers do not duplicate the spoken part labels' );
+	check( 1 === $xpath->query( '//nav//a[@aria-current="page" and @href="https://example.test/post-202/"]' )->length && 1 === $xpath->query( '//div[@class="cr-series-post__entry-copy"]/p[@class="cr-series-post__here" and text()="You’re reading this"]' )->length, 'only the current part gets aria-current and reading metadata beside its link' );
+	check( false !== strpos( $drawer, '>01</span>' ) && false !== strpos( $drawer, 'Rules &amp; &lt;exceptions&gt;' ) && false === strpos( $drawer, 'Draft title' ) && false === strpos( $drawer, 'Protected title' ), 'the drawer escapes post titles and excludes unpublished or protected entries' );
+	check( '' === render_post_header( 999 ), 'posts outside a series have no series drawer' );
 
 	$empty          = new \WP_Term();
 	$empty->term_id = 2176;

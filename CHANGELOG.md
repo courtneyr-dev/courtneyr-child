@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.152
+
+What you see change on courtneyr.dev:
+
+- The “In this series” drawer uses the approved quiet paper treatment: a periwinkle label, an inked chevron, and numbered reading links. It starts closed and keeps native keyboard controls, with no outer frame or hard shadow.
+- The featured image has 48px of space after the drawer on desktop and 32px on phones, whether the contents are open or closed. Other details blocks and images keep their existing layout.
+
 ## 0.7.151
 
 What you see change on courtneyr.dev:

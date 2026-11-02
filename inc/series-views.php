@@ -436,24 +436,27 @@ function render_post_header( int $post_id ): string {
 		/* translators: %s: series name. */
 		$label = sprintf( __( 'Parts of %s', 'courtneyr-child' ), wp_strip_all_tags( series_name( $series, false ) ) );
 		$html .= '<details class="cr-series-post__toc">';
-		$html .= '<summary class="cr-series-post__summary">' . esc_html__( 'In this series', 'courtneyr-child' ) . ' <span class="cr-series-post__summary-count">(' . esc_html( published_count_label( $total ) ) . ')</span></summary>';
-		$html .= '<nav aria-label="' . esc_attr( $label ) . '"><ol class="cr-series-post__list" role="list">';
+		$html .= '<summary class="cr-series-post__summary"><span class="cr-series-post__summary-heading"><span class="cr-series-post__summary-label">' . esc_html__( 'In this series', 'courtneyr-child' ) . '</span> <span class="cr-series-post__summary-count">' . esc_html( published_count_label( $total ) ) . '</span></span>';
+		$html .= '<span class="cr-series-post__summary-toggle" aria-hidden="true" role="presentation"><svg viewBox="0 0 28 24" aria-hidden="true" role="presentation" focusable="false"><path d="M4 7.5 Q8.5 12 13.5 16.5 Q19 12.5 24 7"/><path d="M4.5 8.5 L13.4 17.4 L23.4 8.3" opacity=".25"/></svg></span></summary>';
+		$html .= '<nav class="cr-series-post__contents" aria-label="' . esc_attr( $label ) . '"><ol class="cr-series-post__list" role="list">';
 		foreach ( $rows as $i => $row ) {
 			$current = $row['id'] === $post_id;
+			$number  = $row['part'] ?? $i + 1;
 			/* translators: %d: part number. */
-			$num   = sprintf( __( 'Part %d', 'courtneyr-child' ), $row['part'] ?? $i + 1 );
+			$num   = sprintf( __( 'Part %d', 'courtneyr-child' ), $number );
 			$html .= '<li class="cr-series-post__item' . ( $current ? ' is-current' : '' ) . '">';
+			$html .= '<span class="cr-series-post__num" aria-hidden="true" role="presentation">' . esc_html( sprintf( '%02d', $number ) ) . '</span><div class="cr-series-post__entry-copy">';
 			$html .= sprintf(
-				'<a href="%s"%s><span class="cr-series-post__num">%s</span> <span class="cr-series-post__title">%s</span></a>',
+				'<a class="cr-series-post__title" href="%s"%s><span class="screen-reader-text">%s: </span>%s</a>',
 				esc_url( (string) get_permalink( $row['id'] ) ),
 				$current ? ' aria-current="page"' : '',
 				esc_html( $num ),
 				esc_html( get_the_title( $row['id'] ) )
 			);
 			if ( $current ) {
-				$html .= ' <span class="cr-series-post__here">' . esc_html__( 'You’re reading this', 'courtneyr-child' ) . '</span>';
+				$html .= '<p class="cr-series-post__here">' . esc_html__( 'You’re reading this', 'courtneyr-child' ) . '</p>';
 			}
-			$html .= '</li>';
+			$html .= '</div></li>';
 		}
 		$html .= '</ol></nav></details>';
 	}
