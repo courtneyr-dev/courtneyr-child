@@ -14,7 +14,7 @@
 	"attributes": {
 		"view": {
 			"type": "string",
-			"enum": [ "status", "seasons", "launch", "companions", "post-header", "post-nav", "overview", "group", "start", "cover", "contents", "follow" ],
+			"enum": [ "status", "seasons", "launch", "companions", "post-header", "post-nav", "overview", "group", "start", "cover", "contents", "follow", "publication-contents", "publication-desk", "publication-companion", "publication-parts" ],
 			"default": "status"
 		}
 	},
