@@ -1824,12 +1824,15 @@ figure.cr-media figcaption.cr-media__transcript {
 	background-color: var(--cr-surface-soft);
 	color: var(--cr-ink);
 }
+.able-transcript-area .able-window-toolbar label,
 .able-transcript span,
 .able-transcript p {
 	color: var(--cr-ink) !important;
 }
 .able-transcript .able-highlight,
-.able-transcript .able-highlight span {
+.able-transcript .able-highlight span,
+.able-transcript span:is(:hover, :focus, :active),
+.able-transcript span:is(:hover, :focus, :active) span {
 	background-color: var(--cr-highlight) !important;
 	color: var(--cr-cta-ink) !important;
 }
