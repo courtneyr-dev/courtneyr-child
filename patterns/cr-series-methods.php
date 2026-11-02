@@ -27,7 +27,7 @@ declare( strict_types = 1 );
 		<!-- /wp:heading -->
 
 		<!-- wp:paragraph {"className":"cr-series-methods__why"} -->
-		<p class="cr-series-methods__why"><?php esc_html_e( 'Every part links to the methods page, so you can check how a claim was labeled and sourced. When a count or a claim changes, its log says what changed and when.', 'courtneyr-child' ); ?></p>
+		<p class="cr-series-methods__why"><?php esc_html_e( 'Every post in the series links to it. When a count or a claim changes, its log says what changed and when.', 'courtneyr-child' ); ?></p>
 		<!-- /wp:paragraph -->
 
 	</div>
