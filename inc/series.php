@@ -498,10 +498,11 @@ function enqueue_styles(): void {
 		array(),
 		COURTNEYR_CHILD_VERSION
 	);
-	// Collage art for a landing that places the *-art views; they enqueue it as they render.
+	// Front matter for a landing template (masthead start line, methods file, contents,
+	// follow block); the start, contents and follow views enqueue it as they render.
 	wp_register_style(
-		'courtneyr-series-art',
-		COURTNEYR_CHILD_URI . '/assets/css/cr-series-art.css',
+		'courtneyr-series-front',
+		COURTNEYR_CHILD_URI . '/assets/css/cr-series-front.css',
 		array( 'courtneyr-series' ),
 		COURTNEYR_CHILD_VERSION
 	);
@@ -615,9 +616,26 @@ function gate_methods_link( string $content, array $block ): string {
 	if ( '' !== $href && page_is_public( $href ) ) {
 		return $content;
 	}
-	return '<p class="cr-series-methods__pending">' . esc_html__( 'The methods page isn’t published yet. It goes up with the first part.', 'courtneyr-child' ) . '</p>';
+	return '<p class="cr-series-methods__pending"><span class="cr-series-stamp">' . esc_html__( 'Not published yet', 'courtneyr-child' ) . '</span> ' . esc_html__( 'Every part will link to it.', 'courtneyr-child' ) . '</p>';
 }
 add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\gate_methods_link', 10, 2 );
+
+/**
+ * Page 2 onward of a series archive skips the methods file and the contents
+ * introduction, so later pages open on the parts. The contents list stays as
+ * the way between seasons.
+ *
+ * @param string $content Rendered group.
+ * @param array  $block   Parsed block.
+ */
+function skip_front_matter_when_paged( string $content, array $block ): string {
+	$classes = explode( ' ', (string) ( $block['attrs']['className'] ?? '' ) );
+	if ( ! is_paged() || ! is_tax( TAX ) || ! array_intersect( array( 'cr-series-methods', 'cr-series-intro' ), $classes ) ) {
+		return $content;
+	}
+	return '';
+}
+add_filter( 'render_block_core/group', __NAMESPACE__ . '\\skip_front_matter_when_paged', 10, 2 );
 
 /**
  * The big numeral on an archive row repeats the visually hidden "Part 3"

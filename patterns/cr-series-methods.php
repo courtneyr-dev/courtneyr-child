@@ -3,8 +3,8 @@
  * Title: Series methods and sources
  * Slug: courtneyr-child/cr-series-methods
  * Categories: cr-zine
- * Description: Sky-blue torn-paper band with a notebook drawing that sends readers to the Merge Conflicts methods page. The link paragraph (class cr-series-methods__link) renders only while its page is published; until then it says the page isn't up yet (inc/series.php).
- * Keywords: series, methods, sources, callout, research
+ * Description: The Merge Conflicts research file before the parts: why the methods matter, what the methods page holds, and the way to it. The link paragraph (class cr-series-methods__link) renders only while its page is published; until then it shows a "Not published yet" stamp (inc/series.php). Copy follows the methods page draft (page 40270). Skipped from page 2 on.
+ * Keywords: series, methods, sources, research, evidence labels
  * Inserter: false
  *
  * @package CourtneyrChild
@@ -12,21 +12,23 @@
 
 declare( strict_types = 1 );
 ?>
-<!-- wp:group {"tagName":"aside","metadata":{"name":"Methods and Sources"},"align":"wide","className":"cr-series-methods","ariaLabel":"<?php echo esc_attr__( 'How this series was researched', 'courtneyr-child' ); ?>","layout":{"type":"default"}} -->
-<aside class="wp-block-group alignwide cr-series-methods" aria-label="<?php echo esc_attr__( 'How this series was researched', 'courtneyr-child' ); ?>">
-
-	<!-- wp:courtneyr/series-guide {"view":"methods-art"} /-->
+<!-- wp:group {"tagName":"aside","metadata":{"name":"Methods and Sources"},"align":"wide","className":"cr-series-methods","ariaLabel":"<?php echo esc_attr__( 'Methods and sources', 'courtneyr-child' ); ?>","layout":{"type":"default"}} -->
+<aside class="wp-block-group alignwide cr-series-methods" aria-label="<?php echo esc_attr__( 'Methods and sources', 'courtneyr-child' ); ?>">
 
 	<!-- wp:group {"className":"cr-series-methods__head","layout":{"type":"default"}} -->
 	<div class="wp-block-group cr-series-methods__head">
 
-		<!-- wp:paragraph {"className":"is-style-cr-eyebrow cr-series-methods__eyebrow"} -->
-		<p class="is-style-cr-eyebrow cr-series-methods__eyebrow"><?php esc_html_e( 'How this series was researched', 'courtneyr-child' ); ?></p>
+		<!-- wp:paragraph {"className":"cr-tape cr-series-methods__tape"} -->
+		<p class="cr-tape cr-series-methods__tape"><?php esc_html_e( 'Methods & Sources', 'courtneyr-child' ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:heading {"className":"cr-series-methods__title","fontFamily":"accent"} -->
-		<h2 class="wp-block-heading cr-series-methods__title has-accent-font-family"><?php esc_html_e( 'The Methods & Sources', 'courtneyr-child' ); ?></h2>
+		<h2 class="wp-block-heading cr-series-methods__title has-accent-font-family"><?php esc_html_e( 'How does Merge Conflicts label evidence, stay fair and fix mistakes?', 'courtneyr-child' ); ?></h2>
 		<!-- /wp:heading -->
+
+		<!-- wp:paragraph {"className":"cr-series-methods__why"} -->
+		<p class="cr-series-methods__why"><?php esc_html_e( 'Every part links to the methods page, so you can check how a claim was labeled and sourced. When a count or a claim changes, its log says what changed and when.', 'courtneyr-child' ); ?></p>
+		<!-- /wp:paragraph -->
 
 	</div>
 	<!-- /wp:group -->
@@ -34,12 +36,32 @@ declare( strict_types = 1 );
 	<!-- wp:group {"className":"cr-series-methods__body","layout":{"type":"default"}} -->
 	<div class="wp-block-group cr-series-methods__body">
 
-		<!-- wp:paragraph {"className":"cr-series-methods__desc"} -->
-		<p class="cr-series-methods__desc"><?php esc_html_e( 'How I picked the twelve projects, which sources count as evidence, how each claim gets checked, and how to read the counts and labels you’ll see in every part.', 'courtneyr-child' ); ?></p>
+		<!-- wp:paragraph {"className":"cr-series-methods__inside"} -->
+		<p class="cr-series-methods__inside"><?php esc_html_e( 'What it holds', 'courtneyr-child' ); ?></p>
 		<!-- /wp:paragraph -->
 
+		<!-- wp:list {"className":"cr-series-methods__list"} -->
+		<ul class="wp-block-list cr-series-methods__list">
+			<!-- wp:list-item -->
+			<li><?php esc_html_e( 'What the series compares, and what it claims', 'courtneyr-child' ); ?></li>
+			<!-- /wp:list-item -->
+			<!-- wp:list-item -->
+			<li><?php esc_html_e( 'The six evidence labels every claim carries', 'courtneyr-child' ); ?></li>
+			<!-- /wp:list-item -->
+			<!-- wp:list-item -->
+			<li><?php esc_html_e( 'The twelve fairness rules every part passes', 'courtneyr-child' ); ?></li>
+			<!-- /wp:list-item -->
+			<!-- wp:list-item -->
+			<li><?php esc_html_e( 'Right of reply and the corrections log', 'courtneyr-child' ); ?></li>
+			<!-- /wp:list-item -->
+			<!-- wp:list-item -->
+			<li><?php esc_html_e( 'Who’s writing, and every relationship that bears on it', 'courtneyr-child' ); ?></li>
+			<!-- /wp:list-item -->
+		</ul>
+		<!-- /wp:list -->
+
 		<!-- wp:paragraph {"className":"cr-series-methods__link"} -->
-		<p class="cr-series-methods__link"><a href="/merge-conflicts-methods/"><?php esc_html_e( 'Read the research methods', 'courtneyr-child' ); ?></a></p>
+		<p class="cr-series-methods__link"><a href="/merge-conflicts-methods/"><?php esc_html_e( 'Read the methods', 'courtneyr-child' ); ?></a></p>
 		<!-- /wp:paragraph -->
 
 	</div>
