@@ -347,6 +347,8 @@ const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-cutout',
 	// Series archives, overview and posts in a series only; keeps details[open] and aria-current rules.
 	'courtneyr-series',
+	// The Merge Conflicts landing only: postmark, notebook and margin art, all decorative.
+	'courtneyr-series-art',
 	'wp-block-image',
 	'wp-block-gallery',
 	'wp-block-cover',

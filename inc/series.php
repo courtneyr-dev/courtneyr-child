@@ -498,6 +498,13 @@ function enqueue_styles(): void {
 		array(),
 		COURTNEYR_CHILD_VERSION
 	);
+	// Collage art for a landing that places the *-art views; they enqueue it as they render.
+	wp_register_style(
+		'courtneyr-series-art',
+		COURTNEYR_CHILD_URI . '/assets/css/cr-series-art.css',
+		array( 'courtneyr-series' ),
+		COURTNEYR_CHILD_VERSION
+	);
 }
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_styles' );
 
@@ -613,8 +620,40 @@ function gate_methods_link( string $content, array $block ): string {
 add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\gate_methods_link', 10, 2 );
 
 /**
- * Block bindings source `courtneyr/series-part`: the part chip and season label
- * on series archive cards. Keys: `part` ("Part 3") and `season` ("Season 2").
+ * The big numeral on an archive row repeats the visually hidden "Part 3"
+ * label, so screen readers hear the label once and skip the numeral.
+ *
+ * @param string $content Rendered paragraph.
+ * @param array  $block   Parsed block.
+ */
+function hide_part_numeral( string $content, array $block ): string {
+	$classes = explode( ' ', (string) ( $block['attrs']['className'] ?? '' ) );
+	if ( ! in_array( 'cr-series-card__num', $classes, true ) ) {
+		return $content;
+	}
+	$processor = new \WP_HTML_Tag_Processor( $content );
+	if ( $processor->next_tag( 'p' ) ) {
+		$processor->set_attribute( 'aria-hidden', 'true' );
+		$processor->set_attribute( 'role', 'presentation' );
+	}
+	return $processor->get_updated_html();
+}
+add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\hide_part_numeral', 10, 2 );
+
+/**
+ * Minutes to read a post at 238 words a minute (Brysbaert 2019), never under one.
+ *
+ * @param int $post_id Post.
+ */
+function reading_minutes( int $post_id ): int {
+	$text = wp_strip_all_tags( strip_shortcodes( (string) get_post_field( 'post_content', $post_id ) ) );
+	return max( 1, (int) ceil( str_word_count( $text ) / 238 ) );
+}
+
+/**
+ * Block bindings source `courtneyr/series-part`: the part label, numeral,
+ * season label and reading time on series archive rows. Keys: `part`
+ * ("Part 3"), `numeral` ("03"), `season` ("Season 2") and `read` ("12 min read").
  *
  * @param array<string, mixed> $source_args Binding arguments.
  * @param \WP_Block            $block       Bound block.
@@ -625,19 +664,71 @@ function part_binding_value( array $source_args, $block ): ?string {
 	if ( ! $series ) {
 		return '';
 	}
-	if ( 'season' === ( $source_args['key'] ?? 'part' ) ) {
+	$key = (string) ( $source_args['key'] ?? 'part' );
+	if ( 'season' === $key ) {
 		$n = season_number( $series );
 		/* translators: %d: season number. */
 		return $n ? sprintf( __( 'Season %d', 'courtneyr-child' ), $n ) : '';
 	}
+	if ( 'read' === $key ) {
+		/* translators: %d: minutes. */
+		return sprintf( __( '%d min read', 'courtneyr-child' ), reading_minutes( $post_id ) );
+	}
 	foreach ( parts( $series->term_id ) as $i => $row ) {
 		if ( $row['id'] === $post_id ) {
+			$n = (int) ( $row['part'] ?? $i + 1 );
 			/* translators: %d: part number. */
-			return sprintf( __( 'Part %d', 'courtneyr-child' ), $row['part'] ?? $i + 1 );
+			return 'numeral' === $key ? sprintf( '%02d', $n ) : sprintf( __( 'Part %d', 'courtneyr-child' ), $n );
 		}
 	}
 	return '';
 }
+
+/**
+ * Wrap the archive's parts list in season sections: a tape label, heading and
+ * description per season, each season's parts in its own numbered panel. A
+ * series without seasons gets one panel under a visually hidden heading.
+ * Grouping happens on the rendered rows, so the main query, its ten-per-page
+ * pagination and the post template stay core blocks.
+ *
+ * @param string $content Rendered post template.
+ * @param array  $block   Parsed block.
+ */
+function group_parts( string $content, array $block ): string {
+	$classes = explode( ' ', (string) ( $block['attrs']['className'] ?? '' ) );
+	$list    = trim( $content );
+	$open    = strpos( $list, '>' );
+	if ( ! in_array( 'cr-series-list', $classes, true ) || ! is_tax( TAX ) || ! str_starts_with( $list, '<ul' ) || ! str_ends_with( $list, '</ul>' ) || false === $open ) {
+		return $content;
+	}
+	$term = get_queried_object();
+	if ( ! $term instanceof \WP_Term ) {
+		return $content;
+	}
+	// Each post-template item opens with this exact tag prefix (core's render.php).
+	$marker = '<li class="wp-block-post ';
+	$rows   = array();
+	foreach ( array_slice( explode( $marker, substr( $list, $open + 1, -strlen( '</ul>' ) ) ), 1 ) as $item ) {
+		$item = $marker . $item;
+		$tag  = new \WP_HTML_Tag_Processor( $item );
+		$id   = 0;
+		if ( $tag->next_tag( 'li' ) ) {
+			foreach ( $tag->class_list() as $class ) {
+				if ( str_starts_with( $class, 'post-' ) && ctype_digit( substr( $class, 5 ) ) ) {
+					$id = (int) substr( $class, 5 );
+				}
+			}
+		}
+		if ( $id ) {
+			$rows[] = array(
+				'id'   => $id,
+				'html' => $item,
+			);
+		}
+	}
+	return $rows ? render_part_groups( $term, $rows, substr( $list, 3, $open - 3 ) ) : $content;
+}
+add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\group_parts', 10, 2 );
 
 /**
  * Register the bindings source and the series-guide block.

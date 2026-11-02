@@ -38,6 +38,18 @@ namespace {
 		return 1 === $number ? $single : $plural;
 	}
 
+	function strip_shortcodes( $text ) {
+		return $text;
+	}
+
+	function wp_strip_all_tags( $text ) {
+		return strip_tags( (string) $text );
+	}
+
+	function get_post_field( $field, $post_id ) {
+		return $GLOBALS['cr_post_content'][ $post_id ] ?? '';
+	}
+
 	require CR_SERIES_THEME_DIR . '/inc/series.php';
 }
 
@@ -46,6 +58,7 @@ namespace Courtneyr\Child\Series\Tests {
 	use function Courtneyr\Child\Series\part_key;
 	use function Courtneyr\Child\Series\part_label;
 	use function Courtneyr\Child\Series\published_count_label;
+	use function Courtneyr\Child\Series\reading_minutes;
 	use function Courtneyr\Child\Series\sort_parts;
 
 	$failures = 0;
@@ -128,6 +141,47 @@ namespace Courtneyr\Child\Series\Tests {
 	preg_match_all( '/<[a-z]+\b[^>]*aria-hidden="true"[^>]*>/', $views, $hidden );
 	$bare = array_filter( $hidden[0], static fn( string $tag ): bool => false === strpos( $tag, 'role="presentation"' ) );
 	check( count( $hidden[0] ) > 0 && ! $bare, 'every aria-hidden element in the series views carries role="presentation"' );
+
+	// Reading time: 238 words a minute, rounded up, never under one.
+	$GLOBALS['cr_post_content'] = array(
+		1 => '<p>' . str_repeat( 'word ', 476 ) . '</p>',
+		2 => '<p>' . str_repeat( 'word ', 477 ) . '</p>',
+		3 => '',
+	);
+	check( 2 === reading_minutes( 1 ) && 3 === reading_minutes( 2 ), 'reading time rounds up at 238 words a minute' );
+	check( 1 === reading_minutes( 3 ), 'an empty post still reads as one minute' );
+
+	// Season grouping and the numeral run on the rendered blocks.
+	$hooked = static function ( string $hook, string $fn ): bool {
+		foreach ( $GLOBALS['cr_hooks'][ $hook ] ?? array() as $entry ) {
+			if ( 'Courtneyr\\Child\\Series\\' . $fn === $entry[0] ) {
+				return true;
+			}
+		}
+		return false;
+	};
+	check( $hooked( 'render_block_core/post-template', 'group_parts' ), 'group_parts wraps the post template in season sections' );
+	check( $hooked( 'render_block_core/paragraph', 'hide_part_numeral' ), 'hide_part_numeral hides the big numeral from screen readers' );
+
+	// Rows: numeral first, the "Part 3" label visually hidden, part titles one level under the season h2.
+	check( strpos( $body_pattern, '"key":"numeral"' ) < strpos( $body_pattern, 'card__body' ), 'the numeral leads each row' );
+	check( 1 === preg_match( '/"key":"part"[^>]*"className":"screen-reader-text cr-series-card__part"/', $body_pattern ), 'the part label stays in the text, visually hidden' );
+	check( false !== strpos( $body_pattern, 'wp:post-title {"level":3' ), 'part titles are h3 under the season h2' );
+	check( false !== strpos( $body_pattern, '"key":"read"' ), 'rows show a reading time' );
+
+	// Collage art: hero art above the header, margin art between the methods band and the parts.
+	$hero_art   = strpos( $landing, '"view":"hero-art"' );
+	$margin_art = strpos( $landing, '"view":"margin-art"' );
+	check( false !== $hero_art && $hero_art < $header, 'hero art renders before the header' );
+	check( false !== $margin_art && $methods < $margin_art && $margin_art < $body, 'margin art sits between the methods band and the parts' );
+	check( false === strpos( $generic, '-art"' ), 'other series archives carry no collage art' );
+	check( false !== strpos( $methods_pattern, '"view":"methods-art"' ), 'the methods band carries the notebook' );
+
+	$guide = json_decode( (string) file_get_contents( CR_SERIES_THEME_DIR . '/blocks/series-guide/block.json' ), true );
+	check( ! array_diff( array( 'hero-art', 'methods-art', 'margin-art' ), $guide['attributes']['view']['enum'] ?? array() ), 'series-guide accepts the three art views' );
+
+	$pruning = (string) file_get_contents( CR_SERIES_THEME_DIR . '/inc/stream-style-pruning.php' );
+	check( false !== strpos( $pruning, "'courtneyr-series-art'" ), 'the art sheet is kept whole by the used-CSS pass' );
 
 	echo $failures ? "\n{$failures} failed\n" : "\nall passed\n";
 	exit( $failures ? 1 : 0 );
