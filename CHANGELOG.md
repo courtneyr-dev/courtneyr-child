@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.7.143
+
+What you see change on courtneyr.dev (the Merge Conflicts landing; other series archives only lose the sticky note):
+
+- The masthead sets the thesis as a statement beside the cut-paper title, with its three questions (who decides, how they decide, who can review) marked in orange, and a way in under it: "Start with Part 1" and, once there are two parts, the latest one. With nothing published it says so and links to Follow along.
+- Methods & Sources becomes a compact research file: why it matters, what the methods page holds (what the series compares, the six evidence labels, the twelve fairness rules, right of reply and corrections, who's writing), and the link, or a "Not published yet" stamp until the page is public.
+- A new "How the series is organized" section: the planned scale (100 parts in eight seasons), the twelve projects Season 2 compares, the companion series, then a contents page that lists every season and companion arc that exists as a series term, with published counts or a "Planned" stamp.
+- One Follow along block at the end replaces the launch card's links.
+- Page 2 on skips the methods file and the introduction.
+- Removed: the postmark, the postage stamp, the field-guide tape, the hash, the notebook drawing, the margin note and arrow, the dried flowers, the registration marks, the paperclip and the handwritten note over the parts. Row dates and reading times move from 12 px capitals to 14 px text, and rows in a season section no longer repeat the season.
+
+Under the hood: `courtneyr/series-guide` trades the three art views for `start`, `contents` and `follow`; `cr-series-art.css` is replaced by `cr-series-front.css` (13 KB, in `RUCSS_INLINE_HANDLES`). New patterns `cr-series-mc-masthead` and `cr-series-contents`; `cr-series-methods` is rewritten from the methods page draft. Once the contents view renders, the season chips, the bottom companion list and the launch note step aside so each fact appears once. `Series\skip_front_matter_when_paged()` drops the methods file and introduction on later pages. `series-test.php` checks the landing order, the front matter and the removals.
+
 ## 0.7.142
 
 What you see change on courtneyr.dev:

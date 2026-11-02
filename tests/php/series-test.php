@@ -113,10 +113,10 @@ namespace Courtneyr\Child\Series\Tests {
 
 	// Templates: methods before the parts on the landing; part nav right after the post body.
 	$landing = (string) file_get_contents( CR_SERIES_THEME_DIR . '/templates/taxonomy-series-merge-conflicts.html' );
-	$header  = strpos( $landing, 'courtneyr-child/cr-series-header' );
+	$header  = strpos( $landing, 'courtneyr-child/cr-series-mc-masthead' );
 	$methods = strpos( $landing, 'courtneyr-child/cr-series-methods' );
 	$body    = strpos( $landing, 'courtneyr-child/cr-series-body' );
-	check( false !== $header && false !== $methods && false !== $body && $header < $methods && $methods < $body, 'Merge Conflicts landing: header, then methods, then the parts' );
+	check( false !== $header && false !== $methods && false !== $body && $header < $methods && $methods < $body, 'Merge Conflicts landing: masthead, then methods, then the parts' );
 
 	$generic = (string) file_get_contents( CR_SERIES_THEME_DIR . '/templates/taxonomy-series.html' );
 	check( false === strpos( $generic, 'cr-series-methods' ), 'other series archives carry no methods callout' );
@@ -169,19 +169,36 @@ namespace Courtneyr\Child\Series\Tests {
 	check( false !== strpos( $body_pattern, 'wp:post-title {"level":3' ), 'part titles are h3 under the season h2' );
 	check( false !== strpos( $body_pattern, '"key":"read"' ), 'rows show a reading time' );
 
-	// Collage art: hero art above the header, margin art between the methods band and the parts.
-	$hero_art   = strpos( $landing, '"view":"hero-art"' );
-	$margin_art = strpos( $landing, '"view":"margin-art"' );
-	check( false !== $hero_art && $hero_art < $header, 'hero art renders before the header' );
-	check( false !== $margin_art && $methods < $margin_art && $margin_art < $body, 'margin art sits between the methods band and the parts' );
-	check( false === strpos( $generic, '-art"' ), 'other series archives carry no collage art' );
-	check( false !== strpos( $methods_pattern, '"view":"methods-art"' ), 'the methods band carries the notebook' );
+	// Front matter on the Merge Conflicts landing: masthead, methods file, contents, parts, one follow block.
+	$order = array(
+		'courtneyr-child/cr-series-mc-masthead',
+		'courtneyr-child/cr-series-methods',
+		'courtneyr-child/cr-series-contents',
+		'courtneyr-child/cr-series-body',
+		'"view":"follow"',
+	);
+	$at    = array_map( static fn( string $needle ) => strpos( $landing, $needle ), $order );
+	check( ! in_array( false, $at, true ) && $at === array_values( array_unique( $at ) ) && $at == array_values( ( static function ( array $v ): array { sort( $v ); return $v; } )( $at ) ), 'landing order: masthead, methods, contents, parts, follow' );
+	check( false === strpos( $landing, '-art"' ) && ! file_exists( CR_SERIES_THEME_DIR . '/assets/css/cr-series-art.css' ), 'the collage art and its sheet are gone' );
+	check( false === strpos( $generic, 'cr-series-mc-masthead' ) && false === strpos( $generic, '"view":"contents"' ) && false === strpos( $generic, '"view":"follow"' ), 'other series archives carry no front matter' );
+
+	$masthead = (string) file_get_contents( CR_SERIES_THEME_DIR . '/patterns/cr-series-mc-masthead.php' );
+	check( false !== strpos( $masthead, '"view":"start"' ) && strpos( $masthead, 'wp:query-title' ) < strpos( $masthead, '"view":"start"' ), 'the masthead puts the way in after the title and thesis' );
+	check( 3 === substr_count( $masthead, '<strong>' ), 'the thesis marks its three questions' );
+
+	$contents_pattern = (string) file_get_contents( CR_SERIES_THEME_DIR . '/patterns/cr-series-contents.php' );
+	check( false !== strpos( $contents_pattern, 'cr-series-intro' ) && false !== strpos( $contents_pattern, '"view":"contents"' ), 'the contents section has an introduction and the contents list' );
+	check( false !== strpos( $contents_pattern, 'Backdrop, the CSS and HTML standards bodies, Drupal, Ghost, Joomla, MariaDB, MySQL, Node.js, OpenJS, PHP, TYPO3 and WordPress' ), 'the comparison set is alphabetical, WordPress unhighlighted (methods draft fairness rule)' );
+	check( false !== strpos( $methods_pattern, 'cr-series-methods__list' ) && false === strpos( $methods_pattern, 'methods-art' ), 'the methods file lists what it holds, without the notebook drawing' );
+
+	check( $hooked( 'render_block_core/group', 'skip_front_matter_when_paged' ), 'page 2 on skips the methods file and the introduction' );
 
 	$guide = json_decode( (string) file_get_contents( CR_SERIES_THEME_DIR . '/blocks/series-guide/block.json' ), true );
-	check( ! array_diff( array( 'hero-art', 'methods-art', 'margin-art' ), $guide['attributes']['view']['enum'] ?? array() ), 'series-guide accepts the three art views' );
+	$views = $guide['attributes']['view']['enum'] ?? array();
+	check( ! array_diff( array( 'start', 'contents', 'follow' ), $views ) && ! array_intersect( array( 'hero-art', 'methods-art', 'margin-art' ), $views ), 'series-guide accepts start, contents and follow, and no art views' );
 
 	$pruning = (string) file_get_contents( CR_SERIES_THEME_DIR . '/inc/stream-style-pruning.php' );
-	check( false !== strpos( $pruning, "'courtneyr-series-art'" ), 'the art sheet is kept whole by the used-CSS pass' );
+	check( false !== strpos( $pruning, "'courtneyr-series-front'" ) && false === strpos( $pruning, "'courtneyr-series-art'" ), 'the front-matter sheet is kept whole by the used-CSS pass' );
 
 	echo $failures ? "\n{$failures} failed\n" : "\nall passed\n";
 	exit( $failures ? 1 : 0 );
