@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.150
+
+What you see change on courtneyr.dev:
+
+- The Merge Conflicts series archive follows the approved zine mockup: a cut-paper masthead, a decision collage, the embroidered concert patch, and a handwritten annotation above Methods & Sources.
+- Methods & Sources, the reading desk, companion research, and Follow the investigation use torn-paper surfaces, hand-drawn illustrations, tape labels, and rough marker accents. The layout adapts to phones and light or dark appearance.
+- The contents list uses the seasons announced in WordPress. The reading desk and companion links show published, password-free articles only; Methods stays unlinked until its page is public. Later archive pages skip the Methods introduction.
+
 ## 0.7.149
 
 What you see change on courtneyr.dev:

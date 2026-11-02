@@ -162,9 +162,10 @@ namespace Courtneyr\Child\Series\Tests {
 
 	// Templates: methods before the parts on the landing; part nav right after the post body.
 	$landing = (string) file_get_contents( CR_SERIES_THEME_DIR . '/templates/taxonomy-series-merge-conflicts.html' );
-	$header  = strpos( $landing, 'courtneyr-child/cr-series-mc-masthead' );
-	$methods = strpos( $landing, 'courtneyr-child/cr-series-methods' );
-	$body    = strpos( $landing, 'courtneyr-child/cr-series-body' );
+	$publication_pattern = (string) file_get_contents( CR_SERIES_THEME_DIR . '/patterns/cr-series-mc-publication.php' );
+	$header  = strpos( $publication_pattern, 'cr-mc__hero' );
+	$methods = strpos( $publication_pattern, 'cr-mc__methods' );
+	$body    = strpos( $publication_pattern, '"view":"publication-parts"' );
 	check( false !== $header && false !== $methods && false !== $body && $header < $methods && $methods < $body, 'Merge Conflicts landing: masthead, then methods, then the parts' );
 
 	$generic = (string) file_get_contents( CR_SERIES_THEME_DIR . '/templates/taxonomy-series.html' );
@@ -220,15 +221,15 @@ namespace Courtneyr\Child\Series\Tests {
 
 	// Front matter on the Merge Conflicts landing: masthead, methods file, contents, parts, one follow block.
 	$order = array(
-		'courtneyr-child/cr-series-mc-masthead',
-		'courtneyr-child/cr-series-methods',
-		'courtneyr-child/cr-series-contents',
-		'courtneyr-child/cr-series-body',
+		'cr-mc__hero',
+		'cr-mc__methods',
+		'"view":"publication-contents"',
+		'"view":"publication-parts"',
 		'"view":"follow"',
 	);
-	$at    = array_map( static fn( string $needle ) => strpos( $landing, $needle ), $order );
+	$at    = array_map( static fn( string $needle ) => strpos( $publication_pattern, $needle ), $order );
 	check( ! in_array( false, $at, true ) && $at === array_values( array_unique( $at ) ) && $at == array_values( ( static function ( array $v ): array { sort( $v ); return $v; } )( $at ) ), 'landing order: masthead, methods, contents, parts, follow' );
-	check( false === strpos( $landing, '-art"' ) && ! file_exists( CR_SERIES_THEME_DIR . '/assets/css/cr-series-art.css' ), 'the collage art and its sheet are gone' );
+	check( false !== strpos( $landing, 'courtneyr-child/cr-series-mc-publication' ) && false === strpos( $generic, 'cr-series-mc-publication' ), 'the publication composition belongs only to the Merge Conflicts archive' );
 	check( false === strpos( $generic, 'cr-series-mc-masthead' ) && false === strpos( $generic, '"view":"contents"' ) && false === strpos( $generic, '"view":"follow"' ), 'other series archives carry no front matter' );
 
 	$masthead = (string) file_get_contents( CR_SERIES_THEME_DIR . '/patterns/cr-series-mc-masthead.php' );

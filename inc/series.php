@@ -506,6 +506,14 @@ function enqueue_styles(): void {
 		array( 'courtneyr-series' ),
 		COURTNEYR_CHILD_VERSION
 	);
+	if ( is_admin() || is_tax( TAX, 'merge-conflicts' ) ) {
+		wp_enqueue_style(
+			'courtneyr-series-publication',
+			COURTNEYR_CHILD_URI . '/assets/css/cr-series-publication.css',
+			array( 'courtneyr-series-front' ),
+			COURTNEYR_CHILD_VERSION
+		);
+	}
 }
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_styles' );
 
@@ -630,7 +638,7 @@ add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\gate_methods_link'
  */
 function skip_front_matter_when_paged( string $content, array $block ): string {
 	$classes = explode( ' ', (string) ( $block['attrs']['className'] ?? '' ) );
-	if ( ! is_paged() || ! is_tax( TAX ) || ! array_intersect( array( 'cr-series-methods', 'cr-series-intro' ), $classes ) ) {
+	if ( ! is_paged() || ! is_tax( TAX ) || ! array_intersect( array( 'cr-series-methods', 'cr-series-intro', 'cr-mc__methods' ), $classes ) ) {
 		return $content;
 	}
 	return '';
@@ -825,3 +833,40 @@ function register(): void {
 	register_block_type( COURTNEYR_CHILD_DIR . '/blocks/series-guide' );
 }
 add_action( 'init', __NAMESPACE__ . '\\register' );
+
+/**
+ * Add loading hints and intrinsic sizes after core/image has validated its
+ * editable saved markup. Only the publication's decorative image classes match.
+ *
+ * @param string $content Rendered image block.
+ * @param array  $block Parsed image block.
+ */
+function publication_image_attributes( string $content, array $block ): string {
+	if ( ! is_tax( TAX, 'merge-conflicts' ) ) {
+		return $content;
+	}
+	$sizes = array(
+		'cr-mc__hero-art'  => array( 760, 695 ),
+		'cr-mc__coda'      => array( 1040, 400 ),
+		'cr-mc__notebook'  => array( 360, 393 ),
+		'cr-mc__megaphone' => array( 240, 219 ),
+		'cr-mc__books'     => array( 110, 100 ),
+		'cr-mc__signpost'  => array( 180, 233 ),
+	);
+	$class = (string) ( $block['attrs']['className'] ?? '' );
+	if ( ! isset( $sizes[ $class ] ) ) {
+		return $content;
+	}
+	$image = new \WP_HTML_Tag_Processor( $content );
+	if ( $image->next_tag( 'img' ) ) {
+		$image->set_attribute( 'width', $sizes[ $class ][0] );
+		$image->set_attribute( 'height', $sizes[ $class ][1] );
+		$image->set_attribute( 'decoding', 'async' );
+		$image->set_attribute( 'loading', 'cr-mc__hero-art' === $class ? 'eager' : 'lazy' );
+		if ( 'cr-mc__hero-art' === $class ) {
+			$image->set_attribute( 'fetchpriority', 'high' );
+		}
+	}
+	return $image->get_updated_html();
+}
+add_filter( 'render_block_core/image', __NAMESPACE__ . '\\publication_image_attributes', 10, 2 );
