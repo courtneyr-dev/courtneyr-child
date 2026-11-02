@@ -307,7 +307,7 @@ function series_name( \WP_Term $series, bool $link ): string {
 	if ( $link ) {
 		$name = sprintf( '<a href="%s">%s</a>', esc_url( (string) get_term_link( $landing ) ), $name );
 	}
-	$sep = '<span class="cr-series-sep" aria-hidden="true"> · </span>';
+	$sep = '<span class="cr-series-sep" aria-hidden="true" role="presentation"> · </span>';
 	if ( 'season' === $c['role'] ) {
 		/* translators: %d: season number. */
 		$name .= $sep . esc_html( sprintf( __( 'Season %d', 'courtneyr-child' ), season_number( $series ) ) );
@@ -337,7 +337,7 @@ function render_post_header( int $post_id ): string {
 			break;
 		}
 	}
-	$sep = '<span class="cr-series-sep" aria-hidden="true"> · </span>';
+	$sep = '<span class="cr-series-sep" aria-hidden="true" role="presentation"> · </span>';
 	if ( $position ) {
 		$place = part_label( $rows[ $position - 1 ]['part'], $position, $total );
 	} else {
@@ -444,7 +444,7 @@ function render_post_nav( int $post_id ): string {
 		/* translators: %d: part number. */
 		$part  = sprintf( __( 'Part %d', 'courtneyr-child' ), $row['part'] ?? 0 );
 		$meta  = $row['series']->term_id === $series->term_id ? $part : $where . ' · ' . $part;
-		$arrow = '<span class="cr-series-nav__arrow" aria-hidden="true">' . $arrow . '</span>';
+		$arrow = '<span class="cr-series-nav__arrow" aria-hidden="true" role="presentation">' . $arrow . '</span>';
 		$html .= sprintf(
 			'<a class="cr-card cr-series-nav__link cr-series-nav__link--%1$s" href="%2$s" rel="%1$s"><span class="cr-series-nav__dir">%3$s</span><span class="cr-series-nav__part">%4$s</span><span class="cr-series-nav__title">%5$s</span></a>',
 			esc_attr( $dir ),
