@@ -3,13 +3,15 @@
  * Title: Series archive parts
  * Slug: courtneyr-child/cr-series-body
  * Categories: cr-zine, cr-loops
- * Description: The orange rule, the season index, the published parts in part order (inc/series.php orders the main query, ten per page) as numbered zine cards, the launch state when nothing is published, pagination, and companion series.
+ * Description: The orange rule, the season index, the published parts in part order (inc/series.php orders the main query, ten per page) as numbered rows grouped into season panels, the launch state when nothing is published, pagination, and companion series.
  * Keywords: series, parts, seasons, query, merge conflicts
  * Block Types: core/query
  * Inserter: false
  *
- * Part chip and season label: core/paragraph bound to the courtneyr/series-part
- * source (inc/series.php). Card classes come from cr-blog.css (.cr-blog .card).
+ * Numeral, part label, season and reading time: core/paragraph bound to the
+ * courtneyr/series-part source (inc/series.php). The numeral is aria-hidden and
+ * the "Part 3" label is visually hidden. Series\group_parts() wraps the rows in
+ * season sections after the post template renders.
  *
  * @package CourtneyrChild
  */
@@ -30,23 +32,30 @@ declare( strict_types = 1 );
 		<!-- wp:group {"tagName":"article","className":"card cr-series-card","layout":{"type":"default"}} -->
 		<article class="wp-block-group card cr-series-card">
 
-			<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"courtneyr/series-part","args":{"key":"part"}}}},"className":"cr-tape cr-series-card__part"} -->
-			<p class="cr-tape cr-series-card__part"></p>
+			<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"courtneyr/series-part","args":{"key":"numeral"}}}},"className":"cr-series-card__num"} -->
+			<p class="cr-series-card__num"></p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:group {"className":"card__body cr-series-card__body","layout":{"type":"default"}} -->
 			<div class="wp-block-group card__body cr-series-card__body">
 
-				<!-- wp:group {"className":"card__meta-row","layout":{"type":"flex","flexWrap":"wrap"}} -->
-				<div class="wp-block-group card__meta-row">
-					<!-- wp:post-date {"format":"F j, Y","className":"card__meta cr-dt-published","fontSize":"xs"} /-->
+				<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"courtneyr/series-part","args":{"key":"part"}}}},"className":"screen-reader-text cr-series-card__part"} -->
+				<p class="screen-reader-text cr-series-card__part"></p>
+				<!-- /wp:paragraph -->
+
+				<!-- wp:group {"className":"card__meta-row cr-series-card__meta","layout":{"type":"flex","flexWrap":"wrap"}} -->
+				<div class="wp-block-group card__meta-row cr-series-card__meta">
+					<!-- wp:post-date {"format":"M j, Y","className":"card__meta cr-dt-published","fontSize":"xs"} /-->
 					<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"courtneyr/series-part","args":{"key":"season"}}}},"className":"card__meta cr-series-card__season","fontSize":"xs"} -->
 					<p class="card__meta cr-series-card__season has-xs-font-size"></p>
+					<!-- /wp:paragraph -->
+					<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"courtneyr/series-part","args":{"key":"read"}}}},"className":"card__meta cr-series-card__read","fontSize":"xs"} -->
+					<p class="card__meta cr-series-card__read has-xs-font-size"></p>
 					<!-- /wp:paragraph -->
 				</div>
 				<!-- /wp:group -->
 
-				<!-- wp:post-title {"isLink":true,"className":"card__title p-name cr-u-url","style":{"typography":{"lineHeight":"1.2"}},"fontFamily":"accent"} /-->
+				<!-- wp:post-title {"level":3,"isLink":true,"className":"card__title p-name cr-u-url","style":{"typography":{"lineHeight":"1.2"}},"fontFamily":"accent"} /-->
 
 				<!-- wp:post-excerpt {"className":"card__excerpt","excerptLength":30,"showMoreOnNewLine":false} /-->
 

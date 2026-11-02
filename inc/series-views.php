@@ -56,6 +56,12 @@ function render_view( string $view, $block ): string {
 			return render_launch( $term );
 		case 'companions':
 			return is_paged() ? '' : render_companions( $term );
+		case 'hero-art':
+			return render_hero_art( $term );
+		case 'methods-art':
+			return render_methods_art();
+		case 'margin-art':
+			return render_margin_art( $term );
 	}
 	return '';
 }
@@ -70,35 +76,84 @@ function published_total( array $series ): int {
 }
 
 /**
- * Archive status line: published parts, seasons, and the collection a season belongs to.
+ * Archive status line: the collection a season or companion belongs to. The
+ * header carries no counts (Courtney, 2026-11-02); the parts list shows them.
  *
  * @param \WP_Term $term Queried series.
  */
 function render_status( \WP_Term $term ): string {
-	$c     = collection( $term );
-	$items = array();
-	if ( 'season' === $c['role'] || 'companion' === $c['role'] ) {
-		$n     = season_number( $term );
-		$label = 'season' === $c['role']
-			/* translators: 1: season number, 2: number of seasons, 3: collection link. */
-			? sprintf( __( 'Season %1$d of %2$d in %3$s', 'courtneyr-child' ), $n, count( $c['seasons'] ), '%s' )
-			/* translators: %s: collection link. */
-			: __( 'Companion series to %s', 'courtneyr-child' );
-		$link    = sprintf( '<a href="%s">%s</a>', esc_url( (string) get_term_link( $c['landing'] ) ), esc_html( $c['landing']->name ) );
-		$items[] = sprintf( esc_html( $label ), $link );
-		$items[] = esc_html( published_count_label( published_total( array( $term ) ) ) );
-	} else {
-		$items[] = esc_html( published_count_label( published_total( 'landing' === $c['role'] ? main_series( $c ) : array( $term ) ) ) );
-		if ( $c['seasons'] ) {
-			/* translators: %d: number of seasons. */
-			$items[] = esc_html( sprintf( _n( '%d season', '%d seasons', count( $c['seasons'] ), 'courtneyr-child' ), count( $c['seasons'] ) ) );
+	$c = collection( $term );
+	if ( 'season' !== $c['role'] && 'companion' !== $c['role'] ) {
+		return '';
+	}
+	$label = 'season' === $c['role']
+		/* translators: 1: season number, 2: collection link. */
+		? sprintf( __( 'Season %1$d of %2$s', 'courtneyr-child' ), season_number( $term ), '%s' )
+		/* translators: %s: collection link. */
+		: __( 'Companion series to %s', 'courtneyr-child' );
+	$link = sprintf( '<a href="%s">%s</a>', esc_url( (string) get_term_link( $c['landing'] ) ), esc_html( $c['landing']->name ) );
+	return '<ul class="cr-series-status" role="list"><li>' . sprintf( esc_html( $label ), $link ) . '</li></ul>';
+}
+
+/**
+ * The parts list as season sections (see group_parts()). The first section
+ * carries the handwritten note that the list holds published parts only.
+ *
+ * @param \WP_Term                                 $term       Queried series.
+ * @param array<int, array{id: int, html: string}> $rows       Rendered rows in order.
+ * @param string                                   $list_attrs Attributes of the post template's list.
+ */
+function render_part_groups( \WP_Term $term, array $rows, string $list_attrs ): string {
+	$c       = collection( $term );
+	$grouped = 'landing' === $c['role'] && $c['seasons'];
+	$groups  = array();
+	foreach ( $rows as $row ) {
+		$series = $grouped ? series_of_post( $row['id'] ) : null;
+		$key    = $series ? $series->term_id : 0;
+		$last   = array_key_last( $groups );
+		if ( null === $last || $groups[ $last ]['key'] !== $key ) {
+			$groups[] = array(
+				'key'    => $key,
+				'series' => $series,
+				'rows'   => array(),
+			);
+			$last     = array_key_last( $groups );
 		}
+		$groups[ $last ]['rows'][] = $row;
 	}
-	$html = '<ul class="cr-series-status" role="list">';
-	foreach ( $items as $item ) {
-		$html .= '<li>' . $item . '</li>';
+	$at         = strpos( $list_attrs, 'class="' );
+	$list_attrs = false === $at ? ' class="cr-series-rows"' . $list_attrs : substr_replace( $list_attrs, 'class="cr-series-rows ', $at, strlen( 'class="' ) );
+	$html       = '';
+	foreach ( $groups as $i => $group ) {
+		$season = $group['series'] && $group['series']->term_id !== $c['landing']->term_id ? $group['series'] : null;
+		$id     = 'cr-series-group-' . ( $season ? $season->term_id : $term->term_id );
+		if ( $season ) {
+			$first = parts( $season->term_id )[0]['id'] ?? 0;
+			$title = $first === $group['rows'][0]['id']
+				? $season->name
+				/* translators: %s: season name. */
+				: sprintf( __( '%s (continued)', 'courtneyr-child' ), $season->name );
+			/* translators: %d: season number. */
+			$head  = '<p class="cr-tape cr-series-season__tape">' . esc_html( sprintf( __( 'Season %d', 'courtneyr-child' ), season_number( $season ) ) ) . '</p>';
+			$head .= sprintf( '<h2 class="cr-series-season__title" id="%s"><a href="%s">%s</a></h2>', esc_attr( $id ), esc_url( (string) get_term_link( $season ) ), esc_html( $title ) );
+			$desc  = trim( wp_strip_all_tags( term_description( $season ) ) );
+			$head .= '' !== $desc ? '<p class="cr-series-season__desc">' . esc_html( $desc ) . '</p>' : '';
+		} else {
+			$head = '<h2 class="screen-reader-text" id="' . esc_attr( $id ) . '">' . esc_html__( 'Parts', 'courtneyr-child' ) . '</h2>';
+		}
+		if ( 0 === $i ) {
+			$head .= '<p class="cr-series-note">' . esc_html__( 'Only published essays appear here. New parts join the list as they come out.', 'courtneyr-child' ) . '</p>';
+		}
+		$html .= sprintf(
+			'<section class="cr-series-season%s" aria-labelledby="%s"><div class="cr-series-season__head">%s</div><ol%s role="list">%s</ol></section>',
+			$season ? '' : ' is-untitled',
+			esc_attr( $id ),
+			$head,
+			$list_attrs,
+			implode( '', array_column( $group['rows'], 'html' ) )
+		);
 	}
-	return $html . '</ul>';
+	return '<div class="cr-series-parts">' . $html . '</div>';
 }
 
 /**
@@ -123,7 +178,7 @@ function render_seasons( \WP_Term $term ): string {
 		/* translators: %d: season number. */
 		$inner  = '<span class="cr-series-seasons__num">' . esc_html( sprintf( __( 'Season %d', 'courtneyr-child' ), $i + 1 ) ) . '</span>';
 		$inner .= '<span class="cr-series-seasons__name">' . esc_html( $season->name ) . '</span>';
-		$inner .= '<span class="cr-series-seasons__count">' . esc_html( published_count_label( $count ) ) . '</span>';
+		$inner .= $count ? '' : '<span class="cr-series-seasons__count">' . esc_html__( 'Coming later', 'courtneyr-child' ) . '</span>';
 		$class  = 'cr-series-seasons__item' . ( $count ? '' : ' is-upcoming' ) . ( $current ? ' is-current' : '' );
 		if ( $count ) {
 			$inner = sprintf( '<a class="cr-series-seasons__link" href="%s"%s>%s</a>', esc_url( (string) get_term_link( $season ) ), $current ? ' aria-current="page"' : '', $inner );
@@ -455,4 +510,99 @@ function render_post_nav( int $post_id ): string {
 		);
 	}
 	return $html . '</nav>';
+}
+
+/**
+ * Collage art around a landing title: a hand-drawn hash in the left margin,
+ * and a postage stamp, the postmark (inc/stamps.php) and a tape label in the
+ * top-right corner. Decoration only: the wrapper is aria-hidden, and nothing
+ * it prints is information the page needs.
+ *
+ * @param \WP_Term $term Queried series.
+ */
+function render_hero_art( \WP_Term $term ): string {
+	wp_enqueue_style( 'courtneyr-series-art' );
+	$postmark = \Courtneyr\Child\Stamps\render(
+		array(
+			'shape'    => 'seal',
+			'ring'     => __( 'Open source', 'courtneyr-child' ),
+			'big'      => __( 'People', 'courtneyr-child' ),
+			'small'    => __( 'Processes', 'courtneyr-child' ),
+			'tiny'     => __( 'Power', 'courtneyr-child' ),
+			'ink'      => 'var(--cr-ink)',
+			'tilt'     => 2,
+			'postmark' => true,
+			'uid'      => 'cr-series-postmark-' . $term->term_id,
+			'family'   => 'series',
+		)
+	);
+	$svg      = ' focusable="false" aria-hidden="true" role="presentation"';
+	$html     = '<div class="cr-series-hero-art alignwide" aria-hidden="true" role="presentation">';
+	$html    .= '<svg class="cr-series-hero-art__hash" viewBox="0 0 60 60"' . $svg . '><path class="cr-art-pen" d="M20 6 14 54M40 4 34 52M5 22 55 17M3 40 53 35" /></svg>';
+	$html    .= '<div class="cr-series-hero-art__cluster">';
+	$html    .= '<span class="cr-series-postage"><svg viewBox="0 0 56 68"' . $svg . '>'
+		. '<rect class="cr-art-sky" width="56" height="68" />'
+		. '<circle class="cr-art-sun" cx="42" cy="15" r="6" />'
+		. '<path class="cr-art-ridge" d="M0 50 14 30l8 10 10-20 12 18 12-10v40H0z" />'
+		. '<path class="cr-art-snow" d="m32 20-5 8 4-1 2 3 4-3z" />'
+		. '<path class="cr-art-hill" d="M0 58c18-10 30-2 40 0s12-4 16-4v14H0z" />'
+		. '</svg></span>';
+	$html    .= $postmark;
+	$html    .= '<span class="cr-series-hero-art__tape">' . esc_html__( 'A field guide to decisions', 'courtneyr-child' ) . '</span>';
+	return $html . '</div></div>';
+}
+
+/**
+ * A spiral notebook labelled METHODS for the methods band. Decoration only.
+ */
+function render_methods_art(): string {
+	wp_enqueue_style( 'courtneyr-series-art' );
+	$rings = '';
+	for ( $x = 20; $x <= 96; $x += 11 ) {
+		$rings .= '<path d="M' . $x . ' 18c0-9 7-9 7 0" />';
+	}
+	$rules = '';
+	for ( $y = 66; $y <= 116; $y += 10 ) {
+		$rules .= '<path d="M22 ' . $y . 'h74" />';
+	}
+	return '<div class="cr-series-methods__art" aria-hidden="true" role="presentation"><svg class="cr-series-notebook" viewBox="0 0 120 140" focusable="false" aria-hidden="true" role="presentation">'
+		. '<rect class="cr-art-page" x="16" y="18" width="94" height="114" rx="3" transform="rotate(2.8 63 75)" />'
+		. '<rect class="cr-art-cover" x="10" y="14" width="96" height="118" rx="3" />'
+		. '<g class="cr-art-rule">' . $rules . '</g>'
+		. '<rect class="cr-art-label" x="24" y="32" width="68" height="20" transform="rotate(-2.5 58 42)" />'
+		. '<text class="cr-art-word" x="58" y="47" transform="rotate(-2.5 58 42)">METHODS</text>'
+		. '<g class="cr-art-pen">' . $rings . '</g>'
+		. '<path class="cr-art-pen" d="M100 98 112 86M95 110l2-9 9 3" />'
+		. '</svg></div>';
+}
+
+/**
+ * Margin notes beside the parts: a registration mark and, once parts exist,
+ * a handwritten aside with its arrow, a second mark and a sprig of dried flowers.
+ * Shown only where the margins are wide enough to hold them. Decoration only.
+ *
+ * @param \WP_Term $term Queried series.
+ */
+function render_margin_art( \WP_Term $term ): string {
+	wp_enqueue_style( 'courtneyr-series-art' );
+	$c     = collection( $term );
+	$parts = track( 'landing' === $c['role'] ? main_series( $c ) : array( $term ) );
+	$svg   = ' focusable="false" aria-hidden="true" role="presentation"';
+	$html  = '<div class="cr-series-margin-art alignwide" aria-hidden="true" role="presentation">';
+	$html .= '<span class="cr-series-margin-art__mark cr-series-margin-art__mark--1"></span>';
+	if ( $parts ) {
+		$html .= '<span class="cr-series-margin-art__mark cr-series-margin-art__mark--2"></span>';
+		$html .= '<span class="cr-series-margin-art__note">' . esc_html__( 'Same questions, different projects', 'courtneyr-child' ) . '</span>';
+		$html .= '<svg class="cr-series-margin-art__arrow" viewBox="0 0 80 64"' . $svg . '><path class="cr-art-pen" d="M6 6c24-2 34 24 16 28C8 37 14 18 34 22c18 4 28 18 36 32M60 52l11 3-2-11" /></svg>';
+		$html .= '<svg class="cr-series-margin-art__flowers" viewBox="0 0 120 320"' . $svg . '><g class="cr-art-stem">'
+			. '<path d="M60 318C58 250 50 190 34 120M62 318c2-78 10-148 30-228M60 318c0-88 0-168-2-258" />'
+			. '<path d="M53 232c-14-8-20-18-22-30M65 200c14-6 20-14 24-26M59 150c-12-6-16-12-18-24M61 104c10-4 14-12 16-22" />'
+			. '<path d="M34 120l-10-14M34 120l-2-17M34 120l8-15M92 90l-6-15M92 90l5-16M92 90l12-10M58 60l-9-13M58 60l1-16M58 60l10-12" />'
+			. '</g><g class="cr-art-seed">'
+			. '<circle cx="24" cy="105" r="3" /><circle cx="32" cy="102" r="3" /><circle cx="42" cy="104" r="3" />'
+			. '<circle cx="86" cy="74" r="3" /><circle cx="97" cy="73" r="3" /><circle cx="104" cy="80" r="3" />'
+			. '<circle cx="49" cy="46" r="3" /><circle cx="59" cy="43" r="3" /><circle cx="68" cy="48" r="3" />'
+			. '</g></svg>';
+	}
+	return $html . '</div>';
 }

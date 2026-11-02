@@ -41,53 +41,115 @@
 
 .cr-series-status a { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
 
-/* ---------- Methods & Sources: sky-blue callout before the parts ---------- */
+/* ---------- Archive header: title left, description right (mockup 2026-11-01) ----------
+   The header is a constrained group, whose children carry `margin-inline: auto
+   !important`; the grid needs them flush, so the reset matches that weight. */
+@media (min-width: 64rem) {
+
+	.cr-series .cr-series-header {
+		display: grid;
+		grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+		grid-template-rows: auto 1fr auto;
+		column-gap: var(--cr-space-2xl);
+	}
+
+	.cr-series .cr-series-header > * {
+		grid-column: 1 / -1;
+		max-inline-size: none;
+		margin-inline: 0 !important;
+	}
+
+	.cr-series .cr-series-header > .cr-archive__title { grid-column: 1; grid-row: 2 / span 2; }
+
+	/* The inline padding keeps the title's flank sparkle clear of the text. */
+	.cr-series .cr-series-header > .cr-archive__description { grid-column: 2; grid-row: 2; align-self: end; max-inline-size: 30rem; padding-inline-start: var(--cr-space-lg); }
+
+	.cr-series .cr-series-header > .cr-series-status { grid-column: 2; grid-row: 3; align-self: start; padding-inline-start: var(--cr-space-lg); }
+}
+
+/* ---------- Methods & Sources: a torn sky-blue band before the parts ---------- */
 .cr-series-methods {
+	--cr-series-tear: 0.625rem;
 	position: relative;
-	margin-block: var(--cr-space-xl) var(--cr-space-lg);
-	padding: var(--cr-space-xl) var(--cr-space-lg) var(--cr-space-lg);
+	display: grid;
+	grid-template-columns: 4.5rem minmax(0, 1fr);
+	gap: var(--cr-space-md);
+	align-items: center;
+	margin-block: var(--cr-space-2xl) var(--cr-space-xl);
+	padding: var(--cr-space-lg) var(--cr-space-md);
 	background: var(--cr-accent-1-bg);
 	color: var(--cr-accent-1-ink);
-	border: var(--cr-border-thick);
-	box-shadow: var(--cr-shadow-hard-2);
 }
 
-/* A strip of masking tape pinning the callout to the page. Decorative. */
-.cr-series-methods::before {
+/* Torn top and bottom edges: the cr-paper.css tear, flipped for the top. Decorative. */
+.cr-series-methods::before,
+.cr-series-methods::after {
 	content: "";
 	position: absolute;
-	inset-block-start: calc(-1 * var(--cr-space-sm));
-	inset-inline-start: var(--cr-space-xl);
-	inline-size: 6rem;
-	block-size: 1.5rem;
-	background: var(--cr-tape);
-	transform: rotate(var(--cr-rotate-neg));
-	opacity: 0.9;
+	inset-inline: 0;
+	block-size: var(--cr-series-tear);
+	background-color: var(--cr-accent-1-bg);
+	pointer-events: none;
+	-webkit-mask:
+		linear-gradient(135deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-series-tear) var(--cr-series-tear) repeat-x,
+		linear-gradient(225deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-series-tear) var(--cr-series-tear) repeat-x;
+	mask:
+		linear-gradient(135deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-series-tear) var(--cr-series-tear) repeat-x,
+		linear-gradient(225deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-series-tear) var(--cr-series-tear) repeat-x;
 }
 
-.cr-series-methods > * { max-inline-size: var(--cr-measure); }
+.cr-series-methods::before { inset-block-end: 100%; transform: scaleY(-1); }
 
-.cr-series-methods__eyebrow { color: inherit; margin: 0 0 var(--cr-space-2xs); }
+.cr-series-methods::after { inset-block-start: 100%; }
+
+.cr-series-methods > * { margin: 0; }
+
+.cr-series-methods__art { grid-column: 1; grid-row: 1; }
+
+.cr-series-methods__head { grid-column: 2; grid-row: 1; }
+
+.cr-series-methods__body { grid-column: 1 / -1; }
+
+.cr-series-methods__head > *,
+.cr-series-methods__body > * { margin-block: 0; }
+
+@media (min-width: 60rem) {
+
+	.cr-series-methods {
+		grid-template-columns: 7rem minmax(0, 1fr) minmax(0, 1.15fr);
+		column-gap: var(--cr-space-xl);
+		padding: var(--cr-space-lg) var(--cr-space-xl);
+	}
+
+	.cr-series-methods__body { grid-column: 3; grid-row: 1; }
+}
+
+.cr-series-methods__eyebrow { color: inherit; margin-block-end: var(--cr-space-2xs); }
 
 .cr-series-methods__title {
-	margin: 0 0 var(--cr-space-sm);
 	color: inherit;
-	font-size: var(--cr-text-2xl);
+	font-size: var(--cr-text-xl);
 	line-height: 1.15;
 }
 
-/* Selective-yellow marker under the heading. */
+@media (min-width: 44rem) {
+
+	.cr-series-methods__title { font-size: var(--cr-text-2xl); }
+}
+
+/* Orange marker under the heading. */
 .cr-series-methods__title::after {
 	content: "";
 	display: block;
-	inline-size: 7rem;
+	inline-size: 9rem;
+	max-inline-size: 70%;
 	block-size: 6px;
 	margin-block-start: var(--cr-space-xs);
-	background: var(--cr-highlight);
+	background: var(--cr-marker);
 	transform: rotate(var(--cr-rotate-1));
 }
 
-.cr-series-methods__desc { margin: 0 0 var(--cr-space-sm); font-size: var(--cr-text-md); line-height: 1.5; }
+.cr-series-methods__desc { margin-block-end: var(--cr-space-sm) !important; font-size: var(--cr-text-base); line-height: 1.5; }
 
 .cr-series-methods__link,
 .cr-series-methods__pending { margin: 0; font-weight: var(--cr-weight-bold); }
@@ -121,20 +183,31 @@
 	transform: none;
 }
 
-/* ---------- Season index ---------- */
-.cr-series-seasons { margin-block: 0 var(--cr-space-2xl); }
+/* ---------- Season index: one line of season chips under the rule ---------- */
+.cr-series-seasons {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--cr-space-sm) var(--cr-space-md);
+	margin-block: 0 var(--cr-space-2xl);
+}
 
 .cr-series-seasons__title {
-	margin: 0 0 var(--cr-space-md);
+	margin: 0;
 	font-family: var(--cr-font-accent);
-	font-size: var(--cr-text-xl);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
 	color: var(--cr-ink);
 }
 
 .cr-series-seasons__list {
-	display: grid;
-	gap: var(--cr-space-md);
-	grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+	flex: 1 1 30rem;
+	display: flex;
+	max-inline-size: none;
+	flex-wrap: wrap;
+	gap: var(--cr-space-sm);
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -145,14 +218,15 @@
 .cr-series-seasons__item::before { content: none; }
 
 .cr-series-seasons__link {
-	display: flex;
-	flex-direction: column;
-	gap: var(--cr-space-2xs);
-	block-size: 100%;
-	padding: var(--cr-space-md);
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--cr-space-2xs) var(--cr-space-xs);
+	min-block-size: 2.75rem;
+	padding: var(--cr-space-2xs) var(--cr-space-sm);
 	background: var(--cr-surface-elevated);
 	border: var(--cr-border-thick);
-	box-shadow: var(--cr-shadow-hard);
+	box-shadow: var(--cr-shadow-hard-sm, var(--cr-shadow-hard));
 	color: var(--cr-ink);
 	text-decoration: none;
 }
@@ -166,8 +240,7 @@ a.cr-series-seasons__link:focus-visible {
 }
 
 .cr-series-seasons__num {
-	align-self: flex-start;
-	padding: var(--cr-space-3xs) var(--cr-space-xs);
+	padding: 0 var(--cr-space-2xs);
 	background: var(--cr-accent-2-bg);
 	color: var(--cr-accent-2-ink);
 	font-family: var(--cr-font-accent);
@@ -175,70 +248,262 @@ a.cr-series-seasons__link:focus-visible {
 	font-weight: var(--cr-weight-bold);
 	letter-spacing: var(--cr-tracking-eyebrow);
 	text-transform: uppercase;
-	transform: rotate(var(--cr-rotate-1));
 }
 
-.cr-series-seasons__name { font-family: var(--cr-font-accent); font-weight: var(--cr-weight-bold); font-size: var(--cr-text-md); line-height: 1.25; }
+.cr-series-seasons__name { font-family: var(--cr-font-accent); font-weight: var(--cr-weight-bold); font-size: var(--cr-text-sm); }
 
-.cr-series-seasons__count { font-size: var(--cr-text-sm); color: var(--cr-ink-muted); }
+.cr-series-seasons__count { font-size: var(--cr-text-xs); color: var(--cr-ink-muted); }
 
-/* No published parts: plain text, dashed edge, no shadow. The count says so in words. */
+/* No published parts: plain text, dashed edge, no shadow. */
 .cr-series-seasons__item.is-upcoming .cr-series-seasons__link { border-style: dashed; box-shadow: none; background: transparent; }
 
 .cr-series-seasons__item.is-current .cr-series-seasons__link { border-width: 4px; }
 
-/* ---------- Parts list (cards from cr-blog.css, laid out as a numbered list) ---------- */
-.cr-blog .cr-series-list {
-	display: grid;
-	gap: var(--cr-space-lg);
-	margin: 0 0 var(--cr-space-xl);
-	padding: 0;
-	list-style: none;
-}
+/* ---------- Parts: season sections, each a panel of numbered rows ----------
+   Series\group_parts() wraps the post template's rows in
+   section.cr-series-season > (div.cr-series-season__head, ol.cr-series-rows). */
+.cr-series-parts { display: grid; gap: var(--cr-space-3xl); margin-block-end: var(--cr-space-2xl); }
 
-.cr-blog .cr-series-list > li { margin: 0; padding: 0; }
+.cr-series-season { position: relative; }
 
-.cr-blog .cr-series-list > li::before { content: none; }
-
-/* The archive family's divider between posts; series cards carry their own border. */
-.cr-archive.cr-series .cr-series-list > .wp-block-post::after { content: none; }
-
-.cr-blog .card.cr-series-card {
+.cr-series-season__head {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
 	gap: var(--cr-space-sm);
-	padding: var(--cr-space-lg);
+	margin-block-end: var(--cr-space-lg);
+}
+
+.cr-series-season__head > * { margin: 0; }
+
+.cr-series .cr-series-season__tape {
+	justify-self: start;
+	padding: var(--cr-space-2xs) var(--cr-space-md);
+	background: var(--cr-accent-2-bg);
+	color: var(--cr-accent-2-ink);
+	font-size: var(--cr-text-md);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+}
+
+.cr-series-season__title {
+	font-family: var(--cr-font-accent);
+	font-size: clamp(var(--cr-text-2xl), 3.2vw, var(--cr-text-3xl));
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.15;
+	color: var(--cr-ink);
+}
+
+.cr-series-season__title a {
+	color: inherit;
+	text-decoration: underline;
+	text-decoration-color: var(--cr-marker);
+	text-decoration-thickness: 0.14em;
+	text-underline-offset: 0.2em;
+	text-decoration-skip-ink: none;
+}
+
+.cr-series-season__title a:hover { text-decoration-color: currentcolor; }
+
+.cr-series-season__title a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 3px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo, var(--cr-ink));
+}
+
+.cr-series-season__desc { max-inline-size: var(--cr-measure); color: var(--cr-ink); line-height: 1.5; }
+
+/* The handwritten note on a scrap of tape-coloured paper, with three pen hatches. */
+.cr-series-note {
+	position: relative;
+	justify-self: start;
+	max-inline-size: 19rem;
+	padding: var(--cr-space-sm) var(--cr-space-md);
+	background: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-display);
+	font-size: var(--cr-text-sm);
+	line-height: 1.9;
+	transform: rotate(var(--cr-rotate-2));
+}
+
+@media (min-width: 48rem) {
+
+	.cr-series-season__head { grid-template-columns: auto minmax(0, 1fr); column-gap: var(--cr-space-lg); align-items: center; }
+
+	.cr-series-season__title,
+	.cr-series-season__desc { grid-column: 2; }
+
+	.cr-series-season__tape { grid-column: 1; grid-row: 1; }
+
+	.cr-series-note { grid-column: 1 / -1; }
+
+	.cr-series-season.is-untitled .cr-series-note { justify-self: end; }
+}
+
+@media (min-width: 64rem) {
+
+	.cr-series-season__head { grid-template-columns: auto minmax(0, 1fr) 19rem; }
+
+	.cr-series-note { grid-column: 3; grid-row: 1 / span 2; justify-self: end; }
+
+	.cr-series-note::before {
+		content: "";
+		position: absolute;
+		inset-inline-end: calc(100% + var(--cr-space-sm));
+		inset-block-start: 30%;
+		inline-size: 1.75rem;
+		block-size: 1.5rem;
+		background: repeating-linear-gradient(115deg, transparent 0 5px, var(--cr-ink) 5px 7px);
+	}
+}
+
+.cr-blog .cr-series-rows {
+	position: relative;
+	display: block;
+	margin: 0;
+	padding: 0 var(--cr-space-md);
+	list-style: none;
+	background: var(--cr-surface-elevated);
+	border: var(--cr-border-thick);
+	box-shadow: var(--cr-shadow-hard-2);
+}
+
+@media (min-width: 44rem) {
+
+	.cr-blog .cr-series-rows { padding-inline: var(--cr-space-xl); }
+}
+
+.cr-blog .cr-series-rows > li { margin: 0; padding: 0; }
+
+.cr-blog .cr-series-rows > li::before { content: none; }
+
+.cr-blog .cr-series-rows > li + li { border-block-start: 2px solid var(--cr-rule); }
+
+/* The archive family's divider between posts; the panel carries its own rules. */
+.cr-archive.cr-series .cr-series-rows > .wp-block-post::after { content: none; }
+
+/* One row: numeral, text, arrow. The title link covers the row. */
+.cr-blog .card.cr-series-card {
+	display: grid;
+	grid-template-columns: 2.75rem minmax(0, 1fr) 1.25rem;
+	gap: var(--cr-space-xs) var(--cr-space-md);
+	align-items: start;
 	block-size: auto;
+	padding: var(--cr-space-lg) 0;
+	background: none;
+	border: 0;
+	box-shadow: none;
+	color: var(--cr-ink);
+	transform: none;
+}
+
+.cr-blog .card.cr-series-card:hover { transform: none; box-shadow: none; }
+
+.cr-blog .card.cr-series-card::after {
+	content: "";
+	grid-column: 3;
+	grid-row: 1;
+	align-self: center;
+	inline-size: 1.25rem;
+	block-size: 1rem;
+	background: currentcolor;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 16'%3E%3Cpath d='M1 8h20M14 1l7 7-7 7' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 16'%3E%3Cpath d='M1 8h20M14 1l7 7-7 7' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+@media (min-width: 44rem) {
+
+	.cr-blog .card.cr-series-card { grid-template-columns: 3.5rem minmax(0, 1fr) 1.5rem; column-gap: var(--cr-space-lg); }
+
+	.cr-blog .card.cr-series-card::after { inline-size: 1.5rem; }
 }
 
 .cr-blog .card.cr-series-card > *,
 .cr-blog .card.cr-series-card .card__body > * { margin-block: 0; }
 
-.cr-blog .card.cr-series-card .card__body { padding: 0; display: flex; flex-direction: column; gap: var(--cr-space-xs); }
+.cr-series-card__num {
+	grid-column: 1;
+	grid-row: 1;
+	display: grid;
+	place-items: center;
+	aspect-ratio: 1;
+	background: var(--cr-accent-2-bg);
+	color: var(--cr-accent-2-ink);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1;
+	transform: rotate(var(--cr-rotate-1));
+}
 
-.cr-series-query { margin-block-end: var(--cr-space-2xl); }
+/* The first part of each panel is the yellow one, in both themes. */
+.cr-series-rows > li:first-child .cr-series-card__num { background: var(--cr-selective-yellow); color: var(--cr-russian-violet); }
 
-.cr-series-card__part { justify-self: start; margin: 0; text-transform: uppercase; letter-spacing: var(--cr-tracking-eyebrow); }
-
-.cr-series-card__part:empty,
-.cr-series-card__season:empty { display: none; }
-
-.cr-blog .card.cr-series-card .card__meta-row { gap: var(--cr-space-2xs) var(--cr-space-sm); }
-
-.cr-series-card__season { margin: 0; font-weight: var(--cr-weight-bold); }
-
-.cr-series-card__media { margin: 0; }
-
-.cr-series-card__media img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; border: var(--cr-border-thick); }
+.cr-series-rows > li:nth-child(even) .cr-series-card__num { transform: rotate(var(--cr-rotate-2)); }
 
 @media (min-width: 44rem) {
 
-	.cr-blog .card.cr-series-card { grid-template-columns: 7rem minmax(0, 1fr); align-items: start; column-gap: var(--cr-space-lg); }
-
-	.cr-blog .card.cr-series-card:has(.cr-series-card__media) { grid-template-columns: 7rem minmax(0, 1fr) 11rem; }
-
-	.cr-series-card__media { grid-column: 3; grid-row: 1; }
+	.cr-series-card__num { font-size: var(--cr-text-2xl); }
 }
+
+.cr-blog .card.cr-series-card .card__body {
+	grid-column: 2;
+	grid-row: 1;
+	display: flex;
+	flex-direction: column;
+	gap: var(--cr-space-xs);
+	padding: 0;
+}
+
+.cr-blog .card.cr-series-card .card__meta-row { gap: var(--cr-space-2xs) var(--cr-space-sm); align-items: center; }
+
+.cr-blog .card.cr-series-card .card__meta {
+	margin: 0;
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-xs);
+	font-weight: var(--cr-weight-semibold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+	color: var(--cr-ink-muted);
+}
+
+/* A dot between meta items, drawn rather than typed so it is never read out. */
+.cr-blog .card.cr-series-card .card__meta + .card__meta::before {
+	content: "";
+	display: inline-block;
+	inline-size: 0.25rem;
+	block-size: 0.25rem;
+	margin-inline-end: var(--cr-space-sm);
+	border-radius: var(--cr-radius-full);
+	background: currentcolor;
+	vertical-align: middle;
+}
+
+/* On a phone the section heading already names the season (mockup, mobile frame). */
+@media (max-width: 43.99rem) {
+
+	.cr-series-season:not(.is-untitled) .cr-series-card__season { display: none; }
+}
+
+.cr-series-card__season:empty,
+.cr-series-card__part:empty,
+.cr-series-card__num:empty { display: none; }
+
+.cr-blog .card.cr-series-card .card__title { font-size: var(--cr-text-xl); }
+
+.cr-blog .card.cr-series-card .card__title a {
+	color: var(--cr-ink);
+	text-decoration: none;
+	text-decoration-color: var(--cr-marker);
+	text-decoration-thickness: 4px;
+	text-underline-offset: 5px;
+	text-decoration-skip-ink: none;
+}
+
+.cr-blog .card.cr-series-card .card__title a::after { content: ""; position: absolute; inset: 0; }
+
+.cr-series-rows > li:first-child .card__title a,
+.cr-blog .card.cr-series-card:hover .card__title a { text-decoration-line: underline; }
 
 .cr-blog .card.cr-series-card .card__title a:focus-visible {
 	outline: 3px solid var(--cr-focus-ring);
@@ -246,8 +511,49 @@ a.cr-series-seasons__link:focus-visible {
 	box-shadow: 0 0 0 7px var(--cr-focus-halo, var(--cr-ink));
 }
 
+.cr-blog .card.cr-series-card .card__excerpt { max-inline-size: var(--cr-measure); font-size: var(--cr-text-base); line-height: 1.5; }
+
+.cr-blog .card.cr-series-card .card__excerpt p { margin: 0; }
+
+.cr-series-query { margin-block-end: var(--cr-space-2xl); }
+
+/* A featured image shows on the first row of a panel only, taped into the
+   panel's left gutter where the margin has room for it. */
+.cr-series-card__media { display: none; }
+
+@media (min-width: 56rem) {
+
+	.cr-blog .cr-series-rows:has(> li:first-child .cr-series-card__media) { padding-inline-start: calc(12rem + var(--cr-space-2xl) + var(--cr-space-lg)); }
+
+	.cr-series-rows > li:first-child .cr-series-card__media {
+		position: absolute;
+		inset-block-start: var(--cr-space-lg);
+		inset-inline-start: calc(-12rem - var(--cr-space-2xl));
+		display: block;
+		inline-size: 12rem;
+		margin: 0;
+		transform: rotate(var(--cr-rotate-1));
+	}
+
+	.cr-series-card__media img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; border: var(--cr-border-thick); }
+
+	.cr-series-card__media::before {
+		content: "";
+		position: absolute;
+		z-index: 1;
+		inset-block-start: calc(-1 * var(--cr-space-xs));
+		inset-inline-start: 30%;
+		inline-size: 4.5rem;
+		block-size: 1.25rem;
+		background: var(--cr-tape);
+		opacity: 0.9;
+		transform: rotate(var(--cr-rotate-neg));
+	}
+}
+
 /* ---------- Launch state: no published parts yet ---------- */
 .cr-series-launch {
+	position: relative;
 	max-inline-size: var(--cr-measure);
 	margin-block: 0 var(--cr-space-xl);
 	padding: var(--cr-space-lg);
@@ -255,6 +561,19 @@ a.cr-series-seasons__link:focus-visible {
 	border: var(--cr-border-thick);
 	box-shadow: var(--cr-shadow-hard);
 	color: var(--cr-ink);
+}
+
+/* Taped to the page like the season note. */
+.cr-series-launch::before {
+	content: "";
+	position: absolute;
+	inset-block-start: calc(-1 * var(--cr-space-sm));
+	inset-inline-start: var(--cr-space-xl);
+	inline-size: 5rem;
+	block-size: 1.25rem;
+	background: var(--cr-tape);
+	opacity: 0.9;
+	transform: rotate(var(--cr-rotate-neg));
 }
 
 .cr-series-launch__lede {

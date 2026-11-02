@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.142
+
+What you see change on courtneyr.dev:
+
+- Series archives group their parts by season, the way the Merge Conflicts mockup lays them out: each season gets a tape label ("Season 1"), its title and description, and a white panel of numbered rows. A row shows a big numeral (yellow for a season's first part), the date, season and reading time, the title, the excerpt and an arrow, and the whole row is the link. A featured image on a season's first part sits taped in the panel's left gutter on wide screens. A series without seasons gets one panel. A handwritten note on the first panel says only published essays appear and new parts join as they come out.
+- The season index under the orange rule becomes one line of chips; seasons with nothing out say "Coming later" and don't link.
+- The archive header puts the cut-paper title on the left and the description on the right on wide screens, and drops the parts and seasons counts (Courtney, 2026-11-02). A season's header still links back to its collection.
+- Merge Conflicts only: a torn sky-blue Methods & Sources band with a notebook drawing and a pen arrow; a postmark ("Open source · People · Processes · Power"), a postage stamp and a "A field guide to decisions" tape label in the header's top-right corner; a hand-drawn hash beside the title; and, in the wide margins once parts exist, a handwritten "Same questions, different projects" with its arrow, a sprig of dried flowers, registration marks and a paperclip on the first panel. All of it is decoration, hidden from screen readers, and none of it shows where the margins can't hold it.
+- The launch card gets a strip of tape.
+
+Under the hood: `Series\group_parts()` filters `core/post-template` on series archives and wraps its rendered rows in season sections, so the main query, its ten-per-page pagination and the post template stay core blocks; it reads each row's post ID with `WP_HTML_Tag_Processor` (no new `preg_` calls). The `courtneyr/series-part` bindings source gains `numeral` ("03") and `read` ("12 min read", 238 words a minute) keys; the numeral paragraph is `aria-hidden` with `role="presentation"` and the "Part 3" label stays in the text, visually hidden. Part titles are `h3` under the season `h2`. `courtneyr/series-guide` gains `hero-art`, `methods-art` and `margin-art` views; the postmark comes from `inc/stamps.php`. New `cr-series-art.css` (9 KB) loads only where an art view renders and is in `RUCSS_INLINE_HANDLES`. `series-test.php` adds 14 checks.
+
 ## 0.7.141
 
 What you see change on courtneyr.dev:
