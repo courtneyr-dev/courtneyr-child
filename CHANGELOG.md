@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.147
+
+What you see change on courtneyr.dev (videos with a caption file):
+
+- The interactive transcript under an Able Player video starts closed. The Transcript button in the player controls opens and closes it, by mouse or keyboard.
+- Once open, the transcript is one stop in the Tab order, named "Transcript", and the arrow keys scroll it.
+
+Not fixed here: the WCUS 2024 talk's transcript stays empty until its caption file (attachment 40278) is replaced. Its second line is a `NOTE` with no blank line after `WEBVTT`, which Able Player's parser rejects, so it reads 0 cues.
+
+Under the hood: the inline head guard (`print_able_player_dialog_guard()`) also hides `.ableplayer-transcript > .able-transcript-area`, the external container the plugin's "Insert interactive transcript container" setting adds; `able_player_transcript_scroll_focus()` adds an inline script before the plugin's deferred `ableplayer` handle that gives `.able-transcript` `tabindex="0"` and `role="region"` (axe `scrollable-region-focusable`).
+
 ## 0.7.146
 
 What you see change on courtneyr.dev:
