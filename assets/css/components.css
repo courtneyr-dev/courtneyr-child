@@ -1831,7 +1831,7 @@ figure.cr-media figcaption.cr-media__transcript {
 .able-transcript .able-highlight,
 .able-transcript .able-highlight span {
 	background-color: var(--cr-highlight) !important;
-	color: var(--cr-eyebrow-ink) !important;
+	color: var(--cr-cta-ink) !important;
 }
 
 /* Syndication Links sets ul.relsyn li to 0.8em; inside small meta text that
