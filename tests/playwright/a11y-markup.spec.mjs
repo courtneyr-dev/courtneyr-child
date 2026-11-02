@@ -607,6 +607,12 @@ test( 'the Able Player transcript starts collapsed and the Transcript button ope
 	await expect( button ).not.toHaveClass( /buttonOff/ );
 	// A caption file Able Player can parse fills the panel; an empty one means the VTT failed.
 	expect( await area.locator( '.able-transcript-seekpoint' ).count() ).toBeGreaterThan( 0 );
+	// One tab stop on the scroll box, so arrow keys can scroll it without per-cue stops.
+	const box = area.locator( '.able-transcript' );
+	await expect( box ).toHaveAttribute( 'tabindex', '0' );
+	await expect( box ).toHaveAttribute( 'role', 'region' );
+	await expect( box ).toHaveAccessibleName( /\S/ );
+	await button.focus();
 	await page.keyboard.press( 'Enter' );
 	await expect( area ).toBeHidden();
 } );
