@@ -58,6 +58,8 @@ function render_view( string $view, $block ): string {
 			return is_paged() ? '' : render_companions( $term );
 		case 'start':
 			return render_start( $term );
+		case 'cover':
+			return render_cover( $term );
 		case 'contents':
 			return render_contents( $term );
 		case 'follow':
@@ -691,4 +693,31 @@ function render_follow( \WP_Term $term ): string {
 	$html .= sprintf( '<li><a class="cr-series-follow__link" href="%s">%s</a></li>', esc_url( (string) get_term_feed_link( $c['landing']->term_id, TAX ) ), esc_html__( 'Series RSS feed', 'courtneyr-child' ) );
 	$html .= sprintf( '<li><a class="cr-series-follow__link" href="%s">%s</a></li>', esc_url( home_url( '/newsletter/' ) ), esc_html__( 'Field Notes newsletter', 'courtneyr-child' ) );
 	return $html . '</ul></section>';
+}
+
+/**
+ * The series image from PublishPress Series' "Series featured image" field,
+ * taped into the masthead under the title. Media-library images get srcset and
+ * the library's alt text; an image outside the library is treated as
+ * decoration (empty alt). Nothing renders without an image.
+ *
+ * @param \WP_Term $term Queried series.
+ */
+function render_cover( \WP_Term $term ): string {
+	$image = series_image( collection( $term )['landing'] );
+	if ( ! $image ) {
+		return '';
+	}
+	wp_enqueue_style( 'courtneyr-series-front' );
+	$attrs = array(
+		'class'    => 'cr-series-cover__img',
+		'sizes'    => '(min-width: 64rem) 34rem, 100vw',
+		'loading'  => 'eager',
+		'decoding' => 'async',
+	);
+	$img   = $image['id'] ? wp_get_attachment_image( $image['id'], 'large', false, $attrs ) : '';
+	if ( '' === $img ) {
+		$img = sprintf( '<img class="cr-series-cover__img" src="%s" alt="" loading="eager" decoding="async" width="1200" height="630">', esc_url( $image['url'] ) );
+	}
+	return '<figure class="cr-series-cover">' . $img . '</figure>';
 }

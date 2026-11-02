@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.145
+
+What you see change on courtneyr.dev:
+
+- The image set in PublishPress Series' "Series featured image" field now shows on the Merge Conflicts landing, taped under the cut-paper title on wide screens and after the start line on phones, with the media library's alt text. Nothing changes until an image is set.
+- That image becomes the series page's share preview (Open Graph), in place of the site-wide default card. A social image set on the series term in Yoast still wins. A season archive uses its own image, or its collection's.
+
+Under the hood: `Series\series_image()` reads the plugin's `orgseriesicons` table through `series_get_icons()` (read-only) and rebuilds the URL with `seriesicons_url()`; `Series\series_share_image()` hooks `wpseo_add_opengraph_additional_images`, which Yoast 28.5 fires after the term's own image and before its default. New `cover` view in `courtneyr/series-guide`, placed in the masthead pattern.
+
 ## 0.7.144
 
 What you see change on courtneyr.dev (Merge Conflicts landing, copy only, Courtney's decisions of 2026-11-02):

@@ -2,7 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "courtneyr/series-guide",
-	"version": "0.7.144",
+	"version": "0.7.145",
 	"title": "Series guide",
 	"category": "theme",
 	"icon": "book-alt",
@@ -14,7 +14,7 @@
 	"attributes": {
 		"view": {
 			"type": "string",
-			"enum": [ "status", "seasons", "launch", "companions", "post-header", "post-nav", "overview", "group", "start", "contents", "follow" ],
+			"enum": [ "status", "seasons", "launch", "companions", "post-header", "post-nav", "overview", "group", "start", "cover", "contents", "follow" ],
 			"default": "status"
 		}
 	},

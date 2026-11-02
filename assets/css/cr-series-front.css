@@ -126,6 +126,45 @@
 	text-underline-offset: 4px;
 }
 
+/* ---------- Series image (PublishPress featured image), taped under the title ---------- */
+.cr-series-cover {
+	position: relative;
+	max-inline-size: 34rem;
+	transform: rotate(var(--cr-rotate-1));
+}
+
+/* Scoped like the header grid rules (cr-series.css), which otherwise zero this margin. */
+.cr-series .cr-series-masthead > .cr-series-cover { margin-block: var(--cr-space-2xl) 0; }
+
+.cr-series-cover__img {
+	display: block;
+	inline-size: 100%;
+	block-size: auto;
+	border: var(--cr-border-thick);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-series-cover::before {
+	content: "";
+	position: absolute;
+	z-index: 1;
+	inset-block-start: calc(-1 * var(--cr-space-xs));
+	inset-inline-start: 40%;
+	inline-size: 5rem;
+	block-size: 1.25rem;
+	background: var(--cr-tape);
+	opacity: 0.9;
+	pointer-events: none;
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+@media (min-width: 64rem) {
+
+	.cr-series .cr-series-masthead:has(> .cr-series-cover) > .cr-archive__title { grid-row: 2; }
+
+	.cr-series .cr-series-masthead > .cr-series-cover { grid-column: 1; grid-row: 3; align-self: start; margin-block-start: var(--cr-space-lg); }
+}
+
 /* ---------- Methods & Sources: the research file, compact ---------- */
 .cr-series-methods {
 	--cr-series-tear: 0.625rem;

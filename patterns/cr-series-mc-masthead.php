@@ -3,7 +3,7 @@
  * Title: Merge Conflicts masthead
  * Slug: courtneyr-child/cr-series-mc-masthead
  * Categories: cr-zine
- * Description: The Merge Conflicts landing's masthead: kicker, cut-paper title, the thesis set as a statement with its three questions in bold, and the way in from courtneyr/series-guide (start). The thesis mirrors the Merge Conflicts series description (term 1175); change both together.
+ * Description: The Merge Conflicts landing's masthead: kicker, cut-paper title, the thesis set as a statement with its three questions in bold, the way in from courtneyr/series-guide (start), and the series image from PublishPress Series' featured-image field (cover), taped under the title. The thesis mirrors the Merge Conflicts series description (term 1175); change both together.
  * Keywords: series, masthead, merge conflicts, thesis
  * Block Types: core/query-title
  * Inserter: false
@@ -43,6 +43,8 @@ $courtneyr_child_series_thesis = wp_kses(
 
 	</div>
 	<!-- /wp:group -->
+
+	<!-- wp:courtneyr/series-guide {"view":"cover"} /-->
 
 </div>
 <!-- /wp:group -->
