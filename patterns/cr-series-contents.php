@@ -23,7 +23,7 @@ declare( strict_types = 1 );
 	<div class="wp-block-group cr-series-intro">
 
 		<!-- wp:paragraph -->
-		<p><?php esc_html_e( 'Merge Conflicts is planned as 100 parts in eight seasons. Parts are numbered in reading order within each season, and only published parts appear and link.', 'courtneyr-child' ); ?></p>
+		<p><?php esc_html_e( 'Merge Conflicts is planned in eight seasons. Parts are numbered in reading order within each season, and only published parts appear and link.', 'courtneyr-child' ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.144
+
+What you see change on courtneyr.dev (Merge Conflicts landing, copy only, Courtney's decisions of 2026-11-02):
+
+- "How the series is organized" says the series is planned in eight seasons, without the 100-part total, which the outline still moves.
+- The methods file's "why it matters" uses the methods page draft's own wording: "Every post in the series links to it. When a count or a claim changes, its log says what changed and when."
+
+Kept as shipped in 0.7.143: the twelve-project list with the Season 3 sentence, and "Every part will link to it." under the "Not published yet" stamp.
+
 ## 0.7.143
 
 What you see change on courtneyr.dev (the Merge Conflicts landing; other series archives only lose the sticky note):
