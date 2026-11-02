@@ -313,6 +313,21 @@ th a:not(.wp-element-button) {
   box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
 }
 
+/* Evidence label (Merge Conflicts): a Tape label paragraph with the
+   extra class .cr-evidence-label, placed right before the claim it
+   labels. It floats left of the claim's first line, tilted further than
+   a plain tape label, and the claim wraps beside it. The paragraph after
+   the claim clears it. */
+.is-style-cr-tape-label.cr-evidence-label {
+  float: left;
+  clear: left;
+  margin: 0.2rem 1rem 0.35rem 0;
+  transform: rotate(calc(var(--cr-rotate-neg) * 2));
+  white-space: nowrap;
+}
+.cr-evidence-label + * { margin-block-start: 0; }
+.cr-evidence-label + * + * { clear: left; }
+
 
 /* ============ Marker bar ============
    The hr default is already a marker stripe; this is a stronger one
