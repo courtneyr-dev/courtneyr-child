@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.148
+
+What you see change on courtneyr.dev:
+
+- Merge Conflicts evidence labels ("Label: verified." and the rest) sit left of the claim they label, tilted twice as far as a plain tape label, with the claim's text wrapping beside them. It applies to a Tape label paragraph that also has the class `cr-evidence-label`; other tape labels don't change.
+
+Version 0.7.147 is taken by the Able Player transcript PR (#258).
+
 ## 0.7.146
 
 What you see change on courtneyr.dev:
