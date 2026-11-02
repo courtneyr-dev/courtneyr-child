@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.149
+
+What you see change on courtneyr.dev:
+
+- Body text is a little bigger everywhere: the base size goes from 16px to 17px (`--cr-text-base`, 1rem to 1.0625rem).
+- Blog posts use the same column as pages: 720px for text and 1100px for wide blocks, instead of 80% of the window on screens 1024px and wider.
+- Footnotes sit in a closed "Footnotes (N)" details block at the end of a post, in 14px type. Following a footnote marker opens it and jumps to the note.
+
 ## 0.7.148
 
 What you see change on courtneyr.dev:

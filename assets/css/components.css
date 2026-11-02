@@ -328,6 +328,24 @@ th a:not(.wp-element-button) {
 .cr-evidence-label + * { margin-block-start: 0; }
 .cr-evidence-label + * + * { clear: left; }
 
+/* Footnotes: inc/footnotes.php puts the core Footnotes block inside a
+   closed details element. The summary and notes run smaller than body
+   text. */
+.cr-footnotes {
+  clear: both;
+  margin-block-start: var(--cr-space-xl);
+  font-size: var(--cr-text-sm);
+}
+.cr-footnotes > summary {
+  cursor: pointer;
+  font-family: var(--cr-font-accent);
+  font-weight: var(--cr-weight-bold);
+}
+.cr-footnotes .wp-block-footnotes {
+  margin-block-start: var(--cr-space-sm);
+  font-size: var(--cr-text-sm);
+}
+
 
 /* ============ Marker bar ============
    The hr default is already a marker stripe; this is a stronger one
