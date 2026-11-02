@@ -135,6 +135,11 @@ namespace {
 	function wp_register_script_module() {}
 	function wp_enqueue_script_module() {}
 
+	/** No plugin scripts are enqueued in these tests. */
+	function wp_script_is() {
+		return false;
+	}
+
 	/** Record an inline style by handle. */
 	function wp_add_inline_style( $handle = '', $css = '' ) {
 		$GLOBALS['cr_inline'][ $handle ][] = (string) $css;
