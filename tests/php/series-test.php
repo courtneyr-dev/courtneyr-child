@@ -123,6 +123,12 @@ namespace Courtneyr\Child\Series\Tests {
 	check( false === strpos( $methods_pattern, 'cr-callout' ), 'methods callout avoids the cr-callout class the collapse toggle rewrites' );
 	check( false !== strpos( $methods_pattern, 'href="/merge-conflicts-methods/"' ), 'methods link points at /merge-conflicts-methods/' );
 
+	// Accessibility Checker Pro's aria_hidden_valid_usage flags aria-hidden without role="presentation" (house rule since 0.7.138).
+	$views = (string) file_get_contents( CR_SERIES_THEME_DIR . '/inc/series-views.php' );
+	preg_match_all( '/<[a-z]+\b[^>]*aria-hidden="true"[^>]*>/', $views, $hidden );
+	$bare = array_filter( $hidden[0], static fn( string $tag ): bool => false === strpos( $tag, 'role="presentation"' ) );
+	check( count( $hidden[0] ) > 0 && ! $bare, 'every aria-hidden element in the series views carries role="presentation"' );
+
 	echo $failures ? "\n{$failures} failed\n" : "\nall passed\n";
 	exit( $failures ? 1 : 0 );
 }

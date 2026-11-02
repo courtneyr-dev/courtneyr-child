@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.141
+
+What you see change on courtneyr.dev:
+
+- Nothing visible. Accessibility Checker Pro stops flagging the dot between "Merge Conflicts" and "Part N" in a series post's tape label, and the arrows on the previous/next part cards.
+
+Under the hood: the three `aria-hidden` spans in `inc/series-views.php` now carry `role="presentation"`, the rule 0.7.138 set for every decorative element. `series-test.php` fails if one goes back without it.
+
 ## 0.7.140
 
 What you see change on courtneyr.dev:
