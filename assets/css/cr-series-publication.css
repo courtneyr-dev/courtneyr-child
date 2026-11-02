@@ -548,10 +548,28 @@
 .cr-mc .cr-mc__desk .cr-series-start__link {
 	max-inline-size: 100%;
 	padding: var(--cr-space-sm);
+	background: var(--cr-surface);
+	color: var(--cr-ink);
+	border: 0;
+	border-block-end: var(--cr-border-thin);
+	box-shadow: none;
+}
+
+.cr-mc .cr-mc__desk .cr-series-start__link:is(:hover, :focus-visible, :active) {
+	background: var(--cr-surface);
+	color: var(--cr-ink);
+}
+
+.cr-mc .cr-mc__desk .cr-series-start__link:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 3px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo, var(--cr-ink));
 }
 
 .cr-mc .cr-mc__desk .cr-series-start__title {
 	font-size: var(--cr-text-md);
+	text-decoration: underline;
+	text-decoration-color: currentcolor;
 }
 
 .cr-mc .cr-mc__desk .cr-series-start--empty {

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.153
+
+What you see change on courtneyr.dev:
+
+- The Merge Conflicts Reading Desk links to Part 1 on a quiet paper surface instead of an orange box, with an underlined title and no heavy frame or offset shadow.
+- Its text uses the paired surface and ink colors in light and dark appearance, including hover, active and keyboard focus. Text contrast is 15.00:1 in light appearance and 17.08:1 in dark appearance; keyboard focus keeps the two-color outline.
+
 ## 0.7.152
 
 What you see change on courtneyr.dev:
