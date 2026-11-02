@@ -749,6 +749,66 @@ function group_parts( string $content, array $block ): string {
 add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\group_parts', 10, 2 );
 
 /**
+ * The image set in PublishPress Series' "Series featured image" field. The
+ * plugin keeps it in its own table as a URL with the home URL stripped
+ * (orgSeries-manage.php), so the full URL is rebuilt with its seriesicons_url().
+ * The attachment ID is 0 when the URL isn't in the media library. Read-only.
+ *
+ * @param \WP_Term $series Series.
+ * @return array{id: int, url: string}|null
+ */
+function series_image( \WP_Term $series ): ?array {
+	static $cache = array();
+	if ( array_key_exists( $series->term_id, $cache ) ) {
+		return $cache[ $series->term_id ];
+	}
+	$image = null;
+	if ( function_exists( 'series_get_icons' ) && function_exists( 'seriesicons_url' ) ) {
+		$icon = trim( (string) series_get_icons( $series->term_id ) );
+		if ( '' !== $icon ) {
+			$url   = str_starts_with( $icon, 'http://' ) || str_starts_with( $icon, 'https://' ) ? $icon : seriesicons_url() . ltrim( $icon, '/' );
+			$image = array(
+				'id'  => (int) attachment_url_to_postid( $url ),
+				'url' => $url,
+			);
+		}
+	}
+	$cache[ $series->term_id ] = $image;
+	return $image;
+}
+
+/**
+ * Share image for a series archive: Yoast's own term image wins when one is
+ * set; otherwise the series image, a season falling back to its collection's,
+ * instead of the site-wide default card. Hooked after Yoast reads the term
+ * (wpseo_add_opengraph_additional_images, Yoast 28.5 open-graph-image-generator.php);
+ * its template and default steps skip once the container holds an image.
+ *
+ * @param mixed $container Yoast Open Graph image container.
+ * @return mixed
+ */
+function series_share_image( $container ) {
+	if ( ! is_object( $container ) || ! method_exists( $container, 'has_images' ) || $container->has_images() || ! is_tax( TAX ) ) {
+		return $container;
+	}
+	$term = get_queried_object();
+	if ( ! $term instanceof \WP_Term || TAX !== $term->taxonomy ) {
+		return $container;
+	}
+	$image = series_image( $term ) ?? series_image( collection( $term )['landing'] );
+	if ( ! $image ) {
+		return $container;
+	}
+	if ( $image['id'] && method_exists( $container, 'add_image_by_id' ) ) {
+		$container->add_image_by_id( $image['id'] );
+	} elseif ( method_exists( $container, 'add_image_by_url' ) ) {
+		$container->add_image_by_url( $image['url'] );
+	}
+	return $container;
+}
+add_filter( 'wpseo_add_opengraph_additional_images', __NAMESPACE__ . '\\series_share_image' );
+
+/**
  * Register the bindings source and the series-guide block.
  */
 function register(): void {

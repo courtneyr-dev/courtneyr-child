@@ -50,6 +50,53 @@ namespace {
 		return $GLOBALS['cr_post_content'][ $post_id ] ?? '';
 	}
 
+	// Series image and share-image stubs: PublishPress Series' icon table, the media library, the query.
+	class WP_Term {
+		public $term_id  = 0;
+		public $taxonomy = 'series';
+		public $slug     = '';
+		public $name     = '';
+	}
+
+	function series_get_icons( $series ) {
+		return $GLOBALS['cr_icons'][ $series ] ?? false;
+	}
+
+	function seriesicons_url() {
+		return 'https://example.test/';
+	}
+
+	function attachment_url_to_postid( $url ) {
+		return $GLOBALS['cr_attachments'][ $url ] ?? 0;
+	}
+
+	function taxonomy_exists( $taxonomy ) {
+		return false;
+	}
+
+	function is_tax( $taxonomy = '' ) {
+		return ! empty( $GLOBALS['cr_is_tax'] );
+	}
+
+	function get_queried_object() {
+		return $GLOBALS['cr_queried'] ?? null;
+	}
+
+	/** Records what the share hook adds, shaped like Yoast's image container. */
+	class CR_Fake_Images {
+		public $added = array();
+		public $start = false;
+		public function has_images() {
+			return $this->start || (bool) $this->added;
+		}
+		public function add_image_by_id( $id ) {
+			$this->added[] = array( 'id', $id );
+		}
+		public function add_image_by_url( $url ) {
+			$this->added[] = array( 'url', $url );
+		}
+	}
+
 	require CR_SERIES_THEME_DIR . '/inc/series.php';
 }
 
@@ -59,6 +106,8 @@ namespace Courtneyr\Child\Series\Tests {
 	use function Courtneyr\Child\Series\part_label;
 	use function Courtneyr\Child\Series\published_count_label;
 	use function Courtneyr\Child\Series\reading_minutes;
+	use function Courtneyr\Child\Series\series_image;
+	use function Courtneyr\Child\Series\series_share_image;
 	use function Courtneyr\Child\Series\sort_parts;
 
 	$failures = 0;
@@ -199,6 +248,42 @@ namespace Courtneyr\Child\Series\Tests {
 
 	$pruning = (string) file_get_contents( CR_SERIES_THEME_DIR . '/inc/stream-style-pruning.php' );
 	check( false !== strpos( $pruning, "'courtneyr-series-front'" ) && false === strpos( $pruning, "'courtneyr-series-art'" ), 'the front-matter sheet is kept whole by the used-CSS pass' );
+
+	// Series image: PublishPress stores the URL without the home URL; the theme rebuilds it and finds the attachment.
+	$with_image          = new \WP_Term();
+	$with_image->term_id = 1175;
+	$no_image            = new \WP_Term();
+	$no_image->term_id   = 1176;
+	$GLOBALS['cr_icons']       = array( 1175 => 'wp-content/uploads/2026/11/merge-conflicts.png' );
+	$GLOBALS['cr_attachments'] = array( 'https://example.test/wp-content/uploads/2026/11/merge-conflicts.png' => 4242 );
+	$image                     = series_image( $with_image );
+	check(
+		array(
+			'id'  => 4242,
+			'url' => 'https://example.test/wp-content/uploads/2026/11/merge-conflicts.png',
+		) === $image,
+		'series_image rebuilds the stored path into a URL and finds its attachment'
+	);
+	check( null === series_image( $no_image ), 'a series without an image returns null' );
+
+	// Share image: Yoast's own term image wins; otherwise the series image goes in by attachment ID.
+	check( $hooked( 'wpseo_add_opengraph_additional_images', 'series_share_image' ), 'the share-image hook runs after Yoast reads the term image' );
+	$GLOBALS['cr_is_tax']  = true;
+	$GLOBALS['cr_queried'] = $with_image;
+	$yoast_has_one         = new \CR_Fake_Images();
+	$yoast_has_one->start  = true;
+	series_share_image( $yoast_has_one );
+	check( array() === $yoast_has_one->added, 'a Yoast term image set by hand stays the share image' );
+	$empty = new \CR_Fake_Images();
+	series_share_image( $empty );
+	check( array( array( 'id', 4242 ) ) === $empty->added, 'with no Yoast image, the series image becomes the share image' );
+	$GLOBALS['cr_queried'] = $no_image;
+	$none                  = new \CR_Fake_Images();
+	series_share_image( $none );
+	check( array() === $none->added, 'no series image leaves Yoast to its default card' );
+	$GLOBALS['cr_is_tax'] = false;
+
+	check( strpos( $masthead, '"view":"start"' ) < strpos( $masthead, '"view":"cover"' ), 'the masthead places the series image after the way in' );
 
 	echo $failures ? "\n{$failures} failed\n" : "\nall passed\n";
 	exit( $failures ? 1 : 0 );
