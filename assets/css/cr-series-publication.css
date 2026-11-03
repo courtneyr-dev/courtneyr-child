@@ -217,7 +217,7 @@
 	position: relative;
 	z-index: 1;
 	display: flex;
-	justify-content: flex-end;
+	justify-content: center;
 	margin-block: var(--cr-space-sm) calc(-1 * var(--cr-space-xs));
 	padding-inline: var(--cr-space-lg);
 }

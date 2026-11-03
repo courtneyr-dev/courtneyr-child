@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.154
+
+What you see change on courtneyr.dev:
+
+- The handwritten masking-tape note sits in the horizontal center of the blue Methods & Sources box, retaining its overlap along the top edge on desktop and phones.
+
 ## 0.7.153
 
 What you see change on courtneyr.dev:
