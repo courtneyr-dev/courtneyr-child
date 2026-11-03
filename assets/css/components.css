@@ -313,6 +313,39 @@ th a:not(.wp-element-button) {
   box-shadow: 1px 1px 0 rgba(36, 28, 74, 0.2);
 }
 
+/* Evidence label (Merge Conflicts): a Tape label paragraph with the
+   extra class .cr-evidence-label, placed right before the claim it
+   labels. It floats left of the claim's first line, tilted further than
+   a plain tape label, and the claim wraps beside it. The paragraph after
+   the claim clears it. */
+.is-style-cr-tape-label.cr-evidence-label {
+  float: left;
+  clear: left;
+  margin: 0.2rem 1rem 0.35rem 0;
+  transform: rotate(calc(var(--cr-rotate-neg) * 2));
+  white-space: nowrap;
+}
+.cr-evidence-label + * { margin-block-start: 0; }
+.cr-evidence-label + * + * { clear: left; }
+
+/* Footnotes: inc/footnotes.php puts the core Footnotes block inside a
+   closed details element. The summary and notes run smaller than body
+   text. */
+.cr-footnotes {
+  clear: both;
+  margin-block-start: var(--cr-space-xl);
+  font-size: var(--cr-text-sm);
+}
+.cr-footnotes > summary {
+  cursor: pointer;
+  font-family: var(--cr-font-accent);
+  font-weight: var(--cr-weight-bold);
+}
+.cr-footnotes .wp-block-footnotes {
+  margin-block-start: var(--cr-space-sm);
+  font-size: var(--cr-text-sm);
+}
+
 
 /* ============ Marker bar ============
    The hr default is already a marker stripe; this is a stronger one
@@ -1778,6 +1811,30 @@ figure.cr-media figcaption.cr-media__transcript {
 	margin: 0.5rem 0 0;
 	color: var(--cr-ink-muted);
 	font-size: 0.875rem;
+}
+
+/* Able Player paints both transcript layers white. Use the site's paired
+   surface and ink tokens so the open panel follows the chosen appearance. */
+.able-transcript-area,
+.able-transcript {
+	background-color: var(--cr-surface) !important;
+	color: var(--cr-ink) !important;
+}
+.able-transcript-area .able-window-toolbar {
+	background-color: var(--cr-surface-soft);
+	color: var(--cr-ink);
+}
+.able-transcript-area .able-window-toolbar label,
+.able-transcript span,
+.able-transcript p {
+	color: var(--cr-ink) !important;
+}
+.able-transcript .able-highlight,
+.able-transcript .able-highlight span,
+.able-transcript span:is(:hover, :focus, :active),
+.able-transcript span:is(:hover, :focus, :active) span {
+	background-color: var(--cr-highlight) !important;
+	color: var(--cr-cta-ink) !important;
 }
 
 /* Syndication Links sets ul.relsyn li to 0.8em; inside small meta text that
@@ -8009,8 +8066,7 @@ body.single-format-video main.single-post   { background-color: var(--cr-type-vi
 
 /* Dark-mode readability — light-mode-fixed elements that didn't flip:
    (B) SME success alert (light-green bg + ivory text = invisible) → dark green-tinted bg.
-   (C) <mark> went ivory-on-ivory → restore a yellow highlight with dark text.
-   (D) Able Player transcript ships a fixed white bg → flip to a dark surface + light text. */
+   (C) <mark> went ivory-on-ivory → restore a yellow highlight with dark text. */
 :root[data-theme="dark"] .is-style-sme-alert-success {
 	background: color-mix(in srgb, #5fa052 20%, var(--cr-night-elevated, #251f1c)) !important;
 
@@ -8024,17 +8080,6 @@ body.single-format-video main.single-post   { background-color: var(--cr-type-vi
 	   mark carries an inline light bg. Rather than out-specify both, give the mark a
 	   DARK-amber highlight bg the forced-ivory text reads on (~8:1). */
 	background-color: color-mix(in srgb, var(--cr-selective-yellow, #ffb703) 28%, var(--cr-night-elevated, #251f1c)) !important;
-}
-:root[data-theme="dark"] .able-transcript {
-	background-color: var(--cr-night-elevated, #251f1c) !important;
-}
-:root[data-theme="dark"] .able-transcript span,
-:root[data-theme="dark"] .able-transcript p {
-	color: var(--cr-printer-ivory, #fbfaf5) !important;
-}
-:root[data-theme="dark"] .able-transcript .able-highlight {
-	background-color: var(--cr-selective-yellow, #ffb703) !important;
-	color: var(--cr-russian-violet, #241c4a) !important;
 }
 :root[data-theme="dark"] .able-alert {
 	color: var(--cr-russian-violet, #241c4a) !important;
@@ -8051,16 +8096,6 @@ body.single-format-video main.single-post   { background-color: var(--cr-type-vi
 	:root:not([data-theme]) .entry-content mark,
 	:root[data-theme="system"] .entry-content mark {
 		background-color: color-mix(in srgb, var(--cr-selective-yellow, #ffb703) 28%, var(--cr-night-elevated, #251f1c)) !important;
-	}
-	:root:not([data-theme]) .able-transcript,
-	:root[data-theme="system"] .able-transcript {
-		background-color: var(--cr-night-elevated, #251f1c) !important;
-	}
-	:root:not([data-theme]) .able-transcript span,
-	:root[data-theme="system"] .able-transcript span,
-	:root:not([data-theme]) .able-transcript p,
-	:root[data-theme="system"] .able-transcript p {
-		color: var(--cr-printer-ivory, #fbfaf5) !important;
 	}
 	:root:not([data-theme]) .able-alert,
 	:root[data-theme="system"] .able-alert {

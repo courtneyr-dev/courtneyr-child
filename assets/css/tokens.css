@@ -207,10 +207,10 @@
   --cr-font-body:    "Barlow", system-ui, -apple-system, sans-serif;
   --cr-font-mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  /* Type scale — modular ratio ~1.25, base 1rem */
+  /* Type scale, ratio ~1.25 */
   --cr-text-xs:   0.75rem;
   --cr-text-sm:   0.875rem;
-  --cr-text-base: 1rem;
+  --cr-text-base: 1.0625rem;
   --cr-text-md:   1.125rem;
   --cr-text-lg:   1.25rem;
   --cr-text-xl:   1.5rem;

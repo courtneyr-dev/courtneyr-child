@@ -1,15 +1,55 @@
 # Changelog
 
-## 0.7.147
+## 0.7.154
 
-What you see change on courtneyr.dev (videos with a caption file):
+What you see change on courtneyr.dev:
 
-- The interactive transcript under an Able Player video starts closed. The Transcript button in the player controls opens and closes it, by mouse or keyboard.
-- Once open, the transcript is one stop in the Tab order, named "Transcript", and the arrow keys scroll it.
+- The handwritten masking-tape note sits in the horizontal center of the blue Methods & Sources box, retaining its overlap along the top edge on desktop and phones.
 
-Not fixed here: the WCUS 2024 talk's transcript stays empty until its caption file (attachment 40278) is replaced. Its second line is a `NOTE` with no blank line after `WEBVTT`, which Able Player's parser rejects, so it reads 0 cues.
+## 0.7.153
 
-Under the hood: the inline head guard (`print_able_player_dialog_guard()`) also hides `.ableplayer-transcript > .able-transcript-area`, the external container the plugin's "Insert interactive transcript container" setting adds; `able_player_transcript_scroll_focus()` adds an inline script before the plugin's deferred `ableplayer` handle that gives `.able-transcript` `tabindex="0"` and `role="region"` (axe `scrollable-region-focusable`).
+What you see change on courtneyr.dev:
+
+- The Merge Conflicts Reading Desk links to Part 1 on a quiet paper surface instead of an orange box, with an underlined title and no heavy frame or offset shadow.
+- Its text uses the paired surface and ink colors in light and dark appearance, including hover, active and keyboard focus. Text contrast is 15.00:1 in light appearance and 17.08:1 in dark appearance; keyboard focus keeps the two-color outline.
+
+## 0.7.152
+
+What you see change on courtneyr.dev:
+
+- The “In this series” drawer uses the approved quiet paper treatment: a periwinkle label, an inked chevron, and numbered reading links. It starts closed and keeps native keyboard controls, with no outer frame or hard shadow.
+- The featured image has 48px of space after the drawer on desktop and 32px on phones, whether the contents are open or closed. Other details blocks and images keep their existing layout.
+
+## 0.7.151
+
+What you see change on courtneyr.dev:
+
+- Able Player transcripts start closed. The Transcript control opens and closes them, and keyboard users can focus and scroll the transcript panel. The open panel follows your light or dark appearance instead of showing a white box.
+- The Merge Conflicts contents list fills with published series posts when no seasons are configured. It updates from WordPress as you publish, using the same reading order as the article list.
+
+## 0.7.150
+
+What you see change on courtneyr.dev:
+
+- The Merge Conflicts series archive follows the approved zine mockup: a cut-paper masthead, a decision collage, the embroidered concert patch, and a handwritten annotation above Methods & Sources.
+- Methods & Sources, the reading desk, companion research, and Follow the investigation use torn-paper surfaces, hand-drawn illustrations, tape labels, and rough marker accents. The layout adapts to phones and light or dark appearance.
+- The contents list uses the seasons announced in WordPress. The reading desk and companion links show published, password-free articles only; Methods stays unlinked until its page is public. Later archive pages skip the Methods introduction.
+
+## 0.7.149
+
+What you see change on courtneyr.dev:
+
+- Body text is a little bigger everywhere: the base size goes from 16px to 17px (`--cr-text-base`, 1rem to 1.0625rem).
+- Blog posts use the same column as pages: 720px for text and 1100px for wide blocks, instead of 80% of the window on screens 1024px and wider.
+- Footnotes sit in a closed "Footnotes (N)" details block at the end of a post, in 14px type. Following a footnote marker opens it and jumps to the note.
+
+## 0.7.148
+
+What you see change on courtneyr.dev:
+
+- Merge Conflicts evidence labels ("Label: verified." and the rest) sit left of the claim they label, tilted twice as far as a plain tape label, with the claim's text wrapping beside them. It applies to a Tape label paragraph that also has the class `cr-evidence-label`; other tape labels don't change.
+
+Version 0.7.147 is taken by the Able Player transcript PR (#258).
 
 ## 0.7.146
 

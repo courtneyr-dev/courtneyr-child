@@ -47,6 +47,22 @@ function render_view( string $view, $block ): string {
 	if ( TAX !== $term->taxonomy ) {
 		return '';
 	}
+	if ( in_array( $view, array( 'publication-contents', 'publication-desk', 'publication-companion', 'publication-parts' ), true ) ) {
+		if ( 'merge-conflicts' !== $term->slug ) {
+			return '';
+		}
+		if ( 'publication-contents' === $view ) {
+			has_front_matter( true );
+			return render_publication_contents( $term );
+		}
+		if ( 'publication-desk' === $view ) {
+			return render_publication_desk( $term );
+		}
+		if ( 'publication-companion' === $view ) {
+			return render_publication_companion( $term );
+		}
+		return main_track( $term ) ? do_blocks( '<!-- wp:pattern {"slug":"courtneyr-child/cr-series-body"} /-->' ) : '';
+	}
 	switch ( $view ) {
 		case 'status':
 			return render_status( $term );
@@ -420,24 +436,27 @@ function render_post_header( int $post_id ): string {
 		/* translators: %s: series name. */
 		$label = sprintf( __( 'Parts of %s', 'courtneyr-child' ), wp_strip_all_tags( series_name( $series, false ) ) );
 		$html .= '<details class="cr-series-post__toc">';
-		$html .= '<summary class="cr-series-post__summary">' . esc_html__( 'In this series', 'courtneyr-child' ) . ' <span class="cr-series-post__summary-count">(' . esc_html( published_count_label( $total ) ) . ')</span></summary>';
-		$html .= '<nav aria-label="' . esc_attr( $label ) . '"><ol class="cr-series-post__list" role="list">';
+		$html .= '<summary class="cr-series-post__summary"><span class="cr-series-post__summary-heading"><span class="cr-series-post__summary-label">' . esc_html__( 'In this series', 'courtneyr-child' ) . '</span> <span class="cr-series-post__summary-count">' . esc_html( published_count_label( $total ) ) . '</span></span>';
+		$html .= '<span class="cr-series-post__summary-toggle" aria-hidden="true" role="presentation"><svg viewBox="0 0 28 24" aria-hidden="true" role="presentation" focusable="false"><path d="M4 7.5 Q8.5 12 13.5 16.5 Q19 12.5 24 7"/><path d="M4.5 8.5 L13.4 17.4 L23.4 8.3" opacity=".25"/></svg></span></summary>';
+		$html .= '<nav class="cr-series-post__contents" aria-label="' . esc_attr( $label ) . '"><ol class="cr-series-post__list" role="list">';
 		foreach ( $rows as $i => $row ) {
 			$current = $row['id'] === $post_id;
+			$number  = $row['part'] ?? $i + 1;
 			/* translators: %d: part number. */
-			$num   = sprintf( __( 'Part %d', 'courtneyr-child' ), $row['part'] ?? $i + 1 );
+			$num   = sprintf( __( 'Part %d', 'courtneyr-child' ), $number );
 			$html .= '<li class="cr-series-post__item' . ( $current ? ' is-current' : '' ) . '">';
+			$html .= '<span class="cr-series-post__num" aria-hidden="true" role="presentation">' . esc_html( sprintf( '%02d', $number ) ) . '</span><div class="cr-series-post__entry-copy">';
 			$html .= sprintf(
-				'<a href="%s"%s><span class="cr-series-post__num">%s</span> <span class="cr-series-post__title">%s</span></a>',
+				'<a class="cr-series-post__title" href="%s"%s><span class="screen-reader-text">%s: </span>%s</a>',
 				esc_url( (string) get_permalink( $row['id'] ) ),
 				$current ? ' aria-current="page"' : '',
 				esc_html( $num ),
 				esc_html( get_the_title( $row['id'] ) )
 			);
 			if ( $current ) {
-				$html .= ' <span class="cr-series-post__here">' . esc_html__( 'You’re reading this', 'courtneyr-child' ) . '</span>';
+				$html .= '<p class="cr-series-post__here">' . esc_html__( 'You’re reading this', 'courtneyr-child' ) . '</p>';
 			}
-			$html .= '</li>';
+			$html .= '</div></li>';
 		}
 		$html .= '</ol></nav></details>';
 	}
@@ -687,7 +706,8 @@ function render_follow( \WP_Term $term ): string {
 	wp_enqueue_style( 'courtneyr-series-front' );
 	$c     = collection( $term );
 	$html  = '<section class="cr-series-follow alignwide" id="cr-series-follow" aria-labelledby="cr-series-follow-title">';
-	$html .= '<h2 class="cr-series-follow__title" id="cr-series-follow-title">' . esc_html__( 'Follow along', 'courtneyr-child' ) . '</h2>';
+	$title = 'merge-conflicts' === $term->slug ? __( 'Follow the investigation', 'courtneyr-child' ) : __( 'Follow along', 'courtneyr-child' );
+	$html .= '<h2 class="cr-series-follow__title" id="cr-series-follow-title">' . esc_html( $title ) . '</h2>';
 	$html .= '<p class="cr-series-follow__lede">' . esc_html__( 'Follow along by the series feed or the Field Notes newsletter.', 'courtneyr-child' ) . '</p>';
 	$html .= '<ul class="cr-series-follow__links" role="list">';
 	$html .= sprintf( '<li><a class="cr-series-follow__link" href="%s">%s</a></li>', esc_url( (string) get_term_feed_link( $c['landing']->term_id, TAX ) ), esc_html__( 'Series RSS feed', 'courtneyr-child' ) );
@@ -720,4 +740,81 @@ function render_cover( \WP_Term $term ): string {
 		$img = sprintf( '<img class="cr-series-cover__img" src="%s" alt="" loading="eager" decoding="async" width="1200" height="630">', esc_url( $image['url'] ) );
 	}
 	return '<figure class="cr-series-cover">' . $img . '</figure>';
+}
+
+/**
+ * The Merge Conflicts publication's season list. Terms stay in the CMS;
+ * unpublished seasons have text labels, while published seasons get links.
+ *
+ * @param \WP_Term $term Merge Conflicts landing.
+ */
+function render_publication_contents( \WP_Term $term ): string {
+	$c = collection( $term );
+	if ( ! $c['seasons'] ) {
+		$rows = main_track( $term );
+		if ( ! $rows ) {
+			return '<p class="cr-mc__unannounced">' . esc_html__( 'Eight seasons are planned. The contents will appear here as the seasons are announced.', 'courtneyr-child' ) . '</p>';
+		}
+		$html = '<nav class="cr-mc__contents" aria-label="' . esc_attr__( 'Merge Conflicts published parts', 'courtneyr-child' ) . '"><ol class="cr-mc__seasons" role="list">';
+		foreach ( $rows as $i => $row ) {
+			$number = $row['part'] ?? $i + 1;
+			$html  .= '<li class="cr-mc__season"><span class="cr-mc__season-number" aria-hidden="true" role="presentation">' . esc_html( sprintf( '%02d', $number ) ) . '</span><div class="cr-mc__season-copy"><h3>';
+			$html  .= '<span class="screen-reader-text">' . esc_html( track_label( $row, $term, $i ) . ': ' ) . '</span><a href="' . esc_url( (string) get_permalink( $row['id'] ) ) . '">' . esc_html( get_the_title( $row['id'] ) ) . '</a></h3></div></li>';
+		}
+		return $html . '</ol></nav>';
+	}
+	$html = '<nav class="cr-mc__contents" aria-label="' . esc_attr__( 'Merge Conflicts seasons', 'courtneyr-child' ) . '"><ol class="cr-mc__seasons" role="list">';
+	foreach ( $c['seasons'] as $i => $season ) {
+		$count = published_total( array( $season ) );
+		$name  = esc_html( $season->name );
+		if ( $count ) {
+			$name = '<a href="' . esc_url( (string) get_term_link( $season ) ) . '">' . $name . '</a>';
+		}
+		$state = $count
+			/* translators: %d: published parts in this season. */
+			? sprintf( _n( '%d part', '%d parts', $count, 'courtneyr-child' ), $count )
+			: __( 'Upcoming', 'courtneyr-child' );
+		$html .= '<li class="cr-mc__season"><span class="cr-mc__season-number" aria-hidden="true" role="presentation">' . esc_html( sprintf( '%02d', $i + 1 ) ) . '</span><div class="cr-mc__season-copy"><h3>';
+		/* translators: %d: season number. */
+		$html .= '<span class="screen-reader-text">' . esc_html( sprintf( __( 'Season %d: ', 'courtneyr-child' ), $i + 1 ) ) . '</span>' . $name . '</h3>';
+		$desc  = trim( wp_strip_all_tags( $season->description ) );
+		$html .= '' !== $desc ? '<p>' . esc_html( $desc ) . '</p>' : '';
+		$html .= '</div><span class="cr-mc__state">' . esc_html( $state ) . '</span></li>';
+	}
+	return $html . '</ol></nav>';
+}
+
+/**
+ * The reading desk uses the same published-only track as the main archive.
+ *
+ * @param \WP_Term $term Merge Conflicts landing.
+ */
+function render_publication_desk( \WP_Term $term ): string {
+	$rows  = main_track( $term );
+	$title = $rows ? __( 'Begin the investigation', 'courtneyr-child' ) : __( 'The first part is being prepared.', 'courtneyr-child' );
+	$html  = '<h2>' . esc_html( $title ) . '</h2>';
+	$html .= $rows ? render_start( $term ) : '<p>' . esc_html__( 'Follow along to hear when it publishes.', 'courtneyr-child' ) . '</p>';
+	$html .= '<ul class="cr-mc__desk-links" role="list">';
+	$html .= '<li><a href="' . esc_url( (string) get_term_feed_link( $term->term_id, TAX ) ) . '">' . esc_html__( 'RSS', 'courtneyr-child' ) . '</a></li>';
+	$html .= '<li><a href="' . esc_url( home_url( '/newsletter/' ) ) . '">' . esc_html__( 'Field Notes newsletter', 'courtneyr-child' ) . '</a></li>';
+	return $html . '</ul>';
+}
+
+/**
+ * Companion research keeps its own collection and reading order.
+ *
+ * @param \WP_Term $term Merge Conflicts landing.
+ */
+function render_publication_companion( \WP_Term $term ): string {
+	$c     = collection( $term );
+	$html  = '<p>' . esc_html__( 'First-person pieces run alongside the main series, with their own focus and reading order.', 'courtneyr-child' ) . '</p>';
+	$links = array();
+	foreach ( $c['companions'] as $companion ) {
+		foreach ( $companion['arcs'] as $arc ) {
+			if ( published_total( array( $arc ) ) ) {
+				$links[] = '<li><a href="' . esc_url( (string) get_term_link( $arc ) ) . '">' . esc_html( $arc->name ) . '</a></li>';
+			}
+		}
+	}
+	return $html . ( $links ? '<ul>' . implode( '', $links ) . '</ul>' : '<p class="cr-mc__state">' . esc_html__( 'Upcoming', 'courtneyr-child' ) . '</p>' );
 }

@@ -34,6 +34,26 @@ namespace {
 		return $text;
 	}
 
+	function esc_html( $text ) {
+		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+	}
+
+	function esc_html__( $text, $domain = 'default' ) {
+		return esc_html( $text );
+	}
+
+	function esc_attr__( $text, $domain = 'default' ) {
+		return esc_html( $text );
+	}
+
+	function esc_attr( $text ) {
+		return esc_html( $text );
+	}
+
+	function esc_url( $url ) {
+		return esc_html( $url );
+	}
+
 	function _n( $single, $plural, $number, $domain = 'default' ) {
 		return 1 === $number ? $single : $plural;
 	}
@@ -52,10 +72,12 @@ namespace {
 
 	// Series image and share-image stubs: PublishPress Series' icon table, the media library, the query.
 	class WP_Term {
-		public $term_id  = 0;
-		public $taxonomy = 'series';
-		public $slug     = '';
-		public $name     = '';
+		public $term_id     = 0;
+		public $taxonomy    = 'series';
+		public $slug        = '';
+		public $name        = '';
+		public $parent      = 0;
+		public $description = '';
 	}
 
 	function series_get_icons( $series ) {
@@ -71,7 +93,76 @@ namespace {
 	}
 
 	function taxonomy_exists( $taxonomy ) {
+		return ! empty( $GLOBALS['cr_taxonomies'][ $taxonomy ] );
+	}
+
+	function get_taxonomy( $taxonomy ) {
 		return false;
+	}
+
+	function get_posts( $args ) {
+		if ( 'series_grouping' === $args['post_type'] ) {
+			return array();
+		}
+		$GLOBALS['cr_parts_queries'][] = $args;
+		$ids = array();
+		foreach ( $GLOBALS['cr_parts_posts'] ?? array() as $id => $post ) {
+			if ( $post['series'] === $args['tax_query'][0]['terms'] && $post['status'] === $args['post_status'] && ( ! $args['has_password'] ? ! $post['password'] : true ) ) {
+				$ids[] = $id;
+			}
+		}
+		return $ids;
+	}
+
+	function update_meta_cache( $type, $ids ) {}
+
+	function get_post_meta( $id, $key, $single ) {
+		return $GLOBALS['cr_parts_posts'][ $id ]['part'] ?? '';
+	}
+
+	function get_the_title( $id ) {
+		return $GLOBALS['cr_parts_posts'][ $id ]['title'];
+	}
+
+	function get_permalink( $id ) {
+		return 'https://example.test/post-' . $id . '/';
+	}
+
+	function get_term_by( $field, $value, $taxonomy ) {
+		foreach ( $GLOBALS['cr_terms'][ $taxonomy ] ?? array() as $term ) {
+			if ( $term->$field === $value ) {
+				return $term;
+			}
+		}
+		return false;
+	}
+
+	function get_term( $id, $taxonomy ) {
+		return $GLOBALS['cr_terms'][ $taxonomy ][ $id ] ?? null;
+	}
+
+	function get_objects_in_term( $id, $taxonomy ) {
+		return $GLOBALS['cr_group_objects'][ $id ] ?? array();
+	}
+
+	function get_post( $id ) {
+		return $GLOBALS['cr_shadow_posts'][ $id ] ?? null;
+	}
+
+	function get_terms( $args ) {
+		return array();
+	}
+
+	function is_wp_error( $value ) {
+		return false;
+	}
+
+	function get_term_link( $term ) {
+		return 'https://example.test/series/' . $term->slug . '/';
+	}
+
+	function get_the_terms( $id, $taxonomy ) {
+		return isset( $GLOBALS['cr_post_series'][ $id ] ) ? array( $GLOBALS['cr_post_series'][ $id ] ) : false;
 	}
 
 	function is_tax( $taxonomy = '' ) {
@@ -98,6 +189,7 @@ namespace {
 	}
 
 	require CR_SERIES_THEME_DIR . '/inc/series.php';
+	require CR_SERIES_THEME_DIR . '/inc/series-views.php';
 }
 
 namespace Courtneyr\Child\Series\Tests {
@@ -106,6 +198,8 @@ namespace Courtneyr\Child\Series\Tests {
 	use function Courtneyr\Child\Series\part_label;
 	use function Courtneyr\Child\Series\published_count_label;
 	use function Courtneyr\Child\Series\reading_minutes;
+	use function Courtneyr\Child\Series\render_post_header;
+	use function Courtneyr\Child\Series\render_publication_contents;
 	use function Courtneyr\Child\Series\series_image;
 	use function Courtneyr\Child\Series\series_share_image;
 	use function Courtneyr\Child\Series\sort_parts;
@@ -162,9 +256,10 @@ namespace Courtneyr\Child\Series\Tests {
 
 	// Templates: methods before the parts on the landing; part nav right after the post body.
 	$landing = (string) file_get_contents( CR_SERIES_THEME_DIR . '/templates/taxonomy-series-merge-conflicts.html' );
-	$header  = strpos( $landing, 'courtneyr-child/cr-series-mc-masthead' );
-	$methods = strpos( $landing, 'courtneyr-child/cr-series-methods' );
-	$body    = strpos( $landing, 'courtneyr-child/cr-series-body' );
+	$publication_pattern = (string) file_get_contents( CR_SERIES_THEME_DIR . '/patterns/cr-series-mc-publication.php' );
+	$header  = strpos( $publication_pattern, 'cr-mc__hero' );
+	$methods = strpos( $publication_pattern, 'cr-mc__methods' );
+	$body    = strpos( $publication_pattern, '"view":"publication-parts"' );
 	check( false !== $header && false !== $methods && false !== $body && $header < $methods && $methods < $body, 'Merge Conflicts landing: masthead, then methods, then the parts' );
 
 	$generic = (string) file_get_contents( CR_SERIES_THEME_DIR . '/templates/taxonomy-series.html' );
@@ -220,15 +315,86 @@ namespace Courtneyr\Child\Series\Tests {
 
 	// Front matter on the Merge Conflicts landing: masthead, methods file, contents, parts, one follow block.
 	$order = array(
-		'courtneyr-child/cr-series-mc-masthead',
-		'courtneyr-child/cr-series-methods',
-		'courtneyr-child/cr-series-contents',
-		'courtneyr-child/cr-series-body',
+		'cr-mc__hero',
+		'cr-mc__methods',
+		'"view":"publication-contents"',
+		'"view":"publication-parts"',
 		'"view":"follow"',
 	);
-	$at    = array_map( static fn( string $needle ) => strpos( $landing, $needle ), $order );
+	$at    = array_map( static fn( string $needle ) => strpos( $publication_pattern, $needle ), $order );
 	check( ! in_array( false, $at, true ) && $at === array_values( array_unique( $at ) ) && $at == array_values( ( static function ( array $v ): array { sort( $v ); return $v; } )( $at ) ), 'landing order: masthead, methods, contents, parts, follow' );
-	check( false === strpos( $landing, '-art"' ) && ! file_exists( CR_SERIES_THEME_DIR . '/assets/css/cr-series-art.css' ), 'the collage art and its sheet are gone' );
+	check( false !== strpos( $landing, 'courtneyr-child/cr-series-mc-publication' ) && false === strpos( $generic, 'cr-series-mc-publication' ), 'the publication composition belongs only to the Merge Conflicts archive' );
+
+	$direct          = new \WP_Term();
+	$direct->term_id = 2175;
+	$direct->slug    = 'merge-conflicts';
+	$GLOBALS['cr_parts_posts'] = array(
+		201 => array( 'series' => 2175, 'status' => 'publish', 'password' => '', 'part' => 2, 'title' => 'Rules & <exceptions>' ),
+		202 => array( 'series' => 2175, 'status' => 'publish', 'password' => '', 'part' => 1, 'title' => 'Who decides?' ),
+		203 => array( 'series' => 2175, 'status' => 'draft', 'password' => '', 'part' => 3, 'title' => 'Draft title' ),
+		204 => array( 'series' => 2175, 'status' => 'future', 'password' => '', 'part' => 4, 'title' => 'Scheduled title' ),
+		205 => array( 'series' => 2175, 'status' => 'private', 'password' => '', 'part' => 5, 'title' => 'Private title' ),
+		206 => array( 'series' => 2175, 'status' => 'publish', 'password' => 'secret', 'part' => 6, 'title' => 'Protected title' ),
+		207 => array( 'series' => 9999, 'status' => 'publish', 'password' => '', 'part' => 7, 'title' => 'Other series' ),
+		208 => array( 'series' => 2175, 'status' => 'publish', 'password' => '', 'part' => null, 'title' => 'Another published part' ),
+	);
+	$contents = render_publication_contents( $direct );
+	check( false !== strpos( $contents, '<nav ' ) && false !== strpos( $contents, '<ol ' ) && 3 === substr_count( $contents, '<li ' ), 'direct series posts populate a semantic contents list without seasons' );
+	check( strpos( $contents, 'post-202/' ) < strpos( $contents, 'post-201/' ) && strpos( $contents, 'post-201/' ) < strpos( $contents, 'post-208/' ), 'direct contents keep part order with unnumbered posts afterward' );
+	check( false !== strpos( $contents, 'Rules &amp; &lt;exceptions&gt;' ) && false === strpos( $contents, 'Season ' ), 'direct contents escape real titles and invent no season assignment' );
+	check( false === strpos( $contents, 'Draft title' ) && false === strpos( $contents, 'Scheduled title' ) && false === strpos( $contents, 'Private title' ) && false === strpos( $contents, 'Protected title' ) && false === strpos( $contents, 'Other series' ), 'contents exclude drafts, scheduled, private, password-protected and unrelated posts' );
+	$query = $GLOBALS['cr_parts_queries'][0] ?? array();
+	check( 'publish' === ( $query['post_status'] ?? '' ) && false === ( $query['has_password'] ?? true ) && 2175 === ( $query['tax_query'][0]['terms'] ?? 0 ) && false === ( $query['tax_query'][0]['include_children'] ?? true ), 'contents query only password-free published posts assigned to the exact series term' );
+
+	$direct->name = 'Merge Conflicts';
+	$GLOBALS['cr_post_series'][202] = $direct;
+	$drawer = render_post_header( 202 );
+	$dom    = new \DOMDocument();
+	@$dom->loadHTML( '<?xml encoding="UTF-8">' . $drawer );
+	$xpath   = new \DOMXPath( $dom );
+	$details = $xpath->query( '//details[@class="cr-series-post__toc"]' );
+	$summary = $xpath->query( '//summary[@class="cr-series-post__summary"]' );
+	check( 1 === $details->length && ! $details->item( 0 )->hasAttribute( 'open' ) && 1 === $summary->length, 'the post series drawer uses a closed native details disclosure' );
+	check( 'In this series 3 parts published' === trim( $summary->item( 0 )->textContent ) && 1 === $xpath->query( '//summary/span[@class="cr-series-post__summary-heading"]/span[@class="cr-series-post__summary-label" and text()="In this series"]' )->length && 1 === $xpath->query( '//summary/span[@class="cr-series-post__summary-heading"]/span[@class="cr-series-post__summary-count" and text()="3 parts published"]' )->length, 'the summary groups its label and published count without parentheses' );
+	check( 1 === $xpath->query( '//summary//svg[@role="presentation" and @aria-hidden="true" and @focusable="false"]' )->length, 'the summary chevron is decorative and unfocusable' );
+	$links = $xpath->query( '//nav[@class="cr-series-post__contents"]//li/div[@class="cr-series-post__entry-copy"]/a' );
+	check( 3 === $links->length && 'https://example.test/post-202/' === $links->item( 0 )->getAttribute( 'href' ) && 'https://example.test/post-201/' === $links->item( 1 )->getAttribute( 'href' ) && 'https://example.test/post-208/' === $links->item( 2 )->getAttribute( 'href' ), 'the post drawer lists only real published links in reading order' );
+	check( 3 === $xpath->query( '//li/span[@class="cr-series-post__num" and @aria-hidden="true" and @role="presentation"]' )->length && 3 === $xpath->query( '//nav//a/span[@class="screen-reader-text"]' )->length && 'Part 1: Who decides?' === $links->item( 0 )->textContent, 'decorative two-digit numbers do not duplicate the spoken part labels' );
+	check( 1 === $xpath->query( '//nav//a[@aria-current="page" and @href="https://example.test/post-202/"]' )->length && 1 === $xpath->query( '//div[@class="cr-series-post__entry-copy"]/p[@class="cr-series-post__here" and text()="You’re reading this"]' )->length, 'only the current part gets aria-current and reading metadata beside its link' );
+	check( false !== strpos( $drawer, '>01</span>' ) && false !== strpos( $drawer, 'Rules &amp; &lt;exceptions&gt;' ) && false === strpos( $drawer, 'Draft title' ) && false === strpos( $drawer, 'Protected title' ), 'the drawer escapes post titles and excludes unpublished or protected entries' );
+	check( '' === render_post_header( 999 ), 'posts outside a series have no series drawer' );
+
+	$empty          = new \WP_Term();
+	$empty->term_id = 2176;
+	$empty->slug    = 'empty-series';
+	check( false !== strpos( render_publication_contents( $empty ), 'Eight seasons are planned.' ), 'a series without published posts or announced seasons keeps the planned message' );
+
+	$seasonal         = new \WP_Term();
+	$seasonal->term_id = 2177;
+	$seasonal->slug    = 'seasonal-series';
+	$group            = new \WP_Term();
+	$group->term_id    = 3177;
+	$group->slug       = 'seasonal-series';
+	$season           = new \WP_Term();
+	$season->term_id   = 2178;
+	$season->slug      = 'first-season';
+	$season->name      = 'First season';
+	$planned          = new \WP_Term();
+	$planned->term_id  = 2179;
+	$planned->slug     = 'planned-season';
+	$planned->name     = 'Planned season';
+	$GLOBALS['cr_taxonomies']['series_group'] = true;
+	$GLOBALS['cr_terms'] = array( 'series_group' => array( 3177 => $group ), 'series' => array( 2178 => $season, 2179 => $planned ) );
+	$GLOBALS['cr_group_objects'][3177] = array( 4178, 4179 );
+	$GLOBALS['cr_shadow_posts'] = array(
+		4178 => (object) array( 'post_type' => 'series_grouping', 'post_status' => 'publish', 'post_name' => 'series_grouping_2178' ),
+		4179 => (object) array( 'post_type' => 'series_grouping', 'post_status' => 'publish', 'post_name' => 'series_grouping_2179' ),
+	);
+	$GLOBALS['cr_parts_posts'][209] = array( 'series' => 2178, 'status' => 'publish', 'password' => '', 'part' => 1, 'title' => 'Season post' );
+	$contents = render_publication_contents( $seasonal );
+	check( false !== strpos( $contents, 'href="https://example.test/series/first-season/"' ) && false !== strpos( $contents, '1 part' ), 'announced seasons retain their archive links and published counts' );
+	check( false !== strpos( $contents, 'Planned season' ) && false !== strpos( $contents, 'Upcoming' ) && false === strpos( $contents, 'post-209/' ), 'unpublished seasons stay upcoming and season contents retain their existing structure' );
+	$GLOBALS['cr_taxonomies'] = array();
 	check( false === strpos( $generic, 'cr-series-mc-masthead' ) && false === strpos( $generic, '"view":"contents"' ) && false === strpos( $generic, '"view":"follow"' ), 'other series archives carry no front matter' );
 
 	$masthead = (string) file_get_contents( CR_SERIES_THEME_DIR . '/patterns/cr-series-mc-masthead.php' );

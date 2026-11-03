@@ -204,59 +204,14 @@ function enqueue_baseline(): void {
 		body.single-format-quote main.single-post   { background-color: var(--cr-type-quote-bg); }
 		body.single-format-status main.single-post  { background-color: var(--cr-type-status-bg); }
 		body.single-format-video main.single-post   { background-color: var(--cr-type-video-bg); }
-		/* v0.5.77+v0.5.79 — responsive single-post body width. Below 1024px
-		   (tablet portrait + phone) the theme.json defaults apply unchanged.
-		   At ≥1024px, widen the single-post surface to 80vw.
-
-		   v0.5.79 sledgehammer fix: the v0.5.77 var override
-		   (--wp--style--global--content-size: 80vw at body.single) was on
-		   the page but didnt visibly widen anything (image #186). The theme
-		   uses its own --cr-measure (65ch) on several selectors AND WPs
-		   constrained-layout selectors emit hardcoded values in some paths.
-		   Targeting the post-content + its children directly with !important
-		   guarantees the widening regardless of which underlying variable
-		   path WP chose for this page.
-
-		   v0.5.79 — also bump body paragraph font-size from 1rem to 1.15rem
-		   (~18px) on single-post prose. Original 16px read as tiny on
-		   wide-screen prose at desktop tiers. */
-		/* v0.5.89 (revised v0.5.81): width strategy is now content-shape
-		   aware, not site-wide. User direction (image #202 vs #203):
-		   "I want some things to be closer to the older screenshot of
-		   the homepage, while posts that have more content should have
-		   a wider content area."
-
-		   Translation: theme.json defaults (contentSize 720px / wideSize
-		   1100px) are the right shape for the homepage and other
-		   component-heavy templates — narrower, design-paced. Long-form
-		   single posts read better at the wider 80vw stage where there
-		   is enough room for prose plus pullquotes and image alignwide.
-
-		   Scope: body.single ONLY. Static pages (body.page), home
-		   (body.home), archives (body.archive), search, 404, etc. all
-		   fall back to the theme.json 720/1100 defaults — restoring the
-		   image-202 layout. Inline so Perfmatters Used CSS does not
-		   prune the body.single scope.
-
-		   R-24: the width reaches the article through block layout. The
-		   Single Post group is a constrained layout sized by the content-size
-		   property below, and the Post Content block (templates/single.html)
-		   sets contentSize 100% so its children fill that column. The two
-		   max-width !important rules that used to force it are gone. */
-		@media (min-width: 1024px) {
-			body.single {
-				--wp--style--global--content-size: 80vw;
-				--wp--style--global--wide-size: 86vw;
-				--cr-measure: 80vw;
-				--cr-measure-wide: 86vw;
-			}
-			body.single .wp-block-post-content pre,
-			body.single .wp-block-post-content .wp-block-code,
-			body.single .wp-block-post-content .wp-block-code pre,
-			body.single .wp-block-post-content .wp-block-preformatted {
-				max-width: min(72ch, 100%) !important;
-				margin-inline: auto !important;
-			}
+		/* 0.7.149: single posts use the theme.json content and wide sizes
+		   (720px / 1100px), the same as pages. The body.single 80vw stage
+		   from v0.5.77-v0.5.89 is gone at the request of Courtney (2026-11-02):
+		   post and page widths stay uniform. Post prose sits inside the
+		   .e-content wrapper, so the 65ch reading measure would stop it
+		   short of the column; the measure follows the content size here. */
+		body.single {
+			--cr-measure: var(--wp--style--global--content-size);
 		}
 		/* v0.5.81: hide the thin separator HRs on the homepage that
 		   create faint horizontal lines (image #182, #185, #191). The
