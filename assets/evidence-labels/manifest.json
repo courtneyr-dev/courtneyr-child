@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "reference_artwork": "exec-7c8c3f56-66cd-42b4-bb79-07e06e21d617.png",
+  "viewBox": [
+    0,
+    0,
+    384,
+    144
+  ],
+  "aspect_ratio": "8:3",
+  "usage": "Decorative SVG background. Overlay the live HTML label inside its text box; center both axes. Keep label text, underlines, links, and accessible definitions in HTML.",
+  "suggested_display": {
+    "width_px": 240,
+    "height_px": 90,
+    "text_font_size_px": 18,
+    "text_font_weight": 700,
+    "text_line_height": 1.15,
+    "text_white_space": "nowrap"
+  },
+  "labels": {
+    "verified": {
+      "file": "evidence-verified.svg",
+      "text_box": {
+        "x": 118,
+        "y": 49,
+        "width": 218,
+        "height": 46
+      },
+      "text_box_percent": {
+        "left": 30.7292,
+        "top": 34.0278,
+        "width": 56.7708,
+        "height": 31.9444
+      },
+      "text_color": "#126782"
+    },
+    "source-derived": {
+      "file": "evidence-source-derived.svg",
+      "text_box": {
+        "x": 104,
+        "y": 48,
+        "width": 250,
+        "height": 50
+      },
+      "text_box_percent": {
+        "left": 27.0833,
+        "top": 33.3333,
+        "width": 65.1042,
+        "height": 34.7222
+      },
+      "text_color": "#241c4a"
+    },
+    "account": {
+      "file": "evidence-account.svg",
+      "text_box": {
+        "x": 115,
+        "y": 47,
+        "width": 218,
+        "height": 48
+      },
+      "text_box_percent": {
+        "left": 29.9479,
+        "top": 32.6389,
+        "width": 56.7708,
+        "height": 33.3333
+      },
+      "text_color": "#241c4a"
+    },
+    "analysis": {
+      "file": "evidence-analysis.svg",
+      "text_box": {
+        "x": 119,
+        "y": 48,
+        "width": 211,
+        "height": 49
+      },
+      "text_box_percent": {
+        "left": 30.9896,
+        "top": 33.3333,
+        "width": 54.9479,
+        "height": 34.0278
+      },
+      "text_color": "#241c4a"
+    },
+    "hypothesis": {
+      "file": "evidence-hypothesis.svg",
+      "text_box": {
+        "x": 54,
+        "y": 55,
+        "width": 244,
+        "height": 47
+      },
+      "text_box_percent": {
+        "left": 14.0625,
+        "top": 38.1944,
+        "width": 63.5417,
+        "height": 32.6389
+      },
+      "text_color": "#241c4a"
+    },
+    "unknown": {
+      "file": "evidence-unknown.svg",
+      "text_box": {
+        "x": 133,
+        "y": 62,
+        "width": 213,
+        "height": 44
+      },
+      "text_box_percent": {
+        "left": 34.6354,
+        "top": 43.0556,
+        "width": 55.4688,
+        "height": 30.5556
+      },
+      "text_color": "#241c4a"
+    }
+  }
+}

@@ -556,6 +556,27 @@ function register_calendar_styles(): void {
 add_action( 'init', __NAMESPACE__ . '\\register_calendar_styles', 9 );
 
 /**
+ * Load the evidence-margin patterns' shared presentation in both editors.
+ *
+ * The patterns use native Group and Paragraph blocks. Their label words
+ * remain live links; this stylesheet supplies only layout and decoration.
+ *
+ * @return void
+ */
+function register_evidence_label_styles(): void {
+	wp_enqueue_block_style(
+		'core/group',
+		array(
+			'handle' => 'courtneyr-evidence-labels',
+			'src'    => COURTNEYR_CHILD_URI . '/assets/css/cr-evidence-labels.css',
+			'path'   => COURTNEYR_CHILD_DIR . '/assets/css/cr-evidence-labels.css',
+			'ver'    => COURTNEYR_CHILD_VERSION,
+		)
+	);
+}
+add_action( 'init', __NAMESPACE__ . '\\register_evidence_label_styles', 9 );
+
+/**
  * Enqueue editor-specific styles so the block editor preview matches
  * the front end. Same per-block files are reused; this hook adds them
  * to the editor iframe.
@@ -566,6 +587,7 @@ function add_editor_assets(): void {
 			'assets/css/tokens.css',
 			'assets/css/components.css',
 			'assets/css/cr-post-kinds.css',
+			'assets/css/cr-evidence-labels.css',
 		)
 	);
 }

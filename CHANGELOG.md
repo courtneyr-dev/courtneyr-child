@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.155
+
+Prepared presentation changes; deployment and existing-post migration require verification:
+
+- Six evidence-margin patterns use distinct stamps and stickers with live, linked label text. The account bubble points toward its passage; hypothesis uses a thought cloud.
+- Labels occupy a separate margin when the content area has room and move above their passages on narrow layouts. A passage can contain multiple native blocks.
+- The patterns use the same presentation in the editor and frontend. Existing tape labels keep their current behavior until their posts are migrated.
+
 ## 0.7.154
 
 What you see change on courtneyr.dev:
