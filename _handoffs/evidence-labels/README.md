@@ -1,12 +1,63 @@
-# Evidence labels: implementation and remaining site work
+# Evidence labels: implementation, migration, and deployment handoff
 
 ## Status
 
-Prepared against theme `main` at `3484887618fd7cbfe234bb7fcad727cc9222e117`
-(0.7.154). The patch proposes 0.7.155; recheck the release number before merging.
-This is the presentation component. Site deployment and migration of the three
-existing Merge Conflicts posts remain separate work. Preserve each post's actual
-status when editing; do not assume an already authored post is still a draft.
+The initial presentation component merged as 0.7.155. The 0.7.156 container fix
+is prepared against theme `main` at `0d005bd95e659d3dfca90036feacf0a8f0b3afa5`;
+recheck the release number before merging. All 24 existing labels have been
+migrated and saved across three Merge Conflicts posts, with their existing
+statuses preserved. A comment-delimited copy of the full 0.7.156 stylesheet is
+saved in Site Editor global Additional CSS; that field was originally empty.
+The equivalent theme release has not been deployed. Canonical-content readback
+and the live checks recorded below are complete; remaining untested behavior is
+listed separately.
+
+| Post ID | Preserved status | Labels saved |
+| --- | --- | ---: |
+| 40354 | Draft | 7 |
+| 40333 | Published | 3 |
+| 40256 | Published | 14 |
+
+All three saved posts were reopened in the code editor. Their canonical content
+matches the expected migrated content after normalizing only WordPress-native
+`\u002d` escapes in JSON comment `className` values. Reopening each native visual
+editor then showed zero `.block-editor-warning` elements, with statuses still
+Draft / Published / Published as recorded above.
+Keep article bodies, private before-copies, access details, and deployment
+secrets out of this public repository.
+
+## 0.7.156 container integration
+
+Live inspection found a 720px native post-content container and a Post Kinds
+`.pkiw-singular-entry > .e-content` wrapper around the evidence groups. A legacy
+`.alignwide` rule further capped the evidence group at 90% of that reading column.
+The scoped `.wp-block-post-content:has(.cr-evidence)` adapter allows those content
+containers and their direct `.pkiw-singular-entry` wrappers to use the existing
+wide-size token. It preserves the semantic wrappers and plugin-owned data.
+
+Native constrained child rules still limit ordinary direct blocks to the content
+size. Inside the observed semantic wrapper, the adapter applies that same measure
+and automatic inline margins to ordinary `.e-content` children. It excludes
+wide, full, left, and right alignments. The stronger `.wp-block-group.cr-evidence`
+base selector overrides the legacy alignment cap regardless of stylesheet order.
+No template or global reading-measure changes are needed.
+
+The full component stylesheet currently runs through global Additional CSS.
+Keep that copy in place until equivalent theme stylesheet deployment is verified;
+only then remove the comment-delimited duplicate and recheck the affected posts.
+Preserve any other CSS added since the initially empty field was recorded.
+Measure the actual content box, including nested padding: the existing `68.5rem`
+container-query threshold is 1096px at a 16px root, so stacking remains expected
+below it.
+
+The same adapter was verified through Additional CSS in an actual draft preview
+at a 1440px viewport: the post-content container and all seven evidence groups
+measured 1100px; the grid columns measured 182px / 720px / 182px. Ordinary and
+labeled prose both measured 720px and shared the same 360px left edge. Document
+scroll width remained 1440px. This records that frontend check, not a theme
+deployment. At a 375px viewport, the draft's groups measured 343px, labels stacked
+above their passages, and all labels and bodies fit. Existing admin-toolbar
+overflow was observed separately and was unrelated to the evidence component.
 
 ## What this patch supplies
 
@@ -58,11 +109,16 @@ These describe the basis for a statement. They are not a quality ranking.
   WordPress Studio/wp-env workflow remain to be checked. Source inspection and
   the static fixture do not substitute for those checks.
 
-## Apply to the three posts once access is available
+## Procedure retained for future migrations
 
-1. Identify the exact three posts in the authenticated site. Record IDs, titles,
+The three-post save and readback operations above are complete. Reuse this
+procedure for future posts; completed and remaining verification are recorded
+below.
+
+1. Identify the target posts in the authenticated site. Record IDs, titles,
    current statuses, modification times, and a before-copy of their complete
-   serialized content. Inspect the real allowed blocks and rendered previews.
+   serialized content privately. Inspect the real allowed blocks and rendered
+   previews.
 2. Locate the old evidence paragraphs, commonly
    `is-style-cr-tape-label cr-evidence-label`. Read each labeled passage to establish
    the existing label's scope; do not infer or alter its evidence classification.
@@ -77,7 +133,7 @@ These describe the basis for a statement. They are not a quality ranking.
    Only label presentation and the necessary grouping should change. Leave
    titles, wording, dates, SEO, media, classifications, and statuses intact.
 6. Recheck modification times before saving to avoid overwriting concurrent work.
-   Save the three updates and read them back. Verify both editor block validity
+   Save the updates and read them back. Verify both editor block validity
    and frontend behavior before marking the migration complete.
 
 Do not apply a global regex replacement to arbitrary paragraphs or silently
@@ -98,11 +154,35 @@ Static validation performed here:
 - CSS minification and the repository's size/pruning guardrails passed.
 - CSS lint and native-block structural review are recorded in the pull request.
 
-Not verified here: PHP execution/PHPCS, a running WordPress editor, frontend at
-1440px and 375px, dark mode, 200% zoom, forced colors, print, keyboard operation,
-axe, or console output. Local browser installation failed; a static HTML file is
-not proof of those behaviors. Run the repository's required workflow before
-deploying and capture the actual three-post result.
+Live checks recorded during the migration:
+
+- All three saved posts were reopened and their canonical content matched the
+  expected migration, allowing only the native JSON escape normalization noted
+  above. Reopened visual editors showed zero `.block-editor-warning` elements;
+  label counts and Draft / Published / Published statuses were preserved.
+- Draft frontend geometry passed at 1440px and 375px as recorded above.
+- The published four-freedoms post at 1440px had three 720px passage bodies at
+  x=360px, with labels at x=170px.
+- The published introduction at 1512px had fourteen 720px passage bodies at
+  x=396px, with labels at x=206px. At 720px, all fourteen rows used one 688px
+  column; labels stacked above their bodies and both fit the viewport. This is
+  a responsive viewport check, not an actual 200% browser-zoom check.
+- The actual draft's dark-mode screenshot was inspected: stamp text remained
+  readable on light stamp surfaces, while the article body used light text on
+  a dark surface. Light mode was restored after the check. This was visual
+  inspection, not a numerical contrast audit.
+- Shift+Tab reached a live `source-derived` label link. It matched
+  `:focus-visible` and displayed a 3px solid gold outline. This verifies that
+  observed link interaction, not a complete keyboard-accessibility audit.
+
+Remaining verification record (update only after observed results):
+
+- **Untested:** actual 200% browser zoom, forced colors, print, and axe.
+- **Not verified in this handoff:** PHP execution/PHPCS, console output, and a
+  complete accessibility audit. The static fixture and the targeted live checks
+  do not establish those results.
+- **Pending deployment:** equivalent theme stylesheet loading and behavior after
+  the established deployment and cache process.
 
 ## Deployment and rollback
 
@@ -111,6 +191,10 @@ current deployment checkout and its established theme export, minification,
 review, staged verification, promotion, and cache process. Verify the deployment
 checkout's freshness before exporting this committed source. A source-repository
 commit or pull request alone does not change the site.
+
+Keep the current comment-delimited Additional CSS until the equivalent deployed
+theme stylesheet is verified. After that verification, remove only the duplicate
+component copy, retain unrelated custom CSS, and recheck the migrated posts.
 
 For rollback, use the three recorded before-copies/revisions to restore content
 and revert the theme deployment sync commit through the existing process.
