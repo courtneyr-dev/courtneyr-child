@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="384" height="144" viewBox="0 0 384 144" fill="none" aria-hidden="true" focusable="false">
+<path d="M65 27L307 28C330 27 342 38 345 52L378 71L345 89C342 108 330 117 308 117L64 115C40 116 22 101 22 74C21 48 37 27 65 27Z"
+        fill="#e4f4fa" stroke="#241c4a" stroke-width="2.3" stroke-linejoin="round"/>
+  <path d="M65 31C45 30 27 47 27 73C27 94 41 111 63 111M69 30L307 32C325 31 337 40 341 54L371 71L341 87C338 103 327 112 308 113"
+        stroke="#241c4a" stroke-width=".9" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/>
+  <path d="M68 52C55 56 47 65 47 77C47 86 52 91 59 91C66 91 70 86 70 80C70 73 66 69 60 69C61 63 64 60 70 57Z"
+        fill="#241c4a"/>
+  <path d="M96 52C83 56 75 65 75 77C75 86 80 91 87 91C94 91 98 86 98 80C98 73 94 69 88 69C89 63 92 60 98 57Z"
+        fill="#241c4a"/>
+  <g stroke="#126782" stroke-width=".8" stroke-linecap="round" opacity=".3">
+    <path d="M42 37L47 34M112 30L122 30M276 32L285 32"/>
+    <path d="M53 110L61 112M303 113L313 113M350 62L355 65"/>
+  </g>
+  <path d="M83 27L87 27M203 28L208 28M256 116L261 116M23 79L24 84"
+        stroke="#fffdf7" stroke-width="1" stroke-linecap="round" opacity=".8"/>
+</svg>

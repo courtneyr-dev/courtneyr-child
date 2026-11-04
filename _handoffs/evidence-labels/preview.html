@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evidence labels — local integration fixture</title>
+  <link rel="stylesheet" href="../../assets/css/tokens.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/cr-evidence-labels.css">
+  <style>
+    @font-face { font-family: Barlow; src: url("../../assets/fonts/barlow-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: optional; }
+    @font-face { font-family: Barlow; src: url("../../assets/fonts/barlow-700.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: optional; }
+    @font-face { font-family: "Roboto Slab"; src: url("../../assets/fonts/roboto-slab-variable.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: optional; }
+    :root {
+      --wp--style--global--content-size: 720px;
+      --wp--style--global--wide-size: 1100px;
+    }
+    body { margin: 0; }
+    .evidence-fixture {
+      inline-size: calc(100% - var(--cr-space-md) * 2);
+      max-inline-size: var(--wp--style--global--wide-size);
+      margin-inline: auto;
+      padding-block: var(--cr-space-xl);
+    }
+    .evidence-fixture.is-layout-constrained > :where(:not(.alignwide):not(.alignfull)) {
+      max-inline-size: var(--wp--style--global--content-size);
+      margin-inline: auto !important;
+    }
+    .evidence-fixture > .alignwide {
+      max-inline-size: var(--wp--style--global--wide-size);
+      margin-inline: auto !important;
+    }
+    .evidence-fixture > * + * { margin-block-start: var(--cr-space-lg); }
+    .evidence-fixture h1 { font-size: var(--cr-text-3xl); }
+    .evidence-fixture h2 { font-size: var(--cr-text-xl); }
+    .evidence-fixture .fixture-note {
+      font-size: var(--cr-text-sm);
+      color: var(--cr-ink-soft);
+    }
+    .fixture-narrow {
+      inline-size: min(100%, var(--wp--style--global--content-size));
+      margin-inline: auto;
+    }
+  </style>
+  <script>
+    const fixtureParameters = new URLSearchParams(window.location.search);
+    if (["light", "dark", "system"].includes(fixtureParameters.get("theme"))) {
+      document.documentElement.dataset.theme = fixtureParameters.get("theme");
+    }
+    if (fixtureParameters.get("text") === "200") {
+      document.documentElement.style.fontSize = "200%";
+    }
+  </script>
+</head>
+<body>
+  <main class="wp-block-post-content evidence-fixture is-layout-constrained">
+    <h1>How to read the evidence</h1>
+    <p>These labels describe how a statement is supported. Each label links to the methods page.</p>
+    <p class="fixture-note">Local fixture using the repository’s tokens, components, and fonts. The wide group is 1100px; the ordinary reading measure is 720px. Add <code>?theme=dark</code> or <code>?text=200</code> to inspect those states.</p>
+
+    <div class="wp-block-group alignwide cr-evidence is-layout-constrained">
+      <div class="wp-block-group cr-evidence__row is-layout-flow">
+        <p class="cr-evidence-label cr-evidence-label--verified is-style-cr-tape-label"><a href="/merge-conflicts-methods/">verified</a></p>
+        <div class="wp-block-group cr-evidence__body is-layout-flow"><p>Read in a primary governing document, filing, record or official decision, cited with section or passage</p></div>
+      </div>
+      <div class="wp-block-group cr-evidence__row is-layout-flow">
+        <p class="cr-evidence-label cr-evidence-label--source-derived"><a href="/merge-conflicts-methods/">source-derived</a></p>
+        <div class="wp-block-group cr-evidence__body is-layout-flow"><p>Stated by a reliable secondary source, not yet checked against a primary record</p></div>
+      </div>
+      <div class="wp-block-group cr-evidence__row is-layout-flow">
+        <p class="cr-evidence-label cr-evidence-label--account"><a href="/merge-conflicts-methods/">account</a></p>
+        <div class="wp-block-group cr-evidence__body is-layout-flow"><p>A named participant’s attributed account. Not a finding</p></div>
+      </div>
+      <div class="wp-block-group cr-evidence__row is-layout-flow">
+        <p class="cr-evidence-label cr-evidence-label--analysis"><a href="/merge-conflicts-methods/">analysis</a></p>
+        <div class="wp-block-group cr-evidence__body is-layout-flow"><p>The researcher’s interpretation of cited facts</p></div>
+      </div>
+      <div class="wp-block-group cr-evidence__row is-layout-flow">
+        <p class="cr-evidence-label cr-evidence-label--hypothesis"><a href="/merge-conflicts-methods/">hypothesis</a></p>
+        <div class="wp-block-group cr-evidence__body is-layout-flow"><p>A claim to test. Not a finding</p></div>
+      </div>
+      <div class="wp-block-group cr-evidence__row is-layout-flow">
+        <p class="cr-evidence-label cr-evidence-label--unknown"><a href="/merge-conflicts-methods/">unknown</a></p>
+        <div class="wp-block-group cr-evidence__body is-layout-flow"><p>Searched for and not established</p></div>
+      </div>
+    </div>
+
+    <p id="ordinary-prose-reference">This ordinary paragraph marks the reading column. At a wide container size, every evidence body should have the same left and right edges.</p>
+
+    <h2>A label can cover several paragraphs</h2>
+    <div class="wp-block-group alignwide cr-evidence is-layout-constrained">
+      <div class="wp-block-group cr-evidence__row is-layout-flow">
+        <p class="cr-evidence-label cr-evidence-label--analysis"><a href="/merge-conflicts-methods/">analysis</a></p>
+        <div class="wp-block-group cr-evidence__body is-layout-flow">
+          <p>This is layout sample text, not a claim about a project. The label belongs to this whole group.</p>
+          <p>This second paragraph should remain in the same reading column. It must not wrap underneath the label or be cleared into a different column.</p>
+          <p>The next ordinary paragraph appears after the complete labeled group, in normal document order.</p>
+        </div>
+      </div>
+    </div>
+    <p>Ordinary prose continues here. The evidence label must not float into this paragraph.</p>
+
+    <h2>An editor-style inner-block wrapper</h2>
+    <div class="wp-block-group alignwide cr-evidence is-layout-constrained">
+      <div class="block-editor-inner-blocks">
+        <div class="block-editor-block-list__layout">
+          <div class="wp-block-group cr-evidence__row">
+            <div class="block-editor-inner-blocks">
+              <div class="block-editor-block-list__layout">
+                <p class="cr-evidence-label cr-evidence-label--account"><a href="/merge-conflicts-methods/">account</a></p>
+                <div class="wp-block-group cr-evidence__body">
+                  <div class="block-editor-inner-blocks">
+                    <div class="block-editor-block-list__layout">
+                      <p>A named participant’s attributed account. Not a finding</p>
+                      <p>This additional paragraph exercises the common editor wrapper. It is fixture text, not an attributed account.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2>A narrow container inside a wide page</h2>
+    <div class="fixture-narrow">
+      <div class="wp-block-group alignwide cr-evidence is-layout-constrained">
+        <div class="wp-block-group cr-evidence__row is-layout-flow">
+          <p class="cr-evidence-label cr-evidence-label--source-derived"><a href="/merge-conflicts-methods/">source-derived</a></p>
+          <div class="wp-block-group cr-evidence__body is-layout-flow">
+            <p>Stated by a reliable secondary source, not yet checked against a primary record</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

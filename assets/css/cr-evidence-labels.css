@@ -1,0 +1,295 @@
+/*
+ * Merge Conflicts evidence labels.
+ *
+ * Native blocks: alignwide Group.cr-evidence > Group.cr-evidence__row
+ * > Paragraph.cr-evidence-label + Group.cr-evidence__body.
+ * The editor's inner-block layout receives the same grid.
+ *
+ * SVG backgrounds are embedded from assets/evidence-labels/*.svg so this
+ * sheet remains portable when WordPress or used-CSS tooling inlines it.
+ * Label words, destinations, and definitions remain live HTML.
+ */
+
+.cr-evidence {
+	container-name: cr-evidence;
+	container-type: inline-size;
+	inline-size: 100%;
+	max-inline-size: var(--wp--style--global--wide-size, 1100px);
+}
+
+.cr-evidence > .block-editor-inner-blocks,
+.cr-evidence > .block-editor-block-list__layout,
+.cr-evidence > .block-editor-inner-blocks > .block-editor-block-list__layout,
+.cr-evidence .cr-evidence__row > .block-editor-inner-blocks,
+.cr-evidence .cr-evidence__row > .block-editor-block-list__layout {
+	grid-column: 1 / -1;
+	inline-size: 100%;
+	min-inline-size: 0;
+	max-inline-size: none;
+	margin-inline: 0 !important;
+}
+
+.cr-evidence .cr-evidence__row,
+.cr-evidence .cr-evidence__row > .block-editor-block-list__layout,
+.cr-evidence .cr-evidence__row > .block-editor-inner-blocks > .block-editor-block-list__layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	column-gap: var(--cr-space-xs);
+	row-gap: var(--cr-space-xs);
+	align-items: start;
+	inline-size: 100%;
+	min-inline-size: 0;
+}
+
+.cr-evidence .cr-evidence__row {
+	max-inline-size: var(--wp--style--global--content-size, 720px);
+	margin-block: 0;
+
+	/* WordPress constrained layouts give child inline margins !important. */
+	margin-inline: auto !important;
+}
+
+.cr-evidence .cr-evidence__row + .cr-evidence__row {
+	margin-block-start: var(--cr-space-lg);
+}
+
+
+/* These selectors also cancel the old tape/float treatment, only in new rows. */
+.cr-evidence .cr-evidence__row .cr-evidence-label {
+	--cr-evidence-ink: var(--wp--preset--color--primary, var(--cr-russian-violet));
+	--cr-evidence-underline: var(--cr-evidence-ink);
+	--cr-evidence-left: 30.7292%;
+	--cr-evidence-right: 12.5%;
+	--cr-evidence-top: 34.0278%;
+	--cr-evidence-bottom: 34.0278%;
+
+	position: relative;
+	display: grid;
+	grid-template-columns: var(--cr-evidence-left) minmax(0, 1fr) var(--cr-evidence-right);
+	grid-template-rows: var(--cr-evidence-top) minmax(1.75em, 1fr) var(--cr-evidence-bottom);
+	align-self: start;
+	justify-self: start;
+	inline-size: min(100%, 14em);
+	min-inline-size: 0;
+	max-inline-size: 100%;
+	aspect-ratio: 8 / 3;
+	box-sizing: border-box;
+	margin: 0 !important;
+	padding: 0;
+	border: 0;
+	background-color: transparent;
+	background-image: var(--cr-evidence-art);
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: 100% 100%;
+	box-shadow: none;
+	float: none;
+	clear: none;
+	transform: none;
+	color: var(--cr-evidence-ink);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-sm), 14px);
+	font-style: normal;
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+	letter-spacing: var(--cr-tracking-normal);
+	text-align: center;
+	text-transform: none;
+	white-space: normal;
+	overflow: visible;
+}
+
+.cr-evidence .cr-evidence-label > a:any-link {
+	grid-column: 2;
+	grid-row: 2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-inline-size: 0;
+	min-block-size: 1.75em;
+	max-inline-size: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--cr-evidence-ink);
+	font: inherit;
+	letter-spacing: inherit;
+	text-align: center;
+	text-transform: none;
+	text-decoration-line: underline;
+	text-decoration-color: var(--cr-evidence-underline);
+	text-decoration-thickness: 0.08em;
+	text-underline-offset: 0.16em;
+	overflow-wrap: anywhere;
+}
+
+.cr-evidence .cr-evidence-label > a:any-link:hover {
+	color: var(--cr-evidence-ink);
+	background: none;
+	text-decoration-thickness: 0.14em;
+}
+
+.cr-evidence .cr-evidence-label > a:any-link:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	border-radius: var(--cr-radius-xs);
+	box-shadow: 0 0 0 5px var(--wp--preset--color--primary, var(--cr-russian-violet));
+}
+
+.cr-evidence .cr-evidence__row .cr-evidence__body {
+	grid-column: 1;
+	inline-size: 100%;
+	min-inline-size: 0;
+	max-inline-size: none;
+	margin: 0 !important;
+	clear: none;
+}
+
+.cr-evidence .cr-evidence__body > :first-child,
+.cr-evidence .cr-evidence__body > .block-editor-inner-blocks > .block-editor-block-list__layout > :first-child {
+	margin-block-start: 0;
+}
+
+.cr-evidence .cr-evidence__body > :last-child,
+.cr-evidence .cr-evidence__body > .block-editor-inner-blocks > .block-editor-block-list__layout > :last-child {
+	margin-block-end: 0;
+}
+
+/*
+ * 1096px at the default root size: 720px prose, two 180px gutters,
+ * and two 8px gaps. A rem query also returns enlarged text to normal
+ * stacked flow. The actual container, not the viewport, selects this.
+ */
+@container cr-evidence (min-width: 68.5rem) {
+
+	.cr-evidence .cr-evidence__row,
+	.cr-evidence .cr-evidence__row > .block-editor-block-list__layout,
+	.cr-evidence .cr-evidence__row > .block-editor-inner-blocks > .block-editor-block-list__layout {
+		grid-template-columns: minmax(0, 1fr) var(--wp--style--global--content-size, 720px) minmax(0, 1fr);
+		max-inline-size: none;
+	}
+
+	.cr-evidence .cr-evidence__row .cr-evidence-label {
+		grid-column: 1;
+	}
+
+	.cr-evidence .cr-evidence__row .cr-evidence__body {
+		grid-column: 2;
+	}
+}
+
+/* Physical paper keeps fixed dark ink in both site color schemes. */
+
+.cr-evidence .cr-evidence__row .cr-evidence-label--verified {
+	--cr-evidence-left: 30.7292%;
+	--cr-evidence-right: 12.5000%;
+	--cr-evidence-top: 34.0278%;
+	--cr-evidence-bottom: 34.0278%;
+	--cr-evidence-ink: var(--wp--preset--color--cerulean, var(--cr-cerulean));
+	--cr-evidence-art: url(data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22384%22%20height=%22144%22%20viewBox=%220%200%20384%20144%22%20fill=%22none%22%20aria-hidden=%22true%22%20focusable=%22false%22%3E%3Cpath%20d=%22M193%2010C279%208%20354%2034%20361%2066C367%20100%20289%20130%20198%20132C106%20134%2027%20110%2022%2077C16%2043%2094%2012%20193%2010Z%22%20fill=%22%23eaf6fa%22%20stroke=%22%23126782%22%20stroke-width=%222.2%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M193%2021C276%2019%20344%2041%20349%2068C354%2096%20282%20121%20197%20122C113%20123%2039%20103%2034%2076C30%2049%2099%2023%20193%2021Z%22%20stroke=%22%23126782%22%20stroke-width=%222%22%20stroke-linecap=%22round%22/%3E%3Cpath%20d=%22M59%2072L74%2087L104%2052%22%20stroke=%22%23126782%22%20stroke-width=%228.4%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3Cg%20stroke=%22%23241c4a%22%20stroke-width=%22.8%22%20stroke-linecap=%22round%22%20opacity=%22.32%22%3E%3Cpath%20d=%22M55%2039Q76%2025%20104%2019%22/%3E%3Cpath%20d=%22M269%2017Q299%2022%20318%2032%22/%3E%3Cpath%20d=%22M332%20105Q308%20118%20281%20123%22/%3E%3Cpath%20d=%22M82%20117Q106%20125%20129%20128%22/%3E%3C/g%3E%3Cg%20stroke=%22%23fffdf7%22%20stroke-width=%221.2%22%20stroke-linecap=%22round%22%20opacity=%22.9%22%3E%3Cpath%20d=%22M44%2045L48%2042M143%2012L148%2011M235%2012L240%2013%22/%3E%3Cpath%20d=%22M355%2085L353%2089M182%20132L187%20132M37%20101L40%20103%22/%3E%3C/g%3E%3Cpath%20d=%22M27%2071L27%2078M339%2040L344%2045M148%20126L157%20127%22%20stroke=%22%23219ebc%22%20stroke-width=%221%22%20stroke-linecap=%22round%22%20opacity=%22.5%22/%3E%3C/svg%3E);
+}
+
+.cr-evidence .cr-evidence__row .cr-evidence-label--source-derived {
+	--cr-evidence-left: 27.0833%;
+	--cr-evidence-right: 7.8125%;
+	--cr-evidence-top: 33.3333%;
+	--cr-evidence-bottom: 31.9444%;
+	--cr-evidence-art: url(data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22384%22%20height=%22144%22%20viewBox=%220%200%20384%20144%22%20fill=%22none%22%20aria-hidden=%22true%22%20focusable=%22false%22%3E%3Cpath%20d=%22M12%2025%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q3%20-5%206%200%20q3%204%206%200%20q5%203%200%206%20q-4%203%200%206%20q5%203%200%206%20q-4%203%200%206%20q5%203%200%206%20q-4%203%200%206%20q5%203%200%206%20q-4%203%200%206%20q5%203%200%206%20q-4%203%200%206%20q5%203%200%206%20q-4%203%200%206%20q5%203%200%206%20q-4%203%200%206%20q5%203%200%206%20q-4%203%200%206%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-3%205%20-6%200%20q-3%20-4%20-6%200%20q-5%20-3%200%20-6%20q4%20-3%200%20-6%20q-5%20-3%200%20-6%20q4%20-3%200%20-6%20q-5%20-3%200%20-6%20q4%20-3%200%20-6%20q-5%20-3%200%20-6%20q4%20-3%200%20-6%20q-5%20-3%200%20-6%20q4%20-3%200%20-6%20q-5%20-3%200%20-6%20q4%20-3%200%20-6%20q-5%20-3%200%20-6%20q4%20-3%200%20-6%20q-5%20-3%200%20-6%20q4%20-3%200%20-6%20Z%22%20fill=%22%23bcb5e3%22%20stroke=%22%23647baf%22%20stroke-width=%221.2%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M28%2035L353%2030Q360%2030%20360%2038L360%20108Q360%20114%20353%20115L30%20117Q23%20118%2023%20110L22%2042Q22%2036%2028%2035Z%22%20fill=%22%23fffdf7%22%20stroke=%22%23241c4a%22%20stroke-width=%221.9%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M32%2042L351%2037L352%20107L31%20110Z%22%20stroke=%22%23241c4a%22%20stroke-width=%221%22%20opacity=%22.8%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M43%2049L77%2047L80%2088L45%2090Z%22%20fill=%22%23fffdf7%22%20stroke=%22%23241c4a%22%20stroke-width=%222%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M50%2051L78%2049L93%2064L95%20103L52%20106Z%22%20fill=%22%23fffdf7%22%20stroke=%22%23241c4a%22%20stroke-width=%222.2%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M78%2049L79%2065L93%2064M60%2074L84%2073M60%2082L84%2081M60%2091L75%2090%22%20stroke=%22%23241c4a%22%20stroke-width=%221.6%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3Cg%20stroke=%22%23241c4a%22%20stroke-width=%22.8%22%20stroke-linecap=%22round%22%20opacity=%22.28%22%3E%3Cpath%20d=%22M34%2027L45%2027M118%2027L125%2026M240%2026L249%2025%22/%3E%3Cpath%20d=%22M16%2057L16%2065M368%2086L369%2094M143%20118L154%20118M285%20117L295%20117%22/%3E%3C/g%3E%3Cpath%20d=%22M65%2033L78%2033M313%20113L327%20112%22%20stroke=%22%23ffffff%22%20stroke-width=%221.3%22%20stroke-linecap=%22round%22%20opacity=%22.85%22/%3E%3C/svg%3E);
+}
+
+.cr-evidence .cr-evidence__row .cr-evidence-label--account {
+	--cr-evidence-left: 29.9479%;
+	--cr-evidence-right: 13.2812%;
+	--cr-evidence-top: 32.6389%;
+	--cr-evidence-bottom: 34.0278%;
+	--cr-evidence-underline: var(--wp--preset--color--cerulean, var(--cr-cerulean));
+	--cr-evidence-art: url(data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22384%22%20height=%22144%22%20viewBox=%220%200%20384%20144%22%20fill=%22none%22%20aria-hidden=%22true%22%20focusable=%22false%22%3E%3Cpath%20d=%22M65%2027L307%2028C330%2027%20342%2038%20345%2052L378%2071L345%2089C342%20108%20330%20117%20308%20117L64%20115C40%20116%2022%20101%2022%2074C21%2048%2037%2027%2065%2027Z%22%20fill=%22%23e4f4fa%22%20stroke=%22%23241c4a%22%20stroke-width=%222.3%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M65%2031C45%2030%2027%2047%2027%2073C27%2094%2041%20111%2063%20111M69%2030L307%2032C325%2031%20337%2040%20341%2054L371%2071L341%2087C338%20103%20327%20112%20308%20113%22%20stroke=%22%23241c4a%22%20stroke-width=%22.9%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%20opacity=%22.5%22/%3E%3Cpath%20d=%22M68%2052C55%2056%2047%2065%2047%2077C47%2086%2052%2091%2059%2091C66%2091%2070%2086%2070%2080C70%2073%2066%2069%2060%2069C61%2063%2064%2060%2070%2057Z%22%20fill=%22%23241c4a%22/%3E%3Cpath%20d=%22M96%2052C83%2056%2075%2065%2075%2077C75%2086%2080%2091%2087%2091C94%2091%2098%2086%2098%2080C98%2073%2094%2069%2088%2069C89%2063%2092%2060%2098%2057Z%22%20fill=%22%23241c4a%22/%3E%3Cg%20stroke=%22%23126782%22%20stroke-width=%22.8%22%20stroke-linecap=%22round%22%20opacity=%22.3%22%3E%3Cpath%20d=%22M42%2037L47%2034M112%2030L122%2030M276%2032L285%2032%22/%3E%3Cpath%20d=%22M53%20110L61%20112M303%20113L313%20113M350%2062L355%2065%22/%3E%3C/g%3E%3Cpath%20d=%22M83%2027L87%2027M203%2028L208%2028M256%20116L261%20116M23%2079L24%2084%22%20stroke=%22%23fffdf7%22%20stroke-width=%221%22%20stroke-linecap=%22round%22%20opacity=%22.8%22/%3E%3C/svg%3E);
+}
+
+.cr-evidence .cr-evidence__row .cr-evidence-label--analysis {
+	--cr-evidence-left: 30.9896%;
+	--cr-evidence-right: 14.0625%;
+	--cr-evidence-top: 33.3333%;
+	--cr-evidence-bottom: 32.6389%;
+	--cr-evidence-underline: var(--cr-marker);
+	--cr-evidence-art: url(data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22384%22%20height=%22144%22%20viewBox=%220%200%20384%20144%22%20fill=%22none%22%20aria-hidden=%22true%22%20focusable=%22false%22%3E%3Cpath%20d=%22M40%2035L337%2022Q357%2021%20358%2042L363%2096L336%20121L45%20133C34%20134%2024%20127%2024%20115L20%2056Q19%2038%2040%2035Z%22%20fill=%22%23fee2c3%22%20stroke=%22%23241c4a%22%20stroke-width=%222.3%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M333%20121L363%2096L342%2095Q333%2095%20333%20104Z%22%20fill=%22%23fb8500%22/%3E%3Cpath%20d=%22M336%20120L359%2098M333%20120L334%20105Q334%2098%20341%2098%22%20stroke=%22%23241c4a%22%20stroke-width=%221%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%20opacity=%22.6%22/%3E%3Cpath%20d=%22M60%2087L86%2050L100%2061L73%2098Z%22%20fill=%22%23fff7e7%22%20stroke=%22%23241c4a%22%20stroke-width=%222.1%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M86%2050L92%2042Q94%2040%2097%2043L106%2050Q108%2052%20106%2055L100%2062Z%22%20fill=%22%23fffdf7%22%20stroke=%22%23241c4a%22%20stroke-width=%222.1%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M60%2087L51%20108L73%2098Z%22%20fill=%22%23fffdf7%22%20stroke=%22%23241c4a%22%20stroke-width=%222.1%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M51%20108L55%2098L61%20103Z%22%20fill=%22%23241c4a%22/%3E%3Cpath%20d=%22M63%2089L90%2053M67%2093L95%2057M87%2049L101%2060%22%20stroke=%22%23241c4a%22%20stroke-width=%221.2%22%20stroke-linecap=%22round%22/%3E%3Cg%20stroke=%22%23241c4a%22%20stroke-width=%22.8%22%20stroke-linecap=%22round%22%20opacity=%22.36%22%3E%3Cpath%20d=%22M26%2057C25%2047%2029%2042%2041%2041M49%20128L110%20126M286%20121L327%20118%22/%3E%3Cpath%20d=%22M343%2028C350%2029%20353%2035%20354%2042%22/%3E%3C/g%3E%3Cpath%20d=%22M48%2038L63%2037M183%2030L195%2029M27%20113L28%20119%22%20stroke=%22%23fb8500%22%20stroke-width=%221.1%22%20stroke-linecap=%22round%22%20opacity=%22.35%22/%3E%3C/svg%3E);
+}
+
+.cr-evidence .cr-evidence__row .cr-evidence-label--hypothesis {
+	--cr-evidence-left: 14.0625%;
+	--cr-evidence-right: 22.3958%;
+	--cr-evidence-top: 38.1944%;
+	--cr-evidence-bottom: 29.1667%;
+	--cr-evidence-art: url(data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22384%22%20height=%22144%22%20viewBox=%220%200%20384%20144%22%20fill=%22none%22%20aria-hidden=%22true%22%20focusable=%22false%22%3E%3Cpath%20d=%22M67%2040C77%2019%20113%2017%20140%2033C165%2010%20206%2012%20229%2034C251%2016%20283%2024%20290%2045C314%2047%20326%2067%20316%2084C329%20102%20314%20123%20290%20122C277%20139%20244%20139%20224%20123C203%20143%20165%20143%20143%20124C113%20144%2075%20138%2065%20118C38%20125%2017%20114%2018%2094C2%2077%2013%2050%2036%2046C47%2042%2056%2040%2067%2040Z%22%20fill=%22%23fff6d7%22%20stroke=%22%23241c4a%22%20stroke-width=%222.1%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M67%2044C80%2024%20111%2023%20139%2038M145%2033C166%2016%20203%2018%20226%2038M234%2035C251%2022%20278%2030%20286%2048%22%20stroke=%22%23241c4a%22%20stroke-width=%22.8%22%20stroke-linecap=%22round%22%20opacity=%22.55%22/%3E%3Cpath%20d=%22M35%2051C17%2056%2011%2076%2021%2088M22%2098C22%20112%2041%20119%2062%20114M70%20120C81%20135%20113%20139%20140%20128M149%20128C171%20141%20202%20140%20220%20128M231%20128C249%20137%20275%20134%20286%20122M296%20118C314%20116%20322%20102%20314%2091%22%20stroke=%22%23241c4a%22%20stroke-width=%22.8%22%20stroke-linecap=%22round%22%20opacity=%22.5%22/%3E%3Ccircle%20cx=%22343%22%20cy=%2294%22%20r=%228.7%22%20fill=%22%23fff6d7%22%20stroke=%22%23241c4a%22%20stroke-width=%222%22/%3E%3Ccircle%20cx=%22368%22%20cy=%2277%22%20r=%225.8%22%20fill=%22%23fff6d7%22%20stroke=%22%23241c4a%22%20stroke-width=%222%22/%3E%3Cpath%20d=%22M54%2045L60%2043M104%2026L111%2027M188%2018L194%2019M304%2056L308%2061%22%20stroke=%22%23ffb703%22%20stroke-width=%221%22%20stroke-linecap=%22round%22%20opacity=%22.55%22/%3E%3C/svg%3E);
+}
+
+.cr-evidence .cr-evidence__row .cr-evidence-label--unknown {
+	--cr-evidence-left: 34.6354%;
+	--cr-evidence-right: 9.8958%;
+	--cr-evidence-top: 43.0556%;
+	--cr-evidence-bottom: 26.3889%;
+	--cr-evidence-art: url(data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22384%22%20height=%22144%22%20viewBox=%220%200%20384%20144%22%20fill=%22none%22%20aria-hidden=%22true%22%20focusable=%22false%22%3E%3Cpath%20d=%22M37%2018L130%2017Q137%2016%20142%2024L153%2039L344%2040Q364%2040%20364%2059L364%20113Q364%20128%20347%20128L37%20129Q20%20129%2020%20112L20%2046Q20%2037%2027%2030Z%22%20fill=%22%23f3f3ee%22%20stroke=%22%23241c4a%22%20stroke-width=%222.3%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M37%2022L129%2021Q134%2020%20138%2026L150%2043M157%2043L343%2044Q360%2044%20360%2059M24%20105L24%20112Q24%20125%2038%20125L345%20124%22%20stroke=%22%23647baf%22%20stroke-width=%22.9%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%20opacity=%22.55%22/%3E%3Cpath%20d=%22M54%2053L90%2052L102%2065L102%20110L55%20110Z%22%20fill=%22%23fffdf7%22%20stroke=%22%23241c4a%22%20stroke-width=%222.4%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M90%2052L90%2066L102%2065M64%2070L82%2070M64%2083L77%2083%22%20stroke=%22%23241c4a%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3Ccircle%20cx=%2298%22%20cy=%2294%22%20r=%2215%22%20fill=%22%23f3f3ee%22%20stroke=%22%23241c4a%22%20stroke-width=%223.4%22/%3E%3Cpath%20d=%22M109%20105L123%20119%22%20stroke=%22%23241c4a%22%20stroke-width=%224.4%22%20stroke-linecap=%22round%22/%3E%3Cpath%20d=%22M89%2087C91%2084%2094%2082%2098%2082%22%20stroke=%22%23647baf%22%20stroke-width=%221%22%20stroke-linecap=%22round%22%20opacity=%22.65%22/%3E%3Cg%20stroke=%22%23241c4a%22%20stroke-width=%22.8%22%20stroke-linecap=%22round%22%20opacity=%22.35%22%3E%3Cpath%20d=%22M48%2018L56%2018M112%2019L122%2019M174%2041L188%2041%22/%3E%3Cpath%20d=%22M272%2042L285%2042M363%2069L363%2077M62%20128L74%20128M321%20127L335%20127%22/%3E%3C/g%3E%3C/svg%3E);
+}
+
+/* Decoration is optional; words and their destinations are not. */
+@media (forced-colors: active) {
+
+	.cr-evidence .cr-evidence__row .cr-evidence-label {
+		display: block;
+		inline-size: fit-content;
+		max-inline-size: 100%;
+		aspect-ratio: auto;
+		padding: var(--cr-space-2xs) var(--cr-space-xs);
+		border: 1px solid CanvasText;
+		background: none;
+		color: CanvasText;
+	}
+
+	.cr-evidence .cr-evidence-label > a:any-link {
+		display: inline;
+		min-block-size: 0;
+		color: LinkText;
+		text-decoration-color: currentcolor;
+	}
+
+	.cr-evidence .cr-evidence-label > a:any-link:focus-visible {
+		outline: 2px solid Highlight;
+		box-shadow: none;
+	}
+}
+
+@media print {
+
+	.cr-evidence {
+		container-type: normal;
+		max-inline-size: none;
+	}
+
+	.cr-evidence .cr-evidence__row,
+	.cr-evidence .cr-evidence__row > .block-editor-block-list__layout,
+	.cr-evidence .cr-evidence__row > .block-editor-inner-blocks > .block-editor-block-list__layout {
+		display: block;
+		max-inline-size: none;
+	}
+
+	.cr-evidence .cr-evidence__row .cr-evidence-label {
+		display: block;
+		inline-size: fit-content;
+		max-inline-size: 100%;
+		aspect-ratio: auto;
+		margin-block-end: var(--cr-space-xs) !important;
+		padding: var(--cr-space-2xs) var(--cr-space-xs);
+		border: 1px solid currentcolor;
+		background: none;
+		color: var(--wp--preset--color--primary, var(--cr-russian-violet));
+		break-after: avoid-page;
+	}
+
+	.cr-evidence .cr-evidence-label > a:any-link {
+		display: inline;
+		min-block-size: 0;
+		color: var(--wp--preset--color--primary, var(--cr-russian-violet));
+		text-decoration-color: currentcolor;
+	}
+}
