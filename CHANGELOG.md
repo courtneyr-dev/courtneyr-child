@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.156
+
+Presentation saved on site through temporary Additional CSS; equivalent theme deployment remains pending:
+
+- Post-content containers containing evidence groups, including Post Kinds semantic wrappers, can use the theme's wide measure. Ordinary paragraphs retain the normal reading measure; other post-content containers keep their existing width.
+- Evidence groups override the legacy generic wide-alignment cap, allowing labels to reach their margin layout when space permits.
+- All 24 existing labels were migrated, saved, and reopened across three posts. Canonical content matches the expected migration, statuses remain Draft/Published/Published, and all three native visual editors show zero invalid-block warnings.
+- Live checks verified the wide margin layout, stacked layouts at 375px and 720px, the draft's dark appearance, and visible keyboard focus on a label link. Actual 200% zoom, forced colors, print, and axe remain untested; see the integration handoff for the precise scope and measurements.
+
 ## 0.7.155
 
 Prepared presentation changes; deployment and existing-post migration require verification:

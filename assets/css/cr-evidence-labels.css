@@ -10,7 +10,21 @@
  * Label words, destinations, and definitions remain live HTML.
  */
 
-.cr-evidence {
+/* Give native and Post Kinds evidence content room without changing other posts. */
+.wp-block-post-content:has(.cr-evidence),
+.wp-block-post-content:has(.cr-evidence) > .pkiw-singular-entry {
+	inline-size: 100%;
+	max-inline-size: var(--wp--style--global--wide-size, 1100px);
+}
+
+/* The semantic wrapper is not a native constrained layout; keep its prose measure. */
+.wp-block-post-content:has(.cr-evidence) > .pkiw-singular-entry > .e-content > :not(.alignwide):not(.alignfull):not(.alignleft):not(.alignright) {
+	max-inline-size: var(--wp--style--global--content-size, 720px);
+	margin-inline: auto;
+}
+
+/* Outrank the legacy .alignwide width without depending on stylesheet order. */
+.wp-block-group.cr-evidence {
 	container-name: cr-evidence;
 	container-type: inline-size;
 	inline-size: 100%;
@@ -261,7 +275,7 @@
 
 @media print {
 
-	.cr-evidence {
+	.wp-block-group.cr-evidence {
 		container-type: normal;
 		max-inline-size: none;
 	}
