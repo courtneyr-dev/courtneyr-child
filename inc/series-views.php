@@ -763,23 +763,83 @@ function render_publication_contents( \WP_Term $term ): string {
 		}
 		return $html . '</ol></nav>';
 	}
-	$html = '<nav class="cr-mc__contents" aria-label="' . esc_attr__( 'Merge Conflicts seasons', 'courtneyr-child' ) . '"><ol class="cr-mc__seasons" role="list">';
+	return render_season_folds( $term );
+}
+
+/**
+ * The seasons as folding sections, like the "In this series" list on a post
+ * (Courtney approved the mockup 2026-11-04). Parts published on the landing
+ * are Season 1; each season term in the group follows with its own number
+ * (season_number()). A season with published parts opens by default and
+ * lists them; an upcoming one stays closed and points to the follow block.
+ * Native details and summary, so it folds with a keyboard and without script.
+ *
+ * @param \WP_Term $term Merge Conflicts landing.
+ */
+function render_season_folds( \WP_Term $term ): string {
+	$c       = collection( $term );
+	$seasons = array();
+	$own     = track( array( $c['landing'] ) );
+	if ( $own ) {
+		$seasons[] = array(
+			'number' => 1,
+			'name'   => '',
+			'desc'   => '',
+			'link'   => '',
+			'rows'   => $own,
+		);
+	}
 	foreach ( $c['seasons'] as $i => $season ) {
-		$count = published_total( array( $season ) );
-		$name  = esc_html( $season->name );
-		if ( $count ) {
-			$name = '<a href="' . esc_url( (string) get_term_link( $season ) ) . '">' . $name . '</a>';
-		}
+		$rows      = track( array( $season ) );
+		$seasons[] = array(
+			// The same count season_number() gives, from the landing's collection.
+			'number' => $i + 1 + ( $own ? 1 : 0 ),
+			'name'   => $season->name,
+			'desc'   => trim( wp_strip_all_tags( $season->description ) ),
+			'link'   => $rows ? (string) get_term_link( $season ) : '',
+			'rows'   => $rows,
+		);
+	}
+	$chevron = '<span class="cr-mc__fold-chev" aria-hidden="true" role="presentation"><svg viewBox="0 0 28 24" aria-hidden="true" role="presentation" focusable="false"><path d="M4 7.5 Q8.5 12 13.5 16.5 Q19 12.5 24 7"/></svg></span>';
+	$html    = '<nav class="cr-mc__contents" aria-label="' . esc_attr__( 'Merge Conflicts seasons', 'courtneyr-child' ) . '"><ol class="cr-mc__folds" role="list">';
+	foreach ( $seasons as $season ) {
+		/* translators: %d: season number. */
+		$label = sprintf( __( 'Season %d', 'courtneyr-child' ), $season['number'] );
+		$count = count( $season['rows'] );
 		$state = $count
 			/* translators: %d: published parts in this season. */
 			? sprintf( _n( '%d part', '%d parts', $count, 'courtneyr-child' ), $count )
 			: __( 'Upcoming', 'courtneyr-child' );
-		$html .= '<li class="cr-mc__season"><span class="cr-mc__season-number" aria-hidden="true" role="presentation">' . esc_html( sprintf( '%02d', $i + 1 ) ) . '</span><div class="cr-mc__season-copy"><h3>';
-		/* translators: %d: season number. */
-		$html .= '<span class="screen-reader-text">' . esc_html( sprintf( __( 'Season %d: ', 'courtneyr-child' ), $i + 1 ) ) . '</span>' . $name . '</h3>';
-		$desc  = trim( wp_strip_all_tags( $season->description ) );
-		$html .= '' !== $desc ? '<p>' . esc_html( $desc ) . '</p>' : '';
-		$html .= '</div><span class="cr-mc__state">' . esc_html( $state ) . '</span></li>';
+		$head  = '' === $season['name']
+			? '<span class="cr-mc__fold-name">' . esc_html( $label ) . '</span>'
+			: '<span class="cr-mc__fold-eyebrow">' . esc_html( $label ) . '</span><span class="cr-mc__fold-name">' . esc_html( $season['name'] ) . '</span>';
+		$html .= '<li class="cr-mc__fold' . ( $count ? '' : ' is-upcoming' ) . '"><details class="cr-mc__fold-details"' . ( $count ? ' open' : '' ) . '>';
+		$html .= '<summary class="cr-mc__fold-summary"><span class="cr-mc__fold-num" aria-hidden="true" role="presentation">' . esc_html( sprintf( '%02d', $season['number'] ) ) . '</span>';
+		$html .= '<span class="cr-mc__fold-head">' . $head . '</span><span class="cr-mc__fold-state">' . esc_html( $state ) . '</span>' . $chevron . '</summary>';
+		$html .= '<div class="cr-mc__fold-panel">';
+		$html .= '' !== $season['desc'] ? '<p class="cr-mc__fold-desc">' . esc_html( $season['desc'] ) . '</p>' : '';
+		if ( $count ) {
+			$html .= '<ol class="cr-mc__fold-parts" role="list">';
+			foreach ( $season['rows'] as $i => $row ) {
+				$number = (int) ( $row['part'] ?? $i + 1 );
+				/* translators: %d: part number. */
+				$part  = sprintf( __( 'Part %d', 'courtneyr-child' ), $number );
+				$html .= '<li class="cr-mc__fold-part"><span class="cr-mc__fold-partnum">' . esc_html( $part ) . '</span><span class="cr-mc__fold-copy">';
+				$html .= '<a class="cr-mc__fold-title" href="' . esc_url( (string) get_permalink( $row['id'] ) ) . '"><span class="screen-reader-text">' . esc_html( $label . ', ' . $part . ': ' ) . '</span>' . esc_html( get_the_title( $row['id'] ) ) . '</a>';
+				/* translators: %d: minutes. */
+				$read  = sprintf( __( '%d min read', 'courtneyr-child' ), reading_minutes( $row['id'] ) );
+				$html .= '<span class="cr-mc__fold-meta"><time datetime="' . esc_attr( (string) get_the_date( DATE_W3C, $row['id'] ) ) . '">' . esc_html( (string) get_the_date( 'M j, Y', $row['id'] ) ) . '</time> · ' . esc_html( $read ) . '</span>';
+				$html .= '</span></li>';
+			}
+			$html .= '</ol>';
+			if ( '' !== $season['link'] ) {
+				/* translators: %s: season label, such as "Season 2". */
+				$html .= '<p class="cr-mc__fold-more"><a href="' . esc_url( $season['link'] ) . '">' . esc_html( sprintf( __( 'All of %s', 'courtneyr-child' ), $label ) ) . '</a></p>';
+			}
+		} else {
+			$html .= '<p class="cr-mc__fold-empty">' . esc_html__( 'No parts published yet.', 'courtneyr-child' ) . ' <a href="#cr-series-follow">' . esc_html__( 'Follow along', 'courtneyr-child' ) . '</a> ' . esc_html__( 'to hear when the first one lands.', 'courtneyr-child' ) . '</p>';
+		}
+		$html .= '</div></details></li>';
 	}
 	return $html . '</ol></nav>';
 }

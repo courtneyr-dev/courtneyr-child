@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.159
+
+What you see change on courtneyr.dev:
+
+- Tables in posts look like the rest of the zine: a paper sheet with an ink border and the hard shadow, the caption on a strip of tape above it, an ink header row with each column's name on its own paper strip, dashed ruled lines between rows, and the first column set as the row's question. On a phone each row becomes its own small card, and every value carries its column's name. Screen readers still read a table at every width.
+- The Merge Conflicts "Follow the investigation" band is periwinkle paper in light, dark and system mode alike, the way the home page's closing band keeps its color.
+- The Merge Conflicts contents are ready for seasons. While the series has only its own parts, the page keeps today's Part 1 to 3 list. Once a season series is added to the Merge Conflicts group, the contents become folding seasons, like "In this series" on a post: the parts filed on Merge Conflicts itself are Season 1, each season series counts on from 2, a season with published parts opens with its parts listed, and an upcoming one stays closed and points to the follow band.
+
+Under the hood: `inc/table.php` copies each header cell's text onto the body cells of its column as `data-cr-label` and states the table roles through the HTML API; `assets/css/blocks/core-table.css` loads only where a Table block renders. `render_season_folds()` in `inc/series-views.php` draws native `details` rows styled by `cr-mc-seasons.css` (in `RUCSS_INLINE_HANDLES`); `landing_season_offset()` keeps `season_number()` in step on post tapes and labels. Tests: `php tests/php/table-test.php` (needs `CR_WP_CORE`), `php tests/php/series-test.php`.
+
 ## 0.7.158
 
 What you see change on courtneyr.dev:
