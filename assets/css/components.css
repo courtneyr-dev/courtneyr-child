@@ -1941,7 +1941,7 @@ ul.relsyn li {
 	padding: 0.25rem 0.1rem;
 	transition: color 0.15s ease;
 	text-decoration: none;
-	background-image: linear-gradient(currentColor, currentColor);
+	background-image: linear-gradient(currentcolor, currentcolor);
 	background-position: 0 100%;
 	background-repeat: no-repeat;
 	background-size: 0% 2px;
@@ -2149,8 +2149,8 @@ section.alignfull,
    rest, so the tear stays the same depth at any band height. */
 .related-posts.alignfull,
 .alignfull.has-primary-accent-background-color {
-	-webkit-mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentColor, currentColor) bottom / 100% calc(100% - 7px) no-repeat;
-	mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentColor, currentColor) bottom / 100% calc(100% - 7px) no-repeat;
+	-webkit-mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentcolor, currentcolor) bottom / 100% calc(100% - 7px) no-repeat;
+	mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentcolor, currentcolor) bottom / 100% calc(100% - 7px) no-repeat;
 }
 
 /* (2) Light-bg sections: peach (tertiary) and cream (main-accent)

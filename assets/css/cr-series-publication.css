@@ -1010,6 +1010,6 @@
 
 .cr-mc .cr-mc__follow.alignfull::before {
 	clip-path: none;
-	-webkit-mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentColor, currentColor) bottom / 100% calc(100% - 7px) no-repeat;
-	mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentColor, currentColor) bottom / 100% calc(100% - 7px) no-repeat;
+	-webkit-mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentcolor, currentcolor) bottom / 100% calc(100% - 7px) no-repeat;
+	mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentcolor, currentcolor) bottom / 100% calc(100% - 7px) no-repeat;
 }
