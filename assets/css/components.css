@@ -2144,6 +2144,15 @@ section.alignfull,
 	width: 100vw !important;
 }
 
+/* Torn top edge on the lavender band, the Merge Conflicts follow band's
+   paper (Courtney, 2026-11-04): an 8px strip of torn paper over a solid
+   rest, so the tear stays the same depth at any band height. */
+.related-posts.alignfull,
+.alignfull.has-primary-accent-background-color {
+	-webkit-mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentColor, currentColor) bottom / 100% calc(100% - 7px) no-repeat;
+	mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentColor, currentColor) bottom / 100% calc(100% - 7px) no-repeat;
+}
+
 /* (2) Light-bg sections: peach (tertiary) and cream (main-accent)
    palette tokens never flip in dark mode by design. So the SECTIONS
    that use them as backgrounds stay light in dark mode, and the

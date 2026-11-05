@@ -122,9 +122,10 @@
 	pointer-events: none;
 }
 
+/* The cut-paper title keeps the site default size (cr-cutout.css), the
+   same as /stream/ and every archive; the masthead takes the hero's full
+   width so the longest word has room (Courtney, 2026-11-04). */
 .cr-mc .cr-mc__title {
-	--cr-cutout-min: 1.5rem;
-	--cr-cutout-max: 3.4rem;
 	inline-size: 100%;
 	padding: 0;
 	margin: 0;
@@ -791,9 +792,12 @@
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
+	/* Wide enough for "Conflicts" at the cut-paper maximum (9 tiles x
+	   1.18em x 4.25rem is about 45rem), narrow enough that the field
+	   guide tape still centers under the title. */
 	.cr-mc .cr-mc__masthead {
 		grid-column: 1 / -1;
-		inline-size: min(100%, 32rem);
+		inline-size: min(100%, 46rem);
 	}
 
 	.cr-mc .cr-mc__hero-art {
@@ -837,16 +841,16 @@
 	}
 
 	.cr-mc .cr-mc__masthead {
-		grid-column: 1;
+		grid-column: 1 / -1;
 	}
 
 	.cr-mc .cr-mc__hero-art {
-		grid-column: 2;
+		grid-column: 1;
 		inline-size: 100%;
 	}
 
 	.cr-mc .cr-mc__thesis {
-		grid-column: 3;
+		grid-column: 2 / -1;
 	}
 
 	.cr-mc .cr-mc__methods {
@@ -966,4 +970,20 @@
 		outline-color: Highlight;
 		box-shadow: none;
 	}
+}
+
+/* Follow band: full bleed (the pattern's section is alignfull, so the
+   components.css breakout sets 100vw), contents held to the wide width,
+   torn along the top only so the bottom meets the footer with no ivory
+   showing through (Courtney, 2026-11-04). Same 8px tear as the lavender
+   band on singles. */
+.cr-mc .cr-mc__follow.alignfull {
+	margin-block-end: 0;
+	padding-inline: max(var(--cr-space-lg), calc((100vw - var(--wp--style--global--wide-size)) / 2));
+}
+
+.cr-mc .cr-mc__follow.alignfull::before {
+	clip-path: none;
+	-webkit-mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentColor, currentColor) bottom / 100% calc(100% - 7px) no-repeat;
+	mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentColor, currentColor) bottom / 100% calc(100% - 7px) no-repeat;
 }

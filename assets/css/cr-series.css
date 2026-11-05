@@ -727,6 +727,12 @@ a.cr-series-seasons__link:focus-visible {
 	margin-block: var(--cr-space-2xl) var(--cr-space-lg);
 }
 
+/* Same gap as the post's own Previous/Next row (cr-nav.css); the parent
+   selector outweighs the main group's `> * { margin-block: 0 }`. */
+main > .cr-series-nav {
+	margin-block: var(--cr-space-2xl) var(--cr-space-xl);
+}
+
 @media (min-width: 44rem) {
 
 	.cr-series-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }

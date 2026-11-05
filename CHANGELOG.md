@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.158
+
+What you see change on courtneyr.dev:
+
+- Published web stories show in the Stream (`/stream/`) in date order among the other entries, each as a paper card with its 9:16 poster, a "Web story" tape label, the title and the date. The whole card is one link to the story. Drafts never show. (#268)
+- Previous/Next rows keep a gap below them everywhere (singles, archive pagers), so the lavender "More from the blog" band no longer touches the chips.
+- The lavender band at the foot of a post has a torn paper top edge, the same tear as the Merge Conflicts follow band. Any full-width periwinkle group gets the same edge.
+- On the Merge Conflicts page, the cut-paper title is the same size as the Stream's and every other archive's (68 px tiles, was 35 px), and the "Follow the investigation" band runs edge to edge, torn on top only, and meets the footer with no ivory gap.
+
+Under the hood: `inc/stream-stories.php` flags the Stream page's Query Loop, adds `web-story` after every other `pre_get_posts` filter, and moves the surface meta clause into a subquery so stories pass by post type while posts keep the routing policy's own SQL. The card comes from Post Kinds' `pkiw_stream_card_kind_render` filter; `cr-stream-story.css` loads only when a story card renders and is in `RUCSS_INLINE_HANDLES`. The tear is `assets/img/paper-edge-top.svg`, an 8 px strip cut from `mc-paper-edge.svg`, used as a mask layer so the depth stays fixed at any band height. The follow section's pattern alignment is now `full`. Tests: `php tests/php/stream-stories-test.php`, `php tests/php/toc-test.php`.
+
 ## 0.7.157
 
 What you see change on courtneyr.dev:

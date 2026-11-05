@@ -139,8 +139,8 @@ $courtneyr_child_mc_thesis = wp_kses(
 </div>
 <!-- /wp:group -->
 
-<!-- wp:group {"tagName":"section","align":"wide","className":"cr-mc__follow","layout":{"type":"default"}} -->
-<section class="wp-block-group alignwide cr-mc__follow">
+<!-- wp:group {"tagName":"section","align":"full","className":"cr-mc__follow","layout":{"type":"default"}} -->
+<section class="wp-block-group alignfull cr-mc__follow">
 	<!-- wp:image {"className":"cr-mc__signpost"} -->
 	<figure class="wp-block-image cr-mc__signpost"><img src="<?php echo esc_url( $courtneyr_child_mc_art . 'mc-follow-signpost.webp' ); ?>" alt=""/></figure>
 	<!-- /wp:image -->

@@ -25,6 +25,15 @@
 	margin-block-start: var(--cr-space-2xl);
 }
 
+/* Every previous/next row keeps the same gap below it, so a band that
+   follows (the lavender "More from the blog", the footer) never touches
+   the chips (Courtney, 2026-11-04). The parent selector outweighs the
+   layout container's `> * { margin-block: 0 }`, which zeroed the old
+   margins on singles. */
+:is(main, .wp-block-group, .wp-block-query) > :is(.cr-post-nav, .wp-block-query-pagination) {
+	margin-block-end: var(--cr-space-xl);
+}
+
 .wp-block-query-pagination .wp-block-query-pagination-numbers {
 	display: flex;
 	flex-wrap: wrap;
@@ -41,6 +50,10 @@
 	gap: var(--cr-space-md);
 	align-items: start;
 	margin-block: var(--cr-space-xl);
+}
+
+main > .cr-post-nav {
+	margin-block-start: var(--cr-space-xl);
 }
 
 /* The Group's flow layout adds a block-start margin to the second child,
