@@ -354,6 +354,7 @@ const RUCSS_INLINE_HANDLES = array(
 	// Series landing front matter (Merge Conflicts): masthead start line, methods file, contents, follow block.
 	'courtneyr-series-front',
 	'courtneyr-series-publication',
+	'courtneyr-mc-seasons',
 	'courtneyr-evidence-labels',
 	'wp-block-image',
 	'wp-block-gallery',

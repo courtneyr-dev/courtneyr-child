@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.158' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.159' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -130,3 +130,4 @@ require_once __DIR__ . '/inc/contact-form.php';
 require_once __DIR__ . '/inc/footnotes.php';
 require_once __DIR__ . '/inc/toc.php';
 require_once __DIR__ . '/inc/stream-stories.php';
+require_once __DIR__ . '/inc/table.php';

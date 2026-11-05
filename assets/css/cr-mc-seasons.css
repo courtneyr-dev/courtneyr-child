@@ -1,0 +1,272 @@
+/* Seasons as folding sections (inc/series-views.php render_season_folds(),
+   Courtney approved the mockup 2026-11-04). One paper sheet with a hard
+   shadow; each season a native details row: a torn number tile, the season
+   label and name, a count chip (ink for a season with parts, a dashed
+   outline for an upcoming one) and the hand-drawn chevron the posts use.
+   Tiles are paper objects with measured paper/ink pairs (cr-cutout.css), so
+   they keep their colors in dark mode. */
+.cr-mc .cr-mc__folds {
+	padding: var(--cr-space-2xs) 0;
+	margin: 0;
+	list-style: none;
+	background-color: var(--cr-surface-elevated);
+	background-image: var(--cr-fiber);
+	border: 2px solid var(--cr-ink);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-mc .cr-mc__fold {
+	--cr-fold-paper: var(--cr-selective-yellow);
+	--cr-fold-ink: var(--cr-russian-violet);
+	--cr-fold-tilt: var(--cr-rotate-neg);
+	margin: 0;
+	border-block-end: 2px dashed var(--cr-rule);
+}
+
+.cr-mc .cr-mc__fold:last-child {
+	border-block-end: 0;
+}
+
+.cr-mc .cr-mc__fold:nth-child(5n + 2) { --cr-fold-paper: var(--cr-sky-blue); --cr-fold-ink: var(--cr-prussian-blue); --cr-fold-tilt: var(--cr-rotate-2); }
+
+.cr-mc .cr-mc__fold:nth-child(5n + 3) { --cr-fold-paper: var(--cr-light-orange); --cr-fold-ink: var(--cr-prussian-blue); --cr-fold-tilt: var(--cr-rotate-1); }
+
+.cr-mc .cr-mc__fold:nth-child(5n + 4) { --cr-fold-paper: var(--cr-periwinkle); --cr-fold-ink: var(--cr-russian-violet); --cr-fold-tilt: var(--cr-rotate-2); }
+
+.cr-mc .cr-mc__fold:nth-child(5n + 5) { --cr-fold-paper: var(--cr-cerulean); --cr-fold-ink: var(--cr-printer-ivory); --cr-fold-tilt: var(--cr-rotate-neg); }
+
+.cr-mc .cr-mc__fold-details {
+	padding: 0;
+	margin: 0;
+	background: none;
+	border: 0;
+	border-radius: 0;
+}
+
+.cr-mc .cr-mc__fold-summary {
+	display: grid;
+	font-weight: inherit;
+	grid-template-columns: 3rem minmax(0, 1fr) auto 2.75rem;
+	align-items: center;
+	gap: var(--cr-space-sm);
+	padding: var(--cr-space-sm) var(--cr-space-md);
+	margin-block-end: 0;
+	cursor: pointer;
+	list-style: none;
+}
+
+.cr-mc .cr-mc__fold-summary::-webkit-details-marker {
+	display: none;
+}
+
+.cr-mc .cr-mc__fold-summary:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: -5px;
+	box-shadow: inset 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-mc .cr-mc__fold-num {
+	position: relative;
+	isolation: isolate;
+	display: grid;
+	place-items: center;
+	block-size: 3rem;
+	color: var(--cr-fold-ink);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	font-weight: var(--cr-weight-black);
+	line-height: 1;
+	filter: drop-shadow(var(--cr-shadow-hard));
+	transform: rotate(var(--cr-fold-tilt));
+}
+
+.cr-mc .cr-mc__fold-num::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background-color: var(--cr-fold-paper);
+	background-image: url(../img/mc-paper-grain.svg);
+	clip-path: polygon(0 4%, 22% 0, 48% 5%, 76% 0, 100% 3%, 97% 30%, 100% 62%, 96% 100%, 70% 95%, 41% 100%, 14% 96%, 0 100%, 3% 66%, 0 34%);
+}
+
+.cr-mc .cr-mc__fold-head {
+	display: grid;
+	gap: var(--cr-space-3xs);
+	min-inline-size: 0;
+}
+
+.cr-mc .cr-mc__fold-eyebrow {
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	text-transform: uppercase;
+}
+
+.cr-mc .cr-mc__fold-name {
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+	text-wrap: balance;
+}
+
+.cr-mc .cr-mc__fold-state {
+	padding: var(--cr-space-3xs) var(--cr-space-xs);
+	color: var(--cr-surface);
+	background: var(--cr-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	white-space: nowrap;
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-mc .is-upcoming .cr-mc__fold-state {
+	color: inherit;
+	background: none;
+	border: 2px dashed currentcolor;
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-mc .cr-mc__fold-chev {
+	display: grid;
+	place-items: center;
+	block-size: 2.75rem;
+}
+
+.cr-mc .cr-mc__fold-chev svg {
+	inline-size: 1.6875rem;
+	block-size: 1.5rem;
+	overflow: visible;
+}
+
+.cr-mc .cr-mc__fold-chev path {
+	fill: none;
+	stroke: currentcolor;
+	stroke-width: 2.3;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.cr-mc .cr-mc__fold-details[open] .cr-mc__fold-chev svg {
+	transform: scaleY(-1);
+}
+
+.cr-mc .cr-mc__fold-panel {
+	display: grid;
+	gap: var(--cr-space-sm);
+	padding: 0 var(--cr-space-md) var(--cr-space-md) calc(3rem + var(--cr-space-md) + var(--cr-space-sm));
+}
+
+.cr-mc .cr-mc__fold-parts {
+	padding: 0 0 0 var(--cr-space-md);
+	margin: 0;
+	list-style: none;
+	border-inline-start: 3px solid var(--cr-marker);
+}
+
+.cr-mc .cr-mc__fold-part {
+	display: grid;
+	grid-template-columns: 4.5rem minmax(0, 1fr);
+	gap: var(--cr-space-sm);
+	padding-block: var(--cr-space-sm);
+	margin: 0;
+	border-block-end: 1px dashed var(--cr-rule);
+}
+
+.cr-mc .cr-mc__fold-part:last-child {
+	border-block-end: 0;
+}
+
+.cr-mc .cr-mc__fold-partnum {
+	padding-block-start: 0.2em;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+}
+
+.cr-mc .cr-mc__fold-copy {
+	display: grid;
+	gap: var(--cr-space-3xs);
+	min-inline-size: 0;
+}
+
+.cr-mc .cr-mc__fold-title {
+	color: inherit;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	text-decoration-color: var(--cr-marker);
+	text-underline-offset: 0.2em;
+	text-wrap: pretty;
+}
+
+.cr-mc .cr-mc__fold-title:hover {
+	box-shadow: var(--cr-shadow-marker);
+	text-decoration: none;
+}
+
+.cr-mc .cr-mc__fold-meta,
+.cr-mc .cr-mc__fold-desc,
+.cr-mc .cr-mc__fold-empty,
+.cr-mc .cr-mc__fold-more {
+	margin: 0;
+	font-size: var(--cr-text-sm);
+}
+
+@media (max-width: 37.499rem) {
+
+	.cr-mc .cr-mc__fold-summary {
+		grid-template-columns: 2.5rem minmax(0, 1fr) 2.75rem;
+		padding-inline: var(--cr-space-sm);
+	}
+
+	.cr-mc .cr-mc__fold-num {
+		block-size: 2.5rem;
+		font-size: var(--cr-text-lg);
+	}
+
+	.cr-mc .cr-mc__fold-state {
+		grid-column: 2;
+		grid-row: 2;
+		justify-self: start;
+	}
+
+	.cr-mc .cr-mc__fold-chev {
+		grid-column: 3;
+		grid-row: 1 / span 2;
+	}
+
+	.cr-mc .cr-mc__fold-panel {
+		padding-inline-start: var(--cr-space-sm);
+	}
+
+	.cr-mc .cr-mc__fold-part {
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--cr-space-3xs);
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-mc .cr-mc__folds,
+	.cr-mc .cr-mc__fold-state {
+		border: 1px solid CanvasText;
+	}
+
+	.cr-mc .cr-mc__fold-num {
+		filter: none;
+		border: 1px solid CanvasText;
+	}
+
+	.cr-mc .cr-mc__fold-num::before {
+		display: none;
+	}
+
+	.cr-mc .cr-mc__fold-chev path {
+		stroke: ButtonText;
+	}
+}

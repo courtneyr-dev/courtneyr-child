@@ -658,7 +658,20 @@
 	display: none;
 }
 
+/* The follow band is periwinkle paper in light, dark and system mode alike,
+   like the sky-blue closer on the home page (Courtney, 2026-11-04). Paper
+   doesn't flip, so the band pins the tokens its title, lede and buttons
+   read. Tokens built from --cr-ink on :root (the thick border, the small
+   hard shadow) resolve there, so they are restated here too. */
 .cr-mc .cr-mc__follow {
+	--cr-ink: var(--cr-russian-violet);
+	--cr-surface: var(--cr-printer-ivory);
+	--cr-accent-2-bg: var(--cr-periwinkle);
+	--cr-accent-2-ink: var(--cr-russian-violet);
+	--cr-border-thick: 2px solid var(--cr-russian-violet);
+	--cr-border-strong: color-mix(in srgb, var(--cr-russian-violet) 24%, transparent);
+	--cr-shadow-hard-sm: 3px 3px 0 var(--cr-russian-violet);
+	--cr-shadow-hard: 4px 4px 0 var(--cr-russian-violet);
 	position: relative;
 	isolation: isolate;
 	display: grid;
@@ -1013,3 +1026,4 @@
 	-webkit-mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentcolor, currentcolor) bottom / 100% calc(100% - 7px) no-repeat;
 	mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentcolor, currentcolor) bottom / 100% calc(100% - 7px) no-repeat;
 }
+

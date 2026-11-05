@@ -1,0 +1,248 @@
+/* Core Table as a zine table (Courtney approved the mockup 2026-11-04).
+   Loads only where a Table block renders (BLOCK_STYLE_MAP, inc/enqueue.php).
+
+   Desktop: a paper sheet with an ink border and the hard shadow; the
+   caption on a strip of tape above it; an ink header row whose column
+   names sit on paper strips; dashed ruled lines between rows; the first
+   column reads as the row's question.
+
+   Phone (below 37.5rem): each row is its own small card. inc/table.php copies
+   every column's header text onto its body cells as data-cr-label and states
+   the table roles, so screen readers still read a table after the display
+   change.
+
+   Paper strips are paper objects (like the cut-paper title tiles), so they
+   keep their colors in dark mode; their ink pairs are measured: sky blue
+   with Prussian blue 7.74:1, light orange with Prussian blue 11.13:1,
+   periwinkle with Russian violet 8.10:1, selective yellow with Russian
+   violet 8.98:1, printer ivory on Russian violet 15.00:1.
+
+   components.css section (4) paints every post table at (0,1,2) and forces
+   ivory text in dark mode with !important; this sheet scopes to the Table
+   block at (0,2,x) and answers the dark-mode rule only where a cell keeps a
+   light paper. */
+
+:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--cr-space-sm);
+	margin-block: var(--cr-space-2xl) var(--cr-space-xl);
+	padding: 0 6px 6px 0;
+	overflow-x: auto;
+}
+
+/* The caption sits on tape above the sheet. It stays after the table in
+   the markup, where the figure takes its name from it. */
+:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table > figcaption {
+	order: -1;
+	max-inline-size: 60ch;
+	margin: 0 0 var(--cr-space-2xs);
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	color: var(--cr-tape-ink);
+	background-color: var(--cr-tape);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-snug);
+	font-style: normal;
+	text-align: start;
+	clip-path: polygon(3px 1px, 18% 2px, 36% 0, 53% 2px, 72% 1px, 89% 2px, calc(100% - 2px) 0, calc(100% - 4px) 24%, 100% 46%, calc(100% - 3px) 69%, calc(100% - 1px) calc(100% - 2px), 83% calc(100% - 1px), 65% calc(100% - 3px), 47% calc(100% - 1px), 29% calc(100% - 2px), 12% 100%, 2px calc(100% - 2px), 4px 76%, 0 55%, 3px 32%);
+	transform: rotate(var(--cr-rotate-1));
+}
+
+:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table table {
+	inline-size: 100%;
+	margin: 0;
+	color: var(--cr-ink);
+	background-color: var(--cr-surface-elevated);
+	background-image: var(--cr-fiber);
+	border: 2px solid var(--cr-ink);
+	border-collapse: separate;
+	border-spacing: 0;
+	box-shadow: var(--cr-shadow-hard);
+	font-size: var(--cr-text-md);
+	line-height: var(--cr-leading-normal);
+}
+
+/* Header row: ink, with the first column's name in mono caps. */
+:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table thead th {
+	padding: var(--cr-space-sm) var(--cr-space-md);
+	color: var(--cr-printer-ivory);
+	background: var(--cr-russian-violet);
+	border: 0;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	text-align: start;
+	text-transform: uppercase;
+	vertical-align: bottom;
+}
+
+/* Every other column's name on its own paper strip. */
+:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table thead th:nth-child(n + 2) {
+	--cr-cell-paper: var(--cr-sky-blue);
+	--cr-cell-ink: var(--cr-prussian-blue);
+	color: var(--cr-cell-ink);
+	background: var(--cr-cell-paper);
+	border-inline-start: 2px solid var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-extrabold);
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table thead th:nth-child(4n + 3) { --cr-cell-paper: var(--cr-light-orange); }
+
+:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table thead th:nth-child(4n + 4) { --cr-cell-paper: var(--cr-periwinkle); --cr-cell-ink: var(--cr-russian-violet); }
+
+:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table thead th:nth-child(4n + 5) { --cr-cell-paper: var(--cr-selective-yellow); --cr-cell-ink: var(--cr-russian-violet); }
+
+/* Body: dashed ruled lines, an ink rule between columns, no zebra. */
+:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table table tbody tr > :is(td, th) {
+	padding: var(--cr-space-sm) var(--cr-space-md);
+	color: var(--cr-ink);
+	background: none;
+	border: 0;
+	border-block-start: 2px dashed var(--cr-rule);
+	font-family: var(--cr-font-body);
+	font-weight: var(--cr-weight-regular);
+	text-align: start;
+	vertical-align: top;
+}
+
+/* Desktop only: the ink rule between columns and no line above the first
+   row. Both outrank the phone rules below, so they stay out of that width. */
+@media (min-width: 37.5rem) {
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table table tbody tr > :is(td, th) + :is(td, th) {
+		border-inline-start: 2px solid var(--cr-ink);
+	}
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table table tbody tr:first-child > :is(td, th) {
+		border-block-start: 0;
+	}
+}
+
+/* The first column is the row's question. */
+:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table table tbody tr > :first-child {
+	background-color: var(--cr-surface);
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold);
+}
+
+/* Dark mode: components.css forces ivory text on every cell; the paper
+   strips keep their own ink. */
+:root[data-theme="dark"] :is(.wp-block-post-content, .entry-content) .wp-block-table thead th:nth-child(n + 2) {
+	color: var(--cr-cell-ink) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) :is(.wp-block-post-content, .entry-content) .wp-block-table thead th:nth-child(n + 2) {
+		color: var(--cr-cell-ink) !important;
+	}
+}
+
+/* Phone: one card per row; each value carries its column's name. */
+@media (max-width: 37.499rem) {
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table {
+		align-items: stretch;
+		padding: 0;
+		overflow: visible;
+	}
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table > figcaption {
+		align-self: flex-start;
+		font-size: var(--cr-text-sm);
+	}
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table :is(table, thead, tbody, tfoot, tr, th, td) {
+		display: block;
+	}
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table table {
+		background: none;
+		border: 0;
+		box-shadow: none;
+	}
+
+	/* The header row moves into each card's labels; it stays in the
+	   accessibility tree through the roles inc/table.php states. */
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table thead {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table tbody tr {
+		margin-block-end: var(--cr-space-lg);
+		background-color: var(--cr-surface-elevated);
+		background-image: var(--cr-fiber);
+		border: 2px solid var(--cr-ink);
+		box-shadow: var(--cr-shadow-hard);
+	}
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table tbody tr:last-child {
+		margin-block-end: 0;
+	}
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table table tbody tr > :is(td, th) {
+		padding: var(--cr-space-sm);
+		border: 0;
+		border-block-start: 2px dashed var(--cr-rule);
+	}
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table table tbody tr > :first-child {
+		color: var(--cr-printer-ivory);
+		background: var(--cr-russian-violet);
+		border-block-start: 0;
+		font-size: var(--cr-text-lg);
+		line-height: var(--cr-leading-snug);
+	}
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table table tbody tr > :nth-child(2) {
+		border-block-start: 0;
+	}
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table tbody tr > :not(:first-child)[data-cr-label]::before {
+		content: attr(data-cr-label);
+		display: table;
+		margin-block-end: var(--cr-space-3xs);
+		padding: 0.15em var(--cr-space-2xs);
+		color: var(--cr-prussian-blue);
+		background: var(--cr-sky-blue);
+		font-family: var(--cr-font-mono);
+		font-size: var(--cr-text-xs);
+		font-weight: var(--cr-weight-bold);
+		letter-spacing: var(--cr-tracking-wide);
+		line-height: var(--cr-leading-snug);
+		text-transform: uppercase;
+	}
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table tbody tr > :nth-child(4n + 3)[data-cr-label]::before { background: var(--cr-light-orange); }
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table tbody tr > :nth-child(4n + 4)[data-cr-label]::before { color: var(--cr-russian-violet); background: var(--cr-periwinkle); }
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose) .wp-block-table tbody tr > :nth-child(4n + 5)[data-cr-label]::before { color: var(--cr-russian-violet); background: var(--cr-selective-yellow); }
+}
+
+@media (forced-colors: active) {
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table :is(table, tbody tr) {
+		box-shadow: none;
+	}
+
+	:is(.wp-block-post-content, .entry-content, .cr-prose, .editor-styles-wrapper) .wp-block-table > figcaption {
+		border: 1px solid CanvasText;
+	}
+}

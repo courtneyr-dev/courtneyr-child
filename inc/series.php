@@ -385,10 +385,22 @@ function season_number( \WP_Term $series ): int {
 	$c = collection( $series );
 	foreach ( $c['seasons'] as $i => $season ) {
 		if ( $season->term_id === $series->term_id ) {
-			return $i + 1;
+			return $i + 1 + landing_season_offset( $c );
 		}
 	}
 	return 0;
+}
+
+/**
+ * Parts published on the landing itself are Season 1 (Courtney, 2026-11-04:
+ * Merge Conflicts 1.0 to 1.2 are filed on the landing, and the first season
+ * term she adds will be Season 2). While the landing holds published parts,
+ * every season term counts from 2; once it holds none, from 1.
+ *
+ * @param array<string, mixed> $collection From collection().
+ */
+function landing_season_offset( array $collection ): int {
+	return $collection['seasons'] && parts( $collection['landing']->term_id ) ? 1 : 0;
 }
 
 /**
@@ -511,6 +523,14 @@ function enqueue_styles(): void {
 			'courtneyr-series-publication',
 			COURTNEYR_CHILD_URI . '/assets/css/cr-series-publication.css',
 			array( 'courtneyr-series-front' ),
+			COURTNEYR_CHILD_VERSION
+		);
+		// Folding seasons (render_season_folds()); its own sheet keeps the
+		// publication sheet under the 30 KiB budget.
+		wp_enqueue_style(
+			'courtneyr-mc-seasons',
+			COURTNEYR_CHILD_URI . '/assets/css/cr-mc-seasons.css',
+			array( 'courtneyr-series-publication' ),
 			COURTNEYR_CHILD_VERSION
 		);
 	}

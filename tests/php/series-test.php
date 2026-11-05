@@ -124,6 +124,10 @@ namespace {
 		return $GLOBALS['cr_parts_posts'][ $id ]['title'];
 	}
 
+	function get_the_date( $format = '', $id = 0 ) {
+		return 'c' === $format || DATE_W3C === $format ? '2026-11-02T08:00:00-05:00' : 'Nov 2, 2026';
+	}
+
 	function get_permalink( $id ) {
 		return 'https://example.test/post-' . $id . '/';
 	}
@@ -393,7 +397,34 @@ namespace Courtneyr\Child\Series\Tests {
 	$GLOBALS['cr_parts_posts'][209] = array( 'series' => 2178, 'status' => 'publish', 'password' => '', 'part' => 1, 'title' => 'Season post' );
 	$contents = render_publication_contents( $seasonal );
 	check( false !== strpos( $contents, 'href="https://example.test/series/first-season/"' ) && false !== strpos( $contents, '1 part' ), 'announced seasons retain their archive links and published counts' );
-	check( false !== strpos( $contents, 'Planned season' ) && false !== strpos( $contents, 'Upcoming' ) && false === strpos( $contents, 'post-209/' ), 'unpublished seasons stay upcoming and season contents retain their existing structure' );
+	check( false !== strpos( $contents, 'Planned season' ) && false !== strpos( $contents, 'Upcoming' ), 'unpublished seasons stay upcoming' );
+	check( 2 === substr_count( $contents, '<details' ) && 1 === substr_count( $contents, '<details class="cr-mc__fold-details" open>' ), 'each season folds; only a season with published parts opens by default' );
+	check( false !== strpos( $contents, 'post-209/' ) && false !== strpos( $contents, 'Season 1, Part 1: ' ) && false !== strpos( $contents, '#cr-series-follow' ), 'an open season lists its parts with full link names; an upcoming one points to the follow block' );
+	// A second landing whose own parts become Season 1 (fresh IDs: parts() and collection() cache per term).
+	$own_landing          = new \WP_Term();
+	$own_landing->term_id = 2187;
+	$own_landing->slug    = 'own-parts-series';
+	$own_group            = new \WP_Term();
+	$own_group->term_id   = 3187;
+	$own_group->slug      = 'own-parts-series';
+	$own_season           = new \WP_Term();
+	$own_season->term_id  = 2188;
+	$own_season->slug     = 'own-first-season';
+	$own_season->name     = 'First season';
+	$own_planned          = new \WP_Term();
+	$own_planned->term_id = 2189;
+	$own_planned->slug    = 'own-planned-season';
+	$own_planned->name    = 'Planned season';
+	$GLOBALS['cr_terms']['series_group'][3187] = $own_group;
+	$GLOBALS['cr_terms']['series'][2188]      = $own_season;
+	$GLOBALS['cr_terms']['series'][2189]      = $own_planned;
+	$GLOBALS['cr_group_objects'][3187]        = array( 4188, 4189 );
+	$GLOBALS['cr_shadow_posts'][4188]         = (object) array( 'post_type' => 'series_grouping', 'post_status' => 'publish', 'post_name' => 'series_grouping_2188' );
+	$GLOBALS['cr_shadow_posts'][4189]         = (object) array( 'post_type' => 'series_grouping', 'post_status' => 'publish', 'post_name' => 'series_grouping_2189' );
+	$GLOBALS['cr_parts_posts'][210] = array( 'series' => 2187, 'status' => 'publish', 'password' => '', 'part' => 1, 'title' => 'Landing post' );
+	$with_own = render_publication_contents( $own_landing );
+	check( false !== strpos( $with_own, 'post-210/' ) && false !== strpos( $with_own, 'Season 1, Part 1: ' ) && false !== strpos( $with_own, '>Season 2</span><span class="cr-mc__fold-name">First season' ) && false !== strpos( $with_own, '>Season 3</span>' ), 'parts on the landing are Season 1 and the season terms count from 2' );
+	unset( $GLOBALS['cr_parts_posts'][210] );
 	$GLOBALS['cr_taxonomies'] = array();
 	check( false === strpos( $generic, 'cr-series-mc-masthead' ) && false === strpos( $generic, '"view":"contents"' ) && false === strpos( $generic, '"view":"follow"' ), 'other series archives carry no front matter' );
 
