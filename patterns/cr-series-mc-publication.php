@@ -28,9 +28,16 @@ $courtneyr_child_mc_thesis = wp_kses(
 		<p class="cr-mc__eyebrow"><?php esc_html_e( 'Series', 'courtneyr-child' ); ?></p>
 		<!-- /wp:paragraph -->
 		<!-- wp:query-title {"type":"archive","showPrefix":false,"className":"cr-archive__title cr-mc__title"} /-->
-		<!-- wp:paragraph {"className":"cr-mc__fieldguide"} -->
-		<p class="cr-mc__fieldguide"><?php esc_html_e( 'A field guide to decisions', 'courtneyr-child' ); ?></p>
-		<!-- /wp:paragraph -->
+		<!-- wp:group {"className":"cr-mc__stamps","layout":{"type":"default"}} -->
+		<div class="wp-block-group cr-mc__stamps">
+			<!-- wp:paragraph {"className":"cr-mc__fieldguide"} -->
+			<p class="cr-mc__fieldguide"><?php esc_html_e( 'A field guide to decisions', 'courtneyr-child' ); ?></p>
+			<!-- /wp:paragraph -->
+			<!-- wp:image {"className":"cr-mc__coda"} -->
+			<figure class="wp-block-image cr-mc__coda"><img src="<?php echo esc_url( $courtneyr_child_mc_art . 'mc-concert-patch.webp' ); ?>" alt="<?php esc_attr_e( 'Twelve projects. The same questions.', 'courtneyr-child' ); ?>"/></figure>
+			<!-- /wp:image -->
+		</div>
+		<!-- /wp:group -->
 	</div>
 	<!-- /wp:group -->
 	<!-- wp:image {"className":"cr-mc__hero-art"} -->
@@ -41,9 +48,6 @@ $courtneyr_child_mc_thesis = wp_kses(
 		<!-- wp:paragraph -->
 		<p><?php echo $courtneyr_child_mc_thesis; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- passed through wp_kses above. ?></p>
 		<!-- /wp:paragraph -->
-		<!-- wp:image {"className":"cr-mc__coda"} -->
-		<figure class="wp-block-image cr-mc__coda"><img src="<?php echo esc_url( $courtneyr_child_mc_art . 'mc-concert-patch.webp' ); ?>" alt="<?php esc_attr_e( 'Twelve projects. The same questions.', 'courtneyr-child' ); ?>"/></figure>
-		<!-- /wp:image -->
 	</div>
 	<!-- /wp:group -->
 </div>

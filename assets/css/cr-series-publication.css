@@ -15,7 +15,7 @@
 	margin-block: 0;
 }
 
-.cr-mc :is(.cr-mc__hero, .cr-mc__masthead, .cr-mc__thesis, .cr-mc__methods, .cr-mc__methods-copy, .cr-mc__methods-action, .cr-mc__layout, .cr-mc__sidebar, .cr-mc__desk, .cr-mc__companion) > * {
+.cr-mc :is(.cr-mc__hero, .cr-mc__masthead, .cr-mc__stamps, .cr-mc__thesis, .cr-mc__methods, .cr-mc__methods-copy, .cr-mc__methods-action, .cr-mc__layout, .cr-mc__sidebar, .cr-mc__desk, .cr-mc__companion) > * {
 	min-inline-size: 0;
 	margin-block: 0;
 }
@@ -203,10 +203,21 @@
 	text-decoration-skip-ink: none;
 }
 
+/* The tape and the patch travel together beside the title (stacked under
+   it on narrow screens), so the masthead balances the title's weight
+   (Courtney, 2026-11-04). */
+.cr-mc .cr-mc__stamps {
+	display: grid;
+	justify-self: stretch;
+	justify-items: center;
+	align-content: center;
+	gap: var(--cr-space-lg);
+}
+
 .cr-mc .cr-mc__coda {
-	justify-self: start;
+	justify-self: center;
 	inline-size: 100%;
-	max-inline-size: 24rem;
+	max-inline-size: 18rem;
 }
 
 .cr-mc .cr-mc__coda img {
@@ -840,8 +851,23 @@
 		padding-block-start: var(--cr-space-lg);
 	}
 
+	/* Title left at the full cut-paper size, tape and patch to its right. */
 	.cr-mc .cr-mc__masthead {
 		grid-column: 1 / -1;
+		grid-template-columns: minmax(0, 46rem) minmax(12rem, 1fr);
+		column-gap: var(--cr-space-xl);
+		align-items: center;
+		inline-size: 100%;
+	}
+
+	.cr-mc .cr-mc__masthead > :not(.cr-mc__stamps) {
+		grid-column: 1;
+	}
+
+	.cr-mc .cr-mc__stamps {
+		grid-column: 2;
+		grid-row: 2;
+		align-self: center;
 	}
 
 	.cr-mc .cr-mc__hero-art {
