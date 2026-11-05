@@ -1,0 +1,80 @@
+/* Yoast table of contents as a zine sheet (inc/toc.php loads this sheet
+   only where the block renders). The card is a paper sheet with a hard
+   shadow; its heading sits on top as a tape label; entries run on dashed
+   ruled lines and take the marker highlight on hover and focus.
+
+   .cr-toc--emoji: every entry opens with an emoji (Merge Conflicts puts
+   one on each H2 and H3), so the ✦ list marker would double it. The
+   marker and its indent drop; the list stays a list for screen readers. */
+
+.cr-toc {
+  position: relative;
+  margin-block: var(--cr-space-2xl) var(--cr-space-xl);
+  padding: var(--cr-space-xl) var(--cr-space-lg) var(--cr-space-md);
+  background-color: var(--cr-surface-elevated);
+  background-image: var(--cr-fiber);
+  color: var(--cr-ink);
+  border: 2px solid var(--cr-ink);
+  box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-toc > h2 {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: var(--cr-space-lg);
+  margin: 0;
+  padding: var(--cr-space-2xs) var(--cr-space-sm);
+  background: var(--cr-tape);
+  color: var(--cr-tape-ink);
+  font-family: var(--cr-font-accent);
+  font-size: var(--cr-text-lg);
+  font-weight: var(--cr-weight-bold);
+  line-height: var(--cr-leading-tight);
+  box-shadow: var(--cr-shadow-sm);
+  transform: translateY(-50%) rotate(var(--cr-rotate-neg));
+}
+
+.cr-toc ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cr-toc li {
+  margin: 0;
+  padding-block: var(--cr-space-xs);
+  border-block-end: 1px dashed var(--cr-rule);
+}
+
+.cr-toc li:last-child {
+  border-block-end: 0;
+}
+
+.cr-toc li li {
+  border-block-end: 0;
+  padding-block-end: 0;
+}
+
+.cr-toc a {
+  color: inherit;
+  text-decoration-color: var(--cr-marker);
+  text-underline-offset: 0.2em;
+}
+
+.cr-toc a:hover,
+.cr-toc a:focus-visible {
+  box-shadow: var(--cr-shadow-marker);
+  text-decoration: none;
+}
+
+:is(.cr-prose, .wp-block-post-content, .entry-content) .cr-toc--emoji ul > li {
+  padding-inline-start: 0;
+}
+
+:is(.cr-prose, .wp-block-post-content, .entry-content) .cr-toc--emoji ul > li::before {
+  content: none;
+}
+
+:is(.cr-prose, .wp-block-post-content, .entry-content) .cr-toc--emoji ul ul {
+  padding-inline-start: var(--cr-space-md);
+}

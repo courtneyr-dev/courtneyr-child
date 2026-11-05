@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.156' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.157' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -128,3 +128,4 @@ require_once __DIR__ . '/inc/single-bookmark.php';
 require_once __DIR__ . '/inc/security-headers.php';
 require_once __DIR__ . '/inc/contact-form.php';
 require_once __DIR__ . '/inc/footnotes.php';
+require_once __DIR__ . '/inc/toc.php';

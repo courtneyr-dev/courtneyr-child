@@ -328,6 +328,21 @@ th a:not(.wp-element-button) {
 .cr-evidence-label + * { margin-block-start: 0; }
 .cr-evidence-label + * + * { clear: left; }
 
+/* Prose rhythm: one blank line, the text's own line height, between the
+   blocks of a post body, so spacer blocks aren't needed (Courtney,
+   2026-11-04). Paragraphs otherwise keep the global 1rem from tokens.css,
+   and evidence groups had none, so consecutive groups touched. Headings
+   keep their larger top margin; margins collapse into it. The calc() line
+   is the fallback for browsers without the lh unit. */
+:is(.wp-block-post-content, .e-content, .editor-styles-wrapper .is-root-container) > :is(p, ul, ol, .wp-block-quote, .cr-evidence) {
+  margin-block-end: calc(1em * var(--cr-leading-normal));
+  margin-block-end: 1lh;
+}
+.cr-evidence__body :is(p, ul, ol):not(:last-child) {
+  margin-block-end: calc(1em * var(--cr-leading-normal));
+  margin-block-end: 1lh;
+}
+
 /* Footnotes: inc/footnotes.php puts the core Footnotes block inside a
    closed details element. The summary and notes run smaller than body
    text. */
@@ -343,6 +358,9 @@ th a:not(.wp-element-button) {
 }
 .cr-footnotes .wp-block-footnotes {
   margin-block-start: var(--cr-space-sm);
+  /* The numbers hang outside the list; this padding keeps two-digit
+     numbers inside the box's border (Courtney, 2026-11-04). */
+  padding-inline-start: 2.5em;
   font-size: var(--cr-text-sm);
 }
 

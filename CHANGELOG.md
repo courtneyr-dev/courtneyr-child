@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.157
+
+What you see change on courtneyr.dev:
+
+- A post's table of contents is a paper card with a hard shadow, its heading on a strip of tape, and each entry on a dashed ruled line with the marker highlight on hover and keyboard focus. When every entry already opens with an emoji, as Merge Conflicts headings do, the ✦ bullet drops so the emoji isn't doubled.
+- Footnote numbers sit inside the footnotes box; two-digit numbers no longer cross its border.
+- Post bodies get one blank line, the text's own line height, between paragraphs, lists, quotes and evidence groups, so spacer blocks aren't needed between them.
+
+Under the hood: `inc/toc.php` adds `cr-toc` and `cr-toc--emoji` to Yoast's block through the HTML API (no new `preg_` lines) and loads `cr-toc.css` only where the block renders; the handle is in `RUCSS_INLINE_HANDLES`. The prose rhythm rule and the footnote padding live in `components.css`. Test: `php tests/php/toc-test.php`.
+
 ## 0.7.156
 
 Presentation saved on site through temporary Additional CSS; equivalent theme deployment remains pending:
