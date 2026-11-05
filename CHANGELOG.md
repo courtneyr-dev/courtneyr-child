@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.160
+
+Under the hood: the zine table sheet (`courtneyr-block-core-table`) joins `RUCSS_INLINE_HANDLES`. It loads only on pages with a Table block, and Perfmatters builds one used CSS per URL type from the first page it sees, so a post without a table could have left the tables in other posts unstyled.
+
 ## 0.7.159
 
 What you see change on courtneyr.dev:
