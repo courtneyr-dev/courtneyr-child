@@ -3,7 +3,8 @@
 //   1. A sheet over 30 KiB must be in the baseline and may not grow past its recorded size.
 //   2. No new selector list that names two kinds (.kind-watch, .kind-listen, ...). The pruning engine
 //      only drops a sheet whose distinctive classes did not render, and a grouped rule defeats that.
-//   3. Every courtneyr-* handle in RUCSS_INLINE_HANDLES has a sheet (assets/css/cr-<name>.css).
+//   3. Every courtneyr-* handle in RUCSS_INLINE_HANDLES has a sheet (assets/css/cr-<name>.css, or
+//      assets/css/blocks/<name>.css for a courtneyr-block-<name> per-block handle).
 //   4. A new assets/css/cr-*.css sheet is either in RUCSS_INLINE_HANDLES or listed in the baseline
 //      under "notInRucssHandles": a decision made on purpose that Perfmatters' shared used CSS can carry
 //      it (it loads on every page of the types it is on, or another mechanism already covers it).
@@ -116,7 +117,15 @@ for ( const [ rel, n ] of Object.entries( state.dataThemeGaps ) ) {
 		problems.push( `${ rel } has ${ n } selector lists with :root:not([data-theme]) and no [data-theme="system"] (baseline ${ base.dataThemeGaps?.[ rel ] ?? 0 }). no-flash.js sets data-theme="system" for visitors with no stored choice, so these never match. Use :root:not([data-theme="light"]).` );
 	}
 }
+// Per-block sheets (inc/enqueue.php BLOCK_STYLE_MAP) register as courtneyr-block-<file>.
+const blockSheets = sheets.map( ( s ) => s.rel ).filter( ( r ) => r.startsWith( 'blocks/' ) );
 for ( const name of ownHandles ) {
+	if ( name.startsWith( 'block-' ) ) {
+		if ( ! blockSheets.includes( `blocks/${ name.slice( 'block-'.length ) }.css` ) ) {
+			problems.push( `RUCSS_INLINE_HANDLES lists courtneyr-${ name } but assets/css/blocks/${ name.slice( 'block-'.length ) }.css does not exist.` );
+		}
+		continue;
+	}
 	if ( ! crSheets.includes( `cr-${ name }.css` ) ) {
 		problems.push( `RUCSS_INLINE_HANDLES lists courtneyr-${ name } but assets/css/cr-${ name }.css does not exist.` );
 	}
