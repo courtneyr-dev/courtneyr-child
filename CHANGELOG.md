@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.7.158
+
+What you see change on courtneyr.dev:
+
+- Published web stories show in the Stream (`/stream/`) in date order among the other entries, each as a paper card with its 9:16 poster, a "Web story" tape label, the title and the date. The whole card is one link to the story. Drafts never show. (#268)
+- Previous/Next rows keep a gap below them everywhere (singles, archive pagers), so the lavender "More from the blog" band no longer touches the chips.
+- The lavender band at the foot of a post has a torn paper top edge, the same tear as the Merge Conflicts follow band. Any full-width periwinkle group gets the same edge.
+- On the Merge Conflicts page, the cut-paper title is the same size as the Stream's and every other archive's (68 px tiles, was 35 px). On wide screens the "A field guide to decisions" tape and the "Twelve projects" patch sit to the right of the title, centered on it; on narrow screens they stack under it. The "Follow the investigation" band runs edge to edge, torn on top only, and meets the footer with no ivory gap.
+
+Under the hood: `inc/stream-stories.php` flags the Stream page's Query Loop, adds `web-story` after every other `pre_get_posts` filter, and moves the surface meta clause into a subquery so stories pass by post type while posts keep the routing policy's own SQL. The card comes from Post Kinds' `pkiw_stream_card_kind_render` filter; `cr-stream-story.css` loads only when a story card renders and is in `RUCSS_INLINE_HANDLES`. The tear is `assets/img/paper-edge-top.svg`, an 8 px strip cut from `mc-paper-edge.svg`, used as a mask layer so the depth stays fixed at any band height. The follow section's pattern alignment is now `full`. Tests: `php tests/php/stream-stories-test.php`, `php tests/php/toc-test.php`.
+
+## 0.7.157
+
+What you see change on courtneyr.dev:
+
+- A post's table of contents is a paper card with a hard shadow, its heading on a strip of tape, and each entry on a dashed ruled line with the marker highlight on hover and keyboard focus. When every entry already opens with an emoji, as Merge Conflicts headings do, the ✦ bullet drops so the emoji isn't doubled.
+- Footnote numbers sit inside the footnotes box; two-digit numbers no longer cross its border.
+- Post bodies get one blank line, the text's own line height, between paragraphs, lists, quotes and evidence groups, so spacer blocks aren't needed between them.
+
+Under the hood: `inc/toc.php` adds `cr-toc` and `cr-toc--emoji` to Yoast's block through the HTML API (no new `preg_` lines) and loads `cr-toc.css` only where the block renders; the handle is in `RUCSS_INLINE_HANDLES`. The prose rhythm rule and the footnote padding live in `components.css`. Test: `php tests/php/toc-test.php`.
+
 ## 0.7.156
 
 Presentation saved on site through temporary Additional CSS; equivalent theme deployment remains pending:

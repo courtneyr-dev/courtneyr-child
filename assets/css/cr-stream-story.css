@@ -1,0 +1,91 @@
+/* Web story in the Stream (inc/stream-stories.php, #268). A paper card
+   holding the story's 9:16 poster, a tape label, the title and the date.
+   The title link stretches over the whole card, so the card is one tab
+   stop and one click target; focus draws the site's ring on the card. */
+
+.cr-story-card {
+	position: relative;
+	display: grid;
+	gap: var(--cr-space-xs);
+	max-inline-size: 20rem;
+	margin-inline: auto;
+	padding: var(--cr-space-sm);
+	background-color: var(--cr-surface-elevated);
+	background-image: var(--cr-fiber);
+	color: var(--cr-ink);
+	border: 2px solid var(--cr-ink);
+	box-shadow: var(--cr-shadow-hard);
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-story-card__poster img {
+	display: block;
+	inline-size: 100%;
+	block-size: auto;
+	aspect-ratio: 9 / 16;
+	object-fit: cover;
+	border: 1px solid var(--cr-ink);
+}
+
+.cr-story-card__label {
+	display: grid;
+	justify-items: start;
+	gap: var(--cr-space-2xs);
+}
+
+.cr-story-card__kind {
+	margin: 0;
+	padding: var(--cr-space-2xs) var(--cr-space-xs);
+	background: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	line-height: var(--cr-leading-tight);
+	text-transform: uppercase;
+}
+
+.cr-story-card__title {
+	margin: 0;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	line-height: var(--cr-leading-tight);
+}
+
+.cr-story-card__link {
+	color: inherit;
+	text-decoration-color: var(--cr-marker);
+	text-underline-offset: 0.2em;
+}
+
+.cr-story-card__link::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.cr-story-card__link:focus-visible {
+	outline: none;
+}
+
+.cr-story-card:has(.cr-story-card__link:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-story-card__date {
+	font-size: var(--cr-text-sm);
+}
+
+@media (forced-colors: active) {
+
+	.cr-story-card {
+		box-shadow: none;
+	}
+
+	.cr-story-card:has(.cr-story-card__link:focus-visible) {
+		outline-color: Highlight;
+	}
+}

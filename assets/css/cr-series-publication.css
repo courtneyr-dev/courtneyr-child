@@ -15,7 +15,7 @@
 	margin-block: 0;
 }
 
-.cr-mc :is(.cr-mc__hero, .cr-mc__masthead, .cr-mc__thesis, .cr-mc__methods, .cr-mc__methods-copy, .cr-mc__methods-action, .cr-mc__layout, .cr-mc__sidebar, .cr-mc__desk, .cr-mc__companion) > * {
+.cr-mc :is(.cr-mc__hero, .cr-mc__masthead, .cr-mc__stamps, .cr-mc__thesis, .cr-mc__methods, .cr-mc__methods-copy, .cr-mc__methods-action, .cr-mc__layout, .cr-mc__sidebar, .cr-mc__desk, .cr-mc__companion) > * {
 	min-inline-size: 0;
 	margin-block: 0;
 }
@@ -122,9 +122,10 @@
 	pointer-events: none;
 }
 
+/* The cut-paper title keeps the site default size (cr-cutout.css), the
+   same as /stream/ and every archive; the masthead takes the hero's full
+   width so the longest word has room (Courtney, 2026-11-04). */
 .cr-mc .cr-mc__title {
-	--cr-cutout-min: 1.5rem;
-	--cr-cutout-max: 3.4rem;
 	inline-size: 100%;
 	padding: 0;
 	margin: 0;
@@ -202,10 +203,21 @@
 	text-decoration-skip-ink: none;
 }
 
+/* The tape and the patch travel together beside the title (stacked under
+   it on narrow screens), so the masthead balances the title's weight
+   (Courtney, 2026-11-04). */
+.cr-mc .cr-mc__stamps {
+	display: grid;
+	justify-self: stretch;
+	justify-items: center;
+	align-content: center;
+	gap: var(--cr-space-lg);
+}
+
 .cr-mc .cr-mc__coda {
-	justify-self: start;
+	justify-self: center;
 	inline-size: 100%;
-	max-inline-size: 24rem;
+	max-inline-size: 18rem;
 }
 
 .cr-mc .cr-mc__coda img {
@@ -791,9 +803,12 @@
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
+	/* Wide enough for "Conflicts" at the cut-paper maximum (9 tiles x
+	   1.18em x 4.25rem is about 45rem), narrow enough that the field
+	   guide tape still centers under the title. */
 	.cr-mc .cr-mc__masthead {
 		grid-column: 1 / -1;
-		inline-size: min(100%, 32rem);
+		inline-size: min(100%, 46rem);
 	}
 
 	.cr-mc .cr-mc__hero-art {
@@ -836,17 +851,32 @@
 		padding-block-start: var(--cr-space-lg);
 	}
 
+	/* Title left at the full cut-paper size, tape and patch to its right. */
 	.cr-mc .cr-mc__masthead {
+		grid-column: 1 / -1;
+		grid-template-columns: minmax(0, 46rem) minmax(12rem, 1fr);
+		column-gap: var(--cr-space-xl);
+		align-items: center;
+		inline-size: 100%;
+	}
+
+	.cr-mc .cr-mc__masthead > :not(.cr-mc__stamps) {
 		grid-column: 1;
 	}
 
-	.cr-mc .cr-mc__hero-art {
+	.cr-mc .cr-mc__stamps {
 		grid-column: 2;
+		grid-row: 2;
+		align-self: center;
+	}
+
+	.cr-mc .cr-mc__hero-art {
+		grid-column: 1;
 		inline-size: 100%;
 	}
 
 	.cr-mc .cr-mc__thesis {
-		grid-column: 3;
+		grid-column: 2 / -1;
 	}
 
 	.cr-mc .cr-mc__methods {
@@ -966,4 +996,20 @@
 		outline-color: Highlight;
 		box-shadow: none;
 	}
+}
+
+/* Follow band: full bleed (the pattern's section is alignfull, so the
+   components.css breakout sets 100vw), contents held to the wide width,
+   torn along the top only so the bottom meets the footer with no ivory
+   showing through (Courtney, 2026-11-04). Same 8px tear as the lavender
+   band on singles. */
+.cr-mc .cr-mc__follow.alignfull {
+	margin-block-end: 0;
+	padding-inline: max(var(--cr-space-lg), calc((100vw - var(--wp--style--global--wide-size)) / 2));
+}
+
+.cr-mc .cr-mc__follow.alignfull::before {
+	clip-path: none;
+	-webkit-mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentcolor, currentcolor) bottom / 100% calc(100% - 7px) no-repeat;
+	mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentcolor, currentcolor) bottom / 100% calc(100% - 7px) no-repeat;
 }

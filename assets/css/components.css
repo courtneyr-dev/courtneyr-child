@@ -328,6 +328,21 @@ th a:not(.wp-element-button) {
 .cr-evidence-label + * { margin-block-start: 0; }
 .cr-evidence-label + * + * { clear: left; }
 
+/* Prose rhythm: one blank line, the text's own line height, between the
+   blocks of a post body, so spacer blocks aren't needed (Courtney,
+   2026-11-04). Paragraphs otherwise keep the global 1rem from tokens.css,
+   and evidence groups had none, so consecutive groups touched. Headings
+   keep their larger top margin; margins collapse into it. The calc() line
+   is the fallback for browsers without the lh unit. */
+:is(.wp-block-post-content, .e-content, .editor-styles-wrapper .is-root-container) > :is(p, ul, ol, .wp-block-quote, .cr-evidence) {
+  margin-block-end: calc(1em * var(--cr-leading-normal));
+  margin-block-end: 1lh;
+}
+.cr-evidence__body :is(p, ul, ol):not(:last-child) {
+  margin-block-end: calc(1em * var(--cr-leading-normal));
+  margin-block-end: 1lh;
+}
+
 /* Footnotes: inc/footnotes.php puts the core Footnotes block inside a
    closed details element. The summary and notes run smaller than body
    text. */
@@ -343,6 +358,9 @@ th a:not(.wp-element-button) {
 }
 .cr-footnotes .wp-block-footnotes {
   margin-block-start: var(--cr-space-sm);
+  /* The numbers hang outside the list; this padding keeps two-digit
+     numbers inside the box's border (Courtney, 2026-11-04). */
+  padding-inline-start: 2.5em;
   font-size: var(--cr-text-sm);
 }
 
@@ -1923,7 +1941,7 @@ ul.relsyn li {
 	padding: 0.25rem 0.1rem;
 	transition: color 0.15s ease;
 	text-decoration: none;
-	background-image: linear-gradient(currentColor, currentColor);
+	background-image: linear-gradient(currentcolor, currentcolor);
 	background-position: 0 100%;
 	background-repeat: no-repeat;
 	background-size: 0% 2px;
@@ -2124,6 +2142,15 @@ section.alignfull,
 	margin-right: calc(50% - 50vw) !important;
 	max-width: 100vw !important;
 	width: 100vw !important;
+}
+
+/* Torn top edge on the lavender band, the Merge Conflicts follow band's
+   paper (Courtney, 2026-11-04): an 8px strip of torn paper over a solid
+   rest, so the tear stays the same depth at any band height. */
+.related-posts.alignfull,
+.alignfull.has-primary-accent-background-color {
+	-webkit-mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentcolor, currentcolor) bottom / 100% calc(100% - 7px) no-repeat;
+	mask: url(../img/paper-edge-top.svg) top / 100% 8px no-repeat, linear-gradient(currentcolor, currentcolor) bottom / 100% calc(100% - 7px) no-repeat;
 }
 
 /* (2) Light-bg sections: peach (tertiary) and cream (main-accent)

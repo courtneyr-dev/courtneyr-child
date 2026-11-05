@@ -325,6 +325,10 @@ add_action( 'template_redirect', __NAMESPACE__ . '\\delay_full_sheets_on_front_p
  */
 const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-photo-frames',
+	// Only on posts that render the Yoast table of contents (inc/toc.php).
+	'courtneyr-toc',
+	// Only on /stream/ when a web story renders (inc/stream-stories.php).
+	'courtneyr-stream-story',
 	'courtneyr-photo',
 	'courtneyr-paper',
 	'courtneyr-nav',
