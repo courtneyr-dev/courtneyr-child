@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.162
+
+- In dark mode, the table of contents on Merge Conflicts posts keeps its light-orange card. Dark mode had turned the card cerulean behind violet links (2.45:1, below the 4.5:1 WCAG 1.4.3 floor); violet on light orange is 12.6:1. Light mode is unchanged.
+
 ## 0.7.161
 
 - Web story cards in the Stream show as paper cards (border, hard shadow, tilt, padding). The Stream page strips every Post Kinds card bare, and that rule outranked the story card's own. Posters keep their 3:4 shape instead of a 9:16 crop that left a blank strip.

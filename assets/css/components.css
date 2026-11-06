@@ -271,7 +271,13 @@ th a:not(.wp-element-button) {
 
 
 /* ============ Table of contents ============ */
+/* A paper object: the card keeps its light-orange paper and violet ink in
+   dark mode, like the cut-paper tiles. Dark tokens turn accent-3 into
+   cerulean, and the pinned violet links measured 2.45:1 on it (live QA
+   2026-11-06); violet on light orange is 12.6:1. */
 .cr-toc {
+  --cr-accent-3-bg: var(--cr-light-orange);
+  --cr-accent-3-ink: var(--cr-russian-violet);
   background: var(--cr-accent-3-bg);
   color: var(--cr-accent-3-ink);
   border: var(--cr-border-thick);
