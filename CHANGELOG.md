@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.161
+
+- Web story cards in the Stream show as paper cards (border, hard shadow, tilt, padding). The Stream page strips every Post Kinds card bare, and that rule outranked the story card's own. Posters keep their 3:4 shape instead of a 9:16 crop that left a blank strip.
+
 ## 0.7.160
 
 Under the hood: the zine table sheet (`courtneyr-block-core-table`) joins `RUCSS_INLINE_HANDLES`. It loads only on pages with a Table block, and Perfmatters builds one used CSS per URL type from the first page it sees, so a post without a table could have left the tables in other posts unstyled.

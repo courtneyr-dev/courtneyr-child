@@ -1,9 +1,11 @@
 /* Web story in the Stream (inc/stream-stories.php, #268). A paper card
-   holding the story's 9:16 poster, a tape label, the title and the date.
+   holding the story's 3:4 poster (Web Stories' own poster shape), a tape label, the title and the date.
    The title link stretches over the whole card, so the card is one tab
    stop and one click target; focus draws the site's ring on the card. */
 
-.cr-story-card {
+/* The Stream page resets every .pk-card to bare (.cr-stream-page .pk-card,
+   0,2,0), so the story card answers at (0,3,0). */
+:is(.cr-stream-page, body) .pk-card.cr-story-card {
 	position: relative;
 	display: grid;
 	gap: var(--cr-space-xs);
@@ -22,7 +24,7 @@
 	display: block;
 	inline-size: 100%;
 	block-size: auto;
-	aspect-ratio: 9 / 16;
+	aspect-ratio: 3 / 4;
 	object-fit: cover;
 	border: 1px solid var(--cr-ink);
 }
@@ -81,7 +83,7 @@
 
 @media (forced-colors: active) {
 
-	.cr-story-card {
+	:is(.cr-stream-page, body) .pk-card.cr-story-card {
 		box-shadow: none;
 	}
 
