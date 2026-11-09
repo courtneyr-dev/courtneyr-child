@@ -150,6 +150,22 @@ namespace {
 		}
 	);
 
+	cr_rsvp_stream_check(
+		'CSS keeps compact status rows and complete dark outlines',
+		static function (): void {
+			$css = (string) file_get_contents( CR_RSVP_THEME_DIR . '/assets/css/cr-rsvp.css' );
+			cr_rsvp_stream_assert( str_contains( $css, ".cr-rsvp-stub__status data {\n\tflex: 1 1 auto;" ), 'status uses an auto content basis' );
+			cr_rsvp_stream_assert( str_contains( $css, ".cr-rsvp-stub__status .cr-stamp-mark {\n\tflex: 0 1 8.4rem;\n\tmax-inline-size: 8.4rem;" ), 'stamp uses the shared 8.4rem size' );
+			cr_rsvp_stream_assert( str_contains( $css, ":root:not([data-theme=\"light\"]) .pk-card.pk-card--stream.cr-rsvp-stub {\n\t\tborder: 2px solid var(--cr-printer-ivory);" ), 'system dark Stream stub has a complete ivory border' );
+			cr_rsvp_stream_assert( str_contains( $css, ":root[data-theme=\"dark\"] .pk-card.pk-card--stream.cr-rsvp-stub {\n\tborder: 2px solid var(--cr-printer-ivory);" ), 'manual dark Stream stub has a complete ivory border' );
+			cr_rsvp_stream_assert( str_contains( $css, ":root:not([data-theme=\"light\"]) .cr-rsvp-ticket__stub {\n\t\tborder-color: var(--cr-printer-ivory);\n\t\tbackground-color: var(--cr-night-elevated);\n\t\tcolor: var(--cr-printer-ivory);" ), 'system dark ticket stub uses the dark palette' );
+			cr_rsvp_stream_assert( str_contains( $css, ":root[data-theme=\"dark\"] .cr-rsvp-ticket__stub {\n\tborder-color: var(--cr-printer-ivory);\n\tbackground-color: var(--cr-night-elevated);\n\tcolor: var(--cr-printer-ivory);" ), 'manual dark ticket stub uses the dark palette' );
+			cr_rsvp_stream_assert( str_contains( $css, ":root:not([data-theme=\"light\"]) .cr-rsvp-ticket__punch {\n\t\tborder-color: var(--cr-printer-ivory);" ), 'system dark punch outlines use ivory' );
+			cr_rsvp_stream_assert( str_contains( $css, ":root[data-theme=\"dark\"] .cr-rsvp-ticket__punch {\n\tborder-color: var(--cr-printer-ivory);" ), 'manual dark punch outlines use ivory' );
+			cr_rsvp_stream_assert( 1 === substr_count( $css, ".cr-rsvp-ticket__punch.is-punched {\n\tbackground-color: var(--cr-surface);" ), 'punched hole still exposes the page surface' );
+		}
+	);
+
 	if ( $GLOBALS['cr_rsvp_stream_failures'] ) {
 		foreach ( $GLOBALS['cr_rsvp_stream_failures'] as $failure ) { fwrite( STDERR, '  ' . $failure . "\n" ); }
 		exit( 1 );
