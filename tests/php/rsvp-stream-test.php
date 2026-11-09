@@ -163,6 +163,11 @@ namespace {
 			cr_rsvp_stream_assert( str_contains( $css, ":root:not([data-theme=\"light\"]) .cr-rsvp-ticket__punch {\n\t\tborder-color: var(--cr-printer-ivory);" ), 'system dark punch outlines use ivory' );
 			cr_rsvp_stream_assert( str_contains( $css, ":root[data-theme=\"dark\"] .cr-rsvp-ticket__punch {\n\tborder-color: var(--cr-printer-ivory);" ), 'manual dark punch outlines use ivory' );
 			cr_rsvp_stream_assert( 1 === substr_count( $css, ".cr-rsvp-ticket__punch.is-punched {\n\tbackground-color: var(--cr-surface);" ), 'punched hole still exposes the page surface' );
+			cr_rsvp_stream_assert( str_contains( $css, ".cr-rsvp-stub__status data::before,\n.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__status data::after {\n\tcontent: \"\";\n\tposition: absolute;\n\tborder: 0 dashed var(--cr-russian-violet);" ), 'perforation is a dashed ink rule, not an alpha' );
+			cr_rsvp_stream_assert( str_contains( $css, ".cr-rsvp-stub__status data::before {\n\tinset-block-start: calc(100% + var(--cr-space-md) / 2 - 1px);\n\tinset-inline: 0;\n\tborder-block-start-width: 2px;" ), 'stacked stamp gets a horizontal perforation' );
+			cr_rsvp_stream_assert( str_contains( $css, ".cr-rsvp-stub__status data::after {\n\tinset-block: 0;\n\tinset-inline-start: calc(100% + var(--cr-space-md) / 2 - 1px);\n\tborder-inline-start-width: 2px;" ), 'side-by-side stamp gets a vertical perforation' );
+			cr_rsvp_stream_assert( str_contains( $css, "\tgap: var(--cr-space-md);\n\tmargin: calc(-1 * var(--cr-space-2xs)) calc(-1 * var(--cr-space-3xs));\n\tpadding: var(--cr-space-2xs) var(--cr-space-3xs);\n\toverflow: clip;" ), 'status row clips the off-axis perforation' );
+			cr_rsvp_stream_assert( (bool) preg_match( '/@media \(forced-colors: active\) \{[^@]*\.cr-rsvp-stub__status data::before,\n\t\.pk-card\.pk-card--stream\.cr-rsvp-stub \.cr-rsvp-stub__status data::after,[^}]*display: none;/s', $css ), 'forced colors drop the perforation with the tear and stamp' );
 		}
 	);
 
