@@ -672,7 +672,9 @@
 
 .pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__name a {
 	color: inherit;
-	text-decoration: none;
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.2em;
 }
 
 .pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__name a::after {
@@ -752,6 +754,25 @@
 	display: block;
 	inline-size: 100%;
 	block-size: auto;
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__tear {
+	position: absolute;
+	z-index: 1;
+	inset: auto 0 0;
+	block-size: 5%;
+	background-color: var(--cr-rsvp-tear-edge, transparent);
+	clip-path: polygon(0 0, 100% 0, 100% 20%, 94% 100%, 87% 20%, 79% 100%, 71% 0, 62% 100%, 54% 20%, 45% 100%, 37% 20%, 28% 100%, 20% 0, 12% 100%, 5% 20%, 0 100%);
+	pointer-events: none;
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__tear::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-color: var(--cr-rsvp-paper, var(--cr-periwinkle));
+	clip-path: inherit;
+	transform: translateY(-2px);
 }
 
 /* Responsive wall and ticket layouts. */
@@ -886,6 +907,7 @@
 	:root:not([data-theme="light"]) .pk-card.pk-card--stream.cr-rsvp-stub {
 		border: 2px solid var(--cr-printer-ivory);
 		color: var(--cr-russian-violet);
+		--cr-rsvp-tear-edge: var(--cr-printer-ivory);
 	}
 
 	:root:not([data-theme="light"]) .cr-rsvp-ticket__front,
@@ -942,6 +964,7 @@
 :root[data-theme="dark"] .pk-card.pk-card--stream.cr-rsvp-stub {
 	border: 2px solid var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
+	--cr-rsvp-tear-edge: var(--cr-printer-ivory);
 }
 
 :root[data-theme="dark"] .cr-rsvp-ticket__front,
