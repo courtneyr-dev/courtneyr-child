@@ -321,8 +321,8 @@ namespace {
 			cr_rsvp_contains( ':root[data-theme="dark"] .cr-archive--rsvp .cr-archive__description {', $css, 'manual dark mode keeps the RSVP description legible' );
 			cr_rsvp_contains( '.cr-archive--rsvp .cr-archive__header hr.is-style-cr-marker-bar-short {', $css, 'RSVP marker keeps the short component width' );
 			cr_rsvp_contains( '.cr-archive--rsvp .cr-rsvp-wall__query {', $css, 'RSVP Query owns the wide wall width' );
-			cr_rsvp_contains( 'grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);', $css, 'upcoming poster distributes its three text levels' );
-			cr_rsvp_contains( 'font-size: var(--cr-text-3xl);', $css, 'upcoming title uses the larger accent step' );
+			cr_rsvp_contains( 'grid-template-rows: auto auto minmax(0, 1fr);', $css, 'upcoming poster distributes its three text levels' );
+			cr_rsvp_contains( 'font-size: clamp(var(--cr-text-2xl), 3.2vw, var(--cr-text-4xl));', $css, 'upcoming title uses the larger accent step' );
 			cr_rsvp_contains( ".cr-rsvp-wall .wp-block-post::after {\n\tcontent: none", $css, 'RSVP cards suppress shared archive marker bars' );
 			cr_rsvp_contains( ".cr-rsvp-wall .pkiw-rsvp-entry__image {\n\tdisplay: none;", $css, 'archive poster images stay hidden' );
 			cr_rsvp_not_contains( '.pkiw-rsvp-entry__poster::after', $css, 'poster has no image-cover band' );

@@ -12,12 +12,16 @@
 	text-align: start;
 }
 
+/* Badge and h1 share the first grid cell, so the badge centers on the tile row. */
 .cr-archive--rsvp .cr-archive-identity--kind {
-	position: absolute;
-	inset-block-start: 0.5rem;
-	inset-inline-start: 0;
+	position: static;
+	z-index: 1;
+	grid-area: 1 / 1;
+	align-self: center;
+	justify-self: start;
 	display: block;
 	block-size: auto;
+	margin: 0 !important;
 }
 
 .cr-archive--rsvp .cr-archive-identity--kind .cr-archive-identity__glyph {
@@ -26,10 +30,17 @@
 	block-size: clamp(3rem, 5vw, 4.25rem);
 }
 
+/* Core's constrained layout centers header children with auto !important
+   margins; the cutout h1 is an inline-size container with no content width,
+   so auto margins collapse it to 0px and stack one tile per line. */
 .cr-archive--rsvp .cr-archive__title.cr-cutout {
 	--cr-cutout-min: 2.75rem;
 	--cr-cutout-max: 5.75rem;
-	margin: 0 0 0 clamp(6.5rem, 13vw, 8.5rem);
+	grid-area: 1 / 1;
+	justify-self: stretch;
+	max-inline-size: none;
+	margin-block: 0;
+	margin-inline: clamp(6.5rem, 13vw, 8.5rem) 0 !important;
 }
 
 .cr-archive--rsvp .cr-archive__title.cr-flank::before {
@@ -48,7 +59,8 @@
 
 .cr-archive--rsvp .cr-archive__description {
 	max-inline-size: var(--cr-measure, 720px);
-	margin: 0;
+	margin-block: 0;
+	margin-inline: 0 !important;
 	color: var(--cr-cerulean);
 	font-family: var(--cr-font-accent);
 	font-size: var(--cr-text-lg);
@@ -72,6 +84,11 @@
 	inline-size: 100%;
 	max-inline-size: none;
 	margin-block: 0 var(--cr-space-xl);
+}
+
+/* tokens.css caps .alignwide at 90% and loads later; the wall shares the header's edge. */
+.cr-archive--rsvp .cr-rsvp-wall.alignwide {
+	max-inline-size: none;
 }
 
 .cr-rsvp-wall .wp-block-post::after {
@@ -214,9 +231,12 @@
 }
 
 .cr-rsvp-wall .pkiw-rsvp-entry--upcoming .pkiw-rsvp-entry__status {
-	align-self: end;
-	margin: 0 auto;
-	font-size: var(--cr-text-md);
+	align-self: center;
+	justify-self: center;
+	margin: 0;
+	padding: var(--cr-space-sm) var(--cr-space-xl);
+	font-size: var(--cr-text-lg);
+	text-align: center;
 }
 
 .cr-rsvp-wall .pkiw-rsvp-entry[data-pkiw-rsvp-status="no"] .pkiw-rsvp-entry__status,
@@ -234,23 +254,29 @@
 
 /* Upcoming poster: only the paper rotates; every text line stays upright. */
 
+/* Name, date and sticker spread over the poster: name on top, the ruled date
+   under it, the sticker in the lower third. */
 .cr-rsvp-wall .pkiw-rsvp-entry--upcoming {
-	grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+	grid-template-rows: auto auto minmax(0, 1fr);
+	row-gap: var(--cr-space-lg);
 	align-content: stretch;
-	align-items: center;
-	min-block-size: 22rem;
-	padding: clamp(2.5rem, 5vw, 4rem) clamp(var(--cr-space-lg), 3vw, var(--cr-space-2xl)) var(--cr-space-xl);
+	align-items: start;
+	min-block-size: clamp(16rem, 28vw, 24rem);
+	padding: clamp(2.5rem, 4vw, 3.5rem) clamp(var(--cr-space-lg), 2.5vw, var(--cr-space-xl)) var(--cr-space-xl);
+	text-align: start;
 }
 
 .cr-rsvp-wall .pkiw-rsvp-entry--upcoming .pkiw-rsvp-entry__name {
-	align-self: end;
-	font-size: var(--cr-text-3xl);
+	font-size: clamp(var(--cr-text-2xl), 3.2vw, var(--cr-text-4xl));
+	overflow-wrap: normal;
+	hyphens: manual;
 }
 
 .cr-rsvp-wall .pkiw-rsvp-entry--upcoming .pkiw-rsvp-entry__day {
-	align-self: center;
 	margin-block-start: 0;
-	font-size: var(--cr-text-sm);
+	padding-block-start: var(--cr-space-md);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
 }
 
 .cr-rsvp-wall .pkiw-rsvp-entry--upcoming::before {
