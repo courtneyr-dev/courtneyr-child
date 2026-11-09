@@ -11,8 +11,6 @@ const REQUIRE_SEED = '1' === process.env.CR_RSVP_REQUIRE_SEED;
 const WIDTHS = [ 1440, 800, 375, 320 ];
 const SENTINEL = 'Rv251 Sentinel Hall, 1 Sentinel Way';
 const EVENT_SENTINEL = 'https://events.example/rv251-sentinel';
-const INK = 'rgb(36, 28, 74)';
-const IVORY = 'rgb(251, 250, 245)';
 const YELLOW = 'rgb(255, 183, 3)';
 
 const slugOf = ( key ) => `seed-251-${ key.toLowerCase() }`;
@@ -68,6 +66,17 @@ async function focusPaint( locator ) {
 	} );
 }
 
+async function resolvedToken( locator, token ) {
+	return locator.evaluate( ( node, property ) => {
+		const probe = node.ownerDocument.createElement( 'span' );
+		probe.style.color = `var(${ property })`;
+		node.append( probe );
+		const value = getComputedStyle( probe ).color;
+		probe.remove();
+		return value;
+	}, token );
+}
+
 const entries = ( page ) => page.locator( '.pkiw-rsvp-entry' );
 const fixtureEntry = ( page, key ) => entries( page ).filter( { has: page.locator( `a[href*="${ slugOf( key ) }"]` ) } ).first();
 
@@ -88,6 +97,105 @@ test.describe( 'RSVP archive', () => {
 		await expect( page.locator( '.pkiw-rsvp-entry--past' ) ).toHaveCount( 5 );
 		for ( const key of [ 'C01', 'C02', 'C03', 'C05' ] ) {
 			await expect( fixtureEntry( page, key ) ).toHaveCount( 0 );
+		}
+	} );
+
+	test( 'the RSVP header keeps its decorative badge, star and cutout in one left lockup', async ( { page } ) => {
+		for ( const width of [ 1440, 1280, 390 ] ) {
+			for ( const theme of [ 'light', 'dark' ] ) {
+				await openArchive( page, 1, width );
+				await page.evaluate( ( value ) => {
+					document.documentElement.dataset.theme = value;
+					return document.fonts.ready;
+				}, theme );
+
+				const header = page.locator( 'main .cr-archive__header' );
+				const h1 = header.locator( 'h1.cr-archive__title.cr-cutout' );
+				await expect( page.locator( 'main h1' ), `${ width }px ${ theme}: one H1` ).toHaveCount( 1 );
+				await expect( h1, `${ width }px ${ theme}: the H1 names the archive` ).toHaveAccessibleName( 'RSVP' );
+
+				const lockup = await header.evaluate( ( node ) => {
+					const badgeHolder = node.querySelector( '.cr-archive-identity--kind' );
+					const badge = badgeHolder.querySelector( '.cr-archive-identity__glyph' );
+					const title = node.querySelector( 'h1.cr-archive__title.cr-cutout' );
+					const tiles = title.querySelector( '.cr-cutout__tiles' );
+					const wall = document.querySelector( '.cr-rsvp-wall__query' );
+					const description = node.querySelector( '.cr-archive__description' );
+					const divider = node.querySelector( 'hr.is-style-cr-marker-bar-short' );
+					const box = ( element ) => {
+						const rect = element.getBoundingClientRect();
+						return { top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left, width: rect.width, height: rect.height };
+					};
+					const pseudoBox = ( element, pseudo ) => {
+						const parent = box( element );
+						const style = getComputedStyle( element, pseudo );
+						const width = parseFloat( style.width );
+						const height = parseFloat( style.height );
+						const left = parent.left + parseFloat( style.left );
+						const top = parent.top + parseFloat( style.top );
+						const origin = style.transformOrigin.split( ' ' ).map( parseFloat );
+						const matrix = 'none' === style.transform ? new DOMMatrix() : new DOMMatrix( style.transform );
+						const points = [ [ 0, 0 ], [ width, 0 ], [ width, height ], [ 0, height ] ].map( ( point ) => {
+							const transformed = new DOMPoint( point[0] - origin[0], point[1] - origin[1] ).matrixTransform( matrix );
+							return { x: left + origin[0] + transformed.x, y: top + origin[1] + transformed.y };
+						} );
+						return {
+							top: Math.min( ...points.map( ( point ) => point.y ) ),
+							right: Math.max( ...points.map( ( point ) => point.x ) ),
+							bottom: Math.max( ...points.map( ( point ) => point.y ) ),
+							left: Math.min( ...points.map( ( point ) => point.x ) ),
+							content: style.content,
+							display: style.display,
+							pointerEvents: style.pointerEvents,
+						};
+					};
+					const named = ( element ) => [ 'aria-label', 'aria-labelledby', 'title' ].some( ( attribute ) => element.hasAttribute( attribute ) )
+						|| null !== element.querySelector( 'title' );
+					const focusable = ( element ) => [ element, ...element.querySelectorAll( '*' ) ].some( ( child ) => child.tabIndex >= 0 );
+					const linked = ( element ) => null !== element.closest( 'a' ) || null !== element.querySelector( 'a' );
+					return {
+						badge: box( badge ),
+						tiles: box( tiles ),
+						star: pseudoBox( title, '::before' ),
+						header: box( node ),
+						wall: box( wall ),
+						description: box( description ),
+						divider: box( divider ),
+						badgeDecorative: badge.getAttribute( 'aria-hidden' ) === 'true' && [ 'presentation', 'none' ].includes( badge.getAttribute( 'role' ) ) && ! named( badge ) && ! focusable( badge ) && ! linked( badge ),
+						cutoutDecorative: tiles.getAttribute( 'aria-hidden' ) === 'true' && ! named( tiles ) && ! focusable( tiles ) && ! linked( tiles ),
+						titleLinked: linked( title ),
+						titleFocusable: focusable( title ),
+						overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+					};
+				} );
+
+				expect( lockup.badgeDecorative, `${ width }px ${ theme}: badge is unnamed, unfocusable and unlinked` ).toBe( true );
+				expect( lockup.cutoutDecorative, `${ width }px ${ theme}: cutout tiles are unnamed, unfocusable and unlinked` ).toBe( true );
+				expect( lockup.star.content, `${ width }px ${ theme}: the star has an empty text alternative` ).toMatch( /✺.*\/\s*["']{2}/ );
+				expect( lockup.star.display, `${ width }px ${ theme}: the decorative star is painted` ).toBe( 'block' );
+				expect( lockup.star.pointerEvents, `${ width }px ${ theme}: the star can't receive pointer focus` ).toBe( 'none' );
+				expect( lockup.titleLinked, `${ width }px ${ theme}: the star's H1 isn't a link` ).toBe( false );
+				expect( lockup.titleFocusable, `${ width }px ${ theme}: the star's H1 isn't a keyboard stop` ).toBe( false );
+
+				if ( 390 < width ) {
+					const overlapsVertically = ( first, second ) => Math.min( first.bottom, second.bottom ) - Math.max( first.top, second.top ) > 0;
+					expect( overlapsVertically( lockup.badge, lockup.tiles ), `${ width }px ${ theme}: badge and cutout share one row` ).toBe( true );
+					expect( overlapsVertically( lockup.star, lockup.tiles ), `${ width }px ${ theme}: star and cutout share one row` ).toBe( true );
+					// The badge keeps the shared -1.2deg sticker tilt, which widens its box by about 0.7px a side.
+					expect( Math.abs( lockup.badge.left - lockup.wall.left ), `${ width }px ${ theme}: lockup starts at the wall's wide column` ).toBeLessThanOrEqual( 2 );
+				} else {
+					const overlaps = ( first, second ) => Math.min( first.right, second.right ) - Math.max( first.left, second.left ) > 0
+						&& Math.min( first.bottom, second.bottom ) - Math.max( first.top, second.top ) > 0;
+					const headerParts = [ lockup.badge, lockup.star, lockup.tiles, lockup.description, lockup.divider ];
+					for ( let index = 0; index < headerParts.length; index++ ) {
+						for ( let next = index + 1; next < headerParts.length; next++ ) {
+							expect( overlaps( headerParts[index], headerParts[next] ), `390px ${ theme}: header parts ${ index + 1 } and ${ next + 1 } don't overlap` ).toBe( false );
+						}
+					}
+				}
+
+				expect( lockup.overflow, `${ width }px ${ theme}: no horizontal overflow` ).toBeLessThanOrEqual( 0 );
+			}
 		}
 	} );
 
@@ -135,12 +243,15 @@ test.describe( 'RSVP archive', () => {
 		expect( await axeContrast( page ) ).toEqual( [] );
 		const link = entries( page ).first().locator( 'a' );
 		const focus = await focusPaint( link );
+		const halo = await resolvedToken( link, '--cr-focus-halo' );
 		expect( focus.width ).toBe( '3px' );
 		expect( focus.color ).toBe( YELLOW );
-		expect( focus.shadow ).toContain( INK );
-			expect( focus.inset ).toEqual( [ '0px', '0px', '0px', '0px' ] );
-		await expect( page.locator( '.wp-block-query-pagination .current' ) ).toHaveCSS( 'background-color', INK );
-		await expect( page.locator( '.wp-block-query-pagination .current' ) ).toHaveCSS( 'color', IVORY );
+		expect( focus.shadow ).toContain( halo );
+		expect( focus.inset ).toEqual( [ '0px', '0px', '0px', '0px' ] );
+		// The shared pager fills the current page with --cr-ink on --cr-ink-inverse; both flip in dark mode.
+		const current = page.locator( '.wp-block-query-pagination .current' );
+		await expect( current ).toHaveCSS( 'background-color', await resolvedToken( current, '--cr-ink' ) );
+		await expect( current ).toHaveCSS( 'color', await resolvedToken( current, '--cr-ink-inverse' ) );
 	} );
 } );
 
