@@ -391,11 +391,39 @@
 }
 
 .cr-rsvp-ticket__front {
+	position: relative;
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
 	border: 2px solid var(--cr-ink);
 	background-color: var(--cr-surface-elevated);
 	box-shadow: var(--cr-shadow-hard-2);
+}
+
+/* Die-cut scallops along the ticket's outer edges: page-colored circles
+   straddle the border, the construction the seam notches and past stubs use. */
+.cr-rsvp-ticket__front::before,
+.cr-rsvp-ticket__front::after,
+.cr-rsvp-ticket__back::before,
+.cr-rsvp-ticket__back::after {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset-block: var(--cr-space-sm);
+	inline-size: 1rem;
+	background-color: var(--cr-surface);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 28'%3E%3Ccircle cx='8' cy='14' r='8'/%3E%3C/svg%3E") center top / 100% 1.75rem round;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 28'%3E%3Ccircle cx='8' cy='14' r='8'/%3E%3C/svg%3E") center top / 100% 1.75rem round;
+	pointer-events: none;
+}
+
+.cr-rsvp-ticket__front::before,
+.cr-rsvp-ticket__back::before {
+	inset-inline-start: calc(-1px - 0.5rem);
+}
+
+.cr-rsvp-ticket__front::after,
+.cr-rsvp-ticket__back::after {
+	inset-inline-end: calc(-1px - 0.5rem);
 }
 
 .cr-rsvp-ticket__event {
@@ -488,7 +516,6 @@
 	gap: var(--cr-space-lg);
 	min-block-size: 15rem;
 	padding: var(--cr-space-lg);
-	border-block-start: 2px dashed var(--cr-russian-violet);
 	background-color: var(--cr-light-orange);
 	color: var(--cr-russian-violet);
 	text-align: center;
@@ -514,6 +541,27 @@
 
 .cr-rsvp-ticket__stub::after {
 	inset-inline-end: calc(-1px - var(--cr-rsvp-notch) / 2);
+}
+
+/* A rail of round perforations through to the page marks the tear line. */
+.cr-rsvp-ticket__perf {
+	position: absolute;
+	z-index: 1;
+	inset-block-start: -0.3125rem;
+	inset-inline: calc(var(--cr-rsvp-notch) / 2 + var(--cr-space-xs));
+	block-size: 0.625rem;
+	background-color: var(--cr-surface);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 10'%3E%3Ccircle cx='11' cy='5' r='4'/%3E%3C/svg%3E") left center / 1.375rem 100% round;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 10'%3E%3Ccircle cx='11' cy='5' r='4'/%3E%3C/svg%3E") left center / 1.375rem 100% round;
+}
+
+.cr-rsvp-ticket__kind {
+	display: block;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
 }
 
 .cr-rsvp-ticket__punches {
@@ -546,6 +594,7 @@
 }
 
 .cr-rsvp-ticket__back {
+	position: relative;
 	padding: var(--cr-space-lg);
 	border: 2px solid var(--cr-ink);
 	background-color: var(--cr-surface-elevated);
@@ -760,10 +809,14 @@
 		grid-column: 2;
 	}
 
-	/* The seam turns vertical, so the notches move to its top and bottom. */
-	.cr-rsvp-ticket__stub {
-		border-block-start: 0;
-		border-inline-start: 2px dashed var(--cr-russian-violet);
+	/* The seam turns vertical, so the rail and notches follow it. */
+	.cr-rsvp-ticket__perf {
+		inset-block: calc(var(--cr-rsvp-notch) / 2 + var(--cr-space-xs));
+		inset-inline: -0.3125rem auto;
+		inline-size: 0.625rem;
+		block-size: auto;
+		-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 22'%3E%3Ccircle cx='5' cy='11' r='4'/%3E%3C/svg%3E") center top / 100% 1.375rem round;
+		mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 22'%3E%3Ccircle cx='5' cy='11' r='4'/%3E%3C/svg%3E") center top / 100% 1.375rem round;
 	}
 
 	.cr-rsvp-ticket__stub::before,
@@ -833,6 +886,11 @@
 		border-color: var(--cr-printer-ivory);
 	}
 
+	:root:not([data-theme="light"]) .cr-rsvp-ticket__fact dt,
+	:root:not([data-theme="light"]) .cr-rsvp-ticket__kind {
+		color: var(--cr-periwinkle);
+	}
+
 	:root:not([data-theme="light"]) .pk-card.pk-card--stream.cr-rsvp-stub .cr-stamp rect {
 		stroke: var(--cr-russian-violet);
 	}
@@ -884,6 +942,11 @@
 	border-color: var(--cr-printer-ivory);
 }
 
+:root[data-theme="dark"] .cr-rsvp-ticket__fact dt,
+:root[data-theme="dark"] .cr-rsvp-ticket__kind {
+	color: var(--cr-periwinkle);
+}
+
 :root[data-theme="dark"] .pk-card.pk-card--stream.cr-rsvp-stub .cr-stamp rect {
 	stroke: var(--cr-russian-violet);
 }
@@ -922,6 +985,11 @@
 	.cr-rsvp-wall .pkiw-rsvp-entry--past::before,
 	.cr-rsvp-wall .pkiw-rsvp-entry--past::after,
 	.cr-rsvp-ticket__punches,
+	.cr-rsvp-ticket__perf,
+	.cr-rsvp-ticket__front::before,
+	.cr-rsvp-ticket__front::after,
+	.cr-rsvp-ticket__back::before,
+	.cr-rsvp-ticket__back::after,
 	.cr-rsvp-ticket__stub::before,
 	.cr-rsvp-ticket__stub::after,
 	.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__tear,

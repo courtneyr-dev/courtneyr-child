@@ -94,6 +94,14 @@ function event_name( array $facts, string $title ): string {
 }
 
 /**
+ * Return the visible RSVP kind label through the plugin's label filter.
+ */
+function kind_label(): string {
+	$label = __( 'RSVP', 'courtneyr-child' );
+	return function_exists( '\\PKIW\\get_kind_label' ) ? (string) \PKIW\get_kind_label( $label, 'rsvp', 'rsvp-card' ) : $label;
+}
+
+/**
  * Build one facts-list row.
  *
  * @param string $label Row label.
@@ -155,7 +163,7 @@ function ticket( string $html, array $block, $instance ): string { // phpcs:igno
 	$out .= '</div>';
 
 	$labels = function_exists( '\\PKIW\\rsvp_status_labels' ) ? \PKIW\rsvp_status_labels() : array();
-	$out   .= '<aside class="cr-rsvp-ticket__stub"><div class="cr-rsvp-ticket__punches" aria-hidden="true">';
+	$out   .= '<aside class="cr-rsvp-ticket__stub"><span class="pk-kindlabel cr-rsvp-ticket__kind">' . esc_html( kind_label() ) . '</span><div class="cr-rsvp-ticket__punches" aria-hidden="true">';
 	foreach ( $labels as $value => $label ) {
 		$out .= '<span class="cr-rsvp-ticket__punch' . ( (string) ( $rsvp['status'] ?? '' ) === (string) $value ? ' is-punched' : '' ) . '" data-rsvp-status="' . esc_attr( (string) $value ) . '">' . esc_html( (string) $label ) . '</span>';
 	}
@@ -163,7 +171,7 @@ function ticket( string $html, array $block, $instance ): string { // phpcs:igno
 	if ( '' !== (string) ( $rsvp['status'] ?? '' ) ) {
 		$out .= '<data class="cr-rsvp-ticket__status p-rsvp" value="' . esc_attr( (string) $rsvp['status'] ) . '">' . esc_html( (string) ( $rsvp['status_label'] ?? '' ) ) . '</data>';
 	}
-	$out .= '</aside></div>';
+	$out .= '<span class="cr-rsvp-ticket__perf" aria-hidden="true"></span></aside></div>';
 
 	if ( '' !== (string) ( $rsvp['note'] ?? '' ) || '' !== (string) ( $rsvp['rsvp_at_iso'] ?? '' ) ) {
 		$out .= '<div class="cr-rsvp-ticket__back">';

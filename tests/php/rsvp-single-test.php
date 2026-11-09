@@ -119,6 +119,7 @@ namespace {
 namespace PKIW {
 	function kind_facts( int $post_id ): array { return $GLOBALS['cr_rsvp_single_facts'][ $post_id ] ?? array(); }
 	function rsvp_status_labels(): array { return array( 'yes' => 'Going', 'no' => 'Not Going', 'maybe' => 'Maybe', 'interested' => 'Interested', 'remote' => 'Attending Remotely' ); }
+	function get_kind_label( string $label, string $kind, string $context = '' ): string { return 'rsvp' === $kind && 'rsvp-card' === $context ? ( $GLOBALS['cr_rsvp_single_kind_label'] ?? $label ) : 'wrong kind context'; }
 	function pkiw_new_tab_label_attr( string $visible ): string { return ' aria-label="' . htmlspecialchars( $visible . ' (opens in a new tab)', ENT_QUOTES, 'UTF-8' ) . '"'; }
 }
 
@@ -169,6 +170,23 @@ namespace {
 			foreach ( array( 'Location', 'p-location', "You're invited", 'Admit one', 'RSVP details', 'Response recorded', 'Location hidden', 'cr-stamp' ) as $banned ) {
 				cr_rsvp_single_not_contains( $banned, $html, 'banned string ' . $banned );
 			}
+		}
+	);
+
+	cr_rsvp_single_check(
+		'the stub leads with one visible plugin kind label, never a heading',
+		static function (): void {
+			cr_rsvp_single_post( 111, 'Kind label RSVP' );
+			$html = cr_rsvp_single_render( 111 );
+			cr_rsvp_single_assert( 1 === substr_count( $html, 'class="pk-kindlabel' ), 'exactly one ticket kind label' );
+			cr_rsvp_single_contains( '<aside class="cr-rsvp-ticket__stub"><span class="pk-kindlabel cr-rsvp-ticket__kind">RSVP</span><div class="cr-rsvp-ticket__punches"', $html, 'kind label opens the stub' );
+			cr_rsvp_single_assert( 0 === preg_match( '#<h[1-6][^>]*>\s*RSVP\s*</h[1-6]>#', $html ), 'kind label is not a heading' );
+			cr_rsvp_single_contains( '<span class="cr-rsvp-ticket__perf" aria-hidden="true"></span></aside>', $html, 'perforation rail is decorative' );
+
+			$GLOBALS['cr_rsvp_single_kind_label'] = 'Répondez';
+			cr_rsvp_single_post( 112, 'Filtered kind label' );
+			cr_rsvp_single_contains( '<span class="pk-kindlabel cr-rsvp-ticket__kind">Répondez</span>', cr_rsvp_single_render( 112 ), 'kind label goes through pkiw_kind_label' );
+			unset( $GLOBALS['cr_rsvp_single_kind_label'] );
 		}
 	);
 
