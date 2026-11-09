@@ -171,6 +171,24 @@ namespace {
 		}
 	);
 
+	cr_rsvp_stream_check(
+		'Stream event names use the ink underline treatment',
+		static function (): void {
+			$css = (string) file_get_contents( CR_RSVP_THEME_DIR . '/assets/css/cr-rsvp.css' );
+			cr_rsvp_stream_assert( str_contains( $css, ".cr-rsvp-stub__name a {\n\tcolor: inherit;\n\ttext-decoration: underline;\n\ttext-decoration-thickness: 1px;\n\ttext-underline-offset: 0.2em;" ), 'event name is missing the ink underline treatment' );
+		}
+	);
+
+	cr_rsvp_stream_check(
+		'Dark Stream stubs draw a two-pixel ivory torn edge',
+		static function (): void {
+			$css = (string) file_get_contents( CR_RSVP_THEME_DIR . '/assets/css/cr-rsvp.css' );
+			cr_rsvp_stream_assert( str_contains( $css, ".cr-rsvp-stub__tear::before {\n\tcontent: \"\";\n\tposition: absolute;\n\tinset: 0;\n\tbackground-color: var(--cr-rsvp-paper, var(--cr-periwinkle));\n\tclip-path: inherit;\n\ttransform: translateY(-2px);" ), 'tear is missing its two-pixel paper inset' );
+			cr_rsvp_stream_assert( (bool) preg_match( '/:root:not\(\[data-theme="light"\]\) \.pk-card\.pk-card--stream\.cr-rsvp-stub \{[^}]*--cr-rsvp-tear-edge: var\(--cr-printer-ivory\);/s', $css ), 'system dark Stream stub is missing its ivory torn edge' );
+			cr_rsvp_stream_assert( (bool) preg_match( '/:root\[data-theme="dark"\] \.pk-card\.pk-card--stream\.cr-rsvp-stub \{[^}]*--cr-rsvp-tear-edge: var\(--cr-printer-ivory\);/s', $css ), 'manual dark Stream stub is missing its ivory torn edge' );
+		}
+	);
+
 	if ( $GLOBALS['cr_rsvp_stream_failures'] ) {
 		foreach ( $GLOBALS['cr_rsvp_stream_failures'] as $failure ) { fwrite( STDERR, '  ' . $failure . "\n" ); }
 		exit( 1 );
