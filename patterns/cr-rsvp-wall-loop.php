@@ -13,8 +13,8 @@
 declare( strict_types = 1 );
 ?>
 <?php if ( class_exists( 'WP_Block_Type_Registry' ) && WP_Block_Type_Registry::get_instance()->is_registered( 'post-kinds-indieweb/rsvp-entry' ) ) : ?>
-<!-- wp:query {"queryId":251,"query":{"perPage":9,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"className":"cr-rsvp-wall__query"} -->
-<div class="wp-block-query cr-rsvp-wall__query">
+<!-- wp:query {"queryId":251,"query":{"perPage":9,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"align":"wide","className":"cr-rsvp-wall__query"} -->
+<div class="wp-block-query alignwide cr-rsvp-wall__query">
 	<!-- wp:group {"metadata":{"name":"RSVP wall"},"align":"wide","className":"cr-rsvp-wall","layout":{"type":"default"}} -->
 	<div class="wp-block-group alignwide cr-rsvp-wall">
 		<!-- wp:post-template {"className":"cr-rsvp-wall__entries"} -->

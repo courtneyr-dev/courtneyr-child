@@ -117,6 +117,9 @@ function stub_card( string $html, array $block, $instance ): string { // phpcs:i
 	if ( '' === $name ) {
 		$name = trim( (string) get_the_title( $post ) );
 	}
+	if ( '' === $name && function_exists( '\\PKIW\\untitled_name' ) ) {
+		$name = (string) \PKIW\untitled_name( $post, false );
+	}
 
 	$out  = '<article class="pk-card pk-card--stream cr-rsvp-stub cr-rsvp-tilt-' . $tilt . ' h-entry" style="--cr-rsvp-paper:var(--cr-' . esc_attr( $paper ) . ')">';
 	$out .= '<p class="cr-rsvp-stub__kind">' . esc_html( kind_label() ) . '</p>';

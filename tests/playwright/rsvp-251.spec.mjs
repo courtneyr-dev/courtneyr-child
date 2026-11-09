@@ -58,8 +58,13 @@ async function focusPaint( locator ) {
 	await locator.focus();
 	return locator.evaluate( async ( node ) => {
 		await Promise.all( node.getAnimations().map( ( animation ) => animation.finished ) );
-		const style = getComputedStyle( node );
-		return { color: style.outlineColor, width: style.outlineWidth, shadow: style.boxShadow };
+		const style = getComputedStyle( node, '::after' );
+		return {
+			color: style.outlineColor,
+			width: style.outlineWidth,
+			shadow: style.boxShadow,
+			inset: [ style.top, style.right, style.bottom, style.left ],
+		};
 	} );
 }
 
@@ -133,6 +138,7 @@ test.describe( 'RSVP archive', () => {
 		expect( focus.width ).toBe( '3px' );
 		expect( focus.color ).toBe( YELLOW );
 		expect( focus.shadow ).toContain( INK );
+			expect( focus.inset ).toEqual( [ '0px', '0px', '0px', '0px' ] );
 		await expect( page.locator( '.wp-block-query-pagination .current' ) ).toHaveCSS( 'background-color', INK );
 		await expect( page.locator( '.wp-block-query-pagination .current' ) ).toHaveCSS( 'color', IVORY );
 	} );
@@ -184,13 +190,22 @@ test.describe( 'RSVP Stream', () => {
 		await expect( stubs ).toHaveCount( 3 );
 		for ( const stub of await stubs.all() ) {
 			await expect( stub.locator( 'a[href]' ) ).toHaveCount( 1 );
-			await expect( stub.locator( '.cr-rsvp-stub__kind, .cr-rsvp-stub__name, .cr-rsvp-stub__day, .cr-rsvp-stub__status, .cr-stamp-mark[aria-hidden="true"]' ) ).not.toHaveCount( 0 );
+			await expect( stub.locator( '.cr-rsvp-stub__kind, .cr-rsvp-stub__name, .cr-rsvp-stub__day, .cr-rsvp-stub__status, .cr-stamp-mark svg[aria-hidden="true"]' ) ).not.toHaveCount( 0 );
 			const status = ( await stub.locator( '.p-rsvp' ).innerText() ).toUpperCase();
 			await expect( stub.locator( '.cr-stamp__big' ) ).toHaveText( status );
 			expect( await stub.innerHTML() ).not.toContain( 'p-location' );
+			const paint = await stub.evaluate( ( node ) => {
+				const style = getComputedStyle( node );
+				return { display: style.display, background: style.backgroundColor, padding: style.paddingTop };
+			} );
+			expect( paint.display ).toBe( 'grid' );
+			expect( paint.background ).not.toBe( 'rgba(0, 0, 0, 0)' );
+			expect( paint.padding ).not.toBe( '0px' );
 		}
 		await expect( stubs.filter( { hasText: 'Attending Remotely' } ).locator( '.cr-stamp__big[textLength]' ) ).toHaveCount( 1 );
 		await assertNoOverflow( page, '320px Stream' );
+		await page.emulateMedia( { colorScheme: 'dark' } );
+		expect( await axeContrast( page ) ).toEqual( [] );
 	} );
 } );
 

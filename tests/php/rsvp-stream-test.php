@@ -13,6 +13,8 @@ namespace {
 	$GLOBALS['cr_rsvp_stream_on']       = true;
 	$GLOBALS['cr_rsvp_stream_facts']    = array();
 	$GLOBALS['cr_rsvp_stream_posts']    = array();
+	$GLOBALS['cr_rsvp_stream_terms']    = array();
+	$GLOBALS['cr_rsvp_stream_protected'] = array();
 	$GLOBALS['cr_rsvp_stream_failures'] = array();
 
 	class WP_Post { public int $ID; public string $post_title; public function __construct( int $id ) { $this->ID = $id; $this->post_title = 'Event ' . $id; } }
@@ -21,8 +23,14 @@ namespace {
 	function add_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ): void {}
 	function get_the_ID(): int { return 0; }
 	function get_post( $post = null ): ?WP_Post { return $post instanceof WP_Post ? $post : ( $GLOBALS['cr_rsvp_stream_posts'][ (int) $post ] ?? null ); }
-	function has_term( $term, $taxonomy, $post = null ): bool { return 'rsvp' === $term && 'kind' === $taxonomy; }
-	function post_password_required( $post = null ): bool { return false; }
+	function has_term( $term, $taxonomy, $post = null ): bool {
+		$post = get_post( $post );
+		return $post instanceof WP_Post && 'kind' === $taxonomy && in_array( $term, $GLOBALS['cr_rsvp_stream_terms'][ $post->ID ] ?? array(), true );
+	}
+	function post_password_required( $post = null ): bool {
+		$post = get_post( $post );
+		return $post instanceof WP_Post && ! empty( $GLOBALS['cr_rsvp_stream_protected'][ $post->ID ] );
+	}
 	function get_term_by( $field, $value, $taxonomy ): WP_Term { return new WP_Term(); }
 	function get_the_title( $post = null ): string { $post = get_post( $post ); return $post instanceof WP_Post ? $post->post_title : ''; }
 	function get_permalink( $post = null ): string { $post = get_post( $post ); return 'https://example.test/rsvp/' . ( $post instanceof WP_Post ? $post->ID : 0 ) . '/'; }
@@ -32,6 +40,8 @@ namespace {
 	function __( $text, $domain = null ): string { return (string) $text; }
 	function cr_rsvp_stream_post( int $id, string $status, string $label ): void {
 		$GLOBALS['cr_rsvp_stream_posts'][ $id ] = new WP_Post( $id );
+		$GLOBALS['cr_rsvp_stream_terms'][ $id ] = array( 'rsvp' );
+		$GLOBALS['cr_rsvp_stream_protected'][ $id ] = false;
 		$GLOBALS['cr_rsvp_stream_facts'][ $id ] = array(
 			'name' => 'Event ' . $id, 'name_is_title' => true, 'status' => $status, 'status_label' => $label,
 			'start_day' => '2026-11-12', 'day_display' => 'November 12, 2026', 'date_iso' => '2026-11-01T00:00:00+00:00',
@@ -47,6 +57,19 @@ namespace {
 		try { $test(); } catch ( \Throwable $error ) { $GLOBALS['cr_rsvp_stream_failures'][] = $name . ': ' . $error->getMessage(); }
 		echo ( $before === count( $GLOBALS['cr_rsvp_stream_failures'] ) ? 'ok   ' : 'FAIL ' ) . $name . "\n";
 	}
+
+	$core = getenv( 'CR_WP_CORE' ) ?: (string) getenv( 'HOME' ) . '/.wp-tests/wordpress';
+	$api  = $core . '/wp-includes/html-api';
+	if ( ! is_dir( $api ) ) {
+		fwrite( STDERR, "FAIL: set CR_WP_CORE to a WordPress checkout\n" );
+		exit( 1 );
+	}
+	require_once $core . '/wp-includes/compat.php';
+	require_once $core . '/wp-includes/utf8.php';
+	require_once $core . '/wp-includes/kses.php';
+	foreach ( array( 'class-wp-html-span.php', 'class-wp-html-text-replacement.php', 'class-wp-html-decoder.php', 'class-wp-html-attribute-token.php', 'class-wp-html-tag-processor.php' ) as $file ) {
+		require_once $api . '/' . $file;
+	}
 }
 
 namespace Courtneyr\Child\HomeSections {
@@ -60,6 +83,7 @@ namespace Courtneyr\Child\Rsvp {
 namespace PKIW {
 	function kind_facts( int $post_id ): array { return $GLOBALS['cr_rsvp_stream_facts'][ $post_id ] ?? array(); }
 	function entry_author_html( \WP_Post $post ): string { return '<span class="p-author h-card">Author</span>'; }
+	function untitled_name( \WP_Post $post, bool $with_kind = true ): string { return 'Untitled RSVP, November 1, 2026'; }
 }
 
 namespace {
@@ -99,6 +123,30 @@ namespace {
 			$GLOBALS['cr_rsvp_stream_on'] = true;
 			$stub = '<article class="cr-rsvp-stub">Already</article>';
 			cr_rsvp_stream_assert( $stub === cr_rsvp_stream_render( 220, $stub ), 'stub is not nested' );
+		}
+	);
+
+	cr_rsvp_stream_check(
+		'heading level, kind, password and untitled paths use the incoming card safely',
+		static function (): void {
+			cr_rsvp_stream_post( 221, 'yes', 'Going' );
+			$heading = cr_rsvp_stream_render( 221, '<article class="pk-card"><h4 class="pk-title">Old</h4></article>' );
+			cr_rsvp_stream_assert( str_contains( $heading, '<h4 class="cr-rsvp-stub__name">' ), 'incoming h4 stays h4' );
+
+			cr_rsvp_stream_post( 222, 'yes', 'Going' );
+			$GLOBALS['cr_rsvp_stream_terms'][222] = array( 'note' );
+			$card = '<article class="pk-card"><h3 class="pk-title">Note</h3></article>';
+			cr_rsvp_stream_assert( $card === cr_rsvp_stream_render( 222, $card ), 'non-RSVP card passes through' );
+
+			cr_rsvp_stream_post( 223, 'yes', 'Going' );
+			$GLOBALS['cr_rsvp_stream_protected'][223] = true;
+			cr_rsvp_stream_assert( $card === cr_rsvp_stream_render( 223, $card ), 'password-protected card passes through' );
+
+			cr_rsvp_stream_post( 224, 'yes', 'Going' );
+			$GLOBALS['cr_rsvp_stream_posts'][224]->post_title = '';
+			$GLOBALS['cr_rsvp_stream_facts'][224]['name'] = '';
+			$untitled = cr_rsvp_stream_render( 224 );
+			cr_rsvp_stream_assert( str_contains( $untitled, '>Untitled RSVP, November 1, 2026</a>' ), 'untitled fallback gives the link an accessible name' );
 		}
 	);
 

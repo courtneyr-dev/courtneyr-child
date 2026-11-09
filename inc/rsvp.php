@@ -13,12 +13,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const KIND         = 'rsvp';
-const ENTRY_BLOCK  = 'post-kinds-indieweb/rsvp-entry';
-const ENTRY_STYLE  = 'cr-rsvp-wall';
-const ENTRY_CLASS  = 'is-style-cr-rsvp-wall';
-const STYLE_HANDLE = 'courtneyr-rsvp';
-const PAPERS       = array( 'periwinkle', 'sky-blue', 'light-orange', 'blue-green', 'ut-orange', 'light-gray' );
+const KIND           = 'rsvp';
+const ENTRY_BLOCK    = 'post-kinds-indieweb/rsvp-entry';
+const ENTRY_STYLE    = 'cr-rsvp-wall';
+const ENTRY_CLASS    = 'is-style-cr-rsvp-wall';
+const STYLE_HANDLE   = 'courtneyr-rsvp';
+const PAPERS         = array( 'periwinkle', 'sky-blue', 'light-orange', 'blue-green', 'ut-orange', 'light-gray' );
+const STICKER_PAPERS = array(
+	'no'         => 'periwinkle',
+	'maybe'      => 'periwinkle',
+	'interested' => 'blue-green',
+	'remote'     => 'ut-orange',
+);
 
 /** Whether the current request is the RSVP archive. */
 function is_rsvp_archive(): bool {
@@ -59,6 +65,20 @@ function has_class_name( string $class_name, string $wanted ): bool {
 	return in_array( $wanted, $tokens, true );
 }
 
+/** Register the navigation dependency when the nav module has not done so. */
+function register_nav_dependency(): void {
+	if ( function_exists( 'wp_style_is' ) && wp_style_is( 'courtneyr-nav', 'registered' ) ) {
+		return;
+	}
+	if ( ! defined( 'COURTNEYR_CHILD_URI' ) || ! defined( 'COURTNEYR_CHILD_VERSION' ) || ! defined( 'COURTNEYR_CHILD_DIR' ) || ! function_exists( 'wp_register_style' ) ) {
+		return;
+	}
+	wp_register_style( 'courtneyr-nav', COURTNEYR_CHILD_URI . '/assets/css/cr-nav.css', array(), COURTNEYR_CHILD_VERSION );
+	if ( function_exists( 'wp_style_add_data' ) ) {
+		wp_style_add_data( 'courtneyr-nav', 'path', COURTNEYR_CHILD_DIR . '/assets/css/cr-nav.css' );
+	}
+}
+
 /** Register the archive entry style and attach its editor stylesheet. */
 function register_block_styles(): void {
 	if ( ! class_exists( '\\WP_Block_Type_Registry' ) || ! \WP_Block_Type_Registry::get_instance()->is_registered( ENTRY_BLOCK ) ) {
@@ -73,12 +93,13 @@ function register_block_styles(): void {
 		)
 	);
 
+	register_nav_dependency();
 	wp_enqueue_block_style(
 		ENTRY_BLOCK,
 		array(
 			'handle' => STYLE_HANDLE,
 			'src'    => COURTNEYR_CHILD_URI . '/assets/css/cr-rsvp.css',
-			'deps'   => array( 'courtneyr-paper', 'courtneyr-ticket', 'courtneyr-nav' ),
+			'deps'   => array( 'courtneyr-paper', 'courtneyr-nav' ),
 			'ver'    => COURTNEYR_CHILD_VERSION,
 		)
 	);
@@ -88,16 +109,23 @@ add_action( 'init', __NAMESPACE__ . '\\register_block_styles', 20 );
 /**
  * Return a stable palette paper for one RSVP.
  *
- * @param int $post_id Post ID.
+ * @param int    $post_id Post ID.
+ * @param string $status  RSVP status whose sticker must stay distinct.
  */
-function paper( int $post_id ): string {
+function paper( int $post_id, string $status = '' ): string {
+	$paper = PAPERS[0];
 	if ( function_exists( '\\Courtneyr\\Child\\Stamps\\seeded_paper' ) ) {
-		$paper = \Courtneyr\Child\Stamps\seeded_paper( $post_id, PAPERS );
-		if ( in_array( $paper, PAPERS, true ) ) {
-			return $paper;
+		$seeded = \Courtneyr\Child\Stamps\seeded_paper( $post_id, PAPERS );
+		if ( in_array( $seeded, PAPERS, true ) ) {
+			$paper = $seeded;
 		}
 	}
-	return PAPERS[0];
+	$sticker_paper = STICKER_PAPERS[ $status ] ?? '';
+	if ( $paper !== $sticker_paper ) {
+		return $paper;
+	}
+	$index = array_search( $paper, PAPERS, true );
+	return PAPERS[ ( (int) $index + 1 ) % count( PAPERS ) ];
 }
 
 /**
@@ -141,7 +169,8 @@ function entry_paint( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
-	$paper = paper( $post_id );
+	$status = (string) $tags->get_attribute( 'data-pkiw-rsvp-status' );
+	$paper  = $tags->has_class( 'pkiw-rsvp-entry--protected' ) ? 'light-gray' : paper( $post_id, $status );
 	$tags->set_attribute( 'style', '--cr-rsvp-paper:var(--cr-' . $paper . ')' );
 	if ( $tags->has_class( 'pkiw-rsvp-entry--upcoming' ) && ! $tags->has_class( 'pkiw-rsvp-entry--protected' ) ) {
 		$tilt = poster_tilt( $post_id, $previous_tilt );
@@ -157,10 +186,11 @@ function enqueue(): void {
 	if ( ! is_admin() && ! is_rsvp_archive() && ! is_rsvp_single() && ! is_stream_surface() ) {
 		return;
 	}
+	register_nav_dependency();
 	wp_enqueue_style(
 		STYLE_HANDLE,
 		COURTNEYR_CHILD_URI . '/assets/css/cr-rsvp.css',
-		array( 'courtneyr-paper', 'courtneyr-ticket', 'courtneyr-nav' ),
+		array( 'courtneyr-paper', 'courtneyr-nav' ),
 		COURTNEYR_CHILD_VERSION
 	);
 }
