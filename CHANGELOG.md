@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.163
+
+- X posts embedded in a post show as live X cards for readers who accept marketing cookies, the way they look in the editor. The site's security policy had blocked X's embed script, so every reader saw the plain quote. The X hosts are added only on posts that hold an X embed; readers who decline cookies still get the quote.
+
 ## 0.7.162
 
 - In dark mode, the table of contents on Merge Conflicts posts keeps its light-orange card. Dark mode had turned the card cerulean behind violet links (2.45:1, below the 4.5:1 WCAG 1.4.3 floor); violet on light orange is 12.6:1. Light mode is unchanged.

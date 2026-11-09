@@ -91,6 +91,32 @@ const CSP_ENFORCED = array(
 );
 
 /**
+ * Hosts X's embed script loads from and frames (measured 2026-11-09: widgets.js
+ * from platform.x.com, then scripts and the card iframe from platform.twitter.com).
+ */
+const X_EMBED_HOSTS = 'https://platform.x.com https://platform.twitter.com';
+
+/**
+ * Whether a post's content holds an X (Twitter) post embed.
+ *
+ * Checks the saved block markup for the Embed block's X provider class or an
+ * embed URL on x.com or twitter.com, so posts without X embeds keep the
+ * stricter policy.
+ *
+ * @param mixed $post Queried object.
+ * @return bool True when the content embeds an X post.
+ */
+function has_x_embed( $post ): bool {
+	if ( ! $post instanceof \WP_Post ) {
+		return false;
+	}
+	$content = (string) $post->post_content;
+	return false !== strpos( $content, 'wp-block-embed-x' )
+		|| false !== strpos( $content, 'wp-block-embed-twitter' )
+		|| 1 === preg_match( '#<!-- wp:embed \{"url":"https://(?:www\.)?(?:x|twitter)\.com/#', $content );
+}
+
+/**
  * Build a CSP header value from a directive map.
  *
  * @param array $directives Directive name => source list ('' for valueless).
@@ -165,6 +191,16 @@ function send_frontend_headers(): void {
 		// the stories' own video is hosted on videos.files.wordpress.com.
 		$csp['connect-src'] .= ' https://cdn.ampproject.org https://*.cdn.ampproject.org';
 		$csp['media-src']   .= ' https://*.cdn.ampproject.org https://videos.files.wordpress.com';
+	}
+
+	// X posts embedded with the Embed block render as live cards only when
+	// X's widgets.js runs; without these hosts the browser blocks it and
+	// readers see the bare blockquote fallback. Complianz still holds the
+	// script until a visitor consents to marketing cookies. Scoped to
+	// singular views whose content holds an X embed, like Web Stories above.
+	if ( is_singular() && has_x_embed( get_queried_object() ) ) {
+		$csp['script-src'] .= ' ' . X_EMBED_HOSTS;
+		$csp['frame-src']  .= ' ' . X_EMBED_HOSTS;
 	}
 
 	// /embed/ responses exist to be iframed by other sites: no framing
