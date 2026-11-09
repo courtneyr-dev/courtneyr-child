@@ -533,9 +533,9 @@
 	font-size: 0;
 }
 
+/* The punched position is a hole through the stub to the page behind it. */
 .cr-rsvp-ticket__punch.is-punched {
-	background-color: var(--cr-russian-violet);
-	box-shadow: inset 0 0 0 3px var(--cr-light-orange);
+	background-color: var(--cr-surface);
 }
 
 .cr-rsvp-ticket__status {
