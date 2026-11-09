@@ -111,9 +111,20 @@ function has_x_embed( $post ): bool {
 		return false;
 	}
 	$content = (string) $post->post_content;
-	return false !== strpos( $content, 'wp-block-embed-x' )
-		|| false !== strpos( $content, 'wp-block-embed-twitter' )
-		|| 1 === preg_match( '#<!-- wp:embed \{"url":"https://(?:www\.)?(?:x|twitter)\.com/#', $content );
+	$needles = array(
+		'wp-block-embed-x',
+		'wp-block-embed-twitter',
+		'<!-- wp:embed {"url":"https://x.com/',
+		'<!-- wp:embed {"url":"https://www.x.com/',
+		'<!-- wp:embed {"url":"https://twitter.com/',
+		'<!-- wp:embed {"url":"https://www.twitter.com/',
+	);
+	foreach ( $needles as $needle ) {
+		if ( false !== strpos( $content, $needle ) ) {
+			return true;
+		}
+	}
+	return false;
 }
 
 /**
