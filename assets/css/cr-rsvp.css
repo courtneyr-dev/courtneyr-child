@@ -611,6 +611,7 @@
 
 .pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__name {
 	margin: 0;
+	color: inherit;
 	font-family: var(--cr-font-accent);
 	font-size: var(--cr-text-xl);
 	font-style: normal;
