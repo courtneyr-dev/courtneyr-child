@@ -1,0 +1,1047 @@
+/**
+ * RSVP archive wall, event ticket and Stream stub.
+ */
+
+/* RSVP archive identity: badge, flank and cutout stay one left lockup. */
+
+.cr-archive--rsvp .cr-archive__header {
+	position: relative;
+	display: grid;
+	max-inline-size: var(--wp--style--global--wide-size, 1100px);
+	padding-block-start: 0;
+	text-align: start;
+}
+
+/* Badge and h1 share the first grid cell, so the badge centers on the tile row. */
+.cr-archive--rsvp .cr-archive-identity--kind {
+	position: static;
+	z-index: 1;
+	grid-area: 1 / 1;
+	align-self: center;
+	justify-self: start;
+	display: block;
+	block-size: auto;
+	margin: 0 !important;
+}
+
+.cr-archive--rsvp .cr-archive-identity--kind .cr-archive-identity__glyph {
+	position: static;
+	inline-size: clamp(3rem, 5vw, 4.25rem);
+	block-size: clamp(3rem, 5vw, 4.25rem);
+}
+
+/* Core's constrained layout centers header children with auto !important
+   margins; the cutout h1 is an inline-size container with no content width,
+   so auto margins collapse it to 0px and stack one tile per line. */
+.cr-archive--rsvp .cr-archive__title.cr-cutout {
+	--cr-cutout-min: 2.75rem;
+	--cr-cutout-max: 5.75rem;
+	grid-area: 1 / 1;
+	justify-self: stretch;
+	max-inline-size: none;
+	margin-block: 0;
+	margin-inline: clamp(6.5rem, 13vw, 8.5rem) 0 !important;
+}
+
+.cr-archive--rsvp .cr-archive__title.cr-flank::before {
+	content: "✺" / "" !important;
+	display: block !important;
+	inset-block-start: 50%;
+	inset-inline-start: -1em;
+	font-size: 0.85em;
+	transform: translateY(-50%) rotate(-15deg);
+}
+
+.cr-archive--rsvp .cr-archive__title.cr-flank::after {
+	content: none !important;
+	display: none !important;
+}
+
+.cr-archive--rsvp .cr-archive__description {
+	max-inline-size: var(--cr-measure, 720px);
+	margin-block: 0;
+	margin-inline: 0 !important;
+	color: var(--cr-cerulean);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-bold);
+}
+
+.cr-archive--rsvp .cr-archive__header hr.is-style-cr-marker-bar-short {
+	inline-size: 8rem !important;
+	margin-inline: 0 !important;
+}
+
+/* Browse all spans the wide column: core's constrained layout would hold the
+   heading and columns to the content measure. */
+.cr-archive--rsvp .cr-browse-all > .cr-browse-all__title,
+.cr-archive--rsvp .cr-browse-all > .cr-browse-all__columns {
+	inline-size: 100%;
+	max-inline-size: none;
+	margin-inline: 0 !important;
+}
+
+/* Archive structure. */
+
+.cr-archive--rsvp .cr-rsvp-wall__query {
+	inline-size: min(100%, var(--wp--style--global--wide-size, 1100px));
+	max-inline-size: var(--wp--style--global--wide-size, 1100px);
+	margin-inline: auto;
+}
+
+.cr-rsvp-wall {
+	inline-size: 100%;
+	max-inline-size: none;
+	margin-block: 0 var(--cr-space-xl);
+}
+
+/* tokens.css caps .alignwide at 90% and loads later; the wall shares the header's edge. */
+.cr-archive--rsvp .cr-rsvp-wall.alignwide {
+	max-inline-size: none;
+}
+
+.cr-rsvp-wall .wp-block-post::after {
+	content: none !important;
+}
+
+.cr-rsvp-wall .pkiw-rsvp--sectioned,
+.cr-rsvp-wall .pkiw-rsvp-section,
+.cr-rsvp-wall ul.pkiw-rsvp-section__items {
+	max-inline-size: none;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-section {
+	margin-block: 0 var(--cr-space-2xl);
+}
+
+.cr-rsvp-wall .pkiw-rsvp-section + .pkiw-rsvp-section {
+	padding-block-start: var(--cr-space-xl);
+	border-block-start: 2px solid var(--cr-rule);
+}
+
+.cr-rsvp-wall .pkiw-rsvp-section__heading {
+	margin-block: 0 var(--cr-space-lg);
+	color: var(--cr-ink);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-3xl);
+	font-style: normal;
+	line-height: 1.1;
+	transform: none;
+}
+
+.cr-rsvp-wall ul.pkiw-rsvp-section__items {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	align-items: start;
+	gap: var(--cr-space-xl);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-section[data-pkiw-group="past"] ul.pkiw-rsvp-section__items {
+	align-items: stretch;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-section__items > li.wp-block-post {
+	min-inline-size: 0;
+	margin: 0;
+	padding: 0;
+	transform: none;
+}
+
+/* Shared archive entry. */
+
+.cr-rsvp-wall .pkiw-rsvp-entry {
+	position: relative;
+	isolation: isolate;
+	display: grid;
+	box-sizing: border-box;
+	align-content: center;
+	min-inline-size: 0;
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-body);
+	text-align: center;
+	transform: none;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry__name {
+	z-index: 2;
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: clamp(var(--cr-text-md), 1.7vw, var(--cr-text-2xl));
+	font-style: normal;
+	font-weight: var(--cr-weight-extrabold);
+	line-height: 1.12;
+	overflow-wrap: anywhere;
+	transform: none;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry__name a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry__name a::after {
+	content: "";
+	position: absolute;
+	z-index: 5;
+	inset: 0;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry__name a:focus-visible {
+	outline: 0;
+	box-shadow: none;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry__name a:focus-visible::after {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry__day {
+	position: relative;
+	z-index: 2;
+	display: block;
+	margin-block-start: var(--cr-space-md);
+	padding-block-start: var(--cr-space-sm);
+	border-block-start: 2px solid currentcolor;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: 0.06em;
+	line-height: 1.3;
+	text-transform: uppercase;
+	transform: none;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry__status {
+	position: relative;
+	z-index: 2;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-block-size: 2.75rem;
+	margin: var(--cr-space-md) auto 0;
+	padding: var(--cr-space-xs) var(--cr-space-lg);
+	border: 1px solid var(--cr-russian-violet);
+	background-color: var(--cr-selective-yellow);
+	clip-path: polygon(0 0, 100% 0, 100% 34%, 94% 50%, 100% 66%, 100% 100%, 0 100%, 0 66%, 6% 50%, 0 34%);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.1;
+	text-transform: uppercase;
+	transform: none;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry--upcoming .pkiw-rsvp-entry__status {
+	align-self: center;
+	justify-self: center;
+	margin: 0;
+	padding: var(--cr-space-sm) var(--cr-space-xl);
+	font-size: var(--cr-text-lg);
+	text-align: center;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry[data-pkiw-rsvp-status="no"] .pkiw-rsvp-entry__status,
+.cr-rsvp-wall .pkiw-rsvp-entry[data-pkiw-rsvp-status="maybe"] .pkiw-rsvp-entry__status {
+	background-color: var(--cr-periwinkle);
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry[data-pkiw-rsvp-status="interested"] .pkiw-rsvp-entry__status {
+	background-color: var(--cr-blue-green);
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry[data-pkiw-rsvp-status="remote"] .pkiw-rsvp-entry__status {
+	background-color: var(--cr-ut-orange);
+}
+
+/* Upcoming poster: only the paper rotates; every text line stays upright. */
+
+/* Name, date and sticker spread over the poster: name on top, the ruled date
+   under it, the sticker in the lower third. */
+.cr-rsvp-wall .pkiw-rsvp-entry--upcoming {
+	grid-template-rows: auto auto minmax(0, 1fr);
+	row-gap: var(--cr-space-lg);
+	align-content: stretch;
+	align-items: start;
+	min-block-size: clamp(16rem, 28vw, 24rem);
+	padding: clamp(2.5rem, 4vw, 3.5rem) clamp(var(--cr-space-lg), 2.5vw, var(--cr-space-xl)) var(--cr-space-xl);
+	text-align: start;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry--upcoming .pkiw-rsvp-entry__name {
+	font-size: clamp(var(--cr-text-2xl), 3.2vw, var(--cr-text-4xl));
+	overflow-wrap: normal;
+	hyphens: manual;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry--upcoming .pkiw-rsvp-entry__day {
+	margin-block-start: 0;
+	padding-block-start: var(--cr-space-md);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry--upcoming::before {
+	content: "";
+	position: absolute;
+	z-index: 1;
+	inset-block-start: -0.65rem;
+	inset-inline-start: 50%;
+	inline-size: 5rem;
+	block-size: 1.7rem;
+	background-color: var(--cr-tape);
+	clip-path: polygon(2% 8%, 98% 0, 100% 88%, 4% 100%);
+	transform: translateX(-50%);
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry__poster {
+	position: absolute;
+	z-index: -1;
+	inset: 0;
+	margin: 0;
+	border: 2px solid var(--cr-russian-violet);
+	background-color: var(--cr-rsvp-paper, var(--cr-periwinkle));
+	box-shadow: var(--cr-shadow-hard-2);
+	overflow: hidden;
+}
+
+.cr-rsvp-wall .cr-rsvp-tilt-0 .pkiw-rsvp-entry__poster {
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-rsvp-wall .cr-rsvp-tilt-1 .pkiw-rsvp-entry__poster {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-rsvp-wall .cr-rsvp-tilt-2 .pkiw-rsvp-entry__poster {
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-rsvp-wall .cr-rsvp-tilt-3 .pkiw-rsvp-entry__poster {
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry__image {
+	display: none;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry__poster-name {
+	display: none;
+}
+
+/* Past portrait ticket stubs. */
+
+.cr-rsvp-wall .pkiw-rsvp-entry--past {
+	block-size: 100%;
+	min-block-size: 13rem;
+	padding: var(--cr-space-lg) var(--cr-space-md);
+	border: 2px solid var(--cr-russian-violet);
+	background-color: var(--cr-rsvp-paper, var(--cr-light-gray));
+	box-shadow: var(--cr-shadow-hard-sm);
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry--past .pkiw-rsvp-entry__name {
+	font-size: clamp(var(--cr-text-sm), 1.3vw, var(--cr-text-lg));
+	overflow-wrap: normal;
+	hyphens: manual;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry--past::before,
+.cr-rsvp-wall .pkiw-rsvp-entry--past::after {
+	content: "";
+	position: absolute;
+	z-index: 3;
+	inset-block-start: 50%;
+	inline-size: 1.15rem;
+	block-size: 1.15rem;
+	border-radius: 50%;
+	background-color: var(--cr-surface);
+	transform: translateY(-50%);
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry--past::before {
+	inset-inline-start: -0.7rem;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry--past::after {
+	inset-inline-end: -0.7rem;
+}
+
+.cr-rsvp-wall .pkiw-rsvp-entry--protected {
+	min-block-size: 7rem;
+	background-color: var(--cr-light-gray);
+}
+
+/* Single event ticket. */
+
+.cr-rsvp-ticket {
+	display: grid;
+	gap: var(--cr-space-lg);
+	box-sizing: border-box;
+	inline-size: min(100%, 64rem);
+	margin-inline: auto;
+	color: var(--cr-ink);
+}
+
+.cr-rsvp-ticket__front {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	border: 2px solid var(--cr-ink);
+	background-color: var(--cr-surface-elevated);
+	box-shadow: var(--cr-shadow-hard-2);
+}
+
+/* Die-cut scallops along the ticket's outer edges: page-colored circles
+   straddle the border, the construction the seam notches and past stubs use. */
+.cr-rsvp-ticket__front::before,
+.cr-rsvp-ticket__front::after,
+.cr-rsvp-ticket__back::before,
+.cr-rsvp-ticket__back::after {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset-block: var(--cr-space-sm);
+	inline-size: 1rem;
+	background-color: var(--cr-surface);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 28'%3E%3Ccircle cx='8' cy='14' r='8'/%3E%3C/svg%3E") center top / 100% 1.75rem round;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 28'%3E%3Ccircle cx='8' cy='14' r='8'/%3E%3C/svg%3E") center top / 100% 1.75rem round;
+	pointer-events: none;
+}
+
+.cr-rsvp-ticket__front::before,
+.cr-rsvp-ticket__back::before {
+	inset-inline-start: calc(-1px - 0.5rem);
+}
+
+.cr-rsvp-ticket__front::after,
+.cr-rsvp-ticket__back::after {
+	inset-inline-end: calc(-1px - 0.5rem);
+}
+
+.cr-rsvp-ticket__event {
+	min-inline-size: 0;
+	padding: clamp(var(--cr-space-lg), 4vw, var(--cr-space-2xl));
+}
+
+.cr-rsvp-ticket__poster {
+	margin: 0 0 var(--cr-space-lg);
+	border: 2px solid var(--cr-ink);
+	background-color: var(--cr-light-gray);
+}
+
+.cr-rsvp-ticket__poster img {
+	display: block;
+	inline-size: 100%;
+	block-size: auto;
+}
+
+.cr-rsvp-ticket__event-heading {
+	margin-block-end: var(--cr-space-lg);
+	font-family: var(--cr-font-accent);
+	font-size: clamp(var(--cr-text-xl), 4vw, var(--cr-text-3xl));
+	font-weight: var(--cr-weight-extrabold);
+	line-height: 1.1;
+	overflow-wrap: anywhere;
+}
+
+.cr-rsvp-ticket__event-name {
+	display: block;
+}
+
+.cr-rsvp-ticket__event-link {
+	display: inline-flex;
+	align-items: center;
+	min-block-size: 2.75rem;
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	border: 1.5px solid var(--cr-ink);
+	background-color: var(--cr-tape);
+	box-shadow: 2px 2px 0 var(--cr-selective-yellow);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.2;
+	text-decoration: none;
+}
+
+.cr-rsvp-ticket__event-link:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-rsvp-ticket__facts {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+	gap: var(--cr-space-md);
+	margin: 0;
+	padding-block: var(--cr-space-md);
+	border-block: 1px solid var(--cr-rule);
+}
+
+.cr-rsvp-ticket__fact {
+	min-inline-size: 0;
+}
+
+.cr-rsvp-ticket__fact dt {
+	margin: 0 0 var(--cr-space-2xs);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.cr-rsvp-ticket__fact dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.cr-rsvp-ticket__summary {
+	margin: var(--cr-space-lg) 0 0;
+}
+
+.cr-rsvp-ticket__stub {
+	--cr-rsvp-notch: 1.5rem;
+	position: relative;
+	display: grid;
+	align-content: center;
+	gap: var(--cr-space-lg);
+	min-block-size: 15rem;
+	padding: var(--cr-space-lg);
+	background-color: var(--cr-light-orange);
+	color: var(--cr-russian-violet);
+	text-align: center;
+}
+
+/* Semicircle notches cut the ticket at both ends of the perforation, the
+   same construction as the past stubs. The seam is horizontal here. */
+.cr-rsvp-ticket__stub::before,
+.cr-rsvp-ticket__stub::after {
+	content: "";
+	position: absolute;
+	z-index: 1;
+	inset-block-start: calc(1px - var(--cr-rsvp-notch) / 2);
+	inline-size: var(--cr-rsvp-notch);
+	block-size: var(--cr-rsvp-notch);
+	border-radius: 50%;
+	background-color: var(--cr-surface);
+}
+
+.cr-rsvp-ticket__stub::before {
+	inset-inline-start: calc(-1px - var(--cr-rsvp-notch) / 2);
+}
+
+.cr-rsvp-ticket__stub::after {
+	inset-inline-end: calc(-1px - var(--cr-rsvp-notch) / 2);
+}
+
+/* A rail of round perforations through to the page marks the tear line. */
+.cr-rsvp-ticket__perf {
+	position: absolute;
+	z-index: 1;
+	inset-block-start: -0.3125rem;
+	inset-inline: calc(var(--cr-rsvp-notch) / 2 + var(--cr-space-xs));
+	block-size: 0.625rem;
+	background-color: var(--cr-surface);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 10'%3E%3Ccircle cx='11' cy='5' r='4'/%3E%3C/svg%3E") left center / 1.375rem 100% round;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 10'%3E%3Ccircle cx='11' cy='5' r='4'/%3E%3C/svg%3E") left center / 1.375rem 100% round;
+}
+
+.cr-rsvp-ticket__kind {
+	display: block;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.cr-rsvp-ticket__punches {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: var(--cr-space-xs);
+}
+
+.cr-rsvp-ticket__punch {
+	display: block;
+	inline-size: 1.25rem;
+	block-size: 1.25rem;
+	margin-inline: auto;
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: 50%;
+	color: transparent;
+	font-size: 0;
+}
+
+/* The punched position is a hole through the stub to the page behind it. */
+.cr-rsvp-ticket__punch.is-punched {
+	background-color: var(--cr-surface);
+}
+
+.cr-rsvp-ticket__status {
+	display: block;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	font-weight: var(--cr-weight-extrabold);
+}
+
+.cr-rsvp-ticket__back {
+	position: relative;
+	padding: var(--cr-space-lg);
+	border: 2px solid var(--cr-ink);
+	background-color: var(--cr-surface-elevated);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-rsvp-ticket__note > :first-child {
+	margin-block-start: 0;
+}
+
+.cr-rsvp-ticket__recorded {
+	display: block;
+	margin-block-start: var(--cr-space-md);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+}
+
+/* Stream torn claim stub. The list item owns the unclipped hard shadow. */
+
+.cr-stream-page .wp-block-post-template > li:has(> .pk-card.pk-card--stream.cr-rsvp-stub) {
+	filter: drop-shadow(var(--cr-shadow-hard));
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub {
+	position: relative;
+	isolation: isolate;
+	display: grid;
+	gap: var(--cr-space-sm);
+	box-sizing: border-box;
+	min-inline-size: 0;
+	min-block-size: 16rem;
+	padding: var(--cr-space-lg) var(--cr-space-lg) calc(var(--cr-space-xl) + 0.5rem);
+	background-color: var(--cr-rsvp-paper, var(--cr-periwinkle));
+	clip-path: polygon(0 0, 100% 0, 100% 96%, 94% 100%, 87% 96%, 79% 100%, 71% 95%, 62% 100%, 54% 96%, 45% 100%, 37% 96%, 28% 100%, 20% 95%, 12% 100%, 5% 96%, 0 100%);
+	color: var(--cr-russian-violet);
+	transform: none;
+}
+
+.cr-stream-page .pk-card.pk-card--stream.cr-rsvp-stub.cr-rsvp-tilt-0 {
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-stream-page .pk-card.pk-card--stream.cr-rsvp-stub.cr-rsvp-tilt-1 {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-stream-page .pk-card.pk-card--stream.cr-rsvp-stub.cr-rsvp-tilt-2 {
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-stream-page .pk-card.pk-card--stream.cr-rsvp-stub.cr-rsvp-tilt-3 {
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__kind {
+	margin: 0;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__name {
+	margin: 0;
+	color: inherit;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	font-style: normal;
+	font-weight: var(--cr-weight-extrabold);
+	line-height: 1.15;
+	overflow-wrap: anywhere;
+	transform: none;
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__name a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__name a::after {
+	content: "";
+	position: absolute;
+	z-index: 4;
+	inset: 0;
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__name a:focus-visible {
+	outline: 0;
+	box-shadow: none;
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__name a:focus-visible::after {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: -5px;
+	box-shadow: inset 0 0 0 7px var(--cr-focus-halo);
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__day {
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-bold);
+	text-transform: uppercase;
+}
+
+/* The status row clips just outside its padding, so only the perforation
+   between status and stamp shows: vertical side by side, horizontal once
+   the stamp wraps below. The padding leaves room for the stamp's tilt. */
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__status {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--cr-space-md);
+	margin: calc(-1 * var(--cr-space-2xs)) calc(-1 * var(--cr-space-3xs));
+	padding: var(--cr-space-2xs) var(--cr-space-3xs);
+	overflow: clip;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__status data {
+	flex: 1 1 auto;
+	position: relative;
+	display: flex;
+	align-items: center;
+	align-self: stretch;
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__status data::before,
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__status data::after {
+	content: "";
+	position: absolute;
+	border: 0 dashed var(--cr-russian-violet);
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__status data::before {
+	inset-block-start: calc(100% + var(--cr-space-md) / 2 - 1px);
+	inset-inline: 0;
+	border-block-start-width: 2px;
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__status data::after {
+	inset-block: 0;
+	inset-inline-start: calc(100% + var(--cr-space-md) / 2 - 1px);
+	border-inline-start-width: 2px;
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__status .cr-stamp-mark {
+	flex: 0 1 8.4rem;
+	max-inline-size: 8.4rem;
+}
+
+.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__status .cr-stamp {
+	display: block;
+	inline-size: 100%;
+	block-size: auto;
+}
+
+/* Responsive wall and ticket layouts. */
+
+@media (min-width: 22.5rem) {
+
+	.cr-rsvp-wall .pkiw-rsvp-section[data-pkiw-group="past"] ul.pkiw-rsvp-section__items {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 40rem) {
+
+	.cr-rsvp-wall ul.pkiw-rsvp-section__items {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.cr-rsvp-wall .pkiw-rsvp-section[data-pkiw-group="past"] ul.pkiw-rsvp-section__items {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+}
+
+@media (min-width: 64rem) {
+
+	/* The flank star tracks the badge's 5vw size, so its ink (about 0.7em)
+	   reads at three-quarters of the badge; the h1 start margin makes room. */
+	.cr-archive--rsvp .cr-archive__title.cr-cutout {
+		margin-inline: clamp(8rem, 10.5vw, 9.5rem) 0 !important;
+	}
+
+	.cr-archive--rsvp .cr-archive__title.cr-flank::before {
+		inset-inline-start: -0.9em;
+		font-size: clamp(var(--cr-text-4xl), 5vw, calc(var(--cr-text-4xl) * 1.5));
+	}
+
+	/* Section H2s lead the poster H3s, which grow with 3.2vw to --cr-text-4xl. */
+	.cr-rsvp-wall .pkiw-rsvp-section__heading {
+		font-size: clamp(var(--cr-text-4xl), 3.6vw, var(--cr-text-5xl));
+	}
+
+	.cr-rsvp-wall ul.pkiw-rsvp-section__items {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.cr-rsvp-wall .pkiw-rsvp-section[data-pkiw-group="past"] ul.pkiw-rsvp-section__items {
+		grid-template-columns: repeat(6, minmax(0, 1fr));
+		gap: var(--cr-space-md);
+	}
+
+	/* Landscape admission ticket: break out of the 720px measure, then set
+	   poster, details and punch stub as three columns. */
+	.wp-block-post-content:has(.cr-rsvp-ticket),
+	.wp-block-post-content:has(.cr-rsvp-ticket) > .pkiw-singular-entry {
+		inline-size: 100%;
+		max-inline-size: 64rem;
+	}
+
+	.wp-block-post-content:has(.cr-rsvp-ticket) > .pkiw-singular-entry > .e-content > :not(.cr-rsvp-ticket):not(.alignwide):not(.alignfull) {
+		max-inline-size: var(--wp--style--global--content-size, 720px);
+		margin-inline: auto;
+	}
+
+	.cr-rsvp-ticket__front {
+		grid-template-columns: minmax(0, 1fr) minmax(13rem, 0.34fr);
+	}
+
+	.cr-rsvp-ticket__event:has(> .cr-rsvp-ticket__poster) {
+		display: grid;
+		grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+		grid-auto-rows: min-content;
+		align-content: start;
+		column-gap: var(--cr-space-xl);
+	}
+
+	.cr-rsvp-ticket__event > .cr-rsvp-ticket__poster {
+		grid-row: 1 / span 4;
+		align-self: start;
+		margin: 0;
+	}
+
+	.cr-rsvp-ticket__event > :not(.cr-rsvp-ticket__poster) {
+		grid-column: 2;
+	}
+
+	/* The seam turns vertical, so the rail and notches follow it. */
+	.cr-rsvp-ticket__perf {
+		inset-block: calc(var(--cr-rsvp-notch) / 2 + var(--cr-space-xs));
+		inset-inline: -0.3125rem auto;
+		inline-size: 0.625rem;
+		block-size: auto;
+		-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 22'%3E%3Ccircle cx='5' cy='11' r='4'/%3E%3C/svg%3E") center top / 100% 1.375rem round;
+		mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 22'%3E%3Ccircle cx='5' cy='11' r='4'/%3E%3C/svg%3E") center top / 100% 1.375rem round;
+	}
+
+	.cr-rsvp-ticket__stub::before,
+	.cr-rsvp-ticket__stub::after {
+		inset-inline: calc(1px - var(--cr-rsvp-notch) / 2) auto;
+	}
+
+	.cr-rsvp-ticket__stub::before {
+		inset-block-start: calc(-1px - var(--cr-rsvp-notch) / 2);
+	}
+
+	.cr-rsvp-ticket__stub::after {
+		inset-block: auto calc(-1px - var(--cr-rsvp-notch) / 2);
+	}
+}
+
+@media (max-width: 22.49rem) {
+
+	.cr-rsvp-wall .pkiw-rsvp-section[data-pkiw-group="past"] ul.pkiw-rsvp-section__items {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* Dark mode keeps palette paper with violet ink and yellow hard shadows. */
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-archive--rsvp .cr-archive__description {
+		color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .cr-rsvp-wall .pkiw-rsvp-entry__poster,
+	:root:not([data-theme="light"]) .cr-rsvp-wall .pkiw-rsvp-entry--past {
+		border-color: var(--cr-printer-ivory);
+		box-shadow: var(--cr-shadow-hard-2);
+		color: var(--cr-russian-violet);
+	}
+
+	:root:not([data-theme="light"]) .pk-card.pk-card--stream.cr-rsvp-stub {
+		border: 2px solid var(--cr-printer-ivory);
+		color: var(--cr-russian-violet);
+	}
+
+	:root:not([data-theme="light"]) .cr-rsvp-ticket__front,
+	:root:not([data-theme="light"]) .cr-rsvp-ticket__back {
+		border-color: var(--cr-printer-ivory);
+		background-color: var(--cr-night-elevated);
+		color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .cr-rsvp-ticket__event-link {
+		border-color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .cr-rsvp-ticket__event-link:hover {
+		background-color: var(--cr-night-elevated);
+		color: var(--cr-selective-yellow);
+	}
+
+	:root:not([data-theme="light"]) .cr-rsvp-ticket__stub {
+		border-color: var(--cr-printer-ivory);
+		background-color: var(--cr-night-elevated);
+		color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .cr-rsvp-ticket__punch {
+		border-color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .cr-rsvp-ticket__fact dt,
+	:root:not([data-theme="light"]) .cr-rsvp-ticket__kind {
+		color: var(--cr-periwinkle);
+	}
+
+	:root:not([data-theme="light"]) .pk-card.pk-card--stream.cr-rsvp-stub .cr-stamp rect {
+		stroke: var(--cr-russian-violet);
+	}
+
+	:root:not([data-theme="light"]) .pk-card.pk-card--stream.cr-rsvp-stub .cr-stamp text {
+		fill: var(--cr-russian-violet);
+	}
+}
+
+:root[data-theme="dark"] .cr-archive--rsvp .cr-archive__description {
+	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-rsvp-wall .pkiw-rsvp-entry__poster,
+:root[data-theme="dark"] .cr-rsvp-wall .pkiw-rsvp-entry--past {
+	border-color: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard-2);
+	color: var(--cr-russian-violet);
+}
+
+:root[data-theme="dark"] .pk-card.pk-card--stream.cr-rsvp-stub {
+	border: 2px solid var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+}
+
+:root[data-theme="dark"] .cr-rsvp-ticket__front,
+:root[data-theme="dark"] .cr-rsvp-ticket__back {
+	border-color: var(--cr-printer-ivory);
+	background-color: var(--cr-night-elevated);
+	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-rsvp-ticket__event-link {
+	border-color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-rsvp-ticket__event-link:hover {
+	background-color: var(--cr-night-elevated);
+	color: var(--cr-selective-yellow);
+}
+
+:root[data-theme="dark"] .cr-rsvp-ticket__stub {
+	border-color: var(--cr-printer-ivory);
+	background-color: var(--cr-night-elevated);
+	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-rsvp-ticket__punch {
+	border-color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-rsvp-ticket__fact dt,
+:root[data-theme="dark"] .cr-rsvp-ticket__kind {
+	color: var(--cr-periwinkle);
+}
+
+:root[data-theme="dark"] .pk-card.pk-card--stream.cr-rsvp-stub .cr-stamp rect {
+	stroke: var(--cr-russian-violet);
+}
+
+:root[data-theme="dark"] .pk-card.pk-card--stream.cr-rsvp-stub .cr-stamp text {
+	fill: var(--cr-russian-violet);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.cr-rsvp-ticket__event-link {
+		transition: transform var(--cr-motion-fast) var(--cr-ease-out);
+	}
+
+	.cr-rsvp-ticket__event-link:hover {
+		transform: translateY(-2px);
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-rsvp-wall .pkiw-rsvp-entry__poster,
+	.cr-rsvp-wall .pkiw-rsvp-entry--past,
+	.cr-rsvp-ticket__front,
+	.cr-rsvp-ticket__back,
+	.pk-card.pk-card--stream.cr-rsvp-stub {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		box-shadow: none;
+		clip-path: none;
+		filter: none;
+		color: CanvasText;
+	}
+
+	.cr-rsvp-wall .pkiw-rsvp-entry--upcoming::before,
+	.cr-rsvp-wall .pkiw-rsvp-entry--past::before,
+	.cr-rsvp-wall .pkiw-rsvp-entry--past::after,
+	.cr-rsvp-ticket__punches,
+	.cr-rsvp-ticket__perf,
+	.cr-rsvp-ticket__front::before,
+	.cr-rsvp-ticket__front::after,
+	.cr-rsvp-ticket__back::before,
+	.cr-rsvp-ticket__back::after,
+	.cr-rsvp-ticket__stub::before,
+	.cr-rsvp-ticket__stub::after,
+	.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__status data::before,
+	.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__status data::after,
+	.pk-card.pk-card--stream.cr-rsvp-stub .cr-rsvp-stub__tear,
+	.pk-card.pk-card--stream.cr-rsvp-stub .cr-stamp-mark {
+		display: none;
+	}
+
+	.cr-stream-page .wp-block-post-template > li:has(> .pk-card.pk-card--stream.cr-rsvp-stub) {
+		filter: none;
+	}
+
+	.cr-rsvp-wall .pkiw-rsvp-entry__status {
+		border: 1px solid CanvasText;
+		background: Canvas;
+		clip-path: none;
+		color: CanvasText;
+	}
+
+	.cr-rsvp-ticket__event-link {
+		border: 2px solid LinkText;
+		background: Canvas;
+		box-shadow: none;
+		color: LinkText;
+	}
+}
