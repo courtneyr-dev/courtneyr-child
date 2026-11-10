@@ -64,6 +64,12 @@ async function openSingle( page, key, selector, width = 1440 ) {
 	return page.locator( selector ).first();
 }
 
+async function assertTravelDateYields( page ) {
+	await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
+	await expect( page.locator( '.single-post__lede-meta .single-post__date' ) ).toBeHidden();
+	await expect( page.locator( '.h-entry .dt-published' ).first() ).toBeAttached();
+}
+
 async function assertNoOverflow( page, label ) {
 	const overflow = await page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth );
 	expect( overflow, `${ label } horizontal overflow` ).toBeLessThanOrEqual( 0 );
@@ -335,6 +341,7 @@ test.describe( 'travel singles and embargoes', () => {
 	test( 'trip single renders ruled stops, public dates and one classic map script', async ( { page } ) => {
 		test.skip( 'trip' !== SET, 'trip fixture set' );
 		const card = await openSingle( page, 'T01', '.wp-block-post-kinds-indieweb-trip-card.pkiw-trip' );
+		await assertTravelDateYields( page );
 		await expect( card.locator( '.pkiw-trip__stop' ) ).not.toHaveCount( 0 );
 		for ( const stop of await card.locator( '.pkiw-trip__stop' ).all() ) {
 			await expect( stop.locator( '.cr-stamp[aria-hidden="true"]' ) ).toHaveCount( 1 );
@@ -354,6 +361,7 @@ test.describe( 'travel singles and embargoes', () => {
 	test( 'itinerary single renders stitched legs and visible route fields', async ( { page } ) => {
 		test.skip( 'itinerary' !== SET, 'itinerary fixture set' );
 		const card = await openSingle( page, 'I01', '.wp-block-post-kinds-indieweb-itinerary-card.pkiw-itinerary' );
+		await assertTravelDateYields( page );
 		await expect( card.locator( '.pkiw-itinerary__leg' ) ).not.toHaveCount( 0 );
 		await expect( card.locator( '.pkiw-itinerary__leg-label' ).first() ).toHaveCSS( 'font-weight', '900' );
 		await expect( card.locator( '.pkiw-itinerary__pass dt' ).first() ).toHaveText( /From|To|Departure|Arrival|Carrier/ );

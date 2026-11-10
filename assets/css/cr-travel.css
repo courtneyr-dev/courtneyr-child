@@ -608,6 +608,11 @@
 	font: var(--cr-text-sm)/var(--cr-leading-snug) var(--cr-font-mono);
 }
 
+/* The travel card prints the trip's own dates, so the publication date steps aside (kind-single precedent). */
+body.single-post:is(.kind-trip, .kind-itinerary):has(.pkiw-trip, .pkiw-itinerary) .single-post__lede-meta .single-post__date {
+	display: none;
+}
+
 /* The single prints its title once, visibly, so the titleless format's clip and avatar don't apply. */
 body.single-post.kind-itinerary.pfbt-format-titleless .single-post__title {
 	position: relative !important;
