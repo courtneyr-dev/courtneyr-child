@@ -617,7 +617,11 @@
 }
 
 /* The travel card prints the trip's own dates, so the publication date steps aside (kind-single precedent). */
-body.single-post:is(.kind-trip, .kind-itinerary):has(.pkiw-trip, .pkiw-itinerary) .single-post__lede-meta .single-post__date {
+body.single-post.kind-trip:has(.pkiw-trip) .single-post__lede-meta .single-post__date {
+	display: none;
+}
+
+body.single-post.kind-itinerary:has(.pkiw-itinerary) .single-post__lede-meta .single-post__date {
 	display: none;
 }
 
