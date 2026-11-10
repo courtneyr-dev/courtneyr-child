@@ -628,6 +628,13 @@ figure.cr-media.cr-presentation-frame figcaption.cr-media__transcript {
 	.cr-badge-wall ul.pkiw-presentation-wall__badges {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
+
+	/* Near-square hanging badges, as in the desktop comp. An auto minimum lets long content grow the badge past the ratio. */
+	.cr-badge-wall .pkiw-presentation-badge {
+		grid-template-rows: auto auto minmax(0, 1fr);
+		aspect-ratio: 1.08 / 1;
+		min-block-size: auto;
+	}
 }
 
 /* Dark mode mirrors both the system and manual selector families. */
