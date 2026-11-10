@@ -63,6 +63,9 @@ const HSTS_VALUE = 'max-age=31536000; includeSubDomains';
  * self-hosted, so no asset in the theme still references them (verified
  * by grep 2026-09-22).
  * - google-analytics / googletagmanager: site analytics.
+ * - js-agent.newrelic.com / bam.nr-data.net: Pantheon injects New Relic's
+ *   browser agent inline; without these hosts the CSP blocked its script
+ *   (script-src-elem, 2026-11-10) and the agent never reported.
  * - youtube / vimeo / calendly / spotify: embeds.
  * - img-src https:: IndieWeb post kinds render arbitrary external images
  *   (bookmarks, reposts, avatars); enumerating hosts is not maintainable.
@@ -75,11 +78,11 @@ const HSTS_VALUE = 'max-age=31536000; includeSubDomains';
  */
 const CSP_ENFORCED = array(
 	'default-src'               => "'self'",
-	'script-src'                => "'self' 'unsafe-inline' 'unsafe-eval' www.google-analytics.com www.googletagmanager.com www.youtube.com www.youtube-nocookie.com s.ytimg.com",
+	'script-src'                => "'self' 'unsafe-inline' 'unsafe-eval' www.google-analytics.com www.googletagmanager.com www.youtube.com www.youtube-nocookie.com s.ytimg.com js-agent.newrelic.com",
 	'style-src'                 => "'self' 'unsafe-inline'",
 	'img-src'                   => "'self' data: blob: https:",
 	'font-src'                  => "'self' data:",
-	'connect-src'               => "'self' www.google-analytics.com analytics.google.com region1.google-analytics.com",
+	'connect-src'               => "'self' www.google-analytics.com analytics.google.com region1.google-analytics.com bam.nr-data.net",
 	'frame-src'                 => "'self' www.youtube.com youtube.com www.youtube-nocookie.com player.vimeo.com calendly.com open.spotify.com www.openstreetmap.org read.amazon.com",
 	'media-src'                 => "'self' www.youtube.com",
 	'object-src'                => "'none'",
