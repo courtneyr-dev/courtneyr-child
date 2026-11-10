@@ -400,7 +400,10 @@ test.describe( 'travel Stream objects', () => {
 		await assertFocusContrast( page, link, object, 'dark Stream object' );
 
 		await page.emulateMedia( { reducedMotion: 'reduce' } );
-		expect( await object.evaluate( ( node ) => [ getComputedStyle( node ).transitionDuration, getComputedStyle( node ).animationDuration ] ) ).toEqual( [ '0s', '0s' ] );
+		// Chromium reports a zeroed duration as 1e-06s; any value at or under 10ms counts as no motion.
+		for ( const duration of await object.evaluate( ( node ) => [ getComputedStyle( node ).transitionDuration, getComputedStyle( node ).animationDuration ] ) ) {
+			expect( Math.max( ...duration.split( ',' ).map( ( part ) => parseFloat( part ) ) ) ).toBeLessThanOrEqual( 0.01 );
+		}
 
 		await page.emulateMedia( { forcedColors: 'active', reducedMotion: 'reduce' } );
 		expect( await page.evaluate( () => matchMedia( '(forced-colors: active)' ).matches ) ).toBe( true );
@@ -429,6 +432,6 @@ test.describe( 'travel controls', () => {
 		await expect( page.locator( 'main .wp-block-post-kinds-indieweb-trip-card.pkiw-trip' ) ).toHaveCSS( 'border-top-width', '2px' );
 		const stampShape = page.locator( 'main .pkiw-trip .cr-stamp rect, main .pkiw-trip .cr-stamp circle' ).first();
 		expect( await stampShape.evaluate( ( node ) => getComputedStyle( node ).stroke ) ).not.toBe( 'none' );
-		await expect( page.locator( 'main .pkiw-singular-entry > p' ).first() ).toHaveText( 'Paragraph before the travel card.' );
+		await expect( page.locator( 'main .pkiw-singular-entry .e-content > p' ).first() ).toHaveText( 'Paragraph before the travel card.' );
 	} );
 } );

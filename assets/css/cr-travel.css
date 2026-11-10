@@ -80,6 +80,11 @@
 	font: var(--cr-weight-semibold) var(--cr-text-sm)/var(--cr-leading-snug) var(--cr-font-body);
 }
 
+/* The summary is a separate grid item; cancel the grid row gap so it stays attached to the map. */
+.cr-travel > .pkiw-travel-map__summary {
+	margin-block-start: calc(var(--cr-space-xl) * -1);
+}
+
 :is(.cr-travel, .pkiw-trip) .leaflet-bar {
 	border: 0;
 	border-radius: 0;
