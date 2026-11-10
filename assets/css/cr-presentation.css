@@ -108,10 +108,15 @@
 
 /* Shared conference badge construction. */
 
+:where(.cr-badge-wall .pkiw-presentation-badge, .cr-badge.cr-badge--single, .pk-card.pk-card--stream.cr-badge.cr-badge--stream) {
+
+	/* Zero specificity, so [data-pkiw-event-type] bands and the dark overrides always win. */
+	--cr-badge-band: var(--cr-light-gray);
+}
+
 .cr-badge-wall .pkiw-presentation-badge,
 .cr-badge.cr-badge--single,
 .pk-card.pk-card--stream.cr-badge.cr-badge--stream {
-	--cr-badge-band: var(--cr-light-gray);
 	position: relative;
 	isolation: isolate;
 	display: grid;
@@ -120,7 +125,7 @@
 	border: 2px solid var(--cr-ink);
 	border-radius: 0.75rem;
 	background-color: var(--cr-printer-ivory);
-	box-shadow: inset 0 2rem 0 var(--cr-badge-band), var(--cr-shadow-hard);
+	box-shadow: inset 0 2rem 0 var(--cr-badge-band), var(--cr-shadow-hard), var(--cr-badge-focus-halo, 0 0 0 0 transparent);
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-body);
 	transform: none;
@@ -229,7 +234,9 @@
 	.pk-card.pk-card--stream.cr-badge.cr-badge--stream:has(a:focus-visible) {
 		outline: 3px solid var(--cr-focus-ring);
 		outline-offset: 2px;
-		box-shadow: inset 0 2rem 0 var(--cr-badge-band), var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
+
+		/* Set the halo, not the whole shadow, so the dark-mode badge shadows keep it. */
+		--cr-badge-focus-halo: 0 0 0 7px var(--cr-focus-halo);
 	}
 }
 
@@ -496,7 +503,7 @@ iframe.cr-presentation-frame:focus-visible {
 	:root:not([data-theme="light"]) .pk-card.pk-card--stream.cr-badge.cr-badge--stream {
 		border: 2px solid var(--cr-printer-ivory);
 		background-color: var(--cr-night-elevated);
-		box-shadow: inset 0 2rem 0 var(--cr-badge-band), var(--cr-shadow-hard);
+		box-shadow: inset 0 2rem 0 var(--cr-badge-band), var(--cr-shadow-hard), var(--cr-badge-focus-halo, 0 0 0 0 transparent);
 		color: var(--cr-printer-ivory);
 	}
 
@@ -547,7 +554,7 @@ iframe.cr-presentation-frame:focus-visible {
 :root[data-theme="dark"] .pk-card.pk-card--stream.cr-badge.cr-badge--stream {
 	border: 2px solid var(--cr-printer-ivory);
 	background-color: var(--cr-night-elevated);
-	box-shadow: inset 0 2rem 0 var(--cr-badge-band), var(--cr-shadow-hard);
+	box-shadow: inset 0 2rem 0 var(--cr-badge-band), var(--cr-shadow-hard), var(--cr-badge-focus-halo, 0 0 0 0 transparent);
 	color: var(--cr-printer-ivory);
 }
 

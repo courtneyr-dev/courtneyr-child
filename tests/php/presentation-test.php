@@ -441,7 +441,9 @@ namespace {
 			cr_presentation_contains( ':root[data-theme="dark"] .cr-badge-wall .pkiw-presentation-badge', $css, 'manual dark selector' );
 			cr_presentation_contains( ':root:not([data-theme="light"]) [data-pkiw-event-type="talk"]', $css, 'system dark talk band override' );
 			cr_presentation_contains( ':root[data-theme="dark"] [data-pkiw-event-type="keynote"]', $css, 'manual dark keynote band override' );
-			cr_presentation_contains( 'box-shadow: inset 0 2rem 0 var(--cr-badge-band), var(--cr-shadow-hard);', $css, 'badges have a type-colored top band' );
+			cr_presentation_contains( 'box-shadow: inset 0 2rem 0 var(--cr-badge-band), var(--cr-shadow-hard), var(--cr-badge-focus-halo, 0 0 0 0 transparent);', $css, 'badges have a type-colored top band that keeps the focus halo' );
+			cr_presentation_contains( ':where(.cr-badge-wall .pkiw-presentation-badge', $css, 'band default has zero specificity so type bands win' );
+			cr_presentation_contains( '--cr-badge-focus-halo: 0 0 0 7px var(--cr-focus-halo);', $css, 'focus sets the halo property, not the whole shadow' );
 			cr_presentation_contains( 'gap: 0 var(--cr-space-2xl);', $css, 'single grid uses a column gap only' );
 			cr_presentation_not_contains( 'gap: var(--cr-space-2xl);', $css, 'single grid has no implicit-row gap' );
 			cr_presentation_contains( '@supports selector(:has(a:focus-visible))', $css, ':has focus ring is progressive enhancement' );

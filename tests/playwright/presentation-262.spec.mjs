@@ -81,8 +81,10 @@ test.describe( 'presentation archive', () => {
 		const rotations = await tiles.evaluateAll( ( nodes ) => nodes.map( ( node ) => [ ...node.classList ].find( ( token ) => /^is-r\d+$/.test( token ) ) ) );
 		expect( rotations.every( ( token, index ) => 0 === index || token !== rotations[ index - 1 ] ) ).toBe( true );
 		await expect( page.locator( '.pkiw-presentation-wall__year-label' ) ).toHaveText( [ '2026', '2025', '2024' ] );
-		await expect( page.locator( 'main h2' ) ).toHaveCount( 3 );
-		await expect( page.locator( 'main h3' ) ).toHaveCount( await badges( page ).count() );
+		// One H2 per year inside the wall; the shared "Browse all" footer adds its own H2 on every archive.
+		await expect( page.locator( 'main .cr-badge-wall h2, main .pkiw-presentation-wall h2' ) ).toHaveCount( 3 );
+		// Badge H3s only; the shared "Browse all" footer has its own H3 group headings.
+		await expect( page.locator( 'main .cr-badge-wall h3' ) ).toHaveCount( await badges( page ).count() );
 		for ( const key of [ 'C01', 'C02', 'C03', 'C05' ] ) {
 			await expect( fixtureBadge( page, key ) ).toHaveCount( 0 );
 		}
@@ -113,7 +115,8 @@ test.describe( 'presentation archive', () => {
 			await expect( badge.locator( 'a[href], button, input, select, textarea, [tabindex]' ) ).toHaveCount( 1 );
 			await expect( badge ).toHaveCSS( 'transform', 'none' );
 		}
-		const html = await page.locator( 'main' ).innerHTML();
+		// Badge markup only: the kind's term description ("Slides or a talk you gave …") is site copy, not badge content.
+		const html = ( await badges( page ).evaluateAll( ( nodes ) => nodes.map( ( node ) => node.outerHTML ) ) ).join( '\n' );
 		for ( const banned of [ '<iframe', 'Slides', 'Recording', 'Sentinel Hall', 'Sentinel Locked Summit', 'Sentinel Private Summit', 'sentinel-slides.example', 'Sample content' ] ) {
 			expect( html ).not.toContain( banned );
 		}
@@ -135,6 +138,11 @@ test.describe( 'presentation archive', () => {
 			[ 'meetup', '--cr-ut-orange' ],
 			[ 'podcast-guest', '--cr-coral' ],
 		] );
+		// Dark mode lifts the two darkest bands to meet 3:1 on the night surface.
+		if ( await page.evaluate( () => 'dark' === document.documentElement.dataset.theme || ( 'light' !== document.documentElement.dataset.theme && matchMedia( '(prefers-color-scheme: dark)' ).matches ) ) ) {
+			typeTokens.set( 'talk', '--cr-sky-blue' );
+			typeTokens.set( 'keynote', '--cr-periwinkle' );
+		}
 		for ( const [ type, token ] of typeTokens ) {
 			const typed = page.locator( `.pkiw-presentation-badge[data-pkiw-event-type="${ type }"]:has(.pkiw-presentation-badge__type)` );
 			if ( await typed.count() ) {
@@ -174,7 +182,8 @@ test.describe( 'presentation archive', () => {
 		await expect( page.locator( '.pkiw-presentation-wall__year-label' ).first() ).toHaveText( '2024' );
 		const protectedBadge = fixtureBadge( page, 'C04' );
 		await expect( protectedBadge ).toHaveCount( 1 );
-		await expect( protectedBadge.locator( 'a' ) ).toHaveAccessibleName( 'Protected presentation control' );
+		// Core prefixes protected titles (protected_title_format), so the name ends with the stored title.
+		await expect( protectedBadge.locator( 'a' ) ).toHaveAccessibleName( /Protected presentation control$/ );
 		await expect( protectedBadge.locator( '.pkiw-presentation-badge__event, .pkiw-presentation-badge__type' ) ).toHaveCount( 0 );
 		await expect( page.locator( '.wp-block-query-pagination-next' ) ).toHaveCount( 0 );
 		await expect( page.locator( '.wp-block-query-pagination-previous' ) ).toHaveCount( 1 );
@@ -233,7 +242,8 @@ test.describe( 'presentation archive', () => {
 		await expect( first.locator( '.pkiw-presentation-badge__type' ) ).toBeVisible();
 
 		await page.emulateMedia( { forcedColors: 'none', reducedMotion: 'reduce' } );
-		await expect( first ).toHaveCSS( 'transition-duration', '0s' );
+		// The theme-wide reduced-motion reset uses a near-zero duration (0.001ms), not 0s.
+		expect( parseFloat( await first.evaluate( ( node ) => getComputedStyle( node ).transitionDuration ) ) ).toBeLessThanOrEqual( 0.01 );
 	} );
 } );
 
