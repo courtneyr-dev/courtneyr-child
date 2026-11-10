@@ -90,6 +90,8 @@ require_once __DIR__ . '/inc/stream-issue.php';
 require_once __DIR__ . '/inc/rsvp.php';
 require_once __DIR__ . '/inc/single-rsvp.php';
 require_once __DIR__ . '/inc/stream-rsvp.php';
+require_once __DIR__ . '/inc/presentation.php';
+require_once __DIR__ . '/inc/stream-presentation.php';
 require_once __DIR__ . '/inc/stream-checkin.php';
 require_once __DIR__ . '/inc/single-checkin.php';
 require_once __DIR__ . '/inc/kind-parts.php';
