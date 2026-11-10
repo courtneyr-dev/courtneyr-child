@@ -456,8 +456,8 @@ namespace {
 			cr_presentation_assert( strlen( $css ) <= 30 * 1024, 'cr-presentation.css stays within 30 KB' );
 			cr_presentation_contains( ':root:not([data-theme="light"]) .cr-badge-wall .pkiw-presentation-badge', $css, 'system dark selector' );
 			cr_presentation_contains( ':root[data-theme="dark"] .cr-badge-wall .pkiw-presentation-badge', $css, 'manual dark selector' );
-			cr_presentation_contains( ':root:not([data-theme="light"]) [data-pkiw-event-type="talk"]', $css, 'system dark talk band override' );
-			cr_presentation_contains( ':root[data-theme="dark"] [data-pkiw-event-type="keynote"]', $css, 'manual dark keynote band override' );
+			cr_presentation_not_contains( ':root:not([data-theme="light"]) [data-pkiw-event-type="talk"]', $css, 'system dark talk band keeps its light hue (art r2 dark comp; fidelity ruling 2026-11-09)' );
+			cr_presentation_not_contains( ':root[data-theme="dark"] [data-pkiw-event-type="keynote"]', $css, 'manual dark keynote band keeps its light hue (art r2 dark comp; fidelity ruling 2026-11-09)' );
 			cr_presentation_contains( 'box-shadow: inset 0 2rem 0 var(--cr-badge-band), var(--cr-shadow-hard), var(--cr-badge-focus-halo, 0 0 0 0 transparent);', $css, 'badges have a type-colored top band that keeps the focus halo' );
 			cr_presentation_contains( ':where(.cr-badge-wall .pkiw-presentation-badge', $css, 'band default has zero specificity so type bands win' );
 			cr_presentation_contains( '--cr-badge-focus-halo: 0 0 0 7px var(--cr-focus-halo);', $css, 'focus sets the halo property, not the whole shadow' );
