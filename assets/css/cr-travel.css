@@ -24,6 +24,14 @@
 	--cr-travel-shadow: var(--cr-shadow-hard-2);
 }
 
+/* Travel objects are light paper in both schemes, so the yellow ring's halo stays dark (cr-favorite.css, cr-review.css precedent). */
+.cr-travel,
+.pkiw-trip,
+.pkiw-itinerary,
+.cr-travel-card {
+	--cr-focus-halo: var(--cr-russian-violet);
+}
+
 .cr-travel-query {
 	margin-block: 0;
 }
