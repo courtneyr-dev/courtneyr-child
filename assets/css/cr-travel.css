@@ -134,6 +134,7 @@
 
 .cr-travel .pkiw-pin,
 .pkiw-trip .pkiw-pin,
+.pkiw-trip .pkiw-trip__stop::before,
 .cr-travel .pkiw-travel-map__num {
 	box-sizing: border-box;
 	min-inline-size: 44px;
@@ -200,7 +201,7 @@
 	border: 0;
 	background: transparent;
 	color: var(--cr-ink);
-	font: var(--cr-weight-black) var(--cr-text-xl)/1 var(--cr-font-accent);
+	font: var(--cr-weight-black) var(--cr-text-3xl)/1 var(--cr-font-accent);
 	letter-spacing: var(--cr-tracking-tight);
 	box-shadow: none;
 	transform: none;
@@ -250,7 +251,7 @@
 .cr-archive--trip .pkiw-travel-entry {
 	position: relative;
 	display: grid;
-	grid-template-columns: 44px minmax(0, 1fr) 5.8rem;
+	grid-template-columns: 44px minmax(0, 1fr) 4.5rem;
 	gap: var(--cr-space-sm);
 	align-items: center;
 	min-width: 0;
@@ -259,7 +260,7 @@
 }
 
 .cr-archive--trip .pkiw-travel-entry:has(.pkiw-trip-entry__image) {
-	grid-template-columns: 44px minmax(6rem, 9rem) minmax(0, 1fr) 5.8rem;
+	grid-template-columns: 44px minmax(6rem, 9rem) minmax(0, 1fr) 4.5rem;
 }
 
 .cr-archive--trip .pkiw-travel-year__items > li:last-child .pkiw-travel-entry {
@@ -369,7 +370,7 @@
 
 :is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp--rect { inline-size: 8.4rem; }
 
-:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) :is(.cr-stamp--seal, .cr-stamp--octagon) { inline-size: 5.8rem; }
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) :is(.cr-stamp--seal, .cr-stamp--octagon) { inline-size: 4.5rem; }
 
 :is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp--postmark { inline-size: 10rem; }
 
@@ -408,7 +409,6 @@
 
 .cr-archive--itinerary .pkiw-travel-year__heading {
 	margin-block-end: var(--cr-space-sm);
-	font-size: var(--cr-text-3xl);
 }
 
 .cr-archive--itinerary .pkiw-travel-year__items {
@@ -582,6 +582,7 @@
 }
 
 .pkiw-trip .pkiw-trip__stops {
+	counter-reset: pkiw-stop;
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -589,7 +590,7 @@
 
 .pkiw-trip .pkiw-trip__stop {
 	display: grid;
-	grid-template-columns: minmax(44px, auto) minmax(0, 1fr);
+	grid-template-columns: 44px auto minmax(0, 1fr);
 	gap: var(--cr-space-sm) var(--cr-space-md);
 	align-items: center;
 	min-height: 5.5rem;
@@ -598,25 +599,33 @@
 	border-block-end: 1px dashed var(--cr-russian-violet);
 }
 
+.pkiw-trip .pkiw-trip__stop::before {
+	display: grid;
+	grid-row: 1 / span 2;
+	place-items: center;
+	content: counter(pkiw-stop);
+	counter-increment: pkiw-stop;
+}
+
 .pkiw-trip .pkiw-trip__stop:last-child {
 	border-block-end: 0;
 }
 
 .pkiw-trip .cr-stamp-mark {
-	grid-column: 1;
+	grid-column: 2;
 	grid-row: 1 / span 2;
 }
 
 .pkiw-trip .cr-stamp--rect {
-	inline-size: min(8.4rem, 30vw);
+	inline-size: min(8.4rem, 24vw);
 }
 
 .pkiw-trip .pkiw-trip__place {
-	grid-column: 2;
+	grid-column: 3;
 }
 
 .pkiw-trip .pkiw-trip__date {
-	grid-column: 2;
+	grid-column: 3;
 	font: var(--cr-text-sm)/var(--cr-leading-snug) var(--cr-font-mono);
 }
 
