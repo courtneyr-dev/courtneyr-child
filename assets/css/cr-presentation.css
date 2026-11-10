@@ -25,6 +25,121 @@
 	margin-inline: 0 !important;
 }
 
+/* Archive identity (r2 comps): the round badge sits partly over a blue burst
+   (the h1's ✺ flank) and overlaps the first of the 12 tiles; description and
+   a short marker follow, then a pause before the first year. Badge and h1
+   share one grid cell, as on the RSVP archive. */
+
+.cr-archive--presentation .cr-archive__header:has(.cr-archive-identity--kind) {
+	--cr-presentation-mark: clamp(3.5rem, 8vw, 7rem);
+	--cr-presentation-lockup: calc(var(--cr-presentation-mark) * 0.92);
+	position: relative;
+	display: grid;
+	max-inline-size: var(--wp--style--global--wide-size, 1100px);
+	padding-block: var(--cr-space-2xl) !important;
+	text-align: start;
+}
+
+.cr-archive--presentation .cr-archive-identity--kind {
+	position: static;
+	z-index: 1;
+	grid-area: 1 / 1;
+	align-self: center;
+	justify-self: start;
+	display: block;
+	block-size: auto;
+	margin: 0 !important;
+}
+
+.cr-archive--presentation .cr-archive-identity--kind .cr-archive-identity__glyph {
+	position: static;
+	inline-size: var(--cr-presentation-mark);
+	block-size: var(--cr-presentation-mark);
+}
+
+.cr-archive--presentation .cr-archive-identity--kind .cr-archive-identity__glyph svg {
+	inline-size: 55%;
+	block-size: 55%;
+}
+
+.cr-archive--presentation .cr-archive__title.cr-cutout {
+	--cr-cutout-min: 2.25rem;
+	--cr-cutout-max: 5.5rem;
+	grid-area: 1 / 1;
+	justify-self: stretch;
+	max-inline-size: none;
+	margin-block: 0;
+	margin-inline: var(--cr-presentation-lockup) 0 !important;
+}
+
+.cr-archive--presentation .cr-archive__title.cr-flank::before {
+	content: "✺" / "" !important;
+	display: block !important;
+	inset-block-start: calc(50% - var(--cr-presentation-mark) * 0.2);
+	inset-inline-start: calc(var(--cr-presentation-mark) * 0.3 - var(--cr-presentation-lockup));
+	font-size: calc(var(--cr-presentation-mark) * 1.6);
+	transform: translate(-50%, -50%) rotate(-15deg);
+}
+
+.cr-archive--presentation .cr-archive__title.cr-flank::after {
+	content: none !important;
+	display: none !important;
+}
+
+.cr-archive--presentation .cr-archive__description {
+	max-inline-size: var(--cr-measure, 720px);
+	margin-block: var(--cr-space-sm) 0;
+	margin-inline: var(--cr-space-md) 0 !important;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+}
+
+.cr-archive--presentation .cr-archive__header hr.is-style-cr-marker-bar-short {
+	inline-size: 8rem !important;
+	margin-inline: var(--cr-space-md) 0 !important;
+}
+
+/* Phones: badge and burst above the tiles, the tiles across the full measure.
+   The 1.25rem floor keeps 12 tiles on one line down to 320px. */
+@media (max-width: 47.9375rem) {
+
+	.cr-archive--presentation .cr-archive__header:has(.cr-archive-identity--kind) {
+		--cr-presentation-mark: 4rem;
+		padding-block-start: var(--cr-space-xl) !important;
+	}
+
+	.cr-archive--presentation .cr-archive-identity--kind {
+		align-self: start;
+		margin-inline-start: var(--cr-space-md) !important;
+	}
+
+	.cr-archive--presentation .cr-archive__title.cr-cutout {
+		--cr-cutout-min: 1.25rem;
+		grid-area: 2 / 1;
+		margin-block: calc(var(--cr-presentation-mark) * -0.2) 0;
+		margin-inline: 0 !important;
+	}
+
+	/* A tile runs about 0.97em wide, so 12 tiles fill the measure at 100cqi / 12.5. */
+	.cr-archive--presentation .cr-archive__title .cr-cutout__tiles {
+		font-size: clamp(1.25rem, calc(100cqi / 12.5), 2.75rem);
+	}
+
+	.cr-archive--presentation .cr-archive__title.cr-flank::before {
+		inset-block-start: calc(var(--cr-presentation-mark) * -0.5);
+		inset-inline-start: calc(var(--cr-space-md) + var(--cr-presentation-mark) * 0.25);
+		font-size: calc(var(--cr-presentation-mark) * 1.4);
+	}
+
+	.cr-archive--presentation .cr-archive__description {
+		margin-inline: 0 !important;
+	}
+
+	.cr-archive--presentation .cr-archive__header hr.is-style-cr-marker-bar-short {
+		margin-inline: 0 !important;
+	}
+}
+
 .cr-badge-wall .wp-block-post::after {
 	content: none !important;
 }
@@ -306,6 +421,8 @@ body.single-post.kind-presentation:has(.pkiw-presentation-record) .single-post__
 
 .cr-badge.cr-badge--single .pkiw-presentation-record__title {
 	font-size: clamp(var(--cr-text-2xl), 4vw, var(--cr-text-4xl));
+	overflow-wrap: break-word;
+	text-wrap: balance;
 }
 
 .cr-badge.cr-badge--single .pkiw-presentation-record__facts {
@@ -372,7 +489,10 @@ body.single-post.kind-presentation:has(.pkiw-presentation-record) .single-post__
 .cr-presentation-frame iframe,
 iframe.cr-presentation-frame {
 	display: block;
+	inline-size: 100%;
 	max-inline-size: 100%;
+	block-size: auto;
+	aspect-ratio: 16 / 9;
 }
 
 .cr-presentation-frame:focus-visible,
@@ -473,7 +593,9 @@ iframe.cr-presentation-frame:focus-visible {
 
 	body.single-post.kind-presentation .single-post__content > .pkiw-singular-entry {
 		display: grid;
-		grid-template-columns: minmax(16rem, 0.4fr) minmax(0, 1fr);
+		inline-size: 100%;
+		max-inline-size: none;
+		grid-template-columns: minmax(20rem, 24rem) minmax(0, 1fr);
 		align-items: start;
 		gap: 0 var(--cr-space-2xl);
 	}
