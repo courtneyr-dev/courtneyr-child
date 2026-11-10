@@ -94,7 +94,9 @@ function travel_card( string $html, array $block, $instance ): string { // phpcs
 		return $html;
 	}
 
-	$title = trim( (string) get_the_title( $post ) );
+	$stored_title = trim( (string) get_the_title( $post ) );
+	$title_hidden = function_exists( '\\PKIW\\post_title_is_hidden' ) && \PKIW\post_title_is_hidden( $post );
+	$title        = $stored_title;
 	if ( '' === $title && function_exists( '\\PKIW\\untitled_name' ) ) {
 		$title = (string) \PKIW\untitled_name( $post, false );
 	}
@@ -110,10 +112,11 @@ function travel_card( string $html, array $block, $instance ): string { // phpcs
 	$level       = heading_level( $html );
 	$object      = 'trip' === $kind ? 'cr-travel-tag cr-travel-tag--trip' : 'cr-travel-ticket cr-travel-ticket--itinerary';
 
-	$out  = '<article class="pk-card pk-card--stream cr-travel-card cr-travel-card--stream ' . esc_attr( $object ) . ' h-entry">';
-	$out .= '<span class="cr-travel-card__fastener" aria-hidden="true" role="presentation"></span>';
-	$out .= '<p class="pk-kindlabel cr-travel-card__kind">' . esc_html( kind_label( $kind ) ) . '</p>';
-	$out .= '<h' . $level . ' class="cr-travel-card__title"><a class="u-url p-name" href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( $title ) . '</a></h' . $level . '>';
+	$out        = '<article class="pk-card pk-card--stream cr-travel-card cr-travel-card--stream ' . esc_attr( $object ) . ' h-entry">';
+	$out       .= '<span class="cr-travel-card__fastener" aria-hidden="true" role="presentation"></span>';
+	$out       .= '<p class="pk-kindlabel cr-travel-card__kind">' . esc_html( kind_label( $kind ) ) . '</p>';
+	$name_class = '' !== $stored_title && ! $title_hidden ? ' p-name' : '';
+	$out       .= '<h' . $level . ' class="cr-travel-card__title"><a class="u-url' . $name_class . '" href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( $title ) . '</a></h' . $level . '>';
 	if ( '' !== $route ) {
 		$out .= '<p class="cr-travel-card__route">' . $route . '</p>';
 	}

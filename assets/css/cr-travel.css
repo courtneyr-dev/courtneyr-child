@@ -6,17 +6,21 @@
  */
 /* stylelint-disable no-descending-specificity -- archive, single, map and Stream selectors share plugin classes on separate surfaces. */
 
+@property --cr-travel-focus-halo {
+	syntax: "*";
+	inherits: false;
+	initial-value: 0 0 0 0 transparent;
+}
+
 :where(.cr-archive--trip) {
 	--cr-travel-paper: var(--cr-printer-ivory);
 	--cr-travel-band: var(--cr-light-orange);
-	--cr-travel-edge: var(--cr-russian-violet);
 	--cr-travel-shadow: var(--cr-shadow-hard-2);
 }
 
 :where(.cr-archive--itinerary) {
 	--cr-travel-paper: var(--cr-printer-ivory);
 	--cr-travel-band: var(--cr-sky-blue);
-	--cr-travel-edge: var(--cr-russian-violet);
 	--cr-travel-shadow: var(--cr-shadow-hard-2);
 }
 
@@ -30,21 +34,24 @@
 	align-items: start;
 }
 
-.cr-travel > .pkiw-travel-map {
+.cr-travel > .pkiw-travel-map,
+.pkiw-trip > .pkiw-travel-map {
 	position: relative;
 	z-index: 0;
 	min-width: 0;
 	margin: 0;
-	border: 2px solid var(--cr-russian-violet);
+	border: 2px solid var(--cr-ink);
 	background: var(--cr-surface-soft);
-	box-shadow: var(--cr-shadow-hard-2), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
+	box-shadow: var(--cr-travel-shadow, var(--cr-shadow-hard-2)), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 }
 
-.cr-travel > .pkiw-travel-map:not([hidden]) {
+.cr-travel > .pkiw-travel-map:not([hidden]),
+.pkiw-trip > .pkiw-travel-map:not([hidden]) {
 	display: block;
 }
 
-.cr-travel > .pkiw-travel-map[hidden] {
+.cr-travel > .pkiw-travel-map[hidden],
+.pkiw-trip > .pkiw-travel-map[hidden] {
 	display: none;
 }
 
@@ -52,14 +59,14 @@
 	display: none;
 }
 
-.cr-travel > .pkiw-travel-map:focus-visible {
-	--cr-travel-focus-halo: 0 0 0 7px var(--cr-focus-halo);
-	outline: 3px solid var(--cr-focus-ring);
+.cr-travel > .pkiw-travel-map:focus-visible,
+.pkiw-trip > .pkiw-travel-map:focus-visible {
+	--cr-travel-focus-halo: 0 0 0 3px var(--cr-russian-violet), 0 0 0 7px var(--cr-printer-ivory);
+	outline: 3px solid var(--cr-russian-violet);
 	outline-offset: 2px;
 }
 
-.cr-travel .pkiw-travel-map__viewport,
-.cr-travel .leaflet-container {
+:is(.cr-travel, .pkiw-trip) .leaflet-container {
 	min-height: 19rem;
 	background: var(--cr-surface-soft);
 }
@@ -73,13 +80,13 @@
 	font: var(--cr-weight-semibold) var(--cr-text-sm)/var(--cr-leading-snug) var(--cr-font-body);
 }
 
-.cr-travel .leaflet-bar {
+:is(.cr-travel, .pkiw-trip) .leaflet-bar {
 	border: 0;
 	border-radius: 0;
 	box-shadow: var(--cr-shadow-hard-sm);
 }
 
-.cr-travel .leaflet-bar a {
+:is(.cr-travel, .pkiw-trip) .leaflet-bar a {
 	box-sizing: border-box;
 	inline-size: 44px;
 	block-size: 44px;
@@ -92,22 +99,23 @@
 	box-shadow: var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 }
 
-.cr-travel .leaflet-bar a + a {
+:is(.cr-travel, .pkiw-trip) .leaflet-bar a + a {
 	border-block-start: 0;
 }
 
-.cr-travel .leaflet-control-attribution {
+:is(.cr-travel, .pkiw-trip) .leaflet-control-attribution {
 	padding: .2rem .5rem;
 	background: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
 	font: var(--cr-text-floor)/1.3 var(--cr-font-body);
 }
 
-.cr-travel .leaflet-control-attribution a {
-	color: var(--cr-link);
+:is(.cr-travel, .pkiw-trip) .leaflet-control-attribution a {
+	color: var(--cr-cerulean);
 }
 
 .cr-travel .pkiw-pin,
+.pkiw-trip .pkiw-pin,
 .cr-travel .pkiw-travel-map__num {
 	box-sizing: border-box;
 	min-inline-size: 44px;
@@ -120,21 +128,21 @@
 	box-shadow: var(--cr-shadow-hard-sm), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 }
 
-.cr-travel .pkiw-pin {
+:is(.cr-travel, .pkiw-trip) .pkiw-pin {
 	display: grid !important;
 	place-items: center;
 }
 
-.cr-travel .pkiw-pin.is-active {
+:is(.cr-travel, .pkiw-trip) .pkiw-pin.is-active {
 	border-width: 4px;
 }
 
-.cr-travel .pkiw-pin--cluster {
+:is(.cr-travel, .pkiw-trip) .pkiw-pin--cluster {
 	border-style: double;
 	border-width: 6px;
 }
 
-.cr-travel svg .pkiw-route {
+:is(.cr-travel, .pkiw-trip) svg .pkiw-route {
 	fill: none;
 	stroke: var(--cr-russian-violet);
 	stroke-width: 4;
@@ -142,11 +150,11 @@
 	stroke-linejoin: round;
 }
 
-.cr-travel .pkiw-pin:focus-visible,
+:is(.cr-travel, .pkiw-trip) .pkiw-pin:focus-visible,
 .cr-travel .pkiw-travel-map__num:focus-visible,
-.cr-travel .leaflet-bar a:focus-visible {
-	--cr-travel-focus-halo: 0 0 0 7px var(--cr-focus-halo);
-	outline: 3px solid var(--cr-focus-ring);
+:is(.cr-travel, .pkiw-trip) .leaflet-bar a:focus-visible {
+	--cr-travel-focus-halo: 0 0 0 3px var(--cr-russian-violet), 0 0 0 7px var(--cr-printer-ivory);
+	outline: 3px solid var(--cr-russian-violet);
 	outline-offset: 2px;
 }
 
@@ -167,20 +175,20 @@
 .cr-travel .pkiw-travel-year__heading {
 	position: relative;
 	z-index: 1;
-	width: max-content;
-	max-width: calc(100% - var(--cr-space-md));
-	margin: 0 0 -2px var(--cr-space-md);
-	padding: var(--cr-space-xs) var(--cr-space-lg);
-	border: 2px solid var(--cr-russian-violet);
-	background: var(--cr-travel-band);
-	color: var(--cr-russian-violet);
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--cr-ink);
 	font: var(--cr-weight-black) var(--cr-text-xl)/1 var(--cr-font-accent);
 	letter-spacing: var(--cr-tracking-tight);
-	box-shadow: var(--cr-shadow-hard-sm), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
-	transform: rotate(-1deg);
+	box-shadow: none;
+	transform: none;
 }
 
-:where(.cr-travel .pkiw-travel-year__items) {
+.cr-travel .pkiw-travel-year__items {
 	display: grid;
 	gap: 0;
 	margin: 0;
@@ -189,6 +197,22 @@
 	background: var(--cr-travel-paper);
 	box-shadow: var(--cr-travel-shadow), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 	list-style: none;
+}
+
+.cr-archive--trip .pkiw-travel-year__heading {
+	padding: var(--cr-space-sm) var(--cr-space-lg);
+	border: 2px solid var(--cr-russian-violet);
+	border-block-end: 0;
+	background: var(--cr-light-orange);
+	color: var(--cr-russian-violet);
+}
+
+.cr-archive--trip .pkiw-travel-year:nth-of-type(even) .pkiw-travel-year__heading {
+	background: var(--cr-periwinkle);
+}
+
+.cr-archive--trip .pkiw-travel-year__items {
+	border-block-start: 0;
 }
 
 .cr-travel .pkiw-travel-year__items > li {
@@ -200,12 +224,16 @@
 .cr-archive--trip .pkiw-travel-entry {
 	position: relative;
 	display: grid;
-	grid-template-columns: 44px minmax(0, 1fr);
+	grid-template-columns: 44px minmax(0, 1fr) 5.8rem;
 	gap: var(--cr-space-sm);
 	align-items: center;
 	min-width: 0;
 	padding: var(--cr-space-md) 0;
 	border-block-end: 1px dashed var(--cr-russian-violet);
+}
+
+.cr-archive--trip .pkiw-travel-entry:has(.pkiw-trip-entry__image) {
+	grid-template-columns: 44px minmax(6rem, 9rem) minmax(0, 1fr) 5.8rem;
 }
 
 .cr-archive--trip .pkiw-travel-year__items > li:last-child .pkiw-travel-entry {
@@ -214,9 +242,10 @@
 
 .cr-archive--trip .pkiw-trip-entry__image {
 	grid-column: 2;
-	inline-size: min(100%, 16rem);
+	grid-row: 1;
+	inline-size: 100%;
 	block-size: auto;
-	margin-block-end: var(--cr-space-xs);
+	margin: 0;
 	border: 2px solid var(--cr-russian-violet);
 	background: var(--cr-surface-soft);
 	box-shadow: var(--cr-shadow-hard-sm), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
@@ -241,16 +270,20 @@
 }
 
 .cr-archive--trip .pkiw-travel-entry:has(.pkiw-trip-entry__image)::after {
-	inset-inline-start: min(calc(44px + var(--cr-space-sm) + 14.75rem), calc(100% - 1.25rem));
+	inset-inline-start: min(calc(44px + var(--cr-space-sm) + 7.75rem), calc(100% - 1.25rem));
 	border-width: 4px 4px 0 0;
 }
 
 .cr-archive--trip .cr-stamp-mark {
-	grid-column: 1;
-	grid-row: 1 / span 2;
+	grid-column: 3;
+	grid-row: 1;
 	justify-self: center;
-	max-inline-size: 44px;
-	overflow: hidden;
+	max-inline-size: none;
+	overflow: visible;
+}
+
+.cr-archive--trip .pkiw-travel-entry:has(.pkiw-trip-entry__image) .cr-stamp-mark {
+	grid-column: 4;
 }
 
 .cr-archive--trip .cr-stamp {
@@ -260,8 +293,13 @@
 
 .cr-archive--trip .pkiw-travel-entry__title {
 	grid-column: 2;
+	grid-row: 1;
 	margin: 0;
 	font: var(--cr-weight-bold) var(--cr-text-md)/var(--cr-leading-snug) var(--cr-font-accent);
+}
+
+.cr-archive--trip .pkiw-travel-entry:has(.pkiw-trip-entry__image) .pkiw-travel-entry__title {
+	grid-column: 3;
 }
 
 .cr-archive--trip .pkiw-travel-entry__title a {
@@ -276,15 +314,84 @@
 
 .cr-archive--trip .pkiw-travel-map__num {
 	grid-column: 1;
-	grid-row: 1 / span 2;
+	grid-row: 1;
 	display: grid;
 	place-items: center;
 }
 
+.pkiw-trip-entry.is-style-cr-passport {
+	border-block-end-style: dashed;
+}
+
+/* Travel-owned stamp paint for trip archives, singles and embedded trip cards. */
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp-mark {
+	display: block;
+	line-height: 0;
+	mix-blend-mode: multiply;
+}
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp-mark--tilt-0 { transform: rotate(-3deg); }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp-mark--tilt-1 { transform: rotate(-1deg); }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp-mark--tilt-2 { transform: rotate(1.5deg); }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp-mark--tilt-3 { transform: rotate(3.5deg); }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp-mark + .cr-stamp-mark { margin-inline-start: -.9rem; }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp {
+	display: block;
+	block-size: auto;
+	opacity: .9;
+}
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp--rect { inline-size: 8.4rem; }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) :is(.cr-stamp--seal, .cr-stamp--octagon) { inline-size: 5.8rem; }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp--postmark { inline-size: 10rem; }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp :is(rect, circle, .cr-stamp__waves),
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp > path {
+	fill: none;
+	stroke: var(--cr-stamp-ink, #241c4a);
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp :is(text, .cr-stamp__glyph) {
+	fill: var(--cr-stamp-ink, #241c4a);
+}
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp text {
+	font-family: var(--cr-font-mono, monospace);
+	font-weight: 700;
+	text-anchor: middle;
+	text-transform: uppercase;
+}
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp__big { font-size: 21px; letter-spacing: 2px; }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp__big--seal { font-size: 12.5px; letter-spacing: 1.4px; }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp__mid { font-size: 11.5px; letter-spacing: 1.2px; }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp__mid--seal { font-size: 10px; letter-spacing: 1px; }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp__small { font-size: 9px; letter-spacing: 1px; }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp__tiny { font-size: 8px; letter-spacing: 1px; }
+
+:is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp__ring { font-size: 9.5px; letter-spacing: 2px; }
+
 .cr-archive--itinerary .pkiw-travel-year__items {
 	grid-template-columns: minmax(0, 1fr);
 	gap: var(--cr-space-lg);
-	border-style: dashed;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	box-shadow: none;
 }
 
 .cr-archive--itinerary .pkiw-travel-entry {
@@ -294,9 +401,17 @@
 	min-height: 9rem;
 	padding: var(--cr-space-xl) var(--cr-space-lg) var(--cr-space-lg);
 	border: 2px solid var(--cr-russian-violet);
-	background: var(--cr-periwinkle);
+	background: var(--cr-cerulean);
 	color: var(--cr-russian-violet);
 	box-shadow: var(--cr-shadow-hard-sm), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
+}
+
+.cr-archive--itinerary .pkiw-travel-year__items > li:nth-child(even) .pkiw-travel-entry {
+	background: var(--cr-periwinkle);
+}
+
+.pkiw-itinerary-entry.is-style-cr-wallet {
+	--cr-travel-wallet-seam: var(--cr-russian-violet);
 }
 
 .cr-archive--itinerary .pkiw-travel-entry::before,
@@ -324,7 +439,7 @@
 .cr-archive--itinerary .pkiw-travel-entry__title {
 	margin: 0;
 	padding: var(--cr-space-md);
-	border: 2px dashed var(--cr-russian-violet);
+	border: 2px dashed var(--cr-travel-wallet-seam, var(--cr-russian-violet));
 	background: var(--cr-printer-ivory);
 	font: var(--cr-weight-bold) var(--cr-text-md)/var(--cr-leading-snug) var(--cr-font-accent);
 }
@@ -349,8 +464,8 @@
 
 .pkiw-travel-entry__title a:focus-visible,
 .cr-travel-card__title a:focus-visible {
-	--cr-travel-focus-halo: 0 0 0 7px var(--cr-focus-halo);
-	outline: 3px solid var(--cr-focus-ring);
+	--cr-travel-focus-halo: 0 0 0 3px var(--cr-russian-violet), 0 0 0 7px var(--cr-printer-ivory);
+	outline: 3px solid var(--cr-russian-violet);
 	outline-offset: 3px;
 	box-shadow: var(--cr-travel-focus-halo);
 }
@@ -359,7 +474,7 @@
 
 	.cr-archive--trip .pkiw-travel-year__items:has(a:focus-visible),
 	.cr-archive--itinerary .pkiw-travel-entry:has(a:focus-visible) {
-		--cr-travel-focus-halo: 0 0 0 7px var(--cr-focus-halo);
+		--cr-travel-focus-halo: 0 0 0 3px var(--cr-russian-violet), 0 0 0 7px var(--cr-printer-ivory);
 	}
 }
 
@@ -370,7 +485,7 @@
 	border: 2px solid var(--cr-russian-violet);
 	background: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
-	box-shadow: var(--cr-shadow-hard-2), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
+	box-shadow: var(--cr-travel-shadow, var(--cr-shadow-hard-2)), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 }
 
 .pkiw-trip .pkiw-trip__summary {
@@ -393,7 +508,8 @@
 	gap: var(--cr-space-sm) var(--cr-space-md);
 	align-items: center;
 	min-height: 5.5rem;
-	padding-block: var(--cr-space-sm);
+	padding: var(--cr-space-sm) 0;
+	border: 0;
 	border-block-end: 1px dashed var(--cr-russian-violet);
 }
 
@@ -406,9 +522,11 @@
 	grid-row: 1 / span 2;
 }
 
-.pkiw-trip .pkiw-trip__place,
-.pkiw-trip .h-geo,
-.pkiw-trip .p-location {
+.pkiw-trip .cr-stamp--rect {
+	inline-size: min(8.4rem, 30vw);
+}
+
+.pkiw-trip .pkiw-trip__place {
 	grid-column: 2;
 }
 
@@ -423,7 +541,7 @@
 	border: 2px solid var(--cr-russian-violet);
 	background: var(--cr-sky-blue);
 	color: var(--cr-russian-violet);
-	box-shadow: var(--cr-shadow-hard-2), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
+	box-shadow: var(--cr-travel-shadow, var(--cr-shadow-hard-2)), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 }
 
 .pkiw-itinerary .pkiw-itinerary__summary {
@@ -447,7 +565,7 @@
 	box-shadow: var(--cr-shadow-hard-sm), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 }
 
-.pkiw-itinerary .pkiw-itinerary__label {
+.pkiw-itinerary .pkiw-itinerary__leg-label {
 	margin: 0 0 var(--cr-space-sm);
 	font: var(--cr-weight-black) var(--cr-text-md)/1 var(--cr-font-accent);
 }
@@ -467,7 +585,7 @@
 	margin: 0;
 }
 
-.pkiw-travel-map--single {
+.pkiw-trip > .pkiw-travel-map {
 	margin-block: var(--cr-space-lg) 0;
 	border: 2px solid var(--cr-russian-violet);
 	background: var(--cr-surface-soft);
@@ -475,7 +593,7 @@
 }
 
 /* Stream luggage tag. The shared Stream reset removes borders, so this is full shorthand. */
-:where(.pk-card.cr-travel-tag--trip) {
+.cr-stream-page .pk-card.cr-travel-tag--trip {
 	position: relative;
 	box-sizing: border-box;
 	inline-size: 100%;
@@ -489,7 +607,7 @@
 	transform: rotate(-1deg);
 }
 
-.cr-travel-tag--trip::before {
+.cr-stream-page .pk-card.cr-travel-tag--trip::before {
 	position: absolute;
 	inset-block-start: .8rem;
 	inset-inline-end: 1rem;
@@ -502,7 +620,7 @@
 	content: "";
 }
 
-.cr-travel-tag--trip::after {
+.cr-stream-page .pk-card.cr-travel-tag--trip::after {
 	position: absolute;
 	inset-block: var(--cr-space-sm);
 	inset-inline-start: var(--cr-space-sm);
@@ -511,7 +629,7 @@
 }
 
 /* Stream itinerary ticket: portrait proportions with a perforated stub. */
-:where(.pk-card.cr-travel-ticket--itinerary) {
+.cr-stream-page .pk-card.cr-travel-ticket--itinerary {
 	position: relative;
 	box-sizing: border-box;
 	inline-size: min(100%, 20rem);
@@ -525,7 +643,7 @@
 	transform: rotate(1deg);
 }
 
-.cr-travel-ticket--itinerary::before {
+.cr-stream-page .pk-card.cr-travel-ticket--itinerary::before {
 	position: absolute;
 	inset-block-start: 4.75rem;
 	inset-inline: 0;
@@ -533,7 +651,7 @@
 	content: "";
 }
 
-.cr-travel-ticket--itinerary::after {
+.cr-stream-page .pk-card.cr-travel-ticket--itinerary::after {
 	position: absolute;
 	inset-block-start: 4.15rem;
 	inset-inline-start: -.65rem;
@@ -602,7 +720,7 @@
 @supports selector(:has(a:focus-visible)) {
 
 	.cr-travel-card:has(a:focus-visible) {
-		--cr-travel-focus-halo: 0 0 0 7px var(--cr-focus-halo);
+		--cr-travel-focus-halo: 0 0 0 3px var(--cr-russian-violet), 0 0 0 7px var(--cr-printer-ivory);
 	}
 }
 
@@ -617,13 +735,13 @@
 
 	.cr-travel:has(> .pkiw-travel-map:not([hidden])) {
 		grid-template-columns: minmax(17rem, .9fr) minmax(0, 1.35fr);
+		grid-template-rows: auto 1fr;
 	}
 
 	.cr-travel > .pkiw-travel-map {
 		grid-column: 1;
 		grid-row: 1;
-		position: sticky;
-		top: calc(var(--wp-admin--admin-bar--height, 0px) + var(--cr-sticky-header-clearance, 5rem));
+		position: relative;
 	}
 
 	.cr-travel > .pkiw-travel-map__summary {
@@ -640,8 +758,7 @@
 		grid-column: 1 / -1;
 	}
 
-	.cr-travel .pkiw-travel-map__viewport,
-	.cr-travel .leaflet-container {
+	:is(.cr-travel, .pkiw-trip) .leaflet-container {
 		min-height: 30rem;
 	}
 }
@@ -654,12 +771,16 @@
 	}
 
 	:root:not([data-theme="light"]) .cr-archive--trip .pkiw-travel-year__items,
-	:root:not([data-theme="light"]) .cr-archive--itinerary .pkiw-travel-year__items {
+	:root:not([data-theme="light"]) .cr-archive--itinerary .pkiw-travel-entry {
 		box-shadow: var(--cr-travel-shadow), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 	}
 
 	:root:not([data-theme="light"]) .cr-travel-card {
 		box-shadow: 8px 8px 0 var(--cr-selective-yellow), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
+	}
+
+	:root:not([data-theme="light"]) :is(.pkiw-trip, .pkiw-itinerary) {
+		--cr-travel-shadow: 8px 8px 0 var(--cr-selective-yellow);
 	}
 }
 
@@ -669,7 +790,7 @@
 }
 
 :root[data-theme="dark"] .cr-archive--trip .pkiw-travel-year__items,
-:root[data-theme="dark"] .cr-archive--itinerary .pkiw-travel-year__items {
+:root[data-theme="dark"] .cr-archive--itinerary .pkiw-travel-entry {
 	box-shadow: var(--cr-travel-shadow), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 }
 
@@ -677,12 +798,14 @@
 	box-shadow: 8px 8px 0 var(--cr-selective-yellow), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 }
 
+:root[data-theme="dark"] :is(.pkiw-trip, .pkiw-itinerary) {
+	--cr-travel-shadow: 8px 8px 0 var(--cr-selective-yellow);
+}
+
 @media (prefers-reduced-motion: reduce) {
 
-	.pk-card.cr-travel-tag--trip,
-	.pk-card.cr-travel-ticket--itinerary,
-	.cr-travel .pkiw-travel-year__heading {
-		transition-duration: .01ms;
+	:is(.cr-travel, .pkiw-trip) .leaflet-zoom-animated {
+		transition: none !important;
 	}
 }
 
@@ -694,8 +817,8 @@
 	.cr-archive--itinerary .pkiw-travel-entry,
 	.wp-block-post-kinds-indieweb-trip-card.pkiw-trip,
 	.wp-block-post-kinds-indieweb-itinerary-card.pkiw-itinerary,
-	.pk-card.cr-travel-tag--trip,
-	.pk-card.cr-travel-ticket--itinerary {
+		.cr-stream-page .pk-card.cr-travel-tag--trip,
+		.cr-stream-page .pk-card.cr-travel-ticket--itinerary {
 		border-color: CanvasText;
 		background: Canvas;
 		color: CanvasText;
@@ -715,10 +838,15 @@
 	}
 
 	.cr-travel .pkiw-pin,
+	.pkiw-trip .pkiw-pin,
 	.cr-travel .pkiw-travel-map__num {
 		border-color: ButtonText;
 		background: ButtonFace;
 		color: ButtonText;
 		box-shadow: none;
+	}
+
+	:is(.cr-travel, .pkiw-trip) svg .pkiw-route {
+		stroke: CanvasText;
 	}
 }

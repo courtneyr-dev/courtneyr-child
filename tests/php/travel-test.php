@@ -26,6 +26,9 @@ namespace {
 	$GLOBALS['cr_travel_taxonomy']   = '';
 	$GLOBALS['cr_travel_singular']   = true;
 	$GLOBALS['cr_travel_admin']      = false;
+	$GLOBALS['cr_travel_feed']       = false;
+	$GLOBALS['cr_travel_rest']       = false;
+	$GLOBALS['cr_travel_hidden']     = array();
 	$GLOBALS['cr_travel_failures']   = array();
 
 	class WP_Post {
@@ -61,7 +64,7 @@ namespace {
 			return self::$instance;
 		}
 		public function is_registered( string $name ): bool {
-			return $this->registered && in_array( $name, array( 'post-kinds-indieweb/trip-entry', 'post-kinds-indieweb/itinerary-entry' ), true );
+			return $this->registered && in_array( $name, array( 'post-kinds-indieweb/trip-entry', 'post-kinds-indieweb/itinerary-entry', 'post-kinds-indieweb/trip-card', 'post-kinds-indieweb/itinerary-card' ), true );
 		}
 	}
 
@@ -107,6 +110,14 @@ namespace {
 
 	function is_admin(): bool {
 		return (bool) $GLOBALS['cr_travel_admin'];
+	}
+
+	function is_feed(): bool {
+		return (bool) $GLOBALS['cr_travel_feed'];
+	}
+
+	function wp_is_serving_rest_request(): bool {
+		return (bool) $GLOBALS['cr_travel_rest'];
 	}
 
 	function has_term( $term, $taxonomy, $post = null ): bool {
@@ -196,8 +207,13 @@ namespace {
 				'destination'      => 'Rainport',
 				'range'            => array( 'start' => '2026-06-11', 'end' => '2026-06-14', 'display' => 'June 11–14, 2026' ),
 				'count'            => 3,
-				'private_sentinel' => 'Apartment 44, Sentinel Street',
-				'locked_sentinel'  => 'SEA-LOCKED-8842',
+					'stops'             => array(
+						array( 'label' => 'Pine Harbor', 'place' => array( 'name' => 'Pine Harbor' ), 'lat' => 45.5152, 'lng' => -122.6784 ),
+						array( 'label' => 'Sentinel Quay', 'place' => array( 'street' => '1 Sentinel Way', 'url' => 'https://sentinel.example/quay' ), 'lat' => 0.244244, 'lng' => 0.442442 ),
+					),
+					'legs'              => array(
+						array( 'from' => array( 'label' => 'Pine Harbor' ), 'to' => array( 'label' => 'Sentinel Quay', 'place' => array( 'postal_code' => 'SE244' ) ), 'carrier' => 'Sentinel Air' ),
+					),
 			),
 			$facts
 		);
@@ -289,6 +305,10 @@ namespace PKIW {
 	function untitled_name( \WP_Post $post, bool $with_kind = true ): string {
 		return 'Untitled travel post';
 	}
+
+	function post_title_is_hidden( \WP_Post $post ): bool {
+		return ! empty( $GLOBALS['cr_travel_hidden'][ $post->ID ] );
+	}
 }
 
 namespace {
@@ -323,6 +343,9 @@ namespace {
 			cr_travel_same( 'cr-wallet', $GLOBALS['cr_travel_styles'][1][1]['name'] ?? '', 'itinerary style slug' );
 			cr_travel_same( 'courtneyr-travel', $GLOBALS['cr_travel_enqueued'][0][1]['handle'] ?? '', 'trip editor handle' );
 			cr_travel_same( 'courtneyr-travel', $GLOBALS['cr_travel_enqueued'][1][1]['handle'] ?? '', 'itinerary editor handle' );
+				cr_travel_same( 'post-kinds-indieweb/trip-card', $GLOBALS['cr_travel_enqueued'][2][0] ?? '', 'embedded trip card target' );
+				cr_travel_same( 'courtneyr-travel', $GLOBALS['cr_travel_enqueued'][2][1]['handle'] ?? '', 'embedded trip card handle' );
+				cr_travel_same( 'post-kinds-indieweb/itinerary-card', $GLOBALS['cr_travel_enqueued'][3][0] ?? '', 'embedded itinerary card target' );
 		}
 	);
 
@@ -338,17 +361,24 @@ namespace {
 				cr_travel_not_contains( $forbidden, $entry, 'entry stamp prints no travel fact' );
 			}
 			cr_travel_same( $entry, \Courtneyr\Child\Travel\entry_stamp( '', $post ), 'entry stamp stable output' );
-			$stop = array( 'number' => 2, 'label' => 'Rainport', 'day_display' => 'June 12', 'street' => '44 Sentinel Street', 'coordinates' => '47.000,-122.000' );
+				$stop = array( 'number' => 2, 'label' => 'Rainport', 'day_display' => 'June 12', 'place' => array( 'street' => '1 Sentinel Way' ), 'lat' => 0.244244, 'lng' => 0.442442 );
 			$stamp = \Courtneyr\Child\Travel\stop_stamp( '', $stop, 244 );
 			cr_travel_contains( 'RAINPORT', $stamp, 'stop visible label' );
 			cr_travel_contains( 'JUNE 12', $stamp, 'stop visible day' );
 			cr_travel_not_contains( 'Sentinel', $stamp, 'stop street sentinel' );
-			cr_travel_not_contains( '47.000', $stamp, 'stop coordinates sentinel' );
+				cr_travel_not_contains( '0.244244', $stamp, 'stop latitude sentinel' );
+				cr_travel_not_contains( '0.442442', $stamp, 'stop longitude sentinel' );
 			cr_travel_same( $stamp, \Courtneyr\Child\Travel\stop_stamp( '', $stop, 244 ), 'stop stable output' );
 			$next_stop           = $stop;
 			$next_stop['number'] = 3;
 			cr_travel_assert( $stamp !== \Courtneyr\Child\Travel\stop_stamp( '', $next_stop, 244 ), 'printed stop number changes the seed' );
 			cr_travel_same( '', \Courtneyr\Child\Travel\stop_stamp( '', array(), 244 ), 'empty stop has no empty stamp outline' );
+				$GLOBALS['cr_travel_feed'] = true;
+				cr_travel_same( '', \Courtneyr\Child\Travel\stop_stamp( '', $stop, 244 ), 'feed omits repeated decorative stamp text' );
+				$GLOBALS['cr_travel_feed'] = false;
+				$GLOBALS['cr_travel_rest'] = true;
+				cr_travel_same( '', \Courtneyr\Child\Travel\stop_stamp( '', $stop, 244 ), 'REST render omits repeated decorative stamp text' );
+				$GLOBALS['cr_travel_rest'] = false;
 		}
 	);
 
@@ -368,6 +398,12 @@ namespace {
 			cr_travel_post( 244, 'itinerary' );
 			\Courtneyr\Child\Travel\enqueue();
 			cr_travel_same( 'courtneyr-travel', $GLOBALS['cr_travel_enqueued'][0][0] ?? '', 'single handle' );
+
+				$GLOBALS['cr_travel_enqueued'] = array();
+				$GLOBALS['cr_travel_terms'][244] = array( 'note' );
+				\Courtneyr\Child\Travel\enqueue();
+				cr_travel_same( array(), $GLOBALS['cr_travel_enqueued'], 'singular non-travel post does not globally load the sheet' );
+				$GLOBALS['cr_travel_terms'][244] = array( 'itinerary' );
 
 			$GLOBALS['cr_travel_enqueued'] = array();
 			$GLOBALS['cr_travel_singular'] = false;
@@ -400,7 +436,7 @@ namespace {
 				cr_travel_contains( $token, $html, 'trip Stream token' );
 			}
 			cr_travel_same( 1, substr_count( $html, '<a ' ), 'trip Stream link count' );
-			foreach ( array( 'Apartment 44', 'SEA-LOCKED-8842', '<img' ) as $sentinel ) {
+				foreach ( array( 'Sentinel Quay', '1 Sentinel Way', 'sentinel.example', '0.244244', '0.442442', 'Sentinel Air', '<img' ) as $sentinel ) {
 				cr_travel_not_contains( $sentinel, $html, 'trip Stream sentinel' );
 			}
 
@@ -409,7 +445,35 @@ namespace {
 			cr_travel_contains( 'cr-travel-ticket--itinerary', $ticket, 'itinerary ticket object' );
 			cr_travel_contains( '4 legs', $ticket, 'itinerary leg count' );
 			cr_travel_same( 1, substr_count( $ticket, '<a ' ), 'itinerary Stream link count' );
-			cr_travel_not_contains( 'Apartment 44', $ticket, 'itinerary private sentinel' );
+				cr_travel_not_contains( 'Sentinel Air', $ticket, 'itinerary private sentinel' );
+
+				$title_only = cr_travel_post( 246, 'trip', array( 'origin' => '', 'destination' => '', 'range' => array( 'display' => '' ), 'count' => 0 ) );
+				$title_html = \Courtneyr\Child\StreamTravel\travel_card( $card, array(), new WP_Block( array( 'postId' => $title_only->ID ) ) );
+				cr_travel_contains( 'Night train to Rainport', $title_html, 'zero-count card keeps its title' );
+				cr_travel_not_contains( 'cr-travel-card__route', $title_html, 'zero-count card has no route' );
+				cr_travel_not_contains( 'cr-travel-card__range', $title_html, 'zero-count card has no range' );
+
+				$one_stop = cr_travel_post( 247, 'trip', array( 'origin' => 'Pine Harbor', 'destination' => '', 'range' => array( 'display' => 'June 11, 2026' ), 'count' => 1 ) );
+				$one_stop_html = \Courtneyr\Child\StreamTravel\travel_card( $card, array(), new WP_Block( array( 'postId' => $one_stop->ID ) ) );
+				cr_travel_contains( 'Pine Harbor', wp_json_encode( $GLOBALS['cr_travel_facts'][247] ), 'one-stop allowed value exists in facts' );
+				cr_travel_not_contains( 'cr-travel-card__route', $one_stop_html, 'one-stop trip has no route' );
+
+				$one_leg = cr_travel_post( 248, 'itinerary', array( 'count' => 1 ) );
+				$one_leg_html = \Courtneyr\Child\StreamTravel\travel_card( $card, array(), new WP_Block( array( 'postId' => $one_leg->ID ) ) );
+				cr_travel_contains( '<h3 class="cr-travel-card__title">', $one_leg_html, 'incoming H3 level is preserved' );
+				cr_travel_contains( '1 leg', $one_leg_html, 'singular leg count' );
+
+				$untitled = cr_travel_post( 249, 'trip', array( 'origin' => '', 'destination' => '', 'range' => array( 'display' => '' ), 'count' => 0 ) );
+				$untitled->post_title = '';
+				$untitled_html = \Courtneyr\Child\StreamTravel\travel_card( $card, array(), new WP_Block( array( 'postId' => $untitled->ID ) ) );
+				cr_travel_contains( 'Untitled travel post', $untitled_html, 'untitled fallback' );
+				cr_travel_contains( 'class="u-url"', $untitled_html, 'untitled link omits p-name' );
+
+				$hidden = cr_travel_post( 250, 'trip' );
+				$GLOBALS['cr_travel_hidden'][250] = true;
+				$hidden_html = \Courtneyr\Child\StreamTravel\travel_card( $card, array(), new WP_Block( array( 'postId' => $hidden->ID ) ) );
+				cr_travel_contains( 'class="u-url"', $hidden_html, 'hidden title link omits p-name' );
+				$GLOBALS['cr_travel_hidden'][250] = false;
 
 			$protected = '<article class="pk-card pk-card--protected">Protected</article>';
 			cr_travel_same( $protected, \Courtneyr\Child\StreamTravel\travel_card( $protected, array(), new WP_Block( array( 'postId' => 244 ) ) ), 'protected class passes through' );
@@ -459,7 +523,7 @@ namespace {
 	);
 
 	cr_travel_check(
-		'CSS budget, theme states, map scope and performance exclusions are explicit',
+		'CSS budget, specificity, theme states, fidelity and performance exclusions are explicit',
 		static function (): void {
 			cr_travel_same( array( 'existing.css', 'cr-travel.css', 'travel-archive.css', 'travel-card.css' ), \Courtneyr\Child\Travel\rucss_exclusions( array( 'existing.css' ) ), 'RUCSS exclusions' );
 			foreach ( array( 'travel.php', 'stream-travel.php' ) as $file ) {
@@ -473,13 +537,41 @@ namespace {
 			cr_travel_contains( ':root[data-theme="dark"] .cr-archive--itinerary', $css, 'manual dark itinerary selector' );
 			cr_travel_contains( ':where(.cr-archive--trip', $css, 'trip defaults have zero specificity' );
 			cr_travel_contains( ':where(.cr-archive--itinerary', $css, 'itinerary defaults have zero specificity' );
-			cr_travel_contains( '--cr-travel-focus-halo: 0 0 0 7px var(--cr-focus-halo);', $css, 'focus writes the travel halo property' );
+				cr_travel_contains( '@property --cr-travel-focus-halo', $css, 'focus halo is registered' );
+				cr_travel_contains( 'inherits: false;', $css, 'focus halo does not inherit into pins and chips' );
+				cr_travel_contains( '--cr-travel-focus-halo: 0 0 0 3px var(--cr-russian-violet), 0 0 0 7px var(--cr-printer-ivory);', $css, 'light paper gets a dark inner ring and page-contrast halo' );
 			cr_travel_contains( 'var(--cr-travel-focus-halo, 0 0 0 0 transparent)', $css, 'physical objects append the focus halo' );
 			cr_travel_contains( '.cr-travel > .pkiw-travel-map', $css, 'archive map grid is scoped to the travel group' );
-			cr_travel_contains( 'border: 2px solid', $css, 'Stream objects restore a full border after the shared reset' );
+				cr_travel_contains( '.pkiw-trip > .pkiw-travel-map', $css, 'single trip map shares the themed map scope' );
+				foreach ( array( '.cr-stream-page .pk-card.cr-travel-tag--trip {', '.cr-stream-page .pk-card.cr-travel-ticket--itinerary {' ) as $selector ) {
+					$start = strpos( $css, $selector );
+					cr_travel_assert( false !== $start, 'missing winning Stream selector ' . $selector );
+					if ( false !== $start ) {
+						cr_travel_contains( 'border: 2px solid var(--cr-russian-violet);', substr( $css, $start, 900 ), $selector . ' restores border after reset' );
+						cr_travel_contains( 'background:', substr( $css, $start, 900 ), $selector . ' restores background after reset' );
+						cr_travel_contains( 'box-shadow:', substr( $css, $start, 900 ), $selector . ' restores shadow after reset' );
+					}
+				}
+				cr_travel_contains( ':is(.cr-archive--trip, .pkiw-trip, .pkiw-itinerary) .cr-stamp > path', $css, 'travel-owned stamp paint reaches archive and both single roots' );
+				cr_travel_contains( 'stroke: var(--cr-stamp-ink, #241c4a);', $css, 'stamp paint supplies a stroke' );
+				cr_travel_contains( '.pkiw-trip-entry.is-style-cr-passport', $css, 'passport block style has paint' );
+				cr_travel_contains( '.pkiw-itinerary-entry.is-style-cr-wallet', $css, 'wallet block style has paint' );
+				cr_travel_contains( 'grid-template-rows: auto 1fr;', $css, 'archive summary stays directly below map' );
+				cr_travel_contains( 'stroke: CanvasText;', $css, 'forced colors restores route stroke' );
+				cr_travel_not_contains( '.pkiw-travel-map__viewport', $css, 'no selector for nonexistent map viewport' );
+				cr_travel_not_contains( '.pkiw-itinerary__label', $css, 'no selector for nonexistent itinerary label' );
+				cr_travel_not_contains( '--cr-travel-edge', $css, 'no unused travel edge token' );
+				cr_travel_not_contains( '--cr-sticky-header-clearance', $css, 'no undefined sticky-header token' );
 			cr_travel_contains( '@media (forced-colors: active)', $css, 'forced colors' );
 			cr_travel_contains( '@media (prefers-reduced-motion: reduce)', $css, 'reduced motion' );
-			cr_travel_contains( '@media (min-width: 48.0625rem)', $css, 'archive map breakpoint matches check-in' );
+				cr_travel_contains( '.leaflet-zoom-animated', $css, 'reduced motion disables Leaflet zoom transitions' );
+				cr_travel_not_contains( 'transition-duration: .01ms', $css, 'no vacuous transition rule on static paper objects' );
+				$checkin = (string) file_get_contents( CR_TRAVEL_THEME_DIR . '/assets/css/cr-checkin-archive.css' );
+				$matches = array();
+				cr_travel_assert( 1 === preg_match( '/@media \(min-width: ([0-9.]+rem)\)/', $checkin, $matches ), 'check-in breakpoint can be read' );
+				if ( isset( $matches[1] ) ) {
+					cr_travel_contains( '@media (min-width: ' . $matches[1] . ')', $css, 'archive map breakpoint matches check-in source' );
+				}
 			$pruning = (string) file_get_contents( CR_TRAVEL_THEME_DIR . '/inc/stream-style-pruning.php' );
 			cr_travel_contains( "'courtneyr-travel',", $pruning, 'theme travel sheet is inlined on Stream' );
 			$stream = (string) file_get_contents( CR_TRAVEL_THEME_DIR . '/inc/stream-travel.php' );

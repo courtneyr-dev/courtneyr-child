@@ -21,6 +21,8 @@ const TRIP            = 'trip';
 const ITINERARY       = 'itinerary';
 const TRIP_ENTRY      = 'post-kinds-indieweb/trip-entry';
 const ITINERARY_ENTRY = 'post-kinds-indieweb/itinerary-entry';
+const TRIP_CARD       = 'post-kinds-indieweb/trip-card';
+const ITINERARY_CARD  = 'post-kinds-indieweb/itinerary-card';
 const TRIP_STYLE      = 'cr-passport';
 const ITINERARY_STYLE = 'cr-wallet';
 const STYLE_HANDLE    = 'courtneyr-travel';
@@ -81,6 +83,11 @@ function register_block_styles(): void {
 				'label' => TRIP_ENTRY === $block ? __( 'Passport', 'courtneyr-child' ) : __( 'Ticket wallet', 'courtneyr-child' ),
 			)
 		);
+	}
+	foreach ( array( TRIP_ENTRY, ITINERARY_ENTRY, TRIP_CARD, ITINERARY_CARD ) as $block ) {
+		if ( ! $registry->is_registered( $block ) ) {
+			continue;
+		}
 		wp_enqueue_block_style(
 			$block,
 			array(
@@ -125,6 +132,9 @@ add_filter( 'pkiw_trip_entry_badge_html', __NAMESPACE__ . '\\entry_stamp', 10, 2
  * @param int                  $post_id Post ID.
  */
 function stop_stamp( string $html, array $stop, int $post_id ): string {
+	if ( ( function_exists( 'is_feed' ) && is_feed() ) || ( function_exists( 'wp_is_serving_rest_request' ) && wp_is_serving_rest_request() ) ) {
+		return $html;
+	}
 	$label = trim( (string) ( $stop['label'] ?? '' ) );
 	$day   = trim( (string) ( $stop['day_display'] ?? '' ) );
 	if ( '' === $label && '' === $day ) {
