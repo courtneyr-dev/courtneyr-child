@@ -503,6 +503,16 @@ iframe.cr-presentation-frame:focus-visible {
 	box-shadow: var(--cr-shadow-hard), 0 0 0 7px var(--cr-focus-halo);
 }
 
+/* The recording's transcript link sits on the page surface, not the player chrome:
+   cerulean on Prussian blue measured 2.17:1 (fidelity round 1, 2026-11-09). */
+figure.cr-media.cr-presentation-frame figcaption.cr-media__transcript {
+	margin: 0;
+	padding: var(--cr-space-xs) var(--cr-space-sm);
+	border-block-start: 2px solid var(--cr-ink);
+	background-color: var(--cr-surface);
+	color: var(--cr-ink-muted);
+}
+
 /* Stream badge. */
 
 .pk-card.pk-card--stream.cr-badge.cr-badge--stream {
