@@ -114,6 +114,8 @@ require_once __DIR__ . '/inc/recipe.php';
 require_once __DIR__ . '/inc/menu.php';
 require_once __DIR__ . '/inc/checkin-archive.php';
 require_once __DIR__ . '/inc/checkin-map.php';
+require_once __DIR__ . '/inc/travel.php';
+require_once __DIR__ . '/inc/stream-travel.php';
 require_once __DIR__ . '/inc/single-eat-drink.php';
 require_once __DIR__ . '/inc/stream-eat-drink.php';
 require_once __DIR__ . '/inc/quote-note.php';
