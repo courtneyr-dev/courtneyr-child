@@ -24,7 +24,7 @@
 	--cr-travel-shadow: var(--cr-shadow-hard-2);
 }
 
-/* Travel objects are light paper in both schemes, so the yellow ring's halo stays dark (cr-favorite.css, cr-review.css precedent). */
+/* Light paper in both schemes keeps the yellow ring's halo dark (cr-favorite.css precedent). */
 .cr-travel,
 .pkiw-trip,
 .pkiw-itinerary,
@@ -76,10 +76,10 @@
 
 :is(.cr-travel, .pkiw-trip) .leaflet-container {
 	min-height: 19rem;
-	background: var(--cr-surface-soft);
+	background: var(--cr-sky-blue);
 }
 
-/* The count line closes the map frame: it covers the map's lower shadow and carries the shadow on. */
+/* The count line closes the map frame and carries its shadow. */
 .cr-travel .pkiw-travel-map__summary {
 	position: relative;
 	z-index: 1;
@@ -93,7 +93,7 @@
 	box-shadow: var(--cr-travel-shadow, var(--cr-shadow-hard-2));
 }
 
-/* The summary is a separate grid item; cancel the grid row gap so it stays attached to the map. */
+/* Cancel the row gap so the summary stays attached to the map. */
 .cr-travel > .pkiw-travel-map__summary {
 	margin-block-start: calc(var(--cr-space-xl) * -1);
 }
@@ -210,6 +210,7 @@
 	display: grid;
 	gap: 0;
 	margin: 0;
+	max-width: none;
 	padding: var(--cr-space-lg);
 	border: 2px solid var(--cr-russian-violet);
 	background: var(--cr-travel-paper);
@@ -221,6 +222,7 @@
 	padding: var(--cr-space-sm) var(--cr-space-lg);
 	border: 2px solid var(--cr-russian-violet);
 	border-block-end: 0;
+	border-radius: var(--cr-radius-sm) var(--cr-radius-sm) 0 0;
 	background: var(--cr-light-orange);
 	color: var(--cr-russian-violet);
 }
@@ -231,6 +233,12 @@
 
 .cr-archive--trip .pkiw-travel-year__items {
 	border-block-start: 0;
+	border-radius: 0 0 var(--cr-radius-sm) var(--cr-radius-sm);
+}
+
+/* Rows are ruled by the entry's dashed line only; drop the archive's orange marker bar. */
+.cr-archive--trip .pkiw-travel-year__items > li.wp-block-post::after {
+	content: none;
 }
 
 .cr-travel .pkiw-travel-year__items > li {
@@ -302,11 +310,6 @@
 
 .cr-archive--trip .pkiw-travel-entry:has(.pkiw-trip-entry__image) .cr-stamp-mark {
 	grid-column: 4;
-}
-
-.cr-archive--trip .cr-stamp {
-	inline-size: 62px;
-	block-size: 62px;
 }
 
 .cr-archive--trip .pkiw-travel-entry__title {
@@ -417,8 +420,7 @@
 	box-shadow: none;
 }
 
-/* Ticket wallet: two torn, perforated passes rise from behind a notched pocket. The li owns the
-   passes so they paint under the pocket; this also replaces the archive's orange marker bar. */
+/* Ticket wallet: the li's torn passes paint under the pocket and replace the orange marker bar. */
 .cr-archive--itinerary .pkiw-travel-year__items > li.wp-block-post {
 	position: relative;
 	padding-block: 2.25rem 0;
@@ -522,7 +524,7 @@
 	text-decoration: underline;
 }
 
-/* Reserve the number chip's width on both sides so a centered title never runs under it. */
+/* Reserve the chip's width on both sides of the centered title. */
 .cr-archive--itinerary .pkiw-travel-entry:has(.pkiw-travel-map__num) .pkiw-travel-entry__title {
 	padding-inline: 44px;
 }
@@ -564,6 +566,7 @@
 	position: relative;
 	padding: var(--cr-space-lg);
 	border: 2px solid var(--cr-russian-violet);
+	border-radius: var(--cr-radius-sm);
 	background: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
 	box-shadow: var(--cr-travel-shadow, var(--cr-shadow-hard-2)), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
@@ -573,6 +576,7 @@
 	margin: calc(-1 * var(--cr-space-lg)) calc(-1 * var(--cr-space-lg)) var(--cr-space-md);
 	padding: var(--cr-space-sm) var(--cr-space-lg);
 	border-block-end: 2px solid var(--cr-russian-violet);
+	border-radius: var(--cr-radius-sm) var(--cr-radius-sm) 0 0;
 	background: var(--cr-light-orange);
 	font: var(--cr-weight-bold) var(--cr-text-md)/var(--cr-leading-snug) var(--cr-font-accent);
 }
@@ -626,7 +630,7 @@ body.single-post.kind-itinerary:has(.pkiw-itinerary) .single-post__lede-meta .si
 }
 
 /* The single prints its title once, visibly, so the titleless format's clip and avatar don't apply. */
-body.single-post.kind-itinerary.pfbt-format-titleless .single-post__title {
+body.single-post.pfbt-format-titleless:has(.pkiw-trip, .pkiw-itinerary) .single-post__title {
 	position: relative !important;
 	width: auto !important;
 	height: auto !important;
@@ -638,7 +642,7 @@ body.single-post.kind-itinerary.pfbt-format-titleless .single-post__title {
 	white-space: normal !important;
 }
 
-body.single-post.kind-itinerary .single-post__content > .single-post__format-avatar {
+body.single-post:has(.pkiw-trip, .pkiw-itinerary) .single-post__content > .single-post__format-avatar {
 	display: none;
 }
 
@@ -733,7 +737,7 @@ body.single-post.kind-itinerary .single-post__content > .single-post__format-ava
 .pkiw-trip > .pkiw-travel-map {
 	margin-block: var(--cr-space-lg) 0;
 	border: 2px solid var(--cr-russian-violet);
-	background: var(--cr-surface-soft);
+	border-radius: var(--cr-radius-sm);
 	box-shadow: var(--cr-shadow-hard-sm), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 }
 
@@ -879,6 +883,33 @@ body.single-post.kind-itinerary .single-post__content > .single-post__format-ava
 /* Phones: pass fields stack in DOM order (From, To, Departure, Arrival, Carrier); stub perforations drop. */
 @media (max-width: 37.9375rem) {
 
+	/* Trip rows: number, photo and stamp share the first line; the title takes a full row below. */
+	.cr-archive--trip .pkiw-travel-year__items {
+		padding: var(--cr-space-md);
+	}
+
+	.cr-archive--trip .pkiw-travel-entry:is(*, :has(.pkiw-trip-entry__image)) {
+		grid-template-columns: 44px minmax(0, 1fr) 52px;
+	}
+
+	.cr-archive--trip .pkiw-travel-entry .pkiw-trip-entry__image {
+		max-inline-size: 9rem;
+	}
+
+	.cr-archive--trip .pkiw-travel-entry:is(*, :has(.pkiw-trip-entry__image)) .cr-stamp-mark {
+		grid-column: 3;
+	}
+
+	.cr-archive--trip .pkiw-travel-entry:is(*, :has(.pkiw-trip-entry__image)) .pkiw-travel-entry__title {
+		grid-column: 1 / -1;
+		grid-row: 2;
+	}
+
+	.cr-archive--trip .cr-stamp {
+		inline-size: 52px;
+		block-size: 52px;
+	}
+
 	.pkiw-itinerary .pkiw-itinerary__pass {
 		grid-template-columns: minmax(0, 1fr);
 		gap: 0;
@@ -903,21 +934,13 @@ body.single-post.kind-itinerary .single-post__content > .single-post__format-ava
 
 	.cr-travel:has(> .pkiw-travel-map:not([hidden])) {
 		grid-template-columns: minmax(17rem, .9fr) minmax(0, 1.35fr);
-		grid-template-rows: auto 1fr;
-	}
-
-	.cr-travel > .pkiw-travel-map {
-		grid-column: 1;
-		grid-row: 1;
-		position: relative;
-	}
-
-	/* Itinerary map stretches to the wallet column; its summary closes the frame at the bottom. */
-	.cr-archive--itinerary .cr-travel:has(> .pkiw-travel-map:not([hidden])) {
 		grid-template-rows: 1fr auto;
 	}
 
-	.cr-archive--itinerary .cr-travel > .pkiw-travel-map {
+	/* The map stretches to the entry column; its summary closes the frame at the bottom. */
+	.cr-travel > .pkiw-travel-map {
+		grid-column: 1;
+		grid-row: 1;
 		align-self: stretch;
 		block-size: 100%;
 	}
@@ -934,6 +957,21 @@ body.single-post.kind-itinerary .single-post__content > .single-post__format-ava
 
 	.cr-travel:not(:has(> .pkiw-travel-map:not([hidden]))) > .cr-travel__entries {
 		grid-column: 1 / -1;
+	}
+
+	/* The trip single opens as two pages at the wide size: stops left, map right. */
+	.wp-block-post-kinds-indieweb-trip-card.pkiw-trip:has(> .pkiw-travel-map) {
+		--cr-trip-w: min(var(--wp--style--global--wide-size), 100vw - 4rem);
+		display: grid;
+		grid-template: auto 1fr / repeat(2, minmax(0, 1fr));
+		column-gap: var(--cr-space-xl);
+		inline-size: var(--cr-trip-w);
+		margin-inline-start: calc(50% - var(--cr-trip-w) / 2);
+	}
+
+	.pkiw-trip > .pkiw-travel-map {
+		grid-area: 1 / 2 / 3;
+		margin: 0;
 	}
 
 	:is(.cr-travel, .pkiw-trip) .leaflet-container {
@@ -985,10 +1023,8 @@ body.single-post.kind-itinerary .single-post__content > .single-post__format-ava
 		box-shadow: none;
 	}
 
-	.cr-archive--trip .pkiw-travel-entry::before,
-	.cr-archive--trip .pkiw-travel-entry::after,
-	.cr-archive--itinerary .pkiw-travel-entry::before,
-	.cr-archive--itinerary .pkiw-travel-entry::after,
+	.cr-travel .pkiw-travel-entry::before,
+	.cr-travel .pkiw-travel-entry::after,
 	.cr-archive--itinerary .pkiw-travel-year__items > li.wp-block-post::before,
 	.cr-archive--itinerary .pkiw-travel-year__items > li.wp-block-post::after,
 	.pkiw-itinerary::before,

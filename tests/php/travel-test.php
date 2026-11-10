@@ -556,7 +556,7 @@ namespace {
 				cr_travel_contains( 'stroke: var(--cr-stamp-ink, #241c4a);', $css, 'stamp paint supplies a stroke' );
 				cr_travel_contains( '.pkiw-trip-entry.is-style-cr-passport', $css, 'passport block style has paint' );
 				cr_travel_contains( '.pkiw-itinerary-entry.is-style-cr-wallet', $css, 'wallet block style has paint' );
-				cr_travel_contains( 'grid-template-rows: auto 1fr;', $css, 'archive summary stays directly below map' );
+				cr_travel_contains( 'grid-template-rows: 1fr auto;', $css, 'archive map stretches and its summary closes the frame below' );
 				cr_travel_contains( 'stroke: CanvasText;', $css, 'forced colors restores route stroke' );
 				cr_travel_not_contains( '.pkiw-travel-map__viewport', $css, 'no selector for nonexistent map viewport' );
 				cr_travel_not_contains( '.pkiw-itinerary__label', $css, 'no selector for nonexistent itinerary label' );
