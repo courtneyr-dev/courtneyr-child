@@ -175,11 +175,6 @@ test.describe( 'presentation archive', () => {
 			[ 'meetup', '--cr-ut-orange' ],
 			[ 'podcast-guest', '--cr-coral' ],
 		] );
-		// Dark mode lifts the two darkest bands to meet 3:1 on the night surface.
-		if ( await page.evaluate( () => 'dark' === document.documentElement.dataset.theme || ( 'light' !== document.documentElement.dataset.theme && matchMedia( '(prefers-color-scheme: dark)' ).matches ) ) ) {
-			typeTokens.set( 'talk', '--cr-sky-blue' );
-			typeTokens.set( 'keynote', '--cr-periwinkle' );
-		}
 		for ( const [ type, token ] of typeTokens ) {
 			const typed = page.locator( `.pkiw-presentation-badge[data-pkiw-event-type="${ type }"]:has(.pkiw-presentation-badge__type)` );
 			if ( await typed.count() ) {
@@ -253,23 +248,21 @@ test.describe( 'presentation archive', () => {
 		await page.emulateMedia( { colorScheme: 'dark' } );
 		await expect( first ).toHaveCSS( 'background-color', await resolvedToken( first, '--cr-night-elevated' ) );
 		expect( await first.evaluate( ( node ) => getComputedStyle( node, '::before' ).borderTopColor ) ).toBe( await resolvedToken( first, '--cr-printer-ivory' ) );
-		const darkBandContrast = await badges( page ).evaluateAll( ( nodes ) => {
-			const luminance = ( color ) => {
-				const channels = color.match( /[\d.]+/g ).slice( 0, 3 ).map( ( value ) => Number( value ) / 255 ).map( ( value ) => value <= 0.04045 ? value / 12.92 : ( ( value + 0.055 ) / 1.055 ) ** 2.4 );
-				return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
-			};
-			return nodes.map( ( node ) => {
-				const face = luminance( getComputedStyle( node ).backgroundColor );
-				const band = luminance( getComputedStyle( node, '::after' ).backgroundColor );
-				return ( Math.max( face, band ) + 0.05 ) / ( Math.min( face, band ) + 0.05 );
-			} );
-		} );
-		expect( darkBandContrast.every( ( ratio ) => ratio >= 3 ) ).toBe( true );
+		// The art-r2 dark comp keeps the event-type hues; the Type row names the type in text, so the bands are decorative.
+		for ( const [ type, token ] of [ [ 'talk', '--cr-cerulean' ], [ 'keynote', '--cr-russian-violet' ] ] ) {
+			const typed = page.locator( `.pkiw-presentation-badge[data-pkiw-event-type="${ type }"]:has(.pkiw-presentation-badge__type)` ).first();
+			const expected = await resolvedToken( typed, token );
+			expect( await typed.evaluate( ( node ) => [ getComputedStyle( node, '::before' ).backgroundColor, getComputedStyle( node, '::after' ).backgroundColor ] ), `dark ${ type } strap and band` ).toEqual( [ expected, expected ] );
+		}
 		expect( await axeContrast( page ) ).toEqual( [] );
 
 		await page.emulateMedia( { colorScheme: 'light' } );
 		await page.evaluate( () => document.documentElement.dataset.theme = 'dark' );
 		await expect( first ).toHaveCSS( 'background-color', await resolvedToken( first, '--cr-night-elevated' ) );
+		for ( const [ type, token ] of [ [ 'talk', '--cr-cerulean' ], [ 'keynote', '--cr-russian-violet' ] ] ) {
+			const typed = page.locator( `.pkiw-presentation-badge[data-pkiw-event-type="${ type }"]:has(.pkiw-presentation-badge__type)` ).first();
+			expect( await typed.evaluate( ( node ) => getComputedStyle( node, '::after' ).backgroundColor ), `data-theme dark ${ type } band` ).toBe( await resolvedToken( typed, token ) );
+		}
 		expect( await axeContrast( page ) ).toEqual( [] );
 
 		await page.emulateMedia( { forcedColors: 'active', colorScheme: 'light' } );

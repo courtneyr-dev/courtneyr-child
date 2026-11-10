@@ -663,14 +663,6 @@ iframe.cr-presentation-frame:focus-visible {
 		box-shadow: var(--cr-shadow-hard);
 	}
 
-	:root:not([data-theme="light"]) [data-pkiw-event-type="talk"] {
-		--cr-badge-band: var(--cr-sky-blue);
-	}
-
-	:root:not([data-theme="light"]) [data-pkiw-event-type="keynote"] {
-		--cr-badge-band: var(--cr-periwinkle);
-	}
-
 	:root:not([data-theme="light"]) .cr-badge-wall .pkiw-presentation-badge::before,
 	:root:not([data-theme="light"]) .cr-badge-wall .pkiw-presentation-badge__title::before,
 	:root:not([data-theme="light"]) .cr-badge.cr-badge--single::before,
@@ -718,14 +710,6 @@ iframe.cr-presentation-frame:focus-visible {
 	border-color: var(--cr-printer-ivory);
 	background-color: #1a1714;
 	box-shadow: var(--cr-shadow-hard);
-}
-
-:root[data-theme="dark"] [data-pkiw-event-type="talk"] {
-	--cr-badge-band: var(--cr-sky-blue);
-}
-
-:root[data-theme="dark"] [data-pkiw-event-type="keynote"] {
-	--cr-badge-band: var(--cr-periwinkle);
 }
 
 :root[data-theme="dark"] .cr-badge-wall .pkiw-presentation-badge::before,
