@@ -686,7 +686,12 @@ body.single-post.kind-itinerary .single-post__content > .single-post__format-ava
 
 .pkiw-itinerary .pkiw-itinerary__pass dt {
 	margin: 0;
+	font-family: var(--cr-font-mono);
 	font-weight: var(--cr-weight-bold);
+}
+
+.pkiw-itinerary .pkiw-itinerary__name {
+	font-family: var(--cr-font-accent);
 }
 
 .pkiw-itinerary .pkiw-itinerary__pass dd {
