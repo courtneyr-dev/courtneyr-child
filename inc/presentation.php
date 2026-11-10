@@ -130,6 +130,31 @@ function drop_post_title( string $html, array $block, $instance ): string { // p
 add_filter( 'render_block_core/post-title', __NAMESPACE__ . '\\drop_post_title', 10, 3 );
 
 /**
+ * Print the stored day on a protected presentation, where core's post-date block renders ''.
+ *
+ * Same rule as protected_date() in inc/single-reply.php: the date is already public in the permalink.
+ *
+ * @param string               $html     Rendered post-date block.
+ * @param array<string, mixed> $block    Parsed block.
+ * @param mixed                $instance Block instance.
+ */
+function protected_date( string $html, array $block, $instance = null ): string {
+	$class = (string) ( $block['attrs']['className'] ?? '' );
+	if ( '' !== trim( $html ) || ! str_contains( $class, 'single-post__date' ) || ! is_presentation_single() ) {
+		return $html;
+	}
+	$queried_id = get_queried_object_id();
+	$post_id    = $instance instanceof \WP_Block && isset( $instance->context['postId'] ) ? (int) $instance->context['postId'] : $queried_id;
+	$post       = get_post( $post_id );
+	if ( ! $post instanceof \WP_Post || $queried_id !== $post->ID || ! post_password_required( $post ) ) {
+		return $html;
+	}
+	$format = (string) ( $block['attrs']['format'] ?? '' );
+	return '<div class="' . esc_attr( trim( $class . ' wp-block-post-date' ) ) . '"><time datetime="' . esc_attr( (string) get_the_date( 'c', $post ) ) . '">' . esc_html( (string) get_the_date( $format, $post ) ) . '</time></div>';
+}
+add_filter( 'render_block_core/post-date', __NAMESPACE__ . '\\protected_date', 5, 3 );
+
+/**
  * Add presentation chrome and a missing title to supported embeds.
  *
  * @param string               $html  Rendered embed.
@@ -166,6 +191,10 @@ function frame_embed( string $html, array $block ): string {
 		if ( $first ) {
 			$tags->add_class( 'cr-presentation-frame' );
 			$first = false;
+		}
+		// Able Player gives its off-screen "Media player" heading level 1 unless a heading is a direct child of one of its ancestors; the record holds the page H1.
+		if ( 'VIDEO' === $tags->get_tag() && null !== $tags->get_attribute( 'data-able-player' ) && null === $tags->get_attribute( 'data-heading-level' ) ) {
+			$tags->set_attribute( 'data-heading-level', '2' );
 		}
 		if ( 'IFRAME' === $tags->get_tag() ) {
 			if ( ! $tags->get_attribute( 'title' ) ) {

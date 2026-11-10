@@ -292,6 +292,7 @@ namespace {
 				array( 'courtneyr_child_single_object_holds_h1', 'Courtneyr\\Child\\Presentation\\keep_protected_template_header', PHP_INT_MAX, 2 ),
 				array( 'pkiw_presentation_record_args', 'Courtneyr\\Child\\Presentation\\record_args', 10, 2 ),
 				array( 'render_block_core/post-title', 'Courtneyr\\Child\\Presentation\\drop_post_title', 10, 3 ),
+				array( 'render_block_core/post-date', 'Courtneyr\\Child\\Presentation\\protected_date', 5, 3 ),
 				array( 'render_block_core/embed', 'Courtneyr\\Child\\Presentation\\frame_embed', 20, 2 ),
 				array( 'enqueue_block_assets', 'Courtneyr\\Child\\Presentation\\enqueue', 10, 1 ),
 				array( 'perfmatters_rucss_excluded_stylesheets', 'Courtneyr\\Child\\Presentation\\rucss_exclusions', 20, 1 ),
@@ -330,7 +331,15 @@ namespace {
 			$GLOBALS['cr_presentation_passwords'][262] = true;
 			cr_presentation_same( false, \Courtneyr\Child\Presentation\keep_protected_template_header( true, $post ), 'protected presentation keeps the template header and its date' );
 			cr_presentation_contains( 'Template title', \Courtneyr\Child\Presentation\drop_post_title( '<h1>Template title</h1>', array(), $queried_title ), 'protected title remains' );
+			$date_block = array( 'attrs' => array( 'format' => 'F j, Y', 'className' => 'single-post__date cr-dt-published' ) );
+			$date       = \Courtneyr\Child\Presentation\protected_date( '', $date_block, $queried_title );
+			cr_presentation_contains( 'class="single-post__date cr-dt-published wp-block-post-date"', $date, 'protected presentation prints the lede date core leaves empty' );
+			cr_presentation_contains( '<time datetime="2026-11-09T10:00:00-05:00">November 9, 2026</time>', $date, 'protected date carries the stored day' );
+			cr_presentation_same( '<div>kept</div>', \Courtneyr\Child\Presentation\protected_date( '<div>kept</div>', $date_block, $queried_title ), 'a rendered date is left alone' );
+			cr_presentation_same( '', \Courtneyr\Child\Presentation\protected_date( '', array( 'attrs' => array( 'className' => 'related-post__date' ) ), $queried_title ), 'other date blocks stay empty' );
+			cr_presentation_same( '', \Courtneyr\Child\Presentation\protected_date( '', $date_block, new WP_Block( array( 'postId' => 999 ) ) ), 'another post gets no date' );
 			$GLOBALS['cr_presentation_passwords'][262] = false;
+			cr_presentation_same( '', \Courtneyr\Child\Presentation\protected_date( '', $date_block, $queried_title ), 'public presentation gets no fallback date' );
 			cr_presentation_same( true, \Courtneyr\Child\Presentation\keep_protected_template_header( true, $post ), 'public presentation preserves another H1 owner' );
 			$GLOBALS['cr_presentation_terms'][262] = array( 'note' );
 			cr_presentation_contains( 'Template title', \Courtneyr\Child\Presentation\drop_post_title( '<h1>Template title</h1>', array(), $queried_title ), 'other-kind title remains' );
@@ -357,6 +366,11 @@ namespace {
 			cr_presentation_contains( 'title="Recording: Building accessible block patterns"', $wordpress_tv, 'WordPress.tv iframe title' );
 			$able = '<div class="able-player"><video controls></video></div>';
 			cr_presentation_contains( 'cr-presentation-frame', \Courtneyr\Child\Presentation\frame_embed( $able, array( 'attrs' => array( 'providerNameSlug' => 'youtube' ) ) ), 'Able Player root gains frame class' );
+			$able_media = \Courtneyr\Child\Presentation\frame_embed( '<figure class="cr-media"><video data-able-player data-youtube-id="sample00001"></video></figure>', array( 'attrs' => array( 'providerNameSlug' => 'youtube' ) ) );
+			cr_presentation_contains( 'data-heading-level="2"', $able_media, 'Able Player heading sits under the record H1' );
+			$able_set = \Courtneyr\Child\Presentation\frame_embed( '<figure class="cr-media"><video data-able-player data-heading-level="0"></video></figure>', array( 'attrs' => array( 'providerNameSlug' => 'youtube' ) ) );
+			cr_presentation_contains( 'data-heading-level="0"', $able_set, 'an authored Able Player heading level remains' );
+			cr_presentation_not_contains( 'data-heading-level="2"', $able_set, 'authored heading level is not replaced' );
 			cr_presentation_same( $iframe, \Courtneyr\Child\Presentation\frame_embed( $iframe, array( 'attrs' => array( 'providerNameSlug' => 'soundcloud' ) ) ), 'unsupported embed unchanged' );
 
 			$GLOBALS['cr_presentation_singular'] = false;

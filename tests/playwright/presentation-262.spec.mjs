@@ -28,6 +28,36 @@ function isReservedTestHost( hostname ) {
 		.some( ( reserved ) => host === reserved || host.endsWith( `.${ reserved }` ) );
 }
 
+// A local stand-in for YouTube's IFrame API: Able Player builds its controls only after the API reports ready.
+const YOUTUBE_API_STUB = `( () => {
+	const values = { getDuration: 60, getCurrentTime: 0, getPlayerState: 5, getVolume: 70, getPlaybackRate: 1, getAvailablePlaybackRates: [ 1 ], getOptions: [], getVideoData: {}, isMuted: false };
+	class Player {
+		constructor( id, options ) {
+			const frame = document.createElement( 'iframe' );
+			frame.id = id;
+			frame.src = 'about:blank';
+			frame.title = 'YouTube stand-in';
+			frame.tabIndex = -1;
+			document.getElementById( id )?.replaceWith( frame );
+			const player = new Proxy( this, { get: ( target, key ) => 'getIframe' === key ? () => frame : () => values[ key ] } );
+			setTimeout( () => options?.events?.onReady?.( { target: player } ), 0 );
+			return player;
+		}
+	}
+	window.YT = { Player, PlayerState: { UNSTARTED: -1, ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 }, loaded: 1 };
+	window.onYouTubeIframeAPIReady?.();
+} )();`;
+
+// Singles carry authored embeds, so the browser never leaves the local stack: every other host is aborted.
+async function keepRequestsLocal( page, { youtubeApi = false } = {} ) {
+	await page.route( ( url ) => [ 'http:', 'https:' ].includes( url.protocol ) && ! [ 'localhost', '127.0.0.1', '[::1]' ].includes( url.hostname ), ( route ) => {
+		const url = new URL( route.request().url() );
+		return youtubeApi && 'www.youtube.com' === url.hostname && '/iframe_api' === url.pathname
+			? route.fulfill( { contentType: 'text/javascript', body: YOUTUBE_API_STUB } )
+			: route.abort();
+	} );
+}
+
 async function open( page, path, width = 1440 ) {
 	await page.setViewportSize( { width, height: width <= 400 ? 900 : 1100 } );
 	return page.goto( path, { waitUntil: 'load' } );
@@ -257,6 +287,10 @@ test.describe( 'presentation archive', () => {
 test.describe( 'presentation single', () => {
 	test.skip( 'single' !== SET, 'single fixture set' );
 
+	test.beforeEach( async ( { page }, testInfo ) => {
+		await keepRequestsLocal( page, { youtubeApi: testInfo.title.startsWith( 'keyboard order' ) } );
+	} );
+
 	test( 'the record owns one H1 and keeps public facts before authored embeds', async ( { page } ) => {
 		const record = await openSingle( page, 'S01' );
 		await expect( page.locator( 'main h1' ) ).toHaveCount( 1 );
@@ -269,7 +303,10 @@ test.describe( 'presentation single', () => {
 			await expect( frame ).toHaveAttribute( 'title', /^(Slides|Recording): / );
 			await expect( frame ).toHaveAttribute( 'loading', 'lazy' );
 		}
-		await expect( page.locator( '.able-player, [data-able-player]' ) ).toHaveCount( 1 );
+		// One player: Able Player's script adds its own .able-player controller beside the media element.
+		await expect( page.locator( '[data-able-player]' ) ).toHaveCount( 1 );
+		await expect( page.locator( '.cr-presentation-frame [data-able-player]' ) ).toHaveCount( 1 );
+		await expect( page.locator( 'main :is(h2, h3, h4, h5, h6).able-offscreen' ) ).toHaveCount( 1 );
 		for ( const target of await record.locator( '.pkiw-presentation-record__event, .pkiw-presentation-record__links a' ).all() ) {
 			const targetBox = await box( target );
 			expect( targetBox.height ).toBeGreaterThanOrEqual( 44 );
@@ -294,7 +331,7 @@ test.describe( 'presentation single', () => {
 		expect( geometry.entry ).toBeLessThanOrEqual( Math.max( geometry.record, geometry.content ) + 4 );
 		const text = await page.locator( 'main' ).innerText();
 		expect( text ).not.toContain( 'Sentinel Hall' );
-		expect( record.locator( 'dt' ) ).not.toContainText( /slide count|position|location/i );
+		await expect( record.locator( 'dl' ) ).not.toContainText( /slide count|position|location/i );
 	} );
 
 	test( 'empty and protected singles keep their reduced output', async ( { page } ) => {
@@ -312,33 +349,50 @@ test.describe( 'presentation single', () => {
 
 	test( 'keyboard order reaches record links and embeds without a trap', async ( { page } ) => {
 		await openSingle( page, 'S01' );
+		// Able Player prints its controls after the (stubbed) YouTube API reports ready.
+		await expect( page.locator( '.cr-presentation-frame .able-controller [role="button"]' ).first() ).toBeVisible();
 		const expected = await page.evaluate( () => {
+			// Every stop a keyboard can land on: hidden and tabindex="-1" nodes (Able Player's closed alert, its media frame) are not stops.
+			const isStop = ( node ) => node.tabIndex >= 0 && ! node.disabled && node.getClientRects().length > 0 && 'hidden' !== getComputedStyle( node ).visibility;
 			const targets = [ ...document.querySelectorAll( '.pkiw-presentation-record__event, .pkiw-presentation-record__links a' ) ];
+			const perFrame = [];
 			for ( const frame of document.querySelectorAll( '.cr-presentation-frame' ) ) {
-				const focusable = frame.matches( 'iframe' ) ? frame : frame.querySelector( 'iframe, button, a[href], [tabindex]:not([tabindex="-1"])' );
-				if ( focusable ) targets.push( focusable );
+				const stops = ( frame.matches( 'iframe' ) ? [ frame ] : [ ...frame.querySelectorAll( 'iframe, button, a[href], [tabindex]' ) ] ).filter( isStop );
+				perFrame.push( stops.length );
+				targets.push( ...stops );
 			}
-			return targets.map( ( node, index ) => {
-				node.dataset.crPresentationFocusOrder = String( index );
-				return String( index );
-			} );
+			return {
+				perFrame,
+				playerControls: document.querySelectorAll( '.cr-presentation-frame .able-controller [role="button"]' ).length,
+				order: targets.map( ( node, index ) => {
+					node.dataset.crPresentationFocusOrder = String( index );
+					return String( index );
+				} ),
+			};
 		} );
-		expect( expected.length ).toBeGreaterThanOrEqual( 5 );
+		expect( expected.perFrame ).toHaveLength( 2 );
+		expect( Math.min( ...expected.perFrame ), 'each embed has a keyboard stop' ).toBeGreaterThanOrEqual( 1 );
+		expect( expected.playerControls, 'Able Player controls' ).toBeGreaterThanOrEqual( 2 );
+		expect( expected.order.length ).toBeGreaterThanOrEqual( 5 );
 		const reached = [];
-		for ( let index = 0; index < 100 && reached.length < expected.length; index++ ) {
+		for ( let index = 0; index < 100 && reached.length < expected.order.length; index++ ) {
 			await page.keyboard.press( 'Tab' );
 			const state = await page.evaluate( () => {
 				const active = document.activeElement;
 				const frame = active?.closest?.( '.cr-presentation-frame' );
 				const style = getComputedStyle( frame || active );
-				return { order: active?.dataset?.crPresentationFocusOrder || null, outline: style.outlineWidth };
+				return { order: active?.dataset?.crPresentationFocusOrder || null, outline: style.outlineWidth, drawn: style.outlineStyle, iframe: 'IFRAME' === active?.tagName };
 			} );
 			if ( null !== state.order ) {
 				reached.push( state.order );
 				expect( state.outline ).toBe( '3px' );
+				// Chromium matches no :focus, :focus-visible or :focus-within in the parent page while focus sits inside an iframe; the embedded document draws its own focus.
+				if ( ! state.iframe ) {
+					expect( state.drawn ).toBe( 'solid' );
+				}
 			}
 		}
-		expect( reached ).toEqual( expected );
+		expect( reached ).toEqual( expected.order );
 	} );
 } );
 
@@ -362,7 +416,11 @@ test.describe( 'presentation Stream', () => {
 		expect( await card.evaluate( ( node ) => getComputedStyle( node, '::before' ).content ) ).not.toBe( 'none' );
 		const neighbour = page.locator( '.pk-card:not(.cr-badge--stream)' ).first();
 		if ( await neighbour.count() ) {
-			expect( Math.abs( cardBox.width - ( await box( neighbour ) ).width ) ).toBeLessThanOrEqual( 2 );
+			// Layout width, not the bounding box: a tilted card's bounding box grows with its height and angle (width × cos + height × sin), so two cards of one width differ there.
+			const layoutWidth = ( locator ) => locator.evaluate( ( node ) => ( { width: parseFloat( getComputedStyle( node ).width ), sizing: getComputedStyle( node ).boxSizing } ) );
+			const [ own, other ] = [ await layoutWidth( card ), await layoutWidth( neighbour ) ];
+			expect( own.sizing ).toBe( other.sizing );
+			expect( Math.abs( own.width - other.width ) ).toBeLessThanOrEqual( 0.5 );
 			expect( await card.evaluate( ( node ) => getComputedStyle( node ).transform ) ).not.toBe( 'none' );
 		}
 		await assertNoOverflow( page, '320px Stream' );
