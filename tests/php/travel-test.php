@@ -539,7 +539,7 @@ namespace {
 			cr_travel_contains( ':where(.cr-archive--itinerary', $css, 'itinerary defaults have zero specificity' );
 				cr_travel_contains( '@property --cr-travel-focus-halo', $css, 'focus halo is registered' );
 				cr_travel_contains( 'inherits: false;', $css, 'focus halo does not inherit into pins and chips' );
-				cr_travel_contains( '--cr-travel-focus-halo: 0 0 0 3px var(--cr-russian-violet), 0 0 0 7px var(--cr-printer-ivory);', $css, 'light paper gets a dark inner ring and page-contrast halo' );
+				cr_travel_contains( '--cr-travel-focus-halo: 0 0 0 3px var(--cr-focus-ring), 0 0 0 7px var(--cr-focus-halo);', $css, 'travel focus uses the site selective-yellow ring and ink halo tokens' );
 			cr_travel_contains( 'var(--cr-travel-focus-halo, 0 0 0 0 transparent)', $css, 'physical objects append the focus halo' );
 			cr_travel_contains( '.cr-travel > .pkiw-travel-map', $css, 'archive map grid is scoped to the travel group' );
 				cr_travel_contains( '.pkiw-trip > .pkiw-travel-map', $css, 'single trip map shares the themed map scope' );

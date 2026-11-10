@@ -458,10 +458,14 @@
 	border: 2px solid var(--cr-russian-violet);
 	background: var(--cr-cerulean);
 	color: var(--cr-russian-violet);
-	box-shadow: var(--cr-shadow-hard-sm), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
+	box-shadow: var(--cr-travel-shadow), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 }
 
-.cr-archive--itinerary .pkiw-travel-year__items > li:nth-child(even) .pkiw-travel-entry {
+.cr-archive--itinerary .pkiw-travel-year__items > li:nth-child(3n+2) .pkiw-travel-entry {
+	background: var(--cr-russian-violet-soft);
+}
+
+.cr-archive--itinerary .pkiw-travel-year__items > li:nth-child(3n) .pkiw-travel-entry {
 	background: var(--cr-periwinkle);
 }
 
@@ -492,16 +496,27 @@
 	border: 2px dashed var(--cr-travel-wallet-seam, var(--cr-russian-violet));
 	background: var(--cr-printer-ivory);
 	font: var(--cr-weight-bold) var(--cr-text-md)/var(--cr-leading-snug) var(--cr-font-accent);
+	text-align: center;
 }
 
 .cr-archive--itinerary .pkiw-travel-entry__title a {
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	min-block-size: 44px;
 	color: var(--cr-russian-violet);
-	text-decoration: underline;
+	text-decoration: none;
 	text-decoration-thickness: 2px;
 	text-underline-offset: .16em;
+}
+
+.cr-archive--itinerary .pkiw-travel-entry__title a:hover {
+	text-decoration: underline;
+}
+
+/* Reserve the number chip's width on both sides so a centered title never runs under it. */
+.cr-archive--itinerary .pkiw-travel-entry:has(.pkiw-travel-map__num) .pkiw-travel-entry__title {
+	padding-inline: 44px;
 }
 
 /* The whole wallet, passes included, is the title link's hit area. */
