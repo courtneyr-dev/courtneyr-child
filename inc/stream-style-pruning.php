@@ -360,6 +360,8 @@ const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-evidence-labels',
 	'courtneyr-rsvp',
 	'courtneyr-presentation',
+	// Trip and itinerary archives, singles and Stream cards share this conditional physical-object sheet.
+	'courtneyr-travel',
 	// The plugin's own presentation-entry sheet (1.1 KB), so the badge wall and record don't wait on a blocking link.
 	'pkiw-presentation',
 	'wp-block-image',
