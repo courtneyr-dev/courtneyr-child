@@ -58,10 +58,12 @@ function heading_level( string $html ): int {
 	return 2;
 }
 
-/** Return the visitor-facing presentation kind label. */
+/** Return the visitor-facing presentation kind label, from the plugin's card-label source when present. */
 function kind_label(): string {
-	$term = get_term_by( 'slug', 'presentation', 'kind' );
-	return $term instanceof \WP_Term ? $term->name : __( 'Presentation', 'courtneyr-child' );
+	$term     = get_term_by( 'slug', 'presentation', 'kind' );
+	$fallback = $term instanceof \WP_Term ? $term->name : __( 'Presentation', 'courtneyr-child' );
+	// The plugin's .pk-kindlabel text is filterable per site; the badge card shows the same words.
+	return function_exists( '\\PKIW\\get_kind_label' ) ? (string) \PKIW\get_kind_label( $fallback, 'presentation', 'stream-card' ) : $fallback;
 }
 
 /**

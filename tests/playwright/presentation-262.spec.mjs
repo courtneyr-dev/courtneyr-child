@@ -60,6 +60,12 @@ async function resolvedToken( locator, token ) {
 	}, token );
 }
 
+async function box( locator ) {
+	const value = await locator.boundingBox();
+	expect( value ).not.toBeNull();
+	return { ...value, top: value.y, right: value.x + value.width, bottom: value.y + value.height, left: value.x };
+}
+
 const badges = ( page ) => page.locator( '.pkiw-presentation-badge' );
 const fixtureBadge = ( page, key ) => badges( page ).filter( { has: page.locator( `a[href*="${ slugOf( key ) }"]` ) } ).first();
 
@@ -108,9 +114,17 @@ test.describe( 'presentation archive', () => {
 			await expect( badge ).toHaveCSS( 'transform', 'none' );
 		}
 		const html = await page.locator( 'main' ).innerHTML();
-		for ( const banned of [ '<iframe', 'Slides', 'Recording', 'Sentinel Hall', 'sentinel-slides.example', 'Sample content' ] ) {
+		for ( const banned of [ '<iframe', 'Slides', 'Recording', 'Sentinel Hall', 'Sentinel Locked Summit', 'Sentinel Private Summit', 'sentinel-slides.example', 'Sample content' ] ) {
 			expect( html ).not.toContain( banned );
 		}
+		for ( const key of [ 'P09', 'P10' ] ) {
+			const neutral = fixtureBadge( page, key );
+			await expect( neutral.locator( '.pkiw-presentation-badge__type' ) ).toHaveCount( 0 );
+			expect( await neutral.evaluate( ( node ) => getComputedStyle( node, '::after' ).backgroundColor ) ).toBe( await resolvedToken( neutral, '--cr-light-gray' ) );
+		}
+		await expect( fixtureBadge( page, 'P11' ).locator( 'a' ) ).toHaveAccessibleName( 'Shipping accessible blocks Quiet Forum' );
+		await expect( fixtureBadge( page, 'P12' ).locator( 'a' ) ).toHaveAccessibleName( 'Shipping accessible blocks Cedar Camp' );
+		await expect( page.locator( '.pkiw-presentation-badge:not(:has(a[href*="seed-262-p11"])):not(:has(a[href*="seed-262-p12"])) a[aria-labelledby]' ) ).toHaveCount( 0 );
 
 		const typeTokens = new Map( [
 			[ 'talk', '--cr-cerulean' ],
@@ -125,10 +139,47 @@ test.describe( 'presentation archive', () => {
 			const typed = page.locator( `.pkiw-presentation-badge[data-pkiw-event-type="${ type }"]:has(.pkiw-presentation-badge__type)` );
 			if ( await typed.count() ) {
 				const expected = await resolvedToken( typed.first(), token );
-				const actual = await typed.first().evaluate( ( node ) => getComputedStyle( node, '::after' ).backgroundColor );
-				expect( actual, `${ type } band` ).toBe( expected );
+				const actual = await typed.first().evaluate( ( node ) => [ getComputedStyle( node, '::before' ).backgroundColor, getComputedStyle( node, '::after' ).backgroundColor ] );
+				expect( actual, `${ type } strap and band` ).toEqual( [ expected, expected ] );
 			}
 		}
+	} );
+
+	test( 'straps, year tape and long text stay inside their layout boxes', async ( { page } ) => {
+		await openArchive( page, 1, 1440 );
+		const wallBox = await box( page.locator( '.pkiw-presentation-wall' ).first() );
+		for ( const badge of await badges( page ).all() ) {
+			const badgeBox = await box( badge );
+			const strap = await badge.evaluate( ( node ) => {
+				const style = getComputedStyle( node, '::before' );
+				return { top: Number.parseFloat( style.top ), height: Number.parseFloat( style.height ) };
+			} );
+			expect( badgeBox.top + strap.top ).toBeGreaterThanOrEqual( wallBox.top - 2 );
+			expect( badgeBox.top + strap.top + strap.height ).toBeLessThanOrEqual( badgeBox.bottom + 2 );
+		}
+		const yearTape = await page.locator( '.pkiw-presentation-wall__year-label' ).evaluateAll( ( nodes ) => nodes.slice( 0, 2 ).map( ( node ) => {
+			const before = getComputedStyle( node, '::before' );
+			const after = getComputedStyle( node, '::after' );
+			return `${ before.backgroundColor }|${ before.transform }|${ after.transform }`;
+		} ) );
+		expect( yearTape[0] ).not.toBe( yearTape[1] );
+		await openArchive( page, 2, 1440 );
+		const long = fixtureBadge( page, 'P13' ).locator( 'a' );
+		await expect( long ).toHaveText( /A detailed presentation title that wraps across several lines/ );
+		expect( await long.evaluate( ( node ) => node.scrollWidth <= node.clientWidth && node.scrollHeight <= node.getBoundingClientRect().height + 1 ) ).toBe( true );
+	} );
+
+	test( 'page 2 repeats its year, ends the pager and renders C04 as title-only', async ( { page } ) => {
+		await openArchive( page, 2 );
+		await expect( page.locator( '.pkiw-presentation-wall__year-label' ).first() ).toHaveText( '2024' );
+		const protectedBadge = fixtureBadge( page, 'C04' );
+		await expect( protectedBadge ).toHaveCount( 1 );
+		await expect( protectedBadge.locator( 'a' ) ).toHaveAccessibleName( 'Protected presentation control' );
+		await expect( protectedBadge.locator( '.pkiw-presentation-badge__event, .pkiw-presentation-badge__type' ) ).toHaveCount( 0 );
+		await expect( page.locator( '.wp-block-query-pagination-next' ) ).toHaveCount( 0 );
+		await expect( page.locator( '.wp-block-query-pagination-previous' ) ).toHaveCount( 1 );
+		const missing = await open( page, archivePath( 3 ) );
+		expect( missing?.status() ).toBe( 404 );
 	} );
 
 	test( 'focus, dark paint, forced colors and pager use page tokens', async ( { page } ) => {
@@ -147,11 +198,42 @@ test.describe( 'presentation archive', () => {
 		await expect( current ).toHaveCSS( 'background-color', await resolvedToken( current, '--cr-ink' ) );
 		await expect( current ).toHaveCSS( 'color', await resolvedToken( current, '--cr-ink-inverse' ) );
 		expect( await axeContrast( page ) ).toEqual( [] );
+		for ( const target of await page.locator( '.wp-block-query-pagination a, .wp-block-query-pagination .current' ).all() ) {
+			const targetBox = await box( target );
+			expect( targetBox.width ).toBeGreaterThanOrEqual( 44 );
+			expect( targetBox.height ).toBeGreaterThanOrEqual( 44 );
+		}
 
 		await page.emulateMedia( { colorScheme: 'dark' } );
+		await expect( first ).toHaveCSS( 'background-color', await resolvedToken( first, '--cr-night-elevated' ) );
+		expect( await first.evaluate( ( node ) => getComputedStyle( node, '::before' ).borderTopColor ) ).toBe( await resolvedToken( first, '--cr-printer-ivory' ) );
+		const darkBandContrast = await badges( page ).evaluateAll( ( nodes ) => {
+			const luminance = ( color ) => {
+				const channels = color.match( /[\d.]+/g ).slice( 0, 3 ).map( ( value ) => Number( value ) / 255 ).map( ( value ) => value <= 0.04045 ? value / 12.92 : ( ( value + 0.055 ) / 1.055 ) ** 2.4 );
+				return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+			};
+			return nodes.map( ( node ) => {
+				const face = luminance( getComputedStyle( node ).backgroundColor );
+				const band = luminance( getComputedStyle( node, '::after' ).backgroundColor );
+				return ( Math.max( face, band ) + 0.05 ) / ( Math.min( face, band ) + 0.05 );
+			} );
+		} );
+		expect( darkBandContrast.every( ( ratio ) => ratio >= 3 ) ).toBe( true );
 		expect( await axeContrast( page ) ).toEqual( [] );
-		await page.emulateMedia( { forcedColors: 'active' } );
+
+		await page.emulateMedia( { colorScheme: 'light' } );
+		await page.evaluate( () => document.documentElement.dataset.theme = 'dark' );
+		await expect( first ).toHaveCSS( 'background-color', await resolvedToken( first, '--cr-night-elevated' ) );
+		expect( await axeContrast( page ) ).toEqual( [] );
+
+		await page.emulateMedia( { forcedColors: 'active', colorScheme: 'light' } );
+		expect( await page.evaluate( () => matchMedia( '(forced-colors: active)' ).matches ) ).toBe( true );
 		await expect( first ).toHaveCSS( 'border-top-width', '2px' );
+		expect( await first.evaluate( ( node ) => [ '::before', '::after' ].map( ( pseudo ) => getComputedStyle( node, pseudo ).display ) ) ).toEqual( [ 'none', 'none' ] );
+		await expect( first.locator( '.pkiw-presentation-badge__type' ) ).toBeVisible();
+
+		await page.emulateMedia( { forcedColors: 'none', reducedMotion: 'reduce' } );
+		await expect( first ).toHaveCSS( 'transition-duration', '0s' );
 	} );
 } );
 
@@ -170,9 +252,32 @@ test.describe( 'presentation single', () => {
 			await expect( frame ).toHaveAttribute( 'title', /^(Slides|Recording): / );
 			await expect( frame ).toHaveAttribute( 'loading', 'lazy' );
 		}
+		await expect( page.locator( '.able-player, [data-able-player]' ) ).toHaveCount( 1 );
+		for ( const target of await record.locator( '.pkiw-presentation-record__event, .pkiw-presentation-record__links a' ).all() ) {
+			const targetBox = await box( target );
+			expect( targetBox.height ).toBeGreaterThanOrEqual( 44 );
+		}
+		await expect( page.locator( '.u-slides' ) ).toHaveCount( 1 );
+		await expect( page.locator( '.u-recording' ) ).toHaveCount( 1 );
+		const ordered = await page.evaluate( () => {
+			const nodes = [ '.single-post__lede-meta', '.pkiw-presentation-record', '.cr-presentation-frame', '.single-post__comments-wrapper', 'nav.cr-post-nav' ].map( ( selector ) => document.querySelector( selector ) );
+			return nodes.every( Boolean ) && nodes.slice( 1 ).every( ( node, index ) => Boolean( nodes[ index ].compareDocumentPosition( node ) & Node.DOCUMENT_POSITION_FOLLOWING ) );
+		} );
+		expect( ordered ).toBe( true );
+		const entry = page.locator( '.single-post__content > .pkiw-singular-entry' );
+		const geometry = await entry.evaluate( ( node ) => {
+			const record = node.querySelector( '.pkiw-presentation-record' )?.getBoundingClientRect();
+			const content = [ ...node.children ].filter( ( child ) => ! child.classList.contains( 'pkiw-presentation-record' ) ).map( ( child ) => child.getBoundingClientRect() );
+			return {
+				entry: node.getBoundingClientRect().height,
+				record: record?.height || 0,
+				content: content.length ? Math.max( ...content.map( ( rect ) => rect.bottom ) ) - Math.min( ...content.map( ( rect ) => rect.top ) ) : 0,
+			};
+		} );
+		expect( geometry.entry ).toBeLessThanOrEqual( Math.max( geometry.record, geometry.content ) + 4 );
 		const text = await page.locator( 'main' ).innerText();
 		expect( text ).not.toContain( 'Sentinel Hall' );
-		expect( text ).not.toContain( 'slide count' );
+		expect( record.locator( 'dt' ) ).not.toContainText( /slide count|position|location/i );
 	} );
 
 	test( 'empty and protected singles keep their reduced output', async ( { page } ) => {
@@ -185,16 +290,38 @@ test.describe( 'presentation single', () => {
 		skipUnlessSeeded( 404 === response?.status(), 'no protected single fixture S03' );
 		await expect( page.locator( 'form.post-password-form' ) ).toHaveCount( 1 );
 		await expect( page.locator( '.pkiw-presentation-record' ) ).toHaveCount( 0 );
+		await expect( page.locator( '.single-post__date' ) ).toBeVisible();
 	} );
 
 	test( 'keyboard order reaches record links and embeds without a trap', async ( { page } ) => {
 		await openSingle( page, 'S01' );
-		const expected = page.locator( '.pkiw-presentation-record__event, .pkiw-presentation-record__links a, .cr-presentation-frame iframe, iframe.cr-presentation-frame' );
-		const count = await expected.count();
-		for ( let index = 0; index < count; index++ ) {
+		const expected = await page.evaluate( () => {
+			const targets = [ ...document.querySelectorAll( '.pkiw-presentation-record__event, .pkiw-presentation-record__links a' ) ];
+			for ( const frame of document.querySelectorAll( '.cr-presentation-frame' ) ) {
+				const focusable = frame.matches( 'iframe' ) ? frame : frame.querySelector( 'iframe, button, a[href], [tabindex]:not([tabindex="-1"])' );
+				if ( focusable ) targets.push( focusable );
+			}
+			return targets.map( ( node, index ) => {
+				node.dataset.crPresentationFocusOrder = String( index );
+				return String( index );
+			} );
+		} );
+		expect( expected.length ).toBeGreaterThanOrEqual( 5 );
+		const reached = [];
+		for ( let index = 0; index < 100 && reached.length < expected.length; index++ ) {
 			await page.keyboard.press( 'Tab' );
+			const state = await page.evaluate( () => {
+				const active = document.activeElement;
+				const frame = active?.closest?.( '.cr-presentation-frame' );
+				const style = getComputedStyle( frame || active );
+				return { order: active?.dataset?.crPresentationFocusOrder || null, outline: style.outlineWidth };
+			} );
+			if ( null !== state.order ) {
+				reached.push( state.order );
+				expect( state.outline ).toBe( '3px' );
+			}
 		}
-		expect( count ).toBeGreaterThanOrEqual( 4 );
+		expect( reached ).toEqual( expected );
 	} );
 } );
 
@@ -208,8 +335,19 @@ test.describe( 'presentation Stream', () => {
 		await expect( card ).toHaveCount( 1 );
 		await expect( card.locator( 'a[href]' ) ).toHaveCount( 1 );
 		await expect( card.locator( '.pk-kindlabel, .cr-badge__title, .cr-badge__event, .cr-badge__date, .cr-badge__type' ) ).toHaveCount( 5 );
+		expect( await card.evaluate( ( node ) => [ '.pk-kindlabel', '.cr-badge__title', '.cr-badge__event', '.cr-badge__date', '.cr-badge__type' ].map( ( selector ) => node.querySelector( selector ) ).every( ( item, index, items ) => 0 === index || Boolean( items[ index - 1 ].compareDocumentPosition( item ) & Node.DOCUMENT_POSITION_FOLLOWING ) ) ) ).toBe( true );
 		await expect( card.locator( '.cr-badge__strap[aria-hidden="true"]' ) ).toHaveCount( 1 );
 		await expect( card.locator( 'iframe, button' ) ).toHaveCount( 0 );
+		const cardBox = await box( card );
+		const strapBox = await box( card.locator( '.cr-badge__strap' ) );
+		expect( strapBox.top ).toBeGreaterThanOrEqual( cardBox.top );
+		expect( strapBox.bottom ).toBeLessThanOrEqual( cardBox.bottom );
+		expect( await card.evaluate( ( node ) => getComputedStyle( node, '::before' ).content ) ).not.toBe( 'none' );
+		const neighbour = page.locator( '.pk-card:not(.cr-badge--stream)' ).first();
+		if ( await neighbour.count() ) {
+			expect( Math.abs( cardBox.width - ( await box( neighbour ) ).width ) ).toBeLessThanOrEqual( 2 );
+			expect( await card.evaluate( ( node ) => getComputedStyle( node ).transform ) ).not.toBe( 'none' );
+		}
 		await assertNoOverflow( page, '320px Stream' );
 	} );
 } );
@@ -221,7 +359,7 @@ test.describe( 'presentation request privacy', () => {
 		const thirdParty = [];
 		page.on( 'request', ( request ) => {
 			const url = new URL( request.url() );
-			if ( ! [ 'localhost', '127.0.0.1' ].includes( url.hostname ) && ! url.hostname.endsWith( '.localhost' ) ) {
+			if ( [ 'http:', 'https:' ].includes( url.protocol ) && ! [ 'localhost', '127.0.0.1' ].includes( url.hostname ) && ! url.hostname.endsWith( '.localhost' ) ) {
 				thirdParty.push( request.url() );
 			}
 		} );

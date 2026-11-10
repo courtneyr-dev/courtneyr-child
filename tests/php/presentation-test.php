@@ -225,6 +225,15 @@ namespace {
 		cr_presentation_assert( ! str_contains( $haystack, $needle ), $message . ': found ' . $needle );
 	}
 
+	function cr_presentation_has_hook( string $hook, string $callback, int $priority, int $accepted_args ): bool {
+		foreach ( $GLOBALS['cr_presentation_hooks'] as $registered ) {
+			if ( array( $hook, $callback, $priority, $accepted_args ) === $registered ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	function cr_presentation_check( string $name, callable $test ): void {
 		$before = count( $GLOBALS['cr_presentation_failures'] );
 		try {
@@ -276,6 +285,24 @@ namespace {
 	require CR_PRESENTATION_THEME_DIR . '/inc/stream-presentation.php';
 
 	cr_presentation_check(
+		'presentation hooks keep their required priorities and accepted arguments',
+		static function (): void {
+			$expected = array(
+				array( 'init', 'Courtneyr\\Child\\Presentation\\register_block_styles', 20, 1 ),
+				array( 'pkiw_presentation_record_args', 'Courtneyr\\Child\\Presentation\\record_args', 10, 2 ),
+				array( 'render_block_core/post-title', 'Courtneyr\\Child\\Presentation\\drop_post_title', 10, 3 ),
+				array( 'render_block_core/embed', 'Courtneyr\\Child\\Presentation\\frame_embed', 20, 2 ),
+				array( 'enqueue_block_assets', 'Courtneyr\\Child\\Presentation\\enqueue', 10, 1 ),
+				array( 'perfmatters_rucss_excluded_stylesheets', 'Courtneyr\\Child\\Presentation\\rucss_exclusions', 20, 1 ),
+				array( 'render_block_post-kinds-indieweb/stream-card', 'Courtneyr\\Child\\StreamPresentation\\badge_card', 10, 3 ),
+			);
+			foreach ( $expected as $hook ) {
+				cr_presentation_assert( cr_presentation_has_hook( ...$hook ), 'missing hook ' . $hook[0] . ' at priority ' . $hook[2] );
+			}
+		}
+	);
+
+	cr_presentation_check(
 		'the presentation entry style and editor sheet register on the plugin block',
 		static function (): void {
 			\Courtneyr\Child\Presentation\register_block_styles();
@@ -293,13 +320,17 @@ namespace {
 			cr_presentation_same( 1, $args['title_level'], 'record title level' );
 			cr_presentation_same( true, $args['show_date'], 'record date' );
 			cr_presentation_same( 'cr-badge cr-badge--single', $args['class'], 'record class' );
-			cr_presentation_same( '', \Courtneyr\Child\Presentation\drop_post_title( '<h1>Template title</h1>', array() ), 'template title drops' );
+			$queried_title = new WP_Block( array( 'postId' => 262 ) );
+			cr_presentation_same( '', \Courtneyr\Child\Presentation\drop_post_title( '<h1>Template title</h1>', array(), $queried_title ), 'queried template title drops' );
+			cr_presentation_contains( 'Related title', \Courtneyr\Child\Presentation\drop_post_title( '<h3>Related title</h3>', array(), new WP_Block( array( 'postId' => 999, 'queryId' => 7 ) ) ), 'related-post title remains' );
+			cr_presentation_contains( 'Queried loop title', \Courtneyr\Child\Presentation\drop_post_title( '<h3>Queried loop title</h3>', array(), new WP_Block( array( 'postId' => 262, 'queryId' => 7 ) ) ), 'queried post title inside Query Loop remains' );
+			cr_presentation_contains( 'Context-free title', \Courtneyr\Child\Presentation\drop_post_title( '<h2>Context-free title</h2>', array(), null ), 'title without block context remains' );
 
 			$GLOBALS['cr_presentation_passwords'][262] = true;
-			cr_presentation_contains( 'Template title', \Courtneyr\Child\Presentation\drop_post_title( '<h1>Template title</h1>', array() ), 'protected title remains' );
+			cr_presentation_contains( 'Template title', \Courtneyr\Child\Presentation\drop_post_title( '<h1>Template title</h1>', array(), $queried_title ), 'protected title remains' );
 			$GLOBALS['cr_presentation_passwords'][262] = false;
 			$GLOBALS['cr_presentation_terms'][262] = array( 'note' );
-			cr_presentation_contains( 'Template title', \Courtneyr\Child\Presentation\drop_post_title( '<h1>Template title</h1>', array() ), 'other-kind title remains' );
+			cr_presentation_contains( 'Template title', \Courtneyr\Child\Presentation\drop_post_title( '<h1>Template title</h1>', array(), $queried_title ), 'other-kind title remains' );
 		}
 	);
 
@@ -315,6 +346,14 @@ namespace {
 
 			$recording = \Courtneyr\Child\Presentation\frame_embed( $iframe, array( 'attrs' => array( 'providerNameSlug' => 'youtube' ) ) );
 			cr_presentation_contains( 'title="Recording: Building accessible block patterns"', $recording, 'recording iframe title' );
+			$authored = '<figure><iframe src="https://example.test/embed" title="Authored frame title" loading="lazy"></iframe></figure>';
+			$preserved = \Courtneyr\Child\Presentation\frame_embed( $authored, array( 'attrs' => array( 'providerNameSlug' => 'speaker-deck' ) ) );
+			cr_presentation_contains( 'title="Authored frame title"', $preserved, 'authored iframe title remains' );
+			cr_presentation_same( 1, substr_count( $preserved, 'title=' ), 'authored iframe gets no duplicate title' );
+			$wordpress_tv = \Courtneyr\Child\Presentation\frame_embed( $iframe, array( 'attrs' => array( 'providerNameSlug' => 'wordpress-tv' ) ) );
+			cr_presentation_contains( 'title="Recording: Building accessible block patterns"', $wordpress_tv, 'WordPress.tv iframe title' );
+			$able = '<div class="able-player"><video controls></video></div>';
+			cr_presentation_contains( 'cr-presentation-frame', \Courtneyr\Child\Presentation\frame_embed( $able, array( 'attrs' => array( 'providerNameSlug' => 'youtube' ) ) ), 'Able Player root gains frame class' );
 			cr_presentation_same( $iframe, \Courtneyr\Child\Presentation\frame_embed( $iframe, array( 'attrs' => array( 'providerNameSlug' => 'soundcloud' ) ) ), 'unsupported embed unchanged' );
 
 			$GLOBALS['cr_presentation_singular'] = false;
@@ -327,13 +366,15 @@ namespace {
 		'the Stream adapter prints one public destination and omits sentinel-bearing fields',
 		static function (): void {
 			cr_presentation_post( 264 );
+			$GLOBALS['cr_presentation_facts'][264]['locked_sentinel'] = 'Sentinel Locked Summit';
+			$GLOBALS['cr_presentation_facts'][264]['private_sentinel'] = 'Sentinel Private Summit';
 			$card = '<article class="pk-card"><h3 class="pk-title">Old</h3><iframe>sentinel</iframe></article>';
 			$html = \Courtneyr\Child\StreamPresentation\badge_card( $card, array(), new WP_Block( array( 'postId' => 264 ) ) );
 			foreach ( array( 'cr-badge--stream', 'pk-kindlabel', 'cr-badge__strap', 'cr-badge__title', 'cr-badge__event', 'cr-badge__date', 'cr-badge__type', 'Example Web Camp' ) as $allowed ) {
 				cr_presentation_contains( $allowed, $html, 'Stream output ' . $allowed );
 			}
 			cr_presentation_same( 1, substr_count( $html, '<a ' ), 'Stream link count' );
-			foreach ( array( 'Sentinel Hall, 1 Sentinel Way', 'https://sentinel-slides.example/locked', '<iframe' ) as $sentinel ) {
+			foreach ( array( 'Sentinel Hall, 1 Sentinel Way', 'https://sentinel-slides.example/locked', 'Sentinel Locked Summit', 'Sentinel Private Summit', '<iframe' ) as $sentinel ) {
 				cr_presentation_not_contains( $sentinel, $html, 'Stream sentinel' );
 			}
 
@@ -346,6 +387,15 @@ namespace {
 
 			$protected = '<article class="pk-card pk-card--protected">Protected</article>';
 			cr_presentation_same( $protected, \Courtneyr\Child\StreamPresentation\badge_card( $protected, array(), new WP_Block( array( 'postId' => 264 ) ) ), 'protected card passes through' );
+
+			$GLOBALS['cr_presentation_passwords'][264] = true;
+			cr_presentation_same( $card, \Courtneyr\Child\StreamPresentation\badge_card( $card, array(), new WP_Block( array( 'postId' => 264 ) ) ), 'password-required post passes through without relying on a protected class' );
+			$GLOBALS['cr_presentation_passwords'][264] = false;
+			$GLOBALS['cr_presentation_facts'][264] = array();
+			cr_presentation_same( $card, \Courtneyr\Child\StreamPresentation\badge_card( $card, array(), new WP_Block( array( 'postId' => 264 ) ) ), 'empty facts pass through' );
+			$GLOBALS['cr_presentation_stream'] = false;
+			cr_presentation_same( $card, \Courtneyr\Child\StreamPresentation\badge_card( $card, array(), new WP_Block( array( 'postId' => 264 ) ) ), 'non-Stream surface passes through' );
+			$GLOBALS['cr_presentation_stream'] = true;
 		}
 	);
 
@@ -389,9 +439,23 @@ namespace {
 			cr_presentation_assert( strlen( $css ) <= 30 * 1024, 'cr-presentation.css stays within 30 KB' );
 			cr_presentation_contains( ':root:not([data-theme="light"]) .cr-badge-wall .pkiw-presentation-badge', $css, 'system dark selector' );
 			cr_presentation_contains( ':root[data-theme="dark"] .cr-badge-wall .pkiw-presentation-badge', $css, 'manual dark selector' );
+			cr_presentation_contains( ':root:not([data-theme="light"]) [data-pkiw-event-type="talk"]', $css, 'system dark talk band override' );
+			cr_presentation_contains( ':root[data-theme="dark"] [data-pkiw-event-type="keynote"]', $css, 'manual dark keynote band override' );
+			cr_presentation_contains( 'box-shadow: inset 0 2rem 0 var(--cr-badge-band), var(--cr-shadow-hard);', $css, 'badges have a type-colored top band' );
+			cr_presentation_contains( 'gap: 0 var(--cr-space-2xl);', $css, 'single grid uses a column gap only' );
+			cr_presentation_not_contains( 'gap: var(--cr-space-2xl);', $css, 'single grid has no implicit-row gap' );
+			cr_presentation_contains( '@supports selector(:has(a:focus-visible))', $css, ':has focus ring is progressive enhancement' );
+			cr_presentation_contains( '.cr-badge__title a:focus-visible', $css, 'badge link keeps a fallback focus ring' );
+			cr_presentation_contains( 'min-block-size: 2.75rem;', $css, 'record links meet the 44px target contract' );
+			cr_presentation_contains( 'body.single-post.kind-presentation:has(.pkiw-presentation-record)', $css, 'only singles with a record hide the lede date' );
+			cr_presentation_contains( '.cr-badge--stream::before', $css, 'Stream badge has one tape piece' );
 			cr_presentation_contains( 'border: 2px solid var(--cr-printer-ivory);', $css, 'dark Stream border is complete' );
 			cr_presentation_contains( '@media (forced-colors: active)', $css, 'forced colors' );
 			cr_presentation_contains( '@media (prefers-reduced-motion: reduce)', $css, 'reduced motion' );
+			$pruning = (string) file_get_contents( dirname( __DIR__, 2 ) . '/inc/stream-style-pruning.php' );
+			cr_presentation_contains( "'pkiw-presentation',", $pruning, 'plugin presentation sheet is inlined, not a blocking link (review N2)' );
+			$stream = (string) file_get_contents( dirname( __DIR__, 2 ) . '/inc/stream-presentation.php' );
+			cr_presentation_contains( '\\PKIW\\get_kind_label( $fallback, \'presentation\', \'stream-card\' )', $stream, 'Stream kind label comes from the plugin card-label source (review N8)' );
 		}
 	);
 

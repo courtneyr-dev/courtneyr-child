@@ -95,20 +95,25 @@ add_filter( 'pkiw_presentation_record_args', __NAMESPACE__ . '\\record_args', 10
 /**
  * Remove the template title when the presentation record owns the H1.
  *
- * @param string               $html  Rendered title.
- * @param array<string, mixed> $block Parsed block.
+ * @param string               $html     Rendered title.
+ * @param array<string, mixed> $block    Parsed block.
+ * @param mixed                $instance Block instance.
  */
-function drop_post_title( string $html, array $block ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+function drop_post_title( string $html, array $block, $instance ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	if ( ! is_presentation_single() || ! class_exists( '\\PKIW\\Presentation' ) ) {
 		return $html;
 	}
-	$post = get_post( get_queried_object_id() );
+	$queried_id = get_queried_object_id();
+	if ( ! $instance instanceof \WP_Block || (int) ( $instance->context['postId'] ?? 0 ) !== $queried_id || ! empty( $instance->context['queryId'] ) ) {
+		return $html;
+	}
+	$post = get_post( $queried_id );
 	if ( ! $post instanceof \WP_Post || post_password_required( $post ) || ! has_term( KIND, 'kind', $post ) ) {
 		return $html;
 	}
 	return '';
 }
-add_filter( 'render_block_core/post-title', __NAMESPACE__ . '\\drop_post_title', 10, 2 );
+add_filter( 'render_block_core/post-title', __NAMESPACE__ . '\\drop_post_title', 10, 3 );
 
 /**
  * Add presentation chrome and a missing title to supported embeds.
