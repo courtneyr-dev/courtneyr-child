@@ -1,10 +1,5 @@
-/**
- * Trips as passport pages and luggage tags; itineraries as ticket wallets.
- *
- * The plugin owns sanitized facts, maps and archive structure. This sheet
- * gives those objects the child theme's physical-paper treatment.
- */
-/* stylelint-disable no-descending-specificity -- archive, single, map and Stream selectors share plugin classes on separate surfaces. */
+/* Trips: passport pages and luggage tags. Itineraries: ticket wallets. The plugin owns the facts; this sheet paints the paper. */
+/* stylelint-disable no-descending-specificity -- surfaces share plugin classes. */
 
 @property --cr-travel-focus-halo {
 	syntax: "*";
@@ -750,7 +745,7 @@ body.single-post:has(.pkiw-trip, .pkiw-itinerary) .single-post__content > .singl
 	box-shadow: var(--cr-shadow-hard-sm), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 }
 
-/* Stream luggage tag. The shared Stream reset removes borders, so this is full shorthand. */
+/* Stream luggage tag: full shorthand, since the Stream reset drops borders. */
 .cr-stream-page .pk-card.cr-travel-tag--trip {
 	position: relative;
 	box-sizing: border-box;
@@ -762,10 +757,10 @@ body.single-post:has(.pkiw-trip, .pkiw-itinerary) .single-post__content > .singl
 	background: var(--cr-light-orange);
 	color: var(--cr-russian-violet);
 	box-shadow: var(--cr-shadow-hard-2), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
-	transform: rotate(-1deg);
+	transform: rotate(var(--cr-rotate-1));
 }
 
-.cr-stream-page .pk-card.cr-travel-tag--trip::before {
+.cr-travel-tag--trip .cr-travel-card__fastener {
 	position: absolute;
 	inset-block-start: .8rem;
 	inset-inline-end: 1rem;
@@ -786,60 +781,58 @@ body.single-post:has(.pkiw-trip, .pkiw-itinerary) .single-post__content > .singl
 	content: "";
 }
 
-/* Stream itinerary ticket: portrait proportions with a perforated stub. */
+/* Stream itinerary: portrait stub, perforated short edges, notched long sides. */
 .cr-stream-page .pk-card.cr-travel-ticket--itinerary {
 	position: relative;
 	box-sizing: border-box;
-	inline-size: min(100%, 20rem);
-	min-height: 18rem;
+	inline-size: min(100%, 16rem);
+	min-height: 21rem;
 	margin-inline: auto;
 	padding: var(--cr-space-2xl) var(--cr-space-lg) var(--cr-space-xl);
 	border: 2px solid var(--cr-russian-violet);
 	background: var(--cr-periwinkle);
 	color: var(--cr-russian-violet);
 	box-shadow: var(--cr-shadow-hard-2), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
-	transform: rotate(1deg);
+	transform: rotate(var(--cr-rotate-2));
 }
 
 .cr-stream-page .pk-card.cr-travel-ticket--itinerary::before {
 	position: absolute;
-	inset-block-start: 4.75rem;
-	inset-inline: 0;
-	border-block-start: 2px dashed var(--cr-russian-violet);
+	inset: -5px var(--cr-space-sm);
+	border-block: 8px dotted var(--cr-surface);
+	opacity: 1;
 	content: "";
 }
 
-.cr-stream-page .pk-card.cr-travel-ticket--itinerary::after {
+.cr-stream-page .pk-card.cr-travel-ticket--itinerary::after,
+.cr-travel-ticket--itinerary .cr-travel-card__fastener {
 	position: absolute;
-	inset-block-start: 4.15rem;
-	inset-inline-start: -.65rem;
-	inline-size: 1.15rem;
-	block-size: 1.15rem;
+	inset: calc(50% - .75rem) auto auto -.875rem;
+	box-sizing: border-box;
+	inline-size: 1.5rem;
+	block-size: 1.5rem;
 	border: 2px solid var(--cr-russian-violet);
 	border-radius: var(--cr-radius-full);
 	background: var(--cr-surface);
 	content: "";
+	clip-path: inset(0 0 0 50%);
 }
 
-.cr-travel-card__fastener {
-	position: absolute;
-	inset-block-start: var(--cr-space-sm);
-	inset-inline-start: 50%;
-	inline-size: 2.5rem;
-	block-size: .75rem;
-	border: 1px solid var(--cr-russian-violet);
-	background: var(--cr-tape);
-	transform: translateX(-50%) rotate(-2deg);
+.cr-travel-ticket--itinerary .cr-travel-card__fastener {
+	inset-inline: auto -.875rem;
+	clip-path: inset(0 50% 0 0);
 }
 
-.cr-travel-card__kind {
+.cr-travel-card p.cr-travel-card__kind {
 	margin: 0 0 var(--cr-space-sm);
+	color: inherit;
 	font: var(--cr-weight-black) var(--cr-text-xs)/1 var(--cr-font-mono);
 	letter-spacing: var(--cr-tracking-widest);
 	text-transform: uppercase;
 }
 
-.cr-travel-card__title {
+.cr-travel-card .cr-travel-card__title {
+	position: static;
 	margin: 0;
 	font: var(--cr-weight-black) var(--cr-text-xl)/var(--cr-leading-tight) var(--cr-font-accent);
 }
@@ -852,6 +845,13 @@ body.single-post:has(.pkiw-trip, .pkiw-itinerary) .single-post__content > .singl
 	text-decoration: underline;
 	text-decoration-thickness: 2px;
 	text-underline-offset: .16em;
+}
+
+.cr-travel-card__title a::after {
+	position: absolute;
+	z-index: 1;
+	inset: -2px;
+	content: "";
 }
 
 .cr-travel-card__route,

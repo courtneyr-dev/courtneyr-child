@@ -400,7 +400,14 @@ test.describe( 'travel Stream objects', () => {
 			await expect( object ).toHaveCSS( 'border-top-width', '2px' );
 			expect( await object.evaluate( ( node ) => getComputedStyle( node ).backgroundColor ) ).not.toBe( 'rgba(0, 0, 0, 0)' );
 			expect( await object.evaluate( ( node ) => getComputedStyle( node ).boxShadow ) ).not.toBe( 'none' );
-			expect( await object.evaluate( ( node ) => getComputedStyle( node, '::before' ).content ) ).not.toBe( 'none' );
+			expect( await object.evaluate( ( node ) => getComputedStyle( node, '::after' ).content ) ).not.toBe( 'none' );
+			await object.scrollIntoViewIfNeeded();
+			const corners = await object.evaluate( ( node ) => {
+				const box = node.getBoundingClientRect();
+				const link = node.querySelector( '.cr-travel-card__title a' );
+				return [ [ box.left + 12, box.bottom - 12 ], [ box.right - 12, box.bottom - 12 ] ].map( ( [ x, y ] ) => document.elementFromPoint( x, y ) === link );
+			} );
+			expect( corners, 'lower corners hit the title link' ).toEqual( [ true, true ] );
 			const angle = await object.evaluate( ( node ) => getComputedStyle( node ).transform );
 			expect( Math.abs( transformAngle( angle ) ), 'object tilt' ).toBeLessThanOrEqual( 2.01 );
 		}
