@@ -21,6 +21,13 @@ function skipUnlessSeeded( missing, reason ) {
 	test.skip( missing, reason );
 }
 
+function isReservedTestHost( hostname ) {
+	const host = hostname.toLowerCase().replace( /\.$/, '' );
+	// RFC 2606/6761 test names never identify a production third party.
+	return [ 'invalid', 'example', 'test', 'localhost', 'example.com', 'example.org', 'example.net' ]
+		.some( ( reserved ) => host === reserved || host.endsWith( `.${ reserved }` ) );
+}
+
 async function open( page, path, width = 1440 ) {
 	await page.setViewportSize( { width, height: width <= 400 ? 900 : 1100 } );
 	return page.goto( path, { waitUntil: 'load' } );
@@ -369,7 +376,7 @@ test.describe( 'presentation request privacy', () => {
 		const thirdParty = [];
 		page.on( 'request', ( request ) => {
 			const url = new URL( request.url() );
-			if ( [ 'http:', 'https:' ].includes( url.protocol ) && ! [ 'localhost', '127.0.0.1' ].includes( url.hostname ) && ! url.hostname.endsWith( '.localhost' ) ) {
+			if ( [ 'http:', 'https:' ].includes( url.protocol ) && '127.0.0.1' !== url.hostname && ! isReservedTestHost( url.hostname ) ) {
 				thirdParty.push( request.url() );
 			}
 		} );

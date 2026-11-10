@@ -28,6 +28,20 @@ function is_presentation_single(): bool {
 	return is_singular( 'post' ) && has_term( KIND, 'kind', get_queried_object_id() );
 }
 
+/**
+ * Keep the template header when a protected presentation cannot print its record.
+ *
+ * @param mixed    $holds Whether another adapter claims the page H1.
+ * @param \WP_Post $post  Queried post.
+ */
+function keep_protected_template_header( $holds, \WP_Post $post ): bool {
+	if ( is_presentation_single() && get_queried_object_id() === $post->ID && post_password_required( $post ) ) {
+		return false;
+	}
+	return true === $holds;
+}
+add_filter( 'courtneyr_child_single_object_holds_h1', __NAMESPACE__ . '\\keep_protected_template_header', PHP_INT_MAX, 2 );
+
 /** Whether the current request is a Stream surface. */
 function is_stream_surface(): bool {
 	return function_exists( '\\Courtneyr\\Child\\HomeSections\\is_stream_surface' )

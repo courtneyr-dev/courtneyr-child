@@ -289,6 +289,7 @@ namespace {
 		static function (): void {
 			$expected = array(
 				array( 'init', 'Courtneyr\\Child\\Presentation\\register_block_styles', 20, 1 ),
+				array( 'courtneyr_child_single_object_holds_h1', 'Courtneyr\\Child\\Presentation\\keep_protected_template_header', PHP_INT_MAX, 2 ),
 				array( 'pkiw_presentation_record_args', 'Courtneyr\\Child\\Presentation\\record_args', 10, 2 ),
 				array( 'render_block_core/post-title', 'Courtneyr\\Child\\Presentation\\drop_post_title', 10, 3 ),
 				array( 'render_block_core/embed', 'Courtneyr\\Child\\Presentation\\frame_embed', 20, 2 ),
@@ -327,8 +328,10 @@ namespace {
 			cr_presentation_contains( 'Context-free title', \Courtneyr\Child\Presentation\drop_post_title( '<h2>Context-free title</h2>', array(), null ), 'title without block context remains' );
 
 			$GLOBALS['cr_presentation_passwords'][262] = true;
+			cr_presentation_same( false, \Courtneyr\Child\Presentation\keep_protected_template_header( true, $post ), 'protected presentation keeps the template header and its date' );
 			cr_presentation_contains( 'Template title', \Courtneyr\Child\Presentation\drop_post_title( '<h1>Template title</h1>', array(), $queried_title ), 'protected title remains' );
 			$GLOBALS['cr_presentation_passwords'][262] = false;
+			cr_presentation_same( true, \Courtneyr\Child\Presentation\keep_protected_template_header( true, $post ), 'public presentation preserves another H1 owner' );
 			$GLOBALS['cr_presentation_terms'][262] = array( 'note' );
 			cr_presentation_contains( 'Template title', \Courtneyr\Child\Presentation\drop_post_title( '<h1>Template title</h1>', array(), $queried_title ), 'other-kind title remains' );
 		}
@@ -451,7 +454,8 @@ namespace {
 			cr_presentation_contains( 'min-block-size: 2.75rem;', $css, 'record links meet the 44px target contract' );
 			cr_presentation_contains( 'body.single-post.kind-presentation:has(.pkiw-presentation-record)', $css, 'only singles with a record hide the lede date' );
 			cr_presentation_contains( '.cr-badge--stream::before', $css, 'Stream badge has one tape piece' );
-			cr_presentation_contains( 'border: 2px solid var(--cr-printer-ivory);', $css, 'dark Stream border is complete' );
+			cr_presentation_contains( 'inline-size: 100%;', $css, 'Stream badge matches its collage column width' );
+			cr_presentation_contains( 'inset 0 0 0 2px var(--cr-badge-border)', $css, 'Stream badge keeps its two-pixel border inside that width' );
 			cr_presentation_contains( '@media (forced-colors: active)', $css, 'forced colors' );
 			cr_presentation_contains( '@media (prefers-reduced-motion: reduce)', $css, 'reduced motion' );
 			$pruning = (string) file_get_contents( dirname( __DIR__, 2 ) . '/inc/stream-style-pruning.php' );
