@@ -61,8 +61,8 @@
 
 .cr-travel > .pkiw-travel-map:focus-visible,
 .pkiw-trip > .pkiw-travel-map:focus-visible {
-	--cr-travel-focus-halo: 0 0 0 3px var(--cr-russian-violet), 0 0 0 7px var(--cr-printer-ivory);
-	outline: 3px solid var(--cr-russian-violet);
+	--cr-travel-focus-halo: 0 0 0 3px var(--cr-focus-ring), 0 0 0 7px var(--cr-focus-halo);
+	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 2px;
 }
 
@@ -163,8 +163,8 @@
 :is(.cr-travel, .pkiw-trip) .pkiw-pin:focus-visible,
 .cr-travel .pkiw-travel-map__num:focus-visible,
 :is(.cr-travel, .pkiw-trip) .leaflet-bar a:focus-visible {
-	--cr-travel-focus-halo: 0 0 0 3px var(--cr-russian-violet), 0 0 0 7px var(--cr-printer-ivory);
-	outline: 3px solid var(--cr-russian-violet);
+	--cr-travel-focus-halo: 0 0 0 3px var(--cr-focus-ring), 0 0 0 7px var(--cr-focus-halo);
+	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 2px;
 }
 
@@ -522,8 +522,8 @@
 
 .pkiw-travel-entry__title a:focus-visible,
 .cr-travel-card__title a:focus-visible {
-	--cr-travel-focus-halo: 0 0 0 3px var(--cr-russian-violet), 0 0 0 7px var(--cr-printer-ivory);
-	outline: 3px solid var(--cr-russian-violet);
+	--cr-travel-focus-halo: 0 0 0 3px var(--cr-focus-ring), 0 0 0 7px var(--cr-focus-halo);
+	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 3px;
 	box-shadow: var(--cr-travel-focus-halo);
 }
@@ -532,7 +532,7 @@
 
 	.cr-archive--trip .pkiw-travel-year__items:has(a:focus-visible),
 	.cr-archive--itinerary .pkiw-travel-entry:has(a:focus-visible) {
-		--cr-travel-focus-halo: 0 0 0 3px var(--cr-russian-violet), 0 0 0 7px var(--cr-printer-ivory);
+		--cr-travel-focus-halo: 0 0 0 3px var(--cr-focus-ring), 0 0 0 7px var(--cr-focus-halo);
 	}
 }
 
@@ -828,7 +828,7 @@ body.single-post.kind-itinerary .single-post__content > .single-post__format-ava
 @supports selector(:has(a:focus-visible)) {
 
 	.cr-travel-card:has(a:focus-visible) {
-		--cr-travel-focus-halo: 0 0 0 3px var(--cr-russian-violet), 0 0 0 7px var(--cr-printer-ivory);
+		--cr-travel-focus-halo: 0 0 0 3px var(--cr-focus-ring), 0 0 0 7px var(--cr-focus-halo);
 	}
 }
 
@@ -906,28 +906,14 @@ body.single-post.kind-itinerary .single-post__content > .single-post__format-ava
 
 @media (prefers-color-scheme: dark) {
 
-	:root:not([data-theme="light"]) .cr-archive--trip,
-	:root:not([data-theme="light"]) .cr-archive--itinerary {
-		--cr-travel-shadow: 8px 8px 0 var(--cr-selective-yellow);
-	}
-
 	:root:not([data-theme="light"]) .cr-archive--trip .pkiw-travel-year__items,
 	:root:not([data-theme="light"]) .cr-archive--itinerary .pkiw-travel-entry {
 		box-shadow: var(--cr-travel-shadow), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 	}
 
 	:root:not([data-theme="light"]) .cr-travel-card {
-		box-shadow: 8px 8px 0 var(--cr-selective-yellow), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
+		box-shadow: var(--cr-shadow-hard-2), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 	}
-
-	:root:not([data-theme="light"]) :is(.pkiw-trip, .pkiw-itinerary) {
-		--cr-travel-shadow: 8px 8px 0 var(--cr-selective-yellow);
-	}
-}
-
-:root[data-theme="dark"] .cr-archive--trip,
-:root[data-theme="dark"] .cr-archive--itinerary {
-	--cr-travel-shadow: 8px 8px 0 var(--cr-selective-yellow);
 }
 
 :root[data-theme="dark"] .cr-archive--trip .pkiw-travel-year__items,
@@ -936,11 +922,7 @@ body.single-post.kind-itinerary .single-post__content > .single-post__format-ava
 }
 
 :root[data-theme="dark"] .cr-travel-card {
-	box-shadow: 8px 8px 0 var(--cr-selective-yellow), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
-}
-
-:root[data-theme="dark"] :is(.pkiw-trip, .pkiw-itinerary) {
-	--cr-travel-shadow: 8px 8px 0 var(--cr-selective-yellow);
+	box-shadow: var(--cr-shadow-hard-2), var(--cr-travel-focus-halo, 0 0 0 0 transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -123,7 +123,17 @@ async function assertFocusContrast( page, target, paper, label ) {
 			shadows: [ ...style.boxShadow.matchAll( /rgba?\([^)]*\)/g ) ].map( ( match ) => match[0] ),
 		};
 	}, await paper.elementHandle() );
-	expect( contrast( colors.outline, colors.paper ), `${ label } ring against paper` ).toBeGreaterThanOrEqual( 3 );
+	// The ring is two-tone (tokens.css 0.7.46): selective yellow may sit at 1.67:1 on ivory paper as long as its ink halo gives 3:1.
+	const ringEdge = Math.max( contrast( colors.outline, colors.paper ), ...colors.shadows.map( ( color ) => contrast( color, colors.outline ) ) );
+	expect( ringEdge, `${ label } ring against paper or its halo` ).toBeGreaterThanOrEqual( 3 );
+	expect( colors.outline, `${ label } ring is selective yellow` ).toBe( await target.evaluate( ( node ) => {
+		const probe = node.ownerDocument.createElement( 'span' );
+		probe.style.color = 'var(--cr-focus-ring)';
+		node.append( probe );
+		const value = getComputedStyle( probe ).color;
+		probe.remove();
+		return value;
+	} ) );
 	expect( Math.max( ...colors.shadows.map( ( color ) => contrast( color, colors.page ) ) ), `${ label } halo against page` ).toBeGreaterThanOrEqual( 3 );
 }
 
@@ -298,6 +308,13 @@ test.describe( 'itinerary ticket-wallet archive', () => {
 		const secondFill = await archiveEntries( page, 'itinerary' ).nth( 1 ).evaluate( ( node ) => getComputedStyle( node ).backgroundColor );
 		expect( firstFill, 'alternating wallet fills' ).not.toBe( secondFill );
 		await assertNoOverflow( page, 'itinerary archive' );
+
+		const wallet = archiveEntries( page, 'itinerary' ).first();
+		await assertFocusContrast( page, wallet.locator( 'a' ), wallet, 'light wallet link' );
+		expect( await wallet.evaluate( ( node ) => getComputedStyle( node ).boxShadow ), 'focus halo surrounds the wallet' ).toContain( await resolvedToken( wallet, '--cr-selective-yellow' ) );
+		await page.emulateMedia( { colorScheme: 'dark' } );
+		await assertFocusContrast( page, wallet.locator( 'a' ), wallet, 'dark wallet link' );
+		expect( await wallet.evaluate( ( node ) => getComputedStyle( node ).boxShadow ), 'dark wallet uses the 6px hard-shadow token' ).toMatch( /^rgb\([^)]*\) 6px 6px 0px/ );
 	} );
 
 	test( 'wallets use two columns above 608px and one below', async ( { page } ) => {
