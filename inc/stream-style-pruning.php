@@ -359,6 +359,7 @@ const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-mc-seasons',
 	'courtneyr-evidence-labels',
 	'courtneyr-rsvp',
+	'courtneyr-presentation',
 	'wp-block-image',
 	'wp-block-gallery',
 	'wp-block-cover',
