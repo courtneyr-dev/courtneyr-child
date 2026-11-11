@@ -353,8 +353,21 @@ namespace {
 			foreach ( array( 'rotate(3deg)', 'rotate(-3deg)', 'rotate(2deg)', 'rotate(-2deg)' ) as $literal_rotation ) {
 				cr_event_lacks( $literal_rotation, $css . $event_css, 'Event art rotates through theme tokens' );
 			}
+			$tab_rule = cr_event_css_rule( $event_css, '.cr-stream-page .pk-card.k-event.cr-event-tab' );
 			foreach ( array( 'clip-path: none;', 'filter: none;', 'text-align: start;' ) as $crest_reset ) {
-				cr_event_contains( $crest_reset, cr_event_css_rule( $event_css, '.cr-stream-page .pk-card.k-event.cr-event-tab' ), 'Stream tab resets the legacy Event crest' );
+				cr_event_contains( $crest_reset, $tab_rule, 'Stream tab resets the legacy Event crest' );
+			}
+			foreach ( array( '--cr-event-paper: var(--cr-printer-ivory);', 'border-block-start-color: transparent;', 'background: none;', 'box-shadow: var(--cr-shadow-hard), var(--cr-event-focus-shadow' ) as $tab_paint ) {
+				cr_event_contains( $tab_paint, $tab_rule, 'Stream tab is ivory paper with the token hard shadow and a torn top edge' );
+			}
+			cr_event_lacks( '5px 5px 0 var(--cr-selective-yellow)', $event_css, 'Stream tab uses no raw hard shadow' );
+			$torn_rule = cr_event_css_rule( $event_css, '.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__event::before' );
+			foreach ( array( '.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__event::after', 'background: var(--cr-event-paper);', 'clip-path: polygon(0 0, 7% 0.4rem,', '100% 0, 100% 100%, 0 100%);' ) as $torn_edge ) {
+				cr_event_contains( $torn_edge, $torn_rule, 'Stream tab draws its torn top edge on the edge and paper layers' );
+			}
+			$sticker_rule = cr_event_css_rule( $event_css, ".cr-event-flyer__status,\n.cr-event-tab__status" );
+			foreach ( array( 'background: var(--cr-selective-yellow);', 'color: var(--cr-russian-violet);', 'font-family: var(--cr-font-mono);', 'font-size: var(--cr-text-sm);', 'clip-path: polygon(0 0, 100% 0, 100% 34%, 94% 50%, 100% 66%, 100% 100%, 0 100%, 0 66%, 6% 50%, 0 34%);' ) as $sticker ) {
+				cr_event_contains( $sticker, $sticker_rule, 'Stream Cancelled label shares the notched status sticker' );
 			}
 			cr_event_contains( '.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__name a::after', $event_css, 'Stream link overlay stays scoped to the Stream surface' );
 			cr_event_contains( '.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__name a::after', $event_css, 'home Stream link overlay stays scoped to the Stream surface' );

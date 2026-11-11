@@ -382,6 +382,11 @@ test.describe( 'Event Stream tabs', () => {
 	test.skip( 'stream' !== SET, 'stream fixture set' );
 	test.beforeEach( async ( { page } ) => keepRequestsLocal( page ) );
 
+	// The tab paints no paper itself: `.cr-event-tab__event::before` is the ink edge and `::after` the paper, clipped to the torn top edge.
+	const layerStyle = ( tab, pseudo, property ) => tab.evaluate( ( node, [ which, name ] ) => getComputedStyle( node.querySelector( '.cr-event-tab__event' ), which )[ name ], [ pseudo, property ] );
+	// Matches one layer of a computed box-shadow: the resolved color, then its offsets, blur and spread.
+	const shadowLayer = ( color, geometry ) => new RegExp( `${ color.replace( /[()]/g, '\\$&' ) } ${ geometry }` );
+
 	test( 'one-link tab keeps public facts, omits location and covers both corners', async ( { page } ) => {
 		const response = await open( page, STREAM );
 		skipUnlessSeeded( 404 === response?.status(), 'stream', `Stream returned 404 at ${ STREAM }` );
@@ -399,6 +404,9 @@ test.describe( 'Event Stream tabs', () => {
 			await expect( tab.locator( '.p-location, [class*="location"], img, picture, figure, .p-summary' ) ).toHaveCount( 0 );
 			for ( const sentinel of SENTINELS ) await expect( tab ).not.toContainText( sentinel );
 			await expect( tab ).toHaveCSS( 'border-top-width', '2px' );
+			// The torn top edge is one polygon on both layers, and the tab's own top border paints nothing.
+			await expect( tab ).toHaveCSS( 'border-top-color', 'rgba(0, 0, 0, 0)' );
+			for ( const pseudo of [ '::before', '::after' ] ) expect( await layerStyle( tab, pseudo, 'clipPath' ), `${ key } torn edge ${ pseudo }` ).toMatch( /^polygon\(0px 0px, 7% / );
 			const tabBox = await box( tab );
 			const columnBox = await box( tab.locator( 'xpath=ancestor::li[1]' ) );
 			expect( await tab.evaluate( ( node ) => parseFloat( getComputedStyle( node ).width ) ) ).toBeLessThanOrEqual( columnBox.width + 1 );
@@ -410,7 +418,12 @@ test.describe( 'Event Stream tabs', () => {
 			} );
 			expect( corners, `${ key } whole-tab hit area` ).toEqual( [ true, true ] );
 		}
-		await expect( page.locator( `.cr-event-tab:has(a[href*="${ slugOf( 'E03' ) }"]) .cr-event-tab__status` ) ).toHaveText( 'Cancelled' );
+		const status = page.locator( `.cr-event-tab:has(a[href*="${ slugOf( 'E03' ) }"]) .cr-event-tab__status` );
+		await expect( status ).toHaveText( 'Cancelled' );
+		// The Cancelled label is the notched status sticker: selective-yellow fill, Russian-violet ink, a notch on each side.
+		await expect( status ).toHaveCSS( 'background-color', await resolvedToken( status, '--cr-selective-yellow' ) );
+		await expect( status ).toHaveCSS( 'color', await resolvedToken( status, '--cr-russian-violet' ) );
+		await expect( status ).toHaveCSS( 'clip-path', /94% 50%.*6% 50%/ );
 		await assertNoOverflow( page, 'Event Stream tab' );
 	} );
 
@@ -422,14 +435,28 @@ test.describe( 'Event Stream tabs', () => {
 		await link.focus();
 		await expect( tab ).toHaveCSS( 'outline-width', '3px' );
 		await expect( tab ).toHaveCSS( 'outline-color', await resolvedToken( tab, '--cr-focus-ring' ) );
-		await expect.poll( () => tab.evaluate( ( node ) => getComputedStyle( node ).boxShadow ) ).toContain( await resolvedToken( tab, '--cr-russian-violet' ) );
+		// The light hard shadow is ink too, so the halo is told apart by its 8px spread.
+		await expect.poll( () => tab.evaluate( ( node ) => getComputedStyle( node ).boxShadow ) ).toMatch( shadowLayer( await resolvedToken( tab, '--cr-russian-violet' ), '0px 0px 0px 8px' ) );
 
+		// Light paint: printer-ivory paper, a Russian-violet edge and the ink --cr-shadow-hard.
+		await page.emulateMedia( { colorScheme: 'light' } );
+		const violet = await resolvedToken( tab, '--cr-russian-violet' );
+		const ivory = await resolvedToken( tab, '--cr-printer-ivory' );
+		await expect.poll( () => layerStyle( tab, '::after', 'backgroundColor' ) ).toBe( ivory );
+		await expect.poll( () => layerStyle( tab, '::before', 'backgroundColor' ) ).toBe( violet );
+		await expect( tab ).toHaveCSS( 'border-bottom-color', violet );
+		await expect( tab ).toHaveCSS( 'box-shadow', shadowLayer( violet, '4px 4px 0px 0px' ) );
+
+		// Dark paint: periwinkle paper, an ivory edge and the selective-yellow --cr-shadow-hard.
 		await page.emulateMedia( { colorScheme: 'dark' } );
-		await expect( tab ).toHaveCSS( 'background-color', await resolvedToken( tab, '--cr-periwinkle' ) );
-		await expect( tab ).toHaveCSS( 'border-top-color', await resolvedToken( tab, '--cr-printer-ivory' ) );
+		const periwinkle = await resolvedToken( tab, '--cr-periwinkle' );
+		await expect.poll( () => layerStyle( tab, '::after', 'backgroundColor' ) ).toBe( periwinkle );
+		await expect.poll( () => layerStyle( tab, '::before', 'backgroundColor' ) ).toBe( ivory );
+		await expect( tab ).toHaveCSS( 'border-bottom-color', ivory );
+		await expect( tab ).toHaveCSS( 'box-shadow', shadowLayer( await resolvedToken( tab, '--cr-selective-yellow' ), '4px 4px 0px 0px' ) );
 		await page.emulateMedia( { colorScheme: 'light' } );
 		await page.evaluate( () => document.documentElement.dataset.theme = 'dark' );
-		await expect( tab ).toHaveCSS( 'background-color', await resolvedToken( tab, '--cr-periwinkle' ) );
+		await expect.poll( () => layerStyle( tab, '::after', 'backgroundColor' ) ).toBe( periwinkle );
 
 		await page.emulateMedia( { reducedMotion: 'reduce' } );
 		expect( seconds( await link.evaluate( ( node ) => getComputedStyle( node ).transitionDuration ) ) ).toBeLessThanOrEqual( 0.01 );
