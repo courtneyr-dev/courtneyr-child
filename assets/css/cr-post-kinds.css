@@ -124,7 +124,6 @@ body .pk-card {
 .pk-card.k-reply       { --pk-kind: var(--cr-type-reply); --pk-kind-dark: var(--cr-type-reply); --pk-badge-ink: #fff; --pk-tint: var(--cr-light-gray); }
 .pk-card.k-repost      { --pk-kind: #1d7a99; --pk-kind-dark: #7cc1d4; --pk-badge-ink: #fff; --pk-tint: #cfe8f0; }
 .pk-card.k-bookmark    { --pk-kind: var(--cr-type-bookmark); --pk-kind-dark: var(--cr-type-bookmark); --pk-badge-ink: #fff; --pk-tint: var(--cr-light-gray); }
-.pk-card.k-rsvp        { --pk-kind: #55743f; --pk-kind-dark: #a8c098; --pk-badge-ink: #fff; --pk-tint: #dde8d3; }
 
 /* Review, reply, like and bookmark cards paint from cr-review.css, cr-letters.css, cr-like.css and cr-bookmark.css (PKIW W2); only their accent tokens stay here. */
 
@@ -424,55 +423,6 @@ body .pk-card {
 	right: -0.6rem;
 	box-shadow: 0 0 0 3px var(--cr-printer-ivory, #fbfaf5);
 }
-/* event: gig-poster crest */
-.cr-stream-page .pk-card.k-event {
-	background: #241c4a;
-	color: #fbfaf5;
-	text-align: center;
-	padding: 1.6rem 1.1rem 2rem;
-	border: 0;
-	box-shadow: none;
-	clip-path: polygon(0 5%, 50% 0, 100% 5%, 100% 84%, 50% 100%, 0 84%);
-	filter: drop-shadow(4px 4px 0 var(--cr-hard-color, #241c4a));
-}
-.cr-stream-page .k-event .pk-title { color: #fbfaf5; padding: 0; }
-.cr-stream-page .k-event .pk-stream-date time {
-	border: 0;
-	color: var(--cr-selective-yellow, #ffb703);
-	font-size: 1.6rem;
-	font-weight: 900;
-	letter-spacing: 0.02em;
-}
-.cr-stream-page .k-event .pk-sub { color: var(--cr-sky-blue, #8ecae6); }
-.cr-stream-page .k-event .pk-badge { position: static; margin: 0 auto 0.4rem; }
-
-/* rsvp: the ticket (mask + drop-shadow so notches show paper) */
-.cr-stream-page .pk-card.k-rsvp {
-	filter: drop-shadow(4px 4px 0 var(--cr-hard-color, #241c4a));
-	transform: rotate(var(--cr-rotate-1, -1.2deg));
-}
-.cr-stream-page .k-rsvp .pk-body {
-	background: var(--cr-surface-elevated, #fff);
-	padding: 1rem 6rem 1rem 1.1rem;
-	position: relative;
-	-webkit-mask:
-		radial-gradient(circle 12px at 72% 0, transparent 98%, #000 100%) top / 100% 51% no-repeat,
-		radial-gradient(circle 12px at 72% 100%, transparent 98%, #000 100%) bottom / 100% 51% no-repeat;
-	mask:
-		radial-gradient(circle 12px at 72% 0, transparent 98%, #000 100%) top / 100% 51% no-repeat,
-		radial-gradient(circle 12px at 72% 100%, transparent 98%, #000 100%) bottom / 100% 51% no-repeat;
-}
-.cr-stream-page .k-rsvp .pk-body::after {
-	content: "";
-	position: absolute;
-	left: 72%;
-	top: 10px;
-	bottom: 10px;
-	border-left: 2px dashed rgba(36, 28, 74, 0.35);
-}
-.cr-stream-page .k-rsvp .pk-title { padding: 0; font-size: 1rem; }
-.cr-stream-page .k-rsvp .pk-kindlabel { position: static; width: auto; height: auto; border-radius: 1px; background: var(--cr-tape, #f3e5b8); border: 0; box-shadow: none; color: var(--cr-tape-ink, #241c4a); transform: rotate(-2deg); padding: 0.1rem 0.4rem; display: inline-block; }
-
 /* dark-mode hard-shadow color for the drop-shadow() cases */
 :root { --cr-hard-color: #241c4a; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --cr-hard-color: #ffb703; } }
@@ -529,8 +479,7 @@ body .pk-card {
 .cr-stream-page .k-watch .pk-excerpt,
 .cr-stream-page .k-listen .pk-excerpt,
 .cr-stream-page .k-read .pk-excerpt,
-.cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-excerpt,
-.cr-stream-page .k-event .pk-excerpt { color: rgba(251, 250, 245, 0.88); }
+.cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-excerpt { color: rgba(251, 250, 245, 0.88); }
 
 /* Kill every underline-ish treatment on stream card titles. */
 .cr-stream-page .pk-card .pk-title a {
@@ -1005,24 +954,6 @@ body .pk-card {
 /* PLAY: dashed inset on the box art, like the mock. */
 .cr-stream-page .k-play:not(:where(.cr-spine, .cr-cabinet, .cr-cartridge, .cr-scorepad, .pk-card--tabletop)) .pk-media img { outline: 2px dashed rgba(251, 250, 245, 0.45); outline-offset: -8px; }
 
-/* EVENT: "upcoming" kicker from the kind label. */
-.cr-stream-page .k-event .pk-kindlabel {
-	display: block;
-	position: static;
-	width: auto;
-	height: auto;
-	margin: 0 0 0.3rem;
-	padding: 0;
-	background: none;
-	border: 0;
-	box-shadow: none;
-	transform: none;
-	color: var(--cr-sky-blue, #8ecae6);
-	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
-	letter-spacing: 0.18em;
-	text-align: center;
-}
-
 /* MARGIN DOODLES: hand-drawn squiggle arrow, heart, wave, sparkles,
    dotted circle — scattered in the collage margins, aria-invisible. */
 .cr-stream-page .cr-page__content {
@@ -1294,35 +1225,6 @@ body .pk-card {
 .cr-stream-page .pk-card.k-follow::after { content: "+"; position: absolute; top: 0.55rem; right: 0.9rem; font-family: var(--cr-font-accent, serif); font-weight: 900; font-size: 1.8rem; line-height: 1; color: var(--cr-ut-orange, #fb8500); }
 .cr-stream-page .k-issue .pk-title { font-family: var(--cr-font-mono, monospace); font-size: 0.9rem; }
 
-/* trip → postcard; itinerary → ticket strip. */
-.cr-stream-page .pk-card.k-trip {
-	width: 92%;
-	background: var(--cr-surface-elevated, #fff);
-	border: 2px solid var(--cr-ink, #241c4a);
-	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
-	padding: 1rem 5.2rem 1.1rem 1.1rem;
-	position: relative;
-}
-.cr-stream-page .pk-card.k-trip::after {
-	content: "";
-	position: absolute;
-	top: 0.7rem;
-	right: 0.8rem;
-	width: 2.6rem;
-	height: 3.1rem;
-	border: 2px dashed rgba(36, 28, 74, 0.4);
-	background: var(--cr-light-orange, #fee2c3);
-}
-.cr-stream-page .pk-card.k-itinerary {
-	width: 92%;
-	background: var(--cr-surface-elevated, #fff);
-	border: 2px solid var(--cr-ink, #241c4a);
-	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
-	padding: 0.9rem 1.1rem;
-}
-.cr-stream-page .k-itinerary .pk-title { font-family: var(--cr-font-mono, monospace); letter-spacing: 0.06em; }
-.cr-stream-page .k-itinerary .pk-excerpt { border-top: 2px dashed var(--cr-border-strong, rgba(36, 28, 74, 0.24)); padding-top: 0.5rem; margin-top: 0.4rem; }
-
 /* ============================================================
    v0.5.237 — consistency audit fixes:
    column clipping, scrap label clipping, cassette unification,
@@ -1344,9 +1246,7 @@ body .pk-card {
 .cr-stream-page .pk-card.k-quote .pk-kindlabel,
 .cr-stream-page .pk-card.k-follow .pk-kindlabel,
 .cr-stream-page .pk-card.k-issue .pk-kindlabel,
-.cr-stream-page .pk-card.k-tag .pk-kindlabel,
-.cr-stream-page .pk-card.k-trip .pk-kindlabel,
-.cr-stream-page .pk-card.k-itinerary .pk-kindlabel {
+.cr-stream-page .pk-card.k-tag .pk-kindlabel {
 	position: static;
 	display: block;
 	margin: 0 0 0.35rem;
@@ -1384,76 +1284,11 @@ body .pk-card {
 	background-repeat: no-repeat;
 }
 
-/* 4. RSVP: the real ticket, on the card's actual structure. */
-.cr-stream-page .pk-card.k-rsvp {
-	width: 94%;
-	background: var(--cr-surface-elevated, #fff);
-	border: 2px solid var(--cr-ink, #241c4a);
-	box-shadow: var(--cr-shadow-hard, 4px 4px 0 var(--cr-ink, #241c4a));
-	filter: none;
-	clip-path: none;
-	transform: rotate(var(--cr-rotate-1, -1.2deg));
-	padding: 1rem 6.4rem 1rem 1.1rem;
-	position: relative;
-	background-image: none;
-}
-.cr-stream-page .k-rsvp .pk-body {
-	position: static;
-	background: none;
-	padding: 0;
-	-webkit-mask: none;
-	mask: none;
-}
-.cr-stream-page .k-rsvp .pk-body::after {
-	content: "";
-	position: absolute;
-	top: 0.6rem;
-	bottom: 0.6rem;
-	right: 5.6rem;
-	border-left: 2px dashed rgba(36, 28, 74, 0.35);
-}
-.cr-stream-page .k-rsvp .pk-chip.p-rsvp {
-	position: absolute;
-	top: 50%;
-	right: 0.7rem;
-	transform: translateY(-50%) rotate(-4deg);
-	border: 3px double var(--cr-ut-orange-dark, #b85f00);
-	color: var(--cr-ut-orange-dark, #b85f00);
-	font-family: var(--cr-font-accent, serif);
-	font-weight: 900;
-	font-size: 0.8rem;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	padding: 0.3rem 0.55rem;
-	background: none;
-	border-radius: 2px;
-}
-.cr-stream-page .k-rsvp .pk-kindlabel {
-	position: static;
-	display: block;
-	margin: 0 0 0.35rem;
-	background: none;
-	border: 0;
-	box-shadow: none;
-	transform: none;
-	width: auto;
-	height: auto;
-	padding: 0;
-	font-size: max(0.58rem, var(--cr-text-floor, 0.75rem));
-	letter-spacing: 0.14em;
-	color: var(--cr-ink-muted, #126782);
-}
-.cr-stream-page .k-rsvp .pk-title { padding: 0; font-size: 1rem; }
-.cr-stream-page .k-rsvp .pk-meta time { display: inline; }
-
 /* ---- v0.5.238: no icons over words ----
    Paper-family cards lose their badge circles entirely — the
    small-caps kind label names the kind; pushpins/tape do the holding. */
 .cr-stream-page .pk-card.k-checkin .pk-badge,
-.cr-stream-page .pk-card.k-recipe .pk-badge,
-.cr-stream-page .pk-card.k-rsvp .pk-badge,
-.cr-stream-page .pk-card.k-trip .pk-badge,
-.cr-stream-page .pk-card.k-itinerary .pk-badge { display: none; }
+.cr-stream-page .pk-card.k-recipe .pk-badge { display: none; }
 
 /* ---- v0.5.239: restore the no-touching gutter ----
    The 0.5.237 padding fix trimmed vertical margins too far; round
@@ -1463,55 +1298,7 @@ body .pk-card {
 /* ---- v0.5.240: rsvp ticket matched to the mock ----
    Landscape strip: title + event line + №, die-cut notches at the
    perforation (mask + drop-shadow), bigger stamp. */
-.cr-stream-page .pk-card.k-rsvp {
-	box-shadow: none;
-	/* the mask below clips this element's own drop-shadow (same trap
-	   as clip-path), so the shadow is cast from the list item instead */
-	filter: none;
-	padding: 1.1rem 6.6rem 1.1rem 1.15rem;
-	-webkit-mask:
-		radial-gradient(circle 11px at calc(100% - 5.6rem) 0, transparent 98%, #000 100%) top / 100% 51% no-repeat,
-		radial-gradient(circle 11px at calc(100% - 5.6rem) 100%, transparent 98%, #000 100%) bottom / 100% 51% no-repeat;
-	mask:
-		radial-gradient(circle 11px at calc(100% - 5.6rem) 0, transparent 98%, #000 100%) top / 100% 51% no-repeat,
-		radial-gradient(circle 11px at calc(100% - 5.6rem) 100%, transparent 98%, #000 100%) bottom / 100% 51% no-repeat;
-}
-.cr-stream-page .wp-block-post-template > li:has(.pk-card.k-rsvp) {
-	filter: drop-shadow(4px 4px 0 var(--cr-hard-color, #241c4a));
-}
-.cr-stream-page .k-rsvp .pk-kindlabel,
-.cr-stream-page .k-rsvp .pk-stream-date,
-.cr-stream-page .k-rsvp .pk-note { display: none; }
-.cr-stream-page .k-rsvp .pk-event .pk-sub {
-	font-family: var(--cr-font-accent, serif);
-	font-size: 0.68rem;
-	font-weight: 700;
-	letter-spacing: 0.12em;
-	text-transform: uppercase;
-	color: var(--cr-cerulean, #126782);
-	padding: 0;
-	margin: 0.35rem 0 0;
-}
-.cr-stream-page .k-rsvp .pk-event .pk-dot { display: none; }
-.cr-stream-page .k-rsvp .pk-chip.p-rsvp {
-	font-size: 1rem;
-	padding: 0.4rem 0.7rem;
-	right: 1rem;
-}
 .cr-stream-page .cr-page__content { counter-reset: swi-ticket 216; }
-.cr-stream-page .pk-card.k-rsvp { counter-increment: swi-ticket; }
-.cr-stream-page .k-rsvp .pk-meta {
-	padding: 0;
-	margin: 0.5rem 0 0;
-}
-.cr-stream-page .k-rsvp .pk-meta time { display: none; }
-.cr-stream-page .k-rsvp .pk-meta::before {
-	content: "№ 000" counter(swi-ticket);
-	font-family: var(--cr-font-mono, monospace);
-	font-size: 0.7rem;
-	letter-spacing: 0.08em;
-	color: var(--cr-ink-muted, #126782);
-}
 
 /* ---- v0.5.241: tighter torn edges ----
    The 4x4 drop-shadow left a detached wavy hairline under the tear;
@@ -2228,19 +2015,6 @@ body .pk-card {
 		outline: 3px solid var(--cr-focus-ring);
 		outline-offset: -3px;
 	}
-}
-
-/* rsvp GOING stamp: burnt orange reads 3.6:1 on the dark ticket —
-   flip to selective yellow in dark mode only (~9:1). */
-@media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) .cr-stream-page .k-rsvp .pk-chip.p-rsvp {
-		color: #ffb703;
-		border-color: #ffb703;
-	}
-}
-:root[data-theme="dark"] .cr-stream-page .k-rsvp .pk-chip.p-rsvp {
-	color: #ffb703;
-	border-color: #ffb703;
 }
 
 /* ---- v0.5.278: masthead spacing + alignment ----
