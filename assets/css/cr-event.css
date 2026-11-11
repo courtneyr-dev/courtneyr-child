@@ -1,0 +1,485 @@
+/**
+ * Event single flyer and Stream tear-off tab.
+ */
+
+@property --cr-event-focus-shadow {
+	syntax: "*";
+	inherits: false;
+	initial-value: 0 0 0 0 transparent;
+}
+
+.cr-event-flyer {
+	--cr-focus-halo: var(--cr-russian-violet);
+	--cr-event-paper: var(--cr-printer-ivory);
+	--cr-event-edge: 3px solid var(--cr-russian-violet);
+	--cr-event-perf: var(--cr-russian-violet);
+	--cr-event-shadow: var(--cr-russian-violet);
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	max-inline-size: 64rem;
+	margin: var(--cr-space-xl) auto var(--cr-space-3xl);
+	color: var(--cr-ink);
+}
+
+/* The sheet is the flyer's paper; the facts hang from its bottom edge as tear-off tabs. */
+.cr-event-flyer__sheet {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-lg) var(--cr-space-xl);
+	padding: clamp(1.25rem, 4vw, 3rem);
+	border: var(--cr-event-edge);
+	background: var(--cr-event-paper);
+	box-shadow: var(--cr-shadow-hard-2);
+}
+
+.cr-event-flyer__sheet::before,
+.cr-event-flyer__sheet::after {
+	position: absolute;
+	z-index: 2;
+	inset-block-start: -0.75rem;
+	inline-size: 5.5rem;
+	block-size: 1.3rem;
+	border: 1px solid var(--cr-russian-violet);
+	background: var(--cr-tape);
+	content: "";
+}
+
+.cr-event-flyer__sheet::before {
+	inset-inline-start: 1.5rem;
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-event-flyer__sheet::after {
+	inset-inline-end: 1.5rem;
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.cr-event-flyer__kind {
+	inline-size: fit-content;
+	padding: 0.4rem 1rem 0.55rem;
+	background: var(--cr-periwinkle);
+	color: var(--cr-russian-violet);
+	font-weight: 850;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	clip-path: polygon(0 4%, 12% 0, 24% 6%, 39% 1%, 54% 7%, 68% 0, 83% 6%, 100% 1%, 97% 91%, 82% 100%, 67% 94%, 50% 100%, 35% 94%, 18% 100%, 2% 92%);
+}
+
+.cr-event-flyer__name {
+	margin: 0;
+	font-family: var(--wp--preset--font-family--accent);
+	font-size: clamp(1.75rem, 5vw, var(--cr-text-4xl));
+	line-height: 1.05;
+	overflow-wrap: anywhere;
+}
+
+.cr-event-flyer__image img {
+	display: block;
+	inline-size: 100%;
+	max-block-size: 30rem;
+	border: 2px solid var(--cr-russian-violet);
+	object-fit: cover;
+}
+
+/* The picture sits above the title on narrow screens; neither holds a focusable control. */
+.cr-event-flyer__image {
+	order: -1;
+	margin: 0;
+}
+
+@media (min-width: 40.0625rem) {
+
+	/* From 40rem the picture sits left of the title. The last row is flexible, so a tall picture adds its height there and the title lines stay together. */
+	.cr-event-flyer__sheet:has(> .cr-event-flyer__image) {
+		grid-template-rows: repeat(3, auto) 1fr;
+		grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+	}
+
+	.cr-event-flyer__sheet:has(> .cr-event-flyer__image) > .cr-event-flyer__image {
+		grid-area: 1 / 1 / -1 / 2;
+	}
+
+	.cr-event-flyer__sheet:has(> .cr-event-flyer__image) > :not(.cr-event-flyer__image) {
+		grid-column: 2;
+	}
+}
+
+/* The status sticker takes the RSVP wall's notched shape (cr-rsvp.css, `.pkiw-rsvp-entry__status`). The flyer and the Stream tab print the same sticker. */
+.cr-event-flyer__status,
+.cr-event-tab__status {
+	border: 1px solid var(--cr-russian-violet);
+	background: var(--cr-selective-yellow);
+	clip-path: polygon(0 0, 100% 0, 100% 34%, 94% 50%, 100% 66%, 100% 100%, 0 100%, 0 66%, 6% 50%, 0 34%);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.1;
+	text-transform: uppercase;
+}
+
+.cr-event-flyer__status {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: fit-content;
+	min-block-size: 2.75rem;
+	margin: 0;
+	padding: var(--cr-space-xs) var(--cr-space-lg);
+}
+
+/* The strip laps the sheet's bottom border, so each tab's dashed top edge is the perforation it tears along. */
+.cr-event-flyer__facts {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(9.5rem, 100%), 1fr));
+	gap: var(--cr-space-md) var(--cr-space-xs);
+	margin: -3px 0 0;
+	padding-inline: var(--cr-space-sm);
+}
+
+.cr-event-flyer__fact {
+	position: relative;
+	z-index: 0;
+	display: grid;
+	align-content: start;
+	gap: 0.25rem;
+	padding: var(--cr-space-md) var(--cr-space-md) calc(var(--cr-space-md) + 0.6rem);
+}
+
+/* Three stacked layers draw one tab: the hard shadow, the ink outline, and the paper with its perforation. The torn bottom edge is the shared clip-path. */
+.cr-event-flyer__fact::before,
+.cr-event-flyer__fact::after,
+.cr-event-flyer__fact dt::before {
+	position: absolute;
+	inset: 0;
+	content: "";
+	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 0.55rem), 88% 100%, 75% calc(100% - 0.45rem), 62% 100%, 48% calc(100% - 0.55rem), 34% 100%, 21% calc(100% - 0.4rem), 9% 100%, 0 calc(100% - 0.5rem));
+}
+
+.cr-event-flyer__fact::before {
+	z-index: -3;
+	background: var(--cr-event-shadow);
+
+	/* The offsets of --cr-shadow-hard. */
+	translate: 4px 4px;
+}
+
+.cr-event-flyer__fact::after {
+	z-index: -2;
+	background: var(--cr-event-perf);
+}
+
+.cr-event-flyer__fact dt::before {
+	z-index: -1;
+	inset: 0 2px 2px;
+	border-block-start: 3px dashed var(--cr-event-perf);
+	background: var(--cr-event-paper);
+}
+
+.cr-event-flyer__fact :is(dt, dd) {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.cr-event-flyer__fact dt {
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: var(--cr-text-sm);
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.cr-event-flyer__fact dd {
+	font-size: var(--cr-text-md);
+	font-weight: 700;
+	line-height: 1.3;
+}
+
+.cr-event-flyer__summary,
+.cr-event-flyer__url {
+	margin: var(--cr-space-lg) 0 0;
+}
+
+.cr-event-flyer__url a {
+	display: inline-flex;
+	align-items: center;
+	min-block-size: 44px;
+	padding: 0.55rem 0.9rem;
+	border: 2px solid var(--cr-russian-violet);
+	background: var(--cr-periwinkle);
+	color: var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard-sm);
+	font-weight: 800;
+}
+
+.cr-event-flyer__url a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 3px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+body.single-post.kind-event:has(.cr-event-flyer__date) .single-post__lede-meta .single-post__date {
+	display: none;
+}
+
+/* An Event arrives in a title-less format, and PFBT clips the title with !important rules. The post title is this page's one H1, so it comes back the way the check-in single does it, and the format avatar goes. */
+body.single-post.kind-event.pfbt-format-titleless:has(.cr-event-flyer) .single-post__title {
+	position: relative !important;
+	width: auto !important;
+	height: auto !important;
+	margin-block: 0 !important;
+	margin-inline: auto !important;
+	overflow: visible !important;
+	clip: auto !important;
+	clip-path: none !important;
+	white-space: normal !important;
+}
+
+body.single-post.kind-event:has(.cr-event-flyer) .single-post__content > .single-post__format-avatar {
+	display: none;
+}
+
+.cr-stream-page .pk-card.k-event.cr-event-tab,
+.cr-home-stream .pk-card.cr-event-tab {
+	--cr-focus-halo: var(--cr-russian-violet);
+	--cr-event-paper: var(--cr-printer-ivory);
+	--cr-event-tab-edge: var(--cr-russian-violet);
+	position: relative;
+	display: block;
+	min-block-size: 10rem;
+	padding: 1.4rem 1.25rem 2rem;
+
+	/* The top border is the torn edge, which the two layers below draw; the tab itself paints no paper. */
+	border: 2px solid var(--cr-event-tab-edge);
+	border-block-start-color: transparent;
+	border-radius: 0;
+	background: none;
+	color: var(--cr-russian-violet);
+	box-shadow: var(--cr-shadow-hard), var(--cr-event-focus-shadow, 0 0 0 0 transparent);
+	clip-path: none;
+	filter: none;
+	text-align: start;
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-stream-page .pk-card.cr-event-tab::before,
+.cr-home-stream .pk-card.cr-event-tab::before {
+	position: absolute;
+	inset-block-start: -0.55rem;
+	inset-inline-start: 18%;
+	inline-size: 3.8rem;
+	block-size: 1rem;
+	border: 1px solid var(--cr-russian-violet);
+	background: var(--cr-tape);
+	content: "";
+}
+
+.cr-stream-page .pk-card.cr-event-tab::after,
+.cr-home-stream .pk-card.cr-event-tab::after {
+	position: absolute;
+	inset-inline: 0;
+	inset-block-end: 0.65rem;
+	border-block-end: 2px dashed var(--cr-russian-violet);
+	content: "";
+}
+
+.cr-event-tab__event {
+	display: grid;
+	gap: 0.45rem;
+}
+
+/* The shared Stream card rules position this wrapper; the title's ::after overlay and the torn-edge layers must resolve against the tab itself so the whole tab is the hit area. */
+.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__event,
+.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__event {
+	position: static;
+}
+
+/* The torn top edge: an ink layer over the tab's border box and the paper 2px inside it share one polygon. The tear starts and ends at the corners, so the side borders and the hard shadow meet it, and it cuts into the box, so the focus ring stays a rectangle. */
+.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__event::before,
+.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__event::before,
+.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__event::after,
+.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__event::after {
+	position: absolute;
+	z-index: -1;
+	inset: 0;
+	background: var(--cr-event-paper);
+	content: "";
+	clip-path: polygon(0 0, 7% 0.4rem, 16% 0.05rem, 27% 0.5rem, 39% 0.1rem, 52% 0.55rem, 64% 0.05rem, 76% 0.45rem, 88% 0.1rem, 100% 0, 100% 100%, 0 100%);
+}
+
+.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__event::before,
+.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__event::before {
+	z-index: -2;
+	inset: -2px;
+	background: var(--cr-event-tab-edge);
+}
+
+.cr-event-tab__kind {
+	font-size: var(--cr-text-sm);
+	font-weight: 850;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__name,
+.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__name {
+	margin: 0;
+	padding: 0;
+	color: inherit;
+	font-family: var(--wp--preset--font-family--accent);
+	font-size: clamp(1.35rem, 4vw, 2rem);
+	line-height: 1.05;
+}
+
+.cr-event-tab .cr-event-tab__name a {
+	color: inherit;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.15em;
+}
+
+.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__name a::after,
+.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__name a::after {
+	position: absolute;
+	z-index: 4;
+	inset: 0;
+	content: "";
+}
+
+.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__event .pk-stream-date,
+.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__event .pk-stream-date {
+
+	/* One date per tab: the event's own date prints; the plugin's injected publication date (and its legacy large yellow styling) is dropped. The hidden dt-published stays in the DOM. */
+	display: none;
+}
+
+.cr-event-tab__when {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.4rem 0.7rem;
+	margin: 0;
+	font-weight: 750;
+}
+
+.cr-event-tab__status {
+	padding: 0.3rem 0.8rem;
+}
+
+.cr-stream-page .pk-card.cr-event-tab:has(a:focus-visible),
+.cr-home-stream .pk-card.cr-event-tab:has(a:focus-visible) {
+	--cr-event-focus-shadow: 0 0 0 8px var(--cr-focus-halo);
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+}
+
+.cr-event-tab .cr-event-tab__name a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+
+	/* Dark flyer: elevated paper, ivory ink and edge, periwinkle perforations, yellow hard shadows. */
+	:root:not([data-theme="light"]) .cr-event-flyer {
+		--cr-focus-halo: var(--cr-ink);
+		--cr-event-paper: var(--cr-surface-elevated);
+		--cr-event-edge: 2px solid var(--cr-printer-ivory);
+		--cr-event-perf: var(--cr-periwinkle);
+		--cr-event-shadow: var(--cr-selective-yellow);
+	}
+
+	/* Dark tab: periwinkle paper in Russian-violet ink, an ivory edge; --cr-shadow-hard is already selective yellow. */
+	:root:not([data-theme="light"]) .cr-stream-page .pk-card.cr-event-tab,
+	:root:not([data-theme="light"]) .cr-home-stream .pk-card.cr-event-tab {
+		--cr-event-paper: var(--cr-periwinkle);
+		--cr-event-tab-edge: var(--cr-printer-ivory);
+	}
+}
+
+:root[data-theme="dark"] .cr-event-flyer {
+	--cr-focus-halo: var(--cr-ink);
+	--cr-event-paper: var(--cr-surface-elevated);
+	--cr-event-edge: 2px solid var(--cr-printer-ivory);
+	--cr-event-perf: var(--cr-periwinkle);
+	--cr-event-shadow: var(--cr-selective-yellow);
+}
+
+:root[data-theme="dark"] .cr-stream-page .pk-card.cr-event-tab,
+:root[data-theme="dark"] .cr-home-stream .pk-card.cr-event-tab {
+	--cr-event-paper: var(--cr-periwinkle);
+	--cr-event-tab-edge: var(--cr-printer-ivory);
+}
+
+@media (max-width: 40rem) {
+
+	.cr-event-flyer .cr-event-flyer__sheet {
+		padding: 1rem;
+	}
+
+	.cr-event-flyer__fact {
+		padding-inline: var(--cr-space-sm);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.cr-event-flyer *,
+	.cr-event-flyer *::before,
+	.cr-event-flyer *::after,
+	.cr-stream-page .pk-card.cr-event-tab *,
+	.cr-home-stream .pk-card.cr-event-tab * {
+		animation-duration: 0.01ms;
+		animation-iteration-count: 1;
+		scroll-behavior: auto;
+		transition-duration: 0.01ms;
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-event-flyer__sheet,
+	.cr-stream-page .pk-card.cr-event-tab,
+	.cr-home-stream .pk-card.cr-event-tab {
+		border: 3px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+		box-shadow: 5px 5px 0 CanvasText;
+		forced-color-adjust: auto;
+	}
+
+	.cr-event-flyer__sheet::before,
+	.cr-event-flyer__sheet::after,
+	.cr-event-flyer__fact::before,
+	.cr-event-flyer__fact::after,
+	.cr-event-flyer__fact dt::before,
+	.cr-stream-page .pk-card.cr-event-tab::before,
+	.cr-home-stream .pk-card.cr-event-tab::before,
+	.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__event::before,
+	.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__event::before,
+	.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__event::after,
+	.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__event::after {
+		display: none;
+	}
+
+	.cr-stream-page .pk-card.cr-event-tab::after,
+	.cr-home-stream .pk-card.cr-event-tab::after {
+		border-color: CanvasText;
+		border-style: dashed;
+	}
+
+	/* Each tab is a 2px outline with a dashed perforation on top; the torn edge and shadow layers drop. */
+	.cr-event-flyer__fact {
+		padding-block-end: var(--cr-space-md);
+		border: 2px solid CanvasText;
+		border-block-start: 3px dashed CanvasText;
+		background: Canvas;
+	}
+
+	.cr-event-flyer a,
+		.cr-event-tab .cr-event-tab__name a {
+		color: LinkText;
+	}
+}

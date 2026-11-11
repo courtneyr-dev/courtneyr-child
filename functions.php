@@ -134,6 +134,8 @@ require_once __DIR__ . '/inc/bookmark.php';
 require_once __DIR__ . '/inc/single-bookmark.php';
 require_once __DIR__ . '/inc/security-headers.php';
 require_once __DIR__ . '/inc/contact-form.php';
+require_once __DIR__ . '/inc/event-calendar.php';
+require_once __DIR__ . '/inc/event.php';
 require_once __DIR__ . '/inc/footnotes.php';
 require_once __DIR__ . '/inc/toc.php';
 require_once __DIR__ . '/inc/stream-stories.php';
