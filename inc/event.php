@@ -309,9 +309,12 @@ function single_flyer( string $html, array $block, $instance = null ): string {
 	}
 	$summary = '' !== $facts['summary'] ? '<p class="cr-event-flyer__summary p-summary">' . esc_html( $facts['summary'] ) . '</p>' : '';
 
+	// The sheet is the flyer's paper; the facts hang from its perforated bottom edge as tear-off tabs.
 	return '<article class="cr-event-flyer h-event">'
+		. '<div class="cr-event-flyer__sheet">'
 		. '<span class="cr-event-flyer__kind">' . esc_html( single_label() ) . '</span>'
 		. $name . $image . $status
+		. '</div>'
 		. '<dl class="cr-event-flyer__facts">' . $rows . '</dl>'
 		. $summary . $url
 		. '</article>';
