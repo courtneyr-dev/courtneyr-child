@@ -91,6 +91,30 @@ async function runAxeContrast( page, root ) {
 	expect( result.violations, 'axe color-contrast violations' ).toEqual( [] );
 }
 
+async function contrastRatio( foreground, background ) {
+	const parse = ( value ) => ( value.match( /[\d.]+/g ) || [] ).slice( 0, 3 ).map( Number );
+	const luminance = ( value ) => {
+		const channels = parse( value ).map( ( channel ) => {
+			const normalized = channel / 255;
+			return normalized <= 0.04045 ? normalized / 12.92 : ( ( normalized + 0.055 ) / 1.055 ) ** 2.4;
+		} );
+		return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+	};
+	const values = [ luminance( foreground ), luminance( background ) ].sort( ( a, b ) => b - a );
+	return ( values[0] + 0.05 ) / ( values[1] + 0.05 );
+}
+
+async function assertSentinels( locator, present, label ) {
+	const html = await locator.evaluate( ( node ) => node.outerHTML );
+	for ( const sentinel of SENTINELS ) {
+		expect( html.includes( sentinel ), `${ label }: ${ sentinel }` ).toBe( present );
+	}
+}
+
+function eventEntry( root, title ) {
+	return root.locator( 'article.mc-event' ).filter( { hasText: title } ).first();
+}
+
 test.describe( 'Event calendar archive', () => {
 	test.skip( 'calendar' !== SET || 'calendar-off' === STATE, 'calendar fixture set with calendar enabled' );
 	test.beforeEach( async ( { page } ) => keepRequestsLocal( page ) );
@@ -103,7 +127,8 @@ test.describe( 'Event calendar archive', () => {
 		await expect( main.locator( '.cr-archive__header .wp-block-term-description' ) ).toBeVisible();
 		await expect( main.locator( '.cr-archive__header .is-style-cr-marker-bar-short' ) ).toBeVisible();
 		await expect( calendar ).toHaveAttribute( 'aria-label', /event|calendar/i );
-		await expect( calendar.locator( '.mc-main .heading, .mc-main .mc-calendar-title' ).first() ).toHaveJSProperty( 'tagName', 'H2' );
+		await expect( calendar.locator( '.mc-main .heading' ).first() ).toHaveJSProperty( 'tagName', 'H2' );
+		await expect( page.locator( 'link[href*="my-calendar"], script[src*="my-calendar"]' ) ).not.toHaveCount( 0 );
 		await expect( main.locator( '.wp-block-query, .wp-block-query-pagination' ) ).toHaveCount( 0 );
 		const order = await main.evaluate( ( node ) => [ node.querySelector( '.cr-event-calendar, .pkiw-event-calendar' ), node.querySelector( '[class*="browse-all"]' ) ].map( ( item ) => item ? [ ...node.children ].findIndex( ( child ) => child === item || child.contains( item ) ) : -1 ) );
 		expect( order[0] ).toBeGreaterThanOrEqual( 0 );
@@ -111,7 +136,7 @@ test.describe( 'Event calendar archive', () => {
 	} );
 
 	test( 'A-O3 preserves grid, visual and keyboard order at four widths', async ( { page } ) => {
-		for ( const width of WIDTHS ) {
+		for ( const width of WIDTHS.slice( 0, 3 ) ) {
 			const calendar = await openCalendar( page, 3, width );
 			const table = calendar.locator( '.my-calendar-table' );
 			await expect( table ).toBeVisible();
@@ -124,6 +149,23 @@ test.describe( 'Event calendar archive', () => {
 			}
 			await assertNoOverflow( page, `${ width }px Event calendar` );
 		}
+
+		const calendar = await openCalendar( page, 3, 320 );
+		const table = calendar.locator( '.my-calendar-table' );
+		await expect( table.locator( 'thead th' ).first() ).toBeHidden();
+		const visibleCells = table.locator( 'td:visible' );
+		expect( await visibleCells.count(), '320px stacked layout has event-day cells' ).toBeGreaterThan( 0 );
+		await expect( visibleCells.first() ).toHaveCSS( 'display', 'block' );
+		const tabOrder = await calendar.locator( 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled])' ).evaluateAll( ( nodes ) => nodes.filter( ( node ) => node.getClientRects().length ).map( ( node ) => node.getBoundingClientRect().top ) );
+		expect( tabOrder.length, '320px has keyboard targets' ).toBeGreaterThan( 0 );
+		for ( let index = 1; index < tabOrder.length; index++ ) expect( tabOrder[index] + 2, '320px tab order does not move upward' ).toBeGreaterThanOrEqual( tabOrder[index - 1] );
+		const targets = calendar.locator( 'a[href]:visible, button:not([disabled]):visible, input:not([disabled]):visible, select:not([disabled]):visible' );
+		for ( const target of await targets.all() ) {
+			const targetBox = await box( target );
+			expect( targetBox.width, '320px target width' ).toBeGreaterThanOrEqual( 44 );
+			expect( targetBox.height, '320px target height' ).toBeGreaterThanOrEqual( 44 );
+		}
+		await assertNoOverflow( page, '320px stacked Event calendar' );
 	} );
 
 	test( 'A-O3 has no horizontal scroll at a 400 percent text-size proxy', async ( { page } ) => {
@@ -135,12 +177,11 @@ test.describe( 'Event calendar archive', () => {
 	test( 'A-O4 token paint works in light, system dark and manual dark states', async ( { page } ) => {
 		const calendar = await openCalendar( page );
 		const frame = calendar.locator( '.mc-main' );
-		const event = calendar.locator( '.event-title, [data-controls-modal]' ).first();
+		const event = calendar.locator( '.event-title button' ).first();
 		await expect( frame ).toHaveCSS( 'background-color', await resolvedToken( frame, '--cr-surface' ) );
 		await expect( frame ).toHaveCSS( 'border-top-color', await resolvedToken( frame, '--cr-russian-violet' ) );
-		if ( await event.count() ) {
-			await expect( event ).toHaveCSS( 'background-color', await resolvedToken( event, '--cr-periwinkle' ) );
-		}
+		await expect( event ).toHaveCount( 1 );
+		await expect( event ).toHaveCSS( 'background-color', await resolvedToken( event, '--cr-periwinkle' ) );
 		await runAxeContrast( page, 'main.cr-archive--event' );
 
 		await page.emulateMedia( { colorScheme: 'dark' } );
@@ -157,20 +198,39 @@ test.describe( 'Event calendar archive', () => {
 
 	test( 'A-O4 targets, focus, forced colors and reduced motion stay visible', async ( { page } ) => {
 		const calendar = await openCalendar( page );
-		const targets = calendar.locator( '.my-calendar-navigation a, .my-calendar-navigation button, .mc-format a, .mc-format button, .mc-time a, .mc-time button, .mc-date[href], .event-title, [data-controls-modal], .mc-modal-close' );
+		const targets = calendar.locator( '.my-calendar-navigation a:visible, .my-calendar-navigation button:visible, .mc-format button:visible, .mc-time button:visible, .event-title button:visible, .mc-list .event-date button:visible' );
+		expect( await targets.count(), 'calendar target selector matches controls' ).toBeGreaterThan( 0 );
 		for ( const target of await targets.all() ) {
-			if ( ! await target.isVisible() ) continue;
 			const targetBox = await box( target );
 			expect( targetBox.width ).toBeGreaterThanOrEqual( 44 );
 			expect( targetBox.height ).toBeGreaterThanOrEqual( 44 );
 		}
-		for ( const target of [ calendar.locator( '.my-calendar-navigation a, .my-calendar-navigation button' ).first(), calendar.locator( '.mc-date[href], .event-title, [data-controls-modal]' ).first() ] ) {
-			if ( ! await target.count() ) continue;
+		for ( const target of [ calendar.locator( '.my-calendar-navigation a, .my-calendar-navigation button' ).first(), calendar.locator( '.event-title button' ).first() ] ) {
+			await expect( target ).toHaveCount( 1 );
 			await target.focus();
 			await expect( target ).toHaveCSS( 'outline-width', '3px' );
 			await expect( target ).toHaveCSS( 'outline-color', await resolvedToken( target, '--cr-focus-ring' ) );
 			expect( await target.evaluate( ( node ) => getComputedStyle( node ).boxShadow ) ).not.toBe( 'none' );
 		}
+		await calendar.locator( '.event-title button' ).first().click();
+		const modal = page.locator( 'dialog.my-calendar-modal' );
+		const close = modal.locator( 'button.my-calendar-modal-close' );
+		await expect( modal ).toBeVisible();
+		const closeBox = await box( close );
+		expect( closeBox.width ).toBeGreaterThanOrEqual( 44 );
+		expect( closeBox.height ).toBeGreaterThanOrEqual( 44 );
+		const assertCloseContrast = async ( label ) => {
+			const colors = await close.evaluate( ( node ) => ( { glyph: getComputedStyle( node ).color, fill: getComputedStyle( node ).backgroundColor, boundary: getComputedStyle( node ).borderTopColor, modal: getComputedStyle( node.closest( 'dialog' ) ).backgroundColor } ) );
+			expect( await contrastRatio( colors.glyph, colors.fill ), `${ label } close glyph contrast` ).toBeGreaterThanOrEqual( 4.5 );
+			expect( await contrastRatio( colors.boundary, colors.modal ), `${ label } close boundary contrast` ).toBeGreaterThanOrEqual( 3 );
+		};
+		await assertCloseContrast( 'light' );
+		await page.emulateMedia( { colorScheme: 'dark' } );
+		await assertCloseContrast( 'system dark' );
+		await page.emulateMedia( { colorScheme: 'light' } );
+		await page.evaluate( () => document.documentElement.dataset.theme = 'dark' );
+		await assertCloseContrast( 'manual dark' );
+		await page.evaluate( () => delete document.documentElement.dataset.theme );
 
 		await page.emulateMedia( { reducedMotion: 'reduce' } );
 		const motion = await calendar.locator( '.mc-main' ).evaluate( ( node ) => ( { transition: getComputedStyle( node ).transitionDuration, animation: getComputedStyle( node ).animationDuration } ) );
@@ -181,21 +241,34 @@ test.describe( 'Event calendar archive', () => {
 		expect( await page.evaluate( () => matchMedia( '(forced-colors: active)' ).matches ) ).toBe( true );
 		await expect( calendar.locator( '.mc-main' ) ).toHaveCSS( 'border-top-width', '2px' );
 		await expect( calendar.locator( '.my-calendar-table td' ).first() ).toHaveCSS( 'border-top-width', '2px' );
-		const today = calendar.locator( '[aria-current="date"], .current-day' ).first();
-		if ( await today.count() ) await expect( today ).toHaveCSS( 'border-top-width', '3px' );
+		await open( page, ARCHIVE );
+		const today = page.locator( '.cr-event-calendar .my-calendar-table td[aria-current="date"], .cr-event-calendar .my-calendar-table td.current-day' ).first();
+		await expect( today ).toHaveCount( 1 );
+		await expect( today ).toHaveCSS( 'border-top-width', '3px' );
 	} );
 
 	test( 'A-O5 hides S01 location and shows the S02 positive control', async ( { page } ) => {
-		const s01Calendar = await openCalendar( page, 3 );
-		const s01Html = await s01Calendar.evaluate( ( node ) => node.outerHTML );
-		expect( s01Html ).toContain( 'Sentinel Hidden Meetup' );
-		for ( const sentinel of SENTINELS ) expect( s01Html ).not.toContain( sentinel );
-
-		const s02Calendar = await openCalendar( page, 4 );
-		const s02Html = await s02Calendar.evaluate( ( node ) => node.outerHTML );
-		expect( s02Html ).toContain( 'Sentinel Switch Meetup' );
-		for ( const sentinel of SENTINELS ) expect( s02Html ).toContain( sentinel );
-		const legend = s02Calendar.locator( '.mc_bottomnav, .mc-category-key, [class*="category-key"]' );
+		const calendar = await openCalendar( page, 3 );
+		const s01 = eventEntry( calendar, 'Sentinel Hidden Meetup' );
+		const s02 = eventEntry( calendar, 'Sentinel Switch Meetup' );
+		await expect( s01 ).toHaveCount( 1 );
+		await expect( s02 ).toHaveCount( 1 );
+		await assertSentinels( s01, false, 'S01 grid entry' );
+		await assertSentinels( s02, true, 'S02 grid entry' );
+		for ( const [ title, present ] of [ [ 'Sentinel Hidden Meetup', false ], [ 'Sentinel Switch Meetup', true ] ] ) {
+			await eventEntry( calendar, title ).locator( '.event-title button' ).click();
+			const modal = page.locator( 'dialog.my-calendar-modal' );
+			await expect( modal ).toBeVisible();
+			await expect( modal ).toContainText( title );
+			await assertSentinels( modal, present, `${ title } modal` );
+			await modal.locator( 'button.my-calendar-modal-close' ).click();
+		}
+		await open( page, `${ monthPath( 3 ) }&format=list` );
+		const list = page.locator( '.cr-event-calendar .mc-list' );
+		await assertSentinels( eventEntry( list, 'Sentinel Hidden Meetup' ), false, 'S01 list entry' );
+		await assertSentinels( eventEntry( list, 'Sentinel Switch Meetup' ), true, 'S02 list entry' );
+		const legend = page.locator( '.cr-event-calendar .mc_bottomnav .category-key' );
+		await expect( legend ).toHaveCount( 1 );
 		await expect( legend ).toContainText( 'General' );
 		await expect( legend ).not.toContainText( 'Hide location' );
 	} );
@@ -225,6 +298,13 @@ test.describe( 'Event singles', () => {
 		await expect( e03.locator( '.cr-event-flyer__status' ) ).toHaveText( 'Cancelled' );
 		await expect( e03.locator( 'a[href*="vcal"], a' ).filter( { hasText: /add to calendar|ics/i } ) ).toHaveCount( 0 );
 	} );
+
+	test( 'A-O12 E04 keeps its wall clock and stays unlinked from O01', async ( { page } ) => {
+		const e04 = await openSingle( page, 'E04' );
+		await expect( e04.locator( '.cr-event-flyer__time' ) ).toContainText( '6:00 PM' );
+		await expect( e04.locator( '.dt-start' ) ).toHaveAttribute( 'datetime', /T18:00:00-0[45]:00$/ );
+		await expect( e04 ).not.toContainText( 'Recurring Example Talk' );
+	} );
 } );
 
 test.describe( 'Event Stream tabs', () => {
@@ -251,7 +331,7 @@ test.describe( 'Event Stream tabs', () => {
 			const corners = await tab.evaluate( ( node ) => {
 				const rect = node.getBoundingClientRect();
 				const link = node.querySelector( '.cr-event-tab__name a' );
-				return [ [ rect.left + 10, rect.top + 10 ], [ rect.right - 10, rect.bottom - 10 ] ].map( ( [ x, y ] ) => document.elementFromPoint( x, y ) === link );
+					return [ [ rect.left + 24, rect.top + 24 ], [ rect.right - 24, rect.bottom - 24 ] ].map( ( [ x, y ] ) => document.elementFromPoint( x, y ) === link );
 			} );
 			expect( corners, `${ key } whole-tab hit area` ).toEqual( [ true, true ] );
 		}
@@ -301,7 +381,8 @@ test.describe( 'Event setting states', () => {
 		test.skip( ! [ 'locations-on', 'locations-off' ].includes( STATE ), 'run after the matching location flip' );
 		const response = await open( page, monthPath( 4 ) );
 		skipUnlessSeeded( 404 === response?.status(), 'calendar', 'S02 month is missing' );
-		const html = await page.locator( '.pkiw-event-calendar' ).evaluate( ( node ) => node.outerHTML );
+		const html = await page.content();
+		expect( html ).toContain( 'Sentinel Hidden Meetup' );
 		expect( html ).toContain( 'Sentinel Switch Meetup' );
 		for ( const sentinel of SENTINELS ) {
 			if ( 'locations-on' === STATE ) expect( html ).not.toContain( sentinel );

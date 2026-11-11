@@ -178,6 +178,46 @@ namespace {
 		return esc_html( $text );
 	}
 
+	/** Plugin event-card markup copied from src/blocks/event-card/render.php:99-149. */
+	function cr_event_card_markup( array $overrides = array() ): string {
+		$values = array_merge(
+			array(
+				'name' => 'Allowed Example Talk',
+				'start' => '2026-11-16T18:00:00-05:00',
+				'start_text' => 'November 16, 2026 at 6:00 PM',
+				'end' => '2026-11-16T19:00:00-05:00',
+				'location' => 'Authored Venue',
+				'status' => 'Cancelled',
+				'summary' => 'Public summary',
+				'url' => 'https://events.example/public',
+			),
+			$overrides
+		);
+		$name_value = '' !== $values['url'] ? '<a class="u-url" href="' . esc_url( $values['url'] ) . '" target="_blank" rel="noopener">' . $values['name'] . '</a>' : $values['name'];
+		$name = '' !== $values['name'] ? '<h2 class="pk-title p-name">' . $name_value . '</h2>' : '';
+		$date = '' !== $values['start'] ? '<p class="pk-sub pk-event-date"><time class="dt-start" datetime="' . esc_attr( $values['start'] ) . '">' . esc_html( $values['start_text'] ) . '</time>' . ( '' !== $values['end'] ? '<data class="dt-end" value="' . esc_attr( $values['end'] ) . '" hidden></data>' : '' ) . '</p>' : '';
+		$status = '' !== $values['status'] ? '<p class="pk-sub pk-event-status">' . esc_html( $values['status'] ) . '</p>' : '';
+		$location = '' !== $values['location'] ? '<p class="pk-sub pk-event-location"><span class="p-location">' . esc_html( $values['location'] ) . '</span></p>' : '';
+		$summary = '' !== $values['summary'] ? '<p class="p-summary">' . esc_html( $values['summary'] ) . '</p>' : '';
+		$hidden_url = '' === $values['name'] && '' !== $values['url'] ? '<data class="u-url" value="' . esc_attr( $values['url'] ) . '" hidden></data>' : '';
+		return '<article class="wp-block-post-kinds-indieweb-event-card pk-card k-event h-event"><div class="pk-badge"></div><div class="pk-body"><span class="pk-kindlabel">Event</span><div class="pk-caption">' . $name . $date . $status . $location . '</div>' . $summary . '</div>' . $hidden_url . '</article>';
+	}
+
+	/** Core-shaped render path: parsed blocks have no context key; WP_Block owns context. */
+	function render_block( array $parsed_block ): string {
+		return \Courtneyr\Child\Event\single_flyer( (string) ( $parsed_block['rendered'] ?? '' ), $parsed_block, new WP_Block( array( 'postId' => get_queried_object_id() ) ) );
+	}
+
+	function cr_event_css_rule( string $css, string $selector ): string {
+		$start = strpos( $css, $selector );
+		if ( false === $start ) {
+			return '';
+		}
+		$open = strpos( $css, '{', $start );
+		$close = false === $open ? false : strpos( $css, '}', $open );
+		return false === $open || false === $close ? '' : substr( $css, $start, $close - $start + 1 );
+	}
+
 	function cr_event_check( string $name, callable $test ): void {
 		$before = count( $GLOBALS['cr_event_failures'] );
 		try {
@@ -285,20 +325,39 @@ namespace {
 			cr_event_assert( 'courtneyr-event-calendar' === ( $GLOBALS['cr_event_enqueued'][0][0] ?? '' ), 'calendar block enqueues calendar handle' );
 			cr_event_assert( array( 'existing.css', 'cr-event-calendar.css' ) === \Courtneyr\Child\EventCalendar\rucss_exclusions( array( 'existing.css' ) ), 'calendar RUCSS exclusion' );
 			cr_event_assert( array( 'existing.css', 'cr-event.css' ) === \Courtneyr\Child\Event\rucss_exclusions( array( 'existing.css' ) ), 'Event RUCSS exclusion' );
+			cr_event_lacks( 'wp_enqueue_block_style', (string) file_get_contents( CR_EVENT_THEME_DIR . '/inc/event.php' ), 'Event paint is gated to singles and Stream surfaces' );
 		}
 	);
 
 	cr_event_check(
 		'A-T4 calendar CSS exposes target, focus, forced-color and motion contracts',
 		static function (): void {
-			$css = (string) file_get_contents( CR_EVENT_THEME_DIR . '/assets/css/cr-event-calendar.css' );
+			$css       = (string) file_get_contents( CR_EVENT_THEME_DIR . '/assets/css/cr-event-calendar.css' );
+			$event_css = (string) file_get_contents( CR_EVENT_THEME_DIR . '/assets/css/cr-event.css' );
 			cr_event_assert( strlen( $css ) <= 30720, 'calendar sheet exceeds 30 KiB' );
-			foreach ( array( '@property --cr-event-calendar-focus', 'inherits: false;', '@media (forced-colors: active)', '@media (prefers-reduced-motion: reduce)', 'aria-current="date"', 'HighlightText', 'LinkText', 'CanvasText', 'min-inline-size: 44px;', 'min-block-size: 44px;', '.my-calendar-navigation', '.mc-format', '.mc-time', '.mc-date', '.event-title', '.mc-modal-close' ) as $token ) {
+			cr_event_assert( strlen( $event_css ) <= 30720, 'Event sheet exceeds 30 KiB' );
+			foreach ( array( '@property --cr-event-calendar-focus', 'inherits: false;', '@media (forced-colors: active)', '@media (prefers-reduced-motion: reduce)', 'aria-current="date"', 'HighlightText', 'LinkText', 'ButtonText', 'CanvasText', 'min-inline-size: 44px;', 'min-block-size: 44px;', '.my-calendar-navigation', '.mc-format', '.mc-time', '.mc-date', '.event-title button', 'dialog.my-calendar-modal button.my-calendar-modal-close', '@container mcmain ( width >= 336px )' ) as $token ) {
 				cr_event_contains( $token, $css, 'calendar accessibility CSS' );
+			}
+			foreach ( array( '.cr-event-calendar .mc-main :is(.my-calendar-navigation, .my-calendar-nav, .mc-format, .mc-time) :is(a, button, input, select)', '.cr-event-calendar .mc-main .mc-date', '.cr-event-calendar .mc-main .event-title button', '.cr-event-calendar .mc-main .mc-list .event-date button', 'dialog.my-calendar-modal button.my-calendar-modal-close' ) as $selector ) {
+				$rule = cr_event_css_rule( $css, $selector );
+				cr_event_contains( 'min-inline-size: 44px;', $rule, $selector . ' width target' );
+				cr_event_contains( 'min-block-size: 44px;', $rule, $selector . ' height target' );
 			}
 			foreach ( array( 'linear-gradient', 'radial-gradient', 'filter:' ) as $forbidden ) {
 				cr_event_lacks( $forbidden, $css, 'calendar uses no forbidden effect' );
 			}
+			foreach ( array( '.mc-calendar-title', '[data-controls-modal]', '.cr-event-calendar .mc-events {' ) as $dead_selector ) {
+				cr_event_lacks( $dead_selector, $css, 'calendar uses served My Calendar selectors' );
+			}
+			foreach ( array( 'rotate(3deg)', 'rotate(-3deg)', 'rotate(2deg)', 'rotate(-2deg)' ) as $literal_rotation ) {
+				cr_event_lacks( $literal_rotation, $css . $event_css, 'Event art rotates through theme tokens' );
+			}
+			foreach ( array( 'clip-path: none;', 'filter: none;', 'text-align: start;' ) as $crest_reset ) {
+				cr_event_contains( $crest_reset, cr_event_css_rule( $event_css, '.cr-stream-page .pk-card.k-event.cr-event-tab' ), 'Stream tab resets the legacy Event crest' );
+			}
+			cr_event_contains( '.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__name a::after', $event_css, 'Stream link overlay stays scoped to the Stream surface' );
+			cr_event_contains( '.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__name a::after', $event_css, 'home Stream link overlay stays scoped to the Stream surface' );
 		}
 	);
 
@@ -308,7 +367,7 @@ namespace {
 			$post = new WP_Post( 231, 'Community talk' );
 			$GLOBALS['cr_event_posts'][231] = $post;
 			$GLOBALS['cr_event_terms'][231] = array( 'event' );
-			$fixture = '<article class="pk-card pk-card--stream k-event h-event"><span class="pk-kindlabel">Event</span><h3 class="pk-title p-name"><a class="u-url" href="https://events.example/sentinel">Allowed Example Talk</a></h3><p class="pk-event-date"><time class="dt-start" datetime="2026-11-16T18:00:00-05:00">November 16, 2026 at 6:00 PM</time><data class="dt-end" value="2026-11-16T19:00:00-05:00" hidden></data></p><p class="pk-event-status">Cancelled</p><p class="pk-event-location p-location">Sentinel Hall, 1 Sentinel Way, 0.123456 / 0.654321</p><p class="p-summary">Sentinel private summary</p><img class="u-photo" src="https://img.example/sentinel.jpg" alt="Sentinel poster"></article>';
+			$fixture = cr_event_card_markup( array( 'location' => 'Sentinel Hall, 1 Sentinel Way, 0.123456 / 0.654321', 'summary' => 'Sentinel private summary' ) );
 			$out = \Courtneyr\Child\Event\stream_tab( $fixture, array(), new WP_Block( array( 'postId' => 231 ) ) );
 			foreach ( array( 'cr-event-tab', 'Allowed Example Talk', 'Nov 16 · 6:00 PM', 'Cancelled', 'Calendar event', 'dt-published' ) as $allowed ) {
 				cr_event_contains( $allowed, $out, 'Stream allowed fact' );
@@ -317,6 +376,15 @@ namespace {
 				cr_event_lacks( $private, $out, 'Stream privacy contract' );
 			}
 			cr_event_assert( 1 === substr_count( $out, '<a ' ), 'Stream tab has exactly one link' );
+			cr_event_contains( 'pk-title cr-event-tab__name', $out, 'outer Stream heading-level pass can still find the title' );
+			$early = \Courtneyr\Child\Event\stream_tab( $fixture, array(), null );
+			cr_event_contains( 'cr-event-tab', $early, 'two-argument event-card path transforms card-only output' );
+			$generic = '<article class="pk-card pk-card--stream k-event"><h2 class="pk-title">Body-only event post</h2></article>';
+			cr_event_assert( $generic === \Courtneyr\Child\Event\stream_tab( $generic, array( 'attrs' => array( 'headingLevel' => 4 ) ), new WP_Block( array( 'postId' => 231 ) ) ), 'generic Stream card without an event date remains unchanged' );
+			$all_day = cr_event_card_markup( array( 'start' => '2026-11-16', 'start_text' => 'November 16, 2026', 'end' => '' ) );
+			$all_day_out = \Courtneyr\Child\Event\stream_tab( $all_day, array(), new WP_Block( array( 'postId' => 231 ) ) );
+			cr_event_contains( '>Nov 16</time>', $all_day_out, 'all-day Stream tab omits midnight' );
+			cr_event_lacks( 'Nov 16 ·', $all_day_out, 'all-day Stream tab has no synthetic time' );
 		}
 	);
 
@@ -324,14 +392,19 @@ namespace {
 		'A-T5 single flyer uses only values present in rendered plugin output',
 		static function (): void {
 			$GLOBALS['cr_event_single'] = true;
-			$fixture = '<article class="pk-card k-event h-event"><h2 class="pk-title p-name"><a class="u-url" href="https://events.example/public" rel="noopener">Allowed Example Talk</a></h2><p class="pk-event-date"><time class="dt-start" datetime="2026-11-16T18:00:00-05:00">November 16, 2026 at 6:00 PM</time></p><p class="pk-event-status">Cancelled</p><p class="pk-event-location p-location">Authored Venue</p><p class="p-summary">Public summary</p></article>';
-			$out = \Courtneyr\Child\Event\single_flyer( $fixture, array( 'context' => array( 'postId' => 231 ) ) );
+			$fixture = cr_event_card_markup( array( 'end' => '' ) );
+			$out = render_block( array( 'blockName' => 'post-kinds-indieweb/event-card', 'attrs' => array(), 'innerBlocks' => array(), 'innerHTML' => '', 'innerContent' => array(), 'rendered' => $fixture ) );
 			foreach ( array( 'cr-event-flyer', 'Authored Venue', 'Cancelled', 'Public summary', 'events.example', 'h-event', 'p-location' ) as $allowed ) {
 				cr_event_contains( $allowed, $out, 'single allowed fact' );
 			}
 			foreach ( array( 'Sentinel Hall', '0.123456', 'Add to calendar', 'ICS' ) as $private ) {
 				cr_event_lacks( $private, $out, 'single excludes withheld or unsupported value' );
 			}
+			cr_event_contains( '<span class="p-location">Authored Venue</span>', $out, 'p-location wraps only the value' );
+			$facts = \Courtneyr\Child\Event\rendered_facts( cr_event_card_markup( array( 'name' => 'Allowed <img src="x" alt=""> Name', 'url' => '' ) ) );
+			cr_event_assert( 'Allowed  Name' === $facts['name'], 'void tags do not keep the title parser open' );
+			$hidden_url = \Courtneyr\Child\Event\rendered_facts( cr_event_card_markup( array( 'name' => '', 'url' => 'https://events.example/data-url' ) ) );
+			cr_event_assert( 'https://events.example/data-url' === $hidden_url['event_url'], 'hidden data.u-url reaches the flyer parser' );
 		}
 	);
 

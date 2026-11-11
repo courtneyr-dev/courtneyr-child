@@ -8,13 +8,8 @@
 	initial-value: 0 0 0 0 transparent;
 }
 
-.cr-event-flyer,
-.cr-stream-page .pk-card.cr-event-tab,
-.cr-home-stream .pk-card.cr-event-tab {
-	--cr-focus-halo: var(--cr-russian-violet);
-}
-
 .cr-event-flyer {
+	--cr-focus-halo: var(--cr-russian-violet);
 	position: relative;
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.7fr);
@@ -36,18 +31,18 @@
 	inline-size: 5.5rem;
 	block-size: 1.3rem;
 	border: 1px solid var(--cr-russian-violet);
-	background: var(--cr-selective-yellow);
+	background: var(--cr-tape);
 	content: "";
 }
 
 .cr-event-flyer::before {
 	inset-inline-start: 1.5rem;
-	transform: rotate(-3deg);
+	transform: rotate(var(--cr-rotate-1));
 }
 
 .cr-event-flyer::after {
 	inset-inline-end: 1.5rem;
-	transform: rotate(2deg);
+	transform: rotate(var(--cr-rotate-neg2));
 }
 
 .cr-event-flyer__kind {
@@ -155,12 +150,13 @@
 	outline-offset: 4px;
 }
 
-body.single-post.kind-event:has(.cr-event-flyer) .single-post__lede-meta .single-post__date {
+body.single-post.kind-event:has(.cr-event-flyer__date) .single-post__lede-meta .single-post__date {
 	display: none;
 }
 
-.cr-stream-page .pk-card.cr-event-tab,
+.cr-stream-page .pk-card.k-event.cr-event-tab,
 .cr-home-stream .pk-card.cr-event-tab {
+	--cr-focus-halo: var(--cr-russian-violet);
 	position: relative;
 	display: block;
 	min-block-size: 10rem;
@@ -170,6 +166,9 @@ body.single-post.kind-event:has(.cr-event-flyer) .single-post__lede-meta .single
 	background: var(--cr-periwinkle);
 	color: var(--cr-russian-violet);
 	box-shadow: 5px 5px 0 var(--cr-selective-yellow), var(--cr-event-focus-shadow, 0 0 0 0 transparent);
+	clip-path: none;
+	filter: none;
+	text-align: start;
 	transform: rotate(var(--cr-rotate-neg));
 }
 
@@ -206,20 +205,24 @@ body.single-post.kind-event:has(.cr-event-flyer) .single-post__lede-meta .single
 	text-transform: uppercase;
 }
 
-.cr-event-tab__name {
+.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__name,
+.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__name {
 	margin: 0;
+	padding: 0;
+	color: inherit;
 	font-family: var(--wp--preset--font-family--accent);
 	font-size: clamp(1.35rem, 4vw, 2rem);
 	line-height: 1.05;
 }
 
-.cr-event-tab__name a {
+.cr-event-tab .cr-event-tab__name a {
 	color: inherit;
 	text-decoration-thickness: 2px;
 	text-underline-offset: 0.15em;
 }
 
-.cr-event-tab__name a::after {
+.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__name a::after,
+.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__name a::after {
 	position: absolute;
 	z-index: 4;
 	inset: 0;
@@ -249,7 +252,7 @@ body.single-post.kind-event:has(.cr-event-flyer) .single-post__lede-meta .single
 	outline-offset: 4px;
 }
 
-.cr-event-tab__name a:focus-visible {
+.cr-event-tab .cr-event-tab__name a:focus-visible {
 	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 3px;
 }
@@ -264,6 +267,14 @@ body.single-post.kind-event:has(.cr-event-flyer) .single-post__lede-meta .single
 		color: var(--cr-ink);
 		box-shadow: 5px 5px 0 var(--cr-selective-yellow), var(--cr-event-focus-shadow, 0 0 0 0 transparent);
 	}
+
+		:root:not([data-theme="light"]) .cr-event-flyer {
+			--cr-focus-halo: var(--cr-ink);
+		}
+
+		:root:not([data-theme="light"]) :is(.cr-event-flyer__kind, .cr-event-flyer__status) {
+			color: var(--cr-russian-violet);
+		}
 
 	:root:not([data-theme="light"]) .cr-stream-page .pk-card.cr-event-tab,
 	:root:not([data-theme="light"]) .cr-home-stream .pk-card.cr-event-tab {
@@ -280,6 +291,14 @@ body.single-post.kind-event:has(.cr-event-flyer) .single-post__lede-meta .single
 	background: var(--cr-surface-elevated);
 	color: var(--cr-ink);
 	box-shadow: 5px 5px 0 var(--cr-selective-yellow), var(--cr-event-focus-shadow, 0 0 0 0 transparent);
+}
+
+:root[data-theme="dark"] .cr-event-flyer {
+	--cr-focus-halo: var(--cr-ink);
+}
+
+:root[data-theme="dark"] :is(.cr-event-flyer__kind, .cr-event-flyer__status) {
+	color: var(--cr-russian-violet);
 }
 
 :root[data-theme="dark"] .cr-stream-page .pk-card.cr-event-tab,
@@ -348,7 +367,7 @@ body.single-post.kind-event:has(.cr-event-flyer) .single-post__lede-meta .single
 	}
 
 	.cr-event-flyer a,
-	.cr-event-tab__name a {
+		.cr-event-tab .cr-event-tab__name a {
 		color: LinkText;
 	}
 }

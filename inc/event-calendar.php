@@ -22,7 +22,7 @@ const STYLE_HANDLE = 'courtneyr-event-calendar';
  */
 function variable_map(): array {
 	return array(
-		'--close-button'          => 'var(--cr-ut-orange)',
+		'--close-button'          => 'var(--cr-russian-violet)',
 		'--search-highlight-bg '  => 'var(--cr-selective-yellow)',
 		'--main-background'       => 'var(--cr-surface)',
 		'--main-color'            => 'var(--cr-ink)',

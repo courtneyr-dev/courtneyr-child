@@ -35,27 +35,6 @@ function is_stream_surface(): bool {
 		&& \Courtneyr\Child\HomeSections\is_stream_surface();
 }
 
-/** Register the Event card sheet against the dynamic plugin block. */
-function register_block_style(): void {
-	if ( ! class_exists( '\\WP_Block_Type_Registry' ) ) {
-		return;
-	}
-	$registry = \WP_Block_Type_Registry::get_instance();
-	if ( ! $registry->is_registered( EVENT_CARD ) ) {
-		return;
-	}
-	wp_enqueue_block_style(
-		EVENT_CARD,
-		array(
-			'handle' => STYLE_HANDLE,
-			'src'    => COURTNEYR_CHILD_URI . '/assets/css/cr-event.css',
-			'deps'   => array( 'courtneyr-paper' ),
-			'ver'    => COURTNEYR_CHILD_VERSION,
-		)
-	);
-}
-add_action( 'init', __NAMESPACE__ . '\\register_block_style', 20 );
-
 /** Load Event paint only where an Event object can appear. */
 function enqueue(): void {
 	if ( ! is_admin() && ! is_event_single() && ! is_stream_surface() ) {
@@ -132,9 +111,10 @@ function rendered_facts( string $html ): array {
 				$facts['event_url'] = (string) $tags->get_attribute( 'href' );
 				$facts['event_rel'] = (string) $tags->get_attribute( 'rel' );
 			}
-			$depth += $tags->is_tag_closer() ? -1 : 1;
+			$void   = in_array( (string) $tags->get_tag(), array( 'AREA', 'BASE', 'BR', 'COL', 'EMBED', 'HR', 'IMG', 'INPUT', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR' ), true );
+			$depth += $tags->is_tag_closer() ? -1 : ( $void ? 0 : 1 );
 			if ( 0 === $depth ) {
-				$facts[ $active ] = trim( html_entity_decode( $facts[ $active ], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+				$facts[ $active ] = trim( $facts[ $active ] );
 				$active           = '';
 			}
 			continue;
@@ -151,6 +131,10 @@ function rendered_facts( string $html ): array {
 		}
 		if ( 'DATA' === $tag && $tags->has_class( 'dt-end' ) ) {
 			$facts['end_iso'] = (string) $tags->get_attribute( 'value' );
+			continue;
+		}
+		if ( 'DATA' === $tag && $tags->has_class( 'u-url' ) && '' === $facts['event_url'] ) {
+			$facts['event_url'] = (string) $tags->get_attribute( 'value' );
 			continue;
 		}
 		if ( 'TIME' === $tag && $tags->has_class( 'dt-start' ) ) {
@@ -277,13 +261,16 @@ function fact_row( string $label, string $value, string $class_name ): string {
  *
  * @param string               $html  Rendered Event card.
  * @param array<string, mixed> $block Parsed block.
+ * @param mixed                $instance Block instance.
  */
-function single_flyer( string $html, array $block ): string {
+function single_flyer( string $html, array $block, $instance = null ): string {
 	static $rendered = array();
 	if ( ! is_event_single() ) {
 		return $html;
 	}
-	$post_id = (int) ( $block['context']['postId'] ?? get_queried_object_id() );
+	$post_id = $instance instanceof \WP_Block && ! empty( $instance->context['postId'] )
+		? (int) $instance->context['postId']
+		: get_queried_object_id();
 	if ( get_queried_object_id() !== $post_id || isset( $rendered[ $post_id ] ) ) {
 		return $html;
 	}
@@ -310,7 +297,7 @@ function single_flyer( string $html, array $block ): string {
 	$when  = when_rows( $facts );
 	$rows  = fact_row( __( 'Date', 'courtneyr-child' ), $when['date'], 'cr-event-flyer__date' );
 	$rows .= fact_row( __( 'Time', 'courtneyr-child' ), $when['time'], 'cr-event-flyer__time' );
-	$rows .= fact_row( __( 'Location', 'courtneyr-child' ), esc_html( $facts['location'] ), 'cr-event-flyer__location p-location' );
+	$rows .= fact_row( __( 'Location', 'courtneyr-child' ), '<span class="p-location">' . esc_html( $facts['location'] ) . '</span>', 'cr-event-flyer__location' );
 
 	$status = '' !== $facts['status'] ? '<p class="cr-event-flyer__status">' . esc_html( $facts['status'] ) . '</p>' : '';
 	$url    = '';
@@ -323,13 +310,22 @@ function single_flyer( string $html, array $block ): string {
 	$summary = '' !== $facts['summary'] ? '<p class="cr-event-flyer__summary p-summary">' . esc_html( $facts['summary'] ) . '</p>' : '';
 
 	return '<article class="cr-event-flyer h-event">'
-		. '<span class="cr-event-flyer__kind">' . esc_html__( 'Event', 'courtneyr-child' ) . '</span>'
+		. '<span class="cr-event-flyer__kind">' . esc_html( single_label() ) . '</span>'
 		. $name . $image . $status
 		. '<dl class="cr-event-flyer__facts">' . $rows . '</dl>'
 		. $summary . $url
 		. '</article>';
 }
-add_filter( 'render_block_post-kinds-indieweb/event-card', __NAMESPACE__ . '\\single_flyer', 15, 2 );
+add_filter( 'render_block_post-kinds-indieweb/event-card', __NAMESPACE__ . '\\single_flyer', 15, 3 );
+
+/** Event kind label after the plugin's Event-card label filter. */
+function single_label(): string {
+	$term     = get_term_by( 'slug', KIND, 'kind' );
+	$fallback = $term instanceof \WP_Term ? $term->name : __( 'Event', 'courtneyr-child' );
+	return function_exists( '\\PKIW\\get_kind_label' )
+		? (string) \PKIW\get_kind_label( $fallback, KIND, 'event-card' )
+		: $fallback;
+}
 
 /** Event kind label after the plugin's context-aware label filter. */
 function stream_label(): string {
@@ -359,17 +355,18 @@ function stream_tab( string $html, array $block, $instance = null ): string {
 		return $html;
 	}
 	$facts = rendered_facts( $html );
-	if ( '' === $facts['name'] && '' === $facts['start_iso'] ) {
+	if ( '' === $facts['start_iso'] && '' === $facts['start_text'] ) {
 		return $html;
 	}
 
 	$name      = '' !== $facts['name'] ? $facts['name'] : (string) get_the_title( $post_id );
 	$permalink = (string) get_permalink( $post_id );
-	$heading   = heading_level( $html, 3 );
+	$heading   = heading_level( $html, max( 2, min( 4, (int) ( $block['attrs']['headingLevel'] ?? 2 ) ) ) );
 	$start     = parse_date( $facts['start_iso'] );
-	$date      = $start
-		? (string) wp_date( 'M j · ' . get_option( 'time_format' ), $start->getTimestamp(), $start->getTimezone() )
-		: $facts['start_text'];
+	$date      = $start ? (string) wp_date( 'M j', $start->getTimestamp(), $start->getTimezone() ) : $facts['start_text'];
+	if ( $start && str_contains( $facts['start_iso'], 'T' ) ) {
+		$date .= ' · ' . wp_date( get_option( 'time_format' ), $start->getTimestamp(), $start->getTimezone() );
+	}
 	$published = (string) get_post_time( 'c', true, $post );
 	$author    = (string) get_the_author_meta( 'display_name', (int) $post->post_author );
 	$status    = '' !== $facts['status'] ? '<span class="cr-event-tab__status">' . esc_html( $facts['status'] ) . '</span>' : '';
@@ -377,7 +374,7 @@ function stream_tab( string $html, array $block, $instance = null ): string {
 	return '<article class="pk-card pk-card--stream k-event cr-event-tab h-entry">'
 		. '<div class="cr-event-tab__event h-event">'
 		. '<span class="cr-event-tab__kind">' . esc_html( stream_label() ) . '</span>'
-		. '<h' . $heading . ' class="cr-event-tab__name p-name"><a class="u-url" href="' . esc_url( $permalink ) . '">' . esc_html( $name ) . '</a></h' . $heading . '>'
+		. '<h' . $heading . ' class="pk-title cr-event-tab__name p-name"><a class="u-url" href="' . esc_url( $permalink ) . '">' . esc_html( $name ) . '</a></h' . $heading . '>'
 		. '<p class="cr-event-tab__when"><time class="dt-start" datetime="' . esc_attr( $facts['start_iso'] ) . '">' . esc_html( $date ) . '</time>' . $status . '</p>'
 		. '</div>'
 		. '<time class="dt-published" datetime="' . esc_attr( $published ) . '" hidden></time>'
