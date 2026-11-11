@@ -68,7 +68,8 @@ async function resolvedToken( locator, token ) {
 	return locator.evaluate( ( node, property ) => {
 		const probe = node.ownerDocument.createElement( 'span' );
 		probe.style.color = `var(${ property })`;
-		node.append( probe );
+		// Append beside the node: a <select> doesn't render children, so a child probe resolves to "".
+		( node.parentElement || node ).append( probe );
 		const value = getComputedStyle( probe ).color;
 		probe.remove();
 		return value;
@@ -175,6 +176,8 @@ test.describe( 'Event calendar archive', () => {
 	} );
 
 	test( 'A-O4 token paint works in light, system dark and manual dark states', async ( { page } ) => {
+		// The dark projects start in dark; the light expectations below need an explicit light scheme.
+		await page.emulateMedia( { colorScheme: 'light' } );
 		const calendar = await openCalendar( page );
 		const frame = calendar.locator( '.mc-main' );
 		const event = calendar.locator( '.event-title button' ).first();
@@ -198,20 +201,37 @@ test.describe( 'Event calendar archive', () => {
 
 	test( 'A-O4 targets, focus, forced colors and reduced motion stay visible', async ( { page } ) => {
 		const calendar = await openCalendar( page );
-		const targets = calendar.locator( '.my-calendar-navigation a:visible, .my-calendar-navigation button:visible, .mc-format button:visible, .mc-time button:visible, .event-title button:visible, .mc-list .event-date button:visible' );
+		const targets = calendar.locator( '.my-calendar-navigation a:visible, .my-calendar-navigation button:visible, .my-calendar-navigation input:visible, .my-calendar-navigation select:visible, .mc-format button:visible, .mc-time button:visible, .event-title button:visible, .mc-list .event-date button:visible' );
 		expect( await targets.count(), 'calendar target selector matches controls' ).toBeGreaterThan( 0 );
 		for ( const target of await targets.all() ) {
 			const targetBox = await box( target );
 			expect( targetBox.width ).toBeGreaterThanOrEqual( 44 );
 			expect( targetBox.height ).toBeGreaterThanOrEqual( 44 );
 		}
-		for ( const target of [ calendar.locator( '.my-calendar-navigation a, .my-calendar-navigation button' ).first(), calendar.locator( '.event-title button' ).first() ] ) {
-			await expect( target ).toHaveCount( 1 );
-			await target.focus();
-			await expect( target ).toHaveCSS( 'outline-width', '3px' );
-			await expect( target ).toHaveCSS( 'outline-color', await resolvedToken( target, '--cr-focus-ring' ) );
-			expect( await target.evaluate( ( node ) => getComputedStyle( node ).boxShadow ) ).not.toBe( 'none' );
-		}
+		// Every calendar control family: view toggle, month select, date-switcher submit, event button.
+		const focusTargets = [ calendar.locator( '.my-calendar-navigation a, .my-calendar-navigation button' ).first(), calendar.locator( '.my-calendar-navigation select' ).first(), calendar.locator( '.my-calendar-navigation input[type="submit"]' ).first(), calendar.locator( '.event-title button' ).first() ];
+		const assertFocusRing = async ( label ) => {
+			for ( const target of focusTargets ) {
+				await expect( target, `${ label } focus target exists` ).toHaveCount( 1 );
+				await target.focus();
+				const ring = await resolvedToken( target, '--cr-focus-ring' );
+				const halo = await resolvedToken( target, '--cr-focus-halo' );
+				await expect( target, `${ label } ring style` ).toHaveCSS( 'outline-style', 'solid' );
+				await expect( target, `${ label } ring width` ).toHaveCSS( 'outline-width', '3px' );
+				await expect( target, `${ label } ring is the site token` ).toHaveCSS( 'outline-color', ring );
+				await expect.poll( () => target.evaluate( ( node ) => getComputedStyle( node ).boxShadow ), `${ label } halo is part of the box-shadow list` ).toContain( halo );
+				// WCAG 2.4.11 / 1.4.11: the ring meets 3:1 against the halo bands on both sides of it.
+				expect( await contrastRatio( ring, halo ), `${ label } ring vs halo contrast` ).toBeGreaterThanOrEqual( 3 );
+			}
+		};
+		await page.emulateMedia( { colorScheme: 'light' } );
+		await assertFocusRing( 'light' );
+		await page.emulateMedia( { colorScheme: 'dark' } );
+		await assertFocusRing( 'system dark' );
+		await page.emulateMedia( { colorScheme: 'light' } );
+		await page.evaluate( () => document.documentElement.dataset.theme = 'dark' );
+		await assertFocusRing( 'manual dark' );
+		await page.evaluate( () => delete document.documentElement.dataset.theme );
 		await calendar.locator( '.event-title button' ).first().click();
 		const modal = page.locator( 'dialog.my-calendar-modal' );
 		const close = modal.locator( 'button.my-calendar-modal-close' );
@@ -219,10 +239,11 @@ test.describe( 'Event calendar archive', () => {
 		const closeBox = await box( close );
 		expect( closeBox.width ).toBeGreaterThanOrEqual( 44 );
 		expect( closeBox.height ).toBeGreaterThanOrEqual( 44 );
+		// The button transitions colors after a scheme switch, so poll until the settled values meet the ratios.
 		const assertCloseContrast = async ( label ) => {
-			const colors = await close.evaluate( ( node ) => ( { glyph: getComputedStyle( node ).color, fill: getComputedStyle( node ).backgroundColor, boundary: getComputedStyle( node ).borderTopColor, modal: getComputedStyle( node.closest( 'dialog' ) ).backgroundColor } ) );
-			expect( await contrastRatio( colors.glyph, colors.fill ), `${ label } close glyph contrast` ).toBeGreaterThanOrEqual( 4.5 );
-			expect( await contrastRatio( colors.boundary, colors.modal ), `${ label } close boundary contrast` ).toBeGreaterThanOrEqual( 3 );
+			const read = () => close.evaluate( ( node ) => ( { glyph: getComputedStyle( node ).color, fill: getComputedStyle( node ).backgroundColor, boundary: getComputedStyle( node ).borderTopColor, modal: getComputedStyle( node.closest( 'dialog' ) ).backgroundColor } ) );
+			await expect.poll( async () => { const c = await read(); return contrastRatio( c.glyph, c.fill ); }, { message: `${ label } close glyph contrast`, timeout: 4000 } ).toBeGreaterThanOrEqual( 4.5 );
+			await expect.poll( async () => { const c = await read(); return contrastRatio( c.boundary, c.modal ); }, { message: `${ label } close boundary contrast`, timeout: 4000 } ).toBeGreaterThanOrEqual( 3 );
 		};
 		await assertCloseContrast( 'light' );
 		await page.emulateMedia( { colorScheme: 'dark' } );
@@ -301,7 +322,9 @@ test.describe( 'Event singles', () => {
 
 	test( 'A-O12 E04 keeps its wall clock and stays unlinked from O01', async ( { page } ) => {
 		const e04 = await openSingle( page, 'E04' );
-		await expect( e04.locator( '.cr-event-flyer__time' ) ).toContainText( '6:00 PM' );
+		// The site prints "6:00 pm"; the value sits in its own <dd>, so the label is a separate dt, not glued text.
+		await expect( e04.locator( '.cr-event-flyer__time dt' ) ).toHaveText( 'Time' );
+		await expect( e04.locator( '.cr-event-flyer__time dd' ) ).toHaveText( /^6:00\s*pm\b/i );
 		await expect( e04.locator( '.dt-start' ) ).toHaveAttribute( 'datetime', /T18:00:00-0[45]:00$/ );
 		await expect( e04 ).not.toContainText( 'Recurring Example Talk' );
 	} );
@@ -319,8 +342,12 @@ test.describe( 'Event Stream tabs', () => {
 			skipUnlessSeeded( 0 === await tab.count(), 'stream', `Stream tab ${ key } is missing` );
 			await expect( tab.locator( 'a[href]' ) ).toHaveCount( 1 );
 			await expect( tab.locator( '.cr-event-tab__kind' ) ).toContainText( /event/i );
-			await expect( tab.locator( '.p-name' ) ).toHaveCount( 1 );
+			// The plugin's hidden p-author card also carries a .p-name, so count the event name by its own class.
+			await expect( tab.locator( '.cr-event-tab__name.p-name' ) ).toHaveCount( 1 );
 			await expect( tab.locator( '.dt-start' ) ).toHaveCount( 1 );
+			// One visible date: the event's; the publication date stays hidden in the DOM.
+			await expect( tab.locator( 'time:visible' ) ).toHaveCount( 1 );
+			await expect( tab.locator( 'time.dt-published' ) ).toHaveCount( 1 );
 			await expect( tab.locator( '.p-location, [class*="location"], img, picture, figure, .p-summary' ) ).toHaveCount( 0 );
 			for ( const sentinel of SENTINELS ) await expect( tab ).not.toContainText( sentinel );
 			await expect( tab ).toHaveCSS( 'border-top-width', '2px' );
@@ -346,7 +373,8 @@ test.describe( 'Event Stream tabs', () => {
 		const link = tab.locator( 'a' );
 		await link.focus();
 		await expect( tab ).toHaveCSS( 'outline-width', '3px' );
-		expect( await tab.evaluate( ( node ) => getComputedStyle( node ).boxShadow ) ).not.toBe( 'none' );
+		await expect( tab ).toHaveCSS( 'outline-color', await resolvedToken( tab, '--cr-focus-ring' ) );
+		await expect.poll( () => tab.evaluate( ( node ) => getComputedStyle( node ).boxShadow ) ).toContain( await resolvedToken( tab, '--cr-russian-violet' ) );
 
 		await page.emulateMedia( { colorScheme: 'dark' } );
 		await expect( tab ).toHaveCSS( 'background-color', await resolvedToken( tab, '--cr-periwinkle' ) );

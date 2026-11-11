@@ -14,6 +14,7 @@
 }
 
 .cr-event-calendar .mc-main {
+	--cr-focus-halo: var(--cr-russian-violet);
 	position: relative;
 	inline-size: 100%;
 	max-inline-size: none;
@@ -75,7 +76,7 @@
 	margin-block: var(--cr-space-md);
 }
 
-.cr-event-calendar .mc-main :is(.my-calendar-navigation, .my-calendar-nav, .mc-format, .mc-time) :is(a, button, input, select),
+.cr-event-calendar .mc-main.mc-main :is(.my-calendar-navigation, .my-calendar-nav, .mc-format, .mc-time) :is(a, button, input, select),
 .cr-event-calendar .mc-main .mc-date,
 .cr-event-calendar .mc-main .event-title button,
 .cr-event-calendar .mc-main .mc-list .event-date button {
@@ -196,11 +197,22 @@
 	color: var(--cr-ink);
 }
 
-.cr-event-calendar .mc-main :is(a, button, input, select):focus-visible,
+.cr-event-calendar .mc-main.mc-main :is(a, button, input, select):focus-visible,
 dialog.my-calendar-modal :is(a, button, input, select):focus-visible {
 	--cr-event-calendar-focus: 0 0 0 7px var(--cr-focus-halo);
 	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 3px;
+}
+
+/* Selects and the date-switcher submit take the same halo list as the buttons. */
+.cr-event-calendar .mc-main.mc-main .my-calendar-navigation select {
+	box-shadow: var(--cr-event-calendar-focus, 0 0 0 0 transparent);
+}
+
+.cr-event-calendar .mc-main.mc-main .my-calendar-navigation input[type="submit"] {
+
+	/* Beats components.css:4417 `body.archive input[type="submit"]`, which forces its own !important box-shadow. */
+	box-shadow: 4px 4px 0 var(--cr-russian-violet), var(--cr-event-calendar-focus, 0 0 0 0 transparent) !important;
 }
 
 dialog.my-calendar-modal {
@@ -228,7 +240,6 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 @media (prefers-color-scheme: dark) {
 
 	:root:not([data-theme="light"]) .cr-event-calendar .mc-main {
-		--cr-focus-halo: var(--cr-ink);
 		border-color: var(--cr-printer-ivory);
 		background: var(--cr-surface-elevated);
 		color: var(--cr-ink);
@@ -271,7 +282,6 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 	}
 
 	:root:not([data-theme="light"]) dialog.my-calendar-modal {
-		--cr-focus-halo: var(--cr-ink);
 		border-color: var(--cr-printer-ivory);
 		background: var(--cr-surface-elevated);
 		color: var(--cr-ink);
@@ -286,7 +296,6 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 }
 
 :root[data-theme="dark"] .cr-event-calendar .mc-main {
-	--cr-focus-halo: var(--cr-ink);
 	border-color: var(--cr-printer-ivory);
 	background: var(--cr-surface-elevated);
 	color: var(--cr-ink);
@@ -329,7 +338,6 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 }
 
 :root[data-theme="dark"] dialog.my-calendar-modal {
-	--cr-focus-halo: var(--cr-ink);
 	border-color: var(--cr-printer-ivory);
 	background: var(--cr-surface-elevated);
 	color: var(--cr-ink);
@@ -345,17 +353,21 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 @media (max-width: 40rem) {
 
 	.cr-event-calendar {
-		inline-size: min(100% - 0.75rem, 76rem);
+		inline-size: 100%;
 	}
 
 	.cr-event-calendar .mc-main {
-		padding: 0.5rem;
+		padding: 0.25rem;
 		box-shadow: 4px 4px 0 var(--cr-russian-violet), var(--cr-event-calendar-focus, 0 0 0 0 transparent);
 	}
 
 	.cr-event-calendar :is(.my-calendar-navigation, .my-calendar-header, .my-calendar-nav) {
 		align-items: stretch;
 		flex-direction: column;
+	}
+
+	.cr-event-calendar .my-calendar-table {
+		border-width: 1px;
 	}
 
 	.cr-event-calendar .my-calendar-table th {
@@ -373,8 +385,26 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 	}
 }
 
-/* Seven 44px columns need 308px; 336px leaves room for borders and cell rules. */
-@container mcmain ( width >= 336px ) and ( width <= 600px ) {
+/* Seven 44px columns need 308px plus 2px of table border. Container queries measure the content box: grid from 312px (375px viewport = 329px, 360px = 314px), stack below (320px viewport = 274px). */
+@container mcmain ( width >= 312px ) and ( width <= 600px ) {
+
+	.cr-event-calendar .mc-main.mc-main .my-calendar-table .event-title {
+		margin: 0;
+	}
+
+	/* 44px columns: keep day numbers whole and set event names small so they wrap by word first. */
+	.cr-event-calendar .mc-main.mc-main .my-calendar-table .mc-date {
+		margin: 0;
+		overflow-wrap: normal;
+	}
+
+	.cr-event-calendar .mc-main.mc-main .my-calendar-table .event-title button {
+		padding: 0.15rem;
+		font-size: 0.6rem;
+		hyphens: auto;
+		overflow-wrap: break-word;
+	}
+
 
 	.cr-event-calendar .mc-main.mc-main:not(.mini, .disable-responsive) table.my-calendar-table {
 		display: table;

@@ -336,10 +336,10 @@ namespace {
 			$event_css = (string) file_get_contents( CR_EVENT_THEME_DIR . '/assets/css/cr-event.css' );
 			cr_event_assert( strlen( $css ) <= 30720, 'calendar sheet exceeds 30 KiB' );
 			cr_event_assert( strlen( $event_css ) <= 30720, 'Event sheet exceeds 30 KiB' );
-			foreach ( array( '@property --cr-event-calendar-focus', 'inherits: false;', '@media (forced-colors: active)', '@media (prefers-reduced-motion: reduce)', 'aria-current="date"', 'HighlightText', 'LinkText', 'ButtonText', 'CanvasText', 'min-inline-size: 44px;', 'min-block-size: 44px;', '.my-calendar-navigation', '.mc-format', '.mc-time', '.mc-date', '.event-title button', 'dialog.my-calendar-modal button.my-calendar-modal-close', '@container mcmain ( width >= 336px )' ) as $token ) {
+			foreach ( array( '@property --cr-event-calendar-focus', 'inherits: false;', '@media (forced-colors: active)', '@media (prefers-reduced-motion: reduce)', 'aria-current="date"', 'HighlightText', 'LinkText', 'ButtonText', 'CanvasText', 'min-inline-size: 44px;', 'min-block-size: 44px;', '.my-calendar-navigation', '.mc-format', '.mc-time', '.mc-date', '.event-title button', 'dialog.my-calendar-modal button.my-calendar-modal-close', '@container mcmain ( width >= 312px )' ) as $token ) {
 				cr_event_contains( $token, $css, 'calendar accessibility CSS' );
 			}
-			foreach ( array( '.cr-event-calendar .mc-main :is(.my-calendar-navigation, .my-calendar-nav, .mc-format, .mc-time) :is(a, button, input, select)', '.cr-event-calendar .mc-main .mc-date', '.cr-event-calendar .mc-main .event-title button', '.cr-event-calendar .mc-main .mc-list .event-date button', 'dialog.my-calendar-modal button.my-calendar-modal-close' ) as $selector ) {
+			foreach ( array( '.cr-event-calendar .mc-main.mc-main :is(.my-calendar-navigation, .my-calendar-nav, .mc-format, .mc-time) :is(a, button, input, select)', '.cr-event-calendar .mc-main .mc-date', '.cr-event-calendar .mc-main .event-title button', '.cr-event-calendar .mc-main .mc-list .event-date button', 'dialog.my-calendar-modal button.my-calendar-modal-close' ) as $selector ) {
 				$rule = cr_event_css_rule( $css, $selector );
 				cr_event_contains( 'min-inline-size: 44px;', $rule, $selector . ' width target' );
 				cr_event_contains( 'min-block-size: 44px;', $rule, $selector . ' height target' );

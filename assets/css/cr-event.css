@@ -198,6 +198,12 @@ body.single-post.kind-event:has(.cr-event-flyer__date) .single-post__lede-meta .
 	gap: 0.45rem;
 }
 
+/* The shared Stream card rules position this wrapper; the title's ::after overlay must resolve against the tab itself so the whole tab is the hit area. */
+.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__event,
+.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__event {
+	position: static;
+}
+
 .cr-event-tab__kind {
 	font-size: var(--cr-text-sm);
 	font-weight: 850;
@@ -227,6 +233,13 @@ body.single-post.kind-event:has(.cr-event-flyer__date) .single-post__lede-meta .
 	z-index: 4;
 	inset: 0;
 	content: "";
+}
+
+.cr-stream-page .pk-card.cr-event-tab .cr-event-tab__event .pk-stream-date,
+.cr-home-stream .pk-card.cr-event-tab .cr-event-tab__event .pk-stream-date {
+
+	/* One date per tab: the event's own date prints; the plugin's injected publication date (and its legacy large yellow styling) is dropped. The hidden dt-published stays in the DOM. */
+	display: none;
 }
 
 .cr-event-tab__when {
