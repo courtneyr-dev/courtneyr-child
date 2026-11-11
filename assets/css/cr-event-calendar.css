@@ -438,8 +438,8 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 	}
 }
 
-/* Seven 44px columns need 308px plus 2px of table border. Container queries measure the content box: grid from 312px (375px viewport = 345px, 360px = 330px), stack below (320px viewport = 290px). */
-@container mcmain ( width >= 312px ) and ( width <= 600px ) {
+/* Seven 44px columns need 308px plus 2px of table border, but a nine-letter word needs more: at the type floor "Sentinel", "Cancelled:" and "Recurring" stay whole only from a 344px content box up, in Chromium and WebKit alike. Container queries measure the content box, 30px narrower than the viewport: grid from 344px (375px viewport = 345px), stack below (360px viewport = 330px, 320px = 290px). */
+@container mcmain ( width >= 344px ) and ( width <= 600px ) {
 
 	.cr-event-calendar .mc-main.mc-main .my-calendar-table .event-title {
 		margin: 0;
@@ -507,7 +507,7 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 }
 
 /* Under 450px, seven equal columns can't hold a ten-letter word at the type floor: a 375px viewport has 49px cells and "Cancelled:" is 55px. Columns size to their content here, as the phone comp draws them. The button's grid track reports its longest word as max-content and nothing as min-content, so the automatic table layout hands each event column its longest word before sharing what's left, and no column can push the table past the frame. A word wider than its column still breaks. */
-@container mcmain ( width >= 312px ) and ( width < 450px ) {
+@container mcmain ( width >= 344px ) and ( width < 450px ) {
 
 	.cr-event-calendar .mc-main.mc-main:not(.mini, .disable-responsive) table.my-calendar-table {
 		table-layout: auto;
