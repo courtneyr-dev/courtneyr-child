@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.166
+
+- On phones narrower than 374 px, the Event calendar (`/kind/event/`) shows My Calendar's day-by-day list, as it already did at 320 px. The seven-column grid starts at 374 px. Between 321 and 373 px the grid had split nine-letter words such as "Sentinel", "Recurring" and "Cancelled:" across two lines; a 360 px Android phone is in that range. Measured in Chromium and WebKit: both keep those words whole from 374 px up and split them at 372 px and below. iPhones (375 px and wider) keep the grid. (#231)
+
+Under the hood: the two `@container mcmain` rules in `cr-event-calendar.css` start at a 344px content box, up from 312px. The container is 30px narrower than the viewport. `event-231.spec.mjs` runs its stacked-layout checks (hidden header row, block cells, tab order, 44 px targets, no horizontal scroll) at 360 px as well as 320 px.
+
 ## 0.7.165
 
 - Nothing visible. On the Event calendar (`/kind/event/`), My Calendar's day numbers and weekday abbreviations carry `role="presentation"` beside their `aria-hidden`, like every other hidden ornament on the site since 0.7.138. Each still has its screen-reader text next to it ("November 14, 2026", "Monday"). Without the role, Accessibility Checker Pro flagged 42 elements on a month view (35 day numbers, 7 weekday headers). (#231)

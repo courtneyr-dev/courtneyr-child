@@ -151,22 +151,25 @@ test.describe( 'Event calendar archive', () => {
 			await assertNoOverflow( page, `${ width }px Event calendar` );
 		}
 
-		const calendar = await openCalendar( page, 3, 320 );
-		const table = calendar.locator( '.my-calendar-table' );
-		await expect( table.locator( 'thead th' ).first() ).toBeHidden();
-		const visibleCells = table.locator( 'td:visible' );
-		expect( await visibleCells.count(), '320px stacked layout has event-day cells' ).toBeGreaterThan( 0 );
-		await expect( visibleCells.first() ).toHaveCSS( 'display', 'block' );
-		const tabOrder = await calendar.locator( 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled])' ).evaluateAll( ( nodes ) => nodes.filter( ( node ) => node.getClientRects().length ).map( ( node ) => node.getBoundingClientRect().top ) );
-		expect( tabOrder.length, '320px has keyboard targets' ).toBeGreaterThan( 0 );
-		for ( let index = 1; index < tabOrder.length; index++ ) expect( tabOrder[index] + 2, '320px tab order does not move upward' ).toBeGreaterThanOrEqual( tabOrder[index - 1] );
-		const targets = calendar.locator( 'a[href]:visible, button:not([disabled]):visible, input:not([disabled]):visible, select:not([disabled]):visible' );
-		for ( const target of await targets.all() ) {
-			const targetBox = await box( target );
-			expect( targetBox.width, '320px target width' ).toBeGreaterThanOrEqual( 44 );
-			expect( targetBox.height, '320px target height' ).toBeGreaterThanOrEqual( 44 );
+		// Under a 344px content box (a 374px viewport) nine-letter event words no longer fit seven columns, so 360px stacks like 320px.
+		for ( const stacked of [ 320, 360 ] ) {
+			const calendar = await openCalendar( page, 3, stacked );
+			const table = calendar.locator( '.my-calendar-table' );
+			await expect( table.locator( 'thead th' ).first() ).toBeHidden();
+			const visibleCells = table.locator( 'td:visible' );
+			expect( await visibleCells.count(), `${ stacked }px stacked layout has event-day cells` ).toBeGreaterThan( 0 );
+			await expect( visibleCells.first() ).toHaveCSS( 'display', 'block' );
+			const tabOrder = await calendar.locator( 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled])' ).evaluateAll( ( nodes ) => nodes.filter( ( node ) => node.getClientRects().length ).map( ( node ) => node.getBoundingClientRect().top ) );
+			expect( tabOrder.length, `${ stacked }px has keyboard targets` ).toBeGreaterThan( 0 );
+			for ( let index = 1; index < tabOrder.length; index++ ) expect( tabOrder[index] + 2, `${ stacked }px tab order does not move upward` ).toBeGreaterThanOrEqual( tabOrder[index - 1] );
+			const targets = calendar.locator( 'a[href]:visible, button:not([disabled]):visible, input:not([disabled]):visible, select:not([disabled]):visible' );
+			for ( const target of await targets.all() ) {
+				const targetBox = await box( target );
+				expect( targetBox.width, `${ stacked }px target width` ).toBeGreaterThanOrEqual( 44 );
+				expect( targetBox.height, `${ stacked }px target height` ).toBeGreaterThanOrEqual( 44 );
 		}
-		await assertNoOverflow( page, '320px stacked Event calendar' );
+		await assertNoOverflow( page, `${ stacked }px stacked Event calendar` );
+		}
 	} );
 
 	test( 'A-O3 keeps event words whole in the 375px and 390px grid', async ( { page } ) => {
