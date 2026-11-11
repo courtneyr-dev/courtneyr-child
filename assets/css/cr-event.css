@@ -30,7 +30,7 @@
 	padding: clamp(1.25rem, 4vw, 3rem);
 	border: var(--cr-event-edge);
 	background: var(--cr-event-paper);
-	box-shadow: 9px 9px 0 var(--cr-event-shadow);
+	box-shadow: var(--cr-shadow-hard-2);
 }
 
 .cr-event-flyer__sheet::before,
@@ -105,14 +105,23 @@
 	}
 }
 
+/* The status sticker takes the RSVP wall's notched shape (cr-rsvp.css, `.pkiw-rsvp-entry__status`). */
 .cr-event-flyer__status {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	inline-size: fit-content;
+	min-block-size: 2.75rem;
 	margin: 0;
-	padding: 0.35rem 0.75rem;
-	border: 3px double var(--cr-russian-violet);
+	padding: var(--cr-space-xs) var(--cr-space-lg);
+	border: 1px solid var(--cr-russian-violet);
 	background: var(--cr-selective-yellow);
+	clip-path: polygon(0 0, 100% 0, 100% 34%, 94% 50%, 100% 66%, 100% 100%, 0 100%, 0 66%, 6% 50%, 0 34%);
 	color: var(--cr-russian-violet);
-	font-weight: 900;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	line-height: 1.1;
 	text-transform: uppercase;
 }
 
@@ -198,7 +207,7 @@
 	border: 2px solid var(--cr-russian-violet);
 	background: var(--cr-periwinkle);
 	color: var(--cr-russian-violet);
-	box-shadow: 3px 3px 0 var(--cr-selective-yellow);
+	box-shadow: var(--cr-shadow-hard-sm);
 	font-weight: 800;
 }
 
@@ -356,10 +365,6 @@ body.single-post.kind-event:has(.cr-event-flyer) .single-post__content > .single
 		--cr-event-shadow: var(--cr-selective-yellow);
 	}
 
-	:root:not([data-theme="light"]) .cr-event-flyer__sheet {
-		box-shadow: 5px 5px 0 var(--cr-event-shadow);
-	}
-
 	:root:not([data-theme="light"]) .cr-stream-page .pk-card.cr-event-tab,
 	:root:not([data-theme="light"]) .cr-home-stream .pk-card.cr-event-tab {
 		border: 2px solid var(--cr-printer-ivory);
@@ -377,10 +382,6 @@ body.single-post.kind-event:has(.cr-event-flyer) .single-post__content > .single
 	--cr-event-shadow: var(--cr-selective-yellow);
 }
 
-:root[data-theme="dark"] .cr-event-flyer__sheet {
-	box-shadow: 5px 5px 0 var(--cr-event-shadow);
-}
-
 :root[data-theme="dark"] .cr-stream-page .pk-card.cr-event-tab,
 :root[data-theme="dark"] .cr-home-stream .pk-card.cr-event-tab {
 	border: 2px solid var(--cr-printer-ivory);
@@ -393,7 +394,6 @@ body.single-post.kind-event:has(.cr-event-flyer) .single-post__content > .single
 
 	.cr-event-flyer .cr-event-flyer__sheet {
 		padding: 1rem;
-		box-shadow: 5px 5px 0 var(--cr-event-shadow);
 	}
 
 	.cr-event-flyer__fact {
