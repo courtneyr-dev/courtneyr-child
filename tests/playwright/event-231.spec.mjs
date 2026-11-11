@@ -169,6 +169,51 @@ test.describe( 'Event calendar archive', () => {
 		await assertNoOverflow( page, '320px stacked Event calendar' );
 	} );
 
+	test( 'A-O3 keeps event words whole in the 375px and 390px grid', async ( { page } ) => {
+		// The seeded events run from +3 to +8 days, so near a month's end they span two months.
+		const offsets = [ 3, 6, 8 ].filter( ( offset, index, all ) => all.findIndex( ( other ) => monthPath( other ) === monthPath( offset ) ) === index );
+		for ( const width of [ 375, 390 ] ) {
+			const seen = new Set();
+			for ( const offset of offsets ) {
+				const calendar = await openCalendar( page, offset, width );
+				await page.evaluate( () => document.fonts.ready );
+				const table = calendar.locator( '.my-calendar-table' );
+				await expect( table.locator( 'thead th:visible' ), `${ width }px seven columns` ).toHaveCount( 7 );
+				const report = await table.locator( '.event-title button' ).evaluateAll( ( buttons ) => {
+					const result = { words: [], split: [], clipped: [], small: [], hyphens: [] };
+					for ( const button of buttons ) {
+						const rect = button.getBoundingClientRect();
+						const label = button.textContent.trim();
+						if ( button.scrollWidth > button.clientWidth || rect.right > button.closest( 'td' ).getBoundingClientRect().right + 0.5 ) result.clipped.push( label );
+						if ( rect.width < 44 || rect.height < 44 ) result.small.push( label );
+						result.hyphens.push( ...[ button, ...button.querySelectorAll( 'div' ) ].map( ( node ) => getComputedStyle( node ).hyphens ) );
+						const walker = document.createTreeWalker( button, NodeFilter.SHOW_TEXT );
+						for ( let node = walker.nextNode(); node; node = walker.nextNode() ) {
+							for ( const match of node.data.matchAll( /\S+/g ) ) {
+								const range = document.createRange();
+								range.setStart( node, match.index );
+								range.setEnd( node, match.index + match[0].length );
+								result.words.push( match[0] );
+								// A word that wraps mid-word paints one client rect per line.
+								if ( [ ...range.getClientRects() ].filter( ( line ) => line.width > 0 ).length > 1 ) result.split.push( match[0] );
+							}
+						}
+					}
+					return result;
+				} );
+				report.words.forEach( ( word ) => seen.add( word.replace( /:$/, '' ) ) );
+				expect( report.split, `${ width }px words split across lines` ).toEqual( [] );
+				expect( report.clipped, `${ width }px event names past their button or cell` ).toEqual( [] );
+				expect( report.small, `${ width }px event buttons under 44px` ).toEqual( [] );
+				expect( [ ...new Set( report.hyphens ) ], `${ width }px automatic hyphenation is off` ).toEqual( [ 'manual' ] );
+				await assertNoOverflow( page, `${ width }px Event calendar words` );
+			}
+			for ( const word of [ 'Cancelled', 'Recurring', 'Sentinel', 'Meetup' ] ) {
+				expect( [ ...seen ], `${ width }px fixture word was measured` ).toContain( word );
+			}
+		}
+	} );
+
 	test( 'A-O3 has no horizontal scroll at a 400 percent text-size proxy', async ( { page } ) => {
 		await openCalendar( page, 3, 320 );
 		await page.addStyleTag( { content: 'html { font-size: 400%; }' } );

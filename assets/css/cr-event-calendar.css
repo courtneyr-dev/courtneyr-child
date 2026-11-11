@@ -460,6 +460,11 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 		overflow-wrap: break-word;
 	}
 
+	/* Beats reset.css:1155 and :1163: `word-break: break-word` and `hyphens: auto` cut a word's min-content to one letter, and a word then splits before it has to. */
+	.cr-event-calendar .mc-main.mc-main .my-calendar-table .event-title :is(button, div) {
+		hyphens: manual;
+		word-break: normal;
+	}
 
 	.cr-event-calendar .mc-main.mc-main:not(.mini, .disable-responsive) table.my-calendar-table {
 		display: table;
@@ -498,6 +503,26 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 		/* Beats reset.css:1831, which makes this text static in the stacked layout. */
 		position: absolute !important;
 		white-space: nowrap;
+	}
+}
+
+/* Under 450px, seven equal columns can't hold a ten-letter word at the type floor: a 375px viewport has 49px cells and "Cancelled:" is 55px. Columns size to their content here, as the phone comp draws them. The button's grid track reports its longest word as max-content and nothing as min-content, so the automatic table layout hands each event column its longest word before sharing what's left, and no column can push the table past the frame. A word wider than its column still breaks. */
+@container mcmain ( width >= 312px ) and ( width < 450px ) {
+
+	.cr-event-calendar .mc-main.mc-main:not(.mini, .disable-responsive) table.my-calendar-table {
+		table-layout: auto;
+	}
+
+	.cr-event-calendar .mc-main.mc-main:not(.mini, .disable-responsive) .my-calendar-table :is(td, td.no-events, th) {
+		inline-size: auto;
+	}
+
+	.cr-event-calendar .mc-main.mc-main .my-calendar-table .event-title button {
+		display: grid;
+		grid-template-columns: minmax(0, min-content);
+		place-content: center;
+		padding-inline: 0;
+		letter-spacing: var(--cr-tracking-tight);
 	}
 }
 
