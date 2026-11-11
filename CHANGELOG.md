@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.165
+
+- Nothing visible. On the Event calendar (`/kind/event/`), My Calendar's day numbers and weekday abbreviations carry `role="presentation"` beside their `aria-hidden`, like every other hidden ornament on the site since 0.7.138. Each still has its screen-reader text next to it ("November 14, 2026", "Monday"). Without the role, Accessibility Checker Pro flagged 42 elements on a month view (35 day numbers, 7 weekday headers). (#231)
+
+Under the hood: `inc/event-calendar.php` runs `A11yOutput\hidden_is_presentational()` on the `post-kinds-indieweb/event-calendar` block at priority 999, after the calendar has rendered. A month loaded by My Calendar's own navigation script after the page loads is not covered; the first render is.
+
 ## 0.7.164
 
 What you see change on courtneyr.dev:

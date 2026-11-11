@@ -117,6 +117,14 @@ function enqueue( string $html, array $block ): string { // phpcs:ignore Generic
 }
 add_filter( 'render_block_post-kinds-indieweb/event-calendar', __NAMESPACE__ . '\\enqueue', 10, 2 );
 
+/*
+ * My Calendar hides each day number and weekday abbreviation with aria-hidden
+ * alone; its screen-reader text sits beside them. Give those elements the
+ * role="presentation" every other hidden ornament on the site carries, so
+ * Accessibility Checker Pro's aria_hidden_valid_usage has nothing to flag.
+ */
+add_filter( 'render_block_post-kinds-indieweb/event-calendar', '\\Courtneyr\\Child\\A11yOutput\\hidden_is_presentational', 999 );
+
 /**
  * Keep the conditional calendar sheet out of shared used CSS.
  *
