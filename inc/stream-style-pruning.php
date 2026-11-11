@@ -360,6 +360,10 @@ const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-evidence-labels',
 	'courtneyr-rsvp',
 	'courtneyr-presentation',
+	// Event archive calendar only; My Calendar renders it on /kind/event/.
+	'courtneyr-event-calendar',
+	// Event singles and Event preview cards on /stream/ only.
+	'courtneyr-event',
 	// Trip and itinerary archives, singles and Stream cards share this conditional physical-object sheet.
 	'courtneyr-travel',
 	// The plugin's own presentation-entry sheet (1.1 KB), so the badge wall and record don't wait on a blocking link.

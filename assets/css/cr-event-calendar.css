@@ -1,0 +1,331 @@
+/**
+ * Event archive calendar: a taped-up community noticeboard.
+ */
+
+@property --cr-event-calendar-focus {
+	syntax: "*";
+	inherits: false;
+	initial-value: 0 0 0 0 transparent;
+}
+
+.cr-event-calendar {
+	--cr-focus-halo: var(--cr-russian-violet);
+	inline-size: min(100% - 2rem, 76rem);
+	margin-inline: auto;
+}
+
+.cr-event-calendar .mc-main {
+	position: relative;
+	inline-size: 100%;
+	max-inline-size: none;
+	margin: var(--cr-space-xl) auto var(--cr-space-3xl);
+	padding: clamp(0.75rem, 2vw, 1.5rem);
+	border: 3px solid var(--cr-russian-violet);
+	background: var(--cr-surface);
+	color: var(--cr-ink);
+	box-shadow: 8px 8px 0 var(--cr-russian-violet), var(--cr-event-calendar-focus, 0 0 0 0 transparent);
+}
+
+.cr-event-calendar .mc-main::before,
+.cr-event-calendar .mc-main::after {
+	position: absolute;
+	z-index: 3;
+	inset-block-start: -0.8rem;
+	inline-size: 5rem;
+	block-size: 1.35rem;
+	border: 1px solid var(--cr-russian-violet);
+	background: var(--cr-selective-yellow);
+	content: "";
+	opacity: 0.92;
+}
+
+.cr-event-calendar .mc-main::before {
+	inset-inline-start: 1.25rem;
+	transform: rotate(-3deg);
+}
+
+.cr-event-calendar .mc-main::after {
+	inset-inline-end: 1.25rem;
+	transform: rotate(3deg);
+}
+
+.cr-event-calendar .mc-main .heading,
+.cr-event-calendar .mc-main .mc-calendar-title {
+	inline-size: fit-content;
+	margin: 0 auto var(--cr-space-lg);
+	padding: 0.55rem 1.35rem 0.7rem;
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	font-family: var(--wp--preset--font-family--accent);
+	font-size: clamp(1.5rem, 5vw, var(--cr-text-3xl));
+	line-height: 1.05;
+	clip-path: polygon(0 8%, 9% 1%, 20% 7%, 31% 0, 44% 6%, 56% 1%, 68% 7%, 80% 0, 91% 6%, 100% 1%, 98% 92%, 87% 100%, 76% 94%, 64% 100%, 52% 94%, 39% 100%, 27% 94%, 14% 100%, 2% 93%);
+}
+
+.cr-event-calendar .my-calendar-navigation,
+.cr-event-calendar .my-calendar-header,
+.cr-event-calendar .my-calendar-nav,
+.cr-event-calendar .mc-format,
+.cr-event-calendar .mc-time {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 0.65rem;
+}
+
+.cr-event-calendar .my-calendar-navigation,
+.cr-event-calendar .my-calendar-header {
+	margin-block: var(--cr-space-md);
+}
+
+.cr-event-calendar .mc-main :is(.my-calendar-navigation, .my-calendar-nav, .mc-format, .mc-time) a,
+.cr-event-calendar .mc-main :is(.my-calendar-navigation, .my-calendar-nav, .mc-format, .mc-time) button,
+.cr-event-calendar .mc-main :is(.my-calendar-navigation, .my-calendar-nav, .mc-format, .mc-time) input,
+.cr-event-calendar .mc-main .mc-date,
+.cr-event-calendar .mc-main .event-title,
+.cr-event-calendar .mc-main [data-controls-modal],
+.cr-event-calendar .mc-main .mc-modal-close {
+	min-inline-size: 44px;
+	min-block-size: 44px;
+}
+
+.cr-event-calendar .mc-main :is(.my-calendar-navigation, .my-calendar-nav, .mc-format, .mc-time) a,
+.cr-event-calendar .mc-main :is(.my-calendar-navigation, .my-calendar-nav, .mc-format, .mc-time) button,
+.cr-event-calendar .mc-main .mc-modal-close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-inline: 0.9rem;
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: 0;
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	box-shadow: 3px 3px 0 var(--cr-russian-violet), var(--cr-event-calendar-focus, 0 0 0 0 transparent);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.cr-event-calendar .my-calendar-table {
+	inline-size: 100%;
+	max-inline-size: none;
+	border: 2px solid var(--cr-russian-violet);
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.cr-event-calendar .my-calendar-table :is(th, td) {
+	border: 1px solid var(--cr-periwinkle);
+	background: var(--cr-surface);
+	color: var(--cr-ink);
+	vertical-align: top;
+}
+
+.cr-event-calendar .my-calendar-table th {
+	padding: 0.55rem 0.25rem;
+	border: 1px solid var(--cr-russian-violet);
+	background: var(--cr-periwinkle);
+	color: var(--cr-russian-violet);
+	font-weight: 800;
+	box-shadow: var(--cr-event-calendar-focus, 0 0 0 0 transparent);
+	text-align: center;
+}
+
+.cr-event-calendar .my-calendar-table td {
+	block-size: clamp(6.5rem, 11vw, 10rem);
+}
+
+.cr-event-calendar .my-calendar-table [aria-current="date"],
+.cr-event-calendar .my-calendar-table .current-day {
+	border: 3px solid var(--cr-selective-yellow);
+	background: var(--cr-surface);
+}
+
+.cr-event-calendar .mc-main .mc-date {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: 44px;
+	margin: 0.15rem;
+	color: var(--cr-russian-violet);
+	font-weight: 800;
+}
+
+.cr-event-calendar .mc-events {
+	display: grid;
+	gap: 0.3rem;
+	margin: 0;
+	padding: 0.25rem;
+	list-style: none;
+}
+
+.cr-event-calendar .mc-main .event-title,
+.cr-event-calendar .mc-main .event-title a,
+.cr-event-calendar .mc-main [data-controls-modal] {
+	display: flex;
+	align-items: center;
+	inline-size: 100%;
+	padding: 0.35rem;
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: 0;
+	background: var(--cr-periwinkle);
+	color: var(--cr-russian-violet);
+	box-shadow: 3px 3px 0 var(--cr-selective-yellow), var(--cr-event-calendar-focus, 0 0 0 0 transparent);
+	font-size: clamp(0.75rem, 1.5vw, var(--cr-text-sm));
+	font-weight: 750;
+	line-height: 1.2;
+	overflow-wrap: anywhere;
+	text-align: start;
+	text-decoration: none;
+	white-space: normal;
+}
+
+.cr-event-calendar .mc-main :is(a, button, input, select):focus-visible {
+	--cr-event-calendar-focus: 0 0 0 7px var(--cr-focus-halo);
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 3px;
+}
+
+.cr-event-calendar .mc-main dialog,
+.cr-event-calendar .mc-main .mc-modal {
+	max-inline-size: min(42rem, calc(100vw - 2rem));
+	border: 3px solid var(--cr-russian-violet);
+	background: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+	box-shadow: 7px 7px 0 var(--cr-russian-violet), var(--cr-event-calendar-focus, 0 0 0 0 transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-event-calendar .mc-main,
+	:root:not([data-theme="light"]) .cr-event-calendar .my-calendar-table :is(th, td),
+	:root:not([data-theme="light"]) .cr-event-calendar .my-calendar-table [aria-current="date"],
+	:root:not([data-theme="light"]) .cr-event-calendar .my-calendar-table .current-day {
+		border: 3px solid var(--cr-printer-ivory);
+		background: var(--cr-surface-elevated);
+		color: var(--cr-ink);
+	}
+
+	:root:not([data-theme="light"]) .cr-event-calendar .my-calendar-table th,
+	:root:not([data-theme="light"]) .cr-event-calendar .mc-main .event-title,
+	:root:not([data-theme="light"]) .cr-event-calendar .mc-main .event-title a,
+	:root:not([data-theme="light"]) .cr-event-calendar .mc-main [data-controls-modal] {
+		border: 2px solid var(--cr-printer-ivory);
+		background: var(--cr-periwinkle);
+		color: var(--cr-russian-violet);
+		box-shadow: 3px 3px 0 var(--cr-selective-yellow), var(--cr-event-calendar-focus, 0 0 0 0 transparent);
+	}
+}
+
+:root[data-theme="dark"] .cr-event-calendar .mc-main,
+:root[data-theme="dark"] .cr-event-calendar .my-calendar-table :is(th, td),
+:root[data-theme="dark"] .cr-event-calendar .my-calendar-table [aria-current="date"],
+:root[data-theme="dark"] .cr-event-calendar .my-calendar-table .current-day {
+	border: 3px solid var(--cr-printer-ivory);
+	background: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+}
+
+:root[data-theme="dark"] .cr-event-calendar .my-calendar-table th,
+:root[data-theme="dark"] .cr-event-calendar .mc-main .event-title,
+:root[data-theme="dark"] .cr-event-calendar .mc-main .event-title a,
+:root[data-theme="dark"] .cr-event-calendar .mc-main [data-controls-modal] {
+	border: 2px solid var(--cr-printer-ivory);
+	background: var(--cr-periwinkle);
+	color: var(--cr-russian-violet);
+	box-shadow: 3px 3px 0 var(--cr-selective-yellow), var(--cr-event-calendar-focus, 0 0 0 0 transparent);
+}
+
+@media (max-width: 40rem) {
+
+	.cr-event-calendar {
+		inline-size: min(100% - 0.75rem, 76rem);
+	}
+
+	.cr-event-calendar .mc-main {
+		padding: 0.5rem;
+		box-shadow: 4px 4px 0 var(--cr-russian-violet), var(--cr-event-calendar-focus, 0 0 0 0 transparent);
+	}
+
+	.cr-event-calendar .my-calendar-navigation,
+	.cr-event-calendar .my-calendar-header,
+	.cr-event-calendar .my-calendar-nav {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.cr-event-calendar .my-calendar-table th {
+		padding-inline: 0;
+		font-size: 0.68rem;
+	}
+
+	.cr-event-calendar .my-calendar-table td {
+		block-size: 6rem;
+	}
+
+	.cr-event-calendar .mc-events {
+		padding: 0.1rem;
+	}
+
+	.cr-event-calendar .mc-main .event-title,
+	.cr-event-calendar .mc-main .event-title a,
+	.cr-event-calendar .mc-main [data-controls-modal] {
+		padding-inline: 0.18rem;
+		font-size: 0.66rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.cr-event-calendar .mc-main *,
+	.cr-event-calendar .mc-main *::before,
+	.cr-event-calendar .mc-main *::after {
+		animation-duration: 0.01ms;
+		animation-iteration-count: 1;
+		scroll-behavior: auto;
+		transition-duration: 0.01ms;
+	}
+}
+
+@media (forced-colors: active) {
+
+	.cr-event-calendar .mc-main {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+		box-shadow: 6px 6px 0 CanvasText;
+		forced-color-adjust: auto;
+	}
+
+	.cr-event-calendar .mc-main::before,
+	.cr-event-calendar .mc-main::after {
+		display: none;
+	}
+
+	.cr-event-calendar .my-calendar-table :is(th, td) {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.cr-event-calendar .my-calendar-table [aria-current="date"],
+	.cr-event-calendar .my-calendar-table .current-day {
+		border: 3px solid Highlight;
+		background: Highlight;
+		color: HighlightText;
+	}
+
+	.cr-event-calendar .mc-main :is(a, button) {
+		border: 2px solid LinkText;
+		color: LinkText;
+		box-shadow: none;
+	}
+
+	.cr-event-calendar .mc-main dialog,
+	.cr-event-calendar .mc-main .mc-modal {
+		border: 3px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+		box-shadow: none;
+	}
+}
