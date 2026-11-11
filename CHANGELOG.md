@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.7.164
+
+What you see change on courtneyr.dev:
+
+- Events have a calendar. `/kind/event/` shows the My Calendar month grid under the same header as every other kind archive: a framed paper grid with tape at two corners and the month on a torn strip. It keeps seven columns down to 375 px wide and becomes a day-by-day list at 320 px, where seven 44 px targets don't fit. Each event in a day cell is a button that opens its details. The grid appears once My Calendar is active on the site. (#231)
+- An event post is a flyer: the event name, one date line, the time, and the location hang below it as tear-off tabs. A cancelled event carries a notched "Cancelled" sticker. In the Stream an event is one tear-off tab with its name and date, and the whole tab is the link. The Stream tab never prints a location. (#231)
+- RSVPs have their own archive, a ticket on the single post and a ticket stub in the Stream. (#251, #277)
+- Presentations show as a badge wall on their archive, a record on the single post and a badge in the Stream. (#262)
+- Trips show as passports and itineraries as wallets, with travel cards in the Stream. (#244)
+- New Relic's browser agent loads under the site's enforced security policy, so it stops logging a blocked-script error on every page. (#280, shipped to the site first as 0.7.162.1)
+
+Under the hood: each kind paints from its own sheet, all in `RUCSS_INLINE_HANDLES` and all under the 30,720-byte cap: `cr-rsvp.css` (29,586), `cr-presentation.css` (24,680), `cr-travel.css` (30,650), `cr-event.css` (14,246) and `cr-event-calendar.css` (19,369). The older Stream paint for `.k-event`, `.k-rsvp`, `.k-trip` and `.k-itinerary` leaves `cr-post-kinds.css`: 36 rules and three grouped selectors, which takes that sheet from 389,402 to 381,725 bytes. The calendar region comes from Post Kinds' event-calendar block and renders only when My Calendar is active and the calendar setting is on; the theme styles My Calendar's own markup and adds no calendar markup of its own. An event's location prints exactly as Post Kinds' event card prints it, so the plugin's "Hide location" rules decide what shows. A password-protected RSVP, trip, itinerary or event now shows in the Stream as its "Protected:" title link with no paper card behind it, the way protected jam, wish, like, question and presentation cards already do; the older rules were the only thing drawing that paper.
+
 ## 0.7.163
 
 - X posts embedded in a post show as live X cards for readers who accept marketing cookies, the way they look in the editor. The site's security policy had blocked X's embed script, so every reader saw the plain quote. The X hosts are added only on posts that hold an X embed; readers who decline cookies still get the quote.
