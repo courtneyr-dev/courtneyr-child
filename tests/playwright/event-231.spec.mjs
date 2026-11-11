@@ -184,18 +184,21 @@ test.describe( 'Event calendar archive', () => {
 		await expect( frame ).toHaveCSS( 'background-color', await resolvedToken( frame, '--cr-surface' ) );
 		await expect( frame ).toHaveCSS( 'border-top-color', await resolvedToken( frame, '--cr-russian-violet' ) );
 		await expect( event ).toHaveCount( 1 );
-		await expect( event ).toHaveCSS( 'background-color', await resolvedToken( event, '--cr-periwinkle' ) );
+		// The approved comps split the entry paper by mode: printer ivory in light, periwinkle in dark.
+		await expect( event ).toHaveCSS( 'background-color', await resolvedToken( event, '--cr-printer-ivory' ) );
 		await runAxeContrast( page, 'main.cr-archive--event' );
 
 		await page.emulateMedia( { colorScheme: 'dark' } );
 		await expect( frame ).toHaveCSS( 'background-color', await resolvedToken( frame, '--cr-surface-elevated' ) );
 		await expect( frame ).toHaveCSS( 'border-top-color', await resolvedToken( frame, '--cr-printer-ivory' ) );
+		await expect( event ).toHaveCSS( 'background-color', await resolvedToken( event, '--cr-periwinkle' ) );
 		await runAxeContrast( page, 'main.cr-archive--event' );
 
 		await page.emulateMedia( { colorScheme: 'light' } );
 		await page.evaluate( () => document.documentElement.dataset.theme = 'dark' );
 		await expect( frame ).toHaveCSS( 'background-color', await resolvedToken( frame, '--cr-surface-elevated' ) );
 		await expect( frame ).toHaveCSS( 'border-top-color', await resolvedToken( frame, '--cr-printer-ivory' ) );
+		await expect( event ).toHaveCSS( 'background-color', await resolvedToken( event, '--cr-periwinkle' ) );
 		await runAxeContrast( page, 'main.cr-archive--event' );
 	} );
 

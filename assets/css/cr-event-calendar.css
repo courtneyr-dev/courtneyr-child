@@ -13,13 +13,26 @@
 	margin-inline: auto;
 }
 
+/* The constrained layout caps every child at the 720px content size; the calendar is the page's main object and takes the cap above. */
+.cr-archive--event > .cr-event-calendar {
+	max-inline-size: none;
+}
+
+/* The header's generic separator rule (components.css) stretches the short marker to 60%; it keeps its 8rem component width here, on the header's left edge. */
+.cr-archive--event .cr-archive__header hr.is-style-cr-marker-bar-short {
+	width: 8rem !important;
+	margin-inline: calc((100% - min(100%, var(--wp--style--global--content-size))) / 2) auto !important;
+}
+
 .cr-event-calendar .mc-main {
 	--cr-focus-halo: var(--cr-russian-violet);
+	--cr-event-calendar-pad: clamp(0.75rem, 2vw, 1.5rem);
+	--cr-event-calendar-shadow: var(--cr-russian-violet);
 	position: relative;
 	inline-size: 100%;
 	max-inline-size: none;
-	margin: var(--cr-space-xl) auto var(--cr-space-3xl);
-	padding: clamp(0.75rem, 2vw, 1.5rem);
+	margin: var(--cr-space-2xl) auto var(--cr-space-3xl);
+	padding: var(--cr-event-calendar-pad);
 	border: 3px solid var(--cr-russian-violet);
 	background: var(--cr-surface);
 	color: var(--cr-ink);
@@ -49,18 +62,42 @@
 	transform: rotate(var(--cr-rotate-neg2));
 }
 
-.cr-event-calendar .mc-main.mc-main .heading {
+/* The month label: a torn strip laid over the frame's top edge, with its hard shadow drawn as a second torn layer. `section` lifts the rule past My Calendar's `.mc-main .heading:not(.widget .mc-main .heading)` (reset.css:43), which scores 0,5,0. */
+section.cr-event-calendar .mc-main.mc-main .heading.heading {
+	--cr-event-calendar-tear: polygon(0 8%, 9% 1%, 20% 7%, 31% 0, 44% 6%, 56% 1%, 68% 7%, 80% 0, 91% 6%, 100% 1%, 98% 92%, 87% 100%, 76% 94%, 64% 100%, 52% 94%, 39% 100%, 27% 94%, 14% 100%, 2% 93%);
+	position: relative;
+	z-index: 4;
 	inline-size: fit-content;
 	max-inline-size: 100%;
-	margin: 0 auto var(--cr-space-lg);
-	padding: 0.55rem 1.35rem 0.7rem;
-	background: var(--cr-printer-ivory);
+	margin: calc(-1.5rem - var(--cr-event-calendar-pad)) auto var(--cr-space-md);
 	color: var(--cr-russian-violet);
 	font-family: var(--wp--preset--font-family--accent);
-	font-size: clamp(1.5rem, 5vw, var(--cr-text-3xl));
+	font-size: clamp(1.05rem, 5.2cqi, var(--cr-text-4xl));
+	font-weight: 900;
 	line-height: 1.05;
-	overflow-wrap: anywhere;
-	clip-path: polygon(0 8%, 9% 1%, 20% 7%, 31% 0, 44% 6%, 56% 1%, 68% 7%, 80% 0, 91% 6%, 100% 1%, 98% 92%, 87% 100%, 76% 94%, 64% 100%, 52% 94%, 39% 100%, 27% 94%, 14% 100%, 2% 93%);
+	text-transform: uppercase;
+	text-wrap: balance;
+}
+
+section.cr-event-calendar .mc-main.mc-main .heading.heading::before {
+	position: absolute;
+	z-index: -1;
+	inset: 0;
+	display: block;
+	background: var(--cr-event-calendar-shadow);
+	content: "";
+	clip-path: var(--cr-event-calendar-tear);
+
+	/* The offsets of --cr-shadow-hard-sm. */
+	translate: 3px 3px;
+}
+
+section.cr-event-calendar .mc-main.mc-main .heading.heading > span {
+	display: block;
+	padding: 0.55rem 1.1rem 0.7rem;
+	background: var(--cr-light-orange);
+	color: var(--cr-russian-violet);
+	clip-path: var(--cr-event-calendar-tear);
 }
 
 .cr-event-calendar :is(.my-calendar-navigation, .my-calendar-header, .my-calendar-nav, .mc-format, .mc-time),
@@ -97,7 +134,7 @@
 	border-radius: 0;
 	background: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
-	box-shadow: 3px 3px 0 var(--cr-russian-violet), var(--cr-event-calendar-focus, 0 0 0 0 transparent);
+	box-shadow: var(--cr-shadow-hard-sm), var(--cr-event-calendar-focus, 0 0 0 0 transparent);
 	font-weight: 700;
 	text-decoration: none;
 }
@@ -126,7 +163,8 @@
 	vertical-align: top;
 }
 
-.cr-event-calendar .my-calendar-table th {
+/* `.mc-main` lifts the rule past My Calendar's `.mc-main th.weekend-heading` (reset.css:63), so all seven weekdays share one paper. */
+.cr-event-calendar .mc-main .my-calendar-table th {
 	padding: 0.55rem 0.25rem;
 	border: 1px solid var(--cr-russian-violet);
 	background: var(--cr-periwinkle);
@@ -150,10 +188,11 @@
 .cr-event-calendar .mc-main .mc-date {
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: flex-start;
 	min-inline-size: 44px;
 	min-block-size: 44px;
 	margin: 0.15rem;
+	padding-inline: var(--cr-space-xs);
 	color: var(--cr-ink);
 	box-shadow: var(--cr-event-calendar-focus, 0 0 0 0 transparent);
 	font-weight: 800;
@@ -170,10 +209,10 @@
 	padding: 0.35rem;
 	border: 2px solid var(--cr-russian-violet);
 	border-radius: 0;
-	background: var(--cr-periwinkle);
+	background: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
-	box-shadow: 3px 3px 0 var(--cr-selective-yellow), var(--cr-event-calendar-focus, 0 0 0 0 transparent);
-	font-size: clamp(0.75rem, 1.5vw, var(--cr-text-sm));
+	box-shadow: var(--cr-shadow-hard-sm), var(--cr-event-calendar-focus, 0 0 0 0 transparent);
+	font-size: clamp(var(--cr-text-floor), 1.5vw, var(--cr-text-sm));
 	font-weight: 750;
 	line-height: 1.2;
 	overflow-wrap: anywhere;
@@ -182,9 +221,10 @@
 	white-space: normal;
 }
 
-.cr-event-calendar .mc-list {
+.cr-event-calendar .mc-main .mc-list {
 	display: grid;
 	gap: var(--cr-space-md);
+	max-inline-size: none;
 }
 
 .cr-event-calendar .mc-list > li.mc-events {
@@ -204,8 +244,12 @@ dialog.my-calendar-modal :is(a, button, input, select):focus-visible {
 	outline-offset: 3px;
 }
 
-/* Selects and the date-switcher submit take the same halo list as the buttons. */
+/* Selects are paper fields in both modes, and take the same halo list as the buttons. */
 .cr-event-calendar .mc-main.mc-main .my-calendar-navigation select {
+	border: 2px solid var(--cr-russian-violet);
+	border-radius: 0;
+	background-color: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
 	box-shadow: var(--cr-event-calendar-focus, 0 0 0 0 transparent);
 }
 
@@ -240,6 +284,7 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 @media (prefers-color-scheme: dark) {
 
 	:root:not([data-theme="light"]) .cr-event-calendar .mc-main {
+		--cr-event-calendar-shadow: var(--cr-selective-yellow);
 		border-color: var(--cr-printer-ivory);
 		background: var(--cr-surface-elevated);
 		color: var(--cr-ink);
@@ -296,6 +341,7 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 }
 
 :root[data-theme="dark"] .cr-event-calendar .mc-main {
+	--cr-event-calendar-shadow: var(--cr-selective-yellow);
 	border-color: var(--cr-printer-ivory);
 	background: var(--cr-surface-elevated);
 	color: var(--cr-ink);
@@ -356,8 +402,15 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 		inline-size: 100%;
 	}
 
+	.cr-archive--event > .cr-event-calendar {
+		inline-size: auto;
+
+		/* Beats the constrained layout's `margin-inline: auto !important`: the frame runs 8px past the text column on each side, as the phone comp draws it. */
+		margin-inline: calc(var(--cr-space-xs) * -1) !important;
+	}
+
 	.cr-event-calendar .mc-main {
-		padding: 0.25rem;
+		--cr-event-calendar-pad: 0.25rem;
 		box-shadow: 4px 4px 0 var(--cr-russian-violet), var(--cr-event-calendar-focus, 0 0 0 0 transparent);
 	}
 
@@ -372,7 +425,7 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 
 	.cr-event-calendar .my-calendar-table th {
 		padding-inline: 0;
-		font-size: 0.68rem;
+		font-size: var(--cr-text-floor);
 	}
 
 	.cr-event-calendar .my-calendar-table td {
@@ -381,27 +434,29 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 
 	.cr-event-calendar .mc-main .event-title button {
 		padding-inline: 0.18rem;
-		font-size: 0.66rem;
+		font-size: var(--cr-text-floor);
 	}
 }
 
-/* Seven 44px columns need 308px plus 2px of table border. Container queries measure the content box: grid from 312px (375px viewport = 329px, 360px = 314px), stack below (320px viewport = 274px). */
+/* Seven 44px columns need 308px plus 2px of table border. Container queries measure the content box: grid from 312px (375px viewport = 345px, 360px = 330px), stack below (320px viewport = 290px). */
 @container mcmain ( width >= 312px ) and ( width <= 600px ) {
 
 	.cr-event-calendar .mc-main.mc-main .my-calendar-table .event-title {
 		margin: 0;
 	}
 
-	/* 44px columns: keep day numbers whole and set event names small so they wrap by word first. */
+	/* 44px columns: keep day numbers whole; event names sit at the type floor in the narrower body face and wrap by word first. */
 	.cr-event-calendar .mc-main.mc-main .my-calendar-table .mc-date {
 		margin: 0;
+		padding-inline: 0.25rem;
 		overflow-wrap: normal;
 	}
 
 	.cr-event-calendar .mc-main.mc-main .my-calendar-table .event-title button {
-		padding: 0.15rem;
-		font-size: 0.6rem;
-		hyphens: auto;
+		padding: 0.15rem 1px;
+		border-width: 1px;
+		font-family: var(--wp--preset--font-family--body);
+		font-size: var(--cr-text-floor);
 		overflow-wrap: break-word;
 	}
 
@@ -470,7 +525,8 @@ dialog.my-calendar-modal button.my-calendar-modal-close {
 	}
 
 	.cr-event-calendar .mc-main::before,
-	.cr-event-calendar .mc-main::after {
+	.cr-event-calendar .mc-main::after,
+	section.cr-event-calendar .mc-main.mc-main .heading.heading::before {
 		display: none;
 	}
 
