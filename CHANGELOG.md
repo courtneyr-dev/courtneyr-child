@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.7.168
+
+What changes on the Merge Conflicts series page (`/series/merge-conflicts/`) once its series categories exist in wp-admin:
+
+- The sidebar card is "Alongside the main series": one block per child category of the `merge-conflicts` series category, in term order. The companion block names "Democratizing Publishing, Without a Process" and lists its four arcs, each stamped Planned until it has a published part, then linked with its count. The extras block lists the five newest extras by title and links the extras archive, so the /random/ case study is reachable from the series page. A block with nothing published ends on "Follow the investigation to hear when the first piece publishes," linked to the follow block. The hard-coded "First-person pieces run alongside the main series" sentence and the "Upcoming" line are gone; each block's description comes from its category term. Closes #269.
+- Season 1 has a name. Parts filed on the landing show "What open source is" and its description on the season fold, as the Season 1 heading in the parts list, and in the post header tape ("Merge Conflicts · Season 1 · Part 9 of 9"), the way a Season 2 post reads.
+- "Planned" replaces "Upcoming" on season folds and "Coming later" in the season index, matching the contents view.
+- Seasons, arcs and child categories with no order set in wp-admin sort by slug, so `merge-conflicts-season-2` comes before `-season-5`. By name, "Community health" sorted before "Who decides". An order set in wp-admin still wins.
+- Archives and headers away from the series page print the child category's own name: an extras archive reads "Extras" and "Alongside Merge Conflicts", not "Companion series to Merge Conflicts". The contents view's companion tape prints the category name.
+- Extras carry no part numbers: no "Part 1 of 1" in the header tape, no number or "Part 1:" in the "In this series" drawer, no numeral or "Part 1" on archive rows, no part in the previous and next links. PublishPress Series stores a part for every published post, so the theme leaves it unprinted for a series that is alone in its child category.
+
+Nothing changes on live until Courtney creates the `merge-conflicts` series category: term 1175 has none today, so the page keeps its flat parts list.
+
+Under the hood: `collection()` returns the companion's own child category as `child`. New `landing_season()` holds Season 1's name and description as translatable strings for the `merge-conflicts` landing and returns them only once it has seasons. New `is_unnumbered()` is true for the only series in a child category. `order_terms()` breaks `term_order` ties by natural slug. `render_publication_companion()` renders the blocks, reusing `contents_item()` for arcs. In `cr-series-publication.css` the unused `.cr-mc__state` stamp rules are gone and the card's rules are rewritten (26,535 bytes, cap 30,720). `cr-series.css` hides an empty drawer number chip.
+
 ## 0.7.167
 
 - The Merge Conflicts series feed (`/series/merge-conflicts/feed/`) keeps working when Season 2 starts. Once the series category `merge-conflicts` exists, the feed carries the parts filed on the landing, every season's parts and the extras, newest first. Before, a post filed on a season term or on `merge-conflicts-extras` never reached the series feed, because the feed read the landing term alone. Companion pieces stay out of it; each companion arc keeps its own feed. Season and extras feeds are unchanged.
