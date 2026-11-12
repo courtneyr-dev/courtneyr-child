@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.167
+
+- The Merge Conflicts series feed (`/series/merge-conflicts/feed/`) keeps working when Season 2 starts. Once the series category `merge-conflicts` exists, the feed carries the parts filed on the landing, every season's parts and the extras, newest first. Before, a post filed on a season term or on `merge-conflicts-extras` never reached the series feed, because the feed read the landing term alone. Companion pieces stay out of it; each companion arc keeps its own feed. Season and extras feeds are unchanged.
+
+Under the hood: `landing_feed_query()` in `inc/series.php` runs on `pre_get_posts` at priority 20 for a landing's main feed query and swaps the single `series` term for an exact `tax_query` on the landing, its seasons and the series in each child category named by the `courtneyr_child_series_feed_child_groups` filter (default `array( 'mc-extras' )`). It reads the queried object first, so the feed's channel title stays the landing's. A series with no category keeps core's feed query.
+
 ## 0.7.166
 
 - On phones narrower than 374 px, the Event calendar (`/kind/event/`) shows My Calendar's day-by-day list, as it already did at 320 px. The seven-column grid starts at 374 px. Between 321 and 373 px the grid had split nine-letter words such as "Sentinel", "Recurring" and "Cancelled:" across two lines; a 360 px Android phone is in that range. Measured in Chromium and WebKit: both keep those words whole from 374 px up and split them at 372 px and below. iPhones (375 px and wider) keep the grid. (#231)

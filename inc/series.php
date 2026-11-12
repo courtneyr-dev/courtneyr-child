@@ -577,6 +577,74 @@ function order_series_archive( $query ): void {
 add_action( 'pre_get_posts', __NAMESPACE__ . '\\order_series_archive', 20 );
 
 /**
+ * Slugs of a landing's child series categories whose series also go out in the
+ * landing's feed. Extras do (Courtney, 2026-11-11); companion arcs keep their own feeds.
+ *
+ * @return string[]
+ */
+function feed_child_group_slugs(): array {
+	return array_values( array_filter( array_map( 'strval', (array) apply_filters( 'courtneyr_child_series_feed_child_groups', array( 'mc-extras' ) ) ) ) );
+}
+
+/**
+ * Series a landing's feed carries: the landing, its seasons, and the series of
+ * each child category named in feed_child_group_slugs().
+ *
+ * @param array<string, mixed> $collection From collection().
+ * @return \WP_Term[]
+ */
+function feed_series( array $collection ): array {
+	$series = main_series( $collection );
+	$slugs  = feed_child_group_slugs();
+	foreach ( $collection['companions'] as $child ) {
+		if ( in_array( $child['group']->slug, $slugs, true ) ) {
+			$series = array_merge( $series, $child['arcs'] );
+		}
+	}
+	return $series;
+}
+
+/**
+ * A landing's feed (/series/{landing}/feed/) carries its own parts, every
+ * season's and the extras, newest first. Core's feed query reads the landing
+ * term alone, so without this a post filed on a season term never reaches
+ * series subscribers.
+ *
+ * @param \WP_Query $query The query about to run.
+ */
+function landing_feed_query( $query ): void {
+	if ( is_admin() || ! $query instanceof \WP_Query || ! $query->is_main_query() || ! $query->is_feed() || ! is_available() || ! $query->is_tax( TAX ) ) {
+		return;
+	}
+	// Reading the queried object here caches it, so the feed's channel stays the landing.
+	$term = $query->get_queried_object();
+	if ( ! $term instanceof \WP_Term || TAX !== $term->taxonomy ) {
+		return;
+	}
+	$c = collection( $term );
+	if ( 'landing' !== $c['role'] ) {
+		return;
+	}
+	$series = feed_series( $c );
+	if ( count( $series ) < 2 ) {
+		return;
+	}
+	$query->set( TAX, '' );
+	$query->set(
+		'tax_query',
+		array(
+			array(
+				'taxonomy'         => TAX,
+				'field'            => 'term_id',
+				'terms'            => array_values( array_unique( wp_list_pluck( $series, 'term_id' ) ) ),
+				'include_children' => false,
+			),
+		)
+	);
+}
+add_action( 'pre_get_posts', __NAMESPACE__ . '\\landing_feed_query', 20 );
+
+/**
  * Serve /series-toc/ from templates/series-toc.html before the plugin includes its PHP template.
  */
 function route_series_toc(): void {
