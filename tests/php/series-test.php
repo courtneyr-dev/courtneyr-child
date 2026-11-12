@@ -78,6 +78,7 @@ namespace {
 		public $name        = '';
 		public $parent      = 0;
 		public $description = '';
+		public $term_order  = 0;
 	}
 
 	function series_get_icons( $series ) {
@@ -102,6 +103,11 @@ namespace {
 
 	function get_posts( $args ) {
 		if ( 'series_grouping' === $args['post_type'] ) {
+			foreach ( $GLOBALS['cr_shadow_posts'] ?? array() as $id => $shadow ) {
+				if ( $shadow->post_name === $args['name'] ) {
+					return array( $id );
+				}
+			}
 			return array();
 		}
 		$GLOBALS['cr_parts_queries'][] = $args;
@@ -157,8 +163,26 @@ namespace {
 		return $GLOBALS['cr_child_groups'][ $args['parent'] ?? -1 ] ?? array();
 	}
 
+	function wp_get_object_terms( $object_id, $taxonomy ) {
+		$terms = array();
+		foreach ( $GLOBALS['cr_group_objects'] ?? array() as $group_id => $objects ) {
+			if ( in_array( $object_id, $objects, true ) && isset( $GLOBALS['cr_terms'][ $taxonomy ][ $group_id ] ) ) {
+				$terms[] = $GLOBALS['cr_terms'][ $taxonomy ][ $group_id ];
+			}
+		}
+		return $terms;
+	}
+
 	function is_admin() {
 		return false;
+	}
+
+	function term_description( $term ) {
+		return $term->description;
+	}
+
+	function get_post_time( $format, $gmt, $id ) {
+		return $GLOBALS['cr_post_times'][ $id ] ?? $id;
 	}
 
 	function wp_list_pluck( $list, $field ) {
@@ -228,7 +252,12 @@ namespace {
 
 namespace Courtneyr\Child\Series\Tests {
 
+	use function Courtneyr\Child\Series\is_unnumbered;
 	use function Courtneyr\Child\Series\landing_feed_query;
+	use function Courtneyr\Child\Series\order_terms;
+	use function Courtneyr\Child\Series\part_binding_value;
+	use function Courtneyr\Child\Series\render_publication_companion;
+	use function Courtneyr\Child\Series\render_status;
 	use function Courtneyr\Child\Series\part_key;
 	use function Courtneyr\Child\Series\part_label;
 	use function Courtneyr\Child\Series\published_count_label;
@@ -428,7 +457,7 @@ namespace Courtneyr\Child\Series\Tests {
 	$GLOBALS['cr_parts_posts'][209] = array( 'series' => 2178, 'status' => 'publish', 'password' => '', 'part' => 1, 'title' => 'Season post' );
 	$contents = render_publication_contents( $seasonal );
 	check( false !== strpos( $contents, 'href="https://example.test/series/first-season/"' ) && false !== strpos( $contents, '1 part' ), 'announced seasons retain their archive links and published counts' );
-	check( false !== strpos( $contents, 'Planned season' ) && false !== strpos( $contents, 'Upcoming' ), 'unpublished seasons stay upcoming' );
+	check( false !== strpos( $contents, 'Planned season' ) && false !== strpos( $contents, '<span class="cr-mc__fold-state">Planned</span>' ) && false === strpos( $contents, 'Upcoming' ), 'an unpublished season is stamped Planned' );
 	check( 2 === substr_count( $contents, '<details' ) && 1 === substr_count( $contents, '<details class="cr-mc__fold-details" open>' ), 'each season folds; only a season with published parts opens by default' );
 	check( false !== strpos( $contents, 'post-209/' ) && false !== strpos( $contents, 'Season 1, Part 1: ' ) && false !== strpos( $contents, '#cr-series-follow' ), 'an open season lists its parts with full link names; an upcoming one points to the follow block' );
 	// A second landing whose own parts become Season 1 (fresh IDs: parts() and collection() cache per term).
@@ -580,6 +609,146 @@ namespace Courtneyr\Child\Series\Tests {
 	$lone_query->queried = $lone;
 	landing_feed_query( $lone_query );
 	check( array() === $lone_query->vars, 'a series with no category keeps the core feed query' );
+	$GLOBALS['cr_taxonomies'] = array();
+
+
+	// Term order: term_order first, then the slug, so seasons and arcs need no manual order.
+	$by_slug = static function ( string $slug, string $name, int $order = 0 ): \WP_Term {
+		$t             = new \WP_Term();
+		$t->slug       = $slug;
+		$t->name       = $name;
+		$t->term_order = $order;
+		return $t;
+	};
+	$ordered = order_terms( array( $by_slug( 'merge-conflicts-season-5', 'Community health' ), $by_slug( 'merge-conflicts-season-10', 'A tenth' ), $by_slug( 'merge-conflicts-season-2', 'Who decides, twelve projects compared' ) ) );
+	check( array( 'merge-conflicts-season-2', 'merge-conflicts-season-5', 'merge-conflicts-season-10' ) === array_column( array_map( 'get_object_vars', $ordered ), 'slug' ), 'with no term_order set, seasons sort by natural slug, not by name' );
+	$ordered = order_terms( array( $by_slug( 'mc-extras', 'Extras', 1 ), $by_slug( 'mc-companion', 'Democratizing Publishing', 2 ) ) );
+	check( 'mc-extras' === $ordered[0]->slug, 'a term_order set in wp-admin wins over the slug' );
+
+	// The planned Merge Conflicts setup (copy approved 2026-11-11), with the states the page must handle.
+	$GLOBALS['cr_taxonomies'] = array( 'series' => true, 'series_group' => true );
+	$mk = static function ( int $id, string $slug, string $name, string $tax = 'series', int $parent = 0, string $desc = '' ): \WP_Term {
+		$t              = new \WP_Term();
+		$t->term_id     = $id;
+		$t->slug        = $slug;
+		$t->name        = $name;
+		$t->taxonomy    = $tax;
+		$t->parent      = $parent;
+		$t->description = $desc;
+		$GLOBALS['cr_terms'][ $tax ][ $id ] = $t;
+		return $t;
+	};
+	$link = static function ( int $series_id, int $group_id ): void {
+		$shadow                                  = 90000 + $series_id;
+		$GLOBALS['cr_group_objects'][ $group_id ][] = $shadow;
+		$GLOBALS['cr_shadow_posts'][ $shadow ]   = (object) array( 'post_type' => 'series_grouping', 'post_status' => 'publish', 'post_name' => 'series_grouping_' . $series_id );
+	};
+	$post = static function ( int $id, int $series, ?int $part, string $title, int $time = 0 ): void {
+		$GLOBALS['cr_parts_posts'][ $id ] = array( 'series' => $series, 'status' => 'publish', 'password' => '', 'part' => $part, 'title' => $title );
+		$GLOBALS['cr_post_times'][ $id ]  = $time ? $time : $id;
+	};
+	$mc          = $mk( 8000, 'merge-conflicts', 'Merge Conflicts' );
+	$mc_group    = $mk( 8500, 'merge-conflicts', 'Merge Conflicts', 'series_group' );
+	$s2          = $mk( 8002, 'merge-conflicts-season-2', 'Who decides, twelve projects compared', 'series', 0, 'One reader question per post, asked of every project.' );
+	$s3          = $mk( 8003, 'merge-conflicts-season-3', 'The WordPress record' );
+	$companion   = $mk( 8501, 'mc-companion', 'Democratizing Publishing, Without a Process', 'series_group', 8500, 'The series questions, seen from inside one contributor career.' );
+	$extras_cat  = $mk( 8502, 'mc-extras', 'Extras', 'series_group', 8500, 'Unnumbered case studies about decisions happening now.' );
+	$arcs        = array(
+		$mk( 8011, 'mc-companion-1-before-you-join', 'Before you join' ),
+		$mk( 8012, 'mc-companion-2-the-work', 'The work' ),
+		$mk( 8013, 'mc-companion-3-how-the-project-decides', 'How the project decides, through documents' ),
+		$mk( 8014, 'mc-companion-4-personal', 'Personal' ),
+	);
+	$extras      = $mk( 8020, 'merge-conflicts-extras', 'Merge Conflicts extras' );
+	$GLOBALS['cr_child_groups'][8500] = array( $extras_cat, $companion );
+	foreach ( array( 8000, 8002, 8003 ) as $sid ) {
+		$link( $sid, 8500 );
+	}
+	foreach ( $arcs as $arc ) {
+		$link( $arc->term_id, 8501 );
+	}
+	$link( 8020, 8502 );
+	$post( 8100, 8000, 1, 'Season 1 first part' );
+	$post( 8101, 8000, 2, 'Season 1 second part' );
+	$post( 8102, 8002, 1, 'Season 2 first part' );
+	$GLOBALS['cr_queried'] = $mc;
+
+	// A season with one published part, an empty season, and Season 1 named by the theme.
+	$folds = render_publication_contents( $mc );
+	check( false !== strpos( $folds, '<span class="cr-mc__fold-eyebrow">Season 1</span><span class="cr-mc__fold-name">What open source is</span>' ) && false !== strpos( $folds, 'The basics first. Four freedoms' ), 'the Season 1 fold carries its name and description' );
+	check( false !== strpos( $folds, '>Season 2</span><span class="cr-mc__fold-name">Who decides, twelve projects compared' ) && false !== strpos( $folds, 'post-8102/' ) && false !== strpos( $folds, '<span class="cr-mc__fold-state">1 part</span>' ), 'a season with one published part lists it under Season 2' );
+	check( false !== strpos( $folds, '>Season 3</span><span class="cr-mc__fold-name">The WordPress record' ) && 1 === substr_count( $folds, '<span class="cr-mc__fold-state">Planned</span>' ), 'an empty season is stamped Planned' );
+	check( strpos( $folds, 'Season 1' ) < strpos( $folds, 'Season 2' ) && strpos( $folds, 'Season 2' ) < strpos( $folds, 'Season 3' ), 'seasons fold in order' );
+
+	// Season 1 posts read like Season 2 posts in the header tape.
+	$GLOBALS['cr_post_series'][8101] = $mc;
+	$GLOBALS['cr_post_series'][8102] = $s2;
+	$s1_head = render_post_header( 8101 );
+	check( false !== strpos( $s1_head, 'Merge Conflicts</a><span class="cr-series-sep" aria-hidden="true" role="presentation"> · </span>Season 1<span' ) && false !== strpos( $s1_head, 'Part 2 of 2' ) && false !== strpos( $s1_head, 'The basics first.' ), 'a Season 1 post header names Season 1 and its description' );
+	check( false !== strpos( render_post_header( 8102 ), '>Season 2<span' ), 'a Season 2 post header names Season 2' );
+
+	// The parts list heads Season 1 with its name.
+	$rows    = array(
+		array( 'id' => 8100, 'html' => '<li class="wp-block-post post-8100">a</li>' ),
+		array( 'id' => 8101, 'html' => '<li class="wp-block-post post-8101">b</li>' ),
+		array( 'id' => 8102, 'html' => '<li class="wp-block-post post-8102">c</li>' ),
+	);
+	$grouped = \Courtneyr\Child\Series\render_part_groups( $mc, $rows, ' class="x"' );
+	check( false !== strpos( $grouped, '<p class="cr-tape cr-series-season__tape">Season 1</p><h2 class="cr-series-season__title" id="cr-series-group-8000">What open source is</h2>' ) && false === strpos( $grouped, 'is-untitled' ), 'the parts list heads Season 1 with its name, not a hidden "Parts"' );
+
+	// Alongside the main series: a companion category with no published arc, an extras category with none.
+	$alongside = render_publication_companion( $mc );
+	check( strpos( $alongside, 'Democratizing Publishing' ) < strpos( $alongside, '>Extras</h3>' ), 'blocks follow term order: mc-companion before mc-extras' );
+	check( 4 === substr_count( $alongside, 'is-planned' ) && 5 === substr_count( $alongside, '>Planned</span>' ) && false === strpos( $alongside, 'href="https://example.test/series/mc-companion' ), 'four unpublished arcs are plain text stamped Planned, and so is the empty extras block' );
+	check( 2 === substr_count( $alongside, '<a href="#cr-series-follow">Follow the investigation</a> to hear when the first piece publishes.' ), 'each block with nothing published points to the follow block (T4)' );
+	check( 2 === substr_count( $alongside, '<h3 ' ) && false === strpos( $alongside, '<h2' ) && false === strpos( $alongside, 'First-person pieces run alongside' ) && false === strpos( $alongside, 'Upcoming' ), 'one h3 per category under the pattern h2, no hard-coded sentence, no "Upcoming"' );
+	check( 1 === preg_match( '/<h3 class="cr-mc__alongside-name" id="(cr-mc-alongside-8501)">.*aria-labelledby="\1"/s', $alongside ), 'the arc list is labeled by its category heading' );
+
+	// No category at all: the one follow line.
+	$lone_mc = $mk( 8900, 'lone-series', 'Lone series' );
+	check( '<p class="cr-mc__alongside-follow"><a href="#cr-series-follow">Follow the investigation</a> to hear when the first piece publishes.</p>' === render_publication_companion( $lone_mc ), 'a series with no category shows only the follow line' );
+
+	// Labels away from the series page use the child category's own name.
+	$status = render_status( $extras );
+	check( false !== strpos( $status, '<li>Extras</li>' ) && false === strpos( $status, 'Companion series' ), 'an extras archive is labeled Extras, not Companion series' );
+	check( false !== strpos( render_status( $arcs[0] ), '<li>Democratizing Publishing, Without a Process</li>' ), 'an arc archive is labeled with its companion series name' );
+
+	// A second landing: a companion category with one published arc, a one-series category with posts.
+	$other       = $mk( 8600, 'other-landing', 'Other landing' );
+	$other_group = $mk( 8650, 'other-landing', 'Other landing', 'series_group' );
+	$other_comp  = $mk( 8651, 'other-companion', 'Other companion', 'series_group', 8650 );
+	$other_x     = $mk( 8652, 'other-extras', 'Other extras', 'series_group', 8650 );
+	$o_arc1      = $mk( 8611, 'other-arc-1', 'Published arc' );
+	$o_arc2      = $mk( 8612, 'other-arc-2', 'Empty arc' );
+	$o_extras    = $mk( 8620, 'other-extras-series', 'Other extras series' );
+	$GLOBALS['cr_child_groups'][8650] = array( $other_comp, $other_x );
+	$link( 8600, 8650 );
+	$link( 8611, 8651 );
+	$link( 8612, 8651 );
+	$link( 8620, 8652 );
+	$post( 8700, 8611, 1, 'Arc part' );
+	foreach ( range( 1, 6 ) as $n ) {
+		$post( 8710 + $n, 8620, $n, 'Extra ' . $n, 1000 + $n );
+	}
+	$other_side = render_publication_companion( $other );
+	check( false !== strpos( $other_side, 'href="https://example.test/series/other-arc-1/">Published arc</a>' ) && false !== strpos( $other_side, '>1 part</span>' ) && false !== strpos( $other_side, '<span class="cr-series-contents__name">Empty arc</span>' ), 'a published arc links to its archive with its count; an empty one stays plain text' );
+	check( 0 === substr_count( $other_side, 'Follow the investigation' ), 'blocks with something published get no follow line' );
+	preg_match_all( '/post-(87\d\d)\//', $other_side, $listed );
+	check( array( '8716', '8715', '8714', '8713', '8712' ) === $listed[1], 'a one-series category lists its five newest posts, newest first' );
+	check( false !== strpos( $other_side, '<a href="https://example.test/series/other-extras-series/">All of Other extras series</a>' ), 'then links the series archive by name' );
+
+	// Extras stay unnumbered, even though PublishPress Series stores a part for every published post.
+	$post( 8800, 8020, 1, 'Who pays when WordPress /random/ becomes the default?' );
+	$GLOBALS['cr_post_series'][8800] = $extras;
+	$extra_head = render_post_header( 8800 );
+	check( is_unnumbered( $extras ) && ! is_unnumbered( $arcs[0] ) && ! is_unnumbered( $s2 ), 'only the lone series in a child category is unnumbered' );
+	check( false === strpos( $extra_head, 'Part' ) && false === strpos( $extra_head, '>01<' ), 'an extras post header has no Part label or numeral' );
+	$extra_row = new \stdClass();
+	$extra_row->context = array( 'postId' => 8800 );
+	check( '' === part_binding_value( array( 'key' => 'part' ), $extra_row ) && '' === part_binding_value( array( 'key' => 'numeral' ), $extra_row ), 'an extras archive row has no Part label or numeral' );
+	$GLOBALS['cr_post_series'][8700] = $o_arc1;
+	check( false !== strpos( render_post_header( 8700 ), 'Part 1 of 1' ), 'a companion arc post keeps its part label' );
+	$GLOBALS['cr_queried']    = null;
 	$GLOBALS['cr_taxonomies'] = array();
 
 	echo $failures ? "\n{$failures} failed\n" : "\nall passed\n";

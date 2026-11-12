@@ -104,12 +104,15 @@ function render_status( \WP_Term $term ): string {
 	if ( 'season' !== $c['role'] && 'companion' !== $c['role'] ) {
 		return '';
 	}
-	$label = 'season' === $c['role']
-		/* translators: 1: season number, 2: collection link. */
-		? sprintf( __( 'Season %1$d of %2$s', 'courtneyr-child' ), season_number( $term ), '%s' )
-		/* translators: %s: collection link. */
-		: __( 'Companion series to %s', 'courtneyr-child' );
 	$link = sprintf( '<a href="%s">%s</a>', esc_url( (string) get_term_link( $c['landing'] ) ), esc_html( $c['landing']->name ) );
+	if ( 'companion' === $c['role'] ) {
+		// The child category's own name ("Extras", a companion series' title), never a generic label.
+		$items = $c['child'] ? '<li>' . esc_html( $c['child']->name ) . '</li>' : '';
+		/* translators: %s: collection link. */
+		return '<ul class="cr-series-status" role="list">' . $items . '<li>' . sprintf( esc_html__( 'Alongside %s', 'courtneyr-child' ), $link ) . '</li></ul>';
+	}
+	/* translators: 1: season number, 2: collection link. */
+	$label = sprintf( __( 'Season %1$d of %2$s', 'courtneyr-child' ), season_number( $term ), '%s' );
 	return '<ul class="cr-series-status" role="list"><li>' . sprintf( esc_html( $label ), $link ) . '</li></ul>';
 }
 
@@ -141,10 +144,21 @@ function render_part_groups( \WP_Term $term, array $rows, string $list_attrs ): 
 	$at         = strpos( $list_attrs, 'class="' );
 	$list_attrs = false === $at ? ' class="cr-series-rows"' . $list_attrs : substr_replace( $list_attrs, 'class="cr-series-rows ', $at, strlen( 'class="' ) );
 	$html       = '';
+	$first_name = $grouped ? landing_season( $c ) : array( 'name' => '' );
 	foreach ( $groups as $group ) {
 		$season = $group['series'] && $group['series']->term_id !== $c['landing']->term_id ? $group['series'] : null;
 		$id     = 'cr-series-group-' . ( $season ? $season->term_id : $term->term_id );
-		if ( $season ) {
+		if ( ! $season && '' !== $first_name['name'] ) {
+			// Season 1: the parts filed on the landing, named by the theme (landing_season()).
+			/* translators: %d: season number. */
+			$head  = '<p class="cr-tape cr-series-season__tape">' . esc_html( sprintf( __( 'Season %d', 'courtneyr-child' ), 1 ) ) . '</p>';
+			$title = ( parts( $c['landing']->term_id )[0]['id'] ?? 0 ) === $group['rows'][0]['id']
+				? $first_name['name']
+				/* translators: %s: season name. */
+				: sprintf( __( '%s (continued)', 'courtneyr-child' ), $first_name['name'] );
+			$head .= sprintf( '<h2 class="cr-series-season__title" id="%s">%s</h2>', esc_attr( $id ), esc_html( $title ) );
+			$head .= '<p class="cr-series-season__desc">' . esc_html( $first_name['desc'] ) . '</p>';
+		} elseif ( $season ) {
 			$first = parts( $season->term_id )[0]['id'] ?? 0;
 			$title = $first === $group['rows'][0]['id']
 				? $season->name
@@ -160,7 +174,7 @@ function render_part_groups( \WP_Term $term, array $rows, string $list_attrs ): 
 		}
 		$html .= sprintf(
 			'<section class="cr-series-season%s" aria-labelledby="%s"><div class="cr-series-season__head">%s</div><ol%s role="list">%s</ol></section>',
-			$season ? '' : ' is-untitled',
+			$season || '' !== $first_name['name'] ? '' : ' is-untitled',
 			esc_attr( $id ),
 			$head,
 			$list_attrs,
@@ -192,7 +206,7 @@ function render_seasons( \WP_Term $term ): string {
 		/* translators: %d: season number. */
 		$inner  = '<span class="cr-series-seasons__num">' . esc_html( sprintf( __( 'Season %d', 'courtneyr-child' ), $i + 1 ) ) . '</span>';
 		$inner .= '<span class="cr-series-seasons__name">' . esc_html( $season->name ) . '</span>';
-		$inner .= $count ? '' : '<span class="cr-series-seasons__count">' . esc_html__( 'Coming later', 'courtneyr-child' ) . '</span>';
+		$inner .= $count ? '' : '<span class="cr-series-seasons__count">' . esc_html__( 'Planned', 'courtneyr-child' ) . '</span>';
 		$class  = 'cr-series-seasons__item' . ( $count ? '' : ' is-upcoming' ) . ( $current ? ' is-current' : '' );
 		if ( $count ) {
 			$inner = sprintf( '<a class="cr-series-seasons__link" href="%s"%s>%s</a>', esc_url( (string) get_term_link( $season ) ), $current ? ' aria-current="page"' : '', $inner );
@@ -385,6 +399,10 @@ function series_name( \WP_Term $series, bool $link ): string {
 	if ( 'season' === $c['role'] ) {
 		/* translators: %d: season number. */
 		$name .= $sep . esc_html( sprintf( __( 'Season %d', 'courtneyr-child' ), season_number( $series ) ) );
+	} elseif ( 'landing' === $c['role'] && '' !== landing_season( $c )['name'] ) {
+		// Parts on the landing read as Season 1 once seasons exist (landing_season()).
+		/* translators: %d: season number. */
+		$name .= $sep . esc_html( sprintf( __( 'Season %d', 'courtneyr-child' ), 1 ) );
 	} elseif ( 'companion' === $c['role'] ) {
 		$name .= $sep . esc_html( $series->name );
 	}
@@ -411,8 +429,12 @@ function render_post_header( int $post_id ): string {
 			break;
 		}
 	}
-	$sep = '<span class="cr-series-sep" aria-hidden="true" role="presentation"> · </span>';
-	if ( $position ) {
+	$sep      = '<span class="cr-series-sep" aria-hidden="true" role="presentation"> · </span>';
+	$numbered = ! is_unnumbered( $series );
+	if ( ! $numbered ) {
+		// Extras: no part label, published or not (is_unnumbered()).
+		$place = $position ? '' : __( 'Not published yet', 'courtneyr-child' );
+	} elseif ( $position ) {
 		$place = part_label( $rows[ $position - 1 ]['part'], $position, $total );
 	} else {
 		// A preview of an unpublished part, seen only by people who can edit it.
@@ -423,12 +445,13 @@ function render_post_header( int $post_id ): string {
 			: __( 'Not published yet', 'courtneyr-child' );
 	}
 	$c    = collection( $series );
-	$desc = trim( wp_strip_all_tags( $series->description ) );
+	$desc = 'landing' === $c['role'] ? landing_season( $c )['desc'] : '';
+	$desc = '' !== $desc ? $desc : trim( wp_strip_all_tags( $series->description ) );
 	if ( '' === $desc ) {
 		$desc = trim( wp_strip_all_tags( $c['landing']->description ) );
 	}
 	$html  = '<div class="cr-series-post">';
-	$html .= '<p class="cr-tape cr-series-post__tape">' . series_name( $series, true ) . $sep . esc_html( $place ) . '</p>';
+	$html .= '<p class="cr-tape cr-series-post__tape">' . series_name( $series, true ) . ( '' !== $place ? $sep . esc_html( $place ) : '' ) . '</p>';
 	if ( '' !== $desc ) {
 		$html .= '<p class="cr-series-post__desc">' . esc_html( $desc ) . '</p>';
 	}
@@ -445,12 +468,12 @@ function render_post_header( int $post_id ): string {
 			/* translators: %d: part number. */
 			$num   = sprintf( __( 'Part %d', 'courtneyr-child' ), $number );
 			$html .= '<li class="cr-series-post__item' . ( $current ? ' is-current' : '' ) . '">';
-			$html .= '<span class="cr-series-post__num" aria-hidden="true" role="presentation">' . esc_html( sprintf( '%02d', $number ) ) . '</span><div class="cr-series-post__entry-copy">';
+			$html .= '<span class="cr-series-post__num" aria-hidden="true" role="presentation">' . ( $numbered ? esc_html( sprintf( '%02d', $number ) ) : '' ) . '</span><div class="cr-series-post__entry-copy">';
 			$html .= sprintf(
-				'<a class="cr-series-post__title" href="%s"%s><span class="screen-reader-text">%s: </span>%s</a>',
+				'<a class="cr-series-post__title" href="%s"%s>%s%s</a>',
 				esc_url( (string) get_permalink( $row['id'] ) ),
 				$current ? ' aria-current="page"' : '',
-				esc_html( $num ),
+				$numbered ? '<span class="screen-reader-text">' . esc_html( $num ) . ': </span>' : '',
 				esc_html( get_the_title( $row['id'] ) )
 			);
 			if ( $current ) {
@@ -521,6 +544,7 @@ function render_post_nav( int $post_id ): string {
 		/* translators: %d: part number. */
 		$part  = sprintf( __( 'Part %d', 'courtneyr-child' ), $row['part'] ?? 0 );
 		$meta  = $row['series']->term_id === $series->term_id ? $part : $where . ' · ' . $part;
+		$meta  = is_unnumbered( $row['series'] ) ? $where : $meta;
 		$arrow = '<span class="cr-series-nav__arrow" aria-hidden="true" role="presentation">' . $arrow . '</span>';
 		$html .= sprintf(
 			'<a class="cr-card cr-series-nav__link cr-series-nav__link--%1$s" href="%2$s" rel="%1$s"><span class="cr-series-nav__dir">%3$s</span><span class="cr-series-nav__part">%4$s</span><span class="cr-series-nav__title">%5$s</span></a>',
@@ -653,7 +677,7 @@ function render_contents( \WP_Term $term ): string {
 	foreach ( $c['companions'] as $companion ) {
 		$id    = 'cr-series-companion-' . $companion['group']->term_id;
 		$html .= '<div class="cr-series-contents__companion">';
-		$html .= '<h3 class="cr-series-contents__companion-title" id="' . esc_attr( $id ) . '"><span class="cr-tape cr-series-contents__companion-tape">' . esc_html__( 'Companion series', 'courtneyr-child' ) . '</span> ' . esc_html( $companion['group']->name ) . '</h3>';
+		$html .= '<h3 class="cr-series-contents__companion-title" id="' . esc_attr( $id ) . '"><span class="cr-tape cr-series-contents__companion-tape">' . esc_html( $companion['group']->name ) . '</span></h3>';
 		$desc  = trim( wp_strip_all_tags( $companion['group']->description ) );
 		$html .= '' !== $desc ? '<p class="cr-series-contents__companion-desc">' . esc_html( $desc ) . '</p>' : '';
 		if ( $companion['arcs'] ) {
@@ -781,10 +805,11 @@ function render_season_folds( \WP_Term $term ): string {
 	$seasons = array();
 	$own     = track( array( $c['landing'] ) );
 	if ( $own ) {
+		$first     = landing_season( $c );
 		$seasons[] = array(
 			'number' => 1,
-			'name'   => '',
-			'desc'   => '',
+			'name'   => $first['name'],
+			'desc'   => $first['desc'],
 			'link'   => '',
 			'rows'   => $own,
 		);
@@ -809,7 +834,7 @@ function render_season_folds( \WP_Term $term ): string {
 		$state = $count
 			/* translators: %d: published parts in this season. */
 			? sprintf( _n( '%d part', '%d parts', $count, 'courtneyr-child' ), $count )
-			: __( 'Upcoming', 'courtneyr-child' );
+			: __( 'Planned', 'courtneyr-child' );
 		$head  = '' === $season['name']
 			? '<span class="cr-mc__fold-name">' . esc_html( $label ) . '</span>'
 			: '<span class="cr-mc__fold-eyebrow">' . esc_html( $label ) . '</span><span class="cr-mc__fold-name">' . esc_html( $season['name'] ) . '</span>';
@@ -861,20 +886,68 @@ function render_publication_desk( \WP_Term $term ): string {
 }
 
 /**
- * Companion research keeps its own collection and reading order.
+ * "Alongside the main series" in the sidebar: one block per child category of
+ * the landing's category, in term order (Courtney, 2026-11-11). Each block is
+ * the category name as an h3, its description, then its series:
+ *
+ * - several series (the companion series' arcs): a contents row each, linked
+ *   with a count once published, plain text stamped Planned until then;
+ * - one series (the extras): its five newest published posts by title, then
+ *   a link to the series archive.
+ *
+ * A block with nothing published ends on a line that points to the follow block.
  *
  * @param \WP_Term $term Merge Conflicts landing.
  */
 function render_publication_companion( \WP_Term $term ): string {
-	$c     = collection( $term );
-	$html  = '<p>' . esc_html__( 'First-person pieces run alongside the main series, with their own focus and reading order.', 'courtneyr-child' ) . '</p>';
-	$links = array();
-	foreach ( $c['companions'] as $companion ) {
-		foreach ( $companion['arcs'] as $arc ) {
-			if ( published_total( array( $arc ) ) ) {
-				$links[] = '<li><a href="' . esc_url( (string) get_term_link( $arc ) ) . '">' . esc_html( $arc->name ) . '</a></li>';
+	$c    = collection( $term );
+	$html = '';
+	foreach ( $c['companions'] as $child ) {
+		$id        = 'cr-mc-alongside-' . $child['group']->term_id;
+		$block     = '<h3 class="cr-mc__alongside-name" id="' . esc_attr( $id ) . '">' . esc_html( $child['group']->name ) . '</h3>';
+		$desc      = trim( wp_strip_all_tags( $child['group']->description ) );
+		$block    .= '' !== $desc ? '<p class="cr-mc__alongside-desc">' . esc_html( $desc ) . '</p>' : '';
+		$published = 0;
+		if ( 1 === count( $child['arcs'] ) ) {
+			$series = $child['arcs'][0];
+			$rows   = parts( $series->term_id );
+			usort( $rows, static fn( array $a, array $b ): int => (int) get_post_time( 'U', true, $b['id'] ) <=> (int) get_post_time( 'U', true, $a['id'] ) );
+			$published = count( $rows );
+			if ( $rows ) {
+				$block .= '<ul class="cr-mc__alongside-posts" role="list" aria-labelledby="' . esc_attr( $id ) . '">';
+				foreach ( array_slice( $rows, 0, 5 ) as $row ) {
+					$block .= '<li><a href="' . esc_url( (string) get_permalink( $row['id'] ) ) . '">' . esc_html( get_the_title( $row['id'] ) ) . '</a>';
+					$block .= ' <time datetime="' . esc_attr( (string) get_the_date( DATE_W3C, $row['id'] ) ) . '">' . esc_html( (string) get_the_date( 'M j, Y', $row['id'] ) ) . '</time></li>';
+				}
+				$block .= '</ul>';
+				/* translators: %s: series name. */
+				$block .= '<p class="cr-mc__alongside-more"><a href="' . esc_url( (string) get_term_link( $series ) ) . '">' . esc_html( sprintf( __( 'All of %s', 'courtneyr-child' ), $series->name ) ) . '</a></p>';
+			} else {
+				$block .= '<p class="cr-mc__alongside-state"><span class="cr-series-stamp">' . esc_html__( 'Planned', 'courtneyr-child' ) . '</span></p>';
 			}
+		} elseif ( $child['arcs'] ) {
+			$block .= '<ol class="cr-series-contents__list cr-mc__alongside-arcs" role="list" aria-labelledby="' . esc_attr( $id ) . '">';
+			foreach ( $child['arcs'] as $j => $arc ) {
+				$published += published_total( array( $arc ) );
+				/* translators: %d: arc number within the companion series. */
+				$block .= contents_item( $arc, sprintf( __( 'Arc %d', 'courtneyr-child' ), $j + 1 ) );
+			}
+			$block .= '</ol>';
 		}
+		if ( ! $published ) {
+			$block .= alongside_follow_line();
+		}
+		$html .= '<div class="cr-mc__alongside-block">' . $block . '</div>';
 	}
-	return $html . ( $links ? '<ul>' . implode( '', $links ) . '</ul>' : '<p class="cr-mc__state">' . esc_html__( 'Upcoming', 'courtneyr-child' ) . '</p>' );
+	return '' !== $html ? '<div class="cr-mc__alongside">' . $html . '</div>' : alongside_follow_line();
+}
+
+/**
+ * The line under a block with nothing published (copy T4, 2026-11-11). Its
+ * link goes to the follow block at the end of the same page.
+ */
+function alongside_follow_line(): string {
+	$link = '<a href="#cr-series-follow">' . esc_html__( 'Follow the investigation', 'courtneyr-child' ) . '</a>';
+	/* translators: %s: "Follow the investigation", linked to the follow block. */
+	return '<p class="cr-mc__alongside-follow">' . sprintf( esc_html__( '%s to hear when the first piece publishes.', 'courtneyr-child' ), $link ) . '</p>';
 }

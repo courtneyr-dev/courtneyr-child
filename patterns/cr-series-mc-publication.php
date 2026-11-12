@@ -105,8 +105,8 @@ $courtneyr_child_mc_thesis = wp_kses(
 		<!-- wp:courtneyr/series-guide {"view":"publication-contents"} /-->
 	</section>
 	<!-- /wp:group -->
-	<!-- wp:group {"tagName":"aside","className":"cr-mc__sidebar","ariaLabel":"Reading and companion research","layout":{"type":"default"}} -->
-	<aside class="wp-block-group cr-mc__sidebar" aria-label="<?php esc_attr_e( 'Reading and companion research', 'courtneyr-child' ); ?>">
+	<!-- wp:group {"tagName":"aside","className":"cr-mc__sidebar","ariaLabel":"Reading desk and related series","layout":{"type":"default"}} -->
+	<aside class="wp-block-group cr-mc__sidebar" aria-label="<?php esc_attr_e( 'Reading desk and related series', 'courtneyr-child' ); ?>">
 		<!-- wp:group {"tagName":"section","className":"cr-mc__desk","layout":{"type":"default"}} -->
 		<section class="wp-block-group cr-mc__desk">
 			<!-- wp:paragraph {"className":"cr-mc__eyebrow"} -->
@@ -120,15 +120,12 @@ $courtneyr_child_mc_thesis = wp_kses(
 		<!-- /wp:group -->
 		<!-- wp:group {"tagName":"section","className":"cr-mc__companion","layout":{"type":"default"}} -->
 		<section class="wp-block-group cr-mc__companion">
-			<!-- wp:paragraph {"className":"cr-mc__eyebrow"} -->
-			<p class="cr-mc__eyebrow"><?php esc_html_e( 'Alongside the main series', 'courtneyr-child' ); ?></p>
-			<!-- /wp:paragraph -->
+			<!-- wp:heading {"className":"cr-mc__eyebrow"} -->
+			<h2 class="wp-block-heading cr-mc__eyebrow"><?php esc_html_e( 'Alongside the main series', 'courtneyr-child' ); ?></h2>
+			<!-- /wp:heading -->
 			<!-- wp:image {"className":"cr-mc__books"} -->
 			<figure class="wp-block-image cr-mc__books"><img src="<?php echo esc_url( $courtneyr_child_mc_art . 'mc-book-stack.webp' ); ?>" alt=""/></figure>
 			<!-- /wp:image -->
-			<!-- wp:heading -->
-			<h2 class="wp-block-heading"><?php esc_html_e( 'Companion research', 'courtneyr-child' ); ?></h2>
-			<!-- /wp:heading -->
 			<!-- wp:courtneyr/series-guide {"view":"publication-companion"} /-->
 		</section>
 		<!-- /wp:group -->
