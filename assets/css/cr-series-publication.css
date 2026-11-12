@@ -595,9 +595,11 @@
 	align-items: start;
 }
 
+/* The label sits at the top of its row, so its tape (::after, placed from
+   the label) lands on the card's torn top edge, as on the reading desk. */
 .cr-mc .cr-mc__companion > .cr-mc__eyebrow {
 	grid-column: 1;
-	align-self: center;
+	align-self: start;
 }
 
 .cr-mc .cr-mc__books {
