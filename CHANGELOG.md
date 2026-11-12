@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.169
+
+- On the Merge Conflicts series page, the tape above "Alongside the main series" sits on the card's torn top edge, like the reading desk's. It had ridden 11 px below the edge at 1440 px wide (4 px below at 720), because the label was centered against the taller book-stack drawing beside it.
+
+Under the hood: `.cr-mc__companion > .cr-mc__eyebrow` is `align-self: start` instead of `center` in `cr-series-publication.css`. Measured on local: the tape starts 8 px above the card top in both cards at 1440, 720 and 375 px.
+
 ## 0.7.168
 
 What changes on the Merge Conflicts series page (`/series/merge-conflicts/`) once its series categories exist in wp-admin:
