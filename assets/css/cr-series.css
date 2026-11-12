@@ -658,6 +658,9 @@ a.cr-series-seasons__link:focus-visible {
 
 .cr-series-post__num::before { inset: 0; background: var(--cr-accent-1-bg); }
 
+/* Extras carry no part number (is_unnumbered()): keep the column, drop the chip. */
+.cr-series-post__num:empty { visibility: hidden; }
+
 .cr-series-post__item .cr-series-post__title {
 	color: var(--cr-ink);
 	font-family: var(--cr-font-accent);

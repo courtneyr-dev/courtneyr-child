@@ -184,7 +184,13 @@ function parts( int $series_id, string $status = 'publish' ): array {
 }
 
 /**
- * Sort terms by the plugin's `term_order` column, then naturally by name.
+ * Sort terms by the plugin's `term_order` column, then naturally by slug.
+ *
+ * PublishPress Series 3.1.5 sets `term_order` from the Order field on a series'
+ * edit screen and by drag and drop on the Series and Series Categories lists
+ * (orgSeries-manage.php). Every term starts at 0, so with no order set the
+ * slugs decide: `merge-conflicts-season-2` before `-season-10`, where names
+ * would put "Community health" before "Who decides".
  *
  * @param \WP_Term[] $terms Terms.
  * @return \WP_Term[]
@@ -196,7 +202,7 @@ function order_terms( array $terms ): array {
 			$oa       = isset( $a->term_order ) ? (int) $a->term_order : 0;
 			$ob       = isset( $b->term_order ) ? (int) $b->term_order : 0;
 			$by_order = $oa <=> $ob;
-			return 0 !== $by_order ? $by_order : strnatcasecmp( $a->name, $b->name );
+			return 0 !== $by_order ? $by_order : strnatcasecmp( $a->slug, $b->slug );
 		}
 	);
 	return $terms;
@@ -261,19 +267,21 @@ function groups_of_series( int $series_id ): array {
  * The collection a series belongs to.
  *
  * `role` is `landing` (the series is the collection), `season`, `companion`
- * (an arc in a companion group) or `standalone`.
+ * (a series in a child category: a companion arc or the extras) or
+ * `standalone`. `child` is that child category for a companion.
  *
  * @param \WP_Term $series Series term.
- * @return array{role:string, landing:\WP_Term, group:?\WP_Term, seasons:\WP_Term[], companions:array<int, array{group:\WP_Term, arcs:\WP_Term[]}>}
+ * @return array{role:string, landing:\WP_Term, group:?\WP_Term, child:?\WP_Term, seasons:\WP_Term[], companions:array<int, array{group:\WP_Term, arcs:\WP_Term[]}>}
  */
 function collection( \WP_Term $series ): array {
 	static $cache = array();
 	if ( isset( $cache[ $series->term_id ] ) ) {
 		return $cache[ $series->term_id ];
 	}
-	$role    = 'standalone';
-	$landing = $series;
-	$group   = null;
+	$role      = 'standalone';
+	$landing   = $series;
+	$group     = null;
+	$own_child = null;
 	if ( taxonomy_exists( GROUP_TAX ) ) {
 		$own = get_term_by( 'slug', $series->slug, GROUP_TAX );
 		if ( $own instanceof \WP_Term && 0 === (int) $own->parent ) {
@@ -287,9 +295,10 @@ function collection( \WP_Term $series ): array {
 				}
 				$home = get_term_by( 'slug', $top->slug, TAX );
 				if ( $home instanceof \WP_Term ) {
-					$role    = $candidate->parent ? 'companion' : 'season';
-					$landing = $home;
-					$group   = $top;
+					$role      = $candidate->parent ? 'companion' : 'season';
+					$landing   = $home;
+					$group     = $top;
+					$own_child = $candidate->parent ? $candidate : null;
 					break;
 				}
 			}
@@ -322,6 +331,7 @@ function collection( \WP_Term $series ): array {
 		'role'       => $role,
 		'landing'    => $landing,
 		'group'      => $group,
+		'child'      => $own_child,
 		'seasons'    => $seasons,
 		'companions' => $companions,
 	);
@@ -401,6 +411,50 @@ function season_number( \WP_Term $series ): int {
  */
 function landing_season_offset( array $collection ): int {
 	return $collection['seasons'] && parts( $collection['landing']->term_id ) ? 1 : 0;
+}
+
+/**
+ * Whether a series' posts carry no part numbers: the only series in a child
+ * category of a landing, as the extras are (Courtney, 2026-11-11: unnumbered
+ * case studies, outside the reading order). PublishPress Series stores a part
+ * for every published post (ppseries_normalize_series_parts()), so the theme
+ * leaves it unprinted instead of relying on it being absent.
+ *
+ * @param \WP_Term $series Series term.
+ */
+function is_unnumbered( \WP_Term $series ): bool {
+	$c = collection( $series );
+	if ( 'companion' !== $c['role'] || ! $c['child'] ) {
+		return false;
+	}
+	foreach ( $c['companions'] as $child ) {
+		if ( $child['group']->term_id === $c['child']->term_id ) {
+			return 1 === count( $child['arcs'] );
+		}
+	}
+	return false;
+}
+
+/**
+ * Season 1's name and description. Season 1 is the parts filed on the landing
+ * itself (landing_season_offset()), so it has no term of its own to hold them.
+ * Merge Conflicts' come from the copy Courtney approved on 2026-11-11 (T2, T3).
+ * Empty until the landing has seasons, and for any other series.
+ *
+ * @param array<string, mixed> $collection From collection().
+ * @return array{name:string, desc:string}
+ */
+function landing_season( array $collection ): array {
+	if ( 'merge-conflicts' !== $collection['landing']->slug || ! landing_season_offset( $collection ) ) {
+		return array(
+			'name' => '',
+			'desc' => '',
+		);
+	}
+	return array(
+		'name' => __( 'What open source is', 'courtneyr-child' ),
+		'desc' => __( 'The basics first. Four freedoms, what free means, a dated history, licenses, twelve projects, the stack, sponsorship and your first contribution.', 'courtneyr-child' ),
+	);
 }
 
 /**
@@ -787,6 +841,9 @@ function part_binding_value( array $source_args, $block ): ?string {
 	if ( 'read' === $key ) {
 		/* translators: %d: minutes. */
 		return sprintf( __( '%d min read', 'courtneyr-child' ), reading_minutes( $post_id ) );
+	}
+	if ( is_unnumbered( $series ) ) {
+		return '';
 	}
 	foreach ( parts( $series->term_id ) as $i => $row ) {
 		if ( $row['id'] === $post_id ) {

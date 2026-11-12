@@ -446,32 +446,6 @@
 
 
 
-.cr-mc .cr-mc__state {
-	position: relative;
-	isolation: isolate;
-	grid-column: 2;
-	justify-self: start;
-	align-self: center;
-	padding: var(--cr-space-3xs) var(--cr-space-xs);
-	color: var(--cr-tape-ink);
-	font-family: var(--cr-font-mono);
-	font-size: var(--cr-text-sm);
-	font-weight: var(--cr-weight-bold);
-	line-height: var(--cr-leading-snug);
-}
-
-.cr-mc .cr-mc__state::before {
-	content: "";
-	position: absolute;
-	inset: 0;
-	z-index: -1;
-	background-color: var(--cr-tape);
-	background-image: url(../img/mc-paper-grain.svg);
-	clip-path: var(--cr-mc-tape-edge);
-	transform: rotate(var(--cr-rotate-2));
-	pointer-events: none;
-}
-
 .cr-mc .cr-mc__sidebar {
 	display: grid;
 	align-content: start;
@@ -527,11 +501,6 @@
 	pointer-events: none;
 }
 
-.cr-mc .cr-mc__desk > h2,
-.cr-mc .cr-mc__companion > h2 {
-	font-size: var(--cr-text-xl);
-}
-
 .cr-mc .cr-mc__desk .cr-mc__eyebrow,
 .cr-mc .cr-mc__companion .cr-mc__eyebrow {
 	justify-self: start;
@@ -550,6 +519,7 @@
 
 .cr-mc .cr-mc__desk > h2 {
 	min-block-size: 4rem;
+	font-size: var(--cr-text-xl);
 	padding-inline-end: calc(5rem + var(--cr-space-xs));
 }
 
@@ -618,36 +588,112 @@
 
 
 
+/* "Alongside the main series": the tape-label h2 and the book stack share the
+   first row; the blocks (companion series, extras) run full width under them. */
 .cr-mc .cr-mc__companion {
-	grid-template-columns: 4rem minmax(0, 1fr);
+	grid-template-columns: minmax(0, 1fr) 4rem;
 	align-items: start;
 }
 
 .cr-mc .cr-mc__companion > .cr-mc__eyebrow {
-	grid-column: 1 / -1;
-}
-
-.cr-mc .cr-mc__companion > h2,
-.cr-mc .cr-mc__companion > p:not(.cr-mc__eyebrow),
-.cr-mc .cr-mc__companion > ul {
-	grid-column: 2;
-	grid-row: auto;
-}
-
-.cr-mc .cr-mc__companion > .cr-mc__state {
-	grid-column: 2;
-	grid-row: auto;
+	grid-column: 1;
+	align-self: center;
 }
 
 .cr-mc .cr-mc__books {
-	grid-column: 1;
-	grid-row: 2 / span 3;
+	grid-column: 2;
+	grid-row: 1;
 	inline-size: 4rem;
 	margin: 0;
 }
 
-.cr-mc .cr-mc__companion .cr-series-index {
+.cr-mc .cr-mc__companion > :not(.cr-mc__eyebrow, .cr-mc__books) {
+	grid-column: 1 / -1;
+}
+
+.cr-mc .cr-mc__alongside {
+	display: grid;
+	gap: var(--cr-space-lg);
+}
+
+.cr-mc .cr-mc__alongside-block {
+	display: grid;
+	gap: var(--cr-space-xs);
+	padding-block-start: var(--cr-space-sm);
+	border-block-start: 2px solid var(--cr-ink);
+}
+
+.cr-mc .cr-mc__alongside-name {
+	font-size: var(--cr-text-lg);
+}
+
+.cr-mc .cr-mc__alongside :is(p, ul, ol) {
 	margin: 0;
+}
+
+.cr-mc .cr-mc__alongside-desc,
+.cr-mc .cr-mc__alongside time {
+	color: var(--cr-ink-soft);
+	font-size: var(--cr-text-sm);
+	line-height: 1.5;
+}
+
+/* Contents rows (contents_item()) stack in the narrow card at every width. */
+.cr-mc .cr-mc__alongside-arcs {
+	border-block-start: 0;
+}
+
+.cr-mc .cr-mc__alongside-arcs .cr-series-contents__item {
+	grid-template-columns: auto minmax(0, 1fr);
+	grid-template-areas:
+		"num state"
+		"name name"
+		"desc desc";
+}
+
+.cr-mc .cr-mc__alongside-arcs .cr-series-contents__item:last-child {
+	border-block-end: 0;
+}
+
+.cr-mc .cr-mc__alongside-arcs .cr-series-contents__leader {
+	display: none;
+}
+
+.cr-mc .cr-mc__alongside-arcs .cr-series-contents__name {
+	font-size: var(--cr-text-md);
+}
+
+.cr-mc .cr-mc__alongside-posts {
+	display: grid;
+	gap: var(--cr-space-xs);
+	padding: 0;
+	list-style: none;
+}
+
+.cr-mc .cr-mc__alongside-posts li {
+	margin: 0;
+}
+
+.cr-mc .cr-mc__alongside-posts li::before {
+	content: none;
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- the sidebar post links; the flagged methods and season links are other elements. */
+.cr-mc .cr-mc__alongside-posts li > a {
+	color: var(--cr-ink);
+	font-weight: var(--cr-weight-bold);
+	text-decoration-color: var(--cr-marker);
+	text-decoration-thickness: 3px;
+	text-underline-offset: 4px;
+}
+
+.cr-mc .cr-mc__alongside time {
+	display: block;
+}
+
+.cr-mc .cr-mc__alongside-state .cr-series-stamp {
+	border-style: dashed;
+	color: var(--cr-ink-soft);
 }
 
 .cr-mc .cr-mc__parts {
@@ -848,11 +894,6 @@
 		grid-template-columns: 2.75rem minmax(0, 1fr) auto;
 	}
 
-	.cr-mc .cr-mc__state {
-		grid-column: 3;
-		grid-row: 1;
-	}
-
 }
 
 @media (min-width: 64rem) {
@@ -929,7 +970,7 @@
 
 
 	.cr-mc .cr-mc__companion {
-		grid-template-columns: 5rem minmax(0, 1fr);
+		grid-template-columns: minmax(0, 1fr) 5rem;
 	}
 
 	.cr-mc .cr-mc__books {
@@ -976,7 +1017,6 @@
 	.cr-mc .cr-mc__methods,
 	.cr-mc .cr-mc__follow,
 	.cr-mc .cr-mc__season-number,
-	.cr-mc .cr-mc__state,
 	.cr-mc .cr-mc__eyebrow,
 	.cr-mc .cr-mc__fieldguide,
 	.cr-mc .cr-mc__annotation,
@@ -995,7 +1035,6 @@
 	.cr-mc .cr-mc__fieldguide::before,
 	.cr-mc .cr-mc__annotation::before,
 	.cr-mc .cr-mc__season-number::before,
-	.cr-mc .cr-mc__state::before,
 	.cr-mc .cr-mc__desk > .cr-mc__eyebrow::after,
 	.cr-mc .cr-mc__companion > .cr-mc__eyebrow::after,
 	.cr-mc .cr-mc__methods-copy h2::after,
