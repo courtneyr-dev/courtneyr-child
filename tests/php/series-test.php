@@ -154,7 +154,37 @@ namespace {
 	}
 
 	function get_terms( $args ) {
-		return array();
+		return $GLOBALS['cr_child_groups'][ $args['parent'] ?? -1 ] ?? array();
+	}
+
+	function is_admin() {
+		return false;
+	}
+
+	function wp_list_pluck( $list, $field ) {
+		return array_map( static fn( $item ) => is_object( $item ) ? $item->$field : $item[ $field ], $list );
+	}
+
+	/** The parts of WP_Query the series hooks read and write. */
+	class WP_Query {
+		public $vars = array();
+		public $feed = false;
+		public $queried;
+		public function is_main_query() {
+			return true;
+		}
+		public function is_feed() {
+			return $this->feed;
+		}
+		public function is_tax( $taxonomy = '' ) {
+			return true;
+		}
+		public function get_queried_object() {
+			return $this->queried;
+		}
+		public function set( $key, $value ) {
+			$this->vars[ $key ] = $value;
+		}
 	}
 
 	function is_wp_error( $value ) {
@@ -198,6 +228,7 @@ namespace {
 
 namespace Courtneyr\Child\Series\Tests {
 
+	use function Courtneyr\Child\Series\landing_feed_query;
 	use function Courtneyr\Child\Series\part_key;
 	use function Courtneyr\Child\Series\part_label;
 	use function Courtneyr\Child\Series\published_count_label;
@@ -481,6 +512,75 @@ namespace Courtneyr\Child\Series\Tests {
 	$GLOBALS['cr_is_tax'] = false;
 
 	check( strpos( $masthead, '"view":"start"' ) < strpos( $masthead, '"view":"cover"' ), 'the masthead places the series image after the way in' );
+
+
+	// Feed: a landing's feed carries its own parts, its seasons and the extras; companion arcs keep their own feeds.
+	check( $hooked( 'pre_get_posts', 'landing_feed_query' ), 'landing_feed_query runs on pre_get_posts' );
+	$GLOBALS['cr_taxonomies'] = array( 'series' => true, 'series_group' => true );
+	$feed_landing = new \WP_Term();
+	$feed_landing->term_id = 5100;
+	$feed_landing->slug    = 'feed-landing';
+	$feed_group            = new \WP_Term();
+	$feed_group->term_id   = 6100;
+	$feed_group->slug      = 'feed-landing';
+	$feed_group->taxonomy  = 'series_group';
+	$feed_season           = new \WP_Term();
+	$feed_season->term_id  = 5102;
+	$feed_season->slug     = 'feed-landing-season-2';
+	$feed_companion        = new \WP_Term();
+	$feed_companion->term_id  = 6101;
+	$feed_companion->slug     = 'mc-companion';
+	$feed_companion->parent   = 6100;
+	$feed_companion->taxonomy = 'series_group';
+	$feed_extras_group     = new \WP_Term();
+	$feed_extras_group->term_id  = 6102;
+	$feed_extras_group->slug     = 'mc-extras';
+	$feed_extras_group->parent   = 6100;
+	$feed_extras_group->taxonomy = 'series_group';
+	$feed_arc              = new \WP_Term();
+	$feed_arc->term_id     = 5103;
+	$feed_arc->slug        = 'mc-companion-1-before-you-join';
+	$feed_extras           = new \WP_Term();
+	$feed_extras->term_id  = 5104;
+	$feed_extras->slug     = 'feed-landing-extras';
+	$GLOBALS['cr_terms']['series_group'][6100] = $feed_group;
+	$GLOBALS['cr_terms']['series'][5102]       = $feed_season;
+	$GLOBALS['cr_terms']['series'][5103]       = $feed_arc;
+	$GLOBALS['cr_terms']['series'][5104]       = $feed_extras;
+	$GLOBALS['cr_child_groups'][6100]          = array( $feed_companion, $feed_extras_group );
+	$GLOBALS['cr_group_objects'][6100]         = array( 7100, 7102 );
+	$GLOBALS['cr_group_objects'][6101]         = array( 7103 );
+	$GLOBALS['cr_group_objects'][6102]         = array( 7104 );
+	foreach ( array( 7100 => 5100, 7102 => 5102, 7103 => 5103, 7104 => 5104 ) as $shadow => $series_id ) {
+		$GLOBALS['cr_shadow_posts'][ $shadow ] = (object) array( 'post_type' => 'series_grouping', 'post_status' => 'publish', 'post_name' => 'series_grouping_' . $series_id );
+	}
+	$feed_posts = array( 5100 => 'landing post', 5102 => 'season post', 5104 => 'extras post', 5103 => 'companion post' );
+	$feed_query          = new \WP_Query();
+	$feed_query->feed    = true;
+	$feed_query->queried = $feed_landing;
+	landing_feed_query( $feed_query );
+	$feed_terms = $feed_query->vars['tax_query'][0]['terms'] ?? array();
+	$in_feed    = array_values( array_intersect_key( $feed_posts, array_flip( $feed_terms ) ) );
+	check( array( 'landing post', 'season post', 'extras post' ) === $in_feed, 'the landing feed carries the landing, season and extras posts, not the companion post' );
+	check( '' === ( $feed_query->vars['series'] ?? null ) && false === ( $feed_query->vars['tax_query'][0]['include_children'] ?? true ) && ! isset( $feed_query->vars['orderby'] ), 'the feed swaps the single-term var for an exact tax query and keeps date order' );
+	$archive_query          = new \WP_Query();
+	$archive_query->queried = $feed_landing;
+	landing_feed_query( $archive_query );
+	check( array() === $archive_query->vars, 'the landing archive page is left to order_series_archive' );
+	$season_query          = new \WP_Query();
+	$season_query->feed    = true;
+	$season_query->queried = $feed_season;
+	landing_feed_query( $season_query );
+	check( array() === $season_query->vars, 'a season feed keeps its own term' );
+	$lone          = new \WP_Term();
+	$lone->term_id = 5199;
+	$lone->slug    = 'no-category-series';
+	$lone_query          = new \WP_Query();
+	$lone_query->feed    = true;
+	$lone_query->queried = $lone;
+	landing_feed_query( $lone_query );
+	check( array() === $lone_query->vars, 'a series with no category keeps the core feed query' );
+	$GLOBALS['cr_taxonomies'] = array();
 
 	echo $failures ? "\n{$failures} failed\n" : "\nall passed\n";
 	exit( $failures ? 1 : 0 );
