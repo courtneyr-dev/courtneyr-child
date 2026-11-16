@@ -334,7 +334,8 @@
 	position: relative;
 	display: grid;
 	box-sizing: border-box;
-	max-inline-size: 26rem;
+	inline-size: min(100%, 26rem);
+	justify-self: center;
 	margin-inline: auto;
 	overflow: visible;
 	border: 2px solid var(--cr-name-tag-edge);
