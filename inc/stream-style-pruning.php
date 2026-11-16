@@ -359,6 +359,7 @@ const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-mc-seasons',
 	'courtneyr-evidence-labels',
 	'courtneyr-rsvp',
+	'courtneyr-tag',
 	'courtneyr-presentation',
 	// Event archive calendar only; My Calendar renders it on /kind/event/.
 	'courtneyr-event-calendar',

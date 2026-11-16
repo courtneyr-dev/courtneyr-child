@@ -169,6 +169,10 @@ function parts( int $series_id, string $status = 'publish' ): array {
 		)
 	);
 	$ids = array_map( 'intval', $ids );
+	// Tag and follow posts that aren't public never list as series parts (spec-261 S1).
+	if ( class_exists( '\\PKIW\\Public_Eligibility' ) ) {
+		$ids = array_map( 'intval', \PKIW\Public_Eligibility::filter_ids( $ids ) );
+	}
 	update_meta_cache( 'post', $ids );
 	$meta = part_key( $series_id );
 	$rows = array();
