@@ -220,6 +220,11 @@ test.describe( 'Tag single', () => {
 			expect( font.size ).toBeGreaterThanOrEqual( 16 );
 		}
 		expect( await single.innerHTML() ).not.toContain( 'View the tagged page' );
+		const header = page.locator( 'main.single-post > .single-post__header' );
+		const order = await header.evaluate( ( node ) => [ ...node.children ].map( ( child ) => child.classList.contains( 'single-post__title' ) ? 'title' : child.classList.contains( 'single-post__lede-meta' ) ? 'meta' : '' ).filter( Boolean ) );
+		expect( order, 'H1 before the date and kind line' ).toEqual( [ 'title', 'meta' ] );
+		await expect( header.locator( '.single-post__category' ) ).toHaveCount( 0 );
+		await expect( header.locator( '.single-post__kind a' ) ).toHaveText( 'Tag' );
 		await expect( page.locator( '.pkiw-singular-entry.h-entry, .h-entry' ).first() ).toHaveCount( 1 );
 	} );
 
@@ -248,9 +253,10 @@ test.describe( 'Tag single', () => {
 			const side = await page.locator( '.cr-name-tag-single' ).evaluate( ( root ) => {
 				const sticker = root.querySelector( '.cr-name-tag-single__mount' ).getBoundingClientRect();
 				const clipping = root.querySelector( '.cr-name-tag-clipping' ).getBoundingClientRect();
-				return Math.abs( sticker.top - clipping.top ) < 4 && sticker.right <= clipping.left;
+				// From 64rem the clipping overlaps the backing's right edge, so the two papers read as one collage.
+				return clipping.left > sticker.left + ( sticker.width / 2 ) && clipping.left < sticker.right && clipping.top < sticker.bottom;
 			} );
-			expect( side, `${ width }px sticker beside clipping` ).toBe( width >= 1024 );
+			expect( side, `${ width }px clipping overlaps the backing's right edge` ).toBe( width >= 1024 );
 		}
 		for ( const theme of [ 'light', 'dark' ] ) {
 			await openSingle( page, 'S01' );

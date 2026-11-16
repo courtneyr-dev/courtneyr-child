@@ -349,6 +349,10 @@ function enqueue(): void {
 	if ( ! is_tag_archive() && ! is_tag_single() && ! is_stream_surface() ) {
 		return;
 	}
+	// The single's backing and clipping are shared cr-paper.css sheets.
+	if ( is_tag_single() ) {
+		wp_enqueue_style( 'courtneyr-paper' );
+	}
 	wp_enqueue_style(
 		STYLE_HANDLE,
 		COURTNEYR_CHILD_URI . '/assets/css/' . STYLE_FILE,

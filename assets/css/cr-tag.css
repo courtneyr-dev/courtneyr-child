@@ -328,8 +328,6 @@
 	box-sizing: border-box;
 	min-inline-size: 0;
 	padding: var(--cr-space-xl) var(--cr-space-lg);
-	border-radius: 0;
-	background-color: var(--cr-surface-soft);
 }
 
 .cr-name-tag-single__sticker {
@@ -409,15 +407,21 @@
 	font-weight: var(--cr-weight-bold);
 }
 
+/* The backing (sky blue) and clipping (printer ivory) are cr-paper.css sheets
+   that keep their paper and ink in both color schemes, so the clipping's links
+   keep the light-scheme link colors, as the write-in's do. */
 .cr-name-tag-clipping {
+	--cr-link: var(--cr-cerulean);
+	--cr-link-hover: var(--cr-russian-violet);
+	--cr-link-visited: var(--cr-russian-violet-soft);
+	position: relative;
 	box-sizing: border-box;
 	min-inline-size: 0;
 	padding: var(--cr-space-lg);
-	border: var(--cr-border-thick);
-	border-radius: 0;
-	background-color: var(--cr-surface-elevated);
-	box-shadow: var(--cr-shadow-hard);
-	color: var(--cr-ink);
+}
+
+.cr-name-tag-clipping :is(h2, p) {
+	color: inherit;
 }
 
 .cr-name-tag-clipping > :first-child {
@@ -493,6 +497,7 @@
 	max-inline-size: 100%;
 	block-size: auto;
 	border: var(--cr-border-thick);
+	border-color: currentcolor;
 }
 
 .cr-name-tag-clipping__person {
@@ -519,6 +524,7 @@
 	inline-size: 4rem;
 	block-size: 4rem;
 	border: var(--cr-border-thick);
+	border-color: currentcolor;
 	border-radius: var(--cr-radius-full);
 	object-fit: cover;
 }
@@ -666,6 +672,71 @@
 	text-transform: uppercase;
 }
 
+/* Single header: the H1, then a quiet mono line with the date and kind
+   (inc/single-tag.php reorders the blocks and drops the category). */
+
+body.kind-tag.single main.single-post .single-post__lede-meta {
+	gap: var(--cr-space-xs) !important;
+	color: var(--cr-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+}
+
+body.kind-tag.single main.single-post .single-post__lede-meta > * {
+	font-size: inherit !important;
+}
+
+body.kind-tag.single main.single-post .single-post__lede-meta .single-post__kind {
+	padding: 0;
+	border: 0;
+	background: none;
+	box-shadow: none;
+	color: inherit;
+	font-family: inherit;
+	font-weight: inherit;
+	letter-spacing: inherit;
+	text-transform: none;
+	transform: none;
+}
+
+body.kind-tag.single main.single-post .single-post__lede-meta .single-post__kind::before {
+	content: "·" / "";
+	margin-inline-end: var(--cr-space-xs);
+}
+
+/* The chip link rule in components.css forces color and decoration with
+   !important; the 24px inline-flex target it sets stays. */
+body.kind-tag.single main.single-post .single-post__lede-meta .single-post__kind a {
+	padding: 0;
+	color: var(--cr-link) !important;
+	font-weight: inherit;
+	letter-spacing: inherit;
+	text-decoration: underline !important;
+	text-transform: none;
+}
+
+body.kind-tag.single main.single-post .single-post__lede-meta .single-post__kind a:visited {
+	color: var(--cr-link-visited) !important;
+}
+
+body.kind-tag.single main.single-post .single-post__lede-meta .single-post__kind a:hover {
+	color: var(--cr-link-hover) !important;
+}
+
+/* The tag single's marks are the marker strokes and underline set from 64rem;
+   the shared flank glyphs, header bar and content bookend stay off. The flank
+   glyphs are set with !important in components.css, so only !important
+   replaces them. */
+body.kind-tag.single main.single-post .single-post__title.cr-flank::before,
+body.kind-tag.single main.single-post .single-post__title.cr-flank::after {
+	content: none !important;
+}
+
+body.kind-tag.single main.single-post > .single-post__header::after,
+body.kind-tag.single main.single-post .single-post__content::before {
+	content: none;
+}
+
 /* Wider layouts. */
 
 @media (min-width: 40rem) {
@@ -711,6 +782,46 @@
 		font-size: var(--cr-text-xl);
 	}
 
+	/* The header shares the sticker's 64rem measure; the H1 starts on that
+	   column's edge and is only as wide as its text, so the underline follows it. */
+	body.kind-tag.single main.single-post > .single-post__header {
+		--wp--style--global--content-size: 64rem;
+	}
+
+	body.kind-tag.single main.single-post > .single-post__header > .single-post__title {
+		inline-size: fit-content;
+		margin-inline: calc((100% - min(100%, 64rem)) / 2) auto !important;
+	}
+
+	/* Three marker strokes to the H1's left: top border, content-box stripe, bottom border. */
+	body.kind-tag.single main.single-post .single-post__title.cr-flank::before {
+		content: "" !important;
+		display: block !important;
+		inset-block-start: 0.25em;
+		inset-inline: auto calc(100% + var(--cr-space-md));
+		box-sizing: content-box;
+		inline-size: var(--cr-space-xl);
+		block-size: 3px;
+		padding-block: 3px;
+		border-block: 3px solid var(--cr-marker);
+		background: var(--cr-marker);
+		background-clip: content-box;
+		opacity: 1;
+		transform: rotate(var(--cr-rotate-neg));
+	}
+
+	/* The marker underline under the title's second half. */
+	body.kind-tag.single main.single-post .single-post__title.cr-flank::after {
+		content: "" !important;
+		display: block !important;
+		inset-block: calc(100% + 0.1em) auto;
+		inset-inline: 40% 0;
+		block-size: 0.45rem;
+		background: var(--cr-marker);
+		opacity: 1;
+		transform: rotate(var(--cr-rotate-1));
+	}
+
 	/* Sticker and clipping break out of the 720px measure, as the RSVP ticket does. */
 	.wp-block-post-content:has(> .pkiw-singular-entry > .cr-name-tag-single),
 	.wp-block-post-content > .pkiw-singular-entry:has(> .cr-name-tag-single) {
@@ -723,8 +834,23 @@
 		margin-inline: auto;
 	}
 
+	/* The clipping overlaps the backing's edge so the two papers read as one collage. */
 	.cr-name-tag-single:not(.cr-name-tag-single--no-sticker) {
 		grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+		align-items: stretch;
+		gap: 0;
+	}
+
+	.cr-name-tag-single:not(.cr-name-tag-single--no-sticker) .cr-name-tag-single__mount {
+		display: grid;
+		align-content: center;
+		padding-inline-end: calc(var(--cr-space-lg) + var(--cr-space-xl));
+	}
+
+	.cr-name-tag-single:not(.cr-name-tag-single--no-sticker) .cr-name-tag-clipping {
+		z-index: 1;
+		margin-block-start: calc(-1 * var(--cr-space-md));
+		margin-inline-start: calc(-1 * var(--cr-space-xl));
 	}
 }
 

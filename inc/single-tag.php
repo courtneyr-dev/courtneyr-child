@@ -17,7 +17,9 @@ use function Courtneyr\Child\Tag\band_html;
 use function Courtneyr\Child\Tag\band_style;
 use function Courtneyr\Child\Tag\block_post_id;
 use function Courtneyr\Child\Tag\facts;
+use function Courtneyr\Child\Tag\has_class_name;
 use function Courtneyr\Child\Tag\is_display_label;
+use function Courtneyr\Child\Tag\is_tag_single;
 use function Courtneyr\Child\Tag\tilt;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -53,7 +55,7 @@ function sticker( array $facts, int $post_id ): string {
 		return '';
 	}
 	$prefix = _n( 'Label:', 'Labels:', count( $labels ), 'courtneyr-child' );
-	$out    = '<div class="cr-name-tag-single__mount"><div class="cr-name-tag-single__sticker cr-name-tag cr-name-tag-tilt-' . tilt( $post_id ) . '" style="' . esc_attr( band_style( $post_id ) ) . '">';
+	$out    = '<div class="cr-name-tag-single__mount cr-paper-sheet cr-paper-sheet--flat cr-paper-sheet--torn cr-paper--sky-blue"><div class="cr-name-tag-single__sticker cr-name-tag cr-name-tag-tilt-' . tilt( $post_id ) . '" style="' . esc_attr( band_style( $post_id ) ) . '">';
 	$out   .= '<span class="cr-name-tag__tape" aria-hidden="true"></span>';
 	$out   .= band_html();
 	$out   .= '<p class="cr-name-tag__write-in"><span class="screen-reader-text">' . esc_html( $prefix ) . ' </span>';
@@ -160,7 +162,7 @@ function clipping_html( array $facts, int $post_id ): string {
 	$out  = '<div class="cr-name-tag-single cr-name-tag-single--' . $type . ( '' === $sticker ? ' cr-name-tag-single--no-sticker' : '' ) . '">';
 	$out .= $sticker;
 	if ( '' !== $clipping ) {
-		$out .= '<div class="cr-name-tag-clipping">' . $clipping . '</div>';
+		$out .= '<div class="cr-name-tag-clipping cr-paper-sheet cr-paper-sheet--torn cr-paper--printer-ivory">' . $clipping . '</div>';
 	}
 	return $out . '</div>';
 }
@@ -191,3 +193,71 @@ function clipping( string $html, array $block, $instance ): string { // phpcs:ig
 	return '' === $out ? $html : $out;
 }
 add_filter( 'render_block_post-kinds-indieweb/tag-card', __NAMESPACE__ . '\\clipping', 20, 3 );
+
+/**
+ * Remove one inner block and its placeholder from a parsed block.
+ *
+ * @param array<string, mixed> $block Parsed block.
+ * @param int                  $index Inner block index.
+ * @return array<string, mixed>
+ */
+function drop_inner_block( array $block, int $index ): array {
+	$seen = -1;
+	foreach ( (array) ( $block['innerContent'] ?? array() ) as $position => $chunk ) {
+		if ( null === $chunk && ++$seen === $index ) {
+			unset( $block['innerContent'][ $position ] );
+			break;
+		}
+	}
+	$block['innerContent'] = array_values( (array) ( $block['innerContent'] ?? array() ) );
+	array_splice( $block['innerBlocks'], $index, 1 );
+	return $block;
+}
+
+/**
+ * Tag single header: the H1 first, then the date and kind, with no category.
+ *
+ * The shared single template prints date, kind chip and category chip above
+ * the title. The tag mockup reads title first with a quiet date line under
+ * it, so this reorders the header's inner blocks for tag singles only and
+ * leaves the template file alone.
+ *
+ * @param array<string, mixed> $parsed_block Parsed block about to render.
+ * @return array<string, mixed>
+ */
+function header_order( array $parsed_block ): array {
+	if ( 'core/group' !== ( $parsed_block['blockName'] ?? '' )
+		|| ! has_class_name( (string) ( $parsed_block['attrs']['className'] ?? '' ), 'single-post__header' )
+		|| ! is_tag_single() ) {
+		return $parsed_block;
+	}
+	$title = null;
+	$meta  = null;
+	foreach ( (array) ( $parsed_block['innerBlocks'] ?? array() ) as $index => $inner ) {
+		$name = (string) ( $inner['blockName'] ?? '' );
+		if ( 'core/post-title' === $name ) {
+			$title = $index;
+		} elseif ( 'core/group' === $name && has_class_name( (string) ( $inner['attrs']['className'] ?? '' ), 'single-post__lede-meta' ) ) {
+			$meta = $index;
+		}
+	}
+	if ( null === $title || null === $meta ) {
+		return $parsed_block;
+	}
+
+	$lede = $parsed_block['innerBlocks'][ $meta ];
+	foreach ( array_reverse( (array) ( $lede['innerBlocks'] ?? array() ), true ) as $index => $inner ) {
+		if ( 'core/post-terms' === ( $inner['blockName'] ?? '' ) && 'category' === ( $inner['attrs']['term'] ?? '' ) ) {
+			$lede = drop_inner_block( $lede, (int) $index );
+		}
+	}
+	$parsed_block['innerBlocks'][ $meta ] = $lede;
+
+	if ( $meta < $title ) {
+		$heading                               = $parsed_block['innerBlocks'][ $title ];
+		$parsed_block['innerBlocks'][ $title ] = $parsed_block['innerBlocks'][ $meta ];
+		$parsed_block['innerBlocks'][ $meta ]  = $heading;
+	}
+	return $parsed_block;
+}
+add_filter( 'render_block_data', __NAMESPACE__ . '\\header_order', 10, 1 );
