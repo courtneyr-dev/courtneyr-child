@@ -710,6 +710,9 @@ body.kind-tag.single main.single-post .single-post__lede-meta .single-post__kind
 /* The chip link rule in components.css forces color and decoration with
    !important; the 24px inline-flex target it sets stays. */
 body.kind-tag.single main.single-post .single-post__lede-meta .single-post__kind a {
+	display: inline-block;
+	min-inline-size: 24px;
+	min-block-size: 24px;
 	padding: 0;
 	color: var(--cr-link) !important;
 	font-weight: inherit;
