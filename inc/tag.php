@@ -430,6 +430,10 @@ function purge_urls( $paths, $post ) {
 	}
 
 	foreach ( collection_posts_referencing( (int) $post->ID ) as $collection_id ) {
+		// Synced patterns and other non-public types can hold the block too; only public pages are cached.
+		if ( function_exists( 'is_post_publicly_viewable' ) && ! is_post_publicly_viewable( $collection_id ) ) {
+			continue;
+		}
 		$link = get_permalink( $collection_id );
 		if ( is_string( $link ) && '' !== $link ) {
 			$paths['urls'][] = $link;

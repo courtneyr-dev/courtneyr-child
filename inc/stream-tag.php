@@ -87,9 +87,13 @@ function card_html( array $facts, \WP_Post $post, int $level ): string {
 	if ( '' !== $label ) {
 		$out .= '<p class="cr-name-tag-card__sticker cr-name-tag">' . band_html() . '<span class="cr-name-tag__write-in p-category' . ( is_display_label( $label ) ? '' : ' cr-name-tag__label--long' ) . '">' . esc_html( $label ) . '</span></p>';
 	}
-	$out .= '<h' . $level . ' class="cr-name-tag-card__title"><a class="u-url' . ( empty( $facts['title_is_target'] ) ? ' p-name' : '' ) . '" href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( $title ) . '</a></h' . $level . '>';
+	// Title plus host names the link, so two cards with the same title stay distinguishable (WCAG 2.4.4).
+	$title_id = 'cr-tag-' . (int) $post->ID . '-title';
+	$host_id  = 'cr-tag-' . (int) $post->ID . '-host';
+	$labelled = '' !== $host ? ' aria-labelledby="' . esc_attr( $title_id . ' ' . $host_id ) . '"' : '';
+	$out     .= '<h' . $level . ' class="cr-name-tag-card__title"><a class="u-url' . ( empty( $facts['title_is_target'] ) ? ' p-name' : '' ) . '" id="' . esc_attr( $title_id ) . '" href="' . esc_url( (string) get_permalink( $post ) ) . '"' . $labelled . '>' . esc_html( $title ) . '</a></h' . $level . '>';
 	if ( '' !== $host ) {
-		$out .= '<p class="cr-name-tag-card__host">' . esc_html( $host ) . '</p>';
+		$out .= '<p class="cr-name-tag-card__host" id="' . esc_attr( $host_id ) . '">' . esc_html( $host ) . '</p>';
 	}
 	$out .= '<time class="dt-published cr-name-tag-card__date" datetime="' . esc_attr( (string) ( $facts['date_iso'] ?? '' ) ) . '">' . esc_html( (string) ( $facts['tagged_display'] ?? '' ) ) . '</time>';
 	$out .= '<span hidden>' . hidden_props( $facts, $post ) . '</span>';

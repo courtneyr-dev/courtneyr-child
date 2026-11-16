@@ -261,6 +261,7 @@
 }
 
 .cr-tag-sheets .pkiw-tag-entry__title a {
+	scroll-margin-block-start: calc(var(--cr-space-2xl) * 2);
 	color: var(--cr-name-tag-link);
 	text-decoration: underline;
 	text-decoration-thickness: 1px;
@@ -629,6 +630,7 @@
 }
 
 .pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__title a {
+	scroll-margin-block-start: calc(var(--cr-space-2xl) * 4);
 	color: var(--cr-link);
 	text-decoration: underline;
 	text-decoration-thickness: 1px;
@@ -893,6 +895,12 @@ body.kind-tag.single main.single-post .single-post__content::before {
 
 /* Forced colors: paper, bands and tape drop to 2px CanvasText outlines. */
 @media (forced-colors: active) {
+
+	/* components.css sets every .pk-card to a 1px !important outline here; C18 asks for 2px. */
+	.pk-card.pk-card--stream.cr-name-tag-card {
+		border-width: 2px !important;
+	}
+
 
 	.cr-tag-sheets .pkiw-tag-section,
 	.cr-tag-sheets .pkiw-tag-entry.cr-name-tag,

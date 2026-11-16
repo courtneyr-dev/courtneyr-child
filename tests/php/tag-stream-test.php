@@ -35,8 +35,8 @@ namespace {
 					'<p class="cr-name-tag-card__kind">Tag</p>',
 					'<p class="cr-name-tag-card__sticker cr-name-tag"><span class="cr-name-tag__band" aria-hidden="true">',
 					'<span class="cr-name-tag__write-in p-category">Accessibility</span>',
-					'<h3 class="cr-name-tag-card__title"><a class="u-url" href="https://example.test/tag-201/">Alt text decision guide</a></h3>',
-					'<p class="cr-name-tag-card__host">guides.example.com</p>',
+					'<h3 class="cr-name-tag-card__title"><a class="u-url" id="cr-tag-201-title" href="https://example.test/tag-201/" aria-labelledby="cr-tag-201-title cr-tag-201-host">Alt text decision guide</a></h3>',
+					'<p class="cr-name-tag-card__host" id="cr-tag-201-host">guides.example.com</p>',
 					'<time class="dt-published cr-name-tag-card__date" datetime="2026-11-16T12:00:00+00:00">Nov 16</time>',
 					'<span hidden>',
 				),
@@ -83,6 +83,20 @@ namespace {
 		static function (): void {
 			$html = cr_tag_stream( 203, cr_tag_facts( array( 'title_is_target' => false ) ), str_replace( 'h3', 'h2', CR_TAG_STREAM_CARD ) );
 			cr_tag_contains( '<h2 class="cr-name-tag-card__title"><a class="u-url p-name"', $html, 'h2 with p-name' );
+		}
+	);
+
+	cr_tag_check(
+		'same-title cards get distinct accessible names from title plus host; no host means no labelledby',
+		static function (): void {
+			$one = cr_tag_stream( 211, cr_tag_facts( array( 'display_title' => 'Sample tag item', 'url_host' => 'alpha.example.com' ) ) );
+			$two = cr_tag_stream( 212, cr_tag_facts( array( 'display_title' => 'Sample tag item', 'url_host' => 'beta.example.org' ) ) );
+			cr_tag_contains( 'aria-labelledby="cr-tag-211-title cr-tag-211-host"', $one, 'first card name' );
+			cr_tag_contains( 'aria-labelledby="cr-tag-212-title cr-tag-212-host"', $two, 'second card name' );
+			cr_tag_contains( 'id="cr-tag-212-host">beta.example.org</p>', $two, 'host carries the referenced id' );
+			$none = cr_tag_stream( 213, cr_tag_facts( array( 'url' => '', 'url_host' => '' ) ) );
+			cr_tag_not_contains( 'aria-labelledby', $none, 'no host, no labelledby' );
+			cr_tag_not_contains( 'cr-name-tag-card__host', $none, 'no empty host' );
 		}
 	);
 

@@ -48,6 +48,12 @@ namespace {
 	}
 
 	$GLOBALS['wpdb'] = new CR_Tag_Wpdb();
+	$GLOBALS['cr_tag_not_public'] = array();
+
+	function is_post_publicly_viewable( $post = null ): bool {
+		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
+		return ! in_array( $id, $GLOBALS['cr_tag_not_public'], true );
+	}
 
 	$base = array(
 		'urls'  => array( 'https://example.test/tag-301/', 'https://example.test/kind/tag/' ),
@@ -121,6 +127,27 @@ namespace {
 				$out,
 				'added paths'
 			);
+		}
+	);
+
+	cr_tag_check(
+		'a non-public post holding the block (a synced pattern) is not added',
+		static function () use ( $base ): void {
+			$GLOBALS['wpdb']->rows        = array(
+				601 => array(
+					'status'  => 'publish',
+					'content' => '<!-- wp:post-kinds-indieweb/collection-item {"postId":303} /-->',
+				),
+				602 => array(
+					'status'  => 'publish',
+					'content' => '<!-- wp:post-kinds-indieweb/collection-item {"postId":303} /-->',
+				),
+			);
+			$GLOBALS['cr_tag_not_public'] = array( 602 );
+			$out                          = Tag\purge_urls( $base, new WP_Post( 303 ) );
+			cr_tag_contains( 'https://example.test/tag-601/', implode( ' ', $out['urls'] ), 'public collection kept' );
+			cr_tag_not_contains( 'https://example.test/tag-602/', implode( ' ', $out['urls'] ), 'non-public holder dropped' );
+			$GLOBALS['cr_tag_not_public'] = array();
 		}
 	);
 
