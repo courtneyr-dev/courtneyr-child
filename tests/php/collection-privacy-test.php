@@ -180,6 +180,11 @@ namespace {
 		);
 		$GLOBALS['cr_collection_thumbs'] = array( 1 => 101, 7 => 109 );
 		$GLOBALS['cr_collection_parents'] = array( 101 => 0, 109 => 3 );
+		// PKIW 1.9.2 routes is_public_reference() and public_image_id() through the shared predicate.
+		$eligibility = dirname( $plugin ) . '/class-public-eligibility.php';
+		if ( is_readable( $eligibility ) ) {
+			require_once $eligibility;
+		}
 		require_once $plugin;
 
 		$hidden_attrs = array_map( static fn( int $id ): array => array( 'postId' => $id ), array( 2, 3, 4, 5, 6, 999999 ) );

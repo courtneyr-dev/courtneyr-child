@@ -1,0 +1,937 @@
+/**
+ * Tag posts: name-tag sticker sheets (archive), sticker and clipping (single),
+ * one-link name-tag card (Stream). Every color, face, rotation and shadow is a
+ * tokens.css token; the band pair arrives per post as --cr-name-tag-band and
+ * --cr-name-tag-ink from inc/tag.php's allowed pair list.
+ */
+
+/* Shared sticker: band and write-in field. The write-in stays printer ivory
+   with Russian violet ink in both color schemes, so its links keep the
+   light-scheme link colors. */
+
+.cr-name-tag {
+	--cr-name-tag-paper: var(--cr-printer-ivory);
+	--cr-name-tag-text: var(--cr-russian-violet);
+	--cr-name-tag-link: var(--cr-cerulean);
+	--cr-name-tag-link-hover: var(--cr-russian-violet);
+	--cr-name-tag-link-visited: var(--cr-russian-violet-soft);
+	--cr-name-tag-edge: var(--cr-russian-violet);
+}
+
+.cr-name-tag__band {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.15em;
+	padding: var(--cr-space-xs);
+	background-color: var(--cr-name-tag-band, var(--cr-russian-violet));
+	color: var(--cr-name-tag-ink, var(--cr-printer-ivory));
+	font-family: var(--cr-font-body);
+	line-height: 1;
+	text-align: center;
+	text-transform: none;
+}
+
+.cr-name-tag__hello {
+	font-size: var(--cr-text-xl);
+	font-weight: var(--cr-weight-black);
+	letter-spacing: var(--cr-tracking-wide);
+}
+
+.cr-name-tag__my-name {
+	font-size: var(--cr-text-xs);
+	white-space: nowrap;
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+}
+
+/* Tag archive identity (shared with the RSVP template shape): badge, flank and cutout stay one left lockup. */
+
+.cr-archive--tag .cr-archive__header {
+	position: relative;
+	display: grid;
+	max-inline-size: var(--wp--style--global--wide-size, 1100px);
+	padding-block-start: 0;
+	text-align: start;
+}
+
+/* Badge and h1 share the first grid cell, so the badge centers on the tile row. */
+.cr-archive--tag .cr-archive-identity--kind {
+	position: static;
+	z-index: 1;
+	grid-area: 1 / 1;
+	align-self: center;
+	justify-self: start;
+	display: block;
+	block-size: auto;
+	margin: 0 !important;
+}
+
+.cr-archive--tag .cr-archive-identity--kind .cr-archive-identity__glyph {
+	position: static;
+	inline-size: clamp(3rem, 5vw, 4.25rem);
+	block-size: clamp(3rem, 5vw, 4.25rem);
+}
+
+/* Core's constrained layout centers header children with auto !important
+   margins; the cutout h1 is an inline-size container with no content width,
+   so auto margins collapse it to 0px and stack one tile per line. */
+.cr-archive--tag .cr-archive__title.cr-cutout {
+	--cr-cutout-min: 2.75rem;
+	--cr-cutout-max: 5.75rem;
+	grid-area: 1 / 1;
+	justify-self: stretch;
+	max-inline-size: none;
+	margin-block: 0;
+	margin-inline: clamp(6.5rem, 13vw, 8.5rem) 0 !important;
+}
+
+.cr-archive--tag .cr-archive__title.cr-flank::before {
+	content: "✺" / "" !important;
+	display: block !important;
+	inset-block-start: 50%;
+	inset-inline-start: -1em;
+	font-size: 0.85em;
+	transform: translateY(-50%) rotate(-15deg);
+}
+
+.cr-archive--tag .cr-archive__title.cr-flank::after {
+	content: none !important;
+	display: none !important;
+}
+
+.cr-archive--tag .cr-archive__description {
+	max-inline-size: var(--cr-measure, 720px);
+	margin-block: 0;
+	margin-inline: 0 !important;
+	color: var(--cr-cerulean);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-bold);
+}
+
+.cr-archive--tag .cr-archive__header hr.is-style-cr-marker-bar-short {
+	inline-size: 8rem !important;
+	margin-inline: 0 !important;
+}
+
+/* Browse all spans the wide column: core's constrained layout would hold the
+   heading and columns to the content measure. */
+.cr-archive--tag .cr-browse-all > .cr-browse-all__title,
+.cr-archive--tag .cr-browse-all > .cr-browse-all__columns {
+	inline-size: 100%;
+	max-inline-size: none;
+	margin-inline: 0 !important;
+}
+
+/* Archive: one paper sheet per label, sheets fill rows of 1, 2 or 3 columns. */
+
+.cr-archive--tag .cr-tag-sheets__query {
+	inline-size: min(100%, var(--wp--style--global--wide-size, 1100px));
+	max-inline-size: var(--wp--style--global--wide-size, 1100px);
+	margin-inline: auto;
+}
+
+.cr-tag-sheets {
+	inline-size: 100%;
+	max-inline-size: none;
+	margin-block: 0 var(--cr-space-xl);
+}
+
+.cr-archive--tag .cr-tag-sheets.alignwide {
+	max-inline-size: none;
+}
+
+.cr-tag-sheets .wp-block-post::after {
+	content: none !important;
+}
+
+.cr-tag-sheets .pkiw-tag--sectioned {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	align-items: start;
+	gap: var(--cr-space-xl);
+	max-inline-size: none;
+	margin: 0;
+	padding: 0;
+}
+
+.cr-tag-sheets .pkiw-tag-section {
+	box-sizing: border-box;
+	min-inline-size: 0;
+	max-inline-size: none;
+	margin: 0;
+	padding: 0 var(--cr-space-md) var(--cr-space-lg);
+	border: var(--cr-border-thick);
+	border-radius: 0;
+	background-color: var(--cr-surface-elevated);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-ink);
+}
+
+/* The sheet heading sits on a strip of masking tape, the same on every sheet. */
+.cr-tag-sheets .pkiw-tag-section__heading {
+	box-sizing: border-box;
+	inline-size: fit-content;
+	max-inline-size: calc(100% + var(--cr-space-md));
+	margin-block: calc(-1 * var(--cr-space-md)) var(--cr-space-lg);
+	margin-inline: calc(-1 * var(--cr-space-sm)) 0;
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	background-color: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-display);
+	font-size: var(--cr-text-lg);
+	font-style: normal;
+	font-weight: var(--cr-weight-regular);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: break-word;
+	hyphens: manual;
+	text-transform: none;
+	transform: none;
+}
+
+.cr-tag-sheets .pkiw-tag-section__heading.cr-name-tag-sheet__heading--long {
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-extrabold);
+	text-transform: none;
+}
+
+.cr-tag-sheets ul.pkiw-tag-section__items {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-lg);
+	max-inline-size: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cr-tag-sheets .pkiw-tag-section__items > li.wp-block-post {
+	min-inline-size: 0;
+	margin: 0;
+	padding: 0;
+	transform: none;
+}
+
+/* A die-cut sticker: the only rounded corners in the archive body. */
+.cr-tag-sheets .pkiw-tag-entry.cr-name-tag {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	box-sizing: border-box;
+	min-block-size: 2.75rem;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	border: 2px solid var(--cr-name-tag-edge);
+	border-radius: var(--cr-radius-md);
+	background-color: var(--cr-name-tag-paper);
+	color: var(--cr-name-tag-text);
+}
+
+.cr-tag-sheets .cr-name-tag-tilt-0 {
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-tag-sheets .cr-name-tag-tilt-1 {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-tag-sheets .cr-name-tag-tilt-2 {
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-tag-sheets .cr-name-tag-tilt-3 {
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.cr-tag-sheets .pkiw-tag-entry__title {
+	margin: 0;
+	padding: var(--cr-space-sm) var(--cr-space-md) 0;
+	color: inherit;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-style: normal;
+	font-weight: var(--cr-weight-bold);
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+	transform: none;
+}
+
+.cr-tag-sheets .pkiw-tag-entry__title a {
+	scroll-margin-block-start: calc(var(--cr-space-2xl) * 2);
+	color: var(--cr-name-tag-link);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.2em;
+}
+
+.cr-tag-sheets .pkiw-tag-entry__title a:visited {
+	color: var(--cr-name-tag-link-visited);
+}
+
+.cr-tag-sheets .pkiw-tag-entry__title a:hover {
+	color: var(--cr-name-tag-link-hover);
+	text-decoration-thickness: 2px;
+}
+
+/* The whole sticker is the title link's hit area. */
+.cr-tag-sheets .pkiw-tag-entry__title a::after {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset: 0;
+	border-radius: inherit;
+}
+
+.cr-tag-sheets .pkiw-tag-entry.cr-name-tag:has(a:focus-visible) {
+	overflow: visible;
+}
+
+.cr-tag-sheets .pkiw-tag-entry__title a:focus-visible {
+	outline: 0;
+	box-shadow: none;
+}
+
+.cr-tag-sheets .pkiw-tag-entry__title a:focus-visible::after {
+	border-radius: var(--cr-radius-md);
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 8px var(--cr-focus-halo);
+}
+
+.cr-tag-sheets .pkiw-tag-entry__host {
+	margin: 0;
+	padding: var(--cr-space-xs) var(--cr-space-md) var(--cr-space-sm);
+	color: var(--cr-name-tag-text);
+	font-family: var(--wp--preset--font-family--mono, var(--cr-font-mono));
+	font-size: var(--cr-text-sm);
+	overflow-wrap: anywhere;
+}
+
+.cr-tag-sheets .pkiw-tag-entry__title:last-of-type:not(:has(+ .pkiw-tag-entry__host)) {
+	padding-block-end: var(--cr-space-sm);
+}
+
+/* Single: sticker on an upright backing beside an upright clipping. */
+
+.cr-name-tag-single {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	align-items: start;
+	gap: var(--cr-space-xl);
+	margin-block: var(--cr-space-lg) var(--cr-space-xl);
+}
+
+.cr-name-tag-single__mount {
+	box-sizing: border-box;
+	min-inline-size: 0;
+	padding: var(--cr-space-xl) var(--cr-space-lg);
+}
+
+.cr-name-tag-single__sticker {
+	position: relative;
+	display: grid;
+	box-sizing: border-box;
+	inline-size: min(100%, 26rem);
+	justify-self: center;
+	margin-inline: auto;
+	overflow: visible;
+	border: 2px solid var(--cr-name-tag-edge);
+	border-radius: var(--cr-radius-md);
+	background-color: var(--cr-name-tag-paper);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-name-tag-text);
+}
+
+.cr-name-tag-single__sticker .cr-name-tag__band {
+	border-start-start-radius: calc(var(--cr-radius-md) - 2px);
+	border-start-end-radius: calc(var(--cr-radius-md) - 2px);
+	padding-block: var(--cr-space-md);
+}
+
+.cr-name-tag-single__sticker .cr-name-tag__hello {
+	font-size: var(--cr-text-3xl);
+}
+
+.cr-name-tag-single__sticker .cr-name-tag__my-name {
+	font-size: var(--cr-text-md);
+}
+
+.cr-name-tag-single__sticker.cr-name-tag-tilt-0 {
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-name-tag-single__sticker.cr-name-tag-tilt-1 {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-name-tag-single__sticker.cr-name-tag-tilt-2 {
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-name-tag-single__sticker.cr-name-tag-tilt-3 {
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.cr-name-tag__tape {
+	position: absolute;
+	z-index: 1;
+	inset-block-start: calc(-1 * var(--cr-space-sm));
+	inset-inline-start: 50%;
+	inline-size: 6rem;
+	block-size: 1.5rem;
+	background-color: var(--cr-tape);
+	transform: translateX(-50%) rotate(var(--cr-rotate-neg));
+}
+
+.cr-name-tag__write-in {
+	display: grid;
+	gap: var(--cr-space-xs);
+	margin: 0;
+	padding: var(--cr-space-lg) var(--cr-space-lg) var(--cr-space-xl);
+	color: var(--cr-name-tag-text);
+}
+
+.cr-name-tag__write-in .p-category {
+	display: block;
+	font-family: var(--cr-font-display);
+	font-size: var(--cr-text-xl);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.cr-name-tag__write-in .p-category.cr-name-tag__label--long {
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-bold);
+}
+
+/* The backing (sky blue) and clipping (printer ivory) are cr-paper.css sheets
+   that keep their paper and ink in both color schemes, so the clipping's links
+   keep the light-scheme link colors, as the write-in's do. */
+.cr-name-tag-clipping {
+	--cr-link: var(--cr-cerulean);
+	--cr-link-hover: var(--cr-russian-violet);
+	--cr-link-visited: var(--cr-russian-violet-soft);
+	position: relative;
+	box-sizing: border-box;
+	min-inline-size: 0;
+	padding: var(--cr-space-lg);
+}
+
+.cr-name-tag-clipping :is(h2, p) {
+	color: inherit;
+}
+
+.cr-name-tag-clipping > :first-child {
+	margin-block-start: 0;
+}
+
+.cr-name-tag-clipping > :last-child {
+	margin-block-end: 0;
+}
+
+.cr-name-tag-clipping__title {
+	margin-block: 0 var(--cr-space-xs);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-2xl);
+	font-weight: var(--cr-weight-extrabold);
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+}
+
+.cr-name-tag-single .cr-name-tag-clipping .cr-name-tag-clipping__title a,
+.cr-name-tag-single .cr-name-tag-clipping .cr-name-tag-clipping__person a {
+	color: var(--cr-link);
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.18em;
+}
+
+.cr-name-tag-single .cr-name-tag-clipping .cr-name-tag-clipping__title a:visited,
+.cr-name-tag-single .cr-name-tag-clipping .cr-name-tag-clipping__person a:visited {
+	color: var(--cr-link-visited);
+}
+
+.cr-name-tag-single .cr-name-tag-clipping .cr-name-tag-clipping__title a:hover,
+.cr-name-tag-single .cr-name-tag-clipping .cr-name-tag-clipping__person a:hover {
+	color: var(--cr-link-hover);
+}
+
+.cr-name-tag-single .cr-name-tag-clipping .cr-name-tag-clipping__title a:focus-visible,
+.cr-name-tag-single .cr-name-tag-clipping .cr-name-tag-clipping__person a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 3px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+.cr-name-tag-clipping__external {
+	display: inline-block;
+	inline-size: 0.75em;
+	block-size: 0.75em;
+	margin-inline-start: 0.3em;
+	vertical-align: baseline;
+}
+
+.cr-name-tag-clipping__host {
+	margin-block: 0 var(--cr-space-md);
+	font-family: var(--wp--preset--font-family--mono, var(--cr-font-mono));
+	font-size: var(--cr-text-sm);
+	overflow-wrap: anywhere;
+}
+
+.cr-name-tag-clipping__description {
+	margin-block: 0 var(--cr-space-md);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-md);
+	line-height: var(--cr-leading-normal);
+}
+
+.cr-name-tag-clipping__image {
+	margin: 0;
+}
+
+.cr-name-tag-clipping__image img {
+	display: block;
+	max-inline-size: 100%;
+	block-size: auto;
+	border: var(--cr-border-thick);
+	border-color: currentcolor;
+}
+
+.cr-name-tag-clipping__person {
+	display: flex;
+	margin-block: 0 var(--cr-space-xs);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-2xl);
+	font-weight: var(--cr-weight-extrabold);
+	line-height: var(--cr-leading-tight);
+}
+
+.cr-name-tag-clipping__person .h-card {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--cr-space-sm);
+	min-inline-size: 0;
+	overflow-wrap: anywhere;
+}
+
+.cr-name-tag-clipping__photo,
+.cr-name-tag-clipping__initial {
+	box-sizing: border-box;
+	inline-size: 4rem;
+	block-size: 4rem;
+	border: var(--cr-border-thick);
+	border-color: currentcolor;
+	border-radius: var(--cr-radius-full);
+	object-fit: cover;
+}
+
+.cr-name-tag-clipping__initial {
+	display: inline-grid;
+	place-items: center;
+	background-color: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-display);
+	font-size: var(--cr-text-xl);
+	line-height: 1;
+}
+
+/* Stream: a compact one-link card in the loose collage. */
+
+.cr-stream-page .wp-block-post-template > li:has(> .pk-card.pk-card--stream.cr-name-tag-card) {
+	transform: none;
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card {
+	position: relative;
+	display: grid;
+	gap: var(--cr-space-sm);
+	box-sizing: border-box;
+	min-inline-size: 0;
+	padding: var(--cr-space-xl) var(--cr-space-lg) var(--cr-space-lg);
+	border: var(--cr-border-thick);
+	border-radius: 0;
+	background-color: var(--cr-surface-elevated);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-ink);
+}
+
+.cr-stream-page .pk-card.pk-card--stream.cr-name-tag-card.cr-name-tag-tilt-0 {
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-stream-page .pk-card.pk-card--stream.cr-name-tag-card.cr-name-tag-tilt-1 {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-stream-page .pk-card.pk-card--stream.cr-name-tag-card.cr-name-tag-tilt-2 {
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-stream-page .pk-card.pk-card--stream.cr-name-tag-card.cr-name-tag-tilt-3 {
+	transform: rotate(var(--cr-rotate-neg2));
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__kind {
+	position: absolute;
+	inset-block-start: calc(-1 * var(--cr-space-sm));
+	inset-inline-start: var(--cr-space-md);
+	margin: 0;
+	padding: var(--cr-space-xs) var(--cr-space-sm);
+	background-color: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	text-transform: uppercase;
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__sticker {
+	display: grid;
+	margin: 0;
+	overflow: hidden;
+	border: 2px solid var(--cr-name-tag-edge);
+	border-radius: var(--cr-radius-md);
+	background-color: var(--cr-name-tag-paper);
+	color: var(--cr-name-tag-text);
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag__write-in {
+	display: block;
+	padding: var(--cr-space-sm) var(--cr-space-md) var(--cr-space-md);
+	font-family: var(--cr-font-display);
+	font-size: var(--cr-text-lg);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag__write-in.cr-name-tag__label--long {
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__title {
+	margin: 0;
+	color: inherit;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	font-style: normal;
+	font-weight: var(--cr-weight-extrabold);
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+	transform: none;
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__title a {
+	scroll-margin-block-start: calc(var(--cr-space-2xl) * 4);
+	color: var(--cr-link);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.2em;
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__title a:visited {
+	color: var(--cr-link-visited);
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__title a:hover {
+	color: var(--cr-link-hover);
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__title a::after {
+	content: "";
+	position: absolute;
+	z-index: 4;
+	inset: 0;
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__title a:focus-visible {
+	outline: 0;
+	box-shadow: none;
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__title a:focus-visible::after {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 8px var(--cr-focus-halo);
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__host,
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__date {
+	margin: 0;
+	font-family: var(--wp--preset--font-family--mono, var(--cr-font-mono));
+	font-size: var(--cr-text-sm);
+	overflow-wrap: anywhere;
+}
+
+.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__date {
+	text-transform: uppercase;
+}
+
+/* Single header: the H1, then a quiet mono line with the date and kind
+   (inc/single-tag.php reorders the blocks and drops the category). */
+
+body.kind-tag.single main.single-post .single-post__lede-meta {
+	gap: var(--cr-space-xs) !important;
+	color: var(--cr-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+}
+
+body.kind-tag.single main.single-post .single-post__lede-meta > * {
+	font-size: inherit !important;
+}
+
+body.kind-tag.single main.single-post .single-post__lede-meta .single-post__kind {
+	padding: 0;
+	border: 0;
+	background: none;
+	box-shadow: none;
+	color: inherit;
+	font-family: inherit;
+	font-weight: inherit;
+	letter-spacing: inherit;
+	text-transform: none;
+	transform: none;
+}
+
+body.kind-tag.single main.single-post .single-post__lede-meta .single-post__kind::before {
+	content: "·" / "";
+	margin-inline-end: var(--cr-space-xs);
+}
+
+/* The chip link rule in components.css forces color and decoration with
+   !important; the 24px inline-flex target it sets stays. */
+body.kind-tag.single main.single-post .single-post__lede-meta .single-post__kind a {
+	display: inline-block;
+	min-inline-size: 24px;
+	min-block-size: 24px;
+	padding: 0;
+	color: var(--cr-link) !important;
+	font-weight: inherit;
+	letter-spacing: inherit;
+	text-decoration: underline !important;
+	text-transform: none;
+}
+
+body.kind-tag.single main.single-post .single-post__lede-meta .single-post__kind a:visited {
+	color: var(--cr-link-visited) !important;
+}
+
+body.kind-tag.single main.single-post .single-post__lede-meta .single-post__kind a:hover {
+	color: var(--cr-link-hover) !important;
+}
+
+/* The tag single's marks are the marker strokes and underline set from 64rem;
+   the shared flank glyphs, header bar and content bookend stay off. The flank
+   glyphs are set with !important in components.css, so only !important
+   replaces them. */
+body.kind-tag.single main.single-post .single-post__title.cr-flank::before,
+body.kind-tag.single main.single-post .single-post__title.cr-flank::after {
+	content: none !important;
+}
+
+body.kind-tag.single main.single-post > .single-post__header::after,
+body.kind-tag.single main.single-post .single-post__content::before {
+	content: none;
+}
+
+/* Wider layouts. */
+
+@media (min-width: 40rem) {
+
+	.cr-tag-sheets .pkiw-tag--sectioned {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	/* The band moves to the sticker's left edge. */
+	.cr-tag-sheets .pkiw-tag-entry.cr-name-tag {
+		grid-template-columns: minmax(5.5rem, 0.32fr) minmax(0, 1fr);
+		align-items: start;
+	}
+
+	.cr-tag-sheets .pkiw-tag-entry.cr-name-tag > .cr-name-tag__band {
+		grid-row: 1 / span 2;
+		align-self: stretch;
+	}
+
+	.cr-tag-sheets .pkiw-tag-entry.cr-name-tag > :not(.cr-name-tag__band) {
+		grid-column: 2;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	/* The flank star tracks the badge's 5vw size; the h1 start margin makes room. */
+	.cr-archive--tag .cr-archive__title.cr-cutout {
+		margin-inline: clamp(8rem, 10.5vw, 9.5rem) 0 !important;
+	}
+
+	.cr-archive--tag .cr-archive__title.cr-flank::before {
+		inset-inline-start: -0.9em;
+		font-size: clamp(var(--cr-text-4xl), 5vw, calc(var(--cr-text-4xl) * 1.5));
+	}
+
+
+	.cr-tag-sheets .pkiw-tag--sectioned {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.cr-tag-sheets .pkiw-tag-section__heading {
+		font-size: var(--cr-text-xl);
+	}
+
+	/* The header shares the sticker's 64rem measure; the H1 starts on that
+	   column's edge and is only as wide as its text, so the underline follows it. */
+	body.kind-tag.single main.single-post > .single-post__header {
+		--wp--style--global--content-size: 64rem;
+	}
+
+	body.kind-tag.single main.single-post > .single-post__header > .single-post__title {
+		inline-size: fit-content;
+		margin-inline: calc((100% - min(100%, 64rem)) / 2) auto !important;
+	}
+
+	/* Three marker strokes to the H1's left: top border, content-box stripe, bottom border. */
+	body.kind-tag.single main.single-post .single-post__title.cr-flank::before {
+		content: "" !important;
+		display: block !important;
+		inset-block-start: 0.25em;
+		inset-inline: auto calc(100% + var(--cr-space-md));
+		box-sizing: content-box;
+		inline-size: var(--cr-space-xl);
+		block-size: 3px;
+		padding-block: 3px;
+		border-block: 3px solid var(--cr-marker);
+		background: var(--cr-marker);
+		background-clip: content-box;
+		opacity: 1;
+		transform: rotate(var(--cr-rotate-neg));
+	}
+
+	/* The marker underline under the title's second half. */
+	body.kind-tag.single main.single-post .single-post__title.cr-flank::after {
+		content: "" !important;
+		display: block !important;
+		inset-block: calc(100% + 0.1em) auto;
+		inset-inline: 40% 0;
+		block-size: 0.45rem;
+		background: var(--cr-marker);
+		opacity: 1;
+		transform: rotate(var(--cr-rotate-1));
+	}
+
+	/* Sticker and clipping break out of the 720px measure, as the RSVP ticket does. */
+	.wp-block-post-content:has(> .pkiw-singular-entry > .cr-name-tag-single),
+	.wp-block-post-content > .pkiw-singular-entry:has(> .cr-name-tag-single) {
+		inline-size: 100%;
+		max-inline-size: 64rem;
+	}
+
+	.wp-block-post-content > .pkiw-singular-entry:has(> .cr-name-tag-single) > :not(.cr-name-tag-single):not(.alignwide):not(.alignfull) {
+		max-inline-size: var(--wp--style--global--content-size, 720px);
+		margin-inline: auto;
+	}
+
+	/* The clipping overlaps the backing's edge so the two papers read as one collage. */
+	.cr-name-tag-single:not(.cr-name-tag-single--no-sticker) {
+		grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+		align-items: stretch;
+		gap: 0;
+	}
+
+	.cr-name-tag-single:not(.cr-name-tag-single--no-sticker) .cr-name-tag-single__mount {
+		display: grid;
+		align-content: center;
+		padding-inline-end: calc(var(--cr-space-lg) + var(--cr-space-xl));
+	}
+
+	.cr-name-tag-single:not(.cr-name-tag-single--no-sticker) .cr-name-tag-clipping {
+		z-index: 1;
+		margin-block-start: calc(-1 * var(--cr-space-md));
+		margin-inline-start: calc(-1 * var(--cr-space-xl));
+	}
+}
+
+/* Motion: a small lift on hover only when motion is welcome. */
+@media (prefers-reduced-motion: no-preference) {
+
+	.cr-tag-sheets .pkiw-tag-entry.cr-name-tag,
+	.pk-card.pk-card--stream.cr-name-tag-card {
+		transition: translate var(--cr-motion-fast) var(--cr-ease-out);
+	}
+
+	.cr-tag-sheets .pkiw-tag-entry.cr-name-tag:hover,
+	.pk-card.pk-card--stream.cr-name-tag-card:hover {
+		translate: 0 -1px;
+	}
+}
+
+/* Dark: the sticker keeps its ivory write-in, violet ink and AA band pair;
+   sheets, clipping and cards take the night elevated surface from tokens. */
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-archive--tag .cr-archive__description {
+		color: var(--cr-printer-ivory);
+	}
+
+
+	:root:not([data-theme="light"]) .cr-name-tag {
+		--cr-name-tag-edge: var(--cr-printer-ivory);
+	}
+}
+
+:root[data-theme="dark"] .cr-archive--tag .cr-archive__description {
+	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-name-tag {
+	--cr-name-tag-edge: var(--cr-printer-ivory);
+}
+
+/* Forced colors: paper, bands and tape drop to 2px CanvasText outlines. */
+@media (forced-colors: active) {
+
+	/* components.css sets every .pk-card to a 1px !important outline here; C18 asks for 2px. */
+	.pk-card.pk-card--stream.cr-name-tag-card {
+		border-width: 2px !important;
+	}
+
+
+	.cr-tag-sheets .pkiw-tag-section,
+	.cr-tag-sheets .pkiw-tag-entry.cr-name-tag,
+	.cr-name-tag-single__sticker,
+	.cr-name-tag-clipping,
+	.pk-card.pk-card--stream.cr-name-tag-card,
+	.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__sticker {
+		border: 2px solid CanvasText;
+		box-shadow: none;
+	}
+
+	.cr-name-tag__band,
+	.cr-tag-sheets .pkiw-tag-section__heading,
+	.cr-name-tag-single__mount,
+	.cr-name-tag-clipping__initial,
+	.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__kind {
+		background-color: Canvas;
+		color: CanvasText;
+	}
+
+	.cr-name-tag__tape {
+		display: none;
+	}
+
+	.cr-tag-sheets .pkiw-tag-entry__title a:focus-visible::after,
+	.pk-card.pk-card--stream.cr-name-tag-card .cr-name-tag-card__title a:focus-visible::after,
+	.cr-name-tag-clipping a:focus-visible {
+		outline: 3px solid Highlight;
+		box-shadow: none;
+	}
+}
