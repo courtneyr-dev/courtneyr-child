@@ -828,14 +828,19 @@ body.kind-tag.single main.single-post .single-post__content::before {
 		transform: rotate(var(--cr-rotate-1));
 	}
 
-	/* Sticker and clipping break out of the 720px measure, as the RSVP ticket does. */
+	/* Sticker and clipping break out of the 720px measure, as the RSVP ticket does.
+	   With Post Formats active the composition sits one level down, in `.e-content`. */
 	.wp-block-post-content:has(> .pkiw-singular-entry > .cr-name-tag-single),
-	.wp-block-post-content > .pkiw-singular-entry:has(> .cr-name-tag-single) {
+	.wp-block-post-content > .pkiw-singular-entry:has(> .cr-name-tag-single),
+	.wp-block-post-content:has(> .pkiw-singular-entry > .e-content > .cr-name-tag-single),
+	.wp-block-post-content > .pkiw-singular-entry:has(> .e-content > .cr-name-tag-single) {
 		inline-size: 100%;
 		max-inline-size: 64rem;
 	}
 
-	.wp-block-post-content > .pkiw-singular-entry:has(> .cr-name-tag-single) > :not(.cr-name-tag-single):not(.alignwide):not(.alignfull) {
+	.wp-block-post-content > .pkiw-singular-entry:has(> .cr-name-tag-single) > :not(.cr-name-tag-single):not(.alignwide):not(.alignfull),
+	.wp-block-post-content > .pkiw-singular-entry:has(> .e-content > .cr-name-tag-single) > :not(.e-content):not(.alignwide):not(.alignfull),
+	.wp-block-post-content > .pkiw-singular-entry > .e-content:has(> .cr-name-tag-single) > :not(.cr-name-tag-single):not(.alignwide):not(.alignfull) {
 		max-inline-size: var(--wp--style--global--content-size, 720px);
 		margin-inline: auto;
 	}
