@@ -292,6 +292,41 @@ function entry_paint( string $html, array $block, $instance ): string {
 add_filter( 'render_block_' . ENTRY_BLOCK, __NAMESPACE__ . '\\entry_paint', 10, 3 );
 
 /**
+ * Leave the sticker article as each item's only h-entry root.
+ *
+ * Core's post template copies `get_post_class()` onto every `li.wp-block-post`,
+ * and that list carries `h-entry` and core's classic `hentry` (which mf1
+ * backcompat upgrades to h-entry), so an mf2 parser saw an empty outer entry
+ * wrapping the plugin's populated `article.h-entry`. Both classes come off an
+ * item only when the item holds its own article root.
+ *
+ * @param string $html Rendered post template.
+ */
+function single_entry_roots( string $html ): string {
+	if ( ! str_contains( $html, 'wp-block-post' ) ) {
+		return $html;
+	}
+	$tags    = new \WP_HTML_Tag_Processor( $html );
+	$pending = false;
+	while ( $tags->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
+		$tag = $tags->get_tag();
+		if ( 'LI' === $tag ) {
+			$pending = ! $tags->is_tag_closer() && $tags->has_class( 'wp-block-post' ) && ( $tags->has_class( 'h-entry' ) || $tags->has_class( 'hentry' ) ) && $tags->set_bookmark( 'cr-tag-item' );
+			continue;
+		}
+		if ( $pending && 'ARTICLE' === $tag && ! $tags->is_tag_closer() && $tags->has_class( 'h-entry' ) ) {
+			$pending = false;
+			if ( $tags->set_bookmark( 'cr-tag-article' ) && $tags->seek( 'cr-tag-item' ) ) {
+				$tags->remove_class( 'h-entry' );
+				$tags->remove_class( 'hentry' );
+				$tags->seek( 'cr-tag-article' );
+			}
+		}
+	}
+	return $tags->get_updated_html();
+}
+
+/**
  * Mark long sheet headings in the grouped post template of the sheet pattern.
  *
  * The plugin engine prints each sheet's H2 outside the entry, in the post
@@ -305,7 +340,7 @@ function sheet_headings( string $html, array $block ): string {
 	if ( '' === $html || ! has_class_name( $class_name, 'cr-tag-sheets__entries' ) || ! class_exists( '\\WP_HTML_Tag_Processor' ) ) {
 		return $html;
 	}
-	return mark_long_headings( $html );
+	return mark_long_headings( single_entry_roots( $html ) );
 }
 add_filter( 'render_block_core/post-template', __NAMESPACE__ . '\\sheet_headings', 20, 2 );
 

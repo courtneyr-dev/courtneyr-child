@@ -181,6 +181,39 @@ namespace {
 	);
 
 	cr_tag_check(
+		'each sheet item has one h-entry root: the sticker article, never the list item around it',
+		static function (): void {
+			$item  = static fn( int $id ): string => '<li class="wp-block-post post-' . $id . ' post type-post hentry kind-tag h-entry"><article class="pkiw-tag-entry pkiw-tag-entry--content h-entry cr-name-tag"><h3 class="pkiw-tag-entry__title"><a class="u-url" href="https://example.test/tag-' . $id . '/">Title</a></h3><data class="p-category" value="Accessibility"></data></article></li>';
+			$plain = '<li class="wp-block-post post-9 post type-post hentry kind-tag h-entry"><p>No article root</p></li>';
+			$html  = '<div class="pkiw-tag--sectioned"><section class="pkiw-tag-section"><h2 class="pkiw-tag-section__heading">Accessibility</h2><ul class="pkiw-tag-section__items">' . $item( 1 ) . $item( 2 ) . $plain . '</ul></section></div>';
+			$out   = Tag\sheet_headings( $html, array( 'attrs' => array( 'className' => 'cr-tag-sheets__entries' ) ) );
+
+			// Walk the tree the way an mf2 parser finds roots: count roots and roots nested inside a root.
+			$tags   = new WP_HTML_Tag_Processor( $out );
+			$stack  = array();
+			$roots  = 0;
+			$nested = 0;
+			while ( $tags->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
+				if ( $tags->is_tag_closer() ) {
+					array_pop( $stack );
+					continue;
+				}
+				$root = $tags->has_class( 'h-entry' ) || $tags->has_class( 'hentry' );
+				if ( $root ) {
+					++$roots;
+					$nested += in_array( true, $stack, true ) ? 1 : 0;
+				}
+				$stack[] = $root;
+			}
+			cr_tag_same( 3, $roots, 'two article roots plus the item that has no article of its own' );
+			cr_tag_same( 0, $nested, 'no h-entry nested inside another' );
+			cr_tag_contains( '<li class="wp-block-post post-1 post type-post kind-tag"><article class="pkiw-tag-entry pkiw-tag-entry--content h-entry cr-name-tag">', $out, 'item loses h-entry and hentry, article keeps h-entry' );
+			cr_tag_contains( $plain, $out, 'an item without an article root keeps its classes' );
+			cr_tag_contains( 'cr-name-tag-sheet__heading', $out, 'long-heading pass still runs' );
+		}
+	);
+
+	cr_tag_check(
 		'the stylesheet loads only on tag surfaces and stays out of shared used CSS',
 		static function (): void {
 			$GLOBALS['cr_tag_enqueued'] = array();
