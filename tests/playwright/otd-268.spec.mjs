@@ -282,6 +282,7 @@ test.describe( 'On This Day Stream card', () => {
 		expect( dark.shadow ).toMatch( /4px 4px 0px/ );
 		await card.locator( 'a' ).focus();
 		expect( await card.evaluate( ( node ) => getComputedStyle( node ).outlineWidth ) ).toBe( '3px' );
+		expect( await card.evaluate( ( node ) => getComputedStyle( node ).boxShadow ) ).toMatch( /8px/ );
 
 		await page.emulateMedia( { reducedMotion: 'reduce' } );
 		await open( page, STREAM );
@@ -350,6 +351,7 @@ test.describe( 'On This Day single card', () => {
 			expect( await card.evaluate( ( node ) => getComputedStyle( node ).backgroundColor ) ).toBe( DARK_CARD );
 			await card.locator( 'a' ).focus();
 			expect( await card.evaluate( ( node ) => getComputedStyle( node ).outlineWidth ) ).toBe( '3px' );
+		expect( await card.evaluate( ( node ) => getComputedStyle( node ).boxShadow ) ).toMatch( /8px/ );
 			await page.emulateMedia( { reducedMotion: 'reduce' } );
 			await open( page, href );
 			expect( await card.evaluate( ( node ) => getComputedStyle( node ).transitionProperty ) ).toBe( 'none' );
