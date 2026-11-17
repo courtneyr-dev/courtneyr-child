@@ -91,6 +91,22 @@ namespace {
 	);
 
 	cr_follow_check(
+		'note detection survives self-closing foreign and atomic hidden tags',
+		static function (): void {
+			$rows = array(
+				'<span hidden><svg><path d="M0 0"/></svg></span><p>Visible note.</p>' => true,
+				'<style hidden>.a{}</style><p>Visible note.</p>'                       => true,
+				'<p>&nbsp;</p>'                                                        => false,
+				'<span hidden><svg><path d="M0 0"/></svg>Hidden.</span>'               => false,
+				'<svg hidden><path d="M0 0"/></svg><p>Visible note.</p>'               => true,
+			);
+			foreach ( $rows as $input => $expected ) {
+				cr_follow_same( $expected, SingleFollow\has_visible_note( $input ), 'has_visible_note: ' . $input );
+			}
+		}
+	);
+
+	cr_follow_check(
 		'generated paragraph drops only on its own eligible follow single',
 		static function (): void {
 			$GLOBALS['cr_follow_singular'] = true;

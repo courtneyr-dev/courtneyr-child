@@ -215,10 +215,13 @@
 }
 
 .pkiw-follow-entry__name a {
-	color: inherit;
 	text-decoration: underline;
 	text-decoration-thickness: 2px;
 	text-underline-offset: 0.18em;
+}
+
+.pkiw-follow-entry .pkiw-follow-entry__name a:is(:link, :visited, :hover) {
+	color: inherit;
 }
 
 .pkiw-follow-entry__name a::after {
@@ -251,11 +254,6 @@
 
 /* Native-URL letter index and visible OPML link. */
 .pkiw-follow-letters {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: space-between;
-	gap: var(--cr-space-md);
 	margin-block: 0 var(--cr-space-xl);
 }
 
@@ -304,7 +302,6 @@
 }
 
 .pkiw-follow-letters__opml a {
-	inline-size: auto;
 	font-family: var(--cr-font-mono);
 }
 
@@ -589,10 +586,13 @@ body.single .single-post__content:has(.cr-follow-single)::before {
 }
 
 .cr-follow-stream__name a {
-	color: inherit;
 	text-decoration: underline;
 	text-decoration-thickness: 2px;
 	text-underline-offset: 0.18em;
+}
+
+.cr-follow-stream .cr-follow-stream__name a:is(:link, :visited, :hover) {
+	color: inherit;
 }
 
 .cr-follow-stream__name a::after {

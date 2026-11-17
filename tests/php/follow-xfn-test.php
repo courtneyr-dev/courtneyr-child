@@ -61,6 +61,54 @@ namespace {
 		}
 	);
 
+	/**
+	 * Return the system and manual dark rules of a sheet with the root
+	 * selector normalized, so the two can be compared.
+	 *
+	 * @param string $css Stylesheet.
+	 * @return array{0: string, 1: string}
+	 */
+	function cr_follow_dark_blocks( string $css ): array {
+		$start = strpos( $css, '@media (prefers-color-scheme: dark) {' );
+		if ( false === $start ) {
+			return array( '', '' );
+		}
+		$open  = strpos( $css, '{', $start );
+		$depth = 0;
+		$end   = $open;
+		for ( $i = $open, $n = strlen( $css ); $i < $n; $i++ ) {
+			if ( '{' === $css[ $i ] ) {
+				++$depth;
+			} elseif ( '}' === $css[ $i ] && 0 === --$depth ) {
+				$end = $i;
+				break;
+			}
+		}
+		$system = substr( $css, $open + 1, $end - $open - 1 );
+		$manual = '';
+		$rest   = substr( $css, $end + 1 );
+		while ( preg_match( '/\A\s*(:root\[data-theme="dark"\][^{]*\{[^}]*\})/', $rest, $match ) ) {
+			$manual .= $match[1] . "\n";
+			$rest    = substr( $rest, strlen( $match[0] ) );
+		}
+		$normalize = static function ( string $rules, string $root ): string {
+			$rules = str_replace( $root, ':root-dark', $rules );
+			return trim( (string) preg_replace( '/\s+/', ' ', $rules ) );
+		};
+		return array( $normalize( $system, ':root:not([data-theme="light"])' ), $normalize( $manual, ':root[data-theme="dark"]' ) );
+	}
+
+	cr_follow_check(
+		'system and manual dark rules stay identical in both sheets',
+		static function (): void {
+			foreach ( array( 'assets/css/cr-follow.css', 'assets/css/cr-xfn.css' ) as $file ) {
+				list( $system, $manual ) = cr_follow_dark_blocks( (string) file_get_contents( CR_FOLLOW_THEME_DIR . '/' . $file ) );
+				cr_follow_assert( '' !== $system, $file . ' has system dark rules' );
+				cr_follow_same( $system, $manual, $file . ' dark selectors match' );
+			}
+		}
+	);
+
 	cr_follow_check(
 		'wheel is flat palette SVG without generated effects or text',
 		static function (): void {
