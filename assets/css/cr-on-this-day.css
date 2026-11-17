@@ -94,6 +94,8 @@
 }
 
 .cr-page-style .pkiw-otd-year__heading {
+	position: relative;
+	isolation: isolate;
 	inline-size: 100%;
 	box-sizing: border-box;
 	margin-block: 0 var(--cr-space-md);
@@ -104,24 +106,30 @@
 	line-height: var(--cr-leading-tight);
 }
 
-.cr-page-style .pkiw-otd-year:nth-child(4n+1) .pkiw-otd-year__heading {
-	background-color: var(--cr-periwinkle);
-	transform: rotate(var(--cr-rotate-1));
+/* The heading text stays upright; only the paper strip behind it tilts. */
+.cr-page-style .pkiw-otd-year__heading::before {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	inset: 0;
+	background-color: var(--cr-otd-strip, var(--cr-periwinkle));
+	transform: rotate(var(--cr-otd-strip-tilt, var(--cr-rotate-1)));
+	pointer-events: none;
 }
 
 .cr-page-style .pkiw-otd-year:nth-child(4n+2) .pkiw-otd-year__heading {
-	background-color: var(--cr-sky-blue);
-	transform: rotate(var(--cr-rotate-2));
+	--cr-otd-strip: var(--cr-sky-blue);
+	--cr-otd-strip-tilt: var(--cr-rotate-2);
 }
 
 .cr-page-style .pkiw-otd-year:nth-child(4n+3) .pkiw-otd-year__heading {
-	background-color: var(--cr-light-orange);
-	transform: rotate(var(--cr-rotate-neg));
+	--cr-otd-strip: var(--cr-light-orange);
+	--cr-otd-strip-tilt: var(--cr-rotate-neg);
 }
 
 .cr-page-style .pkiw-otd-year:nth-child(4n) .pkiw-otd-year__heading {
-	background-color: var(--cr-light-gray);
-	transform: rotate(var(--cr-rotate-neg2));
+	--cr-otd-strip: var(--cr-light-gray);
+	--cr-otd-strip-tilt: var(--cr-rotate-neg2);
 }
 
 /* Each year reuses the shelf contract: a clipped grid and a board to row end. */
@@ -365,11 +373,33 @@ aside.pkiw-otd--single .pkiw-otd__label {
 	transform: none;
 }
 
+aside.pkiw-otd--single .pkiw-otd__kind {
+	color: var(--cr-otd-card-ink);
+}
+
+/* The linked memory title leads the card; the H2 introduces it a step down. */
+aside.pkiw-otd--single .pkiw-otd__title {
+	font-size: var(--cr-text-3xl);
+	line-height: var(--cr-leading-tight);
+}
+
 aside.pkiw-otd--single .pkiw-otd__image {
 	position: relative;
 	grid-row: 1 / -1;
 	grid-column: 2;
 	margin: 0;
+}
+
+/* A thin rule centered in the column gap joins the text and photo halves. */
+aside.pkiw-otd--single:has(.pkiw-otd__image)::after {
+	content: "";
+	grid-row: 1 / -1;
+	grid-column: 2;
+	justify-self: start;
+	inline-size: 1px;
+	margin-inline-start: calc(var(--cr-space-xl) / -2 - 0.5px);
+	background-color: var(--cr-rule);
+	pointer-events: none;
 }
 
 aside.pkiw-otd--single .pkiw-otd__excerpt {
@@ -387,6 +417,14 @@ aside.pkiw-otd--single .pkiw-otd__excerpt {
 	aside.pkiw-otd--single .pkiw-otd__image {
 		order: -1;
 		margin-block-end: var(--cr-space-md);
+	}
+
+	aside.pkiw-otd--single .pkiw-otd__title {
+		font-size: var(--cr-text-2xl);
+	}
+
+	aside.pkiw-otd--single:has(.pkiw-otd__image)::after {
+		content: none;
 	}
 }
 
@@ -531,6 +569,7 @@ aside.pkiw-otd--single .pkiw-otd__excerpt {
 
 	.cr-page-style::before,
 	.cr-page-style::after,
+	.cr-page-style .pkiw-otd-year__heading::before,
 	.cr-page-style .pkiw-otd-year__items > li::before,
 	.cr-page-style .pkiw-otd__image::before,
 	aside.pkiw-otd--single .pkiw-otd__image::before,
