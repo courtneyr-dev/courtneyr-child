@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.170
+
+Wave 8: tag posts and follow posts get their own pages. Both need Post Kinds for IndieWeb 1.9.2, and every new renderer reads only the facts PKIW returns for a public post, so a private, draft, scheduled, password-protected or trashed tag or follow post prints nothing new. (#261, #260)
+
+- Tag posts (#289, #290). `/kind/tag/` shows one paper sheet per label, with the label on a strip of tape and each tag post as a die-cut "HELLO / my name is" sticker linking to the single and naming the tagged host, 12 a page. The single shows the first tag card as a tilted name-tag sticker beside an upright clipping, 64rem wide on desktop with Post Formats active, while the post text keeps the 720px reading measure. On the Stream a tag post is a one-link name-tag card.
+- Follow posts (#291, #293). `/kind/follow/` is a Rolodex: the plugin's A to Z letters with its "Follows as OPML" link, then follow cards, 8 a page in 4, 2 or 1 columns. A follow single is one card (photo or initial tile, name, one site link, Followed date, note) over a flat wheel from 40rem, and on the Stream a follow is a one-link card. A visited follow name keeps the card ink at 8.1:1.
+- The two XFN block styles from Link Extension for XFN 1.1.3 (`pills`, `plain`) and its blogroll and badge are painted to match the site.
+- The old `.k-follow` and `.k-tag` Stream paint is gone from `cr-post-kinds.css`, now that both kinds render through their own cards (#292).
+
+Under the hood: new templates and patterns `cr-tag-sheets-loop` and `cr-follow-rolodex-loop`; `cr-tag.css` (handle `courtneyr-tag`), `cr-follow.css` (`courtneyr-follow`, 21.7 KB) and `cr-xfn.css` (`courtneyr-xfn`, 5.0 KB) load only where they're used and join `RUCSS_INLINE_HANDLES`. `inc/series.php` passes series part IDs through `Public_Eligibility::filter_ids()`, and `purge_urls()` on `pkiw_public_eligibility_purge_urls` adds a post's series pages and the collections that reference it. `cr-post-kinds.css` goes from 381,725 to 379,753 bytes. The `Version` change is also what clears the `wp_theme_files_patterns-*` cache: core rebuilds it when the theme version changes, and without that the two new patterns don't register and both archives show no cards.
+
 ## 0.7.169
 
 - On the Merge Conflicts series page, the tape above "Alongside the main series" sits on the card's torn top edge, like the reading desk's. It had ridden 11 px below the edge at 1440 px wide (4 px below at 720), because the label was centered against the taller book-stack drawing beside it.
