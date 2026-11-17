@@ -1186,11 +1186,9 @@ body .pk-card {
 	background-repeat: no-repeat;
 }
 
-/* quote / follow / issue / tag → paper clippings. */
+/* quote / issue → paper clippings. */
 .cr-stream-page .pk-card.k-quote,
-.cr-stream-page .pk-card.k-follow,
-.cr-stream-page .pk-card.k-issue,
-.cr-stream-page .pk-card.k-tag {
+.cr-stream-page .pk-card.k-issue {
 	width: 80%;
 	background: var(--cr-surface-elevated, #fff);
 	border: 2px solid var(--cr-ink, #241c4a);
@@ -1202,9 +1200,7 @@ body .pk-card {
 	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), 92% 100%, 84% calc(100% - 6px), 75% 100%, 66% calc(100% - 9px), 57% 100%, 48% calc(100% - 6px), 39% 100%, 30% calc(100% - 9px), 21% 100%, 13% calc(100% - 6px), 6% 100%, 0 calc(100% - 8px));
 }
 .cr-stream-page .pk-card.k-quote::before,
-.cr-stream-page .pk-card.k-follow::before,
-.cr-stream-page .pk-card.k-issue::before,
-.cr-stream-page .pk-card.k-tag::before {
+.cr-stream-page .pk-card.k-issue::before {
 	content: "";
 	position: absolute;
 	top: 0.35rem;
@@ -1218,11 +1214,10 @@ body .pk-card {
 	z-index: 4;
 	pointer-events: none;
 }
-.cr-stream-page .k-quote .pk-badge, .cr-stream-page .k-follow .pk-badge,
-.cr-stream-page .k-issue .pk-badge, .cr-stream-page .k-tag .pk-badge { display: none; }
+.cr-stream-page .k-quote .pk-badge,
+.cr-stream-page .k-issue .pk-badge { display: none; }
 .cr-stream-page .k-quote blockquote { border-left: 4px solid var(--cr-type-quote, #241c4a); background: var(--cr-surface-soft, #f4f0e4); padding: 0.6rem 0.75rem; margin: 0 0 0.4rem; font-family: var(--cr-font-accent, serif); font-style: italic; }
 .cr-stream-page .pk-card.k-quote::after { content: "\201C"; position: absolute; top: 0.4rem; right: 0.9rem; font-family: var(--cr-font-accent, serif); font-size: 3rem; line-height: 1; color: var(--cr-periwinkle, #bcb5e3); }
-.cr-stream-page .pk-card.k-follow::after { content: "+"; position: absolute; top: 0.55rem; right: 0.9rem; font-family: var(--cr-font-accent, serif); font-weight: 900; font-size: 1.8rem; line-height: 1; color: var(--cr-ut-orange, #fb8500); }
 .cr-stream-page .k-issue .pk-title { font-family: var(--cr-font-mono, monospace); font-size: 0.9rem; }
 
 /* ============================================================
@@ -1244,9 +1239,7 @@ body .pk-card {
 .cr-stream-page .pk-card.k-recipe .pk-kindlabel,
 .cr-stream-page .pk-card.k-checkin .pk-kindlabel,
 .cr-stream-page .pk-card.k-quote .pk-kindlabel,
-.cr-stream-page .pk-card.k-follow .pk-kindlabel,
-.cr-stream-page .pk-card.k-issue .pk-kindlabel,
-.cr-stream-page .pk-card.k-tag .pk-kindlabel {
+.cr-stream-page .pk-card.k-issue .pk-kindlabel {
 	position: static;
 	display: block;
 	margin: 0 0 0.35rem;
@@ -1307,9 +1300,7 @@ body .pk-card {
 
 .cr-stream-page .pk-card.k-article,
 .cr-stream-page .pk-card.k-quote,
-.cr-stream-page .pk-card.k-follow,
-.cr-stream-page .pk-card.k-issue,
-.cr-stream-page .pk-card.k-tag {
+.cr-stream-page .pk-card.k-issue {
 	filter: drop-shadow(2px 4px 0 var(--cr-hard-color, #241c4a));
 	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 5px), 93% 100%, 85% calc(100% - 4px), 76% 100%, 67% calc(100% - 6px), 58% 100%, 49% calc(100% - 4px), 40% 100%, 31% calc(100% - 6px), 22% 100%, 14% calc(100% - 4px), 7% 100%, 0 calc(100% - 5px));
 }
@@ -1351,9 +1342,7 @@ body .pk-card {
 
 .cr-stream-page .pk-card.k-article,
 .cr-stream-page .pk-card.k-quote,
-.cr-stream-page .pk-card.k-follow,
-.cr-stream-page .pk-card.k-issue,
-.cr-stream-page .pk-card.k-tag {
+.cr-stream-page .pk-card.k-issue {
 	border-bottom: 0;
 	padding-bottom: 1.7rem;
 	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), 93% 100%, 85% calc(100% - 5px), 76% 100%, 67% calc(100% - 8px), 58% 100%, 49% calc(100% - 5px), 40% 100%, 31% calc(100% - 8px), 22% 100%, 14% calc(100% - 5px), 7% 100%, 0 calc(100% - 8px));
@@ -1386,15 +1375,12 @@ body .pk-card {
 .cr-stream-page .pk-card.k-article  { background-color: #ffffff; }
 .cr-stream-page .pk-card.k-quote    { background-color: #f0eef8; } /* pale periwinkle */
 .cr-stream-page .pk-card.k-issue    { background-color: #fdf3e7; } /* pale light orange */ /* pale selective yellow */
-.cr-stream-page .pk-card.k-tag      { background-color: #e7f1f4; } /* pale cerulean */
 
 /* ---- v0.5.252: punchier pushpins, full quote glyph ---- */
 
 .cr-stream-page .pk-card.k-article::before,
 .cr-stream-page .pk-card.k-quote::before,
-.cr-stream-page .pk-card.k-follow::before,
-.cr-stream-page .pk-card.k-issue::before,
-.cr-stream-page .pk-card.k-tag::before {
+.cr-stream-page .pk-card.k-issue::before {
 	width: 1rem;
 	height: 1rem;
 	background: radial-gradient(circle at 32% 28%, #d9eef5 0%, #4da3bd 32%, #126782 68%, #0b3f50 100%);
@@ -1418,17 +1404,11 @@ body .pk-card {
 
 .cr-stream-page .pk-card.k-article::before,
 .cr-stream-page .pk-card.k-quote::before,
-.cr-stream-page .pk-card.k-follow::before,
-.cr-stream-page .pk-card.k-issue::before,
-.cr-stream-page .pk-card.k-tag::before {
+.cr-stream-page .pk-card.k-issue::before {
 	width: 1rem;
 	height: 1rem;
 	box-shadow: 0 2px 4px rgba(36, 28, 74, 0.55);
 	opacity: 1;
-}
-/* cerulean: tag */
-.cr-stream-page .pk-card.k-tag::before {
-	background: radial-gradient(circle at 32% 28%, #d9eef5 0%, #4da3bd 32%, #126782 68%, #0b3f50 100%);
 }
 /* russian violet: article */
 .cr-stream-page .pk-card.k-article::before {
@@ -1437,11 +1417,6 @@ body .pk-card {
 /* ut orange: issue */
 .cr-stream-page .pk-card.k-issue::before {
 	background: radial-gradient(circle at 32% 28%, #ffd9a8 0%, #f0952f 35%, #b85f00 72%, #8a4700 100%);
-}
-/* selective yellow: follow */
-
-.cr-stream-page .pk-card.k-follow::before {
-	background: radial-gradient(circle at 32% 28%, #fff0c2 0%, #ffc93d 35%, #d99400 72%, #9c6a00 100%);
 }
 /* periwinkle: quote */
 .cr-stream-page .pk-card.k-quote::before {
@@ -1662,9 +1637,7 @@ body .pk-card {
 
 .cr-stream-page .pk-card.k-article,
 .cr-stream-page .pk-card.k-quote,
-.cr-stream-page .pk-card.k-follow,
-.cr-stream-page .pk-card.k-issue,
-.cr-stream-page .pk-card.k-tag { border: 0; }
+.cr-stream-page .pk-card.k-issue { border: 0; }
 
 /* The quote rail belongs to the reply's quoted context only — never
    the date line. */
@@ -1672,9 +1645,7 @@ body .pk-card {
 
 .cr-stream-page .pk-card.k-article,
 .cr-stream-page .pk-card.k-quote,
-.cr-stream-page .pk-card.k-follow,
-.cr-stream-page .pk-card.k-issue,
-.cr-stream-page .pk-card.k-tag {
+.cr-stream-page .pk-card.k-issue {
 	filter: drop-shadow(4px 4px 0 var(--cr-hard-color, #241c4a));
 }
 
@@ -1684,9 +1655,7 @@ body .pk-card {
 
 .cr-stream-page .pk-card.k-article,
 .cr-stream-page .pk-card.k-quote,
-.cr-stream-page .pk-card.k-follow,
-.cr-stream-page .pk-card.k-issue,
-.cr-stream-page .pk-card.k-tag {
+.cr-stream-page .pk-card.k-issue {
 	filter: drop-shadow(3px 3px 0 var(--cr-hard-color, #241c4a)) drop-shadow(2px 2px 0 var(--cr-hard-color, #241c4a));
 }
 
@@ -1700,9 +1669,7 @@ body .pk-card {
 
 .cr-stream-page .pk-card.k-article,
 .cr-stream-page .pk-card.k-quote,
-.cr-stream-page .pk-card.k-follow,
-.cr-stream-page .pk-card.k-issue,
-.cr-stream-page .pk-card.k-tag {
+.cr-stream-page .pk-card.k-issue {
 	clip-path: none;
 	filter: none;
 	box-shadow: 4px 4px 0 var(--cr-hard-color, #241c4a);
@@ -1728,8 +1695,6 @@ body .pk-card {
 .cr-stream-page .pk-card.k-article  { --swi-paper: #ffffff; } /* white — editorial */
 .cr-stream-page .pk-card.k-quote    { --swi-paper: #f0eef8; } /* pale periwinkle */
 .cr-stream-page .pk-card.k-issue    { --swi-paper: #fdf3e7; } /* pale peach */ /* pale butter */
-.cr-stream-page .pk-card.k-follow   { --swi-paper: #e9f4ef; } /* pale mint (cerulean) */ /* newsprint ivory-gray */
-.cr-stream-page .pk-card.k-tag      { --swi-paper: #f6ead2; } /* manila tag stock */
 
 /* ---- v0.5.266: retire the torn edge ----
    Verdict after six rounds: a torn silhouette and a hard offset
@@ -1740,9 +1705,7 @@ body .pk-card {
 
 .cr-stream-page .pk-card.k-article,
 .cr-stream-page .pk-card.k-quote,
-.cr-stream-page .pk-card.k-follow,
-.cr-stream-page .pk-card.k-issue,
-.cr-stream-page .pk-card.k-tag {
+.cr-stream-page .pk-card.k-issue {
 	padding-bottom: 1.2rem;
 	background-image:
 		repeating-linear-gradient(180deg, transparent 0, transparent calc(1.55em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) calc(1.55em - 1px), var(--cr-border, rgba(36, 28, 74, 0.12)) 1.55em),
@@ -1754,7 +1717,6 @@ body .pk-card {
 
 /* ---- v0.5.270: ink border returns on six clippings ----
    (like, issue, follow stay borderless.) */
-.cr-stream-page .pk-card.k-tag,
 .cr-stream-page .pk-card.k-quote,
 .cr-stream-page .pk-card.k-article {
 	border: 2px solid var(--cr-ink, #241c4a);
@@ -1763,7 +1725,6 @@ body .pk-card {
 /* ---- v0.5.272: borders for the rest of the paper cards ----
    eat, review, follow, issue join the bordered set. */
 
-.cr-stream-page .pk-card.k-follow,
 .cr-stream-page .pk-card.k-issue {
 	border: 2px solid var(--cr-ink, #241c4a);
 }
@@ -1904,8 +1865,6 @@ body .pk-card {
 .cr-stream-page .pk-card.k-article,
 .cr-stream-page .pk-card.k-quote,
 .cr-stream-page .pk-card.k-issue,
-.cr-stream-page .pk-card.k-follow,
-.cr-stream-page .pk-card.k-tag,
 .cr-stream-page .pk-card.k-eat,
 .cr-stream-page .pk-card.k-audio {
 	--cr-ink: #241c4a;
