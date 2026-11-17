@@ -1071,13 +1071,14 @@ add_filter( 'perfmatters_minify_js_exclusions', __NAMESPACE__ . '\\perfmatters_e
  * cr-jam.css, cr-podcast.css, cr-wish.css and cr-question.css, plus the
  * plugin's podcast-lineup.css and question-answers.css. Several are listed
  * before their files exist, so the kind lanes don't edit this list.
+ * The W/X-lane cr-on-this-day.css sheet stays whole across its conditional surfaces.
  *
  * @param array<int, string> $exclusions URL fragments Remove Unused CSS skips.
  * @return array<int, string>
  */
 function perfmatters_rucss_exclusions( $exclusions ): array {
 	$exclusions = is_array( $exclusions ) ? $exclusions : array();
-	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css', 'cr-checkin-archive.css', 'cr-shelf-boards.css', 'cr-play.css', 'cr-play-board.css', 'cr-play-video.css', 'cr-read-shelf.css', 'cr-review.css', 'cr-letters.css', 'cr-like.css', 'cr-bookmark.css', 'cr-paper.css', 'cr-chicken.css', 'chicken-entry.css', 'cr-photo.css', 'photo-projector.css', 'cr-favorite.css', 'cr-sticker.css', 'cr-acquisition.css', 'cr-ticket.css', 'cr-repost.css', 'article-stream-card.css', 'cr-calendar.css', 'cr-mood-year.css', 'mood-year-grid.css', 'cr-weather.css', 'cr-exercise.css', 'exercise-entry.css', 'medal-row.css', 'cr-sleep.css', 'sleep-night.css', 'cr-craft.css', 'cr-note-board.css', 'cr-video.css', 'cr-audio.css', 'cr-jam.css', 'cr-podcast.css', 'cr-wish.css', 'cr-question.css', 'podcast-lineup.css', 'question-answers.css', 'leaflet.css', 'MarkerCluster.css', 'checkins-feed/style.css' ) as $file ) {
+	foreach ( array( 'cr-media-shelf.css', 'cr-nav.css', 'cr-comic.css', 'cr-recipe.css', 'cr-print.css', 'cr-menu.css', 'cr-checkin-archive.css', 'cr-shelf-boards.css', 'cr-play.css', 'cr-play-board.css', 'cr-play-video.css', 'cr-read-shelf.css', 'cr-review.css', 'cr-letters.css', 'cr-like.css', 'cr-bookmark.css', 'cr-paper.css', 'cr-chicken.css', 'chicken-entry.css', 'cr-photo.css', 'photo-projector.css', 'cr-favorite.css', 'cr-sticker.css', 'cr-acquisition.css', 'cr-ticket.css', 'cr-repost.css', 'article-stream-card.css', 'cr-calendar.css', 'cr-mood-year.css', 'mood-year-grid.css', 'cr-weather.css', 'cr-exercise.css', 'exercise-entry.css', 'medal-row.css', 'cr-sleep.css', 'sleep-night.css', 'cr-craft.css', 'cr-note-board.css', 'cr-video.css', 'cr-audio.css', 'cr-jam.css', 'cr-podcast.css', 'cr-wish.css', 'cr-question.css', 'podcast-lineup.css', 'question-answers.css', 'cr-on-this-day.css', 'leaflet.css', 'MarkerCluster.css', 'checkins-feed/style.css' ) as $file ) {
 		$exclusions[] = $file;
 	}
 	return array_values( array_unique( $exclusions ) );

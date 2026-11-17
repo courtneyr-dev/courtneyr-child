@@ -362,6 +362,8 @@ const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-tag',
 	'courtneyr-follow',
 	'courtneyr-xfn',
+	// On This Day archive, Stream card and purge-enabled singles only.
+	'courtneyr-on-this-day',
 	'courtneyr-presentation',
 	// Event archive calendar only; My Calendar renders it on /kind/event/.
 	'courtneyr-event-calendar',

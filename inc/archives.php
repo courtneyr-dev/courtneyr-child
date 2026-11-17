@@ -85,7 +85,15 @@ function resolve_identity(): array {
 	$glyph   = '';
 	$kind    = false;
 
-	if ( $object instanceof \WP_Term ) {
+	if ( get_query_var( 'pkiw_on_this_day' ) ) {
+		$family = 'stream';
+		$kicker = '';
+		$kind   = true;
+		$type   = 'event';
+		if ( function_exists( '\PKIW\get_kind_icon_svg' ) ) {
+			$glyph = \PKIW\get_kind_icon_svg( 'event' );
+		}
+	} elseif ( $object instanceof \WP_Term ) {
 		if ( 'kind' === $object->taxonomy ) {
 			$family = 'stream';
 			$kicker = '';
@@ -131,7 +139,12 @@ function resolve_identity(): array {
 	} elseif ( isset( $_GET['cr_template'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- editor preview hint, read-only.
 		// Site-editor preview: no queried object, so show the family the template serves.
 		$template = sanitize_key( wp_unslash( (string) $_GET['cr_template'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( str_starts_with( $template, 'taxonomy-kind' ) ) {
+		if ( str_starts_with( $template, 'on-this-day' ) ) {
+			$family = 'stream';
+			$kicker = '';
+			$kind   = true;
+			$type   = 'event';
+		} elseif ( str_starts_with( $template, 'taxonomy-kind' ) ) {
 			$family = 'stream';
 			$kicker = '';
 			$kind   = true;
@@ -322,6 +335,7 @@ function cutout_archive_title( string $content, array $block ): string {
 		$match = ( 'core/query-title' === $block['blockName'] && in_array( 'cr-archive__title', $classes, true ) )
 			|| ( $is_heading && in_array( 'cr-blog__title', $classes, true ) && is_home() )
 			|| ( $is_heading && in_array( 'cr-stream__title', $classes, true ) && is_page( 'stream' ) )
+			|| ( $is_heading && in_array( 'cr-otd__title', $classes, true ) && get_query_var( 'pkiw_on_this_day' ) )
 			|| ( $is_heading && in_array( 'cr-archive__title', $classes, true ) && \Courtneyr\Child\Series\is_series_toc() );
 	}
 	if ( ! $match ) {
@@ -331,6 +345,31 @@ function cutout_archive_title( string $content, array $block ): string {
 }
 add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\\cutout_archive_title', 10, 2 );
 add_filter( 'render_block_core/heading', __NAMESPACE__ . '\\cutout_archive_title', 10, 2 );
+
+/**
+ * Render the route's site-local date and remove its empty description.
+ *
+ * @param string $content Rendered paragraph markup.
+ * @param array  $block   Parsed block.
+ */
+function render_on_this_day_paragraph( string $content, array $block ): string {
+	if ( is_admin() || wp_is_serving_rest_request() || ! get_query_var( 'pkiw_on_this_day' ) ) {
+		return $content;
+	}
+	$classes = explode( ' ', (string) ( $block['attrs']['className'] ?? '' ) );
+	if ( in_array( 'cr-otd__date', $classes, true ) ) {
+		return sprintf(
+			'<p class="cr-otd__date"><time datetime="--%1$s">%2$s</time></p>',
+			esc_attr( wp_date( 'm-d' ) ),
+			esc_html( wp_date( 'F j' ) )
+		);
+	}
+	if ( in_array( 'cr-otd__description', $classes, true ) && '' === trim( wp_strip_all_tags( $content ) ) ) {
+		return '';
+	}
+	return $content;
+}
+add_filter( 'render_block_core/paragraph', __NAMESPACE__ . '\\render_on_this_day_paragraph', 10, 2 );
 
 /**
  * Register the identity block.
@@ -358,6 +397,26 @@ function enqueue_styles(): void {
 	);
 }
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_styles' );
+
+/**
+ * Load On This Day paint on its archive, Stream, purgeable singles and editor.
+ */
+function enqueue_on_this_day_styles(): void {
+	$route  = get_query_var( 'pkiw_on_this_day' ) && is_archive();
+	$single = is_singular( 'post' )
+		&& class_exists( '\\PKIW\\On_This_Day' )
+		&& \PKIW\On_This_Day::edge_can_purge();
+	if ( ! is_admin() && ! $route && ! is_page( 'stream' ) && ! $single ) {
+		return;
+	}
+	wp_enqueue_style(
+		'courtneyr-on-this-day',
+		COURTNEYR_CHILD_URI . '/assets/css/cr-on-this-day.css',
+		array(),
+		COURTNEYR_CHILD_VERSION
+	);
+}
+add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_on_this_day_styles' );
 
 /**
  * Cut-paper title stylesheet: everywhere cutout_archive_title() can match
