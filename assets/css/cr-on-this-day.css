@@ -1,0 +1,613 @@
+/* On This Day archive shelves, single memory and Stream memory card. */
+
+.cr-page-style,
+.pkiw-otd {
+	--cr-otd-card-bg: var(--cr-printer-ivory);
+	--cr-otd-card-edge: var(--cr-ink);
+	--cr-otd-card-ink: var(--cr-russian-violet);
+	--cr-otd-card-muted: var(--cr-cerulean);
+	--cr-otd-link: var(--cr-cerulean);
+	--cr-otd-link-hover: var(--cr-russian-violet);
+}
+
+/* Archive header and editable date/description. */
+.cr-page-style {
+	position: relative;
+	overflow: clip;
+	background-color: var(--cr-surface);
+}
+
+.cr-page-style > * {
+	position: relative;
+	z-index: 1;
+}
+
+.cr-page-style .cr-archive__header,
+.cr-page-style > .wp-block-query {
+	inline-size: min(100%, 72rem);
+	max-inline-size: 72rem;
+	margin-inline: auto;
+}
+
+.cr-page-style .cr-otd__date,
+.cr-page-style .cr-otd__description {
+	max-inline-size: var(--cr-measure);
+	margin-block: 0;
+	margin-inline: 0;
+}
+
+.cr-page-style .cr-otd__date {
+	color: var(--cr-otd-card-muted);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-bold);
+}
+
+.cr-page-style .cr-otd__description {
+	color: var(--cr-otd-card-muted);
+	font-size: var(--cr-text-md);
+}
+
+/* Decorative torn-paper margins. Pseudo-elements never enter the access tree. */
+.cr-page-style::before,
+.cr-page-style::after {
+	content: "";
+	position: absolute;
+	z-index: 0;
+	inline-size: 7rem;
+	block-size: 10rem;
+	background-color: var(--cr-periwinkle);
+	background-image: linear-gradient(var(--cr-tape), var(--cr-tape));
+	background-repeat: no-repeat;
+	background-position: center top;
+	background-size: 4rem 1rem;
+	clip-path: polygon(5% 0, 96% 3%, 100% 92%, 91% 100%, 3% 96%, 0 8%);
+	pointer-events: none;
+}
+
+.cr-page-style::before {
+	inset-block-start: 18rem;
+	inset-inline-start: -4.5rem;
+	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-page-style::after {
+	inset-block-start: 35rem;
+	inset-inline-end: -4.25rem;
+	background-color: var(--cr-sky-blue);
+	transform: rotate(var(--cr-rotate-2));
+}
+
+/* The grouped engine replaces the Post Template list with this year stack. */
+.cr-page-style .pkiw-otd-years {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cr-space-xl);
+	max-inline-size: none;
+	margin: 0;
+	padding: 0;
+}
+
+.cr-page-style .pkiw-otd-year {
+	min-inline-size: 0;
+	margin: 0;
+}
+
+.cr-page-style .pkiw-otd-year__heading {
+	position: relative;
+	isolation: isolate;
+	inline-size: 100%;
+	box-sizing: border-box;
+	margin-block: 0 var(--cr-space-md);
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	line-height: var(--cr-leading-tight);
+}
+
+/* The heading text stays upright; only the paper strip behind it tilts. */
+.cr-page-style .pkiw-otd-year__heading::before {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	inset: 0;
+	background-color: var(--cr-otd-strip, var(--cr-periwinkle));
+	transform: rotate(var(--cr-otd-strip-tilt, var(--cr-rotate-1)));
+	pointer-events: none;
+}
+
+.cr-page-style .pkiw-otd-year:nth-child(4n+2) .pkiw-otd-year__heading {
+	--cr-otd-strip: var(--cr-sky-blue);
+	--cr-otd-strip-tilt: var(--cr-rotate-2);
+}
+
+.cr-page-style .pkiw-otd-year:nth-child(4n+3) .pkiw-otd-year__heading {
+	--cr-otd-strip: var(--cr-light-orange);
+	--cr-otd-strip-tilt: var(--cr-rotate-neg);
+}
+
+.cr-page-style .pkiw-otd-year:nth-child(4n) .pkiw-otd-year__heading {
+	--cr-otd-strip: var(--cr-light-gray);
+	--cr-otd-strip-tilt: var(--cr-rotate-neg2);
+}
+
+/* Each year reuses the shelf contract: a clipped grid and a board to row end. */
+.cr-page-style .pkiw-otd-year__items {
+	--pkiw-shelf-gap-row: 2.25rem;
+	--pkiw-shelf-gap-column: 1.5rem;
+	--pkiw-shelf-board-size: 0.75rem;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--pkiw-shelf-gap-row) var(--pkiw-shelf-gap-column);
+	overflow-x: clip;
+	max-inline-size: none;
+	margin: 0;
+	padding: 0.9rem 0.9rem calc(var(--pkiw-shelf-board-size) + var(--cr-space-sm));
+	list-style: none;
+}
+
+.cr-page-style .pkiw-otd-year__items > li {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(7rem, 0.42fr) minmax(0, 1fr);
+	grid-template-rows: auto 1fr;
+	align-content: start;
+	gap: var(--cr-space-xs) var(--cr-space-md);
+	box-sizing: border-box;
+	min-inline-size: 0;
+	margin: 0;
+	padding: var(--cr-space-md);
+	border: 2px solid var(--cr-otd-card-edge);
+	border-radius: 0;
+	background-color: var(--cr-otd-card-bg);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-otd-card-ink);
+}
+
+.cr-page-style .pkiw-otd-year__items > li::before {
+	content: "";
+	position: absolute;
+	z-index: 0;
+	inset-block-end: calc((var(--pkiw-shelf-board-size) + var(--cr-space-sm)) * -1);
+	inset-inline-start: calc(var(--pkiw-shelf-gap-column) / -2);
+	inset-inline-end: -100vw;
+	block-size: var(--pkiw-shelf-board-size);
+	background-color: var(--cr-blue-green);
+	box-shadow: var(--cr-shadow-hard-sm);
+	pointer-events: none;
+}
+
+.cr-page-style .pkiw-otd__image {
+	position: relative;
+	grid-row: 1 / span 2;
+	grid-column: 1;
+	align-self: stretch;
+	min-inline-size: 0;
+	margin: 0;
+	overflow: visible;
+}
+
+.cr-page-style .pkiw-otd__image::before,
+aside.pkiw-otd--single .pkiw-otd__image::before {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset-block-start: -0.55rem;
+	inset-inline-start: 50%;
+	inline-size: 4rem;
+	block-size: 1rem;
+	background-color: var(--cr-tape);
+	transform: translateX(-50%) rotate(var(--cr-rotate-1));
+	pointer-events: none;
+}
+
+.pkiw-otd__image img {
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	min-block-size: 8rem;
+	object-fit: cover;
+}
+
+.pkiw-otd__kind,
+.pkiw-otd__meta,
+.pkiw-otd--single .dt-published {
+	margin: 0;
+	color: var(--cr-otd-card-muted);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+}
+
+.pkiw-otd__kind {
+	font-weight: var(--cr-weight-bold);
+}
+
+.pkiw-otd__title {
+	min-inline-size: 0;
+	margin: 0;
+	color: var(--cr-otd-card-ink);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.cr-page-style .pkiw-otd__kind {
+	grid-row: 1;
+	grid-column: 2;
+}
+
+.cr-page-style .pkiw-otd__title {
+	grid-row: 2;
+	grid-column: 2;
+}
+
+.cr-page-style .pkiw-otd-year__items > li:not(:has(.pkiw-otd__image)) :is(.pkiw-otd__kind, .pkiw-otd__title) {
+	grid-column: 1 / -1;
+}
+
+.pkiw-otd__title a {
+	display: flex;
+	align-items: center;
+	min-block-size: 44px;
+	color: var(--cr-otd-link);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.16em;
+}
+
+.pkiw-otd__title a:hover {
+	color: var(--cr-otd-link-hover);
+}
+
+.pkiw-otd__title a::after {
+	content: "";
+	position: absolute;
+	z-index: 3;
+	inset: 0;
+}
+
+.pkiw-otd__title a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+}
+
+.cr-page-style .pkiw-otd-year__items > li:focus-within,
+.cr-page-style .pkiw-otd-year__items > li:has(a:focus-visible),
+.pkiw-otd--single:focus-within,
+.pkiw-otd--single:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 8px var(--cr-focus-halo), var(--cr-shadow-hard);
+}
+
+@supports selector(:has(a)) {
+
+	.pkiw-otd__title a:focus-visible {
+		outline: none;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-page-style .pkiw-otd-year__items {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 63.999rem) {
+
+	.cr-page-style::before,
+	.cr-page-style::after {
+		display: none;
+	}
+}
+
+@media (max-width: 39.999rem) {
+
+	.cr-page-style .pkiw-otd-year__items > li {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: auto auto auto;
+	}
+
+	.cr-page-style .pkiw-otd__image {
+		grid-row: 1;
+		grid-column: 1;
+	}
+
+	.cr-page-style .pkiw-otd__kind {
+		grid-row: 2;
+		grid-column: 1;
+	}
+
+	.cr-page-style .pkiw-otd__title {
+		grid-row: 3;
+		grid-column: 1;
+	}
+}
+
+/* Core's pager follows the final year shelf and stays inside the viewport. */
+.cr-page-style nav[aria-label="Pagination"] {
+	justify-content: center;
+	inline-size: fit-content;
+	max-inline-size: 100%;
+	margin-block: var(--cr-space-xl) 0;
+	margin-inline: auto;
+}
+
+/* Single memory card: text first in the DOM, photo at right on wide screens. */
+aside.pkiw-otd--single {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.45fr);
+	grid-template-rows: repeat(5, auto) 1fr;
+	gap: var(--cr-space-xs) var(--cr-space-xl);
+	box-sizing: border-box;
+	inline-size: min(100%, var(--wp--style--global--wide-size));
+	max-inline-size: var(--wp--style--global--wide-size);
+	min-inline-size: 0;
+	margin-block: var(--cr-space-xl);
+	margin-inline: auto;
+	padding: var(--cr-space-xl);
+	border: 2px solid var(--cr-otd-card-edge);
+	border-radius: 0;
+	background-color: var(--cr-otd-card-bg);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-otd-card-ink);
+}
+
+aside.pkiw-otd--single:not(:has(.pkiw-otd__image)) {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+aside.pkiw-otd--single > :not(.pkiw-otd__image) {
+	grid-column: 1;
+}
+
+aside.pkiw-otd--single .pkiw-otd__label {
+	margin: 0 0 var(--cr-space-sm);
+	color: var(--cr-otd-card-ink);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	line-height: var(--cr-leading-tight);
+	transform: none;
+}
+
+aside.pkiw-otd--single .pkiw-otd__kind {
+	color: var(--cr-otd-card-ink);
+}
+
+/* The linked memory title leads the card; the H2 introduces it a step down. */
+aside.pkiw-otd--single .pkiw-otd__title {
+	font-size: var(--cr-text-3xl);
+	line-height: var(--cr-leading-tight);
+}
+
+aside.pkiw-otd--single .pkiw-otd__image {
+	position: relative;
+	grid-row: 1 / -1;
+	grid-column: 2;
+	margin: 0;
+}
+
+/* A thin rule centered in the column gap joins the text and photo halves. */
+aside.pkiw-otd--single:has(.pkiw-otd__image)::after {
+	content: "";
+	grid-row: 1 / -1;
+	grid-column: 2;
+	justify-self: start;
+	inline-size: 1px;
+	margin-inline-start: calc(var(--cr-space-xl) / -2 - 0.5px);
+	background-color: var(--cr-rule);
+	pointer-events: none;
+}
+
+aside.pkiw-otd--single .pkiw-otd__excerpt {
+	margin-block: var(--cr-space-sm) 0;
+}
+
+@media (max-width: 39.999rem) {
+
+	aside.pkiw-otd--single {
+		display: flex;
+		flex-direction: column;
+		padding: var(--cr-space-md);
+	}
+
+	aside.pkiw-otd--single .pkiw-otd__image {
+		order: -1;
+		margin-block-end: var(--cr-space-md);
+	}
+
+	aside.pkiw-otd--single .pkiw-otd__title {
+		font-size: var(--cr-text-2xl);
+	}
+
+	aside.pkiw-otd--single:has(.pkiw-otd__image)::after {
+		content: none;
+	}
+}
+
+/* Stream memory card extends the existing collage item and rotation rules. */
+.cr-stream-page .wp-block-post-template > li.pkiw-otd-stream-item {
+	position: relative;
+	break-inside: avoid;
+	display: block;
+	min-inline-size: 0;
+	list-style: none;
+}
+
+.cr-stream-page .wp-block-post-template > li.pkiw-otd-stream-item::after {
+	content: none;
+}
+
+.cr-stream-page .pk-card.pk-card--stream.pkiw-otd.pkiw-otd--stream {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: var(--cr-space-sm);
+	box-sizing: border-box;
+	inline-size: 100%;
+	min-inline-size: 0;
+	margin: 0;
+	padding: var(--cr-space-md);
+	border: 2px solid var(--cr-otd-card-edge);
+	border-radius: 0;
+	background-color: var(--cr-otd-card-bg);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-otd-card-ink);
+}
+
+.cr-stream-page .pk-card.pk-card--stream.pkiw-otd.pkiw-otd--stream:has(a:focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 8px var(--cr-focus-halo), var(--cr-shadow-hard);
+}
+
+.cr-stream-page .pk-card.pk-card--stream.pkiw-otd.pkiw-otd--stream::before {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset-block-start: -0.6rem;
+	inset-inline-start: 50%;
+	inline-size: 4.5rem;
+	block-size: 1.1rem;
+	background-color: var(--cr-tape);
+	transform: translateX(-50%) rotate(var(--cr-rotate-1));
+	pointer-events: none;
+}
+
+.cr-stream-page .pkiw-otd--stream .pkiw-otd__label {
+	align-self: flex-start;
+	margin: 0;
+	padding: var(--cr-space-xs) var(--cr-space-sm);
+	background-color: var(--cr-selective-yellow);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+}
+
+.cr-stream-page .pkiw-otd--stream .pkiw-otd__image {
+	margin: 0;
+	aspect-ratio: 4 / 3;
+	overflow: hidden;
+}
+
+.cr-stream-page .pkiw-otd--stream .pkiw-otd__image img {
+	min-block-size: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.cr-page-style .pkiw-otd-year__items > li,
+	aside.pkiw-otd--single,
+	.cr-stream-page .pkiw-otd--stream {
+		transition: translate 150ms ease-out;
+	}
+
+	.cr-page-style .pkiw-otd-year__items > li:hover,
+	aside.pkiw-otd--single:hover,
+	.cr-stream-page .pkiw-otd--stream:hover {
+		translate: 0 -0.25rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.cr-page-style .pkiw-otd-year__items > li,
+	aside.pkiw-otd--single,
+	.cr-stream-page .pkiw-otd--stream {
+		transition: none;
+		translate: none;
+	}
+}
+
+/* Dark rules repeat for stored dark mode and system dark mode. */
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-page-style,
+	:root:not([data-theme="light"]) .pkiw-otd {
+		--cr-otd-card-bg: var(--cr-night-elevated);
+		--cr-otd-card-edge: var(--cr-printer-ivory);
+		--cr-otd-card-ink: var(--cr-printer-ivory);
+		--cr-otd-card-muted: var(--cr-periwinkle);
+		--cr-otd-link: var(--cr-sky-blue);
+		--cr-otd-link-hover: var(--cr-selective-yellow);
+	}
+
+	:root:not([data-theme="light"]) .cr-page-style {
+		background-color: var(--cr-photocopier-blk);
+	}
+}
+
+:root[data-theme="dark"] .cr-page-style,
+:root[data-theme="dark"] .pkiw-otd {
+	--cr-otd-card-bg: var(--cr-night-elevated);
+	--cr-otd-card-edge: var(--cr-printer-ivory);
+	--cr-otd-card-ink: var(--cr-printer-ivory);
+	--cr-otd-card-muted: var(--cr-periwinkle);
+	--cr-otd-link: var(--cr-sky-blue);
+	--cr-otd-link-hover: var(--cr-selective-yellow);
+}
+
+:root[data-theme="dark"] .cr-page-style {
+	background-color: var(--cr-photocopier-blk);
+}
+
+@media (forced-colors: active) {
+
+	.cr-page-style,
+	.pkiw-otd {
+		--cr-otd-card-bg: Canvas;
+		--cr-otd-card-edge: CanvasText;
+		--cr-otd-card-ink: CanvasText;
+		--cr-otd-card-muted: CanvasText;
+		--cr-otd-link: LinkText;
+		--cr-otd-link-hover: LinkText;
+	}
+
+	.cr-page-style::before,
+	.cr-page-style::after,
+	.cr-page-style .pkiw-otd-year__heading::before,
+	.cr-page-style .pkiw-otd-year__items > li::before,
+	.cr-page-style .pkiw-otd__image::before,
+	aside.pkiw-otd--single .pkiw-otd__image::before,
+	.cr-stream-page .pk-card.pk-card--stream.pkiw-otd.pkiw-otd--stream::before {
+		display: none;
+	}
+
+	.cr-page-style .pkiw-otd-year__heading {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		color: CanvasText;
+		transform: none;
+	}
+
+	.cr-page-style .pkiw-otd-year__items > li,
+	aside.pkiw-otd--single,
+	.cr-stream-page .pk-card.pk-card--stream.pkiw-otd.pkiw-otd--stream {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-page-style .pkiw-otd-year__items > li:focus-within,
+	.cr-page-style .pkiw-otd-year__items > li:has(a:focus-visible),
+	.pkiw-otd--single:focus-within,
+	.pkiw-otd--single:has(a:focus-visible),
+	.cr-stream-page .pk-card.pk-card--stream.pkiw-otd.pkiw-otd--stream:has(a:focus-visible) {
+		outline-color: Highlight;
+		box-shadow: none;
+	}
+
+	.cr-stream-page .pkiw-otd--stream .pkiw-otd__label {
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.pkiw-otd__image:not(:has(img)) {
+		display: none;
+	}
+}
