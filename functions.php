@@ -143,3 +143,6 @@ require_once __DIR__ . '/inc/footnotes.php';
 require_once __DIR__ . '/inc/toc.php';
 require_once __DIR__ . '/inc/stream-stories.php';
 require_once __DIR__ . '/inc/table.php';
+require_once __DIR__ . '/inc/follow.php';
+require_once __DIR__ . '/inc/single-follow.php';
+require_once __DIR__ . '/inc/stream-follow.php';
