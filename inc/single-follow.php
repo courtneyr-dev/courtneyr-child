@@ -42,13 +42,17 @@ function has_visible_note( string $html ): bool {
 	}
 
 	$processor = new \WP_HTML_Tag_Processor( $html );
-	$hidden    = array();
-	$void      = array( 'AREA', 'BASE', 'BR', 'COL', 'EMBED', 'HR', 'IMG', 'INPUT', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR' );
-	$media     = array( 'AUDIO', 'CANVAS', 'EMBED', 'IFRAME', 'IMG', 'OBJECT', 'SVG', 'VIDEO' );
+	// Each entry is array( tag name, hidden ). Closers pop back to their own tag.
+	$open    = array();
+	$void    = array( 'AREA', 'BASE', 'BR', 'COL', 'EMBED', 'HR', 'IMG', 'INPUT', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR' );
+	$atomic  = array( 'IFRAME', 'NOEMBED', 'NOFRAMES', 'SCRIPT', 'STYLE', 'TEXTAREA', 'TITLE', 'XMP' );
+	$foreign = array( 'MATH', 'SVG' );
+	$media   = array( 'AUDIO', 'CANVAS', 'EMBED', 'IFRAME', 'IMG', 'OBJECT', 'SVG', 'VIDEO' );
 	while ( $processor->next_token() ) {
 		$type = $processor->get_token_type();
 		if ( '#text' === $type ) {
-			if ( ! in_array( true, $hidden, true ) && '' !== trim( html_entity_decode( $processor->get_modifiable_text(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) ) {
+			$text = str_replace( "\u{00A0}", ' ', html_entity_decode( $processor->get_modifiable_text(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+			if ( ! in_array( true, array_column( $open, 1 ), true ) && '' !== trim( $text ) ) {
 				return true;
 			}
 			continue;
@@ -56,17 +60,24 @@ function has_visible_note( string $html ): bool {
 		if ( '#tag' !== $type ) {
 			continue;
 		}
+		$tag = (string) $processor->get_tag();
 		if ( $processor->is_tag_closer() ) {
-			array_pop( $hidden );
+			for ( $i = count( $open ) - 1; $i >= 0; $i-- ) {
+				if ( $open[ $i ][0] === $tag ) {
+					array_splice( $open, $i );
+					break;
+				}
+			}
 			continue;
 		}
-		$tag       = (string) $processor->get_tag();
-		$is_hidden = in_array( true, $hidden, true ) || null !== $processor->get_attribute( 'hidden' );
+		$is_hidden = in_array( true, array_column( $open, 1 ), true ) || null !== $processor->get_attribute( 'hidden' );
 		if ( ! $is_hidden && in_array( $tag, $media, true ) ) {
 			return true;
 		}
-		if ( ! in_array( $tag, $void, true ) ) {
-			$hidden[] = $is_hidden;
+		$in_foreign   = in_array( $tag, $foreign, true ) || array() !== array_intersect( $foreign, array_column( $open, 0 ) );
+		$self_closing = $in_foreign && $processor->has_self_closing_flag();
+		if ( ! $self_closing && ! in_array( $tag, $void, true ) && ! in_array( $tag, $atomic, true ) ) {
+			$open[] = array( $tag, $is_hidden );
 		}
 	}
 	return false;
