@@ -13,7 +13,9 @@ const YELLOW = 'rgb(255, 183, 3)';
 const IVORY = 'rgb(251, 250, 245)';
 const VIOLET = 'rgb(36, 28, 74)';
 const PAPERS = [ 'rgb(251, 250, 245)', 'rgb(254, 226, 195)', 'rgb(235, 235, 235)', 'rgb(188, 181, 227)' ];
-const SENTINELS = [ 'Fw260 Sentinel Person', 'https://fw260-sentinel.example/', 'fw260-sentinel.png' ];
+// The bare host part also catches the slash-escaped URL in REST JSON.
+const SENTINELS = [ 'Fw260 Sentinel Person', 'https://fw260-sentinel.example/', 'fw260-sentinel.png', 'fw260-sentinel' ];
+const THEMES = [ 'light', 'dark', 'system-dark' ];
 
 const slugOf = ( key ) => `seed-260-${ key.toLowerCase() }`;
 const singlePath = ( key ) => `/${ slugOf( key ) }/`;
@@ -61,10 +63,13 @@ async function openArchiveContaining( page, key ) {
 	return page.locator( 'a[data-missing-follow-fixture]' );
 }
 
+// `system-dark` reaches the `prefers-color-scheme: dark` rules the way a
+// visitor with no stored choice does: no-flash.js writes `system`.
 async function setTheme( page, theme ) {
+	await page.emulateMedia( { colorScheme: 'system-dark' === theme ? 'dark' : 'light' } );
 	await page.evaluate( ( value ) => {
 		document.documentElement.dataset.theme = value;
-	}, theme );
+	}, 'system-dark' === theme ? 'system' : theme );
 }
 
 async function assertNoOverflow( page, label ) {
@@ -78,6 +83,66 @@ async function axe( page, rules, root = 'main' ) {
 		const context = document.querySelector( selector ) || document;
 		return ( await window.axe.run( context, only ? { runOnly: only } : {} ) ).violations.map( ( violation ) => ( { id: violation.id, nodes: violation.nodes.map( ( node ) => node.target.join( ' ' ) ) } ) );
 	}, [ rules, root ] );
+}
+
+// Measures each visible text element against the opaque fill behind it.
+// axe reports the single card `incomplete` because its paper is an `::after`,
+// so this reads that paper directly. `paper` names the element whose
+// `::after` is the backdrop.
+async function contrastPairs( page, root, paper = '' ) {
+	return page.evaluate( ( [ selector, paperSelector ] ) => {
+		const parse = ( value ) => {
+			const match = value.match( /rgba?\(([^)]+)\)/ );
+			if ( ! match ) {
+				return null;
+			}
+			const [ r, g, b, a = 1 ] = match[1].split( /[ ,/]+/ ).filter( Boolean ).map( Number );
+			return { r, g, b, a };
+		};
+		const luminance = ( { r, g, b } ) => {
+			const channel = ( value ) => {
+				const c = value / 255;
+				return c <= 0.03928 ? c / 12.92 : ( ( c + 0.055 ) / 1.055 ) ** 2.4;
+			};
+			return ( 0.2126 * channel( r ) ) + ( 0.7152 * channel( g ) ) + ( 0.0722 * channel( b ) );
+		};
+		const backdrop = ( node ) => {
+			for ( let current = node; current; current = current.parentElement ) {
+				if ( paperSelector && current.matches( paperSelector ) ) {
+					const sheet = parse( getComputedStyle( current, '::after' ).backgroundColor );
+					if ( sheet && sheet.a >= 0.99 ) {
+						return sheet;
+					}
+				}
+				const own = parse( getComputedStyle( current ).backgroundColor );
+				if ( own && own.a >= 0.99 ) {
+					return own;
+				}
+			}
+			return parse( getComputedStyle( document.body ).backgroundColor );
+		};
+		const rows = [];
+		for ( const scope of document.querySelectorAll( selector ) ) {
+			for ( const node of [ scope, ...scope.querySelectorAll( '*' ) ] ) {
+				const hasText = [ ...node.childNodes ].some( ( child ) => 3 === child.nodeType && '' !== child.textContent.trim() );
+				const box = node.getBoundingClientRect();
+				if ( ! hasText || box.width <= 1 || box.height <= 1 || ! node.checkVisibility( { visibilityProperty: true, opacityProperty: true } ) ) {
+					continue;
+				}
+				const fg = parse( getComputedStyle( node ).color );
+				const bg = backdrop( node );
+				const [ hi, lo ] = [ luminance( fg ), luminance( bg ) ].sort( ( x, y ) => y - x );
+				rows.push( { text: node.textContent.trim().slice( 0, 40 ), ratio: Math.round( ( ( hi + 0.05 ) / ( lo + 0.05 ) ) * 100 ) / 100 } );
+			}
+		}
+		return rows;
+	}, [ root, paper ] );
+}
+
+async function expectContrast( page, root, label, paper = '' ) {
+	const rows = await contrastPairs( page, root, paper );
+	expect( rows.length, `${ label }: measured text pairs` ).toBeGreaterThan( 0 );
+	expect( rows.filter( ( row ) => row.ratio < 4.5 ), `${ label }: pairs under 4.5:1` ).toEqual( [] );
 }
 
 async function allArchiveEntries( page ) {
@@ -229,7 +294,7 @@ test.describe( 'Follow archive', () => {
 	} );
 
 	test( 'A-A7/A-A8: paint, targets, contrast, focus, dark and reduced motion', async ( { page } ) => {
-		for ( const theme of [ 'light', 'dark' ] ) {
+		for ( const theme of THEMES ) {
 			await openArchive( page );
 			await setTheme( page, theme );
 			for ( const entry of await entries( page ).all() ) {
@@ -253,7 +318,9 @@ test.describe( 'Follow archive', () => {
 				expect( box.height ).toBeGreaterThanOrEqual( 44 );
 			}
 			expect( await axe( page, [ 'color-contrast' ], '.cr-rolodex' ) ).toEqual( [] );
+			await expectContrast( page, '.pkiw-follow-entry', `archive ${ theme }` );
 		}
+		await page.emulateMedia( { colorScheme: 'light' } );
 		await openArchive( page );
 		const first = entries( page ).first();
 		await first.locator( 'a' ).focus();
@@ -375,10 +442,12 @@ test.describe( 'Follow single', () => {
 			expect( html ).not.toContain( banned );
 		}
 		await expect( page.locator( '.cr-follow-card__note .u-follow-of.h-card[hidden], .cr-follow-card__note [hidden] .u-follow-of.h-card' ) ).toHaveCount( 1 );
-		for ( const theme of [ 'light', 'dark' ] ) {
+		for ( const theme of THEMES ) {
 			await setTheme( page, theme );
 			expect( await axe( page, [ 'color-contrast' ], '.cr-follow-single' ) ).toEqual( [] );
+			await expectContrast( page, '.cr-follow-single', `single ${ theme }`, '.cr-follow-single' );
 		}
+		await setTheme( page, 'light' );
 		await page.emulateMedia( { forcedColors: 'active' } );
 		await openSingle( page, 'S01' );
 		expect( await page.locator( '.cr-follow-single' ).evaluate( ( node ) => getComputedStyle( node, '::before' ).display ) ).toBe( 'none' );
@@ -411,12 +480,14 @@ test.describe( 'Follow Stream', () => {
 	} );
 
 	test( 'A-R4: Stream contrast, focus and forced colors pass', async ( { page } ) => {
-		for ( const theme of [ 'light', 'dark' ] ) {
+		for ( const theme of THEMES ) {
 			await open( page, STREAM );
 			await setTheme( page, theme );
 			skipUnlessSeeded( 0 === await page.locator( '.cr-follow-stream' ).count(), 'the follow Stream fixtures are not seeded' );
 			expect( await axe( page, [ 'color-contrast' ], '.cr-stream-page' ) ).toEqual( [] );
+			await expectContrast( page, '.cr-follow-stream', `Stream ${ theme }` );
 		}
+		await setTheme( page, 'light' );
 		const card = page.locator( '.cr-follow-stream' ).first();
 		await card.locator( 'a' ).focus();
 		const focus = await card.evaluate( ( node ) => ( { width: getComputedStyle( node ).outlineWidth, color: getComputedStyle( node ).outlineColor } ) );
@@ -430,9 +501,18 @@ test.describe( 'Follow Stream', () => {
 
 test.describe( 'Follow privacy set', () => {
 	test.skip( 'privacy' !== SET, 'privacy fixture set' );
+	test.describe.configure( { mode: 'serial' } );
+	let seeded = false;
+
+	test( 'A-R3/privacy: presence control Fw260 Visible Person prints on the archive', async ( { page } ) => {
+		const link = await openArchiveContaining( page, 'V1' );
+		await expect( link.first() ).toContainText( 'Fw260 Visible Person' );
+		seeded = true;
+	} );
 
 	for ( const path of [ ARCHIVE, STREAM, '/feed/', '/kind/follow/feed/', '/wp-sitemap-posts-post-1.xml', '/wp-json/wp/v2/posts?per_page=100' ] ) {
 		test( `A-R3/privacy: ${ path } contains no follow sentinel`, async ( { page } ) => {
+			skipUnlessSeeded( ! seeded, 'the privacy fixtures are not seeded (no presence control)' );
 			const response = await open( page, path );
 			skipUnlessSeeded( 404 === response?.status(), `no surface ${ path }` );
 			const body = await page.content();
