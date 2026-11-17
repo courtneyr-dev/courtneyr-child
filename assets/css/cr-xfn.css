@@ -1,0 +1,164 @@
+/**
+ * XFN blogroll and relationship badge in the Rolodex paper family.
+ */
+
+.wp-block-xfn-blogroll,
+.wp-block-xfn-relationship-badge {
+	box-sizing: border-box;
+	padding: var(--cr-space-lg);
+	border: 2px solid var(--cr-ink);
+	border-radius: 0;
+	background-color: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-russian-violet);
+}
+
+.wp-block-xfn-blogroll .xfn-blogroll__list {
+	margin: 0;
+}
+
+.wp-block-xfn-blogroll .xfn-blogroll__group-title,
+.wp-block-xfn-relationship-badge .xfn-pills {
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-weight: var(--cr-weight-bold);
+}
+
+.wp-block-xfn-blogroll .xfn-blogroll__group-title {
+	margin-block: var(--cr-space-md) var(--cr-space-xs);
+	border-block-end: 2px solid var(--cr-russian-violet);
+}
+
+.wp-block-xfn-blogroll .xfn-blogroll__group-title:first-child {
+	margin-block-start: 0;
+}
+
+.wp-block-xfn-blogroll .xfn-blogroll__count,
+.wp-block-xfn-blogroll .xfn-blogroll__empty,
+.wp-block-xfn-relationship-badge .xfn-relationship-badge__empty {
+	color: var(--cr-ink-soft);
+	font-family: var(--cr-font-mono);
+}
+
+.wp-block-xfn-blogroll .xfn-blogroll__entry,
+.wp-block-xfn-relationship-badge {
+	gap: var(--cr-space-xs);
+}
+
+.wp-block-xfn-blogroll .xfn-blogroll__link,
+.wp-block-xfn-relationship-badge .xfn-relationship-badge__link {
+	color: var(--cr-cerulean);
+	font-weight: var(--cr-weight-bold);
+	overflow-wrap: anywhere;
+}
+
+.wp-block-xfn-blogroll .xfn-blogroll__link:visited,
+.wp-block-xfn-relationship-badge .xfn-relationship-badge__link:visited {
+	color: var(--cr-russian-violet-soft);
+}
+
+.wp-block-xfn-blogroll .xfn-pill,
+.wp-block-xfn-relationship-badge .xfn-pill,
+.wp-block-xfn-blogroll.is-style-pills .xfn-pill,
+.wp-block-xfn-relationship-badge.is-style-pills .xfn-pill {
+	padding: var(--cr-space-2xs) var(--cr-space-xs);
+	border: 1.5px solid var(--cr-russian-violet);
+	border-radius: 0;
+	background-color: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-weight: var(--cr-weight-bold);
+}
+
+.wp-block-xfn-blogroll.is-style-plain .xfn-pill,
+.wp-block-xfn-relationship-badge.is-style-plain .xfn-pill {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+}
+
+.wp-block-xfn-blogroll a:focus-visible,
+.wp-block-xfn-relationship-badge a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 3px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .wp-block-xfn-blogroll,
+	:root:not([data-theme="light"]) .wp-block-xfn-relationship-badge {
+		border-color: var(--cr-printer-ivory);
+		background-color: var(--cr-night-elevated);
+		color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .wp-block-xfn-blogroll .xfn-blogroll__group-title,
+	:root:not([data-theme="light"]) .wp-block-xfn-relationship-badge .xfn-pills {
+		color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .wp-block-xfn-blogroll .xfn-blogroll__group-title {
+		border-block-end-color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .wp-block-xfn-blogroll .xfn-blogroll__count,
+	:root:not([data-theme="light"]) .wp-block-xfn-blogroll .xfn-blogroll__empty,
+	:root:not([data-theme="light"]) .wp-block-xfn-relationship-badge .xfn-relationship-badge__empty {
+		color: var(--cr-periwinkle);
+	}
+
+	:root:not([data-theme="light"]) .wp-block-xfn-blogroll .xfn-blogroll__link,
+	:root:not([data-theme="light"]) .wp-block-xfn-relationship-badge .xfn-relationship-badge__link {
+		color: var(--cr-periwinkle);
+	}
+}
+
+:root[data-theme="dark"] .wp-block-xfn-blogroll,
+:root[data-theme="dark"] .wp-block-xfn-relationship-badge {
+	border-color: var(--cr-printer-ivory);
+	background-color: var(--cr-night-elevated);
+	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .wp-block-xfn-blogroll .xfn-blogroll__group-title,
+:root[data-theme="dark"] .wp-block-xfn-relationship-badge .xfn-pills {
+	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .wp-block-xfn-blogroll .xfn-blogroll__group-title {
+	border-block-end-color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .wp-block-xfn-blogroll .xfn-blogroll__count,
+:root[data-theme="dark"] .wp-block-xfn-blogroll .xfn-blogroll__empty,
+:root[data-theme="dark"] .wp-block-xfn-relationship-badge .xfn-relationship-badge__empty {
+	color: var(--cr-periwinkle);
+}
+
+:root[data-theme="dark"] .wp-block-xfn-blogroll .xfn-blogroll__link,
+:root[data-theme="dark"] .wp-block-xfn-relationship-badge .xfn-relationship-badge__link {
+	color: var(--cr-periwinkle);
+}
+
+@media (forced-colors: active) {
+
+	.wp-block-xfn-blogroll,
+	.wp-block-xfn-relationship-badge,
+	.wp-block-xfn-blogroll .xfn-pill,
+	.wp-block-xfn-relationship-badge .xfn-pill {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.wp-block-xfn-blogroll a:focus-visible,
+	.wp-block-xfn-relationship-badge a:focus-visible {
+		outline: 3px solid Highlight;
+		box-shadow: none;
+	}
+}

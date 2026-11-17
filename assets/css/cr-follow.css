@@ -1,0 +1,867 @@
+/**
+ * Follow posts: Rolodex archive cards, the single card and Stream adapter.
+ */
+/* stylelint-disable no-descending-specificity -- archive, single and Stream links live on separate surfaces. */
+
+.cr-archive--follow,
+.cr-follow-single,
+.cr-follow-stream,
+.cr-rolodex,
+.pkiw-follow-entry,
+.pkiw-follow-letters {
+	--cr-follow-card-bg: var(--cr-follow-paper, var(--cr-printer-ivory));
+	--cr-follow-card-edge: var(--cr-ink);
+	--cr-follow-card-ink: var(--cr-russian-violet);
+	--cr-follow-card-muted: var(--cr-cerulean);
+	--cr-follow-host-ink: var(--cr-russian-violet-soft);
+	--cr-follow-tape-light: #f3e5b8; /* the locked masking-tape fill, kept in dark mode */
+	--cr-follow-initial-bg: var(--cr-follow-paper, var(--cr-periwinkle));
+	--cr-follow-initial-ink: var(--cr-russian-violet);
+	--cr-follow-current-bg: var(--cr-russian-violet);
+	--cr-follow-current-ink: var(--cr-printer-ivory);
+}
+
+/* Archive identity follows the existing cutout-and-badge lockup. */
+.cr-archive--follow .cr-archive__header {
+	position: relative;
+	display: grid;
+	max-inline-size: var(--wp--style--global--wide-size, 1100px);
+	padding-block-start: 0;
+	text-align: start;
+}
+
+.cr-archive--follow .cr-archive-identity--kind {
+	position: static;
+	z-index: 1;
+	grid-area: 1 / 1;
+	align-self: center;
+	justify-self: start;
+	display: block;
+	block-size: auto;
+	margin: 0 !important;
+}
+
+.cr-archive--follow .cr-archive-identity--kind .cr-archive-identity__glyph {
+	position: static;
+	inline-size: clamp(3rem, 5vw, 4.25rem);
+	block-size: clamp(3rem, 5vw, 4.25rem);
+}
+
+.cr-archive--follow .cr-archive__title.cr-cutout {
+	--cr-cutout-min: 2.75rem;
+	--cr-cutout-max: 5.75rem;
+	grid-area: 1 / 1;
+	justify-self: stretch;
+	max-inline-size: none;
+	margin-block: 0;
+	margin-inline: clamp(6.5rem, 13vw, 8.5rem) 0 !important;
+}
+
+.cr-archive--follow .cr-archive__description {
+	max-inline-size: var(--cr-measure, 720px);
+	margin-block: 0;
+	margin-inline: 0 !important;
+	color: var(--cr-follow-card-muted);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	font-weight: var(--cr-weight-bold);
+}
+
+.cr-archive--follow .cr-archive__header hr.is-style-cr-marker-bar-short {
+	inline-size: 8rem !important;
+	margin-inline: 0 !important;
+}
+
+.cr-archive--follow .cr-browse-all > .cr-browse-all__title,
+.cr-archive--follow .cr-browse-all > .cr-browse-all__columns {
+	inline-size: 100%;
+	max-inline-size: none;
+	margin-inline: 0 !important;
+}
+
+/* Archive cards stay upright and follow DOM order at every width. */
+.cr-rolodex {
+	inline-size: min(100%, var(--wp--style--global--wide-size, 1100px));
+	max-inline-size: var(--wp--style--global--wide-size, 1100px);
+	margin-inline: auto;
+}
+
+.cr-rolodex__cards {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	align-items: stretch;
+	gap: var(--cr-space-xl);
+	max-inline-size: none;
+	margin: 0 0 var(--cr-space-xl);
+	padding: 0;
+	list-style: none;
+}
+
+.cr-rolodex__cards > li.wp-block-post {
+	min-inline-size: 0;
+	margin: 0;
+	padding: 0;
+	transform: none;
+}
+
+.cr-rolodex__cards > li.wp-block-post::after {
+	content: none !important;
+}
+
+.pkiw-follow-entry {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(4.5rem, 0.36fr) minmax(0, 1fr);
+	grid-template-rows: auto 1fr;
+	align-items: start;
+	gap: var(--cr-space-sm) var(--cr-space-md);
+	box-sizing: border-box;
+	min-block-size: 11rem;
+	min-inline-size: 0;
+	padding: var(--cr-space-md) var(--cr-space-md) calc(var(--cr-space-lg) + var(--cr-space-xs));
+	border: 2px solid var(--cr-follow-card-edge);
+	border-radius: 0;
+	background-color: var(--cr-follow-card-bg);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-follow-card-ink);
+	transform: none;
+}
+
+.pkiw-follow-entry::before,
+.pkiw-follow-entry::after {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	inset-block-end: -0.5rem;
+	inline-size: 1.6rem;
+	block-size: 0.75rem;
+	border: 2px solid var(--cr-follow-card-edge);
+	background-color: var(--cr-surface);
+}
+
+.pkiw-follow-entry::before {
+	inset-inline-start: 18%;
+}
+
+.pkiw-follow-entry::after {
+	inset-inline-end: 18%;
+}
+
+.pkiw-follow-entry__photo,
+.pkiw-follow-entry__initial {
+	grid-row: 1 / span 2;
+	grid-column: 1;
+	inline-size: 100%;
+	min-block-size: 5.25rem;
+	margin: 0;
+	border: 2px solid var(--cr-follow-card-edge);
+	background-color: var(--cr-follow-initial-bg);
+	color: var(--cr-follow-initial-ink);
+}
+
+.pkiw-follow-entry__photo {
+	position: relative;
+	z-index: 1;
+	overflow: hidden;
+}
+
+.pkiw-follow-entry__photo img {
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	min-block-size: 5.25rem;
+	object-fit: cover;
+}
+
+.pkiw-follow-entry__initial {
+	display: grid;
+	place-items: center;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-3xl);
+	font-weight: var(--cr-weight-black);
+}
+
+.pkiw-follow-entry__photo:not(.cr-cover--failed) + .pkiw-follow-entry__initial {
+	display: none;
+}
+
+/* The plugin's stylesheet visually hides the initial while a photo precedes it; a failed photo releases it. */
+.pkiw-follow-entry__photo.cr-cover--failed + .pkiw-follow-entry__initial {
+	position: static;
+	inline-size: 100%;
+	block-size: auto;
+	overflow: visible;
+	clip-path: none;
+}
+
+/* A failed photo leaves its empty frame; the initial tile takes the slot. */
+.pkiw-follow-entry__photo.cr-cover--failed,
+.cr-follow-card__photo.cr-cover--failed,
+.cr-follow-stream__photo.cr-cover--failed {
+	display: none;
+}
+
+.pkiw-follow-entry__name {
+	grid-column: 2;
+	align-self: end;
+	min-inline-size: 0;
+	margin: 0;
+	color: var(--cr-follow-card-ink);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+	transform: none;
+}
+
+.pkiw-follow-entry__name a {
+	color: inherit;
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.18em;
+}
+
+.pkiw-follow-entry__name a::after {
+	content: "";
+	position: absolute;
+	z-index: 3;
+	inset: 0;
+}
+
+.pkiw-follow-entry__name a:focus-visible {
+	outline: 0;
+	box-shadow: none;
+}
+
+.pkiw-follow-entry:focus-within {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 8px var(--cr-focus-halo), var(--cr-shadow-hard);
+}
+
+.pkiw-follow-entry__host {
+	grid-column: 2;
+	min-inline-size: 0;
+	margin: 0;
+	color: var(--cr-follow-host-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	overflow-wrap: anywhere;
+}
+
+/* Native-URL letter index and visible OPML link. */
+.pkiw-follow-letters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cr-space-md);
+	margin-block: 0 var(--cr-space-xl);
+}
+
+.pkiw-follow-letters ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cr-space-xs);
+	max-inline-size: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pkiw-follow-letters li {
+	margin: 0;
+}
+
+.pkiw-follow-letters a,
+.cr-rolodex nav[aria-label="Pagination"] a,
+.cr-rolodex nav[aria-label="Pagination"] .page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	min-inline-size: 44px;
+	min-block-size: 44px;
+	padding: var(--cr-space-xs) var(--cr-space-sm);
+	border: 2px solid var(--cr-ink);
+	border-radius: 0;
+	background-color: var(--cr-surface);
+	box-shadow: var(--cr-shadow-hard-sm);
+	color: var(--cr-ink);
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold);
+	text-decoration: none;
+}
+
+.pkiw-follow-letters a[aria-current="page"],
+.cr-rolodex nav[aria-label="Pagination"] [aria-current="page"] {
+	background-color: var(--cr-follow-current-bg);
+	color: var(--cr-follow-current-ink);
+}
+
+.pkiw-follow-letters__opml {
+	margin: 0;
+}
+
+.pkiw-follow-letters__opml a {
+	inline-size: auto;
+	font-family: var(--cr-font-mono);
+}
+
+.pkiw-follow-letters a:focus-visible,
+.cr-rolodex nav[aria-label="Pagination"] a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 3px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+/* Single: one paper card with a flat wheel behind it from 40rem. */
+.cr-follow-single {
+	position: relative;
+	z-index: 0;
+	box-sizing: border-box;
+	inline-size: min(100%, 36rem);
+	margin: var(--cr-space-xl) auto;
+	margin-block-end: calc(var(--cr-space-xl) + 1.1rem) !important; /* room for the clips; Core zeroes a last child's margin */
+	padding: clamp(var(--cr-space-lg), 5vw, var(--cr-space-2xl)) clamp(var(--cr-space-lg), 5vw, var(--cr-space-2xl)) calc(var(--cr-space-2xl) + 1rem);
+	color: var(--cr-russian-violet);
+}
+
+/* The paper is a pseudo-element so the wheel can sit between it and the page. */
+.cr-follow-single::after {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	inset: 0;
+	border: 2px solid var(--cr-follow-card-edge);
+	border-radius: var(--cr-radius-sm);
+	background-color: var(--cr-printer-ivory);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+.cr-follow-single::before {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	inset: -11rem -10rem;
+	display: none;
+	background-image: url(../img/follow-wheel.svg);
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+}
+
+/* The site's article-bookend glyph would land inside the card; the card is the whole composition. */
+body.single .single-post__content:has(.cr-follow-single)::before {
+	content: none;
+}
+
+/* Two flat Rolodex clips on the bottom edge. Decorative, so pseudo-elements on the card wrapper. */
+.cr-follow-card::before,
+.cr-follow-card::after {
+	content: "";
+	position: absolute;
+	z-index: 1;
+	inset-block-end: -1.1rem;
+	inline-size: 1.75rem;
+	block-size: 2.75rem;
+	border-radius: var(--cr-radius-sm);
+	background-color: var(--cr-follow-card-edge);
+	pointer-events: none;
+}
+
+.cr-follow-card::before {
+	inset-inline-start: 24%;
+}
+
+.cr-follow-card::after {
+	inset-inline-end: 24%;
+}
+
+.cr-follow-card {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--cr-space-md);
+	min-inline-size: 0;
+}
+
+.cr-follow-card__photo,
+.cr-follow-card__initial {
+	inline-size: min(100%, 24rem);
+	min-block-size: 12rem;
+	margin: 0;
+	border: 2px solid var(--cr-russian-violet);
+	background-color: var(--cr-periwinkle);
+	color: var(--cr-russian-violet);
+}
+
+.cr-follow-card__photo {
+	overflow: hidden;
+	border-radius: var(--cr-radius-sm);
+}
+
+.cr-follow-card__photo img {
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	min-block-size: 12rem;
+	object-fit: cover;
+}
+
+.cr-follow-card__initial {
+	display: grid;
+	place-items: center;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-5xl);
+	font-weight: var(--cr-weight-black);
+}
+
+.cr-follow-card__photo:not(.cr-cover--failed) + .cr-follow-card__initial {
+	display: none;
+}
+
+.cr-follow-card__name {
+	margin: 0;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: clamp(var(--cr-text-2xl), 6vw, var(--cr-text-4xl));
+	font-weight: var(--cr-weight-black);
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: anywhere;
+}
+
+.cr-follow-card__site {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	inline-size: fit-content;
+	min-block-size: 44px;
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	border: 1.5px solid var(--cr-russian-violet);
+	border-radius: 0;
+	background-color: var(--cr-tape);
+	box-shadow: 2px 2px 0 var(--cr-selective-yellow);
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-mono);
+	font-weight: var(--cr-weight-bold);
+	overflow-wrap: anywhere;
+}
+
+.cr-follow-card__site:visited,
+.cr-follow-card__site:hover {
+	color: var(--cr-russian-violet);
+}
+
+.cr-follow-card__site:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 3px;
+	box-shadow: 0 0 0 7px var(--cr-russian-violet), 2px 2px 0 var(--cr-selective-yellow);
+}
+
+.cr-follow-card__followed {
+	margin: 0;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+}
+
+.cr-follow-card__label {
+	color: var(--cr-cerulean);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-wide);
+	text-transform: uppercase;
+}
+
+.cr-follow-card__note {
+	margin-block-start: var(--cr-space-lg);
+	font-family: var(--cr-font-body);
+}
+
+/* Hidden microformats ride in the wrapper (spec C13); with no visible note there's nothing to draw. */
+.cr-follow-card__note:not(:has(.cr-follow-card__label)) {
+	display: none;
+}
+
+.cr-follow-card__note > .cr-follow-card__label {
+	margin-block-end: var(--cr-space-xs);
+}
+
+.cr-follow-card__note > :last-child {
+	margin-block-end: 0;
+}
+
+/* Stream: a compact one-link card with a wheel peek and two rotated layers. */
+.pk-card.pk-card--stream.cr-follow-stream {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(4.5rem, 0.38fr) minmax(0, 1fr);
+	grid-template-rows: auto auto 1fr auto;
+	align-items: start;
+	gap: var(--cr-space-xs) var(--cr-space-md);
+	box-sizing: border-box;
+	min-inline-size: 0;
+	padding: var(--cr-space-lg);
+	border: 2px solid var(--cr-follow-card-edge);
+	border-radius: var(--cr-radius-xs);
+	background-color: var(--cr-follow-card-bg);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-follow-card-ink);
+	transform: rotate(var(--cr-follow-rotate));
+}
+
+.cr-follow-stream__wheel {
+	position: absolute;
+	z-index: -1;
+	display: none;
+	inset-block-start: -5.5rem;
+	inset-inline-end: -4rem;
+	inline-size: 8rem;
+	block-size: 8rem;
+	background-image: url(../img/follow-wheel.svg);
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+}
+
+.cr-follow-stream__kind {
+	grid-column: 1 / -1;
+	justify-self: start;
+	margin: calc(-1 * var(--cr-space-xl)) 0 var(--cr-space-xs);
+	padding: var(--cr-space-2xs) var(--cr-space-sm);
+	border: 1.5px solid var(--cr-follow-card-edge);
+	background-color: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-weight: var(--cr-weight-bold);
+	transform: rotate(var(--cr-rotate-neg));
+}
+
+.cr-follow-stream__photo,
+.cr-follow-stream__initial {
+	grid-row: 2 / span 3;
+	grid-column: 1;
+	inline-size: 100%;
+	min-block-size: 5rem;
+	margin: 0;
+	border: 2px solid var(--cr-follow-card-edge);
+	background-color: var(--cr-follow-initial-bg);
+	color: var(--cr-follow-initial-ink);
+}
+
+.cr-follow-stream__photo {
+	z-index: 1;
+	overflow: hidden;
+}
+
+.cr-follow-stream__photo img {
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	min-block-size: 5rem;
+	object-fit: cover;
+}
+
+.cr-follow-stream__initial {
+	display: grid;
+	place-items: center;
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-3xl);
+	font-weight: var(--cr-weight-black);
+}
+
+.cr-follow-stream__photo:not(.cr-cover--failed) + .cr-follow-stream__initial {
+	display: none;
+}
+
+.cr-follow-stream__name {
+	grid-column: 2;
+	align-self: end;
+	min-inline-size: 0;
+	margin: 0;
+	color: var(--cr-follow-card-ink);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-xl);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
+.cr-follow-stream__name a {
+	color: inherit;
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.18em;
+}
+
+.cr-follow-stream__name a::after {
+	content: "";
+	position: absolute;
+	z-index: 3;
+	inset: 0;
+}
+
+.cr-follow-stream__name a:focus-visible {
+	outline: 0;
+	box-shadow: none;
+}
+
+.pk-card.pk-card--stream.cr-follow-stream:focus-within {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 4px;
+	box-shadow: 0 0 0 8px var(--cr-focus-halo), var(--cr-shadow-hard);
+}
+
+.cr-follow-stream__host,
+.cr-follow-stream__day {
+	grid-column: 2;
+	min-inline-size: 0;
+	margin: 0;
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-sm);
+	overflow-wrap: anywhere;
+}
+
+.cr-follow-stream__host {
+	color: var(--cr-follow-host-ink);
+}
+
+.cr-follow-stream__day {
+	color: var(--cr-follow-card-ink);
+}
+
+@media (min-width: 40rem) {
+
+	.cr-rolodex__cards {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.cr-follow-stream__wheel {
+		display: block;
+	}
+
+	/* Core's first-child reset would zero the top clearance the wheel needs. */
+	.cr-follow-single {
+		display: grid;
+		grid-template-columns: minmax(8rem, 0.8fr) minmax(0, 1.2fr);
+		align-items: start;
+		gap: var(--cr-space-md);
+		margin-block: 11.5rem !important;
+	}
+
+	.cr-follow-single::before {
+		display: block;
+	}
+
+	/* The wrapper dissolves so photo, name, site, date and note share the card's two columns. */
+	.cr-follow-card {
+		display: contents;
+	}
+
+	.cr-follow-card__photo,
+	.cr-follow-card__initial {
+		grid-row: 1 / span 4;
+		grid-column: 1;
+		inline-size: 100%;
+	}
+
+	.cr-follow-card__name,
+	.cr-follow-card__site,
+	.cr-follow-card__followed,
+	.cr-follow-card__note {
+		grid-column: 2;
+	}
+
+	.cr-follow-card__note {
+		margin-block-start: 0;
+	}
+}
+
+@media (min-width: 64rem) {
+
+	.cr-archive--follow .cr-archive__title.cr-cutout {
+		margin-inline: clamp(8rem, 10.5vw, 9.5rem) 0 !important;
+	}
+
+	.cr-rolodex__cards {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.pkiw-follow-entry,
+	.pk-card.pk-card--stream.cr-follow-stream {
+		transition: translate var(--cr-motion-fast) var(--cr-ease-out);
+	}
+
+	.pkiw-follow-entry:hover,
+	.pk-card.pk-card--stream.cr-follow-stream:hover {
+		translate: 0 -1px;
+	}
+}
+
+/* Dark rules repeat under both supported selectors. */
+@media (prefers-color-scheme: dark) {
+
+	:root:not([data-theme="light"]) .cr-archive--follow,
+	:root:not([data-theme="light"]) .cr-follow-single,
+	:root:not([data-theme="light"]) .cr-follow-stream,
+	:root:not([data-theme="light"]) .cr-rolodex,
+	:root:not([data-theme="light"]) .pkiw-follow-entry,
+	:root:not([data-theme="light"]) .pkiw-follow-letters {
+		--cr-follow-card-bg: var(--cr-night-elevated);
+		--cr-follow-card-edge: var(--cr-printer-ivory);
+		--cr-follow-card-ink: var(--cr-printer-ivory);
+		--cr-follow-card-muted: var(--cr-periwinkle);
+		--cr-follow-host-ink: var(--cr-periwinkle);
+		--cr-follow-initial-bg: var(--cr-follow-paper, var(--cr-periwinkle));
+		--cr-follow-initial-ink: var(--cr-russian-violet);
+		--cr-follow-current-bg: var(--cr-printer-ivory);
+		--cr-follow-current-ink: var(--cr-russian-violet);
+	}
+
+	:root:not([data-theme="light"]) .cr-archive--follow {
+		background-color: var(--cr-photocopier-blk);
+	}
+
+	:root:not([data-theme="light"]) .cr-follow-single {
+		color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .cr-follow-single::after {
+		border-color: var(--cr-printer-ivory);
+		background-color: var(--cr-night-elevated);
+	}
+
+	:root:not([data-theme="light"]) .cr-follow-card__name {
+		color: var(--cr-printer-ivory);
+	}
+
+	:root:not([data-theme="light"]) .cr-follow-card__label {
+		color: var(--cr-periwinkle);
+	}
+
+	:root:not([data-theme="light"]) .cr-follow-card__site,
+	:root:not([data-theme="light"]) .cr-follow-card__site:visited,
+	:root:not([data-theme="light"]) .cr-follow-card__site:hover {
+		border-color: var(--cr-russian-violet);
+		background-color: var(--cr-follow-tape-light);
+		color: var(--cr-russian-violet);
+	}
+}
+
+:root[data-theme="dark"] .cr-archive--follow,
+:root[data-theme="dark"] .cr-follow-single,
+:root[data-theme="dark"] .cr-follow-stream,
+:root[data-theme="dark"] .cr-rolodex,
+:root[data-theme="dark"] .pkiw-follow-entry,
+:root[data-theme="dark"] .pkiw-follow-letters {
+	--cr-follow-card-bg: var(--cr-night-elevated);
+	--cr-follow-card-edge: var(--cr-printer-ivory);
+	--cr-follow-card-ink: var(--cr-printer-ivory);
+	--cr-follow-card-muted: var(--cr-periwinkle);
+	--cr-follow-host-ink: var(--cr-periwinkle);
+	--cr-follow-initial-bg: var(--cr-follow-paper, var(--cr-periwinkle));
+	--cr-follow-initial-ink: var(--cr-russian-violet);
+	--cr-follow-current-bg: var(--cr-printer-ivory);
+	--cr-follow-current-ink: var(--cr-russian-violet);
+}
+
+:root[data-theme="dark"] .cr-archive--follow {
+	background-color: var(--cr-photocopier-blk);
+}
+
+:root[data-theme="dark"] .cr-follow-single {
+	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-follow-single::after {
+	border-color: var(--cr-printer-ivory);
+	background-color: var(--cr-night-elevated);
+}
+
+:root[data-theme="dark"] .cr-follow-card__name {
+	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .cr-follow-card__label {
+	color: var(--cr-periwinkle);
+}
+
+:root[data-theme="dark"] .cr-follow-card__site,
+:root[data-theme="dark"] .cr-follow-card__site:visited,
+:root[data-theme="dark"] .cr-follow-card__site:hover {
+	border-color: var(--cr-russian-violet);
+	background-color: var(--cr-follow-tape-light);
+	color: var(--cr-russian-violet);
+}
+
+@media (forced-colors: active) {
+
+	.pkiw-follow-entry,
+	.pk-card.pk-card--stream.cr-follow-stream {
+		border: 2px solid CanvasText !important;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
+	}
+
+	.cr-follow-single {
+		color: CanvasText;
+	}
+
+	.cr-follow-single::after {
+		border: 2px solid CanvasText;
+		background: Canvas;
+		box-shadow: none;
+	}
+
+	.pkiw-follow-entry::before,
+	.pkiw-follow-entry::after,
+	.cr-follow-single::before,
+	.cr-follow-card::before,
+	.cr-follow-card::after,
+	.cr-follow-stream__wheel {
+		display: none;
+	}
+
+	.pkiw-follow-entry__photo,
+	.pkiw-follow-entry__initial,
+	.cr-follow-card__photo,
+	.cr-follow-card__initial,
+	.cr-follow-stream__photo,
+	.cr-follow-stream__initial,
+	.cr-follow-stream__kind {
+		border-color: CanvasText;
+		background: Canvas;
+		color: CanvasText;
+	}
+
+	.pkiw-follow-letters a[aria-current="page"],
+	.cr-rolodex nav[aria-label="Pagination"] [aria-current="page"] {
+		forced-color-adjust: none;
+		border-color: HighlightText;
+		background: Highlight;
+		box-shadow: none;
+		color: HighlightText;
+	}
+
+	.cr-follow-card__site {
+		border-color: LinkText;
+		background: Canvas;
+		box-shadow: none;
+		color: LinkText;
+	}
+
+	.pkiw-follow-entry:focus-within,
+	.pk-card.pk-card--stream.cr-follow-stream:focus-within,
+	.pkiw-follow-letters a:focus-visible,
+	.cr-rolodex nav[aria-label="Pagination"] a:focus-visible,
+	.cr-follow-card__site:focus-visible {
+		outline: 3px solid Highlight;
+		box-shadow: none;
+	}
+}
