@@ -258,6 +258,36 @@ namespace {
 		}
 	);
 
+	cr_read_group(
+		'read Stream card prints no author before the password',
+		static function (): void {
+			$attrs     = array( 'bookTitle' => 'The Quiet Atlas', 'authorName' => 'Lena Orchard', 'readStatus' => 'finished', 'rating' => 4 );
+			$card      = '<article class="wp-block-post-kinds-indieweb-read-card pk-card k-read h-cite u-read-of"><div class="pk-body"><div class="pk-caption"><h2 class="pk-title p-name"><a href="https://cards.test/p">The Quiet Atlas</a></h2><p class="pk-sub"><span class="p-author h-card"><span class="p-name">Lena Orchard</span></span></p><p class="pk-sub"><span>Finished</span></p></div><div class="pk-stars" role="img" aria-label="Rated 4 of 5"><svg></svg></div><data class="p-rating" value="4" hidden></data><div class="pk-meta"></div></div></article>';
+			$protected = '<article class="pk-card pk-card--stream pk-card--protected k-read h-entry"><h2 class="pk-title p-name"><a class="u-url" href="https://cards.test/p">Protected: The Quiet Atlas</a></h2></article>';
+			$post      = cr_pw_post( 'read', array( array( 'blockName' => 'post-kinds-indieweb/read-card', 'attrs' => $attrs ) ) );
+			$instance  = new WP_Block( array( 'postId' => $post->ID ) );
+			$run       = static fn( string $html ): string => Courtneyr\Child\StreamRead\book_card( $html, array( 'attrs' => array() ), $instance );
+
+			$post->post_password = '';
+			$public              = $run( $card );
+			cr_read_contains( 'Lena Orchard', $public, 'read public card prints the author' );
+
+			$post->post_password = CR_PW_SECRET;
+			$expected            = substr( $protected, 0, -10 ) . '<div class="cr-book__protected-form">' . get_the_password_form( $post ) . '</div></article>';
+			$locked              = $run( $protected );
+			cr_read_same( $expected, $locked, 'read before the password prints the title-only card and the password form' );
+			foreach ( array( 'Lena Orchard', 'cr-book__protected-author' ) as $fact ) {
+				cr_read_not_contains( $fact, $locked, 'read before the password prints ' . $fact );
+			}
+
+			cr_pw_enter( 'wrong-guess' );
+			cr_read_same( $expected, $run( $protected ), 'read with a wrong password cookie prints the title-only card and the password form' );
+
+			cr_pw_enter( CR_PW_SECRET );
+			cr_read_same( $public, $run( $card ), 'read after the password prints what the public card prints' );
+		}
+	);
+
 	foreach ( array( 'eat', 'exercise' ) as $cr_pw_map_kind ) {
 		cr_read_group(
 			$cr_pw_map_kind . ' map image keeps an alt with no address before the password',
