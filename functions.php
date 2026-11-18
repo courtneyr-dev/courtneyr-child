@@ -93,6 +93,8 @@ require_once __DIR__ . '/inc/stream-rsvp.php';
 require_once __DIR__ . '/inc/tag.php';
 require_once __DIR__ . '/inc/single-tag.php';
 require_once __DIR__ . '/inc/stream-tag.php';
+require_once __DIR__ . '/inc/wrapped.php';
+require_once __DIR__ . '/inc/stream-wrapped.php';
 require_once __DIR__ . '/inc/presentation.php';
 require_once __DIR__ . '/inc/stream-presentation.php';
 require_once __DIR__ . '/inc/stream-checkin.php';

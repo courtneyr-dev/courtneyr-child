@@ -364,6 +364,8 @@ const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-xfn',
 	// On This Day archive, Stream card and purge-enabled singles only.
 	'courtneyr-on-this-day',
+	// Wrapped single, archive strip and Stream card only.
+	'courtneyr-wrapped',
 	'courtneyr-presentation',
 	// Event archive calendar only; My Calendar renders it on /kind/event/.
 	'courtneyr-event-calendar',
