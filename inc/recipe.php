@@ -363,6 +363,23 @@ function print_request_recipe_id( string $uri ): int {
 		if ( $recipe instanceof \WP_Post ) {
 			return $recipe->ID;
 		}
+		// The plugin tries a name query next, which WordPress sanitizes ("slug!" finds "slug").
+		$named = get_posts(
+			array(
+				'name'             => $path,
+				'post_type'        => 'wprm_recipe',
+				'post_status'      => 'any',
+				'numberposts'      => 1,
+				'orderby'          => 'ID',
+				'order'            => 'ASC',
+				'fields'           => 'ids',
+				'suppress_filters' => true,
+				'no_found_rows'    => true,
+			)
+		);
+		if ( ! empty( $named ) ) {
+			return (int) $named[0];
+		}
 	}
 	// The plugin reads what is left with intval(), so "168abc" prints recipe 168.
 	$id = (int) $name;
