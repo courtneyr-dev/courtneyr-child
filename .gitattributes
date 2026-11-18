@@ -1,0 +1,21 @@
+# export-ignore keeps development files out of GitHub's source zips and
+# git archive: tests, tooling, docs, archived templates and verification
+# screenshots. Deploy repos pin this theme as a submodule, which ignores it.
+/.github export-ignore
+/tests export-ignore
+/docs export-ignore
+/tools export-ignore
+/_archive export-ignore
+/_handoffs export-ignore
+/CLAUDE.md export-ignore
+/CHANGELOG.md export-ignore
+/composer.json export-ignore
+/composer.lock export-ignore
+/package.json export-ignore
+/package-lock.json export-ignore
+/phpcs.xml.dist export-ignore
+/stylelint.config.mjs export-ignore
+/callouts-test-post.png export-ignore
+/v0.*.png export-ignore
+.gitignore export-ignore
+.gitattributes export-ignore

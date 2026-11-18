@@ -1,0 +1,51 @@
+name: Playground preview
+
+# Adds a "Preview in Playground" button to each pull request's description.
+# The child theme needs its parent, so the Blueprint installs Ollie from
+# WordPress.org, then this theme from the PR branch, and activates it. Post
+# Kinds for IndieWeb is installed so the kind templates have data to render.
+# Fork and Dependabot PRs get a read-only token and are skipped.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions: {}
+
+concurrency:
+  group: playground-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: Add the Playground preview button
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: WordPress/action-wp-playground-pr-preview@1b15093d61b5e98cdfeb31466f34ade495762cd7 # v4.0.0
+        with:
+          mode: append-to-description
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          blueprint: |
+            {
+              "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+              "preferredVersions": { "php": "8.3", "wp": "latest" },
+              "steps": [
+                { "step": "installTheme",
+                  "themeData": { "resource": "wordpress.org/themes", "slug": "ollie" } },
+                { "step": "installTheme",
+                  "themeData": {
+                    "resource": "git:directory",
+                    "url": "https://github.com/${{ github.repository }}.git",
+                    "ref": "${{ github.event.pull_request.head.ref }}",
+                    "path": "/"
+                  },
+                  "options": { "activate": true } },
+                { "step": "installPlugin",
+                  "pluginData": { "resource": "wordpress.org/plugins", "slug": "post-kinds-for-indieweb-in-block-themes" },
+                  "options": { "activate": true } },
+                { "step": "login", "username": "admin" }
+              ]
+            }
