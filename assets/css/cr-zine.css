@@ -633,9 +633,11 @@ body.pkiw-zine-print {
 	 * minutes. cr-wrapped.css gives the Wrapped strip two such grids. The metrics
 	 * wrap to two columns below 64rem, a page width that paper margins reach on a
 	 * landscape sheet, and past four items. The top reads wrap past three. Those
-	 * lists print as flex rows with the same columns; a one-row grid lays out fine
-	 * and stays a grid. Each basis gives up 0.1px so rounding can't wrap the last
-	 * item of a full row.
+	 * lists print as flex rows with the same columns, up to four items: item
+	 * padding is wider than a fifth column. A one-row grid lays out fine and stays
+	 * a grid. Each basis gives up 0.1px so rounding can't wrap the last item of a
+	 * full row. This covers the strip only: any other grid with unequal-height
+	 * rows in a panel hangs the same way.
 	 */
 	body.pkiw-zine-print .pkiw-zine-page__content :is(.pkiw-wrapped__metrics:has(> li:nth-child(5)), .pkiw-wrapped__top:has(> li:nth-child(4))) {
 		display: flex;
