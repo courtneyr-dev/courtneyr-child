@@ -150,6 +150,16 @@ test( 'a head map whose SHA-256 differs from the value passed in is a tooling fa
 	assert.equal( fs.existsSync( out ), false );
 } );
 
+test( 'a /feed/ that is not HTTP 200 or a REST item that is 5xx is a tooling failure, a 404 REST item is not', () => {
+	const sides = ( feed, rest ) => [ 'baseline', 'head' ].map( ( role ) => ( { ...manifest( role, records() ), feed, rest } ) );
+	const ok = { status: 200, file: 'x' };
+	assert.deepEqual( preflight( ...sides( ok, { 1: ok, 2: { status: 404, file: 'y' } } ) ), [] );
+	assert.deepEqual( preflight( ...sides( { status: 500, file: 'x' }, {} ) ).length, 2 );
+	const rest = preflight( ...sides( ok, { 7: { status: 503, file: 'x' } } ) );
+	assert.equal( rest.length, 2 );
+	assert.match( rest[ 0 ], /posts\/7: HTTP 503 at baseline/ );
+} );
+
 test( 'a / or /stream/ handle page that is not HTTP 200 is a tooling failure, not a pass with nothing compared', () => {
 	const ok = { status: 200, link: [], inline: [ 'courtneyr-tokens-css' ] };
 	const withHandles = ( role, stream ) => ( { ...manifest( role, records() ), handles: { '/': ok, '/stream/': stream } } );

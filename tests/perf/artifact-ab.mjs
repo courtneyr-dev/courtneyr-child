@@ -208,6 +208,16 @@ export function preflight( base, head ) {
 			problems.push( `step 6 can't compare the ${ uri } handle set: HTTP ${ a ?? 'none' } at baseline, ${ b ?? 'none' } at head` );
 		}
 	}
+	for ( const [ side, m ] of [ [ 'baseline', base ], [ 'head', head ] ] ) {
+		if ( m.feed && 200 !== m.feed.status ) {
+			problems.push( `step 7 can't compare /feed/: HTTP ${ m.feed.status } at ${ side }` );
+		}
+		for ( const [ id, r ] of Object.entries( m.rest || {} ) ) {
+			if ( r.status >= 500 ) {
+				problems.push( `step 7 can't compare /wp-json/wp/v2/posts/${ id }: HTTP ${ r.status } at ${ side }` );
+			}
+		}
+	}
 	const extra = ( m ) => Object.keys( m.captures ).filter( ( k ) => 'judged' !== m.captures[ k ].role ).sort().join( ' ' );
 	if ( extra( base ) !== extra( head ) ) {
 		problems.push( `the twin and fixture captures differ: baseline [${ extra( base ) }], head [${ extra( head ) }]` );
