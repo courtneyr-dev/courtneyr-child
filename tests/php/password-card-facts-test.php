@@ -260,7 +260,7 @@ namespace {
 
 	foreach ( array( 'eat', 'exercise' ) as $cr_pw_map_kind ) {
 		cr_read_group(
-			$cr_pw_map_kind . ' map image gets no address in its alt before the password',
+			$cr_pw_map_kind . ' map image keeps an alt with no address before the password',
 			static function () use ( $cr_pw_map_kind ): void {
 				$post                = cr_pw_post( $cr_pw_map_kind, array() );
 				$post->post_password = '';
@@ -269,13 +269,18 @@ namespace {
 				$public  = Courtneyr\Child\SlocMapAlt\add_map_alt( $content );
 				cr_read_contains( 'alt="Map showing 9 SENTINELGEO Lane"', $public, $cr_pw_map_kind . ' public post prints the address in the map alt' );
 
+				$generic = '<p>Fixture post.</p><img alt="Map" class="sloc-map" src="https://cards.test/map.png" loading="lazy" />';
+
 				$post->post_password = CR_PW_SECRET;
 				$locked              = Courtneyr\Child\SlocMapAlt\add_map_alt( $content );
-				cr_read_same( $content, $locked, $cr_pw_map_kind . ' before the password returns the markup unchanged' );
+				cr_read_same( $generic, $locked, $cr_pw_map_kind . ' before the password gives the map a generic alt' );
 				cr_read_not_contains( 'SENTINELGEO', $locked, $cr_pw_map_kind . ' before the password prints no address' );
 
+				$named = '<img alt="Fixture map" class="sloc-map" src="https://cards.test/map.png" />';
+				cr_read_same( $named, Courtneyr\Child\SlocMapAlt\add_map_alt( $named ), $cr_pw_map_kind . ' before the password keeps an alt the image already has' );
+
 				cr_pw_enter( 'wrong-guess' );
-				cr_read_same( $content, Courtneyr\Child\SlocMapAlt\add_map_alt( $content ), $cr_pw_map_kind . ' with a wrong password cookie returns the markup unchanged' );
+				cr_read_same( $generic, Courtneyr\Child\SlocMapAlt\add_map_alt( $content ), $cr_pw_map_kind . ' with a wrong password cookie gives the map a generic alt' );
 
 				cr_pw_enter( CR_PW_SECRET );
 				cr_read_same( $public, Courtneyr\Child\SlocMapAlt\add_map_alt( $content ), $cr_pw_map_kind . ' after the password prints what the public post prints' );
