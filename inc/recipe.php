@@ -364,7 +364,9 @@ function print_request_recipe_id( string $uri ): int {
 			return $recipe->ID;
 		}
 	}
-	return 0;
+	// The plugin reads what is left with intval(), so "168abc" prints recipe 168.
+	$id = (int) $name;
+	return $id > 0 && 'wprm_recipe' === get_post_type( $id ) ? $id : 0;
 }
 
 /**
