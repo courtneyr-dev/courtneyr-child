@@ -35,7 +35,7 @@ add_filter( 'the_content', __NAMESPACE__ . '\\add_map_alt', 12 );
  * @return string
  */
 function add_map_alt( string $content ): string {
-	if ( false === strpos( $content, 'sloc-map' ) ) {
+	if ( false === strpos( $content, 'sloc-map' ) || post_password_required( (int) get_the_ID() ) ) {
 		return $content;
 	}
 
