@@ -35,18 +35,23 @@ add_filter( 'the_content', __NAMESPACE__ . '\\add_map_alt', 12 );
  * @return string
  */
 function add_map_alt( string $content ): string {
-	if ( false === strpos( $content, 'sloc-map' ) || post_password_required( (int) get_the_ID() ) ) {
+	if ( false === strpos( $content, 'sloc-map' ) ) {
 		return $content;
 	}
 
-	// The street goes into the alt only when the plugin's one location rule
-	// shows it to this visitor; without the plugin the alt stays generic.
+	// A post behind a password gets a generic alt that names no place; the
+	// street goes into the alt only when the plugin's one location rule shows
+	// it to this visitor, and without the plugin the alt stays generic.
 	$post_id = (int) get_the_ID();
-	$place   = get_post_meta( $post_id, 'geo_address', true );
-	$visible = function_exists( 'pkiw_get_visible_location_fields' ) ? (array) pkiw_get_visible_location_fields( $post_id ) : array();
-	$label   = ! empty( $visible['street'] ) && is_string( $place ) && '' !== trim( $place )
-		? sprintf( 'Map showing %s', wp_strip_all_tags( $place ) )
-		: "Map showing this post's location";
+	if ( post_password_required( $post_id ) ) {
+		$label = __( 'Map', 'courtneyr-child' );
+	} else {
+		$place   = get_post_meta( $post_id, 'geo_address', true );
+		$visible = function_exists( 'pkiw_get_visible_location_fields' ) ? (array) pkiw_get_visible_location_fields( $post_id ) : array();
+		$label   = ! empty( $visible['street'] ) && is_string( $place ) && '' !== trim( $place )
+			? sprintf( 'Map showing %s', wp_strip_all_tags( $place ) )
+			: "Map showing this post's location";
+	}
 	$alt = esc_attr( $label );
 
 	// Simple Location wraps the map in <a target="_blank" href=""> when the
