@@ -495,7 +495,10 @@ namespace {
 			$inserted = "\t<!-- wp:post-kinds-indieweb/wrapped-strip /-->\n\n\t<!-- wp:template-part {\"slug\":\"zine-export\"} /-->\n\n";
 			foreach ( $hashes as $relative => $expected ) {
 				$bytes = (string) file_get_contents( CR_PHOTO_THEME_DIR . '/' . $relative );
-				cr_photo_same( $expected, sha1( str_replace( $inserted, '', $bytes ) ), $relative . ' base hash' );
+				if ( 'templates/taxonomy-kind-comics.html' === $relative ) {
+					$bytes = str_replace( $inserted, '', $bytes );
+				}
+				cr_photo_same( $expected, sha1( $bytes ), $relative . ' base hash' );
 			}
 
 			$comic = (string) file_get_contents( CR_PHOTO_THEME_DIR . '/inc/comic.php' );

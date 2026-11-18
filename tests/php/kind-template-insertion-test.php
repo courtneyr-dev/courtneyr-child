@@ -69,6 +69,20 @@ function cr_kind_insertion_parent( array $nodes ): ?array {
 	return null;
 }
 
+/**
+ * Count nodes of one block name whose attributes contain a string, at any depth.
+ */
+function cr_kind_insertion_count( array $nodes, string $name, string $attr_part ): int {
+	$count = 0;
+	foreach ( $nodes as $node ) {
+		if ( $name === $node['name'] && ( '' === $attr_part || str_contains( $node['attrs'], $attr_part ) ) ) {
+			++$count;
+		}
+		$count += cr_kind_insertion_count( $node['children'], $name, $attr_part );
+	}
+	return $count;
+}
+
 $root  = dirname( __DIR__, 2 );
 $files = glob( $root . '/templates/taxonomy-kind*.html' );
 sort( $files );
@@ -79,14 +93,13 @@ foreach ( $files as $file ) {
 	$slug = basename( $file, '.html' );
 	$html = (string) file_get_contents( $file );
 
-	cr_kind_insertion_check( 1 === substr_count( $html, '<!-- wp:post-kinds-indieweb/wrapped-strip /-->' ), "$slug: one Wrapped strip line" );
-	cr_kind_insertion_check( 1 === substr_count( $html, '<!-- wp:template-part {"slug":"zine-export"} /-->' ), "$slug: one zine-export part line" );
-
 	$tree = cr_kind_insertion_tree( $html );
 	if ( null === $tree ) {
 		cr_kind_insertion_check( false, "$slug: block comments are balanced" );
 		continue;
 	}
+	cr_kind_insertion_check( 1 === cr_kind_insertion_count( $tree, 'post-kinds-indieweb/wrapped-strip', '' ), "$slug: one Wrapped strip block in the tree" );
+	cr_kind_insertion_check( 1 === cr_kind_insertion_count( $tree, 'template-part', '"slug":"zine-export"' ), "$slug: one zine-export part block in the tree" );
 	$parent = cr_kind_insertion_parent( $tree );
 	if ( null === $parent ) {
 		cr_kind_insertion_check( false, "$slug: archive header group found" );
@@ -107,8 +120,9 @@ foreach ( $files as $file ) {
 		'post-kinds-indieweb/wrapped-strip' === $strip['name'],
 		"$slug: Wrapped strip is the sibling right after the header"
 	);
+	cr_kind_insertion_check( '' === trim( $strip['attrs'] ?? '' ), "$slug: Wrapped strip carries no attributes" );
 	cr_kind_insertion_check(
-		'template-part' === $zine['name'] && str_contains( $zine['attrs'], '"slug":"zine-export"' ),
+		'template-part' === $zine['name'] && '{"slug":"zine-export"}' === trim( $zine['attrs'] ),
 		"$slug: zine-export part follows the strip"
 	);
 }
