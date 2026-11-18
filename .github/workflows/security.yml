@@ -28,5 +28,9 @@ jobs:
           coverage: none
           tools: composer
 
-      - name: Audit composer.lock
-        run: composer audit --locked --no-interaction
+      # No composer.lock is committed, so resolve the dev tools first.
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --no-interaction
+
+      - name: Audit installed packages
+        run: composer audit --no-interaction
