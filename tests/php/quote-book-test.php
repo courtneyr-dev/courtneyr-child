@@ -272,13 +272,14 @@ namespace Courtneyr\Child\QuoteBookTests {
 		'commonplace style registers on quote-entry only when the block exists'
 	);
 
-	// This lane never edits inc/quote-note.php. The two hashes are 228d851 and main after #202 (role="presentation" on the pin, mark and dash); add the next one when another PR changes the file.
+	// This lane never edits inc/quote-note.php. The two hashes are 228d851 and main after #202 (role="presentation" on the pin, mark and dash); add the next one when another PR changes the file (the third is the password guard in stream_card()).
 	check(
 		in_array(
 			hash_file( 'sha256', $root . '/inc/quote-note.php' ),
 			array(
 				'9c011e174a541bb03a8d9867bd1176b6da0d3bd93afc93a3711b75bb387e320c',
 				'3bedadac4f0e566e73a1c2795e9a14fd523ade7945e1e3ddd24fe005b92dfcfb',
+				'6cf89f63421cb0dcc4b085b5e9aba6547085e650e593a2442b5f0023d0bb6872',
 			),
 			true
 		),
