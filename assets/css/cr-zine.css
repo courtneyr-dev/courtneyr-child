@@ -615,6 +615,18 @@ body.pkiw-zine-print {
 		background: var(--cr-printer-ivory);
 	}
 
+	/*
+	 * One fixed-height column breaks between line boxes, wherever an image or a
+	 * margin puts them. The clip hides the overflow columns. The gap moves them
+	 * one sheet width away, because their list markers hang to the left and
+	 * would otherwise show inside the panel.
+	 */
+	body.pkiw-zine-print .pkiw-zine-page__content {
+		column-count: 1;
+		column-gap: 100vw;
+		column-fill: auto;
+	}
+
 	@supports (height: round(down, 100%, 1lh)) {
 
 		body.pkiw-zine-print .pkiw-zine-page__content {
