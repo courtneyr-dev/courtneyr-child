@@ -481,7 +481,7 @@ function hide_locked_single_header( $pre, array $block ) {
 		return null;
 	}
 	$class = (string) ( $block['attrs']['className'] ?? '' );
-	if ( 1 !== preg_match( '/(?<![\w-])single-post__(featured|kind|category)(?![\w-])/', $class ) ) {
+	if ( ! str_contains( $class, 'single-post__featured' ) && ! str_contains( $class, 'single-post__kind' ) && ! str_contains( $class, 'single-post__category' ) ) {
 		return null;
 	}
 	return is_singular( 'post' ) && post_password_required( get_queried_object_id() ) ? '' : null;

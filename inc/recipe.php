@@ -332,10 +332,22 @@ add_filter( 'wprm_settings', __NAMESPACE__ . '\\recipe_plugin_settings' );
  * @return int
  */
 function print_request_recipe_id( string $uri ): int {
-	if ( ! class_exists( '\\WPRM_Print' ) || 1 !== preg_match( '/[\/\?]' . preg_quote( \WPRM_Print::slug(), '/' ) . '[\/=](.+?)(\/)?$/', $uri, $match ) ) {
+	if ( ! class_exists( '\\WPRM_Print' ) ) {
 		return 0;
 	}
-	$args = explode( '/', str_replace( array( '?', '&' ), '/', $match[1] ) );
+	$slug = \WPRM_Print::slug();
+	$at   = false;
+	foreach ( array( '/' . $slug . '/', '/' . $slug . '=', '?' . $slug . '/', '?' . $slug . '=' ) as $needle ) {
+		$found = strpos( $uri, $needle );
+		if ( false !== $found && ( false === $at || $found < $at[0] ) ) {
+			$at = array( $found, strlen( $needle ) );
+		}
+	}
+	$rest = false === $at ? '' : substr( $uri, $at[0] + $at[1] );
+	if ( '' === $rest ) {
+		return 0;
+	}
+	$args = explode( '/', str_replace( array( '?', '&' ), '/', $rest ) );
 	if ( in_array( $args[0], array( 'recipes', 'collection', 'shopping-list' ), true ) ) {
 		return 0;
 	}
