@@ -138,22 +138,18 @@ function facts_line( array $a, string $status, string $label ): array {
 }
 
 /**
- * The plugin's protected card plus the book author and the password form.
+ * The plugin's protected card plus the password form.
  *
- * @param string                    $html Plugin's protected Stream card.
- * @param \WP_Post                  $post Protected post.
- * @param array<string, mixed>|null $read Read-card block, when the post has one.
+ * @param string   $html Plugin's protected Stream card.
+ * @param \WP_Post $post Protected post.
  * @return string
  */
-function protected_card( string $html, \WP_Post $post, ?array $read ): string {
+function protected_card( string $html, \WP_Post $post ): string {
 	$end = strrpos( $html, '</article>' );
 	if ( false === $end || false === strpos( $html, 'pk-card--protected' ) ) {
 		return $html;
 	}
-	$author = null !== $read ? trim( (string) ( read_attrs( $post, $read )['authorName'] ?? '' ) ) : '';
-	$insert = ( '' !== $author ? '<p class="pk-sub cr-book__protected-author">' . esc_html( $author ) . '</p>' : '' )
-		. '<div class="cr-book__protected-form">' . get_the_password_form( $post ) . '</div>';
-	return substr( $html, 0, $end ) . $insert . substr( $html, $end );
+	return substr( $html, 0, $end ) . '<div class="cr-book__protected-form">' . get_the_password_form( $post ) . '</div>' . substr( $html, $end );
 }
 
 /**
@@ -178,12 +174,12 @@ function book_card( string $html, array $block, $instance ): string {
 	if ( ! $post instanceof \WP_Post || ! has_term( 'read', 'kind', $post ) ) {
 		return $html;
 	}
-	$read = find_read_block( $post );
-	// A password-protected read shows its title link, the stored book
-	// author and the password form, nothing else from the read card.
+	// A password-protected read shows its title link and the password
+	// form, nothing else from the read card.
 	if ( post_password_required( $post ) ) {
-		return protected_card( $html, $post, $read );
+		return protected_card( $html, $post );
 	}
+	$read = find_read_block( $post );
 	if ( null === $read ) {
 		return $html;
 	}
