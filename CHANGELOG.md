@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.171
+
+Wave X: On This Day, yearly Wrapped posts and printable zines get their paint. All three need Post Kinds for IndieWeb 1.10.0, and each prints only what the plugin returns for published, password-free posts that ActivityPub doesn't mark quiet public. (#268, #267, #269)
+
+- On This Day (#296). `/on-this-day/` uses the new `on-this-day` template: a cut-paper heading, today's date in the site's timezone, and earlier years' posts grouped by year. The Stream card and the single-post card get their paint too.
+- Yearly Wrapped (#297). A Wrapped post's single gets a cut-paper title and its metric paint. The kind archive strip and the one-link Stream card show up to three metrics, and a Wrapped post that ActivityPub marks quiet public gets no Stream card.
+- Printable zines (#306). The Export as Zine panel and the 8- and 16-page booklets are painted for screen, dark mode, forced colors and paper, and the new `zine-export` template part holds the panel. The 16-page contents page lists all 14 entries, and booklet text breaks between lines instead of cutting a line in half above the footer. A single post prints as ink on light paper with its byline and permalink, without comments, forms, the facepile, the newsletter banner or the reading bar.
+- Every kind archive (#307). The 42 `taxonomy-kind*.html` templates print the Wrapped strip and the zine panel between the archive header and the archive's own content. The strip prints nothing until that kind has a published Wrapped post.
+
+Under the hood: new `cr-on-this-day.css`, `cr-wrapped.css` and `cr-zine.css` load only where they're used, and `cr-print.css` grows by appended rules only. The `Version` change to 0.7.171 is also what clears each environment's `wp_theme_files_patterns-*` cache. CSS linting moves to stylelint 17 and `@wordpress/stylelint-config` 27, and the `q` quotes rule in `tokens.css` now parses (#305). The repository adds a GPL-2.0 license file (#295), Playground previews, dependency review, a Composer audit and Dependabot (#298), and dependency bumps (#299, #300, #304). `tools/` stays in `git archive` output, because courtneyr.dev's theme sync runs `tools/minify-css.mjs` from the archive.
+
 ## 0.7.170
 
 Wave 8: tag posts and follow posts get their own pages. Both need Post Kinds for IndieWeb 1.9.2, and every new renderer reads only the facts PKIW returns for a public post, so a private, draft, scheduled, password-protected or trashed tag or follow post prints nothing new. (#261, #260)
