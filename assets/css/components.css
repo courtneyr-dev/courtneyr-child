@@ -2769,7 +2769,7 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 :root[data-theme="dark"] .entry-content table td,
 :root[data-theme="dark"] .wp-block-post-content table th,
 :root[data-theme="dark"] .entry-content table th {
-	color: var(--cr-printer-ivory) !important;
+	color: var(--cr-ink) !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -2781,7 +2781,7 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 	:root[data-theme="system"] .entry-content table td,
 	:root[data-theme="system"] .wp-block-post-content table th,
 	:root[data-theme="system"] .entry-content table th {
-		color: var(--cr-printer-ivory) !important;
+		color: var(--cr-ink) !important;
 	}
 }
 

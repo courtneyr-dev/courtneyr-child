@@ -141,11 +141,19 @@ async function printPalette( page, theme ) {
 			code.textContent = 'print token probe';
 			document.querySelector( '.single-post__content' )?.append( code );
 		}
+		let cell = document.querySelector( '[data-cr-print-cell-probe]' );
+		if ( ! cell ) {
+			const table = document.createElement( 'table' );
+			table.innerHTML = '<tbody><tr><td data-cr-print-cell-probe>print cell probe</td></tr></tbody>';
+			document.querySelector( '.single-post__content' )?.append( table );
+			cell = table.querySelector( 'td' );
+		}
 		const root = getComputedStyle( document.documentElement );
 		const codeStyle = getComputedStyle( code );
 		return {
 			tokens: Object.fromEntries( properties.map( ( property ) => [ property, root.getPropertyValue( property ).trim() ] ) ),
 			code: { background: codeStyle.backgroundColor, color: codeStyle.color },
+			cell: getComputedStyle( cell ).color,
 		};
 	}, { properties: PRINT_TOKENS, value: theme } );
 }
@@ -275,6 +283,9 @@ test.describe( 'Standalone long-post print', () => {
 		const kind = page.locator( '.single-post__lede-meta .single-post__kind' ).first();
 		await expect( kind ).toBeVisible();
 		expect( await kind.evaluate( ( element ) => getComputedStyle( element ).visibility ) ).toBe( 'visible' );
+		const flat = await page.locator( '.single-post__lede-meta .single-post__kind, .single-post__lede-meta .single-post__kind a' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => ( { transform: getComputedStyle( node ).transform, shadow: getComputedStyle( node ).boxShadow } ) ) );
+		expect( flat.length, 'the kind chip and its link are on the page' ).toBeGreaterThan( 0 );
+		expect( flat.every( ( row ) => 'none' === row.transform && 'none' === row.shadow ), 'the printed kind chip has no tilt or hard shadow' ).toBe( true );
 
 		const title = page.locator( 'h1.single-post__title' );
 		const titlePaint = await title.evaluate( ( node ) => ( { font: getComputedStyle( node ).fontFamily, transform: getComputedStyle( node ).transform } ) );
@@ -329,6 +340,7 @@ test.describe( 'Standalone long-post print', () => {
 		const darkPalette = await printPalette( page, 'dark' );
 		expect( darkPalette.tokens, 'dark print restores every light custom property' ).toEqual( lightPalette.tokens );
 		expect( darkPalette.code.color, 'dark print keeps code ink violet, not the dark periwinkle' ).toBe( VIOLET );
+		expect( Math.max( ...darkPalette.cell.match( /\d+/g ).slice( 0, 3 ).map( Number ) ), 'dark print table text stays dark ink on light paper' ).toBeLessThan( 120 );
 		const channels = darkPalette.code.background.match( /\d+/g ).slice( 0, 3 ).map( Number );
 		expect( Math.min( ...channels ), 'dark print code paper stays light' ).toBeGreaterThanOrEqual( 200 );
 		const paper = await page.locator( 'body' ).evaluate( ( node ) => ( { background: getComputedStyle( node ).backgroundColor, color: getComputedStyle( node ).color } ) );

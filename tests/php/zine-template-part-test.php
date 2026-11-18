@@ -307,7 +307,8 @@ namespace {
 	cr_zine_check( 0 === preg_match( '/#[0-9a-f]{3,8}\b|rgb\(|%23/i', cr_zine_css_without_comments( $zine_css ) ), 'cr-zine.css has no literal hex, rgb or encoded hash color' );
 	cr_zine_check( 0 === preg_match( '/#[0-9a-f]{3,8}\b|rgb\(|%23/i', cr_zine_css_without_comments( $print_add ) ), 'appended cr-print.css has no literal hex, rgb or encoded hash color' );
 	cr_zine_contains( '.single-post__title.cr-cutout .cr-cutout__tiles', $print_add, 'single print includes the cutout-title fallback asserted when the browser fixture has no cutout H1' );
-	cr_zine_contains( 'visibility: hidden', $print_add, 'single print hides lede date and category without relying on display' );
+	cr_zine_check( 1 === preg_match( '/\.single-post__lede-meta \.single-post__date,\s*\.single-post__lede-meta \.single-post__category\s*\{[^}]*visibility: hidden[^}]*\}/', $print_add ), 'single print hides lede date and category with visibility, not display' );
+	cr_zine_check( 1 === preg_match( '/\.single-post__kind\.cr-chip a\s*\{[^}]*box-shadow: none;[^}]*transform: none;[^}]*\}/', $print_add ), 'single print flattens the kind chip and its link' );
 	cr_zine_contains( 'body.single-post:not(.cr-order-single):not(.cr-recipe-single):not([class~="kind-eat"]):not([class~="kind-drink"]):not([class~="kind-recipe"]):not([class~="kind-favorite"]):not([class~="kind-jam"]):not([class~="kind-menu"]):not([class~="kind-evidence"]) .single-post__header', $print_add, 'single print header reordering excludes approved kind layouts' );
 	cr_zine_contains( 'body.pkiw-zine-print .cr-cutout__paper::before', $zine_css, 'booklet print forces the cutout paper pseudo-element to light stock' );
 

@@ -235,3 +235,11 @@ body {
 	background: var(--cr-printer-ivory);
 	color: var(--cr-russian-violet);
 }
+
+/* A printed chip is flat: the screen chip's tilt and hard shadow are decoration. */
+body.single-post .single-post__header .single-post__lede-meta .single-post__kind.cr-chip,
+body.single-post .single-post__header .single-post__lede-meta .single-post__kind.cr-chip a {
+	box-shadow: none;
+	rotate: none;
+	transform: none;
+}
