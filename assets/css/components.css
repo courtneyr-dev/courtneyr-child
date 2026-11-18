@@ -2764,24 +2764,32 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 	background: var(--cr-surface-soft);
 }
 
-/* Force visible text on tables in dark mode regardless of inherited rules */
+/* Force visible text on tables in dark mode regardless of inherited rules.
+   Cells read --cr-ink (ivory on screen, remapped to violet in print); headers
+   sit on the callout fill, so they keep the ivory palette token. */
 :root[data-theme="dark"] .wp-block-post-content table td,
-:root[data-theme="dark"] .entry-content table td,
+:root[data-theme="dark"] .entry-content table td {
+	color: var(--cr-ink) !important;
+}
+
 :root[data-theme="dark"] .wp-block-post-content table th,
 :root[data-theme="dark"] .entry-content table th {
-	color: var(--cr-ink) !important;
+	color: var(--cr-printer-ivory) !important;
 }
 
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme]) .wp-block-post-content table td,
 	:root:not([data-theme]) .entry-content table td,
+	:root[data-theme="system"] .wp-block-post-content table td,
+	:root[data-theme="system"] .entry-content table td {
+		color: var(--cr-ink) !important;
+	}
+
 	:root:not([data-theme]) .wp-block-post-content table th,
 	:root:not([data-theme]) .entry-content table th,
-	:root[data-theme="system"] .wp-block-post-content table td,
-	:root[data-theme="system"] .entry-content table td,
 	:root[data-theme="system"] .wp-block-post-content table th,
 	:root[data-theme="system"] .entry-content table th {
-		color: var(--cr-ink) !important;
+		color: var(--cr-printer-ivory) !important;
 	}
 }
 

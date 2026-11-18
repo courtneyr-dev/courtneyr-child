@@ -144,7 +144,7 @@ async function printPalette( page, theme ) {
 		let cell = document.querySelector( '[data-cr-print-cell-probe]' );
 		if ( ! cell ) {
 			const table = document.createElement( 'table' );
-			table.innerHTML = '<tbody><tr><td data-cr-print-cell-probe>print cell probe</td></tr></tbody>';
+			table.innerHTML = '<thead><tr><th data-cr-print-head-probe>print head probe</th></tr></thead><tbody><tr><td data-cr-print-cell-probe>print cell probe</td></tr></tbody>';
 			document.querySelector( '.single-post__content' )?.append( table );
 			cell = table.querySelector( 'td' );
 		}
@@ -154,6 +154,7 @@ async function printPalette( page, theme ) {
 			tokens: Object.fromEntries( properties.map( ( property ) => [ property, root.getPropertyValue( property ).trim() ] ) ),
 			code: { background: codeStyle.backgroundColor, color: codeStyle.color },
 			cell: getComputedStyle( cell ).color,
+			head: { color: getComputedStyle( document.querySelector( '[data-cr-print-head-probe]' ) ).color, background: getComputedStyle( document.querySelector( '[data-cr-print-head-probe]' ) ).backgroundColor },
 		};
 	}, { properties: PRINT_TOKENS, value: theme } );
 }
@@ -341,6 +342,8 @@ test.describe( 'Standalone long-post print', () => {
 		expect( darkPalette.tokens, 'dark print restores every light custom property' ).toEqual( lightPalette.tokens );
 		expect( darkPalette.code.color, 'dark print keeps code ink violet, not the dark periwinkle' ).toBe( VIOLET );
 		expect( Math.max( ...darkPalette.cell.match( /\d+/g ).slice( 0, 3 ).map( Number ) ), 'dark print table text stays dark ink on light paper' ).toBeLessThan( 120 );
+		expect( darkPalette.head.background, 'dark print table header keeps the light print callout fill' ).toBe( lightPalette.head.background );
+		expect( Math.min( ...darkPalette.head.color.match( /\d+/g ).slice( 0, 3 ).map( Number ) ), 'dark print table header text stays light on the cerulean fill (6:1)' ).toBeGreaterThanOrEqual( 240 );
 		const channels = darkPalette.code.background.match( /\d+/g ).slice( 0, 3 ).map( Number );
 		expect( Math.min( ...channels ), 'dark print code paper stays light' ).toBeGreaterThanOrEqual( 200 );
 		const paper = await page.locator( 'body' ).evaluate( ( node ) => ( { background: getComputedStyle( node ).backgroundColor, color: getComputedStyle( node ).color } ) );
