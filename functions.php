@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.170' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.171' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -95,6 +95,7 @@ require_once __DIR__ . '/inc/single-tag.php';
 require_once __DIR__ . '/inc/stream-tag.php';
 require_once __DIR__ . '/inc/wrapped.php';
 require_once __DIR__ . '/inc/stream-wrapped.php';
+require_once __DIR__ . '/inc/zine.php';
 require_once __DIR__ . '/inc/presentation.php';
 require_once __DIR__ . '/inc/stream-presentation.php';
 require_once __DIR__ . '/inc/stream-checkin.php';

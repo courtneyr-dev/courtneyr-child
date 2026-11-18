@@ -85,3 +85,173 @@ footer.wp-block-template-part,
 	transform: none !important;
 	break-inside: auto;
 }
+
+/* ============================================================
+   Standalone single print
+   ============================================================ */
+body.single-post .single-post__comments-wrapper,
+body.single-post .wp-block-comments,
+body.single-post .wp-block-post-comments-form,
+body.single-post .single-post__syndication,
+body.single-post .wp-block-indieblocks-facepile,
+body.single-post .cr-newsletter-banner,
+body.single-post .cr-reading-progress {
+	display: none;
+}
+
+.cr-print-byline {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cr-space-xs);
+	order: 3;
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-sm);
+}
+
+.cr-print-byline > * {
+	margin: 0;
+}
+
+.cr-print-permalink {
+	display: block;
+	margin-block-start: var(--cr-space-xl);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	overflow-wrap: anywhere;
+}
+
+.cr-print-permalink p {
+	margin: 0;
+}
+
+.single-post__header {
+	display: flex;
+	flex-direction: column;
+	box-shadow: none;
+	filter: none;
+	transform: none;
+}
+
+.single-post__title,
+.single-post__title.wp-block-post-title {
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	letter-spacing: normal;
+	text-shadow: none;
+	transform: none;
+}
+
+.single-post__lede-meta,
+.cr-print-byline,
+.cr-print-permalink {
+	box-shadow: none;
+	filter: none;
+	transform: none;
+}
+
+body.cr-order-single .cr-print-byline,
+body.cr-recipe-single .cr-print-byline {
+	display: none;
+}
+
+.single-post__lede-meta .single-post__date,
+.single-post__lede-meta .single-post__category {
+	display: none;
+}
+
+.single-post__lede-meta .single-post__kind {
+	display: inline-flex;
+}
+
+.single-post__header > .single-post__title {
+	order: 1;
+}
+
+.single-post__header > .single-post__lede-meta {
+	order: 2;
+}
+
+.single-post__title.cr-flank::before,
+.single-post__title.cr-flank::after {
+	opacity: 0;
+	visibility: hidden;
+}
+
+.single-post__title.cr-cutout .cr-cutout__tiles {
+	display: none;
+}
+
+body.single-post h1.single-post__title.cr-cutout > .cr-cutout__text.screen-reader-text {
+	position: static;
+	display: inline;
+	inline-size: auto;
+	block-size: auto;
+	margin: 0;
+	padding: 0;
+	overflow: visible;
+	clip: auto;
+	clip-path: none;
+	white-space: normal;
+	border: 0;
+}
+
+main.single-post,
+main.single-post > .single-post__content {
+	max-block-size: none;
+	overflow: visible;
+	background: transparent;
+}
+
+main.single-post > .single-post__content {
+	box-shadow: none;
+	filter: none;
+	transform: none;
+}
+
+main.single-post > .single-post__content > :not(.cr-placemat, .cr-order--ticket, .cr-order__sheet, .cr-map-slip, .cr-recipe-binder, .cr-binder) {
+	background-image: none;
+	box-shadow: none;
+	filter: none;
+	text-shadow: none;
+	transform: none;
+}
+
+.single-post__content .wp-block-quote,
+.single-post__content blockquote {
+	background: transparent;
+	box-shadow: none;
+	color: var(--cr-russian-violet);
+	font-family: var(--cr-font-accent);
+	font-size: max(var(--cr-text-floor), var(--cr-text-sm));
+	font-style: italic;
+	transform: none;
+}
+
+:root:root:root {
+	color-scheme: light;
+	--cr-surface: var(--cr-printer-ivory);
+	--cr-surface-soft: var(--cr-light-orange);
+	--cr-surface-elevated: var(--cr-white);
+	--cr-ink: var(--cr-russian-violet);
+	--cr-ink-muted: var(--cr-cerulean);
+	--cr-ink-soft: var(--cr-russian-violet);
+	--cr-ink-inverse: var(--cr-printer-ivory);
+	--cr-link: var(--cr-cerulean);
+	--cr-link-hover: var(--cr-russian-violet);
+	--cr-link-visited: var(--cr-russian-violet-soft);
+	--cr-rule: var(--cr-paper-rule);
+	--cr-border: var(--cr-russian-violet);
+	--cr-border-strong: var(--cr-russian-violet);
+	--cr-tape: var(--cr-printer-ivory);
+	--cr-tape-ink: var(--cr-russian-violet);
+	--cr-cta-bg: var(--cr-ut-orange);
+	--cr-cta-bg-hover: var(--cr-russian-violet);
+	--cr-cta-ink: var(--cr-prussian-blue);
+	--cr-cta-ink-hover: var(--cr-sky-blue);
+}
+
+html,
+body {
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+}
