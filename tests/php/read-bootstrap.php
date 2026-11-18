@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace {
 	define( 'ABSPATH', __DIR__ . '/' );
+	define( 'COOKIEHASH', md5( 'courtneyr-child-tests' ) );
 
 	$GLOBALS['cr_read_actions']     = array();
 	$GLOBALS['cr_read_filters']     = array();
@@ -34,6 +35,7 @@ namespace {
 		public string $post_title;
 		public string $post_content;
 		public string $post_name;
+		public string $post_password = '';
 
 		public function __construct( int $id = 1, string $title = 'Test Book', string $content = '' ) {
 			$this->ID           = $id;
@@ -144,7 +146,21 @@ namespace {
 
 	function post_password_required( $post = null ): bool {
 		$p = $post instanceof WP_Post ? $post : $GLOBALS['cr_read_post'];
-		return $p instanceof WP_Post && ! empty( $GLOBALS['cr_read_protected'][ $p->ID ] );
+		if ( ! $p instanceof WP_Post ) {
+			return false;
+		}
+		if ( ! empty( $GLOBALS['cr_read_protected'][ $p->ID ] ) ) {
+			return true;
+		}
+		if ( '' === $p->post_password ) {
+			return false;
+		}
+		// Core's check: the wp-postpass cookie must hold the phpass hash of the post password.
+		$hash = $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] ?? null;
+		if ( ! is_string( $hash ) || ! str_starts_with( $hash, '$P$B' ) ) {
+			return true;
+		}
+		return ! ( new PasswordHash( 8, true ) )->CheckPassword( $p->post_password, $hash );
 	}
 
 	function get_the_password_form( $post = 0 ): string {
@@ -292,6 +308,7 @@ namespace {
 	require_once $core . '/wp-includes/compat.php';
 	require_once $core . '/wp-includes/utf8.php';
 	require_once $core . '/wp-includes/kses.php';
+	require_once $core . '/wp-includes/class-phpass.php';
 	foreach ( array( 'class-wp-html-span.php', 'class-wp-html-text-replacement.php', 'class-wp-html-decoder.php', 'class-wp-html-attribute-token.php', 'class-wp-html-tag-processor.php' ) as $file ) {
 		require_once $api . '/' . $file;
 	}

@@ -488,7 +488,11 @@ function bag_card( string $html, array $block, $instance ): string {
 		? (int) $instance->context['postId']
 		: (int) get_the_ID();
 	$post    = $post_id ? get_post( $post_id ) : null;
-	$comic   = comic_read( $post );
+	// The plugin prints a title-only card for a password-protected comic; keep it.
+	if ( $post instanceof \WP_Post && post_password_required( $post ) ) {
+		return $html;
+	}
+	$comic = comic_read( $post );
 	if ( null === $comic ) {
 		// A strip its author drew stands on the rack as its picture and
 		// title link; the excerpt, date and "Read more" stay off the rack.
@@ -613,7 +617,8 @@ function add_title_lede( string $html, array $block ): string {
 	}
 	$post  = \get_post();
 	$comic = comic_read( $post );
-	if ( null === $comic ) {
+	// A password-protected comic shows its title and the password form only.
+	if ( null === $comic || post_password_required( $post ) ) {
 		return $html;
 	}
 	$a        = comic_attrs( $post, $comic );

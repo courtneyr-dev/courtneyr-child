@@ -177,7 +177,8 @@ function add_title_lede( string $html, array $block ): string {
 		return $html;
 	}
 	$post = \get_post();
-	if ( ! $post instanceof \WP_Post ) {
+	// A password-protected watch shows its title and the password form only.
+	if ( ! $post instanceof \WP_Post || post_password_required( $post ) ) {
 		return $html;
 	}
 	$watch = find_watch_block( $post );

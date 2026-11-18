@@ -504,11 +504,11 @@ namespace {
 			$comic = (string) file_get_contents( CR_PHOTO_THEME_DIR . '/inc/comic.php' );
 			$start = strpos( $comic, 'function bag_card(' );
 			$end   = strpos( $comic, 'add_filter(', $start );
-			cr_photo_same( '79c6de5e3ff6bd36b11d033d74d8e0ebbe47358d', sha1( substr( $comic, $start, $end - $start ) ), 'bag_card hash' );
+			cr_photo_same( 'cc7d8b7525036ed969b3ff1688e82ba8edf53987', sha1( substr( $comic, $start, $end - $start ) ), 'bag_card hash' );
 			$new = " * Is this the comics archive rack? The drawn view is not the rack.\n *\n * @return bool\n */\nfunction is_rack(): bool {\n\treturn \\is_tax( 'kind', 'comics' ) && 'drawn' !== \\get_query_var( 'pkiw_comic_view' );\n}";
 			$old = " * Is this the comics archive?\n *\n * @return bool\n */\nfunction is_rack(): bool {\n\treturn \\is_tax( 'kind', 'comics' );\n}";
 		cr_photo_contains( $new, $comic, 'only allowed rack hunk is present' );
-			cr_photo_same( '9631ed8cef965162ac10dbdea2e013ece1b588f1', sha1( str_replace( $new, $old, $comic ) ), 'comic file normalizes to base' );
+			cr_photo_same( '86c5fc81a667b0e3dc428eabd8634d5f1b355dd7', sha1( str_replace( $new, $old, $comic ) ), 'comic file normalizes to base' );
 		}
 	);
 

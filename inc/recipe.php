@@ -337,7 +337,8 @@ function add_title_lede( string $html, array $block ): string {
 	if ( 'core/post-title' !== ( $block['blockName'] ?? '' ) || ! is_recipe_single() || get_the_ID() !== get_queried_object_id() ) {
 		return $html;
 	}
-	$recipe = post_recipe( (int) get_the_ID() );
+	// A password-protected recipe shows its title and the password form only.
+	$recipe = post_password_required( (int) get_the_ID() ) ? null : post_recipe( (int) get_the_ID() );
 	if ( null === $recipe ) {
 		return $html;
 	}

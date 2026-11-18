@@ -48,7 +48,7 @@ function card( string $html, array $block, $instance ): string { // phpcs:ignore
 		? (int) $instance->context['postId']
 		: (int) get_the_ID();
 	$post    = $post_id ? get_post( $post_id ) : null;
-	if ( ! $post instanceof \WP_Post ) {
+	if ( ! $post instanceof \WP_Post || post_password_required( $post ) ) {
 		return $html;
 	}
 	$kind = has_term( 'eat', 'kind', $post ) ? 'eat' : ( has_term( 'drink', 'kind', $post ) ? 'drink' : '' );
