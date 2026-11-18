@@ -627,6 +627,25 @@ body.pkiw-zine-print {
 		column-fill: auto;
 	}
 
+	/*
+	 * Ollie pads lists from a spacing preset this theme does not define, so the
+	 * padding computes to 0 and outside markers hang into the clipped margin.
+	 * Inside markers stay in the panel, in ink: the orange marker token is 2.4:1
+	 * on ivory. Flex and grid items have no marker, so lists laid out that way
+	 * keep their layout.
+	 */
+	body.pkiw-zine-print .pkiw-zine-page__content ul {
+		list-style-type: disc;
+	}
+
+	body.pkiw-zine-print .pkiw-zine-page__content li {
+		list-style-position: inside;
+	}
+
+	body.pkiw-zine-print .pkiw-zine-page__content li::marker {
+		color: currentcolor;
+	}
+
 	body.pkiw-zine-print [data-pkiw-zine-page="2"] .pkiw-zine-page__content {
 		font-size: var(--cr-text-xs);
 		line-height: var(--cr-leading-snug);
