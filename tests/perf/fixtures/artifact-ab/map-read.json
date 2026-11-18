@@ -1,0 +1,27 @@
+{
+ "groups": [
+  {
+   "group": "archive",
+   "mockups": [ { "label": "archive mockup", "path": "234-reads/archive-light.png" } ],
+   "views": [
+    { "name": "archive-desktop", "path": "/kind/read/", "width": 1672, "height": 941, "fullPage": false, "selector": "", "colorScheme": "light", "label": "read archive, top of page" }
+   ]
+  },
+  {
+   "group": "single",
+   "mockups": [ { "label": "single mockup", "path": "234-reads/single-light.png" } ],
+   "views": [
+    { "name": "single-full", "path": "/a-seeded-read/", "width": 1672, "height": 941, "fullPage": true, "selector": "" },
+    { "name": "single-phone", "path": "/a-seeded-read/", "width": 390, "height": 844, "fullPage": false, "selector": "", "colorScheme": "light" }
+   ]
+  },
+  {
+   "group": "stream",
+   "mockups": [ { "label": "stream mockup", "path": "234-reads/stream-light.png" } ],
+   "views": [
+    { "name": "stream-desktop", "path": "/stream/", "width": 1672, "height": 941, "fullPage": false, "selector": "li.kind-read:has(data.u-url[value$=\"/a-seeded-read/\"]) article.k-read", "colorScheme": "light" }
+   ]
+  }
+ ],
+ "contract": [ "234-reads/decision.md" ]
+}

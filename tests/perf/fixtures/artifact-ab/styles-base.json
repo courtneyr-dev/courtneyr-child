@@ -1,0 +1,9 @@
+{
+ "props": [ "color", "display", "content", "margin-top", "transform" ],
+ "rows": [
+  [ "body:1>main:0", "", [ "rgb(17, 17, 17)", "block", "normal", "0px", "none" ] ],
+  [ "body:1>main:0>div:0>div:1", "", [ "rgb(17, 17, 17)", "block", "normal", "24px", "matrix(0.999, -0.035, 0.035, 0.999, 0, 0)" ] ],
+  [ "body:1>main:0>div:0>div:1", "::before", [ "rgb(120, 72, 40)", "block", "\"\"", "0px", "none" ] ],
+  [ "body:1>main:0>div:0>div:1", "::after", [ "rgb(17, 17, 17)", "inline", "none", "0px", "none" ] ]
+ ]
+}
