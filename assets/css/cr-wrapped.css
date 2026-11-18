@@ -122,11 +122,60 @@
 	color: var(--cr-wrapped-ink);
 }
 
-.pkiw-wrapped__top img {
+/* The cover box holds its size whether the image loads, fails or is absent. */
+.pkiw-wrapped__cover {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	gap: var(--cr-space-xs);
+	box-sizing: border-box;
+	inline-size: min(100%, 12rem);
+	aspect-ratio: 2 / 3;
+	min-inline-size: 0;
+	overflow: hidden;
+	border: 2px solid var(--cr-wrapped-ink);
+	background-color: var(--cr-wrapped-paper);
+	box-shadow: var(--cr-shadow-hard-sm);
+	color: var(--cr-wrapped-ink);
+}
+
+.pkiw-wrapped__cover img {
+	position: absolute;
+	inset: 0;
 	display: block;
 	inline-size: 100%;
-	max-block-size: 18rem;
+	block-size: 100%;
 	object-fit: contain;
+}
+
+/* No cover, or a cover that failed to load (assets/js/site-ux.js): a typographic cover. */
+.pkiw-wrapped__cover--type,
+.pkiw-wrapped__cover.cr-cover--failed {
+	padding: var(--cr-space-xs);
+	background-color: var(--cr-periwinkle);
+	background-image: var(--cr-fiber);
+}
+
+.pkiw-wrapped__cover--type::before,
+.pkiw-wrapped__cover.cr-cover--failed::before {
+	content: attr(data-title);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-extrabold);
+	line-height: var(--cr-leading-tight);
+	overflow-wrap: break-word;
+	hyphens: auto;
+}
+
+.pkiw-wrapped__cover--type::after,
+.pkiw-wrapped__cover.cr-cover--failed::after {
+	content: attr(data-author);
+	font-family: var(--cr-font-body);
+	font-size: var(--cr-text-floor);
+	font-weight: var(--cr-weight-semibold);
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: break-word;
 }
 
 .pkiw-wrapped .pkiw-wrapped__top a {
@@ -152,19 +201,63 @@
 
 /* The plugin default and bound pattern share this outer strip. */
 .pkiw-wrapped-strip {
+	--cr-wrapped-tear: 0.5rem;
 	position: relative;
 	isolation: isolate;
 	box-sizing: border-box;
 	inline-size: 100%;
 	max-inline-size: 100%;
 	min-inline-size: 0;
-	margin-block: var(--cr-space-xl);
 	padding: var(--cr-space-xl);
-	background-color: var(--cr-wrapped-paper);
-	background-image: var(--cr-fiber);
 	box-shadow: var(--cr-shadow-hard-2);
 	color: var(--cr-wrapped-ink);
 	transition: translate var(--cr-motion-fast) var(--cr-ease-out);
+}
+
+/* Room for the tear and shadow, above core's constrained-layout margin reset (0,2,0). */
+:root .pkiw-wrapped-strip.pkiw-wrapped-strip {
+	margin-block: var(--cr-space-xl);
+}
+
+/* Torn paper on both long edges, drawn like the metric tiles' clip-path. The box stays unclipped for its shadow and focus ring. */
+.pkiw-wrapped-strip::after {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	inset-block: calc(var(--cr-wrapped-tear) * -1);
+	inset-inline: 0;
+	background-color: var(--cr-wrapped-paper);
+	background-image: var(--cr-fiber);
+	clip-path: polygon(
+		0 var(--cr-wrapped-tear),
+		6% calc(var(--cr-wrapped-tear) * 0.2),
+		13% calc(var(--cr-wrapped-tear) * 0.8),
+		21% 0,
+		29% calc(var(--cr-wrapped-tear) * 0.6),
+		37% calc(var(--cr-wrapped-tear) * 0.1),
+		46% calc(var(--cr-wrapped-tear) * 0.9),
+		55% calc(var(--cr-wrapped-tear) * 0.3),
+		63% calc(var(--cr-wrapped-tear) * 0.7),
+		72% 0,
+		81% calc(var(--cr-wrapped-tear) * 0.8),
+		89% calc(var(--cr-wrapped-tear) * 0.2),
+		95% calc(var(--cr-wrapped-tear) * 0.7),
+		100% calc(var(--cr-wrapped-tear) * 0.3),
+		100% calc(100% - var(--cr-wrapped-tear) * 0.6),
+		94% calc(100% - var(--cr-wrapped-tear) * 0.1),
+		86% calc(100% - var(--cr-wrapped-tear) * 0.9),
+		78% calc(100% - var(--cr-wrapped-tear) * 0.3),
+		69% calc(100% - var(--cr-wrapped-tear) * 0.8),
+		60% 100%,
+		51% calc(100% - var(--cr-wrapped-tear) * 0.7),
+		42% calc(100% - var(--cr-wrapped-tear) * 0.2),
+		33% calc(100% - var(--cr-wrapped-tear) * 1),
+		24% calc(100% - var(--cr-wrapped-tear) * 0.4),
+		16% calc(100% - var(--cr-wrapped-tear) * 0.9),
+		8% calc(100% - var(--cr-wrapped-tear) * 0.1),
+		0 calc(100% - var(--cr-wrapped-tear) * 0.7)
+	);
+	pointer-events: none;
 }
 
 .pkiw-wrapped-strip::before {
@@ -190,7 +283,7 @@
 	border: 0;
 	background: transparent;
 	box-shadow: none;
-	color: var(--cr-wrapped-link);
+	color: var(--cr-wrapped-ink);
 	font-family: var(--cr-font-accent);
 	font-size: var(--cr-text-2xl);
 	font-weight: var(--cr-weight-extrabold);
@@ -276,13 +369,34 @@
 	margin: 0;
 	padding: var(--cr-space-xl);
 	color: var(--cr-wrapped-ink);
-	filter: drop-shadow(var(--cr-shadow-hard));
 }
 
+/* The card's other positions get no collage tilt from cr-post-kinds.css, so they take one here. */
+.cr-stream-page .wp-block-post-template > li:nth-child(4n+2) .pk-card.pk-card--stream.cr-wrapped-card {
+	transform: rotate(var(--cr-rotate-2));
+}
+
+.cr-stream-page .wp-block-post-template > li:nth-child(4n) .pk-card.pk-card--stream.cr-wrapped-card {
+	transform: rotate(var(--cr-rotate-1));
+}
+
+/* The plugin's half-opacity .pk-card::before isn't the paper here. */
 .cr-stream-page .pk-card.pk-card--stream.cr-wrapped-card::before {
-	content: "";
+	content: none;
+}
+
+/* The shadow sits on this unclipped layer so it follows the torn paper and never the text. */
+.cr-wrapped-card__paper {
 	position: absolute;
 	z-index: -1;
+	inset: 0;
+	filter: drop-shadow(var(--cr-shadow-hard));
+	pointer-events: none;
+}
+
+.cr-wrapped-card__paper::before {
+	content: "";
+	position: absolute;
 	inset: 0;
 	background-color: var(--cr-wrapped-paper);
 	background-image: var(--cr-fiber);
@@ -383,6 +497,47 @@
 	}
 }
 
+/* Top reads: a cover beside its title, author and rating. */
+@media (min-width: 40rem) {
+
+	.wp-block-post-kinds-indieweb-wrapped.pkiw-wrapped .pkiw-wrapped__top > li {
+		display: grid;
+		grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+		grid-template-rows: repeat(4, auto) 1fr;
+		align-items: start;
+		column-gap: var(--cr-space-sm);
+		row-gap: var(--cr-space-xs);
+		padding: var(--cr-space-sm);
+	}
+
+	.pkiw-wrapped__cover--type,
+	.pkiw-wrapped__cover.cr-cover--failed {
+		padding: var(--cr-space-2xs);
+	}
+
+	.pkiw-wrapped__cover--type::before,
+	.pkiw-wrapped__cover.cr-cover--failed::before {
+		font-size: var(--cr-text-xs);
+	}
+
+	.pkiw-wrapped__top > li > .pkiw-wrapped__cover {
+		grid-row: 1 / -1;
+		grid-column: 1;
+		inline-size: 100%;
+	}
+
+	.pkiw-wrapped__top > li > :not(.pkiw-wrapped__cover) {
+		grid-column: 2;
+		min-inline-size: 0;
+	}
+
+	.pkiw-wrapped .pkiw-wrapped__top a {
+		align-items: flex-start;
+		font-size: var(--cr-text-md);
+		line-height: var(--cr-leading-tight);
+	}
+}
+
 @media (prefers-reduced-motion: no-preference) {
 
 	.pkiw-wrapped-strip:hover,
@@ -453,9 +608,17 @@
 
 	.pkiw-wrapped__metrics > li::before,
 	.pkiw-wrapped-strip::before,
-	.cr-stream-page .pk-card.pk-card--stream.cr-wrapped-card::before,
+	.pkiw-wrapped-strip::after,
+	.cr-wrapped-card__paper,
 	.cr-stream-page .pk-card.pk-card--stream.cr-wrapped-card::after {
 		display: none;
+	}
+
+	.pkiw-wrapped__cover {
+		border-color: CanvasText;
+		background: Canvas;
+		box-shadow: none;
+		color: CanvasText;
 	}
 
 	.pkiw-wrapped-strip:focus-within,

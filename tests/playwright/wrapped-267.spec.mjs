@@ -153,10 +153,13 @@ test.describe( 'Wrapped archive strip', () => {
 			await expect( strip( page ) ).toHaveCount( 1 );
 			await expect( strip( page ).locator( 'a[href]' ) ).toHaveCount( 1 );
 			const geometry = await strip( page ).evaluate( ( node ) => {
+				// Inside <main>'s constrained layout the strip spans the content width (contract: archive strip widths).
 				const box = node.getBoundingClientRect();
-				const parent = node.parentElement.getBoundingClientRect();
+				const parentStyle = getComputedStyle( node.parentElement );
+				const parentContent = node.parentElement.clientWidth - parseFloat( parentStyle.paddingLeft ) - parseFloat( parentStyle.paddingRight );
+				const contentSize = parseFloat( getComputedStyle( node ).getPropertyValue( '--wp--style--global--content-size' ) ) || parentContent;
 				return {
-					widthDelta: Math.abs( box.width - parent.width ),
+					widthDelta: Math.abs( box.width - Math.min( parentContent, contentSize ) ),
 					countWraps: node.querySelector( '.pkiw-wrapped-strip__count' ).scrollWidth <= node.querySelector( '.pkiw-wrapped-strip__count' ).clientWidth,
 				};
 			} );
@@ -237,14 +240,19 @@ test.describe( 'Wrapped Stream card', () => {
 		await assertWholeHitArea( streamCard( page ).locator( 'a[href]' ), 'Wrapped Stream card link' );
 		const layers = await streamCard( page ).evaluate( ( root ) => ( {
 			card: getComputedStyle( root ).transform,
-			paper: getComputedStyle( root, '::before' ).transform,
+			paper: getComputedStyle( root.querySelector( '.cr-wrapped-card__paper' ), '::before' ).transform,
+			paperOpacity: getComputedStyle( root.querySelector( '.cr-wrapped-card__paper' ), '::before' ).opacity,
+			cardFilter: getComputedStyle( root ).filter,
 			tape: getComputedStyle( root, '::after' ).transform,
 			descendants: [ ...root.querySelectorAll( '*' ) ].filter( ( node ) => ! node.matches( 'svg, svg *' ) && 'none' !== getComputedStyle( node ).transform ).length,
 		} ) );
-		// The card's own collage rotation comes from its column position (cr-post-kinds.css 4n+1 and 4n+3), so it may be none here.
+		// Every collage position tilts the card: cr-post-kinds.css 4n+1 and 4n+3, cr-wrapped.css the others.
+		expect( layers.card ).not.toBe( 'none' );
 		expect( layers.tape ).not.toBe( 'none' );
 		expect( layers.descendants ).toBe( 0 );
 		expect( layers.paper ).toBe( 'none' );
+		expect( layers.paperOpacity, 'paper is opaque (the plugin .pk-card::before is half opacity)' ).toBe( '1' );
+		expect( layers.cardFilter, 'the shadow filter sits on the paper layer, not on the text' ).toBe( 'none' );
 	} );
 } );
 
@@ -285,13 +293,33 @@ test.describe( 'Wrapped appearance and accessibility', () => {
 		await expect( streamCard( page ) ).toHaveCount( 1 );
 		await setTheme( page, 'dark' );
 		const darkCard = await streamCard( page ).evaluate( ( node ) => ( {
-			paper: getComputedStyle( node, '::before' ).backgroundColor,
+			paper: getComputedStyle( node.querySelector( '.cr-wrapped-card__paper' ), '::before' ).backgroundColor,
 			ink: getComputedStyle( node ).color,
-			shadow: getComputedStyle( node ).filter,
+			shadow: getComputedStyle( node.querySelector( '.cr-wrapped-card__paper' ) ).filter,
 		} ) );
 		expect( darkCard.paper ).toBe( IVORY );
 		expect( darkCard.ink ).toBe( VIOLET );
 		expect( darkCard.shadow ).toContain( YELLOW );
+
+		// Dark top reads: each loaded cover decodes and fills its cover box.
+		await open( page, SINGLE );
+		await setTheme( page, 'dark' );
+		const covers = await topItems( page ).locator( '.pkiw-wrapped__cover img' ).evaluateAll( ( nodes ) => nodes.map( ( img ) => {
+			const box = img.getBoundingClientRect();
+			const frame = img.closest( '.pkiw-wrapped__cover' ).getBoundingClientRect();
+			return { natural: img.naturalWidth, width: box.width, frame: frame.width, height: box.height, frameHeight: frame.height };
+		} ) );
+		const loaded = covers.filter( ( cover ) => cover.natural > 0 );
+		expect( loaded.length, 'dark Wrapped single has at least one loaded cover' ).toBeGreaterThan( 0 );
+		for ( const cover of loaded ) {
+			expect( cover.frame, 'cover box has a width' ).toBeGreaterThan( 40 );
+			expect( Math.abs( cover.width - cover.frame ), 'loaded cover spans its cover box' ).toBeLessThanOrEqual( 6 );
+			expect( Math.abs( cover.height - cover.frameHeight ), 'loaded cover spans its cover box height' ).toBeLessThanOrEqual( 6 );
+		}
+		await open( page, STREAM );
+		await setTheme( page, 'light' );
+		const lightPaper = await streamCard( page ).evaluate( ( node ) => getComputedStyle( node.querySelector( '.cr-wrapped-card__paper' ), '::before' ).backgroundColor );
+		expect( lightPaper, 'card paper is the same in light and dark' ).toBe( darkCard.paper );
 
 		await page.emulateMedia( { reducedMotion: 'reduce' } );
 		await open( page, ARCHIVE );
@@ -321,16 +349,18 @@ test.describe( 'Wrapped appearance and accessibility', () => {
 		const forced = await strip( page ).evaluate( ( node ) => ( {
 			border: getComputedStyle( node ).borderTopWidth,
 			tape: getComputedStyle( node, '::before' ).display,
+			tear: getComputedStyle( node, '::after' ).display,
 			shadow: getComputedStyle( node ).boxShadow,
 		} ) );
 		expect( forced.border ).toBe( '2px' );
 		expect( forced.tape ).toBe( 'none' );
+		expect( forced.tear ).toBe( 'none' );
 		expect( forced.shadow ).toBe( 'none' );
 		await open( page, STREAM );
 		await expect( streamCard( page ) ).toHaveCount( 1 );
 		const forcedCard = await streamCard( page ).evaluate( ( node ) => ( {
 			border: getComputedStyle( node ).borderTopWidth,
-			paper: getComputedStyle( node, '::before' ).display,
+			paper: getComputedStyle( node.querySelector( '.cr-wrapped-card__paper' ) ).display,
 			tape: getComputedStyle( node, '::after' ).display,
 		} ) );
 		// Ruling R-T267-1: components.css (forced-colors) sets `.pk-card { border: 1px solid CanvasText !important }`; the card keeps that CanvasText border, since this lane may not add !important.

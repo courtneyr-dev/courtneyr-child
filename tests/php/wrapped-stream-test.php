@@ -49,7 +49,7 @@ namespace {
 	);
 	$GLOBALS['cr_wrapped_request'] = array( 'stream' => true );
 	$html = StreamWrapped\wrapped_card( CR_WRAPPED_PLUGIN_CARD, array(), new WP_Block( array( 'postId' => 267 ) ) );
-	cr_wrapped_contains( '<article class="pk-card pk-card--stream cr-wrapped-card h-entry">', $html, 'card has Stream and h-entry classes' );
+	cr_wrapped_contains( '<article class="pk-card pk-card--stream cr-wrapped-card h-entry"><span class="cr-wrapped-card__paper" aria-hidden="true"></span>', $html, 'card has Stream and h-entry classes and a decorative paper layer first' );
 	cr_wrapped_contains( '<h3 class="cr-wrapped-card__title"><a class="u-url p-name"', $html, 'incoming heading level and title microformats are preserved' );
 	cr_wrapped_check( 1 === substr_count( $html, '<a ' ), 'card has exactly one anchor' );
 	cr_wrapped_check( 3 === substr_count( $html, '<li>' ), 'card caps metrics at three' );

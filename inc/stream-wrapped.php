@@ -62,7 +62,7 @@ function card_html( array $wrapped, \WP_Post $post, int $level ): string {
 		$title = (string) get_the_title( $post );
 	}
 
-	$out = '<article class="pk-card pk-card--stream cr-wrapped-card h-entry">';
+	$out = '<article class="pk-card pk-card--stream cr-wrapped-card h-entry"><span class="cr-wrapped-card__paper" aria-hidden="true"></span>';
 	if ( '' !== $kind && function_exists( '\\PKIW\\get_kind_icon_svg' ) ) {
 		$out .= '<span class="cr-wrapped-card__glyph" aria-hidden="true">' . \PKIW\get_kind_icon_svg( $kind ) . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static plugin glyph; the wrapper and SVG are aria-hidden.
 	}
