@@ -185,7 +185,8 @@ async function printedText( page ) {
 test.describe( 'Zine export panel', () => {
 	test.skip( 'panel' !== SET, 'panel fixture set' );
 
-	test( 'T3: summary and open panel use the fixed light paint without layout rotation', async ( { page } ) => {
+	test( 'T3: summary and open panel use the light paint without layout rotation', async ( { page } ) => {
+		await page.emulateMedia( { colorScheme: 'light' } );
 		await open( page, PANEL_PATH );
 		const details = page.locator( '.pkiw-zine-export' ).first();
 		const summary = details.locator( 'summary' );
@@ -268,6 +269,22 @@ test.describe( 'Zine dark and forced-color paint', () => {
 		} );
 		expect( paint ).toMatchObject( { panel: NIGHT, ink: IVORY, border: IVORY, input: BLACK, cta: YELLOW, ctaInk: VIOLET } );
 		expect( paint.shadow ).toContain( YELLOW );
+	} );
+
+	test( 'T3: system dark mode uses night stock with ivory ink and yellow shadows', async ( { page } ) => {
+		await page.emulateMedia( { colorScheme: 'dark' } );
+		const details = await openPanel( page );
+		await page.mouse.move( 0, 0 );
+		const paint = await details.evaluate( ( node ) => {
+			const panel = getComputedStyle( node );
+			const summary = getComputedStyle( node.querySelector( 'summary' ) );
+			const input = getComputedStyle( node.querySelector( 'input[type="date"]' ) );
+			return { theme: document.documentElement.dataset.theme || 'unset', panel: panel.backgroundColor, ink: panel.color, border: panel.borderTopColor, borderWidth: panel.borderTopWidth, shadow: panel.boxShadow, summary: summary.backgroundColor, summaryInk: summary.color, summaryBorder: summary.borderTopColor, summaryShadow: summary.boxShadow, input: input.backgroundColor, inputInk: input.color };
+		} );
+		expect( [ 'unset', 'system' ], 'no stored choice, so the system scheme decides' ).toContain( paint.theme );
+		expect( paint ).toMatchObject( { panel: NIGHT, ink: IVORY, border: IVORY, borderWidth: '2px', summary: NIGHT, summaryInk: IVORY, summaryBorder: IVORY, input: BLACK, inputInk: IVORY } );
+		expect( paint.shadow, 'panel hard shadow is selective yellow' ).toContain( `${ YELLOW } 4px 4px 0px` );
+		expect( paint.summaryShadow, 'summary hard shadow is selective yellow' ).toContain( `${ YELLOW } 4px 4px 0px` );
 	} );
 
 	test( 'T3: forced colors removes shadows and the booklet drawing but keeps focus', async ( { page } ) => {
@@ -571,10 +588,37 @@ test.describe( 'Booklet imposition', () => {
 		expect( await contents.evaluate( ( node ) => getComputedStyle( node ).paddingInlineStart ), 'the contents list is not indented' ).toBe( '0px' );
 	} );
 
+	const MARGIN_04 = { margin: { top: '0.4in', right: '0.4in', bottom: '0.4in', left: '0.4in' } };
+	for ( const [ name, format, options, items ] of [
+		[ 'portrait A4', 'A4', {}, 0 ],
+		[ 'portrait Letter', 'Letter', {}, 0 ],
+		[ 'portrait A4 with long lists', 'A4', {}, 9 ],
+		[ 'landscape Letter with 0.4in margins', 'Letter', { landscape: true, ...MARGIN_04 }, 9 ],
+		[ 'landscape Letter without margins', 'Letter', { landscape: true }, 9 ],
+	] ) {
+		test( `T7: a ${ name } print of the Stream booklet returns`, async ( { page } ) => {
+			await open( page, withPages( STREAM, 8 ) );
+			const strip = await page.evaluate( ( count ) => {
+				const lists = [ '.pkiw-wrapped__metrics', '.pkiw-wrapped__top' ].map( ( selector ) => document.querySelector( `.pkiw-zine-page ${ selector }` ) );
+				lists.forEach( ( list ) => {
+					while ( list && list.children.length < count ) {
+						list.append( list.children[ list.children.length - 1 ].cloneNode( true ) );
+					}
+				} );
+				return lists.every( Boolean );
+			}, items );
+			expect( strip, 'the Wrapped strip prints in the booklet' ).toBe( true );
+			const hung = new Promise( ( resolve, reject ) => setTimeout( () => reject( new Error( 'page.pdf did not return in 30 s' ) ), 30000 ) );
+			const pdf = await Promise.race( [ page.pdf( { format, preferCSSPageSize: true, printBackground: true, ...options } ), hung ] );
+			expect( pdf.subarray( 0, 5 ).toString(), 'a PDF came back' ).toBe( '%PDF-' );
+		} );
+	}
+
 	test( 'T7: a failed booklet image leaves no visible empty frame', async ( { page } ) => {
 		await open( page, withPages( STREAM, 16 ) );
-		const image = page.locator( '.pkiw-zine-page img' ).first();
-		await expect( image, 'the print fixture includes an image for the failure path' ).toHaveCount( 1 );
+		const entryImages = page.locator( '.pkiw-zine-page img:not([data-cr-cover-fallback] img)' );
+		await expect( entryImages, 'the print fixture includes an entry image, not a Wrapped cover, which the cover handler in site-ux.js replaces on error' ).not.toHaveCount( 0 );
+		const image = entryImages.first();
 		await image.evaluate( ( node ) => {
 			node.hidden = false;
 			node.removeAttribute( 'srcset' );
