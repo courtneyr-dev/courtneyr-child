@@ -145,7 +145,8 @@ namespace {
 	}
 
 	function post_password_required( $post = null ): bool {
-		$p = $post instanceof WP_Post ? $post : $GLOBALS['cr_read_post'];
+		$current = $GLOBALS['cr_read_post'];
+		$p       = is_int( $post ) ? ( $current instanceof WP_Post && $current->ID === $post ? $current : null ) : ( $post instanceof WP_Post ? $post : $current );
 		if ( ! $p instanceof WP_Post ) {
 			return false;
 		}

@@ -206,7 +206,17 @@ namespace {
 				'slug'               => '/wprm_print/lentil-soup',
 				'query form'         => '/?wprm_print=7',
 				'id + query string'  => '/wprm_print/7?servings=2',
+				'id + suffix'        => '/wprm_print/7abc',
+				'recipe form + suffix' => '/wprm_print/recipe/7x',
+				'query form + suffix'  => '/?wprm_print=7x',
 			);
+			$init_priorities = array();
+			foreach ( $GLOBALS['cr_read_actions'] as $action ) {
+				if ( 'init' === $action[0] && 'Courtneyr\\Child\\Recipe\\stop_locked_print' === $action[1] ) {
+					$init_priorities[] = $action[2];
+				}
+			}
+			cr_read_same( array( 9 ), $init_priorities, 'the print guard runs on init before WP Recipe Maker\'s priority 10 callback prints and exits' );
 			$open   = array( 'printer_unhooked' => false, 'is_404' => false, 'status' => 200 );
 			$closed = array( 'printer_unhooked' => true, 'is_404' => true, 'status' => 404 );
 
@@ -254,7 +264,7 @@ namespace {
 			);
 			$others = array(
 				'related terms'   => array( array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'related-post__terms' ) ), '<div class="related-post__terms"><a href="/kind/x/">Kind</a></div>' ),
-				'card image'      => array( array( 'blockName' => 'core/post-featured-image', 'attrs' => array( 'className' => 'cr-blog-grid__image' ) ), '<figure class="wp-block-post-featured-image cr-blog-grid__image"><img src="https://cards.test/cover.jpg" alt=""></figure>' ),
+				'other image'     => array( array( 'blockName' => 'core/post-featured-image', 'attrs' => array() ), '<figure class="wp-block-post-featured-image"><img src="https://cards.test/cover.jpg" alt=""></figure>' ),
 				'tags'            => array( array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'single-post__tags is-style-term-button' ) ), '<div class="single-post__tags"><a href="/tag/x/">Tag</a></div>' ),
 			);
 			foreach ( array( 'watch', 'comics', 'recipe', 'quote', 'read', 'checkin', 'like' ) as $kind ) {
