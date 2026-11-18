@@ -492,8 +492,13 @@ namespace {
 				'patterns/cr-comic-rack-loop.php'     => '36c5da7706c35672b6c7c285e193d0aa35ae756d',
 				'assets/css/cr-comic.css'             => '0dda7f76b8fb51abbc23d827055a495c1958c25d',
 			);
+			$inserted = "\t<!-- wp:post-kinds-indieweb/wrapped-strip /-->\n\n\t<!-- wp:template-part {\"slug\":\"zine-export\"} /-->\n\n";
 			foreach ( $hashes as $relative => $expected ) {
-				cr_photo_same( $expected, sha1_file( CR_PHOTO_THEME_DIR . '/' . $relative ), $relative . ' base hash' );
+				$bytes = (string) file_get_contents( CR_PHOTO_THEME_DIR . '/' . $relative );
+				if ( 'templates/taxonomy-kind-comics.html' === $relative ) {
+					$bytes = str_replace( $inserted, '', $bytes );
+				}
+				cr_photo_same( $expected, sha1( $bytes ), $relative . ' base hash' );
 			}
 
 			$comic = (string) file_get_contents( CR_PHOTO_THEME_DIR . '/inc/comic.php' );

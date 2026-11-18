@@ -53,7 +53,8 @@ $root     = dirname( __DIR__, 2 );
 $shelf    = (string) file_get_contents( $root . '/templates/taxonomy-kind-listen.html' );
 $podcast  = (string) file_get_contents( $root . '/templates/taxonomy-kind-listen-podcast.html' );
 $nav      = '<!-- wp:post-kinds-indieweb/listen-types /-->';
-$baseline = str_replace( "\n\t" . $nav . "\n", '', $shelf );
+$inserted = "\t<!-- wp:post-kinds-indieweb/wrapped-strip /-->\n\n\t<!-- wp:template-part {\"slug\":\"zine-export\"} /-->\n\n";
+$baseline = str_replace( array( $inserted, "\n\t" . $nav . "\n" ), array( '', '' ), $shelf );
 
 cr_podcast_template_check( 'dfd5ee53eece3457a138cf5a1e806ac183f4fc1c' === sha1( $baseline ), 'shelf minus the nav line and adjacent blank line matches a6172cd (#229 title lockup)' );
 cr_podcast_template_check( str_ends_with( $shelf, "\n" ), 'shelf template ends with a newline' );
@@ -71,6 +72,8 @@ $wanted = array(
 	'core/query-title',
 	'core/term-description',
 	'core/separator',
+	'post-kinds-indieweb/wrapped-strip',
+	'core/template-part',
 	'post-kinds-indieweb/listen-types',
 	'core/query',
 	'core/post-template',
