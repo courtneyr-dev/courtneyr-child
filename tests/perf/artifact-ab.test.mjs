@@ -150,6 +150,24 @@ test( 'a head map whose SHA-256 differs from the value passed in is a tooling fa
 	assert.equal( fs.existsSync( out ), false );
 } );
 
+test( 'a / or /stream/ handle page that is not HTTP 200 is a tooling failure, not a pass with nothing compared', () => {
+	const ok = { status: 200, link: [], inline: [ 'courtneyr-tokens-css' ] };
+	const withHandles = ( role, stream ) => ( { ...manifest( role, records() ), handles: { '/': ok, '/stream/': stream } } );
+	assert.deepEqual( preflight( withHandles( 'baseline', ok ), withHandles( 'head', ok ) ), [] );
+	for ( const [ base, head ] of [ [ { status: 404 }, { status: 404 } ], [ ok, { status: 500 } ], [ { status: 301 }, ok ] ] ) {
+		const problems = preflight( withHandles( 'baseline', base ), withHandles( 'head', head ) );
+		assert.deepEqual( problems, [ `step 6 can't compare the /stream/ handle set: HTTP ${ base.status } at baseline, ${ head.status } at head` ] );
+	}
+	const dir = scratch();
+	for ( const role of [ 'baseline', 'head' ] ) {
+		fs.mkdirSync( path.join( dir, role ) );
+		fs.writeFileSync( path.join( dir, role, 'manifest.json' ), JSON.stringify( withHandles( role, { status: 404 } ) ) );
+	}
+	const run = harness( [ 'compare', '--baseline', path.join( dir, 'baseline' ), '--head', path.join( dir, 'head' ), '--style', 'cr-sample=cr-book' ] );
+	assert.equal( run.status, 2, run.stdout + run.stderr );
+	assert.equal( JSON.parse( fs.readFileSync( path.join( dir, 'head', 'compare', 'verdict.json' ), 'utf8' ) ).status, 'tooling' );
+} );
+
 test( 'a screenshot pair passes only within the same-CSS controls', () => {
 	assert.equal( withinControl( { count: 12, maxDelta: 40 }, [ { count: 20, maxDelta: 57 } ] ).ok, true );
 	assert.equal( withinControl( { count: 12, maxDelta: 60 }, [ { count: 20, maxDelta: 57 } ] ).ok, false );

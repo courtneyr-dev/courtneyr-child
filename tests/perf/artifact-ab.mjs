@@ -202,6 +202,12 @@ export function preflight( base, head ) {
 			}
 		}
 	}
+	for ( const uri of new Set( [ ...Object.keys( base.handles || {} ), ...Object.keys( head.handles || {} ) ] ) ) {
+		const [ a, b ] = [ base.handles?.[ uri ]?.status, head.handles?.[ uri ]?.status ];
+		if ( 200 !== a || 200 !== b ) {
+			problems.push( `step 6 can't compare the ${ uri } handle set: HTTP ${ a ?? 'none' } at baseline, ${ b ?? 'none' } at head` );
+		}
+	}
 	const extra = ( m ) => Object.keys( m.captures ).filter( ( k ) => 'judged' !== m.captures[ k ].role ).sort().join( ' ' );
 	if ( extra( base ) !== extra( head ) ) {
 		problems.push( `the twin and fixture captures differ: baseline [${ extra( base ) }], head [${ extra( head ) }]` );
