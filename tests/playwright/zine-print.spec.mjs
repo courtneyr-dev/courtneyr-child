@@ -464,11 +464,25 @@ test.describe( 'Booklet imposition', () => {
 		expect( Buffer.compare( printed, await panel.screenshot() ), 'hiding the overflow column changes no pixel inside the panel' ).toBe( 0 );
 	} );
 
-	for ( const format of [ 'A4', 'Letter' ] ) {
-		test( `T7: a portrait ${ format } print of the Stream booklet returns`, async ( { page } ) => {
+	for ( const [ name, format, options ] of [
+		[ 'portrait A4', 'A4', {} ],
+		[ 'portrait Letter', 'Letter', {} ],
+		[ 'landscape Letter with 0.4in margins', 'Letter', { landscape: true, margin: { top: '0.4in', right: '0.4in', bottom: '0.4in', left: '0.4in' } } ],
+	] ) {
+		test( `T7: a ${ name } print of the Stream booklet returns`, async ( { page } ) => {
 			await open( page, withPages( STREAM, 8 ) );
+			const strip = await page.evaluate( () => {
+				const lists = [ '.pkiw-wrapped__metrics', '.pkiw-wrapped__top' ].map( ( selector ) => document.querySelector( `.pkiw-zine-page ${ selector }` ) );
+				lists.forEach( ( list ) => {
+					while ( list && list.children.length < 9 ) {
+						list.append( list.children[ list.children.length - 1 ].cloneNode( true ) );
+					}
+				} );
+				return lists.every( Boolean );
+			} );
+			expect( strip, 'the Wrapped strip prints in the booklet, with extra rows to lay out' ).toBe( true );
 			const hung = new Promise( ( resolve, reject ) => setTimeout( () => reject( new Error( 'page.pdf did not return in 30 s' ) ), 30000 ) );
-			const pdf = await Promise.race( [ page.pdf( { format, preferCSSPageSize: true, printBackground: true } ), hung ] );
+			const pdf = await Promise.race( [ page.pdf( { format, preferCSSPageSize: true, printBackground: true, ...options } ), hung ] );
 			expect( pdf.subarray( 0, 5 ).toString(), 'a PDF came back' ).toBe( '%PDF-' );
 		} );
 	}
