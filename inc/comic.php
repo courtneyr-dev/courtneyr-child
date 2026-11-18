@@ -488,6 +488,10 @@ function bag_card( string $html, array $block, $instance ): string {
 		? (int) $instance->context['postId']
 		: (int) get_the_ID();
 	$post    = $post_id ? get_post( $post_id ) : null;
+	// The plugin prints a title-only card for a password-protected comic; keep it.
+	if ( $post instanceof \WP_Post && post_password_required( $post ) ) {
+		return $html;
+	}
 	$comic   = comic_read( $post );
 	if ( null === $comic ) {
 		// A strip its author drew stands on the rack as its picture and

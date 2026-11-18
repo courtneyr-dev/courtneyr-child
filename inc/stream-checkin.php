@@ -366,7 +366,7 @@ function passport_card( string $html, array $block, $instance ): string {
 		: (int) get_the_ID();
 	$post    = $post_id ? get_post( $post_id ) : null;
 
-	if ( ! $post instanceof \WP_Post || ! has_term( 'checkin', 'kind', $post ) ) {
+	if ( ! $post instanceof \WP_Post || ! has_term( 'checkin', 'kind', $post ) || post_password_required( $post ) ) {
 		return $html;
 	}
 
