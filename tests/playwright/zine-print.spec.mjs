@@ -363,11 +363,13 @@ test.describe( 'Booklet imposition', () => {
 	}
 
 	test( 'T7: a failed booklet image leaves no visible empty frame', async ( { page } ) => {
-		await open( page, withPages( ARCHIVE, 8 ) );
+		await open( page, withPages( STREAM, 16 ) );
 		const image = page.locator( '.pkiw-zine-page img' ).first();
 		await expect( image, 'the print fixture includes an image for the failure path' ).toHaveCount( 1 );
 		await image.evaluate( ( node ) => {
 			node.hidden = false;
+			node.removeAttribute( 'srcset' );
+			node.removeAttribute( 'sizes' );
 			node.src = `${ location.origin }/__cr-zine-missing-image-${ Date.now() }.jpg`;
 		} );
 		await expect.poll( () => image.evaluate( ( node ) => node.hidden ) ).toBe( true );

@@ -55,6 +55,7 @@ async function open( page, path, width = 1440, scheme = 'light' ) {
 	const response = await page.goto( path, { waitUntil: 'load' } );
 	expect( response?.status(), `${ path } status` ).toBe( 200 );
 	await page.evaluate( () => document.fonts.ready );
+	await page.evaluate( () => Promise.all( [ ...document.images ].map( ( image ) => image.decode().catch( () => {} ) ) ) );
 }
 
 async function visibleBodyText( page, scope = 'body' ) {
@@ -326,7 +327,10 @@ test.describe( 'Standalone long-post print', () => {
 		await open( page, PATHS.get( 'long' ), 1280, 'dark' );
 		const lightPalette = await printPalette( page, 'light' );
 		const darkPalette = await printPalette( page, 'dark' );
-		expect( darkPalette, 'dark print restores light custom properties and code paint' ).toEqual( lightPalette );
+		expect( darkPalette.tokens, 'dark print restores every light custom property' ).toEqual( lightPalette.tokens );
+		expect( darkPalette.code.color, 'dark print keeps code ink violet, not the dark periwinkle' ).toBe( VIOLET );
+		const channels = darkPalette.code.background.match( /\d+/g ).slice( 0, 3 ).map( Number );
+		expect( Math.min( ...channels ), 'dark print code paper stays light' ).toBeGreaterThanOrEqual( 200 );
 		const paper = await page.locator( 'body' ).evaluate( ( node ) => ( { background: getComputedStyle( node ).backgroundColor, color: getComputedStyle( node ).color } ) );
 		expect( paper ).toEqual( { background: IVORY, color: VIOLET } );
 
