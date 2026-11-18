@@ -465,18 +465,67 @@ test.describe( 'Booklet imposition', () => {
 	} );
 
 	for ( const tag of [ 'ol', 'ul' ] ) {
-		test( `T7: ${ tag } list markers print inside the panel`, async ( { page } ) => {
+		test( `T7: ${ tag } list markers print in ink beside a hanging wrapped step`, async ( { page } ) => {
 			await open( page, withPages( STREAM, 16 ), ...LANDSCAPE_SHEETS_CSS_PX.Letter );
 			await page.emulateMedia( { media: 'print' } );
-			const panel = page.locator( '.pkiw-zine-page:has(footer) .pkiw-zine-page__content' ).first();
+			const panel = page.locator( '.pkiw-zine-page:not([data-inverted="1"]):not([data-pkiw-zine-page="2"]):has(footer) .pkiw-zine-page__content' ).first();
+			await expect( panel, 'the fixture has an upright entry panel' ).toHaveCount( 1 );
 			await panel.evaluate( ( node, name ) => {
-				node.innerHTML = `<${ name } class="wp-block-list">${ '<li>Step</li>'.repeat( 3 ) }</${ name }>`;
+				const wrapped = 'Stir the pot until the mixture thickens and coats the back of the spoon, then take it off the heat and let it rest';
+				node.innerHTML = `<${ name } class="wp-block-list"><li>Step</li><li>${ wrapped }</li><li>Step</li></${ name }>`;
 			}, tag );
+			const facts = await panel.evaluate( ( node ) => {
+				const clip = node.getBoundingClientRect();
+				const list = node.firstElementChild;
+				const item = list.children[ 1 ];
+				const range = document.createRange();
+				range.selectNodeContents( item );
+				const lines = [ ...new Set( [ ...range.getClientRects() ].map( ( rect ) => Math.round( rect.top ) ) ) ].length;
+				const lefts = [ ...range.getClientRects() ].map( ( rect ) => Math.round( rect.left ) );
+				const marker = getComputedStyle( item, '::marker' );
+				const style = getComputedStyle( item );
+				return {
+					position: style.listStylePosition,
+					markerColor: marker.color,
+					inkColor: style.color,
+					lines,
+					hangs: Math.max( ...lefts ) === Math.min( ...lefts ),
+					markerInPanel: item.getBoundingClientRect().left - parseFloat( getComputedStyle( list ).paddingInlineStart ) >= clip.left,
+					padding: parseFloat( getComputedStyle( list ).paddingInlineStart ),
+				};
+			} );
+			expect( facts.lines, 'the long step wraps' ).toBeGreaterThan( 1 );
+			expect( facts.position, 'markers stay outside the text' ).toBe( 'outside' );
+			expect( facts.padding, 'the list pads room for its markers' ).toBeGreaterThan( 0 );
+			expect( facts.markerInPanel, 'the marker column sits inside the panel' ).toBe( true );
+			expect( facts.hangs, 'a wrapped line starts under the first word, not under the marker' ).toBe( true );
+			expect( facts.markerColor, 'markers print in ink, not the orange token' ).toBe( facts.inkColor );
+			expect( facts.markerColor ).not.toBe( ORANGE );
 			const withMarkers = await panel.screenshot();
 			await page.addStyleTag( { content: '.pkiw-zine-page__content li { list-style: none !important; }' } );
 			expect( Buffer.compare( withMarkers, await panel.screenshot() ), 'removing the markers changes pixels inside the panel' ).not.toBe( 0 );
 		} );
 	}
+
+	test( 'T7: lists with their own layout keep it in the booklet', async ( { page } ) => {
+		await open( page, withPages( STREAM, 8 ), ...LANDSCAPE_SHEETS_CSS_PX.Letter );
+		await page.emulateMedia( { media: 'print' } );
+		const strip = page.locator( '.pkiw-zine-page .pkiw-wrapped__metrics' ).first();
+		await expect( strip, 'the Wrapped strip prints in the booklet' ).toHaveCount( 1 );
+		expect( await strip.evaluate( ( node ) => getComputedStyle( node ).paddingInlineStart ), 'the strip list is not indented' ).toBe( '0px' );
+		const panel = page.locator( '.pkiw-zine-page:not([data-pkiw-zine-page="2"]):has(footer) .pkiw-zine-page__content' ).first();
+		await panel.evaluate( ( node ) => {
+			node.innerHTML = '<ul class="wp-block-list is-style-list-check"><li>Checked</li></ul>';
+		} );
+		const styled = await panel.evaluate( ( node ) => {
+			const list = node.firstElementChild;
+			return { padding: getComputedStyle( list ).paddingInlineStart, type: getComputedStyle( list.firstElementChild ).listStyleType };
+		} );
+		expect( styled.type, 'a styled list draws no extra disc beside its own marker' ).toBe( 'none' );
+		expect( styled.padding, 'a styled list keeps its own padding rules' ).not.toBe( '28px' );
+		const contents = page.locator( '[data-pkiw-zine-page="2"] ol' ).first();
+		expect( await contents.evaluate( ( node ) => getComputedStyle( node ).paddingInlineStart ), 'the contents list is not indented' ).toBe( '0px' );
+	} );
 
 	test( 'T7: a failed booklet image leaves no visible empty frame', async ( { page } ) => {
 		await open( page, withPages( STREAM, 16 ) );
