@@ -29,7 +29,7 @@ function cr_kind_insertion_tree( string $html ): ?array {
 	$names = array();
 	foreach ( $matches as $m ) {
 		$node = array(
-			'name'     => $m[2],
+			'name'     => preg_replace( '/^core\//', '', $m[2] ),
 			'attrs'    => $m[3],
 			'children' => array(),
 		);
@@ -72,13 +72,25 @@ function cr_kind_insertion_parent( array $nodes ): ?array {
 /**
  * Count nodes of one block name whose attributes contain a string, at any depth.
  */
-function cr_kind_insertion_count( array $nodes, string $name, string $attr_part ): int {
+function cr_kind_insertion_count( array $nodes, string $name, string $slug ): int {
 	$count = 0;
 	foreach ( $nodes as $node ) {
-		if ( $name === $node['name'] && ( '' === $attr_part || str_contains( $node['attrs'], $attr_part ) ) ) {
+		$attrs = json_decode( trim( $node['attrs'] ), true );
+		if ( $name === $node['name'] && ( '' === $slug || ( is_array( $attrs ) && $slug === ( $attrs['slug'] ?? null ) ) ) ) {
 			++$count;
 		}
-		$count += cr_kind_insertion_count( $node['children'], $name, $attr_part );
+		$count += cr_kind_insertion_count( $node['children'], $name, $slug );
+	}
+	return $count;
+}
+
+/**
+ * Count core/group nodes carrying the archive header class, at any depth.
+ */
+function cr_kind_insertion_headers( array $nodes ): int {
+	$count = 0;
+	foreach ( $nodes as $node ) {
+		$count += ( 'group' === $node['name'] && str_contains( $node['attrs'], 'cr-archive__header' ) ? 1 : 0 ) + cr_kind_insertion_headers( $node['children'] );
 	}
 	return $count;
 }
@@ -99,7 +111,8 @@ foreach ( $files as $file ) {
 		continue;
 	}
 	cr_kind_insertion_check( 1 === cr_kind_insertion_count( $tree, 'post-kinds-indieweb/wrapped-strip', '' ), "$slug: one Wrapped strip block in the tree" );
-	cr_kind_insertion_check( 1 === cr_kind_insertion_count( $tree, 'template-part', '"slug":"zine-export"' ), "$slug: one zine-export part block in the tree" );
+	cr_kind_insertion_check( 1 === cr_kind_insertion_count( $tree, 'template-part', 'zine-export' ), "$slug: one zine-export part block in the tree" );
+	cr_kind_insertion_check( 1 === cr_kind_insertion_headers( $tree ), "$slug: exactly one archive header group" );
 	$parent = cr_kind_insertion_parent( $tree );
 	if ( null === $parent ) {
 		cr_kind_insertion_check( false, "$slug: archive header group found" );
@@ -122,7 +135,7 @@ foreach ( $files as $file ) {
 	);
 	cr_kind_insertion_check( '' === trim( $strip['attrs'] ?? '' ), "$slug: Wrapped strip carries no attributes" );
 	cr_kind_insertion_check(
-		'template-part' === $zine['name'] && '{"slug":"zine-export"}' === trim( $zine['attrs'] ),
+		'template-part' === $zine['name'] && array( 'slug' => 'zine-export' ) === json_decode( trim( $zine['attrs'] ), true ),
 		"$slug: zine-export part follows the strip"
 	);
 }
