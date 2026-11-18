@@ -141,7 +141,7 @@ namespace {
 	}
 
 	function has_term( $term, $taxonomy, $post = null ): bool {
-		return (bool) $GLOBALS['cr_read_has_term'] && (string) $GLOBALS['cr_read_kind'] === (string) $term && 'kind' === $taxonomy;
+		return (bool) $GLOBALS['cr_read_has_term'] && in_array( (string) $GLOBALS['cr_read_kind'], array_map( 'strval', (array) $term ), true ) && 'kind' === $taxonomy;
 	}
 
 	function post_password_required( $post = null ): bool {

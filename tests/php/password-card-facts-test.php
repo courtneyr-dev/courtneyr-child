@@ -60,6 +60,7 @@ namespace {
 	require dirname( __DIR__, 2 ) . '/inc/stream-checkin.php';
 	require dirname( __DIR__, 2 ) . '/inc/quote-note.php';
 	require dirname( __DIR__, 2 ) . '/inc/sloc-map-alt.php';
+	require dirname( __DIR__, 2 ) . '/inc/post-kinds.php';
 
 	const CR_PW_SECRET = 'open-sesame';
 
@@ -82,6 +83,73 @@ namespace {
 			'attrs'     => array( 'className' => 'single-post__title' ),
 		);
 	}
+
+
+	/**
+	 * Render one block the way core does: pre_render_block short-circuits,
+	 * otherwise the generic and the block-specific render_block filters run
+	 * in priority order over the block's own output.
+	 *
+	 * @param array  $block Parsed block.
+	 * @param string $html  What the block prints when nothing intervenes.
+	 */
+	function cr_pw_render( array $block, string $html ): string {
+		$run = static function ( string $hook, $value, array $args ) {
+			$filters = array_values( array_filter( $GLOBALS['cr_read_filters'], static fn( array $f ): bool => $f[0] === $hook ) );
+			usort( $filters, static fn( array $a, array $b ): int => $a[2] <=> $b[2] );
+			foreach ( $filters as $f ) {
+				$value = call_user_func_array( $f[1], array_slice( array_merge( array( $value ), $args ), 0, $f[3] ) );
+			}
+			return $value;
+		};
+		$pre = $run( 'pre_render_block', null, array( $block, null ) );
+		if ( null !== $pre ) {
+			return (string) $pre;
+		}
+		$html = (string) $run( 'render_block', $html, array( $block ) );
+		return (string) $run( 'render_block_' . $block['blockName'], $html, array( $block ) );
+	}
+
+	cr_read_group(
+		'locked single prints no featured image and no kind or category chips',
+		static function (): void {
+			$header = array(
+				'featured image' => array( array( 'blockName' => 'core/post-featured-image', 'attrs' => array( 'className' => 'single-post__featured' ) ), '<figure class="wp-block-post-featured-image single-post__featured"><img src="https://cards.test/cover.jpg" alt=""></figure>' ),
+				'kind chip'      => array( array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'cr-chip single-post__kind' ) ), '<div class="taxonomy-kind cr-chip single-post__kind wp-block-post-terms"><a href="/kind/x/">Kind</a></div>' ),
+				'category chip'  => array( array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'cr-chip single-post__category' ) ), '<div class="taxonomy-category cr-chip single-post__category wp-block-post-terms"><a href="/category/x/">Category</a></div>' ),
+			);
+			$others = array(
+				'related terms'   => array( array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'related-post__terms' ) ), '<div class="related-post__terms"><a href="/kind/x/">Kind</a></div>' ),
+				'card image'      => array( array( 'blockName' => 'core/post-featured-image', 'attrs' => array( 'className' => 'cr-blog-grid__image' ) ), '<figure class="wp-block-post-featured-image cr-blog-grid__image"><img src="https://cards.test/cover.jpg" alt=""></figure>' ),
+				'tags'            => array( array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'single-post__tags is-style-term-button' ) ), '<div class="single-post__tags"><a href="/tag/x/">Tag</a></div>' ),
+			);
+			foreach ( array( 'watch', 'comics', 'recipe', 'quote', 'read', 'checkin', 'like' ) as $kind ) {
+				$post                = cr_pw_post( $kind, array() );
+				$post->post_password = '';
+				foreach ( $header as $label => $row ) {
+					cr_read_same( $row[1], cr_pw_render( $row[0], $row[1] ), $kind . ' public single prints the ' . $label );
+				}
+
+				$post->post_password = CR_PW_SECRET;
+				foreach ( $header as $label => $row ) {
+					cr_read_same( '', cr_pw_render( $row[0], $row[1] ), $kind . ' before the password prints no ' . $label );
+				}
+				foreach ( $others as $label => $row ) {
+					cr_read_same( $row[1], cr_pw_render( $row[0], $row[1] ), $kind . ' before the password keeps the ' . $label );
+				}
+
+				cr_pw_enter( 'wrong-guess' );
+				foreach ( $header as $label => $row ) {
+					cr_read_same( '', cr_pw_render( $row[0], $row[1] ), $kind . ' with a wrong password cookie prints no ' . $label );
+				}
+
+				cr_pw_enter( CR_PW_SECRET );
+				foreach ( $header as $label => $row ) {
+					cr_read_same( $row[1], cr_pw_render( $row[0], $row[1] ), $kind . ' after the password prints the ' . $label );
+				}
+			}
+		}
+	);
 
 	cr_read_group(
 		'watch lede prints no film facts before the password',
