@@ -25,6 +25,21 @@ Rules that cost time when ignored:
 - After clearing Perfmatters' used CSS, load one representative page per type before measuring (a post with a figure, an `hr` and a featured image), or rules are missing and CLS moves.
 - PageSpeed Insights' mobile LCP is a simulation. Report the applied-throttle number from `cls.mjs` beside it.
 
+## N7 A/B harness (`artifact-ab.mjs`)
+
+`artifact-ab.mjs` is N7's no-visual-change check: it proves a kind's render didn't change when the kind moved to a registered block style (spec `spec-n7-artifact-styles.md`, "No-visual-change check" steps 1 to 7, and R-N12 (m2)). Its view records come only from the baseline and head `fidelity.json` maps, plus a `-ref` kind's step 4 `spec.json`. It has no width list of its own. Run it from the lane worktree against whatever theme tree the Studio site serves, so the baseline and head use the same harness file (compare checks the file's SHA-256).
+
+| Mode | What it does |
+| --- | --- |
+| `capture --role baseline` | For each view record: server HTML, a PNG and a computed-style dump of every element under `main` (with `::before` and `::after`) per load, two loads by default so the second is the same-CSS control. Adds an other-scheme twin of each record as extra coverage, each `--expect` post's single (private and password-protected ones also as the administrator), the `/` and `/stream/` handle sets (`handles.py`), `/feed/` and `/wp-json/wp/v2/posts/<id>` |
+| `capture --role head` | The same, after it checks `--map-sha256` against the frozen head map and the head records against the baseline's (count, `name`, `path`, `selector`, `width`, `height`, `fullPage`, `colorScheme`). Any mismatch stops it before the first capture |
+| `compare` | DOM diff with one whitelist entry (`is-style-<slug>` on the element carrying the kind's root class, `--style <slug>=<root class>`), zero computed-style differences, each screenshot pair identical or within the controls' `pixview.mjs` count and largest channel change, a handle set equal or smaller, mf2, feed and REST unchanged |
+| `classify` | R-N12 (m2) for `{ prefixed, bare }` selector pairs over the baseline's rendered DOMs and its two-kind fixture, with `closest()` and `matches()` in the browser |
+
+Exit 0 is clean, 1 is a difference, 2 is a tooling failure (a missing or mismatched record, a changed map, a failed capture); a tooling failure is never a clean result. Twins and fixtures are extra coverage: they must be clean too, but none stands in for a judged record. Usage is in the file's header. `node --test tests/perf/artifact-ab.test.mjs` runs the cases offline on `fixtures/artifact-ab/`.
+
+Local only. `--base-url` must be `localhost`, `127.0.0.1`, `[::1]` or a `.local` host (the `tests/routes.mjs` list), and `CR_ALLOW_REMOTE=1` doesn't lift that here. The browser aborts every request to another host and the manifest records which hosts it blocked. The administrator render runs `studio wp eval` with `wp_set_current_user()`, so nothing logs in and no password is read. Write captures to the vault (`<slug>/n7-baseline-<d>/ab/`), never into this repo.
+
 ## Setting up on a new machine
 
 1. `git fetch origin && git checkout chore/perf-handover-2026-10-23` in the theme repo, then `npm install --ignore-scripts` (esbuild, axe-core, stylelint).
