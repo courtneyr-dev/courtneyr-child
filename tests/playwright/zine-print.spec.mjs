@@ -278,11 +278,13 @@ test.describe( 'Zine dark and forced-color paint', () => {
 		const paint = await details.evaluate( ( node ) => {
 			const panel = getComputedStyle( node );
 			const summary = getComputedStyle( node.querySelector( 'summary' ) );
-			return { theme: document.documentElement.dataset.theme || 'unset', panel: panel.backgroundColor, ink: panel.color, border: panel.borderTopColor, borderWidth: panel.borderTopWidth, shadow: panel.boxShadow, summary: summary.backgroundColor, summaryInk: summary.color };
+			const input = getComputedStyle( node.querySelector( 'input[type="date"]' ) );
+			return { theme: document.documentElement.dataset.theme || 'unset', panel: panel.backgroundColor, ink: panel.color, border: panel.borderTopColor, borderWidth: panel.borderTopWidth, shadow: panel.boxShadow, summary: summary.backgroundColor, summaryInk: summary.color, summaryBorder: summary.borderTopColor, summaryShadow: summary.boxShadow, input: input.backgroundColor, inputInk: input.color };
 		} );
 		expect( [ 'unset', 'system' ], 'no stored choice, so the system scheme decides' ).toContain( paint.theme );
-		expect( paint ).toMatchObject( { panel: NIGHT, ink: IVORY, border: IVORY, borderWidth: '2px', summary: NIGHT, summaryInk: IVORY } );
-		expect( paint.shadow ).toContain( YELLOW );
+		expect( paint ).toMatchObject( { panel: NIGHT, ink: IVORY, border: IVORY, borderWidth: '2px', summary: NIGHT, summaryInk: IVORY, summaryBorder: IVORY, input: BLACK, inputInk: IVORY } );
+		expect( paint.shadow, 'panel hard shadow is selective yellow' ).toContain( `${ YELLOW } 4px 4px 0px` );
+		expect( paint.summaryShadow, 'summary hard shadow is selective yellow' ).toContain( `${ YELLOW } 4px 4px 0px` );
 	} );
 
 	test( 'T3: forced colors removes shadows and the booklet drawing but keeps focus', async ( { page } ) => {
@@ -482,7 +484,7 @@ test.describe( 'Booklet imposition', () => {
 	test( 'T7: a failed booklet image leaves no visible empty frame', async ( { page } ) => {
 		await open( page, withPages( STREAM, 16 ) );
 		const entryImages = page.locator( '.pkiw-zine-page img:not([data-cr-cover-fallback] img)' );
-		await expect( entryImages, 'the print fixture includes an entry image, not the Wrapped cover whose own handler keeps it visible' ).not.toHaveCount( 0 );
+		await expect( entryImages, 'the print fixture includes an entry image, not a Wrapped cover, which the cover handler in site-ux.js replaces on error' ).not.toHaveCount( 0 );
 		const image = entryImages.first();
 		await image.evaluate( ( node ) => {
 			node.hidden = false;
