@@ -12,5 +12,7 @@ export default {
 			'^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$',
 			{ message: 'Use lowercase ids separated by hyphens or underscores (selector-id-pattern)' },
 		],
+		// The visually-hidden helpers keep clip: rect(0 0 0 0) as the fallback next to clip-path: inset(50%), as WordPress core's .screen-reader-text does.
+		'property-no-deprecated': [ true, { ignoreProperties: [ 'clip' ] } ],
 	},
 };

@@ -26,9 +26,16 @@ const tools = {
 	stylelint: {
 		command: [ process.execPath, 'node_modules/stylelint/bin/stylelint.mjs', 'assets/css/**/*.css', '--formatter', 'json', '--allow-empty-input' ],
 		okExit: [ 0, 2 ],
-		// stylelint 16 prints the JSON report to stderr when a rule fails.
+		// stylelint prints the one-line JSON report to stderr when a rule fails
+		// (16) or to stdout (17), and css-tree can print "[csstree-match] BREAK"
+		// lines around it, so take the report line from whichever stream has it.
 		parse: ( stdout, stderr ) => {
-			const results = JSON.parse( stdout.trim().startsWith( '[' ) ? stdout : stderr );
+			const report = ( s ) => s.split( '\n' ).find( ( line ) => /^\s*\[(\{|\])/.test( line ) );
+			const json = report( stdout ) ?? report( stderr );
+			if ( ! json ) {
+				throw new Error( 'no JSON report in stylelint output' );
+			}
+			const results = JSON.parse( json );
 			const invalid = results.flatMap( ( r ) => r.invalidOptionWarnings.map( ( w ) => w.text ) );
 			if ( invalid.length ) {
 				throw new Error( `stylelint config is invalid:\n${ invalid.join( '\n' ) }` );
