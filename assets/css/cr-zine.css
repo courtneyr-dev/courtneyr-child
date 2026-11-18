@@ -628,9 +628,10 @@ body.pkiw-zine-print {
 	}
 
 	/*
-	 * WordPress's block-library pads ol.wp-block-list from a spacing preset this
-	 * theme does not define, so the padding computes to 0 and outside markers hang
-	 * into the clipped margin (components.css 8b). Pad the list and keep the markers
+	 * Ollie pads lists with var(--wp--preset--spacing--medium), a WordPress preset
+	 * variable this theme's theme.json does not define, so the padding computes to 0
+	 * and outside markers hang into the clipped margin (components.css 8b has the
+	 * same fix on screen). Pad the list and keep the markers
 	 * outside, so a wrapped line hangs under its text. Markers print in ink: the
 	 * orange marker token is 2.4:1 on ivory. Lists with their own class keep their
 	 * layout: the Wrapped strip's flex and grid items, is-style-* lists with an
