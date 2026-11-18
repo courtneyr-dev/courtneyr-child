@@ -46,7 +46,7 @@ add_filter( 'pkiw_zine_cover_title_html', __NAMESPACE__ . '\\cover_title', 10, 2
 
 /** Hide print-only single blocks on front-end screens. */
 function enqueue_print_only_visibility(): void {
-	if ( is_admin() || ! is_singular( 'post' ) ) {
+	if ( is_admin() || ! is_singular() ) {
 		return;
 	}
 	// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- Inline-only handle has no external resource to version.

@@ -19,6 +19,7 @@ const BLACK = 'rgb(26, 23, 20)';
 const YELLOW = 'rgb(255, 183, 3)';
 const LOCAL_ORIGIN = new URL( BASE_URL ).origin;
 const GUARDED_PAGES = new WeakSet();
+const PRINT_TOKENS = [ '--cr-ink-soft', '--cr-border', '--cr-tape', '--cr-code-bg', '--cr-code-ink' ];
 
 function withPages( path, pages ) {
 	const url = new URL( path, BASE_URL );
@@ -102,6 +103,26 @@ async function printGeometry( page ) {
 			} ),
 		};
 	} );
+}
+
+async function printPalette( page, theme ) {
+	await page.emulateMedia( { media: 'print', colorScheme: theme, forcedColors: 'none' } );
+	return page.evaluate( ( { properties, value } ) => {
+		document.documentElement.dataset.theme = value;
+		let code = document.querySelector( '[data-cr-print-token-probe]' );
+		if ( ! code ) {
+			code = document.createElement( 'code' );
+			code.dataset.crPrintTokenProbe = '';
+			code.textContent = 'print token probe';
+			document.querySelector( '.pkiw-zine-page__content' )?.append( code );
+		}
+		const root = getComputedStyle( document.documentElement );
+		const codeStyle = getComputedStyle( code );
+		return {
+			tokens: Object.fromEntries( properties.map( ( property ) => [ property, root.getPropertyValue( property ).trim() ] ) ),
+			code: { background: codeStyle.backgroundColor, color: codeStyle.color },
+		};
+	}, { properties: PRINT_TOKENS, value: theme } );
 }
 
 test.describe( 'Zine export panel', () => {
@@ -206,6 +227,31 @@ test.describe( 'Zine dark and forced-color paint', () => {
 		await summary.focus();
 		expect( await summary.evaluate( ( node ) => getComputedStyle( node ).outlineStyle ) ).not.toBe( 'none' );
 	} );
+
+	test( 'T3: summary hover and focus paint stays visible in light, stored-dark and system-dark modes', async ( { page } ) => {
+		await page.emulateMedia( { colorScheme: 'light', forcedColors: 'none' } );
+		const details = await openPanel( page );
+		const summary = details.locator( 'summary' );
+		for ( const mode of [ 'light', 'dark', 'system' ] ) {
+			await page.emulateMedia( { colorScheme: 'light' === mode ? 'light' : 'dark', forcedColors: 'none' } );
+			await page.evaluate( ( theme ) => { document.documentElement.dataset.theme = theme; }, mode );
+			await summary.hover();
+			const hover = await summary.evaluate( ( node ) => ( { background: getComputedStyle( node ).backgroundColor, color: getComputedStyle( node ).color } ) );
+			expect( hover, `${ mode } hover paint` ).toEqual( 'light' === mode ? { background: VIOLET, color: IVORY } : { background: IVORY, color: VIOLET } );
+			await page.mouse.move( 0, 0 );
+			await page.keyboard.press( 'Shift' );
+			await summary.focus();
+			const focus = await summary.evaluate( ( node ) => {
+				const style = getComputedStyle( node );
+				return { width: style.outlineWidth, style: style.outlineStyle, color: style.outlineColor, shadow: style.boxShadow };
+			} );
+			expect( focus.width, `${ mode } focus ring width` ).toBe( '3px' );
+			expect( focus.style, `${ mode } focus ring style` ).toBe( 'solid' );
+			expect( focus.color, `${ mode } selective-yellow focus ring` ).toBe( YELLOW );
+			expect( focus.shadow, `${ mode } focus halo` ).toContain( 'light' === mode ? VIOLET : IVORY );
+			expect( focus.shadow, `${ mode } focus halo spread` ).toContain( '7px' );
+		}
+	} );
 } );
 
 test.describe( 'Zine cover and screen reading order', () => {
@@ -228,6 +274,25 @@ test.describe( 'Zine cover and screen reading order', () => {
 		await page.emulateMedia( { media: 'print' } );
 		const tileTransforms = await tiles.locator( '.cr-cutout__tile' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => getComputedStyle( node ).transform ) );
 		expect( tileTransforms.every( ( value ) => 'none' !== value ) ).toBe( true );
+		const tileContrast = await tiles.locator( '.cr-cutout__tile' ).evaluateAll( ( nodes ) => {
+			const rgb = ( value ) => ( value.match( /[\d.]+/g ) || [] ).slice( 0, 3 ).map( Number );
+			const luminance = ( value ) => rgb( value ).map( ( channel ) => {
+				const normalized = channel / 255;
+				return normalized <= 0.04045 ? normalized / 12.92 : ( ( normalized + 0.055 ) / 1.055 ) ** 2.4;
+			} ).reduce( ( sum, channel, index ) => sum + channel * [ 0.2126, 0.7152, 0.0722 ][ index ], 0 );
+			return nodes.map( ( node ) => {
+				const foreground = getComputedStyle( node ).color;
+				const background = getComputedStyle( node.querySelector( '.cr-cutout__paper' ), '::before' ).backgroundColor;
+				const values = [ luminance( foreground ), luminance( background ) ].sort( ( a, b ) => b - a );
+				return { foreground, background, contrast: ( values[0] + 0.05 ) / ( values[1] + 0.05 ) };
+			} );
+		} );
+		expect( tileContrast.length, 'cover fixture has cutout tiles' ).toBeGreaterThan( 0 );
+		for ( const tile of tileContrast ) {
+			expect( tile.foreground, 'tile ink stays violet when background graphics are disabled' ).toBe( VIOLET );
+			expect( tile.background, 'tile paper stays light when background graphics are enabled' ).toBe( IVORY );
+			expect( tile.contrast, `tile ${ tile.foreground } on ${ tile.background } remains legible with print backgrounds on or off` ).toBeGreaterThanOrEqual( 4.5 );
+		}
 		const otherTransforms = await page.locator( '.pkiw-zine-page :not(.cr-cutout__tile)' ).evaluateAll( ( nodes ) => nodes.filter( ( node ) => ! node.closest( '.cr-cutout__tile' ) ).map( ( node ) => getComputedStyle( node ).transform ).filter( ( value ) => 'none' !== value ) );
 		expect( otherTransforms ).toEqual( [] );
 		const pageTransforms = await page.locator( '.pkiw-zine-page' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => ( { inverted: node.dataset.inverted, transform: getComputedStyle( node ).transform } ) ) );
@@ -277,6 +342,9 @@ test.describe( 'Booklet imposition', () => {
 
 				const sizes = await page.locator( '.pkiw-zine-page :is(p, li, span, figcaption)' ).evaluateAll( ( nodes ) => nodes.filter( ( node ) => 'none' !== getComputedStyle( node ).display && node.getClientRects().length ).map( ( node ) => parseFloat( getComputedStyle( node ).fontSize ) ) );
 				expect( Math.min( ...sizes ) ).toBeGreaterThanOrEqual( 12 );
+				const lightPalette = await printPalette( page, 'light' );
+				const darkPalette = await printPalette( page, 'dark' );
+				expect( darkPalette, 'dark booklet print restores light custom properties and code paint' ).toEqual( lightPalette );
 				const paper = await page.locator( 'body' ).evaluate( ( node ) => ( { background: getComputedStyle( node ).backgroundColor, color: getComputedStyle( node ).color } ) );
 				expect( paper ).toEqual( { background: IVORY, color: VIOLET } );
 				const shadows = await page.locator( '.pkiw-zine-pages, .pkiw-zine-pages *' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => getComputedStyle( node ).boxShadow ).filter( ( value ) => 'none' !== value ) );
@@ -293,4 +361,21 @@ test.describe( 'Booklet imposition', () => {
 			} );
 		}
 	}
+
+	test( 'T7: a failed booklet image leaves no visible empty frame', async ( { page } ) => {
+		await open( page, withPages( ARCHIVE, 8 ) );
+		const image = page.locator( '.pkiw-zine-page img' ).first();
+		await expect( image, 'the print fixture includes an image for the failure path' ).toHaveCount( 1 );
+		await image.evaluate( ( node ) => {
+			node.hidden = false;
+			node.src = `${ location.origin }/__cr-zine-missing-image-${ Date.now() }.jpg`;
+		} );
+		await expect.poll( () => image.evaluate( ( node ) => node.hidden ) ).toBe( true );
+		const frame = await image.evaluate( ( node ) => {
+			const style = getComputedStyle( node );
+			const rect = node.getBoundingClientRect();
+			return { display: style.display, width: rect.width, height: rect.height };
+		} );
+		expect( frame ).toEqual( { display: 'none', width: 0, height: 0 } );
+	} );
 } );

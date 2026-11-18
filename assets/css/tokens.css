@@ -1081,3 +1081,84 @@ main, nav, header, footer, article, section, aside, hgroup {
   }
   html { scroll-behavior: auto; }
 }
+
+/* Printed pages always use the light semantic palette, even when the stored
+   preference or operating system selects dark mode. The selector outranks
+   both dark-mode selectors without changing light-mode values. */
+@media print {
+  :root:root:root {
+    color-scheme: light;
+    --cr-surface: var(--cr-printer-ivory);
+    --cr-surface-soft: var(--cr-light-orange);
+    --cr-surface-elevated: var(--cr-white);
+    --cr-ink: var(--cr-russian-violet);
+    --cr-ink-muted: var(--cr-cerulean);
+    --cr-ink-soft: #4a4566;
+    --cr-ink-inverse: var(--cr-printer-ivory);
+    --cr-link: var(--cr-cerulean);
+    --cr-link-hover: var(--cr-russian-violet);
+    --cr-link-visited: #5a4a8a;
+    --cr-band-link: var(--cr-ink);
+    --cr-band-link-hover: var(--cr-ut-orange-dark, #b85f00);
+    --cr-band-link-visited: var(--cr-russian-violet-soft, #3d2f6e);
+    --cr-rule: var(--cr-paper-rule);
+    --cr-border: rgba(36, 28, 74, 0.12);
+    --cr-border-strong: rgba(36, 28, 74, 0.24);
+    --cr-callout-bg: var(--cr-cerulean);
+    --cr-callout-ink: var(--cr-white);
+    --cr-accent-1-bg: var(--cr-sky-blue);
+    --cr-accent-1-ink: var(--cr-russian-violet);
+    --cr-accent-2-bg: var(--cr-periwinkle);
+    --cr-accent-2-ink: var(--cr-russian-violet);
+    --cr-accent-3-bg: var(--cr-light-orange);
+    --cr-accent-3-ink: var(--cr-russian-violet);
+    --cr-tape: #f3e5b8;
+    --cr-tape-ink: var(--cr-russian-violet);
+    --cr-primary: var(--cr-ut-orange);
+    --cr-primary-hover: var(--cr-russian-violet);
+    --cr-primary-ink: var(--cr-prussian-blue);
+    --cr-cta-bg: var(--cr-ut-orange);
+    --cr-cta-bg-hover: var(--cr-russian-violet);
+    --cr-cta-ink: var(--cr-prussian-blue);
+    --cr-cta-ink-hover: var(--cr-sky-blue);
+    --cr-accent: var(--cr-blue-green);
+    --cr-accent-shape: var(--cr-sky-blue);
+    --cr-accent-soft: var(--cr-light-orange);
+    --cr-archive-badge: var(--cr-russian-violet);
+    --cr-archive-badge-ink: var(--cr-light-gray);
+    --cr-archive-badge-edge: var(--cr-russian-violet);
+    --cr-eyebrow-ink: var(--cr-russian-violet);
+    --cr-code-bg: #efece1;
+    --cr-code-ink: var(--cr-russian-violet);
+    --cr-shadow-hard-sm: 3px 3px 0 var(--cr-ink);
+    --cr-shadow-hard: 4px 4px 0 var(--cr-ink);
+    --cr-shadow-hard-2: 6px 6px 0 var(--cr-ink);
+    /* stylelint-disable length-zero-no-unit -- matches the light token byte-for-value. */
+    --cr-fiber: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(36, 28, 74, 0.012) 2px,
+      rgba(36, 28, 74, 0.012) 3px
+    );
+    /* stylelint-enable length-zero-no-unit */
+    --cr-type-blog: var(--cr-russian-violet);
+    --cr-type-aside: var(--cr-glaucous);
+    --cr-type-image: var(--cr-sky-blue);
+    --cr-type-gallery: var(--cr-periwinkle);
+    --cr-type-video: var(--cr-ut-orange);
+    --cr-type-audio: var(--cr-selective-yellow);
+    --cr-type-chat: var(--cr-glaucous-light);
+    --cr-type-status: var(--cr-blue-green);
+    --cr-type-link: var(--cr-cerulean);
+    --cr-type-bookmark: var(--cr-prussian-blue);
+    --cr-type-quote: var(--cr-russian-violet-soft);
+    --cr-type-speaking: var(--cr-ut-orange-dark);
+    --cr-type-book: var(--cr-light-orange-dark);
+    --cr-type-like: var(--cr-coral);
+    --cr-type-repost: var(--cr-cerulean-light);
+    --cr-type-reply: var(--cr-glaucous-dark);
+    --cr-type-event: var(--cr-sage);
+    --cr-type-review: var(--cr-mauve);
+  }
+}

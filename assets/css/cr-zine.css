@@ -45,10 +45,6 @@
 	margin-block-end: var(--cr-space-lg);
 }
 
-.pkiw-zine-export summary::marker {
-	color: currentcolor;
-}
-
 .pkiw-zine-export summary:hover {
 	background: var(--cr-ink);
 	color: var(--cr-ink-inverse);
@@ -260,23 +256,6 @@ body.pkiw-zine-print {
 	transform: none;
 }
 
-body.pkiw-zine-print .pkiw-zine-page {
-	--cr-surface: var(--cr-printer-ivory);
-	--cr-surface-soft: var(--cr-light-orange);
-	--cr-surface-elevated: var(--cr-white);
-	--cr-ink: var(--cr-russian-violet);
-	--cr-ink-muted: var(--cr-cerulean);
-	--cr-ink-soft: var(--cr-russian-violet);
-	--cr-ink-inverse: var(--cr-printer-ivory);
-	--cr-link: var(--cr-cerulean);
-	--cr-link-hover: var(--cr-russian-violet);
-	--cr-link-visited: var(--cr-russian-violet-soft);
-	--cr-rule: var(--cr-paper-rule);
-	--cr-border: var(--cr-russian-violet);
-	--cr-border-strong: var(--cr-russian-violet);
-	--cr-marker: var(--cr-ut-orange);
-}
-
 @media screen {
 
 	body.pkiw-zine-print main {
@@ -438,8 +417,18 @@ body.pkiw-zine-print .pkiw-zine-page {
 :root[data-theme="dark"] .pkiw-zine-toolbar {
 	border-color: var(--cr-printer-ivory);
 	background: var(--cr-night-elevated);
-	box-shadow: 4px 4px 0 var(--cr-selective-yellow);
+	box-shadow: var(--cr-shadow-hard);
 	color: var(--cr-printer-ivory);
+}
+
+:root[data-theme="dark"] .pkiw-zine-export summary:hover {
+	background: var(--cr-ink);
+	color: var(--cr-ink-inverse);
+}
+
+:root[data-theme="dark"] .pkiw-zine-export summary:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	box-shadow: 0 0 0 7px var(--cr-focus-halo), var(--cr-shadow-hard);
 }
 
 :root[data-theme="dark"] .pkiw-zine-export input[type="date"] {
@@ -458,8 +447,20 @@ body.pkiw-zine-print .pkiw-zine-page {
 	:root:not([data-theme]) .pkiw-zine-toolbar {
 		border-color: var(--cr-printer-ivory);
 		background: var(--cr-night-elevated);
-		box-shadow: 4px 4px 0 var(--cr-selective-yellow);
+		box-shadow: var(--cr-shadow-hard);
 		color: var(--cr-printer-ivory);
+	}
+
+	:root[data-theme="system"] .pkiw-zine-export summary:hover,
+	:root:not([data-theme]) .pkiw-zine-export summary:hover {
+		background: var(--cr-ink);
+		color: var(--cr-ink-inverse);
+	}
+
+	:root[data-theme="system"] .pkiw-zine-export summary:focus-visible,
+	:root:not([data-theme]) .pkiw-zine-export summary:focus-visible {
+		outline: 3px solid var(--cr-focus-ring);
+		box-shadow: 0 0 0 7px var(--cr-focus-halo), var(--cr-shadow-hard);
 	}
 
 	:root[data-theme="system"] .pkiw-zine-export input[type="date"],
@@ -578,7 +579,12 @@ body.pkiw-zine-print .pkiw-zine-page {
 	}
 
 	body.pkiw-zine-print .cr-cutout__paper {
+		background: var(--cr-printer-ivory);
 		filter: none;
+	}
+
+	body.pkiw-zine-print .cr-cutout__paper::before {
+		background: var(--cr-printer-ivory);
 	}
 
 	@supports (height: round(down, 100%, 1lh)) {

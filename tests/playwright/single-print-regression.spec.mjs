@@ -22,6 +22,7 @@ const IVORY = 'rgb(251, 250, 245)';
 const VIOLET = 'rgb(36, 28, 74)';
 const LOCAL_ORIGIN = new URL( BASE_URL ).origin;
 const GUARDED_PAGES = new WeakSet();
+const PRINT_TOKENS = [ '--cr-ink-soft', '--cr-border', '--cr-tape', '--cr-code-bg', '--cr-code-ink' ];
 const PROTECTED = {
 	placemat: '.cr-placemat',
 	ticket: '.cr-order--ticket',
@@ -85,6 +86,15 @@ async function protectedStyles( page ) {
 			continue;
 		}
 		rows[ name ] = await node.evaluate( ( element ) => {
+			const paint = ( pseudo = null ) => {
+				const style = getComputedStyle( element, pseudo );
+				return {
+					background: style.background,
+					content: style.content,
+					boxShadow: style.boxShadow,
+					transform: style.transform,
+				};
+			};
 			const style = getComputedStyle( element );
 			return {
 				display: style.display,
@@ -95,10 +105,48 @@ async function protectedStyles( page ) {
 				backgroundColor: style.backgroundColor,
 				borderTop: style.borderTop,
 				overflow: style.overflow,
+				before: paint( '::before' ),
+				after: paint( '::after' ),
 			};
 		} );
 	}
 	return rows;
+}
+
+async function printedHeaderOrder( page ) {
+	const header = page.locator( 'body.cr-recipe-single .single-post__header' ).first();
+	if ( 0 === await header.count() ) {
+		return 'absent';
+	}
+	return header.evaluate( ( element ) => ( {
+		display: getComputedStyle( element ).display,
+		children: [ ...element.children ].filter( ( child ) => ! child.classList.contains( 'cr-print-only' ) ).map( ( child, index ) => ( {
+			domIndex: index,
+			key: `${ child.tagName.toLowerCase() }.${ [ ...child.classList ].join( '.' ) }`,
+			order: getComputedStyle( child ).order,
+			top: Math.round( child.getBoundingClientRect().top ),
+		} ) ),
+	} ) );
+}
+
+async function printPalette( page, theme ) {
+	await page.emulateMedia( { media: 'print', colorScheme: theme, forcedColors: 'none' } );
+	return page.evaluate( ( { properties, value } ) => {
+		document.documentElement.dataset.theme = value;
+		let code = document.querySelector( '[data-cr-print-token-probe]' );
+		if ( ! code ) {
+			code = document.createElement( 'code' );
+			code.dataset.crPrintTokenProbe = '';
+			code.textContent = 'print token probe';
+			document.querySelector( '.single-post__content' )?.append( code );
+		}
+		const root = getComputedStyle( document.documentElement );
+		const codeStyle = getComputedStyle( code );
+		return {
+			tokens: Object.fromEntries( properties.map( ( property ) => [ property, root.getPropertyValue( property ).trim() ] ) ),
+			code: { background: codeStyle.backgroundColor, color: codeStyle.color },
+		};
+	}, { properties: PRINT_TOKENS, value: theme } );
 }
 
 function withoutPermalink( bodyText, permalink ) {
@@ -128,8 +176,10 @@ test.describe( 'Protected single-print objects', () => {
 			console.log( `${ name } absent protected objects: ${ absent.length ? absent.join( ', ' ) : 'none' }` );
 			captured[ name ] = {
 				styles,
+				headerOrder: await printedHeaderOrder( page ),
 				bodyText: await visibleBodyText( page ),
 				contentLines: await visibleBodyText( page, '.single-post__content, .cr-placemat, .cr-order--ticket, .cr-order--coaster, .cr-map-slip, .cr-recipe-binder, .cr-binder' ),
+				allowedByline: await page.locator( '.cr-print-byline .wp-block-post-author-name, .cr-print-byline .wp-block-post-date' ).evaluateAll( ( nodes ) => nodes.map( ( child ) => child.textContent.replace( /\s+/g, ' ' ).trim() ) ),
 				permalink: ( await page.locator( '.cr-print-permalink' ).allTextContents() ).join( ' ' ).replace( /\s+/g, ' ' ).trim(),
 			};
 		}
@@ -143,6 +193,7 @@ test.describe( 'Protected single-print objects', () => {
 		const baseline = JSON.parse( readFileSync( BASELINE_JSON, 'utf8' ) );
 		for ( const [ name, row ] of Object.entries( captured ) ) {
 			expect( row.styles, `${ name } protected computed styles` ).toEqual( baseline[ name ].styles );
+			expect( row.headerOrder, `${ name } recipe header child DOM and printed order` ).toEqual( baseline[ name ].headerOrder );
 			expect( row.permalink, `${ name } has the added permalink line` ).not.toBe( '' );
 			const now = row.bodyText.split( '\n' );
 			for ( const line of baseline[ name ].contentLines.split( '\n' ).filter( Boolean ) ) {
@@ -150,9 +201,7 @@ test.describe( 'Protected single-print objects', () => {
 			}
 			const before = new Set( baseline[ name ].bodyText.split( '\n' ) );
 			const added = withoutPermalink( now.filter( ( line ) => ! before.has( line ) ).join( '\n' ), row.permalink ).split( '\n' ).filter( Boolean );
-			const allowed = await page.locator( '.cr-print-byline .wp-block-post-author-name, .cr-print-byline .wp-block-post-date' ).evaluateAll( ( nodes ) => nodes.map( ( child ) => child.textContent.replace( /\s+/g, ' ' ).trim() ) );
-			expect( added, `${ name } print adds only the byline and the permalink` ).toEqual( expect.arrayContaining( [] ) );
-			expect( added.filter( ( line ) => ! allowed.includes( line ) ), `${ name } added print lines beyond byline and permalink` ).toEqual( [] );
+			expect( added.filter( ( line ) => ! row.allowedByline.includes( line ) ), `${ name } added print lines beyond byline and permalink` ).toEqual( [] );
 		}
 	} );
 } );
@@ -193,14 +242,54 @@ test.describe( 'Standalone long-post print', () => {
 	test( 'C13: print order, hides, plain H1, byline, permalink and quote match the contract', async ( { page } ) => {
 		await open( page, PATHS.get( 'long' ) );
 		await page.emulateMedia( { media: 'print', colorScheme: 'light', forcedColors: 'none' } );
-		const hidden = await page.locator( '.single-post__comments-wrapper, .wp-block-comments, .wp-block-post-comments-form, .single-post__syndication, .wp-block-indieblocks-facepile, .cr-newsletter-banner, .cr-reading-progress' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => getComputedStyle( node ).display ) );
-		expect( hidden.every( ( value ) => 'none' === value ) ).toBe( true );
+		const hiddenSelectors = [ '.single-post__comments-wrapper', '.wp-block-comments', '.wp-block-post-comments-form', '.single-post__syndication', '.wp-block-indieblocks-facepile', '.cr-newsletter-banner', '.cr-reading-progress' ];
+		let hiddenMatches = 0;
+		for ( const selector of hiddenSelectors ) {
+			const nodes = page.locator( selector );
+			const count = await nodes.count();
+			if ( 0 === count ) {
+				console.log( `single-print fixture has no ${ selector }` );
+				continue;
+			}
+			hiddenMatches += count;
+			const paint = await nodes.evaluateAll( ( elements ) => elements.map( ( element ) => {
+				const style = getComputedStyle( element );
+				const rect = element.getBoundingClientRect();
+				return { display: style.display, visibility: style.visibility, width: rect.width, height: rect.height };
+			} ) );
+			expect( paint.every( ( row ) => 'none' === row.display || 'hidden' === row.visibility || 0 === row.width || 0 === row.height ), `${ selector } is absent from print` ).toBe( true );
+		}
+		expect( hiddenMatches, 'the fixture exercises at least one print hide-list selector' ).toBeGreaterThan( 0 );
+
+		for ( const selector of [ '.single-post__lede-meta .single-post__category', '.single-post__lede-meta .single-post__date' ] ) {
+			const chip = page.locator( selector ).first();
+			await expect( chip, `${ selector } exists in the print fixture` ).toHaveCount( 1 );
+			const paint = await chip.evaluate( ( element ) => {
+				const style = getComputedStyle( element );
+				const rect = element.getBoundingClientRect();
+				return { visibility: style.visibility, width: rect.width, height: rect.height };
+			} );
+			expect( 'hidden' === paint.visibility || 0 === paint.width || 0 === paint.height, `${ selector } does not print` ).toBe( true );
+		}
+		const kind = page.locator( '.single-post__lede-meta .single-post__kind' ).first();
+		await expect( kind ).toBeVisible();
+		expect( await kind.evaluate( ( element ) => getComputedStyle( element ).visibility ) ).toBe( 'visible' );
 
 		const title = page.locator( 'h1.single-post__title' );
 		const titlePaint = await title.evaluate( ( node ) => ( { font: getComputedStyle( node ).fontFamily, transform: getComputedStyle( node ).transform } ) );
 		expect( titlePaint.font.split( ',' )[0].replaceAll( '"', '' ) ).toBe( 'Roboto Slab' );
 		expect( titlePaint.transform ).toBe( 'none' );
-		expect( await title.locator( '.cr-cutout__tiles' ).evaluateAll( ( nodes ) => nodes.map( ( node ) => getComputedStyle( node ).display ) ) ).not.toContain( 'block' );
+		const titleTiles = title.locator( '.cr-cutout__tiles' );
+		if ( await titleTiles.count() ) {
+			expect( ( await titleTiles.evaluateAll( ( nodes ) => nodes.map( ( node ) => getComputedStyle( node ).display ) ) ).every( ( display ) => 'none' === display ) ).toBe( true );
+		} else {
+			console.log( 'single-print fixture has no cutout H1; zine-template-part-test.php asserts the CSS fallback' );
+		}
+		const flankPaint = await title.evaluate( ( node ) => [ '::before', '::after' ].map( ( pseudo ) => {
+			const style = getComputedStyle( node, pseudo );
+			return { opacity: style.opacity, visibility: style.visibility };
+		} ) );
+		expect( flankPaint ).toEqual( [ { opacity: '0', visibility: 'hidden' }, { opacity: '0', visibility: 'hidden' } ] );
 
 		const quote = page.locator( '.single-post__content .wp-block-quote, .single-post__content blockquote' ).first();
 		await expect( quote ).toHaveCount( 1 );
@@ -235,7 +324,9 @@ test.describe( 'Standalone long-post print', () => {
 
 	test( 'C13: dark screen preference still prints light paper and a long post flows', async ( { page } ) => {
 		await open( page, PATHS.get( 'long' ), 1280, 'dark' );
-		await page.emulateMedia( { media: 'print', colorScheme: 'dark', forcedColors: 'none' } );
+		const lightPalette = await printPalette( page, 'light' );
+		const darkPalette = await printPalette( page, 'dark' );
+		expect( darkPalette, 'dark print restores light custom properties and code paint' ).toEqual( lightPalette );
 		const paper = await page.locator( 'body' ).evaluate( ( node ) => ( { background: getComputedStyle( node ).backgroundColor, color: getComputedStyle( node ).color } ) );
 		expect( paper ).toEqual( { background: IVORY, color: VIOLET } );
 

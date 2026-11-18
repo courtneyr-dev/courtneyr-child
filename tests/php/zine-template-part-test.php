@@ -217,6 +217,51 @@ namespace {
 		return (string) preg_replace( '~/\*.*?\*/~s', '', $css );
 	}
 
+	/** Return every body for an exact CSS selector. */
+	function cr_zine_css_rule_bodies( string $css, string $selector ): array {
+		$css     = cr_zine_css_without_comments( $css );
+		$pattern = '/(?<![:\w-])' . preg_quote( $selector, '/' ) . '(?![:\[\w-])\s*\{/';
+		$offset  = 0;
+		$bodies  = array();
+		while ( preg_match( $pattern, $css, $match, PREG_OFFSET_CAPTURE, $offset ) ) {
+			$open  = strpos( $css, '{', $match[0][1] );
+			$depth = 1;
+			$end   = $open + 1;
+			for ( $length = strlen( $css ); $end < $length && 0 < $depth; ++$end ) {
+				$depth += '{' === $css[ $end ] ? 1 : ( '}' === $css[ $end ] ? -1 : 0 );
+			}
+			if ( 0 !== $depth ) {
+				break;
+			}
+			$bodies[] = substr( $css, $open + 1, $end - $open - 2 );
+			$offset   = $end;
+		}
+		return $bodies;
+	}
+
+	/** Parse custom-property declarations without splitting function values. */
+	function cr_zine_css_custom_properties( string $body ): array {
+		$declarations = array();
+		$start        = 0;
+		$depth        = 0;
+		$length       = strlen( $body );
+		for ( $index = 0; $index <= $length; ++$index ) {
+			$character = $index < $length ? $body[ $index ] : ';';
+			$depth    += '(' === $character ? 1 : ( ')' === $character ? -1 : 0 );
+			if ( ';' !== $character || 0 !== $depth ) {
+				continue;
+			}
+			$declaration = trim( substr( $body, $start, $index - $start ) );
+			$start       = $index + 1;
+			if ( ! str_starts_with( $declaration, '--' ) || ! str_contains( $declaration, ':' ) ) {
+				continue;
+			}
+			list( $property, $value ) = explode( ':', $declaration, 2 );
+			$declarations[ trim( $property ) ] = trim( (string) preg_replace( '/\s+/', ' ', $value ) );
+		}
+		return $declarations;
+	}
+
 	$core = getenv( 'WP_CORE_DIR' ) ?: (string) getenv( 'HOME' ) . '/.wp-tests/wordpress';
 	foreach ( array( 'class-wp-block-parser-block.php', 'class-wp-block-parser-frame.php', 'class-wp-block-parser.php' ) as $parser_file ) {
 		$parser_path = $core . '/wp-includes/' . $parser_file;
@@ -250,6 +295,7 @@ namespace {
 
 	$zine_css   = (string) file_get_contents( COURTNEYR_CHILD_DIR . '/assets/css/cr-zine.css' );
 	$print_css  = (string) file_get_contents( COURTNEYR_CHILD_DIR . '/assets/css/cr-print.css' );
+	$tokens_css = (string) file_get_contents( COURTNEYR_CHILD_DIR . '/assets/css/tokens.css' );
 	$print_base = substr( $print_css, 0, CR_ZINE_PRINT_BYTES );
 	$print_add  = substr( $print_css, CR_ZINE_PRINT_BYTES );
 	$pruning    = (string) file_get_contents( COURTNEYR_CHILD_DIR . '/inc/stream-style-pruning.php' );
@@ -260,6 +306,29 @@ namespace {
 	cr_zine_check( ! str_contains( $zine_css, '!important' ), 'cr-zine.css has no important declaration' );
 	cr_zine_check( 0 === preg_match( '/#[0-9a-f]{3,8}\b|rgb\(|%23/i', cr_zine_css_without_comments( $zine_css ) ), 'cr-zine.css has no literal hex, rgb or encoded hash color' );
 	cr_zine_check( 0 === preg_match( '/#[0-9a-f]{3,8}\b|rgb\(|%23/i', cr_zine_css_without_comments( $print_add ) ), 'appended cr-print.css has no literal hex, rgb or encoded hash color' );
+	cr_zine_contains( '.single-post__title.cr-cutout .cr-cutout__tiles', $print_add, 'single print includes the cutout-title fallback asserted when the browser fixture has no cutout H1' );
+	cr_zine_contains( 'visibility: hidden', $print_add, 'single print hides lede date and category without relying on display' );
+	cr_zine_contains( 'body.single-post:not(.cr-order-single):not(.cr-recipe-single):not([class~="kind-eat"]):not([class~="kind-drink"]):not([class~="kind-recipe"]):not([class~="kind-favorite"]):not([class~="kind-jam"]):not([class~="kind-menu"]):not([class~="kind-evidence"]) .single-post__header', $print_add, 'single print header reordering excludes approved kind layouts' );
+	cr_zine_contains( 'body.pkiw-zine-print .cr-cutout__paper::before', $zine_css, 'booklet print forces the cutout paper pseudo-element to light stock' );
+
+	$light_tokens = array();
+	foreach ( cr_zine_css_rule_bodies( $tokens_css, ':root' ) as $root_body ) {
+		$light_tokens = array_merge( $light_tokens, cr_zine_css_custom_properties( $root_body ) );
+	}
+	$dark_bodies  = cr_zine_css_rule_bodies( $tokens_css, ':root[data-theme="dark"]' );
+	$print_media  = cr_zine_css_rule_bodies( $tokens_css, '@media print' );
+	$print_bodies = cr_zine_css_rule_bodies( $print_media[0] ?? '', ':root:root:root' );
+	$dark_tokens  = array();
+	foreach ( $dark_bodies as $dark_body ) {
+		$dark_tokens = array_merge( $dark_tokens, cr_zine_css_custom_properties( $dark_body ) );
+	}
+	$print_tokens = cr_zine_css_custom_properties( $print_bodies[0] ?? '' );
+	cr_zine_check( 64 === count( $dark_tokens ), 'tokens.css manual-dark block declares the expected 64 custom properties' );
+	cr_zine_check( array_keys( $dark_tokens ) === array_keys( $print_tokens ), 'tokens.css print block declares exactly the custom properties changed by dark mode' );
+	$expected_print_tokens = array_intersect_key( $light_tokens, $dark_tokens );
+	ksort( $expected_print_tokens );
+	ksort( $print_tokens );
+	cr_zine_check( $expected_print_tokens === $print_tokens, 'tokens.css print block copies every dark-mutated property from the light root values' );
 
 	$style     = (string) file_get_contents( COURTNEYR_CHILD_DIR . '/style.css' );
 	$functions = (string) file_get_contents( COURTNEYR_CHILD_DIR . '/functions.php' );
@@ -309,6 +378,7 @@ namespace {
 	\Courtneyr\Child\Zine\enqueue_print_only_visibility();
 	cr_zine_check( isset( $GLOBALS['cr_zine_styles']['courtneyr-print-only'] ), 'single registers and enqueues the print-only screen handle' );
 	cr_zine_check( '@media screen{.cr-print-only{display:none}}' === ( $GLOBALS['cr_zine_inline']['courtneyr-print-only'] ?? '' ), 'single uses the exact screen-only visibility rule' );
+	cr_zine_contains( '! is_singular()', (string) file_get_contents( COURTNEYR_CHILD_DIR . '/inc/zine.php' ), 'print-only screen handle loads for every singular type that uses templates/single.html' );
 
 	require COURTNEYR_CHILD_DIR . '/inc/archives.php';
 	foreach ( array( 'Read', 'Zine 269!', 'Digits 0123456789, punctuation?!', str_repeat( 'Z', 40 ) ) as $title ) {

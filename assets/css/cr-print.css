@@ -99,7 +99,19 @@ body.single-post .cr-reading-progress {
 	display: none;
 }
 
-.cr-print-byline {
+.single-post__lede-meta,
+.cr-print-byline,
+.cr-print-permalink {
+	box-shadow: none;
+	filter: none;
+	transform: none;
+}
+
+body.cr-recipe-single .cr-print-byline {
+	display: none;
+}
+
+body.single-post:not(.cr-order-single):not(.cr-recipe-single):not([class~="kind-eat"]):not([class~="kind-drink"]):not([class~="kind-recipe"]):not([class~="kind-favorite"]):not([class~="kind-jam"]):not([class~="kind-menu"]):not([class~="kind-evidence"]) .cr-print-byline {
 	display: flex;
 	flex-wrap: wrap;
 	gap: var(--cr-space-xs);
@@ -124,7 +136,7 @@ body.single-post .cr-reading-progress {
 	margin: 0;
 }
 
-.single-post__header {
+body.single-post:not(.cr-order-single):not(.cr-recipe-single):not([class~="kind-eat"]):not([class~="kind-drink"]):not([class~="kind-recipe"]):not([class~="kind-favorite"]):not([class~="kind-jam"]):not([class~="kind-menu"]):not([class~="kind-evidence"]) .single-post__header {
 	display: flex;
 	flex-direction: column;
 	box-shadow: none;
@@ -141,33 +153,24 @@ body.single-post .cr-reading-progress {
 	transform: none;
 }
 
-.single-post__lede-meta,
-.cr-print-byline,
-.cr-print-permalink {
-	box-shadow: none;
-	filter: none;
-	transform: none;
-}
-
-body.cr-order-single .cr-print-byline,
-body.cr-recipe-single .cr-print-byline {
-	display: none;
-}
-
 .single-post__lede-meta .single-post__date,
 .single-post__lede-meta .single-post__category {
-	display: none;
+	position: absolute;
+	inline-size: 0;
+	block-size: 0;
+	overflow: hidden;
+	visibility: hidden;
 }
 
 .single-post__lede-meta .single-post__kind {
 	display: inline-flex;
 }
 
-.single-post__header > .single-post__title {
+body.single-post:not(.cr-order-single):not(.cr-recipe-single):not([class~="kind-eat"]):not([class~="kind-drink"]):not([class~="kind-recipe"]):not([class~="kind-favorite"]):not([class~="kind-jam"]):not([class~="kind-menu"]):not([class~="kind-evidence"]) .single-post__header > .single-post__title {
 	order: 1;
 }
 
-.single-post__header > .single-post__lede-meta {
+body.single-post:not(.cr-order-single):not(.cr-recipe-single):not([class~="kind-eat"]):not([class~="kind-drink"]):not([class~="kind-recipe"]):not([class~="kind-favorite"]):not([class~="kind-jam"]):not([class~="kind-menu"]):not([class~="kind-evidence"]) .single-post__header > .single-post__lede-meta {
 	order: 2;
 }
 
@@ -225,29 +228,6 @@ main.single-post > .single-post__content > :not(.cr-placemat, .cr-order--ticket,
 	font-size: max(var(--cr-text-floor), var(--cr-text-sm));
 	font-style: italic;
 	transform: none;
-}
-
-:root:root:root {
-	color-scheme: light;
-	--cr-surface: var(--cr-printer-ivory);
-	--cr-surface-soft: var(--cr-light-orange);
-	--cr-surface-elevated: var(--cr-white);
-	--cr-ink: var(--cr-russian-violet);
-	--cr-ink-muted: var(--cr-cerulean);
-	--cr-ink-soft: var(--cr-russian-violet);
-	--cr-ink-inverse: var(--cr-printer-ivory);
-	--cr-link: var(--cr-cerulean);
-	--cr-link-hover: var(--cr-russian-violet);
-	--cr-link-visited: var(--cr-russian-violet-soft);
-	--cr-rule: var(--cr-paper-rule);
-	--cr-border: var(--cr-russian-violet);
-	--cr-border-strong: var(--cr-russian-violet);
-	--cr-tape: var(--cr-printer-ivory);
-	--cr-tape-ink: var(--cr-russian-violet);
-	--cr-cta-bg: var(--cr-ut-orange);
-	--cr-cta-bg-hover: var(--cr-russian-violet);
-	--cr-cta-ink: var(--cr-prussian-blue);
-	--cr-cta-ink-hover: var(--cr-sky-blue);
 }
 
 html,
