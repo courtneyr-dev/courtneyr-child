@@ -459,6 +459,36 @@ function suppress_featured_image_on_read_single( string $html, array $block ): s
 add_filter( 'render_block', __NAMESPACE__ . '\\suppress_featured_image_on_read_single', 10, 2 );
 
 /**
+ * Print no featured image and no kind or category chips above a locked single.
+ *
+ * A post that is not publicly viewable prints none of its card facts, so a
+ * password-protected single shows the title and the password form until the
+ * visitor enters the password. pre_render_block skips every render_block
+ * filter, so a kind lane that builds its own chip or picture from the post
+ * cannot print one either. The art a card copies into the featured image at
+ * save time prints through this same block.
+ *
+ * @param string|null          $pre   Short-circuit value from an earlier filter.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string|null
+ */
+function hide_locked_single_header( $pre, array $block ) {
+	if ( null !== $pre ) {
+		return $pre;
+	}
+	$name = (string) ( $block['blockName'] ?? '' );
+	if ( 'core/post-featured-image' !== $name && 'core/post-terms' !== $name ) {
+		return null;
+	}
+	$class = (string) ( $block['attrs']['className'] ?? '' );
+	if ( 1 !== preg_match( '/(?<![\w-])single-post__(featured|kind|category)(?![\w-])/', $class ) ) {
+		return null;
+	}
+	return is_singular( 'post' ) && post_password_required( get_queried_object_id() ) ? '' : null;
+}
+add_filter( 'pre_render_block', __NAMESPACE__ . '\\hide_locked_single_header', 10, 2 );
+
+/**
  * Drop the single template's reactions group when it holds no reactions.
  *
  * IndieBlocks prints each like, bookmark or repost as a list item, or a count

@@ -126,8 +126,9 @@ namespace {
 			foreach ( array( 'watch', 'comics', 'recipe', 'quote', 'read', 'checkin', 'like' ) as $kind ) {
 				$post                = cr_pw_post( $kind, array() );
 				$post->post_password = '';
+				$public = static fn( string $label, array $row ): string => 'read' === $kind && str_contains( $row[1], 'wp-block-post-featured-image' ) ? '' : $row[1];
 				foreach ( $header as $label => $row ) {
-					cr_read_same( $row[1], cr_pw_render( $row[0], $row[1] ), $kind . ' public single prints the ' . $label );
+					cr_read_same( $public( $label, $row ), cr_pw_render( $row[0], $row[1] ), $kind . ' public single prints the ' . $label );
 				}
 
 				$post->post_password = CR_PW_SECRET;
@@ -135,7 +136,7 @@ namespace {
 					cr_read_same( '', cr_pw_render( $row[0], $row[1] ), $kind . ' before the password prints no ' . $label );
 				}
 				foreach ( $others as $label => $row ) {
-					cr_read_same( $row[1], cr_pw_render( $row[0], $row[1] ), $kind . ' before the password keeps the ' . $label );
+					cr_read_same( $public( $label, $row ), cr_pw_render( $row[0], $row[1] ), $kind . ' before the password keeps the ' . $label );
 				}
 
 				cr_pw_enter( 'wrong-guess' );
@@ -145,7 +146,7 @@ namespace {
 
 				cr_pw_enter( CR_PW_SECRET );
 				foreach ( $header as $label => $row ) {
-					cr_read_same( $row[1], cr_pw_render( $row[0], $row[1] ), $kind . ' after the password prints the ' . $label );
+					cr_read_same( $public( $label, $row ), cr_pw_render( $row[0], $row[1] ), $kind . ' after the password prints the ' . $label );
 				}
 			}
 		}
