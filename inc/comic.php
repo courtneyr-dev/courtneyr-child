@@ -613,7 +613,8 @@ function add_title_lede( string $html, array $block ): string {
 	}
 	$post  = \get_post();
 	$comic = comic_read( $post );
-	if ( null === $comic ) {
+	// A password-protected comic shows its title and the password form only.
+	if ( null === $comic || post_password_required( $post ) ) {
 		return $html;
 	}
 	$a        = comic_attrs( $post, $comic );
