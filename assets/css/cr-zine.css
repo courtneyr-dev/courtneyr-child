@@ -14,6 +14,7 @@
 
 .pkiw-zine-export[open] {
 	position: relative;
+	z-index: 1;
 	isolation: isolate;
 	padding: var(--cr-space-lg);
 	border: 2px solid var(--cr-ink);
@@ -293,6 +294,22 @@ body.pkiw-zine-print {
 		min-inline-size: 0;
 	}
 
+	/* One fixed-height column breaks between line boxes; the overflow column is clipped. */
+	body.pkiw-zine-print .pkiw-zine-page__content {
+		min-block-size: 0;
+		overflow: hidden;
+		column-count: 1;
+		column-gap: 0;
+		column-fill: auto;
+	}
+
+	@supports (height: round(down, 100%, 1lh)) {
+
+		body.pkiw-zine-print .pkiw-zine-page__content {
+			height: round(down, 100%, 1lh);
+		}
+	}
+
 	body.pkiw-zine-print .pkiw-zine-page h1,
 	body.pkiw-zine-print .pkiw-zine-page h2 {
 		color: inherit;
@@ -408,6 +425,17 @@ body.pkiw-zine-print {
 	.pkiw-zine-export .wp-element-button.is-style-cr-cta {
 		inline-size: 100%;
 		max-inline-size: none;
+	}
+
+	.pkiw-zine-spread table {
+		inline-size: 100%;
+		min-inline-size: 0;
+		table-layout: fixed;
+	}
+
+	.pkiw-zine-spread th[scope="row"] {
+		inline-size: 40%;
+		overflow-wrap: anywhere;
 	}
 }
 
