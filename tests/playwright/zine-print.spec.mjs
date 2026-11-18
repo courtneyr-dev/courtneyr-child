@@ -185,7 +185,8 @@ async function printedText( page ) {
 test.describe( 'Zine export panel', () => {
 	test.skip( 'panel' !== SET, 'panel fixture set' );
 
-	test( 'T3: summary and open panel use the fixed light paint without layout rotation', async ( { page } ) => {
+	test( 'T3: summary and open panel use the light paint without layout rotation', async ( { page } ) => {
+		await page.emulateMedia( { colorScheme: 'light' } );
 		await open( page, PANEL_PATH );
 		const details = page.locator( '.pkiw-zine-export' ).first();
 		const summary = details.locator( 'summary' );
@@ -268,6 +269,22 @@ test.describe( 'Zine dark and forced-color paint', () => {
 		} );
 		expect( paint ).toMatchObject( { panel: NIGHT, ink: IVORY, border: IVORY, input: BLACK, cta: YELLOW, ctaInk: VIOLET } );
 		expect( paint.shadow ).toContain( YELLOW );
+	} );
+
+	test( 'T3: system dark mode uses night stock with ivory ink and yellow shadows', async ( { page } ) => {
+		await page.emulateMedia( { colorScheme: 'dark' } );
+		const details = await openPanel( page );
+		await page.mouse.move( 0, 0 );
+		const paint = await details.evaluate( ( node ) => {
+			const panel = getComputedStyle( node );
+			const summary = getComputedStyle( node.querySelector( 'summary' ) );
+			const input = getComputedStyle( node.querySelector( 'input[type="date"]' ) );
+			return { theme: document.documentElement.dataset.theme || 'unset', panel: panel.backgroundColor, ink: panel.color, border: panel.borderTopColor, borderWidth: panel.borderTopWidth, shadow: panel.boxShadow, summary: summary.backgroundColor, summaryInk: summary.color, summaryBorder: summary.borderTopColor, summaryShadow: summary.boxShadow, input: input.backgroundColor, inputInk: input.color };
+		} );
+		expect( [ 'unset', 'system' ], 'no stored choice, so the system scheme decides' ).toContain( paint.theme );
+		expect( paint ).toMatchObject( { panel: NIGHT, ink: IVORY, border: IVORY, borderWidth: '2px', summary: NIGHT, summaryInk: IVORY, summaryBorder: IVORY, input: BLACK, inputInk: IVORY } );
+		expect( paint.shadow, 'panel hard shadow is selective yellow' ).toContain( `${ YELLOW } 4px 4px 0px` );
+		expect( paint.summaryShadow, 'summary hard shadow is selective yellow' ).toContain( `${ YELLOW } 4px 4px 0px` );
 	} );
 
 	test( 'T3: forced colors removes shadows and the booklet drawing but keeps focus', async ( { page } ) => {
@@ -492,8 +509,9 @@ test.describe( 'Booklet imposition', () => {
 
 	test( 'T7: a failed booklet image leaves no visible empty frame', async ( { page } ) => {
 		await open( page, withPages( STREAM, 16 ) );
-		const image = page.locator( '.pkiw-zine-page img' ).first();
-		await expect( image, 'the print fixture includes an image for the failure path' ).toHaveCount( 1 );
+		const entryImages = page.locator( '.pkiw-zine-page img:not([data-cr-cover-fallback] img)' );
+		await expect( entryImages, 'the print fixture includes an entry image, not a Wrapped cover, which the cover handler in site-ux.js replaces on error' ).not.toHaveCount( 0 );
+		const image = entryImages.first();
 		await image.evaluate( ( node ) => {
 			node.hidden = false;
 			node.removeAttribute( 'srcset' );
