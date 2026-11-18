@@ -43,6 +43,58 @@ namespace {
 		return false;
 	}
 
+	if ( ! defined( 'OBJECT' ) ) {
+		define( 'OBJECT', 'OBJECT' );
+	}
+
+	final class WPRM_Print {
+		public static string $slug = 'wprm_print';
+
+		public static function slug(): string {
+			return self::$slug;
+		}
+
+		public static function print_page(): void {
+		}
+	}
+
+	final class WP_Query {
+		public bool $is_404 = false;
+
+		public function set_404(): void {
+			$this->is_404 = true;
+		}
+	}
+
+	function wp_unslash( $value ) {
+		return $value;
+	}
+
+	function get_post_type( $post = null ) {
+		return $GLOBALS['cr_pw_types'][ (int) $post ] ?? false;
+	}
+
+	function get_page_by_path( $path, $output = OBJECT, $type = 'page' ) {
+		return $GLOBALS['cr_pw_slugs'][ $type . ':' . $path ] ?? null;
+	}
+
+	function get_posts( $args = array() ): array {
+		return $GLOBALS['cr_pw_names'][ (string) ( $args['name'] ?? '' ) ] ?? array();
+	}
+
+	function remove_action( $hook, $callback, $priority = 10 ): bool {
+		$GLOBALS['cr_pw_removed'][] = array( $hook, $callback, $priority );
+		return true;
+	}
+
+	function status_header( $code ): void {
+		$GLOBALS['cr_pw_status'] = (int) $code;
+	}
+
+	function nocache_headers(): void {
+		$GLOBALS['cr_pw_nocache'] = true;
+	}
+
 	function pkiw_get_visible_location_fields( int $post_id ): array {
 		return array( 'street' => true );
 	}
@@ -60,6 +112,7 @@ namespace {
 	require dirname( __DIR__, 2 ) . '/inc/stream-checkin.php';
 	require dirname( __DIR__, 2 ) . '/inc/quote-note.php';
 	require dirname( __DIR__, 2 ) . '/inc/sloc-map-alt.php';
+	require dirname( __DIR__, 2 ) . '/inc/post-kinds.php';
 
 	const CR_PW_SECRET = 'open-sesame';
 
@@ -82,6 +135,180 @@ namespace {
 			'attrs'     => array( 'className' => 'single-post__title' ),
 		);
 	}
+
+
+	/**
+	 * Render one block the way core does: pre_render_block short-circuits,
+	 * otherwise the generic and the block-specific render_block filters run
+	 * in priority order over the block's own output.
+	 *
+	 * @param array  $block Parsed block.
+	 * @param string $html  What the block prints when nothing intervenes.
+	 */
+	function cr_pw_render( array $block, string $html ): string {
+		$run = static function ( string $hook, $value, array $args ) {
+			$filters = array_values( array_filter( $GLOBALS['cr_read_filters'], static fn( array $f ): bool => $f[0] === $hook ) );
+			usort( $filters, static fn( array $a, array $b ): int => $a[2] <=> $b[2] );
+			foreach ( $filters as $f ) {
+				$value = call_user_func_array( $f[1], array_slice( array_merge( array( $value ), $args ), 0, $f[3] ) );
+			}
+			return $value;
+		};
+		$pre = $run( 'pre_render_block', null, array( $block, null ) );
+		if ( null !== $pre ) {
+			return (string) $pre;
+		}
+		$html = (string) $run( 'render_block', $html, array( $block ) );
+		return (string) $run( 'render_block_' . $block['blockName'], $html, array( $block ) );
+	}
+
+	/**
+	 * Fire a front-end request for one URL the way WordPress would: the
+	 * theme's init callbacks run, then the template_redirect callbacks they
+	 * queued. Returns what a visitor and WP Recipe Maker would see.
+	 *
+	 * @param string $uri Request URI.
+	 * @return array{printer_unhooked: bool, is_404: bool, status: int}
+	 */
+	function cr_pw_print_request( string $uri ): array {
+		$_SERVER['REQUEST_URI']      = $uri;
+		$GLOBALS['cr_pw_removed']    = array();
+		$GLOBALS['cr_pw_status']     = 200;
+		$GLOBALS['cr_pw_nocache']    = false;
+		$GLOBALS['wp_query']         = new WP_Query();
+		$mine                        = static fn( array $a ): bool => is_string( $a[1] ) && str_starts_with( $a[1], 'Courtneyr\\Child\\Recipe\\' );
+		$init                        = array_values( array_filter( $GLOBALS['cr_read_actions'], static fn( array $a ): bool => 'init' === $a[0] && $mine( $a ) ) );
+		usort( $init, static fn( array $a, array $b ): int => $a[2] <=> $b[2] );
+		$seen = count( $GLOBALS['cr_read_actions'] );
+		foreach ( $init as $action ) {
+			call_user_func( $action[1] );
+		}
+		foreach ( array_slice( $GLOBALS['cr_read_actions'], $seen ) as $action ) {
+			if ( 'template_redirect' === $action[0] && $mine( $action ) ) {
+				call_user_func( $action[1] );
+			}
+		}
+		return array(
+			'printer_unhooked' => in_array( array( 'init', array( 'WPRM_Print', 'print_page' ), 10 ), $GLOBALS['cr_pw_removed'], true ),
+			'is_404'           => $GLOBALS['wp_query']->is_404,
+			'status'           => $GLOBALS['cr_pw_status'],
+		);
+	}
+
+	cr_read_group(
+		'WP Recipe Maker print page answers 404 while the recipe\'s post is locked',
+		static function (): void {
+			$post = cr_pw_post( 'recipe', array() );
+			$GLOBALS['cr_pw_types']                                  = array( 7 => 'wprm_recipe', 8 => 'wprm_recipe', $post->ID => 'post' );
+			$GLOBALS['cr_pw_slugs']                                  = array( 'wprm_recipe:wprm-lentil-soup' => new WP_Post( 7, 'Lentil Soup' ) );
+			$GLOBALS['cr_pw_names']                                  = array( 'wprm-lentil-soup!' => array( 7 ) );
+			$GLOBALS['cr_read_meta'][7]['wprm_parent_post_id']       = $post->ID;
+			$urls = array(
+				'id'                 => '/wprm_print/7',
+				'id with a slash'    => '/wprm_print/7/',
+				'recipe form'        => '/wprm_print/recipe/7',
+				'recipe form + tpl'  => '/wprm_print/recipe/7/chic',
+				'slug'               => '/wprm_print/lentil-soup',
+				'query form'         => '/?wprm_print=7',
+				'id + query string'  => '/wprm_print/7?servings=2',
+				'id + more query'    => '/?wprm_print=7&servings=2',
+				'slug WordPress sanitizes' => '/wprm_print/lentil-soup!',
+				'id + suffix'        => '/wprm_print/7abc',
+				'recipe form + suffix' => '/wprm_print/recipe/7x',
+				'query form + suffix'  => '/?wprm_print=7x',
+			);
+			$init_priorities = array();
+			foreach ( $GLOBALS['cr_read_actions'] as $action ) {
+				if ( 'init' === $action[0] && 'Courtneyr\\Child\\Recipe\\stop_locked_print' === $action[1] ) {
+					$init_priorities[] = $action[2];
+				}
+			}
+			cr_read_same( array( 9 ), $init_priorities, 'the print guard runs on init before WP Recipe Maker\'s priority 10 callback prints and exits' );
+			$open   = array( 'printer_unhooked' => false, 'is_404' => false, 'status' => 200 );
+			$closed = array( 'printer_unhooked' => true, 'is_404' => true, 'status' => 404 );
+
+			$post->post_password = '';
+			foreach ( $urls as $label => $uri ) {
+				cr_read_same( $open, cr_pw_print_request( $uri ), 'public recipe print by ' . $label . ' is left to WP Recipe Maker' );
+			}
+
+			$post->post_password = CR_PW_SECRET;
+			foreach ( $urls as $label => $uri ) {
+				cr_read_same( $closed, cr_pw_print_request( $uri ), 'locked recipe print by ' . $label . ' answers 404' );
+			}
+			cr_read_same( true, $GLOBALS['cr_pw_nocache'], 'the 404 is not cached' );
+
+			cr_pw_enter( 'wrong-guess' );
+			foreach ( $urls as $label => $uri ) {
+				cr_read_same( $closed, cr_pw_print_request( $uri ), 'recipe print by ' . $label . ' with a wrong password cookie answers 404' );
+			}
+
+			cr_pw_enter( CR_PW_SECRET );
+			foreach ( $urls as $label => $uri ) {
+				cr_read_same( $open, cr_pw_print_request( $uri ), 'recipe print by ' . $label . ' after the password is left to WP Recipe Maker' );
+			}
+
+			$post->post_password = CR_PW_SECRET;
+			unset( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
+			cr_read_same( $open, cr_pw_print_request( '/watch/the-lantern-archive/' ), 'a locked post\'s own page is not a print request' );
+			cr_read_same( $open, cr_pw_print_request( '/wprm_print/8' ), 'a recipe with no parent post is left to WP Recipe Maker' );
+			cr_read_same( $open, cr_pw_print_request( '/wprm_print/42' ), 'an id that is not a recipe is left to WP Recipe Maker' );
+			cr_read_same( $open, cr_pw_print_request( '/wprm_print/no-such-recipe' ), 'an unknown slug is left to WP Recipe Maker' );
+			WPRM_Print::$slug = 'print-it';
+			cr_read_same( $open, cr_pw_print_request( '/wprm_print/7' ), 'the default print slug is not special once the site renames it' );
+			cr_read_same( $closed, cr_pw_print_request( '/print-it/7' ), 'a renamed print slug is blocked too' );
+			WPRM_Print::$slug = 'wprm_print';
+		}
+	);
+
+	cr_read_group(
+		'locked single prints no featured image and no kind or category chips',
+		static function (): void {
+			$header = array(
+				'featured image' => array( array( 'blockName' => 'core/post-featured-image', 'attrs' => array( 'className' => 'single-post__featured' ) ), '<figure class="wp-block-post-featured-image single-post__featured"><img src="https://cards.test/cover.jpg" alt=""></figure>' ),
+				'kind chip'      => array( array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'cr-chip single-post__kind' ) ), '<div class="taxonomy-kind cr-chip single-post__kind wp-block-post-terms"><a href="/kind/x/">Kind</a></div>' ),
+				'category chip'  => array( array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'cr-chip single-post__category' ) ), '<div class="taxonomy-category cr-chip single-post__category wp-block-post-terms"><a href="/category/x/">Category</a></div>' ),
+			);
+			$others = array(
+				'related terms'   => array( array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'related-post__terms' ) ), '<div class="related-post__terms"><a href="/kind/x/">Kind</a></div>' ),
+				'other image'     => array( array( 'blockName' => 'core/post-featured-image', 'attrs' => array() ), '<figure class="wp-block-post-featured-image"><img src="https://cards.test/cover.jpg" alt=""></figure>' ),
+				'tags'            => array( array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'single-post__tags is-style-term-button' ) ), '<div class="single-post__tags"><a href="/tag/x/">Tag</a></div>' ),
+			);
+			$post                = cr_pw_post( 'watch', array() );
+			$post->post_password = CR_PW_SECRET;
+			$GLOBALS['cr_read_not_singular'] = true;
+			foreach ( $header as $label => $row ) {
+				cr_read_same( $row[1], cr_pw_render( $row[0], $row[1] ), 'a locked post outside a single keeps the ' . $label . ' (the guard covers the single template only)' );
+			}
+			$GLOBALS['cr_read_not_singular'] = false;
+			foreach ( array( 'watch', 'comics', 'recipe', 'quote', 'read', 'checkin', 'like' ) as $kind ) {
+				$post                = cr_pw_post( $kind, array() );
+				$post->post_password = '';
+				$public = static fn( string $label, array $row ): string => 'read' === $kind && str_contains( $row[1], 'wp-block-post-featured-image' ) ? '' : $row[1];
+				foreach ( $header as $label => $row ) {
+					cr_read_same( $public( $label, $row ), cr_pw_render( $row[0], $row[1] ), $kind . ' public single prints the ' . $label );
+				}
+
+				$post->post_password = CR_PW_SECRET;
+				foreach ( $header as $label => $row ) {
+					cr_read_same( '', cr_pw_render( $row[0], $row[1] ), $kind . ' before the password prints no ' . $label );
+				}
+				foreach ( $others as $label => $row ) {
+					cr_read_same( $public( $label, $row ), cr_pw_render( $row[0], $row[1] ), $kind . ' before the password keeps the ' . $label );
+				}
+
+				cr_pw_enter( 'wrong-guess' );
+				foreach ( $header as $label => $row ) {
+					cr_read_same( '', cr_pw_render( $row[0], $row[1] ), $kind . ' with a wrong password cookie prints no ' . $label );
+				}
+
+				cr_pw_enter( CR_PW_SECRET );
+				foreach ( $header as $label => $row ) {
+					cr_read_same( $public( $label, $row ), cr_pw_render( $row[0], $row[1] ), $kind . ' after the password prints the ' . $label );
+				}
+			}
+		}
+	);
 
 	cr_read_group(
 		'watch lede prints no film facts before the password',
@@ -255,6 +482,36 @@ namespace {
 			$quote = array( 'blockName' => 'core/quote', 'attrs' => array(), 'innerBlocks' => array(), 'innerHTML' => '<blockquote class="wp-block-quote"><p>Fixture words.</p><cite>Locked Ledger</cite></blockquote>', 'innerContent' => array() );
 			$card  = '<article class="pk-card pk-card--stream k-quote h-cite"><div class="pk-caption"><p class="pk-sub pk-stream-date">March 5, 2023</p></div><div class="pk-meta"></div></article>';
 			cr_pw_stream_check( 'quote', 'quote', array( $quote ), 'Courtneyr\Child\QuoteNote\stream_card', $card, array( 'Locked Ledger' ) );
+		}
+	);
+
+	cr_read_group(
+		'read Stream card prints no author before the password',
+		static function (): void {
+			$attrs     = array( 'bookTitle' => 'The Quiet Atlas', 'authorName' => 'Lena Orchard', 'readStatus' => 'finished', 'rating' => 4 );
+			$card      = '<article class="wp-block-post-kinds-indieweb-read-card pk-card k-read h-cite u-read-of"><div class="pk-body"><div class="pk-caption"><h2 class="pk-title p-name"><a href="https://cards.test/p">The Quiet Atlas</a></h2><p class="pk-sub"><span class="p-author h-card"><span class="p-name">Lena Orchard</span></span></p><p class="pk-sub"><span>Finished</span></p></div><div class="pk-stars" role="img" aria-label="Rated 4 of 5"><svg></svg></div><data class="p-rating" value="4" hidden></data><div class="pk-meta"></div></div></article>';
+			$protected = '<article class="pk-card pk-card--stream pk-card--protected k-read h-entry"><h2 class="pk-title p-name"><a class="u-url" href="https://cards.test/p">Protected: The Quiet Atlas</a></h2></article>';
+			$post      = cr_pw_post( 'read', array( array( 'blockName' => 'post-kinds-indieweb/read-card', 'attrs' => $attrs ) ) );
+			$instance  = new WP_Block( array( 'postId' => $post->ID ) );
+			$run       = static fn( string $html ): string => Courtneyr\Child\StreamRead\book_card( $html, array( 'attrs' => array() ), $instance );
+
+			$post->post_password = '';
+			$public              = $run( $card );
+			cr_read_contains( 'Lena Orchard', $public, 'read public card prints the author' );
+
+			$post->post_password = CR_PW_SECRET;
+			$expected            = substr( $protected, 0, -10 ) . '<div class="cr-book__protected-form">' . get_the_password_form( $post ) . '</div></article>';
+			$locked              = $run( $protected );
+			cr_read_same( $expected, $locked, 'read before the password prints the title-only card and the password form' );
+			foreach ( array( 'Lena Orchard', 'cr-book__protected-author' ) as $fact ) {
+				cr_read_not_contains( $fact, $locked, 'read before the password prints ' . $fact );
+			}
+
+			cr_pw_enter( 'wrong-guess' );
+			cr_read_same( $expected, $run( $protected ), 'read with a wrong password cookie prints the title-only card and the password form' );
+
+			cr_pw_enter( CR_PW_SECRET );
+			cr_read_same( $public, $run( $card ), 'read after the password prints what the public card prints' );
 		}
 	);
 

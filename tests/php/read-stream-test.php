@@ -135,14 +135,15 @@ cr_read_group(
 );
 
 cr_read_group(
-	'protected Stream read shows its title link, book author and password form only',
+	'protected Stream read shows its title link and password form only',
 	static function (): void {
 		$post                      = cr_read_reset();
 		$GLOBALS['cr_read_blocks'] = array( cr_read_stream_read_block() );
 		$GLOBALS['cr_read_protected'][ $post->ID ] = true;
 		$input = '<article class="pk-card pk-card--stream pk-card--protected k-read h-entry"><h2 class="pk-title p-name"><a class="u-url" href="https://example.test/book">Protected: Stream Book</a></h2></article>';
 		$html  = book_card( $input, array( 'attrs' => array() ), new WP_Block( array( 'postId' => $post->ID ) ) );
-		cr_read_contains( '<p class="pk-sub cr-book__protected-author">S. Author</p>', $html, 'book author' );
+		cr_read_not_contains( 'S. Author', $html, 'protected hides the book author' );
+		cr_read_not_contains( 'cr-book__protected-author', $html, 'protected prints no author element' );
 		cr_read_contains( 'post-password-form', $html, 'password form' );
 		cr_read_same( 1, substr_count( $html, '<a ' ), 'one link' );
 		foreach ( array( 'pk-stars', 'p-rating', 'pk-rating-value', 'cr-book__facts', 'cr-book__stamp', 'cr-book__tab', 'pk-media', 'pk-note', 'Finished', '2026' ) as $hidden ) {

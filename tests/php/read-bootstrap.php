@@ -141,11 +141,12 @@ namespace {
 	}
 
 	function has_term( $term, $taxonomy, $post = null ): bool {
-		return (bool) $GLOBALS['cr_read_has_term'] && (string) $GLOBALS['cr_read_kind'] === (string) $term && 'kind' === $taxonomy;
+		return (bool) $GLOBALS['cr_read_has_term'] && in_array( (string) $GLOBALS['cr_read_kind'], array_map( 'strval', (array) $term ), true ) && 'kind' === $taxonomy;
 	}
 
 	function post_password_required( $post = null ): bool {
-		$p = $post instanceof WP_Post ? $post : $GLOBALS['cr_read_post'];
+		$current = $GLOBALS['cr_read_post'];
+		$p       = is_int( $post ) ? ( $current instanceof WP_Post && $current->ID === $post ? $current : null ) : ( $post instanceof WP_Post ? $post : $current );
 		if ( ! $p instanceof WP_Post ) {
 			return false;
 		}
@@ -210,7 +211,7 @@ namespace {
 	}
 
 	function is_singular( $post_type = '' ): bool {
-		return 'post' === $post_type;
+		return 'post' === $post_type && empty( $GLOBALS['cr_read_not_singular'] );
 	}
 
 	function get_queried_object_id(): int {
