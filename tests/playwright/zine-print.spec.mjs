@@ -185,7 +185,8 @@ async function printedText( page ) {
 test.describe( 'Zine export panel', () => {
 	test.skip( 'panel' !== SET, 'panel fixture set' );
 
-	test( 'T3: summary and open panel use the fixed light paint without layout rotation', async ( { page } ) => {
+	test( 'T3: summary and open panel use the light paint without layout rotation', async ( { page } ) => {
+		await page.emulateMedia( { colorScheme: 'light' } );
 		await open( page, PANEL_PATH );
 		const details = page.locator( '.pkiw-zine-export' ).first();
 		const summary = details.locator( 'summary' );
@@ -268,6 +269,22 @@ test.describe( 'Zine dark and forced-color paint', () => {
 		} );
 		expect( paint ).toMatchObject( { panel: NIGHT, ink: IVORY, border: IVORY, input: BLACK, cta: YELLOW, ctaInk: VIOLET } );
 		expect( paint.shadow ).toContain( YELLOW );
+	} );
+
+	test( 'T3: system dark mode uses night stock with ivory ink and yellow shadows', async ( { page } ) => {
+		await page.emulateMedia( { colorScheme: 'dark' } );
+		const details = await openPanel( page );
+		await page.mouse.move( 0, 0 );
+		const paint = await details.evaluate( ( node ) => {
+			const panel = getComputedStyle( node );
+			const summary = getComputedStyle( node.querySelector( 'summary' ) );
+			const input = getComputedStyle( node.querySelector( 'input[type="date"]' ) );
+			return { theme: document.documentElement.dataset.theme || 'unset', panel: panel.backgroundColor, ink: panel.color, border: panel.borderTopColor, borderWidth: panel.borderTopWidth, shadow: panel.boxShadow, summary: summary.backgroundColor, summaryInk: summary.color, summaryBorder: summary.borderTopColor, summaryShadow: summary.boxShadow, input: input.backgroundColor, inputInk: input.color };
+		} );
+		expect( [ 'unset', 'system' ], 'no stored choice, so the system scheme decides' ).toContain( paint.theme );
+		expect( paint ).toMatchObject( { panel: NIGHT, ink: IVORY, border: IVORY, borderWidth: '2px', summary: NIGHT, summaryInk: IVORY, summaryBorder: IVORY, input: BLACK, inputInk: IVORY } );
+		expect( paint.shadow, 'panel hard shadow is selective yellow' ).toContain( `${ YELLOW } 4px 4px 0px` );
+		expect( paint.summaryShadow, 'summary hard shadow is selective yellow' ).toContain( `${ YELLOW } 4px 4px 0px` );
 	} );
 
 	test( 'T3: forced colors removes shadows and the booklet drawing but keeps focus', async ( { page } ) => {
@@ -464,10 +481,144 @@ test.describe( 'Booklet imposition', () => {
 		expect( Buffer.compare( printed, await panel.screenshot() ), 'hiding the overflow column changes no pixel inside the panel' ).toBe( 0 );
 	} );
 
+	for ( const inverted of [ '0', '1' ] ) {
+		for ( const tag of [ 'ol', 'ul' ] ) {
+			test( `T7: ${ tag } list markers print in ink beside a hanging wrapped step, ${ '1' === inverted ? 'upside-down' : 'upright' } panel`, async ( { page } ) => {
+				await open( page, withPages( STREAM, 16 ), ...LANDSCAPE_SHEETS_CSS_PX.Letter );
+				await page.emulateMedia( { media: 'print' } );
+				const panel = page.locator( `.pkiw-zine-page[data-inverted="${ inverted }"]:not([data-pkiw-zine-page="2"]):has(footer) .pkiw-zine-page__content` ).first();
+				await expect( panel, 'the fixture has an entry panel in this orientation' ).toHaveCount( 1 );
+				await panel.evaluate( ( node, name ) => {
+					const wrapped = 'Stir the pot until the mixture thickens and coats the back of the spoon, then take it off the heat and let it rest';
+					node.innerHTML = `<${ name } class="wp-block-list" start="8"><li>Step</li><li>${ wrapped }</li><li>Step</li></${ name }>`;
+				}, tag );
+				const facts = await panel.evaluate( ( node, upsideDown ) => {
+					const list = node.firstElementChild;
+					const item = list.children[ 1 ];
+					const range = document.createRange();
+					range.selectNodeContents( item );
+					const rects = [ ...range.getClientRects() ];
+					const edges = rects.map( ( rect ) => Math.round( upsideDown ? rect.right : rect.left ) );
+					const marker = getComputedStyle( item, '::marker' );
+					const style = getComputedStyle( item );
+					return {
+						position: style.listStylePosition,
+						markerColor: marker.color,
+						inkColor: style.color,
+						lines: new Set( rects.map( ( rect ) => Math.round( rect.top ) ) ).size,
+						hangs: Math.max( ...edges ) === Math.min( ...edges ),
+						padding: parseFloat( getComputedStyle( list ).paddingInlineStart ),
+					};
+				}, '1' === inverted );
+				expect( facts.lines, 'the long step wraps' ).toBeGreaterThan( 1 );
+				expect( facts.position, 'markers stay outside the text' ).toBe( 'outside' );
+				expect( facts.padding, 'the list pads room for its markers' ).toBeGreaterThan( 0 );
+				expect( facts.hangs, 'a wrapped line starts under the first word, not under the marker' ).toBe( true );
+				expect( facts.markerColor, 'markers print in ink, not the orange token' ).toBe( facts.inkColor );
+				expect( facts.markerColor ).not.toBe( ORANGE );
+				const withMarkers = ( await panel.screenshot() ).toString( 'base64' );
+				await page.addStyleTag( { content: '.pkiw-zine-page__content li { list-style: none !important; }' } );
+				const without = ( await panel.screenshot() ).toString( 'base64' );
+				const ink = await page.evaluate( async ( [ a, b ] ) => {
+					const draw = async ( data ) => {
+						const bitmap = await createImageBitmap( new Blob( [ Uint8Array.from( atob( data ), ( char ) => char.charCodeAt( 0 ) ) ], { type: 'image/png' } ) );
+						const canvas = new OffscreenCanvas( bitmap.width, bitmap.height );
+						const context = canvas.getContext( '2d' );
+						context.drawImage( bitmap, 0, 0 );
+						return context.getImageData( 0, 0, bitmap.width, bitmap.height );
+					};
+					const [ one, two ] = [ await draw( a ), await draw( b ) ];
+					let minX = Infinity;
+					let maxX = -1;
+					for ( let y = 0; y < one.height; y++ ) {
+						for ( let x = 0; x < one.width; x++ ) {
+							const at = ( y * one.width + x ) * 4;
+							if ( one.data[ at ] !== two.data[ at ] || one.data[ at + 1 ] !== two.data[ at + 1 ] || one.data[ at + 2 ] !== two.data[ at + 2 ] ) {
+								minX = Math.min( minX, x );
+								maxX = Math.max( maxX, x );
+							}
+						}
+					}
+					return { minX, maxX, width: one.width };
+				}, [ withMarkers, without ] );
+				expect( ink.maxX, 'removing the markers changes pixels inside the panel' ).toBeGreaterThan( -1 );
+				expect( ink.minX, 'no marker ink touches the left edge of the clip' ).toBeGreaterThan( 0 );
+				expect( ink.maxX, 'no marker ink touches the right edge of the clip' ).toBeLessThan( ink.width - 1 );
+			} );
+		}
+	}
+
+	test( 'T7: unclassed and nested lists get markers too', async ( { page } ) => {
+		await open( page, withPages( STREAM, 16 ), ...LANDSCAPE_SHEETS_CSS_PX.Letter );
+		await page.emulateMedia( { media: 'print' } );
+		const panel = page.locator( '.pkiw-zine-page[data-inverted="0"]:not([data-pkiw-zine-page="2"]):has(footer) .pkiw-zine-page__content' ).first();
+		await panel.evaluate( ( node ) => {
+			node.innerHTML = '<ul><li>Plain<ul class="wp-block-list"><li>Nested</li></ul></li></ul><ol><li>Plain</li></ol>';
+		} );
+		const facts = await panel.evaluate( ( node ) => {
+			const [ outer, ordered ] = node.children;
+			const nested = outer.querySelector( 'ul' );
+			return {
+				outerPadding: getComputedStyle( outer ).paddingInlineStart,
+				outerType: getComputedStyle( outer.firstElementChild ).listStyleType,
+				nestedType: getComputedStyle( nested.firstElementChild ).listStyleType,
+				orderedPadding: getComputedStyle( ordered ).paddingInlineStart,
+			};
+		} );
+		expect( facts ).toEqual( { outerPadding: '28px', outerType: 'disc', nestedType: 'circle', orderedPadding: '28px' } );
+	} );
+
+	test( 'T7: lists with their own layout keep it in the booklet', async ( { page } ) => {
+		await open( page, withPages( STREAM, 8 ), ...LANDSCAPE_SHEETS_CSS_PX.Letter );
+		await page.emulateMedia( { media: 'print' } );
+		const strip = page.locator( '.pkiw-zine-page .pkiw-wrapped__metrics' ).first();
+		await expect( strip, 'the Wrapped strip prints in the booklet' ).toHaveCount( 1 );
+		expect( await strip.evaluate( ( node ) => getComputedStyle( node ).paddingInlineStart ), 'the strip list is not indented' ).toBe( '0px' );
+		const panel = page.locator( '.pkiw-zine-page:not([data-pkiw-zine-page="2"]):has(footer) .pkiw-zine-page__content' ).first();
+		await panel.evaluate( ( node ) => {
+			node.innerHTML = '<ul class="wp-block-list is-style-list-check"><li>Checked</li></ul>';
+		} );
+		const styled = await panel.evaluate( ( node ) => {
+			const list = node.firstElementChild;
+			return { padding: getComputedStyle( list ).paddingInlineStart, type: getComputedStyle( list.firstElementChild ).listStyleType };
+		} );
+		expect( styled.type, 'a styled list draws no extra disc beside its own marker' ).toBe( 'none' );
+		expect( styled.padding, 'a styled list keeps its own padding rules' ).not.toBe( '28px' );
+		const contents = page.locator( '[data-pkiw-zine-page="2"] ol' ).first();
+		expect( await contents.evaluate( ( node ) => getComputedStyle( node ).paddingInlineStart ), 'the contents list is not indented' ).toBe( '0px' );
+	} );
+
+	const MARGIN_04 = { margin: { top: '0.4in', right: '0.4in', bottom: '0.4in', left: '0.4in' } };
+	for ( const [ name, format, options, items ] of [
+		[ 'portrait A4', 'A4', {}, 0 ],
+		[ 'portrait Letter', 'Letter', {}, 0 ],
+		[ 'portrait A4 with long lists', 'A4', {}, 9 ],
+		[ 'landscape Letter with 0.4in margins', 'Letter', { landscape: true, ...MARGIN_04 }, 9 ],
+		[ 'landscape Letter without margins', 'Letter', { landscape: true }, 9 ],
+	] ) {
+		test( `T7: a ${ name } print of the Stream booklet returns`, async ( { page } ) => {
+			await open( page, withPages( STREAM, 8 ) );
+			const strip = await page.evaluate( ( count ) => {
+				const lists = [ '.pkiw-wrapped__metrics', '.pkiw-wrapped__top' ].map( ( selector ) => document.querySelector( `.pkiw-zine-page ${ selector }` ) );
+				lists.forEach( ( list ) => {
+					while ( list && list.children.length < count ) {
+						list.append( list.children[ list.children.length - 1 ].cloneNode( true ) );
+					}
+				} );
+				return lists.every( Boolean );
+			}, items );
+			expect( strip, 'the Wrapped strip prints in the booklet' ).toBe( true );
+			const hung = new Promise( ( resolve, reject ) => setTimeout( () => reject( new Error( 'page.pdf did not return in 30 s' ) ), 30000 ) );
+			const pdf = await Promise.race( [ page.pdf( { format, preferCSSPageSize: true, printBackground: true, ...options } ), hung ] );
+			expect( pdf.subarray( 0, 5 ).toString(), 'a PDF came back' ).toBe( '%PDF-' );
+		} );
+	}
+
 	test( 'T7: a failed booklet image leaves no visible empty frame', async ( { page } ) => {
 		await open( page, withPages( STREAM, 16 ) );
-		const image = page.locator( '.pkiw-zine-page img' ).first();
-		await expect( image, 'the print fixture includes an image for the failure path' ).toHaveCount( 1 );
+		const entryImages = page.locator( '.pkiw-zine-page img:not([data-cr-cover-fallback] img)' );
+		await expect( entryImages, 'the print fixture includes an entry image, not a Wrapped cover, which the cover handler in site-ux.js replaces on error' ).not.toHaveCount( 0 );
+		const image = entryImages.first();
 		await image.evaluate( ( node ) => {
 			node.hidden = false;
 			node.removeAttribute( 'srcset' );
