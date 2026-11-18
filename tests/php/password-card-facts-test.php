@@ -43,6 +43,54 @@ namespace {
 		return false;
 	}
 
+	if ( ! defined( 'OBJECT' ) ) {
+		define( 'OBJECT', 'OBJECT' );
+	}
+
+	final class WPRM_Print {
+		public static string $slug = 'wprm_print';
+
+		public static function slug(): string {
+			return self::$slug;
+		}
+
+		public static function print_page(): void {
+		}
+	}
+
+	final class WP_Query {
+		public bool $is_404 = false;
+
+		public function set_404(): void {
+			$this->is_404 = true;
+		}
+	}
+
+	function wp_unslash( $value ) {
+		return $value;
+	}
+
+	function get_post_type( $post = null ) {
+		return $GLOBALS['cr_pw_types'][ (int) $post ] ?? false;
+	}
+
+	function get_page_by_path( $path, $output = OBJECT, $type = 'page' ) {
+		return $GLOBALS['cr_pw_slugs'][ $type . ':' . $path ] ?? null;
+	}
+
+	function remove_action( $hook, $callback, $priority = 10 ): bool {
+		$GLOBALS['cr_pw_removed'][] = array( $hook, $callback, $priority );
+		return true;
+	}
+
+	function status_header( $code ): void {
+		$GLOBALS['cr_pw_status'] = (int) $code;
+	}
+
+	function nocache_headers(): void {
+		$GLOBALS['cr_pw_nocache'] = true;
+	}
+
 	function pkiw_get_visible_location_fields( int $post_id ): array {
 		return array( 'street' => true );
 	}
@@ -109,6 +157,92 @@ namespace {
 		$html = (string) $run( 'render_block', $html, array( $block ) );
 		return (string) $run( 'render_block_' . $block['blockName'], $html, array( $block ) );
 	}
+
+	/**
+	 * Fire a front-end request for one URL the way WordPress would: the
+	 * theme's init callbacks run, then the template_redirect callbacks they
+	 * queued. Returns what a visitor and WP Recipe Maker would see.
+	 *
+	 * @param string $uri Request URI.
+	 * @return array{printer_unhooked: bool, is_404: bool, status: int}
+	 */
+	function cr_pw_print_request( string $uri ): array {
+		$_SERVER['REQUEST_URI']      = $uri;
+		$GLOBALS['cr_pw_removed']    = array();
+		$GLOBALS['cr_pw_status']     = 200;
+		$GLOBALS['cr_pw_nocache']    = false;
+		$GLOBALS['wp_query']         = new WP_Query();
+		$mine                        = static fn( array $a ): bool => is_string( $a[1] ) && str_starts_with( $a[1], 'Courtneyr\\Child\\Recipe\\' );
+		$init                        = array_values( array_filter( $GLOBALS['cr_read_actions'], static fn( array $a ): bool => 'init' === $a[0] && $mine( $a ) ) );
+		usort( $init, static fn( array $a, array $b ): int => $a[2] <=> $b[2] );
+		$seen = count( $GLOBALS['cr_read_actions'] );
+		foreach ( $init as $action ) {
+			call_user_func( $action[1] );
+		}
+		foreach ( array_slice( $GLOBALS['cr_read_actions'], $seen ) as $action ) {
+			if ( 'template_redirect' === $action[0] && $mine( $action ) ) {
+				call_user_func( $action[1] );
+			}
+		}
+		return array(
+			'printer_unhooked' => in_array( array( 'init', array( 'WPRM_Print', 'print_page' ), 10 ), $GLOBALS['cr_pw_removed'], true ),
+			'is_404'           => $GLOBALS['wp_query']->is_404,
+			'status'           => $GLOBALS['cr_pw_status'],
+		);
+	}
+
+	cr_read_group(
+		'WP Recipe Maker print page answers 404 while the recipe\'s post is locked',
+		static function (): void {
+			$post = cr_pw_post( 'recipe', array() );
+			$GLOBALS['cr_pw_types']                                  = array( 7 => 'wprm_recipe', 8 => 'wprm_recipe', $post->ID => 'post' );
+			$GLOBALS['cr_pw_slugs']                                  = array( 'wprm_recipe:wprm-lentil-soup' => new WP_Post( 7, 'Lentil Soup' ) );
+			$GLOBALS['cr_read_meta'][7]['wprm_parent_post_id']       = $post->ID;
+			$urls = array(
+				'id'                 => '/wprm_print/7',
+				'id with a slash'    => '/wprm_print/7/',
+				'recipe form'        => '/wprm_print/recipe/7',
+				'recipe form + tpl'  => '/wprm_print/recipe/7/chic',
+				'slug'               => '/wprm_print/lentil-soup',
+				'query form'         => '/?wprm_print=7',
+				'id + query string'  => '/wprm_print/7?servings=2',
+			);
+			$open   = array( 'printer_unhooked' => false, 'is_404' => false, 'status' => 200 );
+			$closed = array( 'printer_unhooked' => true, 'is_404' => true, 'status' => 404 );
+
+			$post->post_password = '';
+			foreach ( $urls as $label => $uri ) {
+				cr_read_same( $open, cr_pw_print_request( $uri ), 'public recipe print by ' . $label . ' is left to WP Recipe Maker' );
+			}
+
+			$post->post_password = CR_PW_SECRET;
+			foreach ( $urls as $label => $uri ) {
+				cr_read_same( $closed, cr_pw_print_request( $uri ), 'locked recipe print by ' . $label . ' answers 404' );
+			}
+			cr_read_same( true, $GLOBALS['cr_pw_nocache'], 'the 404 is not cached' );
+
+			cr_pw_enter( 'wrong-guess' );
+			foreach ( $urls as $label => $uri ) {
+				cr_read_same( $closed, cr_pw_print_request( $uri ), 'recipe print by ' . $label . ' with a wrong password cookie answers 404' );
+			}
+
+			cr_pw_enter( CR_PW_SECRET );
+			foreach ( $urls as $label => $uri ) {
+				cr_read_same( $open, cr_pw_print_request( $uri ), 'recipe print by ' . $label . ' after the password is left to WP Recipe Maker' );
+			}
+
+			$post->post_password = CR_PW_SECRET;
+			unset( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
+			cr_read_same( $open, cr_pw_print_request( '/watch/the-lantern-archive/' ), 'a locked post\'s own page is not a print request' );
+			cr_read_same( $open, cr_pw_print_request( '/wprm_print/8' ), 'a recipe with no parent post is left to WP Recipe Maker' );
+			cr_read_same( $open, cr_pw_print_request( '/wprm_print/42' ), 'an id that is not a recipe is left to WP Recipe Maker' );
+			cr_read_same( $open, cr_pw_print_request( '/wprm_print/no-such-recipe' ), 'an unknown slug is left to WP Recipe Maker' );
+			WPRM_Print::$slug = 'print-it';
+			cr_read_same( $open, cr_pw_print_request( '/wprm_print/7' ), 'the default print slug is not special once the site renames it' );
+			cr_read_same( $closed, cr_pw_print_request( '/print-it/7' ), 'a renamed print slug is blocked too' );
+			WPRM_Print::$slug = 'wprm_print';
+		}
+	);
 
 	cr_read_group(
 		'locked single prints no featured image and no kind or category chips',
