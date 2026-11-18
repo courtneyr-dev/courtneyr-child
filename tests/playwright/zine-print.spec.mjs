@@ -464,6 +464,15 @@ test.describe( 'Booklet imposition', () => {
 		expect( Buffer.compare( printed, await panel.screenshot() ), 'hiding the overflow column changes no pixel inside the panel' ).toBe( 0 );
 	} );
 
+	for ( const format of [ 'A4', 'Letter' ] ) {
+		test( `T7: a portrait ${ format } print of the Stream booklet returns`, async ( { page } ) => {
+			await open( page, withPages( STREAM, 8 ) );
+			const hung = new Promise( ( resolve, reject ) => setTimeout( () => reject( new Error( 'page.pdf did not return in 30 s' ) ), 30000 ) );
+			const pdf = await Promise.race( [ page.pdf( { format, preferCSSPageSize: true, printBackground: true } ), hung ] );
+			expect( pdf.subarray( 0, 5 ).toString(), 'a PDF came back' ).toBe( '%PDF-' );
+		} );
+	}
+
 	test( 'T7: a failed booklet image leaves no visible empty frame', async ( { page } ) => {
 		await open( page, withPages( STREAM, 16 ) );
 		const image = page.locator( '.pkiw-zine-page img' ).first();
