@@ -492,7 +492,7 @@ function bag_card( string $html, array $block, $instance ): string {
 	if ( $post instanceof \WP_Post && post_password_required( $post ) ) {
 		return $html;
 	}
-	$comic   = comic_read( $post );
+	$comic = comic_read( $post );
 	if ( null === $comic ) {
 		// A strip its author drew stands on the rack as its picture and
 		// title link; the excerpt, date and "Read more" stay off the rack.
