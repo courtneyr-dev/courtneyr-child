@@ -211,7 +211,7 @@ namespace {
 	}
 
 	function is_singular( $post_type = '' ): bool {
-		return 'post' === $post_type;
+		return 'post' === $post_type && empty( $GLOBALS['cr_read_not_singular'] );
 	}
 
 	function get_queried_object_id(): int {

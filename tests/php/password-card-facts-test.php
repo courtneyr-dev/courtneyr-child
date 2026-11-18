@@ -78,6 +78,10 @@ namespace {
 		return $GLOBALS['cr_pw_slugs'][ $type . ':' . $path ] ?? null;
 	}
 
+	function get_posts( $args = array() ): array {
+		return $GLOBALS['cr_pw_names'][ (string) ( $args['name'] ?? '' ) ] ?? array();
+	}
+
 	function remove_action( $hook, $callback, $priority = 10 ): bool {
 		$GLOBALS['cr_pw_removed'][] = array( $hook, $callback, $priority );
 		return true;
@@ -197,6 +201,7 @@ namespace {
 			$post = cr_pw_post( 'recipe', array() );
 			$GLOBALS['cr_pw_types']                                  = array( 7 => 'wprm_recipe', 8 => 'wprm_recipe', $post->ID => 'post' );
 			$GLOBALS['cr_pw_slugs']                                  = array( 'wprm_recipe:wprm-lentil-soup' => new WP_Post( 7, 'Lentil Soup' ) );
+			$GLOBALS['cr_pw_names']                                  = array( 'wprm-lentil-soup!' => array( 7 ) );
 			$GLOBALS['cr_read_meta'][7]['wprm_parent_post_id']       = $post->ID;
 			$urls = array(
 				'id'                 => '/wprm_print/7',
@@ -206,6 +211,8 @@ namespace {
 				'slug'               => '/wprm_print/lentil-soup',
 				'query form'         => '/?wprm_print=7',
 				'id + query string'  => '/wprm_print/7?servings=2',
+				'id + more query'    => '/?wprm_print=7&servings=2',
+				'slug WordPress sanitizes' => '/wprm_print/lentil-soup!',
 				'id + suffix'        => '/wprm_print/7abc',
 				'recipe form + suffix' => '/wprm_print/recipe/7x',
 				'query form + suffix'  => '/?wprm_print=7x',
@@ -267,6 +274,13 @@ namespace {
 				'other image'     => array( array( 'blockName' => 'core/post-featured-image', 'attrs' => array() ), '<figure class="wp-block-post-featured-image"><img src="https://cards.test/cover.jpg" alt=""></figure>' ),
 				'tags'            => array( array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'single-post__tags is-style-term-button' ) ), '<div class="single-post__tags"><a href="/tag/x/">Tag</a></div>' ),
 			);
+			$post                = cr_pw_post( 'watch', array() );
+			$post->post_password = CR_PW_SECRET;
+			$GLOBALS['cr_read_not_singular'] = true;
+			foreach ( $header as $label => $row ) {
+				cr_read_same( $row[1], cr_pw_render( $row[0], $row[1] ), 'a locked post outside a single keeps the ' . $label . ' (the guard covers the single template only)' );
+			}
+			$GLOBALS['cr_read_not_singular'] = false;
 			foreach ( array( 'watch', 'comics', 'recipe', 'quote', 'read', 'checkin', 'like' ) as $kind ) {
 				$post                = cr_pw_post( $kind, array() );
 				$post->post_password = '';
