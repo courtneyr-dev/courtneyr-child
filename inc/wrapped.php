@@ -103,7 +103,7 @@ function rendered_surface( ?string $html = null ): bool {
 }
 
 /**
- * Record final block markup after all surface adapters have run.
+ * Record final block markup. Core fires render_block before render_block_{name}, so a Stream card is recorded through its parent post-template block.
  *
  * @param string $html Rendered block markup.
  */

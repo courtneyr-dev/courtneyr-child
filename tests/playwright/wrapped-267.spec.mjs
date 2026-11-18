@@ -180,6 +180,7 @@ test.describe( 'Wrapped archive strip', () => {
 		expect( focus.width ).toBe( '3px' );
 		expect( focus.color ).toBe( YELLOW );
 		expect( focus.shadow ).toMatch( /8px/ );
+		expect( await strip( page ).locator( 'a' ).evaluate( ( node ) => getComputedStyle( node ).boxShadow ), 'focused strip link draws no rectangular halo of its own' ).toBe( 'none' );
 		await open( page, ARCHIVE, 360 );
 		await assertNoOverflow( page, '400% zoom Wrapped archive' );
 	} );
@@ -227,9 +228,12 @@ test.describe( 'Wrapped Stream card', () => {
 		const focus = await streamCard( page ).evaluate( ( node ) => ( {
 			color: getComputedStyle( node ).outlineColor,
 			width: getComputedStyle( node ).outlineWidth,
+			shadow: getComputedStyle( node ).boxShadow,
 		} ) );
 		expect( focus.width ).toBe( '3px' );
 		expect( focus.color ).toBe( YELLOW );
+		expect( focus.shadow ).toMatch( /8px/ );
+		expect( await streamCard( page ).locator( 'a' ).evaluate( ( node ) => getComputedStyle( node ).boxShadow ), 'focused card link draws no rectangular halo of its own' ).toBe( 'none' );
 		await assertWholeHitArea( streamCard( page ).locator( 'a[href]' ), 'Wrapped Stream card link' );
 		const layers = await streamCard( page ).evaluate( ( root ) => ( {
 			card: getComputedStyle( root ).transform,
@@ -358,5 +362,8 @@ test.describe( 'quiet_public Wrapped sentinel', () => {
 		await expect( page.locator( 'main h1 .cr-cutout__tile' ) ).toHaveCount( 0 );
 		await expect( page.locator( '#courtneyr-wrapped-css, #courtneyr-wrapped-inline-css, #courtneyr-cutout-css' ) ).toHaveCount( 0 );
 		await expect( page.locator( 'link[href*="cr-wrapped.css"]' ) ).toHaveCount( 0 );
+		await expect( page.locator( '.pkiw-wrapped, .pkiw-wrapped__metrics' ), 'a quiet_public Wrapped single prints no Wrapped block' ).toHaveCount( 0 );
+		await open( page, STREAM );
+		await expect( page.locator( `.cr-wrapped-card a[href$="${ new URL( QUIET, 'http://x.test' ).pathname }"]` ), 'the Stream holds no Wrapped card for the quiet post' ).toHaveCount( 0 );
 	} );
 } );

@@ -26,7 +26,7 @@
 	list-style: none;
 }
 
-.wp-block-post-kinds-indieweb-wrapped .pkiw-wrapped__metrics {
+.wp-block-post-kinds-indieweb-wrapped.pkiw-wrapped .pkiw-wrapped__metrics {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
 	gap: var(--cr-space-lg);
@@ -100,7 +100,7 @@
 	font-family: var(--cr-font-accent);
 }
 
-.wp-block-post-kinds-indieweb-wrapped .pkiw-wrapped__top {
+.wp-block-post-kinds-indieweb-wrapped.pkiw-wrapped .pkiw-wrapped__top {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: var(--cr-space-lg);
@@ -129,7 +129,7 @@
 	object-fit: contain;
 }
 
-.pkiw-wrapped__top a {
+.pkiw-wrapped .pkiw-wrapped__top a {
 	display: flex;
 	align-items: center;
 	min-block-size: 44px;
@@ -181,8 +181,8 @@
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
-.pkiw-wrapped-strip > a,
-.pkiw-wrapped-strip .wp-block-button__link {
+.pkiw-wrapped-strip.pkiw-wrapped-strip > a,
+.pkiw-wrapped-strip.pkiw-wrapped-strip .wp-block-button__link {
 	display: flex;
 	align-items: center;
 	min-block-size: 44px;
@@ -238,8 +238,8 @@
 	box-shadow: 0 0 0 8px var(--cr-focus-halo), var(--cr-shadow-hard-2);
 }
 
-.cr-wrapped-card:focus-within,
-.cr-wrapped-card:has(a:focus-visible) {
+.cr-stream-page .pk-card.pk-card--stream.cr-wrapped-card:focus-within,
+.cr-stream-page .pk-card.pk-card--stream.cr-wrapped-card:has(a:focus-visible) {
 	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 4px;
 	box-shadow: 0 0 0 8px var(--cr-focus-halo);
@@ -249,13 +249,16 @@
 .cr-wrapped-card a:focus-visible {
 	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 4px;
+	box-shadow: none;
 }
 
 @supports selector(:has(a)) {
 
 	.pkiw-wrapped-strip a:focus-visible,
+	.pkiw-wrapped-strip .wp-block-button .wp-block-button__link:focus-visible,
 	.cr-wrapped-card a:focus-visible {
 		outline: none;
+		box-shadow: none;
 	}
 }
 
@@ -319,7 +322,7 @@
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
-.cr-wrapped-card__title a {
+.cr-wrapped-card .cr-wrapped-card__title a {
 	display: flex;
 	align-items: center;
 	min-block-size: 44px;
@@ -362,15 +365,15 @@
 
 @media (max-width: 63.999rem) {
 
-	.wp-block-post-kinds-indieweb-wrapped .pkiw-wrapped__metrics {
+	.wp-block-post-kinds-indieweb-wrapped.pkiw-wrapped .pkiw-wrapped__metrics {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }
 
 @media (max-width: 39.999rem) {
 
-	.wp-block-post-kinds-indieweb-wrapped .pkiw-wrapped__metrics,
-	.wp-block-post-kinds-indieweb-wrapped .pkiw-wrapped__top {
+	.wp-block-post-kinds-indieweb-wrapped.pkiw-wrapped .pkiw-wrapped__metrics,
+	.wp-block-post-kinds-indieweb-wrapped.pkiw-wrapped .pkiw-wrapped__top {
 		grid-template-columns: minmax(0, 1fr);
 	}
 
