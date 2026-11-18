@@ -627,6 +627,34 @@ body.pkiw-zine-print {
 		column-fill: auto;
 	}
 
+	body.pkiw-zine-print [data-pkiw-zine-page="2"] .pkiw-zine-page__content {
+		font-size: var(--cr-text-xs);
+		line-height: var(--cr-leading-snug);
+	}
+
+	body.pkiw-zine-print [data-pkiw-zine-page="2"] li {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		column-gap: var(--cr-space-xs);
+		margin: 0;
+	}
+
+	body.pkiw-zine-print [data-pkiw-zine-page="2"] li > :first-child {
+		display: -webkit-box;
+		overflow: hidden;
+		overflow-wrap: anywhere;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 1;
+	}
+
+	body.pkiw-zine-print [data-pkiw-zine-page="2"] ol:not(:has(> :nth-child(7))) li {
+		margin-block: var(--cr-space-2xs);
+	}
+
+	body.pkiw-zine-print [data-pkiw-zine-page="2"] ol:not(:has(> :nth-child(7))) li > :first-child {
+		-webkit-line-clamp: 2;
+	}
+
 	@supports (height: round(down, 100%, 1lh)) {
 
 		body.pkiw-zine-print .pkiw-zine-page__content {
