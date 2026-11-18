@@ -20,6 +20,7 @@ const YELLOW = 'rgb(255, 183, 3)';
 const LOCAL_ORIGIN = new URL( BASE_URL ).origin;
 const GUARDED_PAGES = new WeakSet();
 const PRINT_TOKENS = [ '--cr-ink-soft', '--cr-border', '--cr-tape', '--cr-code-bg', '--cr-code-ink' ];
+const LANDSCAPE_SHEETS_CSS_PX = { Letter: [ 1056, 816 ], A4: [ 1123, 794 ] };
 
 function withPages( path, pages ) {
 	const url = new URL( path, BASE_URL );
@@ -123,6 +124,62 @@ async function printPalette( page, theme ) {
 			code: { background: codeStyle.backgroundColor, color: codeStyle.color },
 		};
 	}, { properties: PRINT_TOKENS, value: theme } );
+}
+
+async function printedText( page ) {
+	return page.evaluate( () => {
+		const SLACK = 1;
+		const box = ( node ) => node.getBoundingClientRect();
+		const kept = ( rect, clip ) => {
+			if ( Math.min( rect.right, clip.right ) - Math.max( rect.left, clip.left ) <= SLACK || Math.min( rect.bottom, clip.bottom ) - Math.max( rect.top, clip.top ) <= SLACK ) {
+				return 'none';
+			}
+			return rect.top >= clip.top - SLACK && rect.bottom <= clip.bottom + SLACK ? 'all' : 'part';
+		};
+		const clipAround = ( text, content ) => {
+			let clip = box( content );
+			for ( let parent = text.parentElement; parent !== content; parent = parent.parentElement ) {
+				if ( 'visible' !== getComputedStyle( parent ).overflowY ) {
+					const inner = box( parent );
+					clip = { left: Math.max( clip.left, inner.left ), top: Math.max( clip.top, inner.top ), right: Math.min( clip.right, inner.right ), bottom: Math.min( clip.bottom, inner.bottom ) };
+				}
+			}
+			return clip;
+		};
+		const lineBox = ( glyphBox, text ) => {
+			const leading = parseFloat( getComputedStyle( text.parentElement ).lineHeight ) || glyphBox.height;
+			const top = glyphBox.top + ( glyphBox.height - leading ) / 2;
+			return { left: glyphBox.left, right: glyphBox.right, top, bottom: top + leading };
+		};
+		const cut = [];
+		for ( const content of document.querySelectorAll( '.pkiw-zine-page__content' ) ) {
+			const walker = document.createTreeWalker( content, NodeFilter.SHOW_TEXT );
+			while ( walker.nextNode() ) {
+				const text = walker.currentNode;
+				if ( ! text.textContent.trim() ) {
+					continue;
+				}
+				const range = document.createRange();
+				range.selectNodeContents( text );
+				for ( const glyphBox of range.getClientRects() ) {
+					if ( 'part' === kept( lineBox( glyphBox, text ), clipAround( text, content ) ) ) {
+						cut.push( `page ${ content.parentElement.dataset.pkiwZinePage }: ${ text.textContent.trim().slice( 0, 30 ) }` );
+					}
+				}
+			}
+		}
+		const contents = document.querySelector( '[data-pkiw-zine-page="2"]' );
+		const panel = box( contents.querySelector( '.pkiw-zine-page__content' ) );
+		const listed = [ ...contents.querySelectorAll( 'ol > li' ) ].filter( ( item ) => {
+			const number = box( item.lastElementChild );
+			return 'all' === kept( box( item ), panel ) && number.left >= panel.left - SLACK && number.right <= panel.right + SLACK;
+		} );
+		return {
+			folios: [ ...document.querySelectorAll( '.pkiw-zine-entry__folio' ) ].map( ( node ) => node.textContent.trim() ),
+			listed: listed.map( ( item ) => item.lastElementChild.textContent.trim() ),
+			cut,
+		};
+	} );
 }
 
 test.describe( 'Zine export panel', () => {
@@ -361,6 +418,51 @@ test.describe( 'Booklet imposition', () => {
 			} );
 		}
 	}
+
+	for ( const [ format, sheet ] of Object.entries( LANDSCAPE_SHEETS_CSS_PX ) ) {
+		for ( const pages of [ 8, 16 ] ) {
+			for ( const [ source, path ] of [ [ 'archive', ARCHIVE ], [ 'Stream', STREAM ] ] ) {
+				test( `T7: ${ format } ${ pages }-page ${ source } booklet lists every entry and clips between lines`, async ( { page } ) => {
+					await open( page, withPages( path, pages ), ...sheet );
+					await page.emulateMedia( { media: 'print' } );
+					const booklet = await printedText( page );
+					expect( booklet.folios.length, 'the fixture fills entry pages' ).toBeGreaterThan( 0 );
+					expect.soft( booklet.listed, 'the contents panel prints every included entry with its page number' ).toEqual( booklet.folios );
+					expect.soft( booklet.cut, 'no clip runs through a line of text' ).toEqual( [] );
+
+					await page.locator( '[data-pkiw-zine-page="2"] li > :first-child' ).evaluateAll( ( titles ) => titles.forEach( ( title ) => {
+						title.textContent = 'A title long enough to wrap onto three lines of a quarter-sheet panel when nothing limits it';
+					} ) );
+					const wordy = await printedText( page );
+					expect.soft( wordy.listed, 'long titles leave every entry and its page number in the panel' ).toEqual( booklet.folios );
+					expect( wordy.cut, 'no clip runs through a long title' ).toEqual( [] );
+				} );
+			}
+		}
+	}
+
+	test( 'T7: a clipped overflow column keeps its list markers off the panel', async ( { page } ) => {
+		await open( page, withPages( STREAM, 16 ), ...LANDSCAPE_SHEETS_CSS_PX.Letter );
+		await page.emulateMedia( { media: 'print' } );
+		const panel = page.locator( '.pkiw-zine-page:has(footer) .pkiw-zine-page__content' ).first();
+		const overflowItems = ( node, hide ) => {
+			const clip = node.getBoundingClientRect();
+			const beside = [ ...node.querySelectorAll( 'li' ) ].filter( ( item ) => item.getBoundingClientRect().left >= clip.right || item.getBoundingClientRect().right <= clip.left );
+			if ( hide ) {
+				beside.forEach( ( item ) => {
+					item.style.visibility = 'hidden';
+				} );
+			}
+			return beside.length;
+		};
+		await panel.evaluate( ( node ) => {
+			node.innerHTML = `<ol>${ '<li>Injected step</li>'.repeat( 30 ) }</ol>`;
+		} );
+		expect( await panel.evaluate( overflowItems, false ), 'the list runs into a clipped overflow column' ).toBeGreaterThan( 0 );
+		const printed = await panel.screenshot();
+		await panel.evaluate( overflowItems, true );
+		expect( Buffer.compare( printed, await panel.screenshot() ), 'hiding the overflow column changes no pixel inside the panel' ).toBe( 0 );
+	} );
 
 	test( 'T7: a failed booklet image leaves no visible empty frame', async ( { page } ) => {
 		await open( page, withPages( STREAM, 16 ) );
