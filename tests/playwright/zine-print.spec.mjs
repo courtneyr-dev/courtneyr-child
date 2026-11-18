@@ -464,6 +464,20 @@ test.describe( 'Booklet imposition', () => {
 		expect( Buffer.compare( printed, await panel.screenshot() ), 'hiding the overflow column changes no pixel inside the panel' ).toBe( 0 );
 	} );
 
+	for ( const tag of [ 'ol', 'ul' ] ) {
+		test( `T7: ${ tag } list markers print inside the panel`, async ( { page } ) => {
+			await open( page, withPages( STREAM, 16 ), ...LANDSCAPE_SHEETS_CSS_PX.Letter );
+			await page.emulateMedia( { media: 'print' } );
+			const panel = page.locator( '.pkiw-zine-page:has(footer) .pkiw-zine-page__content' ).first();
+			await panel.evaluate( ( node, name ) => {
+				node.innerHTML = `<${ name } class="wp-block-list">${ '<li>Step</li>'.repeat( 3 ) }</${ name }>`;
+			}, tag );
+			const withMarkers = await panel.screenshot();
+			await page.addStyleTag( { content: '.pkiw-zine-page__content li { list-style: none !important; }' } );
+			expect( Buffer.compare( withMarkers, await panel.screenshot() ), 'removing the markers changes pixels inside the panel' ).not.toBe( 0 );
+		} );
+	}
+
 	test( 'T7: a failed booklet image leaves no visible empty frame', async ( { page } ) => {
 		await open( page, withPages( STREAM, 16 ) );
 		const image = page.locator( '.pkiw-zine-page img' ).first();
