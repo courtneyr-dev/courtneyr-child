@@ -366,6 +366,8 @@ const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-on-this-day',
 	// Wrapped single, archive strip and Stream card only.
 	'courtneyr-wrapped',
+	// Zine controls and print views need the full conditional paint on first render.
+	'courtneyr-zine',
 	'courtneyr-presentation',
 	// Event archive calendar only; My Calendar renders it on /kind/event/.
 	'courtneyr-event-calendar',

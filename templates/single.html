@@ -26,6 +26,13 @@
 
 		<!-- wp:post-title {"level":1,"className":"cr-flank cr-flank--blue single-post__title","style":{"typography":{"letterSpacing":"-1px","lineHeight":"1.05"}},"fontFamily":"accent"} /-->
 
+		<!-- wp:group {"className":"cr-print-only cr-print-byline"} -->
+		<div class="wp-block-group cr-print-only cr-print-byline">
+			<!-- wp:post-author-name /-->
+			<!-- wp:post-date /-->
+		</div>
+		<!-- /wp:group -->
+
 	</div>
 	<!-- /wp:group -->
 
@@ -34,6 +41,14 @@
 	<!-- wp:post-featured-image {"align":"wide","className":"single-post__featured","style":{"spacing":{"margin":{"top":"var:preset|spacing|medium","bottom":"3rem"}}}} /-->
 
 	<!-- wp:post-content {"align":"","className":"single-post__content wp-block-post-content","layout":{"type":"constrained"}} /-->
+
+	<!-- wp:group {"className":"cr-print-only cr-print-permalink"} -->
+	<div class="wp-block-group cr-print-only cr-print-permalink">
+		<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"core/post-data","args":{"field":"link"}}}}} -->
+		<p></p>
+		<!-- /wp:paragraph -->
+	</div>
+	<!-- /wp:group -->
 
 	<!-- wp:courtneyr/series-guide {"view":"post-nav"} /-->
 
