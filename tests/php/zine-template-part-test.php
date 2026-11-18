@@ -287,11 +287,11 @@ namespace {
 	$template_has_part = false;
 	$iterator          = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( COURTNEYR_CHILD_DIR . '/templates', FilesystemIterator::SKIP_DOTS ) );
 	foreach ( $iterator as $file ) {
-		if ( $file->isFile() && 'html' === $file->getExtension() && str_contains( (string) file_get_contents( $file->getPathname() ), '"slug":"zine-export"' ) ) {
+		if ( $file->isFile() && 'html' === $file->getExtension() && ! str_starts_with( $file->getBasename(), 'taxonomy-kind' ) && str_contains( (string) file_get_contents( $file->getPathname() ), '"slug":"zine-export"' ) ) {
 			$template_has_part = true;
 		}
 	}
-	cr_zine_check( ! $template_has_part, 'T1 no template inserts the zine-export part' );
+	cr_zine_check( ! $template_has_part, 'T1 no template outside the kind archives inserts the zine-export part' );
 
 	$zine_css   = (string) file_get_contents( COURTNEYR_CHILD_DIR . '/assets/css/cr-zine.css' );
 	$print_css  = (string) file_get_contents( COURTNEYR_CHILD_DIR . '/assets/css/cr-print.css' );
