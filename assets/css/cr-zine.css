@@ -627,6 +627,50 @@ body.pkiw-zine-print {
 		column-fill: auto;
 	}
 
+	/*
+	 * Chromium 151 never finishes laying out a CSS grid with a second row inside
+	 * the one-column panel: page.pdf() and print preview spin one renderer for
+	 * minutes. cr-wrapped.css gives the Wrapped strip two such grids. The metrics
+	 * wrap to two columns below 64rem, a page width that paper margins reach on a
+	 * landscape sheet, and past four items. The top reads wrap past three. Those
+	 * lists print as flex rows with the same columns, up to four items: item
+	 * padding is wider than a fifth column. A one-row grid lays out fine and stays
+	 * a grid. Each basis gives up 0.1px so rounding can't wrap the last item of a
+	 * full row. This covers the strip only: any other grid with unequal-height
+	 * rows in a panel hangs the same way.
+	 */
+	body.pkiw-zine-print .pkiw-zine-page__content :is(.pkiw-wrapped__metrics:has(> li:nth-child(5)), .pkiw-wrapped__top:has(> li:nth-child(4))) {
+		display: flex;
+		flex-wrap: wrap;
+	}
+
+	body.pkiw-zine-print .pkiw-zine-page__content :where(.pkiw-wrapped__metrics) > li {
+		flex: 0 0 calc((100% - 3 * var(--cr-space-lg)) / 4 - 0.1px);
+	}
+
+	body.pkiw-zine-print .pkiw-zine-page__content :where(.pkiw-wrapped__top) > li {
+		flex: 0 0 calc((100% - 2 * var(--cr-space-lg)) / 3 - 0.1px);
+	}
+
+	@media (max-width: 63.999rem) {
+
+		body.pkiw-zine-print .pkiw-zine-page__content .pkiw-wrapped__metrics {
+			display: flex;
+			flex-wrap: wrap;
+		}
+
+		body.pkiw-zine-print .pkiw-zine-page__content :where(.pkiw-wrapped__metrics) > li {
+			flex-basis: calc((100% - var(--cr-space-lg)) / 2 - 0.1px);
+		}
+	}
+
+	@media (max-width: 39.999rem) {
+
+		body.pkiw-zine-print .pkiw-zine-page__content :where(.pkiw-wrapped__metrics, .pkiw-wrapped__top) > li {
+			flex-basis: 100%;
+		}
+	}
+
 	body.pkiw-zine-print [data-pkiw-zine-page="2"] .pkiw-zine-page__content {
 		font-size: var(--cr-text-xs);
 		line-height: var(--cr-leading-snug);
