@@ -628,6 +628,32 @@ body.pkiw-zine-print {
 	}
 
 	/*
+	 * Ollie pads lists with var(--wp--preset--spacing--medium), a WordPress preset
+	 * variable this theme's theme.json does not define, so the padding computes to 0
+	 * and outside markers hang into the clipped margin (components.css 8b has the
+	 * same fix on screen). Pad the list and keep the markers
+	 * outside, so a wrapped line hangs under its text. Markers print in ink: the
+	 * orange marker token is 2.4:1 on ivory. Lists with their own class keep their
+	 * layout: the Wrapped strip's flex and grid items, is-style-* lists with an
+	 * icon, and page 2's contents, whose grid rows draw no marker.
+	 */
+	body.pkiw-zine-print .pkiw-zine-page:not([data-pkiw-zine-page="2"]) .pkiw-zine-page__content :is(ol.wp-block-list, ul.wp-block-list:not([class*="is-style-"]), ol:not([class]), ul:not([class])) {
+		padding-inline-start: 1.75rem;
+	}
+
+	body.pkiw-zine-print .pkiw-zine-page:not([data-pkiw-zine-page="2"]) .pkiw-zine-page__content :is(ul.wp-block-list:not([class*="is-style-"]), ul:not([class])) {
+		list-style-type: disc;
+	}
+
+	body.pkiw-zine-print .pkiw-zine-page:not([data-pkiw-zine-page="2"]) .pkiw-zine-page__content li :is(ul.wp-block-list:not([class*="is-style-"]), ul:not([class])) {
+		list-style-type: circle;
+	}
+
+	body.pkiw-zine-print .pkiw-zine-page:not([data-pkiw-zine-page="2"]) .pkiw-zine-page__content :is(ol.wp-block-list, ul.wp-block-list:not([class*="is-style-"]), ol:not([class]), ul:not([class])) > li::marker {
+		color: currentcolor;
+	}
+
+	/*
 	 * Chromium 151 never finishes laying out a CSS grid with a second row inside
 	 * the one-column panel: page.pdf() and print preview spin one renderer for
 	 * minutes. cr-wrapped.css gives the Wrapped strip two such grids. The metrics
