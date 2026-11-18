@@ -24,6 +24,11 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    ignore:
+      # @wordpress/stylelint-config 27 requires stylelint ^17.14.1; lift this
+      # once a release of it accepts stylelint 18.
+      - dependency-name: stylelint
+        versions: ['>=18']
     groups:
       npm-minor-patch:
         patterns:

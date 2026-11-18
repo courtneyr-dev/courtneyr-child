@@ -681,7 +681,7 @@ dfn {
   text-decoration: none;
 }
 
-q { quotes: """ """ "'" "'"; font-style: italic; }
+q { quotes: "\201C" "\201D" "\2018" "\2019"; font-style: italic; }
 cite { font-style: italic; color: var(--cr-ink-muted); }
 
 kbd {
