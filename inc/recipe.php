@@ -322,6 +322,81 @@ function recipe_plugin_settings( $settings ) {
 add_filter( 'wprm_settings', __NAMESPACE__ . '\\recipe_plugin_settings' );
 
 /**
+ * The recipe a WP Recipe Maker print URL names, or 0.
+ *
+ * Reads the URL the way the plugin's print_page() does: the print slug,
+ * then a recipe ID or slug, with or without a leading "recipe" segment.
+ * Lists, collections and shopping lists are not single-recipe URLs.
+ *
+ * @param string $uri Request URI.
+ * @return int
+ */
+function print_request_recipe_id( string $uri ): int {
+	if ( ! class_exists( '\\WPRM_Print' ) || 1 !== preg_match( '/[\/\?]' . preg_quote( \WPRM_Print::slug(), '/' ) . '[\/=](.+?)(\/)?$/', $uri, $match ) ) {
+		return 0;
+	}
+	$args = explode( '/', str_replace( array( '?', '&' ), '/', $match[1] ) );
+	if ( in_array( $args[0], array( 'recipes', 'collection', 'shopping-list' ), true ) ) {
+		return 0;
+	}
+	$name = 'recipe' === $args[0] ? ( $args[1] ?? '' ) : $args[0];
+	if ( '' === $name ) {
+		return 0;
+	}
+	if ( ctype_digit( $name ) && 'wprm_recipe' === get_post_type( (int) $name ) ) {
+		return (int) $name;
+	}
+	foreach ( array( 'wprm-' . $name, $name ) as $path ) {
+		$recipe = get_page_by_path( $path, OBJECT, 'wprm_recipe' );
+		if ( $recipe instanceof \WP_Post ) {
+			return $recipe->ID;
+		}
+	}
+	return 0;
+}
+
+/**
+ * True when a print URL names a recipe whose parent post still needs its password.
+ *
+ * @param string $uri Request URI.
+ * @return bool
+ */
+function locked_print_request( string $uri ): bool {
+	$recipe_id = print_request_recipe_id( $uri );
+	$parent_id = $recipe_id > 0 ? (int) get_post_meta( $recipe_id, 'wprm_parent_post_id', true ) : 0;
+	return $parent_id > 0 && post_password_required( $parent_id );
+}
+
+/**
+ * Take a locked recipe's print page away from WP Recipe Maker.
+ *
+ * The plugin prints that page from its own init callback and exits, so
+ * template_redirect never runs for it. A post that is not publicly
+ * viewable prints none of its card facts, and the recipe card is one:
+ * until the visitor enters the post's password, the print URL answers
+ * 404 instead. The unhook runs at priority 9, before the plugin's 10.
+ */
+function stop_locked_print(): void {
+	$uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- parsed, never output.
+	if ( ! locked_print_request( $uri ) ) {
+		return;
+	}
+	remove_action( 'init', array( 'WPRM_Print', 'print_page' ) );
+	add_action( 'template_redirect', __NAMESPACE__ . '\\send_print_404', 0 );
+}
+add_action( 'init', __NAMESPACE__ . '\\stop_locked_print', 9 );
+
+/**
+ * Answer the locked print URL with the site's 404.
+ */
+function send_print_404(): void {
+	global $wp_query;
+	$wp_query->set_404();
+	status_header( 404 );
+	nocache_headers();
+}
+
+/**
  * The recipe's summary and the plugin's print link, under the H1.
  *
  * The post title is the page heading, so the template leaves the recipe
