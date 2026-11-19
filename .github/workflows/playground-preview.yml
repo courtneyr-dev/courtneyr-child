@@ -2,7 +2,7 @@ name: Playground preview
 
 # Adds a "Preview in Playground" button to each pull request's description.
 # The child theme needs its parent, so the Blueprint installs Ollie from
-# WordPress.org, then this theme from the PR branch, and activates it. Post
+# WordPress.org, then this theme at the PR head commit, and activates it. Post
 # Kinds for IndieWeb is installed so the kind templates have data to render.
 # Fork and Dependabot PRs get a read-only token and are skipped.
 on:
@@ -39,10 +39,11 @@ jobs:
                   "themeData": {
                     "resource": "git:directory",
                     "url": "https://github.com/${{ github.repository }}.git",
-                    "ref": "${{ github.event.pull_request.head.ref }}",
+                    "ref": "${{ github.event.pull_request.head.sha }}",
+                    "refType": "commit",
                     "path": "/"
                   },
-                  "options": { "activate": true } },
+                  "options": { "activate": true, "targetFolderName": "courtneyr-child" } },
                 { "step": "installPlugin",
                   "pluginData": { "resource": "wordpress.org/plugins", "slug": "post-kinds-for-indieweb-in-block-themes" },
                   "options": { "activate": true } },
