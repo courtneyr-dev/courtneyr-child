@@ -132,6 +132,9 @@ function route( ?string $pre, array $parsed_block ): ?string {
 	}
 	$post_id = (int) get_queried_object_id();
 	$slug    = is_singular( 'post' ) ? part_slug_for( $post_id ) : '';
+	if ( 'kind-listen' === $slug && post_password_required( $post_id ) ) {
+		return '';
+	}
 	if ( '' !== $slug && is_podcast_post( $post_id ) ) {
 		$slug = '';
 	}

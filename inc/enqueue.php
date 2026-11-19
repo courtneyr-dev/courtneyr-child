@@ -702,12 +702,14 @@ function revalidate_page_html(): void {
 		$post_password_set = $post && '' !== (string) $post->post_password;
 	}
 
-	if ( $post_password_set ) {
+	$grid_has_password_cookie = ( is_home() || is_archive() || is_search() ) && isset( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
+	if ( $post_password_set || $grid_has_password_cookie ) {
 		// R-09: a password-protected post must never be shared-cacheable. Gate on
 		// the post HAVING a password, not post_password_required() — that helper
 		// returns false once the visitor's wp-postpass_ cookie is valid, but the
 		// response still varies by that cookie (form vs. content), so it's still
-		// a per-visitor response. The host replaces Cache-Control on HTML unless
+		// a per-visitor response. Grid images and chips vary by the cookie too.
+		// The host replaces Cache-Control on HTML unless
 		// the value contains "private" (/wp-login.php keeps its "...private"
 		// suffix; this branch previously didn't, and reached browsers as
 		// "public, max-age=2678400" — staging evidence 2026-09-14, FAIL 3), so
