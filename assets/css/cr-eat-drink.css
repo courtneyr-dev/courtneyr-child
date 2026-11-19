@@ -25,7 +25,7 @@ body.cr-order-single .single-post__content {
 	margin-inline: auto;
 }
 
-body.cr-order-single .single-post__content .cr-placemat {
+.single-post__content .cr-placemat {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
 	gap: 1.75rem;
@@ -38,7 +38,7 @@ body.cr-order-single .single-post__content .cr-placemat {
 	color: var(--cr-russian-violet);
 }
 
-body.cr-order-single .single-post__content .cr-placemat--drink {
+.single-post__content .cr-placemat--drink {
 	background: var(--cr-glaucous);
 }
 
@@ -336,7 +336,7 @@ body.cr-order-single .single-post__content .cr-placemat--drink {
    ============================================================ */
 @media (min-width: 48rem) {
 
-	body.cr-order-single .single-post__content .cr-placemat {
+	.single-post__content .cr-placemat {
 		gap: 2rem;
 		padding: 2rem;
 	}
@@ -516,7 +516,7 @@ body.cr-order-single .single-post__content .cr-placemat--drink {
    ============================================================ */
 @media (forced-colors: active) {
 
-	body.cr-order-single .single-post__content .cr-placemat,
+	.single-post__content .cr-placemat,
 	.cr-placemat .cr-order__photo,
 	.cr-placemat .cr-order--coaster .cr-order__sheet,
 	.cr-placemat .cr-map-slip,
@@ -562,7 +562,7 @@ body.cr-order-single .single-post__content .cr-placemat--drink {
 
 @media print {
 
-	body.cr-order-single .single-post__content .cr-placemat,
+	.single-post__content .cr-placemat,
 	.cr-placemat .cr-order__photo,
 	.cr-placemat .cr-order--coaster .cr-order__sheet,
 	.cr-placemat .cr-map-slip {

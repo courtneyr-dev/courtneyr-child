@@ -40,12 +40,23 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\SingleOrder;
 
+use Courtneyr\Child\ArtifactStyle;
 use function Courtneyr\Child\CheckinMap\slip;
 use function Courtneyr\Child\StreamMedia\find_block;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+const EAT_STYLE      = 'cr-order-ticket';
+const DRINK_STYLE    = 'cr-coaster';
+const STYLE_FOR_KIND = array(
+	'eat'   => EAT_STYLE,
+	'drink' => DRINK_STYLE,
+);
+
+ArtifactStyle\register( 'post-kinds-indieweb/eat-card', EAT_STYLE, __( 'Order ticket', 'courtneyr-child' ), 'eat' );
+ArtifactStyle\register( 'post-kinds-indieweb/drink-card', DRINK_STYLE, __( 'Coaster', 'courtneyr-child' ), 'drink' );
 
 /**
  * Which order the queried post is: one with the plugin's card for its kind.
@@ -60,8 +71,8 @@ function kind(): string {
 	if ( ! $post instanceof \WP_Post ) {
 		return '';
 	}
-	foreach ( array( 'eat', 'drink' ) as $kind ) {
-		if ( \has_term( $kind, 'kind', $post ) && null !== find_block( $post, 'post-kinds-indieweb/' . $kind . '-card' ) ) {
+	foreach ( STYLE_FOR_KIND as $kind => $style ) {
+		if ( ArtifactStyle\applies( $post, $style ) && null !== find_block( $post, 'post-kinds-indieweb/' . $kind . '-card' ) ) {
 			return $kind;
 		}
 	}
@@ -330,6 +341,7 @@ function placemat( string $html, array $block ): string {
 		$tags->remove_class( 'pk-card' );
 		$tags->add_class( 'cr-placemat' );
 		$tags->add_class( 'cr-placemat--' . $kind );
+		$tags->add_class( 'is-style-' . STYLE_FOR_KIND[ $kind ] );
 		$root = substr( $tags->get_updated_html(), 0, (int) strpos( $tags->get_updated_html(), '>' ) + 1 );
 	}
 	if ( '' === $root ) {

@@ -154,6 +154,10 @@ namespace {
 		return false;
 	}
 
+	function get_the_terms( int $post_id, string $taxonomy ): array {
+		return array_map( static fn( string $slug ): object => (object) array( 'slug' => $slug ), $GLOBALS['cr_terms'][ $post_id ] ?? array() );
+	}
+
 	/** Password-protected flag. */
 	function post_password_required( $post = null ) {
 		$id = $post instanceof WP_Post ? $post->ID : ( null === $post ? (int) $GLOBALS['cr_current_post'] : (int) $post );
@@ -209,6 +213,7 @@ namespace Courtneyr\Child\StreamMedia {
 
 namespace {
 	require CR_W3_T0_THEME_DIR . '/inc/post-kinds.php';
+	require CR_W3_T0_THEME_DIR . '/inc/artifact-style.php';
 	require CR_W3_T0_THEME_DIR . '/inc/single-eat-drink.php';
 	$GLOBALS['cr_base_hooks'] = $GLOBALS['cr_hooks'];
 }

@@ -23,6 +23,7 @@ courtneyr-child/
 │   │                        BLOCK_STYLE_MAP controls the registry.
 │   ├── block-styles.php   ← register_block_style() variations
 │   │                        (cr-tape, cr-highlight, cr-rotate-*, ...)
+│   ├── artifact-style.php ← cr-* artifact styles on the PKIW card blocks.
 │   ├── block-patterns.php ← Pattern category registration.
 │   └── interactivity.php  ← Theme toggle via the Interactivity API +
 │                            inline pre-paint script for flash prevention.

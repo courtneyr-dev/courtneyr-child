@@ -35,6 +35,10 @@ namespace {
 		return false;
 	}
 
+	function get_the_terms( int $post_id, string $taxonomy ): array {
+		return array( (object) array( 'slug' => $GLOBALS['cr_read_kind'] ) );
+	}
+
 	function wp_allowed_protocols(): array {
 		return array( 'http', 'https' );
 	}
@@ -107,6 +111,7 @@ namespace {
 	require dirname( __DIR__, 2 ) . '/inc/comic.php';
 	require dirname( __DIR__, 2 ) . '/inc/recipe.php';
 	require dirname( __DIR__, 2 ) . '/inc/stream-media.php';
+	require dirname( __DIR__, 2 ) . '/inc/artifact-style.php';
 	require dirname( __DIR__, 2 ) . '/inc/single-eat-drink.php';
 	require dirname( __DIR__, 2 ) . '/inc/stream-eat-drink.php';
 	require dirname( __DIR__, 2 ) . '/inc/stream-checkin.php';
@@ -117,7 +122,11 @@ namespace {
 	const CR_PW_SECRET = 'open-sesame';
 
 	function cr_pw_post( string $kind, array $blocks ): WP_Post {
+		static $order_fixture_id = 100;
 		$post                = cr_read_reset();
+		if ( in_array( $kind, array( 'eat', 'drink' ), true ) ) {
+			$post->ID = ++$order_fixture_id;
+		}
 		$post->post_password = CR_PW_SECRET;
 		$GLOBALS['cr_read_kind']   = $kind;
 		$GLOBALS['cr_read_blocks'] = $blocks;

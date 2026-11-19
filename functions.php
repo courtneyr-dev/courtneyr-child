@@ -26,6 +26,7 @@ define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 require_once __DIR__ . '/inc/theme-supports.php';
 require_once __DIR__ . '/inc/enqueue.php';
 require_once __DIR__ . '/inc/block-styles.php';
+require_once __DIR__ . '/inc/artifact-style.php';
 require_once __DIR__ . '/inc/block-patterns.php';
 require_once __DIR__ . '/inc/interactivity.php';
 require_once __DIR__ . '/inc/home-sections.php';
