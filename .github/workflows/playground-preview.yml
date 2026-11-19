@@ -47,6 +47,13 @@ jobs:
                 { "step": "installPlugin",
                   "pluginData": { "resource": "wordpress.org/plugins", "slug": "post-kinds-for-indieweb-in-block-themes" },
                   "options": { "activate": true } },
+                {
+                  "step": "importWxr",
+                  "file": {
+                    "resource": "url",
+                    "url": "https://raw.githubusercontent.com/courtneyr-dev/indieweb-test-data/62a8dbc66bd0814ea720bd23f3893a16d499ff20/indieweb-test-data-small.xml"
+                  }
+                },
                 { "step": "login", "username": "admin" }
               ]
             }
