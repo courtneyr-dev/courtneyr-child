@@ -142,10 +142,11 @@ namespace {
 	 * otherwise the generic and the block-specific render_block filters run
 	 * in priority order over the block's own output.
 	 *
-	 * @param array  $block Parsed block.
-	 * @param string $html  What the block prints when nothing intervenes.
+	 * @param array         $block    Parsed block.
+	 * @param string        $html     What the block prints when nothing intervenes.
+	 * @param WP_Block|null $instance Block instance with the current post context.
 	 */
-	function cr_pw_render( array $block, string $html ): string {
+	function cr_pw_render( array $block, string $html, ?WP_Block $instance = null ): string {
 		$run = static function ( string $hook, $value, array $args ) {
 			$filters = array_values( array_filter( $GLOBALS['cr_read_filters'], static fn( array $f ): bool => $f[0] === $hook ) );
 			usort( $filters, static fn( array $a, array $b ): int => $a[2] <=> $b[2] );
@@ -158,8 +159,9 @@ namespace {
 		if ( null !== $pre ) {
 			return (string) $pre;
 		}
-		$html = (string) $run( 'render_block', $html, array( $block ) );
-		return (string) $run( 'render_block_' . $block['blockName'], $html, array( $block ) );
+		$instance ??= new WP_Block( array( 'postId' => get_the_ID() ) );
+		$html = (string) $run( 'render_block', $html, array( $block, $instance ) );
+		return (string) $run( 'render_block_' . $block['blockName'], $html, array( $block, $instance ) );
 	}
 
 	/**
@@ -196,7 +198,7 @@ namespace {
 	}
 
 	cr_read_group(
-		'WP Recipe Maker print page answers 404 while the recipe\'s post is locked',
+		'WP Recipe Maker print gives the same 404 for locked and missing recipes',
 		static function (): void {
 			$post = cr_pw_post( 'recipe', array() );
 			$GLOBALS['cr_pw_types']                                  = array( 7 => 'wprm_recipe', 8 => 'wprm_recipe', $post->ID => 'post' );
@@ -219,7 +221,7 @@ namespace {
 			);
 			$init_priorities = array();
 			foreach ( $GLOBALS['cr_read_actions'] as $action ) {
-				if ( 'init' === $action[0] && 'Courtneyr\\Child\\Recipe\\stop_locked_print' === $action[1] ) {
+				if ( 'init' === $action[0] && 'Courtneyr\\Child\\Recipe\\stop_unavailable_print' === $action[1] ) {
 					$init_priorities[] = $action[2];
 				}
 			}
@@ -252,12 +254,36 @@ namespace {
 			unset( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
 			cr_read_same( $open, cr_pw_print_request( '/watch/the-lantern-archive/' ), 'a locked post\'s own page is not a print request' );
 			cr_read_same( $open, cr_pw_print_request( '/wprm_print/8' ), 'a recipe with no parent post is left to WP Recipe Maker' );
-			cr_read_same( $open, cr_pw_print_request( '/wprm_print/42' ), 'an id that is not a recipe is left to WP Recipe Maker' );
-			cr_read_same( $open, cr_pw_print_request( '/wprm_print/no-such-recipe' ), 'an unknown slug is left to WP Recipe Maker' );
+			cr_read_same( $closed, cr_pw_print_request( '/wprm_print/42' ), 'an id that is missing from the recipe post type answers 404' );
+			cr_read_same( $closed, cr_pw_print_request( '/wprm_print/no-such-recipe' ), 'an unknown recipe slug answers 404' );
+			cr_read_same( $closed, cr_pw_print_request( '/?wprm_print=42' ), 'an unknown recipe id in the query form answers 404' );
+			cr_read_same( $open, cr_pw_print_request( '/wprm_print/recipes/lookup-list' ), 'a recipe list still goes to WP Recipe Maker' );
+			cr_read_same( $open, cr_pw_print_request( '/wprm_print/collection/42' ), 'a recipe collection still goes to WP Recipe Maker' );
+			cr_read_same( $open, cr_pw_print_request( '/wprm_print/shopping-list/42' ), 'a shopping list still goes to WP Recipe Maker' );
 			WPRM_Print::$slug = 'print-it';
 			cr_read_same( $open, cr_pw_print_request( '/wprm_print/7' ), 'the default print slug is not special once the site renames it' );
 			cr_read_same( $closed, cr_pw_print_request( '/print-it/7' ), 'a renamed print slug is blocked too' );
 			WPRM_Print::$slug = 'wprm_print';
+		}
+	);
+
+	cr_read_group(
+		'grid facts follow the card post and its password',
+		static function (): void {
+			$post = cr_pw_post( 'note', array() );
+			$GLOBALS['cr_read_not_singular'] = true;
+			$blocks = array(
+				array( 'blockName' => 'core/post-featured-image', 'attrs' => array( 'className' => 'card__image' ) ),
+				array( 'blockName' => 'core/post-terms', 'attrs' => array( 'className' => 'card__chip' ) ),
+			);
+			foreach ( $blocks as $block ) {
+				cr_read_same( '', cr_pw_render( $block, 'fact' ), 'the locked grid card hides ' . $block['blockName'] );
+				cr_read_same( 'fact', cr_pw_render( $block, 'fact', new WP_Block() ), 'a block without card context passes through' );
+			}
+			cr_pw_enter( CR_PW_SECRET );
+			foreach ( $blocks as $block ) {
+				cr_read_same( 'fact', cr_pw_render( $block, 'fact' ), 'the unlocked grid card keeps ' . $block['blockName'] );
+			}
 		}
 	);
 

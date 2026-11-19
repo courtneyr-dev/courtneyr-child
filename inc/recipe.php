@@ -329,11 +329,11 @@ add_filter( 'wprm_settings', __NAMESPACE__ . '\\recipe_plugin_settings' );
  * Lists, collections and shopping lists are not single-recipe URLs.
  *
  * @param string $uri Request URI.
- * @return int
+ * @return int|null Recipe ID, 0 for a missing recipe, or null for another route.
  */
-function print_request_recipe_id( string $uri ): int {
+function print_request_recipe_id( string $uri ): ?int {
 	if ( ! class_exists( '\\WPRM_Print' ) ) {
-		return 0;
+		return null;
 	}
 	$slug = \WPRM_Print::slug();
 	$at   = false;
@@ -345,11 +345,12 @@ function print_request_recipe_id( string $uri ): int {
 	}
 	$rest = false === $at ? '' : substr( $uri, $at[0] + $at[1] );
 	if ( '' === $rest ) {
-		return 0;
+		return null;
 	}
-	$args = explode( '/', str_replace( array( '?', '&' ), '/', $rest ) );
-	if ( in_array( $args[0], array( 'recipes', 'collection', 'shopping-list' ), true ) ) {
-		return 0;
+	$args    = explode( '/', str_replace( array( '?', '&' ), '/', $rest ) );
+	$options = apply_filters( 'wprm_print_arg_options', array( 'recipe', 'recipes', 'collection', 'shopping-list' ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Use WP Recipe Maker's route list.
+	if ( '' === $args[0] || ( 'recipe' !== $args[0] && in_array( $args[0], $options, true ) ) ) {
+		return null;
 	}
 	$name = 'recipe' === $args[0] ? ( $args[1] ?? '' ) : $args[0];
 	if ( '' === $name ) {
@@ -387,19 +388,22 @@ function print_request_recipe_id( string $uri ): int {
 }
 
 /**
- * True when a print URL names a recipe whose parent post still needs its password.
+ * True when a single print URL names a missing or locked recipe.
  *
  * @param string $uri Request URI.
  * @return bool
  */
-function locked_print_request( string $uri ): bool {
+function unavailable_print_request( string $uri ): bool {
 	$recipe_id = print_request_recipe_id( $uri );
-	$parent_id = $recipe_id > 0 ? (int) get_post_meta( $recipe_id, 'wprm_parent_post_id', true ) : 0;
+	if ( null === $recipe_id || 0 === $recipe_id ) {
+		return 0 === $recipe_id;
+	}
+	$parent_id = (int) get_post_meta( $recipe_id, 'wprm_parent_post_id', true );
 	return $parent_id > 0 && post_password_required( $parent_id );
 }
 
 /**
- * Take a locked recipe's print page away from WP Recipe Maker.
+ * Use the site's 404 for missing and locked single-recipe print requests.
  *
  * The plugin prints that page from its own init callback and exits, so
  * template_redirect never runs for it. A post that is not publicly
@@ -407,21 +411,22 @@ function locked_print_request( string $uri ): bool {
  * until the visitor enters the post's password, the print URL answers
  * 404 instead. The unhook runs at priority 9, before the plugin's 10.
  */
-function stop_locked_print(): void {
+function stop_unavailable_print(): void {
 	$uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- parsed, never output.
-	if ( ! locked_print_request( $uri ) ) {
+	if ( ! unavailable_print_request( $uri ) ) {
 		return;
 	}
 	remove_action( 'init', array( 'WPRM_Print', 'print_page' ) );
 	add_action( 'template_redirect', __NAMESPACE__ . '\\send_print_404', 0 );
 }
-add_action( 'init', __NAMESPACE__ . '\\stop_locked_print', 9 );
+add_action( 'init', __NAMESPACE__ . '\\stop_unavailable_print', 9 );
 
 /**
- * Answer the locked print URL with the site's 404.
+ * Answer the print URL with the site's 404 before canonical redirects run.
  */
 function send_print_404(): void {
 	global $wp_query;
+	add_filter( 'redirect_canonical', '__return_false' );
 	$wp_query->set_404();
 	status_header( 404 );
 	nocache_headers();

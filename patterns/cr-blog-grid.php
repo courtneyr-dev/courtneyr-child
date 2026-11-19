@@ -29,7 +29,7 @@ declare( strict_types = 1 );
 			<!-- wp:group {"className":"card__media","layout":{"type":"default"}} -->
 			<div class="wp-block-group card__media">
 
-				<!-- wp:post-featured-image {"isLink":false,"aspectRatio":"16/9"} /-->
+				<!-- wp:post-featured-image {"isLink":false,"aspectRatio":"16/9","className":"card__image"} /-->
 
 				<!-- wp:html -->
 				<span class="media-glyph" role="img" aria-label="Post format: blog post" data-cr-card-glyph="blog"><svg viewBox="0 0 24 24"><use href="<?php echo esc_url( get_stylesheet_directory_uri() ); ?>/assets/svg/icons.svg#post-icon-blog"></use></svg></span>

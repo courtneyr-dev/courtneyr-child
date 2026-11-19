@@ -70,6 +70,10 @@ namespace {
 		return $GLOBALS['t233']['queried'];
 	}
 
+	function post_password_required( int $post_id ): bool {
+		return ( $GLOBALS['t233']['locked'] ?? 0 ) === $post_id;
+	}
+
 	/** Record the block a render call receives. */
 	function render_block( array $block ): string {
 		$GLOBALS['t233']['rendered'][] = $block;
@@ -173,6 +177,9 @@ namespace {
 		1 === count( $GLOBALS['t233']['rendered'] ) && 'kind-listen' === $GLOBALS['t233']['rendered'][0]['attrs']['slug']
 	);
 	t233_check( 'route passes an earlier short-circuit through', 'early' === route( 'early', $block ) );
+	$GLOBALS['t233']['locked'] = 5;
+	t233_check( 'route hides the Listen sources part on a locked post', '' === route( null, $block ) );
+	unset( $GLOBALS['t233']['locked'] );
 	t233_check(
 		'route ignores other blocks',
 		null === route(

@@ -293,8 +293,8 @@ function is_order(): bool {
  * @param \WP_Post $post  Post being rendered.
  * @return bool
  */
-function holds_h1( $holds, \WP_Post $post ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-	return true === $holds || is_order();
+function holds_h1( $holds, \WP_Post $post ): bool {
+	return true === $holds || ( is_order() && ! post_password_required( $post ) );
 }
 add_filter( 'courtneyr_child_single_object_holds_h1', __NAMESPACE__ . '\\holds_h1', 10, 2 );
 

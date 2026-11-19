@@ -54,6 +54,10 @@ namespace {
 		return $GLOBALS['cr_state']['queried'];
 	}
 
+	function post_password_required( int $post_id ): bool {
+		return false;
+	}
+
 	function render_block( array $block ): string {
 		return $block['attrs']['slug'];
 	}

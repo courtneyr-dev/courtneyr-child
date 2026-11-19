@@ -489,6 +489,54 @@ function hide_locked_single_header( $pre, array $block ) {
 add_filter( 'pre_render_block', __NAMESPACE__ . '\\hide_locked_single_header', 10, 2 );
 
 /**
+ * Hide the Blog grid's image and category chip when this card is locked.
+ *
+ * @param string               $html     Rendered block.
+ * @param array<string, mixed> $block    Parsed block.
+ * @param \WP_Block            $instance Block with the card's post context.
+ * @return string
+ */
+function hide_locked_grid_fact( string $html, array $block, \WP_Block $instance ): string {
+	$class = $block['attrs']['className'] ?? '';
+	if ( ! in_array( $class, array( 'card__image', 'card__chip' ), true ) ) {
+		return $html;
+	}
+	$post_id = (int) ( $instance->context['postId'] ?? 0 );
+	return $post_id > 0 && post_password_required( $post_id ) ? '' : $html;
+}
+add_filter( 'render_block_core/post-featured-image', __NAMESPACE__ . '\\hide_locked_grid_fact', PHP_INT_MAX, 3 );
+add_filter( 'render_block_core/post-terms', __NAMESPACE__ . '\\hide_locked_grid_fact', PHP_INT_MAX, 3 );
+
+/**
+ * Hide the current post's thumbnail in the WordPress embed template.
+ *
+ * @param int|false $thumbnail_id Embed thumbnail ID.
+ * @return int|false
+ */
+function hide_locked_embed_thumbnail( $thumbnail_id ) {
+	return post_password_required() ? false : $thumbnail_id;
+}
+add_filter( 'embed_thumbnail_id', __NAMESPACE__ . '\\hide_locked_embed_thumbnail', PHP_INT_MAX );
+
+/**
+ * Protect a password post's thumbnail in the oEmbed response.
+ *
+ * @param array<string, mixed> $data oEmbed response data.
+ * @param \WP_Post             $post Post being embedded.
+ * @return array<string, mixed>
+ */
+function hide_locked_oembed_thumbnail( array $data, \WP_Post $post ): array {
+	if ( '' !== $post->post_password && wp_is_serving_rest_request() ) {
+		nocache_headers();
+	}
+	if ( post_password_required( $post ) ) {
+		unset( $data['thumbnail_url'], $data['thumbnail_width'], $data['thumbnail_height'] );
+	}
+	return $data;
+}
+add_filter( 'oembed_response_data', __NAMESPACE__ . '\\hide_locked_oembed_thumbnail', PHP_INT_MAX, 2 );
+
+/**
  * Drop the single template's reactions group when it holds no reactions.
  *
  * IndieBlocks prints each like, bookmark or repost as a list item, or a count
