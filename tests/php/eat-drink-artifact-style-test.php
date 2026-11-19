@@ -25,6 +25,12 @@ require dirname( __DIR__, 2 ) . '/inc/stream-media.php';
 require dirname( __DIR__, 2 ) . '/inc/single-eat-drink.php';
 require dirname( __DIR__, 2 ) . '/inc/stream-eat-drink.php';
 
+foreach ( $GLOBALS['cr_read_actions'] as list( $hook, $callback ) ) {
+	if ( 'after_setup_theme' === $hook ) {
+		$callback();
+	}
+}
+
 foreach ( array( 'eat' => 'cr-order-ticket', 'drink' => 'cr-coaster' ) as $kind => $style ) {
 	cr_read_group(
 		$kind . ' style applies once on the single and Stream',

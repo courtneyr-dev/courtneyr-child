@@ -215,6 +215,9 @@ namespace {
 	require CR_W3_T0_THEME_DIR . '/inc/post-kinds.php';
 	require CR_W3_T0_THEME_DIR . '/inc/artifact-style.php';
 	require CR_W3_T0_THEME_DIR . '/inc/single-eat-drink.php';
+	foreach ( $GLOBALS['cr_hooks']['after_setup_theme'][10] as list( $callback ) ) {
+		$callback();
+	}
 	$GLOBALS['cr_base_hooks'] = $GLOBALS['cr_hooks'];
 }
 

@@ -119,6 +119,12 @@ namespace {
 	require dirname( __DIR__, 2 ) . '/inc/sloc-map-alt.php';
 	require dirname( __DIR__, 2 ) . '/inc/post-kinds.php';
 
+	foreach ( $GLOBALS['cr_read_actions'] as list( $hook, $callback ) ) {
+		if ( 'after_setup_theme' === $hook ) {
+			$callback();
+		}
+	}
+
 	const CR_PW_SECRET = 'open-sesame';
 
 	function cr_pw_post( string $kind, array $blocks ): WP_Post {

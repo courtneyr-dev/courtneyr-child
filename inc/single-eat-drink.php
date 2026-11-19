@@ -55,8 +55,13 @@ const STYLE_FOR_KIND = array(
 	'drink' => DRINK_STYLE,
 );
 
-ArtifactStyle\register( 'post-kinds-indieweb/eat-card', EAT_STYLE, __( 'Order ticket', 'courtneyr-child' ), 'eat' );
-ArtifactStyle\register( 'post-kinds-indieweb/drink-card', DRINK_STYLE, __( 'Coaster', 'courtneyr-child' ), 'drink' );
+add_action(
+	'after_setup_theme',
+	static function (): void {
+		ArtifactStyle\register( 'post-kinds-indieweb/eat-card', EAT_STYLE, __( 'Order ticket', 'courtneyr-child' ), 'eat' );
+		ArtifactStyle\register( 'post-kinds-indieweb/drink-card', DRINK_STYLE, __( 'Coaster', 'courtneyr-child' ), 'drink' );
+	}
+);
 
 /**
  * Which order the queried post is: one with the plugin's card for its kind.
