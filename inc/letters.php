@@ -13,13 +13,17 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Letters;
 
+use Courtneyr\Child\ArtifactStyle;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const CARD_STYLE    = 'is-style-cr-letter';
-const PAPERS        = array( 'sky-blue', 'periwinkle', 'light-orange', 'selective-yellow', 'printer-ivory' );
-const EXCERPT_WORDS = 25;
+const CARD_STYLE     = 'is-style-cr-letter';
+const ARTIFACT_STYLE = 'cr-letter-sheet';
+const ARTIFACT_CLASS = 'is-style-' . ARTIFACT_STYLE;
+const PAPERS         = array( 'sky-blue', 'periwinkle', 'light-orange', 'selective-yellow', 'printer-ivory' );
+const EXCERPT_WORDS  = 25;
 
 /** Register the letter treatment for the plugin's stream card. */
 function register_card_style(): void {
@@ -36,6 +40,12 @@ function register_card_style(): void {
 
 if ( function_exists( 'add_action' ) ) {
 	add_action( 'init', __NAMESPACE__ . '\\register_card_style' );
+	add_action(
+		'after_setup_theme',
+		static function (): void {
+			ArtifactStyle\register( 'post-kinds-indieweb/reply-card', ARTIFACT_STYLE, __( 'Letter', 'courtneyr-child' ), 'reply' );
+		}
+	);
 }
 
 /** Whether this request is the reply kind archive. */
@@ -192,7 +202,7 @@ function letter_card( string $html, array $block, $instance ): string {
 		return $html;
 	}
 	$post = instance_post( $instance );
-	if ( ! $post instanceof \WP_Post || ! function_exists( 'has_term' ) || ! has_term( 'reply', 'kind', $post ) ) {
+	if ( ! $post instanceof \WP_Post || ! ArtifactStyle\applies( $post, ARTIFACT_STYLE ) ) {
 		return $html;
 	}
 	$facts     = facts_for( $post );
@@ -200,7 +210,7 @@ function letter_card( string $html, array $block, $instance ): string {
 	$level     = heading_level( $block['attrs']['headingLevel'] ?? 3, 3 );
 	$name      = '' !== $facts['name'] ? $facts['name'] : ( function_exists( 'get_the_title' ) ? (string) get_the_title( $post ) : (string) $post->post_title );
 	$title_cls = 'cr-letter__title' . ( named( $post ) ? ' p-name' : '' );
-	$classes   = 'cr-letter' . ( $facts['protected'] ? ' cr-letter--protected' : '' ) . ' k-reply';
+	$classes   = 'cr-letter' . ( $facts['protected'] ? ' cr-letter--protected' : '' ) . ' k-reply ' . ARTIFACT_CLASS;
 	$out       = '<article class="' . esc_attr( $classes ) . '">';
 	$out      .= '<h' . $level . ' class="' . esc_attr( $title_cls ) . '"><a id="cr-letter-t-' . esc_attr( $uid ) . '" class="u-url" href="' . esc_url( get_permalink( $post ) ) . '">' . esc_html( $name ) . '</a></h' . $level . '>';
 	if ( ! $facts['protected'] ) {
@@ -334,17 +344,23 @@ function label_duplicate_titles( string $html ): string {
 function decorate_post_template( string $html, array $block ): string {
 	unset( $block );
 
-	if ( ! str_contains( $html, 'cr-letter' ) ) {
+	$letter_query = array(
+		'tag_name'   => 'ARTICLE',
+		'class_name' => 'cr-letter',
+	);
+	$tags         = new \WP_HTML_Tag_Processor( $html );
+	if ( ! $tags->next_tag( $letter_query ) ) {
 		return $html;
 	}
 	$html = (string) preg_replace_callback(
 		'/<li\b([^>]*)\bclass="([^"]*\bwp-block-post\b[^"]*\bpost-(\d+)\b[^"]*)"([^>]*)>(.*?)<\/li>/is',
-		static function ( array $m ): string {
-			if ( ! str_contains( $m[5], 'cr-letter' ) ) {
+		static function ( array $m ) use ( $letter_query ): string {
+			$tags = new \WP_HTML_Tag_Processor( $m[5] );
+			if ( ! $tags->next_tag( $letter_query ) ) {
 				return $m[0];
 			}
 			$post_id   = (int) $m[3];
-			$protected = str_contains( $m[5], 'cr-letter--protected' );
+			$protected = $tags->has_class( 'cr-letter--protected' );
 			$classes   = array( 'cr-paper-sheet', 'cr-paper-sheet--torn', 'cr-paper--' . ( $protected ? 'printer-ivory' : paper_for( $post_id ) ) );
 			if ( ! $protected ) {
 				$classes[] = 'cr-letter-trim--' . trim_for( $post_id );

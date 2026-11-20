@@ -13,11 +13,14 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\StreamReply;
 
+use Courtneyr\Child\ArtifactStyle;
 use function Courtneyr\Child\Letters\excerpt_text;
 use function Courtneyr\Child\Letters\facts_for;
 use function Courtneyr\Child\Letters\heading_level;
 use function Courtneyr\Child\Letters\named;
 use function Courtneyr\Child\Letters\target_data;
+use const Courtneyr\Child\Letters\ARTIFACT_CLASS;
+use const Courtneyr\Child\Letters\ARTIFACT_STYLE;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -64,7 +67,7 @@ function envelope_card( string $html, array $block, $instance ): string {
 	}
 	$post_id = is_object( $instance ) && isset( $instance->context['postId'] ) ? (int) $instance->context['postId'] : ( function_exists( 'get_the_ID' ) ? (int) get_the_ID() : 0 );
 	$post    = $post_id && function_exists( 'get_post' ) ? get_post( $post_id ) : null;
-	if ( ! $post instanceof \WP_Post || ! function_exists( 'has_term' ) || ! has_term( 'reply', 'kind', $post ) ) {
+	if ( ! $post instanceof \WP_Post || ! ArtifactStyle\applies( $post, ARTIFACT_STYLE ) ) {
 		return $html;
 	}
 	if ( function_exists( 'post_password_required' ) && post_password_required( $post ) ) {
@@ -77,7 +80,7 @@ function envelope_card( string $html, array $block, $instance ): string {
 	$tilt       = tilt_for( (int) $post->ID );
 	$insert_cls = 'cr-envelope__insert' . ( $tilt > 0 ? ' cr-envelope__insert--tilt-' . $tilt : '' );
 	$title_cls  = 'cr-envelope__title' . ( named( $post ) ? ' p-name' : '' );
-	$out        = '<article class="cr-envelope k-reply">';
+	$out        = '<article class="cr-envelope k-reply ' . ARTIFACT_CLASS . '">';
 	$out       .= '<div class="' . esc_attr( $insert_cls ) . '">';
 	$out       .= '<p class="cr-envelope__meta"><span class="cr-envelope__label">' . esc_html( label() ) . '</span><time class="dt-published cr-envelope__date" datetime="' . esc_attr( (string) get_post_time( 'c', true, $post ) ) . '">' . esc_html( (string) get_the_date( 'M j', $post ) ) . '</time></p>';
 	$out       .= '<h' . $level . ' class="' . esc_attr( $title_cls ) . '"><a id="cr-envelope-t-' . esc_attr( $uid ) . '" class="u-url" href="' . esc_url( get_permalink( $post ) ) . '">' . esc_html( $name ) . '</a></h' . $level . '>';

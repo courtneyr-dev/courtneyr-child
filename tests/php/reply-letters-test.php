@@ -37,9 +37,10 @@ cr_reply_group(
 		$input = '<article>Plugin card</article>';
 		cr_reply_fixture_facts( $post );
 		cr_reply_same( $input, Letters\letter_card( $input, cr_reply_letter_block( 3, '' ), new WP_Block( array( 'postId' => $post->ID ) ) ), 'missing style unchanged' );
-		$GLOBALS['cr_reply_kind'] = 'like';
-		cr_reply_same( $input, Letters\letter_card( $input, cr_reply_letter_block(), new WP_Block( array( 'postId' => $post->ID ) ) ), 'non-reply unchanged' );
-		$GLOBALS['cr_reply_kind'] = 'reply';
+		$other_kind               = cr_reply_post( 43, 'A like' );
+		$GLOBALS['cr_reply_kinds'] = array( 'like' );
+		cr_reply_same( $input, Letters\letter_card( $input, cr_reply_letter_block(), new WP_Block( array( 'postId' => $other_kind->ID ) ) ), 'non-reply unchanged' );
+		$GLOBALS['cr_reply_kinds'] = array( 'reply' );
 		$other = new WP_Block( array( 'postId' => 999 ) );
 		cr_reply_same( $input, Letters\letter_card( $input, cr_reply_letter_block(), $other ), 'missing post unchanged' );
 	}
@@ -52,7 +53,7 @@ cr_reply_group(
 		$post->post_content = implode( ' ', range( 'a', 'z' ) );
 		cr_reply_fixture_facts( $post );
 		$html = Letters\letter_card( '<article>Plugin card</article>', cr_reply_letter_block( 3 ), new WP_Block( array( 'postId' => $post->ID ) ) );
-		cr_reply_contains( '<article class="cr-letter k-reply">', $html, 'article class' );
+		cr_reply_contains( '<article class="cr-letter k-reply is-style-cr-letter-sheet">', $html, 'article classes' );
 		cr_reply_contains( '<h3 class="cr-letter__title p-name"><a id="cr-letter-t-1" class="u-url" href="https://example.test/reply/42">Letter title</a></h3>', $html, 'named title link' );
 		cr_reply_contains( '<p class="cr-letter__excerpt p-summary">a b c d e f g h i j k l m n o p q r s t u v w x y</p>', $html, 'excerpt at 25 words' );
 		cr_reply_contains( '<time id="cr-letter-d-1" class="dt-published cr-letter__date" datetime="2026-10-11T12:00:00+00:00" hidden>October 11, 2026</time>', $html, 'hidden date' );
@@ -86,7 +87,7 @@ cr_reply_group(
 		$GLOBALS['cr_reply_protected'][ $post->ID ] = true;
 		cr_reply_fixture_facts( $post );
 		$html = Letters\letter_card( 'x', cr_reply_letter_block(), new WP_Block( array( 'postId' => $post->ID ) ) );
-		cr_reply_contains( '<article class="cr-letter cr-letter--protected k-reply">', $html, 'protected class' );
+		cr_reply_contains( '<article class="cr-letter cr-letter--protected k-reply is-style-cr-letter-sheet">', $html, 'protected classes' );
 		cr_reply_contains( '>Protected: Letter title</a>', $html, 'protected title' );
 		foreach ( array( 'p-summary', 'dt-published', 'u-in-reply-to' ) as $gone ) {
 			cr_reply_not_contains( $gone, $html, $gone . ' omitted' );

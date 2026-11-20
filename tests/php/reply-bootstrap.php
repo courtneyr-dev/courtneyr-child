@@ -21,8 +21,7 @@ namespace {
 	$GLOBALS['cr_reply_dates']         = array();
 	$GLOBALS['cr_reply_excerpt']       = array();
 	$GLOBALS['cr_reply_protected']     = array();
-	$GLOBALS['cr_reply_has_term']      = true;
-	$GLOBALS['cr_reply_kind']          = 'reply';
+	$GLOBALS['cr_reply_kinds']         = array( 'reply' );
 	$GLOBALS['cr_reply_tax']           = false;
 	$GLOBALS['cr_reply_single']        = false;
 	$GLOBALS['cr_reply_admin']         = false;
@@ -55,6 +54,16 @@ namespace {
 		/** @param array<string, mixed> $context Block context. */
 		public function __construct( array $context = array() ) {
 			$this->context = $context;
+		}
+	}
+
+	class WP_Block_Type_Registry {
+		public static function get_instance(): self {
+			return new self();
+		}
+
+		public function is_registered( string $name ): bool {
+			return 'post-kinds-indieweb/reply-card' === $name;
 		}
 	}
 
@@ -101,8 +110,11 @@ namespace {
 		return (bool) $GLOBALS['cr_reply_single'] && 'post' === $post_type;
 	}
 
-	function has_term( $term, $taxonomy, $post = null ): bool {
-		return (bool) $GLOBALS['cr_reply_has_term'] && 'kind' === $taxonomy && (string) $term === (string) $GLOBALS['cr_reply_kind'];
+	function get_the_terms( int $post_id, string $taxonomy ): array|false {
+		if ( 'kind' !== $taxonomy || ! isset( $GLOBALS['cr_reply_posts'][ $post_id ] ) ) {
+			return false;
+		}
+		return array_map( static fn( string $slug ): object => (object) array( 'slug' => $slug ), $GLOBALS['cr_reply_kinds'] );
 	}
 
 	function post_password_required( $post = null ): bool {
@@ -235,8 +247,7 @@ namespace {
 		$GLOBALS['cr_reply_dates']        = array();
 		$GLOBALS['cr_reply_excerpt']      = array();
 		$GLOBALS['cr_reply_protected']    = array();
-		$GLOBALS['cr_reply_has_term']     = true;
-		$GLOBALS['cr_reply_kind']         = 'reply';
+		$GLOBALS['cr_reply_kinds']        = array( 'reply' );
 		$GLOBALS['cr_reply_tax']          = false;
 		$GLOBALS['cr_reply_single']       = false;
 		$GLOBALS['cr_reply_admin']        = false;
@@ -327,7 +338,13 @@ namespace Courtneyr\Child\HomeSections {
 namespace {
 	cr_reply_reset();
 	require dirname( __DIR__, 2 ) . '/inc/stamps.php';
+	require dirname( __DIR__, 2 ) . '/inc/artifact-style.php';
 	require dirname( __DIR__, 2 ) . '/inc/letters.php';
 	require dirname( __DIR__, 2 ) . '/inc/single-reply.php';
 	require dirname( __DIR__, 2 ) . '/inc/stream-reply.php';
+	foreach ( $GLOBALS['cr_reply_actions'] as list( $hook, $callback ) ) {
+		if ( 'after_setup_theme' === $hook ) {
+			$callback();
+		}
+	}
 }
