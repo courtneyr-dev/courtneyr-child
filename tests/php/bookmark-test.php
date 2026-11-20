@@ -86,9 +86,8 @@ namespace {
 		return ! empty( $GLOBALS['cr_request']['admin'] );
 	}
 
-	function has_term( $term, $taxonomy, $post ) {
-		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
-		return 'kind' === $taxonomy && 'bookmark' === $term && ! empty( $GLOBALS['cr_terms'][ $id ] );
+	function get_the_terms( int $post_id, string $taxonomy ): array|false {
+		return 'kind' === $taxonomy && ! empty( $GLOBALS['cr_terms'][ $post_id ] ) ? array( (object) array( 'slug' => 'bookmark' ) ) : false;
 	}
 
 	function get_post( $post = null ) {
@@ -199,10 +198,12 @@ namespace {
 	}
 
 	require CR_BM_THEME_DIR . '/inc/stamps.php';
+	require CR_BM_THEME_DIR . '/inc/artifact-style.php';
 	$GLOBALS['cr_hooks'] = array();
 	$bookmark_path = CR_BM_THEME_DIR . '/inc/bookmark.php';
 	if ( is_file( $bookmark_path ) ) {
 		require $bookmark_path;
+		apply_filters( 'after_setup_theme', null );
 	}
 
 	if ( in_array( '--no-plugin', $argv, true ) ) {
@@ -538,11 +539,11 @@ namespace Courtneyr\Child\Bookmark\Tests {
 			if ( $html !== render_card( 41, array(), $html ) ) {
 				return false;
 			}
-			$GLOBALS['cr_terms'][41] = false;
-			if ( $html !== render_card( 41, array( 'className' => 'is-style-cr-bookmark-card' ), $html ) ) {
+			bookmark_post( 92, 'A different kind' );
+			$GLOBALS['cr_terms'][92] = false;
+			if ( $html !== render_card( 92, array( 'className' => 'is-style-cr-bookmark-card' ), $html ) ) {
 				return false;
 			}
-			$GLOBALS['cr_terms'][41] = true;
 			$GLOBALS['cr_request']['kind'] = 'bookmark';
 			if ( ! str_contains( render_card( 41, array(), $html ), 'cr-index-card' ) ) {
 				return false;

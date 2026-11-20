@@ -9,6 +9,10 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\SingleBookmark;
 
+use Courtneyr\Child\ArtifactStyle;
+use const Courtneyr\Child\Bookmark\ARTIFACT_CLASS;
+use const Courtneyr\Child\Bookmark\ARTIFACT_STYLE;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -55,7 +59,7 @@ function single_facts( bool $refresh = false ): array {
 	}
 
 	$facts = array();
-	if ( $post_id > 0 && has_term( 'bookmark', 'kind', $post_id ) && ! post_password_required() && function_exists( '\\PKIW\\kind_facts' ) ) {
+	if ( $post_id > 0 && ArtifactStyle\applies( $post_id, ARTIFACT_STYLE ) && ! post_password_required() && function_exists( '\\PKIW\\kind_facts' ) ) {
 		$facts = \PKIW\kind_facts( $post_id );
 		$facts = is_array( $facts ) ? $facts : array();
 	}
@@ -267,7 +271,7 @@ function index_card( \WP_Post $post, array $facts ): string {
 	if ( '' !== $drawer ) {
 		$html .= '<p class="cr-bookmark-single__tab">' . esc_html( $drawer ) . '</p>';
 	}
-	$html .= '<article class="cr-index-card cr-index-card--single cr-paper-sheet cr-paper--printer-ivory">';
+	$html .= '<article class="cr-index-card cr-index-card--single cr-paper-sheet cr-paper--printer-ivory ' . ARTIFACT_CLASS . '">';
 	$html .= '<p class="cr-index-card__label"><span class="cr-index-card__glyph" aria-hidden="true">' . $glyph . '</span><span class="cr-index-card__kind">' . esc_html( $label ) . '</span></p>';
 	if ( '' !== $cited && comparable_text( $cited, false ) !== comparable_text( (string) $post->post_title, false ) ) {
 		$html .= '<p class="cr-index-card__cited">' . esc_html( $cited ) . '</p>';

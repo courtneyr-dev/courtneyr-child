@@ -44,9 +44,12 @@ namespace {
 		return (int) ( $GLOBALS['cr_request']['queried_id'] ?? 0 );
 	}
 
-	function has_term( $term, $taxonomy, $post ) {
-		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
-		return 'kind' === $taxonomy && 'bookmark' === $term && ! empty( $GLOBALS['cr_terms'][ $id ] );
+	function add_action( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
+		return add_filter( $hook, $callback, $priority, $accepted_args );
+	}
+
+	function get_the_terms( int $post_id, string $taxonomy ): array|false {
+		return 'kind' === $taxonomy && ! empty( $GLOBALS['cr_terms'][ $post_id ] ) ? array( (object) array( 'slug' => 'bookmark' ) ) : false;
 	}
 
 	function post_password_required() {
@@ -110,6 +113,10 @@ namespace PKIW {
 }
 
 namespace {
+	require CR_BM_SINGLE_THEME_DIR . '/inc/artifact-style.php';
+	define( 'Courtneyr\\Child\\Bookmark\\ARTIFACT_STYLE', 'cr-bookmark-index-card' );
+	define( 'Courtneyr\\Child\\Bookmark\\ARTIFACT_CLASS', 'is-style-cr-bookmark-index-card' );
+	\Courtneyr\Child\ArtifactStyle\register( 'post-kinds-indieweb/bookmark-card', 'cr-bookmark-index-card', 'Index card', 'bookmark' );
 	$single_path = CR_BM_SINGLE_THEME_DIR . '/inc/single-bookmark.php';
 	if ( is_file( $single_path ) ) {
 		require $single_path;
@@ -169,11 +176,12 @@ namespace Courtneyr\Child\SingleBookmark\Tests {
 	}
 
 	function bookmark_single( array $facts = array(), string $title = 'Release notes', bool $bookmark = true, bool $protected = false ): \WP_Post {
-		$post                       = new \WP_Post( 41, $title );
-		$GLOBALS['cr_posts'][41]    = $post;
-		$GLOBALS['cr_terms'][41]    = $bookmark;
-		$GLOBALS['cr_kind_facts'][41] = $facts ? $facts : full_facts();
-		$GLOBALS['cr_request']      = array( 'single' => true, 'queried_id' => 41 );
+		$id                             = $bookmark ? 41 : 42;
+		$post                           = new \WP_Post( $id, $title );
+		$GLOBALS['cr_posts'][ $id ]      = $post;
+		$GLOBALS['cr_terms'][ $id ]      = $bookmark;
+		$GLOBALS['cr_kind_facts'][ $id ] = $facts ? $facts : full_facts();
+		$GLOBALS['cr_request']           = array( 'single' => true, 'queried_id' => $id );
 		if ( $protected ) {
 			$GLOBALS['cr_request']['protected'] = true;
 		}
@@ -240,6 +248,7 @@ namespace Courtneyr\Child\SingleBookmark\Tests {
 				&& 0 === $xp->query( '//p[contains(@class,"cr-bookmark-single__tab")]//a' )->length
 				&& in_array( 'cr-index-card', classes( $article ), true )
 				&& in_array( 'cr-index-card--single', classes( $article ), true )
+				&& in_array( 'is-style-cr-bookmark-index-card', classes( $article ), true )
 				&& in_array( 'cr-paper-sheet', classes( $article ), true )
 				&& in_array( 'cr-paper--printer-ivory', classes( $article ), true )
 				&& 'Bookmark' === text_of( $xp, '//p[contains(@class,"cr-index-card__label")]' )
@@ -491,7 +500,7 @@ namespace Courtneyr\Child\SingleBookmark\Tests {
 	);
 
 	check_case(
-		'single bookmark file is self-contained',
+		'single bookmark loads without the archive and Stream callbacks',
 		static function (): bool {
 			return function_exists( 'Courtneyr\\Child\\SingleBookmark\\index_card' )
 				&& ! function_exists( 'Courtneyr\\Child\\Bookmark\\dispatch' );

@@ -9,12 +9,16 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Bookmark;
 
+use Courtneyr\Child\ArtifactStyle;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const ITEM_STYLE = 'cr-bookmark-card';
-const ITEM_CLASS = 'is-style-cr-bookmark-card';
+const ITEM_STYLE     = 'cr-bookmark-card';
+const ITEM_CLASS     = 'is-style-cr-bookmark-card';
+const ARTIFACT_STYLE = 'cr-bookmark-index-card';
+const ARTIFACT_CLASS = 'is-style-' . ARTIFACT_STYLE;
 
 /**
  * Register the bookmark archive stream-card style.
@@ -33,6 +37,12 @@ function register_item_style(): void {
 	}
 }
 add_action( 'init', __NAMESPACE__ . '\\register_item_style' );
+add_action(
+	'after_setup_theme',
+	static function (): void {
+		ArtifactStyle\register( 'post-kinds-indieweb/bookmark-card', ARTIFACT_STYLE, __( 'Index card', 'courtneyr-child' ), 'bookmark' );
+	}
+);
 
 /**
  * Whether the current request is the bookmark archive.
@@ -49,7 +59,7 @@ function is_bookmark_archive(): bool {
  * @return bool
  */
 function is_bookmark_single(): bool {
-	return \is_singular( 'post' ) && has_term( 'bookmark', 'kind', get_queried_object_id() );
+	return \is_singular( 'post' ) && ArtifactStyle\applies( get_queried_object_id(), ARTIFACT_STYLE );
 }
 
 /**
@@ -133,7 +143,7 @@ function label_ids( int $post_id ): array {
 		$members = array();
 		foreach ( $posts as $post ) {
 			$id = is_object( $post ) && isset( $post->ID ) ? (int) $post->ID : (int) $post;
-			if ( ! $id || ! has_term( 'bookmark', 'kind', $post ) ) {
+			if ( ! $id || ! ArtifactStyle\applies( $id, ARTIFACT_STYLE ) ) {
 				continue;
 			}
 			$key            = title_key( $id );
@@ -205,6 +215,7 @@ function locked_card( string $html ): string {
 	) ) {
 		$tags->add_class( 'cr-index-card' );
 		$tags->add_class( 'cr-index-card--locked' );
+		$tags->add_class( ARTIFACT_CLASS );
 		return $tags->get_updated_html();
 	}
 	return $html;
@@ -230,7 +241,7 @@ function archive_card( \WP_Post $post, array $facts, array $block ): string {
 	$link_attrs    = $label ? ' aria-labelledby="' . esc_attr( $ids['title'] . ' ' . $ids['host'] ) . '"' : '';
 	$name_class    = has_real_name( $post, $facts ) ? ' p-name' : '';
 
-	$html  = '<article class="pk-card k-bookmark cr-index-card cr-paper-sheet cr-paper--printer-ivory is-style-cr-bookmark-card">' . "\n";
+	$html  = '<article class="pk-card k-bookmark cr-index-card cr-paper-sheet cr-paper--printer-ivory is-style-cr-bookmark-card ' . ARTIFACT_CLASS . '">' . "\n";
 	$html .= '<h' . $level . ' class="pk-title cr-index-card__title' . $name_class . '"' . $heading_attrs . '><a class="u-url" href="' . esc_url( (string) get_permalink( $post ) ) . '"' . $link_attrs . '>' . esc_html( $title ) . '</a></h' . $level . '>' . "\n";
 	if ( '' !== $host ) {
 		$html .= '<p class="cr-index-card__host"' . $host_attrs . '>' . esc_html( $host ) . '</p>' . "\n";
@@ -256,7 +267,7 @@ function stream_card( \WP_Post $post, array $facts, array $block ): string {
 	$label = function_exists( '\\PKIW\\get_kind_label' ) ? (string) \PKIW\get_kind_label( __( 'Bookmark', 'courtneyr-child' ), 'bookmark', 'stream-card' ) : __( 'Bookmark', 'courtneyr-child' );
 	$glyph = function_exists( '\\PKIW\\get_kind_icon_svg' ) ? (string) \PKIW\get_kind_icon_svg( 'bookmark' ) : '';
 
-	$html  = '<article class="pk-card pk-card--stream k-bookmark cr-bookmark-stream">' . "\n";
+	$html  = '<article class="pk-card pk-card--stream k-bookmark cr-bookmark-stream ' . ARTIFACT_CLASS . '">' . "\n";
 	$html .= '<p class="cr-bookmark-stream__label"><span class="cr-bookmark-stream__glyph" aria-hidden="true">' . $glyph . '</span><span class="cr-bookmark-stream__kind">' . esc_html( $label ) . '</span></p>' . "\n";
 	$html .= '<h' . $level . ' class="pk-title' . ( has_real_name( $post, $facts ) ? ' p-name' : '' ) . '"><a class="u-url" href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( $title ) . '</a></h' . $level . '>' . "\n";
 	if ( '' !== $host ) {
@@ -309,7 +320,7 @@ function dispatch( string $html, array $block, $instance ): string {
 		? (int) $instance->context['postId']
 		: (int) get_the_ID();
 	$post    = $post_id ? get_post( $post_id ) : null;
-	if ( ! $post instanceof \WP_Post || ! has_term( 'bookmark', 'kind', $post ) ) {
+	if ( ! $post instanceof \WP_Post || ! ArtifactStyle\applies( $post, ARTIFACT_STYLE ) ) {
 		return $html;
 	}
 
