@@ -9,12 +9,23 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Exercise;
 
+use Courtneyr\Child\ArtifactStyle;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const KIND         = 'exercise';
-const STYLE_HANDLE = 'courtneyr-exercise';
+const KIND           = 'exercise';
+const STYLE_HANDLE   = 'courtneyr-exercise';
+const ARTIFACT_STYLE = 'cr-race-bib';
+const ARTIFACT_CLASS = 'is-style-' . ARTIFACT_STYLE;
+
+add_action(
+	'after_setup_theme',
+	static function (): void {
+		ArtifactStyle\register( 'post-kinds-indieweb/exercise-card', ARTIFACT_STYLE, __( 'Race bib', 'courtneyr-child' ), KIND );
+	}
+);
 
 /** Whether this request is the exercise kind archive. */
 function is_exercise_archive(): bool {
@@ -23,7 +34,7 @@ function is_exercise_archive(): bool {
 
 /** Whether this request is a single exercise post. */
 function is_exercise_single(): bool {
-	return is_singular( 'post' ) && has_term( KIND, 'kind', get_queried_object_id() );
+	return is_singular( 'post' ) && ArtifactStyle\applies( get_queried_object_id(), ARTIFACT_STYLE );
 }
 
 /** Attach the exercise sheet to its calendar block after the shared calendar sheet. */
@@ -119,7 +130,7 @@ function bib_paper_class( array $classes, array $css_class, int $post_id ): arra
 	if (
 		! is_exercise_archive()
 		|| 'post' !== get_post_type( $post_id )
-		|| ! has_term( KIND, 'kind', $post_id )
+		|| ! ArtifactStyle\applies( $post_id, ARTIFACT_STYLE )
 		|| ! function_exists( '\\Courtneyr\\Child\\Stamps\\seeded_paper' )
 		|| ! defined( 'Courtneyr\\Child\\Stamps\\BIB_PAPERS' )
 	) {
