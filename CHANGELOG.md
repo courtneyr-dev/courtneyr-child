@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.172
+
+- Add the Order Ticket and Coaster styles to Eat and Drink cards. The site keeps the existing single and Stream layouts. (#320)
+- Give the 404 page a comic illustration and a control to pause the rotating rays. (#319)
+
 ## 0.7.171
 
 Wave X: On This Day, yearly Wrapped posts and printable zines get their paint. All three need Post Kinds for IndieWeb 1.10.0, and each prints only what the plugin returns for published, password-free posts that ActivityPub doesn't mark quiet public. (#268, #267, #269)
