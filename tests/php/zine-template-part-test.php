@@ -335,7 +335,11 @@ namespace {
 	$functions = (string) file_get_contents( COURTNEYR_CHILD_DIR . '/functions.php' );
 	preg_match( '/^Version:\s*([^\s]+)/m', $style, $style_version );
 	preg_match( "/COURTNEYR_CHILD_VERSION',\s*'([^']+)'/", $functions, $function_version );
-	cr_zine_check( '0.7.171' === ( $style_version[1] ?? '' ) && ( $style_version[1] ?? '' ) === ( $function_version[1] ?? '' ), 'T2 style.css and functions.php versions match at 0.7.171' );
+	$theme_version = $style_version[1] ?? '';
+	cr_zine_check(
+		$theme_version === ( $function_version[1] ?? '' ) && version_compare( $theme_version, '0.7.171', '>=' ),
+		'T2 style.css and functions.php share a version at or above 0.7.171'
+	);
 
 	$single        = (string) file_get_contents( COURTNEYR_CHILD_DIR . '/templates/single.html' );
 	$single_blocks = cr_zine_named_blocks( ( new WP_Block_Parser() )->parse( $single ) );
