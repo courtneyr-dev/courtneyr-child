@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.173
+
+- Register the Letter, Index card, Pin-back button, and Race bib styles for Reply, Bookmark, Mood, and Exercise. The existing archive, single, and Stream layouts stay the same. (#323, #324, #325)
+
 ## 0.7.172
 
 - Add the Order Ticket and Coaster styles to Eat and Drink cards. The site keeps the existing single and Stream layouts. (#320)
