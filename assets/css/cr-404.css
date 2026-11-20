@@ -66,9 +66,7 @@
 	overflow: hidden;
 	z-index: 1;
 }
-/* Rays live on the HEADER (behind everything via isolation), not on the badge:
-   a negative-z-index ::before of the badge would paint over the badge's own
-   box + border. Centered on the badge (~3.6rem from the header top). */
+/* The heading group keeps the rays behind the badge and copy. */
 .cr-404 .cr-404__header {
 	position: relative;
 	isolation: isolate;
@@ -87,14 +85,11 @@
 		repeating-conic-gradient(from 7deg, transparent 0deg 34deg, var(--cr-russian-violet) 34deg 35deg, transparent 35deg 48deg),
 		repeating-conic-gradient(var(--cr-ut-orange) 0deg 9deg, transparent 9deg 15deg, var(--cr-selective-yellow) 15deg 20deg, transparent 20deg 30deg);
 	mask-image: radial-gradient(ellipse 49% 32% at 50% 50%, #000 70%, transparent 98%);
-	animation: cr-404-rays 40s linear infinite;
 	pointer-events: none;
 }
 
-.cr-404 .cr-404__header:has(.cr-404__motion input:checked)::before { animation-play-state: paused; }
-
 .cr-404 .cr-404__motion {
-	display: flex;
+	display: none;
 	align-items: center;
 	gap: 0.45rem;
 	width: fit-content;
@@ -422,12 +417,21 @@
 /* =============================================================================
    Motion / responsive
    ============================================================================= */
-@media (prefers-reduced-motion: reduce) {
-	.cr-404 .cr-404__header::before { animation: none; }
-	.cr-404 .cr-404__motion { display: none; }
+@supports selector(:has(*)) {
 
+	@media (prefers-reduced-motion: no-preference) {
+		.cr-404 .cr-404__header::before { animation: cr-404-rays 40s linear infinite; }
+
+		.cr-404 .cr-404__header:has(.cr-404__motion input:checked)::before { animation-play-state: paused; }
+
+		.cr-404 .cr-404__motion { display: flex; }
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
 	.cr-404 .cr-404__list-item { transition: none; }
 }
+
 @media (max-width: 1099px) {
 	.cr-404 { --cr-comic-width: clamp(2.6rem, 11vw, 6.5rem); }
 
