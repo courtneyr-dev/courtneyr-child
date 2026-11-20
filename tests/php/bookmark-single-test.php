@@ -116,7 +116,13 @@ namespace {
 	require CR_BM_SINGLE_THEME_DIR . '/inc/artifact-style.php';
 	define( 'Courtneyr\\Child\\Bookmark\\ARTIFACT_STYLE', 'cr-bookmark-index-card' );
 	define( 'Courtneyr\\Child\\Bookmark\\ARTIFACT_CLASS', 'is-style-cr-bookmark-index-card' );
-	\Courtneyr\Child\ArtifactStyle\register( 'post-kinds-indieweb/bookmark-card', 'cr-bookmark-index-card', 'Index card', 'bookmark' );
+	$artifact_styles =& \Courtneyr\Child\ArtifactStyle\styles();
+	$artifact_styles['cr-bookmark-index-card'] = array(
+		'block' => 'post-kinds-indieweb/bookmark-card',
+		'label' => 'Index card',
+		'kind'  => 'bookmark',
+	);
+	unset( $artifact_styles );
 	$single_path = CR_BM_SINGLE_THEME_DIR . '/inc/single-bookmark.php';
 	if ( is_file( $single_path ) ) {
 		require $single_path;
