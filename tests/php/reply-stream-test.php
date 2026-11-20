@@ -24,9 +24,10 @@ cr_reply_group(
 		cr_reply_same( $input, StreamReply\envelope_card( $input, cr_reply_stream_block(), new WP_Block( array( 'postId' => $post->ID ) ) ), 'off Stream unchanged' );
 		$GLOBALS['cr_reply_stream'] = true;
 		cr_reply_same( $input, StreamReply\envelope_card( $input, cr_reply_stream_block( 2, 'is-style-cr-letter' ), new WP_Block( array( 'postId' => $post->ID ) ) ), 'letter style unchanged' );
-		$GLOBALS['cr_reply_kind'] = 'like';
-		cr_reply_same( $input, StreamReply\envelope_card( $input, cr_reply_stream_block(), new WP_Block( array( 'postId' => $post->ID ) ) ), 'non-reply unchanged' );
-		$GLOBALS['cr_reply_kind'] = 'reply';
+		$other_kind               = cr_reply_post( 43, 'A like' );
+		$GLOBALS['cr_reply_kinds'] = array( 'like' );
+		cr_reply_same( $input, StreamReply\envelope_card( $input, cr_reply_stream_block(), new WP_Block( array( 'postId' => $other_kind->ID ) ) ), 'non-reply unchanged' );
+		$GLOBALS['cr_reply_kinds'] = array( 'reply' );
 		$GLOBALS['cr_reply_protected'][ $post->ID ] = true;
 		cr_reply_same( $input, StreamReply\envelope_card( $input, cr_reply_stream_block(), new WP_Block( array( 'postId' => $post->ID ) ) ), 'protected unchanged' );
 	}
@@ -41,7 +42,7 @@ cr_reply_group(
 		$GLOBALS['cr_reply_dates'][ $post->ID ] = array( 'iso' => '2026-10-11T12:00:00+00:00', 'ts' => strtotime( '2026-10-11 12:00:00 UTC' ) );
 		$GLOBALS['cr_reply_facts'][ $post->ID ] = array( 'url' => 'https://target.test/post?x=1&y=2', 'host' => 'target.test', 'name' => 'Letter title' );
 		$html = StreamReply\envelope_card( '<article>Plugin card</article>', cr_reply_stream_block( 2 ), new WP_Block( array( 'postId' => $post->ID ) ) );
-		cr_reply_contains( '<article class="cr-envelope k-reply">', $html, 'article class' );
+		cr_reply_contains( '<article class="cr-envelope k-reply is-style-cr-letter-sheet">', $html, 'article classes' );
 		cr_reply_contains( '<span class="cr-envelope__label">Letter</span>', $html, 'plugin label' );
 		cr_reply_contains( '<time class="dt-published cr-envelope__date" datetime="2026-10-11T12:00:00+00:00">Oct 11</time>', $html, 'short date' );
 		cr_reply_contains( '<h2 class="cr-envelope__title p-name"><a id="cr-envelope-t-1" class="u-url" href="https://example.test/reply/42">Letter title</a></h2>', $html, 'title link' );

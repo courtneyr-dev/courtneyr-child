@@ -16,13 +16,17 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\SingleReply;
 
+use Courtneyr\Child\ArtifactStyle;
+use const Courtneyr\Child\Letters\ARTIFACT_CLASS;
+use const Courtneyr\Child\Letters\ARTIFACT_STYLE;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /** Whether this request is the single view of a reply. */
 function is_reply_single(): bool {
-	return function_exists( 'is_singular' ) && function_exists( 'has_term' ) && is_singular( 'post' ) && has_term( 'reply', 'kind', get_queried_object_id() );
+	return function_exists( 'is_singular' ) && is_singular( 'post' ) && ArtifactStyle\applies( get_queried_object_id(), ARTIFACT_STYLE );
 }
 
 /**
@@ -49,6 +53,7 @@ function add_cite_class( string $html ): string {
 		return $html;
 	}
 	$tags->add_class( 'cr-letter-cite' );
+	$tags->add_class( ARTIFACT_CLASS );
 	return $tags->get_updated_html();
 }
 
@@ -255,7 +260,7 @@ function letter( string $html, array $block ): string {
 	}
 	return str_replace(
 		array( LETTER_OPEN, LETTER_CLOSE ),
-		array( '<div class="cr-letter alignwide cr-paper-sheet cr-paper-sheet--torn cr-paper--printer-ivory">', '</div>' ),
+		array( '<div class="cr-letter alignwide cr-paper-sheet cr-paper-sheet--torn cr-paper--printer-ivory ' . ARTIFACT_CLASS . '">', '</div>' ),
 		$html
 	);
 }
