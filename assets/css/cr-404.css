@@ -1,10 +1,6 @@
 /* =============================================================================
-   404 comic layer — faithful reproduction of the Claude Design 404
-   (design project 755d010b / 404.dc.html). Scoped under .cr-404, enqueued
-   only on is_404() (see inc/enqueue.php). Sunburst 404 badge with spinning
-   rays, russian-violet-outlined comic bursts scattered in the margins, a
-   tape-labelled search card, and numbered post cards with kind chips.
-   The site header/footer come from the theme (the design's were mockups).
+   404 comic layer. Ink and halftones frame the recovery column. This sheet
+   is enqueued only on is_404() (see inc/enqueue.php).
    ============================================================================= */
 
 .cr-404 {
@@ -12,7 +8,9 @@
 	--cr-card:        var(--cr-surface-elevated);
 	--cr-shadow-ink:  var(--cr-russian-violet);
 	--cr-tab:         var(--cr-sky-blue);
-	--burst: polygon(50% 0%,61% 15%,79% 10%,80% 28%,98% 35%,87% 50%,98% 65%,80% 72%,79% 90%,61% 85%,50% 100%,39% 85%,21% 90%,20% 72%,2% 65%,13% 50%,2% 35%,20% 28%,21% 10%,39% 15%);
+	--cr-comic-dot: radial-gradient(var(--cr-russian-violet) 0.8px, transparent 1.4px);
+	--cr-comic-width: clamp(7rem, calc((100vw - 54rem) / 2 - 2rem), 14rem);
+	--cr-comic-edge: clamp(1rem, 3vw, 3.5rem);
 	position: relative;
 	overflow: hidden; /* edge bursts must not cause horizontal scroll */
 	/* halftone dots + fiber lines — matches the design's page-stage and the rest
@@ -52,48 +50,66 @@
 	position: relative;
 	display: inline-block;
 	/* fixed bottom margin so the rays clear the eyebrow on every width */
-	margin: 0 auto 5rem !important;
+	margin: 0 auto 3rem !important;
 	font-family: var(--cr-font-accent);
 	font-weight: 900;
 	font-size: clamp(3.5rem, 12vw, 6rem);
 	line-height: 1;
 	letter-spacing: -0.04em;
 	color: var(--cr-russian-violet);
-	/* solid ut-orange + faint inner sunburst (the design's overlay) */
-	background:
-		repeating-conic-gradient(from 0deg at 50% 60%, rgba(255,183,3,0.55) 0deg 6deg, rgba(251,133,0,0) 6deg 12deg),
-		var(--cr-ut-orange);
-	border: 5px solid var(--cr-russian-violet);
+	background: var(--cr-ut-orange);
+	border: 6px solid var(--cr-russian-violet);
 	border-radius: 0;
 	padding: 0.05em 0.34em 0.12em;
 	box-shadow: 7px 7px 0 var(--cr-russian-violet);
 	transform: rotate(-2.5deg);
 	overflow: hidden;
 	z-index: 1;
-	text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.25);
 }
-/* Rays live on the HEADER (behind everything via isolation), not on the badge:
-   a negative-z-index ::before of the badge would paint over the badge's own
-   box + border. Centered on the badge (~3.6rem from the header top). */
-.cr-404 .cr-404__header { position: relative; isolation: isolate; }
+/* The heading group keeps the rays behind the badge and copy. */
+.cr-404 .cr-404__header {
+	position: relative;
+	isolation: isolate;
+	padding-top: 1.25rem;
+}
 .cr-404 .cr-404__header::before {
 	content: "";
 	position: absolute;
 	z-index: -1;
-	top: 3.6rem;
+	top: 4.85rem;
 	left: 50%;
-	width: 440px;
-	height: 440px;
+	width: clamp(15rem, 35vw, 30rem);
+	aspect-ratio: 1;
 	transform: translate(-50%, -50%);
-	background: repeating-conic-gradient(
-		from 0deg,
-		var(--cr-ut-orange) 0deg 5deg,
-		var(--cr-selective-yellow) 5deg 10deg
-	);
-	-webkit-mask-image: radial-gradient(closest-side, #000 30%, rgba(0,0,0,0.55) 58%, transparent 82%);
-	mask-image: radial-gradient(closest-side, #000 30%, rgba(0,0,0,0.55) 58%, transparent 82%);
-	animation: cr-404-rays 40s linear infinite;
+	background:
+		repeating-conic-gradient(from 7deg, transparent 0deg 34deg, var(--cr-russian-violet) 34deg 35deg, transparent 35deg 48deg),
+		repeating-conic-gradient(var(--cr-ut-orange) 0deg 9deg, transparent 9deg 15deg, var(--cr-selective-yellow) 15deg 20deg, transparent 20deg 30deg);
+	mask-image: radial-gradient(ellipse 49% 32% at 50% 50%, #000 70%, transparent 98%);
 	pointer-events: none;
+}
+
+.cr-404 .cr-404__motion {
+	display: none;
+	align-items: center;
+	gap: 0.45rem;
+	width: fit-content;
+	min-height: 2rem;
+	padding: 0.1rem 0.65rem;
+	margin: 0 auto 0.75rem;
+	background: var(--cr-card);
+	color: var(--cr-ink);
+	font-size: var(--cr-text-sm);
+	cursor: pointer;
+}
+
+.cr-404 .cr-404__motion input {
+	margin: 0;
+	accent-color: var(--cr-marker);
+}
+
+.cr-404 .cr-404__motion:has(input:focus-visible) {
+	outline: 2px solid var(--cr-focus-ring);
+	outline-offset: 2px;
 }
 
 /* =============================================================================
@@ -113,8 +129,7 @@
 }
 
 /* =============================================================================
-   Comic onomatopoeia bursts — russian-violet outline + hard comic lift,
-   scattered around the margins (not tidy rails).
+   Margin artwork. Every burst uses an ink silhouette and an inset print fill.
    ============================================================================= */
 .cr-404 .cr-404__onomat {
 	position: absolute;
@@ -124,6 +139,24 @@
 	margin: 0;
 	pointer-events: none;
 }
+
+.cr-404__onomat::before,
+.cr-404__onomat::after {
+	content: "";
+	position: absolute;
+	width: var(--cr-comic-width);
+	height: 94%;
+	top: 2%;
+	background:
+		var(--cr-comic-dot) 0 0 / 7px 7px,
+		repeating-conic-gradient(from 18deg at 40% 28%, transparent 0deg 23deg, var(--cr-rule) 24deg 25deg, transparent 26deg 65deg);
+	opacity: 0.5;
+}
+
+.cr-404__onomat::before { left: 0; clip-path: polygon(0 0, 90% 0, 42% 12%, 71% 22%, 36% 39%, 70% 48%, 29% 56%, 73% 67%, 39% 78%, 72% 100%, 0 100%); }
+
+.cr-404__onomat::after { right: 0; clip-path: polygon(21% 0, 100% 0, 100% 100%, 14% 100%, 68% 79%, 25% 71%, 61% 58%, 22% 46%, 59% 34%, 23% 20%, 60% 9%); }
+
 .cr-404__onomat .cr-onomat {
 	position: absolute;
 	margin: 0;
@@ -132,66 +165,91 @@
 	justify-content: center;
 	text-align: center;
 	font-family: var(--cr-font-accent);
+	font-style: italic;
 	font-weight: 900;
-	font-size: clamp(0.66rem, 0.85vw, 0.82rem);
+	font-size: clamp(0.95rem, 2.4vw, 2.25rem);
 	line-height: 1;
 	letter-spacing: 0.01em;
 	color: var(--cr-russian-violet);
 	--burst-fill: var(--cr-selective-yellow);
-	/* fixed square so the star clip-path never stretches with word length
-	   (the design's bursts are square; content-sized boxes distort longer words). */
+	--burst: polygon(50% 0, 59% 21%, 76% 5%, 78% 26%, 97% 17%, 88% 40%, 100% 49%, 87% 60%, 98% 79%, 77% 75%, 76% 98%, 61% 82%, 50% 100%, 39% 82%, 20% 94%, 21% 74%, 2% 79%, 13% 57%, 0 48%, 16% 38%, 5% 19%, 26% 26%, 26% 7%, 42% 21%);
 	box-sizing: border-box;
-	width: 5.6rem;
-	height: 5.6rem;
+	width: var(--cr-comic-width);
+	aspect-ratio: 1.24;
 	padding: 0.3em;
 	white-space: nowrap;
-	/* fill + shadow are real stacked star layers (::after / ::before) so the
-	   brutalist drop shadow is a solid offset block, not a faint chained filter. */
+	isolation: isolate;
+	z-index: 1;
+	filter: drop-shadow(5px 6px 0 var(--cr-shadow-ink));
 }
-/* the comic star fill, with a thin russian-violet ink outline (both modes) */
+
 .cr-404__onomat .cr-onomat::after {
 	content: "";
 	position: absolute;
 	inset: 0;
 	z-index: -1;
-	background: var(--burst-fill);
+	background: var(--cr-comic-dot) 0 0 / 5px 5px, var(--burst-fill);
 	clip-path: var(--burst);
-	filter:
-		drop-shadow( 1.5px 0 0 var(--cr-russian-violet))
-		drop-shadow(-1.5px 0 0 var(--cr-russian-violet))
-		drop-shadow( 0 1.5px 0 var(--cr-russian-violet))
-		drop-shadow( 0 -1.5px 0 var(--cr-russian-violet));
+	background-blend-mode: soft-light;
+	transform: scale(0.94, 0.91);
 }
-/* the hard BRUTALIST drop shadow: a solid star echoed down-right behind the
-   fill, in the theme shadow-ink (russian-violet light, selective-yellow dark). */
+
 .cr-404__onomat .cr-onomat::before {
 	content: "";
 	position: absolute;
 	inset: 0;
 	z-index: -2;
-	background: var(--cr-shadow-ink, var(--cr-russian-violet));
+	background: var(--cr-russian-violet);
 	clip-path: var(--burst);
-	transform: translate(7px, 8px);
 }
 /* colour variants (set in the template per burst) — scoped under
    .cr-404__onomat so they beat the base `.cr-404__onomat .cr-onomat`
    background (0,2,0); without this they all stayed selective-yellow. */
 .cr-404__onomat .cr-onomat--blue   { --burst-fill: var(--cr-sky-blue); }
+
 .cr-404__onomat .cr-onomat--orange { --burst-fill: var(--cr-ut-orange); }
+
 .cr-404__onomat .cr-onomat--peach  { --burst-fill: var(--cr-periwinkle); }
-/* anchored positions — the design's 9 bursts hug each section's corners
-   (404.dc.html): hero badge (1,2), mid-hero (3,4), search (5,6), recent (7,8,9).
-   Rotations match the design exactly; placement is %-of-main (the overlay spans
-   the whole <main>) to approximate the design's per-section pixel anchoring. */
-.cr-404__onomat .cr-onomat--1 { top: 4%;  left: 3%;  transform: rotate(-12deg); } /* POW */
-.cr-404__onomat .cr-onomat--2 { top: 2%;  right: 4%; transform: rotate(10deg); }  /* KAPOW */
-.cr-404__onomat .cr-onomat--3 { top: 14%; right: 2%; transform: rotate(16deg); }  /* ZAP */
-.cr-404__onomat .cr-onomat--4 { top: 17%; left: 5%;  transform: rotate(-18deg); } /* BOOM */
-.cr-404__onomat .cr-onomat--5 { top: 50%; left: 3%;  transform: rotate(-14deg); } /* BANG */
-.cr-404__onomat .cr-onomat--6 { top: 44%; right: 3%; transform: rotate(15deg); }  /* WHAM */
-.cr-404__onomat .cr-onomat--7 { top: 71%; left: 3%;  transform: rotate(-16deg); } /* YIKES */
-.cr-404__onomat .cr-onomat--8 { top: 63%; right: 3%; transform: rotate(13deg); }  /* OOF */
-.cr-404__onomat .cr-onomat--9 { top: 85%; right: 4%; transform: rotate(-13deg); } /* THWACK */
+
+.cr-404__onomat .cr-onomat--1 { top: 4%; left: var(--cr-comic-edge); transform: rotate(-12deg); }
+
+.cr-404__onomat .cr-onomat--2 { top: 3%; right: var(--cr-comic-edge); transform: rotate(9deg); }
+
+.cr-404__onomat .cr-onomat--3 {
+	top: 26%;
+	right: var(--cr-comic-edge);
+	transform: rotate(-12deg);
+	--burst: polygon(0 32%, 23% 25%, 7% 15%, 61% 14%, 96% 3%, 81% 26%, 100% 37%, 84% 44%, 99% 59%, 69% 68%, 78% 78%, 26% 82%, 4% 98%, 20% 73%, 0 72%, 13% 53%);
+}
+
+.cr-404__onomat .cr-onomat--4,
+.cr-404__onomat .cr-onomat--8 {
+	--burst: polygon(10% 34%, 9% 25%, 15% 16%, 24% 11%, 31% 16%, 37% 7%, 46% 7%, 52% 17%, 63% 8%, 72% 10%, 76% 16%, 86% 15%, 94% 24%, 89% 36%, 98% 43%, 100% 51%, 97% 58%, 89% 61%, 91% 69%, 86% 77%, 78% 82%, 70% 80%, 64% 91%, 56% 95%, 47% 89%, 40% 96%, 30% 93%, 23% 83%, 15% 84%, 7% 77%, 7% 70%, 10% 64%, 2% 57%, 0 47%, 3% 39%);
+}
+
+.cr-404__onomat .cr-onomat--4 { top: 25%; left: var(--cr-comic-edge); transform: rotate(-9deg); }
+
+.cr-404__onomat .cr-onomat--5 { top: 48%; left: var(--cr-comic-edge); transform: rotate(-10deg); }
+
+.cr-404__onomat .cr-onomat--6 { top: 46%; right: var(--cr-comic-edge); transform: rotate(12deg); }
+
+.cr-404__onomat .cr-onomat--7 { top: 76%; left: var(--cr-comic-edge); transform: rotate(-12deg); }
+
+.cr-404__onomat .cr-onomat--8 { top: 66%; right: var(--cr-comic-edge); transform: rotate(9deg); }
+
+.cr-404__onomat .cr-onomat--9 { bottom: 4%; right: var(--cr-comic-edge); transform: rotate(-11deg); }
+
+.cr-404__bolt {
+	position: absolute;
+	width: clamp(1.8rem, 4vw, 3.7rem);
+	aspect-ratio: 0.66;
+	background: var(--cr-selective-yellow);
+	clip-path: polygon(46% 0, 95% 0, 68% 39%, 98% 39%, 15% 100%, 38% 54%, 0 54%);
+}
+
+.cr-404__bolt--left { top: 65%; left: calc(var(--cr-comic-edge) + 1.5rem); transform: rotate(14deg); }
+
+.cr-404__bolt--right { top: 20%; right: calc(var(--cr-comic-edge) + 1.5rem); transform: rotate(-10deg); }
 
 /* =============================================================================
    Search section — heading + tape-labelled card
@@ -359,11 +417,44 @@
 /* =============================================================================
    Motion / responsive
    ============================================================================= */
+@supports selector(:has(*)) {
+
+	@media (prefers-reduced-motion: no-preference) {
+		.cr-404 .cr-404__header::before { animation: cr-404-rays 40s linear infinite; }
+
+		.cr-404 .cr-404__header:has(.cr-404__motion input:checked)::before { animation-play-state: paused; }
+
+		.cr-404 .cr-404__motion { display: flex; }
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
-	.cr-404 .cr-404__header::before { animation: none; }
 	.cr-404 .cr-404__list-item { transition: none; }
 }
-@media (max-width: 1023px) {
-	.cr-404__onomat { display: none; }
-	.cr-404 .cr-404__header::before { width: 240px; height: 240px; }
+
+@media (max-width: 1099px) {
+	.cr-404 { --cr-comic-width: clamp(2.6rem, 11vw, 6.5rem); }
+
+	.cr-404__onomat .cr-onomat { top: 3.5rem; font-size: clamp(0.56rem, 1.6vw, 0.94rem); }
+
+	.cr-404__onomat .cr-onomat--1 { left: 0.45rem; }
+
+	.cr-404__onomat .cr-onomat--2 { right: 0.45rem; }
+
+	.cr-404__onomat::before,
+	.cr-404__onomat::after,
+	.cr-404__bolt,
+	.cr-404__onomat .cr-onomat:not(.cr-onomat--1, .cr-onomat--2) { display: none; }
+}
+
+@media (max-width: 599px) {
+	.cr-404 .cr-404__search-card .wp-block-search__inside-wrapper {
+		flex-direction: column;
+	}
+
+	.cr-404 .cr-404__search-card .wp-block-search__input,
+	.cr-404 .cr-404__search-card .wp-block-search__button {
+		box-sizing: border-box;
+		width: 100%;
+	}
 }
