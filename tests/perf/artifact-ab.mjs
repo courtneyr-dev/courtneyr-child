@@ -708,10 +708,10 @@ async function shoot( browser, origin, item, page0, out, load ) {
 		}
 		await page.evaluate( async () => {
 			for ( let y = 0; y < document.documentElement.scrollHeight; y += 600 ) {
-				window.scrollTo( 0, y );
+				window.scrollTo( { top: y, left: 0, behavior: 'instant' } );
 				await new Promise( ( r ) => setTimeout( r, 40 ) );
 			}
-			window.scrollTo( 0, 0 );
+			window.scrollTo( { top: 0, left: 0, behavior: 'instant' } );
 		} );
 		await page.waitForFunction( () => [ ...document.images ].every( ( i ) => i.complete ), null, { timeout: 8000 } ).catch( () => {} );
 		await page.evaluate( () => document.fonts.ready );
@@ -725,6 +725,7 @@ async function shoot( browser, origin, item, page0, out, load ) {
 			} )
 		);
 		await page.waitForTimeout( 300 );
+		await page.waitForFunction( () => window.scrollX === 0 && window.scrollY === 0 );
 		const png = path.join( out, 'shots', `${ item.key }.${ load }.png` );
 		if ( record.selector ) {
 			const el = page.locator( record.selector ).first();
