@@ -34,13 +34,23 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\MoodPin;
 
+use Courtneyr\Child\ArtifactStyle;
 use function Courtneyr\Child\MoodMotifs\motif;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const BLOCK = 'post-kinds-indieweb/mood-card';
+const BLOCK          = 'post-kinds-indieweb/mood-card';
+const ARTIFACT_STYLE = 'cr-pin-button';
+const ARTIFACT_CLASS = 'is-style-' . ARTIFACT_STYLE;
+
+add_action(
+	'after_setup_theme',
+	static function (): void {
+		ArtifactStyle\register( BLOCK, ARTIFACT_STYLE, __( 'Pin-back button', 'courtneyr-child' ), 'mood' );
+	}
+);
 
 /**
  * Spot-ink combinations: face, line ink (also the word), accent. Every
@@ -693,17 +703,26 @@ function mood_card( string $html, array $block ): string {
 	if ( is_feed() || false === strpos( $html, 'pk-mood' ) ) {
 		return $html;
 	}
-	$attrs = (array) ( $block['attrs'] ?? array() );
-	$mood  = (string) ( $attrs['mood'] ?? '' );
-	$spec  = resolve( $mood, (string) ( $attrs['emoji'] ?? '' ), (string) ( $attrs['moodKey'] ?? '' ) );
-	if ( is_singular( 'post' ) ) {
+	$attrs     = (array) ( $block['attrs'] ?? array() );
+	$mood      = (string) ( $attrs['mood'] ?? '' );
+	$spec      = resolve( $mood, (string) ( $attrs['emoji'] ?? '' ), (string) ( $attrs['moodKey'] ?? '' ) );
+	$is_single = is_singular( 'post' );
+	if ( $is_single ) {
 		$facts = mood_facts( (int) get_the_ID() );
 		if ( null !== $facts ) {
 			$spec['family_label']   = (string) $facts['family_label'];
 			$spec['intensity_text'] = (string) ( $facts['intensity_text'] ?? '' );
 		}
 	}
-	$html = replace_emoji_span( $html, render( $spec, is_singular( 'post' ) ? 'single' : 'stream' ) );
+	$pin     = render( $spec, $is_single ? 'single' : 'stream' );
+	$post_id = (int) get_the_ID();
+	if ( ( ( $is_single && (int) get_queried_object_id() === $post_id ) || \Courtneyr\Child\HomeSections\is_stream_surface() )
+		&& ! wp_is_serving_rest_request()
+		&& ArtifactStyle\applies( $post_id, ARTIFACT_STYLE )
+		&& ! post_password_required( $post_id ) ) {
+		$pin = mark_pin_style( $pin );
+	}
+	$html = replace_emoji_span( $html, $pin );
 
 	// A card-only micro-post on /stream with no moodAt has no date of its
 	// own; the post's date joins it, in the plugin's own meta markup.
@@ -754,6 +773,25 @@ function mood_card( string $html, array $block ): string {
 add_filter( 'render_block_' . BLOCK, __NAMESPACE__ . '\\mood_card', 10, 2 );
 
 /**
+ * Add the artifact style to the existing pin wrapper.
+ *
+ * @param string $pin Rendered pin markup.
+ * @return string
+ */
+function mark_pin_style( string $pin ): string {
+	$tags = new \WP_HTML_Tag_Processor( $pin );
+	if ( $tags->next_tag(
+		array(
+			'tag_name'   => 'span',
+			'class_name' => 'cr-pin-set',
+		)
+	) ) {
+		$tags->add_class( ARTIFACT_CLASS );
+	}
+	return $tags->get_updated_html();
+}
+
+/**
  * The plugin's generic stream card for a long-form mood post: it carries
  * the emoji but not the word, so read the word from the post's block.
  *
@@ -770,7 +808,7 @@ function stream_card( string $html, array $block, $instance ): string {
 		? (int) $instance->context['postId']
 		: (int) get_the_ID();
 	$post    = $post_id ? get_post( $post_id ) : null;
-	if ( ! $post instanceof \WP_Post || ! has_term( 'mood', 'kind', $post ) ) {
+	if ( ! $post instanceof \WP_Post || ! ArtifactStyle\applies( $post, ARTIFACT_STYLE ) ) {
 		return $html;
 	}
 	$attrs = (array) ( ( find_mood_block( $post ) ?? array() )['attrs'] ?? array() );
@@ -778,7 +816,11 @@ function stream_card( string $html, array $block, $instance ): string {
 	if ( '' === $emoji && preg_match( '/<span class="pk-mood__emoji"[^>]*>(.*?)<\/span>/su', $html, $m ) ) {
 		$emoji = (string) $m[1];
 	}
-	$html = replace_emoji_span( $html, render( resolve( (string) ( $attrs['mood'] ?? '' ), $emoji, (string) ( $attrs['moodKey'] ?? '' ) ), 'stream' ) );
+	$pin = render( resolve( (string) ( $attrs['mood'] ?? '' ), $emoji, (string) ( $attrs['moodKey'] ?? '' ) ), 'stream' );
+	if ( \Courtneyr\Child\HomeSections\is_stream_surface() && ! wp_is_serving_rest_request() && ! post_password_required( $post ) ) {
+		$pin = mark_pin_style( $pin );
+	}
+	$html = replace_emoji_span( $html, $pin );
 	// A title-less post gets the plugin's synthetic kind-label heading as its
 	// link; under a mood pin that reads "Mood" twice, so it hides visually.
 	if ( false === strpos( $html, 'pk-title p-name' ) ) {
@@ -816,7 +858,7 @@ function single_note(): string {
 	$post_id = (int) get_queried_object_id();
 	if ( ! isset( $kept[ $post_id ] ) ) {
 		$post             = get_post( $post_id );
-		$attrs            = ( $post instanceof \WP_Post && has_term( 'mood', 'kind', $post ) ) ? (array) ( ( find_mood_block( $post ) ?? array() )['attrs'] ?? array() ) : array();
+		$attrs            = ( $post instanceof \WP_Post && ArtifactStyle\applies( $post, ARTIFACT_STYLE ) ) ? (array) ( ( find_mood_block( $post ) ?? array() )['attrs'] ?? array() ) : array();
 		$kept[ $post_id ] = comparable_text( (string) ( $attrs['note'] ?? '' ) );
 	}
 	return $kept[ $post_id ];
