@@ -25,8 +25,12 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\StreamOrder;
 
+use Courtneyr\Child\ArtifactStyle;
 use function Courtneyr\Child\SingleOrder\parts;
 use function Courtneyr\Child\StreamMedia\find_block;
+use const Courtneyr\Child\SingleOrder\DRINK_STYLE;
+use const Courtneyr\Child\SingleOrder\EAT_STYLE;
+use const Courtneyr\Child\SingleOrder\STYLE_FOR_KIND;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -51,7 +55,7 @@ function card( string $html, array $block, $instance ): string { // phpcs:ignore
 	if ( ! $post instanceof \WP_Post || post_password_required( $post ) ) {
 		return $html;
 	}
-	$kind = has_term( 'eat', 'kind', $post ) ? 'eat' : ( has_term( 'drink', 'kind', $post ) ? 'drink' : '' );
+	$kind = ArtifactStyle\applies( $post, EAT_STYLE ) ? 'eat' : ( ArtifactStyle\applies( $post, DRINK_STYLE ) ? 'drink' : '' );
 	$card = '' !== $kind ? find_block( $post, 'post-kinds-indieweb/' . $kind . '-card' ) : null;
 	if ( null === $card ) {
 		return $html;
@@ -107,6 +111,11 @@ function card( string $html, array $block, $instance ): string { // phpcs:ignore
 		$out .= '<figure class="cr-chit__photo">' . $photo . '</figure>';
 	}
 	$out .= $parts['marker'] . '</article>';
+
+	$tags = new \WP_HTML_Tag_Processor( $out );
+	$tags->next_tag( 'article' );
+	$tags->add_class( 'is-style-' . STYLE_FOR_KIND[ $kind ] );
+	$out = $tags->get_updated_html();
 
 	// Swap the card in where the stream card held one; otherwise it is the card.
 	if ( $source === $html ) {
