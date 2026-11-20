@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\StreamExercise;
 
+use Courtneyr\Child\ArtifactStyle;
 use Courtneyr\Child\Exercise;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -62,7 +63,7 @@ function bib_corner( string $html, array $block = array(), $instance = null ): s
 
 	$post_id = block_post_id( $instance );
 	$post    = $post_id > 0 ? get_post( $post_id ) : null;
-	if ( ! $post instanceof \WP_Post || ! has_term( Exercise\KIND, 'kind', $post ) || post_password_required( $post ) ) {
+	if ( ! $post instanceof \WP_Post || ! ArtifactStyle\applies( $post, Exercise\ARTIFACT_STYLE ) || post_password_required( $post ) ) {
 		return $html;
 	}
 	if ( ! function_exists( '\\PKIW\\kind_facts' ) ) {
@@ -87,7 +88,7 @@ function bib_corner( string $html, array $block = array(), $instance = null ): s
 
 	// No h-entry here: the plugin's priority-99 filter then treats the card as unrooted, so the Query Loop li carries the entry root.
 	$level = heading_level( $block );
-	$out   = '<article class="pk-card pk-card--stream k-exercise cr-bib-corner">';
+	$out   = '<article class="pk-card pk-card--stream k-exercise cr-bib-corner ' . Exercise\ARTIFACT_CLASS . '">';
 	$out  .= '<span class="cr-bib-corner__kind pk-kindlabel">' . esc_html( kind_label() ) . '</span>';
 	$out  .= '<h' . $level . ' class="' . esc_attr( $title_class ) . '"><a class="u-url cr-bib-corner__link" href="' . esc_url( (string) get_permalink( $post ) ) . '">' . $link_text . '</a></h' . $level . '>';
 
