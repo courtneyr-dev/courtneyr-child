@@ -9,6 +9,9 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Like;
 
+use Courtneyr\Child\ArchiveCheckin;
+use PKIW\Kind_Facts;
+
 use function Courtneyr\Child\HomeSections\is_stream_surface;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -312,17 +315,20 @@ function group_key( int $post_id ): string {
 /**
  * Normalize visible title text for duplicate detection.
  *
- * @param int $post_id Post ID.
+ * @param int                       $post_id Post ID.
+ * @param array<string, mixed>|null $facts   Selected archive facts, if available.
  * @return string
  */
-function title_key( int $post_id ): string {
-	$facts = like_facts( $post_id );
-	$title = (string) ( $facts['cited_title'] ?? '' );
+function title_key( int $post_id, ?array $facts = null ): string {
+	$selected = null !== $facts;
+	$facts    = $facts ?? like_facts( $post_id );
+	$title    = (string) ( $facts['cited_title'] ?? '' );
 	if ( '' === trim( $title ) ) {
 		$title = (string) ( $facts['host'] ?? '' );
 	}
 	if ( '' === trim( $title ) ) {
-		$title = (string) get_the_title( $post_id );
+		$post  = $selected ? get_post( $post_id ) : null;
+		$title = $post instanceof \WP_Post ? ArchiveCheckin\fallback_name( $post ) : (string) get_the_title( $post_id );
 	}
 	$title = trim( (string) preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $title ) ) );
 	return function_exists( 'mb_strtolower' ) ? mb_strtolower( $title, 'UTF-8' ) : strtolower( $title );
@@ -331,10 +337,11 @@ function title_key( int $post_id ): string {
 /**
  * Stable IDs for repeated archive titles.
  *
- * @param int $post_id Post ID.
+ * @param int   $post_id     Post ID.
+ * @param int[] $archive_ids Validated group page map, when available.
  * @return array{title: string, date: string, repeats: bool}
  */
-function label_ids( int $post_id ): array {
+function label_ids( int $post_id, array $archive_ids = array() ): array {
 	static $cache = array();
 
 	$posts = array();
@@ -347,17 +354,18 @@ function label_ids( int $post_id ): array {
 	foreach ( $posts as $post ) {
 		$ids[] = is_object( $post ) && isset( $post->ID ) ? (int) $post->ID : (int) $post;
 	}
-	$cache_key = implode( ',', $ids );
+	$cache_key = ( $archive_ids ? 'archive:' : '' ) . implode( ',', $archive_ids ? $archive_ids : $ids );
 
 	if ( ! isset( $cache[ $cache_key ] ) ) {
 		$counts  = array();
 		$members = array();
-		foreach ( $posts as $post ) {
+		foreach ( $archive_ids ? $archive_ids : $posts as $post ) {
 			$id = is_object( $post ) && isset( $post->ID ) ? (int) $post->ID : (int) $post;
 			if ( ! $id || ! has_term( 'like', 'kind', $post ) ) {
 				continue;
 			}
-			$key            = group_key( $id ) . '|' . title_key( $id );
+			$facts          = $archive_ids ? ArchiveCheckin\peer_facts( $id, 'like' ) : null;
+			$key            = group_key( $id ) . '|' . title_key( $id, $facts );
 			$members[ $id ] = $key;
 			if ( '|' !== $key ) {
 				$counts[ $key ] = ( $counts[ $key ] ?? 0 ) + 1;
@@ -382,12 +390,13 @@ function label_ids( int $post_id ): array {
 /**
  * Add repeated-title labels to the card title link.
  *
- * @param string $html    Fragment.
- * @param int    $post_id Post ID.
+ * @param string $html        Fragment.
+ * @param int    $post_id     Post ID.
+ * @param int[]  $archive_ids Validated group page map, when available.
  * @return string
  */
-function add_duplicate_labels( string $html, int $post_id ): string {
-	$ids = label_ids( $post_id );
+function add_duplicate_labels( string $html, int $post_id, array $archive_ids = array() ): string {
+	$ids = label_ids( $post_id, $archive_ids );
 	if ( empty( $ids['repeats'] ) ) {
 		return $html;
 	}
@@ -451,13 +460,15 @@ function insert_after_caption( string $html, string $insert ): string {
 /**
  * Apply archive card treatment.
  *
- * @param string   $html Fragment.
- * @param \WP_Post $post Post.
+ * @param string   $html     Fragment.
+ * @param \WP_Post $post     Post.
+ * @param mixed    $instance Rendered block instance.
  * @return string
  */
-function archive_card( string $html, \WP_Post $post ): string {
-	$html = add_article_classes( $html, 'cr-like-sticker', paper_class( $post->ID ), shape_class( $post->ID ) );
-	if ( post_password_required( $post ) || false !== strpos( $html, 'pk-card--protected' ) ) {
+function archive_card( string $html, \WP_Post $post, $instance = null ): string {
+	$selected = ArchiveCheckin\selected( $post, $instance, 'like' );
+	$html     = add_article_classes( $html, 'cr-like-sticker', paper_class( $post->ID ), shape_class( $post->ID ) );
+	if ( post_password_required( $post ) || ( $selected ? ArchiveCheckin\is_protected( $html ) : false !== strpos( $html, 'pk-card--protected' ) ) ) {
 		return $html;
 	}
 
@@ -465,10 +476,18 @@ function archive_card( string $html, \WP_Post $post ): string {
 		$html = cut_elements( $html, $cut[0], $cut[1] );
 	}
 
-	$facts   = like_facts( $post->ID );
+	$label = ArchiveCheckin\label( $post, $instance, 'like', $html );
+	if ( '' !== $label ) {
+		$heading_end = strpos( $html, '</h3>' );
+		if ( false !== $heading_end ) {
+			$html = substr_replace( $html, $label, $heading_end + strlen( '</h3>' ), 0 );
+		}
+	}
+
+	$facts   = $selected ? Kind_Facts::get_for_archive_kind( $post->ID, 'like' ) : like_facts( $post->ID );
 	$picture = $facts['picture'] ?? array();
 	$html    = insert_after_caption( $html, is_array( $picture ) ? archive_picture( $picture ) : '' );
-	return add_duplicate_labels( $html, $post->ID );
+	return add_duplicate_labels( $html, $post->ID, ArchiveCheckin\page_ids( $post->ID, $instance, 'like' ) );
 }
 
 /**
@@ -513,7 +532,7 @@ function dispatch( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
-	return $archive ? archive_card( $html, $post ) : stream_card( $html );
+	return $archive ? archive_card( $html, $post, $instance ) : stream_card( $html );
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\dispatch', 10, 3 );
 

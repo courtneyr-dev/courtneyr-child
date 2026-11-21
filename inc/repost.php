@@ -16,6 +16,9 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Repost;
 
+use Courtneyr\Child\ArchiveCheckin;
+use PKIW\Kind_Facts;
+
 use function Courtneyr\Child\HomeSections\is_stream_surface;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -259,13 +262,14 @@ function is_first_row( int $post_id ): bool {
 /**
  * Which displayed names repeat on this page.
  *
+ * @param int[] $archive_ids Validated group page map, when available.
  * @return array{names: array<int, string>, counts: array<string, int>}
  */
-function page_titles(): array {
+function page_titles( array $archive_ids = array() ): array {
 	static $cache = array();
 
-	$ids = page_ids();
-	$key = implode( ',', $ids );
+	$ids = $archive_ids ? $archive_ids : page_ids();
+	$key = ( $archive_ids ? 'archive:' : '' ) . implode( ',', $ids );
 	if ( ! isset( $cache[ $key ] ) ) {
 		$names = array();
 		foreach ( $ids as $id ) {
@@ -273,7 +277,11 @@ function page_titles(): array {
 			if ( ! $post instanceof \WP_Post || ! has_term( 'repost', 'kind', $post ) || post_password_required( $post ) ) {
 				continue;
 			}
-			$facts = facts( $id );
+			$selected = $archive_ids ? ArchiveCheckin\peer_facts( $id, 'repost' ) : null;
+			$facts    = $selected ?? facts( $id );
+			if ( null !== $selected && '' === fact( $facts, 'name' ) ) {
+				$facts['name'] = ArchiveCheckin\fallback_name( $post );
+			}
 			if ( array() === $facts ) {
 				continue;
 			}
@@ -318,10 +326,11 @@ function section_heading_id(): string {
  *
  * @param int                  $post_id Post ID.
  * @param array<string, mixed> $facts   Repost facts.
+ * @param int[]                $archive_ids Validated group page map, when available.
  * @return string '' when the item's name is unique on the page.
  */
-function repeated_name_labels( int $post_id, array $facts ): string {
-	$titles = page_titles();
+function repeated_name_labels( int $post_id, array $facts, array $archive_ids = array() ): string {
+	$titles = page_titles( $archive_ids );
 	$name   = $titles['names'][ $post_id ] ?? '';
 	if ( '' === $name || ( $titles['counts'][ $name ] ?? 0 ) < 2 ) {
 		return '';
@@ -395,21 +404,25 @@ function clipping( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
-	$tape = 'cr-repost-clip--tape-' . tilt_index( $post_id );
+	$tape     = 'cr-repost-clip--tape-' . tilt_index( $post_id );
+	$selected = ArchiveCheckin\selected( $post, $instance, 'repost' );
 
 	// A protected post keeps the plugin's card whole: its one title link
 	// already reads "Protected: <stored title>" and it reads no facts.
-	if ( post_password_required( $post ) ) {
+	if ( post_password_required( $post ) || ( $selected && ArchiveCheckin\is_protected( $html ) ) ) {
 		return '<div class="cr-repost-clip cr-repost-clip--protected ' . esc_attr( $tape ) . '"><div class="' . PAPER_CLASSES . '">' . $html . '</div></div>';
 	}
 
-	$facts = facts( $post_id );
+	$facts = $selected ? Kind_Facts::get_for_archive_kind( $post_id, 'repost' ) : facts( $post_id );
+	if ( $selected && '' === fact( $facts, 'name' ) ) {
+		$facts['name'] = ArchiveCheckin\fallback_name( $post );
+	}
 	if ( array() === $facts ) {
 		return $html;
 	}
 
 	$level  = heading_level( $block['attrs']['headingLevel'] ?? 3 );
-	$labels = repeated_name_labels( $post_id, $facts );
+	$labels = repeated_name_labels( $post_id, $facts, ArchiveCheckin\page_ids( $post_id, $instance, 'repost' ) );
 	$credit = credit_text( $facts );
 
 	$link  = '<a id="cr-repost-title-' . esc_attr( (string) $post_id ) . '" class="u-url" href="' . esc_url( (string) get_permalink( $post ) ) . '"';
@@ -422,8 +435,11 @@ function clipping( string $html, array $block, $instance ): string {
 	if ( '' !== $credit ) {
 		$out .= '<p class="cr-repost-clip__credit" id="cr-repost-credit-' . esc_attr( (string) $post_id ) . '">' . esc_html( $credit ) . '</p>';
 	}
+	$out .= ArchiveCheckin\label( $post, $instance, 'repost', $html );
 	$out .= '</div>';
-	$out .= function_exists( '\\PKIW\\stream_card_kind_cite' ) ? (string) \PKIW\stream_card_kind_cite( $post ) : '';
+	if ( function_exists( '\\PKIW\\stream_card_kind_cite' ) ) {
+		$out .= $selected ? \PKIW\stream_card_kind_cite( $post, $facts, 'repost' ) : (string) \PKIW\stream_card_kind_cite( $post );
+	}
 	return $out . '</div>';
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\clipping', 10, 3 );

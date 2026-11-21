@@ -20,6 +20,9 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Favorite;
 
+use Courtneyr\Child\ArchiveCheckin;
+use PKIW\Kind_Facts;
+
 use function Courtneyr\Child\HomeSections\is_stream_surface;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -214,10 +217,11 @@ function comparable( string $name ): string {
 /**
  * Whether another favorite on this page prints the same visible name.
  *
- * @param int $post_id Post ID.
+ * @param int   $post_id     Post ID.
+ * @param int[] $archive_ids Validated group page map, when available.
  * @return bool
  */
-function repeats_name( int $post_id ): bool {
+function repeats_name( int $post_id, array $archive_ids = array() ): bool {
 	static $cache = array();
 
 	$query = $GLOBALS['wp_query'] ?? null;
@@ -226,12 +230,21 @@ function repeats_name( int $post_id ): bool {
 	foreach ( $posts as $post ) {
 		$ids[] = is_object( $post ) && isset( $post->ID ) ? (int) $post->ID : (int) $post;
 	}
-	$key = implode( ',', $ids );
+	$ids = $archive_ids ? $archive_ids : $ids;
+	$key = ( $archive_ids ? 'archive:' : '' ) . implode( ',', $ids );
 
 	if ( ! isset( $cache[ $key ] ) ) {
 		$names = array();
 		foreach ( $ids as $id ) {
-			$name = comparable( (string) ( facts( $id )['name'] ?? '' ) );
+			$selected = $archive_ids ? ArchiveCheckin\peer_facts( $id, KIND ) : null;
+			$name     = (string) ( ( $selected ?? facts( $id ) )['name'] ?? '' );
+			if ( null !== $selected && '' === $name ) {
+				$post = get_post( $id );
+				if ( $post instanceof \WP_Post && ! post_password_required( $post ) ) {
+					$name = ArchiveCheckin\fallback_name( $post );
+				}
+			}
+			$name = comparable( $name );
 			if ( '' !== $name ) {
 				$names[ $id ] = $name;
 			}
@@ -285,16 +298,18 @@ function is_clipping( array $block ): bool {
  * @param int                  $level Heading level.
  * @param int                  $post_id Post ID.
  * @param string               $tilt  Rotation token for the star.
+ * @param string               $label Secondary archive label HTML.
+ * @param int[]                $archive_ids Validated group page map, when available.
  * @return string
  */
-function item_html( array $facts, int $level, int $post_id, string $tilt ): string {
+function item_html( array $facts, int $level, int $post_id, string $tilt, string $label = '', array $archive_ids = array() ): string {
 	$name   = (string) ( $facts['name'] ?? '' );
 	$url    = (string) ( $facts['url'] ?? '' );
 	$link   = ' href="' . esc_url( (string) get_permalink( $post_id ) ) . '"';
 	$inner  = esc_html( $name );
 	$escurl = '' === $url ? '' : esc_url( $url );
 
-	if ( repeats_name( $post_id ) ) {
+	if ( repeats_name( $post_id, $archive_ids ) ) {
 		$month = month_heading_id( $post_id );
 		if ( '' !== $month ) {
 			$title_id = 'cr-fav-title-' . $post_id;
@@ -306,7 +321,7 @@ function item_html( array $facts, int $level, int $post_id, string $tilt ): stri
 	$classes = 'cr-fav-title' . ( ! empty( $facts['name_is_title'] ) ? ' p-name' : '' );
 	$out     = '<div class="cr-fav-item">';
 	$out    .= '<span class="cr-fav-star" aria-hidden="true" style="--cr-fav-tilt:var(' . esc_attr( $tilt ) . ')">' . star_svg() . '</span>';
-	$out    .= '<div class="cr-fav-clipping"><h' . $level . ' class="' . esc_attr( $classes ) . '"><a class="u-url cr-fav-link"' . $link . '>' . $inner . '</a></h' . $level . '></div>';
+	$out    .= '<div class="cr-fav-clipping"><h' . $level . ' class="' . esc_attr( $classes ) . '"><a class="u-url cr-fav-link"' . $link . '>' . $inner . '</a></h' . $level . '>' . $label . '</div>';
 	if ( '' !== $escurl ) {
 		$out .= '<data class="u-favorite-of" value="' . $escurl . '" hidden></data>';
 	}
@@ -357,15 +372,19 @@ function item( string $html, array $block, $instance ): string {
 	if ( ! $post instanceof \WP_Post || ! is_favorite( $post ) ) {
 		return $html;
 	}
+	$selected = ArchiveCheckin\selected( $post, $instance, KIND );
 
 	// A protected favorite is still an item: a star and a clipping around the
 	// plugin's protected card, which holds the title link and nothing else.
 	// No facts are read, so no cited URL, author or date reaches the page.
-	if ( post_password_required( $post ) ) {
+	if ( post_password_required( $post ) || ( $selected && ArchiveCheckin\is_protected( $html ) ) ) {
 		return protected_item_html( $html, $post_id );
 	}
 
-	$facts = facts( $post_id );
+	$facts = $selected ? Kind_Facts::get_for_archive_kind( $post_id, KIND ) : facts( $post_id );
+	if ( $selected && '' === (string) ( $facts['name'] ?? '' ) ) {
+		$facts['name'] = ArchiveCheckin\fallback_name( $post );
+	}
 	if ( array() === $facts ) {
 		return $html;
 	}
@@ -373,7 +392,14 @@ function item( string $html, array $block, $instance ): string {
 	$tilt = star_tilt( $post_id, last_tilt() );
 	last_tilt( $tilt );
 
-	return item_html( $facts, heading_level( $block, 3 ), $post_id, $tilt );
+	return item_html(
+		$facts,
+		heading_level( $block, 3 ),
+		$post_id,
+		$tilt,
+		ArchiveCheckin\label( $post, $instance, KIND, $html ),
+		ArchiveCheckin\page_ids( $post_id, $instance, KIND )
+	);
 }
 add_filter( 'render_block_post-kinds-indieweb/stream-card', __NAMESPACE__ . '\\item', 10, 3 );
 

@@ -203,6 +203,16 @@ article.pk-card.cr-like-sticker--stream .pk-title a::after,
 	margin-block-start: var(--cr-space-sm);
 }
 
+.cr-like-sticker__checkin {
+	display: block;
+	margin-block-start: var(--cr-space-2xs);
+	color: inherit;
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
 .cr-like article.pk-card.cr-like-sticker .pk-embed img {
 	display: block;
 	width: 100%;

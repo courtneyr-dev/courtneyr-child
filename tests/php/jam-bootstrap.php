@@ -384,6 +384,7 @@ namespace Courtneyr\Child\HomeSections {
 
 namespace {
 	require CR_JAM_THEME_DIR . '/inc/stamps.php';
+	require CR_JAM_THEME_DIR . '/inc/archive-checkin-label.php';
 	require CR_JAM_THEME_DIR . '/inc/jam.php';
 	require CR_JAM_THEME_DIR . '/inc/single-jam.php';
 

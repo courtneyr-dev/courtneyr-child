@@ -293,6 +293,7 @@ namespace {
 
 	require CR_LIKE_THEME_DIR . '/inc/stamps.php';
 	if ( is_file( CR_LIKE_THEME_DIR . '/inc/like.php' ) ) {
+		require CR_LIKE_THEME_DIR . '/inc/archive-checkin-label.php';
 		require CR_LIKE_THEME_DIR . '/inc/like.php';
 	}
 }

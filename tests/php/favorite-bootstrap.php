@@ -276,6 +276,7 @@ namespace PKIW {
 
 namespace {
 	require CR_FAV_THEME_DIR . '/inc/stamps.php';
+	require CR_FAV_THEME_DIR . '/inc/archive-checkin-label.php';
 	require CR_FAV_THEME_DIR . '/inc/favorite.php';
 	require CR_FAV_THEME_DIR . '/inc/single-favorite.php';
 	require CR_FAV_THEME_DIR . '/inc/stream-favorite.php';

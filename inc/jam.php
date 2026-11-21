@@ -12,6 +12,8 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Jam;
 
+use Courtneyr\Child\ArchiveCheckin;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -199,7 +201,23 @@ function jukebox_strip( string $html, array $block = array(), $instance = null )
 			}
 		}
 
-		return $tags->get_updated_html();
+		$html = $tags->get_updated_html();
+		if ( ! function_exists( '\\PKIW\\mixed_kind_archive_slug' ) || ! $instance instanceof \WP_Block || empty( $instance->context['postId'] ) ) {
+			return $html;
+		}
+		$post = get_post( (int) $instance->context['postId'] );
+		if ( ! $post instanceof \WP_Post ) {
+			return $html;
+		}
+		$label = ArchiveCheckin\label( $post, $instance, 'jam', $html );
+		if ( '' === $label ) {
+			return $html;
+		}
+
+		$artist  = strpos( $html, 'id="pkiw-jam-a-' . $post->ID . '"' );
+		$closing = false === $artist ? '</h3>' : '</p>';
+		$end     = strpos( $html, $closing, false === $artist ? 0 : $artist );
+		return false === $end ? $html : substr_replace( $html, $label, $end + strlen( $closing ), 0 );
 	}
 
 	$tags->add_class( 'cr-jam-strip--stream' );

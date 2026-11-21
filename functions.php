@@ -33,6 +33,7 @@ require_once __DIR__ . '/inc/home-sections.php';
 require_once __DIR__ . '/inc/stream-style-pruning.php';
 require_once __DIR__ . '/inc/microformats.php';
 require_once __DIR__ . '/inc/archives.php';
+require_once __DIR__ . '/inc/archive-checkin-label.php';
 require_once __DIR__ . '/inc/series.php';
 require_once __DIR__ . '/inc/series-views.php';
 require_once __DIR__ . '/inc/outpost-appearance.php';
