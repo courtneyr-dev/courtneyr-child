@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.175
+
+- Add an "Also a check-in" label to Like, Repost, Favorite and Jam archive cards for posts that also carry Check-in. The label appears only when Post Kinds for IndieWeb 1.10.3 or later (the selected-card API from its PR #604) is active and the card is a selected mixed row that is public, eligible and not hidden, not a protected shell, and whose check-in name tier allows it. With an older plugin the archives render the same markup as before. (#330)
+
 ## 0.7.174
 
 - Register the Flyer style for Event cards and apply it to the existing single flyer and Stream tab. (#327)
