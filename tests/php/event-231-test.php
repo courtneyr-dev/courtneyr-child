@@ -22,6 +22,7 @@ namespace {
 	$GLOBALS['cr_event_single']     = false;
 	$GLOBALS['cr_event_queried']    = 231;
 	$GLOBALS['cr_event_failures']   = array();
+	$GLOBALS['cr_event_styles']     = array();
 
 	class WP_Post {
 		public int $ID;
@@ -74,6 +75,10 @@ namespace {
 		$GLOBALS['cr_event_enqueued'][] = array( $block, $args );
 	}
 
+	function register_block_style( string $block, array $style ): void {
+		$GLOBALS['cr_event_styles'][] = array( $block, $style );
+	}
+
 	function is_singular( $type = '' ): bool {
 		return 'post' === $type && (bool) $GLOBALS['cr_event_single'];
 	}
@@ -101,6 +106,13 @@ namespace {
 	function has_term( $term, $taxonomy, $post = null ): bool {
 		$post = get_post( $post );
 		return $post instanceof WP_Post && 'kind' === $taxonomy && in_array( $term, $GLOBALS['cr_event_terms'][ $post->ID ] ?? array(), true );
+	}
+
+	function get_the_terms( int $post_id, string $taxonomy ): array|false {
+		if ( 'kind' !== $taxonomy || empty( $GLOBALS['cr_event_terms'][ $post_id ] ) ) {
+			return false;
+		}
+		return array_map( static fn( string $slug ): object => (object) array( 'slug' => $slug ), $GLOBALS['cr_event_terms'][ $post_id ] );
 	}
 
 	function get_term_by( $field, $value, $taxonomy ): WP_Term {
@@ -276,8 +288,15 @@ namespace PKIW {
 }
 
 namespace {
+	require CR_EVENT_THEME_DIR . '/inc/artifact-style.php';
 	require CR_EVENT_THEME_DIR . '/inc/event-calendar.php';
 	require CR_EVENT_THEME_DIR . '/inc/event.php';
+
+	foreach ( $GLOBALS['cr_event_hooks'] as [ $hook, $callback ] ) {
+		if ( 'after_setup_theme' === $hook ) {
+			$callback();
+		}
+	}
 
 	cr_event_check(
 		'A-T1 template parses with the shared header and calendar-only body',
