@@ -33,7 +33,10 @@ cr_event_check(
 			$GLOBALS['cr_event_stream']       = true;
 			$block                            = new WP_Block( array( 'postId' => $id ) );
 			// Model the plugin's rendered location for these Event and RSVP fixtures.
-			$is_rsvp = in_array( 'rsvp', $terms, true ) || isset( $meta['_pkiw_rsvp'] );
+			$is_rsvp = in_array( 'rsvp', $terms, true ) || array_intersect_key(
+				$meta,
+				array_fill_keys( array( '_pkiw_rsvp_location_privacy', '_pkiw_rsvp_status', '_pkiw_rsvp_value' ), true )
+			);
 			$visible = ! $is_rsvp || 'public' === ( $meta['_pkiw_rsvp_location_privacy'] ?? '' );
 			$html    = cr_event_card_markup(
 				array(
@@ -60,7 +63,7 @@ cr_event_check(
 			return;
 		}
 
-		$private_row = $render( 234, array( 'event' ), array( '_pkiw_rsvp' => 'yes', '_pkiw_rsvp_location_privacy' => 'private' ) );
+		$private_row = $render( 234, array( 'event' ), array( '_pkiw_rsvp_location_privacy' => 'private' ) );
 		$term_only   = $render( 235, array( 'event', 'rsvp' ), array() );
 		foreach ( array( 'private RSVP row' => $private_row, 'RSVP term without a privacy row' => $term_only ) as $case => $surfaces ) {
 			foreach ( $surfaces as $surface => $html ) {
