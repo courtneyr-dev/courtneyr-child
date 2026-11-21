@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.174
+
+- Register the Flyer style for Event cards and apply it to the existing single flyer and Stream tab. (#327)
+
 ## 0.7.173
 
 - Register the Letter, Index card, Pin-back button, and Race bib styles for Reply, Bookmark, Mood, and Exercise. The existing archive, single, and Stream layouts stay the same. (#323, #324, #325)
