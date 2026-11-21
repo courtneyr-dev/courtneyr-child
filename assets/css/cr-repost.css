@@ -279,6 +279,16 @@
 	overflow-wrap: anywhere;
 }
 
+.cr-repost-clip__checkin {
+	display: block;
+	margin-block-start: var(--cr-space-2xs);
+	color: inherit;
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	line-height: var(--cr-leading-snug);
+	overflow-wrap: anywhere;
+}
+
 /* The focus ring goes round the whole clipping, tape included. The paper
    sheet's own ring would draw a second one, so it stays off. */
 .cr-repost-zine .cr-repost-clip:has(a:focus-visible) {

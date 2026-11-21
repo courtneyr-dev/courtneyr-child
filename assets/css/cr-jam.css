@@ -131,7 +131,7 @@
 	aspect-ratio: 1;
 }
 
-.cr-jukebox .pkiw-lead .cr-jam-strip--listing :is(.pk-title, .pk-sub) {
+.cr-jukebox .pkiw-lead .cr-jam-strip--listing :is(.pk-title, .pk-sub, .cr-jam-strip__checkin) {
 	grid-column: 1;
 }
 
@@ -154,7 +154,7 @@
 		grid-row: 1 / span 2;
 	}
 
-	.cr-jukebox .pkiw-lead .cr-jam-strip--listing :is(.pk-title, .pk-sub) {
+	.cr-jukebox .pkiw-lead .cr-jam-strip--listing :is(.pk-title, .pk-sub, .cr-jam-strip__checkin) {
 		grid-column: 2;
 	}
 
@@ -216,7 +216,7 @@
 	transform: none;
 }
 
-.cr-jam-strip--listing :is(.pk-title, .pk-sub),
+.cr-jam-strip--listing :is(.pk-title, .pk-sub, .cr-jam-strip__checkin),
 .cr-jukebox .pk-card--protected.k-jam .pk-title {
 	min-width: 0;
 	margin: 0;
@@ -225,7 +225,7 @@
 	transform: none;
 }
 
-.cr-jam-strip--listing:has(> .pk-media) :is(.pk-title, .pk-sub) {
+.cr-jam-strip--listing:has(> .pk-media) :is(.pk-title, .pk-sub, .cr-jam-strip__checkin) {
 	grid-column: 2;
 }
 
@@ -237,7 +237,7 @@
 	grid-template-columns: minmax(0, 1fr);
 }
 
-.cr-jukebox .cr-jam-strip--listing:not(:has(> .pk-media:not(.cr-cover--failed))) :is(.pk-title, .pk-sub) {
+.cr-jukebox .cr-jam-strip--listing:not(:has(> .pk-media:not(.cr-cover--failed))) :is(.pk-title, .pk-sub, .cr-jam-strip__checkin) {
 	grid-column: 1;
 }
 
@@ -254,6 +254,24 @@
 	font-family: var(--cr-font-body);
 	font-size: var(--cr-text-sm);
 	line-height: var(--cr-leading-snug);
+}
+
+.cr-jam-strip__checkin {
+	color: inherit;
+	font-family: var(--cr-font-body);
+	font-size: max(var(--cr-text-sm), var(--cr-text-floor));
+	line-height: var(--cr-leading-snug);
+}
+
+.cr-jukebox .pkiw-group__items .cr-jam-strip--listing:has(> .pk-sub):has(> .cr-jam-strip__checkin) > .pk-media {
+	grid-row-end: span 3;
+}
+
+@media (min-width: 40rem) {
+
+	.cr-jukebox .pkiw-lead .cr-jam-strip--listing:has(> .pk-sub):has(> .cr-jam-strip__checkin) > .pk-media {
+		grid-row-end: span 3;
+	}
 }
 
 /* The plugin's `.pk-card > *` makes the heading a containing block; the title link's ::after must reach the strip. */

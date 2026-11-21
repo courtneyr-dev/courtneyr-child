@@ -353,6 +353,7 @@ namespace PKIW {
 
 namespace {
 	require CR_RP_THEME_DIR . '/inc/stamps.php';
+	require CR_RP_THEME_DIR . '/inc/archive-checkin-label.php';
 	require CR_RP_THEME_DIR . '/inc/repost.php';
 	require CR_RP_THEME_DIR . '/inc/stream-repost.php';
 
