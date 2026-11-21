@@ -9,13 +9,24 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Event;
 
+use Courtneyr\Child\ArtifactStyle;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const KIND         = 'event';
-const EVENT_CARD   = 'post-kinds-indieweb/event-card';
-const STYLE_HANDLE = 'courtneyr-event';
+const KIND           = 'event';
+const EVENT_CARD     = 'post-kinds-indieweb/event-card';
+const STYLE_HANDLE   = 'courtneyr-event';
+const ARTIFACT_STYLE = 'cr-flyer';
+const ARTIFACT_CLASS = 'is-style-' . ARTIFACT_STYLE;
+
+add_action(
+	'after_setup_theme',
+	static function (): void {
+		ArtifactStyle\register( EVENT_CARD, ARTIFACT_STYLE, __( 'Event flyer', 'courtneyr-child' ), KIND );
+	}
+);
 
 /** Whether the queried object is a public Event post. */
 function is_event_single(): bool {
@@ -26,7 +37,7 @@ function is_event_single(): bool {
 	$post    = get_post( $post_id );
 	return $post instanceof \WP_Post
 		&& '' === (string) $post->post_password
-		&& has_term( KIND, 'kind', $post_id );
+		&& ArtifactStyle\applies( $post, ARTIFACT_STYLE );
 }
 
 /** Whether this request renders the Stream surface. */
@@ -310,7 +321,7 @@ function single_flyer( string $html, array $block, $instance = null ): string {
 	$summary = '' !== $facts['summary'] ? '<p class="cr-event-flyer__summary p-summary">' . esc_html( $facts['summary'] ) . '</p>' : '';
 
 	// The sheet is the flyer's paper; the facts hang from its perforated bottom edge as tear-off tabs.
-	return '<article class="cr-event-flyer h-event">'
+	return '<article class="cr-event-flyer h-event ' . ARTIFACT_CLASS . '">'
 		. '<div class="cr-event-flyer__sheet">'
 		. '<span class="cr-event-flyer__kind">' . esc_html( single_label() ) . '</span>'
 		. $name . $image . $status
@@ -354,7 +365,7 @@ function stream_tab( string $html, array $block, $instance = null ): string {
 		? (int) $instance->context['postId']
 		: (int) ( $block['context']['postId'] ?? get_the_ID() );
 	$post    = get_post( $post_id );
-	if ( ! $post instanceof \WP_Post || '' !== (string) $post->post_password || ! has_term( KIND, 'kind', $post_id ) ) {
+	if ( ! $post instanceof \WP_Post || '' !== (string) $post->post_password || ! ArtifactStyle\applies( $post, ARTIFACT_STYLE ) ) {
 		return $html;
 	}
 	$facts = rendered_facts( $html );
@@ -374,7 +385,7 @@ function stream_tab( string $html, array $block, $instance = null ): string {
 	$author    = (string) get_the_author_meta( 'display_name', (int) $post->post_author );
 	$status    = '' !== $facts['status'] ? '<span class="cr-event-tab__status">' . esc_html( $facts['status'] ) . '</span>' : '';
 
-	return '<article class="pk-card pk-card--stream k-event cr-event-tab h-entry">'
+	return '<article class="pk-card pk-card--stream k-event cr-event-tab h-entry ' . ARTIFACT_CLASS . '">'
 		. '<div class="cr-event-tab__event h-event">'
 		. '<span class="cr-event-tab__kind">' . esc_html( stream_label() ) . '</span>'
 		. '<h' . $heading . ' class="pk-title cr-event-tab__name p-name"><a class="u-url" href="' . esc_url( $permalink ) . '">' . esc_html( $name ) . '</a></h' . $heading . '>'
