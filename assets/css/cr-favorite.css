@@ -321,6 +321,24 @@
 }
 
 /*
+ * Width. WordPress holds the post content and the plugin's singular wrapper
+ * to the 720px content size, which squeezes the sheet into a card. A favorite
+ * that printed a sheet gives both the site's wide size so the record and the
+ * mount read as two halves of one spread; narrower screens keep the parent's
+ * width. Prose around the card keeps the content size. A protected favorite
+ * prints no sheet and no other kind prints .cr-fav-sheet, so they don't move.
+ */
+body.single-post.kind-favorite .wp-block-post-content:has(.cr-fav-sheet),
+body.single-post.kind-favorite .wp-block-post-content:has(.cr-fav-sheet) > .pkiw-singular-entry {
+	max-inline-size: var(--wp--style--global--wide-size, 1100px);
+}
+
+body.single-post.kind-favorite .wp-block-post-content:has(.cr-fav-sheet) > .pkiw-singular-entry > :not(.cr-fav-sheet) {
+	max-inline-size: var(--wp--style--global--content-size, 720px);
+	margin-inline: auto;
+}
+
+/*
  * The torn top and bottom edges, the archive clipping's flat mask. Each
  * strip sits outside the sheet's box in the sheet's own fill, so it never
  * clips the hard shadow or a focus ring. The star and the tape sit above the
