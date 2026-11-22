@@ -118,6 +118,12 @@ cr_fav_css_check( (bool) preg_match( '/\.cr-fav-link,\s*\.cr-fav-item--protected
 
 cr_fav_css_check( (bool) preg_match( '/\.cr-fav-item--protected \.pk-card--protected \.pk-title\s*\{\s*position:\s*static/s', $css ), 'protected item: the plugin title is unpositioned so the link covers the whole clipping' );
 
+// Rule X1: a mixed-archive clipping keeps its palette paper and violet ink in dark mode.
+cr_fav_css_check( 1 === preg_match( '/\.cr-fav-clipping\s*\{[^}]*background-color:\s*var\(--cr-printer-ivory\)[^}]*color:\s*var\(--cr-russian-violet\)/s', $css ), 'clipping: printer ivory paper and violet ink come from the base rule' );
+cr_fav_css_check( 1 === preg_match( '/\.cr-fav-clipping__checkin\s*\{[^}]*color:\s*inherit/s', $css ), 'check-in label: inherits the clipping ink' );
+cr_fav_css_check( ! str_contains( $css, 'light-dark(' ) && ! str_contains( $css, '--cr-night-elevated' ), 'no dark repaint of the clipping or its tear (no light-dark, no night-elevated)' );
+cr_fav_css_check( ! preg_match( '/\.cr-fav-clipping:has\(> \.cr-fav-clipping__checkin\)[^{]*\{[^}]*(background-color|color):\s*(?!inherit)/s', $css ), 'no :has(> .cr-fav-clipping__checkin) rule repaints the mixed clipping' );
+
 // Modes.
 cr_fav_css_check( str_contains( $css, '@media (forced-colors: active)' ) && str_contains( $css, '2px solid CanvasText' ) && str_contains( $css, 'LinkText' ), 'forced colors: CanvasText outlines and LinkText links' );
 cr_fav_css_check( (bool) preg_match( '/forced-colors: active\).*\.cr-fav-star__shape/s', $css ), 'forced colors: star art drops' );
