@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.176
+
+- Keep a Favorite archive card that also carries a check-in on its printer-ivory paper and violet ink in dark mode, and match its link colours to plain Favorite clippings (cerulean at rest, violet on hover). Light mode, forced colours and plain clippings are unchanged. (#332, merged as 3f1f92f)
+
 ## 0.7.175
 
 - Add an "Also a check-in" label to Like, Repost, Favorite and Jam archive cards for posts that also carry Check-in. The label appears only when Post Kinds for IndieWeb 1.10.3 or later (the selected-card API from its PR #604) is active and the card is a selected mixed row that is public, eligible and not hidden, not a protected shell, and whose check-in name tier allows it. With an older plugin the archives render the same markup as before. (#330)
