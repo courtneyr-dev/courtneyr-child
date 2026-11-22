@@ -1,0 +1,34 @@
+/* Wide column (inc/single-wide-column.php): the post content is align-wide with a 100% inner layout, and the header's lines start at its edge. Every rule keys on the class that filter adds, so a page it did not mark renders as it always did. */
+
+/* The spread: book column, then notes and record at one width. The divider and the sample keep the journal's own spans (both columns). */
+@media (min-width: 64rem) {
+
+	body.single-post.kind-read .cr-wide-column .cr-journal {
+		grid-template-columns: minmax(17rem, 23rem) minmax(0, 1fr);
+	}
+
+	/* Core centers the header's lines with !important margins; this starts them at the column's edge, on the side the grid starts on. */
+	body.single-post .cr-wide-column.single-post__header > :not(.alignleft):not(.alignright):not(.alignfull) {
+		margin-inline-start: 0 !important;
+	}
+}
+
+/* The sparkle keeps the reading column's top-right corner. */
+body.single-post .cr-wide-column.single-post__content::before {
+	right: calc((100% - min(100%, var(--wp--style--global--content-size))) / 2 - 1rem);
+}
+
+/* Under 64rem the spread stacks and keeps the reading column. */
+@media not all and (min-width: 64rem) {
+
+	body.single-post .cr-wide-column.single-post__content {
+		max-width: var(--wp--style--global--content-size);
+	}
+}
+
+/* Prose after the spread keeps the reading width. */
+body.single-post .cr-wide-column.single-post__content > .pkiw-singular-entry > :not(.cr-journal) {
+	max-width: var(--wp--style--global--content-size);
+	margin-right: auto;
+	margin-left: auto;
+}

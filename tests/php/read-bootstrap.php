@@ -408,6 +408,13 @@ namespace PKIW {
 	}
 }
 
+namespace Courtneyr\Child\SingleWideColumn {
+	/** The unit tests render without a main query: no decision, so the renderer finds the card itself. */
+	function data_for( string $kind ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		return $GLOBALS['cr_wide_data'] ?? null;
+	}
+}
+
 namespace Courtneyr\Child\HomeSections {
 	function is_stream_surface(): bool {
 		return (bool) $GLOBALS['cr_read_stream'];

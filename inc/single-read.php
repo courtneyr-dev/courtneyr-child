@@ -50,10 +50,11 @@ function is_read_single(): bool {
 /**
  * The read-card block in a post's content.
  *
- * @param \WP_Post $post Post.
+ * @param \WP_Post    $post    Post.
+ * @param string|null $content Content to search; the post's saved content when null.
  * @return array<string, mixed>|null
  */
-function find_read_block( \WP_Post $post ): ?array {
+function find_read_block( \WP_Post $post, ?string $content = null ): ?array {
 	$found = null;
 	$walk  = static function ( array $blocks ) use ( &$walk, &$found ): void {
 		foreach ( $blocks as $block ) {
@@ -69,7 +70,7 @@ function find_read_block( \WP_Post $post ): ?array {
 			}
 		}
 	};
-	$walk( parse_blocks( (string) $post->post_content ) );
+	$walk( parse_blocks( $content ?? (string) $post->post_content ) );
 	return $found;
 }
 
@@ -449,6 +450,32 @@ function reading_record( array $block, \WP_Post $post ): string {
 }
 
 /**
+ * The first read card on the page being printed and its reading record.
+ *
+ * The wide column's resolver for reads (inc/single-wide-column.php). The card
+ * is the page's own, not the first in the whole post, so the column and the
+ * journal print the same card. A record means the column is wide.
+ *
+ * @param \WP_Post $post    Post.
+ * @param string   $content The content of the page being printed.
+ * @return array{wide: bool, data: array{block: array<string, mixed>, record: string}}|null Null when the page has no read card.
+ */
+function page_record( \WP_Post $post, string $content ): ?array {
+	$read = find_read_block( $post, $content );
+	if ( null === $read ) {
+		return null;
+	}
+	$record = reading_record( $read, $post );
+	return array(
+		'wide' => '' !== $record,
+		'data' => array(
+			'block'  => $read,
+			'record' => $record,
+		),
+	);
+}
+
+/**
  * The single read footer's one date item.
  *
  * @param array<string, mixed> $a      Resolved attributes.
@@ -527,7 +554,9 @@ function journal_page( string $html, array $block ): string {
 	if ( ! $post instanceof \WP_Post ) {
 		return $html;
 	}
-	$read = find_read_block( $post );
+	// The card and record the wide column decided on; elsewhere (no decision) the post's first card, as always.
+	$page = \Courtneyr\Child\SingleWideColumn\data_for( 'read' );
+	$read = is_array( $page ) ? $page['block'] : find_read_block( $post );
 	if ( null === $read || false === strpos( $html, 'k-read' ) ) {
 		return $html;
 	}
@@ -606,7 +635,7 @@ function journal_page( string $html, array $block ): string {
 	if ( '' !== $note_html ) {
 		$after .= notes_section( __( 'Notes from this read', 'courtneyr-child' ), $note_html );
 	}
-	$after .= reading_record( $read, $post );
+	$after .= is_array( $page ) ? $page['record'] : reading_record( $read, $post );
 	if ( '' !== $kindle ) {
 		$after .= '<section class="cr-read__sample"><h2 class="cr-read__sample-title">' . esc_html__( 'Read a sample', 'courtneyr-child' ) . '</h2>'
 			. $kindle . '</section>';
