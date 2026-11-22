@@ -8,7 +8,7 @@ For WordPress implementation work:
 
 1. Inspect Ollie through Ollie MCP (or read the Ollie source when the MCP is not wired in: `templates/`, `parts/`, `patterns/`, `theme.json`, `functions.php`, `assets/styles/`).
 2. Inspect relevant blocks/APIs through Block MCP (or the local site's REST: `wp/v2/block-types`, `wp/v2/block-patterns/patterns`, `wp/v2/templates`, `wp/v2/template-parts`, `wp-abilities/v1/abilities`).
-3. Reproduce/test the real workflow in WordPress Studio (until a courtneyr.dev Studio site exists, the wp-env instance on `localhost:8892` defined in `~/projects/mood-pin-env/.wp-env.json`, which mounts this checkout).
+3. Reproduce/test the real workflow in WordPress Studio with the `verify-courtneyr-child` skill (`.claude/skills/verify-courtneyr-child/SKILL.md`), which serves a given checkout and proves the site serves it. The wp-env instance on `localhost:8892` (`~/projects/mood-pin-env/.wp-env.json`) mounts `~/projects/staging-courtneyr-dev/themes/courtneyr-child`, a separate copy, not this checkout.
 4. Prefer, in order where appropriate:
    - theme.json/block supports
    - block style
