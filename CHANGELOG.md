@@ -2,7 +2,7 @@
 
 ## 0.7.176
 
-- Keep a Favorite archive card that also carries a check-in on its printer-ivory paper and violet ink in dark mode, and match its link colours to plain Favorite clippings (cerulean at rest, violet on hover). Light mode, forced colours and plain clippings are unchanged. (#332, merged as 3f1f92f)
+- Keep a Favorite archive card that also carries a check-in on its printer-ivory paper and violet ink in dark mode, and match its unvisited link colours to plain Favorite clippings (cerulean at rest, violet on hover). Mixed visited links stay cerulean off hover; plain visited links keep the global visited colour. Light-mode colours are preserved; forced colours and plain clippings are unchanged. (#332, merged as 3f1f92f)
 
 ## 0.7.175
 
