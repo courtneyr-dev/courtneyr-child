@@ -57,6 +57,19 @@ function cr_read_fixture_journal( array $attrs, bool $notes ): string {
 echo json_encode(
 	array(
 		'finished' => cr_read_fixture_journal( array(), true ),
+		'rowless'  => cr_read_fixture_journal(
+			array(
+				'readStatus'  => 'reading',
+				'startedAt'   => '',
+				'finishedAt'  => '',
+				'pageCount'   => 0,
+				'currentPage' => 0,
+				'isbn'        => '',
+				'publisher'   => '',
+				'publishDate' => '',
+			),
+			false
+		),
 		'reading'  => cr_read_fixture_journal(
 			array(
 				'readStatus'  => 'reading',
