@@ -233,23 +233,6 @@
 	overflow-wrap: anywhere;
 }
 
-@media (forced-colors: none) {
-
-	.cr-fav-clipping:has(> .cr-fav-clipping__checkin),
-	.cr-fav-clipping:has(> .cr-fav-clipping__checkin)::after {
-		background-color: light-dark(var(--cr-printer-ivory), var(--cr-night-elevated));
-		color: var(--cr-ink);
-	}
-
-	.cr-fav-clipping:has(> .cr-fav-clipping__checkin) .cr-fav-link {
-		color: var(--cr-link);
-	}
-
-	.cr-fav-clipping:has(> .cr-fav-clipping__checkin) .cr-fav-link:hover {
-		color: inherit;
-	}
-}
-
 .cr-fav-title,
 .cr-fav-item--protected .pk-card--protected .pk-title {
 	margin: 0;
@@ -712,6 +695,20 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 	.cr-fav-card__title .cr-fav-link:focus-visible {
 		outline: none;
 		box-shadow: none;
+	}
+}
+
+/* A mixed clipping is ivory in both schemes, so a visited link keeps the
+   cerulean link look. Global a:visited (0,1,1) would take --cr-link-visited:
+   periwinkle on ivory, 1.85:1. :where() holds this at 0,2,0: above a:visited
+   (0,1,1) and .cr-fav-link (0,1,0). The forced-colors block stays out of
+   reach because this only applies when forced-colors is none. No rule sets a
+   link color on :active or :focus-visible, and hover is excluded so the
+   violet hover wins. */
+@media (forced-colors: none) {
+
+	:where(.cr-fav-clipping:has(> .cr-fav-clipping__checkin)) .cr-fav-link:visited:not(:where(:hover)) {
+		color: var(--cr-cerulean);
 	}
 }
 
