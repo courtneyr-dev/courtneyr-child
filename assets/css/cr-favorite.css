@@ -700,9 +700,16 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 
 /* A mixed clipping is ivory in both schemes, so a visited link keeps the
    cerulean link look. Global a:visited (0,1,1) would take --cr-link-visited:
-   periwinkle on ivory, 1.85:1. :not(:hover) leaves the violet hover to win. */
-.cr-fav-clipping:has(> .cr-fav-clipping__checkin) .cr-fav-link:visited:not(:hover) {
-	color: var(--cr-cerulean);
+   periwinkle on ivory, 1.85:1. :where() holds this at 0,2,0: above a:visited
+   (0,1,1) and .cr-fav-link (0,1,0). The forced-colors block stays out of
+   reach because this only applies when forced-colors is none. No rule sets a
+   link color on :active or :focus-visible, and hover is excluded so the
+   violet hover wins. */
+@media (forced-colors: none) {
+
+	:where(.cr-fav-clipping:has(> .cr-fav-clipping__checkin)) .cr-fav-link:visited:not(:where(:hover)) {
+		color: var(--cr-cerulean);
+	}
 }
 
 /* ============================================================

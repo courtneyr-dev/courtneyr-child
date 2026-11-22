@@ -121,8 +121,9 @@ cr_fav_css_check( (bool) preg_match( '/\.cr-fav-item--protected \.pk-card--prote
 // Rule X1: a mixed-archive clipping keeps its palette paper and violet ink in dark mode.
 
 /**
- * Flatten a stylesheet into rules: at-rule context, selector list, body.
- * Handles nested at-rules (@media) and strips comments.
+ * Flatten a stylesheet into style rules: at-rule context, selector list, body.
+ * Handles nested at-rules (@media, @supports) and nested style rules, resolving
+ * `&` (or a bare descendant) against the parent selector. Strips comments.
  *
  * @return array<int, array{context: string, selector: string, body: string}>
  */
@@ -135,16 +136,47 @@ function cr_fav_css_rules( string $source ): array {
 	for ( $i = 0; $i < $length; $i++ ) {
 		$char = $source[ $i ];
 		if ( '{' === $char ) {
-			$stack[] = trim( $buffer );
+			$cut      = strrpos( $buffer, ';' );
+			$declared = false === $cut ? '' : substr( $buffer, 0, $cut + 1 );
+			$prelude  = trim( false === $cut ? $buffer : substr( $buffer, $cut + 1 ) );
+			if ( '' !== $declared && $stack ) {
+				$stack[ count( $stack ) - 1 ]['body'] .= $declared;
+			}
+			$prelude = (string) preg_replace( '/\s+/', ' ', $prelude );
+			$parent  = '';
+			foreach ( array_reverse( $stack ) as $frame ) {
+				if ( '@' !== substr( $frame['prelude'], 0, 1 ) ) {
+					$parent = $frame['selector'];
+					break;
+				}
+			}
+			$selector = $prelude;
+			if ( '@' !== substr( $prelude, 0, 1 ) && '' !== $parent ) {
+				$selector = str_contains( $prelude, '&' ) ? str_replace( '&', ':is(' . $parent . ')', $prelude ) : $parent . ' ' . $prelude;
+			}
+			$stack[] = array(
+				'prelude'  => $prelude,
+				'selector' => $selector,
+				'body'     => '',
+			);
 			$buffer  = '';
 		} elseif ( '}' === $char ) {
-			$prelude = array_pop( $stack );
-			if ( null !== $prelude && '@' !== substr( $prelude, 0, 1 ) ) {
-				$rules[] = array(
-					'context'  => implode( ' | ', $stack ),
-					'selector' => (string) preg_replace( '/\s+/', ' ', $prelude ),
-					'body'     => trim( $buffer ),
-				);
+			$frame = array_pop( $stack );
+			if ( null !== $frame ) {
+				$frame['body'] .= $buffer;
+				if ( '@' !== substr( $frame['prelude'], 0, 1 ) ) {
+					$context = array();
+					foreach ( $stack as $outer ) {
+						if ( '@' === substr( $outer['prelude'], 0, 1 ) ) {
+							$context[] = $outer['prelude'];
+						}
+					}
+					$rules[] = array(
+						'context'  => implode( ' | ', $context ),
+						'selector' => $frame['selector'],
+						'body'     => trim( (string) preg_replace( '/\s+/', ' ', $frame['body'] ) ),
+					);
+				}
 			}
 			$buffer = '';
 		} else {
@@ -154,12 +186,12 @@ function cr_fav_css_rules( string $source ): array {
 	return $rules;
 }
 
-/** Rules on the clipping or its tear whose paint is keyed to dark mode and that set a background. */
+/** Rules on the clipping, its label or its tear that a dark scheme keys and that set a background or a color. */
 function cr_fav_css_dark_paint_rules( string $source ): array {
 	$found = array();
 	foreach ( cr_fav_css_rules( $source ) as $rule ) {
-		$on_clipping = 1 === preg_match( '/\.cr-fav-clipping(?![\w-])/', $rule['selector'] );
-		$sets_paint  = 1 === preg_match( '/(?:^|[;\s])background(?:-color|-image)?\s*:/', $rule['body'] );
+		$on_clipping = 1 === preg_match( '/\.cr-fav-clipping(?![\w-])|\.cr-fav-clipping__checkin/', $rule['selector'] );
+		$sets_paint  = 1 === preg_match( '/(?:^|[;\s])(?:background(?:-color|-image)?|color)\s*:/', $rule['body'] );
 		$dark_keyed  = 1 === preg_match( '/prefers-color-scheme:\s*dark/', $rule['context'] )
 			|| 1 === preg_match( '/data-theme\s*=\s*["\']?dark/', $rule['selector'] )
 			|| 1 === preg_match( '/:not\(\s*\[data-theme\s*=\s*["\']?light/', $rule['selector'] )
@@ -171,9 +203,20 @@ function cr_fav_css_dark_paint_rules( string $source ): array {
 	return $found;
 }
 
+/** Hover rules on the favorite link whose color is anything but violet. */
+function cr_fav_css_bad_hover_rules( string $source ): array {
+	$found = array();
+	foreach ( cr_fav_css_rules( $source ) as $rule ) {
+		if ( 1 === preg_match( '/\.cr-fav-link:hover|\.pk-title a:hover/', $rule['selector'] ) && 1 === preg_match( '/(?:^|[;\s])color\s*:/', $rule['body'] ) && 1 !== preg_match( '/(?:^|[;\s])color:\s*var\(--cr-russian-violet\);/', $rule['body'] ) ) {
+			$found[] = $rule['selector'];
+		}
+	}
+	return $found;
+}
+
 $rules = cr_fav_css_rules( $css );
 
-/** The one declaration body for an exact selector, or null when absent or repeated. */
+/** The one declaration body for an exact top-level selector, or null when absent or repeated. */
 function cr_fav_css_body_of( array $rules, string $selector ): ?string {
 	$hits = array_values( array_filter( $rules, static fn ( array $rule ): bool => $rule['selector'] === $selector && '' === $rule['context'] ) );
 	return 1 === count( $hits ) ? $hits[0]['body'] : null;
@@ -181,18 +224,24 @@ function cr_fav_css_body_of( array $rules, string $selector ): ?string {
 
 $clipping_body = cr_fav_css_body_of( $rules, '.cr-fav-clipping' );
 $label_body    = cr_fav_css_body_of( $rules, '.cr-fav-clipping__checkin' );
-$mixed_rules   = array_values( array_filter( $rules, static fn ( array $rule ): bool => str_contains( $rule['selector'], ':has(> .cr-fav-clipping__checkin)' ) ) );
+$mixed_rules   = array_values( array_filter( $rules, static fn ( array $rule ): bool => str_contains( $rule['selector'], '.cr-fav-clipping__checkin' ) && '.cr-fav-clipping__checkin' !== $rule['selector'] ) );
+$link_at       = strpos( $css, ".cr-fav-link,\n.cr-fav-item--protected .pk-card--protected .pk-title a {" );
+$visited_at    = strpos( $css, ':visited:not(:where(:hover))' );
 
 cr_fav_css_check( null !== $clipping_body && 1 === preg_match( '/background-color:\s*var\(--cr-printer-ivory\);/', $clipping_body ) && 1 === preg_match( '/(?:^|[;\s])color:\s*var\(--cr-russian-violet\);/', $clipping_body ), 'clipping: printer ivory paper and violet ink come from the base rule' );
-cr_fav_css_check( null !== $label_body && 1 === preg_match( '/(?:^|[;\s])color:\s*inherit;/', $label_body ), 'check-in label: its own rule inherits the clipping ink' );
-cr_fav_css_check( array() === cr_fav_css_dark_paint_rules( $css ), 'no dark-only rule (prefers-color-scheme: dark, [data-theme=dark], light-dark()) sets a background on the clipping or its tear' );
-cr_fav_css_check( 1 === preg_match( '/\.cr-fav-clipping::after\s*\{\s*background-color:\s*var\(--cr-printer-ivory\);\s*\}/', $css ), 'tear: the clipping ::after is printer ivory' );
+cr_fav_css_check( 'display: block; margin-block-start: var(--cr-space-2xs); color: inherit; font-family: var(--cr-font-body); font-size: max(var(--cr-text-sm), var(--cr-text-floor)); line-height: var(--cr-leading-snug); overflow-wrap: anywhere;' === $label_body, 'check-in label: its own rule is pinned (inherits the ink, 14px floor size, spacing)' );
+cr_fav_css_check( array() === cr_fav_css_dark_paint_rules( $css ), 'no dark-keyed rule (prefers-color-scheme: dark, [data-theme=dark], light-dark(), nested & included) sets a background or color on the clipping, its label or its tear' );
+cr_fav_css_check( 1 === count( array_filter( $rules, static fn ( array $rule ): bool => '.cr-fav-clipping::after' === $rule['selector'] && '' === $rule['context'] && 'background-color: var(--cr-printer-ivory);' === $rule['body'] ) ), 'tear: the one top-level .cr-fav-clipping::after rule paints printer ivory only' );
+cr_fav_css_check( array() === cr_fav_css_bad_hover_rules( $css ), 'every favorite link hover rule that sets a color sets violet' );
+cr_fav_css_check( 'color: var(--cr-russian-violet);' === cr_fav_css_body_of( $rules, ".cr-fav-link:hover, .cr-fav-item--protected .pk-card--protected .pk-title a:hover" ), 'link hover: the shared rule is violet only' );
+cr_fav_css_check( 'color: var(--cr-cerulean); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.2em;' === cr_fav_css_body_of( $rules, '.cr-fav-link, .cr-fav-item--protected .pk-card--protected .pk-title a' ), 'link: the shared rule is cerulean, underlined' );
 
 // The mixed clipping's only own rule: the visited link stays cerulean (global a:visited is periwinkle in dark, 1.85:1 on ivory).
-cr_fav_css_check( 1 === count( $mixed_rules ), 'exactly one rule is keyed to :has(> .cr-fav-clipping__checkin)' );
-cr_fav_css_check( 1 === count( $mixed_rules ) && '' === $mixed_rules[0]['context'], 'the mixed visited rule sits outside every at-rule (no forced-colors: none wrapper)' );
-cr_fav_css_check( 1 === count( $mixed_rules ) && '.cr-fav-clipping:has(> .cr-fav-clipping__checkin) .cr-fav-link:visited:not(:hover)' === $mixed_rules[0]['selector'], 'the mixed visited rule targets the link, visited and not hovered' );
-cr_fav_css_check( 1 === count( $mixed_rules ) && 'color: var(--cr-cerulean);' === $mixed_rules[0]['body'], 'the mixed visited rule sets only color, to the cerulean token' );
+cr_fav_css_check( 1 === count( $mixed_rules ), 'exactly one rule is keyed to the mixed clipping beyond the label rule' );
+cr_fav_css_check( 1 === count( $mixed_rules ) && '@media (forced-colors: none)' === $mixed_rules[0]['context'], 'the mixed visited rule applies only under @media (forced-colors: none), so the forced-colors block keeps its LinkText' );
+cr_fav_css_check( 1 === count( $mixed_rules ) && ':where(.cr-fav-clipping:has(> .cr-fav-clipping__checkin)) .cr-fav-link:visited:not(:where(:hover))' === $mixed_rules[0]['selector'], 'the mixed visited rule is :where()-scoped at 0,2,0 and excludes hover' );
+cr_fav_css_check( 1 === count( $mixed_rules ) && 'color: var(--cr-cerulean);' === $mixed_rules[0]['body'], 'the mixed visited rule sets only color, to the cerulean token, without !important' );
+cr_fav_css_check( false !== $link_at && false !== $visited_at && $visited_at > $link_at, 'the mixed visited rule follows the shared link rule' );
 cr_fav_css_check( 1 === preg_match_all( '/--cr-cerulean:\s*#126782;/', $tokens ) && 1 === preg_match_all( '/--cr-cerulean:/', $tokens ), '--cr-cerulean is defined once, as #126782, so it is the same in light and dark' );
 
 // Modes.
