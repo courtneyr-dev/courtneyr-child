@@ -74,13 +74,13 @@ const server = createServer( ( request, response ) => {
 		return;
 	}
 	if ( url.pathname === '/fixture' ) {
-		const { state, theme } = Object.fromEntries( url.searchParams );
+		const { state, theme, sb } = Object.fromEntries( url.searchParams );
 		const kind = state.startsWith( 'control-' ) ? state.slice( 8 ) : 'read';
 		response.setHeader( 'Content-Type', 'text/html' );
 		response.setHeader( 'Content-Security-Policy', "default-src 'self' data:; style-src 'self' 'unsafe-inline'; img-src 'self' data:" );
 		response.end( `<!doctype html><html lang="en" data-theme="${ theme }"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Read single</title>${ SHEETS.map( ( name ) => `<link rel="stylesheet" href="/css/${ name }.css">` ).join( '' ) }<style>
 			:root { --wp--style--global--content-size: ${ CONTENT }px; --wp--style--global--wide-size: ${ WIDE }px; --wp--style--root--padding-left: 1.125rem; --wp--style--root--padding-right: 1.125rem; }
-			html, body { margin: 0; padding: 0; }
+			html, body { margin: 0; padding: 0; }${ sb ? 'html { overflow-y: scroll; } html::-webkit-scrollbar { width: 15px; } body { min-height: 3000px; }' : '' }
 			.has-global-padding { padding-left: var(--wp--style--root--padding-left); padding-right: var(--wp--style--root--padding-right); }
 			.has-global-padding :where(.has-global-padding:not(.wp-block-block)) { padding-left: 0; padding-right: 0; }
 			.is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)) { max-width: var(--wp--style--global--content-size); margin-left: auto !important; margin-right: auto !important; }
@@ -104,7 +104,16 @@ const check = ( key, field, measured, expected ) => {
 	}
 };
 
+const SWEEP = [ 320, 360, 375, 390, 414, 480, 600, 768, 800, 900, 1023, 1024, 1100, 1180, 1280, 1366, 1440, 1536, 1672, 1920, 2200, 2560 ];
+const SWEEP_STATES = [ 'finished', 'reading', 'rowless' ];
+const RUNS = [
+	{ name: 'matrix', classic: false, widths: WIDTHS, schemes: SCHEMES, states: STATES },
+	{ name: 'sweep', classic: false, widths: SWEEP, schemes: SCHEMES.slice( 0, 1 ), states: SWEEP_STATES },
+	{ name: 'scrollbar', classic: true, widths: SWEEP, schemes: SCHEMES.slice( 0, 1 ), states: SWEEP_STATES },
+];
+for ( const run of RUNS ) {
 const context = await chromium.launchPersistentContext( '', {
+	ignoreDefaultArgs: run.classic ? [ '--hide-scrollbars' ] : [],
 	executablePath,
 	viewport: { width: 1672, height: 900 },
 	deviceScaleFactor: 1,
@@ -114,20 +123,20 @@ const context = await chromium.launchPersistentContext( '', {
 try {
 	await context.route( '**/*', ( route ) => ( route.request().url().startsWith( origin + '/' ) ? route.continue() : route.abort( 'blockedbyclient' ) ) );
 	const page = context.pages()[ 0 ] ?? await context.newPage();
-	for ( const scheme of SCHEMES ) {
+	for ( const scheme of run.schemes ) {
 		await page.emulateMedia( { colorScheme: scheme.os, reducedMotion: 'reduce' } );
-		for ( const width of WIDTHS ) {
+		for ( const width of run.widths ) {
 			await page.setViewportSize( { width, height: 900 } );
-			for ( const state of STATES ) {
-				const key = [ scheme.name, width, state ].join( '/' );
-				await page.goto( origin + '/fixture?' + new URLSearchParams( { state, theme: scheme.theme } ) );
+			for ( const state of run.states ) {
+				const key = [ run.name, scheme.name, width, state ].join( '/' );
+				await page.goto( origin + '/fixture?' + new URLSearchParams( { state, theme: scheme.theme, ...( run.classic ? { sb: '1' } : {} ) } ) );
 				const facts = await page.evaluate( () => {
+					const q = ( n ) => Math.round( n * 10 ) / 10;
 					const rect = ( node ) => {
 						if ( ! node ) {
 							return null;
 						}
 						const r = node.getBoundingClientRect();
-						const q = ( n ) => Math.round( n * 10 ) / 10;
 						return { left: q( r.left ), top: q( r.top ), right: q( r.right ), bottom: q( r.bottom ) };
 					};
 					const lines = ( node ) => new Set( [ ...( () => { const r = document.createRange(); r.selectNodeContents( node ); return r.getClientRects(); } )() ].map( ( box ) => Math.round( box.top ) ) ).size;
@@ -150,21 +159,25 @@ try {
 						entry: rect( document.querySelector( '.h-entry' ) ),
 						journal: rect( journal ),
 						book: rect( book ),
-						bookWidth: book ? book.offsetWidth : null,
-						recordWidth: record ? record.offsetWidth : null,
-						notesWidth: notes ? notes.offsetWidth : null,
+						bookWidth: book ? q( book.getBoundingClientRect().width ) : null,
+						recordWidth: record ? q( record.getBoundingClientRect().width ) : null,
+						notesWidth: notes ? q( notes.getBoundingClientRect().width ) : null,
 						notes: rect( notes ),
 						record: rect( record ),
 						sample: rect( document.querySelector( '.cr-read__sample' ) ),
 						values,
+						sampleWidth: document.querySelector( '.cr-read__sample' ) ? q( document.querySelector( '.cr-read__sample' ).getBoundingClientRect().width ) : null,
+						metaWidth: document.querySelector( '.cr-journal__meta' ) ? q( document.querySelector( '.cr-journal__meta' ).getBoundingClientRect().width ) : null,
 						form: !! document.querySelector( '.post-password-form' ),
 						recordBackground: record ? getComputedStyle( record ).backgroundColor : null,
 						valueColor: record ? getComputedStyle( row( 'ISBN' ) ).color : null,
 					};
 				} );
 				record[ key ] = facts;
-				const entryWidth = Math.min( CONTENT, width - 2 * PAGE_PADDING );
-				const entryLeft = PAGE_PADDING + Math.max( 0, width - 2 * PAGE_PADDING - CONTENT ) / 2;
+				const column = facts.clientWidth - 2 * PAGE_PADDING;
+				const entryWidth = Math.min( CONTENT, column );
+				const entryLeft = PAGE_PADDING + Math.max( 0, column - CONTENT ) / 2;
+				check( key, 'client width (scrollbar in effect)', facts.clientWidth, run.classic ? width - 15 : width );
 				const desktop = width >= 1024;
 				check( key, 'horizontal overflow', facts.scrollOverflow, 0 );
 				check( key, 'entry width', facts.entry.right - facts.entry.left, entryWidth );
@@ -177,25 +190,33 @@ try {
 					check( key, 'title left == book left', facts.title.left, facts.book.left );
 				}
 				const widened = desktop && ( state === 'finished' || state === 'reading' );
-				const journalWidth = widened ? Math.min( WIDE, width / 2 + CONTENT / 2 - PAGE_PADDING ) : entryWidth;
+				const journalWidth = widened ? Math.min( WIDE, column / 2 + CONTENT / 2 ) : entryWidth;
 				check( key, 'journal width', facts.journal.right - facts.journal.left, journalWidth );
 				check( key, 'journal left == title left', facts.journal.left, facts.title.left );
-				check( key, 'journal inside the viewport', facts.journal.right <= facts.clientWidth - PAGE_PADDING, true );
+				check( key, 'journal right edge', facts.journal.right, Math.round( ( entryLeft + journalWidth ) * 10 ) / 10 );
+				check( key, 'right edge keeps the page padding', facts.clientWidth - facts.journal.right >= PAGE_PADDING, true );
+				if ( ! state.startsWith( 'control-' ) ) {
+					check( key, 'metadata divider width', facts.metaWidth, entryWidth );
+				}
+				if ( state === 'finished' ) {
+					check( key, 'sample width', facts.sampleWidth, desktop ? CONTENT - 196 : entryWidth );
+				}
 				if ( state === 'rowless' && desktop ) {
 					check( key, 'rowless book column', facts.bookWidth, BOOK_COLUMN );
 				}
 				if ( state === 'finished' || state === 'reading' ) {
 					check( key, 'record background', facts.recordBackground, 'rgb(251, 247, 234)' );
 					check( key, 'value ink', facts.valueColor, 'rgb(36, 28, 74)' );
-					for ( const label of [ 'ISBN', 'Published', state === 'finished' ? 'Finished' : 'Started' ] ) {
+					// Below the 320px floor (a 305px client area beside a classic scrollbar) a date may wrap whole.
+					for ( const label of facts.clientWidth >= 320 ? [ 'ISBN', 'Published', state === 'finished' ? 'Finished' : 'Started' ] : [] ) {
 						check( key, label + ' lines', facts.values[ label ], 1 );
 					}
 					if ( desktop ) {
-						const column = journalWidth - BOOK_COLUMN - COLUMN_GAP;
+						const sheets = journalWidth - BOOK_COLUMN - COLUMN_GAP;
 						check( key, 'book column', facts.bookWidth, BOOK_COLUMN );
-						check( key, 'record width', facts.recordWidth, column );
+						check( key, 'record width', facts.recordWidth, sheets );
 						if ( state === 'finished' ) {
-							check( key, 'notes sheet width', facts.notesWidth, column );
+							check( key, 'notes sheet width', facts.notesWidth, sheets );
 						}
 					} else {
 						check( key, 'record width (stacked)', facts.recordWidth, entryWidth );
@@ -223,8 +244,9 @@ try {
 	}
 } finally {
 	await context.close();
-	await new Promise( ( done ) => server.close( done ) );
 }
+}
+await new Promise( ( done ) => server.close( done ) );
 
 if ( RECORD ) {
 	console.log( JSON.stringify( record, null, 2 ) );
@@ -233,5 +255,5 @@ if ( RECORD ) {
 for ( const failure of failures ) {
 	console.log( 'FAIL ' + failure );
 }
-console.log( `read-single-record: ${ cells } geometry assertions across ${ WIDTHS.length } widths x ${ SCHEMES.length } schemes x ${ STATES.length } states, ${ failures.length } failed (Chrome ${ executablePath })` );
+console.log( `read-single-record: ${ cells } geometry assertions across the matrix (${ WIDTHS.length } widths x ${ SCHEMES.length } schemes x ${ STATES.length } states) and the ${ SWEEP.length }-width sweep with and without a 15px scrollbar, ${ failures.length } failed (Chrome ${ executablePath })` );
 process.exit( failures.length ? 1 : 0 );

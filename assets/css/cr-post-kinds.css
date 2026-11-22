@@ -4597,26 +4597,24 @@ body.single-post.kind-read .cr-read__status--to-read .cr-read__status-chip { bac
 body.single-post.kind-read .cr-read__status-when { color: var(--cr-ink-muted, #126782); }
 body.single-post.kind-read .cr-read__status-progress { color: var(--cr-ink, #241c4a); font-weight: 700; }
 
-/* The journal spread: book column, reading column. A journal that holds a record or notes
-   keeps its left edge on the title's and runs right to the wide width. */
+/* The journal spread. One with a record or notes runs wider, sized in its own content column. */
 @media (min-width: 64rem) {
 	body.single-post.kind-read .cr-journal {
 		grid-template-columns: minmax(17rem, 23rem) minmax(0, 1fr) 9.5rem;
 		column-gap: 2.75rem;
 		row-gap: 2rem;
-		align-items: start;
 	}
-
+	body.single-post.kind-read .single-post__content:has(.cr-record, .cr-journal__notes) { container-type: inline-size; }
 	body.single-post.kind-read .cr-journal:has(> .cr-record, > .cr-journal__notes) {
-		width: min(var(--wp--style--global--wide-size), 50vw + var(--wp--style--global--content-size) / 2 - var(--wp--style--root--padding-right));
+		width: min(var(--wp--style--global--wide-size), 50cqw + var(--wp--style--global--content-size) / 2);
 		grid-template-columns: minmax(17rem, 23rem) minmax(0, 1fr);
 	}
 	body.single-post.kind-read .cr-journal > .cr-book { grid-column: 1; grid-row: 1 / span 2; }
 	body.single-post.kind-read .cr-journal > .cr-journal__notes { grid-column: 2; grid-row: 1; }
 	body.single-post.kind-read .cr-journal > .cr-record { grid-column: 2; grid-row: 2; }
 	body.single-post.kind-read .cr-journal:not(:has(> .cr-journal__notes)) > .cr-record { grid-row: 1; }
-	body.single-post.kind-read .cr-journal > .cr-read__sample { grid-column: 1 / 3; grid-row: 3; }
-	body.single-post.kind-read .cr-journal > .cr-journal__meta { grid-column: 1 / -1; grid-row: 5; }
+	body.single-post.kind-read .cr-journal > .cr-read__sample { grid-column: 1 / 3; grid-row: 3; max-width: calc(var(--wp--style--global--content-size) - 12.25rem); }
+	body.single-post.kind-read .cr-journal > .cr-journal__meta { grid-column: 1 / -1; grid-row: 5; max-width: var(--wp--style--global--content-size); }
 }
 
 /* ---- The book ---- */
