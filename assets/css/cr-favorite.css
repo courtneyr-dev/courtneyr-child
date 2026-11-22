@@ -322,27 +322,27 @@
 
 /*
  * Width. WordPress holds the post content and the plugin's singular wrapper
- * to the 720px content size, which squeezes the sheet into a card. A favorite
- * that printed a sheet gives both the site's wide size so the record and the
- * mount read as two halves of one spread; narrower screens keep the parent's
- * width. Content around the card sits in .cr-fav-prose, which keeps the
- * content size and the old centering, so its children lay out as before.
- * A protected favorite prints no sheet and no other kind prints
- * .cr-fav-sheet, so they don't move.
+ * to the 720px content size, which squeezes the sheet into a card. In a
+ * Favorite single that printed a sheet the post content takes the site's wide
+ * size (narrower screens keep the parent's width). The singular wrapper stays
+ * as WordPress sized it, so every other block in the post lays out exactly as
+ * before; only the sheet reaches out, by equal negative margins, to the post
+ * content's width. <main> is the size container the margins measure against:
+ * it holds no margin that collapses with a child (it has block padding), so
+ * the spacing below the sheet doesn't change. A protected favorite prints no
+ * sheet and no other kind prints .cr-fav-sheet, so they don't move.
  */
-body.single-post.kind-favorite .wp-block-post-content:has(.cr-fav-sheet),
-body.single-post.kind-favorite .wp-block-post-content:has(.cr-fav-sheet) > .pkiw-singular-entry {
+body.single-post.kind-favorite main:has(.cr-fav-sheet) {
+	container-type: inline-size;
+}
+
+body.single-post.kind-favorite .wp-block-post-content:has(.cr-fav-sheet) {
 	max-inline-size: var(--wp--style--global--wide-size, 1100px);
 }
 
-body.single-post.kind-favorite .pkiw-singular-entry > .cr-fav-prose {
-	max-inline-size: var(--wp--style--global--content-size, 720px);
-	margin-inline: auto;
-}
-
-/* An Evidence group anywhere in the post already gives the wrapper the wide size (cr-evidence-labels.css). */
-body.single-post.kind-favorite .wp-block-post-content:has(.cr-evidence) > .pkiw-singular-entry > .cr-fav-prose {
-	max-inline-size: var(--wp--style--global--wide-size, 1100px);
+body.single-post.kind-favorite main:has(.cr-fav-sheet) .cr-fav-sheet {
+	max-inline-size: none;
+	margin-inline: calc((100% - min(var(--wp--style--global--wide-size, 1100px), 100cqw)) / 2);
 }
 
 /*

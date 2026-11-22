@@ -11,17 +11,19 @@
 //     scrollbars and a forced 15px classic scrollbar: client width, no horizontal overflow, equal
 //     left and right gutters, right edge inside the client width, record left and mount right from 64rem.
 //   - the star and the tape never intersect the H1.
-//   - content around the card (paragraph, wide group, full group, left and right floats, a group with an
-//     authored margin, an Evidence group) has the geometry origin/main gave it: left edge, width and (before the
-//     card) top edge or (after it) gap under the sheet equal the values in favorite-single-sheet-width.base.json.
+//   - every other block in the post (paragraph, wide group, full group, left and right floats, a group with
+//     an authored margin, an Evidence group, image, quote, list, embed, and a Group that holds the sheet and
+//     paragraphs) keeps the geometry origin/main gave it, in light and dark, with and without the classic
+//     scrollbar: left edge, width, and the top edge (before the sheet) or the gap under it (after the sheet)
+//     equal favorite-single-sheet-width.base.json. So do the sheet's top edge and the gap from the sheet to
+//     Post navigation. The rendered markup is origin/main's; this fix is CSS only.
 //   - other kinds' singles, a protected favorite, and a .cr-fav-sheet outside a Favorite single keep 720px.
 //
 // Offline: a loopback server serves the sheets and fixtures; everything else is blocked. Needs
 // Chrome: CR_CHROME=/path/to/chrome, or Google Chrome / Chromium in a standard location. Without
 // one the test prints a SKIP banner and exits 0, unless CR_REQUIRE_BROWSER=1. Not wired into CI.
 // CR_FAVORITE_CSS=/path/to/cr-favorite.css renders that sheet instead of the checked-in one (mutation
-// runs). `--record` with CR_FAVORITE_CSS=<origin/main cr-favorite.css> CR_BASE_MARKUP=1 prints the sibling
-// baseline (siblings directly in the wrapper, as origin/main rendered them).
+// runs). `--record` with CR_FAVORITE_CSS=<origin/main cr-favorite.css> prints the origin/main baseline.
 import { createServer } from 'node:http';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -33,7 +35,6 @@ const ROOT = resolve( HERE, '../..' );
 const SHEETS = [ 'tokens', 'components', 'cr-blog', 'cr-paper', 'cr-sticker', 'cr-favorite', 'cr-post-kinds', 'cr-nav', 'cr-evidence-labels' ];
 const SCROLLBAR = 15;
 const RECORD = process.argv.includes( '--record' );
-const BASE_MARKUP = Boolean( process.env.CR_BASE_MARKUP );
 const KEY_WIDTHS = [ 1672, 1280, 1024, 768, 390, 320 ];
 const DENSE_WIDTHS = [ 320, 340, 360, 375, 390, 414, 480, 600, 768, 800, 900, 1000, 1024, 1040, 1050, 1060, 1080, 1100, 1120, 1131, 1132, 1140, 1150, 1200, 1280, 1366, 1448, 1672, 1920 ];
 const SIBLING_WIDTHS = [ 1672, 1448, 1280, 1024, 768, 390, 320 ];
@@ -59,8 +60,6 @@ const RECORD_HTML = '<article class="cr-fav-sheet__record h-cite u-favorite-of">
 const MOUNT = `<div class="cr-fav-sheet__mount" data-cr-cover-fallback=""><img width="1024" height="640" src="${ IMAGE }" class="cr-fav-sheet__img skip-lazy" alt="A flowchart"></div>`;
 const FAILED = `<div class="cr-fav-sheet__mount cr-cover--failed" data-cr-cover-fallback=""><img width="1024" height="640" src="${ IMAGE }" class="cr-fav-sheet__img skip-lazy" alt="A flowchart"></div>`;
 const sheet = ( mount ) => `<div class="cr-fav-sheet">${ HEAD }<div class="cr-fav-sheet__body">${ RECORD_HTML }${ mount }</div></div>`;
-// inc/single-favorite.php prose_html(): content around the card, in .cr-fav-prose.
-const around = ( html ) => ( BASE_MARKUP ? html : `<div class="cr-fav-prose">${ html }</div>` );
 const HIDDEN = '<a class="u-url" href="/x" hidden=""></a><time class="dt-published" datetime="2026-08-28T10:00:00-04:00" hidden=""></time>';
 const OTHER = '<p class="prose">A short note in this kind of post.</p>';
 const NAV = '<nav class="wp-block-group alignwide cr-post-nav is-layout-flow wp-block-group-is-layout-flow" aria-label="Post navigation"><div class="cr-post-nav__link"><a href="/a">Previous</a></div><div class="cr-post-nav__link"><a href="/b">Next</a></div></nav>';
@@ -73,7 +72,12 @@ const SIBLINGS = {
 	'sib-right': '<figure class="wp-block-image alignright sib" style="inline-size:100px;block-size:50px;margin:0 0 0 2em">Right</figure>',
 	'sib-margin': '<div class="wp-block-group sib" style="margin-right:32px;block-size:20px">Authored margin</div>',
 	'sib-evidence': '<div class="wp-block-group alignwide cr-evidence sib"><div class="cr-evidence__row">Evidence row</div></div>',
+	'sib-image': `<figure class="wp-block-image sib"><img src="${ IMAGE }" width="1024" height="640" alt=""></figure>`,
+	'sib-quote': '<blockquote class="wp-block-quote sib"><p>A quoted line that is long enough to wrap in a narrow column.</p></blockquote>',
+	'sib-list': '<ul class="wp-block-list sib"><li>One item</li><li>Another item that wraps when the column is narrow</li></ul>',
+	'sib-embed': '<figure class="wp-block-embed is-type-video sib"><div class="wp-block-embed__wrapper" style="block-size:120px">Embed</div></figure>',
 };
+const NESTED = `<div class="wp-block-group sib"><p class="inner-a">Before the card, inside the group.</p>${ sheet( MOUNT ) }<p class="inner-b">After the card, inside the group.</p></div>`;
 
 // kind: body class. favorite: prints the sheet in a Favorite single. narrow: keeps the 720px content size.
 const FIXTURES = {
@@ -89,9 +93,10 @@ const FIXTURES = {
 	read: { kind: 'read', inner: OTHER },
 	comic: { kind: 'comic', inner: OTHER },
 	quote: { kind: 'quote', inner: OTHER },
-	...Object.fromEntries( Object.entries( SIBLINGS ).map( ( [ key, html ] ) => [ key, { kind: 'favorite', inner: around( html ) + sheet( MOUNT ) + around( html.replace( 'class="', 'class="after ' ) ) + '<div style="clear:both"></div>', favorite: true, sibling: key } ] ) ),
+	...Object.fromEntries( Object.entries( SIBLINGS ).map( ( [ key, html ] ) => [ key, { kind: 'favorite', inner: html + sheet( MOUNT ) + html.replace( 'class="', 'class="after ' ) + '<div style="clear:both"></div>', favorite: true, sibling: true, evidence: key === 'sib-evidence' } ] ) ),
+	'sib-nested': { kind: 'favorite', inner: NESTED, favorite: true, sibling: true, nested: true },
 };
-const FIXTURE_KEYS = RECORD ? Object.keys( SIBLINGS ) : Object.keys( FIXTURES );
+const FIXTURE_KEYS = RECORD ? Object.keys( FIXTURES ).filter( ( key ) => FIXTURES[ key ].sibling || key === 'rich' ) : Object.keys( FIXTURES );
 
 const chromePath = () => {
 	const candidates = [ process.env.CR_CHROME, '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium', '/usr/bin/chromium-browser' ].filter( Boolean );
@@ -154,6 +159,7 @@ const measure = () => {
 	return {
 		client: root.clientWidth,
 		scrollWidth: root.scrollWidth,
+		main: box( document.querySelector( 'main' ) ),
 		entry: box( document.querySelector( '.entry-content' ) ),
 		singular: box( document.querySelector( '.pkiw-singular-entry' ) ),
 		sheet: box( document.querySelector( '.cr-fav-sheet' ) ),
@@ -164,11 +170,32 @@ const measure = () => {
 		prose: [ ...document.querySelectorAll( '.prose' ) ].map( box ),
 		sib: box( document.querySelector( '.sib:not(.after)' ) ),
 		after: box( document.querySelector( '.after' ) ),
+		innerA: box( document.querySelector( '.inner-a' ) ),
+		innerB: box( document.querySelector( '.inner-b' ) ),
 		nav: box( document.querySelector( '.cr-post-nav' ) ),
 		h1: box( document.querySelector( 'h1' ) ),
 	};
 };
 
+const round = ( n ) => Math.round( n * 100 ) / 100;
+// The geometry of what the sheet sits among, compared with origin/main's. Edges before the sheet are
+// absolute tops; edges after it are gaps under the sheet, which don't depend on the sheet's own height.
+const metrics = ( m, f ) => {
+	const out = { sheetTop: m.sheet.top };
+	const lowest = Math.max( m.sheet.bottom, m.after?.bottom ?? 0, f.nested ? m.sib.bottom : 0 );
+	out.navGap = round( m.nav.top - lowest );
+	out.mainTailGap = round( m.main.bottom - m.nav.bottom );
+	if ( m.sib ) {
+		Object.assign( out, { sibLeft: m.sib.left, sibWidth: m.sib.width, sibTop: m.sib.top } );
+	}
+	if ( m.after ) {
+		Object.assign( out, { afterLeft: m.after.left, afterWidth: m.after.width, afterGap: round( m.after.top - m.sheet.bottom ) } );
+	}
+	if ( m.innerA ) {
+		Object.assign( out, { aLeft: m.innerA.left, aWidth: m.innerA.width, aTop: m.innerA.top, bLeft: m.innerB.left, bWidth: m.innerB.width, bGap: round( m.innerB.top - m.sheet.bottom ) } );
+	}
+	return out;
+};
 const failures = [];
 const recorded = {};
 let checks = 0;
@@ -194,8 +221,8 @@ try {
 			const page = await context.newPage();
 			for ( const key of FIXTURE_KEYS ) {
 				const f = FIXTURES[ key ];
-				// Dark runs the key widths on the sheet fixtures only; light runs every width on every fixture.
-				const widths = RECORD ? SIBLING_WIDTHS : theme === 'dark' ? ( f.favorite && ! f.sibling ? KEY_WIDTHS : [] ) : [ ...new Set( [ ...DENSE_WIDTHS, ...SIBLING_WIDTHS ] ) ];
+				// Dark runs the seven sibling widths on the sheet fixtures; light runs every width on every fixture.
+				const widths = RECORD ? SIBLING_WIDTHS : theme === 'dark' ? ( f.favorite ? SIBLING_WIDTHS : [] ) : [ ...new Set( [ ...DENSE_WIDTHS, ...SIBLING_WIDTHS ] ) ];
 				if ( ! widths.length ) {
 					continue;
 				}
@@ -206,7 +233,7 @@ try {
 					const m = await page.evaluate( measure );
 					const at = `${ key } ${ theme } ${ width }px sb${ scrollbar }`;
 					if ( RECORD ) {
-						recorded[ `${ key }|${ width }|${ scrollbar }` ] = { left: m.sib.left, width: m.sib.width, top: m.sib.top, afterLeft: m.after.left, afterWidth: m.after.width, afterGap: Math.round( ( m.after.top - m.sheet.bottom ) * 100 ) / 100 };
+						recorded[ `${ key }|${ width }|${ scrollbar }` ] = metrics( m, f );
 						continue;
 					}
 					same( m.client, width - scrollbar, `${ at }: client width (proves the scrollbar)` );
@@ -214,7 +241,10 @@ try {
 					same( m.nav.width, Math.min( 1100, width - 32 ), `${ at }: Post navigation keeps the wide size` );
 					const want = f.favorite ? favoriteWidth( width ) : narrowWidth( width );
 					same( m.entry.width, want, `${ at }: post content width` );
-					same( m.singular.width, want, `${ at }: singular wrapper width` );
+					// The singular wrapper keeps the size WordPress gave it (the Evidence sheet widens it).
+					const singularWant = f.favorite && ! f.evidence ? narrowWidth( width ) : want;
+					same( m.singular.width, singularWant, `${ at }: singular wrapper width` );
+					same( m.singular.left, ( m.client - singularWant ) / 2, `${ at }: singular wrapper is centered` );
 					same( m.entry.left, ( m.client - want ) / 2, `${ at }: post content is centered` );
 					same( m.entry.right <= m.client, true, `${ at }: post content right edge inside the client width` );
 					if ( KEY_WIDTHS.includes( width ) ) {
@@ -250,17 +280,12 @@ try {
 					if ( f.kind === 'favorite' && ! f.favorite ) {
 						same( m.sheet, null, `${ at }: protected favorite prints no sheet` );
 					}
-					if ( f.sibling && theme === 'light' && SIBLING_WIDTHS.includes( width ) ) {
+					if ( ( f.sibling || key === 'rich' ) && SIBLING_WIDTHS.includes( width ) ) {
 						const base = BASELINE[ `${ key }|${ width }|${ scrollbar }` ];
 						same( Boolean( base ), true, `${ at }: a recorded origin/main baseline exists` );
-						if ( base ) {
-							const gap = ( rect, sheetBox ) => Math.round( ( rect.top - sheetBox.bottom ) * 100 ) / 100;
-							same( m.sib.left, base.left, `${ at }: sibling left edge as origin/main` );
-							same( m.sib.width, base.width, `${ at }: sibling width as origin/main` );
-							same( m.sib.top, base.top, `${ at }: sibling top edge as origin/main` );
-							same( m.after.left, base.afterLeft, `${ at }: sibling after the card, left edge as origin/main` );
-							same( m.after.width, base.afterWidth, `${ at }: sibling after the card, width as origin/main` );
-							same( gap( m.after, m.sheet ), base.afterGap, `${ at }: sibling after the card, gap as origin/main` );
+						const now = metrics( m, f );
+						for ( const name of Object.keys( base ?? {} ) ) {
+							same( now[ name ], base[ name ], `${ at }: ${ name } as origin/main` );
 						}
 					}
 					if ( key === 'like' ) {

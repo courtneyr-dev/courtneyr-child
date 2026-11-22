@@ -60,20 +60,6 @@ cr_fav_group(
 );
 
 cr_fav_group(
-	'content around the card sits in a content-size box, and nothing else does',
-	static function (): void {
-		$post = cr_fav_post( 1, 'Field Guide to Quiet Software', cr_fav_facts() );
-		$out  = cr_fav_sheet( $post, cr_fav_page( '<p>Body before.</p>' . cr_fav_card_html() . '<div class="wp-block-group alignwide">Wide after.</div>' ) );
-		cr_fav_assert( str_contains( $out, '<div class="cr-fav-prose"><p>Body before.</p></div><div class="cr-fav-sheet">' ), 'content before the card is wrapped and precedes the sheet' );
-		cr_fav_assert( str_contains( $out, '</div></div><div class="cr-fav-prose"><div class="wp-block-group alignwide">Wide after.</div></div>' ), 'content after the card is wrapped and follows the sheet' );
-		cr_fav_same( 2, cr_fav_count( '/class="cr-fav-prose"/', $out ), 'one box before and one after' );
-
-		$bare = cr_fav_sheet( $post, cr_fav_page( cr_fav_card_html() ) );
-		cr_fav_same( 0, cr_fav_count( '/cr-fav-prose/', $bare ), 'no empty box when nothing surrounds the card' );
-	}
-);
-
-cr_fav_group(
 	'the picture prints once, eager, with the stored alt and no caption',
 	static function (): void {
 		$post = cr_fav_post( 2, 'Field Guide', cr_fav_facts( array( 'picture' => array( 'source' => 'featured', 'attachment_id' => 77, 'url' => 'https://example.test/uploads/77.png', 'alt' => 'A flowchart of three questions', 'remote' => false, 'suppress_featured' => true ) ) ) );
