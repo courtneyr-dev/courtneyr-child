@@ -1,74 +1,85 @@
 // `npm run test:favorite-single-width`: renders the Favorite single's real wrapper chain
 // (templates/single.html: main > entry-content > the plugin's .pkiw-singular-entry > the sheet)
-// in headless Chrome with WordPress's generated constrained-layout CSS and the theme's checked-in
-// sheets, and asserts the sheet's width against fixed values from the approved contract: the
-// sheet is the page's dominant object, at most the site's wide size (1100px), and fills the
-// width on narrower screens. No `max-width: none` override is in the fixture.
+// in headless Chrome with the layout CSS WordPress printed for a served single (fixtures/
+// wp-generated-layout.css, extracted verbatim, nothing added or removed) and the theme's checked-in
+// sheets, and asserts the sheet's width against fixed values from the approved contract: the sheet is
+// the page's dominant object, at most the site's wide size (1100px), and fills the width on narrower
+// screens. Sheet edges equal the Post navigation's edges (also an .alignwide child of main).
 //
-// The layout CSS below is what WordPress 7.1 prints for this template (wp-includes/block-supports/
-// layout.php constrained rules and class-wp-theme-json.php `.has-global-padding` rules) with
-// theme.json's contentSize 720px, wideSize 1100px and root padding 1rem. The markup is the
-// sheet captured from the served single (G-1 round 1, single-desktop.html), images swapped for data URIs.
-//
-// Each width is checked in light and dark, with overlay scrollbars and with a forced 15px
-// classic scrollbar. No vw units anywhere: expected values come from the client width.
+// What else it asserts:
+//   - 29 widths from 320 to 1920 (1024-1100 and the 1131/1132 cap boundary included), with overlay
+//     scrollbars and a forced 15px classic scrollbar: client width, no horizontal overflow, equal
+//     left and right gutters, right edge inside the client width, record left and mount right from 64rem.
+//   - the star and the tape never intersect the H1.
+//   - content around the card (paragraph, wide group, full group, left and right floats, a group with an
+//     authored margin, an Evidence group) has the geometry origin/main gave it: left edge, width and (before the
+//     card) top edge or (after it) gap under the sheet equal the values in favorite-single-sheet-width.base.json.
+//   - other kinds' singles, a protected favorite, and a .cr-fav-sheet outside a Favorite single keep 720px.
 //
 // Offline: a loopback server serves the sheets and fixtures; everything else is blocked. Needs
 // Chrome: CR_CHROME=/path/to/chrome, or Google Chrome / Chromium in a standard location. Without
 // one the test prints a SKIP banner and exits 0, unless CR_REQUIRE_BROWSER=1. Not wired into CI.
-// CR_FAVORITE_CSS=/path/to/cr-favorite.css renders that sheet instead of the checked-in one (mutation runs).
+// CR_FAVORITE_CSS=/path/to/cr-favorite.css renders that sheet instead of the checked-in one (mutation
+// runs). `--record` with CR_FAVORITE_CSS=<origin/main cr-favorite.css> CR_BASE_MARKUP=1 prints the sibling
+// baseline (siblings directly in the wrapper, as origin/main rendered them).
 import { createServer } from 'node:http';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 
-const ROOT = resolve( dirname( fileURLToPath( import.meta.url ) ), '../..' );
-const SHEETS = [ 'tokens', 'components', 'cr-blog', 'cr-paper', 'cr-sticker', 'cr-favorite', 'cr-post-kinds', 'cr-nav' ];
+const HERE = dirname( fileURLToPath( import.meta.url ) );
+const ROOT = resolve( HERE, '../..' );
+const SHEETS = [ 'tokens', 'components', 'cr-blog', 'cr-paper', 'cr-sticker', 'cr-favorite', 'cr-post-kinds', 'cr-nav', 'cr-evidence-labels' ];
 const SCROLLBAR = 15;
-const VIEWPORTS = [ 1672, 1280, 1024, 768, 390, 320 ];
+const RECORD = process.argv.includes( '--record' );
+const BASE_MARKUP = Boolean( process.env.CR_BASE_MARKUP );
+const KEY_WIDTHS = [ 1672, 1280, 1024, 768, 390, 320 ];
+const DENSE_WIDTHS = [ 320, 340, 360, 375, 390, 414, 480, 600, 768, 800, 900, 1000, 1024, 1040, 1050, 1060, 1080, 1100, 1120, 1131, 1132, 1140, 1150, 1200, 1280, 1366, 1448, 1672, 1920 ];
+const SIBLING_WIDTHS = [ 1672, 1448, 1280, 1024, 768, 390, 320 ];
 
-// Fixed expectations. Main keeps 1rem gutters (32px). The theme's full-bleed rule gives
-// `main.alignfull` the viewport width even beside a classic scrollbar (components.css), so the parent
-// is width - 32 in both scrollbar cases; this fix adds no viewport unit of its own.
-// Favorite sheet: min( 1100, parent ). Everything else keeps min( 720, parent ).
+// Fixed expectations. Main keeps 1rem gutters (32px). The theme's full-bleed rule gives `main.alignfull`
+// the viewport width even beside a classic scrollbar (components.css), so the parent is width - 32 in
+// both scrollbar cases; this fix adds no viewport unit of its own. Favorite sheet: min( 1100, parent ).
+// Everything else keeps min( 720, parent ).
 const FAVORITE = { 1672: 1100, 1280: 1100, 1024: 992, 768: 736, 390: 358, 320: 288 };
 const NARROW = { 1672: 720, 1280: 720, 1024: 720, 768: 720, 390: 358, 320: 288 };
+const favoriteWidth = ( width ) => Math.min( 1100, width - 32 );
+const narrowWidth = ( width ) => Math.min( 720, width - 32 );
 // Record and mount columns (3fr / 2fr) inside sheet padding 24px + gap 24px, from 64rem.
 const COLUMNS = { 1100: [ 617, 411 ], 992: [ 552, 368 ] };
+const BASELINE = RECORD ? {} : JSON.parse( readFileSync( resolve( HERE, 'favorite-single-sheet-width.base.json' ), 'utf8' ) );
 
-const WP_LAYOUT_CSS = `
-:root { --wp--style--global--content-size: 720px; --wp--style--global--wide-size: 1100px; --wp--preset--spacing--md: 1rem;
-  --wp--style--root--padding-left: 1rem; --wp--style--root--padding-right: 1rem; }
-.is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)) { max-width: var(--wp--style--global--content-size); margin-left: auto !important; margin-right: auto !important; }
-.is-layout-constrained > .alignwide { max-width: var(--wp--style--global--wide-size); }
-.wp-container-core-group-is-layout-5c5177d5 > :where(:not(.alignleft):not(.alignright):not(.alignfull)) { max-width: 720px; margin-left: auto !important; margin-right: auto !important; }
-.wp-container-core-group-is-layout-5c5177d5 > .alignwide { max-width: 1100px; }
-.wp-container-core-group-is-layout-5c5177d5 .alignfull { max-width: none; }
-.has-global-padding { padding-right: var(--wp--style--root--padding-right); padding-left: var(--wp--style--root--padding-left); }
-.has-global-padding > .alignfull { margin-right: calc(var(--wp--style--root--padding-right) * -1); margin-left: calc(var(--wp--style--root--padding-left) * -1); }
-.has-global-padding :where(:not(.alignfull.is-layout-flow) > .has-global-padding:not(.wp-block-block, .alignfull)) { padding-right: 0; padding-left: 0; }
-.has-global-padding :where(:not(.alignfull.is-layout-flow) > .has-global-padding:not(.wp-block-block, .alignfull)) > .alignfull { margin-left: 0; margin-right: 0; }
-`;
+const WP_LAYOUT_CSS = readFileSync( resolve( HERE, 'fixtures/wp-generated-layout.css' ), 'utf8' );
 
 const IMAGE = 'data:image/svg+xml;utf8,' + encodeURIComponent( '<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="640"><rect width="1024" height="640" fill="#9bb"/></svg>' );
 const STAR = '<span role="presentation" class="cr-fav-sheet__star" aria-hidden="true"><svg role="presentation" class="cr-fav-star__shape" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 2l3 6.5 7 .6-5.3 4.6 1.6 6.8L12 17l-6.9 3.5 1.6-6.8L1.4 9.1l7-.6z"></path></svg></span>';
 const HEAD = STAR + '<p class="cr-fav-sheet__tape"><span class="pk-kindlabel">Favorite</span><span role="presentation" class="cr-fav-sheet__marker" aria-hidden="true"></span></p><h1 class="cr-fav-sheet__title p-name">Field Guide to Quiet Software</h1>';
-const RECORD = '<article class="cr-fav-sheet__record h-cite u-favorite-of"><dl class="cr-fav-rows"><div class="cr-fav-row cr-fav-row--author"><dt>By</dt><dd><span class="p-author h-card"><span class="p-name">Rowan Vale</span></span></dd></div><div class="cr-fav-row cr-fav-row--source"><dt>Source</dt><dd><a class="u-url cr-fav-link" href="/never-visited" rel="noopener noreferrer nofollow">notes.example.com</a></dd></div><div class="cr-fav-row cr-fav-row--favorited"><dt>Favorited</dt><dd><time class="dt-published" datetime="2026-08-14">August 14, 2026</time></dd></div></dl><p class="cr-fav-sheet__description p-content">Three yes-or-no questions that decide whether a tool earns a place on the desk.</p></article>';
+const RECORD_HTML = '<article class="cr-fav-sheet__record h-cite u-favorite-of"><dl class="cr-fav-rows"><div class="cr-fav-row cr-fav-row--author"><dt>By</dt><dd><span class="p-author h-card"><span class="p-name">Rowan Vale</span></span></dd></div><div class="cr-fav-row cr-fav-row--source"><dt>Source</dt><dd><a class="u-url cr-fav-link" href="/never-visited" rel="noopener noreferrer nofollow">notes.example.com</a></dd></div><div class="cr-fav-row cr-fav-row--favorited"><dt>Favorited</dt><dd><time class="dt-published" datetime="2026-08-14">August 14, 2026</time></dd></div></dl><p class="cr-fav-sheet__description p-content">Three yes-or-no questions that decide whether a tool earns a place on the desk.</p></article>';
 const MOUNT = `<div class="cr-fav-sheet__mount" data-cr-cover-fallback=""><img width="1024" height="640" src="${ IMAGE }" class="cr-fav-sheet__img skip-lazy" alt="A flowchart"></div>`;
 const FAILED = `<div class="cr-fav-sheet__mount cr-cover--failed" data-cr-cover-fallback=""><img width="1024" height="640" src="${ IMAGE }" class="cr-fav-sheet__img skip-lazy" alt="A flowchart"></div>`;
-const sheet = ( mount ) => `<div class="cr-fav-sheet">${ HEAD }<div class="cr-fav-sheet__body">${ RECORD }${ mount }</div></div>`;
-const PROSE = '<div class="wp-block-group prose"><p>Why this one stayed with me.</p></div>';
+const sheet = ( mount ) => `<div class="cr-fav-sheet">${ HEAD }<div class="cr-fav-sheet__body">${ RECORD_HTML }${ mount }</div></div>`;
+// inc/single-favorite.php prose_html(): content around the card, in .cr-fav-prose.
+const around = ( html ) => ( BASE_MARKUP ? html : `<div class="cr-fav-prose">${ html }</div>` );
 const HIDDEN = '<a class="u-url" href="/x" hidden=""></a><time class="dt-published" datetime="2026-08-28T10:00:00-04:00" hidden=""></time>';
 const OTHER = '<p class="prose">A short note in this kind of post.</p>';
 const NAV = '<nav class="wp-block-group alignwide cr-post-nav is-layout-flow wp-block-group-is-layout-flow" aria-label="Post navigation"><div class="cr-post-nav__link"><a href="/a">Previous</a></div><div class="cr-post-nav__link"><a href="/b">Next</a></div></nav>';
 
-// kind: body class; inner: the singular wrapper's content; narrow: expect the 720px content size.
+const SIBLINGS = {
+	'sib-paragraph': '<p class="sib">Why this one stayed with me, in a sentence that wraps onto a second line when the column is narrow enough.</p>',
+	'sib-wide': '<div class="wp-block-group alignwide sib" style="block-size:20px">Wide group</div>',
+	'sib-full': '<div class="wp-block-group alignfull sib" style="block-size:20px">Full group</div>',
+	'sib-left': '<figure class="wp-block-image alignleft sib" style="inline-size:100px;block-size:50px;margin:0 2em 0 0">Left</figure>',
+	'sib-right': '<figure class="wp-block-image alignright sib" style="inline-size:100px;block-size:50px;margin:0 0 0 2em">Right</figure>',
+	'sib-margin': '<div class="wp-block-group sib" style="margin-right:32px;block-size:20px">Authored margin</div>',
+	'sib-evidence': '<div class="wp-block-group alignwide cr-evidence sib"><div class="cr-evidence__row">Evidence row</div></div>',
+};
+
+// kind: body class. favorite: prints the sheet in a Favorite single. narrow: keeps the 720px content size.
 const FIXTURES = {
 	rich: { kind: 'favorite', inner: sheet( MOUNT ), favorite: true, mount: true },
-	nomount: { kind: 'favorite', inner: `<div class="cr-fav-sheet">${ HEAD }<div class="cr-fav-sheet__body">${ RECORD }</div></div>`, favorite: true },
+	nomount: { kind: 'favorite', inner: `<div class="cr-fav-sheet">${ HEAD }<div class="cr-fav-sheet__body">${ RECORD_HTML }</div></div>`, favorite: true },
 	failed: { kind: 'favorite', inner: sheet( FAILED ), favorite: true },
-	prose: { kind: 'favorite', inner: PROSE + sheet( MOUNT ) + PROSE, favorite: true, prose: true },
 	protected: { kind: 'favorite', inner: '<h1 class="single-post__title">Protected</h1><form class="post-password-form"><label>Password <input type="password"></label></form>' },
 	scope: { kind: 'like', inner: sheet( MOUNT ), scope: true },
 	like: { kind: 'like', inner: OTHER },
@@ -78,7 +89,9 @@ const FIXTURES = {
 	read: { kind: 'read', inner: OTHER },
 	comic: { kind: 'comic', inner: OTHER },
 	quote: { kind: 'quote', inner: OTHER },
+	...Object.fromEntries( Object.entries( SIBLINGS ).map( ( [ key, html ] ) => [ key, { kind: 'favorite', inner: around( html ) + sheet( MOUNT ) + around( html.replace( 'class="', 'class="after ' ) ) + '<div style="clear:both"></div>', favorite: true, sibling: key } ] ) ),
 };
+const FIXTURE_KEYS = RECORD ? Object.keys( SIBLINGS ) : Object.keys( FIXTURES );
 
 const chromePath = () => {
 	const candidates = [ process.env.CR_CHROME, '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium', '/usr/bin/chromium-browser' ].filter( Boolean );
@@ -112,7 +125,8 @@ const server = createServer( ( request, response ) => {
 	if ( url.pathname === '/fixture' ) {
 		const { name: key, theme, scrollbar } = Object.fromEntries( url.searchParams );
 		const f = FIXTURES[ key ];
-		const classic = scrollbar === '15' ? `html { overflow-y: scroll; } body::after { content: ""; display: block; block-size: 3000px; } html { scrollbar-width: auto !important; scrollbar-color: auto !important; } ::-webkit-scrollbar { width: ${ SCROLLBAR }px; }` : '';
+		// A tall page, so the viewport scrolls and Chrome reserves the classic scrollbar.
+		const classic = scrollbar === '15' ? `body::after { content: ""; display: block; block-size: 3000px; } html { overflow-y: scroll; scrollbar-width: auto !important; scrollbar-color: auto !important; } ::-webkit-scrollbar { width: ${ SCROLLBAR }px; }` : '';
 		response.setHeader( 'Content-Type', 'text/html' );
 		response.setHeader( 'Content-Security-Policy', "default-src 'self' data:; style-src 'self' 'unsafe-inline'; img-src 'self' data:" );
 		response.end( `<!doctype html><html lang="en" data-theme="${ theme }"><head><meta charset="utf-8"><title>Favorite single width</title>${ SHEETS.map( ( s ) => `<link rel="stylesheet" href="/css/${ s }.css">` ).join( '' ) }<style>${ WP_LAYOUT_CSS }${ classic }</style></head>
@@ -133,26 +147,30 @@ const measure = () => {
 			return null;
 		}
 		const r = element.getBoundingClientRect();
-		return { left: Math.round( r.left * 100 ) / 100, width: Math.round( r.width * 100 ) / 100, top: Math.round( r.top * 100 ) / 100, bottom: Math.round( r.bottom * 100 ) / 100, right: Math.round( r.right * 100 ) / 100 };
+		const round = ( n ) => Math.round( n * 100 ) / 100;
+		return { left: round( r.left ), width: round( r.width ), top: round( r.top ), bottom: round( r.bottom ), right: round( r.right ) };
 	};
 	const root = document.documentElement;
 	return {
 		client: root.clientWidth,
 		scrollWidth: root.scrollWidth,
-		main: box( document.querySelector( 'main' ) ),
 		entry: box( document.querySelector( '.entry-content' ) ),
 		singular: box( document.querySelector( '.pkiw-singular-entry' ) ),
 		sheet: box( document.querySelector( '.cr-fav-sheet' ) ),
 		record: box( document.querySelector( '.cr-fav-sheet__record' ) ),
 		mount: box( document.querySelector( '.cr-fav-sheet__mount:not(.cr-cover--failed)' ) ),
+		star: box( document.querySelector( '.cr-fav-sheet__star' ) ),
+		tape: box( document.querySelector( '.cr-fav-sheet__tape' ) ),
 		prose: [ ...document.querySelectorAll( '.prose' ) ].map( box ),
+		sib: box( document.querySelector( '.sib:not(.after)' ) ),
+		after: box( document.querySelector( '.after' ) ),
 		nav: box( document.querySelector( '.cr-post-nav' ) ),
 		h1: box( document.querySelector( 'h1' ) ),
-		layout: { entryMax: getComputedStyle( document.querySelector( '.entry-content' ) ).maxWidth, singularMax: getComputedStyle( document.querySelector( '.pkiw-singular-entry' ) ).maxWidth },
 	};
 };
 
 const failures = [];
+const recorded = {};
 let checks = 0;
 const same = ( actual, expected, label ) => {
 	checks++;
@@ -160,45 +178,69 @@ const same = ( actual, expected, label ) => {
 		failures.push( `${ label }: expected ${ expected }, got ${ actual }` );
 	}
 };
+const apart = ( a, b ) => a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top;
 
 const browser = await chromium.launch( {
 	executablePath,
 	ignoreDefaultArgs: [ '--hide-scrollbars' ],
 	args: [ '--proxy-server=http://127.0.0.1:1', '--proxy-bypass-list=127.0.0.1', '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1', '--disable-background-networking', '--force-color-profile=srgb' ],
 } );
+const frames = ( page ) => page.evaluate( () => new Promise( ( done ) => requestAnimationFrame( () => requestAnimationFrame( done ) ) ) );
 try {
 	for ( const scrollbar of [ 0, SCROLLBAR ] ) {
-		for ( const theme of [ 'light', 'dark' ] ) {
-			for ( const width of VIEWPORTS ) {
-				const context = await browser.newContext( { viewport: { width, height: 900 }, deviceScaleFactor: 1, colorScheme: theme, reducedMotion: 'reduce', serviceWorkers: 'block' } );
-				await context.route( '**/*', ( route ) => ( route.request().url().startsWith( origin + '/' ) ? route.continue() : route.abort( 'blockedbyclient' ) ) );
-				const page = await context.newPage();
-				for ( const [ key, f ] of Object.entries( FIXTURES ) ) {
-					await page.goto( `${ origin }/fixture?name=${ key }&theme=${ theme }&scrollbar=${ scrollbar }`, { waitUntil: 'load' } );
-					await page.evaluate( () => new Promise( ( done ) => requestAnimationFrame( () => requestAnimationFrame( done ) ) ) );
+		for ( const theme of RECORD ? [ 'light' ] : [ 'light', 'dark' ] ) {
+			const context = await browser.newContext( { viewport: { width: 1280, height: 900 }, deviceScaleFactor: 1, colorScheme: theme, reducedMotion: 'reduce', serviceWorkers: 'block' } );
+			await context.route( '**/*', ( route ) => ( route.request().url().startsWith( origin + '/' ) ? route.continue() : route.abort( 'blockedbyclient' ) ) );
+			const page = await context.newPage();
+			for ( const key of FIXTURE_KEYS ) {
+				const f = FIXTURES[ key ];
+				// Dark runs the key widths on the sheet fixtures only; light runs every width on every fixture.
+				const widths = RECORD ? SIBLING_WIDTHS : theme === 'dark' ? ( f.favorite && ! f.sibling ? KEY_WIDTHS : [] ) : [ ...new Set( [ ...DENSE_WIDTHS, ...SIBLING_WIDTHS ] ) ];
+				if ( ! widths.length ) {
+					continue;
+				}
+				await page.goto( `${ origin }/fixture?name=${ key }&theme=${ theme }&scrollbar=${ scrollbar }`, { waitUntil: 'load' } );
+				for ( const width of widths ) {
+					await page.setViewportSize( { width, height: 900 } );
+					await frames( page );
 					const m = await page.evaluate( measure );
 					const at = `${ key } ${ theme } ${ width }px sb${ scrollbar }`;
-					const parent = width - 32;
+					if ( RECORD ) {
+						recorded[ `${ key }|${ width }|${ scrollbar }` ] = { left: m.sib.left, width: m.sib.width, top: m.sib.top, afterLeft: m.after.left, afterWidth: m.after.width, afterGap: Math.round( ( m.after.top - m.sheet.bottom ) * 100 ) / 100 };
+						continue;
+					}
 					same( m.client, width - scrollbar, `${ at }: client width (proves the scrollbar)` );
 					same( m.scrollWidth, m.client, `${ at }: no horizontal overflow` );
-					same( m.nav.width, Math.min( 1100, parent ), `${ at }: Post navigation keeps the wide size` );
-					const want = f.favorite ? FAVORITE[ width ] : NARROW[ width ];
+					same( m.nav.width, Math.min( 1100, width - 32 ), `${ at }: Post navigation keeps the wide size` );
+					const want = f.favorite ? favoriteWidth( width ) : narrowWidth( width );
 					same( m.entry.width, want, `${ at }: post content width` );
 					same( m.singular.width, want, `${ at }: singular wrapper width` );
 					same( m.entry.left, ( m.client - want ) / 2, `${ at }: post content is centered` );
+					same( m.entry.right <= m.client, true, `${ at }: post content right edge inside the client width` );
+					if ( KEY_WIDTHS.includes( width ) ) {
+						same( want, ( f.favorite ? FAVORITE : NARROW )[ width ], `${ at }: contract width` );
+					}
 					if ( f.favorite ) {
 						same( m.sheet.width, want, `${ at }: sheet width` );
-						same( m.sheet.left, ( m.client - want ) / 2, `${ at }: sheet is centered` );
+						same( m.sheet.left, ( m.client - want ) / 2, `${ at }: sheet left gutter` );
+						same( m.client - m.sheet.right, m.sheet.left, `${ at }: sheet right gutter equals the left gutter` );
+						same( m.sheet.right <= m.client, true, `${ at }: sheet right edge inside the client width` );
+						same( m.sheet.left, m.nav.left, `${ at }: sheet left edge equals Post navigation` );
+						same( m.sheet.right, m.nav.right, `${ at }: sheet right edge equals Post navigation` );
 						same( m.record.left >= m.sheet.left, true, `${ at }: record inside the sheet` );
 						same( m.h1.width > 0, true, `${ at }: one H1 prints` );
+						same( apart( m.h1, m.star ), true, `${ at }: the star does not touch the H1` );
+						same( apart( m.h1, m.tape ), true, `${ at }: the tape does not touch the H1` );
 					}
 					if ( f.scope ) {
-						same( m.sheet.width, NARROW[ width ], `${ at }: a sheet outside a Favorite single keeps the 720px size` );
+						same( m.sheet.width, narrowWidth( width ), `${ at }: a sheet outside a Favorite single keeps the 720px size` );
 					}
 					if ( f.mount ) {
 						if ( width >= 1024 ) {
-							same( Math.round( m.record.width ), COLUMNS[ want ][ 0 ], `${ at }: record column` );
-							same( Math.round( m.mount.width ), COLUMNS[ want ][ 1 ], `${ at }: mount column` );
+							if ( COLUMNS[ want ] ) {
+								same( Math.round( m.record.width ), COLUMNS[ want ][ 0 ], `${ at }: record column` );
+								same( Math.round( m.mount.width ), COLUMNS[ want ][ 1 ], `${ at }: mount column` );
+							}
 							same( m.mount.left >= m.record.right, true, `${ at }: record left, mount right` );
 						} else {
 							same( m.mount.top >= m.record.bottom, true, `${ at }: one column, mount under the record` );
@@ -208,19 +250,25 @@ try {
 					if ( f.kind === 'favorite' && ! f.favorite ) {
 						same( m.sheet, null, `${ at }: protected favorite prints no sheet` );
 					}
-					if ( f.prose ) {
-						const prose = NARROW[ width ];
-						for ( const block of m.prose ) {
-							same( block.width, prose, `${ at }: prose around the card keeps the content size` );
-							same( block.left, ( m.client - prose ) / 2, `${ at }: prose is centered` );
+					if ( f.sibling && theme === 'light' && SIBLING_WIDTHS.includes( width ) ) {
+						const base = BASELINE[ `${ key }|${ width }|${ scrollbar }` ];
+						same( Boolean( base ), true, `${ at }: a recorded origin/main baseline exists` );
+						if ( base ) {
+							const gap = ( rect, sheetBox ) => Math.round( ( rect.top - sheetBox.bottom ) * 100 ) / 100;
+							same( m.sib.left, base.left, `${ at }: sibling left edge as origin/main` );
+							same( m.sib.width, base.width, `${ at }: sibling width as origin/main` );
+							same( m.sib.top, base.top, `${ at }: sibling top edge as origin/main` );
+							same( m.after.left, base.afterLeft, `${ at }: sibling after the card, left edge as origin/main` );
+							same( m.after.width, base.afterWidth, `${ at }: sibling after the card, width as origin/main` );
+							same( gap( m.after, m.sheet ), base.afterGap, `${ at }: sibling after the card, gap as origin/main` );
 						}
 					}
 					if ( key === 'like' ) {
 						same( m.prose[ 0 ].left, ( m.client - want ) / 2, `${ at }: other-kind prose position` );
 					}
 				}
-				await context.close();
 			}
+			await context.close();
 		}
 	}
 } finally {
@@ -228,6 +276,10 @@ try {
 	server.close();
 }
 
+if ( RECORD ) {
+	console.log( JSON.stringify( recorded, null, '\t' ) );
+	process.exit( 0 );
+}
 if ( failures.length ) {
 	console.log( failures.slice( 0, 40 ).join( '\n' ) );
 	console.log( `FAIL favorite-single-sheet-width: ${ failures.length } of ${ checks } checks failed` );

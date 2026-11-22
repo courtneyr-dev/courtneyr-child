@@ -285,6 +285,20 @@ function meta_offset( string $html, int $start ): int {
 }
 
 /**
+ * Post content around the card, in a box that keeps the content size.
+ *
+ * The sheet's wrapper is wider than the content size (cr-favorite.css), so
+ * prose, wide groups, floats and authored margins around the card sit in a
+ * box that lays them out as the narrower wrapper did.
+ *
+ * @param string $html Content before or after the card.
+ * @return string Empty when there is nothing but whitespace.
+ */
+function prose_html( string $html ): string {
+	return '' === trim( $html ) ? '' : '<div class="cr-fav-prose">' . $html . '</div>';
+}
+
+/**
  * Rebuild the main post content as the sheet.
  *
  * @param string               $html  Rendered post-content block.
@@ -314,8 +328,8 @@ function sheet( string $html, array $block ): string {
 	$before = '';
 	$after  = '';
 	if ( preg_match( '/<article\b[^>]*\bclass="[^"]*\bk-favorite\b[^"]*"[^>]*>.*?<\/article>/s', $content, $card, PREG_OFFSET_CAPTURE ) ) {
-		$before = (string) substr( $content, 0, (int) $card[0][1] );
-		$after  = (string) substr( $content, (int) $card[0][1] + strlen( $card[0][0] ) );
+		$before = prose_html( (string) substr( $content, 0, (int) $card[0][1] ) );
+		$after  = prose_html( (string) substr( $content, (int) $card[0][1] + strlen( $card[0][0] ) ) );
 		$body   = body_html( card_record( $facts ) . $mount );
 	} else {
 		$body = body_html( plain_record( $facts ) . $mount ) . $content;
