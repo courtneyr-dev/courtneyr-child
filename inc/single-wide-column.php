@@ -2,7 +2,7 @@
 /**
  * Single posts whose record needs the wide column.
  *
- * templates/single.html sets every single in WordPress's constrained layout:
+ * The single template sets every single in WordPress's constrained layout:
  * the post content is capped at theme.json's contentSize (720px) and the
  * header's children are capped the same way. A kind whose single is a
  * two-column spread (a book beside its notes and record) cannot fit there.
@@ -81,10 +81,13 @@ function widen( array $block ): array {
 	}
 	$layout = (array) ( $block['attrs']['layout'] ?? array( 'type' => 'constrained' ) );
 	// The content fills the wide column; the header keeps its reading-width lines (a title wraps where it always did) from the column's left edge.
-	$block['attrs']['layout'] = array_merge(
-		$layout,
-		$content ? array( 'contentSize' => '100%' ) : array( 'contentSize' => 'var(--wp--style--global--content-size)', 'justifyContent' => 'left' )
-	);
+	if ( $content ) {
+		$layout['contentSize'] = '100%';
+	} else {
+		$layout['contentSize']    = 'var(--wp--style--global--content-size)';
+		$layout['justifyContent'] = 'left';
+	}
+	$block['attrs']['layout'] = $layout;
 	return $block;
 }
 add_filter( 'render_block_data', __NAMESPACE__ . '\\widen' );
