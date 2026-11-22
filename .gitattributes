@@ -3,6 +3,7 @@
 # tools/ and package.json stay in: courtneyr.dev's sync-theme.sh builds from
 # git archive and runs tools/minify-css.mjs, which reads the esbuild pin from
 # package.json.
+/.claude export-ignore
 /.github export-ignore
 /tests export-ignore
 /docs export-ignore
