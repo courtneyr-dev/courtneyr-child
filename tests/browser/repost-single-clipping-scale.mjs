@@ -6,9 +6,10 @@
 // below 48rem it keeps the constrained width, and nothing else on the page moves.
 //
 // The fixture is the real single structure (templates/single.html: constrained main >
-// constrained post-content > the plugin's h-entry wrapper > the article) with WordPress's own
-// generated layout CSS (the `.is-layout-constrained > :where(...) { max-width: content-size }`
-// cap, the wide cap, `.has-global-padding`) and NO `max-width: none` overrides: the cap that
+// constrained post-content > the plugin's h-entry wrapper > the article) with the CSS WordPress
+// 7.1.4 generated for this theme, copied verbatim from a saved page into
+// fixtures/wp-generated.css (the `.is-layout-constrained > :where(...) { max-width: content-size }`
+// cap, the wide cap, `.has-global-padding`), and NO `max-width: none` overrides: the cap that
 // squeezed the clipping to 720px lives in that generated CSS, so a fixture without it passes
 // a fix that fails on the site. Every width is measured twice, with no scrollbar and with a
 // forced 15px classic scrollbar, so a fix built on vw units fails.
@@ -23,7 +24,7 @@
 //                                          checks compare against (default: git show acef24d)
 //   --table      print the measured geometry as a table instead of asserting
 //   --mutants    run the test against sheets with one rule broken each; every mutant must fail
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -46,7 +47,14 @@ const PAD = 24;
 const GAP = 24;
 const BREAK = 768;
 const SCROLLBAR = 15;
+const ROW_GAP = 16;
 const WIDTHS = [ 1672, 1280, 1024, 768, 767, 390, 320 ];
+// A sweep through the range where the wide cap and the viewport trade places, 1024 to 1200, plus
+// the widths around 1050 where a vw-based rule and a classic scrollbar disagree by 6.5px.
+const SWEEP = [ 1448, 1200, 1180, 1150, 1148, 1130, 1110, 1100, 1080, 1060, 1050, 1040, 1030, 1000, 900, 800 ];
+// Pages that carry the kind-repost body class but no Repost clipping: the theme emits the first
+// kind on the body, so a password form and another kind's card can sit under it.
+const NO_CLIPPING = [ 'password', 'like-under-repost', 'repost-under-like' ];
 const SCHEMES = [ { name: 'light', theme: 'light', os: 'light' }, { name: 'dark', theme: 'dark', os: 'dark' } ];
 const VARIANTS = [ 'image', 'no-image', 'url-only', 'note' ];
 // Every other kind's single. Its h-entry and card carry that kind's classes; none of them may
@@ -99,35 +107,58 @@ if ( MUTANTS ) {
 		process.exit( 1 );
 	}
 	const dir = mkdtempSync( join( tmpdir(), 'repost-mutants-' ) );
+	const HAS_CONTENT = ':has(> .pkiw-singular-entry .cr-repost-clip--single)';
+	const HAS_ENTRY = ':has(.cr-repost-clip--single)';
 	const mutate = {
 		'fix removed (the base sheet)': ( css ) => css.replace( block, '' ),
-		'content column stays at 80ch': ( css ) => css.replace( /(\.single-post__content\s*\{\s*max-inline-size:\s*)var\(--wp--style--global--wide-size\)/, '$1var(--cr-measure-wide)' ),
-		'h-entry wrapper keeps the 720px cap': ( css ) => css.replace( /(\.pkiw-singular-entry\s*\{\s*max-inline-size:\s*)none/, '$1var(--wp--style--global--content-size)' ),
+		'content column stays at 80ch': ( css ) => css.replace( block, block.replace( 'max-inline-size: var(--wp--style--global--wide-size);', 'max-inline-size: var(--cr-measure-wide);' ) ),
+		'h-entry wrapper keeps the 720px cap': ( css ) => css.replace( block, block.replace( /(\.pkiw-singular-entry:has\(\.cr-repost-clip--single\) \{\s*max-inline-size:\s*)none/, '$1var(--wp--style--global--content-size)' ) ),
 		'breakpoint moves to 40rem': ( css ) => css.replace( block, block.replace( '(min-width: 48rem)', '(min-width: 40rem)' ) ),
-		'selector loses .kind-repost (hits every kind)': ( css ) => css.replace( block, block.replaceAll( 'body.single-post.kind-repost', 'body.single-post' ) ),
-		'vw sizing (breaks under a classic scrollbar)': ( css ) => css.replace( block, block.replace( /max-inline-size:\s*var\(--wp--style--global--wide-size\);/, 'max-inline-size: min(100vw, var(--wp--style--global--wide-size));' ).replace( /(\.pkiw-singular-entry\s*\{\s*max-inline-size:\s*)none/, '$1min(100vw, var(--wp--style--global--wide-size))' ) ),
-		'fixed 1100px width (overflows below 1148px)': ( css ) => css.replace( block, block.replace( /(\.single-post__content\s*\{\s*)max-inline-size:\s*var\(--wp--style--global--wide-size\);/, '$1inline-size: var(--wp--style--global--wide-size); max-inline-size: none;' ) ),
+		'no :has() scope (widens password forms and other kinds under a kind-repost body)': ( css ) => css.replace( block, block.replaceAll( HAS_CONTENT, '' ).replaceAll( HAS_ENTRY, '' ) ),
+		'vw sizing (breaks under a classic scrollbar)': ( css ) => css.replace( block, block.replace( 'max-inline-size: var(--wp--style--global--wide-size);', 'max-inline-size: min(100vw, var(--wp--style--global--wide-size));' ).replace( /(\.pkiw-singular-entry:has\(\.cr-repost-clip--single\) \{\s*max-inline-size:\s*)none/, '$1min(100vw, var(--wp--style--global--wide-size))' ) ),
+		'vw-centered margin (right in a viewport with no scrollbar, off by 7.5px with one)': ( css ) => css.replace( block, block.replace( 'max-inline-size: var(--wp--style--global--wide-size);', 'max-inline-size: var(--wp--style--global--wide-size);\n\t\tmargin-inline-start: max(0px, calc(50vw - var(--wp--style--global--wide-size) / 2)) !important;' ) ),
+		'fixed 1100px width (overflows below 1148px)': ( css ) => css.replace( block, block.replace( 'max-inline-size: var(--wp--style--global--wide-size);', 'inline-size: var(--wp--style--global--wide-size); max-inline-size: none;' ) ),
 		'wide size widened by 40px': ( css ) => css.replace( block, block.replaceAll( 'var(--wp--style--global--wide-size)', 'calc(var(--wp--style--global--wide-size) + 40px)' ) ),
+		'sparkle counter-offset removed (sparkle follows the wide column)': ( css ) => css.replace( block, block.replace( /\n\t\/\* components\.css pins[\s\S]*?\n\t\}\n/, '\n' ) ),
+		'sparkle moves 20px': ( css ) => css.replace( block, block.replace( 'var(--cr-repost-measure))) / 2)', 'var(--cr-repost-measure))) / 2 + 20px)' ) ),
+		'newsletter band moves 24px (clipping margin grows)': ( css ) => css.replace( block, block.replace( /\n\}\n$/, '\n\n\tbody.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-clip--single {\n\t\tmargin-block-end: calc(var(--cr-space-xl) + 24px);\n\t}\n}\n' ) ),
+		'caption gap left to the stretched rows': ( css ) => css.replace( block, block.replace( 'grid-template-rows: auto 1fr;', 'grid-template-rows: auto;' ) ),
 	};
-	let survived = 0;
-	for ( const [ name, rewrite ] of Object.entries( mutate ) ) {
+	const attempt = async ( name, rewrite, index ) => {
 		const mutated = rewrite( real );
 		if ( name !== 'fix removed (the base sheet)' && mutated === real ) {
-			console.log( `ERROR  ${ name }: the rewrite changed nothing, so it proves nothing` );
-			survived++;
-			continue;
+			return `ERROR     ${ name }: the rewrite changed nothing, so it proves nothing`;
 		}
-		const path = join( dir, 'cr-repost.css' );
+		const path = join( dir, `cr-repost-${ index }.css` );
 		writeFileSync( path, mutated );
-		const run = spawnSync( process.execPath, [ SELF ], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, CR_REPOST_CSS: path }, maxBuffer: 1 << 26 } );
-		const failing = ( run.stdout.match( /^FAIL /gm ) || [] ).length;
-		if ( run.status === 0 ) {
-			survived++;
-			console.log( `SURVIVED  ${ name }` );
-		} else {
-			console.log( `KILLED    ${ name }  (${ failing } failed assertions)` );
+		// A run that dies before asserting anything (Chrome failed to start) is not a kill: retry once,
+		// then report it as an error.
+		const once = () => new Promise( ( done ) => {
+			let out = '';
+			const child = spawn( process.execPath, [ SELF ], { cwd: ROOT, env: { ...process.env, CR_REPOST_CSS: path } } );
+			child.stdout.on( 'data', ( chunk ) => ( out += chunk ) );
+			child.on( 'close', ( status ) => done( { status, out, failing: ( out.match( /^FAIL /gm ) || [] ).length, total: /(\d+) assertions, (\d+) failed/.test( out ) } ) );
+		} );
+		let run = await once();
+		if ( run.status !== 0 && ! run.total ) {
+			run = await once();
 		}
-	}
+		if ( run.status === 0 ) {
+			return `SURVIVED  ${ name }`;
+		}
+		return run.total ? `KILLED    ${ name }  (${ run.failing } failed assertions)` : `ERROR     ${ name }: the run died before asserting`;
+	};
+	const names = Object.entries( mutate );
+	const results = new Array( names.length );
+	let next = 0;
+	await Promise.all( Array.from( { length: 4 }, async () => {
+		while ( next < names.length ) {
+			const index = next++;
+			results[ index ] = await attempt( names[ index ][ 0 ], names[ index ][ 1 ], index );
+		}
+	} ) );
+	results.forEach( ( line ) => console.log( line ) );
+	const survived = results.filter( ( line ) => ! line.startsWith( 'KILLED' ) ).length;
 	rmSync( dir, { recursive: true, force: true } );
 	console.log( survived ? `${ survived } mutant(s) survived or did not apply` : 'all mutants killed' );
 	process.exit( survived ? 1 : 0 );
@@ -140,24 +171,8 @@ if ( ! executablePath ) {
 	process.exit( process.env.CR_REQUIRE_BROWSER ? 1 : 0 );
 }
 
-// ---- WordPress's generated CSS, as the core emits it (wp-includes/class-wp-theme-json.php for
-// root padding, wp-includes/block-supports/layout.php for the layout rules; WordPress 7.1.4) ----
-const spacing = ( THEME.settings.spacing.spacingSizes || [] ).map( ( size ) => `--wp--preset--spacing--${ size.slug }:${ size.size };` ).join( '' );
-const WP_CSS = `
-:root{${ spacing }--wp--style--global--content-size:${ THEME.settings.layout.contentSize };--wp--style--global--wide-size:${ THEME.settings.layout.wideSize };--wp--style--root--padding-top:0;--wp--style--root--padding-right:var(--wp--preset--spacing--md);--wp--style--root--padding-bottom:0;--wp--style--root--padding-left:var(--wp--preset--spacing--md);--wp--style--block-gap:var(--wp--preset--spacing--lg);}
-body{margin:0;}
-.has-global-padding{padding-right:var(--wp--style--root--padding-right);padding-left:var(--wp--style--root--padding-left);}
-.has-global-padding > .alignfull{margin-right:calc(var(--wp--style--root--padding-right) * -1);margin-left:calc(var(--wp--style--root--padding-left) * -1);}
-.has-global-padding :where(:not(.alignfull.is-layout-flow) > .has-global-padding:not(.wp-block-block, .alignfull)){padding-right:0;padding-left:0;}
-.has-global-padding :where(:not(.alignfull.is-layout-flow) > .has-global-padding:not(.wp-block-block, .alignfull)) > .alignfull{margin-left:0;margin-right:0;}
-.is-layout-constrained > .alignleft{float:left;margin-inline-start:0;margin-inline-end:2em;}
-.is-layout-constrained > .alignright{float:right;margin-inline-start:2em;margin-inline-end:0;}
-.is-layout-constrained > .aligncenter{margin-left:auto !important;margin-right:auto !important;}
-.is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)){max-width:var(--wp--style--global--content-size);margin-left:auto !important;margin-right:auto !important;}
-.is-layout-constrained > .alignwide{max-width:var(--wp--style--global--wide-size);}
-:root :where(.is-layout-constrained) > *{margin-block-start:0;margin-block-end:0;}
-.is-layout-flex{display:flex;flex-wrap:wrap;align-items:center;gap:var(--wp--preset--spacing--sm);}
-`;
+// ---- WordPress's generated CSS, verbatim from a saved page of this theme (not reconstructed) ----
+const WP_CSS = 'body{margin:0;}\n' + readFileSync( resolve( ROOT, 'tests/browser/fixtures/wp-generated.css' ), 'utf8' );
 
 const fontFaces = ( THEME.settings.typography.fontFamilies || [] )
 	.flatMap( ( family ) => family.fontFace || [] )
@@ -192,7 +207,11 @@ const otherContent = ( kind ) => `<div class="h-entry kind-${ kind } pkiw-singul
 
 const MAIN = ( content, kind ) => `<div class="wp-site-blocks"><main id="wp--skip-link--target" class="wp-block-group alignfull single-post has-main-accent-background-color has-background has-global-padding is-layout-constrained wp-block-group-is-layout-constrained" style="padding-top:var(--wp--preset--spacing--xl);padding-bottom:var(--wp--preset--spacing--3xl)"><div class="wp-block-group alignwide single-post__header has-global-padding is-layout-constrained wp-block-group-is-layout-constrained"><div class="wp-block-group single-post__lede-meta has-small-font-size is-layout-flex"><div class="single-post__date cr-dt-published wp-block-post-date"><time class="dt-published" datetime="2026-08-28T10:00:00-04:00">August 28, 2026</time></div><div class="taxonomy-kind cr-chip single-post__kind wp-block-post-terms has-xs-font-size"><a href="/kind/${ kind }/" rel="tag">${ kind }</a></div></div></div><div class="entry-content align single-post__content wp-block-post-content has-global-padding is-layout-constrained wp-block-post-content-is-layout-constrained">${ content }</div><div class="wp-block-group alignfull cr-newsletter-banner has-global-padding is-layout-constrained" style="padding:2rem 1rem"><p>Newsletter band</p></div></main><div style="block-size:1600px"></div></div>`;
 
-const bodyClass = ( kind ) => `single single-post postid-1 kind-${ kind }${ kind === 'comic' ? ' cr-comic-single' : '' }`;
+const PASSWORD = '<form action="/wp-login.php?action=postpass" class="post-password-form" method="post"><p>This content is password protected. To view it please enter your password below:</p><p><label for="pwbox-1">Password: <input name="post_password" id="pwbox-1" type="password" spellcheck="false" size="20"></label> <input type="submit" name="Submit" value="Enter"></p></form>';
+const bodyClass = ( kind, variant ) => {
+	const kinds = { 'like-under-repost': 'kind-repost kind-like', 'repost-under-like': 'kind-like kind-repost', password: 'kind-repost' }[ variant ] ?? `kind-${ kind }`;
+	return `single single-post postid-1 ${ kinds }${ kind === 'comic' ? ' cr-comic-single' : '' }`;
+};
 
 const sheetPath = ( name, base ) => ( name === 'cr-repost' ? ( base ? null : HEAD_CSS ) : resolve( ROOT, 'assets/css', name + '.css' ) );
 const server = createServer( ( request, response ) => {
@@ -216,11 +235,11 @@ const server = createServer( ( request, response ) => {
 	}
 	if ( url.pathname === '/fixture' ) {
 		const { kind, variant, theme, scrollbar, base } = Object.fromEntries( url.searchParams );
-		const content = kind === 'repost' ? contentFor( variant ) : otherContent( kind );
+		const content = variant === 'password' ? PASSWORD : ( NO_CLIPPING.includes( variant ) ? otherContent( 'like' ) : ( kind === 'repost' ? contentFor( variant ) : otherContent( kind ) ) );
 		const sheets = SHEETS.map( ( name ) => `<link rel="stylesheet" href="/css/${ name === 'cr-repost' && base === '1' ? 'cr-repost-base' : name }.css">` ).join( '' );
 		response.setHeader( 'Content-Type', 'text/html' );
 		response.setHeader( 'Content-Security-Policy', "default-src 'self' data:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'" );
-		response.end( `<!doctype html><html lang="en" data-theme="${ theme }"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Repost single scale</title><style>${ fontFaces }</style><style>${ WP_CSS }</style>${ sheets }<style>html::-webkit-scrollbar{width:${ scrollbar }px;height:${ scrollbar }px}html::-webkit-scrollbar-thumb{background:#888}</style></head><body class="${ bodyClass( kind ) }">${ MAIN( content, kind ) }</body></html>` );
+		response.end( `<!doctype html><html lang="en" data-theme="${ theme }"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Repost single scale</title><style>${ fontFaces }</style><style>${ WP_CSS }</style>${ sheets }<style>html::-webkit-scrollbar{width:${ scrollbar }px;height:${ scrollbar }px}html::-webkit-scrollbar-thumb{background:#888}</style></head><body class="${ bodyClass( kind, variant ) }">${ MAIN( content, kind ) }</body></html>` );
 		return;
 	}
 	response.writeHead( 404 ).end();
@@ -258,7 +277,19 @@ const measureScript = () => {
 		const box = el.getBoundingClientRect();
 		return [ el.tagName, el.className && el.className.baseVal === undefined ? el.className : '', box.left, box.top, box.width, box.height ];
 	} );
+	// The shared sparkle is the content block's ::before. A positioned pseudo-element reports used
+	// left/right/top, so its box can be placed exactly from the content block's.
+	const spark = content ? getComputedStyle( content, '::before' ) : null;
+	const box = content ? content.getBoundingClientRect() : null;
+	const sparkle = spark && spark.content !== 'none' ? { glyph: spark.content, left: box.left + parseFloat( spark.left ), right: box.right - parseFloat( spark.right ), top: box.top + parseFloat( spark.top ), width: spark.width } : null;
+	const caption = card ? q( '.pk-caption', card ) : null;
+	const summary = card ? q( '.pk-note', card ) : null;
 	return {
+		sparkle,
+		captionGap: caption && summary ? summary.getBoundingClientRect().top - caption.getBoundingClientRect().bottom : null,
+		lede: rect( q( '.single-post__lede-meta' ) ),
+		date: rect( q( '.single-post__date' ) ),
+		newsletter: rect( q( '.cr-newsletter-banner' ) ),
 		fonts: document.fonts.check( '16px Barlow' ),
 		innerWidth: window.innerWidth,
 		clientWidth: document.documentElement.clientWidth,
@@ -303,73 +334,116 @@ try {
 	};
 
 	if ( TABLE ) {
-		console.log( '| viewport | scrollbar | sheet | content | h-entry | article left | article right | article width | pk-body columns |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- |' );
-		for ( const width of WIDTHS ) {
+		console.log( '| viewport | scrollbar | sheet | clipping left | right | width | sparkle left | sparkle right | sparkle top | caption gap | lede left | date left | newsletter top |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |' );
+		for ( const width of [ ...WIDTHS, ...SWEEP.filter( ( w ) => [ 1448, 1100, 1050 ].includes( w ) ) ] ) {
 			for ( const scrollbar of [ 0, SCROLLBAR ] ) {
 				for ( const base of [ true, false ] ) {
-					const m = await measure( { kind: 'repost', scheme: SCHEMES[ 0 ], width, scrollbar, base } );
-					console.log( `| ${ width } | ${ scrollbar } | ${ base ? 'base' : 'head' } | ${ m.content.width } | ${ m.entry.width } | ${ m.card.left } | ${ m.card.right } | ${ m.card.width } | ${ m.columns } |` );
+					const m = await measure( { kind: 'repost', variant: 'image', scheme: SCHEMES[ 0 ], width, scrollbar, base } );
+					console.log( `| ${ width } | ${ scrollbar } | ${ base ? 'base' : 'head' } | ${ m.card.left } | ${ m.card.right } | ${ m.card.width } | ${ m.sparkle?.left } | ${ m.sparkle?.right } | ${ m.sparkle?.top } | ${ m.captionGap } | ${ m.lede.left } | ${ m.date.left } | ${ m.newsletter.top } |` );
+				}
+			}
+		}
+		console.log( '\n| page under a kind-repost body | viewport | scrollbar | sheet | content width | content left |\n| --- | --- | --- | --- | --- | --- |' );
+		for ( const variant of NO_CLIPPING ) {
+			for ( const width of [ 1280, 1448 ] ) {
+				for ( const base of [ true, false ] ) {
+					const m = await measure( { kind: 'repost', variant, scheme: SCHEMES[ 0 ], width, scrollbar: 0, base } );
+					console.log( `| ${ variant } | ${ width } | 0 | ${ base ? 'base' : 'head' } | ${ m.content.width } | ${ m.content.left } |` );
 				}
 			}
 		}
 		process.exit( 0 );
 	}
 
+	// Chrome lays out in 1/64px units. The sparkle's offset is half of (1100 - 80ch), and 80ch is
+	// 768.390625px, so its half is not a whole unit and the sparkle can land one unit (0.0156px) off
+	// the base. That is the limit of "exact"; any real move is at least a pixel.
+	const UNIT = 0.02;
+	const near = ( a, b ) => typeof a === 'number' && typeof b === 'number' && Math.abs( a - b ) <= UNIT;
+
 	// ---- Repost single: fixed expectations from the contract --------------------------------
+	const cell = async ( variant, scheme, width, scrollbar ) => {
+		const client = width - scrollbar;
+		// components.css forces the full-bleed main to 100vw (an existing theme rule), so the
+		// clipping's room is the viewport minus the gutters, centered on the client area.
+		const inner = width - 2 * GUTTER;
+		const wide = width >= BREAK;
+		const m = await measure( { kind: 'repost', variant, scheme, width, scrollbar } );
+		const base = await measure( { kind: 'repost', variant, scheme, width, scrollbar, base: true } );
+		const id = `${ variant }/${ scheme.name }/${ width }px/scrollbar-${ scrollbar }`;
+		const expectWidth = Math.min( inner, wide ? WIDE : CONTENT );
+		const expectLeft = ( client - expectWidth ) / 2;
+
+		check( `${ id }: fixture is sound (Barlow loaded, scrollbar ${ scrollbar }px)`, [ m.fonts, m.scrollbar, m.clientWidth ], [ true, scrollbar, client ] );
+		check( `${ id }: clipping width`, m.card.width, expectWidth );
+		check( `${ id }: clipping left edge, centered in the client area`, m.card.left, expectLeft );
+		check( `${ id }: clipping right edge and gutters inside the client area`, [ m.card.right, m.card.right <= client, m.card.left >= 0 ], [ expectLeft + expectWidth, true, true ] );
+		check( `${ id }: h-entry wrapper and content column ${ wide ? "are the clipping's width" : 'keep their constrained widths' }`, [ m.entry.width, m.content.width ], wide ? [ expectWidth, expectWidth ] : [ Math.min( inner, CONTENT ), inner ] );
+		check( `${ id }: no layout container is introduced`, [ m.contentStyle.containerType, m.entryStyle.containerType, m.cardStyle.containerType ], [ 'normal', 'normal', 'normal' ] );
+		check( `${ id }: clipping padding stays on the lg token`, [ m.cardStyle.paddingLeft, m.cardStyle.paddingRight ], [ `${ PAD }px`, `${ PAD }px` ] );
+
+		if ( variant === 'image' || variant === 'note' ) {
+			const text = wide ? ( expectWidth - 2 * PAD - GAP ) / 2 : expectWidth - 2 * PAD;
+			check( `${ id }: pk-body columns ${ wide ? 'split in two equal tracks from 48rem' : 'stack in one track below 48rem' }`, m.columns, wide ? `${ text }px ${ text }px` : `${ text }px` );
+			check( `${ id }: caption sits one row gap (${ ROW_GAP }px) above the description, whatever the image height`, m.captionGap, ROW_GAP );
+		} else {
+			check( `${ id }: pk-body is one track`, m.columns, `${ expectWidth - 2 * PAD }px` );
+		}
+
+		if ( wide ) {
+			check( `${ id }: computed caps at 48rem and up (content ${ WIDE }px, h-entry none, clipping 100%)`, [ m.contentStyle.maxInlineSize, m.entryStyle.maxInlineSize, m.cardStyle.maxInlineSize ], [ `${ WIDE }px`, 'none', '100%' ] );
+		}
+		if ( variant === 'note' ) {
+			check( `${ id }: Courtney's note keeps the width it had and starts at the clipping's left edge`, [ m.note.width, m.note.left ], [ base.note.width, expectLeft ] );
+		}
+
+		// Nothing but the clipping moves: the lede, date, kind chip and header are exactly where they
+		// were, the band below keeps its left edge, width and height, and its top moves by exactly
+		// the clipping's change in height.
+		check( `${ id }: header, lede row and date do not move`, [ m.header, m.lede, m.date ], [ base.header, base.lede, base.date ] );
+		check( `${ id }: newsletter band keeps its left, width and height`, [ m.newsletter.left, m.newsletter.width, m.newsletter.height ], [ base.newsletter.left, base.newsletter.width, base.newsletter.height ] );
+		check( `${ id }: newsletter band moves by exactly the clipping's height change (${ m.card.height - base.card.height }px)`, m.newsletter.top - base.newsletter.top, m.card.height - base.card.height );
+
+		// The shared sparkle (components.css, content::before) stays exactly where the base put it. It
+		// only exists from 1100px up, so the test also proves it was measured there.
+		if ( width >= 1100 ) {
+			check( `${ id }: sparkle is present and measured`, [ m.sparkle?.glyph, base.sparkle?.glyph ], [ '"\u273A"', '"\u273A"' ] );
+		}
+		check( `${ id }: sparkle keeps its base box (left, right, top, size)`, [ near( m.sparkle?.left, base.sparkle?.left ) || m.sparkle === base.sparkle, near( m.sparkle?.right, base.sparkle?.right ) || m.sparkle === base.sparkle, m.sparkle?.top === base.sparkle?.top, m.sparkle?.width === base.sparkle?.width ], [ true, true, true, true ] );
+	};
 	for ( const scheme of SCHEMES ) {
 		for ( const scrollbar of [ 0, SCROLLBAR ] ) {
 			for ( const width of WIDTHS ) {
-				const client = width - scrollbar;
-				// components.css forces the full-bleed main to 100vw (an existing theme rule), so the
-				// clipping's room is the viewport minus the gutters, centered on the client area.
-				const inner = width - 2 * GUTTER;
-				const wide = width >= BREAK;
 				for ( const variant of VARIANTS ) {
-					const m = await measure( { kind: 'repost', variant, scheme, width, scrollbar } );
-					const id = `${ variant }/${ scheme.name }/${ width }px/scrollbar-${ scrollbar }`;
-					const expectWidth = Math.min( inner, wide ? WIDE : CONTENT );
-					const expectLeft = ( client - expectWidth ) / 2;
-
-					check( `${ id }: fixture is sound (Barlow loaded, scrollbar ${ scrollbar }px)`, [ m.fonts, m.scrollbar, m.clientWidth ], [ true, scrollbar, client ] );
-					check( `${ id }: clipping width`, m.card.width, expectWidth );
-					check( `${ id }: clipping left edge, centered in the client area`, m.card.left, expectLeft );
-					check( `${ id }: clipping right edge stays inside the client area`, [ m.card.right, m.card.right <= client ], [ expectLeft + expectWidth, true ] );
-					check( `${ id }: h-entry wrapper and content column ${ wide ? "are the clipping's width" : 'keep their constrained widths' }`, [ m.entry.width, m.content.width ], wide ? [ expectWidth, expectWidth ] : [ Math.min( inner, CONTENT ), inner ] );
-					check( `${ id }: no layout container is introduced`, [ m.contentStyle.containerType, m.entryStyle.containerType, m.cardStyle.containerType ], [ 'normal', 'normal', 'normal' ] );
-					check( `${ id }: clipping padding and column gap stay on the lg token`, [ m.cardStyle.paddingLeft, m.cardStyle.paddingRight ], [ `${ PAD }px`, `${ PAD }px` ] );
-
-					if ( variant === 'image' || variant === 'note' ) {
-						const text = wide ? ( expectWidth - 2 * PAD - GAP ) / 2 : expectWidth - 2 * PAD;
-						check( `${ id }: pk-body columns ${ wide ? 'split in two equal tracks from 48rem' : 'stack in one track below 48rem' }`, m.columns, wide ? `${ text }px ${ text }px` : `${ text }px` );
-					} else {
-						check( `${ id }: pk-body is one track`, m.columns, `${ expectWidth - 2 * PAD }px` );
-					}
-
-					if ( wide ) {
-						check( `${ id }: computed caps at 48rem and up (content ${ WIDE }px, h-entry none, clipping 100%)`, [ m.contentStyle.maxInlineSize, variant === 'url-only' ? m.entryStyle.maxInlineSize : m.entryStyle.maxInlineSize, m.cardStyle.maxInlineSize ], [ `${ WIDE }px`, 'none', '100%' ] );
-					}
-					if ( variant === 'note' ) {
-						const base = await measure( { kind: 'repost', variant, scheme, width, scrollbar, base: true } );
-						check( `${ id }: Courtney's note keeps the width it had and starts at the clipping's left edge`, [ m.note.width, m.note.left ], [ base.note.width, expectLeft ] );
-					}
+					await cell( variant, scheme, width, scrollbar );
 				}
 			}
 		}
 	}
-
-	// ---- Nothing else moves: the header and every other kind's single are identical to base --
-	for ( const scheme of SCHEMES ) {
-		for ( const scrollbar of [ 0, SCROLLBAR ] ) {
-			for ( const width of WIDTHS ) {
-				const head = await measure( { kind: 'repost', variant: 'note', scheme, width, scrollbar } );
-				const base = await measure( { kind: 'repost', variant: 'note', scheme, width, scrollbar, base: true } );
-				// Above the clipping everything must match exactly. The band below it only shifts down by
-				// the clipping's new height, so its left edge and width are compared, not its top.
-				const rows = ( m ) => m.all.filter( ( row ) => /newsletter|single-post__lede|taxonomy|single-post__date/.test( row[ 1 ] ) ).map( ( row ) => ( /newsletter/.test( row[ 1 ] ) ? [ row[ 0 ], row[ 1 ], row[ 2 ], row[ 4 ] ] : row ) );
-				check( `header, meta row and newsletter band keep their horizontal geometry (${ scheme.name }/${ width }px/scrollbar-${ scrollbar })`, [ head.header, rows( head ) ], [ base.header, rows( base ) ] );
+	for ( const scrollbar of [ 0, SCROLLBAR ] ) {
+		for ( const width of SWEEP ) {
+			for ( const variant of [ 'image', 'url-only' ] ) {
+				await cell( variant, SCHEMES[ 0 ], width, scrollbar );
 			}
 		}
 	}
+
+	// ---- Pages under a kind-repost body that hold no Repost clipping stay as they were ---------
+	for ( const variant of NO_CLIPPING ) {
+		for ( const scrollbar of [ 0, SCROLLBAR ] ) {
+			for ( const width of [ ...WIDTHS, 1448, 1100, 1050 ] ) {
+				const scheme = SCHEMES[ 0 ];
+				const head = await measure( { kind: 'repost', variant, scheme, width, scrollbar } );
+				const base = await measure( { kind: 'repost', variant, scheme, width, scrollbar, base: true } );
+				check( `${ variant } under a kind-repost body: every element in main has the geometry it had before (${ width }px/scrollbar-${ scrollbar }, ${ head.all.length } elements)`, head.all, base.all );
+				check( `${ variant } under a kind-repost body: content column and sparkle are the base's (${ width }px/scrollbar-${ scrollbar })`, [ head.content, head.sparkle ], [ base.content, base.sparkle ] );
+			}
+		}
+		const wide = await measure( { kind: 'repost', variant, scheme: SCHEMES[ 0 ], width: 1280, scrollbar: 0 } );
+		check( `${ variant } under a kind-repost body: at 1280px the content column is the base's, not ${ WIDE }px`, wide.content.width < WIDE, true );
+	}
+
+	// ---- Every other kind's single is identical to base ---------------------------------------
 	for ( const kind of OTHER_KINDS ) {
 		for ( const scrollbar of [ 0, SCROLLBAR ] ) {
 			for ( const width of WIDTHS ) {
