@@ -1,0 +1,25 @@
+/* Wide column (inc/single-wide-column.php): the post content is align-wide with a 100% inner layout, and the header's lines start at its left edge. */
+
+/* Under 64rem the spread stacks: content keeps the reading column and the header's lines are centered in it again. */
+@media not all and (min-width: 64rem) {
+
+	body.single-post .cr-wide-column.single-post__content {
+		max-width: var(--wp--style--global--content-size);
+	}
+
+	body.single-post .cr-wide-column.single-post__header > :not(.alignleft):not(.alignright):not(.alignfull) {
+		margin-left: auto !important;
+	}
+}
+
+/* The sparkle keeps the reading column's top-right corner. */
+body.single-post .cr-wide-column.single-post__content::before {
+	right: calc((100% - min(100%, var(--wp--style--global--content-size))) / 2 - 1rem);
+}
+
+/* Prose after the spread keeps the reading width. */
+body.single-post .cr-wide-column.single-post__content > .pkiw-singular-entry > :not(.cr-journal) {
+	max-width: var(--wp--style--global--content-size);
+	margin-right: auto;
+	margin-left: auto;
+}

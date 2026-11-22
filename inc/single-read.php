@@ -449,6 +449,20 @@ function reading_record( array $block, \WP_Post $post ): string {
 }
 
 /**
+ * Does this read's content carry the reading record?
+ *
+ * The wide column (inc/single-wide-column.php) is for the spread with a record
+ * beside the book; a read with no stored fact keeps the reading column.
+ *
+ * @param \WP_Post $post Post.
+ * @return bool
+ */
+function carries_record( \WP_Post $post ): bool {
+	$read = find_read_block( $post );
+	return null !== $read && '' !== reading_record( $read, $post );
+}
+
+/**
  * The single read footer's one date item.
  *
  * @param array<string, mixed> $a      Resolved attributes.
