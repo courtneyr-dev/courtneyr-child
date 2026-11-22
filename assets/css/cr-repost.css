@@ -674,6 +674,21 @@ body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-e
 	}
 }
 
+/* Repost single clipping width: from 48rem the clipping uses the site's wide size, as the
+   approved single mockup draws it. Two caps held it to 720px: the 80ch above and WordPress's
+   constrained-layout cap on the plugin's h-entry wrapper. Both are max sizes, so a narrow
+   window still fills its column; below 48rem nothing changes. */
+@media (min-width: 48rem) {
+
+	body.single-post.kind-repost .single-post__content {
+		max-inline-size: var(--wp--style--global--wide-size);
+	}
+
+	body.single-post.kind-repost .single-post__content > .pkiw-singular-entry {
+		max-inline-size: none;
+	}
+}
+
 /* The Stream card's ring goes round the whole card, so its link draws none. */
 :is(.cr-stream-page, .cr-home-stream) li.wp-block-post .pk-card.pk-card--stream.cr-repost-clip--stream .pk-title a:focus-visible {
 	outline: 0;
