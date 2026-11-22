@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'COURTNEYR_CHILD_VERSION', '0.7.176' );
+define( 'COURTNEYR_CHILD_VERSION', '0.7.177' );
 define( 'COURTNEYR_CHILD_DIR', __DIR__ );
 define( 'COURTNEYR_CHILD_URI', get_stylesheet_directory_uri() );
 
@@ -151,3 +151,4 @@ require_once __DIR__ . '/inc/table.php';
 require_once __DIR__ . '/inc/follow.php';
 require_once __DIR__ . '/inc/single-follow.php';
 require_once __DIR__ . '/inc/stream-follow.php';
+require_once __DIR__ . '/inc/indieblocks-location.php';
