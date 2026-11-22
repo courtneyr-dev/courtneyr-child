@@ -556,6 +556,7 @@ function journal_page( string $html, array $block ): string {
 	}
 	// The card and record the wide column decided on; elsewhere (no decision) the post's first card, as always.
 	$page = \Courtneyr\Child\SingleWideColumn\data_for( 'read' );
+	$page = isset( $page['block'], $page['record'] ) ? $page : null;
 	$read = is_array( $page ) ? $page['block'] : find_read_block( $post );
 	if ( null === $read || false === strpos( $html, 'k-read' ) ) {
 		return $html;

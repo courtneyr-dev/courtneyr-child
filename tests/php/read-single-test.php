@@ -329,4 +329,43 @@ cr_read_group(
 	}
 );
 
+cr_read_group(
+	'journal page prints the decided record, and its own when the decision lacks a card or record',
+	static function (): void {
+		$post                      = cr_read_reset();
+		$GLOBALS['cr_read_blocks'] = array( cr_read_single_block() );
+		$GLOBALS['cr_wide_data']   = array(
+			'block'  => cr_read_single_block(),
+			'record' => '<section class="cr-test-decided-record"></section>',
+		);
+		$html = journal_page( cr_read_single_card(), array( 'blockName' => 'core/post-content' ) );
+		cr_read_contains( 'cr-test-decided-record', $html, 'decided record printed' );
+
+		$own = '';
+		foreach ( array( array( 'record' => '<section class="cr-test-decided-record"></section>' ), array( 'block' => cr_read_single_block() ), array() ) as $i => $partial ) {
+			$post                      = cr_read_reset();
+			$GLOBALS['cr_read_blocks'] = array( cr_read_single_block() );
+			$GLOBALS['cr_wide_data']   = null;
+			$own                       = journal_page( cr_read_single_card(), array( 'blockName' => 'core/post-content' ) );
+
+			$post                      = cr_read_reset();
+			$GLOBALS['cr_read_blocks'] = array( cr_read_single_block() );
+			$GLOBALS['cr_wide_data']   = $partial;
+			$warned                    = false;
+			set_error_handler(
+				static function () use ( &$warned ): bool {
+					$warned = true;
+					return true;
+				}
+			);
+			$html = journal_page( cr_read_single_card(), array( 'blockName' => 'core/post-content' ) );
+			restore_error_handler();
+			cr_read_assert( ! $warned, "partial decision $i: no PHP warning" );
+			cr_read_same( $own, $html, "partial decision $i: same journal as with no decision" );
+		}
+		cr_read_assert( false !== strpos( $own, 'cr-journal' ), 'the no-decision journal is a journal' );
+		$GLOBALS['cr_wide_data'] = null;
+	}
+);
+
 cr_read_finish();
