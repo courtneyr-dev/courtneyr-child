@@ -9,15 +9,17 @@
  *
  * WordPress's own answer is `align: wide` on the content block, with a
  * contentSize of 100% on its inner layout so the spread takes the wide size
- * (theme.json wideSize, 1100px) and the header's children start at the same
- * left edge. render_block_data sets those two block attributes before the
- * blocks render, so core's layout engine writes the classes and the
- * container rules itself. Nothing else changes: the template, the sparkle's
- * anchor, every other kind and every post that lacks the record (locked,
- * rowless) render the HTML they always did.
+ * (theme.json wideSize, 1100px). render_block_data sets those block
+ * attributes before the blocks render, so core's layout engine writes the
+ * classes and the container rules itself. A block is widened only when it
+ * renders the main query's post, and only when the page of that post it is
+ * showing carries the record, so every other kind, locked and rowless reads,
+ * later pages of a paged post and secondary loops render the HTML they always
+ * did. The kind is the first kind term, the one the `kind-{slug}` body class
+ * carries, so this filter and cr-wide-column.css always agree.
  *
  * To give another kind the same column, add `kind slug => predicate` to
- * KINDS; the predicate says whether this post's content carries the record.
+ * KINDS; the predicate says whether the page content carries the record.
  *
  * @package CourtneyrChild
  */
@@ -26,21 +28,24 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\SingleWideColumn;
 
+use function Courtneyr\Child\Enqueue\primary_kind_slug;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Kind slug => callable( \WP_Post ): bool that says the content carries the record. */
+/** Kind slug => callable( \WP_Post, string ): bool that says the page content carries the record. */
 const KINDS = array(
 	'read' => '\\Courtneyr\\Child\\SingleRead\\carries_record',
 );
 
 /**
- * Does this request show a single whose content takes the wide column?
+ * Does the main singular query show a page whose content takes the wide column?
  *
+ * @param bool $rendering True while a block renders: the block must be rendering the queried post.
  * @return bool
  */
-function applies(): bool {
+function applies( bool $rendering = false ): bool {
 	static $memo = array();
 	if ( ! \is_singular( 'post' ) ) {
 		return false;
@@ -49,16 +54,21 @@ function applies(): bool {
 	if ( ! $post instanceof \WP_Post || \post_password_required( $post ) ) {
 		return false;
 	}
-	if ( ! isset( $memo[ $post->ID ] ) ) {
-		$memo[ $post->ID ] = false;
-		foreach ( KINDS as $kind => $carries_record ) {
-			if ( \has_term( $kind, 'kind', $post ) && \is_callable( $carries_record ) && $carries_record( $post ) ) {
-				$memo[ $post->ID ] = true;
-				break;
-			}
+	if ( $rendering && ( ! \is_main_query() || ! \in_the_loop() || (int) \get_the_ID() !== $post->ID ) ) {
+		return false;
+	}
+	$page = max( 1, (int) \get_query_var( 'page' ) );
+	$key  = $post->ID . ':' . $page;
+	if ( ! isset( $memo[ $key ] ) ) {
+		$memo[ $key ] = false;
+		$kind         = primary_kind_slug( $post->ID );
+		$pages        = preg_split( '/<!--nextpage-->/', (string) $post->post_content );
+		$content      = is_array( $pages ) ? (string) ( $pages[ $page - 1 ] ?? '' ) : '';
+		if ( isset( KINDS[ $kind ] ) && \is_callable( KINDS[ $kind ] ) ) {
+			$memo[ $key ] = (bool) ( KINDS[ $kind ] )( $post, $content );
 		}
 	}
-	return $memo[ $post->ID ];
+	return $memo[ $key ];
 }
 
 /**
@@ -72,20 +82,18 @@ function widen( array $block ): array {
 	$classes = explode( ' ', (string) ( $block['attrs']['className'] ?? '' ) );
 	$content = 'core/post-content' === $name && in_array( 'single-post__content', $classes, true );
 	$header  = 'core/group' === $name && in_array( 'single-post__header', $classes, true );
-	if ( ! ( $content || $header ) || ! applies() ) {
+	if ( ! ( $content || $header ) || ! applies( true ) ) {
 		return $block;
 	}
+	$layout = (array) ( $block['attrs']['layout'] ?? array( 'type' => 'constrained' ) );
 	if ( $content ) {
+		// The content fills the wide column.
 		$block['attrs']['align']     = 'wide';
 		$block['attrs']['className'] = trim( implode( ' ', $classes ) . ' cr-wide-column' );
-	}
-	$layout = (array) ( $block['attrs']['layout'] ?? array( 'type' => 'constrained' ) );
-	// The content fills the wide column; the header keeps its reading-width lines (a title wraps where it always did) from the column's left edge.
-	if ( $content ) {
-		$layout['contentSize'] = '100%';
+		$layout['contentSize']       = '100%';
 	} else {
-		$layout['contentSize']    = 'var(--wp--style--global--content-size)';
-		$layout['justifyContent'] = 'left';
+		// The header keeps the reading width (a title wraps where it always did); cr-wide-column.css starts it at the column's edge.
+		$layout['contentSize'] = 'var(--wp--style--global--content-size)';
 	}
 	$block['attrs']['layout'] = $layout;
 	return $block;
@@ -101,7 +109,7 @@ add_filter( 'render_block_data', __NAMESPACE__ . '\\widen' );
  */
 function mark_header( string $html, array $block ): string {
 	$classes = explode( ' ', (string) ( $block['attrs']['className'] ?? '' ) );
-	if ( ! in_array( 'single-post__header', $classes, true ) || ! applies() ) {
+	if ( ! in_array( 'single-post__header', $classes, true ) || ! applies( true ) ) {
 		return $html;
 	}
 	$tags = new \WP_HTML_Tag_Processor( $html );

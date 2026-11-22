@@ -50,10 +50,11 @@ function is_read_single(): bool {
 /**
  * The read-card block in a post's content.
  *
- * @param \WP_Post $post Post.
+ * @param \WP_Post    $post    Post.
+ * @param string|null $content Content to search; the post's saved content when null.
  * @return array<string, mixed>|null
  */
-function find_read_block( \WP_Post $post ): ?array {
+function find_read_block( \WP_Post $post, ?string $content = null ): ?array {
 	$found = null;
 	$walk  = static function ( array $blocks ) use ( &$walk, &$found ): void {
 		foreach ( $blocks as $block ) {
@@ -69,7 +70,7 @@ function find_read_block( \WP_Post $post ): ?array {
 			}
 		}
 	};
-	$walk( parse_blocks( (string) $post->post_content ) );
+	$walk( parse_blocks( $content ?? (string) $post->post_content ) );
 	return $found;
 }
 
@@ -454,11 +455,12 @@ function reading_record( array $block, \WP_Post $post ): string {
  * The wide column (inc/single-wide-column.php) is for the spread with a record
  * beside the book; a read with no stored fact keeps the reading column.
  *
- * @param \WP_Post $post Post.
+ * @param \WP_Post $post    Post.
+ * @param string   $content The content of the page being rendered.
  * @return bool
  */
-function carries_record( \WP_Post $post ): bool {
-	$read = find_read_block( $post );
+function carries_record( \WP_Post $post, string $content ): bool {
+	$read = find_read_block( $post, $content );
 	return null !== $read && '' !== reading_record( $read, $post );
 }
 

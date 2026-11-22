@@ -223,10 +223,13 @@ namespace {
 	}
 
 	function get_the_ID(): int {
-		return get_queried_object_id();
+		return (int) ( $GLOBALS['cr_wide_loop_id'] ?? get_queried_object_id() );
 	}
 
 	function parse_blocks( $content ): array {
+		if ( is_callable( $GLOBALS['cr_read_parse'] ?? null ) ) {
+			return (array) call_user_func( $GLOBALS['cr_read_parse'], (string) $content );
+		}
 		return $GLOBALS['cr_read_blocks'];
 	}
 

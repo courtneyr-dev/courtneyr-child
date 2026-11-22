@@ -12,6 +12,9 @@ const seen = new Map();
 for (const [name, url] of rows) {
 	const res = await fetch(url, { redirect: 'follow' });
 	writeFileSync(join(outdir, mode, 'pages', name + '.html'), Buffer.from(await res.arrayBuffer()));
+	if ( ! /text\/html/.test( res.headers.get( 'content-type' ) || '' ) ) {
+		continue; // feeds and REST responses are kept as served bytes only
+	}
 	const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 	page.on('response', async (r) => {
 		const u = new URL(r.url());

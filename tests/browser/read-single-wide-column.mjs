@@ -47,8 +47,11 @@ const WIDTHS = [ 1672, 1448, 1280, 1024, 768, 390, 320 ];
 const SWEEP = [ 320, 360, 390, 414, 480, 600, 768, 800, 900, 1000, 1023, 1024, 1025, 1040, 1050, 1060, 1080, 1100, 1120, 1131, 1132, 1133, 1200, 1280, 1366, 1448, 1600, 1672, 1920 ];
 const SCHEMES = [ 'light', 'dark' ];
 // A mutant run needs only the pages its assertion class reads, so it finishes in seconds.
-const RECORD_PAGES = process.env.CR_MUTANT ? [ 'read-finished', 'read-prose' ] : [ 'read-finished', 'read-reading', 'read-abandoned', 'read-prose' ];
-const BASE_IDENTICAL = [ 'read-locked', 'read-rowless', 'checkin', 'comic', 'quote', 'watch', 'listen', 'like', 'eat', 'drink', 'repost', 'favorite', 'jam', 'kind-read', 'kind-like', 'kind-repost', 'kind-favorite', 'kind-checkin', 'stream', 'home', 'hello' ];
+const RECORD_PAGES = process.env.CR_MUTANT ? [ 'read-finished', 'read-prose', 'read-sample' ] : [ 'read-finished', 'read-reading', 'read-abandoned', 'read-prose', 'read-sample', 'read-watch', 'read-loop', 'read-paged' ];
+// A Read with notes but no record, with a sample but no record, page 2 of a paged Read, and a Read whose first kind is Like must render as the base does.
+const BASE_IDENTICAL = [ 'read-locked', 'read-rowless', 'read-rowless-notes', 'read-rowless-sample', 'read-paged-2', 'read-like', 'checkin', 'comic', 'quote', 'watch', 'listen', 'like', 'eat', 'drink', 'repost', 'favorite', 'jam', 'kind-read', 'kind-like', 'kind-repost', 'kind-favorite', 'kind-checkin', 'stream', 'home', 'hello' ];
+// Responses that are not pages (a feed, REST, search): the same bytes as the base.
+const BYTES_ONLY = [ 'search', 'feed-read', 'rest-posts' ];
 
 const MUTANTS = {
 	'sparkle-plus-20px': { cls: 'sparkle', sheet: 'cr-wide-column.css', swap: [ '- 1rem)', '- 1rem + 20px)' ] },
@@ -60,10 +63,19 @@ const MUTANTS = {
 	'rowless-read-widened': { cls: 'identical', page: 'read-rowless', swap: [ 'entry-content align ', 'entry-content alignwide ' ] },
 	'other-kind-widened': { cls: 'identical', page: 'like', swap: [ 'entry-content align ', 'entry-content alignwide ' ] },
 	'order-swap': { cls: 'order', sheet: 'cr-wide-column.css', append: '@media (min-width: 64rem) { body.single-post.kind-read .cr-journal > .cr-record { grid-row: 1; } body.single-post.kind-read .cr-journal > .cr-journal__notes { grid-row: 2; } }' },
-	'divider-widened': { cls: 'divider', sheet: 'cr-wide-column.css', append: 'body.single-post.kind-read .cr-journal > .cr-journal__meta { max-width: none; }' },
-	'record-column-narrow': { cls: 'widths', sheet: 'cr-wide-column.css', append: '@media (min-width: 64rem) { body.single-post.kind-read .cr-journal { grid-template-columns: minmax(17rem, 23rem) 20rem; } }' },
+	'divider-capped-at-720': { cls: 'divider', sheet: 'cr-wide-column.css', append: 'body.single-post.kind-read .cr-journal > .cr-journal__meta { max-width: 720px; }' },
+	'sample-capped-at-524': { cls: 'sample', sheet: 'cr-wide-column.css', append: 'body.single-post.kind-read .cr-wide-column .cr-read__sample { max-width: 524px; }' },
+	'sample-hidden': { cls: 'painted', sheet: 'cr-wide-column.css', append: 'body.single-post.kind-read .cr-wide-column .cr-read__sample { display: none; }' },
+	'record-opacity-dark': { cls: 'painted', sheet: 'cr-wide-column.css', append: '@media (prefers-color-scheme: dark) { body.single-post.kind-read .cr-record { opacity: 0.07; } }' },
+	'rowless-grid-unscoped': { cls: 'identical', sheet: 'cr-post-kinds.css', swap: [ 'minmax(17rem, 23rem) minmax(0, 1fr) 9.5rem', 'minmax(17rem, 23rem) minmax(0, 1fr)' ], identical: [ 'read-rowless-notes' ] },
+	'rowless-sample-span-changed': { cls: 'identical', sheet: 'cr-post-kinds.css', swap: [ '.cr-read__sample { grid-column: 1 / 3; grid-row: 3; }', '.cr-read__sample { grid-column: 1 / 2; grid-row: 3; }' ], identical: [ 'read-rowless-sample' ] },
+	'paged-page-2-widened': { cls: 'identical', page: 'read-paged-2', swap: [ 'entry-content align ', 'entry-content alignwide ' ] },
+	'like-first-widened': { cls: 'identical', page: 'read-like', swap: [ 'entry-content align ', 'entry-content alignwide ' ] },
+	'secondary-loop-marked': { cls: 'loop', page: 'read-loop', swap: [ 'entry-content single-post__content wp-block-post-content has-global-padding', 'entry-content alignwide single-post__content wp-block-post-content cr-wide-column has-global-padding' ] },
+	'header-physical-margin': { cls: 'rtl', sheet: 'cr-wide-column.css', swap: [ 'margin-inline-start: 0 !important;', 'margin-left: 0 !important;' ] },
+	'record-column-narrow': { cls: 'widths', sheet: 'cr-wide-column.css', append: '@media (min-width: 64rem) { body.single-post.kind-read .cr-wide-column .cr-journal { grid-template-columns: minmax(17rem, 23rem) 20rem; } }' },
 	'notes-narrower-than-record': { cls: 'widths', sheet: 'cr-wide-column.css', append: 'body.single-post.kind-read .cr-journal__notes { width: 90%; }' },
-	'title-not-aligned-desktop': { cls: 'title', headerContainer: true },
+	'title-not-aligned-desktop': { cls: 'title', sheet: 'cr-wide-column.css', swap: [ 'margin-inline-start: 0 !important;', 'margin-inline-start: auto !important;' ] },
 	'header-class-missing': { cls: 'title', page: 'read-finished', swap: [ 'wp-block-group-is-layout-constrained cr-wide-column"', 'wp-block-group-is-layout-constrained"' ] },
 	'horizontal-overflow': { cls: 'edge', sheet: 'cr-wide-column.css', append: 'body.single-post.kind-read .cr-record { min-width: 1300px; }' },
 	'prose-widened': { cls: 'prose', sheet: 'cr-wide-column.css', swap: [ 'max-width: var(--wp--style--global--content-size);\n\tmargin-right: auto;\n\tmargin-left: auto;', 'max-width: none;' ] },
@@ -151,13 +163,6 @@ const mutate = ( kind, name, text ) => {
 		result = result.replace( mutant.swap[ 0 ], mutant.swap[ 1 ] );
 		if ( result === text ) {
 			throw new Error( `mutant ${ MUTANT } did not change ${ name }` );
-		}
-	}
-	if ( kind === 'page' && mutant.headerContainer && /^read-/.test( name ) ) {
-		const container = /single-post__header[^"]*?(wp-container-core-group-is-layout-[0-9a-f]+)/.exec( text )?.[ 1 ];
-		const rule = new RegExp( `(\\.${ container } > :where\\(:not\\(\\.alignleft\\):not\\(\\.alignright\\):not\\(\\.alignfull\\)\\)\\{max-width:[^;]+;)margin-left:0 !important` );
-		if ( container && rule.test( text ) ) {
-			result = text.replace( rule, '$1margin-left:auto !important' );
 		}
 	}
 	return result;
@@ -252,6 +257,13 @@ const measure = () => {
 		prose: box( prose ),
 		parts: Object.fromEntries( parts.map( ( [ s, e ] ) => [ s, box( e ) ] ) ),
 		domOrder: parts.map( ( [ s ] ) => s ),
+		painted: parts.map( ( [ s, e ] ) => {
+			const c = getComputedStyle( e );
+			return [ s, c.display !== 'none' && c.visibility === 'visible' && c.opacity === '1' && e.getBoundingClientRect().width > 0 ];
+		} ),
+		loop: box( q( '.wp-block-query .single-post__content' ) ),
+		loopClass: q( '.wp-block-query .single-post__content' )?.className ?? null,
+		dir: getComputedStyle( document.documentElement ).direction,
 		rowLines: [ ...document.querySelectorAll( '.cr-record-row dd' ) ].map( lines ),
 		spark: spark && spark.position === 'absolute' ? { x: cb.right - parseFloat( spark.right ), y: cb.top + scrollY + parseFloat( spark.top ) } : { position: spark ? spark.position : null },
 		leftmost: Math.min( ...[ header, content, entry, q( '.cr-journal' ), ...parts.map( ( [ , e ] ) => e ) ].filter( Boolean ).map( ( e ) => e.getBoundingClientRect().left ) ),
@@ -266,7 +278,7 @@ const failures = [];
 const record = {};
 let checks = 0;
 // An old engine also loses the sheets' own :has() rules (the journal's grid among them), so its layout is not the design. It must still not overflow, keep the sparkle and leave every other box where the base leaves it.
-const DESIGN = [ 'widths', 'title', 'order', 'oneline', 'divider', 'prose' ];
+const DESIGN = [ 'widths', 'title', 'order', 'oneline', 'divider', 'prose', 'rtl', 'sample' ];
 const check = ( cls, ok, label, detail = '' ) => {
 	if ( LEGACY && DESIGN.includes( cls ) ) {
 		return;
@@ -292,8 +304,19 @@ const open = async ( tree, name ) => {
 	}
 	return opened[ key ];
 };
-const reading = async ( tree, name, vw, scheme, sb ) => {
+const reading = async ( tree, name, vw, scheme, sb, dir = '' ) => {
 	const page = await open( tree, name );
+	await page.evaluate( ( d ) => {
+		window.__dir0 = 'dir0' in window ? window.__dir0 : document.documentElement.getAttribute( 'dir' );
+		const original = window.__dir0;
+		if ( d ) {
+			document.documentElement.setAttribute( 'dir', d );
+		} else if ( original === null ) {
+			document.documentElement.removeAttribute( 'dir' );
+		} else {
+			document.documentElement.setAttribute( 'dir', original );
+		}
+	}, dir );
 	await page.setViewportSize( { width: vw, height: 900 } );
 	await page.emulateMedia( { colorScheme: scheme, reducedMotion: 'reduce' } );
 	await page.evaluate( ( on ) => document.documentElement.toggleAttribute( 'data-sb', on ), sb > 0 );
@@ -312,7 +335,7 @@ for ( const name of RECORD_PAGES ) {
 		check( 'static', html.includes( ".is-layout-constrained > .alignwide{max-width: var(--wp--style--global--wide-size);}" ) && /core-block-supports-inline-css/.test( html ), `${ tree }/${ name } carries WordPress's own generated layout CSS` );
 	}
 	const headHtml = readFileSync( join( FIXTURE, 'head', 'pages', name + '.html' ), 'utf8' );
-	check( 'static', /\{max-width:var\(--wp--style--global--content-size\);margin-left:0 !important;margin-right:auto !important;\}/.test( headHtml ), `head/${ name } holds the generated header rule (reading width, left-aligned)` );
+	check( 'static', /\{max-width:var\(--wp--style--global--content-size\);margin-left:auto !important;margin-right:auto !important;\}/.test( headHtml ), `head/${ name } holds the generated header rule (reading width)` );
 	check( 'static', /wp-container-core-post-content-is-layout-[0-9a-f]+ > :where\(:not\(\.alignleft\):not\(\.alignright\):not\(\.alignfull\)\)\{max-width:100%/.test( headHtml ), `head/${ name } holds the generated post-content container rule (contentSize 100%)` );
 }
 
@@ -343,10 +366,17 @@ for ( const name of RECORD_PAGES ) {
 				check( 'title', m.h1.w === b.h1.w && m.h1.t === b.h1.t, `${ label }: the title keeps its base width ${ b.h1.w } and line breaks`, `${ m.h1.w } vs ${ b.h1.w }, top ${ m.h1.t } vs ${ b.h1.t }` );
 				check( 'title', m.h1.l === book.l, `${ label }: title left edge is the book's left edge`, `${ m.h1.l } vs ${ book.l }` );
 				const visual = Object.entries( m.parts ).sort( ( [ , x ], [ , y ] ) => x.t - y.t || x.l - y.l ).map( ( [ s ] ) => s );
-				check( 'order', same( visual, m.domOrder ) && same( m.domOrder, notes ? [ '.cr-book', '.cr-journal__notes', '.cr-record' ] : [ '.cr-book', '.cr-record' ] ), `${ label }: book, notes, record in DOM and visual order`, `${ visual.join( ' ' ) } / ${ m.domOrder.join( ' ' ) }` );
+				check( 'order', same( visual, m.domOrder ) && same( m.domOrder, [ '.cr-book', ...( notes ? [ '.cr-journal__notes' ] : [] ), '.cr-record', ...( m.parts[ '.cr-read__sample' ] ? [ '.cr-read__sample' ] : [] ) ] ), `${ label }: book, notes, record, sample in DOM and visual order`, `${ visual.join( ' ' ) } / ${ m.domOrder.join( ' ' ) }` );
 				check( 'scroll', m.scrollWidth <= m.clientWidth, `${ label }: no horizontal scroll`, `${ m.scrollWidth } > ${ m.clientWidth }` );
 				check( 'oneline', m.rowLines.every( ( n ) => n === 1 ) || vw < 390, `${ label }: every record row value is on one line`, m.rowLines.join( ',' ) );
-				check( 'divider', m.meta.w === b.meta.w && m.meta.l === b.meta.l - ( b.content.l - m.content.l ) * 0 + ( m.content.l - b.content.l ), `${ label }: divider keeps its base width ${ b.meta.w }`, `${ m.meta.w } vs ${ b.meta.w }` );
+				check( 'divider', m.meta.l === m.journal.l && m.meta.w === m.journal.w, `${ label }: the divider spans both columns of the spread (${ m.journal.w })`, `${ m.meta.l },${ m.meta.w } vs ${ m.journal.l },${ m.journal.w }` );
+				if ( m.parts[ '.cr-read__sample' ] ) {
+					const sample = m.parts[ '.cr-read__sample' ];
+					check( 'sample', sample.l === m.journal.l && sample.w === m.journal.w && sample.t >= rec.t + rec.h, `${ label }: the sample takes both columns, below the record (${ m.journal.w })`, `${ sample.l },${ sample.w },${ sample.t } vs ${ m.journal.l },${ m.journal.w },${ rec.t + rec.h }` );
+				} else {
+					check( 'sample', name !== 'read-sample', `${ label }: the sample renders` );
+				}
+				check( 'painted', m.painted.every( ( [ , ok ] ) => ok ) && m.painted.length === m.domOrder.length, `${ label }: the book, notes, record and sample are shown at full opacity`, JSON.stringify( m.painted ) );
 				check( 'sparkle', same( m.spark.position ? m.spark : { x: m.spark.x, y: m.spark.y }, b.spark.position ? b.spark : { x: b.spark.x, y: b.spark.y } ) && ( m.spark.position || m.spark.y === b.spark.y ), `${ label }: sparkle is where the base put it`, `${ JSON.stringify( m.spark ) } vs ${ JSON.stringify( b.spark ) }` );
 				check( 'siblings', same( m.outside, b.outside ), `${ label }: every box outside the header and content keeps its base left edge and width` );
 				check( 'siblings', same( m.before, b.before ), `${ label }: every box above the content keeps its base position` );
@@ -358,6 +388,30 @@ for ( const name of RECORD_PAGES ) {
 				}
 			}
 		}
+	}
+}
+
+// 1b. A plain post a secondary loop renders inside a record Read keeps its base block and box.
+{
+	const headHtml = mutate( 'page', 'read-loop', readFileSync( join( FIXTURE, TREE, 'pages', 'read-loop.html' ), 'utf8' ) );
+	const baseHtml = readFileSync( join( FIXTURE, 'base', 'pages', 'read-loop.html' ), 'utf8' );
+	const inner = ( html ) => [ ...html.matchAll( /<div class="entry-content[^"]*"/g ) ].map( ( x ) => x[ 0 ] )[ 1 ];
+	check( 'loop', inner( headHtml ) !== undefined && inner( headHtml ) === inner( baseHtml ) && ! inner( headHtml ).includes( 'cr-wide-column' ), 'read-loop: the secondary loop block keeps the base class list', `${ inner( headHtml ) }` );
+	for ( const vw of WIDTHS ) {
+		const m = await reading( TREE, 'read-loop', vw, 'light', 0 );
+		const b = await reading( 'base', 'read-loop', vw, 'light', 0 );
+		check( 'loop', m.loop && b.loop && m.loop.l === b.loop.l && m.loop.w === b.loop.w, `read-loop ${ vw }px: the secondary loop block keeps its base left edge and width`, `${ JSON.stringify( m.loop ) } vs ${ JSON.stringify( b.loop ) }` );
+	}
+}
+
+// 1c. Right to left: the header's lines start where the grid starts, so the title and the book share a right edge.
+for ( const vw of [ 1672, 1280, 1024, 768 ] ) {
+	for ( const name of [ 'read-finished', 'read-reading' ] ) {
+		const m = await reading( TREE, name, vw, 'light', 0, 'rtl' );
+		const b = await reading( 'base', name, vw, 'light', 0, 'rtl' );
+		check( 'rtl', m.dir === 'rtl', `${ name } ${ vw }px rtl: the page is right to left`, m.dir );
+		check( 'rtl', m.h1.r === m.parts[ '.cr-book' ].r, `${ name } ${ vw }px rtl: title right edge is the book's right edge`, `${ m.h1.r } vs ${ m.parts[ '.cr-book' ].r }` );
+		check( 'rtl', m.h1.w === b.h1.w, `${ name } ${ vw }px rtl: the title keeps its base width`, `${ m.h1.w } vs ${ b.h1.w }` );
 	}
 }
 
@@ -375,7 +429,7 @@ for ( const sb of [ 0, SCROLLBAR ] ) {
 
 // 3. Locked and rowless reads, the other kinds, archives and non-single pages: the same HTML bytes and the same geometry as the base.
 for ( const name of BASE_IDENTICAL ) {
-	if ( MUTANT && name !== MUTANTS[ MUTANT ]?.page ) {
+	if ( MUTANT && ! ( MUTANTS[ MUTANT ]?.identical || [ MUTANTS[ MUTANT ]?.page ] ).includes( name ) ) {
 		continue;
 	}
 	const headHtml = readFileSync( join( FIXTURE, TREE, 'pages', name + '.html' ), 'utf8' );
@@ -392,6 +446,13 @@ for ( const name of BASE_IDENTICAL ) {
 			}
 		}
 	}
+}
+
+for ( const name of BYTES_ONLY ) {
+	if ( MUTANT ) {
+		break;
+	}
+	check( 'identical', readFileSync( join( FIXTURE, TREE, 'pages', name + '.html' ), 'utf8' ) === readFileSync( join( FIXTURE, 'base', 'pages', name + '.html' ), 'utf8' ), `${ name }: served bytes are identical to the base` );
 }
 
 await browser.close();

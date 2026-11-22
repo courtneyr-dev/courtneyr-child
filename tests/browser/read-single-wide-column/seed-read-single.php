@@ -75,7 +75,7 @@ function rst_term( string $slug ): int {
 
 $n     = 0;
 $posts = array();
-$make  = static function ( string $label, string $kind, string $title, string $content, string $password = '' ) use ( &$n, &$posts, $admin, $key ): void {
+$make  = static function ( string $label, $kind, string $title, string $content, string $password = '', array $meta = array() ) use ( &$n, &$posts, $admin, $key ): void {
 	$date = gmdate( 'Y-m-d H:i:s', strtotime( '2026-08-31 18:00:00 UTC' ) - ( $n++ ) * 86400 );
 	$id   = (int) wp_insert_post(
 		wp_slash(
@@ -96,10 +96,13 @@ $make  = static function ( string $label, string $kind, string $title, string $c
 		),
 		true
 	);
-	$tid = rst_term( $kind );
-	if ( $id && $tid && ! has_term( $tid, 'kind', $id ) ) {
-		wp_set_object_terms( $id, array( $tid ), 'kind' );
+	$tids = array_filter( array_map( 'rst_term', (array) $kind ) );
+	if ( $id && $tids ) {
+		wp_set_object_terms( $id, array_values( $tids ), 'kind' );
 		wp_update_post( array( 'ID' => $id ) );
+	}
+	foreach ( $meta as $k => $v ) {
+		update_post_meta( $id, $k, $v );
 	}
 	$posts[ $label ] = $id;
 };
@@ -125,6 +128,21 @@ $make( 'drink', 'drink', 'A cortado', rst_card( 'drink-card', array( 'name' => '
 $make( 'repost', 'repost', 'Reposted a post', rst_card( 'repost-card', array( 'title' => 'A post worth sharing', 'url' => 'https://example.org/reposted', 'author' => 'Example Author', 'repostedAt' => '2026-08-15T10:00:00' ) ) );
 $make( 'favorite', 'favorite', 'Favorited a post', rst_card( 'favorite-card', array( 'title' => 'A post worth starring', 'url' => 'https://example.org/favorited', 'author' => 'Example Author', 'favoritedAt' => '2026-08-16T10:00:00' ) ) );
 $make( 'jam', 'jam', 'A jam', rst_card( 'jam-card', array( 'title' => 'Slow River', 'artist' => 'The Maps', 'album' => 'Small Rooms', 'note' => 'On repeat.', 'jammedAt' => '2026-08-17T10:00:00' ) ) );
+
+// Edge cases for the wide column's decision (the review of PR 337).
+$note = 'A patient book. My <a href="https://example.org/notes">reading notes</a> are public.';
+$make( 'read-rowless-notes', 'read', 'Notes on a Quiet Shelf', rst_card( 'read-card', array( 'bookTitle' => 'Notes on a Quiet Shelf', 'authorName' => 'Wren Aldous', 'review' => $note ) ) );
+$make( 'read-rowless-sample', 'read', 'A Sampled Rowless Book', rst_card( 'read-card', array( 'bookTitle' => 'A Sampled Rowless Book', 'authorName' => 'Wren Aldous', 'review' => $note ) ), '', array( '_pkiw_read_asin' => 'B000000001' ) );
+$make( 'read-sample', 'read', 'A Sampled Book With A Record', rst_card( 'read-card', array( 'bookTitle' => 'A Sampled Book With A Record', 'authorName' => 'Odile Fenwick', 'readStatus' => 'finished', 'finishedAt' => '2026-08-02', 'isbn' => '9781234567897', 'review' => $note ) ), '', array( '_pkiw_read_asin' => 'B000000002' ) );
+$make( 'read-paged', 'read', 'A Paged Read', rst_card( 'read-card', array( 'bookTitle' => 'A Paged Read', 'authorName' => 'Odile Fenwick', 'readStatus' => 'finished', 'finishedAt' => '2026-08-02', 'isbn' => '9781234567897' ) ) . "\n<!--nextpage-->\n<!-- wp:paragraph -->\n<p>Page two is prose with no record at all. It has to stay at the reading width and load no wide column sheet.</p>\n<!-- /wp:paragraph -->" );
+$make( 'read-like', array( 'read', 'like' ), 'A Read That Is Also A Like', rst_card( 'read-card', array( 'bookTitle' => 'A Read That Is Also A Like', 'authorName' => 'Odile Fenwick', 'readStatus' => 'finished', 'finishedAt' => '2026-08-02', 'isbn' => '9781234567897' ) ) );
+$make( 'read-watch', array( 'read', 'watch' ), 'A Read That Is Also A Watch', rst_card( 'read-card', array( 'bookTitle' => 'A Read That Is Also A Watch', 'authorName' => 'Odile Fenwick', 'readStatus' => 'finished', 'finishedAt' => '2026-08-02', 'isbn' => '9781234567897' ) ) );
+$loop = '<!-- wp:query {"queryId":9,"query":{"perPage":1,"pages":0,"offset":0,"postType":"post","order":"asc","orderby":"date","author":"","search":"Hello world","exclude":[EXCLUDE],"sticky":"","inherit":false}} -->'
+	. '<div class="wp-block-query"><!-- wp:post-template --><!-- wp:post-content {"className":"single-post__content wp-block-post-content","layout":{"type":"constrained"}} /--><!-- /wp:post-template --></div><!-- /wp:query -->';
+$make( 'read-loop', 'read', 'A Read With A Secondary Loop', rst_card( 'read-card', array( 'bookTitle' => 'A Read With A Secondary Loop', 'authorName' => 'Odile Fenwick', 'readStatus' => 'finished', 'finishedAt' => '2026-08-02', 'isbn' => '9781234567897' ) ) . "\n" . $loop );
+// The loop must not find the post that holds it (its own saved content names the search).
+$loop_post = get_post( $posts['read-loop'] );
+wp_update_post( array( 'ID' => $loop_post->ID, 'post_content' => wp_slash( str_replace( 'EXCLUDE', (string) $loop_post->ID, $loop_post->post_content ) ) ) );
 
 foreach ( $posts as $label => $id ) {
 	printf( "%s\t%d\t%s\n", $label, $id, get_permalink( $id ) );

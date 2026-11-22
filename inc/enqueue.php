@@ -949,6 +949,20 @@ function stream_body_class( array $classes ): array {
 add_filter( 'body_class', __NAMESPACE__ . '\\stream_body_class' );
 
 /**
+ * The slug of a post's first kind term: the one its `kind-{slug}` body class carries.
+ *
+ * Anything that must agree with that class (the wide column's filter) asks here
+ * instead of matching any of the post's terms.
+ *
+ * @param int $post_id Post ID.
+ * @return string Empty when the post has no kind.
+ */
+function primary_kind_slug( int $post_id ): string {
+	$terms = get_the_terms( $post_id, 'kind' );
+	return $terms && ! is_wp_error( $terms ) ? (string) $terms[0]->slug : '';
+}
+
+/**
  * Adds `kind-{slug}` on singular posts so the single-post kind styling
  * (cr-post-kinds.css) can scope per kind — PKIW's post_class filter never
  * runs here because single.html has no post_class wrapper.
@@ -958,9 +972,9 @@ add_filter( 'body_class', __NAMESPACE__ . '\\stream_body_class' );
  */
 function kind_body_class( array $classes ): array {
 	if ( is_singular( 'post' ) ) {
-		$terms = get_the_terms( get_queried_object_id(), 'kind' );
-		if ( $terms && ! is_wp_error( $terms ) ) {
-			$classes[] = 'kind-' . $terms[0]->slug;
+		$slug = primary_kind_slug( get_queried_object_id() );
+		if ( '' !== $slug ) {
+			$classes[] = 'kind-' . $slug;
 		}
 	}
 	return $classes;
