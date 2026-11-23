@@ -110,20 +110,22 @@ function tryJson( read ) {
 	}
 }
 
-const readLock = ( sitePath ) => tryJson( () => fs.readFileSync( path.join( sitePath, LOCK, 'target.json' ), 'utf8' ) );
-
-function writeLock( sitePath, target ) {
-	const file = path.join( sitePath, LOCK, 'target.json' );
-	fs.writeFileSync( `${ file }.tmp`, JSON.stringify( target, null, 2 ) );
+function writeJson( file, data ) {
+	fs.writeFileSync( `${ file }.tmp`, JSON.stringify( data, null, 2 ) );
 	fs.renameSync( `${ file }.tmp`, file );
 }
+
+const lockFile = ( sitePath ) => path.join( sitePath, LOCK, 'target.json' );
+const readLock = ( sitePath ) => tryJson( () => fs.readFileSync( lockFile( sitePath ), 'utf8' ) );
+const markerFile = ( sitePath ) => path.join( sitePath, MARKER );
+const readMarker = ( sitePath ) => tryJson( () => fs.readFileSync( markerFile( sitePath ), 'utf8' ) );
 
 // rename(2) onto a non-empty directory fails, so the lock appears with its owner already inside.
 function acquireLock( sitePath, owner, running ) {
 	const lockDir = path.join( sitePath, LOCK );
 	const held = readLock( sitePath );
 	if ( held && held.runId === owner.runId ) {
-		writeLock( sitePath, { ...held, ...owner } );
+		writeJson( lockFile( sitePath ), owner );
 		return;
 	}
 	if ( held ) {
@@ -151,33 +153,42 @@ function seedFingerprint( seedPath ) {
 	return treeHash( path.join( seedPath, 'wp-content' ) );
 }
 
-function provision( site, sitePath, seedName ) {
-	const sites = studioSites();
-	const seed = sites.find( ( s ) => s.name === seedName );
+function copySeed( site, sitePath, seedName ) {
+	const seed = studioSites().find( ( s ) => s.name === seedName );
 	if ( ! seed ) {
 		throw new Error( `Seed site ${ seedName } is not registered in Studio.` );
 	}
 	if ( seed.running ) {
 		throw new Error( `Seed site ${ seedName } is running. Copying a live SQLite file can tear it; wait until it stops.` );
 	}
-	if ( fs.existsSync( sitePath ) ) {
-		throw new Error( `${ sitePath } exists but Studio has no site there. Remove it by hand or pick another --site.` );
+	for ( const name of fs.readdirSync( STUDIO_ROOT ) ) {
+		const [ , pid ] = new RegExp( `^${ site }\\.copying-(\\d+)$` ).exec( name ) || [];
+		if ( pid && ! pidAlive( Number( pid ) ) ) {
+			log( `Removing ${ name }: launcher pid ${ pid } died while it copied the seed.` );
+			fs.rmSync( path.join( STUDIO_ROOT, name ), { recursive: true, force: true } );
+		}
 	}
+	const copy = `${ sitePath }.copying-${ process.pid }`;
 	const before = seedFingerprint( seed.path );
 	log( `Seed ${ seedName } wp-content hash before copy: ${ before }` );
-	sh( 'cp', [ '-R', seed.path, sitePath ] );
+	sh( 'cp', [ '-R', seed.path, copy ] );
 	const after = seedFingerprint( seed.path );
 	log( `Seed ${ seedName } wp-content hash after copy:  ${ after }` );
 	if ( before !== after ) {
-		throw new Error( `Seed ${ seedName } changed during the copy. Delete ${ sitePath } and retry.` );
+		fs.rmSync( copy, { recursive: true, force: true } );
+		throw new Error( `Seed ${ seedName } changed during the copy. Launch again.` );
 	}
-	fs.rmSync( path.join( sitePath, 'wp-content', 'themes', THEME_SLUG ), { force: true, recursive: true } );
-	fs.writeFileSync( path.join( sitePath, MARKER ), `Created by verify-courtneyr-child from ${ seedName } at ${ new Date().toISOString() }\n` );
-	sh( 'studio', [ 'create', '--path', sitePath, '--name', site, '--no-start', '--skip-browser' ] );
-	const created = studioSite( sitePath );
-	sh( 'studio', [ 'wp', '--path', sitePath, 'search-replace', seed.url, created.url, '--all-tables', '--quiet' ] );
-	log( `Provisioned ${ site } at ${ created.url } from ${ seedName }.` );
-	return created;
+	fs.rmSync( path.join( copy, 'wp-content', 'themes', THEME_SLUG ), { force: true, recursive: true } );
+	writeJson( markerFile( copy ), { seed: seedName, contentUrl: seed.url, createdAt: new Date().toISOString() } );
+	try {
+		fs.renameSync( copy, sitePath );
+	} catch ( error ) {
+		fs.rmSync( copy, { recursive: true, force: true } );
+		if ( ! [ 'ENOTEMPTY', 'EEXIST' ].includes( error.code ) ) {
+			throw error;
+		}
+		log( `Another launch placed ${ sitePath } first. Dropped this copy.` );
+	}
 }
 
 const themeLink = ( sitePath ) => path.join( sitePath, 'wp-content', 'themes', THEME_SLUG );
@@ -232,39 +243,46 @@ async function waitReady( target, timeoutMs = 120000 ) {
 export async function launch( { checkout: checkoutInput, site = DEFAULT_SITE, seed = DEFAULT_SEED, run } ) {
 	const { checkout, version } = parseCheckout( checkoutInput );
 	const sitePath = sitePathFor( site );
-	let studio = studioSite( sitePath );
-	if ( studio && ! fs.existsSync( path.join( sitePath, MARKER ) ) ) {
+	if ( ! fs.existsSync( sitePath ) ) {
+		copySeed( site, sitePath, seed );
+	}
+	const marker = readMarker( sitePath );
+	if ( ! marker ) {
 		throw new Error( `REFUSED: ${ sitePath } has no ${ MARKER } marker, so this skill did not create it. Never launch into another session's site.` );
 	}
-	if ( ! studio ) {
-		studio = provision( site, sitePath, seed );
-	}
-	assertLocalTarget( studio.url );
 	const runId = run || `${ new Date().toISOString().replace( /[-:.TZ]/g, '' ).slice( 0, 14 ) }-${ crypto.randomBytes( 3 ).toString( 'hex' ) }`;
 	const owner = {
 		runId,
 		checkout,
-		site,
-		sitePath,
-		port: studio.port,
-		baseUrl: studio.url,
-		version,
 		treeHash: treeHash( checkout, TREE_SKIP ),
 		git: gitState( checkout ),
+		version,
+		site,
+		sitePath,
 		evidenceDir: path.join( REPO, 'tests', 'output', 'verify', runId ),
 		launcherPid: process.pid,
 		startedAt: new Date().toISOString(),
 	};
-	acquireLock( sitePath, owner, studio.running );
+	acquireLock( sitePath, owner, Boolean( studioSite( sitePath )?.running ) );
 	try {
 		// A PHP worker keeps resolving the theme link to its old target for minutes, so no worker may outlive a repoint.
 		stopSite( sitePath );
-		const target = { ...owner, linkId: pointTheme( sitePath, checkout ) };
+		if ( ! studioSite( sitePath ) ) {
+			sh( 'studio', [ 'create', '--path', sitePath, '--name', site, '--no-start', '--skip-browser' ] );
+		}
+		const studio = studioSite( sitePath );
+		assertLocalTarget( studio.url );
+		if ( marker.contentUrl !== studio.url ) {
+			sh( 'studio', [ 'wp', '--path', sitePath, 'search-replace', marker.contentUrl, studio.url, '--all-tables', '--quiet' ] );
+			writeJson( markerFile( sitePath ), { ...marker, contentUrl: studio.url } );
+			log( `Rewrote ${ site } content from ${ marker.contentUrl } to ${ studio.url }.` );
+		}
+		const target = { ...owner, port: studio.port, baseUrl: studio.url, linkId: pointTheme( sitePath, checkout ) };
 		fs.copyFileSync( path.join( SKILL_DIR, LIVE_PLUGIN ), path.join( sitePath, 'wp-content', 'mu-plugins', `verify-${ LIVE_PLUGIN }` ) );
 		if ( wpEval( sitePath, 'echo get_option( "stylesheet" );' ) !== THEME_SLUG ) {
 			sh( 'studio', [ 'wp', '--path', sitePath, 'theme', 'activate', THEME_SLUG ] );
 		}
-		writeLock( sitePath, target );
+		writeJson( lockFile( sitePath ), target );
 		sh( 'studio', [ 'start', '--path', sitePath, '--skip-browser', '--skip-log-details' ] );
 		await waitReady( target );
 		fs.mkdirSync( target.evidenceDir, { recursive: true } );
@@ -293,7 +311,9 @@ export async function doctor( { site = DEFAULT_SITE, checkout: checkoutInput } =
 		throw new Error( `${ site } has no verify lock. Pass --checkout <path> to say which checkout it should serve.` );
 	}
 	const expected = parseCheckout( checkoutInput || lock.checkout );
+	const marker = readMarker( sitePath );
 	results.push( check( 'site-running', studio.running, `${ studio.url } running=${ studio.running }` ) );
+	results.push( check( 'site-provisioned', marker?.contentUrl === studio.url, marker ? `site content uses ${ marker.contentUrl }; Studio serves ${ studio.url }` : `no ${ MARKER } marker, so this skill did not create the site` ) );
 	results.push( check( 'lock-held', lock, lock ? `run ${ lock.runId } since ${ lock.startedAt }` : 'no verify lock; launch did not start this instance' ) );
 
 	const link = themeLink( sitePath );
