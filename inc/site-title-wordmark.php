@@ -4,9 +4,10 @@
  *
  * The `cr-wordmark` style (inc/block-styles.php, components.css) paints the
  * all-paths wordmark asset over the Site Title link and hides the site name
- * text. The link's accessible name must include the visible "courtneyr.dev"
- * (WCAG 2.5.3), and the site name option can differ from the wordmark, so the
- * link keeps the header's existing label. Scoped to blocks with that style.
+ * text. Assistive tech reads the link text, the site name, and sighted users
+ * see the wordmark, "courtneyr.dev". The two can differ, so the label holds
+ * both, site name first (WCAG 2.5.3, Label in Name). Scoped to blocks with
+ * that style.
  *
  * @package CourtneyrChild
  */
@@ -33,7 +34,14 @@ function label_wordmark_link( string $block_content, array $block ): string {
 	}
 	$tags = new \WP_HTML_Tag_Processor( $block_content );
 	if ( $tags->next_tag( 'a' ) ) {
-		$tags->set_attribute( 'aria-label', __( 'Courtney Robertson — CourtneyR.dev home', 'courtneyr-child' ) );
+		$tags->set_attribute(
+			'aria-label',
+			sprintf(
+				/* translators: %s: Site title. */
+				__( '%s — CourtneyR.dev home', 'courtneyr-child' ),
+				wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES )
+			)
+		);
 	}
 	$html = $tags->get_updated_html();
 	// Level 0 renders the block as <p>. A 1.5rem paragraph of two words trips
