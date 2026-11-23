@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.177
+
+- Give eligible Read singles a wider reading record while keeping the divider and sample text in their existing layout. (#338)
+- Test the layout and stylesheet hooks and cover incomplete reading record data. (#341)
+
 ## 0.7.176
 
 - Keep a Favorite archive card that also carries a check-in on its printer-ivory paper and violet ink in dark mode, and match its unvisited link colours to plain Favorite clippings (cerulean at rest, violet on hover). Mixed visited links stay cerulean off hover; plain visited links keep the global visited colour. Light-mode colours are preserved; forced colours and plain clippings are unchanged. (#332, merged as 3f1f92f)
