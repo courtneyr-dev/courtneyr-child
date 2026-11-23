@@ -31,6 +31,12 @@ const EXPECT = {
 	'p-r2-rep-as-add': { sentinel: true, marked: true, records: 1 },
 	'p-r2-rep-as-meta': { sentinel: true, marked: true, records: 1 },
 	'p-r2-rep-as-classic': { sentinel: true, marked: true, records: 1 },
+	// No decision (a synced pattern on the page): the meta-only clipping still prints, from the loop post, found by structure.
+	'r2-rep-as-synced': { marked: true, records: 1 },
+	'p-r2-rep-as-synced': { sentinel: true, marked: false, records: 1 },
+	'r2-rep-classic-synced': { marked: false, records: 1 },
+	// A decision to print the meta-only clipping is followed even when authored HTML holds a k-repost element.
+	'r2-rep-meta-decoy': { marked: true, records: 1, recordTop: true },
 };
 for ( const k of [ 'fav', 'rep' ] ) {
 	for ( const d of [ 'code', 'attr', 'comment', 'pre', 'data', 'class' ] ) {
