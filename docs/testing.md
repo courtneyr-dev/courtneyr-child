@@ -123,7 +123,7 @@ The site Storybook lives in `storybook/` and shows HTML that WordPress rendered 
 | `node storybook/capture/capture.mjs` | Renders every entry of `storybook/recipes.mjs` on the verify site and replaces `storybook/fixtures/<environment>/` | WordPress Studio. No install and no browser |
 | `node storybook/check.mjs` | Fails when a fixture is stale or was changed by hand | git and Node. CI runs it |
 | `npm --prefix storybook test` | Feeds hostile asset paths to the capture's path check and its file writer | Node. CI runs it |
-| `node storybook/prove-harness.mjs` | Sends 20 requests the capture's must-use plugin has to refuse or serve, and checks each answer | WordPress Studio |
+| `node storybook/prove-harness.mjs` | Runs 20 checks on a live verify site: 17 requests the capture's must-use plugin has to refuse or serve, where its key hash sits, and what teardown leaves | WordPress Studio |
 | `npm --prefix storybook ci` | Installs Storybook 10.6.6 and Vitest into `storybook/node_modules` (90 MB) | |
 | `npm --prefix storybook run storybook` | Storybook on port 6006 | the install |
 | `npm --prefix storybook run build-storybook` | Static build in `storybook/storybook-static/` (13 MB) | the install |
