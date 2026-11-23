@@ -521,8 +521,14 @@ body.single-post.kind-repost .single-post__content {
  * 64rem the pin holds and the wrapper keeps the reading width, as before.
  *
  * The sparkle stays where the 80ch column put it. 80ch must resolve in the
- * content's font, not the glyph's, so it is computed on the content element
- * as a registered length and the glyph inherits the number.
+ * content's font, not the glyph's. The content element computes the offset
+ * on its own inline-end inset, where 80ch becomes a length in its font; with
+ * the start inset also set, a relatively positioned box ignores the end one,
+ * so the content does not move. The glyph inherits the computed right, so
+ * left-to-right text needs no @property. In right-to-left text the inline
+ * end is the left side, so there the glyph reads the same length from the
+ * registered custom property; an engine without registration places it as
+ * before (a recorded limit).
  */
 @property --cr-repost-measure {
 	syntax: "<length>";
@@ -532,9 +538,16 @@ body.single-post.kind-repost .single-post__content {
 
 body.single-post.kind-repost .cr-wide-column.single-post__content {
 	--cr-repost-measure: 80ch;
+
+	inset-inline-start: 0;
+	inset-inline-end: calc((100% - min(100%, 80ch)) / 2 - 1rem);
 }
 
 body.single-post.kind-repost .cr-wide-column.single-post__content::before {
+	right: inherit;
+}
+
+[dir="rtl"] body.single-post.kind-repost .cr-wide-column.single-post__content::before {
 	right: calc((100% - min(100%, var(--cr-repost-measure))) / 2 - 1rem);
 }
 
