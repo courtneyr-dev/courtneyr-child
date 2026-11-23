@@ -23,11 +23,13 @@ async function settle( page, theme, pressedName ) {
 	return page.evaluate( readState, PRESSED );
 }
 
-export default async function themeToggle( { browser, baseUrl, out, step } ) {
+export default async function themeToggle( { browser, baseUrl, out, step, served } ) {
 	const context = await browser.newContext( { viewport: { width: 1280, height: 800 }, colorScheme: 'light' } );
 	const page = await context.newPage();
 	const response = await page.goto( `${ baseUrl }/`, { waitUntil: 'load' } );
 	fs.writeFileSync( path.join( out, 'home.server.html' ), await response.text() );
+	const home = served( response );
+	step( { name: 'home-html-from-checkout', ok: home.ok, observed: home.detail } );
 	const group = page.getByRole( 'group', { name: 'Theme' } );
 
 	const first = await settle( page, 'system', 'System theme (follows OS)' );

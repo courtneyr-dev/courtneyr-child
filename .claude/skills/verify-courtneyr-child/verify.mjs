@@ -15,6 +15,8 @@ const DEFAULT_SITE = 'courtneyr-verify';
 const DEFAULT_SEED = 'courtneyr-x-t269';
 const MARKER = '.verify-site';
 const LOCK = '.verify-lock';
+const LIVE_PLUGIN = 'live-theme.php';
+const LIVE_HEADER = 'x-verify-live';
 const TREE_SKIP = new Set( [ '.git', 'node_modules', path.join( 'tests', 'output' ) ] );
 
 const log = ( line ) => process.stderr.write( `${ line }\n` );
@@ -100,13 +102,15 @@ function pidAlive( pid ) {
 	}
 }
 
-function readLock( sitePath ) {
+function tryJson( read ) {
 	try {
-		return JSON.parse( fs.readFileSync( path.join( sitePath, LOCK, 'target.json' ), 'utf8' ) );
+		return JSON.parse( read() );
 	} catch {
 		return null;
 	}
 }
+
+const readLock = ( sitePath ) => tryJson( () => fs.readFileSync( path.join( sitePath, LOCK, 'target.json' ), 'utf8' ) );
 
 function writeLock( sitePath, target ) {
 	const file = path.join( sitePath, LOCK, 'target.json' );
@@ -176,35 +180,53 @@ function provision( site, sitePath, seedName ) {
 	return created;
 }
 
+const themeLink = ( sitePath ) => path.join( sitePath, 'wp-content', 'themes', THEME_SLUG );
+
+function linkId( link ) {
+	const stat = fs.lstatSync( link, { throwIfNoEntry: false } );
+	return stat ? `${ stat.ino }@${ stat.birthtimeMs }` : null;
+}
+
 function pointTheme( sitePath, checkout ) {
-	const link = path.join( sitePath, 'wp-content', 'themes', THEME_SLUG );
+	const link = themeLink( sitePath );
 	const tmp = `${ link }.${ process.pid }`;
 	fs.rmSync( tmp, { force: true } );
 	fs.symlinkSync( checkout, tmp );
 	fs.renameSync( tmp, link );
+	return linkId( link );
 }
 
 async function fetchBody( url ) {
 	const response = await fetch( url, { redirect: 'manual' } );
-	return { status: response.status, body: Buffer.from( await response.arrayBuffer() ) };
+	return { status: response.status, body: Buffer.from( await response.arrayBuffer() ), live: response.headers.get( LIVE_HEADER ) };
 }
 
-async function waitReady( baseUrl, timeoutMs = 120000 ) {
+export function servedBy( header, { sitePath, checkout } ) {
+	const live = tryJson( () => header );
+	if ( ! live ) {
+		return { ok: false, detail: `the response has no ${ LIVE_HEADER } header, so mu-plugins/verify-${ LIVE_PLUGIN } did not run` };
+	}
+	const ok = live.site === fs.realpathSync( sitePath ) && live.theme.length === 1 && live.theme[ 0 ] === checkout;
+	return { ok, detail: `the PHP worker serves ${ live.site } and renders the theme from ${ live.theme.join( ' and ' ) }; expected ${ sitePath } and ${ checkout }` };
+}
+
+async function waitReady( target, timeoutMs = 120000 ) {
 	const deadline = Date.now() + timeoutMs;
 	let last = 'no response';
 	while ( Date.now() < deadline ) {
 		try {
-			const { status, body } = await fetchBody( `${ baseUrl }/` );
-			if ( status === 200 && body.includes( `/wp-content/themes/${ THEME_SLUG }/` ) ) {
+			const home = await fetchBody( `${ target.baseUrl }/` );
+			const served = servedBy( home.live, target );
+			if ( home.status === 200 && home.body.includes( `/wp-content/themes/${ THEME_SLUG }/` ) && served.ok ) {
 				return;
 			}
-			last = `HTTP ${ status }`;
+			last = `HTTP ${ home.status }; ${ served.detail }`;
 		} catch ( error ) {
 			last = error.cause ? error.cause.code : error.message;
 		}
 		await new Promise( ( resolve ) => setTimeout( resolve, 1000 ) );
 	}
-	throw new Error( `${ baseUrl }/ was not ready after ${ timeoutMs / 1000 }s (last: ${ last }).` );
+	throw new Error( `${ target.baseUrl }/ was not ready after ${ timeoutMs / 1000 }s (last: ${ last }).` );
 }
 
 export async function launch( { checkout: checkoutInput, site = DEFAULT_SITE, seed = DEFAULT_SEED, run } ) {
@@ -219,7 +241,7 @@ export async function launch( { checkout: checkoutInput, site = DEFAULT_SITE, se
 	}
 	assertLocalTarget( studio.url );
 	const runId = run || `${ new Date().toISOString().replace( /[-:.TZ]/g, '' ).slice( 0, 14 ) }-${ crypto.randomBytes( 3 ).toString( 'hex' ) }`;
-	const target = {
+	const owner = {
 		runId,
 		checkout,
 		site,
@@ -233,23 +255,25 @@ export async function launch( { checkout: checkoutInput, site = DEFAULT_SITE, se
 		launcherPid: process.pid,
 		startedAt: new Date().toISOString(),
 	};
-	acquireLock( sitePath, target, studio.running );
+	acquireLock( sitePath, owner, studio.running );
 	try {
-		pointTheme( sitePath, checkout );
+		// A PHP worker keeps resolving the theme link to its old target for minutes, so no worker may outlive a repoint.
+		stopSite( sitePath );
+		const target = { ...owner, linkId: pointTheme( sitePath, checkout ) };
+		fs.copyFileSync( path.join( SKILL_DIR, LIVE_PLUGIN ), path.join( sitePath, 'wp-content', 'mu-plugins', `verify-${ LIVE_PLUGIN }` ) );
 		if ( wpEval( sitePath, 'echo get_option( "stylesheet" );' ) !== THEME_SLUG ) {
 			sh( 'studio', [ 'wp', '--path', sitePath, 'theme', 'activate', THEME_SLUG ] );
 		}
-		if ( ! studioSite( sitePath ).running ) {
-			sh( 'studio', [ 'start', '--path', sitePath, '--skip-browser', '--skip-log-details' ] );
-		}
-		await waitReady( target.baseUrl );
+		writeLock( sitePath, target );
+		sh( 'studio', [ 'start', '--path', sitePath, '--skip-browser', '--skip-log-details' ] );
+		await waitReady( target );
+		fs.mkdirSync( target.evidenceDir, { recursive: true } );
+		return target;
 	} catch ( error ) {
 		stopSite( sitePath );
 		fs.rmSync( path.join( sitePath, LOCK ), { recursive: true, force: true } );
 		throw error;
 	}
-	fs.mkdirSync( target.evidenceDir, { recursive: true } );
-	return target;
 }
 
 function check( name, ok, detail ) {
@@ -272,7 +296,11 @@ export async function doctor( { site = DEFAULT_SITE, checkout: checkoutInput } =
 	results.push( check( 'site-running', studio.running, `${ studio.url } running=${ studio.running }` ) );
 	results.push( check( 'lock-held', lock, lock ? `run ${ lock.runId } since ${ lock.startedAt }` : 'no verify lock; launch did not start this instance' ) );
 
-	const link = path.join( sitePath, 'wp-content', 'themes', THEME_SLUG );
+	const link = themeLink( sitePath );
+	if ( lock ) {
+		const linkNow = linkId( link );
+		results.push( check( 'theme-link-unchanged', linkNow === lock.linkId, linkNow === lock.linkId ? `the theme link is the one launch made (${ linkNow })` : `theme link ${ linkNow } is not the one launch made (${ lock.linkId }). PHP workers started before a swap keep rendering the old target. Relaunch.` ) );
+	}
 	const linked = fs.existsSync( link ) ? fs.realpathSync( link ) : null;
 	results.push( check( 'theme-dir-realpath', linked === expected.checkout, `site theme dir -> ${ linked }; expected ${ expected.checkout }` ) );
 
@@ -295,7 +323,9 @@ export async function doctor( { site = DEFAULT_SITE, checkout: checkoutInput } =
 		}
 		const home = await fetchBody( `${ studio.url }/` ).catch( ( error ) => ( { status: error.message, body: Buffer.alloc( 0 ) } ) );
 		const stamp = `/wp-content/themes/${ THEME_SLUG }/assets/css/tokens.css?ver=${ expected.version }`;
+		const served = servedBy( home.live, { sitePath, checkout: expected.checkout } );
 		results.push( check( 'rendered-version', home.status === 200 && home.body.includes( stamp ), `GET / HTTP ${ home.status }; page ${ home.body.includes( stamp ) ? 'links' : 'does not link' } ${ stamp }` ) );
+		results.push( check( 'live-theme', served.ok, `GET / ${ served.detail }` ) );
 	}
 	return { site, baseUrl: studio.url, expected, lock, pass: results.every( ( r ) => r.ok ), checks: results };
 }
@@ -339,7 +369,7 @@ export async function drive( { feature, site = DEFAULT_SITE, run } ) {
 	let error = null;
 	try {
 		const journey = ( await import( pathToFileURL( journeyFile ).href ) ).default;
-		await journey( { browser, baseUrl: lock.baseUrl, out, step: ( s ) => {
+		await journey( { browser, baseUrl: lock.baseUrl, out, served: ( response ) => servedBy( response.headers()[ LIVE_HEADER ], lock ), step: ( s ) => {
 			steps.push( s );
 			log( `${ s.ok ? 'PASS' : 'FAIL' } ${ s.name }: ${ s.observed }` );
 		} } );
