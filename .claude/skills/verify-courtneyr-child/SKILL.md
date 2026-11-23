@@ -31,16 +31,17 @@ A target is one JSON object. `launch` prints it and keeps it in the site's lock 
 node .claude/skills/verify-courtneyr-child/verify.mjs launch --checkout <theme-checkout> [--site courtneyr-verify] [--seed courtneyr-x-t269] [--run <runId>]
 ```
 
-Ready when stderr says `LAUNCH READY <baseUrl> run <runId>` and stdout holds the target JSON. Keep the `runId`. Ready means `GET /` returned 200 with links into `/wp-content/themes/courtneyr-child/`, and its `X-Verify-Live` header names this site and this checkout.
+Ready when stderr says `LAUNCH READY <baseUrl> run <runId>` and stdout holds the target JSON. Keep the `runId`. Ready means every Doctor check passed. Launch runs Doctor before it prints READY. When a check fails, launch prints the FAIL lines, stops the site, releases the lock, and exits 1.
 
 Launch converges from whatever exists, including a launch that died part-way:
 
 1. If `~/Studio/<site>` does not exist, launch copies the stopped seed site into `~/Studio/<site>.copying-<pid>`. It hashes the seed's `wp-content` before and after the copy and aborts if they differ. It writes the `.verify-site` marker into the copy, then renames the copy into place. Launch refuses a running seed. It removes a `.copying-<pid>` directory whose launcher is gone.
 2. It refuses a site without the `.verify-site` marker. Launch never repoints another session's site.
-3. It takes the lock. A second launch on a held site exits 1 with `REFUSED: <site> is held by run <id> (checkout <path>, since <time>)`. A running site with no lock is refused too. A lock whose site is stopped and whose launcher process is gone is stale. One launch moves it aside and takes over. Passing `--run <your runId>` relaunches your own lock.
+3. It takes the lock. A second launch on a held site exits 1 with `REFUSED: <site> is held by run <id> (checkout <path>, since <time>)`. A running site with no lock is refused too. A lock whose site is stopped and whose launcher process is gone is stale. One launch moves it aside and takes over. Passing `--run <your runId>` relaunches your own lock, unless another live process holds that run id.
 4. It stops the site if the site runs. A PHP worker that outlives a repoint keeps rendering the old checkout, so launch never moves the theme symlink under a running worker.
 5. It registers the site with `studio create` if Studio does not list it. The marker's `contentUrl` names the URL that the site's content uses. When `contentUrl` differs from Studio's URL, launch runs `wp search-replace` and then updates the marker.
 6. It points `wp-content/themes/courtneyr-child` at the checkout, copies `live-theme.php` into the site's `mu-plugins`, activates the theme if needed, clears the theme's pattern cache, writes the target into the lock, and runs `studio start`.
+7. It waits for `GET /` to return 200 with links into `/wp-content/themes/courtneyr-child/`, then runs Doctor.
 
 Launch again with the same `--run` after any edit in the checkout, or to serve another checkout on the same site. For a base-versus-head capture, launch the base checkout, capture, launch the head checkout with the same `--run`, and capture again.
 
@@ -59,6 +60,7 @@ Read-only. Without `--checkout` it checks against the checkout in the lock. Exit
 - `checkout-unchanged`: the checkout's path, tree hash and git state are what launch recorded, and no file changed after launch started. An edit, a commit, or another `--checkout` fails it. A file edited and then restored fails it too, because PHP keeps running a changed file's old code for about 2 seconds.
 - `theme-link-unchanged`, `theme-dir-realpath`: the site's theme symlink is the one that launch made, and it resolves to the checkout. A link replaced after launch fails, because PHP workers started before the swap keep rendering the old target.
 - `wp-active-theme`, `wp-theme-dir`, `wp-theme-version`: WordPress in a separate `studio wp eval` process has `courtneyr-child` on `ollie` active, loads it from the checkout's realpath, and reports the checkout's Version.
+- `wp-theme-files-only`: the database holds no saved template, template part or global style. A copy saved from the Site Editor overrides the checkout's file, so the check names each one.
 - `served-style.css`, `served-theme.json`: the bytes the web server returns hash the same as the checkout's files.
 - `rendered-version`: `GET /` links `tokens.css?ver=<checkout Version>`.
 - `live-theme`: the `X-Verify-Live` header of that `GET /` response names this site directory and exactly one theme directory, the checkout. The PHP worker that rendered the page lists every directory its realpath cache maps the theme to.
@@ -100,7 +102,7 @@ Stops the site with `studio stop --path`, checks Studio reports it stopped, and 
 node .claude/skills/verify-courtneyr-child/regress.mjs [--site courtneyr-verify] [--checkout <theme-checkout>] [--verify <path-to-verify.mjs>]
 ```
 
-Run it after any change to `verify.mjs` or `live-theme.php`. It needs a stopped site with no lock, and it takes about 30 seconds. It copies the checkout to a temporary `head` directory with the same `style.css` and `theme.json`. Then it replays five failures this skill once had: a relaunch with another checkout on a running site, an edit in the launched checkout, a pattern added between launches, a file edited and then restored, and a theme symlink swapped by hand under running PHP workers. It prints one `ok` or `not ok` line per claim and ends with `REGRESS PASS 13 of 13`. `--verify` points it at another copy of `verify.mjs`, such as the one from an older commit.
+Run it after any change to `verify.mjs` or `live-theme.php`. It needs a stopped site with no lock, and it takes about 30 seconds. It copies the checkout to a temporary `head` directory with the same `style.css` and `theme.json`. Then it replays six failures this skill once had: a relaunch with another checkout on a running site, an edit in the launched checkout, a pattern added between launches, a footer saved in the database, a file edited and then restored, and a theme symlink swapped by hand under running PHP workers. It prints one `ok` or `not ok` line per claim and ends with `REGRESS PASS 14 of 14`. `--verify` points it at another copy of `verify.mjs`, such as the one from an older commit.
 
 ## Gotchas
 
