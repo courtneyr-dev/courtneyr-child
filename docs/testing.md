@@ -114,6 +114,75 @@ Dark and light mode set both the browser color scheme and the theme's `courtneyr
 
 `tests/output/` is gitignored.
 
+## Storybook
+
+The site Storybook lives in `storybook/` and shows HTML that WordPress rendered from a commit of this repo. Nothing in a story is copied by hand. The directory has its own `package.json`, so the root `npm install` and the exported root `package.json` don't change. `.gitattributes` keeps `/storybook` out of the deploy archive, and the directory holds no PHP, `block.json` or `theme.json` for WordPress to pick up.
+
+| Command | What it does | Needs |
+| --- | --- | --- |
+| `node storybook/capture/capture.mjs` | Renders every entry of `storybook/recipes.mjs` on the verify site and replaces `storybook/fixtures/<environment>/` | WordPress Studio. No install and no browser |
+| `node storybook/check.mjs` | Fails when a fixture is stale or was changed by hand | git and Node. CI runs it |
+| `node --test storybook/tests/` | Feeds hostile asset paths to the capture's path check and its file writer | Node. CI runs it |
+| `node storybook/prove-harness.mjs` | Sends 20 requests the capture's must-use plugin has to refuse or serve, and checks each answer | WordPress Studio |
+| `npm --prefix storybook ci` | Installs Storybook 10.6.6 and Vitest into `storybook/node_modules` (90 MB) | |
+| `npm --prefix storybook run storybook` | Storybook on port 6006 | the install |
+| `npm --prefix storybook run build-storybook` | Static build in `storybook/storybook-static/` (13 MB) | the install |
+| `npm --prefix storybook run test-storybook` | Opens every story in headless Chrome and fails on an axe violation | the install, Google Chrome |
+
+`capture.mjs` takes `--commit <rev>` (default `HEAD`), `--site <studio-site>` (default `courtneyr-verify`) and `--env <name>`. When another session holds `courtneyr-verify`, pass `--site courtneyr-verify-<suffix>` and the skill provisions that site.
+
+### What a capture does
+
+1. It adds a clean detached worktree of the commit at `<repo>.capture`, next to the repo. Doctor fails after any write inside the checkout a site serves, so the capture never renders from the worktree it writes to.
+2. It launches the `verify-courtneyr-child` skill on that worktree. Launch returns only when Doctor passes.
+3. It writes a must-use plugin, the harness, into the verify site and asks WordPress for each recipe entry with two GETs. Both must give the same bytes after normalizing. A page's second GET sends no harness header, so the fixture is what a browser receives.
+4. It checks the `X-Verify-Live` header of every response it keeps, fetches the stylesheets, fonts and images the documents load that the theme doesn't own, and runs Doctor again.
+5. It removes the harness, stops the site, removes the worktree, and swaps the new `fixtures/<environment>/` directory into place in one rename.
+
+A rerun at the same commit on the same site writes the same bytes. `git diff --exit-code storybook/fixtures` after a rerun is the proof.
+
+### Recipe entries
+
+`storybook/recipes.mjs` is the one file to edit. An entry names a route and, for a block or pattern, where WordPress renders it:
+
+- With `in: 'template'`, the route's own template holds the block. The harness keeps that block and the wrappers above it and drops the rest of the template.
+- With `in: 'content'`, the default, WordPress renders the block as the content of the route's post, inside the template's own Post Content block. Nothing writes to the database.
+- With no `block` and no `pattern`, the fixture is the whole page.
+
+`empty` gives the reason a state prints nothing. The capture fails when a state with `empty` prints markup, and when a state without it prints none. After a recipe change, commit, capture, add a `fixtureStory( '<environment>/<id>' )` line to a file in `storybook/stories/`, and commit the fixtures with it.
+
+### What a fixture is
+
+A fixture is the whole response body after seven rules in `storybook/capture/format.mjs`: scripts and `noscript` elements removed, four spellings of the site origin replaced with `http://fixture.invalid`, WP Recipe Maker's random comment-rating id set to `0`, and a 10-digit file-time `ver=` set to `0`. The capture fails if a normalized document still holds the site's host, the home directory or the run's key.
+
+`fixtures/<environment>/manifest.json` records the commit, verify's tree hash and the theme Version, the WordPress and PHP versions, Ollie's Version and tree hash, each active plugin's Version, git HEAD and tree hash, the site name and its seed, a fingerprint of the site's posts, terms and nine options, and for each fixture its route, render request, SHA-256, the template and the blocks, patterns and parts WordPress rendered, and the theme files those came from.
+
+### When the check fails
+
+`storybook/check.mjs` reads theme files from `HEAD`, never from the working tree. Its lines start with one of five words:
+
+- `STALE` means a file in the deploy archive, the recipe, or `storybook/capture/` changed since the capture. Run the capture and commit the result. The theme input is the file set `git archive HEAD` exports, minus `*.md`, `LICENSE`, `package.json` and `tools/`, so a change to tests, docs, CI or a root dependency doesn't count.
+- `TAMPERED` means a file under `storybook/fixtures/` isn't the one the manifest records. Never edit a fixture by hand.
+- `UNRESOLVED` means a document loads a file that neither the theme nor the mirror holds, or names a source file the theme dropped.
+- `UNLINKED` means a fixture has no story, or a story names a fixture that doesn't exist.
+- `UNSAFE` means `git archive` would export `storybook/`, or a `.php`, `block.json` or `theme.json` file sits in it.
+
+The manifest records the commit the fixtures came from, and a squash merge replaces that commit. The check doesn't read it. It compares git blob ids, which a squash keeps.
+
+### The harness
+
+The harness acts only on a front-end `GET` from `127.0.0.1` or `::1`, for the site's own `Host`, that carries the run's key. The key is 32 random bytes held in the capture's memory. The site gets its SHA-256, in a mode-600 file in a temporary directory outside the site. The harness grants `edit_posts` or `read` at most, to the anonymous visitor only, and only inside `template_include`, which the REST API, admin, AJAX, XML-RPC and cron never reach. Teardown deletes the plugin file and the key hash, on a normal exit and on `SIGINT`, `SIGTERM` and `SIGHUP`. A hard kill leaves both behind, inert without the key, until the next capture removes them.
+
+Page and stylesheet content is site data. Every asset path goes through `assetSitePath()` in `storybook/capture/format.mjs`, which rejects a backslash, a NUL, an encoded dot or slash, another origin, and any path that resolves outside `wp-content` and `wp-includes`. Every file the capture writes goes through `writeInside()`, which refuses a path that resolves outside its directory.
+
+### Limits
+
+- Stories are static. A control that needs JavaScript, such as the theme toggle or a callout's collapse button, shows its server-rendered state.
+- A fixture sits inside Storybook's root element, so a `body >` child selector doesn't match. `assets/css/components.css` has one such rule today.
+- `in: 'template'` reaches a block in a template file, not a block inside a template part.
+- On the `courtneyr-x-t269` seed, `series-guide` and a visitor's `contact-form` print nothing, and `weather-log` prints a date row only. PublishPress Series, the site's contact-form plugin and a weather post aren't on the seed.
+- Page stories skip two axe rules that fail in WordPress's own output on this seed. Each page's Overview story names them and the reason.
+
 ## CSS minify
 
 The sources in `assets/css/` are never minified in this repo. `private/bin/sync-theme.sh` in the deploy repo exports HEAD with `git archive`, runs `tools/minify-css.mjs` on the export's `assets/css/`, then rsyncs it, so deployed stylesheets keep their names and paths. That matters because `prunable_sheets()` in `inc/stream-style-pruning.php` matches on file names, and the sync writes `css-build.txt` (tool, version, source commit, per-file sha256) next to `source-sha.txt`.
@@ -126,5 +195,7 @@ The sources in `assets/css/` are never minified in this repo. `private/bin/sync-
 ## CI
 
 `.github/workflows/lint.yml` runs on push and pull request with `actions/checkout@v7`, `shivammathur/setup-php@v2` (PHP 8.5) and `actions/setup-node@v7` (Node 24). All three actions declare the `node24` runtime. The PHPCS and stylelint steps each run even when an earlier gate fails, so one run reports all three.
+
+`.github/workflows/storybook.yml` has two more jobs. One runs `node storybook/check.mjs` with no install. The other runs `npm ci` in `storybook/`, builds the Storybook, and runs axe on every story in the runner's Chrome. Neither publishes anything.
 
 The workflow installs with `composer install` and `npm install` against the exact pins. There's no `package-lock.json` because the machine that set this up had too little disk on 2026-09-13 to resolve one. Adding it and switching the step to `npm ci` is a follow-up.
