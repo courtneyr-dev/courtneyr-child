@@ -41,25 +41,30 @@ function sha256( data ) {
 	return crypto.createHash( 'sha256' ).update( data ).digest( 'hex' );
 }
 
+function* treeEntries( root, skip, rel = '' ) {
+	for ( const name of fs.readdirSync( path.join( root, rel ) ).sort() ) {
+		const child = path.join( rel, name );
+		if ( skip.has( name ) || skip.has( child ) ) {
+			continue;
+		}
+		const stat = fs.lstatSync( path.join( root, child ) );
+		if ( stat.isDirectory() ) {
+			yield* treeEntries( root, skip, child );
+		} else {
+			yield { child, stat };
+		}
+	}
+}
+
 export function treeHash( root, skip = new Set() ) {
 	const rows = [];
-	const walk = ( rel ) => {
-		for ( const name of fs.readdirSync( path.join( root, rel ) ).sort() ) {
-			const child = path.join( rel, name );
-			if ( skip.has( name ) || skip.has( child ) ) {
-				continue;
-			}
-			const stat = fs.lstatSync( path.join( root, child ) );
-			if ( stat.isDirectory() ) {
-				walk( child );
-			} else if ( stat.isSymbolicLink() ) {
-				rows.push( `${ child }\0link:${ fs.readlinkSync( path.join( root, child ) ) }` );
-			} else if ( stat.isFile() ) {
-				rows.push( `${ child }\0${ sha256( fs.readFileSync( path.join( root, child ) ) ) }` );
-			}
+	for ( const { child, stat } of treeEntries( root, skip ) ) {
+		if ( stat.isSymbolicLink() ) {
+			rows.push( `${ child }\0link:${ fs.readlinkSync( path.join( root, child ) ) }` );
+		} else if ( stat.isFile() ) {
+			rows.push( `${ child }\0${ sha256( fs.readFileSync( path.join( root, child ) ) ) }` );
 		}
-	};
-	walk( '' );
+	}
 	return sha256( rows.join( '\n' ) );
 }
 
@@ -84,6 +89,10 @@ function gitState( checkout ) {
 	} catch {
 		return { head: null, dirty: null };
 	}
+}
+
+function checkoutState( checkout ) {
+	return { checkout, treeHash: treeHash( checkout, TREE_SKIP ), git: gitState( checkout ) };
 }
 
 function sitePathFor( site ) {
@@ -251,17 +260,16 @@ export async function launch( { checkout: checkoutInput, site = DEFAULT_SITE, se
 		throw new Error( `REFUSED: ${ sitePath } has no ${ MARKER } marker, so this skill did not create it. Never launch into another session's site.` );
 	}
 	const runId = run || `${ new Date().toISOString().replace( /[-:.TZ]/g, '' ).slice( 0, 14 ) }-${ crypto.randomBytes( 3 ).toString( 'hex' ) }`;
+	const startedAt = new Date().toISOString();
 	const owner = {
 		runId,
-		checkout,
-		treeHash: treeHash( checkout, TREE_SKIP ),
-		git: gitState( checkout ),
+		...checkoutState( checkout ),
 		version,
 		site,
 		sitePath,
 		evidenceDir: path.join( REPO, 'tests', 'output', 'verify', runId ),
 		launcherPid: process.pid,
-		startedAt: new Date().toISOString(),
+		startedAt,
 	};
 	acquireLock( sitePath, owner, Boolean( studioSite( sitePath )?.running ) );
 	try {
@@ -320,7 +328,18 @@ export async function doctor( { site = DEFAULT_SITE, checkout: checkoutInput } =
 
 	const link = themeLink( sitePath );
 	if ( lock ) {
+		const now = checkoutState( expected.checkout );
+		const drift = Object.keys( now )
+			.filter( ( key ) => JSON.stringify( now[ key ] ) !== JSON.stringify( lock[ key ] ) )
+			.map( ( key ) => `${ key }: launch recorded ${ JSON.stringify( lock[ key ] ) }, now ${ JSON.stringify( now[ key ] ) }` );
+		// PHP keeps running a file's old code for about 2 s after the file changes, so a file edited and then restored still counts.
+		const touched = [ ...treeEntries( expected.checkout, TREE_SKIP ) ].filter( ( entry ) => entry.stat.ctimeMs > Date.parse( lock.startedAt ) ).map( ( entry ) => entry.child );
+		if ( touched.length && now.checkout === lock.checkout ) {
+			drift.push( `changed after launch: ${ touched.slice( 0, 5 ).join( ', ' ) }${ touched.length > 5 ? ` and ${ touched.length - 5 } more` : '' }` );
+		}
 		const linkNow = linkId( link );
+		results.push( check( 'lock-url', lock.baseUrl === studio.url, `launch recorded ${ lock.baseUrl }; Studio serves ${ studio.url }` ) );
+		results.push( check( 'checkout-unchanged', drift.length === 0, drift.length ? `${ drift.join( '; ' ) }. Relaunch to serve and record the change.` : `tree hash ${ now.treeHash.slice( 0, 12 ) } and git ${ JSON.stringify( now.git ) } are what launch recorded` ) );
 		results.push( check( 'theme-link-unchanged', linkNow === lock.linkId, linkNow === lock.linkId ? `the theme link is the one launch made (${ linkNow })` : `theme link ${ linkNow } is not the one launch made (${ lock.linkId }). PHP workers started before a swap keep rendering the old target. Relaunch.` ) );
 	}
 	const linked = fs.existsSync( link ) ? fs.realpathSync( link ) : null;
