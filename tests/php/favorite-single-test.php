@@ -174,4 +174,53 @@ cr_fav_group(
 	}
 );
 
+cr_fav_group(
+	'the wide column decides from the facts, and the sheet prints the facts it decided on',
+	static function (): void {
+		$post = cr_fav_post( 1, 'Field Guide to Quiet Software', cr_fav_facts() );
+		$GLOBALS['cr_fav_single']  = true;
+		$GLOBALS['cr_fav_queried'] = $post->ID;
+		Single\single_facts( true );
+		$decided = Single\page_sheet( $post, 'any content' );
+		cr_fav_assert( is_array( $decided ) && true === $decided['wide'] && Single\single_facts() === $decided['data'], 'a readable favorite: wide, with the post facts as data' );
+
+		$GLOBALS['cr_fav_wide_data'] = array_merge( Single\single_facts(), array( 'name' => 'Decided Name' ) );
+		$out                         = cr_fav_sheet( $post, cr_fav_page( cr_fav_card_html() ) );
+		$GLOBALS['cr_fav_wide_data'] = null;
+		cr_fav_assert( str_contains( $out, '<h1 class="cr-fav-sheet__title p-name">Decided Name</h1>' ), 'the sheet prints the decision data, not its own lookup' );
+
+		$out = cr_fav_sheet( $post, cr_fav_page( cr_fav_card_html() ) );
+		cr_fav_assert( str_contains( $out, '<h1 class="cr-fav-sheet__title p-name">Field Guide to Quiet Software</h1>' ), 'with no decision the sheet reads the post facts, as before' );
+
+		foreach ( array( 'top-level card' => array( true, true ), 'no card' => array( null, true ), 'card inside a group' => array( false, false ) ) as $shape => list( $top, $wide ) ) {
+			$GLOBALS['cr_fav_card_top'] = $top;
+			$decided                    = Single\page_sheet( $post, 'any content' );
+			cr_fav_assert( $wide === $decided['wide'], "$shape: wide is " . var_export( $wide, true ) );
+		}
+		unset( $GLOBALS['cr_fav_card_top'] );
+
+		$page = cr_fav_page( '<p>Before.</p>' . cr_fav_card_html() . '<p>After.</p>' );
+		$GLOBALS['cr_fav_wide_applies'] = true;
+		$other                          = cr_fav_sheet( $post, $page );
+		$GLOBALS['cr_fav_wide_data']    = Single\single_facts();
+		$wide                           = cr_fav_sheet( $post, $page );
+		$GLOBALS['cr_fav_wide_applies'] = false;
+		$narrow                         = cr_fav_sheet( $post, $page );
+		cr_fav_assert( str_contains( $wide, '<div class="cr-fav-flow"><p>Before.</p></div><div class="cr-fav-sheet">' ) && 1 === preg_match( '/<div class="cr-fav-flow"><p>After\.<\/p><\/div><a class="u-url"/', $wide ), 'wide: the blocks before and after the sheet sit in the reading-width box' );
+		cr_fav_assert( ! str_contains( $narrow, 'cr-fav-flow' ) && str_contains( $narrow, '<p>Before.</p><div class="cr-fav-sheet">' ), 'not wide: no box, as before' );
+		cr_fav_assert( $other === $narrow, "another kind's column, no favorite decision: no box" );
+		cr_fav_assert( str_replace( array( '<div class="cr-fav-flow">', '</div><div class="cr-fav-sheet">', '</div><a class="u-url"' ), array( '', '<div class="cr-fav-sheet">', '<a class="u-url"' ), $wide ) === $narrow, 'wide and narrow differ by the box only' );
+		$GLOBALS['cr_fav_wide_applies'] = true;
+		$alone                          = cr_fav_sheet( $post, cr_fav_page( cr_fav_card_html() ) );
+		$GLOBALS['cr_fav_wide_applies'] = false;
+		$GLOBALS['cr_fav_wide_data']    = null;
+		cr_fav_assert( ! str_contains( $alone, 'cr-fav-flow' ), 'wide with nothing beside the sheet: no empty box' );
+
+		$locked = cr_fav_post( 2, 'Locked', array() );
+		$GLOBALS['cr_fav_queried'] = $locked->ID;
+		Single\single_facts( true );
+		cr_fav_assert( null === Single\page_sheet( $locked, 'any content' ), 'no facts (protected, unreadable, not a favorite): no decision' );
+	}
+);
+
 cr_fav_done();

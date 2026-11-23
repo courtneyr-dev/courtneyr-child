@@ -274,6 +274,20 @@ namespace PKIW {
 	}
 }
 
+namespace Courtneyr\Child\SingleWideColumn {
+	/** The unit tests render without a main query: no decision unless a test sets one. */
+	function data_for( string $kind ) {
+		return 'favorite' === $kind ? ( $GLOBALS['cr_fav_wide_data'] ?? null ) : null;
+	}
+	function applies(): bool {
+		return (bool) ( $GLOBALS['cr_fav_wide_applies'] ?? false );
+	}
+	/** Where the page's first card sits: the tests name it (true top level, false nested, null none). */
+	function first_block_is_top_level( string $content, string $name ): ?bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		return array_key_exists( 'cr_fav_card_top', $GLOBALS ) ? $GLOBALS['cr_fav_card_top'] : true;
+	}
+}
+
 namespace {
 	require CR_FAV_THEME_DIR . '/inc/stamps.php';
 	require CR_FAV_THEME_DIR . '/inc/archive-checkin-label.php';

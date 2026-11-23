@@ -93,6 +93,10 @@ namespace {
 	function get_the_content(): string {
 		return $GLOBALS['t']['content'];
 	}
+	/** Blocks for the helper checks: content names a fixture in $GLOBALS['blocks']. */
+	function parse_blocks( string $content ): array {
+		return $GLOBALS['blocks'][ $content ] ?? array();
+	}
 
 	function load_html_api(): bool {
 		$core = getenv( 'CR_WP_CORE' ) ?: (string) getenv( 'HOME' ) . '/.wp-tests/wordpress';
@@ -213,6 +217,7 @@ namespace {
 	check( 'layout filter is on render_block_data', array( array( 10, $ns . 'widen', 1 ) ) === hooked( 'render_block_data' ) );
 	check( 'header marker is on render_block_core/group with two arguments', array( array( 10, $ns . 'mark_header', 2 ) ) === hooked( 'render_block_core/group' ) );
 	check( 'stylesheet loader is on wp_enqueue_scripts at 20', array( array( 20, $ns . 'enqueue_styles', 1 ) ) === hooked( 'wp_enqueue_scripts' ) );
+	check( 'favorite and read resolvers are registered', array( 'read' => '\\Courtneyr\\Child\\SingleRead\\page_record', 'favorite' => '\\Courtneyr\\Child\\SingleFavorite\\page_sheet' ) === \Courtneyr\Child\SingleWideColumn\KINDS );
 
 	// Nothing took the column yet: no sheet.
 	check( 'column not used before a block widens', false === column_used() );
@@ -309,6 +314,28 @@ namespace {
 	scenario( 'resolver says false', array( 'kind' => 'note' ) );
 	check( 'a resolver that answers something other than an array: no decision', null === resolve() );
 	$GLOBALS['hooks']['courtneyr_child_wide_column_kinds'] = array();
+
+	// Where a page's first block of a type sits.
+	$card  = array( 'blockName' => 'x/card', 'innerBlocks' => array() );
+	$para  = array( 'blockName' => 'core/paragraph', 'innerBlocks' => array() );
+	$group = static function ( array ...$inner ): array {
+		return array( 'blockName' => 'core/group', 'innerBlocks' => $inner );
+	};
+	$GLOBALS['blocks'] = array(
+		'top'          => array( $para, $card ),
+		'nested'       => array( $para, $group( $para, $card ) ),
+		'deep'         => array( $group( $group( $card ) ) ),
+		'nested-first' => array( $group( $card ), $card ),
+		'top-first'    => array( $card, $group( $card ) ),
+		'none'         => array( $para, $group( $para ) ),
+	);
+	$top_level = static function ( string $content ): ?bool {
+		return \Courtneyr\Child\SingleWideColumn\first_block_is_top_level( $content, 'x/card' );
+	};
+	check( 'first block at the top level', true === $top_level( 'top' ) );
+	check( 'first block inside a group', false === $top_level( 'nested' ) && false === $top_level( 'deep' ) );
+	check( 'the first block in document order decides', false === $top_level( 'nested-first' ) && true === $top_level( 'top-first' ) );
+	check( 'no such block', null === $top_level( 'none' ) && null === $top_level( 'unknown' ) );
 
 	// The layout filter, through render_block_data.
 	scenario( 'layout narrow', array( 'result' => 'narrow' ) );

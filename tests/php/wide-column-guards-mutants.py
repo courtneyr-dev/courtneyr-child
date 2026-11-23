@@ -19,6 +19,8 @@ WCD = 'inc/single-wide-column.php'
 READ = 'inc/single-read.php'
 GUARDS = 'tests/php/wide-column-guards-test.php'
 READ_TEST = 'tests/php/read-single-test.php'
+FAV = 'inc/single-favorite.php'
+FAV_TEST = 'tests/php/favorite-single-test.php'
 
 # name, file, needle, replacement, tests that should kill it.
 MUTANTS = [
@@ -62,6 +64,19 @@ MUTANTS = [
     # The isset line in the Read renderer.
     ('isset-line-removed', READ, "\t$page = isset( $page['block'], $page['record'] ) ? $page : null;\n", '', [READ_TEST]),
     ('isset-block-only', READ, "isset( $page['block'], $page['record'] )", "isset( $page['block'] )", [READ_TEST]),
+    # The Favorite resolver and the sheet reading the decision.
+    ('kinds-no-favorite', WCD, "\t'favorite' => '\\\\Courtneyr\\\\Child\\\\SingleFavorite\\\\page_sheet',\n", '', [GUARDS]),
+    ('top-level-ignores-depth', WCD, 'return 0 === $depth;', 'return true;', [GUARDS]),
+    ('top-level-last-not-first', WCD, "\t\t\tif ( null !== $found ) {\n\t\t\t\treturn $found;\n\t\t\t}\n", '', [GUARDS]),
+    ('favorite-resolver-ignores-nesting', FAV, "'wide' => false !== \\Courtneyr\\Child\\SingleWideColumn\\first_block_is_top_level( $content, 'post-kinds-indieweb/favorite-card' ),", "'wide' => true,", [FAV_TEST]),
+    ('favorite-resolver-plain-narrow', FAV, "'wide' => false !== \\Courtneyr\\Child\\SingleWideColumn\\first_block_is_top_level(", "'wide' => true === \\Courtneyr\\Child\\SingleWideColumn\\first_block_is_top_level(", [FAV_TEST]),
+    ('favorite-no-flow-box', FAV, '\t\t\t$before = flow( $before );\n\t\t\t$after  = flow( $after );\n', '', [FAV_TEST]),
+    ('favorite-flow-when-narrow', FAV, 'if ( is_array( $decided ) && \\Courtneyr\\Child\\SingleWideColumn\\applies() ) {', 'if ( is_array( $decided ) ) {', [FAV_TEST]),
+    ('favorite-flow-for-another-kind', FAV, 'if ( is_array( $decided ) && \\Courtneyr\\Child\\SingleWideColumn\\applies() ) {', 'if ( \\Courtneyr\\Child\\SingleWideColumn\\applies() ) {', [FAV_TEST]),
+    ('favorite-flow-empty-box', FAV, "return '' === trim( $html ) ? $html :", 'return', [FAV_TEST]),
+    ('favorite-resolver-empty-facts', FAV, "\tif ( array() === $facts ) {\n\t\treturn null;\n\t}\n\treturn array(", '\treturn array(', [FAV_TEST]),
+    ('favorite-sheet-ignores-decision', FAV, '$facts   = is_array( $decided ) ? $decided : single_facts();', '$facts   = single_facts();', [FAV_TEST]),
+    ('favorite-sheet-no-fallback', FAV, '$facts   = is_array( $decided ) ? $decided : single_facts();', '$facts   = is_array( $decided ) ? $decided : array();', [FAV_TEST]),
     ('decided-record-ignored', READ, "$after .= is_array( $page ) ? $page['record'] : reading_record( $read, $post );", '$after .= reading_record( $read, $post );', [READ_TEST]),
 ]
 
@@ -85,13 +100,17 @@ def main():
             return tree
 
         base = fresh()
-        if not run(base, [GUARDS, READ_TEST]):
+        if not run(base, [GUARDS, READ_TEST] + ([FAV_TEST] if os.path.exists(os.path.join(base, FAV_TEST)) else [])):
             print('BASELINE FAILS: the unmutated tree does not pass')
             sys.exit(2)
         killed = survived = skipped = 0
         for name, path, needle, repl, tests in MUTANTS:
             tree = fresh()
             target = os.path.join(tree, path)
+            if not os.path.exists(target):
+                print(f'n/a      {name} (no {path})')
+                skipped += 1
+                continue
             src = open(target, encoding='utf-8').read()
             if src.count(needle) != 1:
                 print(f'n/a      {name} (needle found {src.count(needle)} times)')

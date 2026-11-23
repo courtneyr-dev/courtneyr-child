@@ -53,6 +53,30 @@ function single_facts( bool $refresh = false ): array {
 }
 
 /**
+ * The wide column's resolver for favorites (inc/single-wide-column.php).
+ *
+ * The facts belong to the post, not the page, so every page of a readable
+ * favorite prints the sheet and reads these facts from the decision. The
+ * sheet takes the column when the page's first card is a top-level block, or
+ * when the page has no card (the sheet then holds the page). A card inside an
+ * authored block (a Group, say) keeps the sheet in that block, at its width.
+ *
+ * @param \WP_Post $post    Post.
+ * @param string   $content The content of the page being printed.
+ * @return array{wide: bool, data: array<string, mixed>}|null Null when this isn't a readable favorite.
+ */
+function page_sheet( \WP_Post $post, string $content ): ?array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed
+	$facts = single_facts();
+	if ( array() === $facts ) {
+		return null;
+	}
+	return array(
+		'wide' => false !== \Courtneyr\Child\SingleWideColumn\first_block_is_top_level( $content, 'post-kinds-indieweb/favorite-card' ),
+		'data' => $facts,
+	);
+}
+
+/**
  * Whether the sheet owns this page's H1.
  *
  * @return bool
@@ -285,6 +309,19 @@ function meta_offset( string $html, int $start ): int {
 }
 
 /**
+ * Blocks beside the sheet in the wide column, in a box at the reading width.
+ *
+ * The card is a top-level block there (the decision checked), so the HTML on
+ * either side of it is whole blocks.
+ *
+ * @param string $html Blocks before or after the card.
+ * @return string
+ */
+function flow( string $html ): string {
+	return '' === trim( $html ) ? $html : '<div class="cr-fav-flow">' . $html . '</div>';
+}
+
+/**
  * Rebuild the main post content as the sheet.
  *
  * @param string               $html  Rendered post-content block.
@@ -295,7 +332,9 @@ function sheet( string $html, array $block ): string {
 	if ( 'core/post-content' !== ( $block['blockName'] ?? '' ) || false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'single-post__content' ) ) {
 		return $html;
 	}
-	$facts = single_facts();
+	// The facts the wide column decided on; elsewhere (no decision, or another first kind) the post's own, as always.
+	$decided = \Courtneyr\Child\SingleWideColumn\data_for( 'favorite' );
+	$facts   = is_array( $decided ) ? $decided : single_facts();
 	if ( array() === $facts ) {
 		return $html;
 	}
@@ -317,6 +356,11 @@ function sheet( string $html, array $block ): string {
 		$before = (string) substr( $content, 0, (int) $card[0][1] );
 		$after  = (string) substr( $content, (int) $card[0][1] + strlen( $card[0][0] ) );
 		$body   = body_html( card_record( $facts ) . $mount );
+		if ( is_array( $decided ) && \Courtneyr\Child\SingleWideColumn\applies() ) {
+			// In the wide column the blocks around the sheet keep the reading-width box they had in the entry.
+			$before = flow( $before );
+			$after  = flow( $after );
+		}
 	} else {
 		$body = body_html( plain_record( $facts ) . $mount ) . $content;
 	}

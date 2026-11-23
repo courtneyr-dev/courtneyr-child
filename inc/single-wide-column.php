@@ -42,7 +42,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Kind slug => callable( \WP_Post, string ): ?array{wide: bool, data: mixed}. */
 const KINDS = array(
-	'read' => '\\Courtneyr\\Child\\SingleRead\\page_record',
+	'read'     => '\\Courtneyr\\Child\\SingleRead\\page_record',
+	'favorite' => '\\Courtneyr\\Child\\SingleFavorite\\page_sheet',
 );
 
 /**
@@ -83,6 +84,33 @@ function resolve(): ?array {
 		}
 	}
 	return $memo[ $key ];
+}
+
+/**
+ * Where a page's first block of a type sits: at the top level of the page, or inside another block.
+ *
+ * A kind whose record replaces one of its blocks can take the column only when
+ * that block is a top-level block; inside an authored Group the record keeps
+ * the Group's width. This reads block names only, never attributes.
+ *
+ * @param string $content The content of the page being printed.
+ * @param string $name    Block name.
+ * @return bool|null True at the top level, false nested, null when the page has none.
+ */
+function first_block_is_top_level( string $content, string $name ): ?bool {
+	$walk = static function ( array $blocks, int $depth ) use ( &$walk, $name ): ?bool {
+		foreach ( $blocks as $block ) {
+			if ( ( $block['blockName'] ?? '' ) === $name ) {
+				return 0 === $depth;
+			}
+			$found = $walk( (array) ( $block['innerBlocks'] ?? array() ), $depth + 1 );
+			if ( null !== $found ) {
+				return $found;
+			}
+		}
+		return null;
+	};
+	return $walk( \parse_blocks( $content ), 0 );
 }
 
 /**

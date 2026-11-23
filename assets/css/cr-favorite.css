@@ -526,6 +526,66 @@
 }
 
 /*
+ * The sheet in the wide column (inc/single-wide-column.php decides; the
+ * class it adds is the only switch). The sheet fills the column, theme.json
+ * wideSize. From 64rem the record and the mount sit side by side from the
+ * sheet's top: the mount starts at the sheet's midpoint, above the H1, as the
+ * approved mockup draws it. Under 64rem cr-wide-column.css keeps the column
+ * at the reading width and the sheet stacks as before. The blocks around the
+ * sheet sit in .cr-fav-flow, which cr-wide-column.css keeps at the reading
+ * width, so they lay out as they did in the entry. The star and the tape
+ * keep no grid area: their corner stays the sheet's padding box.
+ */
+body.single-post.kind-favorite .cr-wide-column.single-post__content > .pkiw-singular-entry > .cr-fav-sheet {
+	max-width: none;
+}
+
+@media (min-width: 64rem) {
+
+	.cr-wide-column > .pkiw-singular-entry > .cr-fav-sheet {
+		padding-inline: var(--cr-space-2xl);
+	}
+
+	.cr-wide-column > .pkiw-singular-entry > .cr-fav-sheet:has(> .cr-fav-sheet__body > .cr-fav-sheet__mount:not(.cr-cover--failed)) {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		column-gap: var(--cr-space-xl);
+		align-content: start;
+	}
+
+	.cr-wide-column > .pkiw-singular-entry > .cr-fav-sheet:has(> .cr-fav-sheet__body > .cr-fav-sheet__mount:not(.cr-cover--failed)) > :where(:not(.cr-fav-sheet__star):not(.cr-fav-sheet__tape)) {
+		grid-column: 1 / -1;
+	}
+
+	.cr-wide-column > .pkiw-singular-entry > .cr-fav-sheet:has(> .cr-fav-sheet__body > .cr-fav-sheet__mount:not(.cr-cover--failed)) > .cr-fav-sheet__title {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.cr-wide-column > .pkiw-singular-entry > .cr-fav-sheet:has(> .cr-fav-sheet__body > .cr-fav-sheet__mount:not(.cr-cover--failed)) > .cr-fav-sheet__body {
+		display: contents;
+	}
+
+	.cr-wide-column > .pkiw-singular-entry > .cr-fav-sheet:has(> .cr-fav-sheet__body > .cr-fav-sheet__mount:not(.cr-cover--failed)) > .cr-fav-sheet__body > .cr-fav-sheet__record {
+		grid-column: 1;
+		grid-row: 2;
+	}
+
+	/* The mount rises into the sheet's top padding, which on the left clears the star and the tape. */
+	.cr-wide-column > .pkiw-singular-entry > .cr-fav-sheet:has(> .cr-fav-sheet__body > .cr-fav-sheet__mount:not(.cr-cover--failed)) > .cr-fav-sheet__body > .cr-fav-sheet__mount {
+		grid-column: 2;
+		grid-row: 1 / span 2;
+		align-self: start;
+		margin-block-start: calc(var(--cr-space-lg) - var(--cr-space-3xl));
+	}
+
+	/* A card-less sheet's own prose keeps the reading width. */
+	.cr-wide-column > .pkiw-singular-entry > .cr-fav-sheet > :is(p, ul, ol, figure, blockquote, h2, h3, h4) {
+		max-inline-size: var(--wp--style--global--content-size);
+	}
+}
+
+/*
  * A protected favorite keeps the template header. PFBT hides the title of an
  * aside through !important rules, so the title comes back the way the
  * check-in single does it, and the format avatar goes.
