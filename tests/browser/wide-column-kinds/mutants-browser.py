@@ -45,6 +45,26 @@ MUTANTS = {
             ('resolver-unregistered', WCD, "\t'favorite' => '\\\\Courtneyr\\\\Child\\\\SingleFavorite\\\\page_sheet',\n", ''),
         ],
     },
+    'repost': {
+        'pages': 'rep-card,rep-siblings,rep-nested,rep-plain,rep-page-two',
+        'widths': '1448,1024,768',
+        'list': [
+            ('pin-holds', REP_CSS, '\tbody.single-post.kind-repost .cr-wide-column.single-post__header,\n\tbody.single-post.kind-repost .cr-wide-column.single-post__content {\n\t\tmax-inline-size: var(--wp--style--global--wide-size);\n\t}\n', ''),
+            ('wrapper-uncapped-under-64rem', REP_CSS, '\tbody.single-post.kind-repost .cr-wide-column.single-post__content > .pkiw-singular-entry {\n\t\tmax-width: var(--wp--style--global--content-size);\n\t}\n', ''),
+            ('lede-not-spanning', REP_CSS, '.single-post__header > .single-post__lede-meta {\n\t\tmax-inline-size: none;\n\t}', '.single-post__header > .single-post__lede-meta {\n\t}'),
+            ('date-not-moved', REP_CSS, '\t\torder: 1;\n\t\tmargin-inline-start: auto;\n', ''),
+            ('date-order-only', REP_CSS, '\t\torder: 1;\n\t\tmargin-inline-start: auto;\n', '\t\torder: 1;\n'),
+            ('sparkle-shared-compensation', REP_CSS, 'body.single-post.kind-repost .cr-wide-column.single-post__content::before {\n\tright: calc((100% - min(100%, var(--cr-repost-measure))) / 2 - 1rem);\n}', ''),
+            ('sparkle-unregistered', REP_CSS, '@property --cr-repost-measure {\n\tsyntax: "<length>";\n\tinherits: true;\n\tinitial-value: 0;\n}', ''),
+            ('pin-lost-under-64rem', REP_CSS, '@media not all and (min-width: 64rem) {\n\n\tbody.single-post.kind-repost .cr-wide-column.single-post__content {\n\t\tmax-inline-size: var(--cr-measure-wide);\n\t}\n', '@media not all and (min-width: 64rem) {\n'),
+            ('breakpoint-40rem', REP_CSS, '@media (min-width: 64rem) {\n\n\tbody.single-post.kind-repost .cr-wide-column.single-post__header,', '@media (min-width: 40rem) {\n\n\tbody.single-post.kind-repost .cr-wide-column.single-post__header,'),
+            ('clip-rows-stretch', REP_CSS, '\t\tgrid-template-rows: auto 1fr;\n', ''),
+            ('renderer-no-flow-box', REP_PHP, "add_filter( 'render_block', __NAMESPACE__ . '\\\\wide_flow', 20, 2 );", ''),
+            ('resolver-ignores-nesting', REP_PHP, "\t\t\t'wide' => $top,", "\t\t\t'wide' => true,"),
+            ('resolver-meta-only-narrow', REP_PHP, "\t\t'wide' => true,\n\t\t'data' => 'meta',", "\t\t'wide' => false,\n\t\t'data' => 'meta',"),
+            ('resolver-unregistered', WCD, "\t'repost'   => '\\\\Courtneyr\\\\Child\\\\Repost\\\\page_clipping',\n", ''),
+        ],
+    },
 }
 
 
@@ -57,7 +77,7 @@ def main():
         subprocess.run(['rsync', '-a', '--delete', '--exclude', '.git', '--exclude', 'node_modules', '--exclude', 'vendor',
                         '--exclude', 'tests', '--exclude', '.github', tree + '/', theme + '/'], check=True)
         time.sleep(3)
-        for u in ('http://localhost:8887/', 'http://localhost:8887/kind/favorite/'):
+        for u in ('http://localhost:8887/', 'http://localhost:8887/kind/favorite/', 'http://localhost:8887/kind/repost/'):
             urllib.request.urlopen(u).read()
 
     killed = survived = 0

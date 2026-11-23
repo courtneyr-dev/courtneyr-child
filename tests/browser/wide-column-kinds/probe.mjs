@@ -59,6 +59,8 @@ for ( const scheme of schemes ) {
 					mount: r( q( '.cr-fav-sheet__mount' ) ),
 					sheetProse: r( q( '.cr-fav-sheet > p.wp-block-paragraph' ) ),
 					clip: r( q( '.cr-repost-clip--single' ) ),
+					clipCaption: r( q( '.cr-repost-clip--single .pk-caption' ) ),
+					clipNote: r( q( '.cr-repost-clip--single .pk-note' ) ),
 					header: r( q( 'main .single-post__header' ) ),
 					h1: r( q( 'main h1' ) ),
 					date: r( q( 'main .single-post__date' ) ),

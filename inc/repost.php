@@ -675,6 +675,78 @@ function single_card( string $html, array $block, $instance ): string {
 add_filter( 'render_block_post-kinds-indieweb/repost-card', __NAMESPACE__ . '\\single_card', 10, 3 );
 
 /**
+ * The wide column's resolver for reposts (inc/single-wide-column.php).
+ *
+ * Every repost card on the page is dressed by single_card() as it renders, so
+ * the decision carries no data the renderer needs, only whether the clipping
+ * takes the column: when the page's first card is a top-level block, or when
+ * the post holds no card at all and meta_only_clipping() prints one from the
+ * plugin's facts. A page of a split post without the card keeps the reading
+ * width; a card inside an authored Group keeps the Group's width.
+ *
+ * @param \WP_Post $post    Post.
+ * @param string   $content The content of the page being printed.
+ * @return array{wide: bool, data: string}|null Null when the page prints no clipping.
+ */
+function page_clipping( \WP_Post $post, string $content ): ?array {
+	$top = \Courtneyr\Child\SingleWideColumn\first_block_is_top_level( $content, 'post-kinds-indieweb/repost-card' );
+	if ( null !== $top ) {
+		return array(
+			'wide' => $top,
+			'data' => 'card',
+		);
+	}
+	$facts = facts( $post->ID );
+	if ( has_block( 'post-kinds-indieweb/repost-card', $post ) || ( '' === fact( $facts, 'url' ) && '' === fact( $facts, 'cited_title' ) ) ) {
+		return null;
+	}
+	return array(
+		'wide' => true,
+		'data' => 'meta',
+	);
+}
+
+/**
+ * Keep the blocks around a wide clipping at the reading width they had.
+ *
+ * In the wide column the singular wrapper spans the column; the blocks before
+ * and after the page's first clipping go into a box at the reading width, so
+ * floats, wide groups and authored margins lay out as they did in the wrapper.
+ * The decision checked that this clipping is a top-level block, so the HTML on
+ * either side of it is whole blocks.
+ *
+ * @param string               $html  Rendered post content.
+ * @param array<string, mixed> $block Parsed block.
+ * @return string
+ */
+function wide_flow( string $html, array $block ): string {
+	if ( 'core/post-content' !== ( $block['blockName'] ?? '' ) || false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'single-post__content' )
+		|| null === \Courtneyr\Child\SingleWideColumn\data_for( 'repost' ) || ! \Courtneyr\Child\SingleWideColumn\applies() ) {
+		return $html;
+	}
+	// The singular wrapper's first child starts after its opening tag.
+	$open = strpos( $html, 'pkiw-singular-entry' );
+	$open = false === $open ? false : strpos( $html, '>', $open );
+	// The plugin's hidden entry data closes the wrapper; the blocks end where it starts.
+	$data = strrpos( $html, '" hidden></a><time class="dt-published"' );
+	$end  = false === $data ? false : strrpos( substr( $html, 0, $data ), '<a class="u-url" href="' );
+	// The page's first clipping: an article with no article inside it.
+	$mark = false === $open ? false : strpos( $html, 'cr-repost-clip--single', $open );
+	$from = false === $mark ? false : strrpos( substr( $html, 0, $mark ), '<article' );
+	$to   = false === $from ? false : strpos( $html, '</article>', $from );
+	if ( false === $open || false === $end || false === $from || false === $to || $from < $open || $to > $end ) {
+		return $html;
+	}
+	$start  = $open + 1;
+	$to    += strlen( '</article>' );
+	$box    = static fn( string $part ): string => '' === trim( $part ) ? $part : '<div class="cr-repost-flow">' . $part . '</div>';
+	$before = (string) substr( $html, $start, $from - $start );
+	$after  = (string) substr( $html, $to, $end - $to );
+	return (string) substr( $html, 0, $start ) . $box( $before ) . (string) substr( $html, $from, $to - $from ) . $box( $after ) . (string) substr( $html, $end );
+}
+add_filter( 'render_block', __NAMESPACE__ . '\\wide_flow', 20, 2 );
+
+/**
  * Print a clipping on the single of a repost that has no card block.
  *
  * A repost filed from the classic meta box holds its source in post meta and

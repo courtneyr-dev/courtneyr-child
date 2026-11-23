@@ -543,4 +543,61 @@ cr_rp_group(
 	}
 );
 
+cr_rp_group(
+	'the wide column decides per page from the card, and a meta-only repost takes it too',
+	static function (): void {
+		cr_rp_reset();
+		$post = cr_rp_post( 7, 'Shared', cr_rp_facts() );
+		$GLOBALS['cr_rp']['posts'][7]->post_content = '<!-- wp:post-kinds-indieweb/repost-card /-->';
+		foreach ( array( 'top-level card' => array( true, true ), 'card inside a group' => array( false, false ) ) as $shape => list( $top, $wide ) ) {
+			$GLOBALS['cr_rp']['card_top'] = $top;
+			$decided                      = Repost\page_clipping( $post, 'page' );
+			cr_rp_assert( is_array( $decided ) && $wide === $decided['wide'] && 'card' === $decided['data'], "$shape: wide is " . var_export( $wide, true ) );
+		}
+		$GLOBALS['cr_rp']['card_top'] = null;
+		cr_rp_same( null, Repost\page_clipping( $post, 'page two' ), 'a page without the card, when the post holds one: no decision' );
+
+		$meta = cr_rp_post( 8, 'Meta only', cr_rp_facts() );
+		$GLOBALS['cr_rp']['posts'][8]->post_content = '<!-- wp:paragraph --><p>Note.</p><!-- /wp:paragraph -->';
+		$decided = Repost\page_clipping( $meta, 'page' );
+		cr_rp_assert( is_array( $decided ) && true === $decided['wide'] && 'meta' === $decided['data'], 'no card in the post, facts to print: the meta-only clipping is wide' );
+		foreach ( array( 'url', 'cited_title' ) as $key ) {
+			$GLOBALS['cr_rp']['facts'][8] = cr_rp_facts( array( $key => '' ) );
+			cr_rp_assert( null !== Repost\page_clipping( $meta, 'page' ), "meta-only with only the $key missing still prints" );
+		}
+		$GLOBALS['cr_rp']['facts'][8] = cr_rp_facts( array( 'url' => '', 'cited_title' => '' ) );
+		cr_rp_same( null, Repost\page_clipping( $meta, 'page' ), 'no card and nothing to print: no decision' );
+		unset( $GLOBALS['cr_rp']['card_top'] );
+	}
+);
+
+cr_rp_group(
+	'a wide repost page keeps the blocks around its clipping in a reading-width box',
+	static function (): void {
+		cr_rp_reset();
+		$clip   = '<article class="pk-card k-repost h-cite cr-repost-clip cr-repost-clip--single"><div class="pk-body">Clip</div></article>';
+		$meta   = '<a class="u-url" href="https://example.test/r/" hidden></a><time class="dt-published" datetime="2026-01-01" hidden></time>';
+		$page   = static fn( string $inner ): string => '<div class="entry-content single-post__content"><div class="h-entry kind-repost pkiw-singular-entry">' . $inner . $meta . '</div></div>';
+		$block  = array( 'blockName' => 'core/post-content', 'attrs' => array( 'className' => 'single-post__content wp-block-post-content' ) );
+		$html   = $page( '<p>Before.</p>' . $clip . '<p>After.</p>' );
+
+		cr_rp_same( 20, cr_rp_priority( 'render_block', 'Courtneyr\\Child\\Repost\\wide_flow' ), 'the box is drawn on render_block at 20, after the plugin wraps the entry' );
+		cr_rp_same( $html, Repost\wide_flow( $html, $block ), 'no decision: untouched' );
+		$GLOBALS['cr_rp']['wide_applies'] = true;
+		cr_rp_same( $html, Repost\wide_flow( $html, $block ), "another kind's column: untouched" );
+		$GLOBALS['cr_rp']['wide_data'] = 'card';
+		cr_rp_same( $page( '<div class="cr-repost-flow"><p>Before.</p></div>' . $clip . '<div class="cr-repost-flow"><p>After.</p></div>' ), Repost\wide_flow( $html, $block ), 'wide: the blocks before and after sit in the box' );
+		cr_rp_same( $page( $clip ), Repost\wide_flow( $page( $clip ), $block ), 'wide, nothing around the clipping: no empty box' );
+		$two = $page( $clip . '<p>Mid.</p>' . $clip );
+		cr_rp_same( $page( $clip . '<div class="cr-repost-flow"><p>Mid.</p>' . $clip . '</div>' ), Repost\wide_flow( $two, $block ), 'wide: a second clipping stays in the box at the reading width' );
+		cr_rp_same( $html, Repost\wide_flow( $html, array( 'blockName' => 'core/post-content', 'attrs' => array( 'className' => 'other' ) ) ), 'another post content block: untouched' );
+		cr_rp_same( '<div class="pkiw-singular-entry"><p>Before.</p>' . $clip . '</div>', Repost\wide_flow( '<div class="pkiw-singular-entry"><p>Before.</p>' . $clip . '</div>', $block ), 'no entry data to find the end by: untouched' );
+		$outside = $page( '<p>Before.</p>' ) . $clip;
+		cr_rp_same( $outside, Repost\wide_flow( $outside, $block ), 'a clipping after the entry data, outside the wrapper: untouched' );
+		$GLOBALS['cr_rp']['wide_applies'] = false;
+		cr_rp_same( $html, Repost\wide_flow( $html, $block ), 'the repost decision says narrow: untouched' );
+		unset( $GLOBALS['cr_rp']['wide_data'], $GLOBALS['cr_rp']['wide_applies'] );
+	}
+);
+
 cr_rp_finish();

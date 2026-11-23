@@ -21,6 +21,8 @@ GUARDS = 'tests/php/wide-column-guards-test.php'
 READ_TEST = 'tests/php/read-single-test.php'
 FAV = 'inc/single-favorite.php'
 FAV_TEST = 'tests/php/favorite-single-test.php'
+REP = 'inc/repost.php'
+REP_TEST = 'tests/php/repost-test.php'
 
 # name, file, needle, replacement, tests that should kill it.
 MUTANTS = [
@@ -77,6 +79,21 @@ MUTANTS = [
     ('favorite-resolver-empty-facts', FAV, "\tif ( array() === $facts ) {\n\t\treturn null;\n\t}\n\treturn array(", '\treturn array(', [FAV_TEST]),
     ('favorite-sheet-ignores-decision', FAV, '$facts   = is_array( $decided ) ? $decided : single_facts();', '$facts   = single_facts();', [FAV_TEST]),
     ('favorite-sheet-no-fallback', FAV, '$facts   = is_array( $decided ) ? $decided : single_facts();', '$facts   = is_array( $decided ) ? $decided : array();', [FAV_TEST]),
+    # The Repost resolver and the reading-width box around its clipping.
+    ('kinds-no-repost', WCD, "\t'repost'   => '\\\\Courtneyr\\\\Child\\\\Repost\\\\page_clipping',\n", '', [GUARDS]),
+    ('repost-resolver-ignores-nesting', REP, "\t\t\t'wide' => $top,", "\t\t\t'wide' => true,", [REP_TEST]),
+    ('repost-resolver-any-page', REP, "\tif ( null !== $top ) {", "\tif ( true ) {", [REP_TEST]),
+    ('repost-meta-ignores-card-elsewhere', REP, "has_block( 'post-kinds-indieweb/repost-card', $post ) || ( ", "( ", [REP_TEST]),
+    ('repost-meta-ignores-facts', REP, " || ( '' === fact( $facts, 'url' ) && '' === fact( $facts, 'cited_title' ) )", '', [REP_TEST]),
+    ('repost-meta-needs-both', REP, "'' === fact( $facts, 'url' ) && '' === fact( $facts, 'cited_title' )", "( '' === fact( $facts, 'url' ) || '' === fact( $facts, 'cited_title' ) )", [REP_TEST]),
+    ('repost-flow-for-another-kind', REP, "|| null === \\Courtneyr\\Child\\SingleWideColumn\\data_for( 'repost' ) ", '', [REP_TEST]),
+    ('repost-flow-when-narrow', REP, " || ! \\Courtneyr\\Child\\SingleWideColumn\\applies() ) {", ' ) {', [REP_TEST]),
+    ('repost-flow-any-content-block', REP, "'core/post-content' !== ( $block['blockName'] ?? '' ) || false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'single-post__content' )\n\t\t||", "'core/post-content' !== ( $block['blockName'] ?? '' )\n\t\t||", [REP_TEST]),
+    ('repost-flow-empty-box', REP, "'' === trim( $part ) ? $part : ", '', [REP_TEST]),
+    ('repost-flow-last-article-end', REP, "$to   = false === $from ? false : strpos( $html, '</article>', $from );", "$to   = false === $from ? false : strrpos( $html, '</article>' );", [REP_TEST]),
+    ('repost-flow-no-end-guard', REP, ' || $from < $open || $to > $end ) {', ' ) {', [REP_TEST]),
+    # Not listed: dropping `false === $end` is equivalent; with no entry data $to > $end (an int against false) already returns early.
+    ('repost-flow-not-hooked', REP, "add_filter( 'render_block', __NAMESPACE__ . '\\\\wide_flow', 20, 2 );", '', [REP_TEST]),
     ('decided-record-ignored', READ, "$after .= is_array( $page ) ? $page['record'] : reading_record( $read, $post );", '$after .= reading_record( $read, $post );', [READ_TEST]),
 ]
 
@@ -100,7 +117,7 @@ def main():
             return tree
 
         base = fresh()
-        if not run(base, [GUARDS, READ_TEST] + ([FAV_TEST] if os.path.exists(os.path.join(base, FAV_TEST)) else [])):
+        if not run(base, [GUARDS, READ_TEST] + [t for t in (FAV_TEST, REP_TEST) if os.path.exists(os.path.join(base, t))]):
             print('BASELINE FAILS: the unmutated tree does not pass')
             sys.exit(2)
         killed = survived = skipped = 0

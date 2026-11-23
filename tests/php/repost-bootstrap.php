@@ -264,6 +264,20 @@ namespace Courtneyr\Child\Microformats {
 	}
 }
 
+namespace Courtneyr\Child\SingleWideColumn {
+	/** The unit tests render without a main query: no decision unless a test sets one. */
+	function data_for( string $kind ) {
+		return 'repost' === $kind ? ( $GLOBALS['cr_rp']['wide_data'] ?? null ) : null;
+	}
+	function applies(): bool {
+		return (bool) ( $GLOBALS['cr_rp']['wide_applies'] ?? false );
+	}
+	/** Where the page's first card sits: the tests name it (true top level, false nested, null none). */
+	function first_block_is_top_level( string $content, string $name ): ?bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		return array_key_exists( 'card_top', $GLOBALS['cr_rp'] ) ? $GLOBALS['cr_rp']['card_top'] : true;
+	}
+}
+
 namespace PKIW {
 	function kind_facts( int $post_id ): array {
 		return (array) ( $GLOBALS['cr_rp']['facts'][ $post_id ] ?? array() );
