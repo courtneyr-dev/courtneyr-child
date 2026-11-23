@@ -4,6 +4,7 @@
 # git archive and runs tools/minify-css.mjs, which reads the esbuild pin from
 # package.json.
 /.claude export-ignore
+/storybook export-ignore
 /.github export-ignore
 /tests export-ignore
 /docs export-ignore
@@ -20,3 +21,6 @@
 /v0.*.png export-ignore
 .gitignore export-ignore
 .gitattributes export-ignore
+# The manifest holds each fixture's SHA-256, so a checkout must not convert line
+# endings. linguist-generated folds the captured files in GitHub diffs.
+/storybook/fixtures/** -text linguist-generated
