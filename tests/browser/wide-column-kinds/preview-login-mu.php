@@ -22,7 +22,13 @@ add_action(
 		$id = (int) ( $_GET['cr_r2_preview_of'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( $id > 0 ) {
 			header( 'Content-Type: text/plain' );
-			echo esc_url_raw( add_query_arg( 'cr_r2_login', '1', get_preview_post_link( $id ) ) );
+			// The arguments post_preview() adds for a published post, so WordPress serves the autosave.
+			$args = array(
+				'preview_id'    => $id,
+				'preview_nonce' => wp_create_nonce( 'post_preview_' . $id ),
+				'cr_r2_login'   => '1',
+			);
+			echo esc_url_raw( add_query_arg( $args, get_preview_post_link( $id ) ) );
 			exit;
 		}
 	}
