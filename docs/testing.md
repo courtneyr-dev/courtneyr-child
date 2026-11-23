@@ -161,7 +161,7 @@ A fixture is the whole response body after seven rules in `storybook/capture/for
 
 `storybook/check.mjs` reads theme files from `HEAD`, never from the working tree. Its lines start with one of five words:
 
-- `STALE` means a file in the deploy archive, the recipe, or `storybook/capture/` changed since the capture. Run the capture and commit the result. The theme input is the file set `git archive HEAD` exports, minus `*.md`, `LICENSE`, `package.json` and `tools/`, so a change to tests, docs, CI or a root dependency doesn't count.
+- `STALE` means a file in the deploy archive, the recipe, or `storybook/capture/` changed since the capture. Run the capture and commit the result. On a pull request that changes nothing under `storybook/`, CI reports this as a warning and passes, so a theme change merges first and the recapture follows in its own pull request. The theme input is the file set `git archive HEAD` exports, minus `*.md`, `LICENSE`, `package.json` and `tools/`, so a change to tests, docs, CI or a root dependency doesn't count.
 - `TAMPERED` means a file under `storybook/fixtures/` isn't the one the manifest records. Never edit a fixture by hand.
 - `UNRESOLVED` means a document loads a file that neither the theme nor the mirror holds, or names a source file the theme dropped.
 - `UNLINKED` means a fixture has no story, or a story names a fixture that doesn't exist.
@@ -197,5 +197,7 @@ The sources in `assets/css/` are never minified in this repo. `private/bin/sync-
 `.github/workflows/lint.yml` runs on push and pull request with `actions/checkout@v7`, `shivammathur/setup-php@v2` (PHP 8.5) and `actions/setup-node@v7` (Node 24). All three actions declare the `node24` runtime. The PHPCS and stylelint steps each run even when an earlier gate fails, so one run reports all three.
 
 `.github/workflows/storybook.yml` has two more jobs. One runs `node storybook/check.mjs` with no install. The other runs `npm ci` in `storybook/`, builds the Storybook, and runs axe on every story in the runner's Chrome. Neither publishes anything.
+
+`storybook/ci-mode.mjs` picks the mode from the paths a push or pull request changes. A change under `storybook/` or to `storybook.yml` is strict: the first job fails on any finding and the second job runs. A push CI can't compare, such as a new branch, is strict too. Every other change is advisory: `node storybook/check.mjs --advisory` prints `STALE` and `UNRESOLVED` findings as one GitHub warning with the recapture command and exits 0, and the build and axe job is skipped. The other three finding words fail in both modes.
 
 The workflow installs with `composer install` and `npm install` against the exact pins. There's no `package-lock.json` because the machine that set this up had too little disk on 2026-09-13 to resolve one. Adding it and switching the step to `npm ci` is a follow-up.

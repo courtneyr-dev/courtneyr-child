@@ -1,11 +1,19 @@
 # The site Storybook (storybook/) shows HTML that WordPress rendered from a known
-# commit. The first job fails when the committed fixtures no longer match the
-# theme, the recipe or the capture code, or when a file under
-# storybook/fixtures/ is not the one its manifest records. It needs git and
-# Node only. The second job builds the Storybook and runs axe on every story.
+# commit. Nothing is published from here. A capture needs a local WordPress
+# Studio site, so it stays local (docs/testing.md).
 #
-# Nothing is published from here. A capture needs a local WordPress Studio
-# site, so it stays local (docs/testing.md).
+# The rule, decided by storybook/ci-mode.mjs from the paths the push or pull
+# request changes:
+#
+# - strict, when a path under storybook/ or this file changes, and when the
+#   change can't be compared (a new branch, a force push). The first job fails
+#   on any finding of storybook/check.mjs, and the second job builds the
+#   Storybook and runs axe on every story.
+# - advisory, for every other change. A theme change can only leave the fixtures
+#   stale, so the first job prints the stale inputs and the recapture command as
+#   a warning and passes, and the second job is skipped. The build serves the
+#   theme's assets/ from the checkout, so axe sees a stylesheet change in the
+#   pull request that recaptures.
 
 name: Storybook
 
@@ -20,24 +28,38 @@ jobs:
   fixtures:
     name: Storybook fixtures match the theme
     runs-on: ubuntu-24.04
+    outputs:
+      mode: ${{ steps.mode.outputs.mode }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # A pull request is checked out as its merge commit, whose first
+          # parent is the base: 2 commits. A push can hold any number, so it
+          # gets the history.
+          fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 0 }}
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
 
-      - name: storybook/check.mjs (no install)
-        run: node storybook/check.mjs
+      - name: Strict or advisory, from the paths this change touches
+        id: mode
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && 'HEAD^1' || github.event.before }}
+        run: node storybook/ci-mode.mjs "$BASE" >> "$GITHUB_OUTPUT"
 
-      - name: Asset paths and writes stay inside the fixture directory
+      - name: storybook/check.mjs (no install)
+        run: node storybook/check.mjs ${{ steps.mode.outputs.mode == 'advisory' && '--advisory' || '' }}
+
+      - name: Asset paths, writes and the CI rule
         if: ${{ !cancelled() }}
         run: node --test storybook/tests/*.test.mjs
 
   build:
     name: Storybook build and axe
+    needs: fixtures
+    if: ${{ !cancelled() && needs.fixtures.outputs.mode != 'advisory' }}
     runs-on: ubuntu-24.04
     defaults:
       run:

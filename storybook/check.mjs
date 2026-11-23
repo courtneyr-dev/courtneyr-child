@@ -147,10 +147,18 @@ const dirty = git( REPO, [ 'status', '--porcelain', '--', '.', ':(exclude)storyb
 if ( dirty ) {
 	process.stdout.write( `# ${ dirty.split( '\n' ).length } uncommitted changes are not checked: theme files and the capture code are read from HEAD.\n` );
 }
-if ( findings.length ) {
-	findings.forEach( ( line ) => process.stdout.write( `${ line }\n` ) );
+// A recapture clears these two. In CI, --advisory is passed when the change
+// touches neither storybook/ nor its workflow (storybook/ci-mode.mjs).
+const advisory = process.argv.includes( '--advisory' );
+const blocking = advisory ? findings.filter( ( line ) => ! /^(STALE|UNRESOLVED) /.test( line ) ) : findings;
+findings.forEach( ( line ) => process.stdout.write( `${ line }\n` ) );
+if ( blocking.length ) {
 	process.stdout.write( `FIXTURES CHECK FAIL: ${ findings.length } finding${ findings.length === 1 ? '' : 's' }\n` );
 	process.exitCode = 1;
+} else if ( findings.length ) {
+	const message = [ ...findings, 'This check passes because the change touches neither storybook/ nor its workflow. To recapture, on a machine with WordPress Studio: node storybook/capture/capture.mjs' ].join( '\n' );
+	process.stdout.write( `::warning title=Storybook fixtures are stale::${ message.replace( /%/g, '%25' ).replace( /\r/g, '%0D' ).replace( /\n/g, '%0A' ) }\n` );
+	process.stdout.write( `FIXTURES STALE, NOT FAILING: ${ findings.length } finding${ findings.length === 1 ? '' : 's' } a recapture clears; this change touches neither storybook/ nor its workflow\n` );
 } else {
 	const commits = [ ...new Set( [ ...captured.values() ].map( ( manifest ) => manifest.source.commit.slice( 0, 12 ) ) ) ].join( ', ' );
 	process.stdout.write( `FIXTURES FRESH: ${ captured.size } fixtures, captured from commit ${ commits }, match the theme at HEAD, the recipe and the capture code; ${ told.size } are shown by a story\n` );
