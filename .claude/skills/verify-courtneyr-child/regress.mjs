@@ -11,6 +11,7 @@ const THEME_SLUG = 'courtneyr-child';
 const PART = 'verify-regress-head-part';
 const PHP = 'verify-regress-head-php';
 const PATTERN = 'verify-regress-head-pattern';
+const SAVED = 'verify-regress-saved-footer';
 
 const flags = {};
 for ( let i = 2; i < process.argv.length; i += 2 ) {
@@ -64,6 +65,10 @@ function addPattern() {
 	fs.appendFileSync( path.join( head, 'parts', 'footer.html' ), `\n<!-- wp:pattern {"slug":"${ THEME_SLUG }/verify-regress"} /-->\n` );
 }
 
+function wp( sitePath, php ) {
+	return spawnSync( 'studio', [ 'wp', '--path', sitePath, 'eval', php ], { encoding: 'utf8' } ).stdout.trim();
+}
+
 function pointLinkAt( sitePath, checkout ) {
 	const link = path.join( sitePath, 'wp-content', 'themes', THEME_SLUG );
 	fs.symlinkSync( checkout, `${ link }.regress` );
@@ -97,6 +102,12 @@ async function main() {
 	assert( third.code === 0 && JSON.parse( third.stdout ).treeHash !== JSON.parse( second.stdout ).treeHash, 'the relaunched target holds the edited tree hash' );
 	const patternPages = await renders( baseUrl, PATTERN );
 	assert( patternPages === 8, 'all of 8 concurrent requests render the pattern added after the first head launch', `${ patternPages } of 8 do` );
+
+	const savedId = wp( sitePath, `$id = wp_insert_post( array( "post_type" => "wp_template_part", "post_name" => "footer", "post_title" => "footer", "post_status" => "publish", "post_content" => "<!-- wp:paragraph --><p>${ SAVED }</p><!-- /wp:paragraph -->" ) ); wp_set_object_terms( $id, "${ THEME_SLUG }", "wp_theme" ); echo $id;` );
+	const savedPages = await renders( baseUrl, SAVED );
+	const overridden = cli( 'doctor' );
+	wp( sitePath, `wp_delete_post( ${ Number( savedId ) }, true );` );
+	assert( overridden.code === 1 && overridden.failing.includes( 'wp-theme-files-only' ), 'doctor fails while a footer saved in the database overrides the checkout', `${ overridden.lastLine }; ${ savedPages } of 8 pages render the saved footer` );
 
 	const functionsFile = path.join( head, 'functions.php' );
 	const functionsBytes = fs.readFileSync( functionsFile );

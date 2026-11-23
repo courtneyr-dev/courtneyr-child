@@ -355,13 +355,15 @@ export async function doctor( { site = DEFAULT_SITE, checkout: checkoutInput } =
 
 	let wp = null;
 	try {
-		wp = JSON.parse( wpEval( sitePath, `echo wp_json_encode( array( "stylesheet" => get_stylesheet(), "template" => get_template(), "dir" => realpath( get_stylesheet_directory() ), "version" => wp_get_theme()->get( "Version" ) ) );` ) );
+		wp = JSON.parse( wpEval( sitePath, `echo wp_json_encode( array( "stylesheet" => get_stylesheet(), "template" => get_template(), "dir" => realpath( get_stylesheet_directory() ), "version" => wp_get_theme()->get( "Version" ), "saved" => array_merge( array_values( array_map( fn( $t ) => $t->id, array_filter( array_merge( get_block_templates(), get_block_templates( array(), "wp_template_part" ) ), fn( $t ) => "custom" === $t->source ) ) ), array_map( fn( $key ) => "global styles " . $key, array_keys( array_diff_key( WP_Theme_JSON_Resolver::get_user_data()->get_raw_data(), array( "version" => 1 ) ) ) ) ) ) );` ) );
 	} catch ( error ) {
 		wp = { error: error.message.split( '\n' )[ 0 ] };
 	}
 	results.push( check( 'wp-active-theme', wp.stylesheet === THEME_SLUG && wp.template === 'ollie', `stylesheet=${ wp.stylesheet } template=${ wp.template }${ wp.error ? ` error=${ wp.error }` : '' }` ) );
 	results.push( check( 'wp-theme-dir', wp.dir === expected.checkout, `WordPress loads ${ wp.dir }; expected ${ expected.checkout }` ) );
 	results.push( check( 'wp-theme-version', wp.version === expected.version, `WordPress reports ${ wp.version }; checkout style.css says ${ expected.version }` ) );
+	const saved = wp.saved || [ `unknown, ${ wp.error }` ];
+	results.push( check( 'wp-theme-files-only', saved.length === 0, saved.length ? `the database holds saved copies that override theme files: ${ saved.join( ', ' ) }. Delete them, or launch a fresh --site.` : 'no template, template part or global style is saved in the database' ) );
 
 	if ( studio.running ) {
 		for ( const file of [ 'style.css', 'theme.json' ] ) {
