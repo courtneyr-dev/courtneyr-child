@@ -689,7 +689,8 @@ add_filter( 'render_block_post-kinds-indieweb/repost-card', __NAMESPACE__ . '\\s
  * @return array{wide: bool, data: string}|null Null when the page prints no clipping.
  */
 function page_clipping( \WP_Post $post, string $content ): ?array {
-	$top = \Courtneyr\Child\SingleWideColumn\first_block_is_top_level( $content, 'post-kinds-indieweb/repost-card' );
+	$place = \Courtneyr\Child\SingleWideColumn\first_block_place( $content, 'post-kinds-indieweb/repost-card' );
+	$top   = 'top' === $place ? true : ( 'nested' === $place ? false : null );
 	if ( null !== $top ) {
 		return array(
 			'wide' => $top,

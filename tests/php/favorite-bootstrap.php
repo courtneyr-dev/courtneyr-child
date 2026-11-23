@@ -282,10 +282,29 @@ namespace Courtneyr\Child\SingleWideColumn {
 	function applies(): bool {
 		return (bool) ( $GLOBALS['cr_fav_wide_applies'] ?? false );
 	}
-	/** Where the page's first card sits: the tests name it (true top level, false nested, null none). */
-	function first_block_is_top_level( string $content, string $name ): ?bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-		return array_key_exists( 'cr_fav_card_top', $GLOBALS ) ? $GLOBALS['cr_fav_card_top'] : true;
+	/** Where the page's first card sits: the tests name it ('top', 'nested', 'none' or 'unknown'). */
+	function first_block_place( string $content, string $name ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		return $GLOBALS['cr_fav_card_place'] ?? 'top';
 	}
+}
+
+namespace {
+	/** WordPress's HTML API, from the core checkout the other theme tests use; the real card marker and scanner run on it. */
+	$cr_fav_core = getenv( 'CR_WP_CORE' ) ?: getenv( 'HOME' ) . '/.wp-tests/wordpress';
+	foreach ( array( 'class-wp-html-attribute-token.php', 'class-wp-html-span.php', 'class-wp-html-text-replacement.php', 'class-wp-html-decoder.php', 'class-wp-html-token.php', 'class-wp-html-tag-processor.php' ) as $cr_fav_file ) {
+		if ( ! is_file( $cr_fav_core . '/wp-includes/html-api/' . $cr_fav_file ) ) {
+			fwrite( STDERR, 'Missing WordPress HTML API file: ' . $cr_fav_core . '/wp-includes/html-api/' . $cr_fav_file . "\n" );
+			exit( 2 );
+		}
+		require_once $cr_fav_core . '/wp-includes/html-api/' . $cr_fav_file;
+	}
+	function wp_has_noncharacters( $text ) {
+		return false;
+	}
+	function wp_kses_uri_attributes() {
+		return array( 'href', 'src', 'action', 'cite', 'poster' );
+	}
+	require CR_FAV_THEME_DIR . '/inc/wide-column-card.php';
 }
 
 namespace {

@@ -20,6 +20,7 @@ READ = 'inc/single-read.php'
 GUARDS = 'tests/php/wide-column-guards-test.php'
 READ_TEST = 'tests/php/read-single-test.php'
 FAV = 'inc/single-favorite.php'
+CARD = 'inc/wide-column-card.php'
 FAV_TEST = 'tests/php/favorite-single-test.php'
 REP = 'inc/repost.php'
 REP_TEST = 'tests/php/repost-test.php'
@@ -68,15 +69,15 @@ MUTANTS = [
     ('isset-block-only', READ, "isset( $page['block'], $page['record'] )", "isset( $page['block'] )", [READ_TEST]),
     # The Favorite resolver and the sheet reading the decision.
     ('kinds-no-favorite', WCD, "\t'favorite' => '\\\\Courtneyr\\\\Child\\\\SingleFavorite\\\\page_sheet',\n", '', [GUARDS]),
-    ('top-level-ignores-depth', WCD, 'return 0 === $depth;', 'return true;', [GUARDS]),
-    ('top-level-last-not-first', WCD, "\t\t\tif ( null !== $found ) {\n\t\t\t\treturn $found;\n\t\t\t}\n", '', [GUARDS]),
-    ('favorite-resolver-ignores-nesting', FAV, "'wide' => false !== \\Courtneyr\\Child\\SingleWideColumn\\first_block_is_top_level( $content, 'post-kinds-indieweb/favorite-card' ),", "'wide' => true,", [FAV_TEST]),
-    ('favorite-resolver-plain-narrow', FAV, "'wide' => false !== \\Courtneyr\\Child\\SingleWideColumn\\first_block_is_top_level(", "'wide' => true === \\Courtneyr\\Child\\SingleWideColumn\\first_block_is_top_level(", [FAV_TEST]),
-    ('favorite-no-flow-box', FAV, '\t\t\t$before = flow( $before );\n\t\t\t$after  = flow( $after );\n', '', [FAV_TEST]),
-    ('favorite-flow-when-narrow', FAV, 'if ( is_array( $decided ) && \\Courtneyr\\Child\\SingleWideColumn\\applies() ) {', 'if ( is_array( $decided ) ) {', [FAV_TEST]),
-    ('favorite-flow-for-another-kind', FAV, 'if ( is_array( $decided ) && \\Courtneyr\\Child\\SingleWideColumn\\applies() ) {', 'if ( \\Courtneyr\\Child\\SingleWideColumn\\applies() ) {', [FAV_TEST]),
+    ('top-level-ignores-depth', WCD, "return 0 === $depth ? 'top' : 'nested';", "return 'top';", [GUARDS]),
+    ('top-level-last-not-first', WCD, "\t\t\tif ( 'none' !== $found ) {\n\t\t\t\treturn $found;\n\t\t\t}\n", '', [GUARDS]),
+    ('favorite-resolver-ignores-nesting', FAV, "'wide' => 'nested' !== $place,", "'wide' => true,", [FAV_TEST]),
+    ('favorite-resolver-plain-narrow', FAV, "'wide' => 'nested' !== $place,", "'wide' => 'top' === $place,", [FAV_TEST]),
+    ('favorite-no-flow-box', FAV, "\t\t$before = flow( (string) substr( $content, 0, $card_at[0] ) );\n\t\t$after  = flow( (string) substr( $content, $card_at[1] ) );", "\t\t$before = (string) substr( $content, 0, $card_at[0] );\n\t\t$after  = (string) substr( $content, $card_at[1] );", [FAV_TEST]),
+    ('favorite-flow-when-narrow', FAV, '$card_at = is_array( $decided ) && \\Courtneyr\\Child\\SingleWideColumn\\applies() ?', '$card_at = is_array( $decided ) ?', [FAV_TEST]),
+    ('favorite-flow-for-another-kind', FAV, '$card_at = is_array( $decided ) && \\Courtneyr\\Child\\SingleWideColumn\\applies() ?', '$card_at = \\Courtneyr\\Child\\SingleWideColumn\\applies() ?', [FAV_TEST]),
     ('favorite-flow-empty-box', FAV, "return '' === trim( $html ) ? $html :", 'return', [FAV_TEST]),
-    ('favorite-resolver-empty-facts', FAV, "\tif ( array() === $facts ) {\n\t\treturn null;\n\t}\n\treturn array(", '\treturn array(', [FAV_TEST]),
+    ('favorite-resolver-empty-facts', FAV, "\tif ( array() === $facts ) {\n\t\treturn null;\n\t}\n\t$place", '\t$place', [FAV_TEST]),
     ('favorite-sheet-ignores-decision', FAV, '$facts   = is_array( $decided ) ? $decided : single_facts();', '$facts   = single_facts();', [FAV_TEST]),
     ('favorite-sheet-no-fallback', FAV, '$facts   = is_array( $decided ) ? $decided : single_facts();', '$facts   = is_array( $decided ) ? $decided : array();', [FAV_TEST]),
     # The Repost resolver and the reading-width box around its clipping.
@@ -94,6 +95,32 @@ MUTANTS = [
     ('repost-flow-no-end-guard', REP, ' || $from < $open || $to > $end ) {', ' ) {', [REP_TEST]),
     # Not listed: dropping `false === $end` is equivalent; with no entry data $to > $end (an int against false) already returns early.
     ('repost-flow-not-hooked', REP, "add_filter( 'render_block', __NAMESPACE__ . '\\\\wide_flow', 20, 2 );", '', [REP_TEST]),
+    # Round 2: unknown structure (B1), the card found by its mark at the top level.
+    ('opaque-ignored', WCD, "in_array( $block_name, OPAQUE_BLOCKS, true ) || ", '', [GUARDS]),
+    ('opaque-no-synced-pattern', WCD, "\t'core/block',\n", '', [GUARDS]),
+    ('opaque-no-registered-pattern', WCD, "\t'core/pattern',\n", '', [GUARDS]),
+    ('shortcode-ignored', WCD, " || ( '' !== $html && \\strip_shortcodes( $html ) !== $html )", '', [GUARDS]),
+    ('opaque-means-none', WCD, "\t\t\t\treturn 'unknown';", "\t\t\t\tcontinue;", [GUARDS]),
+    ('favorite-unknown-decides', FAV, "\tif ( 'unknown' === $place ) {\n\t\treturn null;\n\t}\n", '', [FAV_TEST]),
+    ('favorite-card-not-marked', FAV, "add_filter( 'render_block_' . CARD_BLOCK, __NAMESPACE__ . '\\\\mark_card' );", '', [FAV_TEST]),
+    ('favorite-split-any-card', FAV, "\\Courtneyr\\Child\\SingleWideColumn\\top_level_card( $content ) : null;", "( preg_match( '/<article\\b[^>]*\\bk-favorite\\b[^>]*>.*?<\\/article>/s', $content, $m, PREG_OFFSET_CAPTURE ) ? array( (int) $m[0][1], (int) $m[0][1] + strlen( $m[0][0] ) ) : null ) : null;", [FAV_TEST]),
+    ('card-mark-any-article', CARD, "'ARTICLE' === $tags->get_tag() && $tags->has_class( $class_name )", "'ARTICLE' === $tags->get_tag()", [GUARDS, FAV_TEST]),
+    ('card-mark-always', CARD, "\tif ( ! marking() ) {\n\t\treturn $html;\n\t}\n\t$tags = new", '\t$tags = new', [GUARDS, FAV_TEST]),
+    ('card-found-nested', CARD, "\t\t\tif ( array() !== $open ) {\n\t\t\t\treturn null;\n\t\t\t}\n\t\t\t$from", '\t\t\t$from', [GUARDS, FAV_TEST]),
+    ('card-any-token', CARD, "card_mark() === $tags->get_attribute( CARD_MARK_ATTRIBUTE )", "null !== $tags->get_attribute( CARD_MARK_ATTRIBUTE )", [GUARDS]),
+    ('card-unbalanced-ok', CARD, "\t\t\tif ( array() === $open || end( $open ) !== $tag ) {\n\t\t\t\treturn null;\n\t\t\t}\n", "\t\t\tif ( array() === $open ) {\n\t\t\t\tcontinue;\n\t\t\t}\n", [GUARDS, FAV_TEST]),
+    ('card-unclosed-ok', CARD, "null === $from || null === $to || array() !== $open ||", "null === $from || null === $to ||", [GUARDS]),
+    ('card-void-pushed', CARD, "in_array( $tag, VOID_ELEMENTS, true ) || ( $foreign", "( $foreign", [GUARDS]),
+    ('card-svg-selfclose-pushed', CARD, " || ( $foreign && $tags->has_self_closing_flag() )", '', [GUARDS]),
+    ('card-end-at-first-closer', CARD, "if ( null !== $from && null === $to && array() === $open ) {", "if ( null !== $from && null === $to ) {", [GUARDS]),
+    ('card-script-pushed', CARD, "array( 'SCRIPT', 'STYLE', 'TEXTAREA', 'TITLE', 'IFRAME', 'NOEMBED', 'NOFRAMES', 'XMP' )", "array( 'STYLE', 'TEXTAREA', 'TITLE', 'IFRAME', 'NOEMBED', 'NOFRAMES', 'XMP' )", [GUARDS]),
+    ('marking-on-narrow', CARD, "if ( is_content_block( $block ) && applies() ) {\n\t\tmarking( true );", "if ( is_content_block( $block ) ) {\n\t\tmarking( true );", [GUARDS]),
+    ('marking-any-block', CARD, "if ( is_content_block( $block ) && applies() ) {\n\t\tmarking( true );", "if ( applies() ) {\n\t\tmarking( true );", [GUARDS]),
+    ('release-keeps-marks', CARD, "\treturn unmark( $html );", "\treturn $html;", [GUARDS]),
+    ('release-keeps-marking', CARD, "\tmarking( false );\n\treturn unmark", "\treturn unmark", [GUARDS]),
+    ('release-any-block', CARD, "\tif ( ! is_content_block( $block ) ) {\n\t\treturn $html;\n\t}\n\tmarking( false );", "\tmarking( false );", [GUARDS]),
+    ('release-before-kind-filters', CARD, "__NAMESPACE__ . '\\\\release', 30, 2 );", "__NAMESPACE__ . '\\\\release', 10, 2 );", [GUARDS]),
+    ('content-block-substring', CARD, "in_array( 'single-post__content', explode( ' ', (string) ( $block['attrs']['className'] ?? '' ) ), true )", "false !== strpos( (string) ( $block['attrs']['className'] ?? '' ), 'single-post__content' )", [GUARDS]),
     ('decided-record-ignored', READ, "$after .= is_array( $page ) ? $page['record'] : reading_record( $read, $post );", '$after .= reading_record( $read, $post );', [READ_TEST]),
 ]
 

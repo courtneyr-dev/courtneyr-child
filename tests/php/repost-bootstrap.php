@@ -273,8 +273,11 @@ namespace Courtneyr\Child\SingleWideColumn {
 		return (bool) ( $GLOBALS['cr_rp']['wide_applies'] ?? false );
 	}
 	/** Where the page's first card sits: the tests name it (true top level, false nested, null none). */
-	function first_block_is_top_level( string $content, string $name ): ?bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-		return array_key_exists( 'card_top', $GLOBALS['cr_rp'] ) ? $GLOBALS['cr_rp']['card_top'] : true;
+	function first_block_place( string $content, string $name ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		if ( ! array_key_exists( 'card_top', $GLOBALS['cr_rp'] ) ) {
+			return 'top';
+		}
+		return true === $GLOBALS['cr_rp']['card_top'] ? 'top' : ( false === $GLOBALS['cr_rp']['card_top'] ? 'nested' : 'none' );
 	}
 }
 

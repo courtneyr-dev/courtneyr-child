@@ -93,6 +93,10 @@ namespace {
 	function get_the_content(): string {
 		return $GLOBALS['t']['content'];
 	}
+	/** Registered shortcodes for the walker checks: [gallery] is one, [not-a-code] is not. */
+	function strip_shortcodes( string $text ): string {
+		return str_replace( '[gallery]', '', $text );
+	}
 	/** Blocks for the helper checks: content names a fixture in $GLOBALS['blocks']. */
 	function parse_blocks( string $content ): array {
 		return $GLOBALS['blocks'][ $content ] ?? array();
@@ -151,6 +155,7 @@ namespace {
 	}
 
 	require dirname( __DIR__, 2 ) . '/inc/single-wide-column.php';
+	require dirname( __DIR__, 2 ) . '/inc/wide-column-card.php';
 
 	use function Courtneyr\Child\SingleWideColumn\applies;
 	use function Courtneyr\Child\SingleWideColumn\column_used;
@@ -214,7 +219,8 @@ namespace {
 	$ns = 'Courtneyr\\Child\\SingleWideColumn\\';
 
 	// The hooks the file registers.
-	check( 'layout filter is on render_block_data', array( array( 10, $ns . 'widen', 1 ) ) === hooked( 'render_block_data' ) );
+	check( 'layout filter and card marking start are on render_block_data', array( array( 10, $ns . 'widen', 1 ), array( 10, $ns . 'start_marking', 1 ) ) === hooked( 'render_block_data' ) );
+	check( 'card marks are released on render_block at 30, after the kind filters', array( array( 30, $ns . 'release', 2 ) ) === hooked( 'render_block' ) );
 	check( 'header marker is on render_block_core/group with two arguments', array( array( 10, $ns . 'mark_header', 2 ) ) === hooked( 'render_block_core/group' ) );
 	check( 'stylesheet loader is on wp_enqueue_scripts at 20', array( array( 20, $ns . 'enqueue_styles', 1 ) ) === hooked( 'wp_enqueue_scripts' ) );
 	check( 'read, favorite and repost resolvers are registered', array( 'read' => '\\Courtneyr\\Child\\SingleRead\\page_record', 'favorite' => '\\Courtneyr\\Child\\SingleFavorite\\page_sheet', 'repost' => '\\Courtneyr\\Child\\Repost\\page_clipping' ) === \Courtneyr\Child\SingleWideColumn\KINDS );
@@ -317,25 +323,83 @@ namespace {
 
 	// Where a page's first block of a type sits.
 	$card  = array( 'blockName' => 'x/card', 'innerBlocks' => array() );
-	$para  = array( 'blockName' => 'core/paragraph', 'innerBlocks' => array() );
+	$para  = array( 'blockName' => 'core/paragraph', 'innerBlocks' => array(), 'innerHTML' => '<p>Text.</p>' );
+	$ref   = array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => 5 ), 'innerBlocks' => array() );
 	$group = static function ( array ...$inner ): array {
 		return array( 'blockName' => 'core/group', 'innerBlocks' => $inner );
 	};
-	$GLOBALS['blocks'] = array(
-		'top'          => array( $para, $card ),
-		'nested'       => array( $para, $group( $para, $card ) ),
-		'deep'         => array( $group( $group( $card ) ) ),
-		'nested-first' => array( $group( $card ), $card ),
-		'top-first'    => array( $card, $group( $card ) ),
-		'none'         => array( $para, $group( $para ) ),
-	);
-	$top_level = static function ( string $content ): ?bool {
-		return \Courtneyr\Child\SingleWideColumn\first_block_is_top_level( $content, 'x/card' );
+	$named = static function ( string $name ): array {
+		return array( 'blockName' => $name, 'innerBlocks' => array() );
 	};
-	check( 'first block at the top level', true === $top_level( 'top' ) );
-	check( 'first block inside a group', false === $top_level( 'nested' ) && false === $top_level( 'deep' ) );
-	check( 'the first block in document order decides', false === $top_level( 'nested-first' ) && true === $top_level( 'top-first' ) );
-	check( 'no such block', null === $top_level( 'none' ) && null === $top_level( 'unknown' ) );
+	$GLOBALS['blocks'] = array(
+		'top'             => array( $para, $card ),
+		'nested'          => array( $para, $group( $para, $card ) ),
+		'deep'            => array( $group( $group( $card ) ) ),
+		'nested-first'    => array( $group( $card ), $card ),
+		'top-first'       => array( $card, $group( $card ) ),
+		'none'            => array( $para, $group( $para ) ),
+		'synced-only'     => array( $ref ),
+		'synced-first'    => array( $ref, $card ),
+		'synced-in-group' => array( $group( $ref ), $card ),
+		'synced-after'    => array( $card, $ref ),
+		'nested-then-ref' => array( $group( $card ), $ref ),
+		'shortcode'       => array( array( 'blockName' => null, 'innerBlocks' => array(), 'innerHTML' => "\n[gallery]\n" ), $card ),
+		'not-a-shortcode' => array( array( 'blockName' => 'core/paragraph', 'innerBlocks' => array(), 'innerHTML' => '<p>[not-a-code]</p>' ), $card ),
+	);
+	foreach ( \Courtneyr\Child\SingleWideColumn\OPAQUE_BLOCKS as $opaque ) {
+		$GLOBALS['blocks'][ 'opaque ' . $opaque ] = array( $named( $opaque ), $card );
+	}
+	$place = static function ( string $content ): string {
+		return \Courtneyr\Child\SingleWideColumn\first_block_place( $content, 'x/card' );
+	};
+	check( 'first block at the top level', 'top' === $place( 'top' ) );
+	check( 'first block inside a group', 'nested' === $place( 'nested' ) && 'nested' === $place( 'deep' ) );
+	check( 'the first block in document order decides', 'nested' === $place( 'nested-first' ) && 'top' === $place( 'top-first' ) );
+	check( 'no such block', 'none' === $place( 'none' ) && 'none' === $place( 'unknown' ) );
+	check( 'a synced pattern alone: unknown, the card may be inside it', 'unknown' === $place( 'synced-only' ) );
+	check( 'a synced pattern before the card, at any depth: unknown', 'unknown' === $place( 'synced-first' ) && 'unknown' === $place( 'synced-in-group' ) );
+	check( 'a synced pattern after the first card does not change where that card sits', 'top' === $place( 'synced-after' ) && 'nested' === $place( 'nested-then-ref' ) );
+	check( 'a registered shortcode before the card: unknown', 'unknown' === $place( 'shortcode' ) );
+	check( 'brackets that are not a registered shortcode: the card is found', 'top' === $place( 'not-a-shortcode' ) );
+	$opaque_ok = true;
+	foreach ( \Courtneyr\Child\SingleWideColumn\OPAQUE_BLOCKS as $opaque ) {
+		$opaque_ok = $opaque_ok && 'unknown' === $place( 'opaque ' . $opaque );
+	}
+	check( 'every block whose output the page cannot show comes back unknown (' . count( \Courtneyr\Child\SingleWideColumn\OPAQUE_BLOCKS ) . ')', $opaque_ok && in_array( 'core/block', \Courtneyr\Child\SingleWideColumn\OPAQUE_BLOCKS, true ) && in_array( 'core/pattern', \Courtneyr\Child\SingleWideColumn\OPAQUE_BLOCKS, true ) );
+
+	// The card a wide page cuts at: found by its mark, at the top level, with balanced tags.
+	$mark   = \Courtneyr\Child\SingleWideColumn\card_mark();
+	$marked = '<article data-cr-wide-card="' . $mark . '" class="k-x"><div>Card<img src="x"><svg><path d="M0"/></svg></div></article>';
+	$at     = static function ( string $html ): ?array {
+		return \Courtneyr\Child\SingleWideColumn\top_level_card( $html );
+	};
+	$slice  = static function ( string $html ) use ( $at ): ?string {
+		$found = $at( $html );
+		return null === $found ? null : substr( $html, $found[0], $found[1] - $found[0] );
+	};
+	check( 'the token is 16 hex characters, the same all request', 1 === preg_match( '/^[0-9a-f]{16}$/', $mark ) && $mark === \Courtneyr\Child\SingleWideColumn\card_mark() );
+	check( 'a marked top-level card is found, start to end', $marked === $slice( '<p>Before.</p>' . $marked . '<p>After.</p>' ) );
+	check( 'card offsets are byte offsets in the slice', array( 14, 14 + strlen( $marked ) ) === $at( '<p>Before.</p>' . $marked . '<p>After.</p>' ) );
+	$variants = array(
+		'the class name as text in a code block'          => '<article id="review-authored-article"><div><code>k-x data-cr-wide-card</code></div></article>',
+		'the class name in a comment'                     => '<!-- <article data-cr-wide-card="' . $mark . '" class="k-x"></article> -->',
+		'the class name in another attribute'             => '<div title="k-x" data-note="article class=k-x"><a href="#k-x">x</a></div>',
+		'the class name in a data attribute'              => '<article data-card="k-x" class="k-x"><p>authored</p></article>',
+		'the token attribute with another value'          => '<article data-cr-wide-card="0000000000000000" class="k-x"><p>authored</p></article>',
+		'an escaped copy of the marked card in a pre'     => '<pre><code>' . htmlspecialchars( $marked ) . '</code></pre>',
+		'a script that holds the marked card as a string' => '<script>var c = ' . json_encode( $marked ) . ';</script>',
+	);
+	foreach ( $variants as $label => $before ) {
+		check( "authored $label before the card: the real card is found", $marked === $slice( '<p>Intro.</p>' . $before . $marked . '<p>After.</p>' ) );
+		check( "authored $label and no card: nothing is found", null === $at( '<p>Intro.</p>' . $before . '<p>After.</p>' ) );
+	}
+	check( 'the first marked card inside a group: none', null === $at( '<div class="wp-block-group"><p>a</p>' . $marked . '</div>' . $marked ) );
+	check( 'two marked cards at the top level: the first', array( 0, strlen( $marked ) ) === $at( $marked . '<p>x</p>' . $marked ) );
+	check( 'an unclosed tag before the card: none', null === $at( '<p>Before.' . $marked . '<p>After.</p>' ) );
+	check( 'a stray closing tag after the card: none', null === $at( $marked . '</div>' ) );
+	check( 'an unclosed tag after the card: none', null === $at( $marked . '<div><p>x</p>' ) );
+	check( 'a card that never closes: none', null === $at( '<p>a</p><article data-cr-wide-card="' . $mark . '" class="k-x"><div>x</div>' ) );
+	check( 'an article nested in the card does not end it early', '<article data-cr-wide-card="' . $mark . '"><article>in</article><p>still</p></article>' === $slice( '<article data-cr-wide-card="' . $mark . '"><article>in</article><p>still</p></article><p>after</p>' ) );
 
 	// The layout filter, through render_block_data.
 	scenario( 'layout narrow', array( 'result' => 'narrow' ) );
@@ -401,6 +465,27 @@ namespace {
 
 	scenario( 'marker narrow', array( 'result' => 'narrow' ) );
 	check( 'not wide: header group is not marked', $html === apply_filters( 'render_block_core/group', $html, header_block() ) );
+
+	// Marking runs only while a wide page's post content renders, and every mark comes off.
+	$card_html = "\n<article class=\"pk-card k-x\">x</article>";
+	\Courtneyr\Child\SingleWideColumn\marking( false ); // The layout checks above opened a wide post content and never rendered it.
+	check( 'marking is off before the post content renders', false === \Courtneyr\Child\SingleWideColumn\marking() && $card_html === \Courtneyr\Child\SingleWideColumn\mark_card( $card_html, 'k-x' ) );
+	scenario( 'marking narrow', array( 'result' => 'narrow' ) );
+	apply_filters( 'render_block_data', content_block() );
+	check( 'a narrow page does not start marking', false === \Courtneyr\Child\SingleWideColumn\marking() );
+	scenario( 'marking wide' );
+	apply_filters( 'render_block_data', header_block() );
+	check( 'the header alone does not start marking', false === \Courtneyr\Child\SingleWideColumn\marking() );
+	apply_filters( 'render_block_data', content_block( 'single-post__content-extra' ) );
+	check( 'a post content whose class only contains the name does not start marking', false === \Courtneyr\Child\SingleWideColumn\marking() );
+	apply_filters( 'render_block_data', content_block() );
+	check( 'a wide page starts marking at its post content', true === \Courtneyr\Child\SingleWideColumn\marking() );
+	$marked_card = \Courtneyr\Child\SingleWideColumn\mark_card( $card_html, 'k-x' );
+	check( 'while marking, the card article gets the token after its tag name', "\n<article data-cr-wide-card=\"" . $mark . '" class="pk-card k-x">x</article>' === $marked_card );
+	check( 'while marking, an article without the class is untouched', '<article class="other">x</article>' === \Courtneyr\Child\SingleWideColumn\mark_card( '<article class="other">x</article>', 'k-x' ) );
+	check( 'another block\'s render does not release', $marked_card === apply_filters( 'render_block', $marked_card, header_block() ) && true === \Courtneyr\Child\SingleWideColumn\marking() );
+	$released = apply_filters( 'render_block', '<div>' . $marked_card . $marked_card . '</div>', content_block() );
+	check( 'the post content releases: every mark comes off byte for byte, marking stops', '<div>' . $card_html . $card_html . '</div>' === $released && false === \Courtneyr\Child\SingleWideColumn\marking() );
 
 	exit( $fail ? 1 : 0 );
 }
