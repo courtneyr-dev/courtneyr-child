@@ -22,6 +22,8 @@ READ_TEST = 'tests/php/read-single-test.php'
 FAV = 'inc/single-favorite.php'
 CARD = 'inc/wide-column-card.php'
 FAV_TEST = 'tests/php/favorite-single-test.php'
+REP = 'inc/repost.php'
+REP_TEST = 'tests/php/repost-test.php'
 
 # name, file, needle, replacement, tests that should kill it.
 MUTANTS = [
@@ -78,6 +80,29 @@ MUTANTS = [
     ('favorite-resolver-empty-facts', FAV, "\tif ( array() === $facts ) {\n\t\treturn null;\n\t}\n\t$place", '\t$place', [FAV_TEST]),
     ('favorite-sheet-ignores-decision', FAV, '$facts   = is_array( $decided ) ? $decided : single_facts();', '$facts   = single_facts();', [FAV_TEST]),
     ('favorite-sheet-no-fallback', FAV, '$facts   = is_array( $decided ) ? $decided : single_facts();', '$facts   = is_array( $decided ) ? $decided : array();', [FAV_TEST]),
+    # The Repost resolver and the reading-width box around its clipping.
+    ('kinds-no-repost', WCD, "\t'repost'   => '\\\\Courtneyr\\\\Child\\\\Repost\\\\page_clipping',\n", '', [GUARDS]),
+    ('repost-resolver-ignores-nesting', REP, "\t\t\t'wide' => 'top' === $place,", "\t\t\t'wide' => true,", [REP_TEST]),
+    ('repost-resolver-unknown-decides', REP, "\tif ( 'unknown' === $place ) {\n\t\treturn null;\n\t}\n\tif ( 'none' !== $place ) {", "\tif ( 'none' !== $place && 'unknown' !== $place ) {", [REP_TEST]),
+    ('repost-resolver-any-page', REP, "\tif ( 'none' !== $place ) {", "\tif ( true ) {", [REP_TEST]),
+    ('repost-meta-ignores-card-elsewhere', REP, "\tif ( has_block( 'post-kinds-indieweb/repost-card', $post ) ) {\n\t\treturn array();\n\t}\n", '', [REP_TEST]),
+    ('repost-meta-ignores-facts', REP, "\tif ( '' === $attrs['url'] && '' === $attrs['title'] ) {\n\t\treturn array();\n\t}\n", '', [REP_TEST]),
+    ('repost-meta-needs-both', REP, "'' === $attrs['url'] && '' === $attrs['title']", "( '' === $attrs['url'] || '' === $attrs['title'] )", [REP_TEST]),
+    ('repost-meta-keeps-empty', REP, "\treturn array_filter( $attrs, static fn( string $value ): bool => '' !== $value );", '\treturn $attrs;', [REP_TEST]),
+    ('repost-decision-no-attrs', REP, "\t\t\t'attrs' => $attrs,\n", '', [REP_TEST]),
+    ('repost-renderer-ignores-decision', REP, "\tif ( is_array( $decided ) ) {\n\t\t// The decision", "\tif ( false ) {\n\t\t// The decision", [REP_TEST]),
+    ('repost-renderer-meta-for-card', REP, "$attrs = 'meta' === ( $decided['shape'] ?? '' ) ? (array) ( $decided['attrs'] ?? array() ) : array();", "$attrs = meta_card_attrs( $post );", [REP_TEST]),
+    ('repost-renderer-saved-post-by-id', REP, "\t$post = get_post();\n", "\t$post = get_post( (int) get_the_ID() );\n", [REP_TEST]),
+    ('repost-renderer-substring-check', REP, "\t\t$attrs = prints_card( $content ) ? array() : meta_card_attrs( $post );", "\t\t$attrs = false !== strpos( $content, 'k-repost' ) ? array() : meta_card_attrs( $post );", [REP_TEST]),
+    ('repost-renderer-no-card-check', REP, "\t\t$attrs = prints_card( $content ) ? array() : meta_card_attrs( $post );", "\t\t$attrs = meta_card_attrs( $post );", [REP_TEST]),
+    ('repost-clip-not-marked', REP, "\treturn \\Courtneyr\\Child\\SingleWideColumn\\mark_card( $html, 'cr-repost-clip--single' );", "\treturn $html;", [REP_TEST]),
+    ('repost-flow-first-class-hit', REP, "\t$card  = \\Courtneyr\\Child\\SingleWideColumn\\top_level_card( (string) substr( $html, $start, $end - $start ) );", "\t$mark  = strpos( $html, 'cr-repost-clip--single', $start );\n\t$from0 = false === $mark ? false : strrpos( substr( $html, 0, $mark ), '<article' );\n\t$to0   = false === $from0 ? false : strpos( $html, '</article>', $from0 );\n\t$card  = false === $to0 || $from0 < $start ? null : array( $from0 - $start, $to0 + 10 - $start );", [REP_TEST]),
+    ('repost-flow-for-another-kind', REP, "|| null === \\Courtneyr\\Child\\SingleWideColumn\\data_for( 'repost' ) ", '', [REP_TEST]),
+    ('repost-flow-when-narrow', REP, " || ! \\Courtneyr\\Child\\SingleWideColumn\\applies() ) {", ' ) {', [REP_TEST]),
+    ('repost-flow-any-content-block', REP, "'core/post-content' !== ( $block['blockName'] ?? '' ) || false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'single-post__content' )\n\t\t||", "'core/post-content' !== ( $block['blockName'] ?? '' )\n\t\t||", [REP_TEST]),
+    ('repost-flow-empty-box', REP, "'' === trim( $part ) ? $part : ", '', [REP_TEST]),
+    ('repost-flow-no-region-guard', REP, ' || $end <= $open ) {', ' ) {', [REP_TEST]),
+    ('repost-flow-not-hooked', REP, "add_filter( 'render_block', __NAMESPACE__ . '\\\\wide_flow', 20, 2 );", '', [REP_TEST]),
     # Round 2: unknown structure (B1), the card found by its mark at the top level.
     ('opaque-ignored', WCD, "in_array( $block_name, OPAQUE_BLOCKS, true ) || ", '', [GUARDS]),
     ('opaque-no-synced-pattern', WCD, "\t'core/block',\n", '', [GUARDS]),
@@ -127,7 +152,7 @@ def main():
             return tree
 
         base = fresh()
-        if not run(base, [GUARDS, READ_TEST] + ([FAV_TEST] if os.path.exists(os.path.join(base, FAV_TEST)) else [])):
+        if not run(base, [GUARDS, READ_TEST] + [t for t in (FAV_TEST, REP_TEST) if os.path.exists(os.path.join(base, t))]):
             print('BASELINE FAILS: the unmutated tree does not pass')
             sys.exit(2)
         killed = survived = skipped = 0

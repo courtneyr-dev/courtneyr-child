@@ -121,6 +121,12 @@ $as       = array(
 	'r2-rep-as-meta'    => array( $p( 'A meta-only repost.' ), $p( "$sentinel: the note was edited." ), $meta_facts ),
 	'r2-rep-as-classic' => array( '<p>A Classic repost that quotes <code>k-repost</code> in its note.</p>', "<p>$sentinel: a Classic note that quotes <code>k-repost</code>.</p>", $meta_facts ),
 );
+// The no-decision path of the meta-only renderer (unknown structure), and a decision it must follow.
+$prose_ref = '<!-- wp:block {"ref":' . $pattern( 'rep-synced-prose', $p( 'A synced paragraph after the card.' ) ) . '} /-->';
+$as['r2-rep-as-synced'] = array( $p( 'A note beside the card.' ) . "\n" . $card2( 'repost' ), $p( "$sentinel: the card was removed and a synced pattern added." ) . "\n" . $prose_ref, $meta_facts );
+$post2( 'r2-rep-meta-decoy', 'repost', 'Meta-only, with an authored element that carries the card class', $p( 'A meta-only repost.' ) . "\n" . $html( '<article class="pk-card k-repost authored-note"><p>An authored element with the card class.</p></article>' ), $meta_facts );
+$post2( 'r2-rep-classic-synced', 'repost', 'Classic note quoting k-repost, then a synced pattern', '<p>A Classic note that quotes <code>k-repost</code>.</p>' . "\n" . $prose_ref, $meta_facts );
+
 foreach ( $as as $label => list( $saved, $autosave, $meta ) ) {
 	$id = $post2( $label, 'repost', ucfirst( str_replace( array( 'r2-rep-as-', '-' ), array( 'Autosave ', ' ' ), $label ) ), $saved, $meta );
 	if ( ! wp_get_post_autosave( $id, $admin2 ) ) {

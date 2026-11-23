@@ -139,6 +139,10 @@ namespace {
 		if ( $post instanceof WP_Post ) {
 			return $post;
 		}
+		if ( null === $post && isset( $GLOBALS['cr_rp']['loop_post'] ) ) {
+			// The loop's post object, which in a preview holds the autosave rather than the saved post.
+			return $GLOBALS['cr_rp']['loop_post'];
+		}
 		$id = null === $post ? get_the_ID() : (int) $post;
 		return $GLOBALS['cr_rp']['posts'][ $id ] ?? null;
 	}
@@ -166,9 +170,10 @@ namespace {
 		return 'kind' === $taxonomy && 'repost' === $term && ! empty( $GLOBALS['cr_rp']['reposts'][ $id ] );
 	}
 
+	/** Core's has_block() reads the content of the post object it is given (an ID is looked up). */
 	function has_block( $block_name, $post = null ) {
-		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
-		return false !== strpos( (string) ( $GLOBALS['cr_rp']['posts'][ $id ]->post_content ?? '' ), 'wp:' . $block_name );
+		$content = $post instanceof WP_Post ? $post->post_content : (string) ( $GLOBALS['cr_rp']['posts'][ (int) $post ]->post_content ?? '' );
+		return false !== strpos( (string) $content, 'wp:' . $block_name );
 	}
 
 	function post_password_required( $post = null ) {
@@ -264,6 +269,24 @@ namespace Courtneyr\Child\Microformats {
 	}
 }
 
+namespace Courtneyr\Child\SingleWideColumn {
+	/** The unit tests render without a main query: no decision unless a test sets one. */
+	function data_for( string $kind ) {
+		return 'repost' === $kind ? ( $GLOBALS['cr_rp']['wide_data'] ?? null ) : null;
+	}
+	function applies(): bool {
+		return (bool) ( $GLOBALS['cr_rp']['wide_applies'] ?? false );
+	}
+	/** Where the page's first card sits: the tests name it (true top level, false nested, null none). */
+	function first_block_place( string $content, string $name ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		if ( ! array_key_exists( 'card_top', $GLOBALS['cr_rp'] ) ) {
+			return 'top';
+		}
+		$top = $GLOBALS['cr_rp']['card_top'];
+		return is_string( $top ) ? $top : ( true === $top ? 'top' : ( false === $top ? 'nested' : 'none' ) );
+	}
+}
+
 namespace PKIW {
 	function kind_facts( int $post_id ): array {
 		return (array) ( $GLOBALS['cr_rp']['facts'][ $post_id ] ?? array() );
@@ -354,6 +377,7 @@ namespace PKIW {
 namespace {
 	require CR_RP_THEME_DIR . '/inc/stamps.php';
 	require CR_RP_THEME_DIR . '/inc/archive-checkin-label.php';
+	require CR_RP_THEME_DIR . '/inc/wide-column-card.php';
 	require CR_RP_THEME_DIR . '/inc/repost.php';
 	require CR_RP_THEME_DIR . '/inc/stream-repost.php';
 

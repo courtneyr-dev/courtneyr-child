@@ -331,6 +331,8 @@ const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-wide-column',
 	// Favorite singles, archive and Stream cards; on a wide single it opens the 720 px cap (the sheet's first-paint width).
 	'courtneyr-favorite',
+	// Repost singles, archive and Stream cards; on a wide single it lets the 80ch pin yield and places the header (first-paint width).
+	'courtneyr-repost',
 	// Only on /stream/ when a web story renders (inc/stream-stories.php).
 	'courtneyr-stream-story',
 	// Zine tables (blocks/core-table.css, 0.7.159): per-block sheet, only where a Table block renders.

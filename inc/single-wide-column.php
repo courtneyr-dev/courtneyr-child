@@ -44,6 +44,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const KINDS = array(
 	'read'     => '\\Courtneyr\\Child\\SingleRead\\page_record',
 	'favorite' => '\\Courtneyr\\Child\\SingleFavorite\\page_sheet',
+	'repost'   => '\\Courtneyr\\Child\\Repost\\page_clipping',
 );
 
 /**

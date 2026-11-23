@@ -49,6 +49,30 @@ MUTANTS = {
             ('resolver-unregistered', WCD, "\t'favorite' => '\\\\Courtneyr\\\\Child\\\\SingleFavorite\\\\page_sheet',\n", ''),
         ],
     },
+    'repost': {
+        'pages': 'rep-card,rep-siblings,rep-nested,rep-plain,rep-page-two,rep-two-cards',
+        'widths': '1448,1024,768',
+        'list': [
+            ('pin-holds', REP_CSS, '\tbody.single-post.kind-repost .cr-wide-column.single-post__header,\n\tbody.single-post.kind-repost .cr-wide-column.single-post__content {\n\t\tmax-inline-size: var(--wp--style--global--wide-size);\n\t}\n', ''),
+            ('wrapper-uncapped-under-64rem', REP_CSS, '\tbody.single-post.kind-repost .cr-wide-column.single-post__content > .pkiw-singular-entry {\n\t\tmax-width: var(--wp--style--global--content-size);\n\t}\n', ''),
+            ('lede-not-spanning', REP_CSS, '.single-post__header > .single-post__lede-meta {\n\t\tmax-inline-size: none;\n\t}', '.single-post__header > .single-post__lede-meta {\n\t}'),
+            ('date-not-moved', REP_CSS, '\t\torder: 1;\n\t\tmargin-inline-start: auto;\n', ''),
+            ('date-order-only', REP_CSS, '\t\torder: 1;\n\t\tmargin-inline-start: auto;\n', '\t\torder: 1;\n'),
+            ('sparkle-shared-compensation', REP_CSS, 'body.single-post.kind-repost .cr-wide-column.single-post__content::before {\n\tright: inherit;\n}', ''),
+            ('sparkle-end-inset-in-glyph-font', REP_CSS, 'body.single-post.kind-repost .cr-wide-column.single-post__content::before {\n\tright: inherit;\n}', 'body.single-post.kind-repost .cr-wide-column.single-post__content::before {\n\tright: calc((100% - min(100%, 80ch)) / 2 - 1rem);\n}'),
+            ('sparkle-content-shifts', REP_CSS, '\tinset-inline-start: 0;\n', ''),
+            ('pin-lost-under-64rem', REP_CSS, '@media not all and (min-width: 64rem) {\n\n\tbody.single-post.kind-repost .cr-wide-column.single-post__content {\n\t\tmax-inline-size: var(--cr-measure-wide);\n\t}\n', '@media not all and (min-width: 64rem) {\n'),
+            ('breakpoint-40rem', REP_CSS, '@media (min-width: 64rem) {\n\n\tbody.single-post.kind-repost .cr-wide-column.single-post__header,', '@media (min-width: 40rem) {\n\n\tbody.single-post.kind-repost .cr-wide-column.single-post__header,'),
+            ('clip-rows-stretch', REP_CSS, '\t\tgrid-template-rows: auto 1fr;\n', ''),
+            ('note-centered', REP_CSS, "~ .cr-repost-flow {\n\t\tmax-width: none;\n\t\tmargin-inline: 0;\n\t}", "~ .cr-repost-flow {\n\t}"),
+            ('note-alignwide-unfixed', REP_CSS, "\t\tmax-width: calc(var(--wp--style--global--content-size) * 0.9);\n\t\tmargin-inline-start: calc(var(--wp--style--global--content-size) * 0.05);\n", ''),
+            ('note-box-moved-naive', REP_CSS, "~ .cr-repost-flow {\n\t\tmax-width: none;\n\t\tmargin-inline: 0;\n\t}", "~ .cr-repost-flow {\n\t\tmargin-inline-start: 0;\n\t}"),
+            ('renderer-no-flow-box', REP_PHP, "add_filter( 'render_block', __NAMESPACE__ . '\\\\wide_flow', 20, 2 );", ''),
+            ('resolver-ignores-nesting', REP_PHP, "\t\t\t'wide' => 'top' === $place,", "\t\t\t'wide' => true,"),
+            ('resolver-meta-only-narrow', REP_PHP, "\t\t'wide' => true,\n\t\t'data' => array(\n\t\t\t'shape' => 'meta',", "\t\t'wide' => false,\n\t\t'data' => array(\n\t\t\t'shape' => 'meta',"),
+            ('resolver-unregistered', WCD, "\t'repost'   => '\\\\Courtneyr\\\\Child\\\\Repost\\\\page_clipping',\n", ''),
+        ],
+    },
     # Round 2: judged by inspect-round2.mjs on the rows in $CR_R2_ROWS (seed-round2.php output), at 1448 px.
     'favorite-r2': {
         'inspect': True,
@@ -58,6 +82,17 @@ MUTANTS = {
             ('split-at-first-class-hit', FAV_PHP, "\\Courtneyr\\Child\\SingleWideColumn\\top_level_card( $content ) : null;", "( preg_match( '/<article\\b[^>]*\\bk-favorite\\b[^>]*>.*?<\\/article>/s', $content, $m, PREG_OFFSET_CAPTURE ) ? array( (int) $m[0][1], (int) $m[0][1] + strlen( $m[0][0] ) ) : null ) : null;"),
             ('card-not-marked', FAV_PHP, "add_filter( 'render_block_' . CARD_BLOCK, __NAMESPACE__ . '\\\\mark_card' );", ''),
             ('marks-not-released', CARD, "\treturn unmark( $html );", "\treturn $html;"),
+        ],
+    },
+    'repost-r2': {
+        'inspect': True,
+        'list': [
+            ('synced-pattern-decides', REP_PHP, "\tif ( 'unknown' === $place ) {\n\t\treturn null;\n\t}\n\tif ( 'none' !== $place ) {", "\tif ( 'none' !== $place && 'unknown' !== $place ) {"),
+            ('clip-not-marked', REP_PHP, "\treturn \\Courtneyr\\Child\\SingleWideColumn\\mark_card( $html, 'cr-repost-clip--single' );", "\treturn $html;"),
+            ('flow-first-class-hit', REP_PHP, "\t$card  = \\Courtneyr\\Child\\SingleWideColumn\\top_level_card( (string) substr( $html, $start, $end - $start ) );", "\t$mark  = strpos( $html, 'cr-repost-clip--single', $start );\n\t$from0 = false === $mark ? false : strrpos( substr( $html, 0, $mark ), '<article' );\n\t$to0   = false === $from0 ? false : strpos( $html, '</article>', $from0 );\n\t$card  = false === $to0 || $from0 < $start ? null : array( $from0 - $start, $to0 + 10 - $start );"),
+            ('renderer-ignores-decision', REP_PHP, "\tif ( is_array( $decided ) ) {\n\t\t// The decision", "\tif ( false ) {\n\t\t// The decision"),
+            ('renderer-saved-post-by-id', REP_PHP, "\t$post = get_post();\n", "\t$post = get_post( (int) get_the_ID() );\n"),
+            ('renderer-substring-check', REP_PHP, "\t\t$attrs = prints_card( $content ) ? array() : meta_card_attrs( $post );", "\t\t$attrs = false !== strpos( $content, 'k-repost' ) ? array() : meta_card_attrs( $post );"),
         ],
     },
 }
@@ -74,7 +109,7 @@ def main():
         subprocess.run(['rsync', '-a', '--delete', '--exclude', '.git', '--exclude', 'node_modules', '--exclude', 'vendor',
                         '--exclude', 'tests', '--exclude', '.github', tree + '/', theme + '/'], check=True)
         time.sleep(3)
-        for u in ('http://localhost:8887/', 'http://localhost:8887/kind/favorite/'):
+        for u in ('http://localhost:8887/', 'http://localhost:8887/kind/favorite/', 'http://localhost:8887/kind/repost/'):
             urllib.request.urlopen(u).read()
 
     killed = survived = 0

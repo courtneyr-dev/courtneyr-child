@@ -223,7 +223,7 @@ namespace {
 	check( 'card marks are released on render_block at 30, after the kind filters', array( array( 30, $ns . 'release', 2 ) ) === hooked( 'render_block' ) );
 	check( 'header marker is on render_block_core/group with two arguments', array( array( 10, $ns . 'mark_header', 2 ) ) === hooked( 'render_block_core/group' ) );
 	check( 'stylesheet loader is on wp_enqueue_scripts at 20', array( array( 20, $ns . 'enqueue_styles', 1 ) ) === hooked( 'wp_enqueue_scripts' ) );
-	check( 'favorite and read resolvers are registered', array( 'read' => '\\Courtneyr\\Child\\SingleRead\\page_record', 'favorite' => '\\Courtneyr\\Child\\SingleFavorite\\page_sheet' ) === \Courtneyr\Child\SingleWideColumn\KINDS );
+	check( 'read, favorite and repost resolvers are registered', array( 'read' => '\\Courtneyr\\Child\\SingleRead\\page_record', 'favorite' => '\\Courtneyr\\Child\\SingleFavorite\\page_sheet', 'repost' => '\\Courtneyr\\Child\\Repost\\page_clipping' ) === \Courtneyr\Child\SingleWideColumn\KINDS );
 
 	// Nothing took the column yet: no sheet.
 	check( 'column not used before a block widens', false === column_used() );
