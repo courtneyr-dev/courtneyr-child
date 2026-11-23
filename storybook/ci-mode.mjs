@@ -26,12 +26,33 @@ export function changedPaths( repo, base ) {
 	}
 }
 
+function mergeBase( repo, defaultBranch ) {
+	try {
+		return git( repo, [ 'merge-base', 'HEAD', `refs/remotes/origin/${ defaultBranch }` ] ).trim();
+	} catch {
+		return '';
+	}
+}
+
+// `before` is the commit the push replaced, or HEAD^1 for a pull request. A new
+// branch's first push has an all-zero `before` and a force push names a commit
+// the checkout doesn't hold. A push passes `defaultBranch`, and those two are
+// then compared with the commit where the branch left it.
+export function comparison( repo, before, defaultBranch ) {
+	const changed = before && ! /^0+$/.test( before ) ? changedPaths( repo, before ) : null;
+	if ( changed || ! defaultBranch ) {
+		return { base: before, changed };
+	}
+	const base = mergeBase( repo, defaultBranch );
+	return { base, changed: base ? changedPaths( repo, base ) : null, from: `the merge base with ${ defaultBranch }` };
+}
+
 if ( process.argv[ 1 ] && import.meta.url === pathToFileURL( fs.realpathSync( process.argv[ 1 ] ) ).href ) {
 	const repo = path.resolve( path.dirname( fileURLToPath( import.meta.url ) ), '..' );
-	const base = process.argv[ 2 ] ?? '';
-	const changed = base && ! /^0+$/.test( base ) ? changedPaths( repo, base ) : null;
+	const before = process.argv[ 2 ] ?? '';
+	const { base, changed, from } = comparison( repo, before, process.argv[ 3 ] ?? '' );
 	const mode = ciMode( base, changed );
-	const because = changed ? `${ changed.length } paths differ from ${ base.slice( 0, 12 ) }` : `no comparison with "${ base.slice( 0, 12 ) }"`;
+	const because = changed ? `${ changed.length } paths differ from ${ from ?? 'the before commit' } ${ base.slice( 0, 12 ) }` : `no comparison with "${ before.slice( 0, 12 ) }"${ from ? ` or ${ from }` : '' }`;
 	process.stderr.write( `${ mode }: ${ because }\n` );
 	process.stdout.write( `mode=${ mode }\n` );
 }

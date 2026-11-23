@@ -5,15 +5,19 @@
 # The rule, decided by storybook/ci-mode.mjs from the paths the push or pull
 # request changes:
 #
-# - strict, when a path under storybook/ or this file changes, and when the
-#   change can't be compared (a new branch, a force push). The first job fails
-#   on any finding of storybook/check.mjs, and the second job builds the
+# - strict, when a path under storybook/ or this file changes. The first job
+#   fails on any finding of storybook/check.mjs, and the second job builds the
 #   Storybook and runs axe on every story.
 # - advisory, for every other change. A theme change can only leave the fixtures
 #   stale, so the first job prints the stale inputs and the recapture command as
 #   a warning and passes, and the second job is skipped. The build serves the
 #   theme's assets/ from the checkout, so axe sees a stylesheet change in the
 #   pull request that recaptures.
+#
+# A pull request is compared with its base. A push is compared with the commit
+# it replaced. A new branch's first push and a force push have no such commit in
+# the checkout, so they are compared with the merge base of HEAD and the default
+# branch, and are strict only when git can't find one.
 
 name: Storybook
 
@@ -47,7 +51,9 @@ jobs:
         id: mode
         env:
           BASE: ${{ github.event_name == 'pull_request' && 'HEAD^1' || github.event.before }}
-        run: node storybook/ci-mode.mjs "$BASE" >> "$GITHUB_OUTPUT"
+          # The fetch-depth 0 checkout of a push already fetched every branch.
+          DEFAULT_BRANCH: ${{ github.event_name == 'push' && github.event.repository.default_branch || '' }}
+        run: node storybook/ci-mode.mjs "$BASE" "$DEFAULT_BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: storybook/check.mjs (no install)
         run: node storybook/check.mjs ${{ steps.mode.outputs.mode == 'advisory' && '--advisory' || '' }}
