@@ -1,0 +1,91 @@
+# The site Storybook (storybook/) shows HTML that WordPress rendered from a known
+# commit. Nothing is published from here. A capture needs a local WordPress
+# Studio site, so it stays local (docs/testing.md).
+#
+# The rule, decided by storybook/ci-mode.mjs from the paths the push or pull
+# request changes:
+#
+# - strict, when a path under storybook/ or this file changes. The first job
+#   fails on any finding of storybook/check.mjs, and the second job builds the
+#   Storybook and runs axe on every story.
+# - advisory, for every other change. A theme change can only leave the fixtures
+#   stale, so the first job prints the stale inputs and the recapture command as
+#   a warning and passes, and the second job is skipped. The build serves the
+#   theme's assets/ from the checkout, so axe sees a stylesheet change in the
+#   pull request that recaptures.
+#
+# A pull request is compared with its base. A push is compared with the commit
+# it replaced. A new branch's first push and a force push have no such commit in
+# the checkout, so they are compared with the merge base of HEAD and the default
+# branch, and are strict only when git can't find one.
+
+name: Storybook
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  fixtures:
+    name: Storybook fixtures match the theme
+    runs-on: ubuntu-24.04
+    outputs:
+      mode: ${{ steps.mode.outputs.mode }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # A pull request is checked out as its merge commit, whose first
+          # parent is the base: 2 commits. A push can hold any number, so it
+          # gets the history.
+          fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 0 }}
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+
+      - name: Strict or advisory, from the paths this change touches
+        id: mode
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && 'HEAD^1' || github.event.before }}
+          # The fetch-depth 0 checkout of a push already fetched every branch.
+          DEFAULT_BRANCH: ${{ github.event_name == 'push' && github.event.repository.default_branch || '' }}
+        run: node storybook/ci-mode.mjs "$BASE" "$DEFAULT_BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: storybook/check.mjs (no install)
+        run: node storybook/check.mjs ${{ steps.mode.outputs.mode == 'advisory' && '--advisory' || '' }}
+
+      - name: Asset paths, writes and the CI rule
+        if: ${{ !cancelled() }}
+        run: node --test storybook/tests/*.test.mjs
+
+  build:
+    name: Storybook build and axe
+    needs: fixtures
+    if: ${{ !cancelled() && needs.fixtures.outputs.mode != 'advisory' }}
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: storybook
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: storybook/package-lock.json
+
+      - name: Install the Storybook's own packages
+        run: npm ci --no-audit --no-fund
+
+      - name: Build
+        run: npm run build-storybook
+
+      - name: axe on every story, in the runner's installed Chrome
+        run: npm run test-storybook
