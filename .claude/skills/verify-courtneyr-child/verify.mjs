@@ -238,23 +238,22 @@ export function servedBy( header, { sitePath, checkout } ) {
 	return { ok, detail: `the PHP worker serves ${ live.site } and renders the theme from ${ live.theme.join( ' and ' ) }; expected ${ sitePath } and ${ checkout }` };
 }
 
-async function waitReady( target, timeoutMs = 120000 ) {
+async function waitReady( baseUrl, timeoutMs = 120000 ) {
 	const deadline = Date.now() + timeoutMs;
 	let last = 'no response';
 	while ( Date.now() < deadline ) {
 		try {
-			const home = await fetchBody( `${ target.baseUrl }/` );
-			const served = servedBy( home.live, target );
-			if ( home.status === 200 && home.body.includes( `/wp-content/themes/${ THEME_SLUG }/` ) && served.ok ) {
+			const { status, body } = await fetchBody( `${ baseUrl }/` );
+			if ( status === 200 && body.includes( `/wp-content/themes/${ THEME_SLUG }/` ) ) {
 				return;
 			}
-			last = `HTTP ${ home.status }; ${ served.detail }`;
+			last = `HTTP ${ status }`;
 		} catch ( error ) {
 			last = error.cause ? error.cause.code : error.message;
 		}
 		await new Promise( ( resolve ) => setTimeout( resolve, 1000 ) );
 	}
-	throw new Error( `${ target.baseUrl }/ was not ready after ${ timeoutMs / 1000 }s (last: ${ last }).` );
+	throw new Error( `${ baseUrl }/ was not ready after ${ timeoutMs / 1000 }s (last: ${ last }).` );
 }
 
 export async function launch( { checkout: checkoutInput, site = DEFAULT_SITE, seed = DEFAULT_SEED, run } ) {
@@ -302,7 +301,11 @@ export async function launch( { checkout: checkoutInput, site = DEFAULT_SITE, se
 		wpEval( sitePath, 'wp_get_theme()->delete_pattern_cache();' );
 		writeJson( lockFile( sitePath ), target );
 		sh( 'studio', [ 'start', '--path', sitePath, '--skip-browser', '--skip-log-details' ] );
-		await waitReady( target );
+		await waitReady( target.baseUrl );
+		const failed = ( await doctor( { site } ) ).checks.filter( ( c ) => ! c.ok );
+		if ( failed.length ) {
+			throw new Error( `REFUSED: ${ site } started, but doctor fails.\n${ failed.map( ( c ) => `FAIL ${ c.name }: ${ c.detail }` ).join( '\n' ) }` );
+		}
 		fs.mkdirSync( target.evidenceDir, { recursive: true } );
 		return target;
 	} catch ( error ) {
