@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Mutants of a kind's wide-column CSS and renderer, killed (or not) by the live-site geometry check.
 
-usage: python3 mutants-browser.py <kind> <head-tree> <site-theme-dir> <urls.tsv> <base.json> <scratch-dir>
+usage: [CR_R2_ROWS=<rows.tsv>] python3 mutants-browser.py <kind> <head-tree> <site-theme-dir> <urls.tsv> <base.json> <scratch-dir>
 
-<kind> is favorite or repost. For each mutant: copy <head-tree> to <scratch-dir>, apply the mutant
+<kind> is favorite or repost, or favorite-r2 / repost-r2 for the second-round fixtures (judged by
+inspect-round2.mjs on $CR_R2_ROWS instead of the geometry check). For each mutant: copy <head-tree> to <scratch-dir>, apply the mutant
 there, rsync it over the Studio site's theme, probe a subset of pages and widths with probe.mjs and run
 check-<kind>.mjs against <base.json>. Killed = the check exits nonzero. The head tree itself is never
 written. The last step mounts the unmutated head tree again. Local Studio only.
@@ -21,6 +22,7 @@ FAV_PHP = 'inc/single-favorite.php'
 REP_CSS = 'assets/css/cr-repost.css'
 REP_PHP = 'inc/repost.php'
 WCD = 'inc/single-wide-column.php'
+CARD = 'inc/wide-column-card.php'
 G = '.cr-wide-column > .pkiw-singular-entry > .cr-fav-sheet:has(> .cr-fav-sheet__body > .cr-fav-sheet__mount:not(.cr-cover--failed))'
 
 MUTANTS = {
@@ -40,9 +42,20 @@ MUTANTS = {
             ('plain-prose-uncapped', FAV_CSS, '\t.cr-wide-column > .pkiw-singular-entry > .cr-fav-sheet > :is(p, ul, ol, figure, blockquote, h2, h3, h4) {\n\t\tmax-inline-size: var(--wp--style--global--content-size);', '\t.cr-wide-column > .pkiw-singular-entry > .cr-fav-sheet > :is(p, ul, ol, figure, blockquote, h2, h3, h4) {\n\t\tmax-inline-size: none;'),
             ('title-spans-both-columns', FAV_CSS, ' > .cr-fav-sheet__title {\n\t\tgrid-column: 1;', ' > .cr-fav-sheet__title {\n\t\tgrid-column: 1 / -1;'),
             ('padding-not-widened', FAV_CSS, '\t\tpadding-inline: var(--cr-space-2xl);\n', ''),
-            ('renderer-no-flow-box', FAV_PHP, '\t\t\t$before = flow( $before );\n\t\t\t$after  = flow( $after );\n', ''),
-            ('resolver-ignores-nesting', FAV_PHP, "'wide' => false !== \\Courtneyr\\Child\\SingleWideColumn\\first_block_is_top_level( $content, 'post-kinds-indieweb/favorite-card' ),", "'wide' => true,"),
+            ('renderer-no-flow-box', FAV_PHP, "\t\t$before = flow( (string) substr( $content, 0, $card_at[0] ) );\n\t\t$after  = flow( (string) substr( $content, $card_at[1] ) );", "\t\t$before = (string) substr( $content, 0, $card_at[0] );\n\t\t$after  = (string) substr( $content, $card_at[1] );"),
+            ('resolver-ignores-nesting', FAV_PHP, "'wide' => 'nested' !== $place,", "'wide' => true,"),
             ('resolver-unregistered', WCD, "\t'favorite' => '\\\\Courtneyr\\\\Child\\\\SingleFavorite\\\\page_sheet',\n", ''),
+        ],
+    },
+    # Round 2: judged by inspect-round2.mjs on the rows in $CR_R2_ROWS (seed-round2.php output), at 1448 px.
+    'favorite-r2': {
+        'inspect': True,
+        'list': [
+            ('synced-pattern-decides', FAV_PHP, "\tif ( 'unknown' === $place ) {\n\t\treturn null;\n\t}\n", ''),
+            ('opaque-blocks-ignored', WCD, "in_array( $block_name, OPAQUE_BLOCKS, true ) || ", ''),
+            ('split-at-first-class-hit', FAV_PHP, "\\Courtneyr\\Child\\SingleWideColumn\\top_level_card( $content ) : null;", "( preg_match( '/<article\\b[^>]*\\bk-favorite\\b[^>]*>.*?<\\/article>/s', $content, $m, PREG_OFFSET_CAPTURE ) ? array( (int) $m[0][1], (int) $m[0][1] + strlen( $m[0][0] ) ) : null ) : null;"),
+            ('card-not-marked', FAV_PHP, "add_filter( 'render_block_' . CARD_BLOCK, __NAMESPACE__ . '\\\\mark_card' );", ''),
+            ('marks-not-released', CARD, "\treturn unmark( $html );", "\treturn $html;"),
         ],
     },
 }
@@ -52,6 +65,8 @@ def main():
     kind, head, theme, tsv, base, scratch = sys.argv[1:7]
     conf = MUTANTS[kind]
     out = os.path.join(scratch, 'mutant.json')
+
+    r2_rows = os.environ.get('CR_R2_ROWS', '')
 
     def mount(tree):
         subprocess.run(['rsync', '-a', '--delete', '--exclude', '.git', '--exclude', 'node_modules', '--exclude', 'vendor',
@@ -75,8 +90,11 @@ def main():
             continue
         open(f, 'w', encoding='utf-8').write(src.replace(needle, repl))
         mount(tree)
-        subprocess.run(['node', os.path.join(HERE, 'probe.mjs'), tsv, conf['pages'], out, conf['widths'], 'light'], check=True, capture_output=True)
-        r = subprocess.run(['node', os.path.join(HERE, f'check-{kind}.mjs'), base, out], capture_output=True, text=True)
+        if conf.get('inspect'):
+            r = subprocess.run(['node', os.path.join(HERE, 'inspect-round2.mjs'), r2_rows, out], capture_output=True, text=True)
+        else:
+            subprocess.run(['node', os.path.join(HERE, 'probe.mjs'), tsv, conf['pages'], out, conf['widths'], 'light'], check=True, capture_output=True)
+            r = subprocess.run(['node', os.path.join(HERE, f'check-{kind}.mjs'), base, out], capture_output=True, text=True)
         if r.returncode:
             killed += 1
             first = next((l for l in r.stdout.splitlines() if l.startswith('FAIL')), '')
