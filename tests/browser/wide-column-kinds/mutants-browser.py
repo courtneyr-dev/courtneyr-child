@@ -4,7 +4,9 @@
 usage: [CR_R2_ROWS=<rows.tsv>] python3 mutants-browser.py <kind> <head-tree> <site-theme-dir> <urls.tsv> <base.json> <scratch-dir>
 
 <kind> is favorite or repost, or favorite-r2 / repost-r2 for the second-round fixtures (judged by
-inspect-round2.mjs on $CR_R2_ROWS instead of the geometry check). For each mutant: copy <head-tree> to <scratch-dir>, apply the mutant
+inspect-round2.mjs on $CR_R2_ROWS instead of the geometry check; give it the rows of the kind under
+test only, plus that kind's two-cards page, since the other kind's fixtures fail by design on a tree
+without its fix and would count every mutant as killed). For each mutant: copy <head-tree> to <scratch-dir>, apply the mutant
 there, rsync it over the Studio site's theme, probe a subset of pages and widths with probe.mjs and run
 check-<kind>.mjs against <base.json>. Killed = the check exits nonzero. The head tree itself is never
 written. The last step mounts the unmutated head tree again. Local Studio only.
