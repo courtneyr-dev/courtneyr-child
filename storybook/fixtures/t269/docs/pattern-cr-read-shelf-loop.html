@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name='robots' content='max-image-preview:large' />
+
+<style id="cr-ableplayer-dialog-guard">.able-prefs-form,.ableplayer-transcript>.able-transcript-area{display:none;}</style>
+<link rel="preload" href="http://fixture.invalid/wp-content/themes/courtneyr-child/assets/fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="http://fixture.invalid/wp-content/themes/courtneyr-child/assets/fonts/barlow-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="http://fixture.invalid/wp-content/themes/courtneyr-child/assets/fonts/roboto-slab-variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="http://fixture.invalid/wp-content/themes/courtneyr-child/assets/fonts/rock-salt-400.woff2" as="font" type="font/woff2" crossorigin>
+<title>Read &#8211; courtneyr-x-t269</title>
+<link rel='dns-prefetch' href='//fixture.invalid' />
+<link rel="alternate" type="application/rss+xml" title="courtneyr-x-t269 &raquo; Feed" href="http://fixture.invalid/feed/" />
+<link rel="alternate" type="application/rss+xml" title="courtneyr-x-t269 &raquo; Comments Feed" href="http://fixture.invalid/comments/feed/" />
+<link rel="alternate" type="application/rss+xml" title="courtneyr-x-t269 &raquo; Read Kind Feed" href="http://fixture.invalid/kind/read/feed/" />
+<link rel="author" href="http://fixture.invalid/" />
+<style id="wp-img-auto-sizes-contain-inline-css">
+img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
+/*# sourceURL=wp-img-auto-sizes-contain-inline-css */
+</style>
+<style id="wp-block-paragraph-inline-css">
+.is-small-text{font-size:.875em}.is-regular-text{font-size:1em}.is-large-text{font-size:2.25em}.is-larger-text{font-size:3em}.has-drop-cap:not(:focus):first-letter{float:left;font-size:8.4em;font-style:normal;font-weight:100;line-height:.68;margin:.05em .1em 0 0;text-transform:uppercase}body.rtl .has-drop-cap:not(:focus):first-letter{float:none;margin-left:.1em}p.has-drop-cap.has-background{overflow:hidden}:root :where(p.has-background){padding:1.25em 2.375em}:where(p.has-text-color:not(.has-link-color)) a{color:inherit}p.has-text-align-left[style*="writing-mode:vertical-lr"],p.has-text-align-right[style*="writing-mode:vertical-rl"]{rotate:180deg}
+/*# sourceURL=http://fixture.invalid/wp-includes/blocks/paragraph/style.min.css */
+</style>
+<link rel='stylesheet' id='courtneyr-post-kinds-css' href='http://fixture.invalid/wp-content/themes/courtneyr-child/assets/css/cr-post-kinds.css?ver=0.7.176' media='all' />
+<style id="courtneyr-mood-pin-inline-css">
+/* ============================================================
+   Mood pin — a pin-back button from the comic-shop counter (v0.7.41).
+
+   The shell is CSS: a rolled rim in a palette shade, a shallow dome,
+   grain and scuffs, and a contact shadow outside the clipped face.
+   The face is one inline SVG from inc/mood-pin.php: a halftone field,
+   a registration mark, the motif printed in two plates (the accent
+   plate nudged under the ink plate, the ink plate roughened by a
+   shared displacement filter), and the mood word set by layout —
+   along the lower or upper rim, big and centered, stacked, or a touch
+   crooked. Raw hexes on the pin are deliberate: a physical pin looks
+   the same in dark mode; only its shadow on the page changes. The
+   inks arrive as custom properties from inc/mood-pin.php.
+   ============================================================ */
+
+.cr-pin-set {
+	display: inline-grid;
+	justify-items: center;
+	gap: 0.25rem;
+	vertical-align: middle;
+}
+
+.cr-pin {
+	--pin-size: 9rem;
+	--pin-scale: 1;
+	--pin-face: #ebebeb;
+	--pin-ink: #241c4a;
+	--pin-accent: #fb8500;
+	--pin-rim-hi: #7a6fb8;
+	--pin-rim-lo: #241c4a;
+	--pin-tilt: 0deg;
+	--pin-wear: 0deg;
+	--pin-shadow: 36, 28, 74;
+	position: relative;
+	display: block;
+	width: calc(var(--pin-size) * var(--pin-scale));
+	height: calc(var(--pin-size) * var(--pin-scale));
+	flex: none;
+	margin: 0.2rem 0 0.1rem;
+	transform: rotate(var(--pin-tilt));
+	line-height: 1;
+	color: var(--pin-ink);
+}
+.cr-pin--single {
+	--pin-size: 12rem;
+	--pin-scale: 1;
+}
+
+.cr-pin__rim,
+.cr-pin__face,
+.cr-pin__gloss,
+.cr-pin__wear {
+	position: absolute;
+	inset: 0;
+	display: block;
+	border-radius: 50%;
+}
+
+/* Rolled edge in the pin's rim shade, lit from the upper left; the face
+   sits up and to the left inside it, so the lower-right lip reads as
+   thickness. The contact shadow lives here, outside the face's clip. */
+.cr-pin__rim {
+	background: conic-gradient(
+		from 215deg,
+		var(--pin-rim-hi),
+		var(--pin-rim-lo) 24%,
+		color-mix(in srgb, var(--pin-rim-hi) 55%, var(--pin-rim-lo)) 42%,
+		var(--pin-rim-lo) 60%,
+		color-mix(in srgb, var(--pin-rim-hi) 70%, var(--pin-rim-lo)) 76%,
+		var(--pin-rim-hi)
+	);
+	box-shadow:
+		inset 0 0 0 1px rgba(36, 28, 74, 0.4),
+		inset -2px -3px 3px rgba(36, 28, 74, 0.45),
+		inset 1px 1px 2px rgba(255, 255, 255, 0.35),
+		0 1px 0 rgba(var(--pin-shadow), 0.55),
+		0 2px 2px -1px rgba(var(--pin-shadow), 0.55),
+		0 5px 6px -3px rgba(var(--pin-shadow), 0.38),
+		0 12px 16px -10px rgba(var(--pin-shadow), 0.3);
+}
+
+/* The face: printed paper under matte laminate. The dome is one quiet
+   light-to-dark sweep (v0.7.41: about a third softer than before). */
+.cr-pin__face {
+	inset: 2.2% 3.8% 3.8% 2.2%;
+	overflow: hidden;
+	background:
+		linear-gradient(148deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02) 40%, rgba(36, 28, 74, 0) 55%, rgba(36, 28, 74, 0.07) 100%),
+		var(--pin-face);
+	box-shadow:
+		inset -2px -3px 5px -3px rgba(36, 28, 74, 0.24),
+		inset 2px 2px 4px -3px rgba(255, 255, 255, 0.3),
+		inset 0 0 0 1px rgba(36, 28, 74, 0.16);
+}
+
+/* ---- The printed face ---- */
+.cr-pin__art {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	display: block;
+	overflow: visible;
+	color: var(--pin-ink);
+}
+/* Stroke widths live on the SVG as attributes (a plate's default of 7 is
+   inherited; a motif's own thinner lines win), so the CSS sets only inks. */
+.cr-pin__art .i { fill: none; stroke: var(--pin-ink); stroke-linecap: round; stroke-linejoin: round; }
+.cr-pin__art .if { fill: var(--pin-ink); stroke: none; }
+.cr-pin__art .a { fill: var(--pin-accent); stroke: none; }
+.cr-pin__art .as { fill: none; stroke: var(--pin-accent); stroke-linecap: round; stroke-linejoin: round; }
+/* The accent plate, printed first and a hair off register. */
+.cr-pin__plate--a { opacity: 0.85; }
+.cr-pin__plate--a .i,
+.cr-pin__plate--a .as { stroke: var(--pin-accent); fill: none; }
+.cr-pin__plate--a .if,
+.cr-pin__plate--a .a { fill: var(--pin-accent); stroke: none; }
+.cr-pin__halftone { opacity: 0.9; }
+.cr-pin__echo { fill: var(--pin-accent); opacity: 0.6; stroke: none; }
+.cr-pin__void { fill: var(--pin-face); opacity: 0.55; }
+/* Print-defect levels from the seed: clean pins skip the grain, the
+   off-register subset gets more of it. */
+.cr-pin--print-0 .cr-pin__wear { opacity: 0.06; }
+.cr-pin--print-2 .cr-pin__wear { opacity: 0.22; }
+.cr-pin--print-2 .cr-pin__plate--a { opacity: 0.95; }
+.cr-pin__rays { opacity: 0.85; }
+.cr-pin__reg { opacity: 0.5; }
+
+/* The word, set in the face's units so it scales with the pin. */
+.cr-pin__word {
+	fill: var(--pin-ink);
+	font-weight: 700;
+	paint-order: stroke fill;
+	stroke: var(--pin-face);
+	stroke-width: 0.9;
+	stroke-linejoin: round;
+}
+.cr-pin__word--mono {
+	font-family: var(--cr-font-mono, ui-monospace, Menlo, monospace);
+	letter-spacing: 0.08em;
+}
+.cr-pin__word--condensed {
+	font-family: var(--cr-font-body, "Barlow", system-ui, sans-serif);
+	font-weight: 800;
+	letter-spacing: 0.04em;
+}
+.cr-pin__word--slab {
+	font-family: var(--cr-font-accent, "Roboto Slab", serif);
+	font-weight: 800;
+	letter-spacing: 0.005em;
+}
+.cr-pin__word--hand {
+	font-family: var(--cr-font-display, "Rock Salt", cursive);
+	font-weight: 400;
+	stroke-width: 0.6;
+}
+
+/* A saved emoji with no catalog entry prints as a text glyph over the
+   art (the word still comes from the SVG). */
+.cr-pin__glyph {
+	position: absolute;
+	top: 41%;
+	left: 50%;
+	display: grid;
+	place-items: center;
+	width: 56%;
+	height: 56%;
+	transform: translate(-50%, -50%);
+	font-size: calc(var(--pin-size) * 0.4);
+	line-height: 1;
+	font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+	filter: saturate(0.75) contrast(1.05);
+}
+.cr-pin--l-word-big .cr-pin__glyph { top: 30%; font-size: calc(var(--pin-size) * 0.26); }
+
+/* The laminate: one narrow reflection along the upper-left curve,
+   faded to one side so it never reads as a ring. */
+.cr-pin__gloss {
+	inset: 4% 7% 7% 4%;
+	border: 2px solid transparent;
+	border-top-color: rgba(255, 255, 255, 0.4);
+	border-left-color: rgba(255, 255, 255, 0.14);
+	transform: rotate(-32deg);
+	filter: blur(0.6px);
+	-webkit-mask-image: linear-gradient(105deg, #000 18%, rgba(0, 0, 0, 0.3) 46%, transparent 60%);
+	mask-image: linear-gradient(105deg, #000 18%, rgba(0, 0, 0, 0.3) 46%, transparent 60%);
+	pointer-events: none;
+}
+
+/* Wear: photocopy grain multiplied over face and word, a sparser light
+   abrasion screened over everything, and two laminate scratches. Two
+   noise filters; the angle comes from the pin's seed.
+   v0.7.127: the noise is inline SVG (inc/mood-pin.php), not CSS images.
+   Chrome counts url() backgrounds and masks as LCP candidates, so the
+   grain, which rasterises late on a slow phone, became the "largest
+   content" on mood posts (gtm-onsight: LCP 5.4 s throttled, 3.0 s
+   without it). Filtered SVG shapes and gradients aren't candidates. */
+.cr-pin__wear {
+	z-index: 3;
+	pointer-events: none;
+	opacity: 0.14;
+	mix-blend-mode: multiply;
+	transform: rotate(var(--pin-wear));
+}
+
+.cr-pin__wear svg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	clip-path: circle(50%);
+}
+
+.cr-pin__abrasion {
+	opacity: 0.8;
+	mix-blend-mode: screen;
+}
+.cr-pin__wear::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	opacity: 0.8;
+	mix-blend-mode: screen;
+	background:
+		linear-gradient(118deg, transparent 43%, rgba(255, 255, 255, 0.3) 43.5%, transparent 44.1%),
+		linear-gradient(62deg, transparent 71%, rgba(255, 255, 255, 0.24) 71.4%, transparent 71.9%);
+}
+
+/* On the dark ground the violet contact shadow disappears; a black one
+   sits the pin down the same way. */
+:root[data-theme="dark"] .cr-pin {
+	--pin-shadow: 0, 0, 0;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .cr-pin {
+		--pin-shadow: 0, 0, 0;
+	}
+}
+
+/* A long custom mood's word, printed under the pin. */
+.cr-pin__word-below {
+	display: block;
+	max-width: 14rem;
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.7rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	text-align: center;
+	line-height: 1.3;
+	color: var(--cr-ink, #241c4a);
+}
+
+/* Family sticker under the single's pin: navigation metadata, kept small. */
+.cr-pin__family {
+	display: inline-block;
+	margin-top: 0.1rem;
+	padding: 0.12rem 0.5rem;
+	border-radius: 1px;
+	background: var(--cr-tape, #f3e5b8);
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.62rem, var(--cr-text-floor, 0.7rem));
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--cr-tape-ink);
+	transform: rotate(var(--cr-rotate-1, -1.2deg));
+}
+
+.cr-pin__intensity {
+	font-family: var(--cr-font-mono, monospace);
+	font-size: max(0.75rem, var(--cr-text-floor, 0.75rem));
+	font-weight: 700;
+	line-height: 1.3;
+	text-align: center;
+	color: var(--cr-ink);
+}
+
+/* ---- Where the pin sits ---------------------------------------------- */
+
+/* Single: the mood-card block is the pin, centered, no card box. The
+   plugin's badge and kind label repeat the header's MOOD chip and go. */
+body.single-post .pk-card.k-mood.wp-block-post-kinds-indieweb-mood-card {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	justify-items: center;
+	gap: 0.25rem;
+	padding: 0.5rem 0 0.75rem;
+	background: none;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	text-align: center;
+}
+body.single-post .pk-card.k-mood .pk-badge,
+body.single-post .pk-card.k-mood .pk-kindlabel,
+body.single-post .pk-card.k-mood::before {
+	display: none;
+}
+body.single-post .pk-card.k-mood .pk-body {
+	width: auto;
+	display: grid;
+	justify-items: center;
+	gap: 0.25rem;
+}
+body.single-post .pk-card.k-mood .pk-mood {
+	display: grid;
+	justify-items: center;
+	gap: 0.5rem;
+}
+body.single-post .pk-card.k-mood .pk-mood__note {
+	max-width: 32rem;
+	margin: 0;
+	font-family: var(--cr-font-accent, "Roboto Slab", serif);
+	font-weight: 700;
+	font-size: 1.05rem;
+	line-height: 1.35;
+	color: var(--cr-ink, #241c4a);
+}
+body.single-post .pk-card.k-mood .pk-meta {
+	margin: 0;
+}
+body.single-post .pk-card.k-mood .pk-meta .dt-published {
+	font-family: var(--cr-font-accent, "Roboto Slab", serif);
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--cr-cerulean, #126782);
+}
+
+/* Stream: the pin is the hero but the title and date sit close under it;
+   a note that only repeats the word on the pin stays out of the caption. */
+.cr-stream-page .pk-card.k-mood .cr-pin-set { margin-bottom: 0; }
+.cr-stream-page .pk-card.k-mood { padding-top: 0.5rem; }
+.cr-stream-page .pk-card.k-mood .pk-caption,
+.cr-stream-page .pk-card.k-mood .pk-meta,
+.cr-stream-page .pk-card.k-mood .pk-mood__note { margin-top: 0.1rem; }
+/* The plugin's synthetic "Mood" heading on a title-less post stays the
+   card's link for assistive tech and hides visually. */
+.cr-stream-page .pk-card.k-mood.cr-pin-card--untitled .pk-title {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+.cr-stream-page .pk-card.k-mood .pk-mood__note.cr-pin-note-dup {
+	display: none;
+}
+
+/* The card's one link (inc/mood-pin.php mood_card()) covers the card;
+   links inside the note sit above it. Focus takes the site ring. */
+.cr-stream-page .pk-card.k-mood .cr-pin-card__link {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+.cr-stream-page .pk-card.k-mood .pk-mood__note a {
+	position: relative;
+	z-index: 2;
+}
+
+/* The date takes the muted ink role: cerulean on paper, periwinkle at night. */
+.cr-stream-page article.pk-card.k-mood :is(.pk-sub, .pk-stream-date, .pk-meta .dt-published) {
+	color: var(--cr-ink-muted);
+}
+
+/* Editor sidebar preview (inc/mood-pin.php enqueues this sheet there). */
+.cr-mood-pin-preview {
+	display: grid;
+	justify-items: center;
+	padding: 1rem 0 0.5rem;
+	background: #fbfaf5;
+	border-radius: 4px;
+}
+.cr-mood-pin-help {
+	margin: 0.5rem 0 0;
+	font-size: 12px;
+	color: #50575e;
+}
+
+/*# sourceURL=http://fixture.invalid/wp-content/themes/courtneyr-child/assets/css/cr-mood-pin.css */
+</style>
+<link rel='stylesheet' id='pkiw-kind-tokens-css' href='http://fixture.invalid/wp-content/plugins/post-kinds-for-indieweb/styles/kind-tokens.css?ver=0' media='all' />
+<link rel='stylesheet' id='post-kinds-indieweb-blocks-css' href='http://fixture.invalid/wp-content/plugins/post-kinds-for-indieweb/build/blocks.css?ver=0' media='all' />
+<style id="wp-block-post-template-inline-css">
+.wp-block-post-template{box-sizing:border-box;list-style:none;margin-bottom:0;margin-top:0;max-width:100%;padding:0}.wp-block-post-template.is-flex-container{display:flex;flex-direction:row;flex-wrap:wrap;gap:1.25em}.wp-block-post-template.is-flex-container>li{margin:0;width:100%}@media (min-width:600px){.wp-block-post-template.is-flex-container.is-flex-container.columns-2>li{width:calc(50% - .625em)}.wp-block-post-template.is-flex-container.is-flex-container.columns-3>li{width:calc(33.33333% - .83333em)}.wp-block-post-template.is-flex-container.is-flex-container.columns-4>li{width:calc(25% - .9375em)}.wp-block-post-template.is-flex-container.is-flex-container.columns-5>li{width:calc(20% - 1em)}.wp-block-post-template.is-flex-container.is-flex-container.columns-6>li{width:calc(16.66667% - 1.04167em)}}@media (max-width:600px){.wp-block-post-template-is-layout-grid[class*=columns-]:not(.has-native-responsive-grid){grid-template-columns:1fr}}.wp-block-post-template-is-layout-constrained>li>.alignright,.wp-block-post-template-is-layout-flow>li>.alignright{float:right;margin-inline-end:0;margin-inline-start:2em}.wp-block-post-template-is-layout-constrained>li>.alignleft,.wp-block-post-template-is-layout-flow>li>.alignleft{float:left;margin-inline-end:2em;margin-inline-start:0}.wp-block-post-template-is-layout-constrained>li>.aligncenter,.wp-block-post-template-is-layout-flow>li>.aligncenter{margin-inline-end:auto;margin-inline-start:auto}
+/*# sourceURL=http://fixture.invalid/wp-includes/blocks/post-template/style.min.css */
+</style>
+<style id="pkiw-kind-layouts-inline-css">
+/**
+ * Post Kinds for IndieWeb — kind archive layouts (issue 233).
+ *
+ * Structure only for the core/post-template block styles registered in
+ * includes/class-kind-archive-layouts.php:
+ *
+ *   .is-style-pkiw-shelf        face-out grid, one linked item per post
+ *   .is-style-pkiw-shelf-spine  spine-out grid, title text set vertically
+ *   .is-style-pkiw-menu         menu lines with section headings + leaders
+ *
+ * A grouped loop (the archive-sections or menu entry block) prints its
+ * Post Template as a stack of sections, each a heading and a
+ * ul.pkiw-group__items list, so every shelf item rule has a sectioned twin
+ * on `.pkiw-group__items > li`.
+ *
+ * Paint comes only from --pkiw-* tokens (defaults in kind-tokens.css) so the
+ * theme owns wood, paper, tape and color. Shelf boards are pseudo-elements:
+ * a row with fewer posts than columns shows empty board, which is neither
+ * focusable nor announced, and no placeholder items exist in the DOM.
+ *
+ * @package PostKindsForIndieWeb
+ */
+
+/* ------------------------------------------------------------------
+ * Shelf (face-out and spine-out)
+ * ------------------------------------------------------------------ */
+
+.wp-block-post-template.is-style-pkiw-shelf,
+.wp-block-post-template.is-style-pkiw-shelf-spine,
+.is-style-pkiw-shelf .pkiw-group__items,
+.is-style-pkiw-shelf-spine .pkiw-group__items {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(var(--pkiw-shelf-item-min, 9rem), 100%), 1fr));
+	gap: var(--pkiw-shelf-gap-row, 2rem) var(--pkiw-shelf-gap-column, 1rem);
+	margin-inline: 0;
+	padding: 0;
+	list-style: none;
+
+	/* Clips each board's run into empty columns at the shelf's edge. */
+	overflow-x: clip;
+}
+
+.wp-block-post-template.is-style-pkiw-shelf-spine,
+.is-style-pkiw-shelf-spine .pkiw-group__items {
+	grid-template-columns: repeat(auto-fill, minmax(var(--pkiw-shelf-spine-min, 3.5rem), 1fr));
+}
+
+/* Grouped: the Post Template stacks its sections, and each section's list
+ * is the shelf. */
+.wp-block-post-template.is-style-pkiw-shelf.pkiw-grouped,
+.wp-block-post-template.is-style-pkiw-shelf-spine.pkiw-grouped {
+	display: flex;
+	flex-direction: column;
+	gap: var(--pkiw-shelf-section-gap, 2rem);
+}
+
+.is-style-pkiw-shelf .pkiw-group,
+.is-style-pkiw-shelf-spine .pkiw-group {
+	min-width: 0;
+	margin: 0;
+}
+
+.is-style-pkiw-shelf .pkiw-group__heading,
+.is-style-pkiw-shelf-spine .pkiw-group__heading {
+	margin-block: 0 var(--pkiw-shelf-heading-gap, 1rem);
+}
+
+.is-style-pkiw-shelf .pkiw-group__items,
+.is-style-pkiw-shelf-spine .pkiw-group__items {
+	margin-block: 0;
+}
+
+.is-style-pkiw-shelf > li,
+.is-style-pkiw-shelf-spine > li,
+.is-style-pkiw-shelf .pkiw-group__items > li,
+.is-style-pkiw-shelf-spine .pkiw-group__items > li {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	min-width: 0;
+	margin: 0;
+	padding-block-end: calc(var(--pkiw-shelf-board-size, 0.375rem) + 0.25rem);
+	background: var(--pkiw-shelf-item-bg, transparent);
+}
+
+/* The board: runs from the item to the shelf's inline end, so the last
+ * item in a row paints the empty positions after it. */
+.is-style-pkiw-shelf > li::after,
+.is-style-pkiw-shelf-spine > li::after,
+.is-style-pkiw-shelf .pkiw-group__items > li::after,
+.is-style-pkiw-shelf-spine .pkiw-group__items > li::after {
+	content: "";
+	position: absolute;
+	inset-block-end: 0;
+	inset-inline-start: calc(var(--pkiw-shelf-gap-column, 1rem) / -2);
+	inset-inline-end: -100vw;
+	height: var(--pkiw-shelf-board-size, 0.375rem);
+	background: var(--pkiw-shelf-board-color, currentcolor);
+	opacity: var(--pkiw-shelf-board-opacity, 0.2);
+	pointer-events: none;
+}
+
+.is-style-pkiw-shelf > li > *,
+.is-style-pkiw-shelf-spine > li > *,
+.is-style-pkiw-shelf .pkiw-group__items > li > *,
+.is-style-pkiw-shelf-spine .pkiw-group__items > li > * {
+	margin: 0;
+}
+
+.is-style-pkiw-shelf .wp-block-post-featured-image {
+	aspect-ratio: var(--pkiw-shelf-artwork-ratio, 2 / 3);
+	overflow: hidden;
+}
+
+.is-style-pkiw-shelf .wp-block-post-featured-image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.is-style-pkiw-shelf .wp-block-post-title,
+.is-style-pkiw-shelf-spine .wp-block-post-title {
+	font-size: inherit;
+	overflow-wrap: anywhere;
+}
+
+/* One link per item: the title link's hit area covers the whole item. The
+ * accessible name stays the title text. */
+.is-style-pkiw-shelf .wp-block-post-title a::before,
+.is-style-pkiw-shelf-spine .wp-block-post-title a::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+/* Spine-out: artwork is decoration here; the title and date remain real
+ * text, set vertically. */
+.is-style-pkiw-shelf-spine > li,
+.is-style-pkiw-shelf-spine .pkiw-group__items > li {
+	min-height: var(--pkiw-shelf-spine-height, 14rem);
+	align-items: center;
+}
+
+.is-style-pkiw-shelf-spine .wp-block-post-featured-image {
+	display: none;
+}
+
+.is-style-pkiw-shelf-spine .wp-block-post-title,
+.is-style-pkiw-shelf-spine .wp-block-post-date {
+	writing-mode: vertical-rl;
+}
+
+/* ------------------------------------------------------------------
+ * Menu
+ * ------------------------------------------------------------------ */
+
+.wp-block-post-template.is-style-pkiw-menu {
+	display: flex;
+	flex-direction: column;
+	gap: var(--pkiw-menu-line-gap, 1rem);
+	margin-inline: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.is-style-pkiw-menu > li {
+	margin: 0;
+}
+
+/* A grouped menu is a stack of sections: a heading, then that group's
+   lines. The gap between sections is the list's own gap. */
+.wp-block-post-template.is-style-pkiw-menu:has(.pkiw-menu-section) {
+	gap: var(--pkiw-menu-section-gap, 2rem);
+}
+
+.pkiw-menu-section__heading {
+	margin-block: 0 0.5rem;
+}
+
+.pkiw-menu-section__items {
+	display: flex;
+	flex-direction: column;
+	gap: var(--pkiw-menu-line-gap, 1rem);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pkiw-menu-section__items > li {
+	margin: 0;
+}
+
+/* The lead list uses the post template item's own layout. */
+.pkiw-lead__items {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* The editor previews each line on its own: the line that opens a section
+   holds the whole section, and the lines it already shows step aside. */
+.is-style-pkiw-menu > li:has(.pkiw-menu-entry--continued) {
+	display: none;
+}
+
+.pkiw-menu-entry__title {
+	flex: 0 1 auto;
+	min-width: 0;
+	margin: 0;
+	font: inherit;
+}
+
+.pkiw-menu-entry__line {
+	display: flex;
+	gap: 0.5em;
+	align-items: baseline;
+	margin: 0;
+}
+
+.pkiw-menu-entry__name {
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.pkiw-menu-entry__leader {
+	flex: 1 1 1em;
+	min-width: 1em;
+	border-block-end: var(--pkiw-menu-leader-width, 2px) var(--pkiw-menu-leader-style, dotted) var(--pkiw-menu-leader-color, currentcolor);
+	translate: 0 -0.25em;
+}
+
+.pkiw-menu-entry__rating {
+	flex: none;
+}
+
+.pkiw-menu-entry__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 0.75em;
+	margin: 0;
+	opacity: var(--pkiw-state-muted-opacity, 0.7);
+}
+
+.pkiw-menu-entry__notes {
+	margin: 0.25em 0 0;
+}
+
+/* ------------------------------------------------------------------
+ * Review archive
+ * ------------------------------------------------------------------ */
+
+.wp-block-post-template.pkiw-review-list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--pkiw-menu-section-gap, 2rem);
+	margin-inline: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pkiw-review-list > li {
+	margin: 0;
+}
+
+.pkiw-review-list > li:has(.pkiw-review-entry--continued) {
+	display: none;
+}
+
+.pkiw-review-section__heading {
+	margin-block: 0 0.5rem;
+}
+
+.pkiw-review-section__items {
+	display: flex;
+	flex-direction: column;
+	gap: var(--pkiw-menu-line-gap, 1rem);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pkiw-review-section__items > li {
+	margin: 0;
+}
+
+.pkiw-review-entry {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.pkiw-review-entry__figure {
+	margin: 0;
+}
+
+.pkiw-review-entry__cover {
+	max-width: 100%;
+	height: auto;
+}
+
+.pkiw-review-entry__title,
+.pkiw-review-entry__item {
+	margin: 0;
+}
+
+.pkiw-four-stars__list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pkiw-review-rating .pk-stars {
+	display: inline-flex;
+}
+
+.pkiw-review-rating .pk-stars svg {
+	width: 1em;
+	height: 1em;
+}
+
+.pkiw-review-rating .pk-stars svg.off,
+.pkiw-review-rating .pk-stars svg.half path.off {
+	opacity: 0.3;
+}
+
+/* ------------------------------------------------------------------
+ * Focus and motion (after all item rules, lowest to highest specificity)
+ * ------------------------------------------------------------------ */
+
+.is-style-pkiw-shelf > li:has(a:focus-visible),
+.is-style-pkiw-shelf-spine > li:has(a:focus-visible),
+.is-style-pkiw-shelf .pkiw-group__items > li:has(a:focus-visible),
+.is-style-pkiw-shelf-spine .pkiw-group__items > li:has(a:focus-visible) {
+	outline: 2px solid var(--pkiw-focus-indicator, currentcolor);
+	outline-offset: -2px;
+}
+
+.is-style-pkiw-shelf .wp-block-post-title a:focus-visible,
+.is-style-pkiw-shelf-spine .wp-block-post-title a:focus-visible {
+	outline: 2px solid var(--pkiw-focus-indicator, currentcolor);
+	outline-offset: 2px;
+}
+
+@supports selector(:has(a)) {
+
+	.is-style-pkiw-shelf .wp-block-post-title a:focus-visible,
+	.is-style-pkiw-shelf-spine .wp-block-post-title a:focus-visible {
+		outline: none;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.is-style-pkiw-shelf > li,
+	.is-style-pkiw-shelf-spine > li,
+	.is-style-pkiw-shelf .pkiw-group__items > li,
+	.is-style-pkiw-shelf-spine .pkiw-group__items > li {
+		transition: translate 150ms ease-out;
+	}
+
+	.is-style-pkiw-shelf > li:hover,
+	.is-style-pkiw-shelf-spine > li:hover,
+	.is-style-pkiw-shelf > li:has(a:focus-visible),
+	.is-style-pkiw-shelf-spine > li:has(a:focus-visible),
+	.is-style-pkiw-shelf .pkiw-group__items > li:hover,
+	.is-style-pkiw-shelf-spine .pkiw-group__items > li:hover,
+	.is-style-pkiw-shelf .pkiw-group__items > li:has(a:focus-visible),
+	.is-style-pkiw-shelf-spine .pkiw-group__items > li:has(a:focus-visible) {
+		translate: 0 -0.25rem;
+	}
+}
+
+/* ------------------------------------------------------------------
+ * Reflow: 320 CSS px (1280px at 400% zoom) is a single column with no
+ * horizontal scroll; spine text returns to horizontal.
+ * ------------------------------------------------------------------ */
+
+@media (max-width: 20em) {
+
+	.wp-block-post-template.is-style-pkiw-shelf,
+	.wp-block-post-template.is-style-pkiw-shelf-spine,
+	.is-style-pkiw-shelf .pkiw-group__items,
+	.is-style-pkiw-shelf-spine .pkiw-group__items {
+		grid-template-columns: 1fr;
+	}
+
+	.is-style-pkiw-shelf-spine > li,
+	.is-style-pkiw-shelf-spine .pkiw-group__items > li {
+		min-height: 0;
+		align-items: stretch;
+	}
+
+	.is-style-pkiw-shelf-spine .wp-block-post-title,
+	.is-style-pkiw-shelf-spine .wp-block-post-date {
+		writing-mode: horizontal-tb;
+	}
+}
+
+/* ------------------------------------------------------------------
+ * Forced colors: boards, leaders and focus use system colors.
+ * ------------------------------------------------------------------ */
+
+/* Recent Specials: the newest entries above a menu, side by side where
+   there is room. Themes restyle it. */
+.pkiw-menu-specials__list {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+	gap: 1.5em;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pkiw-menu-specials__item {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1em;
+	align-items: flex-start;
+}
+
+.pkiw-menu-specials__photo {
+	flex: 0 1 8rem;
+	width: 8rem;
+	height: auto;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
+}
+
+.pkiw-menu-specials__body {
+	flex: 1 1 10rem;
+	min-width: 0;
+}
+
+.pkiw-menu-specials__name,
+.pkiw-menu-specials__notes,
+.pkiw-menu-specials__meta,
+.pkiw-menu-specials__rating {
+	margin-block: 0 0.35em;
+}
+
+/* Recipe courses: a plain wrapping row of links. Themes restyle it. */
+.pk-recipe-courses__list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5em 1em;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pk-recipe-courses__link[aria-current="page"] {
+	font-weight: 700;
+}
+
+@media (forced-colors: active) {
+
+	.is-style-pkiw-shelf > li::after,
+	.is-style-pkiw-shelf-spine > li::after,
+	.is-style-pkiw-shelf .pkiw-group__items > li::after,
+	.is-style-pkiw-shelf-spine .pkiw-group__items > li::after {
+		background: CanvasText;
+		opacity: 1;
+	}
+
+	.pkiw-menu-entry__leader {
+		border-block-end-color: CanvasText;
+	}
+
+	.is-style-pkiw-shelf > li:has(a:focus-visible),
+	.is-style-pkiw-shelf-spine > li:has(a:focus-visible),
+	.is-style-pkiw-shelf .pkiw-group__items > li:has(a:focus-visible),
+	.is-style-pkiw-shelf-spine .pkiw-group__items > li:has(a:focus-visible) {
+		outline-color: Highlight;
+	}
+}
+
+/*# sourceURL=http://fixture.invalid/wp-content/plugins/post-kinds-for-indieweb/styles/kind-layouts.css */
+</style>
+<style id="ollie-block-core-post-template-inline-css">
+/* Post Template
+--------------------------------------------- */
+
+/* Hide empty pagination container */
+.wp-block-post-template + .wp-block-group:empty {
+	display: none;
+}
+
+/*# sourceURL=http://fixture.invalid/wp-content/themes/ollie/assets/styles/core-post-template.css */
+</style>
+<style id="ollie-block-core-query-pagination-numbers-inline-css">
+/* Query pagination
+--------------------------------------------- */
+
+.wp-block-query-pagination-previous,
+.wp-block-query-pagination-next,
+.wp-block-query-pagination-numbers {
+	margin: 0 !important;
+}
+
+.wp-block-query-pagination-numbers a {
+	display: inline-block;
+}
+
+.wp-block-query-pagination-numbers span.page-numbers {
+	padding-left: .7em;
+	padding-right: .7em;
+}
+
+/*# sourceURL=http://fixture.invalid/wp-content/themes/ollie/assets/styles/core-query-pagination-numbers.css */
+</style>
+<style id="wp-block-query-pagination-inline-css">
+.wp-block-query-pagination.is-content-justification-space-between>.wp-block-query-pagination-next:last-of-type{margin-inline-start:auto}.wp-block-query-pagination.is-content-justification-space-between>.wp-block-query-pagination-previous:first-child{margin-inline-end:auto}.wp-block-query-pagination .wp-block-query-pagination-previous-arrow{display:inline-block;margin-right:1ch}.wp-block-query-pagination .wp-block-query-pagination-previous-arrow:not(.is-arrow-chevron){transform:scaleX(1)}.wp-block-query-pagination .wp-block-query-pagination-next-arrow{display:inline-block;margin-left:1ch}.wp-block-query-pagination .wp-block-query-pagination-next-arrow:not(.is-arrow-chevron){transform:scaleX(1)}.wp-block-query-pagination.aligncenter{justify-content:center}
+/*# sourceURL=http://fixture.invalid/wp-includes/blocks/query-pagination/style.min.css */
+</style>
+<style id="courtneyr-nav-inline-css">
+/* ============================================================
+   Shared navigation chips — archive pagination and single-post
+   Previous/Next (PKIW #233, v0.7.70).
+
+   One look for both controls: an outlined paper chip with a thick
+   ink border, the elevated surface, a 3px hard offset shadow, and
+   Roboto Slab. Hover and keyboard focus lift the chip 1px and deepen
+   the shadow; focus adds the site's two-tone ring. The current page
+   fills with ink (Russian violet in light, printer ivory in dark)
+   and takes the inverse ink as text.
+
+   Loaded by inc/nav.php through wp_enqueue_block_style() for
+   core/query-pagination and core/post-navigation-link, so it ships
+   only where one of those blocks renders, in the editor as well.
+   Every archive that paginates (blog, categories, search, /kind/*,
+   post formats, web stories) uses core Query Pagination and gets the
+   same chips from this file; /stream renders no pagination.
+   ============================================================ */
+
+/* Pager row: previous, numbers, next. The block's own layout support
+   (justifyContent: center in each pattern) centers the row. */
+.wp-block-query-pagination {
+	gap: var(--cr-space-sm);
+	flex-wrap: wrap;
+	margin-block-start: var(--cr-space-2xl);
+}
+
+/* Every previous/next row keeps the same gap below it, so a band that
+   follows (the lavender "More from the blog", the footer) never touches
+   the chips (Courtney, 2026-11-04). The parent selector outweighs the
+   layout container's `> * { margin-block: 0 }`, which zeroed the old
+   margins on singles. */
+:is(main, .wp-block-group, .wp-block-query) > :is(.cr-post-nav, .wp-block-query-pagination) {
+	margin-block-end: var(--cr-space-xl);
+}
+
+.wp-block-query-pagination .wp-block-query-pagination-numbers {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--cr-space-sm);
+}
+
+/* Single post: Previous on the left, Next on the right. Core prints an
+   empty wrapper when there's no adjacent post, so a lone link keeps
+   its side. */
+.cr-post-nav {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--cr-space-md);
+	align-items: start;
+	margin-block: var(--cr-space-xl);
+}
+
+main > .cr-post-nav {
+	margin-block-start: var(--cr-space-xl);
+}
+
+/* The Group's flow layout adds a block-start margin to the second child,
+   which would drop Next below Previous. */
+.cr-post-nav > .wp-block-post-navigation-link {
+	margin-block: 0;
+}
+
+.cr-post-nav .post-navigation-link-previous {
+	grid-column: 1;
+	justify-self: start;
+}
+
+.cr-post-nav .post-navigation-link-next {
+	grid-column: 2;
+	justify-self: end;
+}
+
+/* No adjacent post on either side: no empty landmark. */
+.cr-post-nav:not(:has(a)) {
+	display: none;
+}
+
+/* The chip. */
+.wp-block-query-pagination :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .page-numbers:not(.dots)),
+.cr-post-nav .wp-block-post-navigation-link a {
+	--dsgo-text-color: var(--cr-ink);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--cr-space-2xs);
+	min-width: 2.75rem;
+	min-height: 2.75rem;
+	margin: 0;
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	border: var(--cr-border-thick);
+	border-radius: 0;
+	background: var(--cr-surface-elevated);
+	box-shadow: var(--cr-shadow-hard-sm);
+	color: var(--cr-ink);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-md);
+	font-weight: var(--cr-weight-extrabold);
+	line-height: 1.2;
+	text-align: center;
+	text-decoration: none;
+}
+
+/* The current page: filled with ink. */
+.wp-block-query-pagination .page-numbers.current {
+	--dsgo-text-color: var(--cr-ink-inverse);
+	background: var(--cr-ink);
+	border-color: var(--cr-ink);
+	color: var(--cr-ink-inverse);
+}
+
+/* The ellipsis between number ranges is text, not a chip. */
+.wp-block-query-pagination .page-numbers.dots {
+	padding-inline: var(--cr-space-2xs);
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+	color: var(--cr-ink);
+}
+
+/* Core's pager arrow sits inside the link; the post-nav arrow is drawn
+   here so it stays inside the chip (core prints that one outside the
+   link). The empty alt text keeps it out of the link's name. */
+.cr-post-nav .post-navigation-link-previous a::before {
+	content: "←";
+	content: "←" / "";
+}
+
+.cr-post-nav .post-navigation-link-next a::after {
+	content: "→";
+	content: "→" / "";
+}
+
+/* Hover and focus: lift 1px, deepen the shadow. The a.* selectors
+   outrank the chip rule above (0,3,1 over 0,3,0). */
+.wp-block-query-pagination :is(a.wp-block-query-pagination-previous, a.wp-block-query-pagination-next, a.page-numbers):is(:hover, :focus-visible),
+.cr-post-nav .wp-block-post-navigation-link a:is(:hover, :focus-visible) {
+	transform: translate(-1px, -1px);
+	box-shadow: var(--cr-shadow-hard);
+	color: var(--cr-ink);
+}
+
+/* One focus treatment for both controls: the site's selective-yellow
+   ring with the ink halo (tokens.css a:focus-visible). */
+.wp-block-query-pagination :is(a.wp-block-query-pagination-previous, a.wp-block-query-pagination-next, a.page-numbers):focus-visible,
+.cr-post-nav .wp-block-post-navigation-link a:focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.wp-block-query-pagination a,
+	.cr-post-nav .wp-block-post-navigation-link a {
+		transition: transform var(--cr-motion-fast) var(--cr-ease-out), box-shadow var(--cr-motion-fast) var(--cr-ease-out);
+	}
+}
+
+@media (forced-colors: active) {
+
+	.wp-block-query-pagination :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, a.page-numbers),
+	.cr-post-nav .wp-block-post-navigation-link a {
+		border-color: LinkText;
+		box-shadow: none;
+	}
+
+	.wp-block-query-pagination :is(a.wp-block-query-pagination-previous, a.wp-block-query-pagination-next, a.page-numbers):is(:hover, :focus-visible),
+	.cr-post-nav .wp-block-post-navigation-link a:is(:hover, :focus-visible) {
+		box-shadow: none;
+	}
+
+	.wp-block-query-pagination .page-numbers.current {
+		forced-color-adjust: none;
+		background: Highlight;
+		border-color: Highlight;
+		box-shadow: none;
+		color: HighlightText;
+	}
+
+	.wp-block-query-pagination .page-numbers.dots {
+		color: CanvasText;
+	}
+}
+
+/*# sourceURL=http://fixture.invalid/wp-content/themes/courtneyr-child/assets/css/cr-nav.css */
+</style>
+<style id="wp-block-group-inline-css">
+.wp-block-group{box-sizing:border-box}:where(.wp-block-group.wp-block-group-is-layout-constrained){position:relative}
+/*# sourceURL=http://fixture.invalid/wp-includes/blocks/group/style.min.css */
+</style>
+<link rel='stylesheet' id='courtneyr-evidence-labels-css' href='http://fixture.invalid/wp-content/themes/courtneyr-child/assets/css/cr-evidence-labels.css?ver=0.7.176' media='all' />
+<style id="ollie-block-core-group-inline-css">
+/* Group
+--------------------------------------------- */
+
+.is-style-background-blur {
+	-webkit-backdrop-filter: blur(20px);
+	backdrop-filter: blur(20px);
+}
+
+@media (max-width: 600px) {
+	header div.is-style-background-blur {
+		backdrop-filter: none;
+	}
+}
+
+/* Improvements for row group */
+@media (max-width: 781px) {
+	.ollie-row-stack {
+		flex-direction: column;
+		align-items: flex-start !important;
+	}
+
+	.ollie-row-stack > * {
+		flex-basis: 100% !important;
+	}
+
+	.ollie-flex-start {
+		align-items: flex-start !important;
+	}
+
+	.ollie-justify-start {
+		justify-content: flex-start !important;
+	}
+}
+
+.ollie-row-stack > .wp-block-buttons,
+.ollie-no-shrink {
+	flex-shrink: 0;
+}
+
+.wp-block-group.ollie-sticky-top {
+	top: calc(20px + var(--wp-admin--admin-bar--position-offset, 0px))
+}
+
+/* Helper class to swap order on mobile */
+@media (max-width: 781px) {
+	.ollie-swap-order {
+		flex-direction: column-reverse;
+	}
+	.ollie-row-reverse {
+		flex-direction: row-reverse;
+	}
+}
+
+/*# sourceURL=http://fixture.invalid/wp-content/themes/ollie/assets/styles/core-group.css */
+</style>
+<link rel='stylesheet' id='wprm-public-css' href='http://fixture.invalid/wp-content/plugins/wp-recipe-maker/dist/public-modern.css?ver=10.9.2' media='all' />
+<style id="wp-block-library-inline-css">
+:root{--wp-block-synced-color:#7a00df;--wp-block-synced-color--rgb:122,0,223;--wp-bound-block-color:var(--wp-block-synced-color);--wp-editor-canvas-background:#ddd;--wp-admin-theme-color:#007cba;--wp-admin-theme-color--rgb:0,124,186;--wp-admin-theme-color-darker-10:#006ba1;--wp-admin-theme-color-darker-10--rgb:0,107,160.5;--wp-admin-theme-color-darker-20:#005a87;--wp-admin-theme-color-darker-20--rgb:0,90,135;--wp-admin-border-width-focus:2px}@media (min-resolution:192dpi){:root{--wp-admin-border-width-focus:1.5px}}.wp-element-button{cursor:pointer}:root .has-very-light-gray-background-color{background-color:#eee}:root .has-very-dark-gray-background-color{background-color:#313131}:root .has-very-light-gray-color{color:#eee}:root .has-very-dark-gray-color{color:#313131}:root .has-vivid-green-cyan-to-vivid-cyan-blue-gradient-background{background:linear-gradient(135deg,#00d084,#0693e3)}:root .has-purple-crush-gradient-background{background:linear-gradient(135deg,#34e2e4,#4721fb 50%,#ab1dfe)}:root .has-hazy-dawn-gradient-background{background:linear-gradient(135deg,#faaca8,#dad0ec)}:root .has-subdued-olive-gradient-background{background:linear-gradient(135deg,#fafae1,#67a671)}:root .has-atomic-cream-gradient-background{background:linear-gradient(135deg,#fdd79a,#004a59)}:root .has-nightshade-gradient-background{background:linear-gradient(135deg,#330968,#31cdcf)}:root .has-midnight-gradient-background{background:linear-gradient(135deg,#020381,#2874fc)}:root{--wp--preset--font-size--normal:16px;--wp--preset--font-size--huge:42px}.has-regular-font-size{font-size:1em}.has-larger-font-size{font-size:2.625em}.has-normal-font-size{font-size:var(--wp--preset--font-size--normal)}.has-huge-font-size{font-size:var(--wp--preset--font-size--huge)}:root .has-text-align-center{text-align:center}:root .has-text-align-left{text-align:left}:root .has-text-align-right{text-align:right}.has-fit-text{white-space:nowrap!important}#end-resizable-editor-section{display:none}.aligncenter{clear:both}.items-justified-left{justify-content:flex-start}.items-justified-center{justify-content:center}.items-justified-right{justify-content:flex-end}.items-justified-space-between{justify-content:space-between}.screen-reader-text{word-wrap:normal!important;border:0;clip-path:inset(50%);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;word-break:normal!important}.screen-reader-text:focus{background-color:#ddd;clip-path:none;color:#444;display:block;font-size:1em;height:auto;left:5px;line-height:normal;padding:15px 23px 14px;text-decoration:none;top:5px;width:auto;z-index:100000}html :where(.has-border-color){border-style:solid}html :where([style^=border-color],[style*=";border-color"],[style*="; border-color"]){border-style:solid}html :where([style^=border-top-color],[style*=";border-top-color"],[style*="; border-top-color"]){border-top-style:solid}html :where([style^=border-right-color],[style*=";border-right-color"],[style*="; border-right-color"]){border-right-style:solid}html :where([style^=border-bottom-color],[style*=";border-bottom-color"],[style*="; border-bottom-color"]){border-bottom-style:solid}html :where([style^=border-left-color],[style*=";border-left-color"],[style*="; border-left-color"]){border-left-style:solid}html :where([style^=border-width],[style*=";border-width"],[style*="; border-width"]){border-style:solid}html :where([style^=border-top-width],[style*=";border-top-width"],[style*="; border-top-width"]){border-top-style:solid}html :where([style^=border-right-width],[style*=";border-right-width"],[style*="; border-right-width"]){border-right-style:solid}html :where([style^=border-bottom-width],[style*=";border-bottom-width"],[style*="; border-bottom-width"]){border-bottom-style:solid}html :where([style^=border-left-width],[style*=";border-left-width"],[style*="; border-left-width"]){border-left-style:solid}html :where(img[class*=wp-image-]){height:auto;max-width:100%}:where(figure){margin:0 0 1em}html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:var(--wp-admin--admin-bar--height,0px)}@media screen and (max-width:600px){html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:0px}}
+/*# sourceURL=/wp-includes/css/dist/block-library/common.min.css */
+</style>
+<link rel='stylesheet' id='courtneyr-shelf-boards-css' href='http://fixture.invalid/wp-content/themes/courtneyr-child/assets/css/cr-shelf-boards.css?ver=0.7.176' media='all' />
+<link rel='stylesheet' id='courtneyr-archives-css' href='http://fixture.invalid/wp-content/themes/courtneyr-child/assets/css/cr-archives.css?ver=0.7.176' media='all' />
+<link rel='stylesheet' id='courtneyr-cutout-css' href='http://fixture.invalid/wp-content/themes/courtneyr-child/assets/css/cr-cutout.css?ver=0.7.176' media='all' />
+<link rel='stylesheet' id='courtneyr-read-shelf-css' href='http://fixture.invalid/wp-content/themes/courtneyr-child/assets/css/cr-read-shelf.css?ver=0.7.176' media='all' />
+<style id="global-styles-inline-css">
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--primary: #241c4a;--wp--preset--color--primary-accent: #bcb5e3;--wp--preset--color--primary-alt: #219ebc;--wp--preset--color--primary-alt-accent: #023047;--wp--preset--color--main: #1a1714;--wp--preset--color--main-accent: #fbfaf5;--wp--preset--color--base: #ffffff;--wp--preset--color--secondary: #5d72a3;--wp--preset--color--tertiary: #fee2c3;--wp--preset--color--border-light: #d4cfeb;--wp--preset--color--border-dark: #011d2c;--wp--preset--color--selective-yellow: #ffb703;--wp--preset--color--ut-orange: #fb8500;--wp--preset--color--cerulean: #126782;--wp--preset--color--sky-blue: #8ecae6;--wp--preset--color--night-elevated: #251f1c;--wp--preset--color--glaucous-light: #5a7ea8;--wp--preset--color--russian-violet-soft: #3d2f6e;--wp--preset--color--ut-orange-dark: #b85f00;--wp--preset--color--light-orange-dark: #a87a45;--wp--preset--color--coral: #d63240;--wp--preset--color--cerulean-light: #3a8090;--wp--preset--color--glaucous-dark: #3d527d;--wp--preset--color--sage: #658057;--wp--preset--color--mauve: #9d4e6c;--wp--preset--gradient--marker-highlight: linear-gradient(180deg, transparent 0%, transparent 50%, #ffb703 50%, #ffb703 100%);--wp--preset--gradient--tape-gradient: linear-gradient(180deg, #f3e5b8 0%, #ecdda6 100%);--wp--preset--gradient--brand-sunrise: linear-gradient(135deg, #fbfaf5 0%, #fee2c3 50%, #fb8500 100%);--wp--preset--gradient--brand-sunset: linear-gradient(135deg, #fb8500 0%, #ffb703 50%, #fee2c3 100%);--wp--preset--gradient--brand-twilight: linear-gradient(135deg, #bcb5e3 0%, #241c4a 100%);--wp--preset--gradient--brand-press-night: linear-gradient(135deg, #241c4a 0%, #023047 50%, #1a1714 100%);--wp--preset--gradient--brand-sky: linear-gradient(135deg, #8ecae6 0%, #219ebc 50%, #126782 100%);--wp--preset--gradient--brand-indie-web: linear-gradient(135deg, #126782 0%, #8ecae6 100%);--wp--preset--gradient--brand-field-notes: linear-gradient(135deg, #bcb5e3 0%, #fbfaf5 100%);--wp--preset--gradient--brand-marker: linear-gradient(135deg, #ffb703 0%, #fb8500 100%);--wp--preset--gradient--brand-bookmark: linear-gradient(135deg, #fb8500 0%, #241c4a 100%);--wp--preset--gradient--brand-page-tear: linear-gradient(180deg, #fbfaf5 0%, #fee2c3 100%);--wp--preset--gradient--brand-cassette: linear-gradient(135deg, #ffb703 0%, #126782 100%);--wp--preset--gradient--brand-field: linear-gradient(135deg, #fee2c3 0%, #126782 50%, #241c4a 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: clamp(14px, 0.875rem + ((1vw - 3.2px) * 0.769), 20px);--wp--preset--font-size--large: clamp(22.041px, 1.378rem + ((1vw - 3.2px) * 1.79), 36px);--wp--preset--font-size--x-large: clamp(25.014px, 1.563rem + ((1vw - 3.2px) * 2.178), 42px);--wp--preset--font-size--xs: 0.75rem;--wp--preset--font-size--sm: 0.875rem;--wp--preset--font-size--base: clamp(1.0625rem, 1.063rem + ((1vw - 0.2rem) * 0.384), 1.25rem);--wp--preset--font-size--md: clamp(1.0625rem, 1.063rem + ((1vw - 0.2rem) * 0.127), 1.125rem);--wp--preset--font-size--lg: clamp(1.125rem, 1.125rem + ((1vw - 0.2rem) * 0.256), 1.25rem);--wp--preset--font-size--xl: clamp(1.25rem, 1.25rem + ((1vw - 0.2rem) * 0.513), 1.5rem);--wp--preset--font-size--xxl: clamp(1.5rem, 1.5rem + ((1vw - 0.2rem) * 0.769), 1.875rem);--wp--preset--font-size--xxxl: clamp(1.75rem, 1.75rem + ((1vw - 0.2rem) * 1.026), 2.25rem);--wp--preset--font-size--display: clamp(2.25rem, 2.25rem + ((1vw - 0.2rem) * 1.538), 3rem);--wp--preset--font-size--display-lg: clamp(2.5rem, 2.5rem + ((1vw - 0.2rem) * 2.564), 3.75rem);--wp--preset--font-family--body: "Barlow", system-ui, -apple-system, sans-serif;--wp--preset--font-family--accent: "Roboto Slab", Georgia, serif;--wp--preset--font-family--display: "Rock Salt", "Bradley Hand", cursive;--wp--preset--font-family--mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--spacing--3-xs: 0.125rem;--wp--preset--spacing--2-xs: 0.25rem;--wp--preset--spacing--xs: 0.5rem;--wp--preset--spacing--sm: 0.75rem;--wp--preset--spacing--md: 1rem;--wp--preset--spacing--lg: 1.5rem;--wp--preset--spacing--xl: 2rem;--wp--preset--spacing--2-xl: 3rem;--wp--preset--spacing--3-xl: 4.5rem;--wp--preset--spacing--4-xl: 6rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgb(255, 255, 255), 6px 6px rgb(0, 0, 0);--wp--preset--shadow--crisp: 6px 6px 0px rgb(0, 0, 0);--wp--preset--shadow--hard: 4px 4px 0 #241c4a;--wp--preset--shadow--hard-2: 6px 6px 0 #241c4a;--wp--preset--shadow--soft-sm: 0 1px 2px rgba(36, 28, 74, 0.06);--wp--preset--shadow--soft-md: 0 4px 12px -2px rgba(36, 28, 74, 0.10);--wp--preset--shadow--soft-lg: 0 10px 30px -10px rgba(36, 28, 74, 0.25), 0 2px 8px rgba(36, 28, 74, 0.08);--wp--preset--border-radius--xs: 0.25rem;--wp--preset--border-radius--sm: 0.5rem;--wp--preset--border-radius--md: 0.75rem;--wp--preset--border-radius--lg: 1.25rem;--wp--preset--border-radius--xl: 2rem;--wp--preset--border-radius--2-xl: 3rem;--wp--preset--border-radius--full: 100rem;--wp--custom--font-weight--thin: 100;--wp--custom--font-weight--extra-light: 200;--wp--custom--font-weight--light: 300;--wp--custom--font-weight--regular: 425;--wp--custom--font-weight--medium: 500;--wp--custom--font-weight--semi-bold: 600;--wp--custom--font-weight--bold: 700;--wp--custom--font-weight--extra-bold: 800;--wp--custom--font-weight--black: 900;--wp--custom--line-height--none: 1;--wp--custom--line-height--tight: 1.1;--wp--custom--line-height--snug: 1.2;--wp--custom--line-height--body: 1.5;--wp--custom--line-height--relaxed: 1.625;--wp--custom--line-height--loose: 2;--wp--custom--comment: Design system tokens exposed as --wp--custom--*. Mirrors the courtneyr.dev design system. Components reference --cr-* names from tokens.css; these are duplicated here so they are also available to the block editor via theme.json.;--wp--custom--ink--default: var(--cr-ink, #241c4a);--wp--custom--ink--muted: var(--cr-ink-muted, #126782);--wp--custom--ink--soft: var(--cr-ink-soft, #4a4566);--wp--custom--ink--inverse: var(--cr-ink-inverse, #fbfaf5);--wp--custom--surface--default: var(--cr-surface, #fbfaf5);--wp--custom--surface--soft: var(--cr-surface-soft, #fee2c3);--wp--custom--surface--elevated: var(--cr-surface-elevated, #ffffff);--wp--custom--type--blog: var(--cr-type-blog, #241c4a);--wp--custom--type--aside: var(--cr-type-aside, #647baf);--wp--custom--type--image: var(--cr-type-image, #219ebc);--wp--custom--type--gallery: var(--cr-type-gallery, #219ebc);--wp--custom--type--video: var(--cr-type-video, #219ebc);--wp--custom--type--audio: var(--cr-type-audio, #000000);--wp--custom--type--chat: var(--cr-type-chat, #647baf);--wp--custom--type--status: var(--cr-type-status, #647baf);--wp--custom--type--link: var(--cr-type-link, #126782);--wp--custom--type--bookmark: var(--cr-type-bookmark, #126782);--wp--custom--type--quote: var(--cr-type-quote, #241c4a);--wp--custom--type--speaking: var(--cr-type-speaking, #023047);--wp--custom--type--book: var(--cr-type-book, #241c4a);--wp--custom--type--like: var(--cr-type-like, #000000);--wp--custom--type--repost: var(--cr-type-repost, #126782);--wp--custom--type--reply: var(--cr-type-reply, #000000);--wp--custom--type--event: var(--cr-type-event, #023047);--wp--custom--type--review: var(--cr-type-review, #023047);--wp--custom--rotate--first: -1.2deg;--wp--custom--rotate--second: 1.5deg;--wp--custom--rotate--neg: -2.5deg;--wp--custom--rotate--neg-2: 2.8deg;--wp--custom--tracking--tight: -0.01em;--wp--custom--tracking--normal: 0;--wp--custom--tracking--wide: 0.05em;--wp--custom--tracking--eyebrow: 0.12em;--wp--custom--tracking--widest: 0.2em;--wp--custom--leading--tight: 1.15;--wp--custom--leading--snug: 1.35;--wp--custom--leading--normal: 1.55;--wp--custom--leading--relaxed: 1.7;--wp--custom--weight--regular: 400;--wp--custom--weight--medium: 500;--wp--custom--weight--semibold: 600;--wp--custom--weight--bold: 700;--wp--custom--weight--extrabold: 800;--wp--custom--weight--black: 900;--wp--custom--measure--default: 65ch;--wp--custom--measure--narrow: 50ch;--wp--custom--measure--wide: 80ch;--wp--custom--tape--bg: var(--cr-tape, #f3e5b8);--wp--custom--tape--ink: var(--cr-tape-ink, #241c4a);--wp--custom--marker: var(--cr-marker, #fb8500);--wp--custom--highlight: var(--cr-highlight, #ffb703);}.wp-block-button{--wp--preset--dimension--25: 25%;--wp--preset--dimension--50: 50%;--wp--preset--dimension--75: 75%;--wp--preset--dimension--100: 100%;}:root { --wp--style--global--content-size: 720px;--wp--style--global--wide-size: 1100px; }:where(body) { margin: 0; }.wp-site-blocks { padding-top: var(--wp--style--root--padding-top); padding-bottom: var(--wp--style--root--padding-bottom); }.has-global-padding { padding-right: var(--wp--style--root--padding-right); padding-left: var(--wp--style--root--padding-left); }.has-global-padding > .alignfull { margin-right: calc(var(--wp--style--root--padding-right) * -1); margin-left: calc(var(--wp--style--root--padding-left) * -1); }.has-global-padding :where(:not(.alignfull.is-layout-flow) > .has-global-padding:not(.wp-block-block, .alignfull)) { padding-right: 0; padding-left: 0; }.has-global-padding :where(:not(.alignfull.is-layout-flow) > .has-global-padding:not(.wp-block-block, .alignfull)) > .alignfull { margin-left: 0; margin-right: 0; }.wp-site-blocks > .alignleft { float: left; margin-right: 2em; }.wp-site-blocks > .alignright { float: right; margin-left: 2em; }.wp-site-blocks > .aligncenter { justify-content: center; margin-left: auto; margin-right: auto; }:where(.wp-site-blocks) > * { margin-block-start: var(--wp--preset--spacing--lg); margin-block-end: 0; }:where(.wp-site-blocks) > :first-child { margin-block-start: 0; }:where(.wp-site-blocks) > :last-child { margin-block-end: 0; }:root { --wp--style--block-gap: var(--wp--preset--spacing--lg); }:root :where(.is-layout-flow) > :first-child{margin-block-start: 0;}:root :where(.is-layout-flow) > :last-child{margin-block-end: 0;}:root :where(.is-layout-flow) > *{margin-block-start: var(--wp--preset--spacing--lg);margin-block-end: 0;}:root :where(.is-layout-constrained) > :first-child{margin-block-start: 0;}:root :where(.is-layout-constrained) > :last-child{margin-block-end: 0;}:root :where(.is-layout-constrained) > *{margin-block-start: var(--wp--preset--spacing--lg);margin-block-end: 0;}:root :where(.is-layout-flex){gap: var(--wp--preset--spacing--lg);}:root :where(.is-layout-grid){gap: var(--wp--preset--spacing--lg);}.is-layout-flow > .alignleft{float: left;margin-inline-start: 0;margin-inline-end: 2em;}.is-layout-flow > .alignright{float: right;margin-inline-start: 2em;margin-inline-end: 0;}.is-layout-flow > .aligncenter{margin-left: auto !important;margin-right: auto !important;}.is-layout-constrained > .alignleft{float: left;margin-inline-start: 0;margin-inline-end: 2em;}.is-layout-constrained > .alignright{float: right;margin-inline-start: 2em;margin-inline-end: 0;}.is-layout-constrained > .aligncenter{margin-left: auto !important;margin-right: auto !important;}.is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)){max-width: var(--wp--style--global--content-size);margin-left: auto !important;margin-right: auto !important;}.is-layout-constrained > .alignwide{max-width: var(--wp--style--global--wide-size);}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}body{background-color: var(--cr-surface);color: var(--cr-ink);font-family: var(--wp--preset--font-family--body);font-size: var(--cr-text-base);font-weight: 430;line-height: var(--cr-leading-normal, 1.55);--wp--style--root--padding-top: 0;--wp--style--root--padding-right: var(--wp--preset--spacing--md);--wp--style--root--padding-bottom: 0;--wp--style--root--padding-left: var(--wp--preset--spacing--md);}a:where(:not(.wp-element-button)){color: var(--cr-link);}:root :where(a:where(:not(.wp-element-button)):hover){color: var(--cr-link-hover);}:root :where(a:where(:not(.wp-element-button)):focus){color: var(--cr-link-hover);}h1, h2, h3, h4, h5, h6{color: var(--cr-ink);font-family: var(--wp--preset--font-family--accent);font-weight: 700;letter-spacing: var(--cr-tracking-tight, -0.01em);line-height: var(--cr-leading-tight, 1.15);}h1{font-size: var(--cr-text-4xl);line-height: var(--wp--custom--line-height--snug);}h2{font-size: var(--cr-text-3xl);line-height: var(--wp--custom--line-height--snug);}h3{font-size: var(--cr-text-2xl);}h4{font-size: var(--cr-text-xl);}h5{font-size: var(--cr-text-lg);}h6{font-size: var(--cr-text-md);}:root :where(.wp-element-button, .wp-block-button__link){background-color: var(--cr-cta-bg);border-radius: var(--cr-radius-xs, 0.25rem);border-color: var(--cr-ink);border-width: 2px;border-style: solid;color: var(--cr-cta-ink);font-family: var(--wp--preset--font-family--body);font-size: var(--wp--preset--font-size--small);font-style: inherit;font-weight: 700;letter-spacing: var(--cr-tracking-wide, 0.05em);line-height: inherit;padding-top: var(--wp--preset--spacing--sm);padding-right: var(--wp--preset--spacing--lg);padding-bottom: var(--wp--preset--spacing--sm);padding-left: var(--wp--preset--spacing--lg);text-decoration: none;text-transform: uppercase;box-shadow: var(--wp--preset--shadow--hard);}:root :where(.wp-element-button:hover, .wp-block-button__link:hover){background-color: var(--cr-cta-bg-hover);color: var(--cr-cta-ink-hover);}:root :where(.wp-element-button:focus, .wp-block-button__link:focus){outline-color: var(--cr-focus-ring);outline-offset: 2px;outline-style: solid;outline-width: 3px;}:root :where(.wp-element-button:focus-visible, .wp-block-button__link:focus-visible){outline-color: var(--cr-focus-ring);outline-offset: 2px;outline-style: solid;outline-width: 3px;}:root :where(.wp-element-caption, .wp-block-audio figcaption, .wp-block-embed figcaption, .wp-block-gallery figcaption, .wp-block-image figcaption, .wp-block-table figcaption, .wp-block-video figcaption){color: var(--cr-ink-muted);font-size: var(--wp--preset--font-size--sm);font-style: italic;line-height: var(--cr-leading-snug, 1.35);}cite{font-style: italic;}.has-primary-color{color: var(--wp--preset--color--primary) !important;}.has-primary-accent-color{color: var(--wp--preset--color--primary-accent) !important;}.has-primary-alt-color{color: var(--wp--preset--color--primary-alt) !important;}.has-primary-alt-accent-color{color: var(--wp--preset--color--primary-alt-accent) !important;}.has-main-color{color: var(--wp--preset--color--main) !important;}.has-main-accent-color{color: var(--wp--preset--color--main-accent) !important;}.has-base-color{color: var(--wp--preset--color--base) !important;}.has-secondary-color{color: var(--wp--preset--color--secondary) !important;}.has-tertiary-color{color: var(--wp--preset--color--tertiary) !important;}.has-border-light-color{color: var(--wp--preset--color--border-light) !important;}.has-border-dark-color{color: var(--wp--preset--color--border-dark) !important;}.has-selective-yellow-color{color: var(--wp--preset--color--selective-yellow) !important;}.has-ut-orange-color{color: var(--wp--preset--color--ut-orange) !important;}.has-cerulean-color{color: var(--wp--preset--color--cerulean) !important;}.has-sky-blue-color{color: var(--wp--preset--color--sky-blue) !important;}.has-night-elevated-color{color: var(--wp--preset--color--night-elevated) !important;}.has-glaucous-light-color{color: var(--wp--preset--color--glaucous-light) !important;}.has-russian-violet-soft-color{color: var(--wp--preset--color--russian-violet-soft) !important;}.has-ut-orange-dark-color{color: var(--wp--preset--color--ut-orange-dark) !important;}.has-light-orange-dark-color{color: var(--wp--preset--color--light-orange-dark) !important;}.has-coral-color{color: var(--wp--preset--color--coral) !important;}.has-cerulean-light-color{color: var(--wp--preset--color--cerulean-light) !important;}.has-glaucous-dark-color{color: var(--wp--preset--color--glaucous-dark) !important;}.has-sage-color{color: var(--wp--preset--color--sage) !important;}.has-mauve-color{color: var(--wp--preset--color--mauve) !important;}.has-primary-background-color{background-color: var(--wp--preset--color--primary) !important;}.has-primary-accent-background-color{background-color: var(--wp--preset--color--primary-accent) !important;}.has-primary-alt-background-color{background-color: var(--wp--preset--color--primary-alt) !important;}.has-primary-alt-accent-background-color{background-color: var(--wp--preset--color--primary-alt-accent) !important;}.has-main-background-color{background-color: var(--wp--preset--color--main) !important;}.has-main-accent-background-color{background-color: var(--wp--preset--color--main-accent) !important;}.has-base-background-color{background-color: var(--wp--preset--color--base) !important;}.has-secondary-background-color{background-color: var(--wp--preset--color--secondary) !important;}.has-tertiary-background-color{background-color: var(--wp--preset--color--tertiary) !important;}.has-border-light-background-color{background-color: var(--wp--preset--color--border-light) !important;}.has-border-dark-background-color{background-color: var(--wp--preset--color--border-dark) !important;}.has-selective-yellow-background-color{background-color: var(--wp--preset--color--selective-yellow) !important;}.has-ut-orange-background-color{background-color: var(--wp--preset--color--ut-orange) !important;}.has-cerulean-background-color{background-color: var(--wp--preset--color--cerulean) !important;}.has-sky-blue-background-color{background-color: var(--wp--preset--color--sky-blue) !important;}.has-night-elevated-background-color{background-color: var(--wp--preset--color--night-elevated) !important;}.has-glaucous-light-background-color{background-color: var(--wp--preset--color--glaucous-light) !important;}.has-russian-violet-soft-background-color{background-color: var(--wp--preset--color--russian-violet-soft) !important;}.has-ut-orange-dark-background-color{background-color: var(--wp--preset--color--ut-orange-dark) !important;}.has-light-orange-dark-background-color{background-color: var(--wp--preset--color--light-orange-dark) !important;}.has-coral-background-color{background-color: var(--wp--preset--color--coral) !important;}.has-cerulean-light-background-color{background-color: var(--wp--preset--color--cerulean-light) !important;}.has-glaucous-dark-background-color{background-color: var(--wp--preset--color--glaucous-dark) !important;}.has-sage-background-color{background-color: var(--wp--preset--color--sage) !important;}.has-mauve-background-color{background-color: var(--wp--preset--color--mauve) !important;}.has-primary-border-color{border-color: var(--wp--preset--color--primary) !important;}.has-primary-accent-border-color{border-color: var(--wp--preset--color--primary-accent) !important;}.has-primary-alt-border-color{border-color: var(--wp--preset--color--primary-alt) !important;}.has-primary-alt-accent-border-color{border-color: var(--wp--preset--color--primary-alt-accent) !important;}.has-main-border-color{border-color: var(--wp--preset--color--main) !important;}.has-main-accent-border-color{border-color: var(--wp--preset--color--main-accent) !important;}.has-base-border-color{border-color: var(--wp--preset--color--base) !important;}.has-secondary-border-color{border-color: var(--wp--preset--color--secondary) !important;}.has-tertiary-border-color{border-color: var(--wp--preset--color--tertiary) !important;}.has-border-light-border-color{border-color: var(--wp--preset--color--border-light) !important;}.has-border-dark-border-color{border-color: var(--wp--preset--color--border-dark) !important;}.has-selective-yellow-border-color{border-color: var(--wp--preset--color--selective-yellow) !important;}.has-ut-orange-border-color{border-color: var(--wp--preset--color--ut-orange) !important;}.has-cerulean-border-color{border-color: var(--wp--preset--color--cerulean) !important;}.has-sky-blue-border-color{border-color: var(--wp--preset--color--sky-blue) !important;}.has-night-elevated-border-color{border-color: var(--wp--preset--color--night-elevated) !important;}.has-glaucous-light-border-color{border-color: var(--wp--preset--color--glaucous-light) !important;}.has-russian-violet-soft-border-color{border-color: var(--wp--preset--color--russian-violet-soft) !important;}.has-ut-orange-dark-border-color{border-color: var(--wp--preset--color--ut-orange-dark) !important;}.has-light-orange-dark-border-color{border-color: var(--wp--preset--color--light-orange-dark) !important;}.has-coral-border-color{border-color: var(--wp--preset--color--coral) !important;}.has-cerulean-light-border-color{border-color: var(--wp--preset--color--cerulean-light) !important;}.has-glaucous-dark-border-color{border-color: var(--wp--preset--color--glaucous-dark) !important;}.has-sage-border-color{border-color: var(--wp--preset--color--sage) !important;}.has-mauve-border-color{border-color: var(--wp--preset--color--mauve) !important;}.has-marker-highlight-gradient-background{background: var(--wp--preset--gradient--marker-highlight) !important;}.has-tape-gradient-gradient-background{background: var(--wp--preset--gradient--tape-gradient) !important;}.has-brand-sunrise-gradient-background{background: var(--wp--preset--gradient--brand-sunrise) !important;}.has-brand-sunset-gradient-background{background: var(--wp--preset--gradient--brand-sunset) !important;}.has-brand-twilight-gradient-background{background: var(--wp--preset--gradient--brand-twilight) !important;}.has-brand-press-night-gradient-background{background: var(--wp--preset--gradient--brand-press-night) !important;}.has-brand-sky-gradient-background{background: var(--wp--preset--gradient--brand-sky) !important;}.has-brand-indie-web-gradient-background{background: var(--wp--preset--gradient--brand-indie-web) !important;}.has-brand-field-notes-gradient-background{background: var(--wp--preset--gradient--brand-field-notes) !important;}.has-brand-marker-gradient-background{background: var(--wp--preset--gradient--brand-marker) !important;}.has-brand-bookmark-gradient-background{background: var(--wp--preset--gradient--brand-bookmark) !important;}.has-brand-page-tear-gradient-background{background: var(--wp--preset--gradient--brand-page-tear) !important;}.has-brand-cassette-gradient-background{background: var(--wp--preset--gradient--brand-cassette) !important;}.has-brand-field-gradient-background{background: var(--wp--preset--gradient--brand-field) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}.has-xs-font-size{font-size: var(--wp--preset--font-size--xs) !important;}.has-sm-font-size{font-size: var(--wp--preset--font-size--sm) !important;}.has-base-font-size{font-size: var(--wp--preset--font-size--base) !important;}.has-md-font-size{font-size: var(--wp--preset--font-size--md) !important;}.has-lg-font-size{font-size: var(--wp--preset--font-size--lg) !important;}.has-xl-font-size{font-size: var(--wp--preset--font-size--xl) !important;}.has-xxl-font-size{font-size: var(--wp--preset--font-size--xxl) !important;}.has-xxxl-font-size{font-size: var(--wp--preset--font-size--xxxl) !important;}.has-display-font-size{font-size: var(--wp--preset--font-size--display) !important;}.has-display-lg-font-size{font-size: var(--wp--preset--font-size--display-lg) !important;}.has-body-font-family{font-family: var(--wp--preset--font-family--body) !important;}.has-accent-font-family{font-family: var(--wp--preset--font-family--accent) !important;}.has-display-font-family{font-family: var(--wp--preset--font-family--display) !important;}.has-mono-font-family{font-family: var(--wp--preset--font-family--mono) !important;}
+:root :where(.wp-block-post-template li:last-child:not(:only-child) > .wp-block-separator:last-child){display: none;}
+:root :where(.wp-block-post-template h2){font-size: var(--wp--preset--font-size--medium);}
+:root :where(p.has-background ){padding: var(--wp--preset--spacing--small)}
+:root :where(.wp-block-query-pagination a:where(:not(.wp-element-button))){background-color: var(--wp--preset--color--base);border-radius: 5px;border-width: 0;font-size: var(--wp--preset--font-size--small);font-weight: 500;padding-top: .5em;padding-right: 1em;padding-bottom: .5em;padding-left: 1em;text-decoration: none;}
+:root :where(.wp-block-query-pagination a:where(:not(.wp-element-button)):hover){text-decoration: underline;}
+/*# sourceURL=global-styles-inline-css */
+</style>
+<style id="core-block-supports-inline-css">
+.wp-container-core-query-pagination-is-layout-5aae6397{justify-content:center;}
+/*# sourceURL=core-block-supports-inline-css */
+</style>
+<style id="wp-block-template-skip-link-inline-css">
+/*! This file is auto-generated */
+.skip-link.screen-reader-text{border:0;clip-path:inset(50%);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute!important;width:1px;word-wrap:normal!important;word-break:normal!important}.skip-link.screen-reader-text:focus{background-color:#eee;clip-path:none;color:#444;display:block;font-size:1em;height:auto;left:5px;line-height:normal;padding:15px 23px 14px;text-decoration:none;top:5px;width:auto;z-index:100000}
+/*# sourceURL=/wp-includes/css/wp-block-template-skip-link.min.css */
+</style>
+<link rel='stylesheet' id='courtneyr-tokens-css' href='http://fixture.invalid/wp-content/themes/courtneyr-child/assets/css/tokens.css?ver=0.7.176' media='all' />
+<link rel='stylesheet' id='courtneyr-components-css' href='http://fixture.invalid/wp-content/themes/courtneyr-child/assets/css/components.css?ver=0.7.176' media='all' />
+<style id="courtneyr-components-inline-css">
+.site-header > .site-header__inner > .site-header__brand { padding-left: var(--cr-space-md, 1rem); }
+.site-header__brand .wp-block-site-title { font-family: var(--wp--preset--font-family--secondary, serif); letter-spacing: 0.01em; }
+.site-header__controls { flex-wrap: nowrap !important; align-items: center; gap: var(--cr-space-sm, 0.75rem); flex-shrink: 0; min-height: 3.95rem; }
+.cr-theme-cycle { display: none; }
+.cr-theme-cycle__icon { display: none; line-height: 0; }
+.cr-theme-cycle__icon svg { width: 22px; height: 22px; }
+.cr-theme-cycle__icon[data-theme-icon="light"] svg, .cr-theme-cycle__icon[data-theme-icon="system"] svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.cr-theme-cycle__icon[data-theme-icon="dark"] svg { fill: currentColor; stroke: none; }
+:root[data-theme="light"] .cr-theme-cycle__icon[data-theme-icon="light"], :root[data-theme="dark"] .cr-theme-cycle__icon[data-theme-icon="dark"], :root[data-theme="system"] .cr-theme-cycle__icon[data-theme-icon="system"], :root:not([data-theme]) .cr-theme-cycle__icon[data-theme-icon="system"] { display: inline-block; }
+@media (max-width: 1024px) {
+	.cr-theme-segments { display: none !important; }
+	.cr-theme-cycle { display: inline-flex; align-items: center; justify-content: center; inline-size: 44px; min-block-size: 44px; padding: 0; background: var(--cr-surface-elevated, #fbfaf5); color: var(--cr-glaucous, #5d72a3); border: none; border-radius: 12px; cursor: pointer; }
+	.site-header__search { display: none !important; }
+	.site-header__nav .wp-block-navigation__responsive-container-open { display: flex !important; }
+	.site-header__nav .wp-block-navigation__responsive-container:not(.is-menu-open) { display: none !important; }
+}
+.wp-block-site-title.is-style-cr-wordmark { margin: 0; line-height: 1; }
+.wp-block-site-title.is-style-cr-wordmark a:any-link { position: relative; display: block; inline-size: 8.6em; padding: 0.1em 0.05em 0.2em; overflow: hidden; font-size: clamp(1.5rem, 1.2rem + 0.8vw, 2rem); line-height: 1; white-space: nowrap; text-indent: 110%; color: var(--cr-ink, #241c4a); text-decoration: none; }
+.wp-block-site-title.is-style-cr-wordmark a:any-link::before { content: ""; position: absolute; inset: 0; background-color: currentcolor; -webkit-mask: url("http://fixture.invalid/wp-content/themes/courtneyr-child/assets/brand/wordmark.svg") left center / contain no-repeat; mask: url("http://fixture.invalid/wp-content/themes/courtneyr-child/assets/brand/wordmark.svg") left center / contain no-repeat; }
+.site-header > .site-header__inner { gap: 0; align-items: center; flex-wrap: wrap !important; }
+.site-header, .wp-block-group:has(> .site-header), .wp-block-group.is-position-sticky, header.is-position-sticky { position: sticky !important; top: calc(0px + var(--wp-admin--admin-bar--position-offset, 0px)) !important; z-index: 50 !important; border-bottom: 1px solid rgba(36, 28, 74, 0.12); box-shadow: 0 4px 12px rgba(36, 28, 74, 0.08); overflow: visible !important; }
+.wp-block-group.is-position-sticky.has-global-padding { padding-left: 0 !important; padding-right: 0 !important; }
+.wp-block-group.is-position-sticky > *, .wp-block-group.is-position-sticky .site-header, .wp-block-group.is-position-sticky .site-header__inner { max-width: none !important; width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; box-sizing: border-box !important; }
+.site-header__appearance { display: contents; }
+.cr-theme-segments { position: relative !important; display: inline-flex; align-items: center; gap: 2px; padding: 5px; border-radius: 14px; isolation: isolate; }
+.cr-theme-segments .cr-theme-segment { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 36px; padding: 0; border: 0; border-radius: 10px; background: none; }
+.cr-theme-segment__icon { width: 19px; height: 19px; }
+.site-header__search { margin: 0 !important; display: inline-flex; align-items: center; gap: 0.4rem; flex: none; padding: 0.3rem 0.6rem; border: 2px solid var(--cr-ink, #241c4a); }
+.wp-block-search.is-style-cr-header-search .wp-block-search__inside-wrapper { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0; border: 0; }
+.wp-block-search.is-style-cr-header-search .wp-block-search__inside-wrapper::before { content: ""; flex: none; inline-size: 18px; block-size: 18px; }
+.wp-block-search.is-style-cr-header-search .wp-block-search__input { flex: 1 1 auto; min-width: 0; width: 100%; margin: 0; padding: 0.5em 1em !important; border: 0 !important; font-family: var(--cr-font-body); font-size: var(--wp--preset--font-size--small) !important; line-height: 1.4; }
+.site-header .site-header__nav .wp-block-navigation-item__content { font-family: var(--cr-font-accent, serif); font-weight: 500; font-size: 1.125rem; padding: 0.4rem; min-height: 24px; display: inline-flex; align-items: center; }
+.site-header__nav, .site-header__nav .wp-block-navigation__container { flex-wrap: nowrap !important; }
+@media (min-width: 1024px) { .site-header__controls, .site-header__nav .wp-block-navigation__container { gap: var(--cr-space-md, 1.25rem) !important; } }
+.cr-mobile-search-item { display: none !important; }
+.site-header__nav .wp-block-navigation-submenu__toggle { display: inline-flex; align-items: center; justify-content: center; min-inline-size: 24px; min-block-size: 24px; padding: 0; }
+.site-header__nav .wp-block-navigation-submenu__toggle svg { width: 12px; height: 12px; }
+.site-header__nav .wp-block-navigation-item { flex-shrink: 0; }
+body.single-format-aside main.single-post   { background-color: var(--cr-type-aside-bg); }
+		body.single-format-audio main.single-post   { background-color: var(--cr-type-audio-bg); }
+		body.single-format-chat main.single-post    { background-color: var(--cr-type-chat-bg); }
+		body.single-format-gallery main.single-post { background-color: var(--cr-type-gallery-bg); }
+		body.single-format-image main.single-post   { background-color: var(--cr-type-image-bg); }
+		body.single-format-link main.single-post    { background-color: var(--cr-type-link-bg); }
+		body.single-format-quote main.single-post   { background-color: var(--cr-type-quote-bg); }
+		body.single-format-status main.single-post  { background-color: var(--cr-type-status-bg); }
+		body.single-format-video main.single-post   { background-color: var(--cr-type-video-bg); }
+		/* 0.7.149: single posts use the theme.json content and wide sizes
+		   (720px / 1100px), the same as pages. The body.single 80vw stage
+		   from v0.5.77-v0.5.89 is gone at the request of Courtney (2026-11-02):
+		   post and page widths stay uniform. Post prose sits inside the
+		   .e-content wrapper, so the 65ch reading measure would stop it
+		   short of the column; the measure follows the content size here. */
+		body.single {
+			--cr-measure: var(--wp--style--global--content-size);
+		}
+		/* v0.5.81: hide the thin separator HRs on the homepage that
+		   create faint horizontal lines (image #182, #185, #191). The
+		   <hr is-style-separator-thin> elements are baked into a DB
+		   template customization (wp_template post 37371). CSS-hide is
+		   the non-destructive fix — when the DB customization is later
+		   removed, this rule is harmless because the file template
+		   has no separators. */
+		body.home hr.wp-block-separator.is-style-separator-thin {
+			display: none !important;
+		}
+		/* v0.5.82 — restore index-card sizing for groups containing
+		   multiple .is-style-cr-card.is-nowrap siblings (the audience
+		   cards on the homepage and similar patterns). v0.5.81 site-wide
+		   width override ballooned each card to fill 80vw, stacking
+		   them as horizontal bars (image #193). Put the parent in
+		   flex-row+wrap and cap each card at ~25% of a 1100px container,
+		   so 4 fit per row at index-card proportions. Below 1024px the
+		   cards stack naturally. */
+		@media (min-width: 1024px) {
+			.wp-block-group:has(> .is-style-cr-card.is-nowrap) {
+				display: flex !important;
+				flex-direction: row !important;
+				flex-wrap: wrap !important;
+				gap: var(--wp--preset--spacing--medium, 1rem);
+				justify-content: center;
+				max-width: 1100px !important;
+				margin-inline: auto !important;
+			}
+			.wp-block-group:has(> .is-style-cr-card.is-nowrap) > .is-style-cr-card {
+				flex: 0 1 calc(25% - 0.75rem);
+				max-width: 17rem;
+				min-width: 14rem;
+				margin: 0 !important;
+			}
+		}
+		/* v0.5.86 — v0.5.84 prose cap rule reverted. The clamp(45ch, 90ch)
+		   cap on .wp-block-post-content > * cascaded into Query Loop
+		   archives (image #197 — empty boxes per post) and centered
+		   prose narrowly within the 80vw wrapper, leaving dead space
+		   on About and other pages (image #196). User feedback (image
+		   #198): "I actually loved the width of things on home" —
+		   restore the wider prose stage; revisit WCAG 1.4.8 line-length
+		   compliance later via theme.json contentSize per template part
+		   instead of bolt-on override CSS. */
+
+		/* v0.5.88 — v0.5.87 layout/spacing refinements reverted per user
+		   request (image #201): "make the homepage look like this again"
+		   — image #201 matches image #198 (the loved state). Reverted:
+		   hero column gap reduction, audience-cards 2x2 grid, Field
+		   Notes row centering, closer body margin-bottom override.
+		   KEPT (per "keep the larger font though"): the medium-size
+		   font bumps on the four homepage prose paragraphs that read
+		   too small at the v0.5.86 site-wide width. */
+
+		/* Hero: bump "Join my newsletter…" intro paragraph. */
+		.cr-home-hero .has-border-dark-color {
+			font-size: var(--wp--preset--font-size--medium, 1.25rem);
+			line-height: 1.5;
+		}
+
+		/* Newsletter Features left column: bump "Every Saturday…" intro
+		   paragraph + "Looking for personalized guidance?" text-box copy. */
+		.cr-home-features .wp-block-column:first-child p {
+			font-size: var(--wp--preset--font-size--medium, 1.25rem);
+			line-height: 1.55;
+		}
+
+		/* Closer ("Start your journey today" CTA): bump "Every Saturday…"
+		   body paragraph. */
+		.cr-home-closer p.has-secondary-color,
+		.cr-home-closer .wp-block-column:first-child > p {
+			font-size: var(--wp--preset--font-size--medium, 1.25rem);
+			line-height: 1.55;
+		}
+.wp-block-atmosphere-reactions .reaction-label { box-shadow: none !important; background: none !important; border: 0 !important; text-transform: none !important; letter-spacing: normal !important; font-family: var(--cr-font-body, inherit) !important; font-weight: 600 !important; color: var(--cr-ink, #241c4a) !important; padding: 0.25rem 0 !important; }
+		.wp-block-atmosphere-reactions .reaction-label:hover { color: var(--cr-prussian-blue, #023047) !important; text-decoration: underline; }
+		.wp-block-atmosphere-reactions .reaction-label:focus-visible { outline: 3px solid var(--cr-selective-yellow, #ffb703); outline-offset: 2px; box-shadow: none !important; }
+		.wp-block-atmosphere-reactions .reaction-avatar { border: 2px solid var(--cr-printer-ivory, #fbfaf5) !important; box-shadow: 0 1px 2px rgba(36, 28, 74, 0.25) !important; }
+		.wp-block-atmosphere-reactions ul.reaction-avatars > li { margin-right: -6px !important; }
+		.single-post__content .syndication-links .relsyn li { font-size: max(var(--cr-text-floor, 0.7rem), 0.75rem); }
+		.cr-media--ableplayer { margin: 1.5rem 0; }
+		.cr-media--ableplayer .cr-media__transcript { margin-top: 0.5rem; font-size: max(var(--cr-text-floor, 0.7rem), 0.8125rem); }
+/*# sourceURL=courtneyr-components-inline-css */
+</style>
+<link rel='stylesheet' id='courtneyr-print-css' href='http://fixture.invalid/wp-content/themes/courtneyr-child/assets/css/cr-print.css?ver=0.7.176' media='print' />
+<link rel='stylesheet' id='courtneyr-blog-css' href='http://fixture.invalid/wp-content/themes/courtneyr-child/assets/css/cr-blog.css?ver=0.7.176' media='all' />
+<link rel='stylesheet' id='courtneyr-zine-css' href='http://fixture.invalid/wp-content/themes/courtneyr-child/assets/css/cr-zine.css?ver=0.7.176' media='all' />
+<link rel='stylesheet' id='ollie-css' href='http://fixture.invalid/wp-content/themes/ollie/style.css?ver=0.7.176' media='all' />
+<link rel="https://api.w.org/" href="http://fixture.invalid/wp-json/" /><link rel="alternate" title="JSON" type="application/json" href="http://fixture.invalid/wp-json/wp/v2/kind/12" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://fixture.invalid/xmlrpc.php?rsd" />
+<meta name="generator" content="WordPress 7.1.5" />
+<style type="text/css"> .tippy-box[data-theme~="wprm"] { background-color: #333333; color: #FFFFFF; } .tippy-box[data-theme~="wprm"][data-placement^="top"] > .tippy-arrow::before { border-top-color: #333333; } .tippy-box[data-theme~="wprm"][data-placement^="bottom"] > .tippy-arrow::before { border-bottom-color: #333333; } .tippy-box[data-theme~="wprm"][data-placement^="left"] > .tippy-arrow::before { border-left-color: #333333; } .tippy-box[data-theme~="wprm"][data-placement^="right"] > .tippy-arrow::before { border-right-color: #333333; } .tippy-box[data-theme~="wprm"] a { color: #FFFFFF; } .wprm-comment-rating svg { width: 18px !important; height: 18px !important; } img.wprm-comment-rating { width: 90px !important; height: 18px !important; } body { --comment-rating-star-color: #343434; } body { --wprm-popup-font-size: 16px; } body { --wprm-popup-background: #ffffff; } body { --wprm-popup-title: #000000; } body { --wprm-popup-content: #444444; } body { --wprm-popup-button-background: #444444; } body { --wprm-popup-button-text: #ffffff; } body { --wprm-popup-accent: #747B2D; }</style><style type="text/css">.wprm-glossary-term {color: #5A822B;text-decoration: underline;cursor: help;}</style>
+
+
+
+<link rel="modulepreload" href="http://fixture.invalid/wp-includes/js/dist/script-modules/interactivity/index.min.js?ver=6a43cba92ed701f32cd9" id="@wordpress/interactivity-js-modulepreload" data-wp-fetchpriority="low">
+<style class="wp-fonts-local">
+@font-face{font-family:Barlow;font-style:normal;font-weight:400;font-display:optional;src:url('http://fixture.invalid/wp-content/themes/courtneyr-child/assets/fonts/barlow-400.woff2') format('woff2');}
+@font-face{font-family:Barlow;font-style:italic;font-weight:400;font-display:optional;src:url('http://fixture.invalid/wp-content/themes/courtneyr-child/assets/fonts/barlow-400-italic.woff2') format('woff2');}
+@font-face{font-family:Barlow;font-style:normal;font-weight:700;font-display:optional;src:url('http://fixture.invalid/wp-content/themes/courtneyr-child/assets/fonts/barlow-700.woff2') format('woff2');}
+@font-face{font-family:"Roboto Slab";font-style:normal;font-weight:100 900;font-display:optional;src:url('http://fixture.invalid/wp-content/themes/courtneyr-child/assets/fonts/roboto-slab-variable.woff2') format('woff2');}
+@font-face{font-family:"Rock Salt";font-style:normal;font-weight:400;font-display:optional;src:url('http://fixture.invalid/wp-content/themes/courtneyr-child/assets/fonts/rock-salt-400.woff2') format('woff2');}
+</style>
+</head>
+
+<body class="archive tax-kind term-read term-12 wp-embed-responsive wp-theme-ollie wp-child-theme-courtneyr-child">
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <defs></defs>
+
+  
+  <symbol id="post-icon-blog" viewBox="0 0 24 24">
+    <title>Blog post</title>
+    <path d="M6 3 H14 L19 8 V21 H6 Z"></path>
+    <path d="M14 3 V8 H19"></path>
+    <path d="M9 12 H16"></path>
+    <path d="M9 15 H16"></path>
+    <path d="M9 18 H13"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-aside" viewBox="0 0 24 24">
+    <title>Aside</title>
+    <!-- Sticky note body -->
+    <rect x="5" y="6" width="14" height="14"></rect>
+    <!-- Masking tape strip across the top (wider than note for "applied" feel) -->
+    <rect x="3" y="3" width="18" height="3.5"></rect>
+    <!-- Two short text lines inside the note -->
+    <path d="M8 11 H16"></path>
+    <path d="M8 14 H13"></path>
+    <!-- Bottom-right corner curl: diagonal fold line -->
+    <path d="M16 20 L19 17"></path>
+    <!-- Filled triangle showing the "back of paper" peeking through -->
+    <path class="cr-icon-fill" d="M16 20 L19 20 L19 17 Z"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-image" viewBox="0 0 24 24">
+    <title>Image</title>
+    <rect x="3.5" y="4.5" width="17" height="15"></rect>
+    <circle cx="9" cy="9.5" r="1.6"></circle>
+    <path d="M3.5 16 L8.5 12 L12.5 15 L16 12 L20.5 16"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-gallery" viewBox="0 0 24 24">
+    <title>Gallery</title>
+    
+    <rect x="7" y="3" width="14" height="14"></rect>
+    <rect x="3" y="7" width="14" height="14"></rect>
+  </symbol>
+
+  
+  <symbol id="post-icon-video" viewBox="0 0 24 24">
+    <title>Video</title>
+    
+    <path d="M7 4 L11 8"></path>
+    <path d="M17 4 L13 8"></path>
+    <rect x="3" y="8" width="18" height="12" rx="1.5"></rect>
+    <path d="M8 20 L7 22"></path>
+    <path d="M16 20 L17 22"></path>
+    <path class="cr-icon-fill" d="M10.5 11 L15.5 14 L10.5 17 Z"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-audio" viewBox="0 0 24 24">
+    <title>Audio</title>
+    <path d="M4 14 V12 A8 8 0 0 1 20 12 V14"></path>
+    <path d="M4 14 H7 V19 H5 A1 1 0 0 1 4 18 Z"></path>
+    <path d="M20 14 H17 V19 H19 A1 1 0 0 0 20 18 Z"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-chat" viewBox="0 0 24 24">
+    <title>Chat</title>
+    
+    <path d="M9 4 H20 V12 H15 L13 14.5 V12 H9 Z"></path>
+    <path d="M15 12 V16 H10 L8 18.5 V16 H4 V8 H9"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-status" viewBox="0 0 24 24">
+    <title>Status</title>
+    <!-- Pen body (parallelogram, tilted like a pen held to write) -->
+    <path d="M16 4 L20 8 L9 19 L5 15 Z"></path>
+    <!-- Eraser cap line at back end -->
+    <path d="M14 6 L18 10"></path>
+    <!-- Sharp writing tip extending from body -->
+    <path d="M5 15 L3 21 L9 19 Z"></path>
+    <!-- Writing motion: wavy ink trail from tip -->
+    <path d="M3 22 Q7 20 11 22 T19 22"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-link" viewBox="0 0 24 24">
+    <title>Link</title>
+    <!-- Tilted gem-style paperclip — adapted from Lucide (MIT-licensed).
+         One continuous bent wire:
+           outer-tip (upper-right) -> diagonal down-left -> outer bottom hook
+           -> diagonal up-right -> outer top loop (large arc) -> diagonal down-left
+           -> inner bottom hook (small) -> diagonal up-right ending at inner tip. -->
+    <path d="M21.44 11.05 L12.25 20.24 A6 6 0 0 1 3.76 11.75 L12.33 3.18 A4 4 0 1 1 18 8.84 L9.41 17.41 A2 2 0 0 1 6.58 14.58 L15.07 6.10"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-bookmark" viewBox="0 0 24 24">
+    <title>Bookmark</title>
+    <path d="M6 3 H18 V21 L12 16.5 L6 21 Z"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-quote" viewBox="0 0 24 24">
+    <title>Quote</title>
+    
+    <path class="cr-icon-fill" d="M5 7 H10 V12 C10 14.5 8.5 16 6 16.5 V14.5 C7.5 14 8 13.5 8 12 H5 Z"></path>
+    <path class="cr-icon-fill" d="M14 7 H19 V12 C19 14.5 17.5 16 15 16.5 V14.5 C16.5 14 17 13.5 17 12 H14 Z"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-speaking" viewBox="0 0 24 24">
+    <title>Speaking engagement</title>
+    <rect x="9" y="3" width="6" height="11" rx="3"></rect>
+    <path d="M5.5 11 A6.5 6.5 0 0 0 18.5 11"></path>
+    <path d="M12 17.5 V21"></path>
+    <path d="M8.5 21 H15.5"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-book" viewBox="0 0 24 24">
+    <title>Book</title>
+    <path d="M12 6 V20"></path>
+    <path d="M12 6 C9 5 5.5 5 3 6 V19 C5.5 18 9 18 12 19"></path>
+    <path d="M12 6 C15 5 18.5 5 21 6 V19 C18.5 18 15 18 12 19"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-like" viewBox="0 0 24 24">
+    <title>Like</title>
+    <path d="M12 20 C5 15.5 3 12 3 8.5 A4.5 4.5 0 0 1 12 7 A4.5 4.5 0 0 1 21 8.5 C21 12 19 15.5 12 20 Z"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-repost" viewBox="0 0 24 24">
+    <title>Repost</title>
+    <path d="M5 9 V8 A2 2 0 0 1 7 6 H17"></path>
+    <path d="M14 3 L17 6 L14 9"></path>
+    <path d="M19 15 V16 A2 2 0 0 1 17 18 H7"></path>
+    <path d="M10 21 L7 18 L10 15"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-reply" viewBox="0 0 24 24">
+    <title>Reply</title>
+    <path d="M9 7 L4 11.5 L9 16"></path>
+    <path d="M4 11.5 H14 A6 6 0 0 1 20 17.5 V20"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-event" viewBox="0 0 24 24">
+    <title>Event</title>
+    <rect x="3.5" y="5.5" width="17" height="15"></rect>
+    <path d="M3.5 10 H20.5"></path>
+    <path d="M8 3.5 V7.5"></path>
+    <path d="M16 3.5 V7.5"></path>
+    <circle class="cr-icon-fill" cx="8" cy="14" r="1"></circle>
+    <path d="M11 14 H17"></path>
+    <path d="M7 17.5 H17"></path>
+  </symbol>
+
+  
+  <symbol id="post-icon-review" viewBox="0 0 24 24">
+    <title>Review</title>
+    <path d="M12 3.5 L14.6 8.8 L20.5 9.7 L16.2 13.8 L17.2 19.7 L12 16.9 L6.8 19.7 L7.8 13.8 L3.5 9.7 L9.4 8.8 Z"></path>
+  </symbol>
+
+</svg>
+
+<a class="skip-link screen-reader-text" id="wp-skip-link" href="#wp--skip-link--target">Skip to content</a><div class="wp-site-blocks">
+<main id="wp--skip-link--target" class="wp-block-group alignfull cr-archive cr-archive--stream cr-archive--read has-global-padding is-layout-constrained wp-block-group-is-layout-constrained" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--x-large);padding-bottom:var(--wp--preset--spacing--xx-large)">
+
+	
+<div class="wp-block-group alignwide cr-archive-stream cr-read-shelf cr-shelf-boards is-layout-flow wp-block-group-is-layout-flow">
+	
+	<div class="wp-block-query cr-archive-stream__query is-layout-flow wp-block-query-is-layout-flow">
+		<div class="pkiw-grouped cr-archive-stream__list cr-read-shelf__list wp-block-post-template is-layout-flow wp-block-post-template-is-layout-flow"><section class="pkiw-group" data-pkiw-sections="1" data-pkiw-group="finished"><h2 id="pkiw-group-finished" class="pkiw-group__heading">Finished</h2><ul class="pkiw-group__items"><li class="wp-block-post post-95 post type-post status-publish format-standard hentry category-uncategorized kind-read h-entry">
+			
+			<article class="pk-card k-read h-cite u-read-of wp-block-post-kinds-indieweb-read-card cr-shelf-book cr-shelf-book--slab cr-shelf-book--paper-cerulean">
+	
+	<div class="pk-body">
+		
+
+		<div class="pk-caption"><h3 class="pk-title p-name"><a id="cr-shelf-t-1" href="http://fixture.invalid/seed-267-r21/">Fictional Read 21</a></h3>
+
+			
+							<p class="pk-sub">
+					<span id="cr-shelf-a-1" class="p-author h-card"><span class="p-name">Avery Example 1</span></span>
+				</p>
+			
+							
+					</div>
+
+		
+		
+		
+		
+		
+	</div>
+
+	<data value="" hidden></data>
+		</article><time class="dt-published cr-shelf-book__date" id="cr-shelf-d-1" datetime="2026-11-10T12:00:00+00:00" hidden>November 10, 2026</time>
+<span class="pk-entry-props" hidden><span class="p-author h-card"><span class="p-name">admin</span><data class="u-url" value="http://fixture.invalid/"></data></span><data class="u-url" value="http://fixture.invalid/seed-267-r21/"></data></span>
+		</li><li class="wp-block-post post-93 post type-post status-publish format-standard hentry category-uncategorized kind-read h-entry">
+			
+			<article class="pk-card k-read h-cite u-read-of wp-block-post-kinds-indieweb-read-card cr-shelf-book cr-shelf-book--slab cr-shelf-book--paper-sky-blue">
+	
+	<div class="pk-body">
+		
+
+		<div class="pk-caption"><h3 class="pk-title p-name"><a id="cr-shelf-t-2" href="http://fixture.invalid/seed-267-r19/">Fictional Read 19</a></h3>
+
+			
+							<p class="pk-sub">
+					<span id="cr-shelf-a-2" class="p-author h-card"><span class="p-name">Avery Example 3</span></span>
+				</p>
+			
+							
+					</div>
+
+		
+		
+		
+		
+		
+	</div>
+
+	<data value="" hidden></data>
+		</article><time class="dt-published cr-shelf-book__date" id="cr-shelf-d-2" datetime="2026-10-01T12:00:00+00:00" hidden>October 1, 2026</time>
+<span class="pk-entry-props" hidden><span class="p-author h-card"><span class="p-name">admin</span><data class="u-url" value="http://fixture.invalid/"></data></span><data class="u-url" value="http://fixture.invalid/seed-267-r19/"></data></span>
+		</li><li class="wp-block-post post-104 post type-post status-publish format-standard hentry category-uncategorized kind-read h-entry">
+			
+			<article class="pk-card k-read h-cite u-read-of wp-block-post-kinds-indieweb-read-card cr-shelf-book cr-shelf-book--slab cr-shelf-book--paper-sky-blue">
+	
+	<div class="pk-body">
+		
+
+		<div class="pk-caption"><h3 class="pk-title p-name"><a id="cr-shelf-t-3" href="http://fixture.invalid/seed-267-local/">Fictional Local Read Control</a></h3>
+
+			
+							<p class="pk-sub">
+					<span id="cr-shelf-a-3" class="p-author h-card"><span class="p-name">Sentinel Author Qx7</span></span>
+				</p>
+			
+							
+					</div>
+
+		
+		
+		
+		
+		
+	</div>
+
+	<data value="" hidden></data>
+		</article><time class="dt-published cr-shelf-book__date" id="cr-shelf-d-3" datetime="2026-09-12T12:00:00+00:00" hidden>September 12, 2026</time>
+<span class="pk-entry-props" hidden><span class="p-author h-card"><span class="p-name">admin</span><data class="u-url" value="http://fixture.invalid/"></data></span><data class="u-url" value="http://fixture.invalid/seed-267-local/"></data></span>
+		</li><li class="wp-block-post post-92 post type-post status-publish format-standard hentry category-uncategorized kind-read h-entry">
+			
+			<article class="pk-card k-read h-cite u-read-of wp-block-post-kinds-indieweb-read-card cr-shelf-book cr-shelf-book--slab cr-shelf-book--paper-light-orange">
+	
+	<div class="pk-body">
+		
+
+		<div class="pk-caption"><h3 class="pk-title p-name"><a id="cr-shelf-t-4" href="http://fixture.invalid/seed-267-r18/">Fictional Read 18</a></h3>
+
+			
+							<p class="pk-sub">
+					<span id="cr-shelf-a-4" class="p-author h-card"><span class="p-name">Avery Example 2</span></span>
+				</p>
+			
+							
+					</div>
+
+		
+		
+		
+		
+		
+	</div>
+
+	<data value="" hidden></data>
+		</article><time class="dt-published cr-shelf-book__date" id="cr-shelf-d-4" datetime="2026-09-09T12:00:00+00:00" hidden>September 9, 2026</time>
+<span class="pk-entry-props" hidden><span class="p-author h-card"><span class="p-name">admin</span><data class="u-url" value="http://fixture.invalid/"></data></span><data class="u-url" value="http://fixture.invalid/seed-267-r18/"></data></span>
+		</li><li class="wp-block-post post-91 post type-post status-publish format-standard hentry category-uncategorized kind-read h-entry">
+			
+			<article class="pk-card k-read h-cite u-read-of wp-block-post-kinds-indieweb-read-card cr-shelf-book cr-shelf-book--slab cr-shelf-book--paper-light-orange">
+	
+	<div class="pk-body">
+		
+
+		<div class="pk-caption"><h3 class="pk-title p-name"><a id="cr-shelf-t-5" href="http://fixture.invalid/seed-267-r17/">Fictional Read 17</a></h3>
+
+			
+							<p class="pk-sub">
+					<span id="cr-shelf-a-5" class="p-author h-card"><span class="p-name">Avery Example 1</span></span>
+				</p>
+			
+							
+					</div>
+
+		
+		
+		
+		
+		
+	</div>
+
+	<data value="" hidden></data>
+		</article><time class="dt-published cr-shelf-book__date" id="cr-shelf-d-5" datetime="2026-08-22T12:00:00+00:00" hidden>August 22, 2026</time>
+<span class="pk-entry-props" hidden><span class="p-author h-card"><span class="p-name">admin</span><data class="u-url" value="http://fixture.invalid/"></data></span><data class="u-url" value="http://fixture.invalid/seed-267-r17/"></data></span>
+		</li><li class="wp-block-post post-100 post type-post status-publish format-standard hentry category-uncategorized kind-read h-entry">
+			
+			<article class="pk-card k-read h-cite u-read-of wp-block-post-kinds-indieweb-read-card cr-shelf-book cr-shelf-book--slab cr-shelf-book--paper-light-orange">
+	
+	<div class="pk-body">
+		
+
+		<div class="pk-caption"><h3 class="pk-title p-name"><a id="cr-shelf-t-6" href="http://fixture.invalid/seed-267-h-e/">Sentinel Hidden Read Qx7</a></h3>
+
+			
+							<p class="pk-sub">
+					<span id="cr-shelf-a-6" class="p-author h-card"><span class="p-name">Sentinel Author Qx7</span></span>
+				</p>
+			
+							
+					</div>
+
+		
+		
+		
+		
+		
+	</div>
+
+	<data value="" hidden></data>
+		</article><time class="dt-published cr-shelf-book__date" id="cr-shelf-d-6" datetime="2026-08-17T12:00:00+00:00" hidden>August 17, 2026</time>
+<span class="pk-entry-props" hidden><span class="p-author h-card"><span class="p-name">admin</span><data class="u-url" value="http://fixture.invalid/"></data></span><data class="u-url" value="http://fixture.invalid/seed-267-h-e/"></data></span>
+		</li><li class="wp-block-post post-90 post type-post status-publish format-standard hentry category-uncategorized kind-read h-entry">
+			
+			<article class="pk-card k-read h-cite u-read-of wp-block-post-kinds-indieweb-read-card cr-shelf-book cr-shelf-book--slab cr-shelf-book--paper-prussian-blue">
+	
+	<div class="pk-body">
+		
+
+		<div class="pk-caption"><h3 class="pk-title p-name"><a id="cr-shelf-t-7" href="http://fixture.invalid/seed-267-r16/">Fictional Read 16</a></h3>
+
+			
+							<p class="pk-sub">
+					<span id="cr-shelf-a-7" class="p-author h-card"><span class="p-name">Avery Example 4</span></span>
+				</p>
+			
+							
+					</div>
+
+		
+		
+		
+		
+		
+	</div>
+
+	<data value="" hidden></data>
+		</article><time class="dt-published cr-shelf-book__date" id="cr-shelf-d-7" datetime="2026-08-04T12:00:00+00:00" hidden>August 4, 2026</time>
+<span class="pk-entry-props" hidden><span class="p-author h-card"><span class="p-name">admin</span><data class="u-url" value="http://fixture.invalid/"></data></span><data class="u-url" value="http://fixture.invalid/seed-267-r16/"></data></span>
+		</li><li class="wp-block-post post-89 post type-post status-publish format-standard hentry category-uncategorized kind-read h-entry">
+			
+			<article class="pk-card k-read h-cite u-read-of wp-block-post-kinds-indieweb-read-card cr-shelf-book cr-shelf-book--slab cr-shelf-book--paper-light-orange">
+	
+	<div class="pk-body">
+		
+
+		<div class="pk-caption"><h3 class="pk-title p-name"><a id="cr-shelf-t-8" href="http://fixture.invalid/seed-267-r15/">Fictional Read 15</a></h3>
+
+			
+							<p class="pk-sub">
+					<span id="cr-shelf-a-8" class="p-author h-card"><span class="p-name">Avery Example 3</span></span>
+				</p>
+			
+							
+					</div>
+
+		
+		
+		
+		
+		
+	</div>
+
+	<data value="" hidden></data>
+		</article><time class="dt-published cr-shelf-book__date" id="cr-shelf-d-8" datetime="2026-07-17T12:00:00+00:00" hidden>July 17, 2026</time>
+<span class="pk-entry-props" hidden><span class="p-author h-card"><span class="p-name">admin</span><data class="u-url" value="http://fixture.invalid/"></data></span><data class="u-url" value="http://fixture.invalid/seed-267-r15/"></data></span>
+		</li><li class="wp-block-post post-88 post type-post status-publish format-standard hentry category-uncategorized kind-read h-entry">
+			
+			<article class="pk-card k-read h-cite u-read-of wp-block-post-kinds-indieweb-read-card cr-shelf-book cr-shelf-book--slab cr-shelf-book--paper-prussian-blue">
+	
+	<div class="pk-body">
+		
+
+		<div class="pk-caption"><h3 class="pk-title p-name"><a id="cr-shelf-t-9" href="http://fixture.invalid/seed-267-r14/">Fictional Read 14</a></h3>
+
+			
+							<p class="pk-sub">
+					<span id="cr-shelf-a-9" class="p-author h-card"><span class="p-name">Avery Example 2</span></span>
+				</p>
+			
+							
+					</div>
+
+		
+		
+		
+		
+		
+	</div>
+
+	<data value="" hidden></data>
+		</article><time class="dt-published cr-shelf-book__date" id="cr-shelf-d-9" datetime="2026-06-29T12:00:00+00:00" hidden>June 29, 2026</time>
+<span class="pk-entry-props" hidden><span class="p-author h-card"><span class="p-name">admin</span><data class="u-url" value="http://fixture.invalid/"></data></span><data class="u-url" value="http://fixture.invalid/seed-267-r14/"></data></span>
+		</li><li class="wp-block-post post-87 post type-post status-publish format-standard hentry category-uncategorized kind-read h-entry">
+			
+			<article class="pk-card k-read h-cite u-read-of wp-block-post-kinds-indieweb-read-card cr-shelf-book cr-shelf-book--slab cr-shelf-book--paper-light-orange">
+	
+	<div class="pk-body">
+		
+
+		<div class="pk-caption"><h3 class="pk-title p-name"><a id="cr-shelf-t-10" href="http://fixture.invalid/seed-267-r13/">Fictional Read 13</a></h3>
+
+			
+							<p class="pk-sub">
+					<span id="cr-shelf-a-10" class="p-author h-card"><span class="p-name">Avery Example 1</span></span>
+				</p>
+			
+							
+					</div>
+
+		
+		
+		
+		
+		
+	</div>
+
+	<data value="" hidden></data>
+		</article><time class="dt-published cr-shelf-book__date" id="cr-shelf-d-10" datetime="2026-06-11T12:00:00+00:00" hidden>June 11, 2026</time>
+<span class="pk-entry-props" hidden><span class="p-author h-card"><span class="p-name">admin</span><data class="u-url" value="http://fixture.invalid/"></data></span><data class="u-url" value="http://fixture.invalid/seed-267-r13/"></data></span>
+		</li><li class="wp-block-post post-86 post type-post status-publish format-standard hentry category-uncategorized kind-read h-entry">
+			
+			<article class="pk-card k-read h-cite u-read-of wp-block-post-kinds-indieweb-read-card cr-shelf-book cr-shelf-book--slab cr-shelf-book--paper-cerulean">
+	
+	<div class="pk-body">
+		
+
+		<div class="pk-caption"><h3 class="pk-title p-name"><a id="cr-shelf-t-11" href="http://fixture.invalid/seed-267-r12/">Fictional Read 12</a></h3>
+
+			
+							<p class="pk-sub">
+					<span id="cr-shelf-a-11" class="p-author h-card"><span class="p-name">Avery Example 4</span></span>
+				</p>
+			
+							
+					</div>
+
+		
+		
+		
+		
+		
+	</div>
+
+	<data value="" hidden></data>
+		</article><time class="dt-published cr-shelf-book__date" id="cr-shelf-d-11" datetime="2026-05-26T12:00:00+00:00" hidden>May 26, 2026</time>
+<span class="pk-entry-props" hidden><span class="p-author h-card"><span class="p-name">admin</span><data class="u-url" value="http://fixture.invalid/"></data></span><data class="u-url" value="http://fixture.invalid/seed-267-r12/"></data></span>
+		</li><li class="wp-block-post post-85 post type-post status-publish format-standard hentry category-uncategorized kind-read h-entry">
+			
+			<article class="pk-card k-read h-cite u-read-of wp-block-post-kinds-indieweb-read-card cr-shelf-book cr-shelf-book--slab cr-shelf-book--paper-prussian-blue">
+	
+	<div class="pk-body">
+		
+
+		<div class="pk-caption"><h3 class="pk-title p-name"><a id="cr-shelf-t-12" href="http://fixture.invalid/seed-267-r11/">Fictional Read 11</a></h3>
+
+			
+							<p class="pk-sub">
+					<span id="cr-shelf-a-12" class="p-author h-card"><span class="p-name">Avery Example 3</span></span>
+				</p>
+			
+							
+					</div>
+
+		
+		
+		
+		
+		
+	</div>
+
+	<data value="" hidden></data>
+		</article><time class="dt-published cr-shelf-book__date" id="cr-shelf-d-12" datetime="2026-05-08T12:00:00+00:00" hidden>May 8, 2026</time>
+<span class="pk-entry-props" hidden><span class="p-author h-card"><span class="p-name">admin</span><data class="u-url" value="http://fixture.invalid/"></data></span><data class="u-url" value="http://fixture.invalid/seed-267-r11/"></data></span>
+		</li></ul></section></div>
+
+		
+
+		<nav class="wp-block-query-pagination is-content-justification-center is-layout-flex wp-container-core-query-pagination-is-layout-5aae6397 wp-block-query-pagination-is-layout-flex" aria-label="Pagination">
+			
+			<div class="wp-block-query-pagination-numbers"><span aria-current="page" class="page-numbers current">1</span>
+<a class="page-numbers" href="http://fixture.invalid/kind/read/page/2/">2</a>
+<a class="page-numbers" href="http://fixture.invalid/kind/read/page/3/">3</a></div>
+			<a href="http://fixture.invalid/kind/read/page/2/" class="wp-block-query-pagination-next">Next<span class='wp-block-query-pagination-next-arrow is-arrow-arrow' aria-hidden='true'>→</span></a>
+		</nav>
+	</div>
+	
+</div>
+
+
+
+</main>
+</div>
+
+
+
+
+
+
+	</body>
+</html>
