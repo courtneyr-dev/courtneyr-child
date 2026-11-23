@@ -282,6 +282,8 @@ export async function launch( { checkout: checkoutInput, site = DEFAULT_SITE, se
 		if ( wpEval( sitePath, 'echo get_option( "stylesheet" );' ) !== THEME_SLUG ) {
 			sh( 'studio', [ 'wp', '--path', sitePath, 'theme', 'activate', THEME_SLUG ] );
 		}
+		// WordPress keys this cache by theme path and Version, so it outlives a checkout that shares both.
+		wpEval( sitePath, 'wp_get_theme()->delete_pattern_cache();' );
 		writeJson( lockFile( sitePath ), target );
 		sh( 'studio', [ 'start', '--path', sitePath, '--skip-browser', '--skip-log-details' ] );
 		await waitReady( target );
