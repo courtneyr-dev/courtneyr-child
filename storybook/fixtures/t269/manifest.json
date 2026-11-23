@@ -2,8 +2,8 @@
 	"schema": 1,
 	"environment": "t269",
 	"source": {
-		"commit": "1bca3d16a62f826c961bb1bb572cf3c67746c37c",
-		"treeHash": "bb0c9354202a0e5225d502f505597d04ae8e4e8764034df97fabc090ffce05e1",
+		"commit": "69b07ad71a7a8fa6c69bc4d07113b22b71159d28",
+		"treeHash": "6740740f173a7f98a16b3eba0a42b5d1f2fb1eecc179b48f4ea137d59ae8ec4c",
 		"themeVersion": "0.7.176"
 	},
 	"inputs": {
@@ -11,7 +11,7 @@
 			"assets": "1d40809e66253f4c2c25182204af6e739ba4a016a713de34579abfe5c1f8cd96",
 			"blocks": "d0931f142105015c66b2a2a3786087d1f012023a01776c6590bbb20d437865ac",
 			"functions.php": "8b4e38b3eeca5b72b1c073f8258cd875b5241439592d61f07bc368cf887c4f61",
-			"inc": "8b094f601e7583e01dc05e5f14646a43280adc71d9081cca4750be205dc684f3",
+			"inc": "4f4fbe424d6a0991afab8783680be074505136342d21393269c397471325e161",
 			"index.php": "b90105dcd60359cfdcd8f8308337c2b57ee5f8c9ac5bf240b60b38ceaabebb61",
 			"parts": "24a780bdebe5f270c76e0b6e9762ff0afdd20acab2db084fbbddbc3d050099c2",
 			"patterns": "944f0ab7a5150639e8013c4ac2f29a9c35f0100871748eec5f2a773af85d87c5",
@@ -925,8 +925,8 @@
 			"route": "/",
 			"request": {},
 			"doc": {
-				"sha256": "9e7aba6ff9f57376efe08874f95fe7a3704edb416f7ba92cbe3435f468e9565b",
-				"bytes": 117483
+				"sha256": "42ed85bc9a326638f8cc769424704e161e2da2cc3002ad43f3509494ac7d1553",
+				"bytes": 117481
 			},
 			"component": null,
 			"census": {
@@ -969,8 +969,8 @@
 			"route": "/seed-269-s5/",
 			"request": {},
 			"doc": {
-				"sha256": "213ec261a05a26da3d69e42a68558cbd27deaefdc0d78fb544f6e62f24a217f5",
-				"bytes": 159709
+				"sha256": "829a742c27a5e023ee5bcee9e9067cb3b28250a40c2de8a8be5ebd9420785620",
+				"bytes": 159707
 			},
 			"component": null,
 			"census": {
@@ -1031,8 +1031,8 @@
 			"route": "/kind/read/",
 			"request": {},
 			"doc": {
-				"sha256": "392d02f44a0fd2bd63a2dd7ddee5ef010539d959547a70091ba3626b70f202e4",
-				"bytes": 144686
+				"sha256": "3782568fcf717848355a73c3403d5dd7e90a1d7105ce07738eb29d02b98fd644",
+				"bytes": 144684
 			},
 			"component": null,
 			"census": {
