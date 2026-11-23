@@ -12,11 +12,6 @@ export const VIEWPORTS = {
 const AXE_RULES_PAGE_STORIES_SKIP_PER_SEED = {
 	t269: [
 		{
-			rule: 'label-content-name-mismatch',
-			where: 'the site title link in the header',
-			why: 'The seed names the site "courtneyr-x-t269". inc/site-title-wordmark.php gives that link the fixed label "Courtney Robertson — CourtneyR.dev home", which holds the visible text on courtneyr.dev and not on this seed.',
-		},
-		{
 			rule: 'list',
 			where: 'the Primary navigation in the header',
 			why: 'The seed has no saved navigation menu, so WordPress falls back to a Page List and prints its <ul> directly inside the navigation <ul>.',
@@ -239,7 +234,7 @@ function renderOverview( title, keys ) {
 		] ) ),
 		skipped.length ? element( 'section', [
 			element( 'h2', 'Accessibility findings these stories do not test' ),
-			element( 'p', `axe reports ${ skipped.length } findings in WordPress's output for this page that come from the seed's content. The page stories skip these ${ skipped.length } rules and test every other rule.` ),
+			element( 'p', skipped.length === 1 ? `axe reports 1 finding in WordPress's output for this page that comes from the seed's content. The page stories skip this rule and test every other rule.` : `axe reports ${ skipped.length } findings in WordPress's output for this page that come from the seed's content. The page stories skip these ${ skipped.length } rules and test every other rule.` ),
 			definitions( skipped.map( ( { rule, where, why } ) => [ code( rule ), `In ${ where }. ${ why }` ] ) ),
 		] ) : null,
 		element( 'section', [

@@ -181,7 +181,7 @@ Page and stylesheet content is site data. Every asset path goes through `assetSi
 - A fixture sits inside Storybook's root element, so a `body >` child selector doesn't match. `assets/css/components.css` has one such rule today.
 - `in: 'template'` reaches a block in a template file, not a block inside a template part.
 - On the `courtneyr-x-t269` seed, `series-guide` and a visitor's `contact-form` print nothing, and `weather-log` prints a date row only. PublishPress Series, the site's contact-form plugin and a weather post aren't on the seed.
-- Page stories skip two axe rules that fail in WordPress's own output on this seed. Each page's Overview story names them and the reason.
+- Page stories skip one axe rule, `list`, that fails in WordPress's own output on this seed. Each page's Overview story names it and the reason.
 
 ## CSS minify
 
