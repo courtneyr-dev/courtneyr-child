@@ -222,6 +222,10 @@ th a:not(.wp-element-button) {
 
 .cr-callout--note,
 .is-style-cr-callout-note { background: var(--cr-prussian-blue); color: var(--cr-light-orange); }
+/* Keep default heading text on the same palette as the note's body text. */
+:is(.cr-callout--note, .is-style-cr-callout-note) .wp-block-heading:not(.has-text-color) {
+  color: inherit;
+}
 .cr-callout--warn,
 .is-style-cr-callout-warn {
   background: var(--cr-selective-yellow);
