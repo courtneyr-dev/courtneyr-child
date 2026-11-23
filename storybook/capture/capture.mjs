@@ -34,12 +34,13 @@ function removeRenderWorktree() {
 		git( REPO, [ 'worktree', 'remove', '--force', RENDER_WORKTREE ] );
 	} catch {}
 	fs.rmSync( RENDER_WORKTREE, { recursive: true, force: true } );
-	git( REPO, [ 'worktree', 'prune' ] );
 }
 
+// --force lets git reuse this path when a dead run left it registered. `git worktree prune` would do that
+// too, and would also drop every other session's stale entry in the shared repository.
 function addRenderWorktree( sha ) {
 	removeRenderWorktree();
-	git( REPO, [ 'worktree', 'add', '--detach', RENDER_WORKTREE, sha ] );
+	git( REPO, [ 'worktree', 'add', '--force', '--detach', RENDER_WORKTREE, sha ] );
 	return fs.realpathSync( RENDER_WORKTREE );
 }
 
