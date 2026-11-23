@@ -34,3 +34,6 @@ tests/output/
 
 # Playwright MCP browser session artifacts
 .playwright-mcp/
+
+# Storybook build output. The fixtures in storybook/fixtures/ are committed.
+storybook/storybook-static/

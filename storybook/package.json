@@ -1,0 +1,30 @@
+{
+	"name": "courtneyr-child-storybook",
+	"private": true,
+	"description": "Site Storybook for the courtneyr-child theme. Stories render HTML that WordPress produced from a known commit (fixtures/). Not part of the theme: /storybook is export-ignore.",
+	"license": "GPL-2.0-or-later",
+	"type": "module",
+	"engines": {
+		"node": ">=20.19"
+	},
+	"scripts": {
+		"capture": "node capture/capture.mjs",
+		"check": "node check.mjs",
+		"prove-harness": "node prove-harness.mjs",
+		"test": "node --test tests/",
+		"storybook": "storybook dev --port 6006 --no-open --no-version-updates --disable-telemetry",
+		"build-storybook": "storybook build --disable-telemetry",
+		"test-storybook": "vitest run"
+	},
+	"devDependencies": {
+		"@storybook/addon-a11y": "10.6.6",
+		"@storybook/addon-vitest": "10.6.6",
+		"@storybook/html-vite": "10.6.6",
+		"@vitest/browser": "4.1.12",
+		"@vitest/browser-playwright": "4.1.12",
+		"playwright": "1.65.1",
+		"storybook": "10.6.6",
+		"vite": "7.3.8",
+		"vitest": "4.1.12"
+	}
+}
