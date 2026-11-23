@@ -138,6 +138,9 @@ function acquireLock( sitePath, owner, running ) {
 	const lockDir = path.join( sitePath, LOCK );
 	const held = readLock( sitePath );
 	if ( held && held.runId === owner.runId ) {
+		if ( held.launcherPid !== process.pid && pidAlive( held.launcherPid ) ) {
+			throw new Error( `REFUSED: run ${ held.runId } on ${ owner.site } belongs to live process ${ held.launcherPid }. Wait until it exits.` );
+		}
 		writeJson( lockFile( sitePath ), owner );
 		return;
 	}
