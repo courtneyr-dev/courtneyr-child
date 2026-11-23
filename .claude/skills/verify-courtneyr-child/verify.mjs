@@ -129,6 +129,10 @@ const readLock = ( sitePath ) => tryJson( () => fs.readFileSync( lockFile( siteP
 const markerFile = ( sitePath ) => path.join( sitePath, MARKER );
 const readMarker = ( sitePath ) => tryJson( () => fs.readFileSync( markerFile( sitePath ), 'utf8' ) );
 
+function buryStaleLock( lockDir, held ) {
+	fs.renameSync( lockDir, `${ lockDir }.stale-${ held.launcherPid }-${ Date.parse( held.startedAt ) }` );
+}
+
 // rename(2) onto a non-empty directory fails, so the lock appears with its owner already inside.
 function acquireLock( sitePath, owner, running ) {
 	const lockDir = path.join( sitePath, LOCK );
@@ -141,8 +145,12 @@ function acquireLock( sitePath, owner, running ) {
 		if ( running || pidAlive( held.launcherPid ) ) {
 			throw new Error( `REFUSED: ${ owner.site } is held by run ${ held.runId } (checkout ${ held.checkout }, since ${ held.startedAt }). Wait for its cleanup, or launch with --site <another-name>.` );
 		}
-		log( `Removing stale lock from run ${ held.runId }: the site is stopped and launcher pid ${ held.launcherPid } is gone.` );
-		fs.rmSync( lockDir, { recursive: true, force: true } );
+		try {
+			buryStaleLock( lockDir, held );
+		} catch ( error ) {
+			throw new Error( `REFUSED: another launch is replacing the stale lock on ${ owner.site }. ${ error.code }` );
+		}
+		log( `Moved aside the stale lock from run ${ held.runId }: the site is stopped and launcher pid ${ held.launcherPid } is gone.` );
 	} else if ( running ) {
 		throw new Error( `REFUSED: ${ owner.site } is running without a verify lock, so another session started it. Leave it alone, or launch with --site <another-name>.` );
 	}
@@ -430,7 +438,9 @@ export async function cleanup( { site = DEFAULT_SITE, run, force = false } ) {
 	if ( studioSite( sitePath ).running ) {
 		throw new Error( `${ site } still reports running after studio stop. The lock stays; rerun cleanup.` );
 	}
-	fs.rmSync( path.join( sitePath, LOCK ), { recursive: true, force: true } );
+	for ( const name of fs.readdirSync( sitePath ).filter( ( entry ) => entry === LOCK || entry.startsWith( `${ LOCK }.stale-` ) ) ) {
+		fs.rmSync( path.join( sitePath, name ), { recursive: true, force: true } );
+	}
 	return { site, stopped: true, runId: lock.runId, evidenceDir: lock.evidenceDir, evidenceKept: fs.existsSync( lock.evidenceDir ) };
 }
 
