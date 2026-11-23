@@ -20,8 +20,8 @@ Preconditions:
 
 - A launched site with `DOCTOR PASS`, and the `runId` from launch.
 
-- **Full journey.** Run `node .claude/skills/verify-courtneyr-child/verify.mjs drive theme-toggle --run <runId>`. Four PASS lines print, then `DRIVE PASS theme-toggle`.
-- **First visit.** The journey loads `/` in a fresh 1280 by 800 context. `first-visit-system` passes when `data-theme=system`, storage is empty, and only `System theme (follows OS)` is pressed.
+- **Full journey.** Run `node .claude/skills/verify-courtneyr-child/verify.mjs drive theme-toggle --run <runId>`. Five PASS lines print, then `DRIVE PASS theme-toggle`.
+- **First visit.** The journey loads `/` in a fresh 1280 by 800 context and saves the response as `home.server.html`. `home-html-from-checkout` passes when that response's `X-Verify-Live` header names the launched checkout. `first-visit-system` passes when `data-theme=system`, storage is empty, and only `System theme (follows OS)` is pressed.
 - **Choose Dark.** The journey clicks the button named `Dark theme`. `click-dark-applies` passes on `data-theme=dark` with only `Dark theme` pressed. `click-dark-stores` passes on `courtneyr-theme=dark`.
 - **Reload.** `reload-keeps-dark` passes when dark is still applied and pressed after a reload.
 - **Proof.** `1-before.png`, `2-after-dark.png`, `3-after-reload.png`, both `.aria.yml` snapshots of the `Theme` group, and `result.json` land in `<evidenceDir>/theme-toggle/`.

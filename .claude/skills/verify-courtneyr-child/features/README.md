@@ -19,7 +19,7 @@ This directory is the maintained source for verifying what a visitor sees and do
 ## Proof and skip reporting
 
 - Capture the state before and after each action, and read side effects back after a reload.
-- Keep `home.server.html` or the route's server HTML when the proof feeds a Storybook fixture.
+- Keep `home.server.html` or the route's server HTML when the proof feeds a Storybook fixture, and record `served( response )` as a step for each response you keep.
 - Report an unreachable path with the command and the unmet precondition. Do not report a skipped entry point as verified through another one.
 
 ## Features
