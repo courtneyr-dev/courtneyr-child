@@ -1,0 +1,63 @@
+# The site Storybook (storybook/) shows HTML that WordPress rendered from a known
+# commit. The first job fails when the committed fixtures no longer match the
+# theme, the recipe or the capture code, or when a file under
+# storybook/fixtures/ is not the one its manifest records. It needs git and
+# Node only. The second job builds the Storybook and runs axe on every story.
+#
+# Nothing is published from here. A capture needs a local WordPress Studio
+# site, so it stays local (docs/testing.md).
+
+name: Storybook
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  fixtures:
+    name: Storybook fixtures match the theme
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+
+      - name: storybook/check.mjs (no install)
+        run: node storybook/check.mjs
+
+      - name: Asset paths and writes stay inside the fixture directory
+        if: ${{ !cancelled() }}
+        run: node --test storybook/tests/
+
+  build:
+    name: Storybook build and axe
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: storybook
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: storybook/package-lock.json
+
+      - name: Install the Storybook's own packages
+        run: npm ci --no-audit --no-fund
+
+      - name: Build
+        run: npm run build-storybook
+
+      - name: axe on every story, in the runner's installed Chrome
+        run: npm run test-storybook
