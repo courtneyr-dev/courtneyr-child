@@ -11,6 +11,7 @@ declare( strict_types = 1 );
 require __DIR__ . '/favorite-bootstrap.php';
 
 use Courtneyr\Child\SingleFavorite as Single;
+use Courtneyr\Child\SingleWideColumn as Wide;
 
 /** The plugin card a favorite post prints inside the singular wrapper. */
 function cr_fav_card_html( string $extra = '' ): string {
@@ -174,6 +175,14 @@ cr_fav_group(
 	}
 );
 
+/** The card as WordPress hands it to sheet() on a wide page: its renderer marked it. */
+function cr_fav_marked_card( string $extra = '' ): string {
+	Wide\marking( true );
+	$card = Single\mark_card( cr_fav_card_html( $extra ) );
+	Wide\marking( false );
+	return $card;
+}
+
 cr_fav_group(
 	'the wide column decides from the facts, and the sheet prints the facts it decided on',
 	static function (): void {
@@ -192,14 +201,16 @@ cr_fav_group(
 		$out = cr_fav_sheet( $post, cr_fav_page( cr_fav_card_html() ) );
 		cr_fav_assert( str_contains( $out, '<h1 class="cr-fav-sheet__title p-name">Field Guide to Quiet Software</h1>' ), 'with no decision the sheet reads the post facts, as before' );
 
-		foreach ( array( 'top-level card' => array( true, true ), 'no card' => array( null, true ), 'card inside a group' => array( false, false ) ) as $shape => list( $top, $wide ) ) {
-			$GLOBALS['cr_fav_card_top'] = $top;
-			$decided                    = Single\page_sheet( $post, 'any content' );
-			cr_fav_assert( $wide === $decided['wide'], "$shape: wide is " . var_export( $wide, true ) );
+		foreach ( array( 'top' => true, 'none' => true, 'nested' => false ) as $place => $wide ) {
+			$GLOBALS['cr_fav_card_place'] = $place;
+			$decided                      = Single\page_sheet( $post, 'any content' );
+			cr_fav_assert( is_array( $decided ) && $wide === $decided['wide'], "first card $place: wide is " . var_export( $wide, true ) );
 		}
-		unset( $GLOBALS['cr_fav_card_top'] );
+		$GLOBALS['cr_fav_card_place'] = 'unknown';
+		cr_fav_same( null, Single\page_sheet( $post, 'any content' ), 'a block the walker cannot see inside (a synced pattern): no decision, the page renders as without the column' );
+		unset( $GLOBALS['cr_fav_card_place'] );
 
-		$page = cr_fav_page( '<p>Before.</p>' . cr_fav_card_html() . '<p>After.</p>' );
+		$page = cr_fav_page( '<p>Before.</p>' . cr_fav_marked_card() . '<p>After.</p>' );
 		$GLOBALS['cr_fav_wide_applies'] = true;
 		$other                          = cr_fav_sheet( $post, $page );
 		$GLOBALS['cr_fav_wide_data']    = Single\single_facts();
@@ -211,7 +222,7 @@ cr_fav_group(
 		cr_fav_assert( $other === $narrow, "another kind's column, no favorite decision: no box" );
 		cr_fav_assert( str_replace( array( '<div class="cr-fav-flow">', '</div><div class="cr-fav-sheet">', '</div><a class="u-url"' ), array( '', '<div class="cr-fav-sheet">', '<a class="u-url"' ), $wide ) === $narrow, 'wide and narrow differ by the box only' );
 		$GLOBALS['cr_fav_wide_applies'] = true;
-		$alone                          = cr_fav_sheet( $post, cr_fav_page( cr_fav_card_html() ) );
+		$alone                          = cr_fav_sheet( $post, cr_fav_page( cr_fav_marked_card() ) );
 		$GLOBALS['cr_fav_wide_applies'] = false;
 		$GLOBALS['cr_fav_wide_data']    = null;
 		cr_fav_assert( ! str_contains( $alone, 'cr-fav-flow' ), 'wide with nothing beside the sheet: no empty box' );
@@ -220,6 +231,51 @@ cr_fav_group(
 		$GLOBALS['cr_fav_queried'] = $locked->ID;
 		Single\single_facts( true );
 		cr_fav_assert( null === Single\page_sheet( $locked, 'any content' ), 'no facts (protected, unreadable, not a favorite): no decision' );
+	}
+);
+
+cr_fav_group(
+	'the card renderer marks only the card it printed, only while a wide page renders',
+	static function (): void {
+		cr_fav_assert( in_array( array( 'render_block_post-kinds-indieweb/favorite-card', 'Courtneyr\\Child\\SingleFavorite\\mark_card', 10, 1 ), $GLOBALS['cr_fav_filters'], true ), 'the marker runs on the favorite card block' );
+		$card = cr_fav_card_html();
+		cr_fav_same( $card, Single\mark_card( $card ), 'not rendering a wide page: the card is untouched' );
+		$marked = cr_fav_marked_card();
+		cr_fav_assert( str_starts_with( $marked, '<article data-cr-wide-card="' . Wide\card_mark() . '" class="wp-block-post-kinds-indieweb-favorite-card' ), 'rendering a wide page: the card element carries the token' );
+		cr_fav_same( $card, Wide\unmark( $marked ), 'the mark comes off byte for byte' );
+		Wide\marking( true );
+		$plain = '<div class="k-favorite">x</div>';
+		cr_fav_same( $plain, Single\mark_card( $plain ), 'a first tag that is not the card article: untouched' );
+		Wide\marking( false );
+	}
+);
+
+cr_fav_group(
+	'on a wide page the sheet replaces the marked card element, never something that only names it',
+	static function (): void {
+		$post = cr_fav_post( 1, 'Field Guide to Quiet Software', cr_fav_facts() );
+		$GLOBALS['cr_fav_wide_applies'] = true;
+		$GLOBALS['cr_fav_queried']      = $post->ID;
+		$GLOBALS['cr_fav_single']       = true;
+		Single\single_facts( true );
+		$GLOBALS['cr_fav_wide_data'] = Single\single_facts();
+		$fake                        = '<article id="authored"><div><code>&lt;article class="k-favorite"&gt;</code></div></article>';
+		$out                         = cr_fav_sheet( $post, cr_fav_page( '<p>Before.</p>' . $fake . cr_fav_marked_card() . '<p>After.</p>' ) );
+		cr_fav_assert( str_contains( $out, '<div class="cr-fav-flow"><p>Before.</p>' . $fake . '</div><div class="cr-fav-sheet">' ), 'authored code that names the class stays in the box before the sheet' );
+		cr_fav_assert( ! str_contains( $out, 'data-cr-wide-card' ) && ! str_contains( $out, 'pk-badge' ), 'the marked card itself is gone' );
+
+		$group = '<div class="wp-block-group"><p>In the group.</p>' . cr_fav_marked_card() . '<p>Still in the group.</p></div>';
+		$out   = cr_fav_sheet( $post, cr_fav_page( '<p>Before.</p>' . $group ) );
+		cr_fav_assert( ! str_contains( $out, 'cr-fav-flow' ) && str_contains( $out, '<div class="wp-block-group"><p>In the group.</p><div class="cr-fav-sheet">' ) && str_contains( $out, '<p>Still in the group.</p></div>' ), 'a marked card inside a group: no box, the sheet stays inside the group' );
+
+		$out = cr_fav_sheet( $post, cr_fav_page( '<p>Before.' . cr_fav_marked_card() . '<p>After.</p>' ) );
+		cr_fav_assert( ! str_contains( $out, 'cr-fav-flow' ), 'tags that do not balance: no box' );
+
+		$out = cr_fav_sheet( $post, cr_fav_page( '<p>Before.</p>' . cr_fav_card_html() . '<p>After.</p>' ) );
+		cr_fav_assert( ! str_contains( $out, 'cr-fav-flow' ) && str_contains( $out, '<p>Before.</p><div class="cr-fav-sheet">' ), 'no marked card: the sheet replaces the card in place, as without the column' );
+
+		$GLOBALS['cr_fav_wide_applies'] = false;
+		$GLOBALS['cr_fav_wide_data']    = null;
 	}
 );
 

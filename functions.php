@@ -110,6 +110,7 @@ require_once __DIR__ . '/inc/site-title-wordmark.php';
 require_once __DIR__ . '/inc/single-watch.php';
 require_once __DIR__ . '/inc/single-read.php';
 require_once __DIR__ . '/inc/single-wide-column.php';
+require_once __DIR__ . '/inc/wide-column-card.php';
 require_once __DIR__ . '/inc/media-shelf.php';
 require_once __DIR__ . '/inc/stream-media.php';
 require_once __DIR__ . '/inc/stream-read.php';

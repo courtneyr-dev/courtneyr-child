@@ -87,28 +87,61 @@ function resolve(): ?array {
 }
 
 /**
- * Where a page's first block of a type sits: at the top level of the page, or inside another block.
+ * Blocks whose rendered HTML holds blocks the parsed page does not show.
+ *
+ * A synced pattern (core/block) is a reference: its blocks live in another
+ * post and WordPress expands them while it renders. A registered pattern, a
+ * template part, a nested post content or excerpt, a query loop and the
+ * latest-posts list do the same with other content. The walker cannot see
+ * inside any of them, so it cannot say where a card in them sits.
+ */
+const OPAQUE_BLOCKS = array(
+	'core/block',
+	'core/pattern',
+	'core/template-part',
+	'core/post-content',
+	'core/post-excerpt',
+	'core/query',
+	'core/post-template',
+	'core/latest-posts',
+	'core/shortcode',
+	'core/legacy-widget',
+	'core/widget-group',
+);
+
+/**
+ * Where a page's first block of a type sits.
  *
  * A kind whose record replaces one of its blocks can take the column only when
  * that block is a top-level block; inside an authored Group the record keeps
- * the Group's width. This reads block names only, never attributes.
+ * the Group's width. When a block whose output the parsed page cannot show
+ * (OPAQUE_BLOCKS, or any block whose HTML holds a registered shortcode) comes
+ * before the first card, or anywhere on a page with no card, the structure
+ * WordPress will print is unknown and the caller makes no decision, so the
+ * page renders as it did without the column. This reads block names and
+ * markup only, never attributes.
  *
  * @param string $content The content of the page being printed.
  * @param string $name    Block name.
- * @return bool|null True at the top level, false nested, null when the page has none.
+ * @return string 'top', 'nested', 'none' or 'unknown'.
  */
-function first_block_is_top_level( string $content, string $name ): ?bool {
-	$walk = static function ( array $blocks, int $depth ) use ( &$walk, $name ): ?bool {
+function first_block_place( string $content, string $name ): string {
+	$walk = static function ( array $blocks, int $depth ) use ( &$walk, $name ): string {
 		foreach ( $blocks as $block ) {
-			if ( ( $block['blockName'] ?? '' ) === $name ) {
-				return 0 === $depth;
+			$block_name = (string) ( $block['blockName'] ?? '' );
+			if ( $name === $block_name ) {
+				return 0 === $depth ? 'top' : 'nested';
+			}
+			$html = (string) ( $block['innerHTML'] ?? '' );
+			if ( in_array( $block_name, OPAQUE_BLOCKS, true ) || ( '' !== $html && \strip_shortcodes( $html ) !== $html ) ) {
+				return 'unknown';
 			}
 			$found = $walk( (array) ( $block['innerBlocks'] ?? array() ), $depth + 1 );
-			if ( null !== $found ) {
+			if ( 'none' !== $found ) {
 				return $found;
 			}
 		}
-		return null;
+		return 'none';
 	};
 	return $walk( \parse_blocks( $content ), 0 );
 }

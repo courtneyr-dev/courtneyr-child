@@ -30,6 +30,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/** The plugin's favorite card block. */
+const CARD_BLOCK = 'post-kinds-indieweb/favorite-card';
+
 /**
  * Facts for the queried favorite single, kept per post for the request.
  *
@@ -60,21 +63,38 @@ function single_facts( bool $refresh = false ): array {
  * sheet takes the column when the page's first card is a top-level block, or
  * when the page has no card (the sheet then holds the page). A card inside an
  * authored block (a Group, say) keeps the sheet in that block, at its width.
+ * When the page holds a block the walker cannot see inside (a synced pattern,
+ * say) there is no decision: the sheet renders as it does without the column.
  *
  * @param \WP_Post $post    Post.
  * @param string   $content The content of the page being printed.
- * @return array{wide: bool, data: array<string, mixed>}|null Null when this isn't a readable favorite.
+ * @return array{wide: bool, data: array<string, mixed>}|null Null when this isn't a readable favorite, or the page's structure is unknown.
  */
 function page_sheet( \WP_Post $post, string $content ): ?array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed
 	$facts = single_facts();
 	if ( array() === $facts ) {
 		return null;
 	}
+	$place = \Courtneyr\Child\SingleWideColumn\first_block_place( $content, CARD_BLOCK );
+	if ( 'unknown' === $place ) {
+		return null;
+	}
 	return array(
-		'wide' => false !== \Courtneyr\Child\SingleWideColumn\first_block_is_top_level( $content, 'post-kinds-indieweb/favorite-card' ),
+		'wide' => 'nested' !== $place,
 		'data' => $facts,
 	);
 }
+
+/**
+ * Mark the plugin's favorite card as it renders, so sheet() can find that element.
+ *
+ * @param string $html Rendered card.
+ * @return string
+ */
+function mark_card( string $html ): string {
+	return \Courtneyr\Child\SingleWideColumn\mark_card( $html, 'k-favorite' );
+}
+add_filter( 'render_block_' . CARD_BLOCK, __NAMESPACE__ . '\\mark_card' );
 
 /**
  * Whether the sheet owns this page's H1.
@@ -311,8 +331,8 @@ function meta_offset( string $html, int $start ): int {
 /**
  * Blocks beside the sheet in the wide column, in a box at the reading width.
  *
- * The card is a top-level block there (the decision checked), so the HTML on
- * either side of it is whole blocks.
+ * The card is one of the entry's own blocks there (top_level_card() checked
+ * the rendered tags), so the HTML on either side of it is whole blocks.
  *
  * @param string $html Blocks before or after the card.
  * @return string
@@ -352,15 +372,17 @@ function sheet( string $html, array $block ): string {
 
 	$before = '';
 	$after  = '';
-	if ( preg_match( '/<article\b[^>]*\bclass="[^"]*\bk-favorite\b[^"]*"[^>]*>.*?<\/article>/s', $content, $card, PREG_OFFSET_CAPTURE ) ) {
+	// In the wide column: the card element its renderer marked, when it is one of the entry's own blocks.
+	$card_at = is_array( $decided ) && \Courtneyr\Child\SingleWideColumn\applies() ? \Courtneyr\Child\SingleWideColumn\top_level_card( $content ) : null;
+	if ( null !== $card_at ) {
+		// The blocks around the sheet keep the reading-width box they had in the entry.
+		$before = flow( (string) substr( $content, 0, $card_at[0] ) );
+		$after  = flow( (string) substr( $content, $card_at[1] ) );
+		$body   = body_html( card_record( $facts ) . $mount );
+	} elseif ( preg_match( '/<article\b[^>]*\bclass="[^"]*\bk-favorite\b[^"]*"[^>]*>.*?<\/article>/s', $content, $card, PREG_OFFSET_CAPTURE ) ) {
 		$before = (string) substr( $content, 0, (int) $card[0][1] );
 		$after  = (string) substr( $content, (int) $card[0][1] + strlen( $card[0][0] ) );
 		$body   = body_html( card_record( $facts ) . $mount );
-		if ( is_array( $decided ) && \Courtneyr\Child\SingleWideColumn\applies() ) {
-			// In the wide column the blocks around the sheet keep the reading-width box they had in the entry.
-			$before = flow( $before );
-			$after  = flow( $after );
-		}
 	} else {
 		$body = body_html( plain_record( $facts ) . $mount ) . $content;
 	}
