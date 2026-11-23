@@ -3,7 +3,8 @@
 //
 // Wide pages (the page prints a top-level clipping, or the meta-only one) from 64rem: the clipping fills
 // the column, the kind chip starts at the clipping's start edge, the date ends at its end edge, the title
-// starts at the column's edge, the clipping keeps its base top. Under 64rem and on every page that is not
+// starts at the column's edge, the clipping keeps its base top, and the blocks under the clipping (Courtney's note)
+// start at the clipping's start edge. Under 64rem and on every page that is not
 // wide, the column, the clipping and the header are where base put them. Everywhere: blocks beside the
 // clipping keep their base boxes, the sparkle and post navigation do not move, one H1, no horizontal
 // overflow, no console error base did not have.
@@ -65,13 +66,22 @@ for ( const key of Object.keys( head ) ) {
 	const kidsH = ( h.entryKids || [] ).filter( ( k ) => k !== ( h.entryKids || [] ).find( isClip ) );
 	const kidsB = ( b.entryKids || [] ).filter( ( k ) => k !== ( b.entryKids || [] ).find( isClip ) );
 	ok( kidsH.length === kidsB.length, `${ key }: same blocks beside the clipping (${ kidsB.length } -> ${ kidsH.length })` );
+	let note = true;
 	kidsH.forEach( ( k, i ) => {
 		const o = kidsB[ i ];
 		if ( ! o ) {
 			return;
 		}
-		ok( eq( k.box[ 0 ], o.box[ 0 ] ) && eq( k.box[ 2 ], o.box[ 2 ] ) && eq( k.box[ 3 ], o.box[ 3 ] ), `${ key }: ${ k.tag }.${ k.cls } box as base (${ o.box } -> ${ k.box })` );
 		const after = h.clip && b.clip && k.box[ 1 ] > h.clip[ 1 ];
+		// Courtney's ruling: on a wide page the blocks under the clipping start at its start edge, keeping their base
+		// offset from the reading column's start and their base size. Full-width blocks still bleed as on base.
+		const flush = wideHere && after && ! k.cls.split( ' ' ).includes( 'alignfull' );
+		const left = flush ? eq( k.box[ 0 ] - h.clip[ 0 ], o.box[ 0 ] - b.entry[ 0 ] ) : eq( k.box[ 0 ], o.box[ 0 ] );
+		ok( left && eq( k.box[ 2 ], o.box[ 2 ] ) && eq( k.box[ 3 ], o.box[ 3 ] ), `${ key }: ${ k.tag }.${ k.cls } box as base${ flush ? ', from the clipping\'s start edge' : '' } (${ o.box } -> ${ k.box })` );
+		if ( flush && note && 'p' === k.tag ) {
+			note = false;
+			ok( eq( k.box[ 0 ], h.clip[ 0 ] ), `${ key }: the note under the clipping starts at the clipping's start edge (${ k.box[ 0 ] } vs ${ h.clip[ 0 ] })` );
+		}
 		ok( after ? eq( k.box[ 1 ] - bottom( h.clip ), o.box[ 1 ] - bottom( b.clip ) ) : eq( k.box[ 1 ], o.box[ 1 ] ), `${ key }: ${ k.tag }.${ k.cls } vertical place as base` );
 	} );
 }

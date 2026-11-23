@@ -574,6 +574,33 @@ body.single-post.kind-repost .cr-wide-column.single-post__content::before {
 	}
 }
 
+/*
+ * Courtney's note under the clipping starts at the clipping's start edge, as
+ * the approved mockup draws it. The box of blocks after the clipping spans the
+ * column, so a full-width group in it still bleeds from the centered column;
+ * its blocks keep the reading width, starting at that edge.
+ */
+@media (min-width: 64rem) {
+
+	body.single-post.kind-repost .cr-wide-column.single-post__content > .pkiw-singular-entry > .cr-repost-clip--single ~ .cr-repost-flow {
+		max-width: none;
+		margin-inline: 0;
+	}
+
+	body.single-post.kind-repost .cr-wide-column.single-post__content > .pkiw-singular-entry > .cr-repost-clip--single ~ .cr-repost-flow > :not(.alignfull):not(.alignwide) {
+		max-width: var(--wp--style--global--content-size);
+		margin-inline-start: 0;
+		margin-inline-end: auto;
+	}
+
+	/* tokens.css caps .alignwide at 90% of its box, centered; here that box is the reading width from the edge. */
+	body.single-post.kind-repost .cr-wide-column.single-post__content > .pkiw-singular-entry > .cr-repost-clip--single ~ .cr-repost-flow > .alignwide {
+		max-width: calc(var(--wp--style--global--content-size) * 0.9);
+		margin-inline-start: calc(var(--wp--style--global--content-size) * 0.05);
+		margin-inline-end: auto;
+	}
+}
+
 @media not all and (min-width: 64rem) {
 
 	body.single-post.kind-repost .cr-wide-column.single-post__content {

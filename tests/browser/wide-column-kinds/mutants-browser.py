@@ -48,7 +48,7 @@ MUTANTS = {
         ],
     },
     'repost': {
-        'pages': 'rep-card,rep-siblings,rep-nested,rep-plain,rep-page-two',
+        'pages': 'rep-card,rep-siblings,rep-nested,rep-plain,rep-page-two,rep-two-cards',
         'widths': '1448,1024,768',
         'list': [
             ('pin-holds', REP_CSS, '\tbody.single-post.kind-repost .cr-wide-column.single-post__header,\n\tbody.single-post.kind-repost .cr-wide-column.single-post__content {\n\t\tmax-inline-size: var(--wp--style--global--wide-size);\n\t}\n', ''),
@@ -62,6 +62,9 @@ MUTANTS = {
             ('pin-lost-under-64rem', REP_CSS, '@media not all and (min-width: 64rem) {\n\n\tbody.single-post.kind-repost .cr-wide-column.single-post__content {\n\t\tmax-inline-size: var(--cr-measure-wide);\n\t}\n', '@media not all and (min-width: 64rem) {\n'),
             ('breakpoint-40rem', REP_CSS, '@media (min-width: 64rem) {\n\n\tbody.single-post.kind-repost .cr-wide-column.single-post__header,', '@media (min-width: 40rem) {\n\n\tbody.single-post.kind-repost .cr-wide-column.single-post__header,'),
             ('clip-rows-stretch', REP_CSS, '\t\tgrid-template-rows: auto 1fr;\n', ''),
+            ('note-centered', REP_CSS, "~ .cr-repost-flow {\n\t\tmax-width: none;\n\t\tmargin-inline: 0;\n\t}", "~ .cr-repost-flow {\n\t}"),
+            ('note-alignwide-unfixed', REP_CSS, "\t\tmax-width: calc(var(--wp--style--global--content-size) * 0.9);\n\t\tmargin-inline-start: calc(var(--wp--style--global--content-size) * 0.05);\n", ''),
+            ('note-box-moved-naive', REP_CSS, "~ .cr-repost-flow {\n\t\tmax-width: none;\n\t\tmargin-inline: 0;\n\t}", "~ .cr-repost-flow {\n\t\tmargin-inline-start: 0;\n\t}"),
             ('renderer-no-flow-box', REP_PHP, "add_filter( 'render_block', __NAMESPACE__ . '\\\\wide_flow', 20, 2 );", ''),
             ('resolver-ignores-nesting', REP_PHP, "\t\t\t'wide' => 'top' === $place,", "\t\t\t'wide' => true,"),
             ('resolver-meta-only-narrow', REP_PHP, "\t\t'wide' => true,\n\t\t'data' => array(\n\t\t\t'shape' => 'meta',", "\t\t'wide' => false,\n\t\t'data' => array(\n\t\t\t'shape' => 'meta',"),
