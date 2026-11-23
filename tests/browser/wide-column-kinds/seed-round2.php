@@ -102,8 +102,10 @@ foreach ( array( 'favorite' => 'k-favorite', 'repost' => 'cr-repost-clip--single
 	$in_group = $pattern( "$k-synced-group", $grp( $p( 'Before, inside the synced group.' ) . $card2( $kind ) . $p( 'After, inside the synced group.' ) ) );
 	$bare     = $pattern( "$k-synced-bare", $card2( $kind ) );
 	$prose    = $pattern( "$k-synced-prose", $p( 'A synced paragraph after the card.' ) );
-	$post2( "r2-$k-synced", $kind, 'A card inside a synced pattern', '<!-- wp:block {"ref":' . $in_group . '} /-->' );
-	$post2( "r2-$k-synced-bare", $kind, 'A synced pattern that is only the card', '<!-- wp:block {"ref":' . $bare . '} /-->' );
+	// The Repost posts also carry meta-box facts, so a walker that saw the reference as a leaf took the meta-only path (the review's fixture).
+	$facts = 'repost' === $kind ? $meta_facts : array();
+	$post2( "r2-$k-synced", $kind, 'A card inside a synced pattern', '<!-- wp:block {"ref":' . $in_group . '} /-->', $facts );
+	$post2( "r2-$k-synced-bare", $kind, 'A synced pattern that is only the card', '<!-- wp:block {"ref":' . $bare . '} /-->', $facts );
 	$post2( "r2-$k-synced-after", $kind, 'A card, then a synced pattern', $card2( $kind ) . "\n" . '<!-- wp:block {"ref":' . $prose . '} /-->' );
 	// B2: authored HTML that names the card's class, before a real card.
 	foreach ( $decoys as $name => $markup ) {
