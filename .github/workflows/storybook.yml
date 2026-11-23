@@ -34,7 +34,7 @@ jobs:
 
       - name: Asset paths and writes stay inside the fixture directory
         if: ${{ !cancelled() }}
-        run: node --test storybook/tests/
+        run: node --test storybook/tests/*.test.mjs
 
   build:
     name: Storybook build and axe
