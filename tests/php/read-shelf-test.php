@@ -306,6 +306,12 @@ if ( ! in_array( '--html', $argv, true ) ) {
 				cr_read_same( 1, substr_count( $out, '<article ' ), 'mixed row prints exactly one article' );
 				cr_read_same( 'Quiet Atlas Mira Page', cr_shelf_visible_text( $out ), 'mixed row prints only the Read title and author' );
 			}
+			foreach ( array( '', $read . $checkin ) as $invalid_render ) {
+				$GLOBALS['cr_read_render'] = static fn(): string => $invalid_render;
+				$out = Shelf\shelf_card( $checkin . cr_shelf_generic_fixture(), cr_shelf_style_block(), new WP_Block( array( 'postId' => $post->ID ) ) );
+				cr_read_same( 1, substr_count( $out, '<article ' ), 'an invalid rebuild keeps one Read article' );
+				cr_read_not_contains( 'Check-in venue', $out, 'an invalid rebuild cannot bring the Check-in card back' );
+			}
 
 			$post = cr_shelf_shell_reset();
 			$GLOBALS['cr_read_meta'][42] = array( '_pkiw_read_title' => 'Meta Book', '_pkiw_read_author' => 'Meta Writer', '_pkiw_read_status' => 'reading' );

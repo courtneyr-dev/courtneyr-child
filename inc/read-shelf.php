@@ -422,7 +422,11 @@ function shelf_card( string $html, array $block, $instance ): string {
 	}
 	$author = trim( (string) ( $a['authorName'] ?? '' ) );
 
-	if ( ! $protected && ( ! str_contains( $html, 'pk-card k-read' ) || substr_count( $html, '<article ' ) > 1 ) ) {
+	if ( ! $protected && substr_count( $html, '<article ' ) > 1 ) {
+		$html = cut_elements( $html, 'article', 'k-checkin' );
+	}
+
+	if ( ! $protected && ! str_contains( $html, 'pk-card k-read' ) ) {
 		$card_block = $read;
 		if ( null === $card_block && ( '' !== trim( (string) ( $a['bookTitle'] ?? '' ) ) || '' !== $author ) ) {
 			$attrs = array();
@@ -441,7 +445,7 @@ function shelf_card( string $html, array $block, $instance ): string {
 		}
 		if ( is_array( $card_block ) ) {
 			$card = render_block( $card_block );
-			if ( str_contains( $card, 'pk-card k-read' ) ) {
+			if ( str_contains( $card, 'pk-card k-read' ) && 1 === substr_count( $card, '<article ' ) ) {
 				$html = function_exists( '\\PKIW\\link_title_to_post' ) ? \PKIW\link_title_to_post( $card, $post ) : $card;
 			}
 		}
