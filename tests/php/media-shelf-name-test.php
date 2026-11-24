@@ -11,6 +11,7 @@ require __DIR__ . '/read-bootstrap.php';
 
 use function Courtneyr\Child\MediaShelf\name_listen_date;
 use function Courtneyr\Child\MediaShelf\name_watch_date;
+use function Courtneyr\Child\MediaShelf\spine_only;
 
 function cr_media_shelf_item( string $title, string $extra_link_attrs = '', string $classes = 'post-123 kind-watch' ): string {
 	return '<li class="' . $classes . '"><article class="pk-card"><h3 class="pk-title p-name"><a' . $extra_link_attrs . ' class="u-url" href="https://example.test/dune/">' . $title . '</a></h3></article><p class="pk-entry-props"><time class="dt-published" value="2026-05-04">May 4, 2026</time></p></li>';
@@ -71,6 +72,24 @@ cr_read_group(
 
 		$already_labelled = cr_media_shelf_item( 'Dune', ' aria-label="Existing label"' );
 		cr_read_same( $already_labelled, name_watch_date( $already_labelled ), 'existing aria-label is unchanged' );
+	}
+);
+
+cr_read_group(
+	'locked Watch spine wraps the existing safe link',
+	static function (): void {
+		$link = '<h3 class="pk-title"><a class="u-url" href="/safe/">Protected: Safe title</a></h3>';
+		$date = '<span class="pk-entry-props" hidden><data class="dt-published" value="2026-05-04"></data></span>';
+		$item = '<li class="post-123 kind-watch"><article class="pk-card pk-card--stream pk-card--protected k-watch h-entry">' . $link . $date . '</article></li>';
+		$out  = spine_only( $item );
+
+		cr_read_contains( 'pk-card--protected', $out, 'the protection marker remains' );
+		cr_read_contains( 'cr-vhs--stream cr-media--shelf', $out, 'the locked card uses the spine styles' );
+		cr_read_contains( '<div class="pk-body"><div class="pk-caption">' . $link . '</div></div>' . $date, $out, 'the wrapper preserves the exact safe link and date' );
+		cr_read_same( 1, substr_count( $out, '<a ' ), 'one permalink' );
+
+		$other = str_replace( 'k-watch', 'k-listen', $item );
+		cr_read_same( $other, spine_only( $other ), 'the wrapper only applies to Watch' );
 	}
 );
 
