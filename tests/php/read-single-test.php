@@ -188,9 +188,11 @@ cr_read_group(
 cr_read_group(
 	'title lede prints one precise rating and calendar date',
 	static function (): void {
-		cr_read_reset();
+		$post                      = cr_read_reset();
 		$GLOBALS['cr_read_blocks'] = array( cr_read_single_block() );
-		$html = add_title_lede( '<h1>Reading now</h1>', array( 'blockName' => 'core/post-title' ) );
+		$title                     = array( 'blockName' => 'core/post-title', 'attrs' => array( 'level' => 1 ) );
+		$current                   = new WP_Block( array( 'postId' => $post->ID ) );
+		$html                      = add_title_lede( '<h1>Reading now</h1>', $title, $current );
 		cr_read_contains( 'cr-read__author', $html, 'public keeps the author element' );
 		cr_read_contains( 'A. Reader', $html, 'public keeps the author text' );
 		cr_read_contains( 'Currently Reading', $html, 'status' );
@@ -203,7 +205,7 @@ cr_read_group(
 		$post = cr_read_reset();
 		$GLOBALS['cr_read_blocks']              = array( cr_read_single_block() );
 		$GLOBALS['cr_read_protected'][ $post->ID ] = true;
-		$html = add_title_lede( '<h1>Reading now</h1>', array( 'blockName' => 'core/post-title' ) );
+		$html = add_title_lede( '<h1>Reading now</h1>', $title, $current );
 		cr_read_not_contains( 'cr-read__author', $html, 'protected drops the author element' );
 		cr_read_not_contains( 'A. Reader', $html, 'protected drops the author text' );
 		cr_read_not_contains( 'cr-journal__rating', $html, 'protected drops the rating' );
@@ -212,10 +214,27 @@ cr_read_group(
 
 		cr_read_reset();
 		$GLOBALS['cr_read_blocks'] = array( cr_read_single_block( array( 'readStatus' => 'nope' ) ) );
-		$html = add_title_lede( '<h1>Reading now</h1>', array( 'blockName' => 'core/post-title' ) );
+		$html = add_title_lede( '<h1>Reading now</h1>', $title, $current );
 		cr_read_contains( 'Other', $html, 'invalid status label' );
 		cr_read_not_contains( 'Currently Reading', $html, 'invalid status is not reading' );
 		cr_read_not_contains( 'cr-read__status-progress', $html, 'invalid status has no progress' );
+	}
+);
+
+cr_read_group(
+	'title lede stays on the queried Read heading',
+	static function (): void {
+		$post                      = cr_read_reset();
+		$GLOBALS['cr_read_blocks'] = array( cr_read_single_block() );
+		$title                     = array( 'blockName' => 'core/post-title', 'attrs' => array( 'level' => 1 ) );
+		$related                   = new WP_Block( array( 'postId' => $post->ID + 1 ) );
+		$current                   = new WP_Block( array( 'postId' => $post->ID ) );
+		$secondary                 = array( 'blockName' => 'core/post-title', 'attrs' => array( 'level' => 2 ) );
+
+		cr_read_same( '<h1>Related book</h1>', add_title_lede( '<h1>Related book</h1>', $title, $related ), 'a different post cannot receive the lede' );
+		cr_read_same( '<h2>Reading now</h2>', add_title_lede( '<h2>Reading now</h2>', $secondary, $current ), 'a secondary title of the current post stays unchanged' );
+		cr_read_same( '<h1>Reading now</h1>', add_title_lede( '<h1>Reading now</h1>', $title, new WP_Block() ), 'a title without post context stays unchanged' );
+		cr_read_contains( 'cr-read__author', add_title_lede( '<h1>Reading now</h1>', $title, $current ), 'the current post H1 still receives the lede' );
 	}
 );
 
