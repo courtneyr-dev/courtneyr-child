@@ -9,11 +9,16 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Rsvp;
 
+use Courtneyr\Child\ArtifactStyle;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 const KIND           = 'rsvp';
+const CARD_BLOCK     = 'post-kinds-indieweb/rsvp-card';
+const ARTIFACT_STYLE = 'cr-event-ticket';
+const ARTIFACT_CLASS = 'is-style-' . ARTIFACT_STYLE;
 const ENTRY_BLOCK    = 'post-kinds-indieweb/rsvp-entry';
 const ENTRY_STYLE    = 'cr-rsvp-wall';
 const ENTRY_CLASS    = 'is-style-cr-rsvp-wall';
@@ -26,6 +31,13 @@ const STICKER_PAPERS = array(
 	'remote'     => 'ut-orange',
 );
 
+add_action(
+	'after_setup_theme',
+	static function (): void {
+		ArtifactStyle\register( CARD_BLOCK, ARTIFACT_STYLE, __( 'Event ticket', 'courtneyr-child' ), KIND );
+	}
+);
+
 /** Whether the current request is the RSVP archive. */
 function is_rsvp_archive(): bool {
 	return is_tax( 'kind', KIND );
@@ -33,7 +45,7 @@ function is_rsvp_archive(): bool {
 
 /** Whether the current request is an RSVP single. */
 function is_rsvp_single(): bool {
-	return is_singular( 'post' ) && has_term( KIND, 'kind', get_queried_object_id() );
+	return is_singular( 'post' ) && ArtifactStyle\applies( get_queried_object_id(), ARTIFACT_STYLE );
 }
 
 /** Whether the current request is a Stream surface. */

@@ -16,14 +16,18 @@ namespace {
 	class WP_Post { public int $ID = 251; public string $post_title = 'Private RSVP'; }
 	class WP_Term { public string $name = 'RSVP'; }
 	class WP_Block { public array $context = array( 'postId' => 251 ); }
-	function add_action( $hook, $callback, $priority = 10, $accepted_args = 1 ): void {}
+	function add_action( $hook, $callback, $priority = 10, $accepted_args = 1 ): void {
+		if ( 'after_setup_theme' === $hook ) {
+			$callback();
+		}
+	}
 	function add_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ): void {}
 	function apply_filters( $hook, $value, ...$args ) { return $value; }
 	function is_singular( $type = '' ): bool { return true; }
 	function get_queried_object_id(): int { return 251; }
 	function get_the_ID(): int { return 251; }
 	function get_post( $post = null ): WP_Post { return new WP_Post(); }
-	function has_term( $term, $taxonomy, $post = null ): bool { return true; }
+	function get_the_terms( $post, $taxonomy ): array { return array( (object) array( 'slug' => 'rsvp' ) ); }
 	function post_password_required( $post = null ): bool { return false; }
 	function get_the_title( $post = null ): string { return 'Private RSVP'; }
 	function get_permalink( $post = null ): string { return 'https://example.test/private-rsvp/'; }
@@ -69,6 +73,7 @@ namespace PKIW {
 
 namespace {
 	require CR_RSVP_THEME_DIR . '/inc/stamps.php';
+	require CR_RSVP_THEME_DIR . '/inc/artifact-style.php';
 	require CR_RSVP_THEME_DIR . '/inc/rsvp.php';
 	require CR_RSVP_THEME_DIR . '/inc/single-rsvp.php';
 	require CR_RSVP_THEME_DIR . '/inc/stream-rsvp.php';
