@@ -9,6 +9,9 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\StreamRsvp;
 
+use Courtneyr\Child\ArtifactStyle;
+use Courtneyr\Child\Rsvp;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -101,7 +104,7 @@ function stub_card( string $html, array $block, $instance ): string { // phpcs:i
 
 	$post_id = block_post_id( $instance );
 	$post    = $post_id > 0 ? get_post( $post_id ) : null;
-	if ( ! $post instanceof \WP_Post || ! has_term( 'rsvp', 'kind', $post ) || post_password_required( $post ) ) {
+	if ( ! $post instanceof \WP_Post || ! ArtifactStyle\applies( $post, Rsvp\ARTIFACT_STYLE ) || post_password_required( $post ) ) {
 		return $html;
 	}
 	$rsvp = facts( $post_id );
@@ -121,7 +124,7 @@ function stub_card( string $html, array $block, $instance ): string { // phpcs:i
 		$name = (string) \PKIW\untitled_name( $post, false );
 	}
 
-	$out  = '<article class="pk-card pk-card--stream cr-rsvp-stub cr-rsvp-tilt-' . $tilt . ' h-entry" style="--cr-rsvp-paper:var(--cr-' . esc_attr( $paper ) . ')">';
+	$out  = '<article class="pk-card pk-card--stream cr-rsvp-stub cr-rsvp-tilt-' . $tilt . ' h-entry ' . Rsvp\ARTIFACT_CLASS . '" style="--cr-rsvp-paper:var(--cr-' . esc_attr( $paper ) . ')">';
 	$out .= '<p class="cr-rsvp-stub__kind">' . esc_html( kind_label() ) . '</p>';
 	$out .= '<h' . $level . ' class="cr-rsvp-stub__name"><a class="u-url' . ( ! empty( $rsvp['name_is_title'] ) ? ' p-name' : '' ) . '" href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( $name ) . '</a></h' . $level . '>';
 	if ( '' !== (string) ( $rsvp['start_day'] ?? '' ) ) {

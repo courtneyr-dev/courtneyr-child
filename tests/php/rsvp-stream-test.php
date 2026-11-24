@@ -23,9 +23,16 @@ namespace {
 	function add_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ): void {}
 	function get_the_ID(): int { return 0; }
 	function get_post( $post = null ): ?WP_Post { return $post instanceof WP_Post ? $post : ( $GLOBALS['cr_rsvp_stream_posts'][ (int) $post ] ?? null ); }
-	function has_term( $term, $taxonomy, $post = null ): bool {
+	function add_action( $hook, $callback, $priority = 10, $accepted_args = 1 ): void {
+		if ( 'after_setup_theme' === $hook ) {
+			$callback();
+		}
+	}
+	function get_the_terms( $post, $taxonomy ): array {
 		$post = get_post( $post );
-		return $post instanceof WP_Post && 'kind' === $taxonomy && in_array( $term, $GLOBALS['cr_rsvp_stream_terms'][ $post->ID ] ?? array(), true );
+		return $post instanceof WP_Post && 'kind' === $taxonomy
+			? array_map( static fn( $slug ) => (object) array( 'slug' => $slug ), $GLOBALS['cr_rsvp_stream_terms'][ $post->ID ] ?? array() )
+			: array();
 	}
 	function post_password_required( $post = null ): bool {
 		$post = get_post( $post );
@@ -76,10 +83,6 @@ namespace Courtneyr\Child\HomeSections {
 	function is_stream_surface(): bool { return (bool) $GLOBALS['cr_rsvp_stream_on']; }
 }
 
-namespace Courtneyr\Child\Rsvp {
-	function paper( int $post_id ): string { return array( 'periwinkle', 'sky-blue', 'light-orange' )[ $post_id % 3 ]; }
-}
-
 namespace PKIW {
 	function kind_facts( int $post_id ): array { return $GLOBALS['cr_rsvp_stream_facts'][ $post_id ] ?? array(); }
 	function entry_author_html( \WP_Post $post ): string { return '<span class="p-author h-card">Author</span>'; }
@@ -88,6 +91,8 @@ namespace PKIW {
 
 namespace {
 	require CR_RSVP_THEME_DIR . '/inc/stamps.php';
+	require CR_RSVP_THEME_DIR . '/inc/artifact-style.php';
+	require CR_RSVP_THEME_DIR . '/inc/rsvp.php';
 	require CR_RSVP_THEME_DIR . '/inc/stream-rsvp.php';
 
 	cr_rsvp_stream_check(
@@ -98,7 +103,7 @@ namespace {
 				$id = 201 + array_search( $index, array_keys( $labels ), true );
 				cr_rsvp_stream_post( $id, $index, $label );
 				$html = cr_rsvp_stream_render( $id );
-				foreach ( array( 'cr-rsvp-stub', 'cr-rsvp-stub__kind', 'cr-rsvp-stub__name', 'cr-rsvp-stub__day', 'cr-rsvp-stub__status', 'cr-rsvp-stub__tear', 'p-rsvp', 'dt-published', 'p-author h-card', 'u-in-reply-to' ) as $token ) {
+				foreach ( array( 'is-style-cr-event-ticket', 'cr-rsvp-stub', 'cr-rsvp-stub__kind', 'cr-rsvp-stub__name', 'cr-rsvp-stub__day', 'cr-rsvp-stub__status', 'cr-rsvp-stub__tear', 'p-rsvp', 'dt-published', 'p-author h-card', 'u-in-reply-to' ) as $token ) {
 					cr_rsvp_stream_assert( str_contains( $html, $token ), $label . ' missing ' . $token );
 				}
 				cr_rsvp_stream_assert( 1 === substr_count( $html, '<a ' ), $label . ' has one anchor' );

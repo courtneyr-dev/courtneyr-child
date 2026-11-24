@@ -9,6 +9,9 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\SingleRsvp;
 
+use Courtneyr\Child\ArtifactStyle;
+use Courtneyr\Child\Rsvp;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -123,7 +126,7 @@ function ticket( string $html, array $block, $instance ): string { // phpcs:igno
 
 	$post_id = block_post_id( $instance );
 	$post    = $post_id > 0 ? get_post( $post_id ) : null;
-	if ( '' === $html || ! $post instanceof \WP_Post || isset( $rendered[ $post_id ] ) || ! is_singular( 'post' ) || (int) get_queried_object_id() !== $post_id || ! has_term( 'rsvp', 'kind', $post ) || post_password_required( $post ) ) {
+	if ( '' === $html || ! $post instanceof \WP_Post || isset( $rendered[ $post_id ] ) || ! is_singular( 'post' ) || (int) get_queried_object_id() !== $post_id || ! ArtifactStyle\applies( $post, Rsvp\ARTIFACT_STYLE ) || post_password_required( $post ) ) {
 		return $html;
 	}
 
@@ -134,7 +137,7 @@ function ticket( string $html, array $block, $instance ): string { // phpcs:igno
 	$rendered[ $post_id ] = true;
 
 	$title = wp_strip_all_tags( (string) get_the_title( $post ) );
-	$out   = '<article class="cr-rsvp-ticket h-entry">';
+	$out   = '<article class="cr-rsvp-ticket h-entry ' . Rsvp\ARTIFACT_CLASS . '">';
 	$out  .= '<div class="cr-rsvp-ticket__front"><div class="cr-rsvp-ticket__event p-in-reply-to h-event">';
 	if ( '' !== (string) ( $rsvp['image'] ?? '' ) ) {
 		$out .= '<figure class="cr-rsvp-ticket__poster"><img class="u-photo" src="' . esc_url( (string) $rsvp['image'] ) . '" alt="' . esc_attr( (string) ( $rsvp['image_alt'] ?? '' ) ) . '" loading="lazy"></figure>';

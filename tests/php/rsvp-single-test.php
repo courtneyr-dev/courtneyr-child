@@ -39,9 +39,16 @@ namespace {
 	function get_the_ID(): int { return (int) $GLOBALS['cr_rsvp_single_query_id']; }
 	function get_queried_object_id(): int { return (int) $GLOBALS['cr_rsvp_single_query_id']; }
 	function is_singular( $type = '' ): bool { return 'post' === $type && (bool) $GLOBALS['cr_rsvp_single_singular']; }
-	function has_term( $term, $taxonomy, $post = null ): bool {
+	function add_action( $hook, $callback, $priority = 10, $accepted_args = 1 ): void {
+		if ( 'after_setup_theme' === $hook ) {
+			$callback();
+		}
+	}
+	function get_the_terms( $post, $taxonomy ): array {
 		$post = get_post( $post );
-		return $post instanceof WP_Post && 'kind' === $taxonomy && in_array( $term, $GLOBALS['cr_rsvp_single_terms'][ $post->ID ] ?? array(), true );
+		return $post instanceof WP_Post && 'kind' === $taxonomy
+			? array_map( static fn( $slug ) => (object) array( 'slug' => $slug ), $GLOBALS['cr_rsvp_single_terms'][ $post->ID ] ?? array() )
+			: array();
 	}
 	function post_password_required( $post = null ): bool {
 		$post = get_post( $post );
@@ -124,6 +131,8 @@ namespace PKIW {
 }
 
 namespace {
+	require CR_RSVP_THEME_DIR . '/inc/artifact-style.php';
+	require CR_RSVP_THEME_DIR . '/inc/rsvp.php';
 	require CR_RSVP_THEME_DIR . '/inc/single-rsvp.php';
 
 	cr_rsvp_single_check(
@@ -131,7 +140,7 @@ namespace {
 		static function (): void {
 			cr_rsvp_single_post( 101, 'RSVP: Fernwood Tech Talk' );
 			$html = cr_rsvp_single_render( 101 );
-			foreach ( array( 'cr-rsvp-ticket__poster', 'cr-rsvp-ticket__event-heading', '>Date<', '>Time<', '>Location<', 'p-summary', 'cr-rsvp-ticket__stub', 'p-content', 'dt-published', 'u-in-reply-to' ) as $token ) {
+			foreach ( array( 'is-style-cr-event-ticket', 'cr-rsvp-ticket__poster', 'cr-rsvp-ticket__event-heading', '>Date<', '>Time<', '>Location<', 'p-summary', 'cr-rsvp-ticket__stub', 'p-content', 'dt-published', 'u-in-reply-to' ) as $token ) {
 				cr_rsvp_single_contains( $token, $html, 'ticket contract ' . $token );
 			}
 			$positions = array_map( static fn( string $token ): int|false => strpos( $html, $token ), array( 'cr-rsvp-ticket__poster', 'cr-rsvp-ticket__event-heading', '>Date<', '>Time<', '>Location<', 'p-summary' ) );
