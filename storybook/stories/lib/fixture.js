@@ -9,16 +9,6 @@ export const VIEWPORTS = {
 	w1280: { name: 'Desktop, 1280 px', styles: { width: '1280px', height: '800px' }, type: 'desktop' },
 };
 
-const AXE_RULES_PAGE_STORIES_SKIP_PER_SEED = {
-	t269: [
-		{
-			rule: 'list',
-			where: 'the Primary navigation in the header',
-			why: 'The seed has no saved navigation menu, so WordPress falls back to a Page List and prints its <ul> directly inside the navigation <ul>.',
-		},
-	],
-};
-
 const fixtures = new Map();
 for ( const manifest of Object.values( import.meta.glob( '../../fixtures/*/manifest.json', { eager: true, import: 'default' } ) ) ) {
 	for ( const [ id, entry ] of Object.entries( manifest.fixtures ) ) {
@@ -159,10 +149,9 @@ export function guardSentinelLinks() {
  * @return {object} A CSF story.
  */
 export function fixtureStory( key, { viewport, scheme } = {} ) {
-	const { environment, entry } = find( key );
-	const skipped = entry.component === null ? AXE_RULES_PAGE_STORIES_SKIP_PER_SEED[ environment ] ?? [] : [];
+	find( key );
 	return {
-		parameters: { fixture: key, ...( skipped.length ? { a11y: { config: { rules: skipped.map( ( { rule } ) => ( { id: rule, enabled: false } ) ) } } } : {} ) },
+		parameters: { fixture: key },
 		globals: { ...( scheme ? { scheme } : {} ), ...( viewport ? { viewport: { value: viewport, isRotated: false } } : {} ) },
 	};
 }
@@ -214,8 +203,7 @@ function packageLine( name, state ) {
 }
 
 function renderOverview( title, keys ) {
-	const { manifest, environment } = find( keys[ 0 ] );
-	const skipped = keys.some( ( key ) => find( key ).entry.component === null ) ? AXE_RULES_PAGE_STORIES_SKIP_PER_SEED[ environment ] ?? [] : [];
+	const { manifest } = find( keys[ 0 ] );
 	const { source, site } = manifest;
 	const sourceLink = ( file ) => element( 'a', file, { href: `${ REPO_URL }/blob/${ source.commit }/${ file }` } );
 	return element( 'main', [
@@ -232,11 +220,6 @@ function renderOverview( title, keys ) {
 				[ 'Document', [ `${ entry.doc.bytes.toLocaleString( 'en-US' ) } bytes, SHA-256 `, code( entry.doc.sha256.slice( 0, 16 ) ) ] ],
 			] ),
 		] ) ),
-		skipped.length ? element( 'section', [
-			element( 'h2', 'Accessibility findings these stories do not test' ),
-			element( 'p', skipped.length === 1 ? `axe reports 1 finding in WordPress's output for this page that comes from the seed's content. The page stories skip this rule and test every other rule.` : `axe reports ${ skipped.length } findings in WordPress's output for this page that come from the seed's content. The page stories skip these ${ skipped.length } rules and test every other rule.` ),
-			definitions( skipped.map( ( { rule, where, why } ) => [ code( rule ), `In ${ where }. ${ why }` ] ) ),
-		] ) : null,
 		element( 'section', [
 			element( 'h2', 'Captured from' ),
 			definitions( [
