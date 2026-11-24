@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.178
+
+- Keep Read metadata under the main title and render autosaved metadata in previews. (#352)
+- Render one book and one link for mixed Read and Check-in shelf rows. (#353)
+- Match the approved Read archive shelf headings and desktop book stacks. (#354)
+
 ## 0.7.177
 
 - Keep default note callout headings on the callout palette in light and dark themes.
