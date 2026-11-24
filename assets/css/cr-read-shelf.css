@@ -17,7 +17,7 @@
 }
 
 .cr-read-shelf .pkiw-group > .pkiw-group__items {
-	padding-block-start: var(--cr-space-4xl);
+	padding-block-start: var(--cr-space-2xl);
 }
 
 .cr-read-shelf .pkiw-group[data-pkiw-group="reading"] > .pkiw-group__items,
@@ -322,25 +322,37 @@
 
 .cr-read-shelf .pkiw-group__heading {
 	--cr-shelf-label: var(--cr-light-gray);
-	position: absolute;
+	position: relative;
 	z-index: 1;
-	inset-block-start: var(--cr-space-xs);
-	inset-inline-start: var(--cr-space-xl);
 	box-sizing: border-box;
+	width: fit-content;
 	max-width: calc(100% - 2 * var(--cr-space-xl));
-	margin: 0;
-	padding: var(--cr-space-xs) var(--cr-space-lg);
+	margin-block: var(--cr-space-xs) calc(-1 * var(--cr-space-md));
+	margin-inline: var(--cr-space-xl) 0;
+	padding: var(--cr-space-xs) var(--cr-space-md);
 	border: 2px solid var(--cr-russian-violet);
 	background: var(--cr-shelf-label);
 	box-shadow: var(--cr-shadow-hard-sm);
 	color: var(--cr-russian-violet);
-	font-family: var(--cr-font-mono);
-	font-size: var(--cr-text-floor);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-lg);
 	font-weight: var(--cr-weight-bold);
 	line-height: var(--cr-leading-snug);
-	letter-spacing: var(--cr-tracking-eyebrow);
+	letter-spacing: var(--cr-tracking-normal);
 	overflow-wrap: anywhere;
 	text-transform: uppercase;
+}
+
+.cr-read-shelf .pkiw-group__heading::before {
+	position: absolute;
+	inset-block-start: calc(-1 * var(--cr-space-2xs));
+	inset-inline-end: var(--cr-space-sm);
+	width: var(--cr-space-xl);
+	height: var(--cr-space-xs);
+	background: var(--cr-tape);
+	mask: url(../img/paper-edge-top.svg) top / 100% 100% no-repeat;
+	content: "";
+	pointer-events: none;
 }
 
 .cr-read-shelf .pkiw-group[data-pkiw-group="reading"] > .pkiw-group__heading,
@@ -424,6 +436,11 @@
 
 @media (min-width: 40rem) {
 
+	.cr-read-shelf .pkiw-group__heading {
+		padding-inline: var(--cr-space-lg);
+		font-size: var(--cr-text-xl);
+	}
+
 	.cr-read-shelf .pkiw-group__items,
 	.cr-read-shelf > .wp-block-query > ul.wp-block-post-template {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -461,7 +478,7 @@
 
 	.cr-read-shelf::before,
 	.cr-read-shelf::after {
-		--cr-book-art-width: min(6rem, max(0rem, calc((100vw - 100%) / 2 - var(--cr-space-sm))));
+		--cr-book-art-width: min(8rem, max(0rem, calc((100vw - 100%) / 2 - var(--cr-space-sm))));
 		position: absolute;
 		inset-block-start: var(--cr-space-4xl);
 		width: var(--cr-book-art-width);
@@ -547,7 +564,8 @@
 @media (forced-colors: active) {
 
 	.cr-read-shelf::before,
-	.cr-read-shelf::after {
+	.cr-read-shelf::after,
+	.cr-read-shelf .pkiw-group__heading::before {
 		display: none;
 	}
 
