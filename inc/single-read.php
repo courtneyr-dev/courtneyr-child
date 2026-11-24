@@ -330,15 +330,20 @@ function sources_row( array $links ): string {
 /**
  * Rating, status and date under the H1.
  *
- * @param string               $html  Rendered block.
- * @param array<string, mixed> $block Parsed block.
+ * @param string               $html     Rendered block.
+ * @param array<string, mixed> $block    Parsed block.
+ * @param \WP_Block            $instance Block instance.
  * @return string
  */
-function add_title_lede( string $html, array $block ): string {
-	if ( 'core/post-title' !== ( $block['blockName'] ?? '' ) || ! is_read_single() ) {
+function add_title_lede( string $html, array $block, \WP_Block $instance ): string {
+	if ( 'core/post-title' !== ( $block['blockName'] ?? '' ) || 1 !== ( $block['attrs']['level'] ?? 2 ) || ! is_read_single() ) {
 		return $html;
 	}
-	$post = \get_post();
+	$post_id = (int) ( $instance->context['postId'] ?? 0 );
+	if ( \get_queried_object_id() !== $post_id ) {
+		return $html;
+	}
+	$post = \get_post( $post_id );
 	if ( ! $post instanceof \WP_Post ) {
 		return $html;
 	}
@@ -386,7 +391,7 @@ function add_title_lede( string $html, array $block ): string {
 
 	return $html . $out;
 }
-add_filter( 'render_block', __NAMESPACE__ . '\\add_title_lede', 20, 2 );
+add_filter( 'render_block', __NAMESPACE__ . '\\add_title_lede', 20, 3 );
 
 /**
  * The library card.
