@@ -47,6 +47,20 @@ cr_read_group(
 );
 
 cr_read_group(
+	'unnamed Watch spine has a visible and accessible title',
+	static function (): void {
+		$GLOBALS['cr_read_post']              = new WP_Post( 123, '', '' );
+		$GLOBALS['cr_read_dates'][123]['text'] = 'May 4, 2026';
+
+		$out = name_watch_date( cr_media_shelf_item( ' &nbsp; ' ) );
+
+		cr_read_contains( '>Untitled watch</a>', $out, 'the existing link displays a title' );
+		cr_read_contains( 'aria-label="Untitled watch, watched May 4, 2026"', $out, 'the label starts with the visible title' );
+		cr_read_same( 1, substr_count( $out, '<a ' ), 'the case keeps one link' );
+	}
+);
+
+cr_read_group(
 	'watch shelf early returns keep unchanged items',
 	static function (): void {
 		$GLOBALS['cr_read_post']                = new WP_Post( 123, 'Dune', '' );

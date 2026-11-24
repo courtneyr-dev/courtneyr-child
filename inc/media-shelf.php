@@ -428,7 +428,7 @@ function spine_only( string $item ): string {
  */
 function name_watch_date( string $item ): string {
 	/* translators: %s: the date the watch was posted, in the site's date format. */
-	return name_with_date( $item, __( 'watched %s', 'courtneyr-child' ) );
+	return name_with_date( $item, __( 'watched %s', 'courtneyr-child' ), __( 'Untitled watch', 'courtneyr-child' ) );
 }
 
 /**
@@ -450,11 +450,12 @@ function name_listen_date( string $item ): string {
  * Put a case's post date in its title link's aria-label. The h3 text stays
  * the cited name, so no value-title span or hidden duplicate text is needed.
  *
- * @param string $item   One rendered <li>.
- * @param string $format Label suffix, %s the date.
+ * @param string $item     One rendered <li>.
+ * @param string $format   Label suffix, %s the date.
+ * @param string $untitled Link text for a case with no rendered title.
  * @return string
  */
-function name_with_date( string $item, string $format ): string {
+function name_with_date( string $item, string $format, string $untitled = '' ): string {
 	$tags = new \WP_HTML_Tag_Processor( $item );
 	if ( ! $tags->next_tag( 'li' ) ) {
 		return $item;
@@ -485,6 +486,10 @@ function name_with_date( string $item, string $format ): string {
 	$shown = substr( $item, $start, $end - $start );
 	$title = html_entity_decode( wp_strip_all_tags( $shown ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 	$title = trim( (string) preg_replace( '/\s+/u', ' ', $title ) );
+	if ( '' === $title && '' !== $untitled ) {
+		$title = $untitled;
+		$item  = substr_replace( $item, esc_html( $title ), $start, $end - $start );
+	}
 	$label = $title . ', ' . sprintf( $format, $date );
 	return substr( $item, 0, $anchor + 2 )
 		. ' aria-label="' . esc_attr( $label ) . '"'
