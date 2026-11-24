@@ -411,7 +411,33 @@ function cut_all( string $item, array $cuts ): string {
  * @return string
  */
 function spine_only( string $item ): string {
-	return cut_all( $item, array_merge( SINGLE_ONLY, array( array( 'div', 'pk-media' ) ) ) );
+	$item = cut_all( $item, array_merge( SINGLE_ONLY, array( array( 'div', 'pk-media' ) ) ) );
+	$tags = new \WP_HTML_Tag_Processor( $item );
+	if ( ! $tags->next_tag( 'article' ) || ! $tags->has_class( 'pk-card--protected' ) || ! $tags->has_class( 'k-watch' ) ) {
+		return $item;
+	}
+
+	// PKIW already reduced this card to its visitor-safe title link.
+	$tags->add_class( 'cr-vhs' );
+	$tags->add_class( 'cr-vhs--stream' );
+	$tags->add_class( 'cr-media--shelf' );
+	$spine   = $tags->get_updated_html();
+	$article = strpos( $spine, '<article ' );
+	$open    = false === $article ? false : strpos( $spine, '>', $article );
+	$close   = false === $open ? false : strpos( $spine, '</article>', $open );
+	$heading = false === $open ? false : strpos( $spine, '</h3>', $open );
+	if ( false === $close || false === $heading || $heading > $close ) {
+		return $item;
+	}
+
+	$end   = $heading + strlen( '</h3>' );
+	$title = trim( substr( $spine, $open + 1, $end - $open - 1 ) );
+	if ( ! str_starts_with( $title, '<h3 ' ) ) {
+		return $item;
+	}
+	return substr( $spine, 0, $open + 1 )
+		. '<div class="pk-body"><div class="pk-caption">' . $title . '</div></div>'
+		. substr( $spine, $end );
 }
 
 /**
