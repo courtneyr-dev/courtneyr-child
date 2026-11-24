@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.179
+
+- Give untitled Watch shelf links a visible and accessible name. (#356)
+- Keep locked Watch cards on the spine shelf with their visitor-safe title links. (#358)
+- Register the Event ticket style for RSVP cards. (#359)
+
 ## 0.7.178
 
 - Keep Read metadata under the main title and render autosaved metadata in previews. (#352)
