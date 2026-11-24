@@ -222,6 +222,10 @@ th a:not(.wp-element-button) {
 
 .cr-callout--note,
 .is-style-cr-callout-note { background: var(--cr-prussian-blue); color: var(--cr-light-orange); }
+/* Keep default heading text on the same palette as the note's body text. */
+:is(.cr-callout--note, .is-style-cr-callout-note) .wp-block-heading:not(.has-text-color) {
+  color: inherit;
+}
 .cr-callout--warn,
 .is-style-cr-callout-warn {
   background: var(--cr-selective-yellow);
@@ -230,14 +234,7 @@ th a:not(.wp-element-button) {
 .cr-callout--warn a,
 .is-style-cr-callout-warn a { color: var(--cr-cerulean); }
 
-/* v0.5.50 — WARN callout label needs a contrasting tape because the
-   default cream tape (--cr-tape: #f3e5b8) on the WARN bg
-   (--cr-selective-yellow: #ffb703) is yellow-on-yellow (~1.6:1
-   contrast, fails 3:1 large-text AA — and visually "disappears"
-   regardless of tech contrast). Flip the label to russian-violet bg
-   with selective-yellow ink — luminance contrast is 14.45:1 AAA, and
-   the dark navy tape against the bright yellow callout reads as a
-   deliberate "stop" badge that matches WARN's semantic weight. */
+/* WARN labels use violet tape and yellow ink for 14.45:1 contrast. Cream tape on yellow gives about 1.6:1. */
 .cr-callout--warn .cr-callout__label,
 .cr-callout--warn .cr-callout__toggle,
 .is-style-cr-callout-warn .cr-callout__label,

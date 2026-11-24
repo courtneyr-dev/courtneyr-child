@@ -2,6 +2,7 @@
 
 ## 0.7.177
 
+- Keep default note callout headings on the callout palette in light and dark themes.
 - Give eligible Read singles a wider reading record while keeping the divider and sample text in their existing layout. (#338)
 - Test the layout and stylesheet hooks and cover incomplete reading record data. (#341)
 
