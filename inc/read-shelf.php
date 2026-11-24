@@ -422,7 +422,7 @@ function shelf_card( string $html, array $block, $instance ): string {
 	}
 	$author = trim( (string) ( $a['authorName'] ?? '' ) );
 
-	if ( ! $protected && false === strpos( $html, 'pk-card k-read' ) ) {
+	if ( ! $protected && ( ! str_contains( $html, 'pk-card k-read' ) || substr_count( $html, '<article ' ) > 1 ) ) {
 		$card_block = $read;
 		if ( null === $card_block && ( '' !== trim( (string) ( $a['bookTitle'] ?? '' ) ) || '' !== $author ) ) {
 			$attrs = array();

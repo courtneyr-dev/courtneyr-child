@@ -291,6 +291,22 @@ if ( ! in_array( '--html', $argv, true ) ) {
 			$out = Shelf\shelf_card( cr_shelf_generic_fixture(), cr_shelf_style_block(), new WP_Block( array( 'postId' => 42 ) ) );
 			cr_read_same( 'Micropub Book Mira Page', cr_shelf_visible_text( $out ), 'Micropub card rebuilt' );
 
+			$post                      = cr_shelf_shell_reset();
+			$read                      = cr_shelf_card_fixture( 'Quiet Atlas', 'Mira Page' );
+			$checkin                   = '<article class="pk-card k-checkin"><h2>Check-in venue</h2></article>';
+			$GLOBALS['cr_read_blocks'] = array(
+				array(
+					'blockName' => 'post-kinds-indieweb/read-card',
+					'attrs'     => array( 'bookTitle' => 'Quiet Atlas', 'authorName' => 'Mira Page' ),
+					'rendered'  => $read,
+				),
+			);
+			foreach ( array( $checkin . $read, $read . $checkin ) as $mixed ) {
+				$out = Shelf\shelf_card( $mixed, cr_shelf_style_block(), new WP_Block( array( 'postId' => $post->ID ) ) );
+				cr_read_same( 1, substr_count( $out, '<article ' ), 'mixed row prints exactly one article' );
+				cr_read_same( 'Quiet Atlas Mira Page', cr_shelf_visible_text( $out ), 'mixed row prints only the Read title and author' );
+			}
+
 			$post = cr_shelf_shell_reset();
 			$GLOBALS['cr_read_meta'][42] = array( '_pkiw_read_title' => 'Meta Book', '_pkiw_read_author' => 'Meta Writer', '_pkiw_read_status' => 'reading' );
 			$out = Shelf\shelf_card( cr_shelf_generic_fixture(), cr_shelf_style_block(), new WP_Block( array( 'postId' => 42 ) ) );
