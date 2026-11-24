@@ -343,8 +343,8 @@ function add_title_lede( string $html, array $block, \WP_Block $instance ): stri
 	if ( \get_queried_object_id() !== $post_id ) {
 		return $html;
 	}
-	$post = \get_post( $post_id );
-	if ( ! $post instanceof \WP_Post ) {
+	$post = \get_post();
+	if ( ! $post instanceof \WP_Post || $post->ID !== $post_id ) {
 		return $html;
 	}
 	$read = find_read_block( $post );
