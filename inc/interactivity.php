@@ -858,6 +858,18 @@ function home_format_chip_to_icon( string $block_content, array $block ): string
 add_filter( 'render_block', __NAMESPACE__ . '\\home_format_chip_to_icon', 10, 2 );
 
 /**
+ * Keep the Page List fallback inside a list item in the core Navigation list.
+ *
+ * @param string[] $listable_blocks Blocks that core wraps in a list item.
+ * @return string[]
+ */
+function wrap_navigation_page_list( array $listable_blocks ): array {
+	$listable_blocks[] = 'core/page-list';
+	return $listable_blocks;
+}
+add_filter( 'block_core_navigation_listable_blocks', __NAMESPACE__ . '\\wrap_navigation_page_list' );
+
+/**
  * v0.5.178: inject a search field into the header navigation's mobile overlay.
  *
  * On mobile the desktop search box is hidden (CSS) and the nav collapses to a
@@ -874,7 +886,27 @@ function inject_header_search_into_nav( string $block_content, array $block ): s
 	if ( empty( $block['blockName'] ) || 'core/navigation' !== $block['blockName'] ) {
 		return $block_content;
 	}
-	if ( ! str_contains( $block_content, 'site-header__nav' ) ) {
+	$tags = new \WP_HTML_Tag_Processor( $block_content );
+	if ( ! $tags->next_tag(
+		array(
+			'tag_name'   => 'nav',
+			'class_name' => 'site-header__nav',
+		)
+	) || ! $tags->next_tag(
+		array(
+			'tag_name'   => 'div',
+			'class_name' => 'wp-block-navigation__responsive-container-content',
+		)
+	) || ! $tags->set_bookmark( 'responsive-content' ) ) {
+		return $block_content;
+	}
+	$has_list = $tags->next_tag(
+		array(
+			'tag_name'   => 'ul',
+			'class_name' => 'wp-block-navigation__container',
+		)
+	);
+	if ( ! $has_list && ! $tags->seek( 'responsive-content' ) ) {
 		return $block_content;
 	}
 	$form = '<li class="wp-block-navigation-item cr-mobile-search-item">'
@@ -883,12 +915,39 @@ function inject_header_search_into_nav( string $block_content, array $block ): s
 		. '<span class="cr-mobile-search__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" focusable="false" fill="currentColor"><path d="M13.5 6C10.5 6 8 8.5 8 11.5c0 1.1.3 2.1.9 3l-3.4 3 1 1.1 3.4-3c1 .9 2.2 1.4 3.6 1.4 3 0 5.5-2.5 5.5-5.5C19 8.5 16.5 6 13.5 6zm0 9.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"></path></svg></span>'
 		. '<input type="search" id="cr-mobile-search-field" name="s" placeholder="' . \esc_attr__( 'Search…', 'courtneyr-child' ) . '" class="cr-mobile-search__input">'
 		. '</form></li>';
-	$replaced = \preg_replace(
-		'/(<ul[^>]*class="[^"]*wp-block-navigation__container[^"]*"[^>]*>)/',
-		'$1' . $form,
-		$block_content,
-		1
-	);
-	return is_string( $replaced ) ? $replaced : $block_content;
+	if ( ! $has_list ) {
+		$form = '<ul class="wp-block-navigation__container">' . $form . '</ul>';
+	}
+
+	// The Tag Processor identifies the exact tag but cannot insert a child fragment.
+	$marker = 'data-cr-insert-mobile-search';
+	if ( str_contains( $block_content, $marker ) || ! $tags->set_attribute( $marker, true ) ) {
+		return $block_content;
+	}
+	$marker      = ' ' . $marker;
+	$marked_html = $tags->get_updated_html();
+	$marker_at   = strpos( $marked_html, $marker );
+	if ( false === $marker_at ) {
+		return $block_content;
+	}
+	$marker_end  = $marker_at + strlen( $marker );
+	$opening_end = $marker_end;
+	$html_length = strlen( $marked_html );
+	while ( $opening_end < $html_length ) {
+		$opening_end += strcspn( $marked_html, "\"'>", $opening_end );
+		$delimiter    = $marked_html[ $opening_end ] ?? '';
+		if ( '>' === $delimiter ) {
+			++$opening_end;
+			return substr( $marked_html, 0, $marker_at )
+				. substr( $marked_html, $marker_end, $opening_end - $marker_end )
+				. $form . substr( $marked_html, $opening_end );
+		}
+		$quote_end = '' === $delimiter ? false : strpos( $marked_html, $delimiter, $opening_end + 1 );
+		if ( false === $quote_end ) {
+			break;
+		}
+		$opening_end = $quote_end + 1;
+	}
+	return $block_content;
 }
 add_filter( 'render_block', __NAMESPACE__ . '\\inject_header_search_into_nav', 10, 2 );
