@@ -8,6 +8,7 @@
 declare( strict_types = 1 );
 
 require __DIR__ . '/read-bootstrap.php';
+cr_read_setup_artifacts();
 
 use function Courtneyr\Child\Journal\card_attrs;
 use function Courtneyr\Child\SingleRead\add_title_lede;
@@ -330,6 +331,7 @@ cr_read_group(
 				: array( 'source' => 'cover', 'attachment_id' => 0, 'url' => 'https://media.test/plugin-cover.jpg', 'alt' => 'Plugin alt' );
 			$GLOBALS['cr_read_attachments'][81] = 'https://media.test/featured-first.jpg';
 			$html = journal_page( cr_read_single_card( $with_card_cover ), array( 'blockName' => 'core/post-content' ) );
+			cr_read_same( 1, substr_count( $html, 'is-style-cr-book' ), 'one journal book artifact marker' );
 			cr_read_not_contains( 'Good books', $html, 'first slogan' );
 			cr_read_not_contains( 'Pages over pixels', $html, 'second slogan' );
 			cr_read_not_contains( 'peek inside', $html, 'sample slogan' );

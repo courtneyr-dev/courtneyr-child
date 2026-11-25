@@ -8,7 +8,7 @@
 declare( strict_types = 1 );
 
 require __DIR__ . '/read-bootstrap.php';
-require dirname( __DIR__, 2 ) . '/inc/read-shelf.php';
+cr_read_setup_artifacts();
 
 use Courtneyr\Child\ReadShelf as Shelf;
 use PKIW\Grouped_Archive;
@@ -267,8 +267,10 @@ if ( ! in_array( '--html', $argv, true ) ) {
 			$post = cr_shelf_shell_reset();
 			$input = cr_shelf_generic_fixture();
 			cr_read_same( $input, Shelf\shelf_card( $input, array( 'attrs' => array() ), new WP_Block( array( 'postId' => 42 ) ) ), 'style guard' );
+			cr_read_same( array( 'block' => 'post-kinds-indieweb/read-card', 'label' => 'Book', 'kind' => 'read' ), \Courtneyr\Child\ArtifactStyle\styles()['cr-book'], 'Book registration' );
+			$post->ID = 101;
 			$GLOBALS['cr_read_has_term'] = false;
-			cr_read_same( $input, Shelf\shelf_card( $input, cr_shelf_style_block(), new WP_Block( array( 'postId' => 42 ) ) ), 'term guard' );
+			cr_read_same( $input, Shelf\shelf_card( $input, cr_shelf_style_block(), new WP_Block( array( 'postId' => $post->ID ) ) ), 'term guard' );
 
 			$post = cr_shelf_shell_reset();
 			$post->post_title = 'Private notes';
@@ -282,6 +284,7 @@ if ( ! in_array( '--html', $argv, true ) ) {
 			cr_read_contains( 'class="post-password-form"', $out, 'protected password form' );
 			cr_read_not_contains( '<img ', $out, 'protected cover omitted' );
 			cr_read_not_contains( 'cr-shelf-book__cover', $out, 'protected has no cover' );
+			cr_read_same( 1, substr_count( $out, 'is-style-cr-book' ), 'one shelf artifact marker' );
 			cr_read_contains( 'cr-shelf-book--slab', $out, 'protected read lies flat' );
 			cr_read_not_contains( 'Secret book', $out, 'protected book title omitted' );
 
