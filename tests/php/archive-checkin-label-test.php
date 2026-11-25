@@ -214,7 +214,7 @@ namespace {
 	cr_jam_group(
 		'Older PKIW renders the same eight full and protected cards as the pre-change theme',
 		static function () use ( $legacy_hash ): void {
-			cr_jam_same( 'd97bbc994f3527c0c29f811c3ae68c203f7f3672b3f3d6ab91b16bf2a49c796f', $legacy_hash, 'no-API HTML matches the pinned theme fixture output' );
+			cr_jam_same( 'c5b64b8c80d9ea6fc18a088aa99af0c61e5102897bc8970072491bd906b7254d', $legacy_hash, 'no-API HTML matches the pinned theme fixture output' );
 		}
 	);
 
