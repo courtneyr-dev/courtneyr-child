@@ -7312,10 +7312,6 @@ body.home .wp-block-cover:has(img[src*="courtney-pirate"]) .is-style-cr-tape-lab
 	line-height: 1.5;
 }
 
-.cr-newsletter-banner__lede strong {
-	color: var(--cr-marker, var(--cr-ut-orange, #fb8500));
-}
-
 .cr-newsletter-banner__cta {
 	flex: 0 1 auto;
 	gap: 0.75rem;
