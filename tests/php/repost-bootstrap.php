@@ -139,6 +139,10 @@ namespace {
 		if ( $post instanceof WP_Post ) {
 			return $post;
 		}
+		if ( null === $post && isset( $GLOBALS['cr_rp']['loop_post'] ) ) {
+			// The loop's post object, which in a preview holds the autosave rather than the saved post.
+			return $GLOBALS['cr_rp']['loop_post'];
+		}
 		$id = null === $post ? get_the_ID() : (int) $post;
 		return $GLOBALS['cr_rp']['posts'][ $id ] ?? null;
 	}
@@ -166,9 +170,10 @@ namespace {
 		return 'kind' === $taxonomy && 'repost' === $term && ! empty( $GLOBALS['cr_rp']['reposts'][ $id ] );
 	}
 
+	/** Core's has_block() reads the content of the post object it is given (an ID is looked up). */
 	function has_block( $block_name, $post = null ) {
-		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
-		return false !== strpos( (string) ( $GLOBALS['cr_rp']['posts'][ $id ]->post_content ?? '' ), 'wp:' . $block_name );
+		$content = $post instanceof WP_Post ? $post->post_content : (string) ( $GLOBALS['cr_rp']['posts'][ (int) $post ]->post_content ?? '' );
+		return false !== strpos( (string) $content, 'wp:' . $block_name );
 	}
 
 	function post_password_required( $post = null ) {
@@ -261,6 +266,29 @@ namespace Courtneyr\Child\HomeSections {
 namespace Courtneyr\Child\Microformats {
 	function cited_title_is_h1( int $post_id ): bool {
 		return ! empty( $GLOBALS['cr_rp']['h1'][ $post_id ] );
+	}
+}
+
+namespace Courtneyr\Child\SingleWideColumn {
+	/** The unit tests render without a main query: no decision unless a test sets one. */
+	function data_for( string $kind ) {
+		return 'repost' === $kind ? ( $GLOBALS['cr_rp']['wide_data'] ?? null ) : null;
+	}
+	function applies(): bool {
+		return (bool) ( $GLOBALS['cr_rp']['wide_applies'] ?? false );
+	}
+	/** Where the page's first card sits: the tests name it (true top level, false nested, null none). */
+	function first_block_place( string $content, string $name, ?int &$position = null ): string {
+		$position = null; // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		if ( ! array_key_exists( 'card_top', $GLOBALS['cr_rp'] ) ) {
+			$position = 0;
+			return 'top';
+		}
+		$top = $GLOBALS['cr_rp']['card_top'];
+		if ( true === $top || 'top' === $top ) {
+			$position = 0;
+		}
+		return is_string( $top ) ? $top : ( true === $top ? 'top' : ( false === $top ? 'nested' : 'none' ) );
 	}
 }
 

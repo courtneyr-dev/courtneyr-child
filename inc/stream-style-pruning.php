@@ -331,6 +331,8 @@ const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-wide-column',
 	// Favorite's sheet opens the reading-width cap at first paint.
 	'courtneyr-favorite',
+	// The Repost clipping and header need the wide rules at first paint.
+	'courtneyr-repost',
 	// Only on /stream/ when a web story renders (inc/stream-stories.php).
 	'courtneyr-stream-story',
 	// Zine tables (blocks/core-table.css, 0.7.159): per-block sheet, only where a Table block renders.

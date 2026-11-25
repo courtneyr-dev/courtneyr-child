@@ -339,6 +339,11 @@ cr_rp_group(
 		$GLOBALS['cr_rp']['queried']          = 51;
 		$GLOBALS['cr_rp']['reposts'][51]      = false;
 		cr_rp_same( $plain, render_block( array( 'blockName' => 'post-kinds-indieweb/repost-card', 'attrs' => $attrs ) ), 'a post that is not a repost is untouched' );
+		$GLOBALS['cr_rp']['reposts'][51] = true;
+		$dressed = cr_rp_single( 51, $attrs );
+		cr_rp_lacks( 'data-cr-wide-card', $dressed, 'not rendering a wide page: the clipping carries no mark' );
+
+		$GLOBALS['cr_rp']['reposts'][51] = false;
 		cr_rp_same( '', Repost\single_card( '', array(), cr_rp_instance( 51 ) ), 'an empty card stays empty' );
 		cr_rp_same( '<p>x</p>', Repost\single_card( '<p>x</p>', array(), cr_rp_instance( 51 ) ), 'markup that is not a repost card stays' );
 	}
@@ -540,6 +545,88 @@ cr_rp_group(
 		$GLOBALS['cr_rp']['admin']    = false;
 		Repost\enqueue_editor_styles();
 		cr_rp_same( array(), $GLOBALS['cr_rp']['enqueued'], 'the editor hook does nothing on the front end' );
+	}
+);
+
+cr_rp_group(
+	'the wide column decides per page from the card, and a meta-only repost takes it too',
+	static function (): void {
+		cr_rp_reset();
+		$post = cr_rp_post( 7, 'Shared', cr_rp_facts() );
+		$GLOBALS['cr_rp']['posts'][7]->post_content = '<!-- wp:post-kinds-indieweb/repost-card /-->';
+		foreach ( array( 'top-level card' => array( true, true ), 'card inside a group' => array( false, false ) ) as $shape => list( $top, $wide ) ) {
+			$GLOBALS['cr_rp']['card_top'] = $top;
+			$decided                      = Repost\page_clipping( $post, 'page' );
+			cr_rp_assert( is_array( $decided ) && $wide === $decided['wide'] && array( 'shape' => 'card' ) === $decided['data'], "$shape: wide is " . var_export( $wide, true ) );
+		}
+		$GLOBALS['cr_rp']['card_top'] = null;
+		cr_rp_same( null, Repost\page_clipping( $post, 'page two' ), 'a page without the card, when the post holds one: no decision' );
+		$GLOBALS['cr_rp']['card_top'] = 'unknown';
+		cr_rp_same( null, Repost\page_clipping( $post, 'synced' ), 'a block the walker cannot see inside (a synced pattern): no decision' );
+
+		$meta = cr_rp_post( 8, 'Meta only', cr_rp_facts() );
+		$GLOBALS['cr_rp']['posts'][8]->post_content = '<!-- wp:paragraph --><p>Note.</p><!-- /wp:paragraph -->';
+		$GLOBALS['cr_rp']['card_top']                = null;
+		$decided = Repost\page_clipping( $meta, 'page' );
+		cr_rp_assert( is_array( $decided ) && true === $decided['wide'] && 'meta' === $decided['data']['shape'] && Repost\meta_card_attrs( $meta ) === $decided['data']['attrs'], 'no card in the post, facts to print: the meta-only clipping is wide and the decision carries its card' );
+		foreach ( array( 'url', 'cited_title' ) as $key ) {
+			$GLOBALS['cr_rp']['facts'][8] = cr_rp_facts( array( $key => '' ) );
+			cr_rp_assert( null !== Repost\page_clipping( $meta, 'page' ), "meta-only with only the $key missing still prints" );
+		}
+		$GLOBALS['cr_rp']['facts'][8] = cr_rp_facts( array( 'url' => '', 'cited_title' => '' ) );
+		cr_rp_same( null, Repost\page_clipping( $meta, 'page' ), 'no card and nothing to print: no decision' );
+		$GLOBALS['cr_rp']['card_top'] = 'unknown';
+		$GLOBALS['cr_rp']['facts'][8] = cr_rp_facts();
+		cr_rp_same( null, Repost\page_clipping( $meta, 'synced' ), 'meta-only facts and a synced pattern on the page: no decision (the pattern may hold a card)' );
+		unset( $GLOBALS['cr_rp']['card_top'] );
+	}
+);
+
+cr_rp_group(
+	'the meta-only clipping prints what the decision says, from the loop post, never the saved post by ID',
+	static function (): void {
+		cr_rp_reset();
+		$saved                           = cr_rp_post( 63, '', cr_rp_facts() );
+		$saved->post_content             = '<!-- wp:post-kinds-indieweb/repost-card {"title":"T"} /-->';
+		$GLOBALS['cr_rp']['single']      = true;
+		$GLOBALS['cr_rp']['queried']     = 63;
+		$GLOBALS['cr_rp']['global_post'] = 63;
+		$GLOBALS['cr_rp']['loop']        = true;
+		// The preview: the loop's post object holds an autosave that removed the card.
+		$preview                        = new WP_Post( 63, '' );
+		$preview->post_content          = '<!-- wp:paragraph --><p>R2 AUTOSAVE SENTINEL</p><!-- /wp:paragraph -->';
+		$GLOBALS['cr_rp']['loop_post']  = $preview;
+		$content                        = '<p>R2 AUTOSAVE SENTINEL</p>';
+
+		$GLOBALS['cr_rp']['card_top'] = null;
+		$decided                      = Repost\page_clipping( $preview, $preview->post_content );
+		cr_rp_assert( is_array( $decided ) && true === $decided['wide'] && 'meta' === $decided['data']['shape'], 'the autosave removed the card: the decision is a wide meta-only clipping' );
+		$GLOBALS['cr_rp']['wide_data'] = $decided['data'];
+		$out                           = Repost\meta_only_clipping( $content );
+		cr_rp_contains( 'cr-repost-clip--single', $out, 'decided meta, the saved post still has its card: the clipping prints anyway' );
+		cr_rp_same( $decided['data']['attrs'], $GLOBALS['cr_rp']['rendered'][0]['attrs'] ?? null, 'the printed card is the one the decision carries' );
+
+		$GLOBALS['cr_rp']['rendered']  = array();
+		$GLOBALS['cr_rp']['wide_data'] = array( 'shape' => 'card' );
+		cr_rp_same( $content, Repost\meta_only_clipping( $content ), 'decided card: no synthetic clipping' );
+
+		unset( $GLOBALS['cr_rp']['wide_data'] );
+		$GLOBALS['cr_rp']['rendered'] = array();
+		$out                          = Repost\meta_only_clipping( $content );
+		cr_rp_contains( 'cr-repost-clip--single', $out, 'no decision: the card is computed from the loop post (the autosave), not the saved post' );
+
+		$classic                       = cr_rp_post( 64, '', cr_rp_facts() );
+		$classic->post_content         = '<p>A Classic note that quotes <code>k-repost</code>.</p>';
+		$GLOBALS['cr_rp']['loop_post'] = $classic;
+		$GLOBALS['cr_rp']['queried']   = 64;
+		$GLOBALS['cr_rp']['global_post'] = 64;
+		$GLOBALS['cr_rp']['rendered']  = array();
+		$out = Repost\meta_only_clipping( $classic->post_content );
+		cr_rp_contains( 'cr-repost-clip--single', $out, 'a Classic note that quotes k-repost as code: the clipping prints (text is not a card)' );
+		$GLOBALS['cr_rp']['rendered'] = array();
+		$real = '<article class="pk-card k-repost h-cite">from a synced pattern</article>';
+		cr_rp_same( $real . '<p>x</p>', Repost\meta_only_clipping( $real . '<p>x</p>' ), 'no decision and a real card element already in the content: no second clipping' );
+		unset( $GLOBALS['cr_rp']['loop_post'], $GLOBALS['cr_rp']['card_top'] );
 	}
 );
 
