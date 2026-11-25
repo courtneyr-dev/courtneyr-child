@@ -76,14 +76,17 @@ function page_sheet( \WP_Post $post, string $content ): ?array { // phpcs:ignore
 		return null;
 	}
 	$position = null;
-	$place = \Courtneyr\Child\SingleWideColumn\first_block_place( $content, CARD_BLOCK, $position );
+	$place    = \Courtneyr\Child\SingleWideColumn\first_block_place( $content, CARD_BLOCK, $position );
 	if ( 'unknown' === $place ) {
 		return null;
 	}
 	return array(
 		'wide' => 'nested' !== $place,
 		'data' => $facts,
-		'flow' => null === $position ? null : array( 'class' => 'cr-fav-flow', 'position' => $position ),
+		'flow' => null === $position ? null : array(
+			'class'    => 'cr-fav-flow',
+			'position' => $position,
+		),
 	);
 }
 
@@ -320,12 +323,12 @@ function body_html( string $inner ): string {
  * @return string
  */
 function render_sheet( callable $render, array $attrs, string $content, \WP_Block $block, array $facts, int $depth ): string {
-	$post_id   = (int) $block->context['postId'];
-	$replaced  = false;
-	$mount     = mount_html( is_array( $facts['picture'] ?? null ) ? $facts['picture'] : array() );
-	$head      = '<div class="cr-fav-sheet">' . sheet_head( $facts );
-	$swap      = static function ( string $html, array $parsed, \WP_Block $card ) use ( $depth, $post_id, $head, $facts, $mount, &$replaced ): string {
-		if ( $replaced || $depth !== \Courtneyr\Child\SingleWideColumn\content_depth()
+	$post_id  = (int) $block->context['postId'];
+	$replaced = false;
+	$mount    = mount_html( is_array( $facts['picture'] ?? null ) ? $facts['picture'] : array() );
+	$head     = '<div class="cr-fav-sheet">' . sheet_head( $facts );
+	$swap     = static function ( string $html, array $parsed, \WP_Block $card ) use ( $depth, $post_id, $head, $facts, $mount, &$replaced ): string {
+		if ( $replaced || \Courtneyr\Child\SingleWideColumn\content_depth() !== $depth
 			|| (int) ( $card->context['postId'] ?? 0 ) !== $post_id || '' === trim( $html )
 		) {
 			return $html;
@@ -334,7 +337,7 @@ function render_sheet( callable $render, array $attrs, string $content, \WP_Bloc
 		return $head . body_html( card_record( $facts ) . $mount ) . '</div>';
 	};
 	$fallback = static function ( string $html ) use ( $depth, $head, $facts, $mount, &$replaced ): string {
-		if ( $replaced || $depth !== \Courtneyr\Child\SingleWideColumn\content_depth() ) {
+		if ( $replaced || \Courtneyr\Child\SingleWideColumn\content_depth() !== $depth ) {
 			return $html;
 		}
 		return $head . body_html( plain_record( $facts ) . $mount ) . $html . '</div>';

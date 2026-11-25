@@ -694,7 +694,7 @@ add_filter( 'render_block_post-kinds-indieweb/repost-card', __NAMESPACE__ . '\\s
  */
 function page_clipping( \WP_Post $post, string $content ): ?array {
 	$position = null;
-	$place = \Courtneyr\Child\SingleWideColumn\first_block_place( $content, 'post-kinds-indieweb/repost-card', $position );
+	$place    = \Courtneyr\Child\SingleWideColumn\first_block_place( $content, 'post-kinds-indieweb/repost-card', $position );
 	if ( 'unknown' === $place ) {
 		return null;
 	}
@@ -702,7 +702,10 @@ function page_clipping( \WP_Post $post, string $content ): ?array {
 		return array(
 			'wide' => 'top' === $place,
 			'data' => array( 'shape' => 'card' ),
-			'flow' => null === $position ? null : array( 'class' => 'cr-repost-flow', 'position' => $position ),
+			'flow' => null === $position ? null : array(
+				'class'    => 'cr-repost-flow',
+				'position' => $position,
+			),
 		);
 	}
 	$attrs = meta_card_attrs( $post );
@@ -711,7 +714,10 @@ function page_clipping( \WP_Post $post, string $content ): ?array {
 	}
 	return array(
 		'wide' => true,
-		'flow' => array( 'class' => 'cr-repost-flow', 'position' => -1 ),
+		'flow' => array(
+			'class'    => 'cr-repost-flow',
+			'position' => -1,
+		),
 		'data' => array(
 			'shape' => 'meta',
 			'attrs' => $attrs,

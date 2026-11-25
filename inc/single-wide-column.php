@@ -124,14 +124,14 @@ const OPAQUE_BLOCKS = array(
  * page renders as it did without the column. This reads block names and
  * markup only, never attributes.
  *
- * @param string $content The content of the page being printed.
- * @param string $name    Block name.
+ * @param string   $content The content of the page being printed.
+ * @param string   $name    Block name.
  * @param int|null $position Top-level index of a card, when found.
  * @return string 'top', 'nested', 'none' or 'unknown'.
  */
 function first_block_place( string $content, string $name, ?int &$position = null ): string {
 	$position = null;
-	$walk = static function ( array $blocks, int $depth ) use ( &$walk, $name, &$position ): string {
+	$walk     = static function ( array $blocks, int $depth ) use ( &$walk, $name, &$position ): string {
 		foreach ( $blocks as $index => $block ) {
 			$block_name = (string) ( $block['blockName'] ?? '' );
 			if ( $name === $block_name ) {
@@ -268,19 +268,22 @@ function content_depth(): int {
  * The reading-width group around a run of the page's original blocks.
  *
  * @param array<int, array<string, mixed>> $blocks Parsed blocks.
- * @param string                            $class Flow wrapper class.
+ * @param string                           $flow_class Flow wrapper class.
  * @return string Serialized group, or the unchanged inter-block whitespace.
  */
-function flow_group( array $blocks, string $class ): string {
+function flow_group( array $blocks, string $flow_class ): string {
 	$content = \serialize_blocks( $blocks );
 	if ( '' === trim( $content ) ) {
 		return $content;
 	}
-	$open = '<div class="wp-block-group ' . \esc_attr( $class ) . '">';
+	$open = '<div class="wp-block-group ' . \esc_attr( $flow_class ) . '">';
 	return \serialize_block(
 		array(
 			'blockName'    => 'core/group',
-			'attrs'        => array( 'className' => $class, 'layout' => array( 'type' => 'default' ) ),
+			'attrs'        => array(
+				'className' => $flow_class,
+				'layout'    => array( 'type' => 'default' ),
+			),
 			'innerBlocks'  => $blocks,
 			'innerHTML'    => $open . '</div>',
 			'innerContent' => array_merge( array( $open ), array_fill( 0, count( $blocks ), null ), array( '</div>' ) ),
@@ -292,21 +295,21 @@ function flow_group( array $blocks, string $class ): string {
  * Group the top-level siblings of the card, leaving the card block itself alone.
  *
  * @param string $content Page content before it passes through do_blocks().
- * @param string $class Flow wrapper class.
+ * @param string $flow_class Flow wrapper class.
  * @param int    $position Top-level index, or -1 for a card prepended later.
  * @return string Serialized content.
  */
-function group_content( string $content, string $class, int $position ): string {
+function group_content( string $content, string $flow_class, int $position ): string {
 	$blocks = \parse_blocks( $content );
 	if ( -1 === $position ) {
-		return flow_group( $blocks, $class );
+		return flow_group( $blocks, $flow_class );
 	}
 	if ( ! isset( $blocks[ $position ] ) ) {
 		return $content;
 	}
-	return flow_group( array_slice( $blocks, 0, $position ), $class )
+	return flow_group( array_slice( $blocks, 0, $position ), $flow_class )
 		. \serialize_block( $blocks[ $position ] )
-		. flow_group( array_slice( $blocks, $position + 1 ), $class );
+		. flow_group( array_slice( $blocks, $position + 1 ), $flow_class );
 }
 
 /**
@@ -320,7 +323,7 @@ function scope_post_content( array $args, string $name ): array {
 	if ( 'core/post-content' !== $name || ! is_callable( $args['render_callback'] ?? null ) ) {
 		return $args;
 	}
-	$render = $args['render_callback'];
+	$render                  = $args['render_callback'];
 	$args['render_callback'] = static function ( array $attrs, string $content, \WP_Block $block ) use ( $render ): string {
 		$post_id = (int) ( $block->context['postId'] ?? 0 );
 		$classes = explode( ' ', (string) ( $attrs['className'] ?? '' ) );
