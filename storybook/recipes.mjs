@@ -52,6 +52,8 @@ export const environments = {
 			{ id: 'page-home', route: '/' },
 			{ id: 'page-kind-single', route: '/seed-269-s5/' },
 			{ id: 'page-kind-archive', route: READ_ARCHIVE },
+			{ id: 'page-read-single', route: '/seed-267-r21/' },
+			{ id: 'page-stream', route: '/stream/' },
 		],
 	},
 };
