@@ -145,7 +145,7 @@ export function guardSentinelLinks() {
  * @param {string} key                 `<environment>/<fixture id>`, for example `t269/block-post-glyph--blog`.
  * @param {object} [presentation]
  * @param {'w390'|'w1280'} [presentation.viewport]
- * @param {'light'|'dark'} [presentation.scheme]
+ * @param {'light'|'dark'|'system'} [presentation.scheme]
  * @return {object} A CSF story.
  */
 export function fixtureStory( key, { viewport, scheme } = {} ) {
