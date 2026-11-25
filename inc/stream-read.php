@@ -18,6 +18,9 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\StreamRead;
 
+use Courtneyr\Child\ArtifactStyle;
+use Courtneyr\Child\ReadShelf;
+
 use function Courtneyr\Child\MediaShelf\cut_elements;
 use function Courtneyr\Child\SingleRead\book_cover;
 use function Courtneyr\Child\SingleRead\date_pair;
@@ -171,7 +174,7 @@ function book_card( string $html, array $block, $instance ): string {
 		? (int) $instance->context['postId']
 		: (int) get_the_ID();
 	$post    = $post_id ? get_post( $post_id ) : null;
-	if ( ! $post instanceof \WP_Post || ! has_term( 'read', 'kind', $post ) ) {
+	if ( ! $post instanceof \WP_Post || ! ArtifactStyle\applies( $post, ReadShelf\ARTIFACT_STYLE ) ) {
 		return $html;
 	}
 	// A password-protected read shows its title link and the password
@@ -266,6 +269,7 @@ function book_card( string $html, array $block, $instance ): string {
 	if ( $tags->next_tag( array( 'tag_name' => 'article', 'class_name' => 'pk-card' ) ) ) {
 		$tags->add_class( 'pk-card--stream' );
 		$tags->add_class( 'cr-book' );
+		$tags->add_class( ReadShelf\ARTIFACT_CLASS );
 		$tags->add_class( 'cr-book--stream' );
 		$tags->add_class( 'cr-book--' . $status );
 		$html = $tags->get_updated_html();

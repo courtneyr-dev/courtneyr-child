@@ -20,6 +20,9 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\SingleRead;
 
+use Courtneyr\Child\ArtifactStyle;
+use Courtneyr\Child\ReadShelf;
+
 use function Courtneyr\Child\Journal\meta_item;
 use function Courtneyr\Child\Journal\meta_row;
 use function Courtneyr\Child\Journal\notes_section;
@@ -44,7 +47,7 @@ const STATUSES = array( 'reading', 'to-read', 'finished', 'abandoned' );
  * @return bool
  */
 function is_read_single(): bool {
-	return \is_singular( 'post' ) && \has_term( 'read', 'kind', \get_queried_object_id() );
+	return \is_singular( 'post' ) && ArtifactStyle\applies( \get_queried_object_id(), ReadShelf\ARTIFACT_STYLE );
 }
 
 /**
@@ -391,7 +394,7 @@ function add_title_lede( string $html, array $block, \WP_Block $instance ): stri
 
 	return $html . $out;
 }
-add_filter( 'render_block', __NAMESPACE__ . '\\add_title_lede', 20, 3 );
+add_filter( 'render_block_core/post-title', __NAMESPACE__ . '\\add_title_lede', 20, 3 );
 
 /**
  * The library card.
@@ -632,6 +635,7 @@ function journal_page( string $html, array $block ): string {
 	$tags = new \WP_HTML_Tag_Processor( $html );
 	if ( $tags->next_tag( array( 'tag_name' => 'article', 'class_name' => 'pk-card' ) ) ) {
 		$tags->add_class( 'cr-book' );
+		$tags->add_class( ReadShelf\ARTIFACT_CLASS );
 		$tags->add_class( 'cr-book--' . $status );
 		$html = $tags->get_updated_html();
 	}
@@ -650,4 +654,4 @@ function journal_page( string $html, array $block ): string {
 
 	return wrap( $html, $after );
 }
-add_filter( 'render_block', __NAMESPACE__ . '\\journal_page', 20, 2 );
+add_filter( 'render_block_core/post-content', __NAMESPACE__ . '\\journal_page', 20, 2 );

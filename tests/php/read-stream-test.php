@@ -8,6 +8,7 @@
 declare( strict_types = 1 );
 
 require __DIR__ . '/read-bootstrap.php';
+cr_read_setup_artifacts();
 
 use function Courtneyr\Child\StreamRead\book_card;
 use function Courtneyr\Child\StreamRead\facts_line;
@@ -100,6 +101,10 @@ cr_read_group(
 		$GLOBALS['cr_read_attachments'][91] = 'https://media.test/stream-featured.jpg';
 		$input = cr_read_stream_card();
 		$html  = book_card( $input, array( 'attrs' => array() ), new WP_Block( array( 'postId' => $post->ID ) ) );
+		cr_read_same( 1, substr_count( $html, 'is-style-cr-book' ), 'one default book marker' );
+		$saved = str_replace( 'pk-card k-read', 'pk-card k-read is-style-cr-book', $input );
+		$saved = book_card( $saved, array( 'attrs' => array() ), new WP_Block( array( 'postId' => $post->ID ) ) );
+		cr_read_same( 1, substr_count( $saved, 'is-style-cr-book' ), 'one saved book marker' );
 		cr_read_not_contains( 'cr-book__hand', $html, 'slogan absent' );
 		cr_read_not_contains( 'pk-progress', $html, 'progress absent' );
 		cr_read_contains( 'pk-note', $html, 'review kept' );

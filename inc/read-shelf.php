@@ -12,6 +12,8 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\ReadShelf;
 
+use Courtneyr\Child\ArtifactStyle;
+
 use function Courtneyr\Child\MediaShelf\cut_elements;
 use function Courtneyr\Child\SingleRead\find_read_block;
 use function Courtneyr\Child\SingleRead\read_attrs;
@@ -21,10 +23,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const CARD_STYLE = 'is-style-cr-shelf-book';
-const FACE_OUT   = array( 'reading', 'to-read' );
-const PAPERS     = array( 'sky-blue', 'periwinkle', 'light-orange', 'prussian-blue', 'cerulean' );
-const FIRST_ROW  = 4;
+const ARTIFACT_STYLE = 'cr-book';
+const ARTIFACT_CLASS = 'is-style-' . ARTIFACT_STYLE;
+const CARD_STYLE     = 'is-style-cr-shelf-book';
+const FACE_OUT       = array( 'reading', 'to-read' );
+const PAPERS         = array( 'sky-blue', 'periwinkle', 'light-orange', 'prussian-blue', 'cerulean' );
+const FIRST_ROW      = 4;
+
+add_action(
+	'after_setup_theme',
+	static function (): void {
+		ArtifactStyle\register( 'post-kinds-indieweb/read-card', ARTIFACT_STYLE, __( 'Book', 'courtneyr-child' ), 'read' );
+	}
+);
 
 /** Register the shelf treatment for the plugin's stream card. */
 function register_card_style(): void {
@@ -364,7 +375,7 @@ function shelf_item( string $html, array $item ): string {
 		}
 	}
 
-	$classes = array( 'cr-shelf-book', 'cr-shelf-book--' . $item['shape'] );
+	$classes = array( 'cr-shelf-book', ARTIFACT_CLASS, 'cr-shelf-book--' . $item['shape'] );
 	if ( 'slab' === $item['shape'] && '' !== $item['paper'] ) {
 		$classes[] = 'cr-shelf-book--paper-' . $item['paper'];
 	}
@@ -399,7 +410,7 @@ function shelf_card( string $html, array $block, $instance ): string {
 	}
 	$post_id = is_object( $instance ) && isset( $instance->context['postId'] ) ? (int) $instance->context['postId'] : (int) get_the_ID();
 	$post    = $post_id ? get_post( $post_id ) : null;
-	if ( ! $post instanceof \WP_Post || ! has_term( 'read', 'kind', $post ) ) {
+	if ( ! $post instanceof \WP_Post || ! ArtifactStyle\applies( $post, ARTIFACT_STYLE ) ) {
 		return $html;
 	}
 
