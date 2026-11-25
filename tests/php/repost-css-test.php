@@ -151,7 +151,7 @@ function repost_contrast( string $a, string $b ): float {
 }
 
 repost_css_case(
-	'the stylesheet exists and holds no raw colour, fill ramp, clip or soft shadow',
+	'the stylesheet holds no raw colour, fill ramp or soft shadow and clips only the paper layers',
 	static function (): bool {
 		$css = repost_css();
 		if ( '' === $css ) {
@@ -162,7 +162,6 @@ repost_css_case(
 			'/\brgba?\s*\(/i',
 			'/\bhsla?\s*\(/i',
 			'/(?:linear|radial|conic)-gradient\s*\(/i',
-			'/\bclip-path\s*:/i',
 			'/\bbackdrop-filter\s*:/i',
 			'/blur\s*\(/i',
 			'/text-overflow\s*:\s*ellipsis/i',
@@ -175,7 +174,11 @@ repost_css_case(
 				return false;
 			}
 		}
-		return true;
+		$contour = 'var(--cr-repost-torn-contour)';
+		return array( $contour, $contour ) === repost_values( $css, 'clip-path' )
+			&& $contour === repost_find( $css, '.cr-repost-zine .pkiw-group__heading::before', 'clip-path' )
+			&& $contour === repost_find( $css, '.cr-repost-zine .cr-repost-clip__paper.cr-paper-sheet--torn::after', 'clip-path' )
+			&& $contour === repost_find( $css, 'body.single-post.kind-repost .single-post__content .cr-repost-clip--single.cr-paper-sheet--torn::after', 'clip-path' );
 	}
 );
 
@@ -184,7 +187,7 @@ repost_css_case(
 	static function (): bool {
 		$css = repost_css();
 		foreach ( repost_values( $css, 'filter' ) as $value ) {
-			if ( ! in_array( $value, array( 'none', 'grayscale(1)', 'drop-shadow(var(--cr-shadow-hard))' ), true ) ) {
+			if ( ! in_array( $value, array( 'none', 'grayscale(1)', 'drop-shadow(var(--cr-shadow-hard))', 'drop-shadow(var(--cr-space-2xs) var(--cr-space-2xs) light-dark(var(--cr-ink), var(--cr-selective-yellow)))' ), true ) ) {
 				return false;
 			}
 		}
@@ -359,7 +362,7 @@ repost_css_case(
 );
 
 repost_css_case(
-	'the Stream clipping is 80% wide, tilted by a token, taped flat and clamped to three lines',
+	'the Stream clipping is 80% wide, the card and tape turn independently, and text clamps to three lines',
 	static function (): bool {
 		$css  = repost_css();
 		$card = repost_rule( $css, ':is(.cr-stream-page, .cr-home-stream) .pk-card.pk-card--stream.cr-repost-clip--stream' );
@@ -370,6 +373,7 @@ repost_css_case(
 			&& 'var(--cr-shadow-hard)' === repost_decl( $card, 'box-shadow' )
 			&& 'var(--cr-tape)' === repost_decl( $tape, 'background' )
 			&& 'none' === repost_decl( $tape, 'box-shadow' )
+			&& preg_match( '/^rotate\(var\(--cr-rotate-(?:1|2|neg|neg2)\)\)$/', repost_decl( $tape, 'transform' ) )
 			&& '3' === repost_decl( $note, '-webkit-line-clamp' )
 			&& 4 === preg_match_all( '/li\.wp-block-post \.pk-card\.pk-card--stream\.cr-repost-clip--stream\.cr-repost-clip--tilt-[0-3]\s*\{[^}]*rotate\(var\(--cr-rotate-/', $css )
 			&& 1 === preg_match( '/(?:^|\s):is\(\.cr-stream-page, \.cr-home-stream\)/m', $css );

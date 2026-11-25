@@ -404,6 +404,7 @@ body.single-post.kind-repost .single-post__content {
 	background: var(--cr-tape);
 	box-shadow: none;
 	opacity: 1;
+	transform: rotate(var(--cr-rotate-neg));
 	pointer-events: none;
 }
 
