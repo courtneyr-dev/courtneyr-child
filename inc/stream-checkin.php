@@ -405,6 +405,13 @@ function passport_card( string $html, array $block, $instance ): string {
 	// The post title is the entry's headline, under the date; the h2 stays
 	// the venue so the plugin's p-name / h-card structure is untouched.
 	$title = trim( get_the_title( $post ) );
+	if ( '' === $title ) {
+		$title = sprintf(
+			/* translators: %s: the post's date. */
+			__( 'Check-in, %s', 'courtneyr-child' ),
+			get_the_date( '', $post )
+		);
+	}
 	$venue = trim( (string) ( $checkin['attrs']['venueName'] ?? '' ) );
 	if ( false !== $at && '' !== $title && 0 !== strcasecmp( $title, $venue ) ) {
 		$headline = '<div class="cr-passport__title"><a href="' . esc_url( (string) get_permalink( $post ) ) . '">' . esc_html( $title ) . '</a></div>';
