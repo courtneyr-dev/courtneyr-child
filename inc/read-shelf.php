@@ -25,10 +25,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const ARTIFACT_STYLE = 'cr-book';
 const ARTIFACT_CLASS = 'is-style-' . ARTIFACT_STYLE;
-const CARD_STYLE = 'is-style-cr-shelf-book';
-const FACE_OUT   = array( 'reading', 'to-read' );
-const PAPERS     = array( 'sky-blue', 'periwinkle', 'light-orange', 'prussian-blue', 'cerulean' );
-const FIRST_ROW  = 4;
+const CARD_STYLE     = 'is-style-cr-shelf-book';
+const FACE_OUT       = array( 'reading', 'to-read' );
+const PAPERS         = array( 'sky-blue', 'periwinkle', 'light-orange', 'prussian-blue', 'cerulean' );
+const FIRST_ROW      = 4;
 
 add_action(
 	'after_setup_theme',
