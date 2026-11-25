@@ -67,7 +67,7 @@ namespace Courtneyr\Child\Repost {
 		return 'unknown' === $place ? null : array(
 			'wide' => 'nested' !== $place,
 			'data' => array( 'test' => 'repost' ),
-			'flow' => null === $index ? null : array( 'class' => 'cr-repost-flow', 'position' => $index ),
+			'flow' => null === $index && 'none' !== $place ? null : array( 'class' => 'cr-repost-flow', 'position' => $index ?? -1 ),
 		);
 	}
 }
@@ -110,4 +110,17 @@ namespace {
 		}
 		prove( 'unknown' === Wide\first_block_place( '<!-- wp:block {"ref":7} /-->' . $card, 'post-kinds-indieweb/' . $kind . '-card', $index ) && null === $index, "$kind does not consume an opaque earlier block" );
 	}
+	$GLOBALS['kind'] = 'repost';
+	$GLOBALS['content'] = "First paragraph.\n\nSecond paragraph.\nA line break.";
+	$formatted = "<p>First paragraph.</p>\n<p>Second paragraph.<br />\nA line break.</p>";
+	$autop = static fn( string $input ): string => has_blocks( $input ) ? $input : $formatted;
+	add_filter( 'the_content', $autop, 10 );
+	$render = Wide\scope_post_content( array( 'render_callback' => static fn() =>
+		apply_filters( 'the_content', get_the_content() )
+	), 'core/post-content' )['render_callback'];
+	$main = array( 'className' => 'single-post__content' );
+	prove( '<div class="wp-block-group cr-repost-flow">' . $formatted . '</div>'
+		=== $render( $main, '', new WP_Block( array( 'postId' => 42 ) ) ), 'classic Repost groups after paragraph and line-break formatting' );
+	prove( $formatted === apply_filters( 'the_content', get_the_content() ), 'classic Repost removes its temporary filter' );
+	remove_filter( 'the_content', $autop, 10 );
 }
