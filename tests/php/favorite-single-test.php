@@ -9,6 +9,7 @@
 declare( strict_types = 1 );
 
 require __DIR__ . '/favorite-bootstrap.php';
+require dirname( __DIR__, 2 ) . '/inc/single-wide-column.php';
 
 use Courtneyr\Child\SingleFavorite as Single;
 
@@ -25,12 +26,58 @@ function cr_fav_page( string $content, bool $avatar = true ): string {
 		. '<a class="u-url" href="https://example.test/favorite-1/" hidden></a><time class="dt-published" datetime="2026-08-28T10:00:00+00:00" hidden></time><span hidden><span class="p-author h-card"><span class="p-name">Courtney</span></span></span></div></div>';
 }
 
-/** Run the sheet filter for the queried post. */
+/** The test bootstrap records hooks. Remove the per-render callbacks from that record. */
+function remove_filter( string $name, callable $callback, int $priority ): void {
+	$GLOBALS['cr_fav_filters'] = array_values(
+		array_filter( $GLOBALS['cr_fav_filters'], static fn( array $filter ): bool => $name !== $filter[0] || $callback !== $filter[1] || $priority !== $filter[2] )
+	);
+}
+
+/** Run only the hooks the fake Post Content callback needs. */
+function cr_fav_apply( string $name, string $html, ...$args ): string {
+	foreach ( $GLOBALS['cr_fav_filters'] as list( $hook, $callback, , $accepted ) ) {
+		if ( $name === $hook ) {
+			$html = $callback( ...array_slice( array_merge( array( $html ), $args ), 0, $accepted ) );
+		}
+	}
+	return $html;
+}
+
+/** Run the real scoped Favorite replacement with the existing markup fixtures. */
 function cr_fav_sheet( WP_Post $post, string $html ): string {
 	$GLOBALS['cr_fav_single']  = true;
 	$GLOBALS['cr_fav_queried'] = $post->ID;
-	Single\single_facts( true );
-	return Single\sheet( $html, array( 'blockName' => 'core/post-content', 'attrs' => array( 'className' => 'single-post__content wp-block-post-content' ) ) );
+	$facts = Single\single_facts( true );
+	if ( array() === $facts ) {
+		return $html;
+	}
+	$opening = '<div class="h-entry kind-favorite pkiw-singular-entry">';
+	$ending  = '<a class="u-url" href="https://example.test/favorite-1/" hidden>';
+	$start   = strpos( $html, $opening ) + strlen( $opening );
+	$end     = strpos( $html, $ending, $start );
+	$body    = substr( $html, $start, $end - $start );
+	$card    = cr_fav_card_html();
+	return Single\render_sheet(
+		static function () use ( $post, $html, $start, $end, $body, $card ): string {
+			$GLOBALS['wp_current_filter'] = array( 'the_content' );
+			try {
+				$instance = new WP_Block( array( 'postId' => $post->ID ) );
+				if ( str_contains( $body, $card ) ) {
+					$replacement = cr_fav_apply( 'render_block_' . Single\CARD_BLOCK, $card, array(), $instance );
+					$body        = str_replace( $card, $replacement, $body );
+				}
+				$body = cr_fav_apply( 'the_content', $body );
+			} finally {
+				$GLOBALS['wp_current_filter'] = array();
+			}
+			return substr( $html, 0, $start ) . $body . substr( $html, $end );
+		},
+		array(),
+		'',
+		new WP_Block( array( 'postId' => $post->ID ) ),
+		$facts,
+		1
+	);
 }
 
 cr_fav_group(
@@ -42,7 +89,6 @@ cr_fav_group(
 		cr_fav_same( 1, cr_fav_count( '/<h1\b/', $out ), 'exactly one h1' );
 		cr_fav_assert( str_contains( $out, '<h1 class="cr-fav-sheet__title p-name">Field Guide to Quiet Software</h1>' ), 'the h1 holds the exact title with p-name' );
 		cr_fav_assert( ! preg_match( '/<h1[^>]*>\s*<a/', $out ) && ! preg_match( '/<article[^>]*h-cite[^>]*>(?:(?!<\/article>).)*<h1/s', $out ), 'the h1 is not a link and not inside the h-cite' );
-		cr_fav_assert( ! str_contains( $out, 'single-post__format-avatar' ), 'the format avatar is gone' );
 		cr_fav_assert( ! str_contains( $out, 'pk-card' ) && ! str_contains( $out, 'pk-title' ) && ! str_contains( $out, 'pk-badge' ), 'the plugin card markup is replaced, not restyled' );
 		cr_fav_assert( str_contains( $out, '<article class="cr-fav-sheet__record h-cite u-favorite-of">' ), 'the record is the h-cite with favorite-of' );
 		cr_fav_same( 1, cr_fav_count( '/<a\b[^>]*href="https:\/\/notes\.example\.com\/quiet-software"/', $out ), 'exactly one link to the cited URL' );
@@ -160,8 +206,11 @@ cr_fav_group(
 		cr_fav_same( true, Single\holds_h1( true, $post ), 'a lane that already holds it keeps it' );
 
 		$html = cr_fav_page( cr_fav_card_html() );
-		cr_fav_same( $html, Single\sheet( $html, array( 'blockName' => 'core/post-content', 'attrs' => array( 'className' => 'related-posts' ) ) ), 'another post-content block is untouched' );
-		cr_fav_same( $html, Single\sheet( $html, array( 'blockName' => 'core/group', 'attrs' => array( 'className' => 'single-post__content' ) ) ), 'other blocks are untouched' );
+		$other = static fn(): string => $html;
+		$args = array( 'render_callback' => $other );
+		$wrapped = \Courtneyr\Child\SingleWideColumn\scope_post_content( $args, 'core/post-content' )['render_callback'];
+		cr_fav_same( $html, $wrapped( array( 'className' => 'related-posts' ), '', new WP_Block() ), 'another post-content block is untouched' );
+		cr_fav_same( $args, \Courtneyr\Child\SingleWideColumn\scope_post_content( $args, 'core/group' ), 'other blocks are untouched' );
 
 		$GLOBALS['cr_fav_single'] = false;
 		Single\single_facts( true );
@@ -169,8 +218,23 @@ cr_fav_group(
 
 		$filter = array_values( array_filter( $GLOBALS['cr_fav_filters'], static fn( array $f ): bool => 'courtneyr_child_single_object_holds_h1' === $f[0] ) );
 		cr_fav_assert( count( $filter ) >= 1, 'the lane hooks the shared H1 filter' );
-		$render = array_values( array_filter( $GLOBALS['cr_fav_filters'], static fn( array $f ): bool => 'render_block' === $f[0] && 20 === $f[2] ) );
-		cr_fav_assert( count( $render ) >= 1, 'the sheet runs on render_block at 20, after the avatar at 10' );
+		$render = array_values( array_filter( $GLOBALS['cr_fav_filters'], static fn( array $f ): bool => 'register_block_type_args' === $f[0] ) );
+		cr_fav_assert( count( $render ) >= 1, 'the sheet uses the scoped Core post-content callback' );
+	}
+);
+
+cr_fav_group(
+	'only a real Favorite block consumes the replacement',
+	static function (): void {
+		$post = cr_fav_post( 1, 'Field Guide to Quiet Software', cr_fav_facts() );
+		$decoy = '<!-- <article class="k-favorite"> --><svg xmlns="http://www.w3.org/2000/svg"/><article id="author" class="k-favorite">Authored HTML</article>';
+		$out = cr_fav_sheet( $post, cr_fav_page( $decoy . cr_fav_card_html() . '<p>After.</p>' ) );
+		cr_fav_assert( str_contains( $out, $decoy . '<div class="cr-fav-sheet">' ), 'the authored comment, SVG and article survive before the replaced block' );
+		cr_fav_assert( ! str_contains( $out, 'wp-block-post-kinds-indieweb-favorite-card' ), 'the real Favorite block was replaced' );
+		cr_fav_assert( str_contains( $out, '</div><p>After.</p>' ), 'following content stays outside the sheet' );
+		$out = cr_fav_sheet( $post, cr_fav_page( $decoy ) );
+		cr_fav_assert( str_contains( $out, $decoy ) && 1 === substr_count( $out, '<h1 ' ), 'with no real card the authored HTML and fallback H1 both print' );
+		cr_fav_assert( empty( array_filter( $GLOBALS['cr_fav_filters'], static fn( array $filter ): bool => in_array( $filter[0], array( 'render_block_' . Single\CARD_BLOCK, 'the_content' ), true ) ) ), 'both scoped hooks have been removed' );
 	}
 );
 

@@ -30,6 +30,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/** The plugin's favorite card block. */
+const CARD_BLOCK = 'post-kinds-indieweb/favorite-card';
+
 /**
  * Facts for the queried favorite single, kept per post for the request.
  *
@@ -50,6 +53,38 @@ function single_facts( bool $refresh = false ): array {
 		$kept[ $post_id ] = $post_id > 0 && is_favorite( $post_id ) && ! post_password_required() ? facts( $post_id ) : array();
 	}
 	return $kept[ $post_id ];
+}
+
+/**
+ * The wide column's resolver for favorites (inc/single-wide-column.php).
+ *
+ * The facts belong to the post, not the page, so every page of a readable
+ * favorite prints the sheet and reads these facts from the decision. The
+ * sheet takes the column when the page's first card is a top-level block, or
+ * when the page has no card (the sheet then holds the page). A card inside an
+ * authored block (a Group, say) keeps the sheet in that block, at its width.
+ * When the page holds a block the walker cannot see inside (a synced pattern,
+ * say) there is no decision: the sheet renders as it does without the column.
+ *
+ * @param \WP_Post $post    Post.
+ * @param string   $content The content of the page being printed.
+ * @return array{wide: bool, data: array<string, mixed>, flow: ?array{class: string, position: int}}|null Null when this isn't a readable favorite, or the page's structure is unknown.
+ */
+function page_sheet( \WP_Post $post, string $content ): ?array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed
+	$facts = single_facts();
+	if ( array() === $facts ) {
+		return null;
+	}
+	$position = null;
+	$place = \Courtneyr\Child\SingleWideColumn\first_block_place( $content, CARD_BLOCK, $position );
+	if ( 'unknown' === $place ) {
+		return null;
+	}
+	return array(
+		'wide' => 'nested' !== $place,
+		'data' => $facts,
+		'flow' => null === $position ? null : array( 'class' => 'cr-fav-flow', 'position' => $position ),
+	);
 }
 
 /**
@@ -270,58 +305,46 @@ function body_html( string $inner ): string {
 }
 
 /**
- * Where the plugin's hidden entry meta starts in the singular wrapper.
+ * Render core's post content, replacing its first real Favorite card with the sheet.
  *
- * @param string $html  Post-content HTML.
- * @param int    $start Offset of the wrapper's inner start.
- * @return int Offset of the hidden meta, or the wrapper's last closing tag.
- */
-function meta_offset( string $html, int $start ): int {
-	if ( preg_match_all( '/<a class="u-url" href="[^"]*" hidden><\/a><time class="dt-published"/', $html, $found, PREG_OFFSET_CAPTURE, $start ) && ! empty( $found[0] ) ) {
-		return (int) end( $found[0] )[1];
-	}
-	$close = strrpos( $html, '</div>' );
-	return false === $close ? strlen( $html ) : (int) $close;
-}
-
-/**
- * Rebuild the main post content as the sheet.
+ * Scope the replacement to this invocation, so an excerpt, a card for another
+ * post in a nested loop, or a second render cannot consume the replacement.
+ * PKIW's entry wrapper and hidden properties are added afterward as usual.
  *
- * @param string               $html  Rendered post-content block.
- * @param array<string, mixed> $block Parsed block.
+ * @param callable             $render Core's Post Content render callback.
+ * @param array<string, mixed> $attrs Core block attributes.
+ * @param string               $content Incoming block content.
+ * @param \WP_Block            $block The main post-content block.
+ * @param array<string, mixed> $facts The sheet's facts.
+ * @param int                  $depth Main content filter depth.
  * @return string
  */
-function sheet( string $html, array $block ): string {
-	if ( 'core/post-content' !== ( $block['blockName'] ?? '' ) || false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'single-post__content' ) ) {
-		return $html;
+function render_sheet( callable $render, array $attrs, string $content, \WP_Block $block, array $facts, int $depth ): string {
+	$post_id   = (int) $block->context['postId'];
+	$replaced  = false;
+	$mount     = mount_html( is_array( $facts['picture'] ?? null ) ? $facts['picture'] : array() );
+	$head      = '<div class="cr-fav-sheet">' . sheet_head( $facts );
+	$swap      = static function ( string $html, array $parsed, \WP_Block $card ) use ( $depth, $post_id, $head, $facts, $mount, &$replaced ): string {
+		if ( $replaced || $depth !== \Courtneyr\Child\SingleWideColumn\content_depth()
+			|| (int) ( $card->context['postId'] ?? 0 ) !== $post_id || '' === trim( $html )
+		) {
+			return $html;
+		}
+		$replaced = true;
+		return $head . body_html( card_record( $facts ) . $mount ) . '</div>';
+	};
+	$fallback = static function ( string $html ) use ( $depth, $head, $facts, $mount, &$replaced ): string {
+		if ( $replaced || $depth !== \Courtneyr\Child\SingleWideColumn\content_depth() ) {
+			return $html;
+		}
+		return $head . body_html( plain_record( $facts ) . $mount ) . $html . '</div>';
+	};
+	\add_filter( 'render_block_' . CARD_BLOCK, $swap, 10, 3 );
+	\add_filter( 'the_content', $fallback, 19 );
+	try {
+		return $render( $attrs, $content, $block );
+	} finally {
+		\remove_filter( 'render_block_' . CARD_BLOCK, $swap, 10 );
+		\remove_filter( 'the_content', $fallback, 19 );
 	}
-	$facts = single_facts();
-	if ( array() === $facts ) {
-		return $html;
-	}
-
-	// The format avatar is aria-hidden decoration the sheet's star replaces.
-	$html = (string) preg_replace( '/<span class="[^"]*\bsingle-post__format-avatar\b[^"]*"[^>]*>.*?<\/svg><\/span>/s', '', $html, 1 );
-
-	$start = 0;
-	if ( preg_match( '/<div class="[^"]*\bpkiw-singular-entry\b[^"]*">/', $html, $open, PREG_OFFSET_CAPTURE ) ) {
-		$start = (int) $open[0][1] + strlen( $open[0][0] );
-	}
-	$end     = meta_offset( $html, $start );
-	$content = (string) substr( $html, $start, $end - $start );
-	$mount   = mount_html( is_array( $facts['picture'] ?? null ) ? $facts['picture'] : array() );
-
-	$before = '';
-	$after  = '';
-	if ( preg_match( '/<article\b[^>]*\bclass="[^"]*\bk-favorite\b[^"]*"[^>]*>.*?<\/article>/s', $content, $card, PREG_OFFSET_CAPTURE ) ) {
-		$before = (string) substr( $content, 0, (int) $card[0][1] );
-		$after  = (string) substr( $content, (int) $card[0][1] + strlen( $card[0][0] ) );
-		$body   = body_html( card_record( $facts ) . $mount );
-	} else {
-		$body = body_html( plain_record( $facts ) . $mount ) . $content;
-	}
-
-	$sheet = '<div class="cr-fav-sheet">' . sheet_head( $facts ) . $body . '</div>';
-	return (string) substr( $html, 0, $start ) . $before . $sheet . $after . (string) substr( $html, $end );
 }
-add_filter( 'render_block', __NAMESPACE__ . '\\sheet', 20, 2 );

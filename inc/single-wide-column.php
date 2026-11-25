@@ -25,7 +25,8 @@
  * filter courtneyr_child_wide_column_kinds). A resolver takes the post and the
  * page content and returns null (nothing for this kind on this page) or
  * array( 'wide' => bool, 'data' => mixed ): `wide` says the record takes the
- * column, `data` is what the kind's renderer prints from.
+ * column, `data` is what the kind's renderer prints from. An optional
+ * `flow` describes the reading-width groups around a top-level card.
  *
  * @package CourtneyrChild
  */
@@ -42,7 +43,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Kind slug => callable( \WP_Post, string ): ?array{wide: bool, data: mixed}. */
 const KINDS = array(
-	'read' => '\\Courtneyr\\Child\\SingleRead\\page_record',
+	'read'     => '\\Courtneyr\\Child\\SingleRead\\page_record',
+	'favorite' => '\\Courtneyr\\Child\\SingleFavorite\\page_sheet',
 );
 
 /**
@@ -52,7 +54,7 @@ const KINDS = array(
  * a feed, an excerpt or the editor never gets a decision; those render as they
  * always did. A post behind a password has no decision either.
  *
- * @return array{kind: string, wide: bool, data: mixed}|null
+ * @return array{kind: string, wide: bool, data: mixed, flow: ?array{class: string, position: int}}|null
  */
 function resolve(): ?array {
 	static $memo = array();
@@ -78,11 +80,75 @@ function resolve(): ?array {
 					'kind' => $kind,
 					'wide' => (bool) ( $found['wide'] ?? false ),
 					'data' => $found['data'] ?? null,
+					'flow' => $found['flow'] ?? null,
 				);
 			}
 		}
 	}
 	return $memo[ $key ];
+}
+
+/**
+ * Blocks whose rendered HTML holds blocks the parsed page does not show.
+ *
+ * A synced pattern (core/block) is a reference: its blocks live in another
+ * post and WordPress expands them while it renders. A registered pattern, a
+ * template part, a nested post content or excerpt, a query loop and the
+ * latest-posts list do the same with other content. The walker cannot see
+ * inside any of them, so it cannot say where a card in them sits.
+ */
+const OPAQUE_BLOCKS = array(
+	'core/block',
+	'core/pattern',
+	'core/template-part',
+	'core/post-content',
+	'core/post-excerpt',
+	'core/query',
+	'core/post-template',
+	'core/latest-posts',
+	'core/shortcode',
+	'core/legacy-widget',
+	'core/widget-group',
+);
+
+/**
+ * Where a page's first block of a type sits.
+ *
+ * A kind whose record replaces one of its blocks can take the column only when
+ * that block is a top-level block; inside an authored Group the record keeps
+ * the Group's width. When a block whose output the parsed page cannot show
+ * (OPAQUE_BLOCKS, or any block whose HTML holds a registered shortcode) comes
+ * before the first card, or anywhere on a page with no card, the structure
+ * WordPress will print is unknown and the caller makes no decision, so the
+ * page renders as it did without the column. This reads block names and
+ * markup only, never attributes.
+ *
+ * @param string $content The content of the page being printed.
+ * @param string $name    Block name.
+ * @param int|null $position Top-level index of a card, when found.
+ * @return string 'top', 'nested', 'none' or 'unknown'.
+ */
+function first_block_place( string $content, string $name, ?int &$position = null ): string {
+	$position = null;
+	$walk = static function ( array $blocks, int $depth ) use ( &$walk, $name, &$position ): string {
+		foreach ( $blocks as $index => $block ) {
+			$block_name = (string) ( $block['blockName'] ?? '' );
+			if ( $name === $block_name ) {
+				$position = 0 === $depth ? $index : null;
+				return 0 === $depth ? 'top' : 'nested';
+			}
+			$html = (string) ( $block['innerHTML'] ?? '' );
+			if ( in_array( $block_name, OPAQUE_BLOCKS, true ) || ( '' !== $html && \strip_shortcodes( $html ) !== $html ) ) {
+				return 'unknown';
+			}
+			$found = $walk( (array) ( $block['innerBlocks'] ?? array() ), $depth + 1 );
+			if ( 'none' !== $found ) {
+				return $found;
+			}
+		}
+		return 'none';
+	};
+	return $walk( \parse_blocks( $content ), 0 );
 }
 
 /**
@@ -187,3 +253,111 @@ function enqueue_styles(): void {
 	}
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_styles', 20 );
+
+/**
+ * Current nesting of the_content, including nested block and excerpt renders.
+ *
+ * @return int
+ */
+function content_depth(): int {
+	return count( array_keys( $GLOBALS['wp_current_filter'] ?? array(), 'the_content', true ) );
+}
+
+/**
+ * The reading-width group around a run of the page's original blocks.
+ *
+ * @param array<int, array<string, mixed>> $blocks Parsed blocks.
+ * @param string                            $class Flow wrapper class.
+ * @return string Serialized group, or the unchanged inter-block whitespace.
+ */
+function flow_group( array $blocks, string $class ): string {
+	$content = \serialize_blocks( $blocks );
+	if ( '' === trim( $content ) ) {
+		return $content;
+	}
+	$open = '<div class="wp-block-group ' . \esc_attr( $class ) . '">';
+	return \serialize_block(
+		array(
+			'blockName'    => 'core/group',
+			'attrs'        => array( 'className' => $class, 'layout' => array( 'type' => 'default' ) ),
+			'innerBlocks'  => $blocks,
+			'innerHTML'    => $open . '</div>',
+			'innerContent' => array_merge( array( $open ), array_fill( 0, count( $blocks ), null ), array( '</div>' ) ),
+		)
+	);
+}
+
+/**
+ * Group the top-level siblings of the card, leaving the card block itself alone.
+ *
+ * @param string $content Page content before it passes through do_blocks().
+ * @param string $class Flow wrapper class.
+ * @param int    $position Top-level index, or -1 for a card prepended later.
+ * @return string Serialized content.
+ */
+function group_content( string $content, string $class, int $position ): string {
+	$blocks = \parse_blocks( $content );
+	if ( -1 === $position ) {
+		return flow_group( $blocks, $class );
+	}
+	if ( ! isset( $blocks[ $position ] ) ) {
+		return $content;
+	}
+	return flow_group( array_slice( $blocks, 0, $position ), $class )
+		. \serialize_block( $blocks[ $position ] )
+		. flow_group( array_slice( $blocks, $position + 1 ), $class );
+}
+
+/**
+ * Install the layout preparation filter only while core renders the real main content block.
+ *
+ * @param array<string, mixed> $args Registered block arguments.
+ * @param string               $name Block name.
+ * @return array<string, mixed>
+ */
+function scope_post_content( array $args, string $name ): array {
+	if ( 'core/post-content' !== $name || ! is_callable( $args['render_callback'] ?? null ) ) {
+		return $args;
+	}
+	$render = $args['render_callback'];
+	$args['render_callback'] = static function ( array $attrs, string $content, \WP_Block $block ) use ( $render ): string {
+		$post_id = (int) ( $block->context['postId'] ?? 0 );
+		$classes = explode( ' ', (string) ( $attrs['className'] ?? '' ) );
+		if ( ! in_array( 'single-post__content', $classes, true ) || ! \is_singular( 'post' ) || ! \is_main_query() || ! \in_the_loop()
+			|| ! $post_id || (int) \get_queried_object_id() !== $post_id || (int) \get_the_ID() !== $post_id
+			|| \is_feed() || \wp_is_serving_rest_request() || \doing_filter( 'get_the_excerpt' ) || \post_password_required( $post_id )
+		) {
+			return $render( $attrs, $content, $block );
+		}
+
+		$decision = resolve();
+		$flow     = $decision['flow'] ?? null;
+		$depth    = content_depth() + 1;
+		$prepare  = null;
+		if ( is_array( $flow ) ) {
+			$raw      = str_replace( ']]>', ']]&gt;', (string) \get_the_content() );
+			$suffix   = \has_block( 'core/nextpage' ) ? (string) \wp_link_pages( array( 'echo' => 0 ) ) : '';
+			$prepare  = static function ( string $input ) use ( $raw, $suffix, $flow, $depth ): string {
+				if ( content_depth() !== $depth || ( $input !== $raw && $input !== $raw . $suffix ) ) {
+					return $input;
+				}
+				return group_content( $raw, $flow['class'], $flow['position'] ) . substr( $input, strlen( $raw ) );
+			};
+			\add_filter( 'the_content', $prepare, 7 );
+		}
+		try {
+			$favorite = \Courtneyr\Child\SingleFavorite\single_facts();
+			if ( array() !== $favorite ) {
+				$facts = 'favorite' === ( $decision['kind'] ?? '' ) ? $decision['data'] : $favorite;
+				return \Courtneyr\Child\SingleFavorite\render_sheet( $render, $attrs, $content, $block, $facts, $depth );
+			}
+			return $render( $attrs, $content, $block );
+		} finally {
+			if ( null !== $prepare ) {
+				\remove_filter( 'the_content', $prepare, 7 );
+			}
+		}
+	};
+	return $args;
+}
+add_filter( 'register_block_type_args', __NAMESPACE__ . '\scope_post_content', 10, 2 );

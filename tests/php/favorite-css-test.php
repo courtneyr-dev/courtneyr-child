@@ -57,7 +57,8 @@ preg_match_all( '/var\(\s*(--[a-z0-9-]+)/', $css, $used );
 preg_match_all( '/(--[a-z0-9-]+)\s*:/', $css, $own );
 preg_match_all( '/(--[a-z0-9-]+)\s*:/', $tokens, $known );
 // --cr-fav-tilt is set inline on each star by inc/favorite.php, with a fallback in the sheet.
-$missing = array_diff( array_unique( $used[1] ), array_unique( array_merge( $own[1], $known[1], array( '--cr-fav-tilt' ) ) ) );
+// --wp--style--global--content-size is WordPress's own, from theme.json contentSize.
+$missing = array_diff( array_unique( $used[1] ), array_unique( array_merge( $own[1], $known[1], array( '--cr-fav-tilt', '--wp--style--global--content-size' ) ) ) );
 cr_fav_css_check( array() === $missing, 'every custom property resolves (' . implode( ', ', $missing ) . ')' );
 
 // Hard shadows only: a box-shadow is none, a hard token, or a hard token plus the focus halo.
