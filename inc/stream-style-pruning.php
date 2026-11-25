@@ -329,6 +329,8 @@ const RUCSS_INLINE_HANDLES = array(
 	'courtneyr-toc',
 	// Only on a single whose content takes the wide column (inc/single-wide-column.php).
 	'courtneyr-wide-column',
+	// Favorite's sheet opens the reading-width cap at first paint.
+	'courtneyr-favorite',
 	// Only on /stream/ when a web story renders (inc/stream-stories.php).
 	'courtneyr-stream-story',
 	// Zine tables (blocks/core-table.css, 0.7.159): per-block sheet, only where a Table block renders.

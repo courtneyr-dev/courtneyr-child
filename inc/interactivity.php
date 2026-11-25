@@ -544,6 +544,9 @@ function inject_avatar_before_post_content( string $block_content, array $block 
 	if ( ! str_contains( $class_name, 'single-post__content' ) ) {
 		return $block_content;
 	}
+	if ( function_exists( '\\Courtneyr\\Child\\SingleFavorite\\is_sheet' ) && \Courtneyr\Child\SingleFavorite\is_sheet() ) {
+		return $block_content;
+	}
 	$post_id = \get_the_ID();
 	$format  = \get_post_format( $post_id );
 	if ( ! in_array( $format, SINGLE_POST_TITLELESS_FORMATS, true ) ) {
