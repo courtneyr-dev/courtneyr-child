@@ -327,8 +327,7 @@
  * top strip.
  */
 .cr-fav-sheet::before,
-.cr-fav-sheet::after,
-.cr-fav-sheet__mount::after {
+.cr-fav-sheet::after {
 	content: "";
 	position: absolute;
 	inset-inline: 0;
@@ -347,8 +346,7 @@
 		linear-gradient(315deg, var(--cr-black) 25%, transparent 25%) top left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x;
 }
 
-.cr-fav-sheet::after,
-.cr-fav-sheet__mount::after {
+.cr-fav-sheet::after {
 	inset-block-start: 100%;
 	-webkit-mask:
 		linear-gradient(135deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x,
@@ -527,8 +525,8 @@
 	display: none;
 }
 
-.cr-fav-sheet__mount::after {
-	background-color: var(--cr-printer-ivory);
+.cr-fav-sheet__mount.cr-paper-sheet--torn {
+	margin-block-end: 0;
 }
 
 .cr-fav-sheet__img {
@@ -826,7 +824,6 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 	.cr-fav-sheet::before,
 	.cr-fav-sheet::after,
 	.cr-fav-sheet__mount::before,
-	.cr-fav-sheet__mount::after,
 	.cr-fav-star__shape,
 	.cr-fav-item > .cr-fav-star,
 	.cr-fav-sheet__star,
