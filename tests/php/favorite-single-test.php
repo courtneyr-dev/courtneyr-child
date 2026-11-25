@@ -226,6 +226,10 @@ cr_fav_group(
 cr_fav_group(
 	'only a real Favorite block consumes the replacement',
 	static function (): void {
+		cr_fav_same( array( 'uses_context' => array( 'postId' ) ), Single\card_post_context( array(), Single\CARD_BLOCK ), 'WordPress supplies the Favorite card post ID' );
+		$context = array( 'uses_context' => array( 'postType', 'postId' ) );
+		cr_fav_same( $context, Single\card_post_context( $context, Single\CARD_BLOCK ), 'the existing Favorite context stays intact' );
+		cr_fav_same( array(), Single\card_post_context( array(), 'core/group' ), 'unrelated block context stays intact' );
 		$post = cr_fav_post( 1, 'Field Guide to Quiet Software', cr_fav_facts() );
 		$decoy = '<!-- <article class="k-favorite"> --><svg xmlns="http://www.w3.org/2000/svg"/><article id="author" class="k-favorite">Authored HTML</article>';
 		$out = cr_fav_sheet( $post, cr_fav_page( $decoy . cr_fav_card_html() . '<p>After.</p>' ) );
