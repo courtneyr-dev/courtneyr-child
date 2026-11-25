@@ -124,7 +124,7 @@
 /*
  * Constellation marks: one static background for each band, in the gutter
  * beside the items, never a line from one item to the next. The shape is a
- * mask; the color is --cr-cerulean, and --cr-prussian-blue on even bands.
+ * mask. Dark mode uses periwinkle on every band.
  */
 .cr-favorite-chart .pkiw-group::before {
 	content: "";
@@ -133,14 +133,14 @@
 	inset-block: var(--cr-space-lg);
 	inset-inline-end: var(--cr-space-2xs);
 	inline-size: var(--cr-space-lg);
-	background-color: var(--cr-cerulean);
+	background-color: light-dark(var(--cr-cerulean), var(--cr-periwinkle));
 	pointer-events: none;
 	-webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 120'><g fill='black' stroke='black' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'><path fill='none' d='M5 8L17 30L8 58L18 86L10 112'/><circle cx='5' cy='8' r='2'/><circle cx='8' cy='58' r='2'/><circle cx='10' cy='112' r='2'/><path d='M17 24l1.5 4.5 4.5.4-3.4 3 1 4.4-3.6-2.4-3.6 2.4 1-4.4-3.4-3 4.5-.4z'/><path d='M18 81l1.2 3.6 3.6.3-2.7 2.4.8 3.5-2.9-1.9-2.9 1.9.8-3.5-2.7-2.4 3.6-.3z'/></g></svg>") center top / 100% auto repeat-y;
 	mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 120'><g fill='black' stroke='black' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'><path fill='none' d='M5 8L17 30L8 58L18 86L10 112'/><circle cx='5' cy='8' r='2'/><circle cx='8' cy='58' r='2'/><circle cx='10' cy='112' r='2'/><path d='M17 24l1.5 4.5 4.5.4-3.4 3 1 4.4-3.6-2.4-3.6 2.4 1-4.4-3.4-3 4.5-.4z'/><path d='M18 81l1.2 3.6 3.6.3-2.7 2.4.8 3.5-2.9-1.9-2.9 1.9.8-3.5-2.7-2.4 3.6-.3z'/></g></svg>") center top / 100% auto repeat-y;
 }
 
 .cr-favorite-chart .pkiw-group:nth-child(even)::before {
-	background-color: var(--cr-prussian-blue);
+	background-color: light-dark(var(--cr-prussian-blue), var(--cr-periwinkle));
 }
 
 /* The month label: tape on the band's top-left edge, upright. */
@@ -327,7 +327,8 @@
  * top strip.
  */
 .cr-fav-sheet::before,
-.cr-fav-sheet::after {
+.cr-fav-sheet::after,
+.cr-fav-sheet__mount::after {
 	content: "";
 	position: absolute;
 	inset-inline: 0;
@@ -346,7 +347,8 @@
 		linear-gradient(315deg, var(--cr-black) 25%, transparent 25%) top left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x;
 }
 
-.cr-fav-sheet::after {
+.cr-fav-sheet::after,
+.cr-fav-sheet__mount::after {
 	inset-block-start: 100%;
 	-webkit-mask:
 		linear-gradient(135deg, var(--cr-black) 25%, transparent 25%) bottom left / var(--cr-paper-tear) var(--cr-paper-tear) repeat-x,
@@ -382,6 +384,18 @@
 	background-color: var(--cr-tape);
 	color: var(--cr-tape-ink);
 	transform: rotate(var(--cr-rotate-2));
+}
+
+@media (max-width: 39.999rem) {
+
+	.cr-fav-sheet__star {
+		inset-inline-start: var(--cr-space-xs);
+	}
+
+	.cr-fav-sheet__tape {
+		inset-inline-start: calc(4.5rem + var(--cr-space-lg));
+		max-inline-size: calc(100% - 6.5rem);
+	}
 }
 
 .cr-fav-sheet__tape .pk-kindlabel {
@@ -487,7 +501,7 @@
 	line-height: var(--cr-leading-relaxed);
 }
 
-/* The picture, on a flat taped paper mount. */
+/* The picture, on a taped paper mount. */
 .cr-fav-sheet__mount {
 	position: relative;
 	box-sizing: border-box;
@@ -511,6 +525,10 @@
 
 .cr-fav-sheet__mount.cr-cover--failed {
 	display: none;
+}
+
+.cr-fav-sheet__mount::after {
+	background-color: var(--cr-printer-ivory);
 }
 
 .cr-fav-sheet__img {
@@ -616,7 +634,7 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
    ============================================================ */
 
 .cr-fav-card {
-	--cr-fav-star-size: 14rem;
+	--cr-fav-star-size: calc(var(--cr-space-4xl) + 2 * var(--cr-space-xl));
 	position: relative;
 	display: flex;
 	flex-direction: column;
@@ -808,6 +826,7 @@ body.single-post.kind-favorite .single-post__content > .single-post__format-avat
 	.cr-fav-sheet::before,
 	.cr-fav-sheet::after,
 	.cr-fav-sheet__mount::before,
+	.cr-fav-sheet__mount::after,
 	.cr-fav-star__shape,
 	.cr-fav-item > .cr-fav-star,
 	.cr-fav-sheet__star,
