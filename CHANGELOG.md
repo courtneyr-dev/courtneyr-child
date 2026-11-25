@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.180
+
+- Match the Read journal mockup's notes heading, torn edge, and dark-mode shadows. (#362)
+- Register the Book style for Read cards. (#365)
+
 ## 0.7.179
 
 - Give untitled Watch shelf links a visible and accessible name. (#356)
