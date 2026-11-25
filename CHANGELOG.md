@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.181
+
+- Group Favorite and Repost single content around their cards. (#363, #364)
+- Match the Sleep dark palette to the approved mockups. (#368)
+- Give untitled Check-in Stream cards a date link. (#366)
+
 ## 0.7.180
 
 - Match the Read journal mockup's notes heading, torn edge, and dark-mode shadows. (#362)
