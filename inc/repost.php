@@ -407,9 +407,21 @@ function clipping( string $html, array $block, $instance ): string {
 	$tape     = 'cr-repost-clip--tape-' . tilt_index( $post_id );
 	$selected = ArchiveCheckin\selected( $post, $instance, 'repost' );
 
-	// A protected post keeps the plugin's card whole: its one title link
-	// already reads "Protected: <stored title>" and it reads no facts.
+	// Keep the protected title and date. The ordinary Archive list item
+	// owns the entry root; the mixed-kind adapter keeps its card root.
 	if ( post_password_required( $post ) || ( $selected && ArchiveCheckin\is_protected( $html ) ) ) {
+		if ( ! $selected ) {
+			$tags = new \WP_HTML_Tag_Processor( $html );
+			if ( $tags->next_tag(
+				array(
+					'tag_name'   => 'article',
+					'class_name' => 'pk-card--protected',
+				)
+			) ) {
+				$tags->remove_class( 'h-entry' );
+				$html = $tags->get_updated_html();
+			}
+		}
 		return '<div class="cr-repost-clip cr-repost-clip--protected ' . esc_attr( $tape ) . '"><div class="' . PAPER_CLASSES . '">' . $html . '</div></div>';
 	}
 

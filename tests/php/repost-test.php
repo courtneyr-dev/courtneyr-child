@@ -134,13 +134,14 @@ cr_rp_group(
 );
 
 cr_rp_group(
-	'a protected repost keeps the plugin card whole inside a clipping',
+	'a protected repost keeps its title and date and lets the Archive row own the entry',
 	static function (): void {
 		cr_rp_post( 5, 'Locked Clipping', cr_rp_facts() );
 		$GLOBALS['cr_rp']['protected'][5] = true;
-		$html                              = cr_rp_clip( 5 );
+		$props                             = '<h3><a class="u-url" href="https://example.test/locked/">Protected: Locked Clipping</a></h3><time class="dt-published" datetime="2026-08-09" hidden></time>';
+		$html                              = Repost\clipping( '<article class="pk-card pk-card--protected h-entry">' . $props . '</article>', cr_rp_archive_block(), cr_rp_instance( 5 ) );
 		cr_rp_contains( 'cr-repost-clip cr-repost-clip--protected cr-repost-clip--tape-', $html, 'the protected wrapper' );
-		cr_rp_contains( '<article class="pk-card plugin">Plugin card</article>', $html, 'the plugin card sits inside, untouched' );
+		cr_rp_contains( '<article class="pk-card pk-card--protected">' . $props . '</article>', $html, 'the nested card keeps its title and hidden date without an entry root' );
 		cr_rp_lacks( 'Paper Trails', $html, 'no cited title leaks' );
 		cr_rp_lacks( 'blog.example.net', $html, 'no source host leaks' );
 		cr_rp_lacks( 'pk-kind-cite', $html, 'no hidden cite' );
