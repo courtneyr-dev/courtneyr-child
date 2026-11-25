@@ -222,7 +222,7 @@ function mount_html( array $picture ): string {
 	if ( '' === $img ) {
 		$img = '<img class="cr-fav-sheet__img skip-lazy" src="' . esc_url( $url ) . '" alt="' . esc_attr( $alt ) . '" fetchpriority="high" decoding="async" data-skip-lazy="1">';
 	}
-	return '<div class="cr-fav-sheet__mount" data-cr-cover-fallback>' . $img . '</div>';
+	return '<div class="cr-fav-sheet__mount cr-paper-sheet--torn cr-paper--printer-ivory" data-cr-cover-fallback>' . $img . '</div>';
 }
 
 /**

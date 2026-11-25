@@ -113,7 +113,7 @@ cr_fav_group(
 		cr_fav_same( 1, cr_fav_count( '/<img\b/', $out ), 'one image' );
 		cr_fav_assert( str_contains( $out, 'alt="A flowchart of three questions"' ), 'the stored alt' );
 		cr_fav_assert( str_contains( $out, 'fetchpriority="high"' ) && str_contains( $out, 'skip-lazy' ) && ! str_contains( $out, 'loading=' ), 'eager: fetchpriority high, no loading attribute' );
-		cr_fav_assert( str_contains( $out, '<div class="cr-fav-sheet__mount" data-cr-cover-fallback>' ), 'the mount carries the cover-fallback hook' );
+		cr_fav_assert( str_contains( $out, '<div class="cr-fav-sheet__mount cr-paper-sheet--torn cr-paper--printer-ivory" data-cr-cover-fallback>' ), 'the mount uses the ivory torn edge and keeps the cover-fallback hook' );
 		cr_fav_assert( ! str_contains( $out, 'u-photo' ), 'a featured picture adds no u-photo to the h-cite' );
 
 		$remote = cr_fav_post( 3, 'Broken', cr_fav_facts( array( 'picture' => array( 'source' => 'card', 'attachment_id' => 0, 'url' => 'https://images.example.com/missing.png', 'alt' => '', 'remote' => true, 'suppress_featured' => false ) ) ) );
