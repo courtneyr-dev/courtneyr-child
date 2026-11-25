@@ -638,6 +638,40 @@ body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-c
 	color: var(--cr-russian-violet);
 }
 
+@media (forced-colors: none) {
+
+	body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-clip--single {
+		background: none;
+		box-shadow: none;
+		filter: drop-shadow(var(--cr-space-2xs) var(--cr-space-2xs) light-dark(var(--cr-ink), var(--cr-selective-yellow)));
+	}
+
+	body.single-post.kind-repost .single-post__content .cr-repost-clip--single.cr-paper-sheet--torn::after {
+		z-index: -1;
+		inset: 0;
+		block-size: auto;
+		background-image: var(--cr-fiber);
+		-webkit-mask: none;
+		mask: none;
+		clip-path: polygon(
+			0 3px, 4% 1px, 8% 4px, 13% 0, 20% 3px, 26% 1px,
+			32% 5px, 37% 2px, 44% 4px, 50% 0, 56% 3px, 62% 1px,
+			68% 5px, 74% 2px, 81% 4px, 87% 1px, 94% 4px, 100% 2px,
+			calc(100% - 3px) 8%, 100% 16%, calc(100% - 5px) 25%,
+			calc(100% - 1px) 33%, calc(100% - 4px) 44%, 100% 54%,
+			calc(100% - 4px) 63%, calc(100% - 1px) 74%,
+			calc(100% - 5px) 84%, 100% 93%, calc(100% - 3px) 100%,
+			94% calc(100% - 4px), 88% 100%, 82% calc(100% - 2px),
+			76% calc(100% - 5px), 69% calc(100% - 1px), 63% 100%,
+			56% calc(100% - 4px), 49% calc(100% - 2px), 42% 100%,
+			36% calc(100% - 3px), 30% 100%, 24% calc(100% - 5px),
+			18% calc(100% - 1px), 12% calc(100% - 4px), 6% 100%,
+			1px calc(100% - 3px), 4px 93%, 0 84%, 3px 75%, 1px 65%,
+			5px 56%, 0 47%, 2px 38%, 0 29%, 4px 19%, 1px 12%
+		);
+	}
+}
+
 body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-clip--single::before {
 	content: "";
 	position: absolute;
