@@ -34,6 +34,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 const CARD_BLOCK = 'post-kinds-indieweb/favorite-card';
 
 /**
+ * Give rendered Favorite cards the post ID used to scope single-sheet replacement.
+ *
+ * @param array<string, mixed> $args Registered block arguments.
+ * @param string               $name Block name.
+ * @return array<string, mixed>
+ */
+function card_post_context( array $args, string $name ): array {
+	if ( CARD_BLOCK === $name ) {
+		$context = $args['uses_context'] ?? array();
+		if ( ! in_array( 'postId', $context, true ) ) {
+			$context[] = 'postId';
+		}
+		$args['uses_context'] = $context;
+	}
+	return $args;
+}
+add_filter( 'register_block_type_args', __NAMESPACE__ . '\\card_post_context', 10, 2 );
+
+/**
  * Facts for the queried favorite single, kept per post for the request.
  *
  * @param bool $refresh Whether to rebuild the kept answer.
