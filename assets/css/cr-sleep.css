@@ -6,9 +6,10 @@
    ============================================================ */
 
 :is(.cr-sleep, body.cr-sleep-archive) {
-	--cr-sleep-bar: var(--cr-cerulean);
+	--cr-sleep-bar: light-dark(var(--cr-cerulean), var(--cr-sky-blue));
 	--cr-sleep-edge: var(--cr-ink);
 	--cr-sleep-ink: var(--cr-ink);
+	--cr-sleep-label: light-dark(var(--cr-ink), var(--cr-periwinkle));
 	--cr-sleep-paper: var(--cr-surface-elevated);
 	--cr-sleep-rule: var(--cr-rule);
 	--cr-sleep-track: 7.5rem;
@@ -110,7 +111,7 @@
 	grid-column: 1;
 	grid-row: 1;
 	min-inline-size: 0;
-	color: inherit;
+	color: var(--cr-sleep-label);
 	font-family: var(--cr-font-mono);
 	font-size: var(--cr-text-floor);
 	font-weight: var(--cr-weight-bold);
@@ -123,7 +124,7 @@
 	grid-row: 2;
 	align-self: center;
 	min-inline-size: 0;
-	color: var(--cr-sleep-ink);
+	color: var(--cr-sleep-label);
 	font-family: var(--cr-font-mono);
 	font-size: var(--cr-text-floor);
 	font-weight: var(--cr-weight-bold);
@@ -183,6 +184,7 @@
 	grid-row: 4;
 	align-self: center;
 	min-inline-size: 0;
+	color: var(--cr-sleep-label);
 	font-family: var(--cr-font-mono);
 	font-size: var(--cr-text-floor);
 	font-weight: var(--cr-weight-bold);
@@ -381,10 +383,11 @@
    ============================================================ */
 
 .pk-card.pkiw-sleep {
-	--cr-sleep-bar: var(--cr-cerulean);
+	--cr-sleep-bar: light-dark(var(--cr-cerulean), var(--cr-sky-blue));
 	--cr-sleep-edge: var(--cr-ink);
 	--cr-focus-halo: var(--cr-russian-violet);
 	--cr-sleep-ink: var(--cr-ink);
+	--cr-sleep-label: light-dark(var(--cr-ink), var(--cr-periwinkle));
 	--cr-sleep-paper: var(--cr-surface-elevated);
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
@@ -431,7 +434,7 @@
 
 .pkiw-sleep .pkiw-sleep__row dt {
 	margin: 0;
-	color: var(--cr-sleep-ink);
+	color: var(--cr-sleep-label);
 	font-family: var(--cr-font-mono);
 	font-size: var(--cr-text-floor);
 	font-weight: var(--cr-weight-bold);
@@ -729,28 +732,14 @@
 }
 
 /* ============================================================
-   Dark mode: paper objects keep their light palette.
+   Dark mode: retain the Stream sticker's paper palette and yellow shadow.
    ============================================================ */
-
-:root[data-theme="dark"] :is(.cr-sleep, body.cr-sleep-archive),
-:root[data-theme="dark"] .pkiw-sleep {
-	--cr-sleep-edge: var(--cr-printer-ivory);
-	--cr-sleep-ink: var(--cr-russian-violet);
-	--cr-sleep-paper: var(--cr-white);
-}
 
 :root[data-theme="dark"] .cr-sleep-sticker {
 	--cr-sleep-shadow: var(--cr-selective-yellow);
 }
 
 @media (prefers-color-scheme: dark) {
-
-	:root:not([data-theme="light"]) :is(.cr-sleep, body.cr-sleep-archive),
-	:root:not([data-theme="light"]) .pkiw-sleep {
-		--cr-sleep-edge: var(--cr-printer-ivory);
-		--cr-sleep-ink: var(--cr-russian-violet);
-		--cr-sleep-paper: var(--cr-white);
-	}
 
 	:root:not([data-theme="light"]) .cr-sleep-sticker {
 		--cr-sleep-shadow: var(--cr-selective-yellow);
