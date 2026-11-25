@@ -2,30 +2,30 @@
 	"schema": 1,
 	"environment": "t269",
 	"source": {
-		"commit": "9cdfcfcb47a544b56b448f01761943e5a808a9f8",
-		"treeHash": "56ff5992fe8a0e2a573a7647210d039edec1b5f14797a3338b9c1efa437c9523",
-		"themeVersion": "0.7.177"
+		"commit": "95b0ab49d6757e7759aef589ae8f189b0a82c729",
+		"treeHash": "6035bdb8db8148d66789a928da23221ff83a60078ab775656aec70fb04400375",
+		"themeVersion": "0.7.179"
 	},
 	"inputs": {
 		"theme": {
-			"assets": "c251d5989c59bdac7f0c305915a35de56d9bd9690a3f5990c602e766a9a1fa0f",
+			"assets": "8a69a383f77c3a0cc51c140a7b3595049f09c690d8a12f7ff26f03f1b466f684",
 			"blocks": "d0931f142105015c66b2a2a3786087d1f012023a01776c6590bbb20d437865ac",
-			"functions.php": "f4547f06fffe604430095934432666b386f973e85b09a653d702dbd66b7cf384",
-			"inc": "4791cc0291f973b7b75297b6f52df748d46cb629eec9135bb1e3156ee9529cbd",
+			"functions.php": "d66f0fcd28dc704692bf6780732744268d8d41c7423ec676df215f88402f4bd4",
+			"inc": "d80ed6110f6d558bce9d8cd7a9f90c10b8b948444e4520d1a20e61a7318f0aae",
 			"index.php": "b90105dcd60359cfdcd8f8308337c2b57ee5f8c9ac5bf240b60b38ceaabebb61",
 			"parts": "24a780bdebe5f270c76e0b6e9762ff0afdd20acab2db084fbbddbc3d050099c2",
 			"patterns": "944f0ab7a5150639e8013c4ac2f29a9c35f0100871748eec5f2a773af85d87c5",
-			"style.css": "38b319c54d17db3e690fa9dbc76006e242c3ef97997b53245d33c389d432b7b4",
+			"style.css": "b4a4a3483ebd607721f87095eab00e1baa2de1758ddd3f8973c41c6b4312d8ad",
 			"styles": "9b2667bf77dba25b9668ea3e45cd340963d5d833704241d85334c6765b12bcb8",
 			"templates": "c629c334bba9f415526f8aa0582d169674cb4bce1a742bc51d270744c5c203e1",
 			"theme.json": "f09c0a858169ebb9ed7e01cdb63c9399f5d366a295bdc3bc25ea2fcb6310b2fa",
 			"wprm-templates": "4be84a004a27586f967b312bdb464f6251f35b9c0e4f825e0dfd39fe91f96dff"
 		},
-		"recipe": "0148b10d74bd307e2e4f108e24209f591c6f00a00cb56e6a1ead1b4c7d01f379",
+		"recipe": "4a02d4eb7a5b303102821b7b158c3ae6ab29c567b03620b963eb876971e5294f",
 		"engine": "d898b14a326e8d00d845c0534ed6f0596454c536"
 	},
 	"site": {
-		"name": "courtneyr-verify-nav-a11y",
+		"name": "courtneyr-verify-overnight-read-stream",
 		"seed": "courtneyr-x-t269",
 		"wordpress": "7.1.5",
 		"php": "8.4.27",
@@ -51,7 +51,7 @@
 			}
 		},
 		"muPlugins": {
-			"99-studio-loader.php": "b0a773572fd1f18ecdc7425792d20683526b3cee5d416e3859cccdc1efd7b81b",
+			"99-studio-loader.php": "f39a2c12971fc4901e46ec561d802fe78f4c943447a396973439bc99794deeb0",
 			"cr-content-surfaces.php": "f2a81eb3421ffb81e8692c328e0dcbc79220fc68b08ca13dff80b0fb63bf188b",
 			"sqlite-database-integration": "d3f73d04532075b98374ee6afbb1bb38f217f90726b10ba31136f3d7d0576549",
 			"verify-live-theme.php": "6a4ec54321e38c1e27b044f9d33ec81debe148d8550d0e27aebe0c7589bce05b",
@@ -80,7 +80,7 @@
 				}
 			},
 			"doc": {
-				"sha256": "28b0021b84935aa12d02367e974b8ba6293869ce341d48303454745a8d1a3b06",
+				"sha256": "ad7c443bd44b75ee44245404db05d18b3e46cc0bd29753c688d94427f63b04c0",
 				"bytes": 79643
 			},
 			"component": {
@@ -118,7 +118,7 @@
 				}
 			},
 			"doc": {
-				"sha256": "837a508d544029a6963e2242998701ea8b25423238d00ae7513885182b4825cd",
+				"sha256": "11bf73935be3285ac4452e1e214cac35738b2b8abb824735a1393af51d898be7",
 				"bytes": 79399
 			},
 			"component": {
@@ -154,7 +154,7 @@
 				"content": "<!-- wp:courtneyr/post-glyph /-->"
 			},
 			"doc": {
-				"sha256": "5a035d4c2c6753f179d71adb7f5285c081c773a7bbda3a1f8d4ae66911a0e6df",
+				"sha256": "39af419c9f67b3a756d04864ba1671a2fce1b8af0ff41aa4f0707766304c0865",
 				"bytes": 80081
 			},
 			"component": {
@@ -191,7 +191,7 @@
 				"content": "<!-- wp:courtneyr/term-chips /-->"
 			},
 			"doc": {
-				"sha256": "b72b7ab99e8c82e46a0bc91fd127a7101e7dd24cf2be004db79538608db6845c",
+				"sha256": "2ecd7f1c0244e2fbca315056ad691d593ee35e04351f42212da4e1fcaf76c1d9",
 				"bytes": 81190
 			},
 			"component": {
@@ -227,7 +227,7 @@
 				"content": "<!-- wp:courtneyr/term-chips {\"term\":\"kind\"} /-->"
 			},
 			"doc": {
-				"sha256": "d8a2047b196b2fecbef2707e13fba8248cbd0bc86a5e5bd5e20a4093bf4f09fd",
+				"sha256": "5f6209776b39bbc14365d335606e19384566c48ef3d9862853f74f363a199256",
 				"bytes": 81109
 			},
 			"component": {
@@ -263,7 +263,7 @@
 				"content": "<!-- wp:courtneyr/weather-log /-->"
 			},
 			"doc": {
-				"sha256": "fbef6ab5bdf9d68acc001a2886e9d116a3e8c0b2eea7c0410c07abdd8b4518df",
+				"sha256": "5f2fd05c8409e3d0e746b4a4a97fbbb08e169da25ff3c0e36e63b02d6fff8c78",
 				"bytes": 80076
 			},
 			"component": {
@@ -306,7 +306,7 @@
 			},
 			"empty": "The seed has no series taxonomy because PublishPress Series is not installed, so every view of the block prints nothing.",
 			"doc": {
-				"sha256": "dc035ba711530923be504879451ce9f4132c8bc68370c82b675fee19c4cab75c",
+				"sha256": "75e7cc5e0c061c9cff45e1d13988f6e40ab501eba77b35ca46de7aa1c5020a4f",
 				"bytes": 79174
 			},
 			"component": {
@@ -344,7 +344,7 @@
 			},
 			"empty": "The seed has no contact-form plugin, so the cr_contact_form shortcode does not exist and a visitor gets no markup.",
 			"doc": {
-				"sha256": "025968e5e0ad5450712c1d3a0abb4721ac917fff4797314f9d5e77ba39a0b3ff",
+				"sha256": "a5fa7c2ad948815194da40988e748dfe2750deb5df5eb4e2478b3acc6aa0ceb2",
 				"bytes": 79258
 			},
 			"component": {
@@ -383,7 +383,7 @@
 				]
 			},
 			"doc": {
-				"sha256": "08121d981a6c61a0020a09ea104029207fc1696fd98de28c12c9edb5a3ac1dde",
+				"sha256": "aec926e02649c0a263f8cee67e71a0ad5102b0d426d6ce5997f3f5b8eca6f56c",
 				"bytes": 79448
 			},
 			"component": {
@@ -419,7 +419,7 @@
 				"content": "<!-- wp:pattern {\"slug\":\"courtneyr-child/cr-callout-note\"} /-->"
 			},
 			"doc": {
-				"sha256": "bccff2269f9e93bedf4dbcf9d3a9d7cf020d70075424bbe0d8015aa45351c27f",
+				"sha256": "6aa5b8324aebe4768499a042a3a7c3f451791845fedc00a0b54886ec2b5a0353",
 				"bytes": 81129
 			},
 			"component": {
@@ -454,7 +454,7 @@
 				"content": "<!-- wp:pattern {\"slug\":\"courtneyr-child/cr-callout-warn\"} /-->"
 			},
 			"doc": {
-				"sha256": "bd6bf9e89050e7109020ba5f0819f79d110dee92d52a22130f59830caca5a821",
+				"sha256": "0a8afeba6e71343917f53a761340639fa08bf3810ea4520cb32235dfd086e95e",
 				"bytes": 81156
 			},
 			"component": {
@@ -489,7 +489,7 @@
 				"content": "<!-- wp:pattern {\"slug\":\"courtneyr-child/cr-card-default\"} /-->"
 			},
 			"doc": {
-				"sha256": "9c3e5cfdaa8e7ccbc6434ad6ec4290fbe737d97a3cd386a89b60d50ac2e6e3ac",
+				"sha256": "f0fd372e683118a96a7f8b81a87c9aadc98686c14044d71fcc57a25a5dcabf16",
 				"bytes": 81930
 			},
 			"component": {
@@ -524,7 +524,7 @@
 				"content": "<!-- wp:pattern {\"slug\":\"courtneyr-child/cr-pull-quote\"} /-->"
 			},
 			"doc": {
-				"sha256": "f8a2ef0234a49a3a890df8c57a93f45104b4786291ee8efab438edd10d2e0225",
+				"sha256": "4832e33d323fecac3b78562795503e68b3497c40873f3abd866e9ef7c9afd0cf",
 				"bytes": 86138
 			},
 			"component": {
@@ -559,7 +559,7 @@
 				"content": "<!-- wp:pattern {\"slug\":\"courtneyr-child/cr-tape-label\"} /-->"
 			},
 			"doc": {
-				"sha256": "b20deb428089ab8a38cfcff9885d58421b01a46753beeb4bb58eca69ff0054df",
+				"sha256": "e696031c62e5120babea98d9a9024fa7799c3318d2a272a6051698e1e92cb9ed",
 				"bytes": 80173
 			},
 			"component": {
@@ -594,7 +594,7 @@
 				"content": "<!-- wp:pattern {\"slug\":\"courtneyr-child/cr-stream-item\"} /-->"
 			},
 			"doc": {
-				"sha256": "5d4254dd1ce2b659ee3b076b1c0064a5fb79365773a3cb723450ba32e874ee73",
+				"sha256": "8613893d96a633869c86fe73bff6ee51b95d8353330a718b36d0ec1c99985b06",
 				"bytes": 82920
 			},
 			"component": {
@@ -629,7 +629,7 @@
 				"content": "<!-- wp:pattern {\"slug\":\"courtneyr-child/cr-evidence-verified\"} /-->"
 			},
 			"doc": {
-				"sha256": "321fba7b0c3465f1ed8f7976d41b6e9d54b186b2b37fe4f8d870dbd98e6abe69",
+				"sha256": "b834ccef64a3f6917fa7ce9c2988f997ba81a1ab876b4f0fee05f2dec937f604",
 				"bytes": 80585
 			},
 			"component": {
@@ -664,7 +664,7 @@
 				"content": "<!-- wp:pattern {\"slug\":\"courtneyr-child/cr-hero-display\"} /-->"
 			},
 			"doc": {
-				"sha256": "dc8a341144bf9c660d60f95cc84dea94e7bde228a7455db06c1882d29a90ac20",
+				"sha256": "3b3353ac5416ea0229b52811a1a0cbe2e5a8bf760a0f5b7b34aee96c70446753",
 				"bytes": 89249
 			},
 			"component": {
@@ -699,7 +699,7 @@
 				"content": "<!-- wp:pattern {\"slug\":\"courtneyr-child/cr-home-newsletter-reasons\"} /-->"
 			},
 			"doc": {
-				"sha256": "05d193fc013bbb4b43e7217513adbe2c2b232f712f6416ffccc92164b31a1154",
+				"sha256": "f077ded3d335b423a8937788167b3750afe79c37d2f675dbb22555cdeb715e27",
 				"bytes": 96758
 			},
 			"component": {
@@ -733,7 +733,7 @@
 				"content": "<!-- wp:pattern {\"slug\":\"courtneyr-child/cr-home-field-notes\"} /-->"
 			},
 			"doc": {
-				"sha256": "fb9e593d41bc1747acd5603abd3f414223da0b71037fa8eda1fc66de9e1ea0ef",
+				"sha256": "94aa9e9f44333a5f9451e72eb923483a52a124d4bad90ca926a883cf5807dc9c",
 				"bytes": 108010
 			},
 			"component": {
@@ -779,7 +779,7 @@
 				"content": "<!-- wp:pattern {\"slug\":\"courtneyr-child/cr-hcard\"} /-->"
 			},
 			"doc": {
-				"sha256": "31414f532c76105de07dfeedc1fba2370c9cbfe306675b4e1d30aa70d8c0a22a",
+				"sha256": "e0e284d32861ecd594a7f8ec3ad457c98d88775b58877a33b332ed8b2f5563d6",
 				"bytes": 79426
 			},
 			"component": {
@@ -814,7 +814,7 @@
 				"content": "<!-- wp:pattern {\"slug\":\"courtneyr-child/post-format-quote\"} /-->"
 			},
 			"doc": {
-				"sha256": "ccbe69236729af6f3e39d5a41e0ff3b75d8240074c850234cb883d46ad16a7fb",
+				"sha256": "0c1f920b25823928a851d96aa9383f71361ccdf6d9e91d0278bd0b2fed198181",
 				"bytes": 86133
 			},
 			"component": {
@@ -854,7 +854,7 @@
 				}
 			},
 			"doc": {
-				"sha256": "e222985fdee8db9575abd9dee2969ada292208ec1b1297e1fcd4bd99a104dee7",
+				"sha256": "9239d9093a745bfae8ba93d18f2778333b3f6d6fa3f8555279d652a215d758e7",
 				"bytes": 85860
 			},
 			"component": {
@@ -893,7 +893,7 @@
 				}
 			},
 			"doc": {
-				"sha256": "62b2e63f75d245960baffa23b310c1206a31d53e7388dcc72b677b19b5d290f4",
+				"sha256": "2f94318f234d77e9ecc84e60158e44c7a81826d63cb5b619bfc5ae86d7d0dc45",
 				"bytes": 106663
 			},
 			"component": {
@@ -925,7 +925,7 @@
 			"route": "/",
 			"request": {},
 			"doc": {
-				"sha256": "b8a10e68e85688a3c8abd2c0650250a90ffeb34adc9e41c990f26b6ffaa08991",
+				"sha256": "aa2a6aef1d201b7314b401ca156c73d34c2d4c46031a03ecdc3d04dae34d9960",
 				"bytes": 117523
 			},
 			"component": null,
@@ -969,7 +969,7 @@
 			"route": "/seed-269-s5/",
 			"request": {},
 			"doc": {
-				"sha256": "ca8a316f4017ab0554460eb78f2f98e1bf3ef3773a92f2ec2a680436b12fc40e",
+				"sha256": "46cede521075dc3f050813ec0a7025c22bf375a2f0fbd4640e11860bb42c988a",
 				"bytes": 159749
 			},
 			"component": null,
@@ -1031,7 +1031,7 @@
 			"route": "/kind/read/",
 			"request": {},
 			"doc": {
-				"sha256": "6ac13c2eaf09cbdcd9a90036f67510bec100b1fbb312c9bad4b49589d414bc8b",
+				"sha256": "1d2a4d8eca19ee0a5e45abec5e2a6de440abf5844a25570bd3691270bfdc415f",
 				"bytes": 144726
 			},
 			"component": null,
@@ -1088,6 +1088,113 @@
 			"normalized": {
 				"scripts": 14,
 				"origin": 127,
+				"origin-host": 1,
+				"ver-mtime": 5
+			}
+		},
+		"page-read-single": {
+			"route": "/seed-267-r21/",
+			"request": {},
+			"doc": {
+				"sha256": "bcd0988e3fd12b1683b568fd8ec98d6b30200503206860d39b7b55d6b43809b4",
+				"bytes": 156492
+			},
+			"component": null,
+			"census": {
+				"template": "courtneyr-child//single",
+				"rendered": {
+					"block:courtneyr/series-guide": {
+						"calls": 2,
+						"empty": 2
+					},
+					"part:appearance-toggle": {
+						"calls": 1,
+						"empty": 0
+					},
+					"part:footer": {
+						"calls": 1,
+						"empty": 0
+					},
+					"part:header": {
+						"calls": 1,
+						"empty": 0
+					},
+					"part:newsletter-cta": {
+						"calls": 1,
+						"empty": 0
+					},
+					"pattern:courtneyr-child/cr-hcard": {
+						"calls": 1,
+						"empty": 0
+					},
+					"pattern:courtneyr-child/cr-related-posts": {
+						"calls": 1,
+						"empty": 0
+					}
+				}
+			},
+			"sources": [
+				"blocks/series-guide/block.json",
+				"blocks/series-guide/render.php",
+				"parts/appearance-toggle.html",
+				"parts/footer.html",
+				"parts/header.html",
+				"parts/newsletter-cta.html",
+				"patterns/cr-hcard.php",
+				"patterns/cr-related-posts.php",
+				"templates/single.html"
+			],
+			"notes": "",
+			"normalized": {
+				"scripts": 16,
+				"origin": 78,
+				"origin-encoded": 2,
+				"origin-host": 1,
+				"wprm-id": 2,
+				"ver-mtime": 3
+			}
+		},
+		"page-stream": {
+			"route": "/stream/",
+			"request": {},
+			"doc": {
+				"sha256": "a919817542a8e9df48c21156ed287085b6f778cec1379e177946edbabcc2b45d",
+				"bytes": 138804
+			},
+			"component": null,
+			"census": {
+				"template": "courtneyr-child//page-stream",
+				"rendered": {
+					"part:appearance-toggle": {
+						"calls": 1,
+						"empty": 0
+					},
+					"part:footer": {
+						"calls": 1,
+						"empty": 0
+					},
+					"part:header": {
+						"calls": 1,
+						"empty": 0
+					},
+					"pattern:courtneyr-child/cr-hcard": {
+						"calls": 1,
+						"empty": 0
+					}
+				}
+			},
+			"sources": [
+				"parts/appearance-toggle.html",
+				"parts/footer.html",
+				"parts/header.html",
+				"patterns/cr-hcard.php",
+				"templates/page-stream.html"
+			],
+			"notes": "",
+			"normalized": {
+				"scripts": 14,
+				"origin": 94,
+				"origin-encoded": 2,
 				"origin-host": 1,
 				"ver-mtime": 5
 			}
