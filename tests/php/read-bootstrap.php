@@ -140,6 +140,12 @@ namespace {
 		return $GLOBALS['cr_read_meta'][ (int) $post_id ][ (string) $key ] ?? '';
 	}
 
+	if ( ! function_exists( 'get_the_terms' ) ) {
+		function get_the_terms( $post_id, $taxonomy ) {
+			return 'kind' === $taxonomy && $GLOBALS['cr_read_has_term'] ? array( (object) array( 'slug' => $GLOBALS['cr_read_kind'] ) ) : false;
+		}
+	}
+
 	function has_term( $term, $taxonomy, $post = null ): bool {
 		return (bool) $GLOBALS['cr_read_has_term'] && in_array( (string) $GLOBALS['cr_read_kind'], array_map( 'strval', (array) $term ), true ) && 'kind' === $taxonomy;
 	}
@@ -425,6 +431,16 @@ namespace {
 	require dirname( __DIR__, 2 ) . '/inc/stamps.php';
 	require dirname( __DIR__, 2 ) . '/inc/journal.php';
 	require dirname( __DIR__, 2 ) . '/inc/media-shelf.php';
+	require dirname( __DIR__, 2 ) . '/inc/read-shelf.php';
 	require dirname( __DIR__, 2 ) . '/inc/single-read.php';
 	require dirname( __DIR__, 2 ) . '/inc/stream-read.php';
+
+	function cr_read_setup_artifacts(): void {
+		require_once dirname( __DIR__, 2 ) . '/inc/artifact-style.php';
+		foreach ( $GLOBALS['cr_read_actions'] as $action ) {
+			if ( 'after_setup_theme' === $action[0] ) {
+				$action[1]();
+			}
+		}
+	}
 }

@@ -4617,6 +4617,8 @@ body.single-post.kind-read .cr-read__status-progress { color: var(--cr-ink, #241
 	body.single-post.kind-read .cr-journal > .cr-journal__meta { grid-column: 1 / -1; grid-row: 5; }
 }
 
+body.single-post.kind-read { --cr-read-shadow-ink: var(--cr-ink); }
+
 /* ---- The book ---- */
 body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book {
 	display: block;
@@ -4736,7 +4738,7 @@ body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book .pk-med
 	z-index: 0;
 	border-radius: 0 4px 4px 0;
 	background: repeating-linear-gradient(180deg, #f8f5ec 0 2px, #d8d3c5 2px 3px);
-	box-shadow: 6px 6px 0 var(--cr-ink, #241c4a);
+	box-shadow: var(--cr-shadow-hard-2);
 }
 /* Typographic cover when no image is stored anywhere, or when the stored
    image fails to load (site-ux.js adds cr-cover--failed). The page block
@@ -4752,7 +4754,7 @@ body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book :is(.cr
 	background: var(--cr-russian-violet);
 	color: var(--cr-printer-ivory);
 	border-radius: 2px 5px 5px 2px;
-	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0.6rem 0.6rem 0 #d8d3c5, calc(0.6rem + 6px) calc(0.6rem + 6px) 0 var(--cr-ink, #241c4a);
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0.6rem 0.6rem 0 #d8d3c5, calc(0.6rem + 6px) calc(0.6rem + 6px) 0 var(--cr-read-shadow-ink);
 }
 body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book :is(.cr-book__cover--type, .cr-book__cover.cr-cover--failed)::after { content: none; }
 body.single-post.kind-read .single-post__content .pk-card.k-read.cr-book :is(.cr-book__cover--type, .cr-book__cover.cr-cover--failed) { padding-right: calc(17% + 1.6rem); }
@@ -4888,6 +4890,40 @@ body.single-post:is(.kind-read, .kind-watch) .cr-journal__notes-title {
 	color: #241c4a;
 	border-bottom: 2px solid #241c4a;
 }
+/* The Comic note's torn edge sits behind the Read panel and its punched holes. */
+body.single-post.kind-read .cr-journal__notes {
+	--notes-tear: polygon(0 0.3rem, 4% 0.05rem, 11% 0.4rem, 19% 0.1rem, 27% 0.45rem, 36% 0.15rem, 44% 0.35rem, 53% 0, 61% 0.4rem, 70% 0.1rem, 78% 0.45rem, 86% 0.05rem, 93% 0.35rem, 100% 0.1rem, 100% calc(100% - 0.35rem), 94% calc(100% - 0.05rem), 87% calc(100% - 0.4rem), 79% calc(100% - 0.1rem), 71% calc(100% - 0.45rem), 62% calc(100% - 0.05rem), 54% calc(100% - 0.35rem), 45% 100%, 37% calc(100% - 0.4rem), 28% calc(100% - 0.1rem), 20% calc(100% - 0.45rem), 12% calc(100% - 0.05rem), 5% calc(100% - 0.3rem), 0 calc(100% - 0.1rem));
+	isolation: isolate;
+	background: none;
+	border-color: transparent;
+	box-shadow: none;
+	filter: drop-shadow(1.5px 0 0 var(--cr-ink)) drop-shadow(-1.5px 0 0 var(--cr-ink)) drop-shadow(0 1.5px 0 var(--cr-ink)) drop-shadow(0 -1.5px 0 var(--cr-ink)) drop-shadow(5px 5px 0 var(--cr-read-shadow-ink));
+}
+body.single-post.kind-read .cr-journal__notes::after {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	inset: -1.5px;
+	background-color: #fbfaf5;
+	background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.7rem - 1px), rgba(36, 28, 74, 0.13) calc(1.7rem - 1px) 1.7rem);
+	background-position: 0 1.25rem;
+	clip-path: var(--notes-tear);
+	pointer-events: none;
+}
+body.single-post.kind-read .cr-journal__notes-title {
+	font-family: var(--cr-font-accent, serif);
+	font-weight: var(--cr-weight-black);
+	letter-spacing: var(--cr-tracking-tight);
+	text-transform: uppercase;
+}
+@media (forced-colors: active) {
+	body.single-post.kind-read .cr-journal__notes {
+		background: Canvas;
+		filter: none;
+		outline: 2px solid CanvasText;
+	}
+	body.single-post.kind-read .cr-journal__notes::after { content: none; }
+}
 body.single-post:is(.kind-read, .kind-watch) .cr-journal__notes .pk-note {
 	margin: 0;
 	font-family: var(--cr-font-mono, monospace);
@@ -4909,6 +4945,7 @@ body.single-post:is(.kind-read, .kind-watch) .cr-record {
 	color: #241c4a;
 	font-family: var(--cr-font-mono, monospace);
 }
+body.single-post.kind-read .cr-record { box-shadow: var(--cr-shadow-hard); }
 /* The read single keeps both panels upright; the watch single keeps its tilt. */
 body.single-post.kind-watch .cr-journal__notes { transform: rotate(-0.5deg); }
 body.single-post.kind-watch .cr-record { transform: rotate(0.6deg); }
@@ -4972,7 +5009,7 @@ body.single-post.kind-read .cr-read__sample {
 	padding: 1.2rem 1.4rem 1.6rem;
 	background: #fbfaf5;
 	border: 1.5px solid var(--cr-ink, #241c4a);
-	box-shadow: 5px 5px 0 var(--cr-ink, #241c4a);
+	box-shadow: 5px 5px 0 var(--cr-read-shadow-ink);
 	color: #241c4a;
 }
 body.single-post.kind-read .cr-read__sample-title {
@@ -5011,6 +5048,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 }
 
 /* Dark page ground: the paper objects keep their ink. */
+:root[data-theme="dark"] body.single-post.kind-read { --cr-read-shadow-ink: var(--cr-selective-yellow); }
 :root[data-theme="dark"] body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.cr-journal__notes, .cr-journal__notes *, .cr-record, .cr-record *, .cr-read__sample, .cr-read__sample *) { color: #241c4a !important; }
 :root[data-theme="dark"] body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.cr-record-eyebrow, .cr-read__sample-note) { color: #126782 !important; }
 :root[data-theme="dark"] body.single-post.kind-read.single .single-post__content :is(.cr-book__cover--type, .cr-book__cover--type *, .cr-cover--failed, .cr-cover--failed *) { color: #fbfaf5 !important; }
@@ -5019,6 +5057,7 @@ body.single-post:is(.kind-checkin, .kind-watch, .kind-read, .kind-eat, .kind-dri
 :root[data-theme="dark"] body.single-post.kind-read.single .single-post .single-post__header .cr-read__status .cr-read__status-chip { color: #023047 !important; }
 :root[data-theme="dark"] body.single-post.kind-read.single .single-post .single-post__header :is(.cr-read__status--reading, .cr-read__status--abandoned, .cr-read__status--to-read) .cr-read__status-chip { color: #241c4a !important; }
 @media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) body.single-post.kind-read { --cr-read-shadow-ink: var(--cr-selective-yellow); }
 	:root:not([data-theme="light"]) body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.cr-journal__notes, .cr-journal__notes *, .cr-record, .cr-record *, .cr-read__sample, .cr-read__sample *) { color: #241c4a !important; }
 	:root:not([data-theme="light"]) body.single-post:is(.kind-read, .kind-watch).single .single-post__content :is(.cr-record-eyebrow, .cr-read__sample-note) { color: #126782 !important; }
 	:root:not([data-theme="light"]) body.single-post.kind-read.single .single-post__content :is(.cr-book__cover--type, .cr-book__cover--type *, .cr-cover--failed, .cr-cover--failed *) { color: #fbfaf5 !important; }
