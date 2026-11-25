@@ -45,6 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const KINDS = array(
 	'read'     => '\\Courtneyr\\Child\\SingleRead\\page_record',
 	'favorite' => '\\Courtneyr\\Child\\SingleFavorite\\page_sheet',
+	'repost'   => '\\Courtneyr\\Child\\Repost\\page_clipping',
 );
 
 /**
@@ -337,16 +338,27 @@ function scope_post_content( array $args, string $name ): array {
 		$flow     = $decision['flow'] ?? null;
 		$depth    = content_depth() + 1;
 		$prepare  = null;
+		$priority = 7;
 		if ( is_array( $flow ) ) {
-			$raw     = str_replace( ']]>', ']]&gt;', (string) \get_the_content() );
-			$suffix  = \has_block( 'core/nextpage' ) ? (string) \wp_link_pages( array( 'echo' => 0 ) ) : '';
-			$prepare = static function ( string $input ) use ( $raw, $suffix, $flow, $depth ): string {
-				if ( content_depth() !== $depth || ( $input !== $raw && $input !== $raw . $suffix ) ) {
-					return $input;
-				}
-				return group_content( $raw, $flow['class'], $flow['position'] ) . substr( $input, strlen( $raw ) );
-			};
-			\add_filter( 'the_content', $prepare, 7 );
+			$raw = str_replace( ']]>', ']]&gt;', (string) \get_the_content() );
+			if ( -1 === $flow['position'] && ! \has_blocks( $raw ) ) {
+				// Classic text needs wpautop before a wrapper turns it into a block.
+				$priority = 15;
+				$prepare  = static function ( string $input ) use ( $flow, $depth ): string {
+					return content_depth() === $depth && '' !== trim( $input )
+						? '<div class="wp-block-group ' . \esc_attr( $flow['class'] ) . '">' . $input . '</div>'
+						: $input;
+				};
+			} else {
+				$suffix  = \has_block( 'core/nextpage' ) ? (string) \wp_link_pages( array( 'echo' => 0 ) ) : '';
+				$prepare = static function ( string $input ) use ( $raw, $suffix, $flow, $depth ): string {
+					if ( content_depth() !== $depth || ( $input !== $raw && $input !== $raw . $suffix ) ) {
+						return $input;
+					}
+					return group_content( $raw, $flow['class'], $flow['position'] ) . substr( $input, strlen( $raw ) );
+				};
+			}
+			\add_filter( 'the_content', $prepare, $priority );
 		}
 		try {
 			$favorite = \Courtneyr\Child\SingleFavorite\single_facts();
@@ -357,7 +369,7 @@ function scope_post_content( array $args, string $name ): array {
 			return $render( $attrs, $content, $block );
 		} finally {
 			if ( null !== $prepare ) {
-				\remove_filter( 'the_content', $prepare, 7 );
+				\remove_filter( 'the_content', $prepare, $priority );
 			}
 		}
 	};

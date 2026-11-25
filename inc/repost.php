@@ -407,9 +407,21 @@ function clipping( string $html, array $block, $instance ): string {
 	$tape     = 'cr-repost-clip--tape-' . tilt_index( $post_id );
 	$selected = ArchiveCheckin\selected( $post, $instance, 'repost' );
 
-	// A protected post keeps the plugin's card whole: its one title link
-	// already reads "Protected: <stored title>" and it reads no facts.
+	// Keep the protected title and date. The ordinary Archive list item
+	// owns the entry root; the mixed-kind adapter keeps its card root.
 	if ( post_password_required( $post ) || ( $selected && ArchiveCheckin\is_protected( $html ) ) ) {
+		if ( ! $selected ) {
+			$tags = new \WP_HTML_Tag_Processor( $html );
+			if ( $tags->next_tag(
+				array(
+					'tag_name'   => 'article',
+					'class_name' => 'pk-card--protected',
+				)
+			) ) {
+				$tags->remove_class( 'h-entry' );
+				$html = $tags->get_updated_html();
+			}
+		}
 		return '<div class="cr-repost-clip cr-repost-clip--protected ' . esc_attr( $tape ) . '"><div class="' . PAPER_CLASSES . '">' . $html . '</div></div>';
 	}
 
@@ -675,6 +687,81 @@ function single_card( string $html, array $block, $instance ): string {
 add_filter( 'render_block_post-kinds-indieweb/repost-card', __NAMESPACE__ . '\\single_card', 10, 3 );
 
 /**
+ * The wide column's resolver for reposts (inc/single-wide-column.php).
+ *
+ * Every repost card on the page is dressed by single_card() as it renders, so
+ * for a card the decision carries only its shape. The clipping takes the
+ * column when the page's first card is a top-level block, or when the post
+ * holds no card at all and meta_only_clipping() will print one from the
+ * plugin's facts; for that shape the decision carries the card it prints, so
+ * the renderer prints exactly what was decided. A page of a split post
+ * without the card keeps the reading width; a card inside an authored Group
+ * keeps the Group's width. When the page holds a block the walker cannot see
+ * inside (a synced pattern, say) there is no decision, and the page renders
+ * as it does without the column.
+ *
+ * @param \WP_Post $post    Post: the loop's post object, which holds the autosave in a preview.
+ * @param string   $content The content of the page being printed.
+ * @return array{wide: bool, data: array{shape: string, attrs?: array<string, string>}, flow: ?array{class: string, position: int}}|null Null when the page prints no clipping, or its structure is unknown.
+ */
+function page_clipping( \WP_Post $post, string $content ): ?array {
+	$position = null;
+	$place    = \Courtneyr\Child\SingleWideColumn\first_block_place( $content, 'post-kinds-indieweb/repost-card', $position );
+	if ( 'unknown' === $place ) {
+		return null;
+	}
+	if ( 'none' !== $place ) {
+		return array(
+			'wide' => 'top' === $place,
+			'data' => array( 'shape' => 'card' ),
+			'flow' => null === $position ? null : array(
+				'class'    => 'cr-repost-flow',
+				'position' => $position,
+			),
+		);
+	}
+	$attrs = meta_card_attrs( $post );
+	if ( array() === $attrs ) {
+		return null;
+	}
+	return array(
+		'wide' => true,
+		'flow' => array(
+			'class'    => 'cr-repost-flow',
+			'position' => -1,
+		),
+		'data' => array(
+			'shape' => 'meta',
+			'attrs' => $attrs,
+		),
+	);
+}
+
+/**
+ * The card a repost with no card block prints, from the plugin's facts.
+ *
+ * @param \WP_Post $post Post: the loop's post object, which holds the autosave in a preview.
+ * @return array<string, string> Card attributes; empty when the post holds a card or has nothing to print.
+ */
+function meta_card_attrs( \WP_Post $post ): array {
+	if ( has_block( 'post-kinds-indieweb/repost-card', $post ) ) {
+		return array();
+	}
+	$facts = facts( $post->ID );
+	$attrs = array(
+		'title'       => fact( $facts, 'cited_title' ),
+		'url'         => fact( $facts, 'url' ),
+		'author'      => fact( $facts, 'author' ),
+		'description' => fact( $facts, 'summary' ),
+		'image'       => fact( $facts, 'card_image' ),
+	);
+	if ( '' === $attrs['url'] && '' === $attrs['title'] ) {
+		return array();
+	}
+	return array_filter( $attrs, static fn( string $value ): bool => '' !== $value );
+}
+
+/**
  * Print a clipping on the single of a repost that has no card block.
  *
  * A repost filed from the classic meta box holds its source in post meta and
@@ -684,6 +771,12 @@ add_filter( 'render_block_post-kinds-indieweb/repost-card', __NAMESPACE__ . '\\s
  * hidden data (99) and the singular wrapper (100), so it lands inside the
  * h-entry and wpautop never sees it.
  *
+ * On a page the wide column decided, the card printed is the one the decision
+ * carries (page_clipping()), so a page marked wide always prints its clipping
+ * and a page whose decision is a card never prints a second one. Elsewhere the
+ * same meta_card_attrs() answers, from the loop's post object, never the saved
+ * post fetched again by ID.
+ *
  * @param string $content Post content.
  * @return string
  */
@@ -691,37 +784,45 @@ function meta_only_clipping( string $content ): string {
 	if ( ! is_repost_single() || ! in_the_loop() || is_feed() || doing_filter( 'get_the_excerpt' ) ) {
 		return $content;
 	}
-	$post_id = (int) get_the_ID();
-	if ( ! $post_id || get_queried_object_id() !== $post_id || '' !== (string) get_query_var( 'atproto', '' ) ) {
-		return $content;
-	}
-	$post = get_post( $post_id );
-	if ( ! $post instanceof \WP_Post || post_password_required( $post ) || has_block( 'post-kinds-indieweb/repost-card', $post ) || false !== strpos( $content, 'k-repost' ) ) {
+	// The loop's post object: in a preview it holds the autosave, as the wide column's decision read it.
+	$post = get_post();
+	if ( ! $post instanceof \WP_Post || get_queried_object_id() !== $post->ID || '' !== (string) get_query_var( 'atproto', '' ) || post_password_required( $post ) ) {
 		return $content;
 	}
 
-	$facts = facts( $post_id );
-	$attrs = array(
-		'title'       => fact( $facts, 'cited_title' ),
-		'url'         => fact( $facts, 'url' ),
-		'author'      => fact( $facts, 'author' ),
-		'description' => fact( $facts, 'summary' ),
-		'image'       => fact( $facts, 'card_image' ),
-	);
-	if ( '' === $attrs['url'] && '' === $attrs['title'] ) {
+	$decided = \Courtneyr\Child\SingleWideColumn\data_for( 'repost' );
+	if ( is_array( $decided ) ) {
+		// The decision already said what this page prints; print exactly that.
+		$attrs = 'meta' === ( $decided['shape'] ?? '' ) ? (array) ( $decided['attrs'] ?? array() ) : array();
+	} else {
+		// No decision (a synced pattern on the page, say): the same card, unless the content already prints one.
+		$attrs = prints_card( $content ) ? array() : meta_card_attrs( $post );
+	}
+	if ( array() === $attrs ) {
 		return $content;
 	}
 
 	$card = render_block(
 		array(
 			'blockName'    => 'post-kinds-indieweb/repost-card',
-			'attrs'        => array_filter( $attrs, static fn( string $value ): bool => '' !== $value ),
+			'attrs'        => $attrs,
 			'innerBlocks'  => array(),
 			'innerHTML'    => '',
 			'innerContent' => array(),
 		)
 	);
 	return $card . $content;
+}
+
+/**
+ * Whether rendered content already holds a repost card element.
+ *
+ * @param string $content Rendered content.
+ * @return bool
+ */
+function prints_card( string $content ): bool {
+	$tags = new \WP_HTML_Tag_Processor( $content );
+	return $tags->next_tag( array( 'class_name' => 'k-repost' ) );
 }
 add_filter( 'the_content', __NAMESPACE__ . '\\meta_only_clipping', 20 );
 

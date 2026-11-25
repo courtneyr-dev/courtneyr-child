@@ -16,6 +16,26 @@
    Archive: the zine spreads
    ========================================================================== */
 
+.cr-repost-zine,
+body.single-post.kind-repost .single-post__content {
+	--cr-repost-torn-contour: polygon(
+		0 3px, 4% 1px, 8% 4px, 13% 0, 20% 3px, 26% 1px,
+		32% 5px, 37% 2px, 44% 4px, 50% 0, 56% 3px, 62% 1px,
+		68% 5px, 74% 2px, 81% 4px, 87% 1px, 94% 4px, 100% 2px,
+		calc(100% - 3px) 8%, 100% 16%, calc(100% - 5px) 25%,
+		calc(100% - 1px) 33%, calc(100% - 4px) 44%, 100% 54%,
+		calc(100% - 4px) 63%, calc(100% - 1px) 74%,
+		calc(100% - 5px) 84%, 100% 93%, calc(100% - 3px) 100%,
+		94% calc(100% - 4px), 88% 100%, 82% calc(100% - 2px),
+		76% calc(100% - 5px), 69% calc(100% - 1px), 63% 100%,
+		56% calc(100% - 4px), 49% calc(100% - 2px), 42% 100%,
+		36% calc(100% - 3px), 30% 100%, 24% calc(100% - 5px),
+		18% calc(100% - 1px), 12% calc(100% - 4px), 6% 100%,
+		1px calc(100% - 3px), 4px 93%, 0 84%, 3px 75%, 1px 65%,
+		5px 56%, 0 47%, 2px 38%, 0 29%, 4px 19%, 1px 12%
+	);
+}
+
 /* The engine prints each item as li.wp-block-post. components.css gives every
    .cr-archive .wp-block-post padding, a hover lift and an orange marker bar,
    and cr-archives.css undoes those only for the collage and stories. */
@@ -384,6 +404,7 @@
 	background: var(--cr-tape);
 	box-shadow: none;
 	opacity: 1;
+	transform: rotate(var(--cr-rotate-neg));
 	pointer-events: none;
 }
 
@@ -510,6 +531,108 @@ body.single-post.kind-repost .single-post__content {
 	margin-inline: auto;
 }
 
+/*
+ * The clipping in the wide column (inc/single-wide-column.php decides; the
+ * class it adds is the only switch). From 64rem the 80ch pin above yields to
+ * the column, theme.json wideSize: the clipping takes the full column (its
+ * own max-inline-size is 100% of the singular wrapper, which now spans it), the
+ * header's date and kind chip line up with the clipping's edges as the
+ * approved mockup draws them, and the blocks around the clipping sit in
+ * .cr-repost-flow, which cr-wide-column.css keeps at the reading width. Under
+ * 64rem the pin holds and the wrapper keeps the reading width, as before.
+ *
+ * The sparkle stays where the 80ch column put it. 80ch must resolve in the
+ * content's font, not the glyph's. The content element computes the offset
+ * on its own inline-end inset, where 80ch becomes a length in its font; with
+ * the start inset also set, a relatively positioned box ignores the end one,
+ * so the content does not move. The glyph inherits the computed right, so
+ * left-to-right text needs no @property. In right-to-left text the inline
+ * end is the left side, so there the glyph reads the same length from the
+ * registered custom property; an engine without registration places it as
+ * before (a recorded limit).
+ */
+@property --cr-repost-measure {
+	syntax: "<length>";
+	inherits: true;
+	initial-value: 0;
+}
+
+body.single-post.kind-repost .cr-wide-column.single-post__content {
+	--cr-repost-measure: 80ch;
+
+	inset-inline-start: 0;
+	inset-inline-end: calc((100% - min(100%, 80ch)) / 2 - 1rem);
+}
+
+body.single-post.kind-repost .cr-wide-column.single-post__content::before {
+	right: inherit;
+}
+
+[dir="rtl"] body.single-post.kind-repost .cr-wide-column.single-post__content::before {
+	right: calc((100% - min(100%, var(--cr-repost-measure))) / 2 - 1rem);
+}
+
+@media (min-width: 64rem) {
+
+	body.single-post.kind-repost .cr-wide-column.single-post__header,
+	body.single-post.kind-repost .cr-wide-column.single-post__content {
+		max-inline-size: var(--wp--style--global--wide-size);
+	}
+
+	/* The kind chip at the clipping's start edge, the date at its end edge. */
+	body.single-post.kind-repost .cr-wide-column.single-post__header > .single-post__lede-meta {
+		max-inline-size: none;
+	}
+
+	body.single-post.kind-repost .cr-wide-column.single-post__header > .single-post__lede-meta > .single-post__date {
+		order: 1;
+		margin-inline-start: auto;
+	}
+
+	/* The taller picture spans both text rows; the caption row keeps its height so the description follows it. */
+	body.single-post.kind-repost .cr-wide-column .cr-repost-clip--single .pk-body:has(> .pk-embed:not(.cr-cover--failed)) {
+		grid-template-rows: auto 1fr;
+	}
+}
+
+/*
+ * Courtney's note under the clipping starts at the clipping's start edge, as
+ * the approved mockup draws it. The box of blocks after the clipping spans the
+ * column, so a full-width group in it still bleeds from the centered column;
+ * its blocks keep the reading width, starting at that edge.
+ */
+@media (min-width: 64rem) {
+
+	body.single-post.kind-repost .cr-wide-column.single-post__content > .pkiw-singular-entry > .cr-repost-clip--single ~ .cr-repost-flow {
+		max-width: none;
+		margin-inline: 0;
+	}
+
+	body.single-post.kind-repost .cr-wide-column.single-post__content > .pkiw-singular-entry > .cr-repost-clip--single ~ .cr-repost-flow > :not(.alignfull):not(.alignwide) {
+		max-width: var(--wp--style--global--content-size);
+		margin-inline-start: 0;
+		margin-inline-end: auto;
+	}
+
+	/* tokens.css caps .alignwide at 90% of its box, centered; here that box is the reading width from the edge. */
+	body.single-post.kind-repost .cr-wide-column.single-post__content > .pkiw-singular-entry > .cr-repost-clip--single ~ .cr-repost-flow > .alignwide {
+		max-width: calc(var(--wp--style--global--content-size) * 0.9);
+		margin-inline-start: calc(var(--wp--style--global--content-size) * 0.05);
+		margin-inline-end: auto;
+	}
+}
+
+@media not all and (min-width: 64rem) {
+
+	body.single-post.kind-repost .cr-wide-column.single-post__content {
+		max-inline-size: var(--cr-measure-wide);
+	}
+
+	body.single-post.kind-repost .cr-wide-column.single-post__content > .pkiw-singular-entry {
+		max-width: var(--wp--style--global--content-size);
+	}
+}
+
 body.single-post.kind-repost .single-post__date {
 	font-family: var(--cr-font-mono);
 }
@@ -534,6 +657,35 @@ body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-c
 	background-image: var(--cr-fiber);
 	box-shadow: var(--cr-shadow-hard);
 	color: var(--cr-russian-violet);
+}
+
+@media (forced-colors: none) {
+
+	body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-clip--single {
+		background: none;
+		box-shadow: none;
+		filter: drop-shadow(var(--cr-space-2xs) var(--cr-space-2xs) light-dark(var(--cr-ink), var(--cr-selective-yellow)));
+	}
+
+	.cr-repost-zine .cr-repost-clip__paper {
+		isolation: isolate;
+		background: none;
+	}
+
+	.cr-repost-zine .pkiw-group__heading::before {
+		clip-path: var(--cr-repost-torn-contour);
+	}
+
+	.cr-repost-zine .cr-repost-clip__paper.cr-paper-sheet--torn::after,
+	body.single-post.kind-repost .single-post__content .cr-repost-clip--single.cr-paper-sheet--torn::after {
+		z-index: -1;
+		inset: 0;
+		block-size: auto;
+		background-image: var(--cr-fiber);
+		-webkit-mask: none;
+		mask: none;
+		clip-path: var(--cr-repost-torn-contour);
+	}
 }
 
 body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-clip--single::before {
@@ -650,6 +802,18 @@ body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-e
 	max-inline-size: 100%;
 	block-size: auto;
 	filter: none;
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-embed--photo {
+	padding: var(--cr-space-xs);
+	border-radius: 0;
+	background-color: var(--cr-printer-ivory);
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-embed--photo > img {
+	aspect-ratio: 5 / 4;
+	border-radius: 0;
+	object-fit: cover;
 }
 
 body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-embed.cr-cover--failed {
