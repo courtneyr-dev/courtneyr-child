@@ -16,6 +16,26 @@
    Archive: the zine spreads
    ========================================================================== */
 
+.cr-repost-zine,
+body.single-post.kind-repost .single-post__content {
+	--cr-repost-torn-contour: polygon(
+		0 3px, 4% 1px, 8% 4px, 13% 0, 20% 3px, 26% 1px,
+		32% 5px, 37% 2px, 44% 4px, 50% 0, 56% 3px, 62% 1px,
+		68% 5px, 74% 2px, 81% 4px, 87% 1px, 94% 4px, 100% 2px,
+		calc(100% - 3px) 8%, 100% 16%, calc(100% - 5px) 25%,
+		calc(100% - 1px) 33%, calc(100% - 4px) 44%, 100% 54%,
+		calc(100% - 4px) 63%, calc(100% - 1px) 74%,
+		calc(100% - 5px) 84%, 100% 93%, calc(100% - 3px) 100%,
+		94% calc(100% - 4px), 88% 100%, 82% calc(100% - 2px),
+		76% calc(100% - 5px), 69% calc(100% - 1px), 63% 100%,
+		56% calc(100% - 4px), 49% calc(100% - 2px), 42% 100%,
+		36% calc(100% - 3px), 30% 100%, 24% calc(100% - 5px),
+		18% calc(100% - 1px), 12% calc(100% - 4px), 6% 100%,
+		1px calc(100% - 3px), 4px 93%, 0 84%, 3px 75%, 1px 65%,
+		5px 56%, 0 47%, 2px 38%, 0 29%, 4px 19%, 1px 12%
+	);
+}
+
 /* The engine prints each item as li.wp-block-post. components.css gives every
    .cr-archive .wp-block-post padding, a hover lift and an orange marker bar,
    and cr-archives.css undoes those only for the collage and stories. */
@@ -646,6 +666,16 @@ body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-c
 		filter: drop-shadow(var(--cr-space-2xs) var(--cr-space-2xs) light-dark(var(--cr-ink), var(--cr-selective-yellow)));
 	}
 
+	.cr-repost-zine .cr-repost-clip__paper {
+		isolation: isolate;
+		background: none;
+	}
+
+	.cr-repost-zine .pkiw-group__heading::before {
+		clip-path: var(--cr-repost-torn-contour);
+	}
+
+	.cr-repost-zine .cr-repost-clip__paper.cr-paper-sheet--torn::after,
 	body.single-post.kind-repost .single-post__content .cr-repost-clip--single.cr-paper-sheet--torn::after {
 		z-index: -1;
 		inset: 0;
@@ -653,22 +683,7 @@ body.single-post.kind-repost .single-post__content .pk-card.k-repost.cr-repost-c
 		background-image: var(--cr-fiber);
 		-webkit-mask: none;
 		mask: none;
-		clip-path: polygon(
-			0 3px, 4% 1px, 8% 4px, 13% 0, 20% 3px, 26% 1px,
-			32% 5px, 37% 2px, 44% 4px, 50% 0, 56% 3px, 62% 1px,
-			68% 5px, 74% 2px, 81% 4px, 87% 1px, 94% 4px, 100% 2px,
-			calc(100% - 3px) 8%, 100% 16%, calc(100% - 5px) 25%,
-			calc(100% - 1px) 33%, calc(100% - 4px) 44%, 100% 54%,
-			calc(100% - 4px) 63%, calc(100% - 1px) 74%,
-			calc(100% - 5px) 84%, 100% 93%, calc(100% - 3px) 100%,
-			94% calc(100% - 4px), 88% 100%, 82% calc(100% - 2px),
-			76% calc(100% - 5px), 69% calc(100% - 1px), 63% 100%,
-			56% calc(100% - 4px), 49% calc(100% - 2px), 42% 100%,
-			36% calc(100% - 3px), 30% 100%, 24% calc(100% - 5px),
-			18% calc(100% - 1px), 12% calc(100% - 4px), 6% 100%,
-			1px calc(100% - 3px), 4px 93%, 0 84%, 3px 75%, 1px 65%,
-			5px 56%, 0 47%, 2px 38%, 0 29%, 4px 19%, 1px 12%
-		);
+		clip-path: var(--cr-repost-torn-contour);
 	}
 }
 
@@ -786,6 +801,18 @@ body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-e
 	max-inline-size: 100%;
 	block-size: auto;
 	filter: none;
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-embed--photo {
+	padding: var(--cr-space-xs);
+	border-radius: 0;
+	background-color: var(--cr-printer-ivory);
+}
+
+body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-embed--photo > img {
+	aspect-ratio: 5 / 4;
+	border-radius: 0;
+	object-fit: cover;
 }
 
 body.single-post.kind-repost .single-post__content .cr-repost-clip--single .pk-embed.cr-cover--failed {
