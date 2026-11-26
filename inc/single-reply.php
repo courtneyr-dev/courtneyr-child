@@ -109,11 +109,16 @@ function cite_card( string $html, array $block, $instance = null ): string {
 	}
 	$facts = function_exists( '\\PKIW\\kind_facts' ) ? \PKIW\kind_facts( $post_id ) : array();
 	$host  = is_array( $facts ) ? trim( (string) ( $facts['host'] ?? '' ) ) : '';
-	$tags = new \WP_HTML_Tag_Processor( $html );
-	$cue  = $tags->next_tag( array( 'tag_name' => 'H2', 'class_name' => 'pk-title' ) ) && $tags->has_class( 'p-name' )
+	$tags  = new \WP_HTML_Tag_Processor( $html );
+	$cue   = $tags->next_tag(
+		array(
+			'tag_name'   => 'H2',
+			'class_name' => 'pk-title',
+		)
+	) && $tags->has_class( 'p-name' )
 		? '<span class="cr-letter-cite__label">' . esc_html( __( 'In reply to', 'courtneyr-child' ) ) . '</span>'
 		: '';
-	$out  = preg_replace_callback(
+	$out   = preg_replace_callback(
 		'/<span\b[^>]*\bclass="[^"]*(?<![\w-])pk-kindlabel(?![\w-])[^"]*"[^>]*>.*?<\/span>/is',
 		static fn(): string => $cue,
 		$html,
