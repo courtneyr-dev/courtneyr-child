@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.186
+
+- Add the Key takeaways block and share its styling with existing Yoast summaries. (#384)
+
 ## 0.7.185
 
 - Restore contrast for Blog contents headings, links, and keyboard focus. (#382)
