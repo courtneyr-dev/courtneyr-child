@@ -78,3 +78,36 @@
 :is(.cr-prose, .wp-block-post-content, .entry-content) .cr-toc--emoji ul ul {
   padding-inline-start: var(--cr-space-md);
 }
+
+@media screen and (min-width: 80rem) {
+
+  .single-post__content .cr-toc--blog {
+    --cr-toc-rail: 14rem;
+    --cr-toc-offset: calc(var(--wp-admin--admin-bar--height, 0px) + var(--cr-sticky-header-clearance, 5rem));
+
+    float: inline-start;
+    position: sticky;
+    inset-block-start: var(--cr-toc-offset);
+    inline-size: var(--cr-toc-rail);
+    max-block-size: calc(100dvh - var(--cr-toc-offset) - var(--cr-space-lg));
+    margin-block: 0;
+    margin-inline: calc(-1 * (var(--cr-toc-rail) + var(--cr-space-xl))) 0 !important;
+    padding: var(--cr-space-sm);
+    overflow-y: auto;
+    background: var(--cr-surface);
+    border: 0;
+    box-shadow: none;
+    font-size: var(--cr-text-sm);
+    overflow-wrap: anywhere;
+  }
+
+  .single-post__content .cr-toc--blog > h2 {
+    position: static;
+    margin-block-end: var(--cr-space-xs);
+    padding: 0;
+    background: none;
+    color: inherit;
+    box-shadow: none;
+    transform: none;
+  }
+}

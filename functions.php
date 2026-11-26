@@ -147,6 +147,7 @@ require_once __DIR__ . '/inc/event-calendar.php';
 require_once __DIR__ . '/inc/event.php';
 require_once __DIR__ . '/inc/footnotes.php';
 require_once __DIR__ . '/inc/toc.php';
+require_once __DIR__ . '/inc/single-navigation.php';
 require_once __DIR__ . '/inc/stream-stories.php';
 require_once __DIR__ . '/inc/table.php';
 require_once __DIR__ . '/inc/follow.php';
