@@ -39,6 +39,9 @@ cr_reply_group(
 		cr_reply_not_contains( 'cr-letter-cite__sep', $bare, 'no author: no separator' );
 		$already = SingleReply\cite_card( cr_reply_cite_fixture( 'target.test' ), array(), new WP_Block( array( 'postId' => $post->ID ) ) );
 		cr_reply_not_contains( 'cr-letter-cite__host', $already, 'matching link text suppresses host' );
+		$synthetic = str_replace( 'pk-title p-name', 'pk-title', $no_author );
+		$out       = SingleReply\cite_card( $synthetic, array(), new WP_Block( array( 'postId' => $post->ID ) ) );
+		cr_reply_not_contains( 'cr-letter-cite__label', $out, 'unnamed citation preserves its implied name' );
 	}
 );
 
