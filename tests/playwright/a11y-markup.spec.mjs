@@ -4680,12 +4680,15 @@ test( 'a reply citation fills the article column at 1280 and 320 (PKIW #253)', a
 				card: card.getBoundingClientRect().width,
 				top: cs.borderTopWidth,
 				shadow: cs.boxShadow,
+				hasQuote: Boolean( card.querySelector( '.pk-body > blockquote.pk-note' ) ),
+				paper: getComputedStyle( card, '::after' ).clipPath,
 			};
 		} );
 		expect( o.body, `${ width }px citation body fills the card` ).toBeGreaterThanOrEqual( o.content - 1 );
 		expect( Math.abs( o.card - o.entry ), `${ width }px citation spans the article column` ).toBeLessThanOrEqual( 1 );
-		expect( o.top, `${ width }px citation has its top rule` ).toBe( '3px' );
-		expect( o.shadow, `${ width }px citation has an offset shadow` ).not.toBe( 'none' );
+		expect( o.top, `${ width }px citation has no straight top rule` ).toBe( '0px' );
+		expect( o.shadow, `${ width }px citation has no box shadow` ).toBe( 'none' );
+		expect( o.paper.startsWith( 'polygon(' ), `${ width }px paper follows the optional quote` ).toBe( o.hasQuote );
 		expect( await hasHorizontalScroll( page ), `${ width }px no horizontal scroll` ).toBeLessThanOrEqual( 0 );
 	}
 } );
