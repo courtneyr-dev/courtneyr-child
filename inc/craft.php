@@ -13,13 +13,24 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Craft;
 
+use Courtneyr\Child\ArtifactStyle;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 const KIND           = 'craft';
+const ARTIFACT_STYLE = 'cr-pegboard-tag';
+const ARTIFACT_CLASS = 'is-style-' . ARTIFACT_STYLE;
 const STYLE_HANDLE   = 'courtneyr-craft';
 const PEG_CARD_STYLE = 'is-style-cr-peg-card';
+
+add_action(
+	'after_setup_theme',
+	static function (): void {
+		ArtifactStyle\register( 'post-kinds-indieweb/craft-card', ARTIFACT_STYLE, __( 'Pegboard tag', 'courtneyr-child' ), KIND );
+	}
+);
 
 /** Whether this request is the craft pegboard archive. */
 function is_pegboard(): bool {
@@ -28,7 +39,18 @@ function is_pegboard(): bool {
 
 /** Whether this request is a single craft post. */
 function is_craft_single(): bool {
-	return is_singular( 'post' ) && has_term( KIND, 'kind', get_queried_object_id() );
+	return is_singular( 'post' ) && ArtifactStyle\applies( get_queried_object_id(), ARTIFACT_STYLE );
+}
+
+/**
+ * Resolve the post ID from the current block's context.
+ *
+ * @param mixed $instance Block instance.
+ */
+function block_post_id( $instance ): int {
+	return ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
+		? (int) $instance->context['postId']
+		: (int) get_the_ID();
 }
 
 /**
@@ -122,11 +144,9 @@ function peg_card( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
-	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
-		? (int) $instance->context['postId']
-		: (int) get_the_ID();
+	$post_id = block_post_id( $instance );
 	$post    = $post_id ? get_post( $post_id ) : null;
-	if ( ! $post instanceof \WP_Post || ! has_term( KIND, 'kind', $post ) ) {
+	if ( ! $post instanceof \WP_Post || ! ArtifactStyle\applies( $post, ARTIFACT_STYLE ) ) {
 		return $html;
 	}
 
@@ -175,7 +195,8 @@ function peg_card( string $html, array $block, $instance ): string {
 		}
 	}
 
-	return '<div class="cr-peg-card" data-cr-cover-fallback="true">'
+	$root_class = post_password_required( $post ) ? 'cr-peg-card' : 'cr-peg-card ' . ARTIFACT_CLASS;
+	return '<div class="' . esc_attr( $root_class ) . '" data-cr-cover-fallback="true">'
 		. $picture
 		. '<h' . $heading_level . ' class="cr-peg-card__title"><a class="' . esc_attr( $name_class ) . '" href="' . $permalink . '">'
 		. esc_html( (string) $name )

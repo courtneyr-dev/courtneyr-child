@@ -2,8 +2,7 @@
 /**
  * Craft single integration (PKIW issue 249).
  *
- * The H1 stays in the template header, and this file adds no single render
- * filter. The craft layout belongs to the stylesheet added in the next lane.
+ * The H1 stays in the template header. The craft layout belongs to its stylesheet.
  *
  * @package CourtneyrChild
  */
@@ -11,6 +10,8 @@
 declare( strict_types = 1 );
 
 namespace Courtneyr\Child\SingleCraft;
+
+use Courtneyr\Child\Craft;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -34,6 +35,34 @@ function body_class( array $classes ): array {
 	return $classes;
 }
 add_filter( 'body_class', __NAMESPACE__ . '\\body_class' );
+
+/**
+ * Mark the existing Craft facts block on its own single.
+ *
+ * @param string $html     Rendered card.
+ * @param array  $block    Parsed block.
+ * @param mixed  $instance Block instance.
+ */
+function mark_artifact( string $html, array $block, $instance ): string {
+	if ( '' === $html || ! Craft\is_craft_single() ) {
+		return $html;
+	}
+	$post_id = Craft\block_post_id( $instance );
+	if ( (int) get_queried_object_id() !== $post_id || post_password_required( $post_id ) ) {
+		return $html;
+	}
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	if ( $tags->next_tag(
+		array(
+			'tag_name'   => 'DL',
+			'class_name' => 'pkiw-craft-facts',
+		)
+	) ) {
+		$tags->add_class( Craft\ARTIFACT_CLASS );
+	}
+	return $tags->get_updated_html();
+}
+add_filter( 'render_block_post-kinds-indieweb/craft-card', __NAMESPACE__ . '\\mark_artifact', 10, 3 );
 
 /**
  * Let the shared featured-image filter suppress repeated craft covers.
