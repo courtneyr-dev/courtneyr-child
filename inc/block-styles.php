@@ -11,6 +11,20 @@
 
 defined( 'ABSPATH' ) || exit;
 
+add_action(
+	'init',
+	static function () {
+		wp_register_script(
+			'courtneyr-key-takeaways-editor',
+			COURTNEYR_CHILD_URI . '/blocks/key-takeaways/editor.js',
+			array( 'wp-blocks', 'wp-block-editor', 'wp-element', 'wp-i18n' ),
+			COURTNEYR_CHILD_VERSION,
+			true
+		);
+		register_block_type( COURTNEYR_CHILD_DIR . '/blocks/key-takeaways' );
+	}
+);
+
 /**
  * Register block styles for core/group so users can pick zine treatments
  * from the editor sidebar.

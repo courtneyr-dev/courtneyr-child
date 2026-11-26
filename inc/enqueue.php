@@ -36,20 +36,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Value: the filename inside assets/css/blocks/ (without extension).
  */
 const BLOCK_STYLE_MAP = array(
-	'core/button'    => 'core-button',
-	'core/buttons'   => 'core-buttons',
-	'core/quote'     => 'core-quote',
-	'core/pullquote' => 'core-pullquote',
-	'core/code'      => 'core-code',
-	'core/group'     => 'core-group',
-	'core/columns'   => 'core-columns',
-	'core/image'     => 'core-image',
-	'core/gallery'   => 'core-gallery',
-	'core/separator' => 'core-separator',
-	'core/heading'   => 'core-heading',
-	'core/list'      => 'core-list',
-	'core/table'     => 'core-table',
-	'core/embed'     => 'core-embed',
+	'core/button'             => 'core-button',
+	'core/buttons'            => 'core-buttons',
+	'core/quote'              => 'core-quote',
+	'core/pullquote'          => 'core-pullquote',
+	'core/code'               => 'core-code',
+	'core/group'              => 'core-group',
+	'core/columns'            => 'core-columns',
+	'core/image'              => 'core-image',
+	'core/gallery'            => 'core-gallery',
+	'core/separator'          => 'core-separator',
+	'core/heading'            => 'core-heading',
+	'core/list'               => 'core-list',
+	'core/table'              => 'core-table',
+	'core/embed'              => 'core-embed',
+	'courtneyr/key-takeaways' => 'key-takeaways',
+	'yoast-seo/ai-summarize'  => 'key-takeaways',
 );
 
 /**
