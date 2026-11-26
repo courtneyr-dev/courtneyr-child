@@ -89,6 +89,10 @@
   text-decoration-thickness: 2px;
 }
 
+.cr-toc.cr-toc--blog a:focus-visible {
+  outline-color: currentcolor;
+}
+
 :is(.cr-prose, .wp-block-post-content, .entry-content) .cr-toc--emoji ul > li {
   padding-inline-start: 0;
 }
