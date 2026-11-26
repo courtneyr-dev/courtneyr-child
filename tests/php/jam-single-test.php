@@ -102,6 +102,7 @@ cr_jam_group(
 		}
 		$positions = array_map( static fn( string $class ): int => (int) strpos( $out, $class ), array( 'cr-jcard__insert', 'cr-jcard__details', 'cr-jcard__spine', 'cr-jcard__note' ) );
 		cr_jam_assert( $positions === array_values( $positions ) && $positions[0] < $positions[1] && $positions[1] < $positions[2] && $positions[2] < $positions[3], 'panel DOM order' );
+		cr_jam_same( 0, preg_match( '/<article\b[^>]*\bu-jam-of\b/', $out ), 'only the nested URL carries jam-of' );
 		cr_jam_contains( '<p class="pk-title p-name"><a class="u-url u-jam-of"', $out, 'Track becomes a paragraph and keeps link classes' );
 		cr_jam_contains( '<span class="p-author h-card"><span class="p-name">The Paper Satellites</span></span>', $out, 'artist span verbatim' );
 		cr_jam_contains( '<em>Signal Bloom</em>', $out, 'album fragment' );

@@ -748,6 +748,7 @@ test.describe( 'single J-card', () => {
 		await openSingle( page, request, 'J01' );
 		const link = page.locator( '.cr-jcard a.pk-link' );
 		expect( ( await link.boundingBox() ).height ).toBeGreaterThanOrEqual( 44 );
+		await expect( link ).toHaveCSS( 'justify-content', 'flex-start' );
 		await link.focus();
 		expect( await page.locator( '.cr-jcard__details' ).evaluate( ( node ) => getComputedStyle( node ).outlineWidth ) ).toBe( '3px' );
 	} );
@@ -755,6 +756,7 @@ test.describe( 'single J-card', () => {
 	test( 'single microformat classes survive on the rebuilt J-card', async ( { page, request } ) => {
 		await openSingle( page, request, 'J09' );
 		const card = page.locator( 'article.cr-jcard.h-cite' );
+		await expect( card ).not.toHaveClass( /\bu-jam-of\b/ );
 		// The author h-card's own p-name belongs to that nested card, not to the h-cite.
 		await expect( card.locator( '.p-name:not(.h-card .p-name)' ) ).toHaveCount( 1 );
 		await expect( card.locator( '.u-jam-of' ) ).toHaveCount( 1 );

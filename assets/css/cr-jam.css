@@ -714,7 +714,7 @@ body[class*="kind-"].single .single-post__content .pk-card.cr-jcard::before {
 .cr-jcard__details .pk-link {
 	display: inline-flex;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: flex-start;
 	gap: var(--cr-space-sm);
 	min-height: 2.75rem;
 	padding: var(--cr-space-xs) var(--cr-space-sm);
