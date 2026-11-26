@@ -33,13 +33,17 @@ namespace {
 		}
 		return $value;
 	}
-	function has_term( $term, $taxonomy, $post ) {
-		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
-		return 'wish' === $term && 'kind' === $taxonomy && ! empty( $GLOBALS['cr_terms'][ $id ] );
+	function get_the_terms( $post, $taxonomy ) {
+		return 'kind' === $taxonomy && ! empty( $GLOBALS['cr_terms'][ $post ] ) ? array( (object) array( 'slug' => 'wish' ) ) : false;
+	}
+	function add_action( $hook, $callback, $priority = 10, $args = 1 ) {
+		return add_filter( $hook, $callback, $priority, $args );
 	}
 }
 
 namespace Courtneyr\Child\Wish {
+	const ARTIFACT_STYLE = 'cr-catalog-clipping';
+
 	function is_wish_single(): bool {
 		return (bool) $GLOBALS['cr_single'];
 	}
@@ -52,7 +56,9 @@ namespace PKIW {
 }
 
 namespace {
+	require dirname( __DIR__, 2 ) . '/inc/artifact-style.php';
 	require dirname( __DIR__, 2 ) . '/inc/single-wish.php';
+	\Courtneyr\Child\ArtifactStyle\register( 'post-kinds-indieweb/wish-card', 'cr-catalog-clipping', 'Catalog clipping', 'wish' );
 	$failures = array();
 
 	function cr_wish_single_check( string $name, callable $test ): void {

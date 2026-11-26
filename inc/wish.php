@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Wish;
 
+use Courtneyr\Child\ArtifactStyle;
 use function Courtneyr\Child\HomeSections\is_stream_surface;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -16,10 +17,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const KIND           = 'wish';
+const ARTIFACT_STYLE = 'cr-catalog-clipping';
+const ARTIFACT_CLASS = 'is-style-' . ARTIFACT_STYLE;
 const ITEM_STYLE     = 'cr-wish-listing';
 const ITEM_CLASS     = 'is-style-cr-wish-listing';
 const STYLE_HANDLE   = 'courtneyr-wish';
 const EAGER_SECTIONS = 3;
+
+add_action(
+	'after_setup_theme',
+	static function (): void {
+		ArtifactStyle\register( 'post-kinds-indieweb/wish-card', ARTIFACT_STYLE, __( 'Catalog clipping', 'courtneyr-child' ), KIND );
+	}
+);
 
 /** Whether the current request is a Stream surface. */
 function on_stream_surface(): bool {
@@ -69,7 +79,7 @@ function is_wish_archive(): bool {
 
 /** Whether this request is a wish single. */
 function is_wish_single(): bool {
-	return is_singular( 'post' ) && has_term( KIND, 'kind', get_queried_object_id() );
+	return is_singular( 'post' ) && ArtifactStyle\applies( get_queried_object_id(), ARTIFACT_STYLE );
 }
 
 /**
@@ -229,7 +239,7 @@ function archive_item( \WP_Post $post, array $facts, int $level ): string {
 
 	$priority = $has_facts ? (string) ( $facts['priority'] ?? '' ) : '';
 	$attrs    = '' !== $priority ? ' data-priority="' . esc_attr( $priority ) . '"' : '';
-	$out      = '<article class="cr-wish-listing pk-card--stream"' . $attrs . '>' . $media
+	$out      = '<article class="cr-wish-listing pk-card--stream ' . esc_attr( ARTIFACT_CLASS ) . '"' . $attrs . '>' . $media
 		. '<h' . $level . ' class="cr-wish-listing__title"><a class="' . esc_attr( $classes ) . '" href="' . $permalink . '">' . esc_html( $name ) . '</a></h' . $level . '>';
 	if ( $has_facts && '' !== (string) ( $facts['priority_text'] ?? '' ) ) {
 		$out .= '<p class="cr-wish-listing__priority">' . esc_html( (string) $facts['priority_text'] ) . '</p>';
@@ -254,7 +264,7 @@ function dispatch( string $html, array $block, $instance ): string {
 	}
 	$post_id = block_post_id( $instance );
 	$post    = $post_id ? get_post( $post_id ) : null;
-	if ( ! $post instanceof \WP_Post || ! has_term( KIND, 'kind', $post ) || post_password_required( $post ) || false !== strpos( $html, 'pk-card--protected' ) ) {
+	if ( ! $post instanceof \WP_Post || ! ArtifactStyle\applies( $post, ARTIFACT_STYLE ) || post_password_required( $post ) || false !== strpos( $html, 'pk-card--protected' ) ) {
 		return $html;
 	}
 	return archive_item( $post, facts( $post->ID ), heading_level( $html ) );
