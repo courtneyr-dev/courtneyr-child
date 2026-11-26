@@ -67,6 +67,28 @@
   text-decoration: none;
 }
 
+.cr-toc.cr-toc--blog {
+  background-color: var(--cr-surface-elevated);
+  color: var(--cr-ink);
+}
+
+.cr-toc.cr-toc--blog > h2 {
+  color: var(--cr-tape-ink);
+}
+
+.cr-toc.cr-toc--blog a {
+  color: var(--cr-link);
+  text-decoration-line: underline;
+  text-decoration-color: currentcolor;
+}
+
+.cr-toc.cr-toc--blog a:hover,
+.cr-toc.cr-toc--blog a:focus-visible {
+  background: transparent;
+  box-shadow: none;
+  text-decoration-thickness: 2px;
+}
+
 :is(.cr-prose, .wp-block-post-content, .entry-content) .cr-toc--emoji ul > li {
   padding-inline-start: 0;
 }
@@ -81,7 +103,7 @@
 
 @media screen and (min-width: 80rem) {
 
-  .single-post__content .cr-toc--blog {
+  .single-post__content .cr-toc.cr-toc--blog {
     --cr-toc-rail: 14rem;
     --cr-toc-offset: calc(var(--wp-admin--admin-bar--height, 0px) + var(--cr-sticky-header-clearance, 5rem));
 
@@ -101,7 +123,7 @@
     overflow-wrap: anywhere;
   }
 
-  .single-post__content .cr-toc--blog > h2 {
+  .single-post__content .cr-toc.cr-toc--blog > h2 {
     position: static;
     margin-block-end: var(--cr-space-xs);
     padding: 0;
