@@ -150,8 +150,13 @@ function peg_card( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
+	$facts = array();
+	if ( function_exists( '\\PKIW\\kind_facts_for_kind' ) ) {
+		$facts = \PKIW\kind_facts_for_kind( $post->ID, KIND );
+	} elseif ( KIND === ( ArtifactStyle\kind_slugs( $post->ID )[0] ?? '' ) ) {
+		$facts = \PKIW\kind_facts( $post->ID );
+	}
 	$heading_level = max( 2, min( 4, (int) ( $block['attrs']['headingLevel'] ?? 3 ) ) );
-	$facts         = (array) \PKIW\kind_facts( $post->ID );
 	$permalink     = esc_url( (string) get_permalink( $post ) );
 	$picture       = '';
 	$name_class    = 'u-url';

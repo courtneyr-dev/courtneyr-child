@@ -53,7 +53,7 @@ function tool_tag( string $html, array $block, $instance ): string {
 	}
 
 	$post_id = Craft\block_post_id( $instance );
-	if ( ! ArtifactStyle\applies( $post_id, Craft\ARTIFACT_STYLE ) ) {
+	if ( 0 >= $post_id || post_password_required( $post_id ) || ! ArtifactStyle\applies( $post_id, Craft\ARTIFACT_STYLE ) ) {
 		return $html;
 	}
 
