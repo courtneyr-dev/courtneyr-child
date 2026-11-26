@@ -26,7 +26,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const HANDLE = 'courtneyr-toc';
+const HANDLE      = 'courtneyr-toc';
+const YOAST_BLOCK = 'yoast-seo/table-of-contents';
 
 /**
  * Code point ranges that open an emoji in heading text: the pictograph and
@@ -148,6 +149,15 @@ function decorate( string $block_content ): string {
 	$tags  = new \WP_HTML_Tag_Processor( $block_content );
 	if ( $tags->next_tag() ) {
 		$tags->add_class( 'cr-toc' );
+		if ( is_blog_entry() ) {
+			$tags->add_class( 'cr-toc--blog' );
+			if ( 'NAV' !== $tags->get_tag() ) {
+				$tags->set_attribute( 'role', 'navigation' );
+			}
+			if ( null === $tags->get_attribute( 'aria-label' ) ) {
+				$tags->set_attribute( 'aria-label', __( 'Table of contents', 'courtneyr-child' ) );
+			}
+		}
 		if ( $emoji ) {
 			$tags->add_class( 'cr-toc--emoji' );
 		}
@@ -155,3 +165,110 @@ function decorate( string $block_content ): string {
 	return $tags->get_updated_html();
 }
 add_filter( 'render_block_yoast-seo/table-of-contents', __NAMESPACE__ . '\\decorate' );
+
+/** Whether this is a public Blog article outside the Kind and Stream lanes. */
+function is_blog_entry(): bool {
+	$post = \Courtneyr\Child\SingleNavigation\public_entry();
+	if ( ! $post || 'post' !== $post->post_type || (int) get_the_ID() !== $post->ID || has_term( '', 'kind', $post ) ) {
+		return false;
+	}
+
+	if ( 'stream' === get_post_meta( $post->ID, '_pkiw_surface', true ) || '1' === get_post_meta( $post->ID, '_cr_stream_preview', true ) ) {
+		return false;
+	}
+
+	return ! ( class_exists( '\\PKIW\\Post_Type' ) && \PKIW\Post_Type::is_hidden_mode() && '' !== get_post_meta( $post->ID, '_pkiw_imported_from', true ) );
+}
+
+/**
+ * Generate an article's table of contents from its rendered section headings.
+ *
+ * @param string $html Rendered post content.
+ * @return string
+ */
+function add_blog_contents( string $html ): string {
+	if ( ! is_blog_entry() || has_block( YOAST_BLOCK, get_queried_object_id() ) ) {
+		return $html;
+	}
+
+	$used_ids = array();
+	$tags     = new \WP_HTML_Tag_Processor( $html );
+	while ( $tags->next_tag() ) {
+		if ( $tags->has_class( 'cr-toc' ) ) {
+			return $html;
+		}
+		$id = $tags->get_attribute( 'id' );
+		if ( is_string( $id ) && '' !== $id ) {
+			$used_ids[ $id ] = true;
+		}
+	}
+
+	$headings = \WP_HTML_Processor::create_fragment( $html );
+	if ( ! $headings ) {
+		return $html;
+	}
+	$links = array();
+	while ( $headings->next_tag() ) {
+		if ( ! in_array( $headings->get_tag(), array( 'H2', 'H3' ), true ) || array_intersect( array( 'NAV', 'ASIDE', 'BLOCKQUOTE' ), $headings->get_breadcrumbs() ) || 'true' === $headings->get_attribute( 'aria-hidden' ) || true === $headings->get_attribute( 'hidden' ) ) {
+			continue;
+		}
+
+		$id = $headings->get_attribute( 'id' );
+		if ( ! $headings->set_bookmark( 'toc-heading' ) ) {
+			return $html;
+		}
+		$label = heading_label( $headings );
+		if ( '' === $label ) {
+			$headings->release_bookmark( 'toc-heading' );
+			continue;
+		}
+
+		if ( ! is_string( $id ) || '' === $id ) {
+			$slug = sanitize_title( $label );
+			$base = 'section-' . ( '' !== $slug ? $slug : 'heading' );
+			$id   = $base;
+			for ( $n = 2; isset( $used_ids[ $id ] ); ++$n ) {
+				$id = $base . '-' . $n;
+			}
+			if ( ! $headings->seek( 'toc-heading' ) || ! $headings->set_attribute( 'id', $id ) ) {
+				return $html;
+			}
+			$used_ids[ $id ] = true;
+		}
+		$headings->release_bookmark( 'toc-heading' );
+		$links[ $id ] ??= '<li><a href="#' . esc_attr( rawurlencode( $id ) ) . '">' . esc_html( $label ) . '</a></li>';
+	}
+
+	if ( array() === $links || null !== $headings->get_last_error() ) {
+		return $html;
+	}
+
+	$title = esc_html__( 'Table of contents', 'courtneyr-child' );
+	$nav   = '<nav class="cr-toc--generated" aria-label="' . $title . '"><h2>' . $title . '</h2><ul>' . implode( '', $links ) . '</ul></nav>';
+	return decorate( $nav ) . $headings->get_updated_html();
+}
+add_filter( 'the_content', __NAMESPACE__ . '\\add_blog_contents', 95 );
+
+/**
+ * Read a heading label, skipping its decorative and hidden children.
+ *
+ * @param \WP_HTML_Processor $heading Processor positioned on the heading.
+ * @return string
+ */
+function heading_label( \WP_HTML_Processor $heading ): string {
+	$depth  = $heading->get_current_depth();
+	$hidden = null;
+	$label  = '';
+	while ( $heading->next_token() && $heading->get_current_depth() >= $depth ) {
+		if ( null !== $hidden && $heading->get_current_depth() < $hidden ) {
+			$hidden = null;
+		}
+		if ( '#tag' === $heading->get_token_type() && ! $heading->is_tag_closer() && $heading->expects_closer() && ( 'true' === $heading->get_attribute( 'aria-hidden' ) || true === $heading->get_attribute( 'hidden' ) ) ) {
+			$hidden ??= $heading->get_current_depth();
+		}
+		if ( null === $hidden && '#text' === $heading->get_token_type() ) {
+			$label .= $heading->get_modifiable_text();
+		}
+	}
+	return trim( $label );
+}

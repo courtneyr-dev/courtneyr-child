@@ -8380,6 +8380,16 @@ html {
 	scroll-padding-bottom: calc(var(--cr-consent-covered, var(--cmplz-manage-consent-height, 50px)) + var(--wp--preset--spacing--md, 1rem));
 }
 
+.cr-single-breadcrumbs {
+	color: var(--cr-ink-soft);
+	overflow-wrap: anywhere;
+}
+
+.cr-reply-article > .single-post__header > .cr-single-breadcrumbs {
+	order: -2;
+	margin-inline-start: 0 !important;
+}
+
 @media (1024px < width < 1280px) {
 
 	html {
