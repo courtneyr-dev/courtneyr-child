@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.184
+
+- Style quoted Reply sources as torn Periwinkle paper with a Russian Violet speech bubble. (#379)
+- Add Yoast breadcrumbs to public singles and a sticky table of contents to Blog articles. (#380)
+
 ## 0.7.183
 
 - Register Pegboard tag for Craft and Catalog clipping for Wish. (#373, #374)
