@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.182
+
+- Give Reply singles an article layout with a distinct source panel and optional quote. (#370)
+- Keep Sleep duration bars legible in dark mode with JavaScript disabled. (#371)
+
 ## 0.7.181
 
 - Group Favorite and Repost single content around their cards. (#363, #364)
