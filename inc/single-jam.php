@@ -36,6 +36,22 @@ function body_class( array $classes ): array {
 add_filter( 'body_class', __NAMESPACE__ . '\\body_class' );
 
 /**
+ * Give a standalone J-card room to open while keeping authored groups at their width.
+ *
+ * @param \WP_Post $post    Post being rendered.
+ * @param string   $content Content of its current page.
+ * @return array{wide: bool}|null
+ */
+function page_jcard( \WP_Post $post, string $content ): ?array {
+	if ( 'top' !== \Courtneyr\Child\SingleWideColumn\first_block_place( $content, 'post-kinds-indieweb/jam-card' ) ) {
+		return null;
+	}
+
+	$facts = \Courtneyr\Child\Jam\facts( $post->ID );
+	return empty( $facts['has_card'] ) ? null : array( 'wide' => true );
+}
+
+/**
  * Let the shared featured-image filter inspect jam posts.
  *
  * @param mixed $kinds Kind slugs registered so far.

@@ -670,9 +670,10 @@ body[class*="kind-"].single .single-post__content .pk-card.cr-jcard::before {
 .cr-jcard__row dt,
 .cr-jcard__label {
 	display: table;
+	justify-self: start;
 	margin: 0;
 	padding: var(--cr-space-3xs) var(--cr-space-2xs);
-	background-color: var(--cr-periwinkle);
+	background-color: var(--cr-sky-blue);
 	color: var(--cr-russian-violet);
 	font-family: var(--cr-font-mono);
 	font-size: var(--cr-text-xs);
@@ -691,6 +692,10 @@ body[class*="kind-"].single .single-post__content .pk-card.cr-jcard::before {
 	font-weight: var(--cr-weight-bold);
 	line-height: var(--cr-leading-normal);
 	overflow-wrap: anywhere;
+}
+
+.cr-jcard__row dd em {
+	font-style: normal;
 }
 
 .cr-jcard__row--track .pk-title {
@@ -756,7 +761,7 @@ body[class*="kind-"].single .single-post__content .pk-card.cr-jcard::before {
 .cr-jcard__note {
 	grid-area: note;
 	background-color: var(--cr-paper);
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='32' viewBox='0 0 40 32'%3E%3Cpath d='M0 31.5H40' stroke='%23126782' stroke-width='1'/%3E%3C/svg%3E");
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='32' viewBox='0 0 40 32'%3E%3Cpath d='M0 31.5H40' stroke='%238ecae6' stroke-width='1'/%3E%3C/svg%3E");
 	background-repeat: repeat;
 	color: var(--cr-ink);
 	font-family: var(--cr-font-body);
@@ -825,6 +830,7 @@ body[class*="kind-"].single .single-post__content .pk-card.cr-jcard::before {
 		grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr) 5rem minmax(0, 1fr);
 		grid-template-areas: "insert details spine note";
 		align-items: stretch;
+		column-gap: 0;
 	}
 
 	.cr-jcard:not(:has(> .cr-jcard__insert)) {
@@ -840,6 +846,24 @@ body[class*="kind-"].single .single-post__content .pk-card.cr-jcard::before {
 	.cr-jcard:not(:has(> .cr-jcard__insert)):not(:has(> .cr-jcard__note)) {
 		grid-template-columns: minmax(0, 1fr) 5rem;
 		grid-template-areas: "details spine";
+	}
+
+	body.single-post.cr-jam-single .cr-wide-column.single-post__content > .pkiw-singular-entry > :is(.cr-jcard, .cr-jcard + .pk-embed--audio) {
+		max-width: var(--wp--style--global--wide-size, 72rem);
+	}
+
+	.cr-jcard__insert + .cr-jcard__details,
+	.cr-jcard__spine,
+	.cr-jcard__note {
+		border-inline-start-width: 0;
+	}
+
+	.cr-jcard__details {
+		position: relative;
+	}
+
+	.cr-jcard__details:has(a:focus-visible) {
+		z-index: 1;
 	}
 
 	.cr-jcard__spine {
