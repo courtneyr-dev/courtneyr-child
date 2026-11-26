@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.185
+
+- Restore contrast for Blog contents headings, links, and keyboard focus. (#382)
+
 ## 0.7.184
 
 - Style quoted Reply sources as torn Periwinkle paper with a Russian Violet speech bubble. (#379)
