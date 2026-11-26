@@ -347,6 +347,42 @@ add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\\cutout_archive_t
 add_filter( 'render_block_core/heading', __NAMESPACE__ . '\\cutout_archive_title', 10, 2 );
 
 /**
+ * Offer Core's random redirect on a category's first archive page.
+ *
+ * @param string $content Rendered Query Title block.
+ * @param array  $block   Parsed Query Title block.
+ */
+function append_random_category_link( string $content, array $block ): string {
+	global $wp_the_query;
+
+	if ( is_admin() || wp_is_serving_rest_request() || ! is_category() || is_paged()
+		|| ! function_exists( 'wp_is_random_content_redirect_enabled' ) || ! wp_is_random_content_redirect_enabled()
+		|| ! in_array( 'cr-archive__title', explode( ' ', (string) ( $block['attrs']['className'] ?? '' ) ), true ) ) {
+		return $content;
+	}
+
+	$eligible_types = wp_get_random_content_post_types( $wp_the_query );
+	$has_candidate  = array_any(
+		$wp_the_query->posts,
+		static fn( $post ) => $post instanceof \WP_Post && 'publish' === $post->post_status
+			&& '' === $post->post_password && in_array( $post->post_type, $eligible_types, true )
+	);
+	if ( ! $has_candidate ) {
+		return $content;
+	}
+
+	$category = get_queried_object();
+	return $content . sprintf(
+		'<p class="has-small-font-size"><a href="%1$s" aria-label="%2$s">%3$s</a></p>',
+		esc_url( add_query_arg( 'random', '1', get_category_link( $category ) ) ),
+		/* translators: %s: category name. */
+		esc_attr( sprintf( __( 'Surprise me in %s', 'courtneyr-child' ), $category->name ) ),
+		esc_html__( 'Surprise me', 'courtneyr-child' )
+	);
+}
+add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\\append_random_category_link', 20, 2 );
+
+/**
  * Render the route's site-local date and remove its empty description.
  *
  * @param string $content Rendered paragraph markup.
