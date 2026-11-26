@@ -497,10 +497,16 @@ function bag_card( string $html, array $block, $instance ): string {
 		// A strip its author drew stands on the rack as its picture and
 		// title link; the excerpt, date and "Read more" stay off the rack.
 		if ( $rack && $post instanceof \WP_Post && has_term( 'comics', 'kind', $post ) ) {
-			foreach ( array( array( 'p', 'pk-stream-date' ), array( 'p', 'pk-excerpt' ), array( 'div', 'pk-meta' ), array( 'span', 'pk-kindlabel' ), array( 'div', 'pk-badge' ) ) as $cut ) {
+			foreach ( array( array( 'p', 'pk-stream-date' ), array( 'p', 'pk-excerpt' ), array( 'span', 'pk-kindlabel' ), array( 'div', 'pk-badge' ) ) as $cut ) {
 				$html = cut_elements( $html, $cut[0], $cut[1] );
 			}
-			$html = card_classes( $html, array( 'cr-comic-strip' ) );
+			$classes = array( 'cr-comic-strip' );
+			if ( ! has_cover( $html ) ) {
+				$title     = trim( get_the_title( $post ) );
+				$classes[] = 'cr-comic';
+				$html      = before_meta( $html, type_cover( array( 'title' => '' !== $title ? $title : __( 'Comics', 'courtneyr-child' ) ), $post, false ) );
+			}
+			$html = card_classes( cut_elements( $html, 'div', 'pk-meta' ), $classes );
 		}
 		return $html;
 	}
@@ -566,7 +572,7 @@ function bag_card( string $html, array $block, $instance ): string {
 		foreach ( array( array( 'p', 'pk-sub' ), array( 'div', 'pk-stars' ), array( 'data', 'p-rating' ), array( 'div', 'pk-note' ), array( 'span', 'pk-kindlabel' ), array( 'div', 'pk-badge' ) ) as $cut ) {
 			$html = cut_elements( $html, $cut[0], $cut[1] );
 		}
-		if ( '' !== $issue ) {
+		if ( '' !== $issue && 0 !== strcasecmp( plain( $issue ), plain( (string) ( $a['title'] ?? '' ) ) ) ) {
 			// A series named like the title would read "Saga Saga".
 			if ( 0 === strcasecmp( plain( (string) ( $a['series'] ?? '' ) ), plain( (string) ( $a['title'] ?? '' ) ) ) ) {
 				$issue = cut_elements( $issue, 'span', 'pk-comic-series' );

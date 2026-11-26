@@ -490,7 +490,7 @@ namespace {
 			$hashes = array(
 				'templates/taxonomy-kind-comics.html' => '7e5ef6335229f0e51c707c0494e407eb0c9a2be8',
 				'patterns/cr-comic-rack-loop.php'     => '36c5da7706c35672b6c7c285e193d0aa35ae756d',
-				'assets/css/cr-comic.css'             => '0dda7f76b8fb51abbc23d827055a495c1958c25d',
+				'assets/css/cr-comic.css'             => 'efb97a9cc30f8af5ee9996db82d408ff370d1beb',
 			);
 			$inserted = "\t<!-- wp:post-kinds-indieweb/wrapped-strip /-->\n\n\t<!-- wp:template-part {\"slug\":\"zine-export\"} /-->\n\n";
 			foreach ( $hashes as $relative => $expected ) {
@@ -504,11 +504,11 @@ namespace {
 			$comic = (string) file_get_contents( CR_PHOTO_THEME_DIR . '/inc/comic.php' );
 			$start = strpos( $comic, 'function bag_card(' );
 			$end   = strpos( $comic, 'add_filter(', $start );
-			cr_photo_same( 'cc7d8b7525036ed969b3ff1688e82ba8edf53987', sha1( substr( $comic, $start, $end - $start ) ), 'bag_card hash' );
+			cr_photo_same( 'cd347250822e2cddef96363e209e66e0b7ab1593', sha1( substr( $comic, $start, $end - $start ) ), 'bag_card hash' );
 			$new = " * Is this the comics archive rack? The drawn view is not the rack.\n *\n * @return bool\n */\nfunction is_rack(): bool {\n\treturn \\is_tax( 'kind', 'comics' ) && 'drawn' !== \\get_query_var( 'pkiw_comic_view' );\n}";
 			$old = " * Is this the comics archive?\n *\n * @return bool\n */\nfunction is_rack(): bool {\n\treturn \\is_tax( 'kind', 'comics' );\n}";
 		cr_photo_contains( $new, $comic, 'only allowed rack hunk is present' );
-			cr_photo_same( '86c5fc81a667b0e3dc428eabd8634d5f1b355dd7', sha1( str_replace( $new, $old, $comic ) ), 'comic file normalizes to base' );
+			cr_photo_same( 'bc37b3022f95c11ee0e615fa53addbe5fd0e3062', sha1( str_replace( $new, $old, $comic ) ), 'comic file normalizes to base' );
 		}
 	);
 

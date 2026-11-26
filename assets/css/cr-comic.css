@@ -240,18 +240,7 @@
 	order: -1;
 }
 
-/* The polybag. On the rack a comic stands in a loose clear bag, not on the
-   board the Stream and the single use. The media box is the bag: pale
-   plastic that washes the rack lightly where it reaches past the cover, a
-   narrow rim at the sides and foot, a taller folded flap on top, soft
-   corners, and a slight tilt so it doesn't sit square. ::before is the
-   flap, folded over the top of the bag. ::after lies over the cover: one
-   broad reflection that fades at both edges and a few creases at the top
-   and corners. Neither adds content. The plastic is Light Gray under a
-   Periwinkle tint, dense enough at the rim and flap to stay pale against the
-   dark rack and thin over the cover, in light and dark mode alike. The comic
-   rests at the foot of the bag, and one hard shadow lifts the bag off the
-   rack. The shelf tag under it stays upright. */
+/* On the rack, the loose sleeve uses a folded top flap and a translucent reflection over the cover. */
 .cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media {
 	padding: var(--sleeve-flap) var(--sleeve-gap) var(--sleeve-foot);
 	border: var(--sleeve-edge) solid var(--sleeve-line);
@@ -259,6 +248,18 @@
 	background: linear-gradient(var(--sleeve-lilac), var(--sleeve-lilac)) var(--sleeve-film);
 	box-shadow: var(--cr-shadow-hard-sm);
 	transform: rotate(var(--cr-rotate-1));
+}
+
+.cr-comic-rack .cr-comic--rack .pk-media .pk-credit--cover {
+	position: absolute;
+	z-index: 1;
+	inset-inline: var(--sleeve-gap);
+	inset-block-end: var(--sleeve-foot);
+	margin: 0;
+	padding-inline: 0.3em;
+	background: var(--cr-printer-ivory);
+	color: var(--cr-russian-violet);
+	overflow-wrap: anywhere;
 }
 
 .cr-comic-rack .cr-comic-rack__list > li .pk-card.cr-comic--rack .pk-media::before {
@@ -335,11 +336,9 @@
 	object-fit: cover;
 }
 
-/* The shelf tag on the lip under the bag: the title, then series, volume
-   and issue when stored. Cover art does not always carry its title, so the
-   tag is where a sighted reader finds it. One line: the tiers are a fixed
-   height, and the full title is on the single. */
-.cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-caption {
+/* One-line shelf tags keep the rack tiers at a fixed height. The single shows the full title. */
+.cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-caption,
+.cr-comic-rack .cr-comic-rack__list > li .pk-card--protected > .pk-title {
 	display: flex;
 	gap: 0.35rem;
 	align-items: baseline;
@@ -359,7 +358,7 @@
 	overflow: hidden;
 }
 
-.cr-comic-rack .cr-comic-rack__list > li .pk-card .pk-title {
+.cr-comic-rack .cr-comic-rack__list > li .pk-card:not(.pk-card--protected) .pk-title {
 	flex: 0 1 auto;
 	min-width: 0;
 	margin: 0;
@@ -368,6 +367,18 @@
 	font: inherit;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card--protected > .pk-title a {
+	min-width: 0;
+	color: inherit;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.cr-comic-rack .cr-comic-rack__list > li .pk-card--protected > .pk-title:focus-within {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
 }
 
 .cr-comic-rack .cr-comic__label {
