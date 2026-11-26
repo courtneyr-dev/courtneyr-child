@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.183
+
+- Register Pegboard tag for Craft and Catalog clipping for Wish. (#373, #374)
+- Match Jam singles to the folded J-card mockup and keep the source on the nested citation. (#375)
+- Keep Comics credits and shelf titles within their rack bays and register the Bagged comic style. (#376, #377)
+
 ## 0.7.182
 
 - Give Reply singles an article layout with a distinct source panel and optional quote. (#370)
