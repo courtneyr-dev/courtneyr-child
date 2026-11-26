@@ -6,7 +6,7 @@
    ============================================================ */
 
 :is(.cr-sleep, body.cr-sleep-archive) {
-	--cr-sleep-bar: light-dark(var(--cr-cerulean), var(--cr-sky-blue));
+	--cr-sleep-bar: var(--cr-link);
 	--cr-sleep-edge: var(--cr-ink);
 	--cr-sleep-ink: var(--cr-ink);
 	--cr-sleep-label: light-dark(var(--cr-ink), var(--cr-periwinkle));
@@ -383,7 +383,7 @@
    ============================================================ */
 
 .pk-card.pkiw-sleep {
-	--cr-sleep-bar: light-dark(var(--cr-cerulean), var(--cr-sky-blue));
+	--cr-sleep-bar: var(--cr-link);
 	--cr-sleep-edge: var(--cr-ink);
 	--cr-focus-halo: var(--cr-russian-violet);
 	--cr-sleep-ink: var(--cr-ink);
