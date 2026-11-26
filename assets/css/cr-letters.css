@@ -806,5 +806,22 @@ body.kind-reply.single .single-post__content .pk-card.cr-letter-cite:has( > .pk-
 		background: Canvas;
 		color: CanvasText;
 	}
+}
 
+@media print {
+
+	.cr-letter-cite::before,
+	.cr-letter-cite::after,
+	.pk-card.k-reply.cr-letter-cite blockquote.pk-note::before {
+		display: none;
+	}
+
+	.pk-card.k-reply.cr-letter-cite blockquote.pk-note {
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--cr-russian-violet);
+		font-size: max( var(--cr-text-floor), var(--cr-text-sm) );
+		font-style: italic;
+	}
 }
