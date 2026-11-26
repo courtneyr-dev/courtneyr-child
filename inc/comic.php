@@ -30,6 +30,7 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\Comic;
 
+use Courtneyr\Child\ArtifactStyle;
 use function Courtneyr\Child\HomeSections\is_stream_surface;
 use function Courtneyr\Child\Journal\card_attrs;
 use function Courtneyr\Child\Journal\notes_section;
@@ -45,7 +46,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const BLOCK = 'post-kinds-indieweb/comic-card';
+const BLOCK          = 'post-kinds-indieweb/comic-card';
+const ARTIFACT_STYLE = 'cr-bagged-comic';
+const ARTIFACT_CLASS = 'is-style-' . ARTIFACT_STYLE;
+
+add_action(
+	'after_setup_theme',
+	static function (): void {
+		ArtifactStyle\register( BLOCK, ARTIFACT_STYLE, __( 'Bagged comic', 'courtneyr-child' ), 'comics' );
+	}
+);
 
 /**
  * Comics in the first rack row on page 1; their covers load eagerly.
@@ -532,7 +542,7 @@ function bag_card( string $html, array $block, $instance ): string {
 	$a         = comic_attrs( $post, $comic );
 	$status    = (string) $a['readStatus'];
 	$has_cover = has_cover( $html );
-	$classes   = array( 'cr-comic', $rack ? 'cr-comic--rack' : 'cr-comic--stream', 'cr-comic--' . $status );
+	$classes   = array( 'cr-comic', $rack ? 'cr-comic--rack' : 'cr-comic--stream', 'cr-comic--' . $status, ARTIFACT_CLASS );
 	if ( $has_cover ) {
 		$classes[] = 'has-cover';
 	}
@@ -786,7 +796,7 @@ function comic_page( string $html, array $block ): string {
 	if ( ! $has_cover ) {
 		$card = before_meta( $card, type_cover( $a, $post, true ) );
 	}
-	$card = card_classes( $card, array_merge( array( 'cr-comic', 'cr-comic--single', 'cr-comic--' . $a['readStatus'] ), $has_cover ? array( 'has-cover' ) : array() ) );
+	$card = card_classes( $card, array_merge( array( 'cr-comic', 'cr-comic--single', 'cr-comic--' . $a['readStatus'], ARTIFACT_CLASS ), $has_cover ? array( 'has-cover' ) : array() ) );
 
 	// The cover stands at the top of the page and is its largest image.
 	// Eager with fetchpriority high: the browser fetches it first, and
