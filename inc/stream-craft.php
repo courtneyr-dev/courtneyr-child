@@ -12,6 +12,9 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\StreamCraft;
 
+use Courtneyr\Child\ArtifactStyle;
+use Courtneyr\Child\Craft;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -49,6 +52,11 @@ function tool_tag( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
+	$post_id = Craft\block_post_id( $instance );
+	if ( 0 >= $post_id || post_password_required( $post_id ) || ! ArtifactStyle\applies( $post_id, Craft\ARTIFACT_STYLE ) ) {
+		return $html;
+	}
+
 	$cuts = array(
 		array( 'div', 'pk-badge' ),
 		array( 'p', 'pk-stream-date' ),
@@ -59,15 +67,12 @@ function tool_tag( string $html, array $block, $instance ): string {
 		$html = \Courtneyr\Child\MediaShelf\cut_elements( $html, $cut[0], $cut[1] );
 	}
 
-	$post_id = ( $instance instanceof \WP_Block && ! empty( $instance->context['postId'] ) )
-		? (int) $instance->context['postId']
-		: (int) get_the_ID();
-
 	$tags = new \WP_HTML_Tag_Processor( $html );
 	if ( ! $tags->next_tag( 'article' ) ) {
 		return $html;
 	}
 	$tags->add_class( 'cr-craft-tag' );
+	$tags->add_class( Craft\ARTIFACT_CLASS );
 	if ( function_exists( '\\Courtneyr\\Child\\Stamps\\seeded_paper' ) ) {
 		$paper = sanitize_html_class(
 			\Courtneyr\Child\Stamps\seeded_paper(

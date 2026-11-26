@@ -112,8 +112,11 @@ namespace {
 	/** Stub: no front-end admin bar. */
 	function is_admin_bar_showing() { return false; }
 
-	/** Stub: no term objects are needed. */
-	function get_the_terms() { return false; }
+	/** Return the queried post's kind in the terms format WordPress uses. */
+	function get_the_terms( $post, $taxonomy ) {
+		$kind = $GLOBALS['cr_request']['single_kind'] ?? '';
+		return 'kind' === $taxonomy && get_queried_object_id() === $post && '' !== $kind ? array( (object) array( 'slug' => $kind ) ) : false;
+	}
 
 	/** Stub: test values aren't errors. */
 	function is_wp_error() { return false; }
@@ -168,8 +171,8 @@ namespace {
 	/** Stub: return translated text unchanged. */
 	function __( $text ) { return $text; }
 
-	/** Stub: return one queried object ID. */
-	function get_queried_object_id() { return 1; }
+	/** Use a different cache key for the Craft and Note fixtures. */
+	function get_queried_object_id() { return 'craft' === ( $GLOBALS['cr_request']['single_kind'] ?? '' ) ? 1 : 2; }
 	/** The podcast sheet is not part of this test: its file never exists here. */
 	function get_theme_file_path( $file = '' ) { return COURTNEYR_CHILD_DIR . '/' . ltrim( (string) $file, '/' ); }
 
@@ -204,6 +207,7 @@ namespace Courtneyr\Child\MediaShelf {
 }
 
 namespace {
+	require CR_CRAFT_THEME_DIR . '/inc/artifact-style.php';
 	require CR_CRAFT_THEME_DIR . '/inc/craft.php';
 	require CR_CRAFT_THEME_DIR . '/inc/single-craft.php';
 	require CR_CRAFT_THEME_DIR . '/inc/stream-craft.php';
@@ -272,6 +276,10 @@ namespace Courtneyr\Child\CraftEnqueueTests {
 			)
 		);
 	}
+
+	fire( 'after_setup_theme' );
+	$style = \Courtneyr\Child\ArtifactStyle\styles()['cr-pegboard-tag'] ?? array();
+	check( 'post-kinds-indieweb/craft-card' === ( $style['block'] ?? '' ) && 'craft' === ( $style['kind'] ?? '' ), 'Pegboard tag registers on the Craft card' );
 
 	$homes = array();
 	$walk  = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( CR_CRAFT_THEME_DIR . '/assets/css', \FilesystemIterator::SKIP_DOTS ) );
