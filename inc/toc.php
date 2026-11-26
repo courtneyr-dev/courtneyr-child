@@ -28,6 +28,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const HANDLE      = 'courtneyr-toc';
 const YOAST_BLOCK = 'yoast-seo/table-of-contents';
+const TOC_OPEN    = '<!-- cr-blog-toc:open -->';
+const TOC_CLOSE   = '<!-- cr-blog-toc:close -->';
 
 /**
  * Code point ranges that open an emoji in heading text: the pictograph and
@@ -147,6 +149,7 @@ function decorate( string $block_content ): string {
 
 	$emoji = all_start_with_emoji( entry_texts( $block_content ) );
 	$tags  = new \WP_HTML_Tag_Processor( $block_content );
+	$move  = false;
 	if ( $tags->next_tag() ) {
 		$tags->add_class( 'cr-toc' );
 		if ( is_blog_entry() ) {
@@ -157,19 +160,26 @@ function decorate( string $block_content ): string {
 			if ( null === $tags->get_attribute( 'aria-label' ) ) {
 				$tags->set_attribute( 'aria-label', __( 'Table of contents', 'courtneyr-child' ) );
 			}
+			$move = doing_filter( 'the_content' ) && ! $tags->has_class( 'cr-toc--generated' );
 		}
 		if ( $emoji ) {
 			$tags->add_class( 'cr-toc--emoji' );
 		}
 	}
-	return $tags->get_updated_html();
+	$html = $tags->get_updated_html();
+	return $move ? TOC_OPEN . $html . TOC_CLOSE : $html;
 }
 add_filter( 'render_block_yoast-seo/table-of-contents', __NAMESPACE__ . '\\decorate' );
 
-/** Whether this is a public Blog article outside the Kind and Stream lanes. */
+/** Whether this is a public Blog article outside the specialty Kind and Stream lanes. */
 function is_blog_entry(): bool {
 	$post = \Courtneyr\Child\SingleNavigation\public_entry();
-	if ( ! $post || 'post' !== $post->post_type || (int) get_the_ID() !== $post->ID || has_term( '', 'kind', $post ) ) {
+	if ( ! $post || 'post' !== $post->post_type || (int) get_the_ID() !== $post->ID ) {
+		return false;
+	}
+
+	$kinds = taxonomy_exists( 'kind' ) ? get_the_terms( $post, 'kind' ) : false;
+	if ( is_wp_error( $kinds ) || ( $kinds && array_diff( wp_list_pluck( $kinds, 'slug' ), array( 'article' ) ) ) ) {
 		return false;
 	}
 
@@ -187,7 +197,20 @@ function is_blog_entry(): bool {
  * @return string
  */
 function add_blog_contents( string $html ): string {
-	if ( ! is_blog_entry() || has_block( YOAST_BLOCK, get_queried_object_id() ) ) {
+	if ( ! is_blog_entry() ) {
+		return $html;
+	}
+
+	// A sticky rail has to live in the article flow, outside a short Group.
+	$open  = strpos( $html, TOC_OPEN );
+	$close = false === $open ? false : strpos( $html, TOC_CLOSE, $open + strlen( TOC_OPEN ) );
+	if ( false !== $open && false !== $close ) {
+		$start = $open + strlen( TOC_OPEN );
+		$toc   = substr( $html, $start, $close - $start );
+		$body  = substr( $html, 0, $open ) . substr( $html, $close + strlen( TOC_CLOSE ) );
+		return $toc . str_replace( array( TOC_OPEN, TOC_CLOSE ), '', $body );
+	}
+	if ( has_block( YOAST_BLOCK, get_queried_object_id() ) ) {
 		return $html;
 	}
 
@@ -207,9 +230,11 @@ function add_blog_contents( string $html ): string {
 	if ( ! $headings ) {
 		return $html;
 	}
-	$links = array();
-	while ( $headings->next_tag() ) {
-		if ( ! in_array( $headings->get_tag(), array( 'H2', 'H3' ), true ) || array_intersect( array( 'NAV', 'ASIDE', 'BLOCKQUOTE' ), $headings->get_breadcrumbs() ) || 'true' === $headings->get_attribute( 'aria-hidden' ) || true === $headings->get_attribute( 'hidden' ) ) {
+	$links  = array();
+	$hidden = null;
+	while ( $headings->next_token() ) {
+		$hidden = hidden_depth( $headings, $hidden );
+		if ( null !== $hidden || $headings->is_tag_closer() || ! in_array( $headings->get_tag(), array( 'H2', 'H3' ), true ) || array_intersect( array( 'NAV', 'ASIDE', 'BLOCKQUOTE' ), $headings->get_breadcrumbs() ) ) {
 			continue;
 		}
 
@@ -243,8 +268,8 @@ function add_blog_contents( string $html ): string {
 		return $html;
 	}
 
-	$title = esc_html__( 'Table of contents', 'courtneyr-child' );
-	$nav   = '<nav class="cr-toc--generated" aria-label="' . $title . '"><h2>' . $title . '</h2><ul>' . implode( '', $links ) . '</ul></nav>';
+	$title = __( 'Table of contents', 'courtneyr-child' );
+	$nav   = '<nav class="cr-toc--generated" aria-label="' . esc_attr( $title ) . '"><h2>' . esc_html( $title ) . '</h2><ul>' . implode( '', $links ) . '</ul></nav>';
 	return decorate( $nav ) . $headings->get_updated_html();
 }
 add_filter( 'the_content', __NAMESPACE__ . '\\add_blog_contents', 95 );
@@ -260,15 +285,33 @@ function heading_label( \WP_HTML_Processor $heading ): string {
 	$hidden = null;
 	$label  = '';
 	while ( $heading->next_token() && $heading->get_current_depth() >= $depth ) {
-		if ( null !== $hidden && $heading->get_current_depth() < $hidden ) {
-			$hidden = null;
+		$hidden = hidden_depth( $heading, $hidden );
+		if ( null !== $hidden ) {
+			continue;
 		}
-		if ( '#tag' === $heading->get_token_type() && ! $heading->is_tag_closer() && $heading->expects_closer() && ( 'true' === $heading->get_attribute( 'aria-hidden' ) || true === $heading->get_attribute( 'hidden' ) ) ) {
-			$hidden ??= $heading->get_current_depth();
-		}
-		if ( null === $hidden && '#text' === $heading->get_token_type() ) {
+		if ( '#text' === $heading->get_token_type() ) {
 			$label .= $heading->get_modifiable_text();
+		} elseif ( 'BR' === $heading->get_tag() ) {
+			$label .= ' ';
 		}
 	}
 	return trim( $label );
+}
+
+/**
+ * Track the outermost hidden element while walking rendered heading tokens.
+ *
+ * @param \WP_HTML_Processor $tokens Processor at the current token.
+ * @param int|null           $hidden Depth of the current hidden ancestor.
+ * @return int|null
+ */
+function hidden_depth( \WP_HTML_Processor $tokens, ?int $hidden ): ?int {
+	$depth = $tokens->get_current_depth();
+	if ( null !== $hidden && $depth >= $hidden ) {
+		return $hidden;
+	}
+	if ( '#tag' === $tokens->get_token_type() && ! $tokens->is_tag_closer() && $tokens->expects_closer() && ( 'true' === $tokens->get_attribute( 'aria-hidden' ) || true === $tokens->get_attribute( 'hidden' ) ) ) {
+		return $depth;
+	}
+	return null;
 }
