@@ -1,13 +1,12 @@
 <?php
 /**
- * Single reply letter sheet.
+ * Single Reply article.
  *
  * The plugin's reply-card owns the cited source microformats. This file
  * removes Stream-only chrome from that card, adds the cited host when the
  * card title does not already show it, appends a plain author signature to
- * the reply body, and wraps the post header (date, kind chip, H1) and that
- * body in one torn letter sheet. Comments, the newsletter and the post
- * navigation stay outside the sheet.
+ * the reply body, and groups the post header and content in an article layout.
+ * Comments, the newsletter and post navigation stay outside that layout.
  *
  * @package CourtneyrChild
  */
@@ -110,7 +109,21 @@ function cite_card( string $html, array $block, $instance = null ): string {
 	}
 	$facts = function_exists( '\\PKIW\\kind_facts' ) ? \PKIW\kind_facts( $post_id ) : array();
 	$host  = is_array( $facts ) ? trim( (string) ( $facts['host'] ?? '' ) ) : '';
-	$out   = cut_element( $html, 'span', 'pk-kindlabel' );
+	$tags  = new \WP_HTML_Tag_Processor( $html );
+	$cue   = $tags->next_tag(
+		array(
+			'tag_name'   => 'H2',
+			'class_name' => 'pk-title',
+		)
+	) && $tags->has_class( 'p-name' )
+		? '<span class="cr-letter-cite__label">' . esc_html( __( 'In reply to', 'courtneyr-child' ) ) . '</span>'
+		: '';
+	$out   = preg_replace_callback(
+		'/<span\b[^>]*\bclass="[^"]*(?<![\w-])pk-kindlabel(?![\w-])[^"]*"[^>]*>.*?<\/span>/is',
+		static fn(): string => $cue,
+		$html,
+		1
+	) ?? $html;
 	$out   = cut_element( $out, 'div', 'pk-badge' );
 	$out   = add_cite_class( $out );
 	return insert_host( $out, $host );
@@ -260,7 +273,7 @@ function letter( string $html, array $block ): string {
 	}
 	return str_replace(
 		array( LETTER_OPEN, LETTER_CLOSE ),
-		array( '<div class="cr-letter alignwide cr-paper-sheet cr-paper-sheet--torn cr-paper--printer-ivory ' . ARTIFACT_CLASS . '">', '</div>' ),
+		array( '<div class="cr-reply-article alignwide ' . ARTIFACT_CLASS . '">', '</div>' ),
 		$html
 	);
 }

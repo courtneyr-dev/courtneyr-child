@@ -25,6 +25,7 @@ cr_reply_group(
 		cr_reply_contains( 'cr-letter-cite', $html, 'cite class' );
 		cr_reply_contains( 'is-style-cr-letter-sheet', $html, 'citation artifact style' );
 		cr_reply_not_contains( 'pk-kindlabel', $html, 'kind label removed' );
+		cr_reply_contains( '<span class="cr-letter-cite__label">In reply to</span>', $html, 'source cue displayed' );
 		cr_reply_not_contains( 'pk-badge', $html, 'badge removed' );
 		cr_reply_contains( '<span class="p-author h-card"><span class="p-name">A. Source</span></span><span class="cr-letter-cite__sep" aria-hidden="true">·</span><span class="cr-letter-cite__host">target.test</span></p>', $html, 'host follows the author on one line' );
 		cr_reply_not_contains( '</h2><p class="cr-letter-cite__host">', $html, 'host not under the title when an author exists' );
@@ -38,6 +39,9 @@ cr_reply_group(
 		cr_reply_not_contains( 'cr-letter-cite__sep', $bare, 'no author: no separator' );
 		$already = SingleReply\cite_card( cr_reply_cite_fixture( 'target.test' ), array(), new WP_Block( array( 'postId' => $post->ID ) ) );
 		cr_reply_not_contains( 'cr-letter-cite__host', $already, 'matching link text suppresses host' );
+		$synthetic = str_replace( 'pk-title p-name', 'pk-title', $no_author );
+		$out       = SingleReply\cite_card( $synthetic, array(), new WP_Block( array( 'postId' => $post->ID ) ) );
+		cr_reply_not_contains( 'cr-letter-cite__label', $out, 'unnamed citation preserves its implied name' );
 	}
 );
 
@@ -101,7 +105,7 @@ cr_reply_group(
 		cr_reply_same( '<div class="single-post__lede-meta"></div>', SingleReply\letter_open( '<div class="single-post__lede-meta"></div>', array( 'attrs' => array( 'className' => 'single-post__lede-meta' ) ) ), 'other groups unmarked' );
 		$page = '<main>' . $opened . '<div class="cr-letter-sheet">B</div>' . SingleReply\LETTER_CLOSE . '<nav>N</nav></main>';
 		$out  = SingleReply\letter( $page, $main );
-		cr_reply_same( '<main><div class="cr-letter alignwide cr-paper-sheet cr-paper-sheet--torn cr-paper--printer-ivory is-style-cr-letter-sheet"><div class="single-post__header"><h1>T</h1></div><div class="cr-letter-sheet">B</div></div><nav>N</nav></main>', $out, 'header and body inside the letter, nav outside' );
+		cr_reply_same( '<main><div class="cr-reply-article alignwide is-style-cr-letter-sheet"><div class="single-post__header"><h1>T</h1></div><div class="cr-letter-sheet">B</div></div><nav>N</nav></main>', $out, 'header and body inside the article layout, nav outside' );
 		cr_reply_same( '<main><div class="single-post__header"><h1>T</h1></div><nav>N</nav></main>', SingleReply\letter( '<main>' . $opened . '<nav>N</nav></main>', $main ), 'open without close: markers stripped, no wrapper' );
 		cr_reply_same( $page, SingleReply\letter( $page, $header ), 'only the main group wraps' );
 		$GLOBALS['cr_reply_protected'][ $post->ID ] = true;

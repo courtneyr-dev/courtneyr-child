@@ -4665,7 +4665,7 @@ test( 'a reply single is a torn sheet: the cited host once, the body, then a pla
 	expect( sheetFailures, sheetFailures.join( ' | ' ) ).toEqual( [] );
 } );
 
-test( 'a reply citation is one full-width column with only its rail, at 1280 and 320 (PKIW #253)', async ( { page }, testInfo ) => {
+test( 'a reply citation fills the article column at 1280 and 320 (PKIW #253)', async ( { page }, testInfo ) => {
 	test.skip( '1280-light' !== testInfo.project.name, 'runs once, in the 1280-light project' );
 	for ( const width of [ 1280, 320 ] ) {
 		await page.setViewportSize( { width, height: 900 } );
@@ -4676,18 +4676,16 @@ test( 'a reply citation is one full-width column with only its rail, at 1280 and
 			return {
 				content,
 				body: card.querySelector( '.pk-body' ).getBoundingClientRect().width,
-				sheet: card.closest( '.cr-letter-sheet' ).clientWidth,
+				entry: card.closest( '.pkiw-entry' )?.getBoundingClientRect().width ?? card.closest( '.single-post__content' ).getBoundingClientRect().width,
 				card: card.getBoundingClientRect().width,
 				top: cs.borderTopWidth,
 				shadow: cs.boxShadow,
-				rail: parseFloat( cs.borderLeftWidth ),
 			};
 		} );
 		expect( o.body, `${ width }px citation body fills the card` ).toBeGreaterThanOrEqual( o.content - 1 );
-		expect( o.card, `${ width }px citation spans the sheet's reading width` ).toBeGreaterThan( o.sheet * 0.6 );
-		expect( o.top, `${ width }px citation has no full border` ).toBe( '0px' );
-		expect( o.shadow, `${ width }px citation has no hard shadow` ).toBe( 'none' );
-		expect( o.rail, `${ width }px citation keeps its rail` ).toBeGreaterThan( 2 );
+		expect( Math.abs( o.card - o.entry ), `${ width }px citation spans the article column` ).toBeLessThanOrEqual( 1 );
+		expect( o.top, `${ width }px citation has its top rule` ).toBe( '3px' );
+		expect( o.shadow, `${ width }px citation has an offset shadow` ).not.toBe( 'none' );
 		expect( await hasHorizontalScroll( page ), `${ width }px no horizontal scroll` ).toBeLessThanOrEqual( 0 );
 	}
 } );
