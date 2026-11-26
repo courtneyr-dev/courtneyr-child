@@ -310,7 +310,7 @@ function hidden_depth( \WP_HTML_Processor $tokens, ?int $hidden ): ?int {
 	if ( null !== $hidden && $depth >= $hidden ) {
 		return $hidden;
 	}
-	if ( '#tag' === $tokens->get_token_type() && ! $tokens->is_tag_closer() && $tokens->expects_closer() && ( 'true' === $tokens->get_attribute( 'aria-hidden' ) || true === $tokens->get_attribute( 'hidden' ) ) ) {
+	if ( '#tag' === $tokens->get_token_type() && ! $tokens->is_tag_closer() && $tokens->expects_closer() && ( 'true' === $tokens->get_attribute( 'aria-hidden' ) || null !== $tokens->get_attribute( 'hidden' ) ) ) {
 		return $depth;
 	}
 	return null;
