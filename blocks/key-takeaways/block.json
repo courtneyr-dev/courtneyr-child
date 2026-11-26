@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "courtneyr/key-takeaways",
+	"title": "Key takeaways",
+	"category": "text",
+	"icon": "list-view",
+	"description": "Summarize the article in an editable list.",
+	"keywords": [ "summary", "highlights" ],
+	"textdomain": "courtneyr-child",
+	"allowedBlocks": [ "core/list" ],
+	"supports": {
+		"anchor": true,
+		"html": false
+	},
+	"attributes": {
+		"heading": {
+			"type": "string",
+			"source": "text",
+			"selector": "h2"
+		}
+	},
+	"editorScript": "courtneyr-key-takeaways-editor"
+}

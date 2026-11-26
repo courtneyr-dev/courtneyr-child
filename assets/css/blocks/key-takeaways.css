@@ -1,0 +1,66 @@
+:is( .wp-block-courtneyr-key-takeaways, .wp-block-yoast-seo-ai-summarize.yoast-ai-summarize ) {
+	position: relative;
+	margin-block: var(--cr-space-2xl) var(--cr-space-xl);
+	padding: var(--cr-space-xl) var(--cr-space-lg) var(--cr-space-md);
+	border: var(--cr-border-thick);
+	background: var(--cr-surface-elevated);
+	color: var(--cr-ink);
+	box-shadow: var(--cr-shadow-hard);
+}
+
+:is( .wp-block-courtneyr-key-takeaways, .wp-block-yoast-seo-ai-summarize.yoast-ai-summarize ) > h2 {
+	position: absolute;
+	inset-block-start: calc( -1 * var(--cr-space-md) );
+	inset-inline-start: var(--cr-space-md);
+	margin: 0;
+	padding: var(--cr-space-xs) var(--cr-space-md);
+	background: var(--cr-tape);
+	color: var(--cr-tape-ink);
+	box-shadow: 1px 1px 0 var(--cr-border-strong);
+	font-family: var(--cr-font-accent);
+	font-size: var(--cr-text-sm);
+	font-weight: var(--cr-weight-bold);
+	letter-spacing: var(--cr-tracking-eyebrow);
+	line-height: 1.3;
+	text-transform: uppercase;
+	transform: rotate( var(--cr-rotate-1) );
+}
+
+:is( .wp-block-courtneyr-key-takeaways, .wp-block-yoast-seo-ai-summarize.yoast-ai-summarize ) > .wp-block-list {
+	margin: 0;
+	padding-inline: var(--cr-space-xl) 0;
+	list-style: decimal-leading-zero outside;
+}
+
+:is( .wp-block-courtneyr-key-takeaways, .wp-block-yoast-seo-ai-summarize.yoast-ai-summarize ) > .wp-block-list > li {
+	display: list-item;
+	margin: 0;
+	padding: var(--cr-space-sm) 0;
+	border-block-start: 1px dashed var(--cr-paper-rule);
+	font-size: 1rem;
+	line-height: 1.5;
+}
+
+:is( .wp-block-courtneyr-key-takeaways, .wp-block-yoast-seo-ai-summarize.yoast-ai-summarize ) > .wp-block-list > li:first-child {
+	padding-block-start: 0;
+	border-block-start: 0;
+}
+
+:is( .wp-block-courtneyr-key-takeaways, .wp-block-yoast-seo-ai-summarize.yoast-ai-summarize ) > .wp-block-list > li::before {
+	content: none !important;
+}
+
+:is( .wp-block-courtneyr-key-takeaways, .wp-block-yoast-seo-ai-summarize.yoast-ai-summarize ) > .wp-block-list > li::marker {
+	color: var(--cr-ink-muted);
+	font-family: var(--cr-font-mono);
+	font-size: var(--cr-text-xs);
+	font-weight: var(--cr-weight-bold);
+}
+
+:is( .wp-block-courtneyr-key-takeaways, .wp-block-yoast-seo-ai-summarize.yoast-ai-summarize ) > .wp-block-list > li > strong {
+	padding-inline: 0.1em;
+	box-shadow: var(--cr-shadow-marker);
+	box-decoration-break: clone;
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-bold);
+}

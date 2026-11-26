@@ -423,7 +423,7 @@ body.kind-reply.single .single-post__content .pk-card.cr-letter-cite:has( > .pk-
 	border-block-start: 2px solid var(--cr-border-strong);
 }
 
-.cr-reply-article:not( :has( .cr-reply-plain-sections ) ) :is( .yoast-ai-summarize, .cr-toc, .cr-reply-screenshots ) {
+.cr-reply-article:not( :has( .cr-reply-plain-sections ) ) :is( .cr-toc, .cr-reply-screenshots ) {
 	padding: var(--cr-space-md);
 	border: 1px solid var(--cr-border-strong);
 	background: var(--cr-surface-elevated);
@@ -437,7 +437,7 @@ body.kind-reply.single .single-post__content .pk-card.cr-letter-cite:has( > .pk-
 	font-size: var(--cr-text-sm);
 }
 
-.cr-reply-article :is( .yoast-ai-summarize, .cr-toc ) > h2 {
+.cr-reply-article .cr-toc > h2 {
 	position: static;
 	margin-block: 0 var(--cr-space-xs);
 	padding: 0;
