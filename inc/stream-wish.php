@@ -186,7 +186,7 @@ function clipping( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
-	$facts    = function_exists( '\\PKIW\\kind_facts' ) ? \PKIW\kind_facts( $post_id ) : array();
+	$facts    = Wish\facts( $post_id );
 	$priority = is_array( $facts ) ? (string) ( $facts['priority'] ?? '' ) : '';
 	$edited   = \Courtneyr\Child\MediaShelf\cut_elements( $html, 'div', 'pk-badge' );
 	if ( $generic ) {

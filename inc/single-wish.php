@@ -111,12 +111,12 @@ add_filter( 'courtneyr_child_featured_repeat_kinds', __NAMESPACE__ . '\\repeat_k
  * @param mixed $post    Post object.
  */
 function featured_repeats( bool $repeats, $post ): bool {
-	if ( $repeats || ! $post instanceof \WP_Post || ! ArtifactStyle\applies( $post, Wish\ARTIFACT_STYLE ) || ! function_exists( '\\PKIW\\kind_facts' ) ) {
+	if ( $repeats || ! $post instanceof \WP_Post || ! ArtifactStyle\applies( $post, Wish\ARTIFACT_STYLE ) ) {
 		return $repeats;
 	}
-	$facts   = \PKIW\kind_facts( $post->ID );
+	$facts   = Wish\facts( $post->ID );
 	$picture = is_array( $facts ) && is_array( $facts['picture'] ?? null ) ? $facts['picture'] : array();
-	return ! empty( $picture['suppress_featured'] );
+	return ! empty( $facts['has_card'] ) && ! empty( $picture['suppress_featured'] );
 }
 add_filter( 'courtneyr_child_featured_repeats', __NAMESPACE__ . '\\featured_repeats', 10, 2 );
 

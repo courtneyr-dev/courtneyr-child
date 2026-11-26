@@ -110,7 +110,10 @@ function is_archive_item( array $block ): bool {
  * @param int $post_id Post ID.
  */
 function facts( int $post_id ): array {
-	if ( ! function_exists( '\\PKIW\\kind_facts' ) ) {
+	if ( function_exists( '\\PKIW\\kind_facts_for_kind' ) ) {
+		return \PKIW\kind_facts_for_kind( $post_id, KIND );
+	}
+	if ( ! function_exists( '\\PKIW\\kind_facts' ) || KIND !== ( ArtifactStyle\kind_slugs( $post_id )[0] ?? '' ) ) {
 		return array();
 	}
 	$facts = \PKIW\kind_facts( $post_id );

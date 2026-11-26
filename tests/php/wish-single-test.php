@@ -47,6 +47,10 @@ namespace Courtneyr\Child\Wish {
 	function is_wish_single(): bool {
 		return (bool) $GLOBALS['cr_single'];
 	}
+
+	function facts( int $post_id ): array {
+		return \PKIW\kind_facts( $post_id );
+	}
 }
 
 namespace PKIW {
@@ -102,13 +106,15 @@ namespace {
 			$wish = new WP_Post( 10 );
 			$note = new WP_Post( 11 );
 			$GLOBALS['cr_terms'][10] = true;
-			$GLOBALS['cr_facts'][10] = array( 'picture' => array( 'suppress_featured' => true ) );
+			$GLOBALS['cr_facts'][10] = array( 'has_card' => true, 'picture' => array( 'suppress_featured' => true ) );
 			$yes = apply_filters( 'courtneyr_child_featured_repeats', false, $wish );
-			$GLOBALS['cr_facts'][10] = array( 'picture' => array( 'suppress_featured' => false ) );
+			$GLOBALS['cr_facts'][10] = array( 'has_card' => true, 'picture' => array( 'suppress_featured' => false ) );
 			$no = apply_filters( 'courtneyr_child_featured_repeats', false, $wish );
+			$GLOBALS['cr_facts'][10] = array( 'has_card' => false, 'picture' => array( 'suppress_featured' => true ) );
+			$cardless = apply_filters( 'courtneyr_child_featured_repeats', false, $wish );
 			$GLOBALS['cr_facts'][10] = array();
 			$empty = apply_filters( 'courtneyr_child_featured_repeats', false, $wish );
-			return $yes && ! $no && ! $empty && ! apply_filters( 'courtneyr_child_featured_repeats', false, $note ) && apply_filters( 'courtneyr_child_featured_repeats', true, $note );
+			return $yes && ! $no && ! $cardless && ! $empty && ! apply_filters( 'courtneyr_child_featured_repeats', false, $note ) && apply_filters( 'courtneyr_child_featured_repeats', true, $note );
 		}
 	);
 

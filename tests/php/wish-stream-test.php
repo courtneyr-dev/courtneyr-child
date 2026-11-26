@@ -81,6 +81,10 @@ namespace Courtneyr\Child\Wish {
 	function is_archive_item( array $block ): bool {
 		return false !== strpos( (string) ( $block['attrs']['className'] ?? '' ), 'is-style-cr-wish-listing' );
 	}
+
+	function facts( int $post_id ): array {
+		return \PKIW\kind_facts( $post_id );
+	}
 }
 
 namespace Courtneyr\Child\MediaShelf {
