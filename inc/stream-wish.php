@@ -9,6 +9,9 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\StreamWish;
 
+use Courtneyr\Child\ArtifactStyle;
+use Courtneyr\Child\Wish;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -57,6 +60,7 @@ function dress_article( string $html, int $post_id, string $priority ): string {
 	foreach ( array( 'cr-wish-clipping', 'cr-paper-sheet', 'cr-paper-sheet--torn', 'cr-paper--printer-ivory', 'cr-wish-clipping--tilt-' . $rotation ) as $class_name ) {
 		$tags->add_class( $class_name );
 	}
+	$tags->add_class( Wish\ARTIFACT_CLASS );
 	if ( '' !== $priority && null === $tags->get_attribute( 'data-priority' ) ) {
 		$tags->set_attribute( 'data-priority', $priority );
 	}
@@ -168,7 +172,7 @@ function clipping( string $html, array $block, $instance ): string {
 	$post    = $post_id ? get_post( $post_id ) : null;
 	$classes = root_classes( $html );
 	if ( ! $post instanceof \WP_Post
-		|| ! has_term( 'wish', 'kind', $post )
+		|| ! ArtifactStyle\applies( $post, Wish\ARTIFACT_STYLE )
 		|| post_password_required( $post )
 		|| ! in_array( 'k-wish', $classes, true )
 		|| in_array( 'pk-card--protected', $classes, true )
@@ -182,7 +186,7 @@ function clipping( string $html, array $block, $instance ): string {
 		return $html;
 	}
 
-	$facts    = function_exists( '\\PKIW\\kind_facts' ) ? \PKIW\kind_facts( $post_id ) : array();
+	$facts    = Wish\facts( $post_id );
 	$priority = is_array( $facts ) ? (string) ( $facts['priority'] ?? '' ) : '';
 	$edited   = \Courtneyr\Child\MediaShelf\cut_elements( $html, 'div', 'pk-badge' );
 	if ( $generic ) {

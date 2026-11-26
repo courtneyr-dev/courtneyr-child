@@ -9,6 +9,9 @@ declare( strict_types = 1 );
 
 namespace Courtneyr\Child\SingleWish;
 
+use Courtneyr\Child\ArtifactStyle;
+use Courtneyr\Child\Wish;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -58,6 +61,34 @@ function photo_fallback( string $html, array $block, $instance ): string {
 add_filter( 'render_block_post-kinds-indieweb/wish-card', __NAMESPACE__ . '\\photo_fallback', 10, 3 );
 
 /**
+ * Mark the existing Wish card root on its own single.
+ *
+ * @param string $html  Rendered card.
+ * @param array  $block Parsed block.
+ * @param mixed  $instance Block instance.
+ */
+function mark_artifact( string $html, array $block, $instance ): string {
+	if ( '' === $html || ! Wish\is_wish_single() ) {
+		return $html;
+	}
+	$post_id = Wish\block_post_id( $instance );
+	if ( (int) get_queried_object_id() !== $post_id || post_password_required( $post_id ) ) {
+		return $html;
+	}
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	if ( $tags->next_tag(
+		array(
+			'tag_name'   => 'ARTICLE',
+			'class_name' => 'pk-wish',
+		)
+	) ) {
+		$tags->add_class( Wish\ARTIFACT_CLASS );
+	}
+	return $tags->get_updated_html();
+}
+add_filter( 'render_block_post-kinds-indieweb/wish-card', __NAMESPACE__ . '\\mark_artifact', 11, 3 );
+
+/**
  * Register wish with the shared featured-repeat filter.
  *
  * @param mixed $kinds Kind slugs.
@@ -80,12 +111,12 @@ add_filter( 'courtneyr_child_featured_repeat_kinds', __NAMESPACE__ . '\\repeat_k
  * @param mixed $post    Post object.
  */
 function featured_repeats( bool $repeats, $post ): bool {
-	if ( $repeats || ! $post instanceof \WP_Post || ! has_term( 'wish', 'kind', $post ) || ! function_exists( '\\PKIW\\kind_facts' ) ) {
+	if ( $repeats || ! $post instanceof \WP_Post || ! ArtifactStyle\applies( $post, Wish\ARTIFACT_STYLE ) ) {
 		return $repeats;
 	}
-	$facts   = \PKIW\kind_facts( $post->ID );
+	$facts   = Wish\facts( $post->ID );
 	$picture = is_array( $facts ) && is_array( $facts['picture'] ?? null ) ? $facts['picture'] : array();
-	return ! empty( $picture['suppress_featured'] );
+	return ! empty( $facts['has_card'] ) && ! empty( $picture['suppress_featured'] );
 }
 add_filter( 'courtneyr_child_featured_repeats', __NAMESPACE__ . '\\featured_repeats', 10, 2 );
 

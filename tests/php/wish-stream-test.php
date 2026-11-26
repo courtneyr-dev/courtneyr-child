@@ -50,9 +50,11 @@ namespace {
 		$id = null === $post ? get_the_ID() : (int) $post;
 		return $GLOBALS['cr_posts'][ $id ] ?? null;
 	}
-	function has_term( $term, $taxonomy, $post ) {
-		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
-		return 'wish' === $term && 'kind' === $taxonomy && ! empty( $GLOBALS['cr_terms'][ $id ] );
+	function get_the_terms( $post, $taxonomy ) {
+		return 'kind' === $taxonomy && ! empty( $GLOBALS['cr_terms'][ $post ] ) ? array( (object) array( 'slug' => 'wish' ) ) : false;
+	}
+	function add_action( $hook, $callback, $priority = 10, $args = 1 ) {
+		return add_filter( $hook, $callback, $priority, $args );
 	}
 	function post_password_required( $post = null ) {
 		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
@@ -73,8 +75,15 @@ namespace Courtneyr\Child\HomeSections {
 }
 
 namespace Courtneyr\Child\Wish {
+	const ARTIFACT_STYLE = 'cr-catalog-clipping';
+	const ARTIFACT_CLASS = 'is-style-' . ARTIFACT_STYLE;
+
 	function is_archive_item( array $block ): bool {
 		return false !== strpos( (string) ( $block['attrs']['className'] ?? '' ), 'is-style-cr-wish-listing' );
+	}
+
+	function facts( int $post_id ): array {
+		return \PKIW\kind_facts( $post_id );
 	}
 }
 
@@ -145,7 +154,9 @@ namespace {
 		}
 		require_once $api . $file;
 	}
+	require dirname( __DIR__, 2 ) . '/inc/artifact-style.php';
 	require dirname( __DIR__, 2 ) . '/inc/stream-wish.php';
+	\Courtneyr\Child\ArtifactStyle\register( 'post-kinds-indieweb/wish-card', 'cr-catalog-clipping', 'Catalog clipping', 'wish' );
 
 	$failures = array();
 
@@ -201,6 +212,7 @@ namespace {
 			$out = cr_wish_render_stream( cr_wish_card_fixture(), 41 );
 			return str_contains( $out, 'cr-wish-clipping' )
 				&& 1 === preg_match_all( '/cr-wish-clipping--tilt-[0-3]/', $out )
+				&& 1 === substr_count( $out, 'is-style-cr-catalog-clipping' )
 				&& 1 === substr_count( $out, 'cr-wish-clipping__tape' )
 				&& ! str_contains( $out, 'pk-badge' )
 				&& str_contains( $out, 'pk-wish-chip pk-wish-chip--type' )

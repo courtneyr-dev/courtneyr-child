@@ -107,9 +107,17 @@ namespace {
 		$id = $post instanceof WP_Post ? $post->ID : ( null === $post ? get_the_ID() : (int) $post );
 		return $GLOBALS['cr_posts'][ $id ] ?? null;
 	}
-	function has_term( $term, $taxonomy, $post ) {
-		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
-		return 'wish' === $term && 'kind' === $taxonomy && ! empty( $GLOBALS['cr_terms'][ $id ] );
+	function get_the_terms( $post, $taxonomy ) {
+		return 'kind' === $taxonomy && ! empty( $GLOBALS['cr_terms'][ $post ] ) ? array( (object) array( 'slug' => 'wish' ) ) : false;
+	}
+
+	class WP_Block_Type_Registry {
+		public static function get_instance(): self {
+			return new self();
+		}
+		public function is_registered( string $block ): bool {
+			return 'post-kinds-indieweb/wish-card' === $block;
+		}
 	}
 	function post_password_required( $post = null ) {
 		$id = $post instanceof WP_Post ? $post->ID : (int) $post;
@@ -158,7 +166,9 @@ namespace PKIW {
 }
 
 namespace {
+	require dirname( __DIR__, 2 ) . '/inc/artifact-style.php';
 	require dirname( __DIR__, 2 ) . '/inc/wish.php';
+	do_action( 'after_setup_theme' );
 	use Courtneyr\Child\Wish;
 
 	$failures = array();
@@ -249,7 +259,7 @@ namespace {
 				if ( 1 !== preg_match_all( '/<a\b[^>]*\bhref=/i', $html )
 					|| ! str_contains( $html, 'alt=""' )
 					|| ! str_contains( $html, 'data-priority="' . $priority . '"' )
-					|| ! preg_match( '/^<article class="cr-wish-listing pk-card--stream"/', $html )
+					|| ! preg_match( '/^<article class="cr-wish-listing pk-card--stream is-style-cr-catalog-clipping"/', $html )
 					|| ! str_contains( $text, ucfirst( $priority ) . ' priority' )
 					|| preg_match( '/\b(?:Reason|Price|January|February|March|April|May|June|July|August|September|October|November|December)\b|\d/', $text )
 				) {
