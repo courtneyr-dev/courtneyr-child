@@ -836,8 +836,7 @@ hr {
 
 /* Forms */
 button, input, select, textarea { font: inherit; color: inherit; }
-input[type="text"], input[type="email"], input[type="url"], input[type="search"],
-input[type="password"], input[type="number"], input[type="tel"], textarea, select {
+:where(input[type="text"],input[type="email"],input[type="url"],input[type="search"],input[type="password"],input[type="number"],input[type="tel"],textarea,select) {
   background: var(--cr-surface-elevated);
   border: var(--cr-border-thick);
   padding: var(--cr-space-xs) var(--cr-space-sm);
@@ -845,7 +844,7 @@ input[type="password"], input[type="number"], input[type="tel"], textarea, selec
   width: 100%;
   max-width: 30rem;
 }
-input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible {
+:where(input,textarea):where(:focus-visible),select:focus-visible,button:focus-visible {
   outline: 3px solid var(--cr-focus-ring);
   outline-offset: 2px;
   box-shadow: 0 0 0 7px var(--cr-focus-halo);

@@ -276,14 +276,6 @@
 }
 .cr-404 .cr-404__search-card .wp-block-search { max-width: none; margin: 0; }
 .cr-404 .cr-404__search-card .wp-block-search__inside-wrapper { gap: 12px; border: 0; padding: 0; }
-.cr-404 .cr-404__search-card .wp-block-search__input {
-	background: var(--cr-surface-elevated);
-	border: 2px solid var(--cr-ink);
-	border-radius: 3px;
-	padding: 13px 14px;
-	font-size: 16px;
-	color: var(--cr-ink);
-}
 .cr-404 .cr-404__search-card .wp-block-search__button {
 	font-family: var(--cr-font-accent);
 	font-weight: 800;

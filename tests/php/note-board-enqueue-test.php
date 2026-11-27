@@ -124,6 +124,8 @@ namespace {
 	function wp_add_inline_style() {}
 	function wp_enqueue_block_style() {}
 	function add_editor_style() {}
+	class WP_Theme_JSON { const ELEMENTS = array( 'label' => 'label' ); const VALID_ELEMENT_PSEUDO_SELECTORS = array( 'textInput' => array( '::placeholder' ) ); } // Stub: a 7.2 core, so no form fallback sheet loads.
+	function wp_styles() { return new class() { public function query() { return false; } }; } // Stub: Ollie is not registered, so its sheet stays as is.
 	function wp_register_style() {}
 
 	function get_queried_object_id() {

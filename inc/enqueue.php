@@ -148,6 +148,15 @@ function enqueue_baseline(): void {
 		'print'
 	);
 
+	foreach ( missing_form_elements() as $sheet ) {
+		wp_enqueue_style(
+			'courtneyr-' . $sheet,
+			COURTNEYR_CHILD_URI . '/assets/css/cr-' . $sheet . '.css',
+			array( 'courtneyr-components' ),
+			COURTNEYR_CHILD_VERSION
+		);
+	}
+
 	// 404 comic layer — only loaded on the Not Found template.
 	if ( is_404() ) {
 		wp_enqueue_style(
@@ -592,8 +601,116 @@ function add_editor_assets(): void {
 			'assets/css/cr-evidence-labels.css',
 		)
 	);
+	foreach ( missing_form_elements() as $sheet ) {
+		add_editor_style( 'assets/css/cr-' . $sheet . '.css' );
+	}
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\\add_editor_assets' );
+
+/**
+ * The fallback sheets for the theme.json form features the Global Styles
+ * engine in use drops. WordPress 7.2 added the label element and the
+ * textInput :focus-visible, :user-invalid and ::placeholder states; 7.1
+ * has neither, and Gutenberg 24.2 (WP_Theme_JSON_Gutenberg, which replaces
+ * core's engine while active) has the label but not the states.
+ *
+ * @param string $engine Theme JSON class to read; defaults to the active engine.
+ * @return string[] Sheet names under assets/css/cr-<name>.css.
+ */
+function missing_form_elements( string $engine = '' ): array {
+	if ( '' === $engine ) {
+		$engine = class_exists( 'WP_Theme_JSON_Gutenberg' ) ? 'WP_Theme_JSON_Gutenberg' : 'WP_Theme_JSON';
+	}
+	$sheets = array();
+	if ( ! isset( $engine::ELEMENTS['label'] ) ) {
+		$sheets[] = 'forms-label-fallback';
+	}
+	if ( ! in_array( '::placeholder', $engine::VALID_ELEMENT_PSEUDO_SELECTORS['textInput'] ?? array(), true ) ) {
+		$sheets[] = 'forms-fallback';
+	}
+	return $sheets;
+}
+
+/**
+ * Ollie 1.6.5's style.css styles input:not([type="submit"]):not([type="radio"])
+ * at 0,2,1, comment-form fields at up to 0,4,1, and input:focus-visible at
+ * 0,1,1. WordPress prints theme.json and saved Global Styles for the Search
+ * block and comment form text fields at :root :where() (0,1,0), so those two
+ * Ollie rules would beat a site owner's edit. Appending OLLIE_FIELD_SCOPE to
+ * each of their selectors drops just those fields; :where() keeps every other
+ * field at the specificity Ollie gave it.
+ */
+const OLLIE_FIELD_SCOPE = ':not(:where(:is(.wp-block-search, .wp-block-post-comments-form) :is(textarea, [type="email"], [type="number"], [type="password"], [type="search"], [type="text"], [type="tel"], [type="url"])))';
+
+/**
+ * Selectors of the Ollie 1.6.5 rules OLLIE_FIELD_SCOPE narrows, one list per
+ * rule, in the order its style.css has them.
+ */
+const OLLIE_FIELD_RULES = array(
+	array(
+		'input:not([type="submit"]):not([type="radio"])',
+		'select',
+		'textarea',
+		'.wp-block-post-comments-form input:not([type="submit"]):not([type="checkbox"]):not([type="radio"])',
+		'.wp-block-post-comments-form textarea',
+	),
+	array( 'input:focus-visible', 'textarea:focus-visible', 'select:focus-visible' ),
+);
+
+/**
+ * Ollie's stylesheet with OLLIE_FIELD_SCOPE on every selector of the rules in
+ * OLLIE_FIELD_RULES, or null when any of them is not there exactly once.
+ * Whitespace inside and between the selectors, and around the brackets and
+ * operator of an attribute selector, may differ from the list; any other
+ * change to a rule's selectors leaves the stylesheet alone.
+ *
+ * @param string $css Ollie's style.css.
+ */
+function scope_ollie_field_rules( string $css ): ?string {
+	$spacing = array(
+		'\\[' => '\\[\\s*',
+		'\\]' => '\\s*\\]',
+		'\\=' => '\\s*\\=\\s*',
+	);
+	foreach ( array( '~', '\\|', '\\^', '\\$', '\\*' ) as $operator ) {
+		$spacing[ $operator . '\\=' ] = '\\s*' . $operator . '\\=\\s*';
+	}
+	foreach ( OLLIE_FIELD_RULES as $selectors ) {
+		$tokens  = array_map(
+			static fn( string $selector ): string => implode( '\\s+', array_map( static fn( string $part ): string => strtr( preg_quote( $part, '/' ), $spacing ), preg_split( '/\\s+/', $selector ) ) ),
+			$selectors
+		);
+		$pattern = '/(^|\\}|\\*\\/)(\\s*)' . implode( '\\s*,\\s*', $tokens ) . '\\s*\\{/';
+		if ( 1 !== preg_match_all( $pattern, $css ) ) {
+			return null;
+		}
+		$scoped = implode( OLLIE_FIELD_SCOPE . ",\n", $selectors ) . OLLIE_FIELD_SCOPE . ' {';
+		$css    = (string) preg_replace_callback( $pattern, static fn( array $m ): string => $m[1] . $m[2] . $scoped, $css );
+	}
+	return $css;
+}
+
+/**
+ * Serve Ollie's stylesheet inline with its field rules narrowed. When Ollie's
+ * text no longer matches OLLIE_FIELD_RULES, its file loads as before.
+ */
+function enqueue_scoped_ollie_sheet(): void {
+	$style = wp_styles()->query( 'ollie', 'registered' );
+	if ( ! $style ) {
+		return;
+	}
+	$file = get_template_directory() . '/style.css';
+	if ( ! is_readable( $file ) ) {
+		return;
+	}
+	$css = scope_ollie_field_rules( (string) file_get_contents( $file ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local parent theme file.
+	if ( null === $css ) {
+		return;
+	}
+	$style->src = false;
+	wp_add_inline_style( 'ollie', $css );
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\enqueue_scoped_ollie_sheet', 20 );
 
 
 /**
