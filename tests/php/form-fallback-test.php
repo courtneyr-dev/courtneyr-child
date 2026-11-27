@@ -41,6 +41,7 @@ namespace Courtneyr\Child\FormFallbackTests {
 
 	use function Courtneyr\Child\Enqueue\missing_form_elements;
 	use function Courtneyr\Child\Enqueue\scope_ollie_field_rules;
+	use const Courtneyr\Child\Enqueue\OLLIE_FIELD_RULES;
 	use const Courtneyr\Child\Enqueue\OLLIE_FIELD_SCOPE;
 
 	$failures = array();
@@ -74,6 +75,31 @@ namespace Courtneyr\Child\FormFallbackTests {
 	check( str_starts_with( $scoped, "label {\n\twidth: 100%;\n}" ), 'other rules unchanged' );
 	check( 1 === substr_count( OLLIE_FIELD_SCOPE, ':not(:where(' ), 'scope adds no specificity (one :not(:where()))' );
 	check( null === scope_ollie_field_rules( str_replace( 'select:focus-visible {', 'select:focus {', $ollie ) ), 'changed Ollie text is left alone' );
+
+	check( null !== scope_ollie_field_rules( str_replace( "\n", "\r\n", $ollie ) ), 'CRLF line endings still match' );
+	check( null !== scope_ollie_field_rules( str_replace( array( ",\n", 'textarea {' ), array( ' ,  ', "textarea\n\n{" ), $ollie ) ), 'reflowed selector lists still match' );
+	check( null === scope_ollie_field_rules( str_replace( "\nselect,\ntextarea,", "\ntextarea,\nselect,", $ollie ) ), 'reordered selectors are left alone' );
+	check( null === scope_ollie_field_rules( 'form ' . str_replace( "label {\n\twidth: 100%;\n}\n\n", '', $ollie ) ), 'a longer selector list ending in the same selectors is left alone' );
+
+	/*
+	 * The Ollie stylesheet courtneyr.dev deploys: wp-content/themes/ollie/style.css
+	 * from courtneyr-dev/car-courtneyr-dev at 2efcbba2d42d7df4e09199dbce7774d627cf9ba5,
+	 * Ollie 1.6.5. CR_OLLIE_STYLE points the check at another copy. Updating Ollie
+	 * means replacing this fixture; the checks below then say whether the rewrite
+	 * still neutralizes both rules.
+	 */
+	$fixture = getenv( 'CR_OLLIE_STYLE' ) ?: __DIR__ . '/fixtures/ollie-1.6.5-style.css';
+	$shipped = (string) file_get_contents( $fixture );
+	check( '' !== $shipped, "Ollie stylesheet read from $fixture" );
+	$scoped = scope_ollie_field_rules( $shipped );
+	check( null !== $scoped, 'shipped Ollie: both field rules are found' );
+	$scoped = (string) $scoped;
+	foreach ( OLLIE_FIELD_RULES as $selectors ) {
+		$rule = implode( OLLIE_FIELD_SCOPE . ",\n", $selectors ) . OLLIE_FIELD_SCOPE . ' {';
+		check( 1 === substr_count( $scoped, $rule ), 'shipped Ollie: the rule starting "' . $selectors[0] . '" is scoped on every selector' );
+	}
+	check( 8 === substr_count( $scoped, OLLIE_FIELD_SCOPE ), 'shipped Ollie: exactly the 8 target selectors are scoped' );
+	check( preg_replace( '/\s+/', '', str_replace( OLLIE_FIELD_SCOPE, '', $scoped ) ) === preg_replace( '/\s+/', '', $shipped ), 'shipped Ollie: nothing else changes' );
 
 	echo "\n", count( $failures ) ? count( $failures ) . ' failed' : 'all passed', "\n";
 	exit( count( $failures ) ? 1 : 0 );

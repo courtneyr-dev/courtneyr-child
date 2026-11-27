@@ -643,28 +643,40 @@ function missing_form_elements( string $engine = '' ): array {
 const OLLIE_FIELD_SCOPE = ':not(:where(:is(.wp-block-search, .wp-block-post-comments-form) :is(textarea, [type="email"], [type="number"], [type="password"], [type="search"], [type="text"], [type="tel"], [type="url"])))';
 
 /**
- * Selector lists of the Ollie 1.6.5 rules OLLIE_FIELD_SCOPE narrows, as they
- * appear in its style.css.
+ * Selectors of the Ollie 1.6.5 rules OLLIE_FIELD_SCOPE narrows, one list per
+ * rule, in the order its style.css has them.
  */
 const OLLIE_FIELD_RULES = array(
-	"input:not([type=\"submit\"]):not([type=\"radio\"]),\nselect,\ntextarea,\n.wp-block-post-comments-form input:not([type=\"submit\"]):not([type=\"checkbox\"]):not([type=\"radio\"]),\n.wp-block-post-comments-form textarea {",
-	"input:focus-visible,\ntextarea:focus-visible,\nselect:focus-visible {",
+	array(
+		'input:not([type="submit"]):not([type="radio"])',
+		'select',
+		'textarea',
+		'.wp-block-post-comments-form input:not([type="submit"]):not([type="checkbox"]):not([type="radio"])',
+		'.wp-block-post-comments-form textarea',
+	),
+	array( 'input:focus-visible', 'textarea:focus-visible', 'select:focus-visible' ),
 );
 
 /**
  * Ollie's stylesheet with OLLIE_FIELD_SCOPE on every selector of the rules in
  * OLLIE_FIELD_RULES, or null when any of them is not there exactly once.
+ * Whitespace inside and between the selectors may differ from the list; any
+ * other change to a rule's selectors leaves the stylesheet alone.
  *
  * @param string $css Ollie's style.css.
  */
 function scope_ollie_field_rules( string $css ): ?string {
-	foreach ( OLLIE_FIELD_RULES as $prelude ) {
-		if ( 1 !== substr_count( $css, $prelude ) ) {
+	foreach ( OLLIE_FIELD_RULES as $selectors ) {
+		$tokens  = array_map(
+			static fn( string $selector ): string => implode( '\\s+', array_map( static fn( string $part ): string => preg_quote( $part, '/' ), preg_split( '/\\s+/', $selector ) ) ),
+			$selectors
+		);
+		$pattern = '/(^|\\}|\\*\\/)(\\s*)' . implode( '\\s*,\\s*', $tokens ) . '\\s*\\{/';
+		if ( 1 !== preg_match_all( $pattern, $css ) ) {
 			return null;
 		}
-		$selectors = explode( ",\n", substr( $prelude, 0, -2 ) );
-		$scoped    = implode( OLLIE_FIELD_SCOPE . ",\n", $selectors ) . OLLIE_FIELD_SCOPE . ' {';
-		$css       = str_replace( $prelude, $scoped, $css );
+		$scoped = implode( OLLIE_FIELD_SCOPE . ",\n", $selectors ) . OLLIE_FIELD_SCOPE . ' {';
+		$css    = (string) preg_replace_callback( $pattern, static fn( array $m ): string => $m[1] . $m[2] . $scoped, $css );
 	}
 	return $css;
 }
