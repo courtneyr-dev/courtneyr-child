@@ -1,15 +1,20 @@
-/* Search block and comment form labels and placeholders on WordPress 7.1.
-   7.1 drops the label element and the textInput states from theme.json, so
-   inc/enqueue.php loads this sheet only when WP_Theme_JSON::ELEMENTS has no
-   label. The values and :root :where() shape match what 7.2 prints from the
-   core/search and core/post-comments-form elements in theme.json. Field,
-   focus and error styles stay in components.css on every core. */
-:root :where(.wp-block-search label, .wp-block-post-comments-form label) {
-	color: var(--cr-ink);
-	font-family: var(--cr-font-accent);
-	font-weight: var(--cr-weight-semibold);
+/* Search block and comment form text field states for a Global Styles engine
+   without the 7.2 textInput :focus-visible, :user-invalid and ::placeholder
+   states (WordPress 7.1, Gutenberg 24.2). inc/enqueue.php loads it from
+   missing_form_elements(). Values and the :root :where() shape match what 7.2
+   prints from the core/search and core/post-comments-form elements in
+   theme.json, so a saved Global Styles edit to the field still wins. */
+:root :where(:is(.wp-block-search, .wp-block-post-comments-form) :is(textarea, input:where([type="email"], [type="number"], [type="password"], [type="search"], [type="text"], [type="tel"], [type="url"])):focus-visible) {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 
-:root :where(.wp-block-search textarea, .wp-block-search input, .wp-block-post-comments-form textarea, .wp-block-post-comments-form input)::placeholder {
+:root :where(:is(.wp-block-search, .wp-block-post-comments-form) :is(textarea, input:where([type="email"], [type="number"], [type="password"], [type="search"], [type="text"], [type="tel"], [type="url"])):user-invalid) {
+	border-color: var(--cr-coral);
+	border-style: dashed;
+}
+
+:root :where(:is(.wp-block-search, .wp-block-post-comments-form) :is(textarea, input:where([type="email"], [type="number"], [type="password"], [type="search"], [type="text"], [type="tel"], [type="url"])))::placeholder {
 	color: var(--cr-ink-muted);
 }

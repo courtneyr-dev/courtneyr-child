@@ -616,6 +616,9 @@
 				"event": "var(--cr-type-event, #023047)",
 				"review": "var(--cr-type-review, #023047)"
 			},
+			"field": {
+				"font-size": "1rem"
+			},
 			"rotate": {
 				"first": "-1.2deg",
 				"second": "1.5deg",
@@ -810,7 +813,7 @@
 							}
 						},
 						"typography": {
-							"fontSize": "1rem"
+							"fontSize": "var(--wp--custom--field--font-size)"
 						},
 						"color": {
 							"background": "var(--cr-surface-elevated)",
@@ -858,6 +861,14 @@
 			"core/post-comments-form": {
 				"elements": {
 					"textInput": {
+						"spacing": {
+							"padding": {
+								"top": "0.5em",
+								"right": "1em",
+								"bottom": "0.5em",
+								"left": "1em"
+							}
+						},
 						"color": {
 							"background": "var(--cr-surface-elevated)",
 							"text": "var(--cr-ink)"

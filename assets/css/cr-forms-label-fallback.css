@@ -1,0 +1,9 @@
+/* Search block and comment form labels for a Global Styles engine without the
+   7.2 theme.json label element (WordPress 7.1). inc/enqueue.php loads it from
+   missing_form_elements(). Values and the :root :where() shape match what 7.2
+   prints from the core/search and core/post-comments-form label elements. */
+:root :where(.wp-block-search label, .wp-block-post-comments-form label) {
+	color: var(--cr-ink);
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-semibold);
+}

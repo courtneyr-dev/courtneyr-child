@@ -6549,19 +6549,24 @@ header.is-position-sticky .site-header__inner {
            field. Dark mode gets a parallel pair.
    ============================================================ */
 
-/* (1) Search block and comment form fields. theme.json carries the values as
-   core/search and core/post-comments-form elements (textInput, label); WordPress
-   7.2 prints them, plus their :focus-visible, :user-invalid and ::placeholder
-   states, at :root :where() specificity (0,1,0). Ollie 1.6.5's style.css styles
-   input:not([type="submit"]):not([type="radio"]) at 0,2,1 and comment-form
-   fields at up to 0,4,1, so these selectors restate the same tokens above it.
-   The comments-area selector also covers the webmention form beside it.
-   Tokens flip for dark mode in tokens.css. Delete when Ollie stops styling
-   bare inputs. Label and placeholder on 7.1: cr-forms-fallback.css. */
-.wp-block-search:not(.is-style-cr-header-search) .wp-block-search__input,
-.wp-block-post-comments-form .comment-form textarea,
-#commentform :is(input[type="email"], input[type="text"], input[type="url"]),
-.single-post__comments-wrapper form :is(input[type="email"], input[type="text"], input[type="url"]) {
+/* (1) Search block and comment form text fields take every value from
+   theme.json: core/search and core/post-comments-form elements (textInput,
+   label). WordPress prints them at :root :where() (0,1,0) together with any
+   saved Global Styles edit, so nothing here restates them. Ollie's style.css
+   form rules skip these fields (inc/enqueue.php, OLLIE_FIELD_SCOPE) and the
+   tokens.css form rules sit in :where(). The Search field's 1rem is
+   --wp--custom--field--font-size because fluid typography would shrink a
+   literal 1rem to 14px at 320px. On 7.1 the label and the :focus-visible, :user-invalid
+   and ::placeholder states come from cr-forms-label-fallback.css and
+   cr-forms-fallback.css. Ollie's ::placeholder rule dims every placeholder to
+   0.75 opacity; full opacity keeps --cr-ink-muted at its rated contrast. */
+:is(.wp-block-search, .wp-block-post-comments-form) :is(input, textarea)::placeholder {
+	opacity: 1;
+}
+
+/* The Webmention form beside the comment form is not a theme.json element, so
+   its field restates the comment field tokens above Ollie's 0,2,1 rule. */
+.single-post__comments-wrapper .webmention-form input[type="url"] {
 	color: var(--cr-ink);
 	background-color: var(--cr-surface-elevated);
 	border: var(--cr-border-thick);
@@ -6569,39 +6574,25 @@ header.is-position-sticky .site-header__inner {
 	box-shadow: none;
 }
 
-.wp-block-search:not(.is-style-cr-header-search) .wp-block-search__input {
-	padding: var(--cr-space-xs) var(--cr-space-sm);
-	font-size: 1rem;
-}
-
-.wp-block-search:not(.is-style-cr-header-search) .wp-block-search__input:focus-visible,
-.wp-block-post-comments-form .comment-form textarea:focus-visible,
-#commentform :is(input[type="email"], input[type="text"], input[type="url"]):focus-visible,
-.single-post__comments-wrapper form :is(input[type="email"], input[type="text"], input[type="url"]):focus-visible {
+.single-post__comments-wrapper .webmention-form input[type="url"]:focus-visible {
 	outline: 3px solid var(--cr-focus-ring);
 	outline-offset: 2px;
 	box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
 
-.wp-block-search:not(.is-style-cr-header-search) .wp-block-search__input::placeholder,
-.wp-block-post-comments-form .comment-form textarea::placeholder,
-#commentform input::placeholder,
-.single-post__comments-wrapper form input::placeholder {
+.single-post__comments-wrapper .webmention-form input[type="url"]::placeholder {
+	color: var(--cr-ink-muted);
 	opacity: 1;
-}
-
-.wp-block-post-comments-form .comment-form textarea:user-invalid,
-#commentform :is(input[type="email"], input[type="text"], input[type="url"]):user-invalid {
-	border-color: var(--cr-coral);
-	border-style: dashed;
 }
 
 /* R-13: the header search is the core Search block (no button, Enter submits)
    with the cr-header-search style. The form keeps the site-header__search box
    (the rules near the top of the header section); the inside wrapper carries the
-   leading glyph and the borderless field. The Search block field rules above
-   skip .is-style-cr-header-search; the !important here outranks Ollie's
-   style.css form rule and the core/search theme.json element.
+   leading glyph and the borderless field: an explicit variation of the
+   core/search theme.json element, which these 0,3,0 rules outrank on purpose,
+   so a Global Styles edit to Search fields leaves the header field transparent.
+   The field has no border, so an empty Enter puts the :user-invalid cue on the
+   form's box instead: the dashed coral border the in-page fields get.
    Padding, size and width repeat what the old header field actually rendered
    with: the input:not([type="submit"]) form rule gave it 0.5em 1em and the
    small font-size preset, the tokens.css form rule gave it width 100%, so the
@@ -6656,7 +6647,12 @@ header.is-position-sticky .site-header__inner {
 
 .wp-block-search.is-style-cr-header-search .wp-block-search__input::placeholder {
 	color: var(--cr-ink-muted, #647baf) !important;
-	opacity: 0.85 !important;
+	opacity: 1 !important;
+}
+
+.wp-block-search.is-style-cr-header-search:has(.wp-block-search__input:user-invalid) {
+	border-color: var(--cr-coral);
+	border-style: dashed;
 }
 
 .wp-block-search.is-style-cr-header-search .wp-block-search__input:focus,
