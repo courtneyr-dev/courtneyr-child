@@ -3632,10 +3632,12 @@ body.home .has-tertiary-background-color h3 {
    ivory bg rule even with !important. Two exclusions: the sticky wrapper
    itself, and any group whose subtree contains .site-header (covers the
    intermediate template-part wrapper layers). Newsletter form groups
-   still match — they don't contain .site-header. */
-body.home .wp-block-group:not(.is-position-sticky):not(:has(.site-header)):has(form),
-body.home .wp-block-group:not(.is-position-sticky):not(:has(.site-header)):has(.tnp-subscription),
-body.home .wp-block-group:not(.is-position-sticky):not(:has(.site-header)):has(input[type="email"]),
+   still match — they don't contain .site-header.
+   The Navigation overlay part (.cr-nav-overlay) holds a Search form and
+   paints its own background, so it is excluded too. */
+body.home .wp-block-group:not(.is-position-sticky):not(.cr-nav-overlay):not(:has(.site-header)):has(form),
+body.home .wp-block-group:not(.is-position-sticky):not(.cr-nav-overlay):not(:has(.site-header)):has(.tnp-subscription),
+body.home .wp-block-group:not(.is-position-sticky):not(.cr-nav-overlay):not(:has(.site-header)):has(input[type="email"]),
 body.home .wp-block-columns:has(form) .wp-block-column:has(form) {
 	background-color: transparent !important;
 	box-shadow: none !important;
