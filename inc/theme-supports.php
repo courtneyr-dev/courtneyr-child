@@ -175,16 +175,34 @@ function append_random_category_link( string $content, array $block ): string {
 	}
 
 	$eligible_types = wp_get_random_content_post_types( $wp_the_query );
-	$has_candidate  = array_any(
+	if ( ! $eligible_types ) {
+		return $content;
+	}
+
+	$category      = get_queried_object();
+	$has_candidate = array_any(
 		$wp_the_query->posts,
 		static fn( $post ) => $post instanceof \WP_Post && 'publish' === $post->post_status
 			&& '' === $post->post_password && in_array( $post->post_type, $eligible_types, true )
 	);
 	if ( ! $has_candidate ) {
+		$has_candidate = (bool) get_posts(
+			array(
+				'cat'                    => $category->term_id,
+				'post_type'              => $eligible_types,
+				'post_status'            => 'publish',
+				'has_password'           => false,
+				'posts_per_page'         => 1,
+				'fields'                 => 'ids',
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			)
+		);
+	}
+	if ( ! $has_candidate ) {
 		return $content;
 	}
 
-	$category = get_queried_object();
 	return $content . sprintf(
 		'<p class="has-small-font-size"><a href="%1$s" aria-label="%2$s">%3$s</a></p>',
 		esc_url( add_query_arg( 'random', '1', get_category_link( $category ) ) ),
