@@ -706,7 +706,9 @@ function revalidate_page_html(): void {
 	}
 
 	$grid_has_password_cookie = ( is_home() || is_archive() || is_search() ) && isset( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
-	if ( $post_password_set || $grid_has_password_cookie ) {
+	// A logged-out commenter's pending-comment preview (wp_get_unapproved_comment_author_email()).
+	$pending_comment_preview = ! empty( $_GET['unapproved'] ) && ! empty( $_GET['moderation-hash'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only cache decision.
+	if ( $post_password_set || $grid_has_password_cookie || $pending_comment_preview ) {
 		// R-09: a password-protected post must never be shared-cacheable. Gate on
 		// the post HAVING a password, not post_password_required() — that helper
 		// returns false once the visitor's wp-postpass_ cookie is valid, but the

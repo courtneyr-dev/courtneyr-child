@@ -89,7 +89,6 @@ namespace {
 namespace Courtneyr\Child\BlockPatterns\Tests {
 
 	use WP_Block_Patterns_Registry;
-	use function Courtneyr\Child\BlockPatterns\replace_ollie_woo_pattern_cleanup;
 	use function Courtneyr\Child\BlockPatterns\unregister_ollie_woo_patterns;
 
 	$failures = 0;
@@ -105,7 +104,9 @@ namespace Courtneyr\Child\BlockPatterns\Tests {
 
 	check( 3 === count( array_filter( array( 'woo-cart', 'woo-header', 'hero-1' ), static fn( $s ) => WP_Block_Patterns_Registry::get_instance()->is_registered( "ollie/{$s}" ) ) ), 'the fixture registers its three patterns' );
 
-	replace_ollie_woo_pattern_cleanup();
+	foreach ( $GLOBALS['cr_actions']['after_setup_theme'][10] ?? array() as $callback ) {
+		$callback();
+	}
 	$init = $GLOBALS['cr_actions']['init'][999] ?? array();
 	check( ! in_array( 'Ollie\\unregister_ollie_woocommerce_patterns', $init, true ), "Ollie's cleanup no longer runs on init" );
 	check( in_array( 'Courtneyr\\Child\\BlockPatterns\\unregister_ollie_woo_patterns', $init, true ), 'the name-based cleanup runs on init at 999' );
