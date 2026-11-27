@@ -148,6 +148,15 @@ function enqueue_baseline(): void {
 		'print'
 	);
 
+	if ( needs_form_element_fallback() ) {
+		wp_enqueue_style(
+			'courtneyr-forms-fallback',
+			COURTNEYR_CHILD_URI . '/assets/css/cr-forms-fallback.css',
+			array( 'courtneyr-components' ),
+			COURTNEYR_CHILD_VERSION
+		);
+	}
+
 	// 404 comic layer — only loaded on the Not Found template.
 	if ( is_404() ) {
 		wp_enqueue_style(
@@ -592,8 +601,20 @@ function add_editor_assets(): void {
 			'assets/css/cr-evidence-labels.css',
 		)
 	);
+	if ( needs_form_element_fallback() ) {
+		add_editor_style( 'assets/css/cr-forms-fallback.css' );
+	}
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\\add_editor_assets' );
+
+/**
+ * WordPress 7.2 added the theme.json label element and the textInput
+ * :focus-visible, :user-invalid and ::placeholder states. Older cores drop
+ * them from theme.json, so they load cr-forms-fallback.css instead.
+ */
+function needs_form_element_fallback(): bool {
+	return ! isset( \WP_Theme_JSON::ELEMENTS['label'] );
+}
 
 
 /**

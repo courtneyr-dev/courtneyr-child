@@ -280,8 +280,6 @@
 	background: var(--cr-surface-elevated);
 	border: 2px solid var(--cr-ink);
 	border-radius: 3px;
-	padding: 13px 14px;
-	font-size: 16px;
 	color: var(--cr-ink);
 }
 .cr-404 .cr-404__search-card .wp-block-search__button {

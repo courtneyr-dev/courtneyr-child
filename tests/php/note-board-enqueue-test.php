@@ -124,6 +124,7 @@ namespace {
 	function wp_add_inline_style() {}
 	function wp_enqueue_block_style() {}
 	function add_editor_style() {}
+	class WP_Theme_JSON { const ELEMENTS = array( 'label' => 'label' ); } // Stub: a 7.2 core, so cr-forms-fallback.css stays off.
 	function wp_register_style() {}
 
 	function get_queried_object_id() {

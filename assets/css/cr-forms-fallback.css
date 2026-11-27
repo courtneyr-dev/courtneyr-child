@@ -1,0 +1,15 @@
+/* Search block and comment form labels and placeholders on WordPress 7.1.
+   7.1 drops the label element and the textInput states from theme.json, so
+   inc/enqueue.php loads this sheet only when WP_Theme_JSON::ELEMENTS has no
+   label. The values and :root :where() shape match what 7.2 prints from the
+   core/search and core/post-comments-form elements in theme.json. Field,
+   focus and error styles stay in components.css on every core. */
+:root :where(.wp-block-search label, .wp-block-post-comments-form label) {
+	color: var(--cr-ink);
+	font-family: var(--cr-font-accent);
+	font-weight: var(--cr-weight-semibold);
+}
+
+:root :where(.wp-block-search textarea, .wp-block-search input, .wp-block-post-comments-form textarea, .wp-block-post-comments-form input)::placeholder {
+	color: var(--cr-ink-muted);
+}

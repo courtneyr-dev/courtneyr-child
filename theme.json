@@ -798,6 +798,109 @@
 			}
 		},
 		"blocks": {
+			"core/search": {
+				"elements": {
+					"textInput": {
+						"spacing": {
+							"padding": {
+								"top": "var(--cr-space-xs)",
+								"right": "var(--cr-space-sm)",
+								"bottom": "var(--cr-space-xs)",
+								"left": "var(--cr-space-sm)"
+							}
+						},
+						"typography": {
+							"fontSize": "1rem"
+						},
+						"color": {
+							"background": "var(--cr-surface-elevated)",
+							"text": "var(--cr-ink)"
+						},
+						"border": {
+							"color": "var(--cr-ink)",
+							"style": "solid",
+							"width": "2px",
+							"radius": "var(--cr-radius-xs)"
+						},
+						"shadow": "none",
+						":focus-visible": {
+							"outline": {
+								"color": "var(--cr-focus-ring)",
+								"style": "solid",
+								"width": "3px",
+								"offset": "2px"
+							},
+							"shadow": "0 0 0 7px var(--cr-focus-halo)"
+						},
+						":user-invalid": {
+							"border": {
+								"color": "var(--cr-coral)",
+								"style": "dashed"
+							}
+						},
+						"::placeholder": {
+							"color": {
+								"text": "var(--cr-ink-muted)"
+							}
+						}
+					},
+					"label": {
+						"color": {
+							"text": "var(--cr-ink)"
+						},
+						"typography": {
+							"fontFamily": "var(--cr-font-accent)",
+							"fontWeight": "var(--cr-weight-semibold)"
+						}
+					}
+				}
+			},
+			"core/post-comments-form": {
+				"elements": {
+					"textInput": {
+						"color": {
+							"background": "var(--cr-surface-elevated)",
+							"text": "var(--cr-ink)"
+						},
+						"border": {
+							"color": "var(--cr-ink)",
+							"style": "solid",
+							"width": "2px",
+							"radius": "var(--cr-radius-xs)"
+						},
+						"shadow": "none",
+						":focus-visible": {
+							"outline": {
+								"color": "var(--cr-focus-ring)",
+								"style": "solid",
+								"width": "3px",
+								"offset": "2px"
+							},
+							"shadow": "0 0 0 7px var(--cr-focus-halo)"
+						},
+						":user-invalid": {
+							"border": {
+								"color": "var(--cr-coral)",
+								"style": "dashed"
+							}
+						},
+						"::placeholder": {
+							"color": {
+								"text": "var(--cr-ink-muted)"
+							}
+						}
+					},
+					"label": {
+						"color": {
+							"text": "var(--cr-ink)"
+						},
+						"typography": {
+							"fontFamily": "var(--cr-font-accent)",
+							"fontWeight": "var(--cr-weight-semibold)"
+						}
+					}
+				}
+			},
 			"core/button": {
 				"variations": {
 					"cr-cta": {

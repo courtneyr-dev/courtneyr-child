@@ -164,6 +164,7 @@ namespace {
 
 	/** Stub: editor stylesheet registration isn't inspected. */
 	function add_editor_style() {}
+	class WP_Theme_JSON { const ELEMENTS = array( 'label' => 'label' ); } // Stub: a 7.2 core, so cr-forms-fallback.css stays off.
 
 	/** Stub: block-style registration isn't inspected. */
 	function register_block_style() {}

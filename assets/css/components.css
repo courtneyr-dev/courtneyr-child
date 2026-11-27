@@ -2213,22 +2213,6 @@ section.alignfull,
 	color: var(--cr-ink, #241c4a);
 }
 
-/* Comments-form labels and inputs inside the cream comments wrapper —
-   make sure form controls don't render with dark-mode flipped colors */
-.single-post__comments-wrapper input[type="text"],
-.single-post__comments-wrapper input[type="email"],
-.single-post__comments-wrapper input[type="url"],
-.single-post__comments-wrapper textarea {
-	color: var(--cr-russian-violet, #241c4a);
-	background: var(--cr-printer-ivory, #fbfaf5);
-	border: 1px solid var(--wp--preset--color--border-light, #d4cfeb);
-}
-
-.single-post__comments-wrapper label,
-.single-post__comments-wrapper legend {
-	color: var(--cr-russian-violet, #241c4a);
-}
-
 /* Code blocks/inline code inside light sections — dark-on-light pair */
 .has-tertiary-background-color code,
 .has-main-accent-background-color code,
@@ -2658,8 +2642,9 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
    that hid it, so post body text rendered #1a1714 on the dark surface. No
    stylesheet rule outranks an inline !important, so dark mode re-points the
    preset that declaration reads. Newsletter fields keep their ivory paper,
-   so their text takes --cr-ink-inverse instead of the flipped ink. The
-   comment-form labels were hard-coded violet under the same locks. */
+   so their text takes --cr-ink-inverse instead of the flipped ink.
+   Comments-area and Search block fields flip with the tokens, so they are
+   left out. */
 :root[data-theme="dark"] :is(.has-main-accent-background-color, .has-tertiary-background-color, .has-base-background-color, .has-secondary-background-color) {
 	--wp--preset--color--main: var(--cr-ink);
 }
@@ -2668,13 +2653,8 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 	--wp--preset--color--main: var(--cr-callout-ink);
 }
 
-:root[data-theme="dark"] :is(.has-main-accent-background-color, .has-tertiary-background-color, .has-base-background-color, .has-secondary-background-color, .related-posts) :is(input, textarea, select):not([type="submit"], [type="button"], [type="checkbox"], [type="radio"]) {
+:root[data-theme="dark"] :is(.has-main-accent-background-color, .has-tertiary-background-color, .has-base-background-color, .has-secondary-background-color, .related-posts) :is(input, textarea, select):not([type="submit"], [type="button"], [type="checkbox"], [type="radio"], .single-post__comments-wrapper *, .comment-form *, .wp-block-search__input) {
 	color: var(--cr-ink-inverse);
-}
-
-:root[data-theme="dark"] .single-post__comments-wrapper label,
-:root[data-theme="dark"] .single-post__comments-wrapper legend {
-	color: var(--cr-ink);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -2688,16 +2668,9 @@ body.home .home-stream .home-stream-item .wp-block-post-title {
 		--wp--preset--color--main: var(--cr-callout-ink);
 	}
 
-	:root:not([data-theme]) :is(.has-main-accent-background-color, .has-tertiary-background-color, .has-base-background-color, .has-secondary-background-color, .related-posts) :is(input, textarea, select):not([type="submit"], [type="button"], [type="checkbox"], [type="radio"]),
-	:root[data-theme="system"] :is(.has-main-accent-background-color, .has-tertiary-background-color, .has-base-background-color, .has-secondary-background-color, .related-posts) :is(input, textarea, select):not([type="submit"], [type="button"], [type="checkbox"], [type="radio"]) {
+	:root:not([data-theme]) :is(.has-main-accent-background-color, .has-tertiary-background-color, .has-base-background-color, .has-secondary-background-color, .related-posts) :is(input, textarea, select):not([type="submit"], [type="button"], [type="checkbox"], [type="radio"], .single-post__comments-wrapper *, .comment-form *, .wp-block-search__input),
+	:root[data-theme="system"] :is(.has-main-accent-background-color, .has-tertiary-background-color, .has-base-background-color, .has-secondary-background-color, .related-posts) :is(input, textarea, select):not([type="submit"], [type="button"], [type="checkbox"], [type="radio"], .single-post__comments-wrapper *, .comment-form *, .wp-block-search__input) {
 		color: var(--cr-ink-inverse);
-	}
-
-	:root:not([data-theme]) .single-post__comments-wrapper label,
-	:root:not([data-theme]) .single-post__comments-wrapper legend,
-	:root[data-theme="system"] .single-post__comments-wrapper label,
-	:root[data-theme="system"] .single-post__comments-wrapper legend {
-		color: var(--cr-ink);
 	}
 }
 
@@ -2899,30 +2872,16 @@ body.home .wp-block-latest-posts__post-date {
 	font-size: 0.875rem;
 }
 
-/* (9) Comments form inputs — semantic flip for dark mode safety */
-.single-post__comments-wrapper input[type="text"],
-.single-post__comments-wrapper input[type="email"],
-.single-post__comments-wrapper input[type="url"],
-.single-post__comments-wrapper textarea,
-.wp-block-post-comments-form input[type="text"],
-.wp-block-post-comments-form input[type="email"],
-.wp-block-post-comments-form input[type="url"],
-.wp-block-post-comments-form textarea {
-	background: var(--cr-surface-elevated) !important;
-	color: var(--cr-ink) !important;
-	border: 1.5px solid var(--cr-border) !important;
-}
-
-/* (10) Comments wrapper sub-elements — readable text in both modes */
+/* (10) Comments wrapper sub-elements — readable text in both modes.
+   Comment-form fields and labels take theme.json elements (see the
+   "Search block and comment form fields" section). */
 .single-post__comments-title,
 .single-post__comments-wrapper h2,
 .single-post__comments-wrapper h3 {
 	color: var(--cr-ink) !important;
 }
 
-.single-post__comment-item,
-.wp-block-post-comments-form .comment-form-comment label,
-.wp-block-post-comments-form label {
+.single-post__comment-item {
 	color: var(--cr-ink) !important;
 }
 
@@ -6590,70 +6549,59 @@ header.is-position-sticky .site-header__inner {
            field. Dark mode gets a parallel pair.
    ============================================================ */
 
-/* (1) Search input — readable text + visible field, EVERYWHERE the
-   wp:search block renders. Ollie's parent-theme `:where(.wp-block-
-   search__input)` rule was painting input text the same color as
-   the input background, making typed query text invisible. v0.5.14
-   scoped this to body.search + cr-search-results; v0.5.16 broadens
-   to all .wp-block-search__input on any page (header expanded
-   search, in-page search blocks, etc.) and uses !important to win
-   the cascade against Ollie's :where() rules. */
-input.wp-block-search__input,
-.wp-block-search__input {
-	background: var(--cr-surface-elevated, var(--cr-printer-ivory, #fbfaf5)) !important;
-	color: var(--cr-ink, #241c4a) !important;
-	border: 2px solid var(--cr-russian-violet, #241c4a) !important;
-	padding: 0.5rem 0.75rem !important;
-	font-size: 1rem !important;
-}
-input.wp-block-search__input::placeholder,
-.wp-block-search__input::placeholder {
-	color: var(--cr-ink-muted, #5e577a) !important;
-	opacity: 1 !important;
-}
-input.wp-block-search__input:focus,
-.wp-block-search__input:focus {
-	outline: 3px solid var(--cr-marker, var(--cr-ut-orange, #fb8500)) !important;
-	outline-offset: 2px;
+/* (1) Search block and comment form fields. theme.json carries the values as
+   core/search and core/post-comments-form elements (textInput, label); WordPress
+   7.2 prints them, plus their :focus-visible, :user-invalid and ::placeholder
+   states, at :root :where() specificity (0,1,0). Ollie 1.6.5's style.css styles
+   input:not([type="submit"]):not([type="radio"]) at 0,2,1 and comment-form
+   fields at up to 0,4,1, so these selectors restate the same tokens above it.
+   The comments-area selector also covers the webmention form beside it.
+   Tokens flip for dark mode in tokens.css. Delete when Ollie stops styling
+   bare inputs. Label and placeholder on 7.1: cr-forms-fallback.css. */
+.wp-block-search:not(.is-style-cr-header-search) .wp-block-search__input,
+.wp-block-post-comments-form .comment-form textarea,
+#commentform :is(input[type="email"], input[type="text"], input[type="url"]),
+.single-post__comments-wrapper form :is(input[type="email"], input[type="text"], input[type="url"]) {
+	color: var(--cr-ink);
+	background-color: var(--cr-surface-elevated);
+	border: var(--cr-border-thick);
+	border-radius: var(--cr-radius-xs);
+	box-shadow: none;
 }
 
-/* Dark-mode pair — flip surface to night-elevated + ink-color to
-   ivory. Three-path dark-mode trio. */
-:root[data-theme="dark"] input.wp-block-search__input,
-:root[data-theme="dark"] .wp-block-search__input {
-	background: var(--cr-night-elevated, #251f1c) !important;
-	color: var(--cr-printer-ivory, #fbfaf5) !important;
-	border-color: var(--cr-printer-ivory, #fbfaf5) !important;
+.wp-block-search:not(.is-style-cr-header-search) .wp-block-search__input {
+	padding: var(--cr-space-xs) var(--cr-space-sm);
+	font-size: 1rem;
 }
-:root[data-theme="dark"] input.wp-block-search__input::placeholder,
-:root[data-theme="dark"] .wp-block-search__input::placeholder {
-	color: var(--cr-periwinkle, #d4cfeb) !important;
+
+.wp-block-search:not(.is-style-cr-header-search) .wp-block-search__input:focus-visible,
+.wp-block-post-comments-form .comment-form textarea:focus-visible,
+#commentform :is(input[type="email"], input[type="text"], input[type="url"]):focus-visible,
+.single-post__comments-wrapper form :is(input[type="email"], input[type="text"], input[type="url"]):focus-visible {
+	outline: 3px solid var(--cr-focus-ring);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--cr-focus-halo);
 }
-@media (prefers-color-scheme: dark) {
-	:root:not([data-theme]) input.wp-block-search__input,
-	:root:not([data-theme]) .wp-block-search__input,
-	:root[data-theme="system"] input.wp-block-search__input,
-	:root[data-theme="system"] .wp-block-search__input {
-		background: var(--cr-night-elevated, #251f1c) !important;
-		color: var(--cr-printer-ivory, #fbfaf5) !important;
-		border-color: var(--cr-printer-ivory, #fbfaf5) !important;
-	}
-	:root:not([data-theme]) input.wp-block-search__input::placeholder,
-	:root:not([data-theme]) .wp-block-search__input::placeholder,
-	:root[data-theme="system"] input.wp-block-search__input::placeholder,
-	:root[data-theme="system"] .wp-block-search__input::placeholder {
-		color: var(--cr-periwinkle, #d4cfeb) !important;
-	}
+
+.wp-block-search:not(.is-style-cr-header-search) .wp-block-search__input::placeholder,
+.wp-block-post-comments-form .comment-form textarea::placeholder,
+#commentform input::placeholder,
+.single-post__comments-wrapper form input::placeholder {
+	opacity: 1;
+}
+
+.wp-block-post-comments-form .comment-form textarea:user-invalid,
+#commentform :is(input[type="email"], input[type="text"], input[type="url"]):user-invalid {
+	border-color: var(--cr-coral);
+	border-style: dashed;
 }
 
 /* R-13: the header search is the core Search block (no button, Enter submits)
    with the cr-header-search style. The form keeps the site-header__search box
    (the rules near the top of the header section); the inside wrapper carries the
-   leading glyph and the borderless field. These rules sit after the generic
-   .wp-block-search__input rules above, which set background, colour, border,
-   padding, size, placeholder and focus outline with !important for in-page
-   search fields; the header field repeats !important on those properties only,
-   and equal specificity plus later order makes it win in light and dark modes.
+   leading glyph and the borderless field. The Search block field rules above
+   skip .is-style-cr-header-search; the !important here outranks Ollie's
+   style.css form rule and the core/search theme.json element.
    Padding, size and width repeat what the old header field actually rendered
    with: the input:not([type="submit"]) form rule gave it 0.5em 1em and the
    small font-size preset, the tokens.css form rule gave it width 100%, so the
