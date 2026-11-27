@@ -12,7 +12,7 @@ const root = path.resolve( path.dirname( fileURLToPath( import.meta.url ) ), '..
 const PINNED = {
 	'https://schemas.wp.org/trunk/theme.json': {
 		file: 'tests/schemas/theme.json',
-		source: 'WordPress/gutenberg@d0ceb5c86f534dfa7f69ed7c852865c1d7a9da6a schemas/json/theme.json',
+		source: 'WordPress/gutenberg@0138948f3618701daabd2ab1e77044e0dab45522 schemas/json/theme.json',
 	},
 };
 const DEFAULT_SCHEMA = 'https://schemas.wp.org/trunk/theme.json';

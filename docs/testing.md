@@ -63,7 +63,7 @@ Every other rule stays on, and the baseline holds its existing hits. The WordPre
 
 ## theme.json schema
 
-`theme.json` and `styles/dark.json` declare `"$schema": "https://schemas.wp.org/trunk/theme.json"`. That URL redirects to Gutenberg trunk and changes without notice, so the check never fetches it. `tests/lint/theme-json-schema.mjs` maps the URL to `tests/schemas/theme.json`, a copy of `schemas/json/theme.json` from WordPress/gutenberg commit `d0ceb5c86f534dfa7f69ed7c852865c1d7a9da6a` (2026-09-11), and validates with ajv 8.20.0 and ajv-formats 2.1.1 (JSON Schema draft-07). A file that declares another `$schema` URL fails until you add a pinned copy for it.
+`theme.json` and `styles/dark.json` declare `"$schema": "https://schemas.wp.org/trunk/theme.json"`. That URL redirects to Gutenberg trunk and changes without notice, so the check never fetches it. `tests/lint/theme-json-schema.mjs` maps the URL to `tests/schemas/theme.json`, a copy of `schemas/json/theme.json` from WordPress/gutenberg commit `0138948f3618701daabd2ab1e77044e0dab45522` (2026-11-25), and validates with ajv 8.20.0 and ajv-formats 2.1.1 (JSON Schema draft-07). A file that declares another `$schema` URL fails until you add a pinned copy for it.
 
 To refresh the pinned copy:
 
