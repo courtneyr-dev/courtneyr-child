@@ -94,6 +94,7 @@ function header_first_paint_css(): string {
 	.wp-block-site-title.is-style-cr-wordmark { margin: 0; line-height: 1; }
 	.wp-block-site-title.is-style-cr-wordmark a:any-link { position: relative; display: block; inline-size: 8.6em; padding: 0.1em 0.05em 0.2em; overflow: hidden; font-size: clamp(1.5rem, 1.2rem + 0.8vw, 2rem); line-height: 1; white-space: nowrap; text-indent: 110%; color: var(--cr-ink, #241c4a); text-decoration: none; }
 	.wp-block-site-title.is-style-cr-wordmark a:any-link::before { content: ""; position: absolute; inset: 0; background-color: currentcolor; -webkit-mask: url("{wordmark}") left center / contain no-repeat; mask: url("{wordmark}") left center / contain no-repeat; }
+	@media (forced-colors: active) { .wp-block-site-title.is-style-cr-wordmark a:any-link { inline-size: auto; text-indent: 0; } }
 	.site-header > .site-header__inner { gap: 0; align-items: center; flex-wrap: wrap !important; }
 	.site-header, .wp-block-group:has(> .site-header), .wp-block-group.is-position-sticky, header.is-position-sticky { position: sticky !important; top: calc(0px + var(--wp-admin--admin-bar--position-offset, 0px)) !important; z-index: 50 !important; border-bottom: 1px solid rgba(36, 28, 74, 0.12); box-shadow: 0 4px 12px rgba(36, 28, 74, 0.08); overflow: visible !important; }
 	.wp-block-group.is-position-sticky.has-global-padding { padding-left: 0 !important; padding-right: 0 !important; }
