@@ -660,15 +660,24 @@ const OLLIE_FIELD_RULES = array(
 /**
  * Ollie's stylesheet with OLLIE_FIELD_SCOPE on every selector of the rules in
  * OLLIE_FIELD_RULES, or null when any of them is not there exactly once.
- * Whitespace inside and between the selectors may differ from the list; any
- * other change to a rule's selectors leaves the stylesheet alone.
+ * Whitespace inside and between the selectors, and around the brackets and
+ * operator of an attribute selector, may differ from the list; any other
+ * change to a rule's selectors leaves the stylesheet alone.
  *
  * @param string $css Ollie's style.css.
  */
 function scope_ollie_field_rules( string $css ): ?string {
+	$spacing = array(
+		'\\[' => '\\[\\s*',
+		'\\]' => '\\s*\\]',
+		'\\=' => '\\s*\\=\\s*',
+	);
+	foreach ( array( '~', '\\|', '\\^', '\\$', '\\*' ) as $operator ) {
+		$spacing[ $operator . '\\=' ] = '\\s*' . $operator . '\\=\\s*';
+	}
 	foreach ( OLLIE_FIELD_RULES as $selectors ) {
 		$tokens  = array_map(
-			static fn( string $selector ): string => implode( '\\s+', array_map( static fn( string $part ): string => preg_quote( $part, '/' ), preg_split( '/\\s+/', $selector ) ) ),
+			static fn( string $selector ): string => implode( '\\s+', array_map( static fn( string $part ): string => strtr( preg_quote( $part, '/' ), $spacing ), preg_split( '/\\s+/', $selector ) ) ),
 			$selectors
 		);
 		$pattern = '/(^|\\}|\\*\\/)(\\s*)' . implode( '\\s*,\\s*', $tokens ) . '\\s*\\{/';

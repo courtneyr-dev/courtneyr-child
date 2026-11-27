@@ -101,6 +101,11 @@ namespace Courtneyr\Child\FormFallbackTests {
 	check( 8 === substr_count( $scoped, OLLIE_FIELD_SCOPE ), 'shipped Ollie: exactly the 8 target selectors are scoped' );
 	check( preg_replace( '/\s+/', '', str_replace( OLLIE_FIELD_SCOPE, '', $scoped ) ) === preg_replace( '/\s+/', '', $shipped ), 'shipped Ollie: nothing else changes' );
 
+	$spaced = scope_ollie_field_rules( str_replace( '[type="submit"]', '[ type = "submit" ]', $shipped ) );
+	check( null !== $spaced && 8 === substr_count( $spaced, OLLIE_FIELD_SCOPE ), 'shipped Ollie with [ type = "submit" ]: all 8 selectors are still scoped' );
+	check( null === scope_ollie_field_rules( str_replace( '[type="submit"]', '[type="button"]', $shipped ) ), 'shipped Ollie with a renamed attribute value is left alone' );
+	check( null === scope_ollie_field_rules( str_replace( '[type="submit"]', '[kind="submit"]', $shipped ) ), 'shipped Ollie with a renamed attribute is left alone' );
+
 	echo "\n", count( $failures ) ? count( $failures ) . ' failed' : 'all passed', "\n";
 	exit( count( $failures ) ? 1 : 0 );
 }
