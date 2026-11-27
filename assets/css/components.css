@@ -2056,6 +2056,14 @@ figure.wp-block-post-featured-image.single-post__featured {
 	filter: none !important;
 }
 
+/* The Navigation overlay part renders inside .site-header__nav, so the rule
+   above also strips the ink halo from its focus ring, leaving selective
+   yellow at 1.67:1 on ivory (WCAG 1.4.11 wants 3:1). Forced colors drop the
+   shadow and keep the system outline. */
+.site-header__nav .cr-nav-overlay :focus-visible {
+	box-shadow: 0 0 0 7px var(--cr-focus-halo) !important;
+}
+
 /* Bump nav text presence — the wp:navigation fontSize=medium is
    1.125rem; reinforce in case any WP core CSS argues with it.
    v0.5.11: tighten horizontal padding from 0.5rem to 0.4rem so the
