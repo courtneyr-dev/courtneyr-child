@@ -1565,6 +1565,12 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
 	box-shadow: 0 0 0 7px var(--cr-focus-halo) !important;
 }
 
+/* The overlay has its own Search field; a Search block in the menu would
+   make it two. */
+.cr-nav-overlay__nav .wp-block-search {
+	display: none;
+}
+
 /* Dark header — track deepens to prussian-blue, idle icons go sky-blue; the
    thumb stays lit periwinkle and the active icon stays dark so it reads. */
 :root[data-theme="dark"] .cr-theme-segments {
