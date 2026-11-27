@@ -690,8 +690,9 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\able_player_transcript_scro
  * Override it on document responses: logged-in users (editing/previewing) get a
  * non-cached, always-fresh page; anonymous visitors get a 10-minute revalidating
  * cache instead of 31 days. Versioned assets (?ver=) stay long-cached untouched.
- * Runs on uncached responses (logged-in, or origin hits); fully taming anonymous
- * CDN-cached hits is still a GoDaddy CDN cache-TTL setting.
+ * Runs on uncached responses (logged-in, or origin hits). `s-maxage` lets the
+ * Pantheon edge keep a page for a day; Pantheon Advanced Page Cache purges it
+ * when its content changes, and browsers still revalidate after 10 minutes.
  */
 function revalidate_page_html(): void {
 	if ( is_admin() || is_feed() || is_robots() ) {
@@ -720,7 +721,7 @@ function revalidate_page_html(): void {
 	} elseif ( is_user_logged_in() ) {
 		header( 'Cache-Control: no-cache, must-revalidate, max-age=0', true );
 	} else {
-		header( 'Cache-Control: public, max-age=600, must-revalidate', true );
+		header( 'Cache-Control: public, max-age=600, s-maxage=86400, must-revalidate', true );
 	}
 }
 add_action( 'send_headers', __NAMESPACE__ . '\\revalidate_page_html', 99 );
