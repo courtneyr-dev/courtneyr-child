@@ -70,6 +70,11 @@ check( 1 === count( of_type( $overlay, 'core/search' ) ), 'the overlay has one s
 $overlay_navs = of_type( $overlay, 'core/navigation' );
 check( 1 === count( $overlay_navs ), 'the overlay has one Navigation block' );
 check( ( $overlay_navs[0]['ref'] ?? null ) === ( $nav['ref'] ?? null ), 'the overlay Navigation resolves to the same menu as the header' );
+// Core renders the part's top-level blocks without render_block_data, so
+// inc/navigation-overlay.php reaches the Navigation only inside a group.
+$overlay_html = (string) file_get_contents( $root . '/parts/navigation-overlay.html' );
+$nav_at       = strpos( $overlay_html, '<!-- wp:navigation ' );
+check( false !== $nav_at && strpos( $overlay_html, '<!-- wp:group ' ) < $nav_at && $nav_at < strrpos( $overlay_html, '<!-- /wp:group -->' ), 'the overlay Navigation sits inside the part\'s group' );
 
 if ( $failures ) {
 	echo count( $failures ), " failed\n";
