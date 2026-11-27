@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.187
+
+- Let the Pantheon edge keep logged-out page HTML for a day (`s-maxage=86400`); browsers still revalidate after 10 minutes.
+- Skip Ollie's WooCommerce pattern cleanup that loaded every pattern file on each request, and remove the same `ollie/woo-*` patterns by name.
+
 ## 0.7.186
 
 - Add the Key takeaways block and share its styling with existing Yoast summaries. (#384)
