@@ -55,3 +55,30 @@ function register_categories(): void {
 	}
 }
 add_action( 'init', __NAMESPACE__ . '\\register_categories' );
+
+/**
+ * Ollie's unregister_ollie_woocommerce_patterns() calls get_all_registered(),
+ * which includes every registered pattern file to read its content: 0.7–0.9 s
+ * on each uncached request (Pantheon dev profile, 2026-11-27). Swap it for a
+ * name lookup that removes the same ollie/woo-* patterns.
+ */
+function replace_ollie_woo_pattern_cleanup(): void {
+	if ( remove_action( 'init', 'Ollie\\unregister_ollie_woocommerce_patterns', 999 ) ) {
+		add_action( 'init', __NAMESPACE__ . '\\unregister_ollie_woo_patterns', 999 );
+	}
+}
+add_action( 'after_setup_theme', __NAMESPACE__ . '\\replace_ollie_woo_pattern_cleanup' );
+
+/**
+ * Unregister Ollie's WooCommerce patterns by slug, without loading any pattern content.
+ */
+function unregister_ollie_woo_patterns(): void {
+	$registry = \WP_Block_Patterns_Registry::get_instance();
+	$files    = glob( get_template_directory() . '/patterns/woo-*.php' );
+	foreach ( false === $files ? array() : $files as $file ) {
+		$name = 'ollie/' . basename( $file, '.php' );
+		if ( $registry->is_registered( $name ) ) {
+			unregister_block_pattern( $name );
+		}
+	}
+}
