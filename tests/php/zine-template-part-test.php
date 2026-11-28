@@ -343,7 +343,8 @@ namespace {
 
 	$single        = (string) file_get_contents( COURTNEYR_CHILD_DIR . '/templates/single.html' );
 	$single_blocks = cr_zine_named_blocks( ( new WP_Block_Parser() )->parse( $single ) );
-	cr_zine_check( CR_ZINE_BASE_BLOCKS + CR_ZINE_BLOCK_DELTA === count( $single_blocks ), 'T8 single block count rises from 48 to 53' );
+	$zine_blocks   = array_filter( $single_blocks, static fn( array $block ): bool => 'core/breadcrumbs' !== $block['blockName'] );
+	cr_zine_check( CR_ZINE_BASE_BLOCKS + CR_ZINE_BLOCK_DELTA === count( $zine_blocks ), 'T8 single block count, less the breadcrumbs block native-breadcrumbs-test.php pins, rises from 48 to 53' );
 	$byline_groups    = array_values( array_filter( $single_blocks, static fn( array $block ): bool => 'core/group' === $block['blockName'] && 'cr-print-only cr-print-byline' === ( $block['attrs']['className'] ?? '' ) ) );
 	$permalink_groups = array_values( array_filter( $single_blocks, static fn( array $block ): bool => 'core/group' === $block['blockName'] && 'cr-print-only cr-print-permalink' === ( $block['attrs']['className'] ?? '' ) ) );
 	cr_zine_check( 1 === count( $byline_groups ), 'T8 single has one print-only byline group' );
