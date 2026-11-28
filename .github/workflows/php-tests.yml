@@ -2,8 +2,9 @@
 # failed check. They find their dependencies through environment variables
 # that otherwise fall back to paths under $HOME: WordPress core (CR_WP_CORE,
 # WP_CORE_DIR), the php-mf2 parser (MF2_AUTOLOAD, MF2_PARSER_FILE), Post Kinds
-# for IndieWeb's develop branch (PKIW_DIR, CR_PKIW_COLLECTION_ITEMS) and the
-# theme's own origin/main (a full-history checkout). All are provided here, so
+# for IndieWeb's develop branch (PKIW_DIR, CR_PKIW_COLLECTION_ITEMS), the
+# theme's own origin/main (a full-history checkout) and a SQLite multisite
+# running the theme (CR_WP_SITE, CR_WP_URL). All are provided here, so
 # any SKIP line means a dependency went missing and fails the job.
 
 name: PHP tests
@@ -20,6 +21,11 @@ env:
   WP_SHA1: b552c39cd95d89895b4e7a55af53a03687aff4f6
   # The version post-kinds-for-indieweb's composer.lock pins.
   MF2_VERSION: '0.5.0'
+  SQLITE_VERSION: '3.1.3'
+  SQLITE_SHA256: f6ce35e8419d0b9326221a907627d905e25c2a5ba2afc86492811f14c851efe0
+  OLLIE_VERSION: '1.6.5'
+  OLLIE_SHA256: 66a050e5225ba3a43806a148adc3079c366b46cfc8396c8a6e44742f8958ddc7
+  WP_CLI_VERSION: '2.12.0'
 
 jobs:
   php-tests:
@@ -41,6 +47,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
+          extensions: pdo_sqlite, sqlite3
           coverage: none
           tools: composer:v2
 
@@ -54,6 +61,35 @@ jobs:
           curl -fsSL -o "$RUNNER_TEMP/wordpress.zip" "https://wordpress.org/wordpress-$WP_VERSION.zip"
           echo "$WP_SHA1  $RUNNER_TEMP/wordpress.zip" | sha1sum -c -
           unzip -q "$RUNNER_TEMP/wordpress.zip" -d "$RUNNER_TEMP"
+
+      - name: SQLite multisite running the theme, for navigation-overlay-menu-test.php
+        run: |
+          dl="$RUNNER_TEMP/downloads"
+          site="$RUNNER_TEMP/multisite"
+          mkdir -p "$dl"
+          curl -fsSL -o "$dl/sqlite.zip" "https://downloads.wordpress.org/plugin/sqlite-database-integration.$SQLITE_VERSION.zip"
+          echo "$SQLITE_SHA256  $dl/sqlite.zip" | sha256sum -c -
+          curl -fsSL -o "$dl/ollie.zip" "https://downloads.wordpress.org/theme/ollie.$OLLIE_VERSION.zip"
+          echo "$OLLIE_SHA256  $dl/ollie.zip" | sha256sum -c -
+          curl -fsSL -o "$dl/wp-cli.phar" "https://github.com/wp-cli/wp-cli/releases/download/v$WP_CLI_VERSION/wp-cli-$WP_CLI_VERSION.phar"
+          curl -fsSL -o "$dl/wp-cli.phar.sha512" "https://github.com/wp-cli/wp-cli/releases/download/v$WP_CLI_VERSION/wp-cli-$WP_CLI_VERSION.phar.sha512"
+          echo "$(cat "$dl/wp-cli.phar.sha512")  $dl/wp-cli.phar" | sha512sum -c -
+          cp -R "$RUNNER_TEMP/wordpress" "$site"
+          unzip -q "$dl/sqlite.zip" -d "$site/wp-content/plugins"
+          cp "$site/wp-content/plugins/sqlite-database-integration/db.copy" "$site/wp-content/db.php"
+          unzip -q "$dl/ollie.zip" -d "$site/wp-content/themes"
+          ln -s "$GITHUB_WORKSPACE/theme" "$site/wp-content/themes/courtneyr-child"
+          wp() { php "$dl/wp-cli.phar" --path="$site" --url=cr-p35.test "$@"; }
+          wp config create --dbname=wp --dbuser=wp --dbpass=wp --skip-check --quiet
+          wp core install --title=p35 --admin_user=admin --admin_email=admin@example.invalid --admin_password="$(openssl rand -hex 16)" --skip-email --quiet
+          wp core multisite-convert --title=p35 --base=/ --quiet
+          wp theme enable courtneyr-child --network --quiet
+          wp theme enable twentytwentyfive --network --quiet
+          wp theme activate courtneyr-child --quiet
+          wp site create --slug=other --title=Other --porcelain
+          php "$dl/wp-cli.phar" --path="$site" --url=cr-p35.test/other/ theme activate twentytwentyfive --quiet
+          echo "CR_WP_SITE=$site" >> "$GITHUB_ENV"
+          echo "CR_WP_URL=http://cr-p35.test/" >> "$GITHUB_ENV"
 
       - name: tests/php/*-test.php
         working-directory: theme
