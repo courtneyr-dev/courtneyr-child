@@ -1,9 +1,12 @@
 <?php
 /**
  * `CR_WP_SITE=<root> CR_WP_URL=<url> php tests/php/native-breadcrumbs-test.php`:
- * on templates/single.html a Stream post with a kind gets core's Breadcrumbs
- * trail (Home, Stream, its kind, its title) as the page's only breadcrumb
- * landmark, and every other post keeps Yoast's.
+ * every page gets exactly one breadcrumb landmark. On templates/single.html
+ * the Breadcrumbs block marked `cr-page-trail` draws a Stream post's trail
+ * (Home, Stream, its kind, its title), Yoast's trail for other posts, or
+ * core's when Yoast prints none, wherever the template puts it. Every other
+ * Breadcrumbs block is core's, untouched. Checks named R1-n and R2-n cover
+ * the findings of review rounds 1 and 2.
  *
  * CR_WP_SITE is a WordPress root whose main site runs this theme as
  * `courtneyr-child` with Post Kinds for IndieWeb active (the `kind`
@@ -122,13 +125,24 @@ function page( string $title, string $status, int $parent = 0 ): int {
 	);
 }
 
+/** Start a fresh request: the page trail isn't printed yet, and Yoast forgets the last page it described. */
+function fresh_request(): void {
+	if ( function_exists( 'Courtneyr\\Child\\SingleNavigation\\trail_printed' ) ) {
+		\Courtneyr\Child\SingleNavigation\trail_printed( false );
+	}
+	if ( function_exists( 'YoastSEO' ) && class_exists( 'Yoast\\WP\\SEO\\Memoizers\\Meta_Tags_Context_Memoizer' ) ) {
+		YoastSEO()->classes->get( 'Yoast\\WP\\SEO\\Memoizers\\Meta_Tags_Context_Memoizer' )->clear();
+	}
+}
+
 /** Render a block template for a query the way the template canvas does. */
-function render_page( array $query, string $content ): string {
+function render_page( array $query, string $content, string $slug = 'single' ): string {
 	global $wp_query, $wp_the_query, $_wp_current_template_id, $_wp_current_template_content;
+	fresh_request();
 	$wp_query                     = new WP_Query( $query );
 	$wp_the_query                 = $wp_query;
 	$GLOBALS['post']              = $wp_query->post;
-	$_wp_current_template_id      = get_stylesheet() . '//single';
+	$_wp_current_template_id      = get_stylesheet() . '//' . $slug;
 	$_wp_current_template_content = $content;
 	$html                         = get_the_block_template_html();
 	wp_reset_postdata();
@@ -144,6 +158,7 @@ function render_single( int $id, ?string $content = null ): string {
 
 /** Render loose block markup with an entry set up as the queried post, outside any template. */
 function render_loose( int $id, string $markup ): string {
+	fresh_request();
 	$GLOBALS['wp_query']     = new WP_Query( array( 'p' => $id, 'post_type' => get_post_type( $id ) ) );
 	$GLOBALS['wp_the_query'] = $GLOBALS['wp_query'];
 	$GLOBALS['wp_query']->the_post();
@@ -215,7 +230,18 @@ function check_stream_page( int $id, string $what, string $stream_label, ?string
 	check( ! preg_match( '/href=""/', $nav->outerHTML ), "$what: no empty href" );
 }
 
-check( 1 === substr_count( $template, '<!-- wp:breadcrumbs ' ), 'templates/single.html holds one core/breadcrumbs block' );
+$marked = '<!-- wp:breadcrumbs {"className":"cr-single-breadcrumbs cr-page-trail","fontSize":"small"} /-->';
+check( 1 === substr_count( $template, '<!-- wp:breadcrumbs ' ) && str_contains( $template, $marked ), 'templates/single.html holds one core/breadcrumbs block, marked cr-page-trail' );
+
+/** Turn Yoast's breadcrumbs setting off (true) or back to what it was (false), without saving it. */
+function yoast_setting_off( bool $off ): void {
+	static $filter = null;
+	$filter ??= static fn( $value ) => is_array( $value ) ? array_merge( $value, array( 'breadcrumbs-enable' => false ) ) : $value;
+	$off ? add_filter( 'option_wpseo_titles', $filter ) : remove_filter( 'option_wpseo_titles', $filter );
+	if ( class_exists( 'WPSEO_Options' ) ) {
+		WPSEO_Options::clear_cache();
+	}
+}
 
 $existing = get_page_by_path( 'stream' );
 $stream   = $existing ? $existing->ID : page( 'Stream', 'publish' );
@@ -238,9 +264,17 @@ foreach ( array( 'note' => $note, 'photo' => $photo ) as $kind => $id ) {
 
 // A Blog post: Yoast's trail with Yoast, core's own trail without; one either way.
 $blog = entry( 'A blog article', 'article', 'main' );
-one_landmark( render_single( $blog ), 'blog post', $yoast_off );
+$blog_nav = one_landmark( render_single( $blog ), 'blog post', $yoast_off );
+check( $blog_nav && str_ends_with( trim( $blog_nav->textContent ), shown( 'A blog article' ) ), 'blog post: the trail ends at its title' );
 
-// 1. Parent pages never enter a Stream trail: no private or draft title, no lost Stream / kind.
+// R2-1. Yoast active with its breadcrumbs setting off: the Blog post still gets core's trail.
+yoast_setting_off( true );
+$blog_off = entry( 'A blog article with Yoast breadcrumbs off', 'article', 'main' );
+$off_nav  = one_landmark( render_single( $blog_off ), 'blog post with Yoast\'s breadcrumbs setting off', true );
+check( $off_nav && shown( 'A blog article with Yoast breadcrumbs off' ) === ( end( items( $off_nav ) )[0] ?? '' ), 'blog post with Yoast\'s breadcrumbs setting off: core\'s trail ends at its title' );
+yoast_setting_off( false );
+
+// R1-1. Parent pages never enter a Stream trail: no private or draft title, no lost Stream / kind.
 $grandparent = page( 'P36 secret grandparent', 'private' );
 $parent      = page( 'P36 public parent', 'publish', $grandparent );
 $draft       = page( 'P36 draft parent', 'draft' );
@@ -250,7 +284,7 @@ check_stream_page( $under_page, 'note whose parent page has a private parent', $
 check( ! preg_match( '/secret grandparent|public parent/', render_single( $under_page ) ), 'note whose parent page has a private parent: no parent or ancestor title on the page' );
 check_stream_page( $under_draft, 'note whose parent is a draft page', $stream_label, $stream_url );
 
-// 4. A Posts page stays out of a Stream trail.
+// R1-4. A Posts page stays out of a Stream trail.
 $options = array(
 	'show_on_front'  => get_option( 'show_on_front' ),
 	'page_on_front'  => get_option( 'page_on_front' ),
@@ -264,61 +298,115 @@ foreach ( $options as $option => $value ) {
 	update_option( $option, $value );
 }
 
-// 5. An untitled Stream page reads "Stream"; a Stream URL esc_url() drops leaves the item out.
-$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_title' => '' ), array( 'ID' => $stream ) );
-clean_post_cache( $stream );
+// R1-5. An untitled Stream page reads "Stream"; a Stream URL esc_url() drops leaves the item out.
+$set_stream_title = static function ( string $title ) use ( $stream ): void {
+	$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_title' => $title ), array( 'ID' => $stream ) );
+	clean_post_cache( $stream );
+};
+$set_stream_title( '' );
 check_stream_page( $photo, 'photo with an untitled Stream page', 'Stream', $stream_url );
 $bad_link = static fn( $link, $id ) => $id === $stream ? 'javascript:alert(1)' : $link;
 add_filter( 'page_link', $bad_link, 10, 2 );
 check_stream_page( $photo, 'photo whose Stream URL esc_url() drops', 'Stream', null );
 remove_filter( 'page_link', $bad_link, 10 );
-$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_title' => $stream_label ), array( 'ID' => $stream ) );
-clean_post_cache( $stream );
 
-// 2. Composed pages keep one landmark; Breadcrumbs blocks in content or a Query Loop draw nothing.
-register_block_pattern( 'courtneyr-child/p36-breadcrumbs', array( 'title' => 'p36', 'content' => '<!-- wp:breadcrumbs {"className":"cr-single-breadcrumbs","fontSize":"small"} /-->' ) );
-$in_content = '<!-- wp:pattern {"slug":"courtneyr-child/p36-breadcrumbs"} /--><!-- wp:paragraph --><p>Body.</p><!-- /wp:paragraph -->';
-$note_pat   = entry( 'A note with a breadcrumbs pattern', 'note', 'stream', array( 'post_content' => $in_content ) );
-check_stream_page( $note_pat, 'note with a Breadcrumbs pattern in its content', $stream_label, $stream_url );
-$blog_pat = entry( 'A blog article with a breadcrumbs pattern', 'article', 'main', array( 'post_content' => $in_content ) );
-one_landmark( render_single( $blog_pat ), 'blog post with a Breadcrumbs pattern in its content', $yoast_off );
+// R2-5. A Stream page titled only with non-breaking spaces, raw or as entities, reads "Stream".
+$set_stream_title( "\u{00A0}\u{00A0}" );
+check_stream_page( $photo, 'photo whose Stream page title is two non-breaking spaces', 'Stream', $stream_url );
+$set_stream_title( '&nbsp; &#160;' );
+check_stream_page( $photo, 'photo whose Stream page title is &nbsp; entities', 'Stream', $stream_url );
+$set_stream_title( "\u{2003}\u{3000} " );
+check_stream_page( $photo, 'photo whose Stream page title is an em space and an ideographic space', 'Stream', $stream_url );
+$set_stream_title( $stream_label );
 
-$loop          = '<!-- wp:query {"queryId":9,"query":{"perPage":5,"postType":"post","inherit":false}} --><div class="wp-block-query"><!-- wp:post-template --><!-- wp:post-title /--><!-- wp:breadcrumbs /--><!-- /wp:post-template --></div><!-- /wp:query -->';
-$with_loop     = str_replace( '<!-- wp:template-part {"slug":"footer"', $loop . '<!-- wp:template-part {"slug":"footer"', $template );
-$with_loop     = $with_loop === $template ? $template . $loop : $with_loop;
-$note_loop     = entry( 'A note on a page with a Query Loop', 'note', 'stream' );
-check_stream_page( $note_loop, 'note on single.html with a Query Loop of Breadcrumbs added', $stream_label, $stream_url, $with_loop );
-$blog_loop = entry( 'A blog article on a page with a Query Loop', 'article', 'main' );
-one_landmark( render_single( $blog_loop, $with_loop ), 'blog post on single.html with a Query Loop of Breadcrumbs added', $yoast_off );
+// R2-4. Page 2 of a split Stream post: the title is the trail's one current item, unlinked; no "Page 2".
+$split = entry( 'A split note', 'note', 'stream', array( 'post_content' => '<!-- wp:paragraph --><p>One.</p><!-- /wp:paragraph --><!--nextpage--><!-- wp:paragraph --><p>Two.</p><!-- /wp:paragraph -->' ) );
+$paged = one_landmark( render_page( array( 'p' => $split, 'page' => 2 ), $template ), 'split note, page 2', true );
+if ( $paged ) {
+	$got = items( $paged );
+	check( stream_expected( $split, $stream_label, $stream_url ) === $got, 'split note, page 2: trail reads Home / Stream / Note / title, the title unlinked and current; got ' . wp_json_encode( $got ) );
+}
 
-$search      = '<!-- wp:breadcrumbs /--><!-- wp:query {"queryId":3,"query":{"inherit":true}} --><div class="wp-block-query"><!-- wp:post-template --><!-- wp:post-title {"isLink":true} /--><!-- wp:breadcrumbs /--><!-- /wp:post-template --></div><!-- /wp:query -->';
+// R2-2. One trail when the marked block sits in a template part, in a pattern, or twice in the template.
+$part = (int) wp_insert_post(
+	array(
+		'post_type'    => 'wp_template_part',
+		'post_status'  => 'publish',
+		'post_name'    => 'p36-trail',
+		'post_title'   => 'p36 trail',
+		'post_content' => $marked,
+	)
+);
+wp_set_object_terms( $part, get_stylesheet(), 'wp_theme' );
+register_block_pattern( 'courtneyr-child/p36-breadcrumbs', array( 'title' => 'p36', 'content' => $marked ) );
+$h1_block     = (string) ( preg_match( '/<!-- wp:post-title \{"level":1[^>]*\/-->/', $template, $m ) ? $m[0] : '' );
+$part_block   = '<!-- wp:template-part {"slug":"p36-trail","theme":"' . get_stylesheet() . '"} /-->';
+$pattern_tag  = '<!-- wp:pattern {"slug":"courtneyr-child/p36-breadcrumbs"} /-->';
+$tpl_block    = (string) ( preg_match( '/<!-- wp:breadcrumbs [^>]*\/-->/', $template, $m ) ? $m[0] : '' );
+$h1_first     = str_replace( array( $tpl_block, $h1_block ), array( '', $h1_block . "\n" . $tpl_block ), $template );
+$layouts      = array(
+	'the marked block in a template part'          => str_replace( $tpl_block, $part_block, $template ),
+	'the marked block in a pattern'                => str_replace( $tpl_block, $pattern_tag, $template ),
+	'two marked blocks'                            => str_replace( $h1_block, $h1_block . "\n" . $tpl_block, $template ),
+	'the title before the marked block'            => $h1_first,
+	'the title before a template part holding it'  => str_replace( $tpl_block, $part_block, $h1_first ),
+	'the title before a pattern holding it'        => str_replace( $tpl_block, $pattern_tag, $h1_first ),
+);
+check( '' !== $h1_block && '' !== $tpl_block && 1 === substr_count( $h1_first, $tpl_block ) && strpos( $h1_first, $h1_block ) < strpos( $h1_first, $tpl_block ), 'fixture: single.html with the title moved before the marked block' );
+foreach ( $layouts as $layout => $markup ) {
+	check( $markup !== $template, "fixture: single.html with $layout" );
+	$layout_note = entry( "A note with $layout", 'note', 'stream' );
+	if ( str_starts_with( $layout, 'the title before' ) ) {
+		// The title renders first, so with Yoast it prints Yoast's trail and the marked block adds none.
+		one_landmark( render_single( $layout_note, $markup ), "note on single.html with $layout", $yoast_off );
+	} else {
+		check_stream_page( $layout_note, "note on single.html with $layout", $stream_label, $stream_url, $markup );
+	}
+	one_landmark( render_single( entry( "A blog article with $layout", 'article', 'main' ), $markup ), "blog post on single.html with $layout", $yoast_off );
+}
+yoast_setting_off( true );
+one_landmark( render_single( entry( 'A blog article under a title that renders first, Yoast breadcrumbs off', 'article', 'main' ), $h1_first ), 'blog post on single.html with the title first and Yoast\'s breadcrumbs setting off', true );
+yoast_setting_off( false );
+
+// R2-2. A level-1 title inside post content, under a level-2 template title: one trail.
+$h2_template = str_replace( $h1_block, str_replace( '{"level":1,', '{"level":2,', $h1_block ), $template );
+$h1_body     = '<!-- wp:post-title {"level":1} /--><!-- wp:paragraph --><p>Body.</p><!-- /wp:paragraph -->';
+check( $h2_template !== $template, 'fixture: single.html with a level-2 title' );
+one_landmark( render_single( entry( 'A blog article with a title in its content', 'article', 'main', array( 'post_content' => $h1_body ) ), $h2_template ), 'blog post with a level-1 title in its content', $yoast_off );
+check_stream_page( entry( 'A note with a title in its content', 'note', 'stream', array( 'post_content' => $h1_body ) ), 'note with a level-1 title in its content', $stream_label, $stream_url, $h2_template );
+
+// Query Loop rows: a marked block or a level-1 title in a row adds no trail.
+$loop      = '<!-- wp:query {"queryId":9,"query":{"perPage":5,"postType":"post","inherit":false}} --><div class="wp-block-query"><!-- wp:post-template --><!-- wp:post-title {"level":1} /-->' . $marked . '<!-- /wp:post-template --></div><!-- /wp:query -->';
+$with_loop = str_replace( '<!-- wp:template-part {"slug":"footer"', $loop . '<!-- wp:template-part {"slug":"footer"', $template );
+check( $with_loop !== $template, 'fixture: single.html with a Query Loop before the footer' );
+check_stream_page( entry( 'A note on a page with a Query Loop', 'note', 'stream' ), 'note on single.html with marked Breadcrumbs and level-1 titles in Query Loop rows', $stream_label, $stream_url, $with_loop );
+one_landmark( render_single( entry( 'A blog article on a page with a Query Loop', 'article', 'main' ), $with_loop ), 'blog post on single.html with marked Breadcrumbs and level-1 titles in Query Loop rows', $yoast_off );
+
+$search = $marked . '<!-- wp:query {"queryId":3,"query":{"inherit":true}} --><div class="wp-block-query"><!-- wp:post-template --><!-- wp:post-title {"isLink":true} /-->' . $marked . '<!-- /wp:post-template --></div><!-- /wp:query -->';
 entry( 'P36 searchable one', 'note', 'stream' );
 entry( 'P36 searchable two', 'article', 'main' );
-$search_html = render_page( array( 's' => 'P36 searchable' ), $search );
+$search_html = render_page( array( 's' => 'P36 searchable' ), $search, 'search' );
 check( 2 === substr_count( $search_html, 'wp-block-post-title' ), 'search fixture: the Query Loop lists two results' );
-$search_nav = one_landmark( $search_html, 'search results with Breadcrumbs in each Query Loop row', true );
+$search_nav = one_landmark( $search_html, 'search results with the marked block in each Query Loop row', true );
 check( $search_nav && str_contains( $search_nav->textContent, 'Search results for' ), 'search results: the one trail is core\'s search trail' );
 
-$h1_first   = str_replace( '<!-- wp:breadcrumbs {"className":"cr-single-breadcrumbs","fontSize":"small"} /-->', '', $template );
-$h1_first   = preg_replace( '/(<!-- wp:post-title \{"level":1[^>]*\/-->)/', '$1' . "\n" . '<!-- wp:breadcrumbs {"className":"cr-single-breadcrumbs","fontSize":"small"} /-->', $h1_first, 1 );
-check( 1 === substr_count( (string) $h1_first, '<!-- wp:breadcrumbs ' ) && strpos( (string) $h1_first, 'wp:post-title {"level":1' ) < strpos( (string) $h1_first, '<!-- wp:breadcrumbs ' ), 'fixture: single.html with the title moved before Breadcrumbs' );
-$note_h1 = entry( 'A note under a title that renders first', 'note', 'stream' );
-check_stream_page( $note_h1, 'note when the title renders before Breadcrumbs', $stream_label, $stream_url, (string) $h1_first );
-$blog_h1 = entry( 'A blog article under a title that renders first', 'article', 'main' );
-one_landmark( render_single( $blog_h1, (string) $h1_first ), 'blog post when the title renders before Breadcrumbs', $yoast_off );
+// R2-3. An ordinary Page with an unmarked Breadcrumbs block in its body keeps that trail.
+$page_body = (int) wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'P36 page with breadcrumbs', 'post_content' => '<!-- wp:breadcrumbs /--><!-- wp:paragraph --><p>Body.</p><!-- /wp:paragraph -->' ) );
+$page_nav  = one_landmark( render_page( array( 'page_id' => $page_body ), (string) file_get_contents( $root . '/templates/page.html' ), 'page' ), 'page with an unmarked Breadcrumbs block in its body', true );
+check( $page_nav && shown( 'P36 page with breadcrumbs' ) === ( end( items( $page_nav ) )[0] ?? '' ), 'page with an unmarked Breadcrumbs block: core\'s trail ends at its title' );
 
-// 3. A custom post type keeps core's trail where Yoast's doesn't print, and gets one trail where it does.
+// R1-3. A custom post type gets one trail: Yoast's where Yoast prints one, else core's.
 register_post_type( 'p36_thing', array( 'public' => true, 'show_in_rest' => true, 'label' => 'Things', 'supports' => array( 'title', 'editor' ) ) );
 $thing = (int) wp_insert_post( array( 'post_type' => 'p36_thing', 'post_status' => 'publish', 'post_title' => 'A thing' ) );
-$bare  = one_landmark( render_single( $thing, '<!-- wp:breadcrumbs /--><!-- wp:post-content /-->' ), 'custom post type on a template with Breadcrumbs and no title', true );
-check( $bare && shown( 'A thing' ) === ( end( items( $bare ) )[0] ?? '' ), 'custom post type: core\'s trail ends at its title' );
+$bare  = one_landmark( render_single( $thing, $marked . '<!-- wp:post-content /-->' ), 'custom post type on a template with the marked block and no title', $yoast_off );
+check( $bare && str_ends_with( trim( $bare->textContent ), shown( 'A thing' ) ), 'custom post type: the trail ends at its title; got ' . ( $bare ? trim( $bare->textContent ) : '' ) );
 $thing_two = (int) wp_insert_post( array( 'post_type' => 'p36_thing', 'post_status' => 'publish', 'post_title' => 'Another thing' ) );
 one_landmark( render_single( $thing_two ), 'custom post type on single.html', $yoast_off );
 
-// 3. Another theme on the site: none of this theme's trail handling applies.
+// R1-3. Another theme on the site: none of this theme's trail handling applies.
 $other_theme = static fn() => 'twentytwentyfive';
 add_filter( 'pre_option_stylesheet', $other_theme );
-$foreign = trails( render_loose( $note, '<!-- wp:breadcrumbs /-->' ) );
+$foreign = trails( render_loose( $note, $marked ) );
 remove_filter( 'pre_option_stylesheet', $other_theme );
 check( 1 === count( $foreign ) && ! in_array( $stream_url, array_column( items( $foreign[0] ), 1 ), true ), 'with another stylesheet active, a Stream note gets core\'s trail, no Stream item' );
 $subsite = null;
@@ -334,37 +422,34 @@ if ( $subsite ) {
 	switch_to_blog( $subsite );
 	$sub_stream = get_page_by_path( 'stream' ) ? get_page_by_path( 'stream' )->ID : page( 'Stream', 'publish' );
 	$sub_note   = entry( 'A subsite note', 'note', 'stream' );
-	$sub_trails = trails( render_loose( $sub_note, '<!-- wp:breadcrumbs /-->' ) );
+	$sub_trails = trails( render_loose( $sub_note, $marked ) );
 	check( 1 === count( $sub_trails ) && ! in_array( get_permalink( $sub_stream ), array_column( items( $sub_trails[0] ), 1 ), true ), 'subsite running ' . get_option( 'stylesheet' ) . ': a Stream note gets core\'s trail, no Stream item' );
 	restore_current_blog();
 } else {
 	echo "note no subsite with another theme here; the stylesheet check above covers the guard\n";
 }
 
-// Editor parity: the block renderer the editor's ServerSideRender calls.
+// A pattern instance of the marked block outside a template draws the template's trail.
+$front   = trails( render_single( $photo ) );
+$pattern = trails( render_loose( $photo, $pattern_tag ) );
+check( $pattern && $front && items( $pattern[0] ) === items( $front[0] ), 'pattern: a pattern instance of the marked block draws the template\'s trail' );
+
+// R2-4. Editor parity: an unmarked block draws core's trail in the editor and on the front end alike.
+// The editor's ServerSideRender drops className, so the block renderer only ever sees unmarked blocks.
+$body_note = entry( 'A note with breadcrumbs in its body', 'note', 'stream', array( 'post_content' => '<!-- wp:paragraph --><p>Body.</p><!-- /wp:paragraph --><!-- wp:breadcrumbs /-->' ) );
+$body_navs = array_values( array_filter( trails( render_single( $body_note ) ), static fn( $nav ) => null !== $nav->closest( '.wp-block-post-content' ) ) );
+check( 1 === count( $body_navs ) && is_native( $body_navs[0] ), 'note with an unmarked Breadcrumbs block in its body: the body block draws a trail' );
 $admin = get_user_by( 'login', get_super_admins()[0] ?? '' );
 wp_set_current_user( $admin ? $admin->ID : 1 );
+$GLOBALS['wp_query']     = new WP_Query();
+$GLOBALS['wp_the_query'] = $GLOBALS['wp_query'];
+fresh_request();
 $request = new WP_REST_Request( 'GET', '/wp/v2/block-renderer/core/breadcrumbs' );
-$request->set_query_params( array( 'context' => 'edit', 'post_id' => $photo, 'attributes' => array() ) );
+$request->set_query_params( array( 'context' => 'edit', 'post_id' => $body_note, 'attributes' => array() ) );
 $response = rest_do_request( $request );
 $editor   = trails( (string) ( $response->get_data()['rendered'] ?? '' ) );
 wp_set_current_user( 0 );
-$front = trails( render_single( $photo ) );
-check( 200 === $response->get_status() && $editor && $front && items( $editor[0] ) === items( $front[0] ), 'editor: the block renderer draws the photo\'s front-end trail' );
-wp_set_current_user( $admin ? $admin->ID : 1 );
-$request->set_query_params( array( 'context' => 'edit', 'post_id' => $blog, 'attributes' => array() ) );
-$blog_editor = trails( (string) ( rest_do_request( $request )->get_data()['rendered'] ?? '' ) );
-wp_set_current_user( 0 );
-if ( $yoast_off ) {
-	$blog_front = trails( render_single( entry( 'Another blog article', 'article', 'main' ) ) );
-	check( 1 === count( $blog_editor ) && $blog_front && is_native( $blog_front[0] ) && array_column( items( $blog_editor[0] ), 0 )[0] === 'Home', 'editor: the block renderer draws core\'s trail for a Blog post, as the front end does without Yoast' );
-} else {
-	check( ! $blog_editor, 'editor: the block renderer draws nothing for a Blog post, as the front end leaves it to Yoast' );
-}
-
-// A pattern instance in the template draws the template block's trail.
-$pattern = trails( render_loose( $photo, '<!-- wp:pattern {"slug":"courtneyr-child/p36-breadcrumbs"} /-->' ) );
-check( $pattern && $front && items( $pattern[0] ) === items( $front[0] ), 'pattern: a pattern instance outside post content draws the template\'s trail' );
+check( 200 === $response->get_status() && $editor && $body_navs && items( $editor[0] ) === items( $body_navs[0] ), 'editor: the block renderer draws the body block\'s front-end trail' . ( $editor && $body_navs ? '; editor ' . wp_json_encode( items( $editor[0] ) ) . ', front ' . wp_json_encode( items( $body_navs[0] ) ) : '' ) );
 
 if ( $failures ) {
 	echo count( $failures ), " failed\n";

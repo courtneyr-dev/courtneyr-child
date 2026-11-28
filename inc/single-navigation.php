@@ -2,19 +2,17 @@
 /**
  * Navigation for publicly readable single entries.
  *
- * Breadcrumbs. templates/single.html holds core's Breadcrumbs block
- * (WordPress 7.0+). During the pilot it draws the trail for Stream posts
- * only: a `post` that Post Kinds routed to the Stream (`_pkiw_surface`), that
- * has a kind, while the /stream/ page is published, reads
- * Home / Stream / <kind> / <title>. The theme builds that middle itself
- * (stream_trail()), so no parent page, ancestor or Posts page core would add
- * reaches it. Every other entry Yoast's trail already covers keeps Yoast's
- * trail, printed before the title as before, and the block draws nothing for
- * it. Who draws the trail is decided from the entry and the template alone,
- * never from which block happens to render first, so a page gets one trail.
+ * Breadcrumbs. A page gets one breadcrumb trail. Two places can print it:
+ * the Breadcrumbs block marked with the `cr-page-trail` class
+ * (templates/single.html holds one) and the level-1 Post Title, which puts
+ * Yoast's trail before itself. Whichever renders first with a trail to show
+ * prints it, and the other then adds nothing. Neither prints a trail inside a
+ * Query Loop row or for any post other than the queried one.
  *
- * The page trail comes from the template: a Breadcrumbs block inside post
- * content or a Query Loop draws nothing.
+ * The marked block shows, in this order of preference: a Stream post's own
+ * trail, Home / Stream / <kind> / <title> (stream_trail()); Yoast's trail;
+ * core's trail. Every other Breadcrumbs block is core's, untouched, in the
+ * editor and on the front end.
  *
  * Every callback first checks that this theme is the current site's
  * stylesheet, which follows switch_to_blog() on a multisite.
@@ -36,14 +34,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 const THEME = 'courtneyr-child';
 
 /**
- * Post types whose single view gets no Yoast trail.
+ * Class that marks the Breadcrumbs block this theme draws the page trail with.
+ */
+const MARKER = 'cr-page-trail';
+
+/**
+ * Post types whose single view gets no Yoast trail at the title.
  */
 const NO_TRAIL_TYPES = array( 'page', 'web-story', 'attachment' );
 
 /**
- * Blocks whose inner blocks are post content or Query Loop rows, never the page's own trail.
+ * Unicode space separators (Zs, Zl, Zp) that trim() leaves in place.
  */
-const NESTING_BLOCKS = array( 'core/post-content', 'core/query', 'core/post-template' );
+const UNICODE_SPACES = array( "\u{00A0}", "\u{1680}", "\u{2000}", "\u{2001}", "\u{2002}", "\u{2003}", "\u{2004}", "\u{2005}", "\u{2006}", "\u{2007}", "\u{2008}", "\u{2009}", "\u{200A}", "\u{2028}", "\u{2029}", "\u{202F}", "\u{205F}", "\u{3000}" );
 
 /**
  * Whether this theme is the current site's stylesheet.
@@ -52,6 +55,20 @@ const NESTING_BLOCKS = array( 'core/post-content', 'core/query', 'core/post-temp
  */
 function is_active(): bool {
 	return THEME === get_option( 'stylesheet' );
+}
+
+/**
+ * Whether this request's page trail is printed; pass true once it is.
+ *
+ * @param bool|null $printed True when a trail was just printed, false to reset (tests), null to read.
+ * @return bool
+ */
+function trail_printed( ?bool $printed = null ): bool {
+	static $done = false;
+	if ( null !== $printed ) {
+		$done = $printed;
+	}
+	return $done;
 }
 
 /**
@@ -69,6 +86,19 @@ function public_entry(): ?\WP_Post {
 		return null;
 	}
 	return $post;
+}
+
+/**
+ * Yoast's trail for the page, in the theme's landmark, or '' when Yoast prints none.
+ *
+ * @return string
+ */
+function yoast_trail(): string {
+	$trail = function_exists( 'yoast_breadcrumb' ) ? yoast_breadcrumb( '', '', false ) : '';
+	if ( ! is_string( $trail ) || '' === trim( $trail ) ) {
+		return '';
+	}
+	return '<nav class="cr-single-breadcrumbs has-small-font-size" aria-label="' . esc_attr__( 'Breadcrumb', 'courtneyr-child' ) . '">' . $trail . '</nav>';
 }
 
 /**
@@ -99,16 +129,6 @@ function stream_kind( int $post_id ): ?\WP_Term {
 }
 
 /**
- * Whether the theme draws a post's trail: a Stream post while /stream/ is published.
- *
- * @param int $post_id Post ID.
- * @return bool
- */
-function draws_stream_trail( int $post_id ): bool {
-	return null !== stream_kind( $post_id ) && null !== stream_page();
-}
-
-/**
  * A URL a trail item can link to, or null when esc_url() would drop it.
  *
  * @param mixed $url Candidate URL.
@@ -119,261 +139,138 @@ function link_url( $url ): ?string {
 }
 
 /**
- * What the template being rendered holds outside post content and Query Loops.
+ * A Stream post's trail: core's Home item, the Stream page, the kind, the title.
  *
- * Read from the template's markup, so the answer doesn't depend on the order
- * its blocks render in. Template parts and patterns aren't expanded.
+ * Built here, so no parent page, ancestor, Posts page or page number core
+ * would add reaches it; on page 2 or later the title stays the unlinked
+ * current item. A Stream page whose title is blank once entities are decoded
+ * reads "Stream"; an item whose URL esc_url() would drop is left out.
+ * Labels other than the title are plain text: core escapes a label that
+ * doesn't set `allow_html`.
  *
- * @return array{breadcrumbs: bool, title: bool} A Breadcrumbs block; a level-1, unlinked Post Title.
- */
-function template_holds(): array {
-	static $cache = array();
-	$content      = $GLOBALS['_wp_current_template_content'] ?? '';
-	if ( ! is_string( $content ) || '' === $content ) {
-		return array(
-			'breadcrumbs' => false,
-			'title'       => false,
-		);
-	}
-
-	$key = md5( $content );
-	if ( ! isset( $cache[ $key ] ) ) {
-		$found = array(
-			'breadcrumbs' => false,
-			'title'       => false,
-		);
-		$walk  = static function ( array $blocks ) use ( &$walk, &$found ): void {
-			foreach ( $blocks as $block ) {
-				$name = (string) ( $block['blockName'] ?? '' );
-				if ( in_array( $name, NESTING_BLOCKS, true ) ) {
-					continue;
-				}
-				if ( 'core/breadcrumbs' === $name ) {
-					$found['breadcrumbs'] = true;
-				}
-				if ( 'core/post-title' === $name && 1 === (int) ( $block['attrs']['level'] ?? 2 ) && empty( $block['attrs']['isLink'] ) ) {
-					$found['title'] = true;
-				}
-				$walk( (array) ( $block['innerBlocks'] ?? array() ) );
-			}
-		};
-		$walk( parse_blocks( $content ) );
-		$cache[ $key ] = $found;
-	}
-	return $cache[ $key ];
-}
-
-/**
- * Whether the theme's native trail replaces Yoast's on this entry's page.
- *
- * @param \WP_Post $entry Entry being read.
- * @return bool
- */
-function native_replaces_yoast( \WP_Post $entry ): bool {
-	return draws_stream_trail( $entry->ID ) && template_holds()['breadcrumbs'];
-}
-
-/**
- * Whether breadcrumbs() prints Yoast's trail on this entry's page.
- *
- * @param \WP_Post $entry Entry being read.
- * @return bool
- */
-function yoast_prints( \WP_Post $entry ): bool {
-	return function_exists( 'yoast_breadcrumb' )
-		&& ! in_array( $entry->post_type, NO_TRAIL_TYPES, true )
-		&& ! native_replaces_yoast( $entry )
-		&& template_holds()['title'];
-}
-
-/**
- * Trail through the kind taxonomy, not Category, for a Stream post.
- *
- * @param array<string, string> $settings  Core's taxonomy and term choice.
- * @param string                $post_type Post type.
- * @param int                   $post_id   Post the block describes.
- * @return array<string, string>
- */
-function kind_settings( $settings, $post_type, $post_id ): array {
-	$kind = is_active() ? stream_kind( (int) $post_id ) : null;
-	if ( ! $kind ) {
-		return (array) $settings;
-	}
-	return array(
-		'taxonomy' => 'kind',
-		'term'     => $kind->slug,
-	);
-}
-add_filter( 'block_core_breadcrumbs_post_type_settings', __NAMESPACE__ . '\\kind_settings', 10, 3 );
-
-/**
- * Draw a Stream post's trail as Home / Stream / <kind> / <title>.
- *
- * Core runs this filter inside the block's render, with the described post
- * set up as the global post (template and the editor's block renderer
- * alike). Core's Home item and its title (and page number) items stay; what
- * core put between them (a Posts page, a parent page and its ancestors, the
- * term) gives way to the Stream page and the kind. A Stream page with no
- * title reads "Stream"; an item whose URL esc_url() would drop is left out.
- * Labels are plain text: core escapes a label that doesn't set `allow_html`.
- *
- * @param array<int, array<string, mixed>> $items Trail items.
+ * @param array<int, mixed> $items   Core's trail items.
+ * @param int               $post_id Stream post.
+ * @param bool              $current Whether the block shows the current item.
  * @return array<int, array<string, mixed>>
  */
-function stream_trail( $items ): array {
-	$items   = array_values( (array) $items );
-	$post_id = (int) get_the_ID();
-	if ( ! is_active() || ! $post_id || is_home() || is_front_page() || is_search() || is_404() || is_archive() || ! draws_stream_trail( $post_id ) ) {
-		return $items;
-	}
-
-	$kind   = stream_kind( $post_id );
-	$stream = stream_page();
-
-	$head = array();
+function stream_trail( array $items, int $post_id, bool $current ): array {
+	$items = array_values( $items );
+	$trail = array();
 	if ( $items && is_array( $items[0] ) && home_url( '/' ) === ( $items[0]['url'] ?? null ) ) {
-		$head[] = array_shift( $items );
+		$trail[] = $items[0];
 	}
 
-	$at = null;
-	foreach ( $items as $i => $item ) {
-		if ( is_array( $item ) && get_permalink( $post_id ) === ( $item['url'] ?? null ) ) {
-			$at = $i;
-			break;
-		}
-	}
-	if ( null === $at ) {
-		$at = $items && empty( end( $items )['url'] ) ? count( $items ) - 1 : count( $items );
-	}
-	$tail = array_slice( $items, $at );
-
-	$middle     = array();
-	$stream_url = link_url( get_permalink( $stream ) );
-	if ( $stream_url ) {
-		$middle[] = array(
-			'label' => '' === trim( $stream->post_title ) ? __( 'Stream', 'courtneyr-child' ) : $stream->post_title,
+	$stream     = stream_page();
+	$stream_url = $stream ? link_url( get_permalink( $stream ) ) : null;
+	if ( $stream && $stream_url ) {
+		$blank   = '' === trim( str_replace( UNICODE_SPACES, '', html_entity_decode( $stream->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+		$trail[] = array(
+			'label' => $blank ? __( 'Stream', 'courtneyr-child' ) : $stream->post_title,
 			'url'   => $stream_url,
 		);
 	}
-	$kind_url = link_url( get_term_link( $kind ) );
-	if ( $kind_url ) {
-		$middle[] = array(
+	$kind     = stream_kind( $post_id );
+	$kind_url = $kind ? link_url( get_term_link( $kind ) ) : null;
+	if ( $kind && $kind_url ) {
+		$trail[] = array(
 			'label' => $kind->name,
 			'url'   => $kind_url,
 		);
 	}
 
-	return array_merge( $head, $middle, $tail );
-}
-add_filter( 'block_core_breadcrumbs_items', __NAMESPACE__ . '\\stream_trail' );
-
-/**
- * Depth of post content and Query Loops being rendered.
- *
- * @param int $change +1 entering one, -1 leaving one, 0 to only read.
- * @return int
- */
-function nesting( int $change = 0 ): int {
-	static $depth = 0;
-	$depth        = max( 0, $depth + $change );
-	return $depth;
-}
-
-/**
- * Track entry into post content and Query Loops; a Breadcrumbs block inside one draws nothing.
- *
- * Runs last, so a block another filter already rendered isn't counted.
- *
- * @param string|null $pre   Content another filter rendered, or null.
- * @param array       $block Parsed block.
- * @return string|null
- */
-function enter_block( $pre, $block ) {
-	if ( null !== $pre || ! is_active() ) {
-		return $pre;
+	if ( $current ) {
+		$trail[] = array(
+			'label'      => block_core_breadcrumbs_get_post_title( $post_id ),
+			'allow_html' => true,
+		);
 	}
-	$name = (string) ( $block['blockName'] ?? '' );
-	if ( 'core/breadcrumbs' === $name && nesting() > 0 ) {
+	return $trail;
+}
+
+/**
+ * Render a Breadcrumbs block: core's untouched, unless it carries the marker.
+ *
+ * The marked block prints the page trail once per request and never for a
+ * post other than the singular page's own (a Query Loop row). It prints a
+ * Stream post's trail, else Yoast's trail for the public entry being read,
+ * else core's. An empty trail prints nothing and leaves the page trail to the
+ * title.
+ *
+ * @param callable  $core       Core's render callback.
+ * @param array     $attributes Block attributes.
+ * @param string    $content    Block content.
+ * @param \WP_Block $block      Block instance.
+ * @return string
+ */
+function render_breadcrumbs( callable $core, array $attributes, string $content, \WP_Block $block ): string {
+	if ( ! is_active() || ! in_array( MARKER, explode( ' ', (string) ( $attributes['className'] ?? '' ) ), true ) ) {
+		return (string) $core( $attributes, $content, $block );
+	}
+
+	$post_id = (int) ( $block->context['postId'] ?? 0 );
+	if ( trail_printed() || ( is_singular() && get_queried_object_id() !== $post_id ) ) {
 		return '';
 	}
-	if ( in_array( $name, NESTING_BLOCKS, true ) ) {
-		nesting( 1 );
+
+	$lists = is_home() || is_front_page() || is_search() || is_404() || is_archive();
+	if ( $post_id && ! $lists && stream_kind( $post_id ) && stream_page() ) {
+		$stream = static fn( $items ) => stream_trail( (array) $items, $post_id, ! empty( $attributes['showCurrentItem'] ) );
+		add_filter( 'block_core_breadcrumbs_items', $stream );
+		$trail  = (string) $core( $attributes, $content, $block );
+		remove_filter( 'block_core_breadcrumbs_items', $stream );
+	} else {
+		$entry = public_entry();
+		$trail = $entry && $entry->ID === $post_id ? yoast_trail() : '';
+		$trail = '' !== $trail ? $trail : (string) $core( $attributes, $content, $block );
 	}
-	return $pre;
+
+	if ( '' === trim( $trail ) ) {
+		return '';
+	}
+	trail_printed( true );
+	return $trail;
 }
-add_filter( 'pre_render_block', __NAMESPACE__ . '\\enter_block', PHP_INT_MAX, 2 );
 
 /**
- * Leave post content or a Query Loop.
+ * Route core's Breadcrumbs render callback through render_breadcrumbs().
  *
- * @param string $html Rendered block.
- * @return string
+ * @param array  $args Block type arguments.
+ * @param string $name Block type name.
+ * @return array
  */
-function leave_block( $html ) {
-	if ( is_active() ) {
-		nesting( -1 );
+function wrap_breadcrumbs( $args, $name ): array {
+	$args = (array) $args;
+	if ( 'core/breadcrumbs' === $name && isset( $args['render_callback'] ) && is_callable( $args['render_callback'] ) ) {
+		$core                    = $args['render_callback'];
+		$args['render_callback'] = static fn( $attributes, $content, $block ) => render_breadcrumbs( $core, (array) $attributes, (string) $content, $block );
 	}
-	return $html;
+	return $args;
 }
-array_map( static fn( $name ) => add_filter( "render_block_{$name}", __NAMESPACE__ . '\\leave_block', PHP_INT_MAX ), NESTING_BLOCKS );
+add_filter( 'register_block_type_args', __NAMESPACE__ . '\\wrap_breadcrumbs', 10, 2 );
 
 /**
- * Leave a post Yoast's trail covers to Yoast.
+ * Place Yoast's trail before the singular template's main title, unless the page trail is printed.
  *
- * Only on a single-post trail: core builds archive, search and home trails
- * from the query, whatever post the block's context holds. On the entry's
- * page the block steps aside exactly when breadcrumbs() prints Yoast's
- * trail. In the editor's block renderer, with no page to compare, it steps
- * aside for a `post` Yoast would cover, as the front end of single.html does.
- *
- * @param string    $html     Rendered trail.
- * @param array     $block    Parsed block.
- * @param \WP_Block $instance Block instance.
- * @return string
- */
-function native_trail( string $html, array $block, \WP_Block $instance ): string {
-	$post_id = (int) ( $instance->context['postId'] ?? 0 );
-	if ( ! is_active() || '' === trim( $html ) || ! $post_id || is_home() || is_front_page() || is_search() || is_404() || is_archive() || draws_stream_trail( $post_id ) ) {
-		return $html;
-	}
-
-	$entry = public_entry();
-	if ( $entry && $entry->ID === $post_id ) {
-		return yoast_prints( $entry ) ? '' : $html;
-	}
-	return function_exists( 'yoast_breadcrumb' ) && 'post' === get_post_type( $post_id ) ? '' : $html;
-}
-add_filter( 'render_block_core/breadcrumbs', __NAMESPACE__ . '\\native_trail', 10, 3 );
-
-/**
- * Place Yoast's trail before the singular template's main title.
- *
- * @param string    $html   Rendered title.
- * @param array     $block  Parsed title block.
+ * @param string    $html     Rendered title.
+ * @param array     $block    Parsed title block.
  * @param \WP_Block $instance Block instance.
  * @return string
  */
 function breadcrumbs( string $html, array $block, \WP_Block $instance ): string {
-	if ( ! is_active() || 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || ! empty( $block['attrs']['isLink'] ) || ! function_exists( 'yoast_breadcrumb' ) ) {
+	if ( ! is_active() || 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || ! empty( $block['attrs']['isLink'] ) || trail_printed() || isset( $instance->context['queryId'] ) ) {
 		return $html;
 	}
 
 	$post = public_entry();
-	if ( ! $post || in_array( $post->post_type, NO_TRAIL_TYPES, true ) || (int) ( $instance->context['postId'] ?? 0 ) !== $post->ID || native_replaces_yoast( $post ) ) {
+	if ( ! $post || in_array( $post->post_type, NO_TRAIL_TYPES, true ) || (int) ( $instance->context['postId'] ?? 0 ) !== $post->ID ) {
 		return $html;
 	}
 
-	static $printed = array();
-	if ( isset( $printed[ $post->ID ] ) ) {
+	$trail = yoast_trail();
+	if ( '' === $trail ) {
 		return $html;
 	}
-
-	$trail = yoast_breadcrumb( '', '', false );
-	if ( ! is_string( $trail ) || '' === trim( $trail ) ) {
-		return $html;
-	}
-	$printed[ $post->ID ] = true;
-
-	return '<nav class="cr-single-breadcrumbs has-small-font-size" aria-label="' . esc_attr__( 'Breadcrumb', 'courtneyr-child' ) . '">' . $trail . '</nav>' . $html;
+	trail_printed( true );
+	return $trail . $html;
 }
 add_filter( 'render_block_core/post-title', __NAMESPACE__ . '\\breadcrumbs', 50, 3 );

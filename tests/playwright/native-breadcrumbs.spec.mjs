@@ -1,9 +1,11 @@
 // `CR_SPEC=native-breadcrumbs.spec.mjs npx playwright test --config tests/playwright/playwright.config.mjs`
-// Core's Breadcrumbs block on templates/single.html (inc/single-navigation.php), front end and editor.
+// The page trail on templates/single.html (inc/single-navigation.php), front end and editor: the
+// Breadcrumbs block marked cr-page-trail, and core's untouched block everywhere else.
 // Needs a running local site with Post Kinds active, a published /stream/ page, Stream posts of two
-// kinds and a Blog post (CR_P36_NOTE_PATH, CR_P36_PHOTO_PATH, CR_P36_BLOG_PATH; slugs below by default).
-// The editor tests log in with CR_WP_USER and CR_WP_PASS and change nothing: the inserted block is
-// never saved. The Blog post has one landmark: Yoast's trail with Yoast SEO active, core's block without.
+// kinds, a Blog post, and a post with an unmarked Breadcrumbs block in its content (CR_P36_NOTE_PATH,
+// CR_P36_PHOTO_PATH, CR_P36_BLOG_PATH, CR_P36_BODY_PATH; slugs below by default). The editor tests log
+// in with CR_WP_USER and CR_WP_PASS and change nothing: the inserted block is never saved. The Blog
+// post has one landmark: Yoast's trail with Yoast SEO active, the marked block's core trail without.
 import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
 
@@ -13,6 +15,7 @@ const STREAM = [
 	{ kind: 'Photo', path: process.env.CR_P36_PHOTO_PATH || '/p36-stream-photo/' },
 ];
 const BLOG = process.env.CR_P36_BLOG_PATH || '/p36-blog-article/';
+const BODY = process.env.CR_P36_BODY_PATH || '/p36-body-breadcrumbs/';
 
 async function open( page, path, colorScheme ) {
 	await page.goto( path );
@@ -31,6 +34,7 @@ for ( const { kind, path } of STREAM ) {
 		await expect( trails( page ) ).toHaveCount( 1 );
 		const nav = trails( page ).first();
 		await expect( nav ).toHaveClass( /wp-block-breadcrumbs/ );
+		await expect( nav ).toHaveClass( /cr-page-trail/ );
 		const title = ( await page.locator( 'h1.wp-block-post-title' ).innerText() ).trim();
 		await expect( nav.locator( 'li' ) ).toHaveText( [ 'Home', 'Stream', kind, title ] );
 		await expect( nav.locator( 'li a' ) ).toHaveCount( 3 );
@@ -102,23 +106,25 @@ test.describe( 'editor', () => {
 		return ( await page.locator( 'iframe[name="editor-canvas"]' ).count() ) ? page.frameLocator( 'iframe[name="editor-canvas"]' ) : page;
 	};
 
-	for ( const { kind, path } of STREAM ) {
-		test( `post editor: a Breadcrumbs block in a ${ kind } post draws the front-end trail`, async ( { page } ) => {
-			await page.goto( path );
-			const front = await trails( page ).first().locator( 'li' ).allInnerTexts();
-			const id = await page.evaluate( () => Number( ( document.body.className.match( /postid-(\d+)/ ) || [] )[ 1 ] ) );
-			await page.goto( `/wp-admin/post.php?post=${ id }&action=edit` );
-			await page.waitForFunction( () => window.wp?.data?.select( 'core/editor' )?.getCurrentPostId() );
-			await page.evaluate( () => {
-				window.wp.data.dispatch( 'core/preferences' ).set( 'core/edit-post', 'welcomeGuide', false );
-				window.wp.data.dispatch( 'core/block-editor' ).insertBlocks( window.wp.blocks.createBlock( 'core/breadcrumbs' ) );
-			} );
-			const frame = await canvas( page );
-			const items = frame.locator( '.wp-block-breadcrumbs li' );
-			await expect( items ).toHaveText( front.map( ( t ) => t.trim() ) );
-			await expect( frame.locator( '.wp-block-breadcrumbs [aria-current]' ) ).toHaveCount( 1 );
+	test( 'post editor: a Breadcrumbs block inserted in a post draws the trail its content block draws on the front end', async ( { page } ) => {
+		await page.goto( BODY );
+		const body = page.locator( '.wp-block-post-content .wp-block-breadcrumbs' );
+		await expect( body ).toHaveCount( 1 );
+		await expect( body ).not.toHaveClass( /cr-page-trail/ );
+		const front = ( await body.locator( 'li' ).allInnerTexts() ).map( ( t ) => t.trim() );
+		expect( front.length ).toBeGreaterThan( 1 );
+		const id = await page.evaluate( () => Number( ( document.body.className.match( /postid-(\d+)/ ) || [] )[ 1 ] ) );
+		await page.goto( `/wp-admin/post.php?post=${ id }&action=edit` );
+		await page.waitForFunction( () => window.wp?.data?.select( 'core/editor' )?.getCurrentPostId() );
+		await page.evaluate( () => {
+			window.wp.data.dispatch( 'core/preferences' ).set( 'core/edit-post', 'welcomeGuide', false );
+			window.wp.data.dispatch( 'core/block-editor' ).insertBlocks( window.wp.blocks.createBlock( 'core/breadcrumbs' ) );
 		} );
-	}
+		const frame = await canvas( page );
+		const inserted = frame.locator( '.wp-block-breadcrumbs' ).last();
+		await expect( inserted.locator( 'li' ) ).toHaveText( front );
+		await expect( inserted.locator( '[aria-current]' ) ).toHaveCount( 1 );
+	} );
 
 	test( 'site editor: the single template shows its Breadcrumbs block', async ( { page } ) => {
 		await page.goto( '/wp-admin/site-editor.php?p=%2Fwp_template%2Fcourtneyr-child%2F%2Fsingle&canvas=edit' );
