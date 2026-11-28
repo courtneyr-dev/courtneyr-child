@@ -3,7 +3,7 @@
 // Needs a running local site with Post Kinds active, a published /stream/ page, Stream posts of two
 // kinds and a Blog post (CR_P36_NOTE_PATH, CR_P36_PHOTO_PATH, CR_P36_BLOG_PATH; slugs below by default).
 // The editor tests log in with CR_WP_USER and CR_WP_PASS and change nothing: the inserted block is
-// never saved. With Yoast SEO active the Blog post's landmark is Yoast's trail; without it, none.
+// never saved. The Blog post has one landmark: Yoast's trail with Yoast SEO active, core's block without.
 import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
 
@@ -77,10 +77,12 @@ for ( const { kind, path } of STREAM ) {
 	} );
 }
 
-test( 'front end: a Blog post keeps one trail, and it is not the native block', async ( { page }, info ) => {
+test( 'front end: a Blog post has exactly one trail, Yoast\'s when Yoast SEO is active', async ( { page }, info ) => {
 	await open( page, BLOG, info.project.use.colorScheme );
-	await expect( page.locator( '.wp-block-breadcrumbs' ) ).toHaveCount( 0 );
-	expect( await trails( page ).count() ).toBeLessThanOrEqual( 1 );
+	await expect( trails( page ) ).toHaveCount( 1 );
+	const yoast = ( await page.locator( 'script.yoast-schema-graph' ).count() ) > 0;
+	await expect( trails( page ).first() ).toHaveClass( yoast ? /cr-single-breadcrumbs/ : /wp-block-breadcrumbs/ );
+	await expect( page.locator( '.wp-block-breadcrumbs' ) ).toHaveCount( yoast ? 0 : 1 );
 } );
 
 test.describe( 'editor', () => {
