@@ -2070,6 +2070,15 @@ figure.wp-block-post-featured-image.single-post__featured {
 	box-shadow: 0 0 0 7px var(--cr-focus-halo) !important;
 }
 
+/* The header's hover, focus and current-item rule turns link text marker
+   orange, 2.38:1 on the overlay's ivory (WCAG 1.4.3 wants 4.5:1). In the
+   overlay the text stays ink; the full underline still marks the state. */
+.site-header__nav .cr-nav-overlay .wp-block-navigation-item__content:hover,
+.site-header__nav .cr-nav-overlay .wp-block-navigation-item__content:focus-visible,
+.site-header__nav .cr-nav-overlay .current-menu-item .wp-block-navigation-item__content {
+	color: var(--cr-ink);
+}
+
 /* Bump nav text presence — the wp:navigation fontSize=medium is
    1.125rem; reinforce in case any WP core CSS argues with it.
    v0.5.11: tighten horizontal padding from 0.5rem to 0.4rem so the
