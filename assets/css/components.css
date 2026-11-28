@@ -1565,6 +1565,12 @@ html.has-modal-open #cmplz-cookiebanner-container { display: none !important; }
 	box-shadow: 0 0 0 7px var(--cr-focus-halo) !important;
 }
 
+/* The overlay has its own Search field; a Search block in the menu would
+   make it two. */
+.cr-nav-overlay__nav .wp-block-search {
+	display: none;
+}
+
 /* Dark header — track deepens to prussian-blue, idle icons go sky-blue; the
    thumb stays lit periwinkle and the active icon stays dark so it reads. */
 :root[data-theme="dark"] .cr-theme-segments {
@@ -2054,6 +2060,23 @@ figure.wp-block-post-featured-image.single-post__featured {
 .site-header__nav .wp-block-navigation__submenu-container {
 	box-shadow: none !important;
 	filter: none !important;
+}
+
+/* The Navigation overlay part renders inside .site-header__nav, so the rule
+   above also strips the ink halo from its focus ring, leaving selective
+   yellow at 1.67:1 on ivory (WCAG 1.4.11 wants 3:1). Forced colors drop the
+   shadow and keep the system outline. */
+.site-header__nav .cr-nav-overlay :focus-visible {
+	box-shadow: 0 0 0 7px var(--cr-focus-halo) !important;
+}
+
+/* The header's hover, focus and current-item rule turns link text marker
+   orange, 2.38:1 on the overlay's ivory (WCAG 1.4.3 wants 4.5:1). In the
+   overlay the text stays ink; the full underline still marks the state. */
+.site-header__nav .cr-nav-overlay .wp-block-navigation-item__content:hover,
+.site-header__nav .cr-nav-overlay .wp-block-navigation-item__content:focus-visible,
+.site-header__nav .cr-nav-overlay .current-menu-item .wp-block-navigation-item__content {
+	color: var(--cr-ink);
 }
 
 /* Bump nav text presence — the wp:navigation fontSize=medium is
@@ -3632,10 +3655,12 @@ body.home .has-tertiary-background-color h3 {
    ivory bg rule even with !important. Two exclusions: the sticky wrapper
    itself, and any group whose subtree contains .site-header (covers the
    intermediate template-part wrapper layers). Newsletter form groups
-   still match — they don't contain .site-header. */
-body.home .wp-block-group:not(.is-position-sticky):not(:has(.site-header)):has(form),
-body.home .wp-block-group:not(.is-position-sticky):not(:has(.site-header)):has(.tnp-subscription),
-body.home .wp-block-group:not(.is-position-sticky):not(:has(.site-header)):has(input[type="email"]),
+   still match — they don't contain .site-header.
+   The Navigation overlay part (.cr-nav-overlay) holds a Search form and
+   paints its own background, so it is excluded too. */
+body.home .wp-block-group:not(.is-position-sticky):not(.cr-nav-overlay):not(:has(.site-header)):has(form),
+body.home .wp-block-group:not(.is-position-sticky):not(.cr-nav-overlay):not(:has(.site-header)):has(.tnp-subscription),
+body.home .wp-block-group:not(.is-position-sticky):not(.cr-nav-overlay):not(:has(.site-header)):has(input[type="email"]),
 body.home .wp-block-columns:has(form) .wp-block-column:has(form) {
 	background-color: transparent !important;
 	box-shadow: none !important;

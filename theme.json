@@ -801,6 +801,30 @@
 			}
 		},
 		"blocks": {
+			"core/navigation-overlay-close": {
+				"color": {
+					"background": "transparent",
+					"text": "var(--cr-ink)"
+				},
+				"border": {
+					"color": "var(--cr-ink)",
+					"style": "solid",
+					"width": "2px",
+					"radius": "var(--cr-radius-xs)"
+				},
+				"spacing": {
+					"padding": {
+						"top": "var(--cr-space-xs)",
+						"right": "var(--cr-space-sm)",
+						"bottom": "var(--cr-space-xs)",
+						"left": "var(--cr-space-sm)"
+					}
+				},
+				"typography": {
+					"fontFamily": "var(--cr-font-accent)",
+					"fontWeight": "var(--cr-weight-medium)"
+				}
+			},
 			"core/search": {
 				"elements": {
 					"textInput": {
@@ -1173,6 +1197,11 @@
 			"name": "sidebar",
 			"title": "Sidebar",
 			"area": "sidebar"
+		},
+		{
+			"name": "navigation-overlay",
+			"title": "Navigation overlay",
+			"area": "navigation-overlay"
 		},
 		{
 			"name": "newsletter-cta",
