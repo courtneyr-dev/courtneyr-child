@@ -1,15 +1,15 @@
 <?php
 /**
- * The header Navigation's overlay part shows the header's menu.
+ * A Navigation block with no menu shows the menu the header picked.
  *
- * `parts/navigation-overlay.html` holds a Navigation block with no `ref`, so
- * core resolves it on its own: the most recently published `wp_navigation`
- * post. Once a site picks a menu in the header, a newer menu would fill the
- * overlay instead. Core 7.1.5 and 7.2-RC3 pass no menu from the parent to the
- * overlay, so this hands it over: while a Navigation that opens an overlay part
- * renders, a Navigation inside that part (core marks it
- * `_isWithinOverlayTemplatePart`) with no menu of its own takes the parent's.
- * A parent with no menu passes nothing, and both fall back to the same menu.
+ * `parts/navigation-overlay.html` holds a Navigation block with no `ref`.
+ * Core resolves one to the most recently published `wp_navigation` post: on
+ * the front end through `block_core_navigation_get_fallback_blocks()`, and in
+ * the Site Editor through `/wp-block-editor/v1/navigation-fallback`, whose id
+ * the editor keeps as `ref` when the part is saved. Once a site picks an older
+ * menu in the header, a newer menu would fill the overlay instead. Both paths
+ * here answer with the header's menu, so the editor, the front end and a saved
+ * overlay part agree. A header with no published menu changes nothing.
  *
  * @package CourtneyrChild
  */
@@ -17,20 +17,6 @@
 declare( strict_types = 1 );
 
 namespace Courtneyr\Child\NavigationOverlay;
-
-/**
- * Menus of the overlay-opening Navigation blocks rendering now, innermost last.
- *
- * @param array<int, int|null>|null $set Replacement stack, or null to read.
- * @return array<int, int|null>
- */
-function parent_refs( ?array $set = null ): array {
-	static $refs = array();
-	if ( null !== $set ) {
-		$refs = $set;
-	}
-	return $refs;
-}
 
 /**
  * The menu a Navigation block names, if any.
@@ -44,43 +30,67 @@ function menu_of( array $attrs ): ?int {
 }
 
 /**
- * Remember an overlay-opening Navigation's menu; give it to the overlay's Navigation.
+ * The menu of the first Navigation that opens an overlay part.
  *
- * @param array $parsed_block Parsed block.
- * @return array
+ * @param array $blocks Parsed blocks.
+ * @return int|null
  */
-function share_menu( array $parsed_block ): array {
-	if ( 'core/navigation' !== ( $parsed_block['blockName'] ?? '' ) ) {
-		return $parsed_block;
-	}
-	$attrs = $parsed_block['attrs'] ?? array();
-	if ( empty( $attrs['_isWithinOverlayTemplatePart'] ) ) {
-		if ( ! empty( $attrs['overlay'] ) ) {
-			parent_refs( array_merge( parent_refs(), array( menu_of( $attrs ) ) ) );
+function overlay_opener_menu( array $blocks ): ?int {
+	foreach ( $blocks as $block ) {
+		if ( 'core/navigation' === ( $block['blockName'] ?? '' ) && ! empty( $block['attrs']['overlay'] ) ) {
+			return menu_of( $block['attrs'] );
 		}
-		return $parsed_block;
+		$menu = overlay_opener_menu( $block['innerBlocks'] ?? array() );
+		if ( null !== $menu ) {
+			return $menu;
+		}
 	}
-	$refs   = parent_refs();
-	$parent = $refs ? end( $refs ) : null;
-	if ( null !== $parent && null === menu_of( $attrs ) ) {
-		$parsed_block['attrs']['ref'] = $parent;
-	}
-	return $parsed_block;
+	return null;
 }
-add_filter( 'render_block_data', __NAMESPACE__ . '\\share_menu' );
 
 /**
- * Forget an overlay-opening Navigation's menu once it has rendered.
+ * The published menu the header's Navigation picked, if any.
  *
- * @param string $block_content Rendered block HTML.
- * @param array  $block         Parsed block.
- * @return string
+ * @return \WP_Post|null
  */
-function release_menu( string $block_content, array $block ): string {
-	$attrs = $block['attrs'] ?? array();
-	if ( ! empty( $attrs['overlay'] ) && empty( $attrs['_isWithinOverlayTemplatePart'] ) ) {
-		parent_refs( array_slice( parent_refs(), 0, -1 ) );
-	}
-	return $block_content;
+function header_menu(): ?\WP_Post {
+	$header = get_block_template( get_stylesheet() . '//header', 'wp_template_part' );
+	$id     = $header ? overlay_opener_menu( parse_blocks( (string) $header->content ) ) : null;
+	$menu   = null === $id ? null : get_post( $id );
+	return $menu instanceof \WP_Post && 'wp_navigation' === $menu->post_type && 'publish' === $menu->post_status ? $menu : null;
 }
-add_filter( 'render_block_core/navigation', __NAMESPACE__ . '\\release_menu', 10, 2 );
+
+/**
+ * Front end: a Navigation with no menu renders the header's menu.
+ *
+ * @param array[] $blocks Core's fallback blocks.
+ * @return array[]
+ */
+function render_fallback( $blocks ) {
+	$menu = header_menu();
+	if ( ! $menu ) {
+		return $blocks;
+	}
+	$menu_blocks = block_core_navigation_filter_out_empty_blocks( parse_blocks( $menu->post_content ) );
+	return $menu_blocks ? parse_blocks( apply_block_hooks_to_content_from_post_object( serialize_blocks( $menu_blocks ), $menu ) ) : $blocks;
+}
+add_filter( 'block_core_navigation_render_fallback', __NAMESPACE__ . '\\render_fallback' );
+
+/**
+ * Site Editor: the fallback menu endpoint answers with the header's menu.
+ *
+ * Runs after core's permission check and callback, so a refused request stays refused.
+ *
+ * @param \WP_REST_Response|\WP_Error|mixed $response Result of core's callback.
+ * @param array                             $handler  Route handler.
+ * @param \WP_REST_Request                  $request  Request.
+ * @return \WP_REST_Response|\WP_Error|mixed
+ */
+function editor_fallback( $response, $handler, $request ) {
+	if ( is_wp_error( $response ) || '/wp-block-editor/v1/navigation-fallback' !== $request->get_route() ) {
+		return $response;
+	}
+	$menu = header_menu();
+	return $menu ? ( new \WP_REST_Navigation_Fallback_Controller() )->prepare_item_for_response( $menu, $request ) : $response;
+}
+add_filter( 'rest_request_after_callbacks', __NAMESPACE__ . '\\editor_fallback', 10, 3 );
