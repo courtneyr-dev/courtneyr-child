@@ -7,7 +7,9 @@
  * (templates/single.html holds one) and the level-1 Post Title, which puts
  * Yoast's trail before itself. Whichever renders first with a trail to show
  * prints it, and the other then adds nothing. Neither prints a trail inside a
- * Query Loop row or for any post other than the queried one.
+ * Query Loop row (in_loop_row() counts Post Template renders) or for any post
+ * other than the queried one, and neither prints one for the post types in
+ * NO_TRAIL_TYPES, as before the marked block existed.
  *
  * The marked block shows, in this order of preference: a Stream post's own
  * trail, Home / Stream / <kind> / <title> (stream_trail()); Yoast's trail;
@@ -39,7 +41,7 @@ const THEME = 'courtneyr-child';
 const MARKER = 'cr-page-trail';
 
 /**
- * Post types whose single view gets no Yoast trail at the title.
+ * Post types whose single view gets no page trail.
  */
 const NO_TRAIL_TYPES = array( 'page', 'web-story', 'attachment' );
 
@@ -69,6 +71,19 @@ function trail_printed( ?bool $printed = null ): bool {
 		$done = $printed;
 	}
 	return $done;
+}
+
+/**
+ * Whether a Query Loop row is rendering; pass 1 or -1 as a Post Template render starts or ends.
+ *
+ * @param int $step 1 entering a Post Template, -1 leaving it, 0 to read.
+ * @return bool
+ */
+function in_loop_row( int $step = 0 ): bool {
+	static $depth = 0;
+
+	$depth = max( 0, $depth + $step );
+	return $depth > 0;
 }
 
 /**
@@ -145,8 +160,8 @@ function link_url( $url ): ?string {
  * would add reaches it; on page 2 or later the title stays the unlinked
  * current item. A Stream page whose title is blank once entities are decoded
  * reads "Stream"; an item whose URL esc_url() would drop is left out.
- * Labels other than the title are plain text: core escapes a label that
- * doesn't set `allow_html`.
+ * Every label, the title too, is plain text: core escapes a label that
+ * doesn't set `allow_html`, and the title's tags are stripped first.
  *
  * @param array<int, mixed> $items   Core's trail items.
  * @param int               $post_id Stream post.
@@ -180,8 +195,7 @@ function stream_trail( array $items, int $post_id, bool $current ): array {
 
 	if ( $current ) {
 		$trail[] = array(
-			'label'      => block_core_breadcrumbs_get_post_title( $post_id ),
-			'allow_html' => true,
+			'label' => wp_strip_all_tags( block_core_breadcrumbs_get_post_title( $post_id ) ),
 		);
 	}
 	return $trail;
@@ -208,7 +222,7 @@ function render_breadcrumbs( callable $core, array $attributes, string $content,
 	}
 
 	$post_id = (int) ( $block->context['postId'] ?? 0 );
-	if ( trail_printed() || ( is_singular() && get_queried_object_id() !== $post_id ) ) {
+	if ( trail_printed() || in_loop_row() || ( is_singular() && get_queried_object_id() !== $post_id ) || ( $post_id && in_array( get_post_type( $post_id ), NO_TRAIL_TYPES, true ) ) ) {
 		return '';
 	}
 
@@ -232,7 +246,8 @@ function render_breadcrumbs( callable $core, array $attributes, string $content,
 }
 
 /**
- * Route core's Breadcrumbs render callback through render_breadcrumbs().
+ * Route core's Breadcrumbs render callback through render_breadcrumbs(), and
+ * count Post Template renders for in_loop_row().
  *
  * @param array  $args Block type arguments.
  * @param string $name Block type name.
@@ -240,9 +255,21 @@ function render_breadcrumbs( callable $core, array $attributes, string $content,
  */
 function wrap_breadcrumbs( $args, $name ): array {
 	$args = (array) $args;
-	if ( 'core/breadcrumbs' === $name && isset( $args['render_callback'] ) && is_callable( $args['render_callback'] ) ) {
-		$core                    = $args['render_callback'];
+	if ( ! isset( $args['render_callback'] ) || ! is_callable( $args['render_callback'] ) ) {
+		return $args;
+	}
+	$core = $args['render_callback'];
+	if ( 'core/breadcrumbs' === $name ) {
 		$args['render_callback'] = static fn( $attributes, $content, $block ) => render_breadcrumbs( $core, (array) $attributes, (string) $content, $block );
+	} elseif ( 'core/post-template' === $name ) {
+		$args['render_callback'] = static function ( $attributes, $content, $block ) use ( $core ) {
+			in_loop_row( 1 );
+			try {
+				return $core( $attributes, $content, $block );
+			} finally {
+				in_loop_row( -1 );
+			}
+		};
 	}
 	return $args;
 }
@@ -257,7 +284,7 @@ add_filter( 'register_block_type_args', __NAMESPACE__ . '\\wrap_breadcrumbs', 10
  * @return string
  */
 function breadcrumbs( string $html, array $block, \WP_Block $instance ): string {
-	if ( ! is_active() || 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || ! empty( $block['attrs']['isLink'] ) || trail_printed() || isset( $instance->context['queryId'] ) ) {
+	if ( ! is_active() || 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || ! empty( $block['attrs']['isLink'] ) || trail_printed() || in_loop_row() || isset( $instance->context['queryId'] ) ) {
 		return $html;
 	}
 

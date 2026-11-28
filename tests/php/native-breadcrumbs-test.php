@@ -451,6 +451,49 @@ $editor   = trails( (string) ( $response->get_data()['rendered'] ?? '' ) );
 wp_set_current_user( 0 );
 check( 200 === $response->get_status() && $editor && $body_navs && items( $editor[0] ) === items( $body_navs[0] ), 'editor: the block renderer draws the body block\'s front-end trail' . ( $editor && $body_navs ? '; editor ' . wp_json_encode( items( $editor[0] ) ) . ', front ' . wp_json_encode( items( $body_navs[0] ) ) : '' ) );
 
+// R3-1. A Query Loop row never claims the page trail, wherever the loop sits.
+/** The landmarks inside Query Loop rows. */
+function row_trails( string $html ): array {
+	return array_values( array_filter( trails( $html ), static fn( $nav ) => null !== $nav->closest( '.wp-block-post-template' ) ) );
+}
+$all_loop   = '<!-- wp:query {"queryId":11,"query":{"perPage":100,"postType":"post","inherit":false}} --><div class="wp-block-query"><!-- wp:post-template --><!-- wp:post-title {"level":1} /-->' . $marked . '<!-- /wp:post-template --></div><!-- /wp:query -->';
+$loop_first = str_replace( $tpl_block, $all_loop . "\n" . $tpl_block, $template );
+check( $loop_first !== $template && strpos( $loop_first, $all_loop ) < strpos( $loop_first, $tpl_block ), 'fixture: single.html with a Query Loop before the marked block' );
+$loop_note = entry( 'A note after a Query Loop that lists it', 'note', 'stream' );
+$loop_html = render_single( $loop_note, $loop_first );
+check( 0 === count( row_trails( $loop_html ) ), 'note on single.html with a Query Loop first: no trail inside a row (found ' . count( row_trails( $loop_html ) ) . ')' );
+check_stream_page( $loop_note, 'note on single.html with a Query Loop first', $stream_label, $stream_url, $loop_first );
+$loop_blog = entry( 'A blog article after a Query Loop that lists it', 'article', 'main' );
+$blog_html = render_single( $loop_blog, $loop_first );
+check( 0 === count( row_trails( $blog_html ) ), 'blog post on single.html with a Query Loop first: no trail inside a row (found ' . count( row_trails( $blog_html ) ) . ')' );
+one_landmark( $blog_html, 'blog post on single.html with a Query Loop first', $yoast_off );
+$row_only    = '<!-- wp:query {"queryId":12,"query":{"inherit":true}} --><div class="wp-block-query"><!-- wp:post-template --><!-- wp:post-title {"isLink":true} /-->' . $marked . '<!-- /wp:post-template --></div><!-- /wp:query -->';
+$search_rows = render_page( array( 's' => 'P36 searchable' ), $row_only, 'search' );
+check( 0 === count( trails( $search_rows ) ), 'search results with the marked block only inside Query Loop rows: no trail (found ' . count( trails( $search_rows ) ) . ')' );
+
+// R3-2. A Stream post's title prints as text: no link and no second aria-current inside the current item.
+$linked = entry( 'P36 linked title placeholder', 'note', 'stream' );
+$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_title' => '<a href="https://example.com/" aria-current="page">Linked</a> title' ), array( 'ID' => $linked ) );
+clean_post_cache( $linked );
+$linked_nav = one_landmark( render_single( $linked ), 'note whose title holds a link', true );
+if ( $linked_nav ) {
+	$last = $linked_nav->querySelector( 'li:last-child' );
+	check( $last && null === $last->querySelector( 'a' ) && 'Linked title' === trim( $last->textContent ), 'note whose title holds a link: the current item is the plain text "Linked title"' );
+	check( 1 === count( iterator_to_array( $linked_nav->querySelectorAll( '[aria-current]' ) ) ), 'note whose title holds a link: one aria-current in the trail' );
+}
+
+// R3-3. Attachment pages keep main's behavior: no trail from the marked block or the title.
+$attachments_on = static fn() => '1';
+add_filter( 'pre_option_wp_attachment_pages_enabled', $attachments_on );
+foreach ( array( 'inherit' => $note, 'publish' => 0 ) as $status => $parent_id ) {
+	$attachment = (int) wp_insert_post( array( 'post_type' => 'attachment', 'post_status' => $status, 'post_title' => "P36 $status attachment", 'post_parent' => $parent_id, 'post_mime_type' => 'image/png', 'guid' => home_url( "/p36-$status.png" ) ) );
+	$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_status' => $status ), array( 'ID' => $attachment ) );
+	clean_post_cache( $attachment );
+	$found = count( trails( render_single( $attachment ) ) );
+	check( 0 === $found, "$status attachment on single.html: no breadcrumb trail, as on main (found $found)" );
+}
+remove_filter( 'pre_option_wp_attachment_pages_enabled', $attachments_on );
+
 if ( $failures ) {
 	echo count( $failures ), " failed\n";
 	exit( 1 );
