@@ -62,7 +62,7 @@ jobs:
           echo "$WP_SHA1  $RUNNER_TEMP/wordpress.zip" | sha1sum -c -
           unzip -q "$RUNNER_TEMP/wordpress.zip" -d "$RUNNER_TEMP"
 
-      - name: SQLite multisite running the theme, for navigation-overlay-menu-test.php
+      - name: SQLite multisite running the theme and Post Kinds, for navigation-overlay-menu-test.php and the breadcrumb and adjacency tests
         run: |
           dl="$RUNNER_TEMP/downloads"
           site="$RUNNER_TEMP/multisite"
@@ -79,6 +79,7 @@ jobs:
           cp "$site/wp-content/plugins/sqlite-database-integration/db.copy" "$site/wp-content/db.php"
           unzip -q "$dl/ollie.zip" -d "$site/wp-content/themes"
           ln -s "$GITHUB_WORKSPACE/theme" "$site/wp-content/themes/courtneyr-child"
+          ln -s "$GITHUB_WORKSPACE/post-kinds-for-indieweb" "$site/wp-content/plugins/post-kinds-for-indieweb"
           wp() { php "$dl/wp-cli.phar" --path="$site" --url=cr-p35.test "$@"; }
           wp config create --dbname=wp --dbuser=wp --dbpass=wp --skip-check --quiet
           wp core install --title=p35 --admin_user=admin --admin_email=admin@example.invalid --admin_password="$(openssl rand -hex 16)" --skip-email --quiet
@@ -86,6 +87,7 @@ jobs:
           wp theme enable courtneyr-child --network --quiet
           wp theme enable twentytwentyfive --network --quiet
           wp theme activate courtneyr-child --quiet
+          wp plugin activate post-kinds-for-indieweb --quiet
           wp site create --slug=other --title=Other --porcelain
           php "$dl/wp-cli.phar" --path="$site" --url=cr-p35.test/other/ theme activate twentytwentyfive --quiet
           echo "CR_WP_SITE=$site" >> "$GITHUB_ENV"
